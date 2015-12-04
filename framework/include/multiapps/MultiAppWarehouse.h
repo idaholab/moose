@@ -19,7 +19,7 @@
 #include <map>
 #include <set>
 
-#include "Warehouse.h"
+#include "ExecuteMooseObjectWarehouse.h"
 #include "MooseTypes.h"
 
 class MultiApp;
@@ -33,7 +33,7 @@ typedef std::vector<MooseSharedPointer<MultiApp> >::const_iterator MultiAppIter;
 /**
  * Holds MultiApps and provides some services
  */
-class MultiAppWarehouse : public Warehouse<MultiApp>
+class MultiAppWarehouse : public ExecuteMooseObjectWarehouse<MultiApp>
 {
 public:
   MultiAppWarehouse();
@@ -43,42 +43,13 @@ public:
    * Get list of all TransientMultiApps
    * @return The list of all active TransientMultiApps
    */
-  const std::vector<TransientMultiApp *> & transient() const { return _transient_multi_apps; }
+  const MooseObjectStorage<TransientMultiApp> & getTransientStorage(ExecFlagType exec_type) const { return _transient_multi_apps[exec_type]; }
 
   /**
    * Add a MultiApps
    * @param multi_app MultiApp being added
    */
-  void addMultiApp(MooseSharedPointer<MultiApp> multi_app);
-
-  /**
-   * Whether or not this warehouse has a MultiApp named multi_app_name
-   * @param multi_app_name The name of the MultiApp we're looking for
-   * @return True if that MultiApp exists False otherwise
-   */
-  bool hasMultiApp(const std::string & multi_app_name) const;
-
-  /**
-   * Returns whether there are any multiapps
-   */
-  bool hasMultiApp() const;
-
-  /**
-   * Get a MultiApp by name.  Will error if the MultiApp doesn't exist in this Warehouse.
-   * @param multi_app_name The name of the MultiApp to get.
-   * @return A pointer to the MultiApp
-   */
-  MultiApp * getMultiApp(const std::string & multi_app_name) const;
-
-  /**
-   * Get a const iterator for the first sub app
-   */
-  MultiAppIter subAppsBegin() const { return _all_ptrs.begin(); }
-
-  /**
-   * Get a const iterator for the first sub app
-   */
-  MultiAppIter subAppsEnd() const { return _all_ptrs.end(); }
+  void addObject(MooseSharedPointer<MultiApp> object, THREAD_ID tid = 0);
 
   /**
    * Gets called when the output position has changed for the parent app.
@@ -87,17 +58,11 @@ public:
    */
   void parentOutputPositionChanged();
 
-  /**
-   * Calls the initialSetup() function for all Multiapps in the Warehouse
-   */
-  void initialSetup();
-
-protected:
-  std::vector<TransientMultiApp *> _transient_multi_apps;
 
 private:
-  /// Hold shared pointers for automatic cleanup
-  std::vector<MooseSharedPointer<MultiApp> > _all_ptrs;
+
+  /// Storage for TransientMultiApps (needed for calling computeDT() method)
+  ExecuteMooseObjectStorage<TransientMultiApp> _transient_multi_apps;
 };
 
 #endif // MULTIAPPWAREHOUSE_H

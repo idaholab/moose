@@ -601,7 +601,7 @@ public:
   /**
    * Get a MultiApp object by name.
    */
-  MultiApp * getMultiApp(const std::string & multi_app_name);
+  MooseSharedPointer<MultiApp> getMultiApp(const std::string & multi_app_name);
 
   /**
    * Execute the MultiApps associated with the ExecFlagType
@@ -1019,7 +1019,8 @@ protected:
   // user objects
   ExecStore<UserObjectWarehouse> _user_objects;
 
-  ExecStore<MultiAppWarehouse> _multi_apps;
+  // MultiApp Warehouse
+  MultiAppWarehouse _multi_apps;
 
   /// Normal Transfers
   ExecStore<TransferWarehouse> _transfers;
