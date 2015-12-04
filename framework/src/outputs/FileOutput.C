@@ -18,6 +18,7 @@
 #include "FEProblem.h"
 
 #include <unistd.h>
+#include <time.h>
 
 template<>
 InputParameters validParams<FileOutput>()
@@ -25,15 +26,12 @@ InputParameters validParams<FileOutput>()
   // Create InputParameters object for this stand-alone object
   InputParameters params = validParams<PetscOutput>();
   params.addParam<std::string>("file_base", "The desired solution output name without an extension");
-
+  params.addParam<bool>("append_date", false, "When true the date and time are appended to the output filename.");
+  params.addParam<std::string>("append_date_format", "The format of the date/time to append, if not given UTC format used (see http://www.cplusplus.com/reference/ctime/strftime).");
   // Add the padding option and list it as 'Advanced'
   params.addParam<unsigned int>("padding", 4, "The number of for extension suffix (e.g., out.e-s002)");
   params.addParam<std::vector<std::string> >("output_if_base_contains", std::vector<std::string>(), "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
   params.addParamNamesToGroup("padding output_if_base_contains", "Advanced");
-
-  // **** DEPRECATED AND REMOVED PARAMETERS ****
-  params.addDeprecatedParam<bool>("append_displaced", false, "Append '_displaced' to the output file base",
-                                  "This parameter is no longer operational, to append '_displaced' utilize the output block name or 'file_base'");
 
   return params;
 }
@@ -56,15 +54,31 @@ FileOutput::FileOutput(const InputParameters & parameters) :
   else
     _file_base = getOutputFileBase(_app, "_" + name());
 
+  // Append the date/time
+  if (getParam<bool>("append_date"))
+  {
+    std::string format;
+    if (isParamValid("append_date_format"))
+      format = getParam<std::string>("append_date_format");
+    else
+      format = "%Y-%m-%dT%T%z";
+
+    // Get the current time
+    time_t now;
+    ::time(&now); // need :: to avoid confusion with time() method of Output class
+
+    // Format the time
+    char buffer[80];
+    strftime(buffer, 80, format.c_str(), localtime(&now));
+    _file_base += "_";
+    _file_base += buffer;
+  }
+
   // Check the file directory of file_base
   std::string base = "./" + _file_base;
   base = base.substr(0, base.find_last_of('/'));
   if (access(base.c_str(), W_OK) == -1)
     mooseError("Can not write to directory: " + base + " for file base: " + _file_base);
-
-  // ** DEPRECATED SUPPORT **
-  if (getParam<bool>("append_displaced"))
-    _file_base += "_displaced";
 
 }
 

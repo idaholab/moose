@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = RunApp
+    input = append_date.i
+    recover = false # Steady
+  [../]
+[]
