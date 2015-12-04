@@ -2641,6 +2641,7 @@ FEProblem::updateActiveObjects()
   }
 
   _control_warehouse->updateActive();
+  _multi_apps.updateActive();
 }
 
 void
