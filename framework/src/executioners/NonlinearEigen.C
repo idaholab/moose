@@ -58,7 +58,7 @@ NonlinearEigen::init()
     _problem.advanceState();
 
     // free power iterations
-    _console << std::endl << " Free power iteration starts"  << std::endl;
+    _console << " Free power iteration starts"  << std::endl;
 
     Real initial_res;
     inversePowerIteration(_free_iter, _free_iter, _pfactor, false,

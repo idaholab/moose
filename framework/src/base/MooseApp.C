@@ -117,6 +117,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
+    _output_warehouse(*this),
     _input_parameter_warehouse(new InputParameterWarehouse()),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
@@ -136,7 +137,6 @@ MooseApp::MooseApp(InputParameters parameters) :
     _restartable_data(libMesh::n_threads()),
     _multiapp_level(0)
 {
-
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");

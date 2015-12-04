@@ -25,8 +25,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-OutputWarehouse::OutputWarehouse() :
+OutputWarehouse::OutputWarehouse(MooseApp & app) :
     Warehouse<Output>(),
+    _app(app),
+    _buffer_action_console_outputs(true),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false)
 {
@@ -177,6 +179,19 @@ OutputWarehouse::mooseConsole()
     // Reset
     _console_buffer.clear();
     _console_buffer.str("");
+  }
+  else
+  {
+    if (!_buffer_action_console_outputs)
+    {
+      // this will cause messages to console before its construction immediately flushed and cleared.
+      std::string message = _console_buffer.str();
+      if (_app.multiAppLevel() > 0)
+        MooseUtils::indentMessage(_app.name(), message);
+      Moose::out << message;
+      _console_buffer.clear();
+      _console_buffer.str("");
+    }
   }
 }
 
