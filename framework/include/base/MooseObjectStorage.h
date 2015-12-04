@@ -75,13 +75,21 @@ public:
 
   ///@{
   /**
-   * Convenience functions for determining if block/boundary restricted objects exist.
+   * Convenience functions for determining if objects exist.
    */
   bool hasActiveObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
+  ///@}
+
+  ///@{
+  /**
+   * Convenience functions for determing checking/getting specific objects
+   */
+  bool hasActiveObject(const std::string & name, THREAD_ID tid = 0) const;
+  MooseSharedPointer<T> getActiveObject(const std::string & name, THREAD_ID tid = 0) const;
   ///@}
 
   /**
@@ -392,6 +400,32 @@ MooseObjectStorage<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* =
 
 
 template<typename T>
+bool
+MooseObjectStorage<T>::hasActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
+  for (it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+    if ((*it)->name() == name)
+      return true;
+  return false;
+}
+
+
+template<typename T>
+MooseSharedPointer<T>
+MooseObjectStorage<T>::getActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
+  for (it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+    if ((*it)->name() == name)
+      return *it;
+  mooseError("Unable to locate active object: " << name << ".");
+}
+
+
+template<typename T>
 void
 MooseObjectStorage<T>::updateActive(THREAD_ID tid /*= 0*/)
 {
@@ -404,7 +438,6 @@ MooseObjectStorage<T>::updateActive(THREAD_ID tid /*= 0*/)
     for (it = _all_block_objects[tid].begin(); it != _all_block_objects[tid].end(); ++it)
       updateActiveHelper(_active_block_objects[tid][it->first], it->second);
   }
-
 
   {
     typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
