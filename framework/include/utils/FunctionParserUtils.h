@@ -32,12 +32,15 @@ public:
   /// Shorthand for an autodiff function parser object.
   typedef FunctionParserADBase<Real> ADFunction;
 
+  /// Shorthand for an smart pointer to an autodiff function parser object.
+  typedef MooseSharedPointer<ADFunction> ADFunctionPtr;
+
 protected:
   /// Evaluate FParser object and check EvalError
-  Real evaluate(ADFunction *);
+  Real evaluate(ADFunctionPtr &);
 
   /// add constants (which can be complex expressions) to the parser object
-  void addFParserConstants(ADFunction * parser,
+  void addFParserConstants(ADFunctionPtr & parser,
                            const std::vector<std::string> & constant_names,
                            const std::vector<std::string> & constant_expressions);
 

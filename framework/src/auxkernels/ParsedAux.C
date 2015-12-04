@@ -45,7 +45,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters) :
   }
 
   // base function object
-  _func_F = new ADFunction();
+  _func_F = ADFunctionPtr(new ADFunction());
 
   // add the constant expressions
   addFParserConstants(_func_F,
@@ -68,11 +68,6 @@ ParsedAux::ParsedAux(const InputParameters & parameters) :
   _func_params.resize(_nargs);
 }
 
-ParsedAux::~ParsedAux()
-{
-  delete _func_F;
-}
-
 Real
 ParsedAux::computeValue()
 {
@@ -81,4 +76,3 @@ ParsedAux::computeValue()
 
   return evaluate(_func_F);
 }
-

@@ -34,7 +34,6 @@ class ParsedAux :
 {
 public:
   ParsedAux(const InputParameters & parameters);
-  virtual ~ParsedAux();
 
 protected:
   virtual Real computeValue();
@@ -47,7 +46,7 @@ protected:
   std::vector<VariableValue *> _args;
 
   /// function parser object for the resudual and on-diagonal Jacobian
-  ADFunction * _func_F;
+  ADFunctionPtr _func_F;
 };
 
 #endif /* PARSEDAUX_H */
