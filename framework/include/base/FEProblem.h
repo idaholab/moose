@@ -543,7 +543,7 @@ public:
   /**
    * Returns whether or not the current simulation has any multiapps
    */
-  bool hasMultiApps() const { return _has_multiapps; }
+  bool hasMultiApps() const { return _multi_apps.hasActiveObjects(); }
   bool hasMultiApp(const std::string & name);
 
   /**
@@ -1077,9 +1077,6 @@ protected:
 
   /// Whether or not this system has any Constraints.
   bool _has_constraints;
-
-  /// Whether or not this system has any multiapps
-  bool _has_multiapps;
 
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;

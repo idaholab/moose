@@ -128,7 +128,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
-    _has_multiapps(false),
     _has_initialized_stateful(false),
     _resurrector(NULL),
     _const_jacobian(false),
@@ -515,7 +514,7 @@ void FEProblem::initialSetup()
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been restored
 
   // Call initialSetup on the MultiApps
-  if (_has_multiapps)
+  if (_multi_apps.hasActiveObjects())
   {
     _console << COLOR_CYAN << "Initializing MultiApps" << COLOR_DEFAULT << std::endl;
     _multi_apps.initialSetup();
@@ -2646,6 +2645,7 @@ FEProblem::updateActiveObjects()
   }
 
   _control_warehouse->updateActive();
+  _multi_apps.updateActive();
 }
 
 void
@@ -2742,8 +2742,6 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
 void
 FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters)
 {
-  _has_multiapps = true;
-
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
   parameters.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
