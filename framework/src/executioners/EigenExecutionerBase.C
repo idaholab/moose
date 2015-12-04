@@ -213,8 +213,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   if (echo)
   {
-    _console << std::endl;
-    _console << " Power iterations starts" << std::endl;
+    _console << '\n';
+    _console << " Power iterations starts\n";
     _console << " ________________________________________________________________________________ " << std::endl;
   }
 
@@ -268,7 +268,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       std::stringstream ss;
       if (solution_diff)
       {
-        ss << std::endl;
+        ss << '\n';
         ss << " +================+=====================+=====================+\n";
         ss << " | iteration      | eigenvalue          | solution_difference |\n";
         ss << " +================+=====================+=====================+\n";
@@ -287,7 +287,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       }
       else
       {
-        ss << std::endl;
+        ss << '\n';
         ss << " +================+=====================+\n";
         ss << " | iteration      | eigenvalue          |\n";
         ss << " +================+=====================+\n";
@@ -373,7 +373,7 @@ EigenExecutionerBase::postExecute()
   Real s = 1.0;
   if (_norm_execflag & EXEC_CUSTOM)
   {
-    _console << " Cannot let the normalization postprocessor on custom." << std::endl;
+    _console << " Cannot let the normalization postprocessor on custom.\n";
     _console << " Normalization is abandoned!" << std::endl;
   }
   else
@@ -426,12 +426,12 @@ void
 EigenExecutionerBase::printEigenvalue()
 {
   std::ostringstream ss;
-  ss << std::endl;
-  ss << "******************************************************* " << std::endl;
-  ss << " Eigenvalue = " << std::fixed << std::setprecision(10) << _eigenvalue << std::endl;
-  ss << "******************************************************* " << std::endl;
+  ss << '\n';
+  ss << "*******************************************************\n";
+  ss << " Eigenvalue = " << std::fixed << std::setprecision(10) << _eigenvalue << '\n';
+  ss << "*******************************************************";
 
-  _console << ss.str() << std::flush;
+  _console << ss.str() << std::endl;
 }
 
 EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters()
