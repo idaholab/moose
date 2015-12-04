@@ -112,6 +112,9 @@ public:
    */
   const std::map<dof_id_type, std::vector<Real> > & getNodeToPhaseWeightMap() const;
 
+  /// Maps need to be updated when the mesh changes
+  void meshChanged();
+
 protected:
   // MooseMesh Variables
   MooseMesh & _mesh;
@@ -146,6 +149,9 @@ protected:
 
   /// Map of phase weights per node
   std::map<dof_id_type, std::vector<Real> > _node_to_phase_weight_map;
+
+  /// current timestep. Maps are only rebuild on mesh change during time step zero
+  const int & _time_step;
 
   /// Dimension of the problem domain
   unsigned int _mesh_dimension;
