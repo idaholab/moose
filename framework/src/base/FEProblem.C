@@ -516,15 +516,11 @@ void FEProblem::initialSetup()
 
   // Call initialSetup on the MultiApps
   if (_has_multiapps)
+  {
     _console << COLOR_CYAN << "Initializing MultiApps" << COLOR_DEFAULT << std::endl;
-  _multi_apps(EXEC_LINEAR)[0].initialSetup();
-  _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
-  _multi_apps(EXEC_TIMESTEP_END)[0].initialSetup();
-  _multi_apps(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
-  _multi_apps(EXEC_INITIAL)[0].initialSetup();
-  _multi_apps(EXEC_CUSTOM)[0].initialSetup();
-  if (_has_multiapps)
+    _multi_apps.initialSetup();
     _console << COLOR_CYAN << "Finished Initializing MultiApps" << COLOR_DEFAULT << std::endl;
+  }
 
   // Call initialSetup on the transfers
   _transfers(EXEC_LINEAR)[0].initialSetup();
@@ -2190,8 +2186,7 @@ FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
 void
 FEProblem::parentOutputPositionChanged()
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    _multi_apps(Moose::exec_types[i])[0].parentOutputPositionChanged();
+  _multi_apps.parentOutputPositionChanged();
 }
 
 void
@@ -2765,45 +2760,30 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-  MooseSharedPointer<MooseObject> mo = _factory.create(multi_app_name, name, parameters);
-
-  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(mo);
-  if (multi_app.get() == NULL)
+  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(_factory.create(multi_app_name, name, parameters));
+  if (!multi_app)
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
-  const std::vector<ExecFlagType> & exec_flags = multi_app->execFlags();
-  for (unsigned int i=0; i<exec_flags.size(); ++i)
-    _multi_apps(exec_flags[i])[0].addMultiApp(multi_app);
-
-  // TODO: Is this really the right spot to init a multiapp?
-//  multi_app->init();
+  _multi_apps.addObject(multi_app);
 }
 
 bool
 FEProblem::hasMultiApp(const std::string & multi_app_name)
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
-      return true;
-
-  return false;
+  return _multi_apps.getStorage().hasActiveObject(multi_app_name);
 }
 
 
-MultiApp *
+MooseSharedPointer<MultiApp>
 FEProblem::getMultiApp(const std::string & multi_app_name)
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
-      return _multi_apps(Moose::exec_types[i])[0].getMultiApp(multi_app_name);
-
-  mooseError("MultiApp "<<multi_app_name<<" not found!");
+  return _multi_apps.getStorage().getActiveObject(multi_app_name);
 }
 
 bool
 FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
   for (unsigned int i=0; i<multi_apps.size(); i++)
@@ -2883,7 +2863,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 void
 FEProblem::advanceMultiApps(ExecFlagType type)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2902,7 +2882,7 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 void
 FEProblem::backupMultiApps(ExecFlagType type)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2921,7 +2901,7 @@ FEProblem::backupMultiApps(ExecFlagType type)
 void
 FEProblem::restoreMultiApps(ExecFlagType type, bool force)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2944,7 +2924,7 @@ FEProblem::restoreMultiApps(ExecFlagType type, bool force)
 Real
 FEProblem::computeMultiAppsDT(ExecFlagType type)
 {
-  std::vector<TransientMultiApp *> multi_apps = _multi_apps(type)[0].transient();
+  const std::vector<MooseSharedPointer<TransientMultiApp> > & multi_apps = _multi_apps.getTransientStorage(type).getActiveObjects();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
