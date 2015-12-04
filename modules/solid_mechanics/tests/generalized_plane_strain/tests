@@ -29,4 +29,10 @@
    exodiff = 'generalized_plane_strain_field_kinematic_out.e'
    custom_cmp = 'generalized.exodiff'
  [../]
+ [./out_of_plane_pressure]
+   type = 'Exodiff'
+   input = 'out_of_plane_pressure.i'
+   exodiff = 'out_of_plane_pressure_out.e'
+   abs_zero = 1e-9
+ [../]
 []
