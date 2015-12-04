@@ -26,6 +26,7 @@
 #include "InertialForce.h"
 #include "Gravity.h"
 #include "DynamicStressDivergenceTensors.h"
+#include "OutOfPlanePressure.h"
 
 #include "LinearElasticMaterial.h"
 #include "LinearElasticTruss.h"
@@ -184,6 +185,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(InertialForce);
   registerKernel(Gravity);
   registerKernel(DynamicStressDivergenceTensors);
+  registerKernel(OutOfPlanePressure);
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(LinearElasticTruss);
