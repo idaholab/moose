@@ -47,7 +47,7 @@ FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters) :
 }
 
 Real
-FunctionParserUtils::evaluate(ADFunction * parser)
+FunctionParserUtils::evaluate(ADFunctionPtr & parser)
 {
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
   if (parser == NULL) return 0.0;
@@ -71,13 +71,10 @@ FunctionParserUtils::evaluate(ADFunction * parser)
 }
 
 void
-FunctionParserUtils::addFParserConstants(ADFunction * parser,
+FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
                                          const std::vector<std::string> & constant_names,
                                          const std::vector<std::string> & constant_expressions)
 {
-  // temporary FParser object to evaluate constant_expressions
-  ADFunction *expression;
-
   // check constant vectors
   unsigned int nconst = constant_expressions.size();
   if (nconst != constant_expressions.size())
@@ -88,7 +85,7 @@ FunctionParserUtils::addFParserConstants(ADFunction * parser,
 
   for (unsigned int i = 0; i < nconst; ++i)
   {
-    expression = new ADFunction();
+    ADFunctionPtr expression = ADFunctionPtr(new ADFunction());
 
     // add previously evaluated constants
     for (unsigned int j = 0; j < i; ++j)
@@ -103,8 +100,6 @@ FunctionParserUtils::addFParserConstants(ADFunction * parser,
 
     if (!parser->AddConstant(constant_names[i], constant_values[i]))
       mooseError("Invalid constant name in parsed function object");
-
-    delete expression;
   }
 }
 
