@@ -54,4 +54,10 @@
   requires_swig2 = True
  [../]
 
+ [./test_transformationMatrix]
+  type = 'CrowPython'
+  input = 'test_transformationMatrix.py'
+  requires_swig2 = True
+ [../]
+
 []
