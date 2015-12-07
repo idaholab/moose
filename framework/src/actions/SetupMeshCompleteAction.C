@@ -42,6 +42,9 @@ SetupMeshCompleteAction::completeSetup(MooseMesh *mesh)
     Moose::setup_perf_log.pop("Prepare Mesh","Setup");
   }
 
+  // Clear the modifiers, they are not used again during the simulation after the mesh has been completed
+  _app.clearMeshModifiers();
+
   return prepared;
 }
 

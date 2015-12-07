@@ -425,9 +425,19 @@ public:
   bool isUltimateMaster() { return !_multiapp_level; }
 
   /**
-   * Add a Mesh modifier that will act on the meshes in the system
+   * Add a mesh modifier that will act on the meshes in the system
    */
   void addMeshModifier(const std::string & modifier_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Get a mesh modifer with its name
+   */
+  const MeshModifier & getMeshModifier(const std::string & name) const;
+
+  /**
+   * Clear all mesh modifers
+   */
+  void clearMeshModifiers();
 
   /**
    * Execute and clear the Mesh Modifiers data structure
