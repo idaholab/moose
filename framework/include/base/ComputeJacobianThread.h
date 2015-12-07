@@ -49,11 +49,11 @@ protected:
 
   unsigned int _num_cached;
 
-  ///@{
   // Reference to BC storage structures
   const MooseObjectStorage<IntegratedBC> & _integrated_bcs;
 
-  ///@}
+  // Reference to DGKernel storage structure
+  const MooseObjectStorage<DGKernel> & _dg_kernels;
 
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);

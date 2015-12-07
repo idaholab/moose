@@ -23,15 +23,16 @@
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
     ComputeJacobianThread(fe_problem, sys, jacobian),
-    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage())
-
+    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage()),
+    _dg_kernels(sys.getDGKernelWarehouse().getStorage())
 {
 }
 
 // Splitting Constructor
 ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split) :
     ComputeJacobianThread(x, split),
-    _integrated_bcs(x._integrated_bcs)
+    _integrated_bcs(x._integrated_bcs),
+    _dg_kernels(x._dg_kernels)
 
 {
 }
@@ -165,20 +166,23 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian()
 {
-  std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
-  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
+  if (_dg_kernels.hasActiveObjects(_tid))
   {
-    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid).active();
-    for (std::vector<DGKernel *>::iterator dg_it = dgks.begin(); dg_it != dgks.end(); ++dg_it)
+    std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+    for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
     {
-      unsigned int ivar = (*it).first->number();
-      DGKernel * dg = *dg_it;
-      if (dg->variable().number() == ivar && dg->isImplicit())
+      const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
+      for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator dg_it = dgks.begin(); dg_it != dgks.end(); ++dg_it)
       {
-        unsigned int jvar = (*it).second->number();
-        dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
-        dg->subProblem().prepareNeighborShapes(jvar, _tid);
-        dg->computeOffDiagJacobian(jvar);
+        unsigned int ivar = (*it).first->number();
+        MooseSharedPointer<DGKernel> dg = *dg_it;
+        if (dg->variable().number() == ivar && dg->isImplicit())
+        {
+          unsigned int jvar = (*it).second->number();
+          dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
+          dg->subProblem().prepareNeighborShapes(jvar, _tid);
+          dg->computeOffDiagJacobian(jvar);
+        }
       }
     }
   }
