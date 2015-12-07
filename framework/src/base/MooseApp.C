@@ -857,6 +857,12 @@ MooseApp::addMeshModifier(const std::string & modifier_name, const std::string &
   _mesh_modifiers.insert(std::make_pair(MooseUtils::shortName(name), mesh_modifier));
 }
 
+const MeshModifier &
+MooseApp::getMeshModifier(const std::string & name) const
+{
+  return *_mesh_modifiers.find(MooseUtils::shortName(name))->second.get();
+}
+
 void
 MooseApp::executeMeshModifiers()
 {
@@ -906,8 +912,11 @@ MooseApp::executeMeshModifiers()
     if (displaced_mesh)
       displaced_mesh->prepared(false);
   }
+}
 
-  // Clear the modifiers, they are not used again during the simulation
+void
+MooseApp::clearMeshModifiers()
+{
   _mesh_modifiers.clear();
 }
 
