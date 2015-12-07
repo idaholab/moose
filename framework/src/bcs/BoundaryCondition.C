@@ -29,6 +29,7 @@ InputParameters validParams<BoundaryCondition>()
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
+  params.declareControllable("enable");
   params.registerBase("BoundaryCondition");
 
   return params;
@@ -73,4 +74,3 @@ BoundaryCondition::shouldApply()
 {
   return true;
 }
-

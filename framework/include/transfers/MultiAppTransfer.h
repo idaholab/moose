@@ -57,11 +57,11 @@ public:
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
   /// Return the MultiApp that this transfer belongs to
-  const MultiApp * getMultiApp() const { return _multi_app; }
+  const MooseSharedPointer<MultiApp> getMultiApp() const { return _multi_app; }
 
 protected:
   /// The MultiApp this Transfer is transferring data to or from
-  MultiApp * _multi_app;
+  MooseSharedPointer<MultiApp> _multi_app;
 
   /// Whether we're transferring to or from the MultiApp
   MooseEnum _direction;

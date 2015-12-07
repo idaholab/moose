@@ -15,7 +15,7 @@
 #ifndef PARALLELUNIQUEID_H
 #define PARALLELUNIQUEID_H
 
-#include "Moose.h"  // included for namespace usage
+#include "MooseTypes.h"  // included for namespace usage and THREAD_ID
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/threads.h"
@@ -24,8 +24,6 @@
 #include "tbb/concurrent_queue.h"
 #include "tbb/tbb_thread.h"
 #endif
-
-typedef unsigned int THREAD_ID;
 
 class ParallelUniqueId
 {

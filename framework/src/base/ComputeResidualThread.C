@@ -26,7 +26,8 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSy
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _sys(sys),
     _kernel_type(type),
-    _num_cached(0)
+    _num_cached(0),
+    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage())
 {
 }
 
@@ -35,7 +36,8 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
     ThreadedElementLoop<ConstElemRange>(x, split),
     _sys(x._sys),
     _kernel_type(x._kernel_type),
-    _num_cached(0)
+    _num_cached(0),
+    _integrated_bcs(x._integrated_bcs)
 {
 }
 
@@ -60,26 +62,7 @@ ComputeResidualThread::subdomainChanged()
   }
 
   // Boundary Condition Dependencies
-  const std::set<unsigned int> & subdomain_boundary_ids = _mesh.getSubdomainBoundaryIds(_subdomain);
-  for (std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
-      id_it != subdomain_boundary_ids.end();
-      ++id_it)
-  {
-    std::vector<IntegratedBC *> bcs;
-    _sys.getBCWarehouse(_tid).activeIntegrated(*id_it, bcs);
-    if (bcs.size() > 0)
-    {
-      for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
-      {
-        IntegratedBC * bc = (*it);
-        if (bc->shouldApply())
-        {
-          const std::set<MooseVariable *> & mv_deps = bc->getMooseVariableDependencies();
-          needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-        }
-      }
-    }
-  }
+  _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
 
   // DG Kernel dependencies
   {
@@ -120,11 +103,10 @@ ComputeResidualThread::onElement(const Elem *elem)
 void
 ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-
-  std::vector<IntegratedBC *> bcs;
-  _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
-  if (bcs.size() > 0)
+  if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
   {
+    const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
     unsigned int subdomain = elem->subdomain_id();
@@ -137,11 +119,10 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
     // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
     _fe_problem.setCurrentBoundaryID(bnd_id);
 
-    for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+    for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
     {
-      IntegratedBC * bc = (*it);
-      if (bc->shouldApply())
-        bc->computeResidual();
+      if ((*it)->shouldApply() && (*it)->isActive())
+        (*it)->computeResidual();
     }
     _fe_problem.swapBackMaterialsFace(_tid);
 

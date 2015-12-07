@@ -440,16 +440,10 @@ UserObjectWarehouse::sortUserObjects(std::vector<T *> & uo_vector)
   try
   {
     // Sort based on dependencies
-    DependencyResolverInterface::sort(uo_vector.begin(), uo_vector.end());
+    DependencyResolverInterface::sort<T *>(uo_vector);
   }
-  catch(CyclicDependencyException<DependencyResolverInterface *> & e)
+  catch(CyclicDependencyException<T *> & e)
   {
-    std::ostringstream oss;
-
-    oss << "Cyclic dependency detected in UserObject ordering:\n";
-    const std::multimap<DependencyResolverInterface *, DependencyResolverInterface *> & depends = e.getCyclicDependencies();
-    for (std::multimap<DependencyResolverInterface *, DependencyResolverInterface *>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-      oss << (static_cast<T *>(it->first))->name() << " -> " << (static_cast<T *>(it->second))->name() << "\n";
-    mooseError(oss.str());
+    DependencyResolverInterface::cyclicDependencyError<T *>(e, "Cyclic dependency detected in UserObject ordering");
   }
 }

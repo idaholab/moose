@@ -39,6 +39,12 @@ protected:
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);
   virtual void computeInternalFaceJacobian();
+
+  ///@{
+  // Reference to BC storage structures
+  const MooseObjectStorage<IntegratedBC> & _integrated_bcs;
+
+  ///@}
 };
 
 #endif //COMPUTEFULLJACOBIANTHREAD_H
