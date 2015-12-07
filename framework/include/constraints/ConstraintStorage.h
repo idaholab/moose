@@ -12,11 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTRAINTWAREHOUSE_H
-#define CONSTRAINTWAREHOUSE_H
+#ifndef CONSTRAINTSTORAGE_H
+#define CONSTRAINTSTORAGE_H
 
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
+#include "MooseObjectStorage.h"
 #include "MooseTypes.h"
 
 class Constraint;
@@ -27,10 +27,10 @@ class FaceFaceConstraint;
 /**
  * Warehouse for storing constraints
  */
-class ConstraintWarehouse : public MooseObjectWarehouse<Constraint>
+class ConstraintStorage : public MooseObjectStorage<Constraint>
 {
 public:
-  ConstraintWarehouse();
+  ConstraintStorage();
 
   /**
    * Add Constraint object to the warehouse.
@@ -60,7 +60,7 @@ public:
   /**
    * Update supplied subdomain and variable coverate containters.
    */
-  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const;
+  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid = 0) const;
 
   /**
    * Update the various active lists.
@@ -82,4 +82,4 @@ protected:
   std::map<std::string, MooseObjectStorage<FaceFaceConstraint> > _face_face_constraints;
 };
 
-#endif // CONSTRAINTWAREHOUSE_H
+#endif // CONSTRAINTSTORAGE_H

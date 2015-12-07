@@ -22,6 +22,7 @@
 #include "TransientInterface.h"
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
+#include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
 
@@ -44,6 +45,7 @@ class Control :
   public TransientInterface,
   public SetupInterface,
   public FunctionInterface,
+  public UserObjectInterface,
   protected PostprocessorInterface,
   protected VectorPostprocessorInterface
 {

@@ -26,7 +26,6 @@
 #include "Adaptivity.h"
 #include "IndicatorWarehouse.h"
 #include "MarkerWarehouse.h"
-#include "MultiAppWarehouse.h"
 #include "TransferWarehouse.h"
 #include "UserObjectWarehouse.h"
 #include "InitialConditionWarehouse.h"
@@ -34,7 +33,7 @@
 #include "SolverParams.h"
 #include "PetscSupport.h"
 #include "MooseApp.h"
-#include "ControlWarehouse.h"
+#include "ExecuteMooseObjectStorage.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -55,7 +54,9 @@ class MooseEnum;
 class Resurrector;
 class Assembly;
 class JacobianBlock;
-class ControlWarehouse;
+class Control;
+class MultiApp;
+class TransientMultiApp;
 
 // libMesh forward declarations
 namespace libMesh
@@ -943,7 +944,7 @@ public:
   /**
    * Reference to the control logic warehouse.
    */
-  ControlWarehouse & getControlWarehouse() { return *_control_warehouse; }
+  ExecuteMooseObjectStorage<Control> & getControlStorage() { return _control_storage; }
 
   /**
    * Performs setup and execute calls for Control objects.
@@ -1022,8 +1023,11 @@ protected:
   // user objects
   ExecStore<UserObjectWarehouse> _user_objects;
 
-  // MultiApp Warehouse
-  MultiAppWarehouse _multi_apps;
+  /// MultiApp Warehouse
+  ExecuteMooseObjectStorage<MultiApp> _multi_apps;
+
+  /// Storage for TransientMultiApps (only needed for calling 'computeDT')
+  ExecuteMooseObjectStorage<TransientMultiApp> _transient_multi_apps;
 
   /// Normal Transfers
   ExecStore<TransferWarehouse> _transfers;
@@ -1119,8 +1123,8 @@ protected:
   /// Current execute_on flag
   ExecFlagType _current_execute_on_flag;
 
-  /// The control logic warehouse (must be pointer because of cyclic includes of FEProblem.h: FEProblem->ControlWarehouse->Control->UserObjectInterface->FEProblem)
-  UniquePtr<ControlWarehouse> _control_warehouse;
+  /// The control logic warehouse
+  ExecuteMooseObjectStorage<Control> _control_storage;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage

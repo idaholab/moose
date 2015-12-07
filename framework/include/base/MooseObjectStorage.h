@@ -97,20 +97,15 @@ public:
    */
   virtual void updateActive(THREAD_ID tid = 0);
 
-  /**
-   * Return the number of active objects stored in this container.
-   */
-  inline unsigned int size(THREAD_ID tid = 0) const { return _active_objects[tid].size(); }
-
   ///@{
   /**
    * Convenience methods for calling object setup methods.
    */
-  void initialSetup(THREAD_ID tid = 0) const;
-  void timestepSetup(THREAD_ID tid = 0) const;
-  void subdomainSetup(THREAD_ID tid = 0) const;
-  void jacobianSetup(THREAD_ID tid = 0) const;
-  void residualSetup(THREAD_ID tid = 0) const;
+  virtual void initialSetup(THREAD_ID tid = 0) const;
+  virtual void timestepSetup(THREAD_ID tid = 0) const;
+  virtual void subdomainSetup(THREAD_ID tid = 0) const;
+  virtual void jacobianSetup(THREAD_ID tid = 0) const;
+  virtual void residualSetup(THREAD_ID tid = 0) const;
   ///@}
 
   /**

@@ -789,9 +789,6 @@ NonlinearSystem::setInitialSolution()
     _fe_problem.predictorCleanup(initial_solution);
   }
 
-  // PresetNodalBC storage
-  const MooseObjectStorage<PresetNodalBC> & storage = _preset_nodal_bcs.getStorage();
-
   // do nodal BC
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
   for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
@@ -805,9 +802,9 @@ NonlinearSystem::setInitialSolution()
       // reinit variables in nodes
       _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-      if (storage.hasActiveBoundaryObjects(boundary_id))
+      if (_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
       {
-        const std::vector<MooseSharedPointer<PresetNodalBC> > & preset = storage.getActiveBoundaryObjects(boundary_id);
+        const std::vector<MooseSharedPointer<PresetNodalBC> > & preset = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
         for (std::vector<MooseSharedPointer<PresetNodalBC> >::const_iterator it = preset.begin(); it != preset.end(); ++it)
           (*it)->computeValue(initial_solution);
       }
@@ -1230,9 +1227,9 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   // residual contributions from the scalar kernels
   PARALLEL_TRY {
     // do scalar kernels (not sure how to thread this)
-    if (_scalar_kernels.getStorage().hasActiveObjects())
+    if (_scalar_kernels.hasActiveObjects())
     {
-      const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getStorage().getActiveObjects();
+      const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getActiveObjects();
       for (std::vector<MooseSharedPointer<ScalarKernel> >::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
       {
         (*it)->reinit();
@@ -1317,9 +1314,6 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
   if (_has_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
-  // Storage structure for NodalBCs
-  const MooseObjectStorage<NodalBC> & storage = _nodal_bcs.getStorage();
-
   PARALLEL_TRY {
     // last thing to do are nodal BCs
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -1334,9 +1328,9 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
         // reinit variables in nodes
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        if (storage.hasActiveBoundaryObjects(boundary_id))
+        if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
         {
-          const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getStorage().getActiveBoundaryObjects(boundary_id);
+          const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
           for (std::vector<MooseSharedPointer<NodalBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
           {
             if ((*it)->shouldApply() && (*it)->isActive())
@@ -1759,10 +1753,10 @@ void
 NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 {
   // Compute the diagonal block for scalar variables
-  if (_scalar_kernels.getStorage().hasActiveObjects())
+  if (_scalar_kernels.hasActiveObjects())
   {
     const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(/*tid=*/0);
-    const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getStorage().getActiveObjects();
+    const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getActiveObjects();
 
     _fe_problem.reinitScalars(/*tid=*/0);
     for (std::vector<MooseSharedPointer<ScalarKernel> >::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
@@ -1913,9 +1907,6 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   if (_has_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
-  // Storage structure for all NodalBC objects
-  const MooseObjectStorage<NodalBC> & storage = _nodal_bcs.getStorage();
-
   PARALLEL_TRY {
     // Cache the information about which BCs are coupled to which
     // variables, so we don't have to figure it out for each node.
@@ -1925,9 +1916,9 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     {
       // Get reference to all the NodalBCs for this ID.  This is only
       // safe if there are NodalBCs there to be gotten...
-      if (storage.hasActiveBoundaryObjects(*it))
+      if (_nodal_bcs.hasActiveBoundaryObjects(*it))
       {
-        const std::vector<MooseSharedPointer<NodalBC> > & bcs = storage.getActiveBoundaryObjects(*it);
+        const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(*it);
         for (std::vector<MooseSharedPointer<NodalBC> >::const_iterator bc_it = bcs.begin(); bc_it != bcs.end(); ++bc_it)
         {
           MooseSharedPointer<NodalBC> bc = *bc_it;
@@ -1959,11 +1950,11 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       BoundaryID boundary_id = bnode->_bnd_id;
       Node * node = bnode->_node;
 
-      if (storage.hasActiveBoundaryObjects(boundary_id) && node->processor_id() == processor_id())
+      if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id) && node->processor_id() == processor_id())
       {
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        const std::vector<MooseSharedPointer<NodalBC> > & bcs = storage.getActiveBoundaryObjects(boundary_id);
+        const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
         for (std::vector<MooseSharedPointer<NodalBC> >::const_iterator bc_it = bcs.begin(); bc_it != bcs.end(); ++bc_it)
         {
           MooseSharedPointer<NodalBC> bc = *bc_it;
@@ -2081,7 +2072,6 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
     blocks[i]->_jacobian.close();
 
 
-  const MooseObjectStorage<NodalBC> & storage = _nodal_bcs.getStorage();
   for (unsigned int i=0; i<blocks.size(); i++)
   {
     libMesh::System & precond_system = blocks[i]->_precond_system;
@@ -2100,9 +2090,9 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
         BoundaryID boundary_id = bnode->_bnd_id;
         Node * node = bnode->_node;
 
-        if (storage.hasActiveBoundaryObjects(boundary_id))
+        if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
         {
-          const std::vector<MooseSharedPointer<NodalBC> > & bcs = storage.getActiveBoundaryObjects(boundary_id);
+          const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
           {
             if (node->processor_id() == processor_id())
             {
@@ -2160,12 +2150,12 @@ NonlinearSystem::updateActive(THREAD_ID tid)
 Real
 NonlinearSystem::computeDamping(const NumericVector<Number>& update)
 {
-  Moose::perf_log.push("compute_dampers()","Solve");
+  Moose::perf_log.push("compute_dampers()", "Solve");
 
   // Default to no damping
   Real damping = 1.0;
 
-  if (_dampers.size() > 0)
+  if (_dampers.hasActiveObjects())
   {
     *_increment_vec = update;
     ComputeDampingThread cid(_fe_problem, *this);
@@ -2175,7 +2165,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number>& update)
 
   _communicator.min(damping);
 
-  Moose::perf_log.pop("compute_dampers()","Solve");
+  Moose::perf_log.pop("compute_dampers()", "Solve");
 
   return damping;
 }
@@ -2386,10 +2376,10 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   std::set<std::string> kernel_variables;
 
   bool global_kernels_exist = _kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
-  global_kernels_exist |= _scalar_kernels.getStorage().hasActiveObjects();
+  global_kernels_exist |= _scalar_kernels.hasActiveObjects();
   global_kernels_exist |= _nodal_kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
 
-  _scalar_kernels.getStorage().subdomainsCovered(input_subdomains, kernel_variables);
+  _scalar_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);
   if (!global_kernels_exist)
   {
@@ -2450,7 +2440,7 @@ NonlinearSystem::setPCSide(MooseEnum pcs)
 bool
 NonlinearSystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
-  return _integrated_bcs.getStorage().hasActiveBoundaryObjects(bnd_id, tid);
+  return _integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
 bool

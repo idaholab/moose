@@ -26,7 +26,7 @@ ComputeDampingThread::ComputeDampingThread(FEProblem & feproblem,
     ThreadedElementLoop<ConstElemRange>(feproblem, sys),
     _damping(1.0),
     _nl(sys),
-    _dampers(sys.getDamperWarehouse().getStorage())
+    _dampers(sys.getDamperStorage())
 {
 }
 

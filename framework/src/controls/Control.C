@@ -14,7 +14,6 @@
 
 // MOOSE includes
 #include "Control.h"
-#include "MooseApp.h"
 
 template<>
 InputParameters validParams<Control>()
@@ -35,6 +34,7 @@ Control::Control(const InputParameters & parameters) :
     TransientInterface(parameters, "control"),
     SetupInterface(parameters),
     FunctionInterface(parameters),
+    UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     VectorPostprocessorInterface(parameters),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
