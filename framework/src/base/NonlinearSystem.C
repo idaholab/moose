@@ -196,7 +196,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   _kernels.resize(n_threads);
   _nodal_kernels.resize(n_threads);
   _dirac_kernels.resize(n_threads);
-  _dg_kernels.resize(n_threads);
 }
 
 NonlinearSystem::~NonlinearSystem()
@@ -329,7 +328,7 @@ NonlinearSystem::initialSetup()
     _kernels[tid].initialSetup();
     _dirac_kernels[tid].initialSetup();
     if (_doing_dg)
-      _dg_kernels[tid].initialSetup();
+      _dg_kernels.initialSetup(tid);
 
     _dampers.initialSetup(tid);
     _integrated_bcs.initialSetup(tid);
@@ -347,7 +346,7 @@ NonlinearSystem::timestepSetup()
     _kernels[tid].timestepSetup();
     _dirac_kernels[tid].timestepSetup();
     if (_doing_dg)
-      _dg_kernels[tid].timestepSetup();
+      _dg_kernels.timestepSetup(tid);
     _dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
   }
@@ -673,7 +672,7 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
 
     MooseSharedPointer<DGKernel> dg_kernel = MooseSharedNamespace::static_pointer_cast<DGKernel>(_factory.create(dg_kernel_name, name, parameters, tid));
 
-    _dg_kernels[tid].addDGKernel(dg_kernel);
+    _dg_kernels.addObject(dg_kernel, tid);
   }
 
   _doing_dg = true;
@@ -1201,7 +1200,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     _kernels[tid].residualSetup();
     _dirac_kernels[tid].residualSetup();
     if (_doing_dg)
-      _dg_kernels[tid].residualSetup();
+      _dg_kernels.residualSetup(tid);
     _dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
   }
@@ -1812,7 +1811,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     _kernels[tid].jacobianSetup();
     _dirac_kernels[tid].jacobianSetup();
     if (_doing_dg)
-      _dg_kernels[tid].jacobianSetup();
+      _dg_kernels.jacobianSetup(tid);
     _dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
   }
@@ -2147,6 +2146,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
 {
   _dampers.updateActive(tid);
   _integrated_bcs.updateActive(tid);
+  _dg_kernels.updateActive(tid);
 
   if (tid == 0)
   {
@@ -2470,25 +2470,11 @@ NonlinearSystem::updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid)
   _kernels[tid].updateActiveKernels(subdomain_id);
 }
 
-void
-NonlinearSystem::updateActiveDGKernels(Real t, Real dt, THREAD_ID tid)
-{
-  mooseAssert(tid < _dg_kernels.size(), "Thread ID does not exist.");
-  _dg_kernels[tid].updateActiveDGKernels(t, dt);
-}
-
 const KernelWarehouse &
 NonlinearSystem::getKernelWarehouse(THREAD_ID tid)
 {
   mooseAssert(tid < _kernels.size(), "Thread ID does not exist.");
   return _kernels[tid];
-}
-
-const DGKernelWarehouse &
-NonlinearSystem::getDGKernelWarehouse(THREAD_ID tid)
-{
-  mooseAssert(tid < _dg_kernels.size(), "Thread ID does not exist.");
-  return _dg_kernels[tid];
 }
 
 const DiracKernelWarehouse &
