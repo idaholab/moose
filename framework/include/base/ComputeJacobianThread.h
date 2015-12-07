@@ -23,6 +23,9 @@
 // Forward declarations
 class FEProblem;
 class NonlinearSystem;
+class IntegratedBC;
+class DGKernel;
+
 
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {

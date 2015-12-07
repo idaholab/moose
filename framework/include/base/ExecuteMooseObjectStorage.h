@@ -23,9 +23,14 @@
  * A class for storing MooseObjects based on execution flag.
  */
 template<typename T>
-class ExecuteMooseObjectStorage
+class ExecuteMooseObjectStorage : public MooseObjectStorage<T>
 {
 public:
+
+  using MooseObjectStorage<T>::checkThreadID;
+  using MooseObjectStorage<T>::initialSetup;
+  using MooseObjectStorage<T>::timestepSetup;
+  using MooseObjectStorage<T>::subdomainSetup;
 
   /**
    * Constructor.
@@ -57,14 +62,25 @@ public:
   /**
    * Provide access to begin/end iterators of the underlying map of execution flags.
    */
-  typename std::map<ExecFlagType, MooseObjectStorage<T> >::iterator begin(){ return _execute_objects.begin(); }
-  typename std::map<ExecFlagType, MooseObjectStorage<T> >::iterator end(){ return _execute_objects.end(); }
+  typename std::map<ExecFlagType, MooseObjectStorage<T> >::const_iterator begin() const { return _execute_objects.begin(); }
+  typename std::map<ExecFlagType, MooseObjectStorage<T> >::const_iterator end() const { return _execute_objects.end(); }
   ///@}
 
   /**
    * Updates the active objects storage.
    */
   virtual void updateActive(THREAD_ID tid = 0);
+
+  ///@{
+  /**
+   * Convenience methods for calling object setup methods.
+   *
+   * Limits call to these methods only to objects being executed on linear/nonlinear iterations.
+   */
+  void jacobianSetup(THREAD_ID tid = 0) const;
+  void residualSetup(THREAD_ID tid = 0) const;
+  void setup(ExecFlagType exec_flag, THREAD_ID tid = 0) const;
+  ///@}
 
   /**
    * Performs a sort using the DependencyResolver.
@@ -84,7 +100,8 @@ protected:
 
 
 template<typename T>
-ExecuteMooseObjectStorage<T>::ExecuteMooseObjectStorage(bool threaded)
+ExecuteMooseObjectStorage<T>::ExecuteMooseObjectStorage(bool threaded) :
+    MooseObjectStorage<T>(threaded)
 {
   // Initialize the active/all data structures with the correct map entries and empty vectors
   for (std::vector<ExecFlagType>::const_iterator it = Moose::exec_types.begin(); it != Moose::exec_types.end(); ++it)
@@ -132,6 +149,9 @@ template<typename T>
 void
 ExecuteMooseObjectStorage<T>::updateActive(THREAD_ID tid/* = 0 */)
 {
+  // Update all objects active list
+  MooseObjectStorage<T>::updateActive(tid);
+
   // Update the execute flag lists of objects
   typename std::map<ExecFlagType, MooseObjectStorage<T> >::iterator iter;
   for (iter = _execute_objects.begin(); iter != _execute_objects.end(); ++iter)
@@ -141,8 +161,61 @@ ExecuteMooseObjectStorage<T>::updateActive(THREAD_ID tid/* = 0 */)
 
 template<typename T>
 void
+ExecuteMooseObjectStorage<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::map<ExecFlagType, MooseObjectStorage<T> >::const_iterator iter = _execute_objects.find(EXEC_NONLINEAR);
+  if (iter != _execute_objects.end())
+    iter->second.jacobianSetup(tid);
+}
+
+
+template<typename T>
+void
+ExecuteMooseObjectStorage<T>::residualSetup(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::map<ExecFlagType, MooseObjectStorage<T> >::const_iterator iter = _execute_objects.find(EXEC_LINEAR);
+  if (iter != _execute_objects.end())
+    iter->second.residualSetup(tid);
+}
+
+
+template<typename T>
+void
+ExecuteMooseObjectStorage<T>::setup(ExecFlagType exec_flag, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  switch (exec_flag)
+  {
+  case EXEC_INITIAL:
+    initialSetup(tid);
+    break;
+  case EXEC_TIMESTEP_BEGIN:
+    timestepSetup(tid);
+    break;
+  case EXEC_SUBDOMAIN:
+    subdomainSetup(tid);
+    break;
+  case EXEC_NONLINEAR:
+    jacobianSetup(tid);
+    break;
+  case EXEC_LINEAR:
+    residualSetup(tid);
+    break;
+  default:
+    break;
+  }
+}
+
+
+template<typename T>
+void
 ExecuteMooseObjectStorage<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid/*=0*/)
 {
+  // Update list of all objects
+  MooseObjectStorage<T>::addObject(object, tid);
+
   // Update the execute flag lists of objects
   MooseSharedPointer<SetupInterface> ptr = MooseSharedNamespace::dynamic_pointer_cast<SetupInterface>(object);
   if (ptr)
@@ -158,6 +231,9 @@ template<typename T>
 void
 ExecuteMooseObjectStorage<T>::sort(THREAD_ID tid/* = 0*/)
 {
+  // Sort all objects
+  MooseObjectStorage<T>::sort(tid);
+
   // Sort execute object storage
   typename std::map<ExecFlagType, MooseObjectStorage<T> >::iterator iter;
   for (iter = _execute_objects.begin(); iter != _execute_objects.end(); ++iter)

@@ -23,7 +23,8 @@
 // Forward declarations
 class FEProblem;
 class NonlinearSystem;
-
+class IntegratedBC;
+class DGKernel;
 
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {

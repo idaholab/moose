@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "TestControl.h"
-#include "ControlWarehouse.h"
 #include "FEProblem.h"
 
 template<>
@@ -39,7 +38,7 @@ TestControl::TestControl(const InputParameters & parameters) :
     getControllableValue<NonlinearVariableName>("parameter");
 
   else if (_test_type == "tid_warehouse_error")
-    _fe_problem.getControlWarehouse().initialSetup(12345);
+    _fe_problem.getControlStorage().initialSetup(12345);
 
   else if (_test_type == "disable_executioner")
     getControllableValueByName<bool>("Executioner/enable");

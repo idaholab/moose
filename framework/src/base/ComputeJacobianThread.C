@@ -27,8 +27,8 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
     _jacobian(jacobian),
     _sys(sys),
     _num_cached(0),
-    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage()),
-    _dg_kernels(sys.getDGKernelWarehouse().getStorage())
+    _integrated_bcs(sys.getIntegratedBCStorage()),
+    _dg_kernels(sys.getDGKernelStorage())
 {
 }
 

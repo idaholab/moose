@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "SystemBase.h"
+#include "ExecuteMooseObjectStorage.h"
 
 // libMesh include
 #include "libmesh/explicit_system.h"
@@ -26,9 +27,8 @@
 class AuxKernel;
 class FEProblem;
 class TimeIntegrator;
-class AuxScalarKernelWarehouse;
-class NodalAuxKernelWarehouse;
-class ElementalAuxKernelWarehouse;
+class AuxScalarKernel;
+class AuxKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -155,14 +155,14 @@ protected:
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
 
-  // Storage for AuxScalarKernel objects (this must be a pointer due to cyclic includes)
-  UniquePtr<AuxScalarKernelWarehouse> _aux_scalar_warehouse;
+  // Storage for AuxScalarKernel objects
+  ExecuteMooseObjectStorage<AuxScalarKernel> _aux_scalar_storage;
 
-  // Storage for AuxKernel objects (this must be a pointer due to cyclic includes)
-  UniquePtr<NodalAuxKernelWarehouse> _nodal_aux_warehouse;
+  // Storage for AuxKernel objects
+  ExecuteMooseObjectStorage<AuxKernel> _nodal_aux_storage;
 
-  // Storage for AuxKernel objects (this must be a pointer due to cyclic includes)
-  UniquePtr<ElementalAuxKernelWarehouse> _elemental_aux_warehouse;
+  // Storage for AuxKernel objects
+  ExecuteMooseObjectStorage<AuxKernel> _elemental_aux_storage;
 
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;
