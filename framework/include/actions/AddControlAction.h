@@ -16,9 +16,9 @@
 #define ADDCONTROLACTION_H
 
 // MOOSE includes
-#include "AddUserObjectAction.h"
+#include "MooseObjectAction.h"
 
-// Forward declerations
+// Forward declarations
 class AddControlAction;
 
 template<>
@@ -30,7 +30,7 @@ InputParameters validParams<AddControlAction>();
  * Control objects are GeneralUserObjects, thus just
  * use the AddUserObjectAction
  */
-class AddControlAction : public AddUserObjectAction
+class AddControlAction : public MooseObjectAction
 {
 public:
 
@@ -38,12 +38,17 @@ public:
    * Class constructor
    * @param params Parameters for this Action
    */
-  AddControlAction(InputParameters params);
+  AddControlAction(InputParameters parameters);
 
   /**
    * Class destructor
    */
   virtual ~AddControlAction(){};
+
+  /**
+   * Create and store the Control object.
+   */
+  virtual void act();
 
 };
 

@@ -71,6 +71,7 @@
 #include "MultiMooseEnum.h"
 #include "Predictor.h"
 #include "Assembly.h"
+#include "ControlWarehouse.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -140,6 +141,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _has_time_integrator(false),
     _has_exception(false),
     _current_execute_on_flag(EXEC_NONE),
+    _control_warehouse(new ControlWarehouse()),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
@@ -465,8 +467,6 @@ void FEProblem::initialSetup()
     _has_initialized_stateful = true;
 
   // Call initialSetup on the nonlinear system
-  _nl.initialSetupBCs();
-  _nl.initialSetupKernels();
   _nl.initialSetup();
 
   // Auxilary variable initialSetup calls
@@ -599,6 +599,9 @@ void FEProblem::initialSetup()
                                      _material_props, _bnd_material_props, _materials, _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
+
+  // Control Logic
+  executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -1168,6 +1171,7 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
     // FIXME: cannot do this b/c variables are not computed => potential NaNs will pop-up
 //    reinitMaterials(subdomain, tid);
   }
+
 
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
@@ -2279,6 +2283,11 @@ FEProblem::execute(const ExecFlagType & exec_type)
   computeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
   Moose::perf_log.pop("computeUserObjects()", "Setup");
 
+  // Controls
+  Moose::perf_log.push("computeControls()", "Setup");
+  executeControls(exec_type);
+  Moose::perf_log.pop("computeControls()", "Setup");
+
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
 }
@@ -2292,7 +2301,7 @@ FEProblem::computeAuxiliaryKernels(const ExecFlagType & type)
 void
 FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group)
 {
-  // Perform Residual/Jacobian setups
+  // Perform Residual/Jacobain setups
   switch (type)
   {
   case EXEC_LINEAR:
@@ -2618,6 +2627,26 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
     if (pp)
       _pps_data.storeValue(name, pp->getValue());
   }
+}
+
+void
+FEProblem::executeControls(const ExecFlagType & exec_type)
+{
+  _control_warehouse->setup(exec_type);
+  _control_warehouse->execute(exec_type);
+}
+
+void
+FEProblem::updateActiveObjects()
+{
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    _nl.updateActive(tid);
+    _aux.updateActive(tid);
+  }
+
+  _control_warehouse->updateActive();
 }
 
 void
@@ -3465,6 +3494,8 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
 
+  executeControls(EXEC_LINEAR);
+
   _app.getOutputWarehouse().residualSetup();
 
   _nl.computeResidual(residual, type);
@@ -3513,6 +3544,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _aux.compute(EXEC_NONLINEAR);
 
     computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::POST_AUX);
+
+    executeControls(EXEC_NONLINEAR);
 
     _app.getOutputWarehouse().jacobianSetup();
 

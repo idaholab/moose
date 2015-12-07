@@ -12,34 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RealControlParameterReporter.h"
-#include "SubProblem.h"
+#ifndef CONTROLWAREHOUSE_H
+#define CONTROLWAREHOUSE_H
 
-template<>
-InputParameters validParams<RealControlParameterReporter>()
+// MOOSE includes
+#include "MooseObjectWarehouse.h"
+#include "Control.h"
+
+/**
+ * Non threaded storage for Control objects.
+ */
+class ControlWarehouse : public MooseObjectWarehouse<Control>
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
-  params += validParams<ControlInterface>();
+public:
 
-  params.addRequiredParam<std::string>("parameter", "The input parameter to control.");
+  /**
+   * Contrcutor.
+   */
+  ControlWarehouse();
 
-  return params;
-}
+  /**
+   * Convienence method for calling setup methods (initialSetup, jacobianSetup, ...)
+   */
+  void setup(const ExecFlagType & exec_flag);
 
-RealControlParameterReporter::RealControlParameterReporter(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    ControlInterface(parameters)
-{
-}
+  /**
+   * Call the execute methods of Control objects.
+   */
+  virtual void execute(const ExecFlagType & exec_flag);
+};
 
-void
-RealControlParameterReporter::initialSetup()
-{
-  _parameter = &getControllableValue<Real>("parameter");
-}
-
-Real
-RealControlParameterReporter::getValue()
-{
-  return *_parameter;
-}
+#endif // CONTROLWAREHOUSE

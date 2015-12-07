@@ -174,6 +174,7 @@
 #include "ElementL2Diff.h"
 #include "TestPostprocessor.h"
 #include "ElementSidePP.h"
+#include "RealControlParameterReporter.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -443,6 +444,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(ElementL2Diff);
   registerPostprocessor(TestPostprocessor);
   registerPostprocessor(ElementSidePP);
+  registerPostprocessor(RealControlParameterReporter);
 
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);
