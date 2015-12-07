@@ -75,6 +75,7 @@
 #include "RambergOsgoodHardening.h"
 #include "EulerAngleFileReader.h"
 
+#include "CylindricalRankTwoAux.h"
 #include "RankTwoAux.h"
 #include "RankFourAux.h"
 #include "TensorElasticEnergyAux.h"
@@ -184,6 +185,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(RambergOsgoodHardening);
   registerUserObject(EulerAngleFileReader);
 
+  registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);
   registerAux(RankFourAux);
   registerAux(TensorElasticEnergyAux);
