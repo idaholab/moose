@@ -84,5 +84,13 @@ MarkerWarehouse::updateActiveMarkers(unsigned int subdomain_id)
       _active_markers.push_back(marker);
   }
 
-  DependencyResolverInterface::sort(_active_markers.begin(), _active_markers.end());
+  DependencyResolverInterface::sort<Marker *>(_active_markers);
+  try
+  {
+    DependencyResolverInterface::sort<Marker *>(_active_markers);
+  }
+  catch (CyclicDependencyException<Marker *> & e)
+  {
+    DependencyResolverInterface::cyclicDependencyError<Marker *>(e, "Cyclic dependency detected in markers");
+  }
 }

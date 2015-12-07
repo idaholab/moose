@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "InputParameterWarehouse.h"
 #include "InputParameters.h"
 
@@ -21,9 +22,11 @@ InputParameterWarehouse::InputParameterWarehouse() :
 {
 }
 
+
 InputParameterWarehouse::~InputParameterWarehouse()
 {
 }
+
 
 InputParameters &
 InputParameterWarehouse::addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
@@ -66,20 +69,43 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
 }
 
 
-InputParameters &
-InputParameterWarehouse::getInputParameters(const std::string & name, THREAD_ID tid)
+const InputParameters &
+InputParameterWarehouse::getInputParametersObject(const std::string & name, THREAD_ID tid) const
 {
   return getInputParameters(MooseObjectName(name), tid);
 }
 
-InputParameters &
-InputParameterWarehouse::getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid)
+
+const InputParameters &
+InputParameterWarehouse::getInputParametersObject(const std::string & tag, const std::string & name, THREAD_ID tid) const
 {
   return getInputParameters(MooseObjectName(tag, name), tid);
 }
 
+
+const InputParameters &
+InputParameterWarehouse::getInputParametersObject(const MooseObjectName & object_name, THREAD_ID tid) const
+{
+  return getInputParameters(object_name, tid);
+}
+
+
 InputParameters &
-InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name, THREAD_ID tid)
+InputParameterWarehouse::getInputParameters(const std::string & name, THREAD_ID tid) const
+{
+  return getInputParameters(MooseObjectName(name), tid);
+}
+
+
+InputParameters &
+InputParameterWarehouse::getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid) const
+{
+  return getInputParameters(MooseObjectName(tag, name), tid);
+}
+
+
+InputParameters &
+InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name, THREAD_ID tid) const
 {
   // Locate the InputParameters object and error if it was not located
   std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::const_iterator iter;
@@ -90,6 +116,7 @@ InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name,
   // Return a reference to the parameter
   return *(iter->second.get());
 }
+
 
 const std::vector<InputParameters *> &
 InputParameterWarehouse::all() const

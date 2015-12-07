@@ -12,30 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "RealControlParameterReporter.h"
 #include "SubProblem.h"
+#include "MooseObjectParameterName.h"
+#include "InputParameterWarehouse.h"
 
 template<>
 InputParameters validParams<RealControlParameterReporter>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params += validParams<ControlInterface>();
-
-  params.addRequiredParam<std::string>("parameter", "The input parameter to control.");
-
+  params.addRequiredParam<std::string>("parameter", "The input parameter to control, the name must be complete (e.g. Kernels/object/param_name).");
   return params;
 }
 
 RealControlParameterReporter::RealControlParameterReporter(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    ControlInterface(parameters)
+    GeneralPostprocessor(parameters)
 {
 }
 
 void
 RealControlParameterReporter::initialSetup()
 {
-  _parameter = &getControllableValue<Real>("parameter");
+  MooseObjectParameterName name(getParam<std::string>("parameter"));
+  const InputParameters & params = getMooseApp().getInputParameterWarehouse().getInputParametersObject(name.tag(), name.name(), _tid);
+  _parameter = &params.get<Real>(name.parameter());
 }
 
 Real

@@ -12,25 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef CONTROLWAREHOUSE_H
+#define CONTROLWAREHOUSE_H
 
-#include "ControlInterface.h"
-#include "InputParameterWarehouse.h"
-#include "MooseApp.h"
+// MOOSE includes
+#include "MooseObjectWarehouse.h"
+#include "Control.h"
 
-template<>
-InputParameters validParams<ControlInterface>()
+/**
+ * Non threaded storage for Control objects.
+ */
+class ControlWarehouse : public MooseObjectWarehouse<Control>
 {
-  return emptyInputParameters();
-}
+public:
 
+  /**
+   * Contrcutor.
+   */
+  ControlWarehouse();
 
-ControlInterface::ControlInterface(const InputParameters & parameters) :
-    _ci_parameters(parameters),
-    _ci_app(*parameters.get<MooseApp *>("_moose_app")),
-    _input_parameter_warehouse(_ci_app.getInputParameterWarehouse()),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _ci_name(parameters.get<std::string>("_object_name"))
-{
-  if (libMesh::n_threads() > 1)
-    mooseError("The control logic system is experimental and under heavy development, it currently does not work with threading.");
-}
+  /**
+   * Convienence method for calling setup methods (initialSetup, jacobianSetup, ...)
+   */
+  void setup(const ExecFlagType & exec_flag);
+
+  /**
+   * Call the execute methods of Control objects.
+   */
+  virtual void execute(const ExecFlagType & exec_flag);
+};
+
+#endif // CONTROLWAREHOUSE

@@ -12,37 +12,47 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DAMPERWAREHOUSE_H
-#define DAMPERWAREHOUSE_H
+#ifndef DISABLEOBJECTS_H
+#define DISABLEOBJECTS_H
 
-#include "Warehouse.h"
-#include "MooseTypes.h"
+// MOOSE includes
+#include "Control.h"
 
-#include <vector>
+// Forward declarations
+class DisableObjects;
+class Function;
 
-class Damper;
+template<>
+InputParameters validParams<DisableObjects>();
 
 /**
- * Holds dampers and provides some services
+ * A basic control for disabling objects for a portion of the simulation.
  */
-class DamperWarehouse : public Warehouse<Damper>
+class DisableObjects : public Control
 {
 public:
-  DamperWarehouse();
-  virtual ~DamperWarehouse();
 
   /**
-   * Adds a damper
-   * @param damper Damper being added
+   * Class constructor
+   * @param parameters Input parameters for this Control object
    */
-  void addDamper(MooseSharedPointer<Damper> & damper);
+  DisableObjects(const InputParameters & parameters);
 
-protected:
   /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
-   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
+   * Evaluate the function and set the parameter value
    */
-  std::vector<MooseSharedPointer<Damper> > _all_ptrs;
+  virtual void execute();
+
+private:
+
+  /// List of objects to disable
+  const std::vector<std::string> & _disable;
+
+  /// The time to begin disabling the supplied object tags (defaults to the simulation start time)
+  std::vector<Real> _start_time;
+
+  /// The time to stop disabling the supplied object tags (defaults to the end of the simulation)
+  std::vector<Real> _end_time;
 };
 
-#endif // DAMPERWAREHOUSE_H
+#endif // DISABLEOBJECTS_H

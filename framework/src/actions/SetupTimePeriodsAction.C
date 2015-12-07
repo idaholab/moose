@@ -44,6 +44,9 @@ SetupTimePeriodsAction::act()
 {
   if (_problem.get() != NULL)
   {
+    if (!name().empty()) // empty name indicates the default time period
+      mooseDeprecated("TimePeriods are deprecated, please update your application to use Controls.");
+
     TimePeriod & tp = _problem->addTimePeriod(_name, getParam<Real>("start"));
 
     if (_pars.isParamValid("active_kernels"))
@@ -57,4 +60,3 @@ SetupTimePeriodsAction::act()
       tp.addInactiveObjects("bcs", getParam<std::vector<std::string> >("inactive_bcs"));
   }
 }
-
