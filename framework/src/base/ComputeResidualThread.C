@@ -27,7 +27,8 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSy
     _sys(sys),
     _kernel_type(type),
     _num_cached(0),
-    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage())
+    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage()),
+    _dg_kernels(sys.getDGKernelWarehouse().getStorage())
 {
 }
 
@@ -37,7 +38,8 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
     _sys(x._sys),
     _kernel_type(x._kernel_type),
     _num_cached(0),
-    _integrated_bcs(x._integrated_bcs)
+    _integrated_bcs(x._integrated_bcs),
+    _dg_kernels(x._dg_kernels)
 {
 }
 
@@ -50,8 +52,6 @@ ComputeResidualThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
   _sys.updateActiveKernels(_subdomain, _tid);
-  if (_sys.doingDG())
-    _sys.updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt(), _tid);
 
   std::set<MooseVariable *> needed_moose_vars;
   const std::vector<KernelBase *> & kernels = _sys.getKernelWarehouse(_tid).active();
@@ -65,9 +65,10 @@ ComputeResidualThread::subdomainChanged()
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
 
   // DG Kernel dependencies
+  if (_dg_kernels.hasActiveObjects(_tid))
   {
-    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid).active();
-    for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+    const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
+    for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
     {
       const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
@@ -134,38 +135,36 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-  if (_sys.getDGKernelWarehouse(_tid).active().empty())
-    return;
-
-  // Pointer to the neighbor we are currently working on.
-  const Elem * neighbor = elem->neighbor(side);
-
-  // Get the global id of the element and the neighbor
-  const dof_id_type
-    elem_id = elem->id(),
-    neighbor_id = neighbor->id();
-
-  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+  if (_dg_kernels.hasActiveObjects(_tid))
   {
-    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid).active();
-    if (dgks.size() > 0)
+    // Pointer to the neighbor we are currently working on.
+    const Elem * neighbor = elem->neighbor(side);
+
+    // Get the global id of the element and the neighbor
+    const dof_id_type
+      elem_id = elem->id(),
+      neighbor_id = neighbor->id();
+
+    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
-      _fe_problem.reinitNeighbor(elem, side, _tid);
-
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
-      for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+      if (_dg_kernels.hasActiveObjects(_tid))
       {
-        DGKernel * dg = *it;
-        dg->computeResidual();
-      }
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
+        _fe_problem.reinitNeighbor(elem, side, _tid);
 
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addResidualNeighbor(_tid);
+        _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+        _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+        const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
+        for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
+          (*it)->computeResidual();
+
+        _fe_problem.swapBackMaterialsFace(_tid);
+        _fe_problem.swapBackMaterialsNeighbor(_tid);
+
+        {
+          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+          _fe_problem.addResidualNeighbor(_tid);
+        }
       }
     }
   }

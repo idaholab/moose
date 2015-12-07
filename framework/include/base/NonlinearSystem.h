@@ -18,7 +18,6 @@
 #include "SystemBase.h"
 #include "KernelWarehouse.h"
 #include "DiracKernelWarehouse.h"
-#include "DGKernelWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
@@ -38,6 +37,7 @@ class Damper;
 class IntegratedBC;
 class NodalBC;
 class PresetNodalBC;
+class DGKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -431,7 +431,6 @@ public:
    * passed in subdomain_id and thread
    */
   void updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid);
-  void updateActiveDGKernels(Real t, Real dt, THREAD_ID tid);
   //@}
 
   //@{
@@ -439,7 +438,7 @@ public:
    * Access functions to Warehouses from outside NonlinearSystem
    */
   const KernelWarehouse & getKernelWarehouse(THREAD_ID tid);
-  const DGKernelWarehouse & getDGKernelWarehouse(THREAD_ID tid);
+  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
@@ -531,8 +530,9 @@ protected:
 
   /// Dirac Kernel storage for each thread
   std::vector<DiracKernelWarehouse> _dirac_kernels;
-  /// DG Kernel storage for each thread
-  std::vector<DGKernelWarehouse> _dg_kernels;
+
+  /// Threaded DGKernel storage
+  MooseObjectWarehouse<DGKernel> _dg_kernels;
 
   /// Dampers for each thread
   MooseObjectWarehouse<Damper> _dampers;
