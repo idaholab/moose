@@ -15,7 +15,6 @@
 #include "KernelWarehouse.h"
 #include "TimeDerivative.h"
 #include "KernelBase.h"
-#include "ScalarKernel.h"
 
 KernelWarehouse::KernelWarehouse() :
     Warehouse<KernelBase>()
@@ -86,13 +85,6 @@ KernelWarehouse::addKernel(MooseSharedPointer<KernelBase> & kernel, const std::s
 }
 
 void
-KernelWarehouse::addScalarKernel(MooseSharedPointer<ScalarKernel> & kernel)
-{
-  _all_scalar_ptrs.push_back(kernel);
-  _scalar_kernels.push_back(kernel.get());
-}
-
-void
 KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
 {
   _active_kernels.clear();
@@ -149,10 +141,8 @@ KernelWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, s
 {
   for (std::vector<KernelBase *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
     unique_variables.insert((*it)->variable().name());
-  for (std::vector<ScalarKernel *>::const_iterator it = _scalar_kernels.begin(); it != _scalar_kernels.end(); ++it)
-    unique_variables.insert((*it)->variable().name());
 
-  if (!_time_global_kernels.empty() || !_nontime_global_kernels.empty() || !_scalar_kernels.empty())
+  if (!_time_global_kernels.empty() || !_nontime_global_kernels.empty())// || !_scalar_kernels.empty())
     return true;
   else
   {

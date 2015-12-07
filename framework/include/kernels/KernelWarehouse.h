@@ -78,23 +78,11 @@ public:
     }
 
   /**
-   * Get list of scalar kernels
-   * @return The list of scalar active kernels
-   */
-  const std::vector<ScalarKernel *> & scalars() const { return _scalar_kernels; }
-
-  /**
    * Add a kernels
    * @param kernel Kernel being added
    * @param block_ids Set of active domain where the kernel is defined
    */
   void addKernel(MooseSharedPointer<KernelBase> & kernel, const std::set<SubdomainID> & block_ids);
-
-  /**
-   * Add a scalar kernels
-   * @param kernel Scalar kernel being added
-   */
-  void addScalarKernel(MooseSharedPointer<ScalarKernel> & kernel);
 
   /**
    * Update the list of active kernels
@@ -121,7 +109,6 @@ protected:
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
    */
   std::vector<MooseSharedPointer<KernelBase> > _all_ptrs;
-  std::vector<MooseSharedPointer<ScalarKernel> > _all_scalar_ptrs;
   ///@}
 
   /// Kernels active on a block and in specified time
@@ -143,8 +130,6 @@ protected:
   std::map<SubdomainID, std::vector<KernelBase *> > _time_block_kernels;
   /// Kernels that live on a specified block
   std::map<SubdomainID, std::vector<KernelBase *> > _nt_block_kernels;
-  /// Scalar kernels
-  std::vector<ScalarKernel *> _scalar_kernels;
 };
 
 #endif // KERNELWAREHOUSE_H

@@ -38,6 +38,7 @@ class IntegratedBC;
 class NodalBC;
 class PresetNodalBC;
 class DGKernel;
+class ScalarKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -445,6 +446,7 @@ public:
   const MooseObjectWarehouse<NodalBC> & getNodalBCWarehouse() { return _nodal_bcs; }
   const MooseObjectWarehouse<PresetNodalBC> & getPresetNodalBCWarehouse() { return _preset_nodal_bcs; }
   const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
+  const MooseObjectWarehouse<ScalarKernel> & getScalarKernelWarehouse() { return _scalar_kernels; }
   //@}
 
   /**
@@ -521,7 +523,12 @@ protected:
   /// Kernel storage for each thread
   std::vector<KernelWarehouse> _kernels;
 
+  ///@{
+  /// Kernel warehouses
+  MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
   ///@}
+
+  ///@{
   /// BoundaryCondition Warhouses
   MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
   MooseObjectWarehouse<NodalBC> _nodal_bcs;

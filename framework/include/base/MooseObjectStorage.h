@@ -127,6 +127,11 @@ public:
   void updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   ///@}
 
+  /**
+   * Populates a set of covered subdomains and the associated variable names.
+   */
+  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid = 0) const;
+
 
 protected:
 
@@ -589,6 +594,19 @@ MooseObjectStorage<T>::updateVariableDependencyHelper(std::set<MooseVariable *> 
     const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
   }
+}
+
+
+template<typename T>
+void
+MooseObjectStorage<T>::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid/*=0*/) const
+{
+  for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
+    unique_variables.insert((*it)->variable().name());
+
+  typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
+  for (it = _active_block_objects[tid].begin(); it != _active_block_objects[tid].end(); ++it)
+    subdomains_covered.insert(it->first);
 }
 
 

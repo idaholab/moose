@@ -151,6 +151,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _Re_time(addVector("Re_time", false, GHOSTED)),
     _Re_non_time(addVector("Re_non_time", false, GHOSTED)),
+    _scalar_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
     _increment_vec(NULL),
@@ -333,6 +334,7 @@ NonlinearSystem::initialSetup()
     _dampers.initialSetup(tid);
     _integrated_bcs.initialSetup(tid);
   }
+  _scalar_kernels.initialSetup();
   _constraints.initialSetup();
   _nodal_bcs.initialSetup();
   _preset_nodal_bcs.initialSetup();
@@ -350,6 +352,7 @@ NonlinearSystem::timestepSetup()
     _dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
   }
+  _scalar_kernels.initialSetup();
   _constraints.timestepSetup();
   _nodal_bcs.timestepSetup();
   _preset_nodal_bcs.timestepSetup();
@@ -579,13 +582,9 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
 void
 NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    MooseSharedPointer<ScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<ScalarKernel>(_factory.create(kernel_name, name, parameters, tid));
-    mooseAssert(kernel != NULL, "Not a Kernel object");
-
-    _kernels[tid].addScalarKernel(kernel);
-  }
+  MooseSharedPointer<ScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<ScalarKernel>(_factory.create(kernel_name, name, parameters));
+  mooseAssert(kernel, "Not a ScalarKernel object");
+  _scalar_kernels.addObject(kernel);
 }
 
 void
@@ -1198,12 +1197,14 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels[tid].residualSetup();
+
     _dirac_kernels[tid].residualSetup();
     if (_doing_dg)
       _dg_kernels.residualSetup(tid);
     _dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
   }
+  _scalar_kernels.residualSetup();
   _constraints.residualSetup();
   _nodal_bcs.residualSetup();
 
@@ -1229,15 +1230,13 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   // residual contributions from the scalar kernels
   PARALLEL_TRY {
     // do scalar kernels (not sure how to thread this)
-    const std::vector<ScalarKernel *> & scalars = _kernels[0].scalars();
-    if (scalars.size() > 0)
+    if (_scalar_kernels.getStorage().hasActiveObjects())
     {
-      for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+      const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getStorage().getActiveObjects();
+      for (std::vector<MooseSharedPointer<ScalarKernel> >::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
       {
-        ScalarKernel * kernel = *it;
-
-        kernel->reinit();
-        kernel->computeResidual();
+        (*it)->reinit();
+        (*it)->computeResidual();
       }
       _fe_problem.addResidualScalar();
     }
@@ -1760,16 +1759,15 @@ void
 NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 {
   // Compute the diagonal block for scalar variables
-  THREAD_ID tid = 0;
-  const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(tid);
-  if (scalar_vars.size() > 0)
+  if (_scalar_kernels.getStorage().hasActiveObjects())
   {
-    const std::vector<ScalarKernel *> & scalars = _kernels[tid].scalars();
+    const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(/*tid=*/0);
+    const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getStorage().getActiveObjects();
 
-    _fe_problem.reinitScalars(tid);
-    for (std::vector<ScalarKernel *>::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
+    _fe_problem.reinitScalars(/*tid=*/0);
+    for (std::vector<MooseSharedPointer<ScalarKernel> >::const_iterator it = scalars.begin(); it != scalars.end(); ++it)
     {
-      ScalarKernel * kernel = *it;
+      MooseSharedPointer<ScalarKernel> kernel = *it;
 
       kernel->reinit();
       kernel->computeJacobian();
@@ -1809,12 +1807,14 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels[tid].jacobianSetup();
+
     _dirac_kernels[tid].jacobianSetup();
     if (_doing_dg)
       _dg_kernels.jacobianSetup(tid);
     _dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
   }
+  _scalar_kernels.jacobianSetup();
   _constraints.jacobianSetup();
   _nodal_bcs.jacobianSetup();
   _preset_nodal_bcs.jacobianSetup();
@@ -2153,6 +2153,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
     _constraints.updateActive();
+    _scalar_kernels.updateActive();
   }
 }
 
@@ -2385,9 +2386,10 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   std::set<std::string> kernel_variables;
 
   bool global_kernels_exist = _kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
-
+  global_kernels_exist |= _scalar_kernels.getStorage().hasActiveObjects();
   global_kernels_exist |= _nodal_kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
 
+  _scalar_kernels.getStorage().subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);
   if (!global_kernels_exist)
   {
