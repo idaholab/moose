@@ -39,22 +39,9 @@ public:
   RealFunctionControl(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~RealFunctionControl(){}
-
-  /**
    * Evaluate the function and set the parameter value
    */
   virtual void execute();
-
-  ///@{
-  /**
-   * These methods are left intentionally empty
-   */
-  virtual void initialize(){}
-  virtual void finalize(){}
-  ///@}
 
 private:
 

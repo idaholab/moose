@@ -22,13 +22,17 @@
 #include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
-    ComputeJacobianThread(fe_problem, sys, jacobian)
+    ComputeJacobianThread(fe_problem, sys, jacobian),
+    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage())
+
 {
 }
 
 // Splitting Constructor
 ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split) :
-    ComputeJacobianThread(x, split)
+    ComputeJacobianThread(x, split),
+    _integrated_bcs(x._integrated_bcs)
+
 {
 }
 
@@ -108,13 +112,14 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   {
     MooseVariable & ivar = *(*it).first;
     MooseVariable & jvar = *(*it).second;
-    if (ivar.activeOnSubdomain(_subdomain) && jvar.activeOnSubdomain(_subdomain))
+    if (ivar.activeOnSubdomain(_subdomain) && jvar.activeOnSubdomain(_subdomain) && _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
-      std::vector<IntegratedBC *> bcs = _sys.getBCWarehouse(_tid).getBCs(bnd_id);
-      for (std::vector<IntegratedBC *>::iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
+
+      const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
+      for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator jt = bcs.begin(); jt != bcs.end(); ++jt)
       {
-        IntegratedBC * bc = *jt;
+        MooseSharedPointer<IntegratedBC> bc = *jt;
         if (bc->shouldApply() && bc->variable().number() == ivar.number() && bc->isImplicit())
         {
           bc->subProblem().prepareFaceShapes(jvar.number(), _tid);
@@ -132,14 +137,13 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); it++)
     {
       MooseVariable & ivar = *(*it);
-      if (ivar.activeOnSubdomain(_subdomain) > 0)
+      if (ivar.activeOnSubdomain(_subdomain) > 0 && _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
       {
         // for each variable get the list of active kernels
-        std::vector<IntegratedBC *> bcs;
-        _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
-        for (std::vector<IntegratedBC *>::iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
+        const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+        for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator kt = bcs.begin(); kt != bcs.end(); ++kt)
         {
-          IntegratedBC * bc = *kt;
+          MooseSharedPointer<IntegratedBC> bc = *kt;
           if (bc->variable().number() == ivar.number() && bc->isImplicit())
           {
             // now, get the list of coupled scalar vars and compute their off-diag jacobians
