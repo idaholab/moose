@@ -32,6 +32,7 @@
 // C++ includes
 #include <string>
 #include <vector>
+#include <list>
 #include <iostream>
 #include <map>
 
@@ -200,8 +201,30 @@ dataStore(std::ostream & stream, std::set<T> & s, void * context)
     T & x = const_cast<T&>(*it);
     storeHelper(stream, x, context);
   }
-
 }
+
+template<typename T>
+inline void
+dataStore(std::ostream & stream, std::list<T> & l, void * context)
+{
+  // Moose::out<<"Set dataStore"<<std::endl;
+
+  // First store the size of the set
+  unsigned int size = l.size();
+  stream.write((char *) &size, sizeof(size));
+
+  // Moose::out<<"Size: "<<size<<std::endl;
+
+  typename std::list<T>::iterator it = l.begin();
+  typename std::list<T>::iterator end = l.end();
+
+  for (; it != end; ++it)
+  {
+    T & x = const_cast<T&>(*it);
+    storeHelper(stream, x, context);
+  }
+}
+
 
 template<typename T, typename U>
 inline void
@@ -346,6 +369,26 @@ dataLoad(std::istream & stream, std::set<T> & s, void * context)
     T data;
     loadHelper(stream, data, context);
     s.insert(data);
+  }
+}
+
+template<typename T>
+inline void
+dataLoad(std::istream & stream, std::list<T> & l, void * context)
+{
+  // Moose::out<<"Set dataLoad"<<std::endl;
+
+  // First read the size of the set
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  //// Moose::out<<"Size: "<<size<<std::endl;
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    T data;
+    loadHelper(stream, data, context);
+    l.push_back(data);
   }
 }
 

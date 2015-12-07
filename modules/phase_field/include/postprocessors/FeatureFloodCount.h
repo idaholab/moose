@@ -19,6 +19,7 @@
 #include <iterator>
 
 #include "libmesh/periodic_boundaries.h"
+#include "libmesh/mesh_tools.h"
 
 //Forward Declarations
 class FeatureFloodCount;
@@ -72,22 +73,44 @@ public:
 
   inline bool isElemental() const { return _is_elemental; }
   
-protected:
+  class FooBar
+  {
+  public:
+    std::set<dof_id_type> _entity_ids;
+    unsigned int _var_idx;
+    Point _max;
+    Point _min;
+  };
+
+  
   class BubbleData
   {
   public:
+    BubbleData() :
+        _var_idx(std::numeric_limits<unsigned int>::max()),
+        _intersects_boundary(false),
+        _min_feature_id(DofObject::invalid_id)
+    {}
+    
     BubbleData(std::set<dof_id_type> & entity_ids, unsigned int var_idx) :
         _entity_ids(entity_ids),
         _var_idx(var_idx),
-        _intersects_boundary(false)
+        _intersects_boundary(false),
+        _min_feature_id(DofObject::invalid_id)
     {}
+
+    void updateBBoxMin(const Point & min);
+    void updateBBoxMax(const Point & max);
 
     std::set<dof_id_type> _entity_ids;
     std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
     bool _intersects_boundary;
+    MeshTools::BoundingBox _bbox;
+    dof_id_type _min_feature_id;
   };
 
+protected:
   /**
    * This method is used to populate any of the data structures used for storing field data (nodal or elemental).
    * It is called at the end of finalize and can make use of any of the data structures created during
@@ -107,8 +130,8 @@ protected:
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void pack(std::vector<unsigned int> & packed_data);
-  void unpack(const std::vector<unsigned int> & packed_data);
+  void pack(std::string & packed_data);
+  void unpack(const std::string & packed_data);
 
   /**
    * This routine merges the data in _bubble_sets from separate threads/processes to resolve
@@ -242,9 +265,9 @@ protected:
    * to true.
    */
   std::vector<std::map<dof_id_type, int> > _var_index_maps;
-
-  /// The data structure used to marshall the data between processes and/or threads
-  std::vector<unsigned int> _packed_data;
+  
+//  /// The data structure used to marshall the data between processes and/or threads
+//  std::vector<unsigned int> _packed_data;
 
   /// The data structure used to find neighboring elements give a node ID
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;

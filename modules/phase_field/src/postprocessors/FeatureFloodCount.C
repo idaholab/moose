@@ -22,6 +22,24 @@
 #include <algorithm>
 #include <limits>
 
+template<> void dataStore(std::ostream & stream, FeatureFloodCount::BubbleData & feature, void * context)
+{
+  storeHelper(stream, feature._entity_ids, context);
+  storeHelper(stream, feature._var_idx, context);
+  storeHelper(stream, feature._bbox.min(), context);
+  storeHelper(stream, feature._bbox.max(), context);
+  storeHelper(stream, feature._min_feature_id, context);
+}
+
+template<> void dataLoad(std::istream & stream, FeatureFloodCount::BubbleData & feature, void * context)
+{  
+  loadHelper(stream, feature._entity_ids, context);
+  loadHelper(stream, feature._var_idx, context);
+  loadHelper(stream, feature._bbox.min(), context);
+  loadHelper(stream, feature._bbox.max(), context);
+  loadHelper(stream, feature._min_feature_id, context);
+}
+
 template<>
 InputParameters validParams<FeatureFloodCount>()
 {
@@ -105,10 +123,7 @@ FeatureFloodCount::initialize()
   // TODO: use iterator
   for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
     _entities_visited[var_num].clear();
-
-  // Clear the packed data structure
-  _packed_data.clear();
-
+  
   // Reset the ownership structure
   _region_to_var_idx.clear();
 
@@ -178,10 +193,12 @@ FeatureFloodCount::execute()
 void
 FeatureFloodCount::finalize()
 {
+  std::string packed_buffer;
+  
   // Exchange data in parallel
-  pack(_packed_data);
-  _communicator.allgather(_packed_data, false);
-  unpack(_packed_data);
+  pack(packed_buffer);
+//  _communicator.allgather(packed_buffer, false);
+  unpack(packed_buffer);
 
   mergeSets(true);
 
@@ -296,55 +313,133 @@ FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 }
 
 void
-FeatureFloodCount::pack(std::vector<unsigned int> & packed_data)
+FeatureFloodCount::pack(std::string & packed_data)
 {
-  /**
-   * Don't repack the data if it's already packed - we might lose data that was updated
-   * or stored into the packed_data that is not available in the local thread.
-   * This happens when we call threadJoin which does not unpack the data on the local thread.
-   */
-  if (!packed_data.empty())
-    return;
-
+//  std::vector<FooBar> foo_bar(1);
+//  
+//  if (_app.n_processors() == 2)
+//  {
+//    if (processor_id() == 0)
+//    {
+////      foo_bar[0] = new FooBar();
+//      foo_bar[0]._entity_ids.insert(5);
+//      foo_bar[0]._entity_ids.insert(6);
+//      foo_bar[0]._entity_ids.insert(7);
+//      foo_bar[0]._var_idx = 2;
+//      foo_bar[0]._max = Point(0.5, 2.5, 3.14);
+// 
+//      
+//      for (unsigned int i = 0; i < foo_bar.size(); ++i)
+//      {
+//        std::cerr << processor_id() << " Set " << i << ": ";
+//        for (std::set<dof_id_type>::const_iterator it = foo_bar[i]._entity_ids.begin(); it != foo_bar[i]._entity_ids.end(); ++it)
+//          std::cerr << *it << " ";
+//        std::cerr << "\nVar_idx: " << foo_bar[i]._var_idx;
+//        std::cerr << "\nMax: " << foo_bar[i]._max;
+//        std::cerr << "\n";
+//      }
+//      
+//      std::ostringstream oss;
+//      dataStore(oss, foo_bar, this);
+//      
+//      std::string buf = oss.str();
+//      _communicator.send(1, buf);
+//    }
+//    else
+//    {
+//      foo_bar.clear();
+//      std::string buf;
+//      _communicator.receive(0, buf);
+//      std::istringstream iss(buf);
+//      
+//      dataLoad(iss, foo_bar, this);
+//      
+//      for (unsigned int i = 0; i < foo_bar.size(); ++i)
+//      {
+//        std::cerr << processor_id() << " Set " << i << ": ";
+//        for (std::set<dof_id_type>::const_iterator it = foo_bar[i]._entity_ids.begin(); it != foo_bar[i]._entity_ids.end(); ++it)
+//          std::cerr << *it << " ";
+//        std::cerr << "\nVar_idx: " << foo_bar[i]._var_idx;
+//        std::cerr << "\nMax: " << foo_bar[i]._max;
+//        std::cerr << "\n";
+//      }
+//    }
+//  }
+  
   /**
    * We need a data structure that reorganizes the region markings into sets so that we can pack them up
    * in a form to marshall them between processors.  The set of nodes are stored by region_num for the
    * current map_num.
    **/
-  std::vector<std::set<dof_id_type> > ghost_data;
+  std::vector<BubbleData> ghost_data;
 
   /**
    * This data structure holds just the local processors markings. It's used to prepopulate
    * the bubble_sets data structure for use in the mergeSets routine.
    */
   std::vector<std::set<dof_id_type> > local_data;
-  
+
+//  std::vector<Point> min_points;
+//  std::vector<Point> max_points;
+//  std::vector<dof_id_type> min_feature_id;
+
+  MeshBase & mesh = _mesh.getMesh();
+
+  std::ostringstream oss;
+
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-  { 
+  {
+    ghost_data.clear();
+    
     ghost_data.resize(_region_counts[map_num]);
     local_data.resize(_region_counts[map_num]);
-    unsigned int ghost_counter = 0;
+//    min_points.resize(_region_counts[map_num],  std::numeric_limits<Real>::max());
+//    max_points.resize(_region_counts[map_num], -std::numeric_limits<Real>::max());
+//    min_feature_id.resize(_region_counts[map_num], std::numeric_limits<Real>::max());
+
+//    unsigned int ghost_counter = 0;
 
     std::map<dof_id_type, int>::const_iterator b_end = _bubble_maps[map_num].end();
     // Reorganize the data by values
     for (std::map<dof_id_type, int>::const_iterator b_it = _bubble_maps[map_num].begin(); b_it != b_end; ++b_it)
     {
+      // Local variables for clarity
+      dof_id_type entity_id = b_it->first;
+      int partial_feature_num = b_it->second;
+
       /**
        * Neighboring processors only need enough information to stitch together the regions
        * we'll only pack information that's on the processor boundaries.
        */
-      if (_ghosted_entity_ids.find(b_it->first) != _ghosted_entity_ids.end())        
+      if (_ghosted_entity_ids.find(entity_id) != _ghosted_entity_ids.end())
       {
-        ghost_data[(b_it->second)].insert(b_it->first);
-        ++ghost_counter;
+        ghost_data[partial_feature_num]._entity_ids.insert(entity_id);
+//        ++ghost_counter;
       }
       
+      // Now retrieve the location of this entity for determining the bounding box region
+      const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
+
+      ghost_data[partial_feature_num].updateBBoxMin(entity_point);
+      ghost_data[partial_feature_num].updateBBoxMax(entity_point);
+      
+      // Finally save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
+      ghost_data[partial_feature_num]._min_feature_id = std::min(ghost_data[partial_feature_num]._min_feature_id, entity_id);
+
       /**
        * However we still need to save all of the local data for use in merging
        * and field update routines.
        */
-//      local_data[(b_it->second)].insert(b_it->first);
+      local_data[(b_it->second)].insert(b_it->first);
     }
+
+    // Save the variable index
+    for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
+      ghost_data[i]._var_idx = _region_to_var_idx[i];
+    
+
+//    std::cout << oss.str() << '\n';
+    
 
     /**
      * We'll save the local data immediately two our bubble_sets data structure. It doesn't
@@ -381,87 +476,123 @@ FeatureFloodCount::pack(std::vector<unsigned int> & packed_data)
      */
 
     // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
-    std::vector<dof_id_type> partial_packed_data;
-    partial_packed_data.reserve(ghost_counter + _region_counts[map_num]*2);
-
+//    std::vector<dof_id_type> partial_packed_data;
+//    partial_packed_data.reserve(ghost_counter + _region_counts[map_num]*2);
+// 
     // Now pack it up
-    for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
-    {
-      // Skip over the empty sets
-      if (ghost_data[i].empty())
-        continue;
-      
-      partial_packed_data.push_back(ghost_data[i].size());              // The number of nodes in the current region
-      
-      if (_single_map_mode)
-      {
-        mooseAssert(i < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
-        partial_packed_data.push_back(_region_to_var_idx[i]);           // The variable owning this bubble
-      }
-      else
-        partial_packed_data.push_back(map_num);                         // The variable owning this bubble
-      
-      std::set<dof_id_type>::iterator end = ghost_data[i].end();
-      for (std::set<dof_id_type>::iterator it = ghost_data[i].begin(); it != end; ++it)
-        partial_packed_data.push_back(*it);                             // The individual entity ids
-    }
-    
-    packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
+    dataStore(oss, ghost_data, this);
+    packed_data.assign(oss.str());
   }
+  
+
+    
+//    for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
+//    {
+//      // Skip over the empty sets
+//      if (ghost_data[i].empty())
+//        continue;
+//      
+//      partial_packed_data.push_back(ghost_data[i].size());              // The number of nodes in the current region
+//      
+//      if (_single_map_mode)
+//      {
+//        mooseAssert(i < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
+//        partial_packed_data.push_back(_region_to_var_idx[i]);           // The variable owning this bubble
+//      }
+//      else
+//        partial_packed_data.push_back(map_num);                         // The variable owning this bubble
+//      
+//      std::set<dof_id_type>::iterator end = ghost_data[i].end();
+//      for (std::set<dof_id_type>::iterator it = ghost_data[i].begin(); it != end; ++it)
+//        partial_packed_data.push_back(*it);                             // The individual entity ids
+//    }
+//    
+//    packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
+//  }
+
+
+    
+
 }
 
 void
-FeatureFloodCount::unpack(const std::vector<unsigned int> & packed_data)
+FeatureFloodCount::unpack(const std::string & packed_data)
 {
-  bool start_next_set = true;
-  bool has_data_to_save = false;
+  std::list<BubbleData> ghost_data;
+  
+  std::istringstream iss(packed_data);
+  dataLoad(iss, ghost_data, this);
 
-  unsigned int curr_set_length = 0;
-  std::set<dof_id_type> curr_set;
-  unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
-
-  _region_to_var_idx.clear();
-  for (unsigned int i = 0; i < packed_data.size(); ++i)
+  unsigned int counter = 0;
+  if (processor_id() == 1)
   {
-    if (start_next_set)
+    std::list<BubbleData>::iterator l_end = ghost_data.end();
+    
+    for (std::list<BubbleData>::iterator l_it = ghost_data.begin(); l_it != l_end; ++l_it)
     {
-      if (has_data_to_save)
-      {
-        // See Note at the bottom of this routine
-        _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
-        _region_to_var_idx.push_back(curr_var_idx);
-        curr_set.clear();
-      }
-
-      // Get the length of the next set
-      curr_set_length = packed_data[i];
-      // Also get the owning variable idx.
-      // Note: We are intentionally advancing "i" here too!
-      curr_var_idx = packed_data[++i];
+      std::cerr << processor_id() << " Set " << ++counter << ": ";
+      for (std::set<dof_id_type>::const_iterator it = l_it->_entity_ids.begin();
+           it != l_it->_entity_ids.end(); ++it)
+        std::cerr << *it << " ";
+      std::cerr << "\nVar_idx: " << l_it->_var_idx;
+      std::cerr << "\nMax: " << l_it->_bbox.max();
+      std::cerr << "\nMin: " << l_it->_bbox.min();
+      std::cerr << "\n";
     }
-    else
-    {
-      // unpack each bubble
-      curr_set.insert(packed_data[i]);
-      --curr_set_length;
-    }
-
-    start_next_set = !(curr_set_length);
-    has_data_to_save = true;
   }
+  
+  
+  
 
-  /**
-   * Note: In multi-map mode the var_idx information stored inside of BubbleData is redundant with
-   * the outer index of the _bubble_sets data-structure.  We need this information for single-map
-   * mode when we have multiple variables coupled in.
-   */
-  if (has_data_to_save)
-  {
-    _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
-    _region_to_var_idx.push_back(curr_var_idx);
-  }
-
-  mooseAssert(curr_set_length == 0, "Error in unpacking data");
+//  bool start_next_set = true;
+//  bool has_data_to_save = false;
+// 
+//  unsigned int curr_set_length = 0;
+//  std::set<dof_id_type> curr_set;
+//  unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
+// 
+//  _region_to_var_idx.clear();
+//  for (unsigned int i = 0; i < packed_data.size(); ++i)
+//  {
+//    if (start_next_set)
+//    {
+//      if (has_data_to_save)
+//      {
+//        // See Note at the bottom of this routine
+//        _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
+//        _region_to_var_idx.push_back(curr_var_idx);
+//        curr_set.clear();
+//      }
+// 
+//      // Get the length of the next set
+//      curr_set_length = packed_data[i];
+//      // Also get the owning variable idx.
+//      // Note: We are intentionally advancing "i" here too!
+//      curr_var_idx = packed_data[++i];
+//    }
+//    else
+//    {
+//      // unpack each bubble
+//      curr_set.insert(packed_data[i]);
+//      --curr_set_length;
+//    }
+// 
+//    start_next_set = !(curr_set_length);
+//    has_data_to_save = true;
+//  }
+// 
+//  /**
+//   * Note: In multi-map mode the var_idx information stored inside of BubbleData is redundant with
+//   * the outer index of the _bubble_sets data-structure.  We need this information for single-map
+//   * mode when we have multiple variables coupled in.
+//   */
+//  if (has_data_to_save)
+//  {
+//    _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
+//    _region_to_var_idx.push_back(curr_var_idx);
+//  }
+// 
+//  mooseAssert(curr_set_length == 0, "Error in unpacking data");
 }
 
 void
@@ -931,7 +1062,6 @@ FeatureFloodCount::calculateUsage() const
   }
 
   bytes += sizeof(unsigned int) * _region_counts.size();
-  bytes += sizeof(unsigned int) * _packed_data.size();
   bytes += sizeof(unsigned int) * _region_to_var_idx.size();
   bytes += sizeof(unsigned int) * _region_offsets.size();
 
@@ -962,5 +1092,19 @@ FeatureFloodCount::formatBytesUsed() const
   _console << oss.str() << std::endl;
 }
 
+void
+FeatureFloodCount::BubbleData::updateBBoxMin(const Point & min)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    _bbox.min()(i) = std::min(_bbox.min()(i), min(i));
+}
+
+void
+FeatureFloodCount::BubbleData::updateBBoxMax(const Point & max)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    _bbox.max()(i) = std::max(_bbox.max()(i), max(i));
+}
 
 const std::vector<std::pair<unsigned int, unsigned int> > FeatureFloodCount::_empty;
+

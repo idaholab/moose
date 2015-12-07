@@ -158,9 +158,9 @@ GrainTracker::finalize()
   Moose::perf_log.push("finalize()","GrainTracker");
 
   // Exchange data in parallel
-  pack(_packed_data);
-  _communicator.allgather(_packed_data, false);
-  unpack(_packed_data);
+//  pack(_packed_data);
+//  _communicator.allgather(_packed_data, false);
+//  unpack(_packed_data);
   mergeSets(false);
 
   Moose::perf_log.push("buildspheres()","GrainTracker");
