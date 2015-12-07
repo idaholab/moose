@@ -53,15 +53,15 @@ EBSDMesh::readEBSDHeader()
 
   // Labels to look for in the header
   std::vector<std::string> labels;
-  labels.push_back("X_step"); // 0
-  labels.push_back("X_Dim");
-  labels.push_back("Y_step"); // 2
-  labels.push_back("Y_Dim");
-  labels.push_back("Z_step"); // 4
-  labels.push_back("Z_Dim");
-  labels.push_back("X_Min");  // 6
-  labels.push_back("Y_Min");
-  labels.push_back("Z_Min");
+  labels.push_back("x_step"); // 0
+  labels.push_back("x_dim");
+  labels.push_back("y_step"); // 2
+  labels.push_back("y_dim");
+  labels.push_back("z_step"); // 4
+  labels.push_back("z_dim");
+  labels.push_back("x_min");  // 6
+  labels.push_back("y_min");
+  labels.push_back("z_min");
 
   // Dimension variables to store once they are found in the header
   // X_step, X_Dim, Y_step, Y_Dim, Z_step, Z_Dim
@@ -75,15 +75,15 @@ EBSDMesh::readEBSDHeader()
     // X_step, X_Dim
     // Y_step, Y_Dim
     // Z_step, Z_Dim
-    // in them.
+    // in them. The labels are case insensitive.
     if (line.find("#") == 0)
     {
       // Process lines that start with a comment character (comments and meta data)
+      std::transform(line.begin(), line.end(), line.begin(), ::tolower);
 
       for (unsigned i=0; i<labels.size(); ++i)
         if (line.find(labels[i]) != std::string::npos)
         {
-          // Moose::out << "Found label " << labels[i] << ": " << line << std::endl;
           std::string dummy;
           std::istringstream iss(line);
           iss >> dummy >> dummy >> label_vals[i];
