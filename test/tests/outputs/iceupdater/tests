@@ -2,7 +2,7 @@
   [./testupdater]
     type = 'ICEUpdaterTester'
     input = 'ice_updater_test.i'
-    nPosts = 4 # start, stop, 2 postprocessor posts
+    nPosts = 5 # start, stop, 3 postprocessor posts
 
     # If you change this, make sure you change
     # it in ice_updater_test.i:Outputs/ICEUpdater/url
@@ -13,6 +13,6 @@
     curl = true
     tbb = true
 
-    deleted = '#5741'
+#    deleted = '#5741'
   [../]
 []
