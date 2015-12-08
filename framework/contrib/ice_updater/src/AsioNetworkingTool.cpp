@@ -31,7 +31,7 @@
  *******************************************************************************/
 #include "AsioNetworkingTool.h"
 
-#ifdef LIBMESH_HAVE_CXX11
+#ifdef ASIO_STANDALONE
 
 using namespace asio;
 
@@ -212,7 +212,7 @@ std::string AsioNetworkingTool::post(std::string url, std::string value,
 
   } else
   {
-	  return "Asio Error: Could not open socket to " + url + ".";
+    return "Asio Error: Could not open socket to " + url + ".";
   }
 
 }

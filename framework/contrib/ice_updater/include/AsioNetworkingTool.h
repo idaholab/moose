@@ -35,7 +35,7 @@
 #include "INetworkingTool.h"
 #include "MooseTypes.h"
 
-#ifdef LIBMESH_HAVE_CXX11
+#ifdef ASIO_STANDALONE
 #include "asio.hpp"
 
 /**
@@ -117,7 +117,7 @@ public:
   }
 };
 
-#else // !LIBMESH_HAVE_CXX11
+#else // !ASIO_STANDALONE
 
 
 
@@ -143,6 +143,6 @@ public:
   			std::string password) {return "";}
 };
 
-#endif // LIBMESH_HAVE_CXX11
+#endif // ASIO_STANDALONE
 
 #endif
