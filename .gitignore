@@ -142,6 +142,8 @@ libmoose-dbg*
 moose/doc/doxygen/html/*
 modules/*/doc/doxygen/html/*
 tutorials/*/*/doc/doxygen/html/*
+ICE/
+framework/contrib/asio/
 
 # Restartable Data
 *.rd

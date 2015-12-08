@@ -57,9 +57,14 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler = $(shell $(libmesh_CXX) -show)
 endif
 
-# If we are using C++11 then we can use Asio Networking
+# Check that we have Asio installed.
+ASIO_FILE := $(MOOSE_DIR)/framework/contrib/asio/include/asio.hpp
+ifneq ("$(wildcard $(ASIO_FILE))","")
+# If it is installed, make sure this is a 
+# build using C++11, if so, then turn on Asio Networking
 ifeq (,$(findstring "-std=gnu++11",$(libmesh_CXXFLAGS)))
 	ADDITIONAL_CPPFLAGS += "-DASIO_STANDALONE"
+endif
 endif
 
 MOOSE_PRECOMPILED ?= false

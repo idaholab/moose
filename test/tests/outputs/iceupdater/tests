@@ -10,7 +10,7 @@
     
     # Only run this test if C++ 11 is enabled
     cxx11 = true
-
+    asio = true
   [../]
   [./testupdater_curl]
     type = 'ICEUpdaterTester'

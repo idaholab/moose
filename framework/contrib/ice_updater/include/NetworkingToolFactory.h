@@ -35,7 +35,10 @@
 #include "INetworkingTool.h"
 #include "LibcurlUtils.h"
 #include "MooseTypes.h"
+
+#ifdef ASIO_STANDALONE
 #include "AsioNetworkingTool.h"
+#endif
 
 /**
  * This factory decouples clients from the act of creating new
@@ -50,11 +53,18 @@ public:
 	 * This method returns the INetworkingTool with the provided name.
 	 */
 	MooseSharedPointer<INetworkingTool> createNetworkingTool(std::string toolName) {
-		if (toolName == "curl") {
+		if (toolName == "curl") 
+		{
 			return MooseSharedPointer<INetworkingTool>(new LibcurlUtils());
-		} else if (toolName == "asio") {
+		}
+#ifdef ASIO_STANDALONE
+		else if (toolName == "asio") 
+		{
 			return MooseSharedPointer<INetworkingTool>(new AsioNetworkingTool());
-		} else {
+		} 
+#endif
+		else 
+		{
 			return MooseSharedPointer<INetworkingTool>(new INetworkingTool());
 		}
 	}
