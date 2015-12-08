@@ -194,7 +194,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 #endif
 
   unsigned int n_threads = libMesh::n_threads();
-  _kernels.resize(n_threads);
   _nodal_kernels.resize(n_threads);
   _dirac_kernels.resize(n_threads);
 }
@@ -326,7 +325,7 @@ NonlinearSystem::initialSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    _kernels[tid].initialSetup();
+    _kernels.initialSetup(tid);
     _dirac_kernels[tid].initialSetup();
     if (_doing_dg)
       _dg_kernels.initialSetup(tid);
@@ -345,7 +344,7 @@ NonlinearSystem::timestepSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    _kernels[tid].timestepSetup();
+    _kernels.timestepSetup(tid);
     _dirac_kernels[tid].timestepSetup();
     if (_doing_dg)
       _dg_kernels.timestepSetup(tid);
@@ -542,11 +541,16 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
     // Create the kernel object via the factory
     MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters, tid));
 
-    // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-    std::set<SubdomainID> blk_ids = kernel->blockIDs();
-
     // Add the kernel to the warehouse
-    _kernels[tid].addKernel(kernel, blk_ids);
+    _kernels.addObject(kernel, tid);
+
+    // Store time/non-time kernels separately
+    MooseSharedPointer<TimeKernel> t_kernel = MooseSharedNamespace::dynamic_pointer_cast<TimeKernel>(kernel);
+    if (t_kernel)
+      _time_kernels.addObject(kernel, tid);
+    else
+      _non_time_kernels.addObject(kernel, tid);
+
   }
 
   if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
@@ -830,8 +834,10 @@ void
 NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
 {
   //Global Kernels
-  for (std::vector<KernelBase *>::const_iterator kernel_it = _kernels[tid].active().begin(); kernel_it != _kernels[tid].active().end(); kernel_it++)
-    (*kernel_it)->subdomainSetup();
+  _kernels.subdomainSetup(tid);
+
+//  for (std::vector<KernelBase *>::const_iterator kernel_it = _kernels.active().begin(); kernel_it != _kernels.active().end(); kernel_it++)
+//    (*kernel_it)->subdomainSetup();
 
   _dampers.subdomainSetup(tid);
 }
@@ -1193,7 +1199,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    _kernels[tid].residualSetup();
+    _kernels.residualSetup(tid);
 
     _dirac_kernels[tid].residualSetup();
     if (_doing_dg)
@@ -1800,7 +1806,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   // jacobianSetup /////
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    _kernels[tid].jacobianSetup();
+    _kernels.jacobianSetup(tid);
 
     _dirac_kernels[tid].jacobianSetup();
     if (_doing_dg)
@@ -2137,6 +2143,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   _dampers.updateActive(tid);
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
+  _kernels.updateActive(tid);
 
   if (tid == 0)
   {
@@ -2375,12 +2382,14 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
   std::set<SubdomainID> input_subdomains;
   std::set<std::string> kernel_variables;
 
-  bool global_kernels_exist = _kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
+  bool global_kernels_exist = _kernels.hasActiveBlockObjects(Moose::ANY_BLOCK_ID);
   global_kernels_exist |= _scalar_kernels.hasActiveObjects();
   global_kernels_exist |= _nodal_kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
 
+  _kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _scalar_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);
+
   if (!global_kernels_exist)
   {
     std::set<SubdomainID> difference;
@@ -2416,12 +2425,16 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
 bool
 NonlinearSystem::containsTimeKernel()
 {
-  bool time_kernels = false;
+  //bool time_kernels = false;
+  return _time_kernels.hasActiveObjects();
+
+  /*
   for (std::vector<KernelBase *>::const_iterator it = _kernels[0].all().begin(); it != _kernels[0].all().end(); ++it)
     if (dynamic_cast<TimeKernel *>(*it) != NULL)
       time_kernels = true;
 
   return time_kernels;
+  */
 }
 
 void
@@ -2453,20 +2466,6 @@ bool
 NonlinearSystem::doingDG() const
 {
   return _doing_dg;
-}
-
-void
-NonlinearSystem::updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid)
-{
-  mooseAssert(tid < _kernels.size(), "Thread ID does not exist.");
-  _kernels[tid].updateActiveKernels(subdomain_id);
-}
-
-const KernelWarehouse &
-NonlinearSystem::getKernelWarehouse(THREAD_ID tid)
-{
-  mooseAssert(tid < _kernels.size(), "Thread ID does not exist.");
-  return _kernels[tid];
 }
 
 const DiracKernelWarehouse &

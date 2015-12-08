@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 #include "EigenSystem.h"
-#include "KernelWarehouse.h"
 
 #include "MaterialData.h"
 #include "Factory.h"
@@ -51,9 +50,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
         MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters, tid));
         if (parameters.get<bool>("eigen"))
           markEigenVariable(parameters.get<NonlinearVariableName>("variable"));
-        // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-        std::set<SubdomainID> blk_ids = ekernel->blockIDs();
-        _kernels[tid].addKernel(ekernel, blk_ids);
+        _kernels.addObject(ekernel, tid);
       }
       if (parameters.get<bool>("eigen"))
       {
@@ -63,9 +60,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
 
         MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, old_name, parameters, tid));
         _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
-        // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-        std::set<SubdomainID> blk_ids = ekernel->blockIDs();
-        _kernels[tid].addKernel(ekernel, blk_ids);
+        _kernels.addObject(ekernel, tid);
         ++_eigen_kernel_counter;
       }
     }
@@ -73,9 +68,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
     {
       // Create the kernel object via the factory
       MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters, tid));
-      // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-      std::set<SubdomainID> blk_ids = kernel->blockIDs();
-      _kernels[tid].addKernel(kernel, blk_ids);
+      _kernels.addObject(kernel, tid);
     }
   }
 

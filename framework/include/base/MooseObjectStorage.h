@@ -86,7 +86,7 @@ public:
 
   ///@{
   /**
-   * Convenience functions for determing checking/getting specific objects
+   * Convenience functions for checking/getting specific objects
    */
   bool hasActiveObject(const std::string & name, THREAD_ID tid = 0) const;
   MooseSharedPointer<T> getActiveObject(const std::string & name, THREAD_ID tid = 0) const;
@@ -226,13 +226,22 @@ MooseObjectStorage<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid /*=
   // Block Restricted
   else if (blk)
   {
-    const std::set<SubdomainID> * ids;
-    if (blk->blockRestricted())
-      ids = &blk->blockIDs();
-    else
-      ids = &blk->meshBlockIDs();
+    // Temporary storage for Block IDs for which this object is active
+    std::set<SubdomainID> ids;
 
-    for (std::set<SubdomainID>::const_iterator it = ids->begin(); it != ids->end(); ++it)
+    // Populate the list of ids if restricted (i.e., users has 'block=...')
+    if (blk->blockRestricted())
+      ids = blk->blockIDs();
+
+    // Populate the list if NOT restricted, be sure to add ANY_BLOCK_ID so that getActiveBlockObject(Moose::ANY_BLOCK_ID) works correct.
+    else
+    {
+      ids = blk->meshBlockIDs();
+      ids.insert(Moose::ANY_BLOCK_ID);
+    }
+
+    // Store the object for each domain on which it is active
+    for (std::set<SubdomainID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     {
       _all_block_objects[tid][*it].push_back(object);
       if (enabled)

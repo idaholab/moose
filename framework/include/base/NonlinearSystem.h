@@ -16,7 +16,7 @@
 #define NONLINEARSYSTEM_H
 
 #include "SystemBase.h"
-#include "KernelWarehouse.h"
+#include "KernelStorage.h"
 #include "DiracKernelWarehouse.h"
 #include "ConstraintStorage.h"
 #include "SplitWarehouse.h"
@@ -428,17 +428,12 @@ public:
 
   //@{
   /**
-   * Updates the active kernels/dgkernels in the warehouse for the
-   * passed in subdomain_id and thread
-   */
-  void updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid);
-  //@}
-
-  //@{
-  /**
    * Access functions to Warehouses from outside NonlinearSystem
    */
-  const KernelWarehouse & getKernelWarehouse(THREAD_ID tid);
+  const KernelStorage & getKernelStorage() { return _kernels; }
+  const MooseObjectStorage<KernelBase> & getTimeKernelStorage() { return _time_kernels; }
+  const MooseObjectStorage<KernelBase> & getNonTimeKernelStorage() { return _non_time_kernels; }
+
   const MooseObjectStorage<DGKernel> & getDGKernelStorage() { return _dg_kernels; }
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
@@ -516,13 +511,14 @@ protected:
   /// residual vector for non-time contributions
   NumericVector<Number> & _Re_non_time;
 
-  // holders
-  /// Kernel storage for each thread
-  std::vector<KernelWarehouse> _kernels;
-
   ///@{
-  /// Kernel warehouses
+  /// Kernel Storage
+  KernelStorage _kernels;
   MooseObjectStorage<ScalarKernel> _scalar_kernels;
+  MooseObjectStorage<DGKernel> _dg_kernels;
+  MooseObjectStorage<KernelBase> _time_kernels;
+  MooseObjectStorage<KernelBase> _non_time_kernels;
+
   ///@}
 
   ///@{
@@ -534,9 +530,6 @@ protected:
 
   /// Dirac Kernel storage for each thread
   std::vector<DiracKernelWarehouse> _dirac_kernels;
-
-  /// Threaded DGKernel storage
-  MooseObjectStorage<DGKernel> _dg_kernels;
 
   /// Dampers for each thread
   MooseObjectStorage<Damper> _dampers;
