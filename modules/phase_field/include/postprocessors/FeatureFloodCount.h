@@ -61,7 +61,7 @@ public:
   CENTROID,
   GHOSTED_ELEMS
   };
-  
+
   // Retrieve field information
   virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
   virtual Real getElementalValue(dof_id_type element_id) const;
@@ -72,7 +72,7 @@ public:
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
-  
+
   class FooBar
   {
   public:
@@ -82,7 +82,7 @@ public:
     Point _min;
   };
 
-  
+
   class BubbleData
   {
   public:
@@ -91,7 +91,7 @@ public:
         _intersects_boundary(false),
         _min_feature_id(DofObject::invalid_id)
     {}
-    
+
     BubbleData(std::set<dof_id_type> & entity_ids, unsigned int var_idx) :
         _entity_ids(entity_ids),
         _var_idx(var_idx),
@@ -130,8 +130,8 @@ protected:
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void pack(std::string & packed_data);
-  void unpack(const std::string & packed_data);
+  void pack(std::string * packed_buffer);
+  void unpack(std::list<std::string *> & packed_buffer_list);
 
   /**
    * This routine merges the data in _bubble_sets from separate threads/processes to resolve
@@ -265,7 +265,7 @@ protected:
    * to true.
    */
   std::vector<std::map<dof_id_type, int> > _var_index_maps;
-  
+
 //  /// The data structure used to marshall the data between processes and/or threads
 //  std::vector<unsigned int> _packed_data;
 

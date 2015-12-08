@@ -22,6 +22,116 @@
 #include <algorithm>
 #include <limits>
 
+#include <unistd.h> // sleep
+
+template <typename T>
+struct string_list_inserter
+  : std::iterator<std::output_iterator_tag, T>
+{
+  explicit string_list_inserter(std::list<T *> & list) : _list(list)
+    {
+    }
+
+  template <typename T2>
+  void operator=(const T2 & value)
+    {
+      _list.push_back(value);
+    }
+
+  string_list_inserter& operator++() {
+    return *this;
+  }
+
+  string_list_inserter operator++(int) {
+    return string_list_inserter(*this);
+  }
+
+  // We don't return a reference-to-T here because we don't want to
+  // construct one or have any of its methods called.
+  string_list_inserter& operator*() { return *this; }
+
+private:
+  std::list<T *> & _list;
+};
+
+
+/**
+ * The following methods are specializations for using the libMesh::Parallel::packed_range_* routines
+ * for std::strings. These are here because the dataLoad/dataStore routines create raw string
+ * buffers that can be communicated in a standard way using packed ranges.
+ */
+namespace libMesh {
+namespace Parallel {
+
+/// BufferType<> specializations to return a buffer datatype to handle communication of std::strings
+template <>
+struct BufferType<const std::string *> {
+  typedef char type;
+};
+
+///@{
+/// packed_size to return the size of the packed (serialized) string
+template<>
+unsigned int packed_size(const std::string *, std::vector<char>::const_iterator in)
+{
+  // std::string is encoded as a 32-bit length followed by the content (char)
+  return (static_cast<unsigned char>(in[0]) << 24) | (static_cast<unsigned char>(in[1]) << 16) | (static_cast<unsigned char>(in[2]) << 8) | (static_cast<unsigned char>(in[3]) << 0);
+
+}
+
+template<>
+unsigned int packed_size(const std::string * s, std::vector<char>::iterator in)
+{
+  return packed_size(s, std::vector<char>::const_iterator(in));
+}
+///@}
+
+/// packable size is called prior to serializing the string
+template<>
+unsigned int packable_size(const std::string * s, const void *)
+{
+  // String is encoded as a 32-bit length followed by the content (char)
+  return s->size() + sizeof(uint32_t);
+}
+
+/// pack a single variable sized string onto the data buffer
+template <>
+void pack (const std::string * b, std::vector<char> & data, const void *)
+{
+  uint32_t size = sizeof(uint32_t) + b->size();
+
+  data.push_back(size >> 24);
+  data.push_back(size >> 16);
+  data.push_back(size >> 8);
+  data.push_back(size);
+
+  // Copy the content to the buffer
+  std::copy(b->begin(), b->end(), std::back_inserter(data));
+}
+
+/// unpack a single variable sized string from the data buffer
+template <>
+void unpack(std::vector<char>::const_iterator in, std::string ** out, void *)
+{
+//  uint32_t size = ((unsigned char)in[0] << 24) | (unsigned char)(in[1] << 16) | (unsigned char)(in[2] << 8) | (unsigned char)(in[3] << 0);
+  uint32_t size = (static_cast<unsigned char>(in[0]) << 24) | (static_cast<unsigned char>(in[1]) << 16) | (static_cast<unsigned char>(in[2]) << 8) | (static_cast<unsigned char>(in[3]) << 0);
+
+  /**
+   * Start at the right place in the string (after the length parameter) and adjust the
+   * size of the content by the same amount.
+   */
+  std::string * out_string = new std::string(&in[sizeof(uint32_t)], size - sizeof(uint32_t));
+
+  // Advance the position in the buffer
+  in += size;
+
+  (*out) = out_string;
+}
+
+}
+}
+
+
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::BubbleData & feature, void * context)
 {
   storeHelper(stream, feature._entity_ids, context);
@@ -32,7 +142,7 @@ template<> void dataStore(std::ostream & stream, FeatureFloodCount::BubbleData &
 }
 
 template<> void dataLoad(std::istream & stream, FeatureFloodCount::BubbleData & feature, void * context)
-{  
+{
   loadHelper(stream, feature._entity_ids, context);
   loadHelper(stream, feature._var_idx, context);
   loadHelper(stream, feature._bbox.min(), context);
@@ -123,7 +233,7 @@ FeatureFloodCount::initialize()
   // TODO: use iterator
   for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
     _entities_visited[var_num].clear();
-  
+
   // Reset the ownership structure
   _region_to_var_idx.clear();
 
@@ -141,7 +251,7 @@ FeatureFloodCount::initialize()
   _all_bubble_volumes.clear();
 
   _bytes_used = 0;
-  
+
   _ghosted_entity_ids.clear();
 
   // Populate the global ghosted entity data structure
@@ -194,11 +304,55 @@ void
 FeatureFloodCount::finalize()
 {
   std::string packed_buffer;
-  
+//  switch (processor_id())
+//  {
+//  case 0:
+//    for (unsigned int i=0; i<10000; ++i)
+//      packed_buffer.push_back('x');
+//    break;
+////    packed_buffer.assign("zero"); break;
+//  case 1:
+//    packed_buffer.assign("one"); break;
+//  case 2:
+//    packed_buffer.assign("two"); break;
+//  case 3:
+//    packed_buffer.assign("three"); break;
+//  case 4:
+//    packed_buffer.assign("four"); break;
+//  case 5:
+//    packed_buffer.assign("five"); break;
+//  case 6:
+//    packed_buffer.assign("six"); break;
+//  default:
+//    packed_buffer.assign("some bigger number"); break;
+//  }
+
+  std::vector<std::string *> send_buffer(1, &packed_buffer);
+  std::list<std::string *> recv_buffer;
+
   // Exchange data in parallel
-  pack(packed_buffer);
+  pack(&packed_buffer);
+
+//  if (processor_id() == 0)
+//    _communicator.send(1, packed_buffer);
+//  else
+//  {
+//    packed_buffer.clear();
+//    _communicator.receive(0, packed_buffer);
+//  }
+
+  _communicator.allgather_packed_range((void *)(NULL), send_buffer.begin(), send_buffer.end(),
+                                       string_list_inserter<std::string>(recv_buffer));
+
+//  // Print the raw unpacked buffer
+//  for (std::list<std::string *>::iterator it = recv_buffer.begin(); it != recv_buffer.end(); ++it)
+//    std::cout << **it << '\n';
+
 //  _communicator.allgather(packed_buffer, false);
-  unpack(packed_buffer);
+  unpack(recv_buffer);
+
+  exit(0);
+
 
   mergeSets(true);
 
@@ -265,7 +419,7 @@ Real
 FeatureFloodCount::getElementalValue(dof_id_type /*element_id*/) const
 {
   mooseDoOnce(mooseWarning("Method not implemented"));
-  
+
   return 0;
 }
 
@@ -313,10 +467,12 @@ FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
 }
 
 void
-FeatureFloodCount::pack(std::string & packed_data)
+FeatureFloodCount::pack(std::string * packed_buffer)
 {
 //  std::vector<FooBar> foo_bar(1);
-//  
+//
+//  sleep(processor_id());
+//
 //  if (_app.n_processors() == 2)
 //  {
 //    if (processor_id() == 0)
@@ -327,8 +483,8 @@ FeatureFloodCount::pack(std::string & packed_data)
 //      foo_bar[0]._entity_ids.insert(7);
 //      foo_bar[0]._var_idx = 2;
 //      foo_bar[0]._max = Point(0.5, 2.5, 3.14);
-// 
-//      
+//
+//
 //      for (unsigned int i = 0; i < foo_bar.size(); ++i)
 //      {
 //        std::cerr << processor_id() << " Set " << i << ": ";
@@ -336,24 +492,24 @@ FeatureFloodCount::pack(std::string & packed_data)
 //          std::cerr << *it << " ";
 //        std::cerr << "\nVar_idx: " << foo_bar[i]._var_idx;
 //        std::cerr << "\nMax: " << foo_bar[i]._max;
-//        std::cerr << "\n";
+//        std::cerr << "\n\n";
 //      }
-//      
+//
 //      std::ostringstream oss;
 //      dataStore(oss, foo_bar, this);
-//      
+//
 //      std::string buf = oss.str();
-//      _communicator.send(1, buf);
+////      _communicator.send(1, buf);
 //    }
 //    else
 //    {
 //      foo_bar.clear();
 //      std::string buf;
-//      _communicator.receive(0, buf);
+////      _communicator.receive(0, buf);
 //      std::istringstream iss(buf);
-//      
-//      dataLoad(iss, foo_bar, this);
-//      
+//
+////      dataLoad(iss, foo_bar, this);
+//
 //      for (unsigned int i = 0; i < foo_bar.size(); ++i)
 //      {
 //        std::cerr << processor_id() << " Set " << i << ": ";
@@ -361,11 +517,11 @@ FeatureFloodCount::pack(std::string & packed_data)
 //          std::cerr << *it << " ";
 //        std::cerr << "\nVar_idx: " << foo_bar[i]._var_idx;
 //        std::cerr << "\nMax: " << foo_bar[i]._max;
-//        std::cerr << "\n";
+//        std::cerr << "\n\n";
 //      }
 //    }
 //  }
-  
+
   /**
    * We need a data structure that reorganizes the region markings into sets so that we can pack them up
    * in a form to marshall them between processors.  The set of nodes are stored by region_num for the
@@ -390,7 +546,7 @@ FeatureFloodCount::pack(std::string & packed_data)
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     ghost_data.clear();
-    
+
     ghost_data.resize(_region_counts[map_num]);
     local_data.resize(_region_counts[map_num]);
 //    min_points.resize(_region_counts[map_num],  std::numeric_limits<Real>::max());
@@ -416,13 +572,13 @@ FeatureFloodCount::pack(std::string & packed_data)
         ghost_data[partial_feature_num]._entity_ids.insert(entity_id);
 //        ++ghost_counter;
       }
-      
+
       // Now retrieve the location of this entity for determining the bounding box region
       const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
 
       ghost_data[partial_feature_num].updateBBoxMin(entity_point);
       ghost_data[partial_feature_num].updateBBoxMax(entity_point);
-      
+
       // Finally save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
       ghost_data[partial_feature_num]._min_feature_id = std::min(ghost_data[partial_feature_num]._min_feature_id, entity_id);
 
@@ -436,10 +592,10 @@ FeatureFloodCount::pack(std::string & packed_data)
     // Save the variable index
     for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
       ghost_data[i]._var_idx = _region_to_var_idx[i];
-    
+
 
 //    std::cout << oss.str() << '\n';
-    
+
 
     /**
      * We'll save the local data immediately two our bubble_sets data structure. It doesn't
@@ -459,7 +615,7 @@ FeatureFloodCount::pack(std::string & packed_data)
      * quite true when using periodic boundaries.
      */
 
-    
+
 
     /**
      * The size of the packed data structure should be the sum of all of the following:
@@ -478,22 +634,22 @@ FeatureFloodCount::pack(std::string & packed_data)
     // Note the _region_counts[mar_num]*2 takes into account the number of nodes and the variable index for each region
 //    std::vector<dof_id_type> partial_packed_data;
 //    partial_packed_data.reserve(ghost_counter + _region_counts[map_num]*2);
-// 
+//
     // Now pack it up
     dataStore(oss, ghost_data, this);
-    packed_data.assign(oss.str());
+    packed_buffer->assign(oss.str());
   }
-  
 
-    
+
+
 //    for (unsigned int i = 0; i < _region_counts[map_num]; ++i)
 //    {
 //      // Skip over the empty sets
 //      if (ghost_data[i].empty())
 //        continue;
-//      
+//
 //      partial_packed_data.push_back(ghost_data[i].size());              // The number of nodes in the current region
-//      
+//
 //      if (_single_map_mode)
 //      {
 //        mooseAssert(i < _region_to_var_idx.size(), "Index out of bounds in FeatureFloodCounter");
@@ -501,56 +657,69 @@ FeatureFloodCount::pack(std::string & packed_data)
 //      }
 //      else
 //        partial_packed_data.push_back(map_num);                         // The variable owning this bubble
-//      
+//
 //      std::set<dof_id_type>::iterator end = ghost_data[i].end();
 //      for (std::set<dof_id_type>::iterator it = ghost_data[i].begin(); it != end; ++it)
 //        partial_packed_data.push_back(*it);                             // The individual entity ids
 //    }
-//    
+//
 //    packed_data.insert(packed_data.end(), partial_packed_data.begin(), partial_packed_data.end());
 //  }
 
 
-    
+
 
 }
 
 void
-FeatureFloodCount::unpack(const std::string & packed_data)
+FeatureFloodCount::unpack(std::list<std::string *> & packed_buffer_list)
 {
   std::list<BubbleData> ghost_data;
-  
-  std::istringstream iss(packed_data);
-  dataLoad(iss, ghost_data, this);
 
-  unsigned int counter = 0;
-  if (processor_id() == 1)
+  for (std::list<std::string *>::iterator it = packed_buffer_list.begin(); it != packed_buffer_list.end(); ++it)
   {
+    std::istringstream iss(**it);
+    dataLoad(iss, ghost_data, this);
+  }
+
+
+
+
+
+//  std::list<BubbleData> ghost_data;
+//
+//  std::istringstream iss(packed_data);
+//  dataLoad(iss, ghost_data, this);
+//
+  unsigned int counter = 0;
+//  if (processor_id() == 1)
+//  {
     std::list<BubbleData>::iterator l_end = ghost_data.end();
-    
+
     for (std::list<BubbleData>::iterator l_it = ghost_data.begin(); l_it != l_end; ++l_it)
     {
-      std::cerr << processor_id() << " Set " << ++counter << ": ";
+      std::cout << "Proc: " << processor_id() << "\nItem: " << ++counter << "\nGhosted Entities: ";
       for (std::set<dof_id_type>::const_iterator it = l_it->_entity_ids.begin();
            it != l_it->_entity_ids.end(); ++it)
-        std::cerr << *it << " ";
-      std::cerr << "\nVar_idx: " << l_it->_var_idx;
-      std::cerr << "\nMax: " << l_it->_bbox.max();
-      std::cerr << "\nMin: " << l_it->_bbox.min();
-      std::cerr << "\n";
+        std::cout << *it << " ";
+      std::cout << "\nVar_idx: " << l_it->_var_idx;
+      std::cout << "\nMax: " << l_it->_bbox.max();
+      std::cout << "\nMin: " << l_it->_bbox.min();
+      std::cout << "\nMin Entitity ID: " << l_it->_min_feature_id;
+      std::cout << "\n\n";
     }
-  }
-  
-  
-  
+//  }
+
+
+
 
 //  bool start_next_set = true;
 //  bool has_data_to_save = false;
-// 
+//
 //  unsigned int curr_set_length = 0;
 //  std::set<dof_id_type> curr_set;
 //  unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
-// 
+//
 //  _region_to_var_idx.clear();
 //  for (unsigned int i = 0; i < packed_data.size(); ++i)
 //  {
@@ -563,7 +732,7 @@ FeatureFloodCount::unpack(const std::string & packed_data)
 //        _region_to_var_idx.push_back(curr_var_idx);
 //        curr_set.clear();
 //      }
-// 
+//
 //      // Get the length of the next set
 //      curr_set_length = packed_data[i];
 //      // Also get the owning variable idx.
@@ -576,11 +745,11 @@ FeatureFloodCount::unpack(const std::string & packed_data)
 //      curr_set.insert(packed_data[i]);
 //      --curr_set_length;
 //    }
-// 
+//
 //    start_next_set = !(curr_set_length);
 //    has_data_to_save = true;
 //  }
-// 
+//
 //  /**
 //   * Note: In multi-map mode the var_idx information stored inside of BubbleData is redundant with
 //   * the outer index of the _bubble_sets data-structure.  We need this information for single-map
@@ -591,7 +760,7 @@ FeatureFloodCount::unpack(const std::string & packed_data)
 //    _bubble_sets[_single_map_mode ? 0 : curr_var_idx].push_back(BubbleData(curr_set, curr_var_idx));
 //    _region_to_var_idx.push_back(curr_var_idx);
 //  }
-// 
+//
 //  mooseAssert(curr_set_length == 0, "Error in unpacking data");
 }
 
@@ -752,12 +921,12 @@ FeatureFloodCount::updateFieldInfo()
 {
   // This variable is only relevant in single map mode
   _region_to_var_idx.resize(_bubble_sets[0].size());
-  
+
   // Finally update the original bubble map with field data from the merged sets
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     _bubble_maps[map_num].clear();
-    
+
     unsigned int counter = 0;
     for (std::list<BubbleData>::iterator it1 = _bubble_sets[map_num].begin(); it1 != _bubble_sets[map_num].end(); ++it1)
     {
@@ -769,13 +938,13 @@ FeatureFloodCount::updateFieldInfo()
 //        if (_var_index_mode)
 //          _var_index_maps[map_num][*it2] = it1->_var_idx;
       }
-// 
+//
 //      if (_single_map_mode)
 //        _region_to_var_idx[counter] = it1->_var_idx;
       ++counter;
     }
 
-    std::cerr << "Proc: " << processor_id() << " map_num: " << map_num << " : " << counter << '\n';
+//    std::cerr << "Proc: " << processor_id() << " map_num: " << map_num << " : " << counter << '\n';
     _region_counts[map_num] = counter;
   }
 }
@@ -1107,4 +1276,3 @@ FeatureFloodCount::BubbleData::updateBBoxMax(const Point & max)
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > FeatureFloodCount::_empty;
-
