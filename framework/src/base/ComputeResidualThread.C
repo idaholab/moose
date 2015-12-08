@@ -11,6 +11,7 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "ComputeResidualThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
@@ -19,6 +20,9 @@
 #include "IntegratedBC.h"
 #include "DGKernel.h"
 #include "Material.h"
+#include "TimeKernel.h"
+#include "KernelStorage.h"
+
 // libmesh includes
 #include "libmesh/threads.h"
 
@@ -28,7 +32,10 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSy
     _kernel_type(type),
     _num_cached(0),
     _integrated_bcs(sys.getIntegratedBCStorage()),
-    _dg_kernels(sys.getDGKernelStorage())
+    _dg_kernels(sys.getDGKernelStorage()),
+    _kernels(sys.getKernelStorage()),
+    _time_kernels(sys.getTimeKernelStorage()),
+    _non_time_kernels(sys.getNonTimeKernelStorage())
 {
 }
 
@@ -39,7 +46,10 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
     _kernel_type(x._kernel_type),
     _num_cached(0),
     _integrated_bcs(x._integrated_bcs),
-    _dg_kernels(x._dg_kernels)
+    _dg_kernels(x._dg_kernels),
+    _kernels(x._kernels),
+    _time_kernels(x._time_kernels),
+    _non_time_kernels(x._kernels)
 {
 }
 
@@ -51,20 +61,24 @@ void
 ComputeResidualThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
-  _sys.updateActiveKernels(_subdomain, _tid);
 
   std::set<MooseVariable *> needed_moose_vars;
-  const std::vector<KernelBase *> & kernels = _sys.getKernelWarehouse(_tid).active();
-  for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+
+  // Kernel Dependencies
+  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+      const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
+      for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+      {
+        const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+        needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+      }
   }
 
-  // Boundary Condition Dependencies
+  // BoundaryCondition Dependencies
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
 
-  // DG Kernel dependencies
+  // DGKernel Dependencies
   if (_dg_kernels.hasActiveObjects(_tid))
   {
     const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
@@ -86,16 +100,29 @@ ComputeResidualThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  const std::vector<KernelBase *> * kernels = NULL;
+
+  const MooseObjectStorage<KernelBase> * storage;
   switch (_kernel_type)
   {
-  case Moose::KT_ALL: kernels = & _sys.getKernelWarehouse(_tid).active(); break;
-  case Moose::KT_TIME: kernels = & _sys.getKernelWarehouse(_tid).activeTime(); break;
-  case Moose::KT_NONTIME: kernels = & _sys.getKernelWarehouse(_tid).activeNonTime(); break;
+  case Moose::KT_ALL:
+    storage = &_kernels;
+    break;
+
+  case Moose::KT_TIME:
+    storage = &_time_kernels;
+    break;
+
+  case Moose::KT_NONTIME:
+    storage = &_non_time_kernels;
+    break;
   }
-  for (std::vector<KernelBase *>::const_iterator it = kernels->begin(); it != kernels->end(); ++it)
+
+  if (storage->hasActiveBlockObjects(_subdomain, _tid))
   {
-    (*it)->computeResidual();
+    const std::vector<MooseSharedPointer<KernelBase> > & kernels = storage->getActiveBlockObjects(_subdomain, _tid);
+    for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+      if ((*it)->isActive())
+        (*it)->computeResidual();
   }
 
   _fe_problem.swapBackMaterials(_tid);

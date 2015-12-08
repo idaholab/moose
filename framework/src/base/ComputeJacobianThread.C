@@ -18,6 +18,7 @@
 #include "TimeDerivative.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
+#include "KernelStorage.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -28,7 +29,8 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
     _sys(sys),
     _num_cached(0),
     _integrated_bcs(sys.getIntegratedBCStorage()),
-    _dg_kernels(sys.getDGKernelStorage())
+    _dg_kernels(sys.getDGKernelStorage()),
+    _kernels(sys.getKernelStorage())
 {
 }
 
@@ -39,7 +41,8 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
     _sys(x._sys),
     _num_cached(x._num_cached),
     _integrated_bcs(x._integrated_bcs),
-    _dg_kernels(x._dg_kernels)
+    _dg_kernels(x._dg_kernels),
+    _kernels(x._kernels)
 {
 }
 
@@ -50,14 +53,17 @@ ComputeJacobianThread::~ComputeJacobianThread()
 void
 ComputeJacobianThread::computeJacobian()
 {
-  const std::vector<KernelBase *> & kernels = _sys.getKernelWarehouse(_tid).active();
-  for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    KernelBase * kernel = *it;
-    if (kernel->isImplicit())
+    const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
+    for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
     {
-      kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
-      kernel->computeJacobian();
+      MooseSharedPointer<KernelBase> kernel = *it;
+      if (kernel->isImplicit() && kernel->isActive())
+      {
+        kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
+        kernel->computeJacobian();
+      }
     }
   }
 }
@@ -100,21 +106,24 @@ void
 ComputeJacobianThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
-  _sys.updateActiveKernels(_subdomain, _tid);
 
   std::set<MooseVariable *> needed_moose_vars;
 
-  const std::vector<KernelBase *> & kernels = _sys.getKernelWarehouse(_tid).active();
-  for (std::vector<KernelBase *>::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+  // Kernels Dependencies
+  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
+    for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
   }
 
-  // Boundary Condition Dependencies
+  // BoundaryCondition Dependencies
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars);
 
-  // DG Kernel dependencies
+  // DGKernel Dependencies
   if (_dg_kernels.hasActiveObjects(_tid));
   {
     const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
