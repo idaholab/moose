@@ -156,6 +156,48 @@ XFEMCutElem2D::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
 }
 
 void
+XFEMCutElem2D::get_crack_tip_origin_and_direction(unsigned tip_id, Point & origin, Point & direction) const
+{
+  //TODO: two cut plane case is not working
+  std::vector<EFAnode*> cut_line_nodes;
+  for (unsigned int i = 0; i < _efa_elem2d.get_fragment(0)->num_edges(); ++i)
+  {
+    if (_efa_elem2d.get_fragment(0)->is_edge_interior(i))
+    {
+      std::vector<EFAnode*> node_line(2,NULL);
+      node_line[0] = _efa_elem2d.get_frag_edge(0,i)->get_node(0);
+      node_line[1] = _efa_elem2d.get_frag_edge(0,i)->get_node(1);
+      if (node_line[1]->id() == tip_id)
+      {
+        cut_line_nodes.push_back(node_line[0]);
+        cut_line_nodes.push_back(node_line[1]);
+      }
+      else if (node_line[0]->id() == tip_id)
+      {
+        node_line[1] = node_line[0];
+        node_line[0] = _efa_elem2d.get_frag_edge(0,i)->get_node(1);
+        cut_line_nodes.push_back(node_line[0]);
+        cut_line_nodes.push_back(node_line[1]);
+      }
+    }
+  }
+  if (cut_line_nodes.size() == 0)
+  {
+    libMesh::err << " ERROR: no cut line found in this element"<<std::endl;
+    exit(1);
+  }
+
+  Point cut_line_p1 = get_node_coords(cut_line_nodes[0]);
+  Point cut_line_p2 = get_node_coords(cut_line_nodes[1]);
+  Point cut_line = cut_line_p2 - cut_line_p1;
+  Real len = std::sqrt(cut_line.size_sq());
+  cut_line *= (1.0/len);
+  origin = cut_line_p2;
+  direction = Point(cut_line(0), cut_line(1), 0.0);
+}
+
+
+void
 XFEMCutElem2D::get_frag_faces(std::vector<std::vector<Point> > &frag_faces, MeshBase* displaced_mesh) const
 {
   frag_faces.clear();
@@ -217,7 +259,7 @@ XFEMCutElem2D::partial_gauss(unsigned int nen, std::vector<std::vector<Real> > &
   {
     std::vector<std::vector<Real> > sg2;
     std::vector<std::vector<Real> > shape(nnd_pe,std::vector<Real>(3,0.0));
-    stdQuadr2D(nnd_pe, 2, sg2); // 
+    stdQuadr2D(nnd_pe, 2, sg2); //
     for (unsigned int l = 0; l < sg2.size(); ++l)
     {
       shapeFunc2D(nnd_pe, sg2[l], frag_points, shape, jac, true); // Get shape
@@ -306,7 +348,7 @@ XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &
     else if (nen == 3) // 2D triangle elem
       old_weights[l] = wss[l][3]*jac;
     else
-      mooseError("Invalid element!");    
+      mooseError("Invalid element!");
     for (unsigned int k = 0; k < nen; ++k) // physical coords of Q-pts
     {
       wsg[l][0] += shape[k][2]*elem_nodes[k](0);
@@ -348,7 +390,7 @@ XFEMCutElem2D::solve_mf(unsigned int nen, unsigned int nqp, std::vector<Point> &
   int info;
   int n = wsg.size();
   std::vector<int> ipiv(n);
- 
+
   LAPACKgesv_(&n, &nrhs, A, &n, &ipiv[0], b, &n, &info );
 
   for (unsigned int i = 0; i < wsg.size(); ++i)

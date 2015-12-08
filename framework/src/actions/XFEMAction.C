@@ -35,13 +35,15 @@ template<>
 InputParameters validParams<XFEMAction>()
 {
   InputParameters params = validParams<Action>();
-  
+
   params.addParam<std::string>("cut_type", "line_segment_2d", "The type of XFEM cuts");
   params.addParam<std::vector<Real> >("cut_data","Data for XFEM geometric cuts");
   params.addParam<std::vector<Real> >("cut_scale","X,Y scale factors for XFEM geometric cuts");
   params.addParam<std::vector<Real> >("cut_translate","X,Y translations for XFEM geometric cuts");
   params.addParam<std::string>("qrule", "volfrac", "XFEM quadrature rule to use");
-  params.addParam<bool>("cut_plane",false,"Output the XFEM cut plane and volume fraction");
+  params.addParam<bool>("output_cut_plane",false,"Output the XFEM cut plane and volume fraction");
+  params.addParam<bool>("use_crack_growth_increment", false, "Use fixed crack growth increment");
+  params.addParam<Real>("crack_growth_increment", 0.1, "Crack growth increment");
   return params;
 }
 
@@ -49,13 +51,15 @@ XFEMAction::XFEMAction(InputParameters params) :
     Action(params),
     _xfem_cut_type(getParam<std::string>("cut_type")),
     _xfem_qrule(getParam<std::string>("qrule")),
-    _xfem_cut_plane(false)
+    _xfem_cut_plane(false),
+    _xfem_use_crack_growth_increment(getParam<bool>("use_crack_growth_increment")),
+    _xfem_crack_growth_increment(getParam<Real>("crack_growth_increment"))
 {
-   _order = "CONSTANT"; 
+   _order = "CONSTANT";
    _family = "MONOMIAL";
-   if (isParamValid("cut_plane"))
-     _xfem_cut_plane = getParam<bool>("cut_plane");
-} 
+   if (isParamValid("output_cut_plane"))
+     _xfem_cut_plane = getParam<bool>("output_cut_plane");
+}
 
 void
 XFEMAction::act()
@@ -66,8 +70,10 @@ XFEMAction::act()
   if(_current_task == "setup_xfem"){
 
     _xfem_cut_data = getParam<std::vector<Real> >("cut_data");
- 
+
     xfem->set_xfem_qrule(_xfem_qrule);
+
+    xfem->set_crack_growth_method(_xfem_use_crack_growth_increment, _xfem_crack_growth_increment);
 
     if (_xfem_cut_type == "line_segment_2d")
     {
@@ -113,26 +119,26 @@ XFEMAction::act()
     {
       if(_xfem_cut_data.size() % 12 != 0)
         mooseError("Length of XFEM_cuts must be 12 when square_cut_3d");
-      
+
       unsigned int num_cuts = _xfem_cut_data.size()/12;
       std::vector<Real> square_cut_data(12);
       for(unsigned i = 0; i < num_cuts; ++i){
         for(unsigned j = 0; j < 12; j++){
-          square_cut_data[j] = _xfem_cut_data[i*12+j]; 
+          square_cut_data[j] = _xfem_cut_data[i*12+j];
         }
         xfem->addGeometricCut(new XFEM_square_cut(square_cut_data));
       }
-    }  
+    }
     else if (_xfem_cut_type == "circle_cut_3d")
     {
        if(_xfem_cut_data.size() % 9 != 0)
          mooseError("Length of XFEM_cuts must be 9 when circle_cut_3d");
-       
+
        unsigned int num_cuts = _xfem_cut_data.size()/9;
        std::vector<Real> circle_cut_data(9);
        for(unsigned i = 0; i < num_cuts; ++i){
          for(unsigned j = 0; j < 9; j++){
-           circle_cut_data[j] = _xfem_cut_data[i*9+j]; 
+           circle_cut_data[j] = _xfem_cut_data[i*9+j];
          }
          xfem->addGeometricCut(new XFEM_circle_cut(circle_cut_data));
        }
@@ -141,19 +147,19 @@ XFEMAction::act()
     {
       if(_xfem_cut_data.size() % 9 != 0)
         mooseError("Length of XFEM_cuts must be 9 when ellipse_cut_3d");
-           
+
       unsigned int num_cuts = _xfem_cut_data.size()/9;
       std::vector<Real> ellipse_cut_data(9);
       for(unsigned i = 0; i < num_cuts; ++i){
         for(unsigned j = 0; j < 9; j++){
-          ellipse_cut_data[j] = _xfem_cut_data[i*9+j]; 
+          ellipse_cut_data[j] = _xfem_cut_data[i*9+j];
         }
         xfem->addGeometricCut(new XFEM_ellipse_cut(ellipse_cut_data));
       }
     }
     else
       mooseError("unrecognized XFEM cut type");
-  } 
+  }
   else if (_current_task == "add_aux_variable" && _xfem_cut_plane)
   {
     _problem->addAuxVariable("xfem_cut_origin_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
@@ -169,7 +175,7 @@ XFEMAction::act()
     _problem->addAuxVariable("xfem_cut2_normal_x",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
     _problem->addAuxVariable("xfem_cut2_normal_y",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
     _problem->addAuxVariable("xfem_cut2_normal_z",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
-  
+
     _problem->addAuxVariable("xfem_volfrac",FEType(Utility::string_to_enum<Order>(_order),Utility::string_to_enum<FEFamily>(_family)));
   }
   else if (_current_task == "add_aux_kernel" && _xfem_cut_plane)
@@ -178,7 +184,7 @@ XFEMAction::act()
     params.set<MultiMooseEnum>("execute_on") = "timestep_begin";
     params.set<AuxVariableName>("variable") = "xfem_volfrac";
     _problem->addAuxKernel("XFEMVolFracAux","xfem_volfrac",params);
-    
+
     params = _factory.getValidParams("XFEMCutPlaneAux");
     params.set<MultiMooseEnum>("execute_on") = "timestep_end";
 

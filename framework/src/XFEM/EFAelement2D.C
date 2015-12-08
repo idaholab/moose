@@ -497,6 +497,23 @@ EFAelement2D::init_crack_tip(std::set<EFAelement*> &CrackTipElements)
   }
 }
 
+unsigned int
+EFAelement2D::get_crack_tip_split_element_id() const
+{
+  if (is_crack_tip_elem())
+  {
+    for (unsigned int edge_iter = 0; edge_iter < _num_edges; ++edge_iter)
+    {
+      if ((_edge_neighbors[edge_iter].size() == 2) && (_edges[edge_iter]->has_intersection())){
+        if(_edge_neighbors[edge_iter][0]!=NULL && _edge_neighbors[edge_iter][0]->is_crack_tip_split()){
+          return _edge_neighbors[edge_iter][0]->id();
+        }
+      }
+    }
+  }
+  return 9999;
+}
+
 bool
 EFAelement2D::should_duplicate_for_crack_tip(const std::set<EFAelement*> &CrackTipElements)
 {
@@ -1605,7 +1622,7 @@ EFAelement2D::branching_split(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
 {
   if (is_partial())
     mooseError("branching is only allowed for an uncut element");
-  
+
   // collect all emb nodes counterclockwise
   std::vector<EFAnode*> three_nodes;
   for (unsigned int i = 0; i < _edges.size(); ++i)
@@ -1623,7 +1640,7 @@ EFAelement2D::branching_split(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
   }
   if (three_nodes.size() != 3)
     mooseError("three_nodes.size() != 3");
-  
+
   // get the parent coords of the braycenter of the three nodes
   // TODO: may need a better way to compute this "branching point"
   std::vector<double> center_xi(2,0.0);
@@ -1686,7 +1703,7 @@ EFAelement2D::branching_split(std::map<unsigned int, EFAnode*> &EmbeddedNodes)
     }
     new_fragments.push_back(new_frag);
   } // i
-  return new_fragments;  
+  return new_fragments;
 }
 
 void

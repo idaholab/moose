@@ -464,6 +464,8 @@ ElementFragmentAlgorithm::updateCrackTipElements()
   //std::cout<<std::endl;
 }
 
+
+
 void
 ElementFragmentAlgorithm::printMesh()
 {

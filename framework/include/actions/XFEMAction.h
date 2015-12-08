@@ -38,6 +38,8 @@ protected:
   std::string _order;
   std::string _family;
   bool _xfem_cut_plane;
+  bool _xfem_use_crack_growth_increment;
+  Real _xfem_crack_growth_increment;
 };
 
-#endif 
+#endif

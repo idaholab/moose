@@ -89,6 +89,9 @@ public:
   const std::vector<EFAelement*> &getParentElements(){return _parent_elements;};
   const std::vector<EFAnode*> &getNewNodes(){return _new_nodes;};
   const std::set<EFAelement*> &getCrackTipElements(){return _crack_tip_elements;};
+  const std::map<unsigned int, EFAnode*> &getPermanentNodes(){return _permanent_nodes;}
+  const std::map<unsigned int, EFAnode*> &getTempNodes(){return _temp_nodes;}
+  const std::map<unsigned int, EFAnode*> &getEmbeddedNodes(){return _embedded_nodes;}
   EFAelement* getElemByID(unsigned int id);
   unsigned int getElemIdByNodes(unsigned int * node_id);
   void clearPotentialIsolatedNodes();

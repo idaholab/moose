@@ -34,6 +34,7 @@
 
 #include "XFEM.h"
 #include "XFEM_geometric_cut.h"
+#include "XFEM_geometric_cut_2d.h"
 #include "EFAfuncs.h"
 
 #ifdef DEBUG
@@ -75,6 +76,48 @@ void
 XFEM::addGeometricCut(XFEM_geometric_cut* geometric_cut)
 {
   _geometric_cuts.push_back(geometric_cut);
+}
+
+void
+XFEM::get_crack_tip_origin(std::map<unsigned int, const Elem* > & elem_id_crack_tip, std::vector<Point> & crack_front_points)
+{
+  elem_id_crack_tip.clear();
+  crack_front_points.clear();
+  crack_front_points.resize(_elem_crack_origin_direction_map.size());
+
+  std::map<const Elem*, std::vector<Point> >::iterator mit1 = _elem_crack_origin_direction_map.begin();
+  unsigned int crack_tip_index = 0;
+  // This map is used to sort the order in _elem_crack_origin_direction_map such that every process has same order
+  std::map<unsigned int, const Elem*> elem_id_map;
+ 
+  int m = -1;
+  for (mit1 = _elem_crack_origin_direction_map.begin(); mit1 != _elem_crack_origin_direction_map.end(); mit1++)
+  {
+    unsigned int elem_id = mit1->first->id();
+    if (elem_id > 999999)
+    {
+      elem_id_map[m] = mit1->first;
+      m--;
+    }
+    else
+    {
+      elem_id_map[elem_id] = mit1->first;
+    }
+  }
+
+  std::map<unsigned int, const Elem*> ::iterator mit2 = elem_id_map.begin();
+  
+  for (; mit2 != elem_id_map.end(); mit2++)
+  {
+    const Elem* elem = mit2->second;
+    mit1 = _elem_crack_origin_direction_map.find(elem);
+    if (mit1 != _elem_crack_origin_direction_map.end())
+    {
+      elem_id_crack_tip[crack_tip_index] = mit1->first;
+      crack_front_points[crack_tip_index] = (mit1->second)[0]; // [0] stores origin coordinates and [1] stores direction
+      crack_tip_index++;
+    }
+  }
 }
 
 void
@@ -129,6 +172,43 @@ XFEM::clearStateMarkedElems()
   _state_marked_elem_sides.clear();
 }
 
+void
+XFEM::store_crack_tip_origin_and_direction()
+{
+  _elem_crack_origin_direction_map.clear();
+  std::set<EFAelement*> CrackTipElements = _efa_mesh.getCrackTipElements();
+  std::set<EFAelement*>::iterator sit;
+  for (sit = CrackTipElements.begin(); sit != CrackTipElements.end(); ++sit)
+  {
+    if (_mesh->mesh_dimension() == 2){
+      EFAelement2D * CEMElem = dynamic_cast<EFAelement2D*>(*sit);
+      EFAnode *tip_node = CEMElem->get_tip_embedded();
+      unsigned int cts_id = CEMElem->get_crack_tip_split_element_id();
+
+      Point origin(0,0,0);
+      Point direction(0,0,0);
+
+      std::map<const Elem*, XFEMCutElem*>::const_iterator it;
+      it = _cut_elem_map.find(_mesh->elem(cts_id));
+      if (it != _cut_elem_map.end())
+      {
+        const XFEMCutElem *xfce = it->second;
+        const EFAelement* EFAelem = xfce->get_efa_elem();
+        if (EFAelem->is_partial()) // exclude the full crack tip elements
+        {
+          xfce->get_crack_tip_origin_and_direction(tip_node->id(),origin,direction);
+        }
+      }
+
+      std::vector<Point> tip_data;
+      tip_data.push_back(origin);
+      tip_data.push_back(direction);
+      const Elem* elem = _mesh->elem((*sit)->id());
+      _elem_crack_origin_direction_map.insert(std::pair<const Elem*, std::vector<Point> >(elem,tip_data));
+    }
+  }
+}
+
 bool
 XFEM::update(Real time)
 {
@@ -137,9 +217,18 @@ XFEM::update(Real time)
   bool mesh_changed = false;
 
   build_efa_mesh();
+
+  store_crack_tip_origin_and_direction();
+
   if (mark_cut_edges(time))
   {
     mesh_changed = cut_mesh_with_efa();
+  }
+
+  if (mesh_changed)
+  {
+    build_efa_mesh();
+    store_crack_tip_origin_and_direction();
   }
 
   if (mesh_changed)
@@ -165,6 +254,7 @@ XFEM::update(Real time)
 //      _mesh2->prepare_for_use(true,true);
     }
   }
+  
   clearStateMarkedElems();
 
   return mesh_changed;
@@ -283,7 +373,7 @@ XFEM::mark_cut_edges(Real time)
   if (_mesh->mesh_dimension() == 2)
   {
     marked_sides = mark_cut_edges_by_geometry(time);
-    marked_sides |= mark_cut_edges_by_state();
+    marked_sides |= mark_cut_edges_by_state(time);
   }
   else if (_mesh->mesh_dimension() == 3)
   {
@@ -309,6 +399,7 @@ XFEM::mark_cut_edges_by_geometry(Real time)
     std::vector<std::vector<Point> > frag_edges;
     EFAelement * EFAelem = _efa_mesh.getElemByID(elem->id());
     EFAelement2D * CEMElem = dynamic_cast<EFAelement2D*>(EFAelem);
+
     if (!CEMElem)
     {
       libMesh::err << " ERROR: EFAelem is not of EFAelement2D type" << std::endl;
@@ -354,18 +445,142 @@ XFEM::mark_cut_edges_by_geometry(Real time)
   return marked_edges;
 }
 
+void
+XFEM::correct_crack_extension_angle(const Elem * elem, EFAelement2D * CEMElem, EFAedge * orig_edge, Point normal, Point crack_tip_origin, Point crack_tip_direction, Real & distance_keep, unsigned int & edge_id_keep, Point & normal_keep)
+{
+  std::vector<Point> edge_ends(2,Point(0.0,0.0,0.0));
+  Point edge1(0.0,0.0,0.0);
+  Point edge2(0.0,0.0,0.0);
+  Point left_angle(0.0,0.0,0.0);
+  Point right_angle(0.0,0.0,0.0);
+  Point left_angle_normal(0.0,0.0,0.0);
+  Point right_angle_normal(0.0,0.0,0.0);
+  Point crack_direction_normal(0.0,0.0,0.0);
+  Point edge1_to_tip(0.0,0.0,0.0);
+  Point edge2_to_tip(0.0,0.0,0.0);
+  Point edge1_to_tip_normal(0.0,0.0,0.0);
+  Point edge2_to_tip_normal(0.0,0.0,0.0);
+
+  Real cos_45 = std::cos(45.0/180.0*3.14159);
+  Real sin_45 = std::sin(45.0/180.0*3.14159);
+
+  left_angle(0) = cos_45*crack_tip_direction(0) - sin_45*crack_tip_direction(1);
+  left_angle(1) = sin_45*crack_tip_direction(0) + cos_45*crack_tip_direction(1);
+
+  right_angle(0) =  cos_45*crack_tip_direction(0) + sin_45*crack_tip_direction(1);
+  right_angle(1) = -sin_45*crack_tip_direction(0) + cos_45*crack_tip_direction(1);
+
+  left_angle_normal(0) = -left_angle(1);
+  left_angle_normal(1) = left_angle(0);
+
+  right_angle_normal(0) = -right_angle(1);
+  right_angle_normal(1) = right_angle(0);
+
+  crack_direction_normal(0) = -crack_tip_direction(1);
+  crack_direction_normal(1) = crack_tip_direction(0);
+
+  Real angle_min = 0.0;
+  Real distance = 0.0;
+  unsigned int nsides = CEMElem->num_edges();
+
+  for (unsigned int i = 0; i < nsides; ++i)
+  {
+    if (!orig_edge->isPartialOverlap(*CEMElem->get_edge(i)))
+    {
+      edge_ends[0] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(0),CEMElem,elem);
+      edge_ends[1] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(1),CEMElem,elem);
+
+      edge1_to_tip = (edge_ends[0]*0.95 + edge_ends[1]*0.05) - crack_tip_origin;
+      edge2_to_tip = (edge_ends[0]*0.05 + edge_ends[1]*0.95) - crack_tip_origin;
+
+      edge1_to_tip /= pow(edge1_to_tip.size_sq(),0.5);
+      edge2_to_tip /= pow(edge2_to_tip.size_sq(),0.5);
+
+      edge1_to_tip_normal(0) = -edge1_to_tip(1);
+      edge1_to_tip_normal(1) = edge1_to_tip(0);
+
+      edge2_to_tip_normal(0) = -edge2_to_tip(1);
+      edge2_to_tip_normal(1) = edge2_to_tip(0);
+
+      Real angle_edge1_normal = edge1_to_tip_normal * normal;
+      Real angle_edge2_normal = edge2_to_tip_normal * normal;
+
+      if(std::abs(angle_edge1_normal) > std::abs(angle_min) && (edge1_to_tip*crack_tip_direction) > std::cos(45.0/180.0*3.14159))
+      {
+        edge_id_keep = i;
+        distance_keep = 0.05;
+        normal_keep = edge1_to_tip_normal;
+        angle_min = angle_edge1_normal;
+      }
+      else if (std::abs(angle_edge2_normal) > std::abs(angle_min) && (edge2_to_tip*crack_tip_direction) > std::cos(45.0/180.0*3.14159))
+      {
+        edge_id_keep = i;
+        distance_keep = 0.95;
+        normal_keep = edge2_to_tip_normal;
+        angle_min = angle_edge2_normal;
+      }
+
+      if (init_crack_intersect_edge(crack_tip_origin,left_angle_normal,edge_ends[0],edge_ends[1],distance) &&  (!CEMElem->is_edge_phantom(i)) )
+      {
+        if(std::abs(left_angle_normal*normal) > std::abs(angle_min) && (edge1_to_tip*crack_tip_direction) > std::cos(45.0/180.0*3.14159))
+        {
+          edge_id_keep = i;
+          distance_keep = distance;
+          normal_keep = left_angle_normal;
+          angle_min = left_angle_normal*normal;
+        }
+      }
+      else if (init_crack_intersect_edge(crack_tip_origin,right_angle_normal,edge_ends[0],edge_ends[1],distance) && (!CEMElem->is_edge_phantom(i)))
+      {
+        if(std::abs(right_angle_normal*normal) > std::abs(angle_min) && (edge2_to_tip*crack_tip_direction) > std::cos(45.0/180.0*3.14159))
+        {
+          edge_id_keep = i;
+          distance_keep = distance;
+          normal_keep = right_angle_normal;
+          angle_min = right_angle_normal*normal;
+        }
+      }
+      else if (init_crack_intersect_edge(crack_tip_origin,crack_direction_normal,edge_ends[0],edge_ends[1],distance) && (!CEMElem->is_edge_phantom(i)))
+      {
+        if(std::abs(crack_direction_normal*normal) > std::abs(angle_min) && (crack_tip_direction*crack_tip_direction) > std::cos(45.0/180.0*3.14159))
+        {
+          edge_id_keep = i;
+          distance_keep = distance;
+          normal_keep = crack_direction_normal;
+          angle_min = crack_direction_normal*normal;
+        }
+      }
+    }
+  }
+
+  //avoid small volume fraction cut
+  if((distance_keep-0.05) < 0.0)
+  {
+    distance_keep = 0.05;
+  }
+  else if((distance_keep - 0.95) > 0.0)
+  {
+    distance_keep = 0.95;
+  }
+}
+
+
 bool
-XFEM::mark_cut_edges_by_state()
+XFEM::mark_cut_edges_by_state(Real time)
 {
   bool marked_edges = false;
-
   std::map<const Elem*, RealVectorValue>::iterator pmeit;
   for (pmeit = _state_marked_elems.begin(); pmeit != _state_marked_elems.end(); ++pmeit)
   {
     const Elem *elem = pmeit->first;
-    RealVectorValue &normal = pmeit->second;
+    RealVectorValue normal = pmeit->second;
     EFAelement * EFAelem = _efa_mesh.getElemByID(elem->id());
     EFAelement2D * CEMElem = dynamic_cast<EFAelement2D*>(EFAelem);
+
+    Real volfrac_elem = get_elem_phys_volfrac(elem);
+    if (volfrac_elem < 0.25)
+      continue;
+
     if (!CEMElem)
     {
       libMesh::err << " ERROR: EFAelem is not of EFAelement2D type" << std::endl;
@@ -383,6 +598,10 @@ XFEM::mark_cut_edges_by_state()
     EFAnode * orig_node = NULL;
     EFAedge * orig_edge = NULL;
 
+    //crack tip origin coordinates and direction
+    Point crack_tip_origin(0,0,0);
+    Point crack_tip_direction(0,0,0);
+
     if (is_elem_at_crack_tip(elem)) // crack tip element's crack intiation
     {
       orig_cut_side_id = CEMElem->get_tip_edge_id();
@@ -397,6 +616,16 @@ XFEM::mark_cut_edges_by_state()
       {
         libMesh::err << " ERROR: element "<<elem->id()<<" has no valid crack-tip edge" << std::endl;
         exit(1);
+      }
+
+      //obtain the crack tip origin coordinates and direction.
+      std::map<const Elem*, std::vector<Point> >::iterator ecodm = _elem_crack_origin_direction_map.find(elem);
+      if (ecodm != _elem_crack_origin_direction_map.end()){
+        crack_tip_origin = (ecodm->second)[0];
+        crack_tip_direction = (ecodm->second)[1];
+      }
+      else{
+        mooseError("element " << elem->id() << " cannot find its crack tip origin and direction.");
       }
     }
     else
@@ -416,6 +645,19 @@ XFEM::mark_cut_edges_by_state()
           _efa_mesh.addElemEdgeIntersection(elem->id(), orig_cut_side_id, orig_cut_distance);
           orig_edge = CEMElem->get_edge(orig_cut_side_id);
           orig_node = orig_edge->get_embedded_node(0);
+          //get a virtual crack tip direction
+          Point elem_center(0.0,0.0,0.0);
+          Point edge_center;
+          for (unsigned int i = 0; i < nsides; ++i){
+            elem_center += get_efa_node_coor(CEMElem->get_edge(i)->get_node(0),CEMElem,elem);
+            elem_center += get_efa_node_coor(CEMElem->get_edge(i)->get_node(1),CEMElem,elem);
+          }
+          elem_center /= nsides*2.0;
+          edge_center = get_efa_node_coor(orig_edge->get_node(0),CEMElem,elem) + get_efa_node_coor(orig_edge->get_node(1),CEMElem,elem);
+          edge_center /= 2.0;
+          crack_tip_origin = edge_center;
+          crack_tip_direction = elem_center - edge_center;
+          crack_tip_direction /= pow(crack_tip_direction.size_sq(),0.5);
         }
         else
           continue; // skip this elem if specified boundary edge is phantom
@@ -425,7 +667,7 @@ XFEM::mark_cut_edges_by_state()
         if (CEMElem->num_frags() != 1)
         {
           libMesh::err << " ERROR: element "<<elem->id()<<" flagged for a secondary crack, but has "
-                       <<CEMElem->num_frags()<<" fragments"<<std::endl;
+            <<CEMElem->num_frags()<<" fragments"<<std::endl;
           exit(1);
         }
         std::vector<unsigned int> interior_edge_id = CEMElem->get_fragment(0)->get_interior_edge_id();
@@ -437,14 +679,28 @@ XFEM::mark_cut_edges_by_state()
         _efa_mesh.addFragEdgeIntersection(elem->id(), orig_cut_side_id, orig_cut_distance);
         orig_edge = CEMElem->get_frag_edge(0,orig_cut_side_id);
         orig_node = orig_edge->get_embedded_node(0); // must be an interior embedded node
+        Point elem_center(0.0,0.0,0.0);
+        Point edge_center;
+        unsigned int nsides_frag = CEMElem->get_fragment(0)->num_edges();
+        for (unsigned int i = 0; i < nsides_frag; ++i){
+          elem_center += get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(0),CEMElem,elem);
+          elem_center += get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1),CEMElem,elem);
+        }
+        elem_center /= nsides_frag*2.0;
+        edge_center = get_efa_node_coor(orig_edge->get_node(0),CEMElem,elem) + get_efa_node_coor(orig_edge->get_node(1),CEMElem,elem);
+        edge_center /= 2.0;
+        crack_tip_origin = edge_center;
+        crack_tip_direction = elem_center - edge_center;
+        crack_tip_direction /= pow(crack_tip_direction.size_sq(),0.5);
       }
       else
       {
         libMesh::err << " ERROR: element " << elem->id()
-                     << " flagged for state-based growth, but has no edge intersections" << std::endl;
+          << " flagged for state-based growth, but has no edge intersections" << std::endl;
         exit(1);
       }
     }
+
     Point cut_origin(0.0,0.0,0.0);
     if (orig_node)
       cut_origin = get_efa_node_coor(orig_node, CEMElem, elem);// cutting plane origin's coords
@@ -456,25 +712,103 @@ XFEM::mark_cut_edges_by_state()
 
     // loop through element edges to add possible second cut points
     std::vector<Point> edge_ends(2,Point(0.0,0.0,0.0));
+    Point edge1(0.0,0.0,0.0);
+    Point edge2(0.0,0.0,0.0);
+    Point cut_edge_point(0.0,0.0,0.0);
+    bool find_compatible_direction = false;
+    unsigned int edge_id_keep = 0;
+    Real distance_keep = 0.0;
+    Point normal_keep(0.0,0.0,0.0);
+    Real distance = 0.0;
+    bool edge_cut = false;
+
     for (unsigned int i = 0; i < nsides; ++i)
     {
       if (!orig_edge->isPartialOverlap(*CEMElem->get_edge(i)))
       {
         edge_ends[0] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(0),CEMElem,elem);
         edge_ends[1] = get_efa_node_coor(CEMElem->get_edge(i)->get_node(1),CEMElem,elem);
-        Real distance = 0.0;
-        if (init_crack_intersect_edge(cut_origin,normal,edge_ends[0],edge_ends[1],distance) &&
-           (!CEMElem->is_edge_phantom(i)))
+        if((init_crack_intersect_edge(crack_tip_origin,normal,edge_ends[0],edge_ends[1],distance) && (!CEMElem->is_edge_phantom(i))))
         {
-          _efa_mesh.addElemEdgeIntersection(elem->id(), i, distance);
+          cut_edge_point = distance * edge_ends[1] + (1.0-distance) * edge_ends[0];
+          distance_keep = distance;
+          edge_id_keep = i;
+          normal_keep = normal;
+          edge_cut = true;
           break;
         }
       }
-    } // i
+    }
 
+    Point between_two_cuts = (cut_edge_point - crack_tip_origin);
+    between_two_cuts /= pow(between_two_cuts.size_sq(),0.5);
+    Real angle_between_two_cuts = between_two_cuts * crack_tip_direction;
+
+    if (angle_between_two_cuts > std::cos(45.0/180.0*3.14159)) //original cut direction is good
+      find_compatible_direction = true;
+
+    if (!find_compatible_direction && edge_cut)
+      correct_crack_extension_angle(elem, CEMElem, orig_edge, normal, crack_tip_origin, crack_tip_direction, distance_keep, edge_id_keep, normal_keep);
+
+    if (edge_cut)
+    {
+      if (!_use_crack_growth_increment)
+        _efa_mesh.addElemEdgeIntersection(elem->id(), edge_id_keep, distance_keep);
+      else
+      {
+        MeshBase::element_iterator       elem_it  = _mesh->elements_begin();
+        const MeshBase::element_iterator elem_end = _mesh->elements_end();
+
+        Point growth_direction(0.0,0.0,0.0);
+
+        growth_direction(0) = -normal_keep(1);
+        growth_direction(1) = normal_keep(0);
+
+        if (growth_direction * crack_tip_direction < 1.0e-10)
+          growth_direction *= (-1.0);
+
+        Real x0 = crack_tip_origin(0);
+        Real y0 = crack_tip_origin(1);
+        Real x1 = x0 + _crack_growth_increment * growth_direction(0);
+        Real y1 = y0 + _crack_growth_increment * growth_direction(1);
+
+        XFEM_geometric_cut * geometric_cut  = new XFEM_geometric_cut_2d( x0, y0, x1, y1, time*0.9, time*0.9);    
+
+        for ( ; elem_it != elem_end; ++elem_it)
+        {
+          const Elem *elem = *elem_it;
+          std::vector<cutEdge> elemCutEdges;
+          EFAelement * EFAelem = _efa_mesh.getElemByID(elem->id());
+          EFAelement2D * CEMElem = dynamic_cast<EFAelement2D*>(EFAelem);
+
+          if (!CEMElem)
+          {
+            libMesh::err << " ERROR: EFAelem is not of EFAelement2D type" << std::endl;
+            exit(1);
+          }
+
+          // continue if elem has been already cut twice - IMPORTANT
+          if (CEMElem->is_final_cut())
+            continue;
+
+          // mark cut edges for the element and its fragment
+          geometric_cut->cut_elem_by_geometry(elem, elemCutEdges, time);
+
+          for (unsigned int i = 0; i < elemCutEdges.size(); ++i) // mark element edges
+          {
+            if (!CEMElem->is_edge_phantom(elemCutEdges[i].host_side_id)) // must not be phantom edge
+            {
+              _efa_mesh.addElemEdgeIntersection(elem->id(), elemCutEdges[i].host_side_id,
+                                                elemCutEdges[i].distance);
+              marked_edges = true;
+            }
+          }
+        }
+      }
+    }
     // loop though framgent boundary edges to add possible second cut points
     // N.B. must do this after marking element edges
-    if (CEMElem->num_frags() > 0)
+    if (CEMElem->num_frags() > 0 && !edge_cut)
     {
       for (unsigned int i = 0; i < CEMElem->get_fragment(0)->num_edges(); ++i)
       {
@@ -482,11 +816,10 @@ XFEM::mark_cut_edges_by_state()
         {
           edge_ends[0] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(0),CEMElem,elem);
           edge_ends[1] = get_efa_node_coor(CEMElem->get_frag_edge(0,i)->get_node(1),CEMElem,elem);
-          Real distance = 0.0;
-          if (init_crack_intersect_edge(cut_origin,normal,edge_ends[0],edge_ends[1],distance) &&
-             (!CEMElem->get_fragment(0)->isSecondaryInteriorEdge(i)))
+          if (init_crack_intersect_edge(crack_tip_origin,normal,edge_ends[0],edge_ends[1],distance) &&
+              (!CEMElem->get_fragment(0)->isSecondaryInteriorEdge(i)))
           {
-            _efa_mesh.addFragEdgeIntersection(elem->id(), i, distance);
+            _efa_mesh.addFragEdgeIntersection(elem->id(), edge_id_keep, distance_keep);
             break;
           }
         }
@@ -494,7 +827,8 @@ XFEM::mark_cut_edges_by_state()
     }
 
     marked_edges = true;
-  } // loop over all state_marked_elems
+
+  }// loop over all state_marked_elems
 
   return marked_edges;
 }
@@ -653,8 +987,11 @@ XFEM::cut_mesh_with_efa()
 //    std::cout<<"BWS new node : "<<new_node->id() << " parent node: "<<parent_node->id()<<std::endl;
 //  }
 
+
   //Add new elements
   const std::vector<EFAelement*> NewElements = _efa_mesh.getChildElements();
+  
+
   for (unsigned int i = 0; i < NewElements.size(); ++i)
   {
     unsigned int parent_id = NewElements[i]->parent()->id();
@@ -716,6 +1053,15 @@ XFEM::cut_mesh_with_efa()
     //TODO: Also need to copy surface and neighbor material data
     if (parent_elem->processor_id() == _mesh->processor_id())
       _material_data[0]->copy(*libmesh_elem, *parent_elem, 0);
+
+    // The crack tip origin map is stored before cut, thus the elem should be updated with new element.
+    std::map<const Elem*, std::vector<Point> >::iterator mit = _elem_crack_origin_direction_map.find(parent_elem);
+    if (mit != _elem_crack_origin_direction_map.end())
+    { 
+      std::vector<Point> crack_data = _elem_crack_origin_direction_map[parent_elem];
+      _elem_crack_origin_direction_map.erase(mit);
+      _elem_crack_origin_direction_map[libmesh_elem] = crack_data;
+    }
 
     std::cout<<"XFEM added elem "<<libmesh_elem->id()+1<<std::endl;
 
@@ -834,9 +1180,8 @@ XFEM::cut_mesh_with_efa()
       else
         crack_tip_elem = _mesh->elem(eid);
       _crack_tip_elems.insert(crack_tip_elem);
-    }
+   }
   }
-
   //store virtual nodes
   //store cut edge info
   return mesh_changed;
@@ -1049,31 +1394,31 @@ XFEM::get_frag_faces(const Elem* elem, EFAelement3D* CEMElem, std::vector<std::v
   }
 }
 
-std::vector<Real>& 
+std::vector<Real>&
 XFEM::get_xfem_cut_data()
 {
   return _XFEM_cut_data;
 }
-  
-void 
+
+void
 XFEM::set_xfem_cut_data(std::vector<Real> &cut_data)
 {
   _XFEM_cut_data = cut_data;
 }
 
-std::string & 
+std::string &
 XFEM::get_xfem_cut_type()
 {
   return _XFEM_cut_type;
 }
 
-void 
+void
 XFEM::set_xfem_cut_type(std::string & cut_type)
 {
   _XFEM_cut_type = cut_type;
 }
 
-std::string & 
+std::string &
 XFEM::get_xfem_qrule()
 {
   return _XFEM_qrule;
@@ -1083,4 +1428,11 @@ void
 XFEM::set_xfem_qrule(std::string & xfem_qrule)
 {
   _XFEM_qrule = xfem_qrule;
+}
+
+void
+XFEM::set_crack_growth_method(bool use_crack_growth_increment, Real crack_growth_increment)
+{
+  _use_crack_growth_increment = use_crack_growth_increment;
+  _crack_growth_increment = crack_growth_increment;
 }

@@ -67,6 +67,10 @@ public:
   void case6Mesh(ElementFragmentAlgorithm &MyMesh);
   void CutElemMeshTest6a();
   void CutElemMeshTest6b();
+
+  void CutElemCheckNodes(std::map<unsigned int, EFAnode*> & nodes, std::vector<unsigned int> & gold);
+  void CutElemCheckElements(std::vector<EFAelement*> & elems, std::vector<unsigned int> & gold);
+  void CutElemCheckElements(std::set<EFAelement*> & elems, std::vector<unsigned int> & gold);
 };
 
 #endif  // CUTELEMMESHTEST_H

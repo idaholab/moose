@@ -106,7 +106,7 @@ public:
   EFAface* get_frag_face(unsigned int frag_id, unsigned int face_id) const;
   std::set<EFAnode*> getPhantomNodeOnFace(unsigned int face_id) const;
   bool getFragmentFaceID(unsigned int elem_face_id, unsigned int &frag_face_id) const;
-  bool getFragmentFaceEdgeID(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, 
+  bool getFragmentFaceEdgeID(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID,
                              unsigned int &FragFaceID, unsigned int &FragFaceEdgeID) const;
   bool is_real_edge_cut(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, double position) const;
   bool is_face_phantom(unsigned int face_id) const;

@@ -103,6 +103,8 @@ public:
   unsigned int num_edge_neighbors(unsigned int edge_id) const;
   EFAelement2D* get_edge_neighbor(unsigned int edge_id, unsigned int neighbor_id) const;
 
+  unsigned int get_crack_tip_split_element_id() const;
+
   bool frag_has_tip_edges() const;
   unsigned int get_tip_edge_id() const;
   EFAnode* get_tip_embedded() const;

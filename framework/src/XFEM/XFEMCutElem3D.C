@@ -186,6 +186,12 @@ XFEMCutElem3D::get_normal(unsigned int plane_id, MeshBase* displaced_mesh) const
 }
 
 void
+XFEMCutElem3D::get_crack_tip_origin_and_direction(unsigned tip_id, Point & origin, Point & direction) const
+{
+    //TODO: not implemented for 3D
+}
+
+void
 XFEMCutElem3D::get_frag_faces(std::vector<std::vector<Point> > &frag_faces, MeshBase* displaced_mesh) const
 {
   // TODO: need to finish this in the future

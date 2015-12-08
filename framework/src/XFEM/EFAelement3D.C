@@ -1317,7 +1317,7 @@ EFAelement3D::getFragmentFaceID(unsigned int elem_face_id, unsigned int &frag_fa
 }
 
 bool
-EFAelement3D::getFragmentFaceEdgeID(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, 
+EFAelement3D::getFragmentFaceEdgeID(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID,
                                     unsigned int &FragFaceID, unsigned int &FragFaceEdgeID) const
 {
   // Purpose: given an edge of an elem face, find which frag face's edge it contains
