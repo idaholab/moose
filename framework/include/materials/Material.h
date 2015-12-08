@@ -248,10 +248,11 @@ protected:
 
 
 private:
-  /**
-   * Small helper function to call storeMatPropName
-   */
+  /// Small helper function to call storeMatPropName
   void registerPropName(std::string prop_name, bool is_get, Prop_State state);
+
+  /// Check and throw an error if the execution has progerssed past the construction stage
+  void checkExecutionStage();
 
   bool _has_stateful_property;
 };
@@ -305,6 +306,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyByName(const std::string & prop_name)
 {
+  checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
@@ -361,6 +363,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getZeroMaterialProperty(const std::string & prop_name)
 {
+  checkExecutionStage();
   MaterialProperty<T> & preload_with_zero = _material_data->getProperty<T>(prop_name);
 
   _requested_props.insert(prop_name);

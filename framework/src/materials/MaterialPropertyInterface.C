@@ -235,3 +235,10 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name)
 
   return *discrete;
 }
+
+void
+MaterialPropertyInterface::checkExecutionStage()
+{
+  if (_mi_feproblem.startedInitialSetup())
+    mooseError("Material properties must be retrieved during object construction to ensure correct problem integrity validation.");
+}

@@ -224,10 +224,11 @@ protected:
   std::vector<MooseSharedPointer<MaterialProperty<Real> > > _default_real_properties;
 
 private:
-  /**
-   * An initialization routine needed for dual constructors
-   */
+  /// An initialization routine needed for dual constructors
   void initializeMaterialPropertyInterface(const InputParameters & parameters);
+
+  /// Check and throw an error if the execution has progerssed past the construction stage
+  void checkExecutionStage();
 
   /// Empty sets for referencing when ids is not included
   const std::set<SubdomainID> _empty_block_ids;
@@ -325,6 +326,7 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name)
 {
+  checkExecutionStage();
   checkMaterialProperty(name);
 
   if (!_stateful_allowed && _material_data->getMaterialPropertyStorage().hasStatefulProperties())
