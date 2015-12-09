@@ -29,8 +29,8 @@ InputParameters validParams<ICEUpdater>()
   InputParameters params = validParams<AdvancedOutput<Output> >();
   params += AdvancedOutput<Output>::enableOutputTypes("postprocessor");
 
-  // Get an MooseEnum of the available 'execute_on' options
-  MooseEnum networkingTools("asio=0x01 curl=0x02");
+  // Get an MooseEnum of the available networkingTools
+  MooseEnum networkingTools("asio=0 curl=1");
 
   params.addParam<MooseEnum>("networkingTool", networkingTools, "The back-end networking tool to use - could be asio, curl, etc...");
   params.addRequiredParam<std::string>("item_id", "The currently running MOOSE Item Id.");
