@@ -67,10 +67,10 @@
 
 [Controls]
   [./constraints]
-    type = DisableObjects
-    disable =    'lower complete'
-    start_time = '0     1.95'
-    end_time   = '2     4'
+    type = TimePeriod
+    disable_objects = 'lower complete'
+    start_time      = '0     1.95'
+    end_time        = '2     4'
     execute_on = 'initial timestep_end'
   [../]
 []

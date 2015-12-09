@@ -10,20 +10,6 @@
   [../]
 []
 
-[AuxVariables]
-  [./aux0]
-  [../]
-  [./aux1]
-  [../]
-[]
-
-[Functions]
-  [./func]
-    type = ParsedFunction
-    value = t*x*y
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = CoefDiffusion
@@ -33,19 +19,6 @@
   [./time]
     type = TimeDerivative
     variable = u
-  [../]
-[]
-
-[AuxKernels]
-  [./aux0]
-    type = FunctionAux
-    variable = aux0
-    function = func
-  [../]
-  [./aux1]
-    type = FunctionAux
-    variable = aux1
-    function = func
   [../]
 []
 
@@ -62,11 +35,17 @@
     boundary = right
     value = 1
   [../]
+  [./right2]
+    type = FunctionDirichletBC
+    variable = u
+    boundary = right
+    function = (y*(t-1))+1
+  [../]
 []
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 20
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -78,11 +57,18 @@
 []
 
 [Controls]
-  [./damping_control]
-    type = DisableObjects
-    disable    = 'AuxKernels::aux0 AuxKernels::aux1'
-    start_time = '0.25             0.55'
-    end_time   = '0.65             0.75'
+  [./period0]
+    type = TimePeriod
+    disable_objects = 'BCs::right2'
+    start_time = '0'
+    end_time = '0.95'
+    execute_on = 'initial timestep_begin'
+  [../]
+
+  [./period2]
+    type = TimePeriod
+    disable_objects = 'BCs::right'
+    start_time = '1'
     execute_on = 'initial timestep_begin'
   [../]
 []

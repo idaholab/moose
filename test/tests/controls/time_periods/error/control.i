@@ -38,7 +38,9 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 10
+  dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -53,14 +55,14 @@
 []
 
 [Outputs]
-  exodus = true
 []
 
 [Controls]
   [./damping_control]
-    type = DisableObjects
-    disable = 'u_damp'
+    type = TimePeriod
+    disable_objects = 'u_damp'
     start_time = 0.25
+    end_time = 0.55
     execute_on = 'initial timestep_begin'
   [../]
 []

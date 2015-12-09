@@ -39,34 +39,36 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 5
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Outputs]
-  exodus = true
-[]
-
-[MultiApps]
-  [./sub]
-    type = TransientMultiApp
-    app_type = MooseTestApp
-    positions = '1. 0. 0.'
-    input_files = sub.i
-    execute_on = 'initial timestep_end'
-    output_in_position = true
+[Postprocessors]
+  [./nlin]
+    type = NumNonlinearIterations
   [../]
 []
 
+[Dampers]
+  [./u_damp]
+    type = ConstantDamper
+    variable = u
+    damping = 0.9
+  [../]
+[]
+
+[Outputs]
+  csv = true
+[]
+
 [Controls]
-  [./multiapp]
-    type = DisableObjects
-    disable = 'MultiApps::sub'
-    start_time = '0'
-    end_time = '0.25'
+  [./damping_control]
+    type = TimePeriod
+    disable_objects = 'u_damp'
+    start_time = 0.25
     execute_on = 'initial timestep_begin'
   [../]
 []
