@@ -15,6 +15,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 template<>
 InputParameters validParams<ExampleApp>()

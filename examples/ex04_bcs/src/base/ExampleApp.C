@@ -15,6 +15,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 // Example 4 Includes
 #include "ExampleConvection.h"

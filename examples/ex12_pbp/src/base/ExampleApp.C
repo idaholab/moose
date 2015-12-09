@@ -13,6 +13,7 @@
 /****************************************************************/
 #include "ExampleApp.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 template<>
 InputParameters validParams<ExampleApp>()

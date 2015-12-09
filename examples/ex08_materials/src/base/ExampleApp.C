@@ -15,6 +15,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 // Example 8 Includes
 #include "ExampleDiffusion.h"
