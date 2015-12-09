@@ -1,4 +1,5 @@
 #include "PolycrystalVoronoiVoidIC.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<PolycrystalVoronoiVoidIC>()
@@ -133,8 +134,8 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
       {
         Real min_rij_1,  min_rij_2, rij, rij_diff_tol;
 
-        min_rij_1 = _range.size();
-        min_rij_2 = _range.size();
+        min_rij_1 = _range.norm();
+        min_rij_2 = _range.norm();
 
         rij_diff_tol = 0.1 * _radius;
 
@@ -222,7 +223,7 @@ PolycrystalVoronoiVoidIC::grain_value_calc(const Point & p)
 {
   Real val = 0.0;
 
-  unsigned int min_index = PolycrystalICTools::assignPointToGrain(p, _centerpoints, _mesh, _var, _range.size());
+  unsigned int min_index = PolycrystalICTools::assignPointToGrain(p, _centerpoints, _mesh, _var, _range.norm());
 
   //If the current order parameter index (_op_index) is equal to the min_index, set the value to 1.0
   if (_assigned_op[min_index] == _op_index)
