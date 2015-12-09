@@ -12,23 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DISABLEOBJECTS_H
-#define DISABLEOBJECTS_H
+#ifndef TIMEPERIOD_H
+#define TIMEPERIOD_H
 
 // MOOSE includes
 #include "Control.h"
 
 // Forward declarations
-class DisableObjects;
+class TimePeriod;
 class Function;
 
 template<>
-InputParameters validParams<DisableObjects>();
+InputParameters validParams<TimePeriod>();
 
 /**
  * A basic control for disabling objects for a portion of the simulation.
  */
-class DisableObjects : public Control
+class TimePeriod : public Control
 {
 public:
 
@@ -36,7 +36,7 @@ public:
    * Class constructor
    * @param parameters Input parameters for this Control object
    */
-  DisableObjects(const InputParameters & parameters);
+  TimePeriod(const InputParameters & parameters);
 
   /**
    * Evaluate the function and set the parameter value
@@ -45,14 +45,17 @@ public:
 
 private:
 
+  /// List of objects to enable
+  const std::vector<std::string> & _enable;
+
   /// List of objects to disable
   const std::vector<std::string> & _disable;
 
-  /// The time to begin disabling the supplied object tags (defaults to the simulation start time)
+  /// The time to begin enabling the supplied object tags (defaults to the simulation start time)
   std::vector<Real> _start_time;
 
-  /// The time to stop disabling the supplied object tags (defaults to the end of the simulation)
+  /// The time to stop enabling the supplied object tags (defaults to the end of the simulation)
   std::vector<Real> _end_time;
 };
 
-#endif // DISABLEOBJECTS_H
+#endif // TIMEPERIOD_H

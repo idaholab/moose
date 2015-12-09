@@ -13,29 +13,35 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "DisableObjects.h"
+#include "TimePeriod.h"
 #include "Function.h"
 #include "Transient.h"
 #include "MooseUtils.h"
 
 template<>
-InputParameters validParams<DisableObjects>()
+InputParameters validParams<TimePeriod>()
 {
   InputParameters params = validParams<Control>();
-  params.addRequiredParam<std::vector<std::string> >("disable", "A list of object tags to disable.");
-  params.addParam<std::vector<Real> >("start_time", "The time at which the objects are to be disabled.");
-  params.addParam<std::vector<Real> >("end_time", "The time at which the objects are to be re-enabled.");
+  params.addParam<std::vector<std::string> >("disable_objects", std::vector<std::string>(), "A list of object tags to disable.");
+  params.addParam<std::vector<std::string> >("enable_objects", std::vector<std::string>(), "A list of object tags to enable.");
+  params.addParam<std::vector<Real> >("start_time", "The time at which the objects are to be enabled/disabled.");
+  params.addParam<std::vector<Real> >("end_time", "The time at which the objects are to be enable/disabled.");
   return params;
 }
 
 
-DisableObjects::DisableObjects(const InputParameters & parameters) :
+TimePeriod::TimePeriod(const InputParameters & parameters) :
     Control(parameters),
-    _disable(getParam<std::vector<std::string> >("disable"))
+    _enable(getParam<std::vector<std::string> >("enable_objects")),
+    _disable(getParam<std::vector<std::string> >("disable_objects"))
 {
   // Error if not a transient problem
   if (!_fe_problem.isTransient())
-    mooseError("DisableObjects objects only operate on transient problems.");
+    mooseError("TimePeriod objects only operate on transient problems.");
+
+  // Error if enable and disable lists are both empty
+  if (_enable.empty() && _disable.empty())
+    mooseError("Either or both of the 'enable_objects' and 'disable_objects' parameters must be set.");
 
   // Set start time
   if (isParamValid("start_time"))
@@ -54,27 +60,39 @@ DisableObjects::DisableObjects(const InputParameters & parameters) :
     mooseError("The end time and start time vectors must be the same length.");
 
   // Resize the start/end times if only a single value given
-  if (_end_time.size() == 1 && _disable.size() > 1)
+  if (_end_time.size() == 1 && _disable.size() > 1 && _enable.size() )
   {
-    _end_time = std::vector<Real>(_disable.size(), _end_time[0]);
-    _start_time = std::vector<Real>(_disable.size(), _start_time[0]);
+    unsigned int size = std::max(_disable.size(), _enable.size());
+    _end_time = std::vector<Real>(size, _end_time[0]);
+    _start_time = std::vector<Real>(size, _start_time[0]);
   }
-  else if (_end_time.size() != _disable.size())
-    mooseError("The start/end time input must be a scalar or the same length as the disable list.");
+  else if (_end_time.size() != _disable.size() && _end_time.size() != _enable.size())
+    mooseError("The start/end time input must be a scalar or the same length as the enable/disable lists.");
 }
 
 
 void
-DisableObjects::execute()
+TimePeriod::execute()
 {
+  // ENABLE
+  for (unsigned int i = 0; i < _enable.size(); ++i)
+  {
+    // If the current time falls between the start and end time, ENABLE the object (_t >= _start_time and _t <= _end_time)
+    if (MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[i]) && MooseUtils::absoluteFuzzyLessEqual(_t, _end_time[i]))
+      setControllableValueByName<bool>(_enable[i], std::string("enable"), true);
+
+    else
+      setControllableValueByName<bool>(_enable[i], std::string("enable"), false);
+  }
+
+  // DISABLE
   for (unsigned int i = 0; i < _disable.size(); ++i)
   {
-    // If the current time falls between the start and end time, disable the object (_t >= _start_time and _t <= _end_time)
+    // If the current time falls between the start and end time, DISABLE the object (_t >= _start_time and _t <= _end_time)
     if (MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[i]) && MooseUtils::absoluteFuzzyLessEqual(_t, _end_time[i]))
       setControllableValueByName<bool>(_disable[i], std::string("enable"), false);
 
     else
       setControllableValueByName<bool>(_disable[i], std::string("enable"), true);
-
   }
 }

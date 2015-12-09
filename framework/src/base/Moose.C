@@ -408,7 +408,7 @@
 
 // Controls
 #include "RealFunctionControl.h"
-#include "DisableObjects.h"
+#include "TimePeriod.h"
 
 // Partitioner
 #include "LibmeshPartitioner.h"
@@ -754,7 +754,7 @@ registerObjects(Factory & factory)
 
   // Controls
   registerControl(RealFunctionControl);
-  registerControl(DisableObjects);
+  registerControl(TimePeriod);
 
   // Partitioner
   registerPartitioner(LibmeshPartitioner);

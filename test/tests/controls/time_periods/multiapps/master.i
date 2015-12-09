@@ -30,22 +30,16 @@
     value = 0
   [../]
   [./right]
-    type = NeumannBC
+    type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./right2]
-    type = FunctionNeumannBC
-    variable = u
-    boundary = right
-    function = (y*(t-1))+1
   [../]
 []
 
 [Executioner]
   type = Transient
-  num_steps = 20
+  num_steps = 10
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -56,19 +50,23 @@
   exodus = true
 []
 
-[Controls]
-  [./period0]
-    type = DisableObjects
-    disable    = 'BCs::right2'
-    start_time = '0'
-    end_time   = '0.95'
-    execute_on = 'initial timestep_begin'
+[MultiApps]
+  [./sub]
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    positions = '1. 0. 0.'
+    input_files = sub.i
+    execute_on = 'initial timestep_end'
+    output_in_position = true
   [../]
+[]
 
-  [./period2]
-    type = DisableObjects
-    disable    = 'BCs::right'
-    start_time = '1'
+[Controls]
+  [./multiapp]
+    type = TimePeriod
+    disable_objects = 'MultiApps::sub'
+    start_time = '0'
+    end_time = '0.25'
     execute_on = 'initial timestep_begin'
   [../]
 []
