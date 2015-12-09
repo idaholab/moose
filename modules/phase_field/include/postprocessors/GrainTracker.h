@@ -106,8 +106,6 @@ protected:
    */
   virtual void calculateBubbleVolumes();
 
-  virtual unsigned long calculateUsage() const;
-
   /*************************************************
    *************** Data Structures *****************
    ************************************************/

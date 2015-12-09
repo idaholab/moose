@@ -83,17 +83,17 @@ public:
   };
 
 
-  class BubbleData
+  class FeatureData
   {
   public:
-    BubbleData() :
+    FeatureData() :
         _var_idx(std::numeric_limits<unsigned int>::max()),
         _intersects_boundary(false),
         _min_feature_id(DofObject::invalid_id)
     {}
 
-    BubbleData(std::set<dof_id_type> & entity_ids, unsigned int var_idx) :
-        _entity_ids(entity_ids),
+    FeatureData(std::set<dof_id_type> & ghosted_ids, unsigned int var_idx) :
+        _ghosted_ids(ghosted_ids),
         _var_idx(var_idx),
         _intersects_boundary(false),
         _min_feature_id(DofObject::invalid_id)
@@ -102,7 +102,8 @@ public:
     void updateBBoxMin(const Point & min);
     void updateBBoxMax(const Point & max);
 
-    std::set<dof_id_type> _entity_ids;
+    std::set<dof_id_type> _ghosted_ids;
+    std::set<dof_id_type> _interior_ids;
     std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
     bool _intersects_boundary;
@@ -126,33 +127,47 @@ protected:
   void flood(const DofObject *dof_object, int current_idx, int live_region);
 
   /**
-   * These routines packs/unpack the _bubble_map data into a structure suitable for parallel
+   * This routine uses the local flooded data to build up the local feature data structures (_feature_sets).
+   * This routine does not perform any communication so the _feature_sets data structure will only contain
+   * information from the local processor after calling this routine. Any existing data in the _feature_sets
+   * structure is destroyed by calling this routine.
+   *
+   *
+   * _feature_sets layout:
+   * The outer vector is sized to one when _single_map_mode == true, otherwise it is sized for the number
+   * of coupled variables. The inner list represents the flooded regions (local only after this call
+   * but fully populated after parallel communication and stitching).
+   */
+  void populateDataStructuresFromFloodData();
+
+  /**
+   * These routines packs/unpack the _feature_map data into a structure suitable for parallel
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void pack(std::string * packed_buffer);
-  void unpack(std::list<std::string *> & packed_buffer_list);
+  void serialize(std::string * serialized_buffer);
+  void deserialize(std::vector<std::string *> & serialized_buffers);
 
   /**
-   * This routine merges the data in _bubble_sets from separate threads/processes to resolve
+   * This routine merges the data in _feature_sets from separate threads/processes to resolve
    * any bubbles that were counted as unique by multiple processors.
    */
   void mergeSets(bool use_periodic_boundary_info);
 
   /**
-   * This routine broadcasts a std::list<BubbleData> to other ranks. It includes both the
+   * This routine broadcasts a std::list<FeatureData> to other ranks. It includes both the
    * serialization and de-serialization routines.
    * @param list the list to broadcast
    * @param owner_id the rank initiating the broadcast
-   * @param map_num the number in the _bubble_sets datastructure that will be replaced by the results of the broadcast
+   * @param map_num the number in the _feature_sets datastructure that will be replaced by the results of the broadcast
    */
-  void communicateOneList(std::list<BubbleData> & list, unsigned int owner_id, unsigned int map_num);
+  void communicateOneList(std::list<FeatureData> & list, unsigned int owner_id, unsigned int map_num);
 
   /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
-  void appendPeriodicNeighborNodes(BubbleData & data) const;
+  void appendPeriodicNeighborNodes(FeatureData & data) const;
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining
@@ -191,14 +206,6 @@ protected:
       }
       return false;
     }
-
-  // Attempt to make a lower bound computation of memory consumed by this object
-  virtual unsigned long calculateUsage() const;
-
-  template<typename T>
-  static unsigned long bytesHelper(T container);
-
-  void formatBytesUsed() const;
 
   /*************************************************
    *************** Data Structures *****************
@@ -247,17 +254,17 @@ protected:
   const unsigned int _maps_size;
 
   /**
-   * This variable keeps track of which nodes have been visited during execution.  We don't use the _bubble_map
+   * This variable keeps track of which nodes have been visited during execution.  We don't use the _feature_map
    * for this since we don't want to explicitly store data for all the unmarked nodes in a serialized datastructures.
    * This keeps our overhead down since this variable never needs to be communicated.
    */
   std::vector<std::map<dof_id_type, bool> > _entities_visited;
 
   /**
-   * The bubble maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
+   * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
    * of them so we can create one per variable if that level of detail is desired.
    */
-  std::vector<std::map<dof_id_type, int> > _bubble_maps;
+  std::vector<std::map<dof_id_type, int> > _feature_maps;
 
   /**
    * This map keeps track of which variables own which nodes.  We need a vector of them for multimap mode where
@@ -279,10 +286,17 @@ protected:
   std::vector<unsigned int> _region_offsets;
 
   /**
-   * The data structure used to join partial bubbles between processes and/or threads.  We may have a list of BubbleData
-   * per variable in multi-map mode
+   * The data structure used to hold the feature sets.
+   * The outer vector is index by map. The inner vector is index by feature id.
    */
-  std::vector<std::list<BubbleData> > _bubble_sets;
+  std::vector<std::vector<FeatureData> > _feature_sets;
+
+  /**
+   * The data structure used to hold partial and communicated feature data.
+   * The data structure mirrors that found in _feature_sets, but contains
+   * one additional vector indexed by processor id
+   */
+  std::vector<std::vector<std::vector<FeatureData> > > _partial_feature_sets;
 
   /// The scalar counters used during the marking stage of the flood algorithm. Up to one per variable
   std::vector<unsigned int> _region_counts;
@@ -311,11 +325,7 @@ protected:
    * The vector hold the volume of each flooded bubble.  Note: this vector is only populated
    * when requested by passing a file name to write this information to.
    */
-  std::vector<Real> _all_bubble_volumes;
-
-  // Memory Usage
-  const bool _track_memory;
-  unsigned long _bytes_used;
+  std::vector<Real> _all_feature_volumes;
 
   // Dummy value for unimplemented method
   static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
@@ -340,15 +350,6 @@ protected:
    */
   bool _is_elemental;
 };
-
-template<typename T>
-unsigned long
-FeatureFloodCount::bytesHelper(T container)
-{
-  typename T::value_type t;
-  return sizeof(t) * container.size();
-}
-
 
 template <class T>
 void
