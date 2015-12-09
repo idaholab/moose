@@ -45,5 +45,5 @@ Control::Control(const InputParameters & parameters) :
 MultiMooseEnum
 Control::getExecuteOptions()
 {
-  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 custom=0x100 subdomain=0x200", "timestep_end");
+  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 custom=0x100 subdomain=0x200", "initial timestep_end");
 }
