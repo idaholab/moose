@@ -40,6 +40,7 @@ InputParameters validParams<KernelBase>()
 
   params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
 
+  params.declareControllable("enable");
   return params;
 }
 
@@ -129,4 +130,3 @@ KernelBase::subProblem()
 {
   return _subproblem;
 }
-
