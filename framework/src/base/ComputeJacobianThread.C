@@ -59,7 +59,7 @@ ComputeJacobianThread::computeJacobian()
     for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
     {
       MooseSharedPointer<KernelBase> kernel = *it;
-      if (kernel->isImplicit() && kernel->isActive())
+      if (kernel->isImplicit())
       {
         kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
         kernel->computeJacobian();
@@ -75,7 +75,7 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
   {
     MooseSharedPointer<IntegratedBC> bc = *it;
-    if (bc->shouldApply() && bc->isImplicit() && bc->isActive())
+    if (bc->shouldApply() && bc->isImplicit())
     {
       bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
       bc->computeJacobian();

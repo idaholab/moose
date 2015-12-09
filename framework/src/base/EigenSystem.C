@@ -222,12 +222,14 @@ void
 EigenSystem::eigenKernelOnOld()
 {
   _active_on_old = true;
+  _fe_problem.updateActiveObjects();   // update warehouse active objects
 }
 
 void
 EigenSystem::eigenKernelOnCurrent()
 {
   _active_on_old = false;
+  _fe_problem.updateActiveObjects();   // update warehouse active objects
 }
 
 bool

@@ -121,8 +121,7 @@ ComputeResidualThread::onElement(const Elem *elem)
   {
     const std::vector<MooseSharedPointer<KernelBase> > & kernels = storage->getActiveBlockObjects(_subdomain, _tid);
     for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-      if ((*it)->isActive())
-        (*it)->computeResidual();
+      (*it)->computeResidual();
   }
 
   _fe_problem.swapBackMaterials(_tid);
@@ -149,7 +148,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 
     for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
     {
-      if ((*it)->shouldApply() && (*it)->isActive())
+      if ((*it)->shouldApply())
         (*it)->computeResidual();
     }
     _fe_problem.swapBackMaterialsFace(_tid);

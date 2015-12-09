@@ -1338,10 +1338,8 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
         {
           const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
           for (std::vector<MooseSharedPointer<NodalBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
-          {
-            if ((*it)->shouldApply() && (*it)->isActive())
+            if ((*it)->shouldApply())
               (*it)->computeResidual(residual);
-          }
         }
       }
     }
@@ -2107,7 +2105,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
               for (std::vector<MooseSharedPointer<NodalBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
               {
                 MooseSharedPointer<NodalBC> bc = *it;
-                if (bc->variable().number() == ivar && bc->shouldApply() && bc->isActive())
+                if (bc->variable().number() == ivar && bc->shouldApply())
                 {
                   //The first zero is for the variable number... there is only one variable in each mini-system
                   //The second zero only works with Lagrange elements!
@@ -2144,7 +2142,6 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
   _kernels.updateActive(tid);
-
   if (tid == 0)
   {
     _nodal_bcs.updateActive();
