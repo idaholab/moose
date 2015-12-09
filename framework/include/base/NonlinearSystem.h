@@ -17,13 +17,11 @@
 
 #include "SystemBase.h"
 #include "KernelWarehouse.h"
-#include "BCWarehouse.h"
 #include "DiracKernelWarehouse.h"
-#include "DGKernelWarehouse.h"
-#include "DamperWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
+#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -35,6 +33,11 @@ class MoosePreconditioner;
 class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
+class Damper;
+class IntegratedBC;
+class NodalBC;
+class PresetNodalBC;
+class DGKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -72,8 +75,6 @@ public:
 
   // Setup Functions ////
   virtual void initialSetup();
-  virtual void initialSetupBCs();
-  virtual void initialSetupKernels();
   virtual void timestepSetup();
 
   void setupFiniteDifferencedPreconditioner();
@@ -274,6 +275,12 @@ public:
 
   virtual void setSolution(const NumericVector<Number> & soln);
 
+
+  /**
+   * Update active objects of Warehouses owned by NonlinearSystem
+   */
+  void updateActive(THREAD_ID tid);
+
   /**
    * Set transient term used by residual and Jacobian evaluation.
    * @param udot transient term
@@ -424,7 +431,6 @@ public:
    * passed in subdomain_id and thread
    */
   void updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid);
-  void updateActiveDGKernels(Real t, Real dt, THREAD_ID tid);
   //@}
 
   //@{
@@ -432,11 +438,13 @@ public:
    * Access functions to Warehouses from outside NonlinearSystem
    */
   const KernelWarehouse & getKernelWarehouse(THREAD_ID tid);
-  const DGKernelWarehouse & getDGKernelWarehouse(THREAD_ID tid);
-  const BCWarehouse & getBCWarehouse(THREAD_ID tid);
+  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
-  const DamperWarehouse & getDamperWarehouse(THREAD_ID tid);
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
+  const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
+  const MooseObjectWarehouse<NodalBC> & getNodalBCWarehouse() { return _nodal_bcs; }
+  const MooseObjectWarehouse<PresetNodalBC> & getPresetNodalBCWarehouse() { return _preset_nodal_bcs; }
+  const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
   //@}
 
   /**
@@ -512,23 +520,31 @@ protected:
   // holders
   /// Kernel storage for each thread
   std::vector<KernelWarehouse> _kernels;
-  /// BC storage for each thread
-  std::vector<BCWarehouse> _bcs;
+
+  ///@}
+  /// BoundaryCondition Warhouses
+  MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
+  MooseObjectWarehouse<NodalBC> _nodal_bcs;
+  MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
+  ///@}
+
   /// Dirac Kernel storage for each thread
   std::vector<DiracKernelWarehouse> _dirac_kernels;
-  /// DG Kernel storage for each thread
-  std::vector<DGKernelWarehouse> _dg_kernels;
+
+  /// Threaded DGKernel storage
+  MooseObjectWarehouse<DGKernel> _dg_kernels;
+
   /// Dampers for each thread
-  std::vector<DamperWarehouse> _dampers;
+  MooseObjectWarehouse<Damper> _dampers;
   /// NodalKernels for each thread
   std::vector<NodalKernelWarehouse> _nodal_kernels;
 
   /// Decomposition splits
   SplitWarehouse _splits;
 
-public:
+//public:
   /// Constraints for each thread
-  std::vector<ConstraintWarehouse> _constraints;
+  ConstraintWarehouse _constraints;
 
 
 protected:

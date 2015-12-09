@@ -53,6 +53,9 @@ public:
    */
   Real computeDamping();
 
+  void printTime();
+
+
 protected:
   /**
    * This MUST be overridden by a child damper.

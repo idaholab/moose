@@ -71,6 +71,7 @@
 #include "MultiMooseEnum.h"
 #include "Predictor.h"
 #include "Assembly.h"
+#include "ControlWarehouse.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -140,6 +141,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _has_time_integrator(false),
     _has_exception(false),
     _current_execute_on_flag(EXEC_NONE),
+    _control_warehouse(new ControlWarehouse()),
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
@@ -465,8 +467,6 @@ void FEProblem::initialSetup()
     _has_initialized_stateful = true;
 
   // Call initialSetup on the nonlinear system
-  _nl.initialSetupBCs();
-  _nl.initialSetupKernels();
   _nl.initialSetup();
 
   // Auxilary variable initialSetup calls
@@ -515,12 +515,7 @@ void FEProblem::initialSetup()
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been restored
 
   // Call initialSetup on the MultiApps
-  _multi_apps(EXEC_LINEAR)[0].initialSetup();
-  _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
-  _multi_apps(EXEC_TIMESTEP_END)[0].initialSetup();
-  _multi_apps(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
-  _multi_apps(EXEC_INITIAL)[0].initialSetup();
-  _multi_apps(EXEC_CUSTOM)[0].initialSetup();
+  _multi_apps.initialSetup();
 
   // Call initialSetup on the transfers
   _transfers(EXEC_LINEAR)[0].initialSetup();
@@ -599,6 +594,9 @@ void FEProblem::initialSetup()
                                      _material_props, _bnd_material_props, _materials, _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
+
+  // Control Logic
+  executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -1168,6 +1166,7 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
     // FIXME: cannot do this b/c variables are not computed => potential NaNs will pop-up
 //    reinitMaterials(subdomain, tid);
   }
+
 
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
@@ -2182,8 +2181,7 @@ FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
 void
 FEProblem::parentOutputPositionChanged()
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    _multi_apps(Moose::exec_types[i])[0].parentOutputPositionChanged();
+  _multi_apps.parentOutputPositionChanged();
 }
 
 void
@@ -2279,6 +2277,11 @@ FEProblem::execute(const ExecFlagType & exec_type)
   computeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
   Moose::perf_log.pop("computeUserObjects()", "Setup");
 
+  // Controls
+  Moose::perf_log.push("computeControls()", "Setup");
+  executeControls(exec_type);
+  Moose::perf_log.pop("computeControls()", "Setup");
+
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
 }
@@ -2292,7 +2295,7 @@ FEProblem::computeAuxiliaryKernels(const ExecFlagType & type)
 void
 FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group)
 {
-  // Perform Residual/Jacobian setups
+  // Perform Residual/Jacobain setups
   switch (type)
   {
   case EXEC_LINEAR:
@@ -2621,6 +2624,27 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
 }
 
 void
+FEProblem::executeControls(const ExecFlagType & exec_type)
+{
+  _control_warehouse->setup(exec_type);
+  _control_warehouse->execute(exec_type);
+}
+
+void
+FEProblem::updateActiveObjects()
+{
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    _nl.updateActive(tid);
+    _aux.updateActive(tid);
+  }
+
+  _control_warehouse->updateActive();
+  _multi_apps.updateActive();
+}
+
+void
 FEProblem::reinitBecauseOfGhostingOrNewGeomObjects()
 {
   // Need to see if _any_ processor has ghosted elems or geometry objects.
@@ -2732,45 +2756,30 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-  MooseSharedPointer<MooseObject> mo = _factory.create(multi_app_name, name, parameters);
-
-  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(mo);
-  if (multi_app.get() == NULL)
+  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(_factory.create(multi_app_name, name, parameters));
+  if (!multi_app)
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
-  const std::vector<ExecFlagType> & exec_flags = multi_app->execFlags();
-  for (unsigned int i=0; i<exec_flags.size(); ++i)
-    _multi_apps(exec_flags[i])[0].addMultiApp(multi_app);
-
-  // TODO: Is this really the right spot to init a multiapp?
-//  multi_app->init();
+  _multi_apps.addObject(multi_app);
 }
 
 bool
 FEProblem::hasMultiApp(const std::string & multi_app_name)
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
-      return true;
-
-  return false;
+  return _multi_apps.getStorage().hasActiveObject(multi_app_name);
 }
 
 
-MultiApp *
+MooseSharedPointer<MultiApp>
 FEProblem::getMultiApp(const std::string & multi_app_name)
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
-      return _multi_apps(Moose::exec_types[i])[0].getMultiApp(multi_app_name);
-
-  mooseError("MultiApp "<<multi_app_name<<" not found!");
+  return _multi_apps.getStorage().getActiveObject(multi_app_name);
 }
 
 bool
 FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
   for (unsigned int i=0; i<multi_apps.size(); i++)
@@ -2835,7 +2844,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 void
 FEProblem::advanceMultiApps(ExecFlagType type)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2854,7 +2863,7 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 void
 FEProblem::backupMultiApps(ExecFlagType type)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2873,7 +2882,7 @@ FEProblem::backupMultiApps(ExecFlagType type)
 void
 FEProblem::restoreMultiApps(ExecFlagType type, bool force)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps.getStorage(type).getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2896,7 +2905,7 @@ FEProblem::restoreMultiApps(ExecFlagType type, bool force)
 Real
 FEProblem::computeMultiAppsDT(ExecFlagType type)
 {
-  std::vector<TransientMultiApp *> multi_apps = _multi_apps(type)[0].transient();
+  const std::vector<MooseSharedPointer<TransientMultiApp> > & multi_apps = _multi_apps.getTransientStorage(type).getActiveObjects();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
@@ -3465,6 +3474,8 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
 
+  executeControls(EXEC_LINEAR);
+
   _app.getOutputWarehouse().residualSetup();
 
   _nl.computeResidual(residual, type);
@@ -3513,6 +3524,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _aux.compute(EXEC_NONLINEAR);
 
     computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::POST_AUX);
+
+    executeControls(EXEC_NONLINEAR);
 
     _app.getOutputWarehouse().jacobianSetup();
 

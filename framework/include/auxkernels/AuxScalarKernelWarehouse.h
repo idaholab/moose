@@ -12,25 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef AUXSCALARKERNELWAREHOUSE_H
+#define AUXSCALARKERNELWAREHOUSE_H
 
-#include "ControlInterface.h"
-#include "InputParameterWarehouse.h"
-#include "MooseApp.h"
+// MOOSE includes
+#include "ExecuteMooseObjectWarehouse.h"
+#include "AuxScalarKernel.h"
 
-template<>
-InputParameters validParams<ControlInterface>()
+class AuxScalarKernelWarehouse : public ExecuteMooseObjectWarehouse<AuxScalarKernel>
 {
-  return emptyInputParameters();
-}
+public:
 
+  /**
+   * Constructor.
+   */
+  AuxScalarKernelWarehouse();
 
-ControlInterface::ControlInterface(const InputParameters & parameters) :
-    _ci_parameters(parameters),
-    _ci_app(*parameters.get<MooseApp *>("_moose_app")),
-    _input_parameter_warehouse(_ci_app.getInputParameterWarehouse()),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _ci_name(parameters.get<std::string>("_object_name"))
-{
-  if (libMesh::n_threads() > 1)
-    mooseError("The control logic system is experimental and under heavy development, it currently does not work with threading.");
-}
+  /**
+   * Sorts the AuxScalarKenels prior to calling the initialSetup.
+   */
+  virtual void initialSetup(THREAD_ID tid);
+
+};
+
+#endif // AUXSCALARKERNELWAREHOUSE_H

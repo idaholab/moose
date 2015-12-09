@@ -12,21 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DamperWarehouse.h"
-#include "Damper.h"
+// MOOSE includes
+#include "NodalAuxKernelWarehouse.h"
 
-DamperWarehouse::DamperWarehouse() :
-    Warehouse<Damper>()
+
+NodalAuxKernelWarehouse::NodalAuxKernelWarehouse() :
+    ExecuteMooseObjectWarehouse<AuxKernel>()
 {
 }
 
-DamperWarehouse::~DamperWarehouse()
-{
-}
 
 void
-DamperWarehouse::addDamper(MooseSharedPointer<Damper> & damper)
+NodalAuxKernelWarehouse::initialSetup(THREAD_ID tid)
 {
-  _all_ptrs.push_back(damper);
-  _all_objects.push_back(damper.get());
+  // Sort the objects
+  _all_objects.sort(tid);
+  _execute_objects.sort(tid);
+
+  // Call initialSetup on all objects
+  MooseObjectWarehouse<AuxKernel>::initialSetup(tid);
 }

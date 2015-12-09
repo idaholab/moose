@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    # Test ability to disable/enable constraints
+    type = Exodiff
+    input = 'constraints.i'
+    exodiff = 'constraints_out.e'
+  [../]
+[]

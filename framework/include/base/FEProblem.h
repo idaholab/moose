@@ -51,6 +51,7 @@ class VectorPostprocessorData;
 class MooseEnum;
 class Resurrector;
 class Assembly;
+class ControlWarehouse;
 
 // libMesh forward declarations
 namespace libMesh
@@ -600,7 +601,7 @@ public:
   /**
    * Get a MultiApp object by name.
    */
-  MultiApp * getMultiApp(const std::string & multi_app_name);
+  MooseSharedPointer<MultiApp> getMultiApp(const std::string & multi_app_name);
 
   /**
    * Execute the MultiApps associated with the ExecFlagType
@@ -898,7 +899,6 @@ public:
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
-
   /**
    * Return the current execution flag.
    *
@@ -936,6 +936,21 @@ public:
   std::vector<VariableSecond> _second_zero;
   std::vector<VariablePhiSecond> _second_phi_zero;
   ///@}
+
+  /**
+   * Reference to the control logic warehouse.
+   */
+  ControlWarehouse & getControlWarehouse() { return *_control_warehouse; }
+
+  /**
+   * Performs setup and execute calls for Control objects.
+   */
+  void executeControls(const ExecFlagType & exec_type);
+
+  /**
+   * Update the active objects in the warehouses
+   */
+  void updateActiveObjects();
 
 protected:
   MooseMesh & _mesh;
@@ -1004,7 +1019,8 @@ protected:
   // user objects
   ExecStore<UserObjectWarehouse> _user_objects;
 
-  ExecStore<MultiAppWarehouse> _multi_apps;
+  // MultiApp Warehouse
+  MultiAppWarehouse _multi_apps;
 
   /// Normal Transfers
   ExecStore<TransferWarehouse> _transfers;
@@ -1028,6 +1044,7 @@ protected:
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
   void checkUserObjects();
+
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();
@@ -1101,6 +1118,9 @@ protected:
 
   /// Current execute_on flag
   ExecFlagType _current_execute_on_flag;
+
+  /// The control logic warehouse (must be pointer because of cyclic includes of FEProblem.h: FEProblem->ControlWarehouse->Control->UserObjectInterface->FEProblem)
+  UniquePtr<ControlWarehouse> _control_warehouse;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage

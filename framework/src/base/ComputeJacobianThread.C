@@ -26,7 +26,9 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _jacobian(jacobian),
     _sys(sys),
-    _num_cached(0)
+    _num_cached(0),
+    _integrated_bcs(sys.getIntegratedBCWarehouse().getStorage()),
+    _dg_kernels(sys.getDGKernelWarehouse().getStorage())
 {
 }
 
@@ -35,7 +37,9 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
     ThreadedElementLoop<ConstElemRange>(x, split),
     _jacobian(x._jacobian),
     _sys(x._sys),
-    _num_cached(x._num_cached)
+    _num_cached(x._num_cached),
+    _integrated_bcs(x._integrated_bcs),
+    _dg_kernels(x._dg_kernels)
 {
 }
 
@@ -61,12 +65,11 @@ ComputeJacobianThread::computeJacobian()
 void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  std::vector<IntegratedBC *> bcs;
-  _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
-  for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
+  const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+  for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
   {
-    IntegratedBC * bc = *it;
-    if (bc->shouldApply() && bc->isImplicit())
+    MooseSharedPointer<IntegratedBC> bc = *it;
+    if (bc->shouldApply() && bc->isImplicit() && bc->isActive())
     {
       bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
       bc->computeJacobian();
@@ -77,27 +80,27 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeJacobianThread::computeInternalFaceJacobian()
 {
-  std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid).active();
-  for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+  if (_dg_kernels.hasActiveObjects(_tid));
   {
-    DGKernel * dg = *it;
-    if (dg->isImplicit())
+    const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
+    for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
     {
-      dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
-      dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
-      dg->computeJacobian();
+      MooseSharedPointer<DGKernel> dg = *it;
+      if (dg->isImplicit())
+      {
+        dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
+        dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
+        dg->computeJacobian();
+      }
     }
   }
 }
-
 
 void
 ComputeJacobianThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
   _sys.updateActiveKernels(_subdomain, _tid);
-  if (_sys.doingDG())
-    _sys.updateActiveDGKernels(_fe_problem.time(), _fe_problem.dt(), _tid);
 
   std::set<MooseVariable *> needed_moose_vars;
 
@@ -109,31 +112,13 @@ ComputeJacobianThread::subdomainChanged()
   }
 
   // Boundary Condition Dependencies
-  const std::set<unsigned int> & subdomain_boundary_ids = _mesh.getSubdomainBoundaryIds(_subdomain);
-  for (std::set<unsigned int>::const_iterator id_it = subdomain_boundary_ids.begin();
-      id_it != subdomain_boundary_ids.end();
-      ++id_it)
-  {
-    std::vector<IntegratedBC *> bcs;
-    _sys.getBCWarehouse(_tid).activeIntegrated(*id_it, bcs);
-    if (bcs.size() > 0)
-    {
-      for (std::vector<IntegratedBC *>::iterator it = bcs.begin(); it != bcs.end(); ++it)
-      {
-        IntegratedBC * bc = (*it);
-        if (bc->shouldApply())
-        {
-          const std::set<MooseVariable *> & mv_deps = bc->getMooseVariableDependencies();
-          needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-        }
-      }
-    }
-  }
+  _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars);
 
   // DG Kernel dependencies
+  if (_dg_kernels.hasActiveObjects(_tid));
   {
-    std::vector<DGKernel *> dgks = _sys.getDGKernelWarehouse(_tid).active();
-    for (std::vector<DGKernel *>::iterator it = dgks.begin(); it != dgks.end(); ++it)
+    const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
+    for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
     {
       const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
@@ -163,10 +148,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
 void
 ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
-
-  std::vector<IntegratedBC *> bcs;
-  _sys.getBCWarehouse(_tid).activeIntegrated(bnd_id, bcs);
-  if (bcs.size() > 0)
+  if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
@@ -191,32 +173,32 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 void
 ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-  if (_sys.getDGKernelWarehouse(_tid).active().empty())
-    return;
-
-  // Pointer to the neighbor we are currently working on.
-  const Elem * neighbor = elem->neighbor(side);
-
-  // Get the global id of the element and the neighbor
-  const dof_id_type
-    elem_id = elem->id(),
-    neighbor_id = neighbor->id();
-
-  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+  if (_dg_kernels.hasActiveObjects(_tid))
   {
-    _fe_problem.reinitNeighbor(elem, side, _tid);
+      // Pointer to the neighbor we are currently working on.
+    const Elem * neighbor = elem->neighbor(side);
 
-    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-    _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+    // Get the global id of the element and the neighbor
+    const dof_id_type
+      elem_id = elem->id(),
+      neighbor_id = neighbor->id();
 
-    computeInternalFaceJacobian();
-
-    _fe_problem.swapBackMaterialsFace(_tid);
-    _fe_problem.swapBackMaterialsNeighbor(_tid);
-
+    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _fe_problem.addJacobianNeighbor(_jacobian, _tid);
+      _fe_problem.reinitNeighbor(elem, side, _tid);
+
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+      computeInternalFaceJacobian();
+
+      _fe_problem.swapBackMaterialsFace(_tid);
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
+
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        _fe_problem.addJacobianNeighbor(_jacobian, _tid);
+      }
     }
   }
 }
