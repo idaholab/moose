@@ -18,12 +18,6 @@ pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
                   $(patsubst %.c, %.$(obj-suffix).d, $(pcre_csrcfiles))
 
 #
-# asio networking
-#
-#asio_DIR	:= $(FRAMEWORK_DIR)/contrib/asio
-
-
-#
 # ice_updater
 #
 ice_updater_DIR       := $(FRAMEWORK_DIR)/contrib/ice_updater
