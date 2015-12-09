@@ -19,8 +19,8 @@ whitelisted_kernels = ['Diffusion', 'TimeDerivative']
 MfdRE = re.compile("^Finite[ -]difference Jacobian \(user-defined state\)")
 MhcRE = re.compile("^Hand-coded Jacobian \(user-defined state\)")
 MdiffRE = re.compile("^Hand-coded minus finite[ -]difference Jacobian \(user-defined state\)")
-rowRE = re.compile("row ([\d]+): ")
-valRE = re.compile(" \(([\d]+), ([+-.e\d]+)\)")
+rowRE = re.compile("row (\d+): ")
+valRE = re.compile(" \((\d+), ([+.e\d-]+)\)")
 
 
 # Get the real path of jacobian analyzer
