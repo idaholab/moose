@@ -305,9 +305,11 @@ public:
     EBTerm(const EBTerm & term) : _root(term.cloneRoot()) {};
     ~EBTerm() { delete _root; };
 
+  private:
     // construct a term from a node
     EBTerm(EBTermNode * root) : _root(root) {};
 
+  public:
     // construct from number or string
     EBTerm(int number) : _root(new EBNumberNode<int>(number)) {}
     EBTerm(Real number) : _root(new EBNumberNode<Real>(number)) {}
@@ -404,10 +406,11 @@ public:
      */
     #define BINARYCOMP_OP_IMPLEMENT(op,OP) \
     EBTerm & operator op (const EBTerm & term) { \
-      if (_root != NULL && term._root != NULL) \
-        _root = new EBBinaryOpTermNode(_root, term.cloneRoot(), EBBinaryOpTermNode::OP); \
-      else if (term._root != NULL) \
-        _root = term.cloneRoot(); \
+      mooseAssert(_root != NULL, "Empty term provided on left side of operator " #op); \
+      mooseAssert(term._root != NULL, "Empty term provided on right side of operator " #op); \
+      if (dynamic_cast<EBTempIDNode *>(_root)) \
+        mooseError("Using compound assignment operator on anonymous term. Set it to 0 first!"); \
+      _root = new EBBinaryOpTermNode(_root, term.cloneRoot(), EBBinaryOpTermNode::OP); \
       return *this; \
     }
     BINARYCOMP_OP_IMPLEMENT(+=,ADD)
