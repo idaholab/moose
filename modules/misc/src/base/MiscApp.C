@@ -7,6 +7,7 @@
 #include "MiscApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "BodyForceVoid.h"
 #include "CoefDiffusion.h"

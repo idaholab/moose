@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "FauxGrainTracker.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<FauxGrainTracker>()

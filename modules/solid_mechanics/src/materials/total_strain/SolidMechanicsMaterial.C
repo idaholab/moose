@@ -4,10 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "SolidMechanicsMaterial.h"
 #include "Problem.h"
-
 #include "VolumetricModel.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<SolidMechanicsMaterial>()

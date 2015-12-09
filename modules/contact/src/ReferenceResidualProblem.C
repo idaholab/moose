@@ -5,11 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
+// MOOSE includes
 #include "ReferenceResidualProblem.h"
-
 #include "MooseApp.h"
-#include <sstream>
+#include "MooseMesh.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<ReferenceResidualProblem>()

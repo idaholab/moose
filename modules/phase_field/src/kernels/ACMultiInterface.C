@@ -4,7 +4,9 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "ACMultiInterface.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<ACMultiInterface>()

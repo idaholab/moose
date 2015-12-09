@@ -4,14 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "DomainIntegralAction.h"
 
+// MOOSE includes
+#include "DomainIntegralAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
-#include "libmesh/string_to_enum.h"
 #include "CrackFrontDefinition.h"
 #include "InteractionIntegralAuxFields.h"
+#include "MooseMesh.h"
+
+// libMesh includes
+#include "libmesh/string_to_enum.h"
 
 template<>
 InputParameters validParams<DomainIntegralAction>()

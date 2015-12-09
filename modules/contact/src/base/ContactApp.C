@@ -7,6 +7,7 @@
 #include "ContactApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "ContactAction.h"
 #include "ContactMaster.h"

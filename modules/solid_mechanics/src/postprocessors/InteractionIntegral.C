@@ -7,6 +7,7 @@
 //  This post processor returns the Interaction Integral
 //
 #include "InteractionIntegral.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<InteractionIntegral>()

@@ -20,6 +20,7 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
+#include "NonlinearSystem.h"
 
 // Forward declarations
 class FEProblem;

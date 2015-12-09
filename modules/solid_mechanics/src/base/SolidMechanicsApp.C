@@ -7,6 +7,7 @@
 #include "SolidMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "AbaqusCreepMaterial.h"
 #include "AbaqusUmatMaterial.h"

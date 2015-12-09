@@ -5,10 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RichardsMultiphaseProblem.h"
-
-//#include "NonlinearSystem.h"
+#include "NonlinearSystem.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<RichardsMultiphaseProblem>()

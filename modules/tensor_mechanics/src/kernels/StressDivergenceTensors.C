@@ -4,9 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "StressDivergenceTensors.h"
 
+#include "StressDivergenceTensors.h"
 #include "Material.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<StressDivergenceTensors>()
