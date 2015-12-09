@@ -61,7 +61,7 @@ ComputeFullJacobianThread::computeJacobian()
       for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
       {
         MooseSharedPointer<KernelBase> kernel = *kt;
-        if ((kernel->variable().number() == ivar) && kernel->isImplicit() && kernel->isActive())
+        if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
           kernel->subProblem().prepareShapes(jvar, _tid);
           kernel->computeOffDiagJacobian(jvar);
@@ -85,7 +85,7 @@ ComputeFullJacobianThread::computeJacobian()
         for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator kt = kernels.begin(); kt != kernels.end(); ++kt)
         {
           MooseSharedPointer<KernelBase> kernel = *kt;
-          if (kernel->isImplicit() && kernel->isActive())
+          if (kernel->isImplicit())
           {
             // now, get the list of coupled scalar vars and compute their off-diag jacobians
             const std::vector<MooseVariableScalar *> coupled_scalar_vars = kernel->getCoupledMooseScalarVars();

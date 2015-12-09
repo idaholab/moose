@@ -20,6 +20,7 @@
 #include "BoundaryRestrictable.h"
 #include "BlockRestrictable.h"
 #include "MooseVariable.h"
+#include "TransientInterface.h"
 
 /**
  * A storage container for MooseObjects.
@@ -414,7 +415,7 @@ MooseObjectStorage<T>::hasActiveObject(const std::string & name, THREAD_ID tid/*
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
-  for (it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     if ((*it)->name() == name)
       return true;
   return false;
@@ -427,7 +428,7 @@ MooseObjectStorage<T>::getActiveObject(const std::string & name, THREAD_ID tid/*
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
-  for (it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     if ((*it)->name() == name)
       return *it;
   mooseError("Unable to locate active object: " << name << ".");
@@ -468,8 +469,18 @@ MooseObjectStorage<T>::updateActiveHelper(std::vector<MooseSharedPointer<T> > & 
 
   // Add "enabled" objects to the active list
   for (iter = all.begin(); iter != all.end(); ++iter)
-    if ( (*iter)->enabled() )
+  {
+    // Cast to TransientInterface to call isActive (deprecated, be sure to remove #include TransientInterface.h when this goes away)
+    MooseSharedPointer<TransientInterface> ti = MooseSharedNamespace::dynamic_pointer_cast<TransientInterface>(*iter);
+    if (ti)
+    {
+      if (ti->isActive() && (*iter)->enabled())
+        active.push_back(*iter);
+    }
+
+    else if ( (*iter)->enabled() )
       active.push_back(*iter);
+  }
 }
 
 
