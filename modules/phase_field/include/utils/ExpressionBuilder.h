@@ -399,6 +399,23 @@ public:
     BINARY_OP_IMPLEMENT(==,EQ)
     BINARY_OP_IMPLEMENT(!=,NOTEQ)
 
+    /*
+     * Compound assignment operators
+     */
+    #define BINARYCOMP_OP_IMPLEMENT(op,OP) \
+    EBTerm & operator op (const EBTerm & term) { \
+      if (_root != NULL && term._root != NULL) \
+        _root = new EBBinaryOpTermNode(_root, term.cloneRoot(), EBBinaryOpTermNode::OP); \
+      else if (term._root != NULL) \
+        _root = term.cloneRoot(); \
+      return *this; \
+    }
+    BINARYCOMP_OP_IMPLEMENT(+=,ADD)
+    BINARYCOMP_OP_IMPLEMENT(-=,SUB)
+    BINARYCOMP_OP_IMPLEMENT(*=,MUL)
+    BINARYCOMP_OP_IMPLEMENT(/=,DIV)
+    BINARYCOMP_OP_IMPLEMENT(%=,MOD)
+
     /**
     * @{
      * Binary functions
