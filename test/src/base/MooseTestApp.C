@@ -14,6 +14,8 @@
 #include "MooseTestApp.h"
 #include "Moose.h"
 #include "Factory.h"
+#include "MooseSyntax.h"
+
 #include "ActionFactory.h"
 #include "AppFactory.h"
 
