@@ -353,7 +353,6 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 void
 AuxiliarySystem::computeNodalVars(ExecFlagType type)
 {
-
   Moose::perf_log.push("update_aux_vars_nodal()","Solve");
 
   // Reference to the Nodal AuxKernel storage

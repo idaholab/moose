@@ -53,19 +53,16 @@ ComputeElemAuxVarsThread::subdomainChanged()
 
   std::set<MooseVariable *> needed_moose_vars;
 
-  // Get a map of all active block restricted AuxKernel objects
-  const std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > > & block_kernels = _storage.getActiveBlockObjects(_tid);
-
-  // Locate the AuxKernel objects for the current SubdomainID
-  const std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = block_kernels.find(_subdomain);
-
-  if (iter != block_kernels.end())
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
+  if (_storage.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _storage.getActiveBlockObjects(_subdomain, _tid);
+    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = kernels.begin(); aux_it != kernels.end(); ++aux_it)
     {
       (*aux_it)->subdomainSetup();
       const std::set<MooseVariable *> & mv_deps = (*aux_it)->getMooseVariableDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
+  }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
@@ -75,21 +72,16 @@ ComputeElemAuxVarsThread::subdomainChanged()
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
-  // Get a map of all active block restricted AuxKernel objects
-  const std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > > & block_kernels = _storage.getActiveBlockObjects(_tid);
-
-  // Locate the AuxKernel objects for the current SubdomainID
-  const std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = block_kernels.find(_subdomain);
-
-  if (iter != block_kernels.end() && iter->second.size() > 0)
+  if (_storage.hasActiveBlockObjects(_subdomain, _tid))
   {
+    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _storage.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
+    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = kernels.begin(); aux_it != kernels.end(); ++aux_it)
       (*aux_it)->compute();
 
     if (_need_materials)
