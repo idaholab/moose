@@ -72,7 +72,7 @@
 
   #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   #petsc_options_value = 'hypre boomeramg 101'
-  petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
   l_tol = 1e-4
   end_time = 80.0
