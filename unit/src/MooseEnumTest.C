@@ -16,6 +16,8 @@
 #include "MooseEnum.h"
 #include "MultiMooseEnum.h"
 
+#include <algorithm> // std::set_symmetric_difference
+
 CPPUNIT_TEST_SUITE_REGISTRATION( MooseEnumTest );
 
 void
