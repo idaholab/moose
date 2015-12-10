@@ -624,7 +624,7 @@ MultiMooseEnum
 getCommonPetscKeys()
 {
   return MultiMooseEnum(
-    "-ksp_atol -ksp_gmres_restart -ksp_gmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "
+    "-ksp_atol -ksp_gmres_restart -ksp_max_it -ksp_pc_side -ksp_rtol "
     "-ksp_type -mat_fd_coloring_err -mat_fd_type -mat_mffd_type -pc_asm_overlap -pc_factor_levels "
     "-pc_factor_mat_ordering_type -pc_hypre_boomeramg_grid_sweeps_all -pc_hypre_boomeramg_max_iter "
     "-pc_hypre_boomeramg_strong_threshold -pc_hypre_type -pc_type -snes_atol -snes_linesearch_type "
