@@ -9,4 +9,9 @@
     input = 'one_elem_multi.i'
     exodiff = 'one_elem_multi.e'
   [../]
+  [./one_elem_base]
+    type = 'Exodiff'
+    input = 'one_elem_base.i'
+    exodiff = 'one_elem_base.e'
+  [../]
 []
