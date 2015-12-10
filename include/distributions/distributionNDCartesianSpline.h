@@ -52,7 +52,6 @@ public:
   };
 
   void BasicMultiDimensionalCartesianSpline_init(){
-
     std::vector<double> alpha(_interpolator.returnDimensionality());
     std::vector<double> beta(_interpolator.returnDimensionality());
 
@@ -96,7 +95,6 @@ public:
         //std::cout<< NDcoordinate.at(0) << " " << NDcoordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
       }
       _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
-      //std::cout<<"Creation of CDF interpolator for cartesian spline completed [BasicMultiDimensionalCartesianSpline_init]:"<< std::endl;
     }
   };
 

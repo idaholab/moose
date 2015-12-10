@@ -75,7 +75,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
    computeInverse(_cov_matrix, inverseCovMatrix);
 
    for (int i=0;i<rows;i++){
-  std::vector<double> temp;
+    std::vector<double> temp;
     for (int j=0;j<columns;j++)
      temp.push_back(inverseCovMatrix.at(i).at(j));
     _inverse_cov_matrix.push_back(temp);
@@ -94,23 +94,25 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
      throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
 
    // Creation BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
-   // number of discretizations in sigma/2 units; plus/minus six sigma
 
    int numberValues=1;
    std::vector< std::vector<double> > discretizations;
    std::vector<double> alpha (_mu.size());
    std::vector<double> beta (_mu.size());
 
+   int numberOfDiscretizations = 10;
+
    for(int i=0; i<dimensions; i++){
      alpha.at(i) = 0.0;
      beta.at(i)  = 0.0;
 
-     numberValues = numberValues * 25;
+     numberValues = numberValues * numberOfDiscretizations;
 
      std::vector<double> discretization_temp;
      double sigma = sqrt(_cov_matrix[i][i]);
-     for(int n=0; n<25; n++){
-       double disc_value = mu.at(i) - 6.0 * sigma + sigma * (double)n /2.0;
+     double deltaSigma = 12.0*sigma/(double)numberOfDiscretizations;
+     for(int n=0; n<numberOfDiscretizations; n++){
+       double disc_value = mu.at(i) - 6.0 * sigma + deltaSigma * (double)n;
        discretization_temp.push_back(disc_value);
      }
      discretizations.push_back(discretization_temp);
@@ -121,7 +123,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
    std::vector< double > values (numberValues);
    for(int i=0; i<numberValues; i++){
      std::vector<int> intCoordinates;
-     base10tobaseN(i,25,intCoordinates);
+     base10tobaseN(i,10,intCoordinates);
 
      std::vector<double> pointCoordinates(dimensions);
      std::vector<int> intCoordinatesFormatted(dimensions);
@@ -136,7 +138,9 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
 
      values.at(i) = getPdf(pointCoordinates, _mu, _inverse_cov_matrix);
    }
+
    _cartesianDistribution = BasicMultiDimensionalCartesianSpline(discretizations,values,alpha,beta,false);
+
 }
 
 BasicMultivariateNormal::BasicMultivariateNormal(std::string data_filename, std::vector<double> mu){
@@ -232,8 +236,24 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
     }
     _determinant_cov_matrix = getDeterminant(_cov_matrix);
   }
+
   //compute the svd
   computeSVD(_rank);
+
+  int numberOfDiscretizations = 10;
+  unsigned int dimensions = _mu.size();
+  for(int i=0; i<dimensions; i++){
+	std::vector<double> discretization_temp;
+    double sigma = sqrt(_cov_matrix[i][i]);
+    double deltaSigma = 12.0*sigma/(double)numberOfDiscretizations;
+    for(int n=0; n<numberOfDiscretizations; n++){
+      double disc_value = mu.at(i) - 6.0 * sigma + deltaSigma * (double)n;
+      discretization_temp.push_back(disc_value);
+    }
+    _lowerBounds.push_back(discretization_temp.at(0));
+    _upperBounds.push_back(discretization_temp.back());
+  }
+
 }
 
 void BasicMultivariateNormal::computeSVD() {
@@ -477,9 +497,7 @@ std::vector<double> BasicMultivariateNormal::InverseCdf(double F, double g){
     /**
      * This function calculates the inverse CDF values at F of a MVN distribution
      */
-  std::cout<<"BasicMultivariateNormal::InverseCdf"<< std::endl;
   return _cartesianDistribution.InverseCdf(F,g);
-  std::cout << "test inverseCdf" << std::endl;
 }
 
 double BasicMultivariateNormal::inverseMarginal(double F, int dimension){
