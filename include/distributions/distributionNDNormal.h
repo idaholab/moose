@@ -56,6 +56,8 @@ public:
   std::vector<double> getRightSingularVectors();
   std::vector<int> getLeftSingularVectorsDimensions();
   std::vector<int> getRightSingularVectorsDimensions();
+  std::vector<double> getTransformationMatrix();
+  std::vector<int> getTransformationMatrixDimensions();
   int  getSingularValuesDimension();
 
   std::vector<double> coordinateInTransformedSpace(int rank);
@@ -63,6 +65,7 @@ public:
 
   double cellProbabilityWeight(std::vector<double> center, std::vector<double> dx);
   double inverseMarginalForPCA(double F);
+  double marginalCdfForPCA(double x);
 
   void computeSVD();
   void computeSVD(int rank);
