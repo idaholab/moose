@@ -227,18 +227,15 @@ MooseObjectStorage<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid /*=
   // Block Restricted
   else if (blk)
   {
-    // Temporary storage for Block IDs for which this object is active
-    std::set<SubdomainID> ids;
+    // Get a copy of the Subdomains on which this object is active
+    std::set<SubdomainID> ids = blk->blockIDs();
 
-    // Populate the list of ids if restricted (i.e., users has 'block=...')
-    if (blk->blockRestricted())
-      ids = blk->blockIDs();
-
-    // Populate the list if NOT restricted, be sure to add ANY_BLOCK_ID so that getActiveBlockObject(Moose::ANY_BLOCK_ID) works correct.
-    else
+    // If ANY_BLOCK_ID is in the list, then it is not block restricted, thus the active subdomains is every id from the mesh
+    // (Note: BlockRestrictable::blockRestricted() doesn't work correctly with YAK, just looking for ANY_BLOCK_ID does.)
+    if (ids.find(Moose::ANY_BLOCK_ID) != ids.end() )
     {
       ids = blk->meshBlockIDs();
-      ids.insert(Moose::ANY_BLOCK_ID);
+      ids.insert(Moose::ANY_BLOCK_ID); // insert to allow for hasActiveBlockObjects(ANY_BLOCK_ID) to work correctly
     }
 
     // Store the object for each domain on which it is active
