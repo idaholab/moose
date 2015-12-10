@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = dgkernels.i
+    exodiff = dgkernels_out.e
+  [../]
+[]

@@ -60,7 +60,7 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
     mooseError("The end time and start time vectors must be the same length.");
 
   // Resize the start/end times if only a single value given
-  if (_end_time.size() == 1 && _disable.size() > 1 && _enable.size() )
+  if (_end_time.size() == 1 && (_disable.size() > 1 || _enable.size() > 1) )
   {
     unsigned int size = std::max(_disable.size(), _enable.size());
     _end_time = std::vector<Real>(size, _end_time[0]);
