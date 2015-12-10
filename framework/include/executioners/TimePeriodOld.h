@@ -21,10 +21,10 @@
 /**
  * Class to hold information about executioner time periods
  */
-class TimePeriod
+class TimePeriodOld
 {
 public:
-  TimePeriod(const std::string & name, Real start);
+  TimePeriodOld(const std::string & name, Real start);
 
   void addActiveObjects(std::string kind, const std::vector<std::string> & object_list);
 

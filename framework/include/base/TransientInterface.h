@@ -19,7 +19,7 @@
 
 
 class FEProblem;
-class TimePeriod;
+class TimePeriodOld;
 class TransientInterface;
 
 template<>
@@ -64,7 +64,7 @@ protected:
 
   const std::string _object_type;
 
-  const std::vector<TimePeriod *> & _time_periods;
+  const std::vector<TimePeriodOld *> & _time_periods;
 
 private:
   const std::string _ti_name;

@@ -17,7 +17,7 @@
 // MOOSE includes
 #include "Factory.h"
 #include "SubProblem.h"
-#include "TimePeriod.h"
+#include "TimePeriodOld.h"
 #include "TimeStepper.h"
 #include "MooseApp.h"
 #include "Conversion.h"
@@ -663,7 +663,7 @@ Transient::preExecute()
   */
 
   // Add time period start times to sync times
-  const std::vector<TimePeriod *> time_periods = _problem.getTimePeriods();
+  const std::vector<TimePeriodOld *> time_periods = _problem.getTimePeriods();
   for (unsigned int i = 0; i < time_periods.size(); ++i)
     _time_stepper->addSyncTime(time_periods[i]->start());
 
