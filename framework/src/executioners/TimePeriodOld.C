@@ -12,42 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TimePeriod.h"
+#include "TimePeriodOld.h"
 
-TimePeriod::TimePeriod(const std::string & name, Real start) :
+TimePeriodOld::TimePeriodOld(const std::string & name, Real start) :
     _name(name),
     _start(start)
 {}
 
 void
-TimePeriod::addActiveObjects(std::string kind, const std::vector<std::string> & object_list)
+TimePeriodOld::addActiveObjects(std::string kind, const std::vector<std::string> & object_list)
 {
   _objects[kind] = object_list;
   _list_type[kind] = true;
 }
 
 void
-TimePeriod::addInactiveObjects(std::string kind, const std::vector<std::string> & object_list)
+TimePeriodOld::addInactiveObjects(std::string kind, const std::vector<std::string> & object_list)
 {
   _objects[kind] = object_list;
   _list_type[kind] = false;
 }
 
 const std::vector<std::string> &
-TimePeriod::getObjectList(const std::string & kind, bool & is_active)
+TimePeriodOld::getObjectList(const std::string & kind, bool & is_active)
 {
   is_active = _list_type[kind];
   return _objects[kind];
 }
 
 const std::string &
-TimePeriod::name() const
+TimePeriodOld::name() const
 {
   return _name;
 }
 
 Real
-TimePeriod::start() const
+TimePeriodOld::start() const
 {
   return _start;
 }
