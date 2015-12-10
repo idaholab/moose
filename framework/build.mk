@@ -342,6 +342,13 @@ libmesh_update:
 	@echo ======================================================
 	$(MOOSE_DIR)/scripts/update_and_rebuild_libmesh.sh
 
+update:
+	@echo ======================================================
+	@echo Downloading and updating MOOSE and libMesh
+	@echo ======================================================
+	$(MOOSE_DIR)/scripts/update.sh
+
+
 #
 # Maintenance
 #
