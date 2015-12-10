@@ -181,6 +181,17 @@ RankTwoTensor::row(const unsigned int r) const
   return result;
 }
 
+TypeVector<Real>
+RankTwoTensor::column(const unsigned int c) const
+{
+  RealVectorValue result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    result(i) = _vals[i][c];
+
+  return result;
+}
+
 void
 RankTwoTensor::rotate(RealTensorValue & R)
 {
@@ -977,4 +988,12 @@ RankTwoTensor::genRandomSymmTensor( Real scale, Real offset )
       tensor(i,j) = tensor(j,i) = ( MooseRandom::rand() + offset ) * scale;
 
   return tensor;
+}
+
+void
+RankTwoTensor::vectorOuterProduct(const TypeVector<Real> & v1, const TypeVector<Real> & v2)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      _vals[i][j] = v1(i) * v2(j);
 }
