@@ -89,18 +89,40 @@ public:
     FeatureData() :
         _var_idx(std::numeric_limits<unsigned int>::max()),
         _intersects_boundary(false),
-        _min_feature_id(DofObject::invalid_id)
+        _min_feature_id(DofObject::invalid_id),
+        _merged(false)
     {}
 
     FeatureData(std::set<dof_id_type> & ghosted_ids, unsigned int var_idx) :
         _ghosted_ids(ghosted_ids),
         _var_idx(var_idx),
         _intersects_boundary(false),
-        _min_feature_id(DofObject::invalid_id)
+        _min_feature_id(DofObject::invalid_id),
+        _merged(false)
     {}
+
+    FeatureData(const FeatureData & f) :
+        _ghosted_ids(f._ghosted_ids),
+        _interior_ids(f._interior_ids),
+        _periodic_nodes(f._periodic_nodes),
+        _var_idx(f._var_idx),
+        _intersects_boundary(f._intersects_boundary),
+        _bbox(f._bbox),
+        _min_feature_id(f._min_feature_id),
+        _merged(f._merged)
+    {}
+
 
     void updateBBoxMin(const Point & min);
     void updateBBoxMax(const Point & max);
+
+    void inflateBoundingBox(Real inflation_amount)
+      {
+        Point inflation(inflation_amount, inflation_amount, inflation_amount);
+
+        _bbox.max() += inflation;
+        _bbox.min() -= inflation;
+      }
 
     std::set<dof_id_type> _ghosted_ids;
     std::set<dof_id_type> _interior_ids;
@@ -109,6 +131,7 @@ public:
     bool _intersects_boundary;
     MeshTools::BoundingBox _bbox;
     dof_id_type _min_feature_id;
+    bool _merged;
   };
 
 protected:
@@ -118,6 +141,8 @@ protected:
    * the execution of this postprocessor.
    */
   virtual void updateFieldInfo();
+
+  void inflateBoundingBoxes(Real inflation_amount = 1.0);
 
   /**
    * This method will "mark" all entities on neighboring elements that

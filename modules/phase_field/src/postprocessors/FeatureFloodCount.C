@@ -351,9 +351,34 @@ FeatureFloodCount::finalize()
    *********************************************************************************
    *********************************************************************************/
 
-  exit(0);
+  inflateBoundingBoxes();
 
   mergeSets(true);
+
+
+  // Debugging
+  unsigned int counter = 0;
+  std::cout << "\n*********************************************************************************\nDATA ON PROCESSOR " << processor_id() << '\n';
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    for (std::vector<FeatureData>::iterator l_it = _feature_sets[map_num].begin(); l_it != _feature_sets[map_num].end(); ++l_it)
+    {
+      std::cout << "\nItem: " << ++counter << "\nGhosted Entities: ";
+      for (std::set<dof_id_type>::const_iterator it = l_it->_ghosted_ids.begin();
+           it != l_it->_ghosted_ids.end(); ++it)
+        std::cout << *it << " ";
+      std::cout << "\nInterior Entities: ";
+      for (std::set<dof_id_type>::const_iterator it = l_it->_interior_ids.begin();
+           it != l_it->_interior_ids.end(); ++it)
+        std::cout << *it << " ";
+
+      std::cout << "\nVar_idx: " << l_it->_var_idx;
+      std::cout << "\nMax: " << l_it->_bbox.max();
+      std::cout << "\nMin: " << l_it->_bbox.min();
+      std::cout << "\nMin Entitity ID: " << l_it->_min_feature_id;
+      std::cout << "\n\n";
+    }
+
+  exit(0);
 
   // Populate _feature_maps and _var_index_maps
   updateFieldInfo();
@@ -588,27 +613,28 @@ FeatureFloodCount::deserialize(std::vector<std::string *> & serialized_buffers)
     dataLoad(iss, _partial_feature_sets[rank], this);
   }
 
-  unsigned int counter = 0;
-  std::cout << "\n*********************************************************************************\nDATA ON PROCESSOR " << processor_id() << '\n';
-  for (unsigned int rank = 0; rank < _app.n_processors(); ++rank)
-    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-      for (std::vector<FeatureData>::iterator l_it = _partial_feature_sets[rank][map_num].begin(); l_it != _partial_feature_sets[rank][map_num].end(); ++l_it)
-      {
-        std::cout << "From Proc: " << rank << "\nItem: " << ++counter << "\nGhosted Entities: ";
-        for (std::set<dof_id_type>::const_iterator it = l_it->_ghosted_ids.begin();
-             it != l_it->_ghosted_ids.end(); ++it)
-          std::cout << *it << " ";
-        std::cout << "\nInterior Entities: ";
-        for (std::set<dof_id_type>::const_iterator it = l_it->_interior_ids.begin();
-             it != l_it->_interior_ids.end(); ++it)
-          std::cout << *it << " ";
-
-        std::cout << "\nVar_idx: " << l_it->_var_idx;
-        std::cout << "\nMax: " << l_it->_bbox.max();
-        std::cout << "\nMin: " << l_it->_bbox.min();
-        std::cout << "\nMin Entitity ID: " << l_it->_min_feature_id;
-        std::cout << "\n\n";
-      }
+//  // Debugging
+//  unsigned int counter = 0;
+//  std::cout << "\n*********************************************************************************\nDATA ON PROCESSOR " << processor_id() << '\n';
+//  for (unsigned int rank = 0; rank < _app.n_processors(); ++rank)
+//    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+//      for (std::vector<FeatureData>::iterator l_it = _partial_feature_sets[rank][map_num].begin(); l_it != _partial_feature_sets[rank][map_num].end(); ++l_it)
+//      {
+//        std::cout << "From Proc: " << rank << "\nItem: " << ++counter << "\nGhosted Entities: ";
+//        for (std::set<dof_id_type>::const_iterator it = l_it->_ghosted_ids.begin();
+//             it != l_it->_ghosted_ids.end(); ++it)
+//          std::cout << *it << " ";
+//        std::cout << "\nInterior Entities: ";
+//        for (std::set<dof_id_type>::const_iterator it = l_it->_interior_ids.begin();
+//             it != l_it->_interior_ids.end(); ++it)
+//          std::cout << *it << " ";
+//
+//        std::cout << "\nVar_idx: " << l_it->_var_idx;
+//        std::cout << "\nMax: " << l_it->_bbox.max();
+//        std::cout << "\nMin: " << l_it->_bbox.min();
+//        std::cout << "\nMin Entitity ID: " << l_it->_min_feature_id;
+//        std::cout << "\n\n";
+//      }
 
 
 //  bool start_next_set = true;
@@ -738,14 +764,112 @@ FeatureFloodCount::communicateOneList(std::list<FeatureData> & list, unsigned in
 void
 FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 {
-//  Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
-//  std::set<dof_id_type> set_union;
-//  std::insert_iterator<std::set<dof_id_type> > set_union_inserter(set_union, set_union.begin());
-//
-//  /**
-//   * If map_num <= n_processors (normal case), each processor up to map_num will handle one list
-//   * of nodes and receive the merged nodes from other processors for all other lists.
-//   */
+  Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
+  std::set<dof_id_type> set_union;
+  std::insert_iterator<std::set<dof_id_type> > set_union_inserter(set_union, set_union.begin());
+
+  processor_id_type n_procs = _app.n_processors();
+
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  {
+    for (processor_id_type rank1 = 0; rank1 < n_procs; ++rank1)
+    {
+      for (processor_id_type rank2 = 0; rank2 < n_procs; ++rank2)
+      {
+        if (rank1 == rank2)
+          continue;
+
+        for (std::vector<FeatureData>::iterator it1 = _partial_feature_sets[rank1][map_num].begin(); it1 != _partial_feature_sets[rank1][map_num].end(); /* no increment */)
+        {
+          if (it1->_merged)
+          {
+            ++it1;
+            continue;
+          }
+
+          bool region_merged = false;
+          for (std::vector<FeatureData>::iterator it2 = _partial_feature_sets[rank2][map_num].begin(); it2 != _partial_feature_sets[rank2][map_num].end(); ++it2)
+          {
+            if (it1 != it2 &&                                                                // Make sure that these iterators aren't pointing at the same set
+                !it2->_merged &&                                                             // and that it2 is not merged (it1 was already checked)
+                it1->_var_idx == it2->_var_idx &&                                            // and that the sets have matching variable indices
+
+                 (it1->_bbox.intersect(it2->_bbox) ||                                        // and either their bounding boxes intersect
+                   (use_periodic_boundary_info &&                                            // or if we are merging across periodic nodes
+                     setsIntersect(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), // their periodic node sets overlap
+                                   it2->_periodic_nodes.begin(), it2->_periodic_nodes.end())
+                   )
+                 )
+               )
+            {
+              // Merge these two entity sets
+              set_union.clear();
+              std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(), set_union_inserter);
+              it1->_ghosted_ids.swap(set_union);
+              it2->_ghosted_ids.clear();
+
+              // If we are merging periodic boundaries we'll need to merge those nodes too
+              if (use_periodic_boundary_info)
+              {
+                set_union.clear();
+                std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
+                it1->_periodic_nodes.swap(set_union);
+                it2->_periodic_nodes.clear();
+              }
+
+              // Merge interior nodes (this case rarely occurs so we'll avoid building the intersection if we can avoid it)
+              if (!it1->_interior_ids.empty() && !it2->_interior_ids.empty())
+              {
+                set_union.clear();
+                std::set_union(it1->_interior_ids.begin(), it1->_interior_ids.end(), it2->_interior_ids.begin(), it2->_interior_ids.end(), set_union_inserter);
+                it1->_interior_ids.swap(set_union);
+                it2->_interior_ids.clear();
+              }
+
+              // Update the bounding box
+              it1->updateBBoxMax(it2->_bbox.max());
+              it1->updateBBoxMin(it2->_bbox.min());
+
+              // Update the min feature id
+              it1->_min_feature_id = std::min(it1->_min_feature_id, it2->_min_feature_id);
+
+              // Set the flag on the merged set so we don't revisit it again
+              it2->_merged = true;
+
+              // Something was merged so we'll need to repeat this loop
+              region_merged = true;
+            }
+          } // it2 loop
+
+          // Don't increment if we had a merge, we need to retry earlier candidates again
+          if (!region_merged)
+            ++it1;
+
+        } // it1 loop
+      } // rank2 loop
+    } // rank1 loop
+  } // map loop
+
+  // Now consolidate the data structure
+  for (processor_id_type rank = 0; rank < n_procs; ++rank)
+  {
+    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    {
+      if (rank == 0)
+        _feature_sets[map_num].clear();
+
+      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
+           it != _partial_feature_sets[rank][map_num].end(); ++it)
+
+        if (!it->_merged)
+          _feature_sets[map_num].push_back(*it);
+    }
+  }
+
+   /**
+    * If map_num <= n_processors (normal case), each processor up to map_num will handle one list
+    * of nodes and receive the merged nodes from other processors for all other lists.
+    */
 //  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
 //  {
 //    unsigned int owner_id = map_num % _app.n_processors();
@@ -811,7 +935,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 //      // Now communicate this list with all the other processors
 //      communicateOneList(_feature_sets[map_num], map_num % _app.n_processors(), map_num);
 //
-//  Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
+  Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
 
 void
@@ -980,6 +1104,18 @@ FeatureFloodCount::updateRegionOffsets()
     // Note: We never need to touch offset zero - it should *always* be zero
     for (unsigned int map_num = 1; map_num < _maps_size; ++map_num)
       _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
+}
+
+void
+FeatureFloodCount::inflateBoundingBoxes(Real inflation_amount)
+{
+  processor_id_type n_procs = _app.n_processors();
+
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    for (processor_id_type rank = 0; rank < n_procs; ++rank)
+      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
+           it != _partial_feature_sets[rank][map_num].end(); ++it)
+        it->inflateBoundingBox(inflation_amount);
 }
 
 void
