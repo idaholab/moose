@@ -171,7 +171,7 @@ public:
   /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l = 3).
    * Fill method depends on size of input
-   * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0] + input[1])/2,
+   * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0] - input[1])/2,
    *                  and C_ijkl = C_jikl = C_ijlk = C_klij, and C_1211 = C_1222 = 0.
    * Input size = 9.  Then C_1111 = input[0], C_1112 = input[1], C_1122 = input[3],
    *                       C_1212 = input[4], C_1222 = input[5], C_1211 = input[6]
