@@ -62,10 +62,9 @@
     block = 0
   [../]
   [./peeq]
-    type = MaterialStdVectorAux
+    type = MaterialRealAux
     variable = peeq
-    property = internal_var
-    index = 0
+    property = ep_eqv
     execute_on = timestep_end
     block = 0
   [../]
@@ -99,21 +98,27 @@
 []
 
 [UserObjects]
-  [./stress_uo]
-    type = HyperElasticStress
-  [../]
-  [./flowstress_uo]
-    type = RambergOsgoodHardening
+  [./flowstress]
+    type = HEVPRambergOsgoodHardening
     yield_stress = 100
     hardening_exponent = 0.1
     reference_plastic_strain = 0.002
+    intvar_prop_name = ep_eqv
   [../]
-  [./flowrate_uo]
-    type = FlowRateModel
+  [./flowrate]
+    type = HEVPFlowRatePowerLawJ2
     reference_flow_rate = 0.0001
     flow_rate_exponent = 50.0
     flow_rate_tol = 1
-    flow_stress_user_object = flowstress_uo
+    strength_prop_name = flowstress
+  [../]
+  [./ep_eqv]
+     type = HEVPEqvPlasticStrain
+     intvar_rate_prop_name = ep_eqv_rate
+  [../]
+  [./ep_eqv_rate]
+     type = HEVPEqvPlasticStrainRate
+     flow_rate_prop_name = flowrate
   [../]
 []
 
@@ -130,8 +135,10 @@
     resid_rel_tol = 1e-8
     maxiters = 50
     max_substep_iteration = 5
-    stress_user_object = stress_uo
-    flow_rate_user_objects = flowrate_uo
+    flow_rate_user_objects = 'flowrate'
+    strength_user_objects = 'flowstress'
+    internal_var_user_objects = 'ep_eqv'
+    internal_var_rate_user_objects = 'ep_eqv_rate'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
