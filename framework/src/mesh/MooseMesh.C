@@ -117,6 +117,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _bnd_node_range(NULL),
     _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
+    _node_to_active_semilocal_elem_map_built(false),
     _patch_size(40),
     _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
@@ -333,6 +334,8 @@ MooseMesh::update()
   //Update the node to elem map
   _node_to_elem_map.clear();
   _node_to_elem_map_built = false;
+  _node_to_active_semilocal_elem_map.clear();
+  _node_to_active_semilocal_elem_map_built = false;
 
   buildNodeList();
   buildBndElemList();
@@ -607,6 +610,28 @@ MooseMesh::nodeToElemMap()
   return _node_to_elem_map;
 }
 
+std::map<dof_id_type, std::vector<dof_id_type> > &
+MooseMesh::nodeToActiveSemilocalElemMap()
+{
+  if (!_node_to_active_semilocal_elem_map_built) // Guard the creation with a double checked lock
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    if (!_node_to_active_semilocal_elem_map_built)
+    {
+      MeshBase::const_element_iterator       el  = getMesh().semilocal_elements_begin();
+      const MeshBase::const_element_iterator end = getMesh().semilocal_elements_end();
+
+      for (; el != end; ++el)
+        if ((*el)->active())
+          for (unsigned int n=0; n<(*el)->n_nodes(); n++)
+            _node_to_active_semilocal_elem_map[(*el)->node(n)].push_back((*el)->id());
+
+      _node_to_active_semilocal_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
+    }
+  }
+
+  return _node_to_active_semilocal_elem_map;
+}
 
 
 ConstElemRange *
@@ -829,6 +854,8 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
     _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp] = qnode;
 
     _node_to_elem_map[new_id].push_back(elem->id());
+    if (elem->active())
+      _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
   }
   else
     qnode = _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp];
