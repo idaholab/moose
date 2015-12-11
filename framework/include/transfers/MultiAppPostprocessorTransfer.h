@@ -17,14 +17,14 @@
 
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppPostprocessorTransfer;
 
 template<>
 InputParameters validParams<MultiAppPostprocessorTransfer>();
 
 /**
- * Copies the value of a Postprocessor from the Master to a MultiApp
+ * Copies the value of a Postprocessor from the Master to a MultiApp.
  */
 class MultiAppPostprocessorTransfer :
   public MultiAppTransfer

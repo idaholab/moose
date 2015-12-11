@@ -32,6 +32,8 @@
 #include "InputParameterWarehouse.h"
 #include "SystemInfo.h"
 #include "RestartableDataIO.h"
+#include "MooseMesh.h"
+#include "FileOutput.h"
 
 // Regular expression includes
 #include "pcrecpp.h"

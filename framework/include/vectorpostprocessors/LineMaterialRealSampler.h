@@ -15,9 +15,10 @@
 #ifndef LINEMATERIALREALSAMPLER_H
 #define LINEMATERIALREALSAMPLER_H
 
+// MOOSE includes
 #include "LineMaterialSamplerBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class LineMaterialRealSampler;
 
 template<>

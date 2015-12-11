@@ -15,14 +15,9 @@
 #ifndef VECTORPOSTPROCESSORINTERFACE_H
 #define VECTORPOSTPROCESSORINTERFACE_H
 
-// Standard includes
-#include <map>
-#include <string>
-
 // MOOSE includes
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
-#include "VectorPostprocessorData.h"
 
 // Forward Declarations
 class FEProblem;
@@ -31,6 +26,11 @@ class VectorPostprocessorInterface
 {
 public:
   VectorPostprocessorInterface(const InputParameters & parameters);
+
+  /**
+   * This class has virtual methods, so it needs a virtual dtor.
+   */
+  virtual ~VectorPostprocessorInterface() {}
 
   /**
    * Retrieve the value of a VectorPostprocessor

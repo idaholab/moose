@@ -17,9 +17,8 @@
 
 #include "NodalVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class AverageNodalVariableValue;
-class MooseMesh;
 
 template<>
 InputParameters validParams<AverageNodalVariableValue>();

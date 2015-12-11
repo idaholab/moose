@@ -12,9 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "MultiAppProjectionTransfer.h"
 #include "FEProblem.h"
 #include "AddVariableAction.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"

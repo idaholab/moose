@@ -15,24 +15,27 @@
 #ifndef ELEMENTUSEROBJECT_H
 #define ELEMENTUSEROBJECT_H
 
-#include "MooseVariable.h"
+// MOOSE includes
 #include "UserObject.h"
+#include "BlockRestrictable.h"
+#include "MaterialPropertyInterface.h"
 #include "UserObjectInterface.h"
 #include "Coupleable.h"
 #include "ScalarCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
-#include "BlockRestrictable.h"
-#include "MaterialPropertyInterface.h"
 #include "RandomInterface.h"
 #include "ZeroInterface.h"
-// libMesh
-#include "libmesh/elem.h"
-#include "MooseTypes.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementUserObject;
+
+namespace libMesh
+{
+class Elem;
+class QBase;
+}
 
 template<>
 InputParameters validParams<ElementUserObject>();
@@ -54,9 +57,10 @@ public:
   ElementUserObject(const InputParameters & parameters);
 
   /**
-   * This function will get called on each geometric object this postprocessor acts on
-   * (ie Elements, Sides or Nodes).  This will most likely get called multiple times
-   * before getValue() is called.
+   * This function will get called on each geometric object this
+   * postprocessor acts on (ie Elements, Sides or Nodes).  This will
+   * most likely get called multiple times before getValue() is
+   * called.
    *
    * Someone somewhere has to override this.
    */

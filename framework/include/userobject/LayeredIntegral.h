@@ -15,12 +15,9 @@
 #ifndef LAYEREDINTEGRAL_H
 #define LAYEREDINTEGRAL_H
 
+// MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
-
 #include "LayeredBase.h"
-
-// libmesh includes
-#include "libmesh/mesh_tools.h"
 
 //Forward Declarations
 class LayeredIntegral;

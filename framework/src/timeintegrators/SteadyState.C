@@ -14,6 +14,9 @@
 
 #include "SteadyState.h"
 
+// libMesh includes
+#include "libmesh/numeric_vector.h"
+
 template<>
 InputParameters validParams<SteadyState>()
 {

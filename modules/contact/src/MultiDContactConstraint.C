@@ -5,10 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// MOOSE includes
 #include "MultiDContactConstraint.h"
-
 #include "SystemBase.h"
 #include "PenetrationLocator.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"

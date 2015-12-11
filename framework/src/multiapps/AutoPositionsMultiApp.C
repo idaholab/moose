@@ -11,7 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE includes
 #include "AutoPositionsMultiApp.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<AutoPositionsMultiApp>()

@@ -17,9 +17,7 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-class Function;
-
-//Forward Declarations
+// Forward Declarations
 class ElementL2Difference;
 
 template<>

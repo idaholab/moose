@@ -15,17 +15,16 @@
 #ifndef GENERALUSEROBJECT_H
 #define GENERALUSEROBJECT_H
 
+// MOOSE includes
 #include "UserObject.h"
+#include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 #include "DependencyResolverInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
-#include "MaterialPropertyInterface.h"
-#include "Problem.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GeneralUserObject;
 
 template<>

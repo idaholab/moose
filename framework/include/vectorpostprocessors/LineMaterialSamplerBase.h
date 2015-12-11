@@ -15,30 +15,32 @@
 #ifndef LINEMATERIALSAMPLERBASE_H
 #define LINEMATERIALSAMPLERBASE_H
 
+// MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "RayTracing.h"
 #include "SamplerBase.h"
-#include "FEProblem.h"
-#include "InputParameters.h"
 #include "BlockRestrictable.h"
-#include "Assembly.h"
+#include "LineSegment.h"
+#include "RayTracing.h" // Moose::elementsIntersectedByLine()
+#include "Assembly.h" // Assembly::qRule()
+#include "MooseMesh.h" // MooseMesh::getMesh()
 
-// libmesh includes
-#include "libmesh/quadrature.h"
+// libMesh includes
+#include "libmesh/quadrature.h" // _qrule->n_points()
 
-//Forward Declarations
-template<typename T>
-class LineMaterialSamplerBase;
+// Forward Declarations
+class MooseMesh;
+template<typename T> class LineMaterialSamplerBase;
 
 template<>
 InputParameters validParams<LineMaterialSamplerBase<Real> >();
 
 /**
- * This is a base class for sampling material properties for the integration points
- * in all elements that are intersected by a user-defined line.  The positions of
- * those points are output in x, y, z coordinates, as well as in terms of the projected
- * positions of those points along the line.  Derived classes can be created to sample
- * arbitrary types of material properties.
+ * This is a base class for sampling material properties for the
+ * integration points in all elements that are intersected by a
+ * user-defined line.  The positions of those points are output in x,
+ * y, z coordinates, as well as in terms of the projected positions of
+ * those points along the line.  Derived classes can be created to
+ * sample arbitrary types of material properties.
  */
 template<typename T>
 class LineMaterialSamplerBase :

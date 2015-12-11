@@ -12,15 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "LinearNodalConstraint.h"
-#include <limits.h>
-
-/**
-* The slave node variable is programmed as a linear combination of the master node variables
-* (i.e, slave_var = a_1*master_var_1+ a_2*master_var_2+... + a_n*master_var_n).
-* The master nodes ids and corresponding weights are required as input.
-* The same linear combination applies to all slave nodes.
-**/
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<LinearNodalConstraint>()

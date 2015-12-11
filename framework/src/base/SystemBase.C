@@ -24,6 +24,7 @@
 #include "InitialCondition.h"
 #include "ScalarInitialCondition.h"
 #include "Assembly.h"
+#include "MooseMesh.h"
 
 /// Free function used for a libMesh callback
 void extraSendList(std::vector<dof_id_type> & send_list, void * context)

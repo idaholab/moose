@@ -11,7 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "MMSCoupledDirichletBC.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<MMSCoupledDirichletBC>()

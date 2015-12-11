@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
+#include "MooseError.h"
 #include "GriddedData.h"
 
 /**

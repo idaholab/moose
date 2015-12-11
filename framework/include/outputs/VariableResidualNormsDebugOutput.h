@@ -18,7 +18,9 @@
 // MOOSE includes
 #include "BasicOutput.h"
 #include "PetscOutput.h"
-#include "FEProblem.h"
+
+// libMesh includes
+#include "libmesh/transient_system.h" // TransientNonlinearImplicitSystem typedef
 
 // Forward declerations
 class VariableResidualNormsDebugOutput;
@@ -55,7 +57,6 @@ protected:
 
   /// Reference to libMesh system
   TransientNonlinearImplicitSystem & _sys;
-
 };
 
 #endif // VARIABLERESIDUALNORMSDEBUGOUTPUT_H

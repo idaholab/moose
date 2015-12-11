@@ -23,7 +23,6 @@
 
 // Forward declarations
 class InputParameters;
-class MooseApp;
 
 /**
  * Storage container for all InputParamter objects.

@@ -12,16 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Conversion.h"
 #include "MooseError.h"
+#include "MultiMooseEnum.h"
 
-#include <map>
-#include <algorithm>
-
+// libMesh includes
 #include "libmesh/string_to_enum.h"
 
-namespace Moose {
-
+namespace Moose
+{
   std::map<std::string, ExecFlagType> execstore_type_to_enum;
   std::map<std::string, QuadratureType> quadrature_type_to_enum;
   std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;

@@ -17,9 +17,9 @@
 
 // Moose Includes
 #include "MooseError.h"
-
 #include "DTKInterpolationHelper.h"
 
+// libMesh includes
 #include "libmesh/system.h"
 
 // Trilinos Includes
@@ -37,7 +37,8 @@
 #include <DTK_CommTools.hpp>
 #include <DTK_CommIndexer.hpp>
 
-namespace libMesh {
+namespace libMesh
+{
 
 DTKInterpolationHelper::DTKInterpolationHelper()
 {}
@@ -56,7 +57,14 @@ DTKInterpolationHelper::~DTKInterpolationHelper()
 }
 
 void
-DTKInterpolationHelper::transferWithOffset(unsigned int from, unsigned int to, const Variable * from_var, const Variable * to_var, const Point & from_offset, const Point & to_offset, MPI_Comm * from_mpi_comm, MPI_Comm * to_mpi_comm)
+DTKInterpolationHelper::transferWithOffset(unsigned int from,
+                                           unsigned int to,
+                                           const Variable * from_var,
+                                           const Variable * to_var,
+                                           const Point & from_offset,
+                                           const Point & to_offset,
+                                           MPI_Comm * from_mpi_comm,
+                                           MPI_Comm * to_mpi_comm)
 {
   Teuchos::RCP<const Teuchos::MpiComm<int> > from_comm;
   Teuchos::RCP<const Teuchos::MpiComm<int> > to_comm;

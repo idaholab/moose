@@ -15,10 +15,12 @@
 #ifndef FACEFACECONSTRAINT_H
 #define FACEFACECONSTRAINT_H
 
+// MOOSE includes
 #include "Constraint.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "MooseMesh.h"
 
-//Forward Declarations
+// Forward Declarations
 class FaceFaceConstraint;
 class FEProblem;
 

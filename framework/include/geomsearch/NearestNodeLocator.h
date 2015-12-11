@@ -20,6 +20,7 @@
 
 // Forward declarations
 class SubProblem;
+class MooseMesh;
 
 /**
  * Finds the nearest node to each node in boundary1 to each node in boundary2 and the other way around.

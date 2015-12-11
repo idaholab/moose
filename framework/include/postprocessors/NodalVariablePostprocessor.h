@@ -15,16 +15,20 @@
 #ifndef NODALVARIABLEPOSTPROCESSOR_H
 #define NODALVARIABLEPOSTPROCESSOR_H
 
+// MOOSE includes
 #include "NodalPostprocessor.h"
+#include "MooseVariableInterface.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalVariablePostprocessor;
 
 template<>
 InputParameters validParams<NodalVariablePostprocessor>();
 
+/**
+ * This is a base class for other classes which compute post-processed
+ * values based on nodal solution values of _u.
+ */
 class NodalVariablePostprocessor :
   public NodalPostprocessor,
   public MooseVariableInterface

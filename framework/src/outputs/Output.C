@@ -25,6 +25,9 @@
 #include "FileMesh.h"
 #include "MooseUtils.h"
 
+// libMesh includes
+#include "libmesh/equation_systems.h"
+
 
 template<>
 InputParameters validParams<Output>()

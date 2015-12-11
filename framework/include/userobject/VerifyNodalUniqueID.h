@@ -15,10 +15,10 @@
 #ifndef VERIFYNODALUNIQUEID_H
 #define VERIFYNODALUNIQUEID_H
 
+// MOOSE includes
 #include "NodalUserObject.h"
-#include "libmesh/id_types.h"
 
-//Forward Declarations
+// Forward Declarations
 class VerifyNodalUniqueID;
 
 template<>

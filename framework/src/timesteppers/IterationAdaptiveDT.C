@@ -11,11 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "IterationAdaptiveDT.h"
 
+// MOOSE includes
+#include "IterationAdaptiveDT.h"
 #include "Function.h"
 #include "Piecewise.h"
 #include "Transient.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<IterationAdaptiveDT>()

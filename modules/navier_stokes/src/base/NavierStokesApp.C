@@ -7,6 +7,7 @@
 #include "NavierStokesApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "NSMassInviscidFlux.h"
 #include "NSMomentumInviscidFlux.h"

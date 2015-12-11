@@ -15,10 +15,10 @@
 #ifndef POINTVALUESAMPLER_H
 #define POINTVALUESAMPLER_H
 
-#include "GeneralVectorPostprocessor.h"
+// MOOSE includes
 #include "PointSamplerBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PointValueSampler;
 
 template<>

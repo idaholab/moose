@@ -15,13 +15,15 @@
 #ifndef USEROBJECTINTERFACE_H
 #define USEROBJECTINTERFACE_H
 
-#include "InputParameters.h"
+// MOOSE includes
 #include "ParallelUniqueId.h"
-#include "MooseTypes.h"
 #include "FEProblem.h"
 
+// Forward declarations
+class InputParameters;
+
 /**
- * Interface for objects that need to use user objects
+ * Interface for objects that need to use UserObjects.
  */
 class UserObjectInterface
 {

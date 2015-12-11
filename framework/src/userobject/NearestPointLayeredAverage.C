@@ -12,10 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "NearestPointLayeredAverage.h"
-
-// libmesh includes
-#include "libmesh/mesh_tools.h"
+#include "LayeredAverage.h"
 
 template<>
 InputParameters validParams<NearestPointLayeredAverage>()
@@ -86,6 +85,12 @@ NearestPointLayeredAverage::threadJoin(const UserObject & y)
 
   for (unsigned int i=0; i<_layered_averages.size(); i++)
     _layered_averages[i]->threadJoin(*npla._layered_averages[i]);
+}
+
+Real
+NearestPointLayeredAverage::spatialValue(const Point & p) const
+{
+  return nearestLayeredAverage(p)->integralValue(p);
 }
 
 LayeredAverage *

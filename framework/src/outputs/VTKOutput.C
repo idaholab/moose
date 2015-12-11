@@ -14,6 +14,10 @@
 
 #include "VTKOutput.h"
 
+// libMesh includes
+#include "libmesh/vtk_io.h"
+#include "libmesh/equation_systems.h"
+
 template<>
 InputParameters validParams<VTKOutput>()
 {

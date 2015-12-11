@@ -11,8 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "ExceptionKernel.h"
 #include "MooseException.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<ExceptionKernel>()

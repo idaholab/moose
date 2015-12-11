@@ -15,10 +15,10 @@
 #ifndef SIDEFLUXINTEGRAL_H
 #define SIDEFLUXINTEGRAL_H
 
+// MOOSE includes
 #include "SideIntegralVariablePostprocessor.h"
-#include "MaterialPropertyInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideFluxIntegral;
 
 template<>

@@ -18,10 +18,10 @@
 // MOOSE includes
 #include "BasicOutput.h"
 #include "Output.h"
-#include "FEProblem.h"
 
 // Forward declerations
 class MaterialPropertyDebugOutput;
+class Material;
 
 template<>
 InputParameters validParams<MaterialPropertyDebugOutput>();

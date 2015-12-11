@@ -7,6 +7,7 @@
 
 #include "RichardsMaterial.h"
 #include "Assembly.h"
+#include "MooseMesh.h"
 
 #include <cmath> // std::sinh and std::cosh
 

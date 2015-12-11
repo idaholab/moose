@@ -12,7 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "NodalNormalsCorner.h"
+#include "MooseMesh.h"
 
 Threads::spin_mutex nodal_normals_corner_mutex;
 

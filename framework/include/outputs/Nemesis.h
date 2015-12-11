@@ -19,12 +19,14 @@
 #include "AdvancedOutput.h"
 #include "OversampleOutput.h"
 
-// libMesh includes
-#include "libmesh/nemesis_io.h"
-#include "libmesh/parallel_mesh.h"
-
 // Forward declarations
 class Nemesis;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class Nemesis_IO;
+}
 
 template<>
 InputParameters validParams<Nemesis>();

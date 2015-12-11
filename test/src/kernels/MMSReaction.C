@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MMSReaction.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<MMSReaction>()

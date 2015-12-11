@@ -11,23 +11,24 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
+// MOOSE includes
 #include "Moose.h"
-
 #include "DTKInterpolationEvaluator.h"
 #include "DTKInterpolationAdapter.h"
 #include "Transfer.h"
 
+// libMesh includes
 #include "libmesh/mesh.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem.h"
 
+// DTK includes
 #include <DTK_MeshTypes.hpp>
-
-#include <vector>
 
 DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim):
     comm(in_comm),

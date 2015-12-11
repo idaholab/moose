@@ -15,18 +15,18 @@
 #ifndef SIDEUSEROBJECT_H
 #define SIDEUSEROBJECT_H
 
+// MOOSE includes
 #include "UserObject.h"
+#include "BoundaryRestrictable.h"
+#include "MaterialPropertyInterface.h"
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
-#include "MooseVariable.h"
-#include "MaterialPropertyInterface.h"
-#include "TransientInterface.h"
 #include "UserObjectInterface.h"
+#include "TransientInterface.h"
 #include "PostprocessorInterface.h"
-#include "BoundaryRestrictable.h"
 #include "ZeroInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideUserObject;
 
 template<>

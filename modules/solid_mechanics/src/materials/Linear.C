@@ -4,11 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "Linear.h"
 #include "SolidModel.h"
-
 #include "Problem.h"
-
+#include "MooseMesh.h"
 
 namespace SolidMechanics
 {

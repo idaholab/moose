@@ -4,9 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// MOOSE includes
 #include "CrackFrontDefinition.h"
-#include <map>
-#include <vector>
+#include "MooseMesh.h"
+
+// libMesh includes
 #include "libmesh/mesh_tools.h"
 
 template<>

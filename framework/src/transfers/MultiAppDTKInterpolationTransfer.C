@@ -16,11 +16,12 @@
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
+// MOOSE includes
 #include "MultiAppDTKInterpolationTransfer.h"
-
-// Moose
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "MultiApp.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<MultiAppDTKInterpolationTransfer>()

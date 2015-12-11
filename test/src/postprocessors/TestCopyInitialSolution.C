@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "TestCopyInitialSolution.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<TestCopyInitialSolution>()

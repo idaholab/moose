@@ -17,15 +17,16 @@
 
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppMeshFunctionTransfer;
 
 template<>
 InputParameters validParams<MultiAppMeshFunctionTransfer>();
 
 /**
- * Samples a variable's value in the Master domain at the point where the MultiApp is.
- * Copies that value into a postprocessor in the MultiApp.
+ * Samples a variable's value in the Master domain at the point where
+ * the MultiApp is.  Copies that value into a postprocessor in the
+ * MultiApp.
  */
 class MultiAppMeshFunctionTransfer :
   public MultiAppTransfer

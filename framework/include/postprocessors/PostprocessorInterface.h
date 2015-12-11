@@ -16,17 +16,20 @@
 #define POSTPROCESSORINTERFACE_H
 
 // Standard includes
-#include <map>
 #include <string>
 
 // MOOSE includes
-#include "InputParameters.h"
-#include "ParallelUniqueId.h"
-#include "PostprocessorData.h"
+#include "MooseTypes.h"
 
 // Forward Declarations
 class FEProblem;
+class InputParameters;
+class PostprocessorName;
 
+/**
+ * Interface class for classes which interact with Postprocessors.
+ * Provides the getPostprocessorValueXYZ() and related interfaces.
+ */
 class PostprocessorInterface
 {
 public:

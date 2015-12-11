@@ -17,13 +17,15 @@
 
 #include "NodalVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodalSum;
-class MooseMesh;
 
 template<>
 InputParameters validParams<NodalSum>();
 
+/**
+ * Computes a sum of the nodal values of the coupled variable.
+ */
 class NodalSum : public NodalVariablePostprocessor
 {
 public:

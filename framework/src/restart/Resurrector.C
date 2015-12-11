@@ -12,10 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Resurrector.h"
 #include "FEProblem.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
+#include "NonlinearSystem.h"
 
 #include <stdio.h>
 #include <sys/stat.h>

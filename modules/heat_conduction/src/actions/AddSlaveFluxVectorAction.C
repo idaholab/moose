@@ -4,9 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "AddSlaveFluxVectorAction.h"
 #include "Parser.h"
 #include "FEProblem.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<AddSlaveFluxVectorAction>()

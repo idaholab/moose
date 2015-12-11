@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RigidBodyModes3D.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<RigidBodyModes3D>()

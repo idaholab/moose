@@ -15,21 +15,13 @@
 #ifndef POINTSAMPLERBASE_H
 #define POINTSAMPLERBASE_H
 
+// MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "SamplerBase.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "SamplerBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PointSamplerBase;
-
-// libMesh Forward Declarations
-namespace libMesh
-{
-  namespace MeshTools
-  {
-    class BoundingBox;
-  }
-}
 
 template<>
 InputParameters validParams<PointSamplerBase>();

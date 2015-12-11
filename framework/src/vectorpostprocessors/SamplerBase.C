@@ -12,8 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "SamplerBase.h"
 #include "IndirectSort.h"
+#include "VectorPostprocessor.h"
 
 template<>
 InputParameters validParams<SamplerBase>()

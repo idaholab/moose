@@ -12,11 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "RestartableDataIO.h"
 #include "MooseUtils.h"
 #include "RestartableData.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "NonlinearSystem.h"
 
 #include <stdio.h>
 

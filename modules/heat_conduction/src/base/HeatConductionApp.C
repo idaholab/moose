@@ -7,6 +7,7 @@
 #include "HeatConductionApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "AddSlaveFluxVectorAction.h"
 #include "ConvectiveFluxFunction.h"

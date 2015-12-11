@@ -21,6 +21,7 @@
 
 // Forward declarations
 class DOFMapOutput;
+class MooseMesh;
 
 template<>
 InputParameters validParams<DOFMapOutput>();

@@ -17,6 +17,8 @@
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
 #include "MultiAppDTKUserObjectTransfer.h"
+#include "DTKInterpolationAdapter.h"
+#include "MultiApp.h"
 
 // Moose Includes
 #include "MooseTypes.h"

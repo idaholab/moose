@@ -15,16 +15,24 @@
 #ifndef MOOSEENUM_H
 #define MOOSEENUM_H
 
+// MOOSE includes
 #include "MooseEnumBase.h"
 
-#include "libmesh/parameters.h"
+// Forward declarations
+namespace libMesh
+{
+class Parameters;
+}
 
 /**
- * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
- * It should be initialized with a space-delimited list of strings which become the enum values.
- * You may also optionally supply numeric ints for one or more values similar to a C++ enum.  This
- * is done with the "=" sign (no spaces). It can be used any place where an integer (switch statements), const char*
- * or std::string is expected. In addition the InputParameters system has full support for this Enum type
+ * This is a "smart" enum class intended to replace many of the
+ * shortcomings in the C++ enum type It should be initialized with a
+ * space-delimited list of strings which become the enum values.  You
+ * may also optionally supply numeric ints for one or more values
+ * similar to a C++ enum.  This is done with the "=" sign (no
+ * spaces). It can be used any place where an integer (switch
+ * statements), const char* or std::string is expected. In addition
+ * the InputParameters system has full support for this Enum type
  */
 class MooseEnum : public MooseEnumBase
 {

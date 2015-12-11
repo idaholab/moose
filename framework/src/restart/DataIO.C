@@ -14,6 +14,12 @@
 
 #include "DataIO.h"
 #include "MooseMesh.h"
+#include "ColumnMajorMatrix.h"
+
+// libMesh includes
+#include "libmesh/numeric_vector.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/elem.h"
 
 template<>
 void

@@ -16,7 +16,7 @@
 
 #ifdef LIBMESH_HAVE_PETSC
 
-// Moose includes
+// MOOSE includes
 #include "MooseApp.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
@@ -31,8 +31,9 @@
 #include "MultiMooseEnum.h"
 #include "Conversion.h"
 #include "Executioner.h"
+#include "MooseMesh.h"
 
-//libMesh Includes
+// libMesh includes
 #include "libmesh/libmesh_common.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -44,7 +45,7 @@
 #include "libmesh/petsc_preconditioner.h"
 #include "libmesh/getpot.h"
 
-//PETSc includes
+// PETSc includes
 #include <petsc.h>
 #include <petscsnes.h>
 #include <petscksp.h>

@@ -15,12 +15,11 @@
 #ifndef NODALVECTORPOSTPROCESSOR_H
 #define NODALVECTORPOSTPROCESSOR_H
 
-#include "VectorPostprocessor.h"
+// MOOSE includes
 #include "NodalUserObject.h"
+#include "VectorPostprocessor.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalVectorPostprocessor;
 
 template<>

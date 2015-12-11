@@ -14,7 +14,7 @@
 
 #include "Transient.h"
 
-//Moose includes
+// MOOSE includes
 #include "Factory.h"
 #include "SubProblem.h"
 #include "TimePeriod.h"
@@ -22,8 +22,9 @@
 #include "MooseApp.h"
 #include "Conversion.h"
 #include "FEProblem.h"
+#include "NonlinearSystem.h"
 
-//libMesh includes
+// libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/transient_system.h"

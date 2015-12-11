@@ -15,12 +15,11 @@
 #ifndef NODALPOSTPROCESSOR_H
 #define NODALPOSTPROCESSOR_H
 
+// MOOSE includes
 #include "Postprocessor.h"
 #include "NodalUserObject.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalPostprocessor;
 
 template<>
@@ -34,7 +33,9 @@ public:
   NodalPostprocessor(const InputParameters & parameters);
 
   /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
+   * Finalize.  This is called _after_ execute() and _after_
+   * threadJoin()!  This is probably where you want to do MPI
+   * communication!
    */
   virtual void finalize(){}
 };

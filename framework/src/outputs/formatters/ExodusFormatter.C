@@ -12,12 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "ExodusFormatter.h"
 #include "Parser.h"
 #include "MooseApp.h"
 #include "SystemInfo.h"
+#include "CommandLine.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/exodusII.h"
 
 // C++

@@ -15,22 +15,23 @@
 #ifndef POSTPROCESSOR_H
 #define POSTPROCESSOR_H
 
-#include <string>
-
 // MOOSE includes
-#include "InputParameters.h"
-#include "Restartable.h"
 #include "OutputInterface.h"
 
 // libMesh
 #include "libmesh/parallel.h"
 
+// Forward declarations
 class Postprocessor;
 
 template<>
 InputParameters validParams<Postprocessor>();
 
-
+/**
+ * Base class for all Postprocessors.  Defines a name and sets up the
+ * virtual getValue() interface which must be overridden by derived
+ * classes.
+ */
 class Postprocessor : public OutputInterface
 {
 public:

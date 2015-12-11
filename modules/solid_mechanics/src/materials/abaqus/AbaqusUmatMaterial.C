@@ -4,9 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "AbaqusUmatMaterial.h"
 
+#include "AbaqusUmatMaterial.h"
 #include "Factory.h"
+#include "MooseMesh.h"
 
 #include <dlfcn.h>
 #define QUOTE(macro) stringifyName(macro)

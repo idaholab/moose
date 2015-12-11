@@ -3272,6 +3272,30 @@ FEProblem::converged()
     return true;
 }
 
+unsigned int
+FEProblem::nNonlinearIterations()
+{
+  return _nl.nNonlinearIterations();
+}
+
+unsigned int
+FEProblem::nLinearIterations()
+{
+  return _nl.nLinearIterations();
+}
+
+Real
+FEProblem::finalNonlinearResidual()
+{
+  return _nl.finalNonlinearResidual();
+}
+
+bool
+FEProblem::computingInitialResidual()
+{
+  return _nl.computingInitialResidual();
+}
+
 void
 FEProblem::copySolutionsBackwards()
 {

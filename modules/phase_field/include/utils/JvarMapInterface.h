@@ -8,6 +8,7 @@
 #define JVARMAPINTERFACE_H
 
 #include "MooseVariable.h"
+#include "NonlinearSystem.h"
 
 /**
  * Interface class ("Veneer") to provide a mapping from 'jvar' in

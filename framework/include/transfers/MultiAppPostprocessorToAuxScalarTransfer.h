@@ -19,7 +19,6 @@
 #include "MultiAppTransfer.h"
 
 // Forward declerations
-class MooseVariable;
 class MultiAppPostprocessorToAuxScalarTransfer;
 
 template<>

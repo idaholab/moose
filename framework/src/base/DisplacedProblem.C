@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "DisplacedProblem.h"
 #include "Problem.h"
 #include "SubProblem.h"
@@ -21,6 +22,7 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "FEProblem.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/numeric_vector.h"

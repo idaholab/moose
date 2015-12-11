@@ -17,9 +17,7 @@
 
 #include "ElementW1pError.h"
 
-class Function;
-
-//Forward Declarations
+// Forward Declarations
 class ElementH1Error;
 
 template<>

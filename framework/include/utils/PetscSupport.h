@@ -15,20 +15,22 @@
 #ifndef PETSCSUPPORT_H
 #define PETSCSUPPORT_H
 
-#include "libmesh/libmesh.h"
+#include "libmesh/libmesh.h" // Real, LIBMESH_HAVE_PETSC
 
 #ifdef LIBMESH_HAVE_PETSC
 
-// Moose includes
-#include "Problem.h"
-#include "NonlinearSystem.h"
-#include "CommandLine.h"
-#include "Console.h"
+// MOOSE includes
+#include "MultiMooseEnum.h"
+#include "InputParameters.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/petsc_nonlinear_solver.h"
+#include "libmesh/petsc_macro.h"
 
+// Forward declarations
 class FEProblem;
+class NonlinearSystem;
+class CommandLine;
 
 namespace Moose
 {
@@ -75,7 +77,7 @@ PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 /**
  * Helper function for outputing the norm values with/without color
  */
-void outputNorm(Real old_norm, Real norm, bool use_color = false);
+void outputNorm(libMesh::Real old_norm, libMesh::Real norm, bool use_color = false);
 
 /**
  * Helper function for displaying the linear residual during PETSC solve

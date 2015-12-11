@@ -5,13 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// MOOSE includes
 #include "GapHeatTransfer.h"
 #include "GapConductance.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
 #include "Assembly.h"
+#include "MooseMesh.h"
 
-// libmesh
+// libMesh includes
 #include "libmesh/string_to_enum.h"
 
 Threads::spin_mutex slave_flux_mutex;

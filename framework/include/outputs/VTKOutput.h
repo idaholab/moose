@@ -19,9 +19,6 @@
 #include "BasicOutput.h"
 #include "OversampleOutput.h"
 
-// libMesh includes
-#include "libmesh/vtk_io.h"
-
 // Forward declerations
 class VTKOutput;
 

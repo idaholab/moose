@@ -11,10 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 // MOOSE includes
 #include "MooseError.h"
 #include "SolutionUserObject.h"
 #include "RotationMatrix.h"
+#include "MooseUtils.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/equation_systems.h"
@@ -24,6 +27,7 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/parallel_mesh.h"
 #include "libmesh/serial_mesh.h"
+#include "libmesh/exodusII_io.h"
 
 template<>
 InputParameters validParams<SolutionUserObject>()

@@ -4,8 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "HexPolycrystalIC.h"
 #include "MooseRandom.h"
+#include "MooseMesh.h"
 
 #include <cmath>
 

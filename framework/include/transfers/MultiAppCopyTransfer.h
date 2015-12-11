@@ -17,7 +17,7 @@
 
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppCopyTransfer;
 
 template<>

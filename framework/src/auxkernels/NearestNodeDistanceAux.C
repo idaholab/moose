@@ -12,8 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "NearestNodeDistanceAux.h"
 #include "NearestNodeLocator.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<NearestNodeDistanceAux>()

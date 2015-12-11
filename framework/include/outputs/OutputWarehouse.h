@@ -15,17 +15,13 @@
 #ifndef OUTPUTWAREHOUSE_H
 #define OUTPUTWAREHOUSE_H
 
-// Standard includes
-#include <vector>
-
 // MOOSE includes
 #include "Output.h"
 #include "Warehouse.h"
-#include "InputParameters.h"
 
 // Forward declarations
-class Checkpoint;
 class FEProblem;
+class InputParameters;
 
 /**
  * Class for storing and utilizing output objects

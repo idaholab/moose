@@ -12,17 +12,19 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef LIBMESH_TRILINOS_HAVE_DTK
-
 #ifndef MULTIAPPDTKUSEROBJECTTRANSFER_H
 #define MULTIAPPDTKUSEROBJECTTRANSFER_H
 
+#include "libmesh/libmesh_config.h"
+
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
+
+// MOOSE includes
 #include "MultiAppTransfer.h"
 #include "MooseVariableInterface.h"
 #include "MultiAppDTKUserObjectEvaluator.h"
-#include "DTKInterpolationAdapter.h"
 
-// DTK Includes
+// DTK includes
 #include <DTK_VolumeSourceMap.hpp>
 #include <DTK_MeshManager.hpp>
 #include <DTK_MeshContainer.hpp>
@@ -35,6 +37,8 @@
 #include <DTK_CommTools.hpp>
 #include <DTK_GeometryManager.hpp>
 #include <DTK_Box.hpp>
+
+// Trilinos includes
 #include <Teuchos_RCP.hpp>
 #include <Teuchos_ArrayRCP.hpp>
 #include <Teuchos_CommHelpers.hpp>
@@ -42,12 +46,9 @@
 #include <Teuchos_GlobalMPISession.hpp>
 #include <Teuchos_Ptr.hpp>
 
-
-// libMesh Includes
-#include "libmesh/dtk_solution_transfer.h"
-
-class MooseVariable;
+// Forward declarations
 class MultiAppDTKUserObjectTransfer;
+class DTKInterpolationAdapter;
 
 template<>
 InputParameters validParams<MultiAppDTKUserObjectTransfer>();
@@ -87,6 +88,6 @@ protected:
   Teuchos::RCP<DataTransferKit::FieldManager<DTKAdapter::FieldContainerType> > _to_values;
 };
 
-#endif /* MULTIAPPDTKUSEROBJECTTRANSFER_H */
 
-#endif //LIBMESH_TRILINOS_HAVE_DTK
+#endif // LIBMESH_TRILINOS_HAVE_DTK
+#endif // MULTIAPPDTKUSEROBJECTTRANSFER_H

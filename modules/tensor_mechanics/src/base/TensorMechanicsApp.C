@@ -7,6 +7,7 @@
 #include "TensorMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "TensorMechanicsAction.h"
 #include "DynamicTensorMechanicsAction.h"
