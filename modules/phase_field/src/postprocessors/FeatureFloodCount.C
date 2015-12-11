@@ -180,7 +180,9 @@ template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData 
   storeHelper(stream, feature._periodic_nodes, context);
   storeHelper(stream, feature._var_idx, context);
   storeHelper(stream, feature._bboxes, context);
-  storeHelper(stream, feature._min_feature_id, context);
+  storeHelper(stream, feature._min_entity_id, context);
+  storeHelper(stream, feature._merged, context);
+  storeHelper(stream, feature._intersects_boundary, context);
 }
 
 template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
@@ -195,7 +197,9 @@ template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData &
   loadHelper(stream, feature._periodic_nodes, context);
   loadHelper(stream, feature._var_idx, context);
   loadHelper(stream, feature._bboxes, context);
-  loadHelper(stream, feature._min_feature_id, context);
+  loadHelper(stream, feature._min_entity_id, context);
+  loadHelper(stream, feature._merged, context);
+  loadHelper(stream, feature._intersects_boundary, context);
 }
 
 template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
@@ -284,7 +288,6 @@ FeatureFloodCount::initialize()
     _feature_maps[map_num].clear();
     _feature_sets[map_num].clear();
     _region_counts[map_num] = 0;
-    _entities_visited[map_num].clear();
 
     if (_var_index_mode)
       _var_index_maps[map_num].clear();
@@ -583,7 +586,7 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
       feature.updateBBoxMax(feature._bboxes[0], entity_point);
 
       // Finally save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
-      feature._min_feature_id = std::min(feature._min_feature_id, entity_id);
+      feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
     }
 
     // Populate the remaining feature data structure members.
@@ -810,7 +813,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
           bool region_merged = false;
           for (std::vector<FeatureData>::iterator it2 = _partial_feature_sets[rank2][map_num].begin(); it2 != _partial_feature_sets[rank2][map_num].end(); ++it2)
           {
-            bool pb_intersect;
+            bool pb_intersect = false;
             if (it1 != it2 &&                                                                // Make sure that these iterators aren't pointing at the same set
                 !it2->_merged &&                                                             // and that it2 is not merged (it1 was already checked)
                 it1->_var_idx == it2->_var_idx &&                                            // and that the sets have matching variable indices
@@ -823,6 +826,8 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
                  )
                )
             {
+              std::cout << "Merging " << it1->_min_entity_id << " " << it2->_min_entity_id << " due to " << pb_intersect << '\n';
+
               // Merge these two entity sets
               set_union.clear();
               std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(), set_union_inserter);
@@ -856,7 +861,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
                 it1->expandBBox(*it2);
 
               // Update the min feature id
-              it1->_min_feature_id = std::min(it1->_min_feature_id, it2->_min_feature_id);
+              it1->_min_entity_id = std::min(it1->_min_entity_id, it2->_min_entity_id);
 
               // Set the flag on the merged set so we don't revisit it again
               it2->_merged = true;
@@ -883,11 +888,16 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       if (rank == 0)
         _feature_sets[map_num].clear();
 
+//      std::cout << "Consolidating\n";
+
       for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
            it != _partial_feature_sets[rank][map_num].end(); ++it)
+      {
+//        std::cout << *it;
 
         if (!it->_merged)
           _feature_sets[map_num].push_back(*it);
+      }
     }
   }
 
@@ -978,7 +988,7 @@ FeatureFloodCount::updateFieldInfo()
   {
     /**
      * Perform an indexed sort to give a parallel unique sorting to the identified features.
-     * We use the "min_feature_id" inside each feature to assign it's position in the
+     * We use the "min_entity_id" inside each feature to assign it's position in the
      * sorted indices vector.
      */
     index_vector.resize(_feature_sets[map_num].size());
@@ -990,7 +1000,7 @@ FeatureFloodCount::updateFieldInfo()
     // Clear out the original markings since they aren't unique globally
     _feature_maps[map_num].clear();
 
-//    std::cerr << "###########################################################################\nProc " << processor_id() << '\n';
+//    std::cerr << "###########################################################################\n";
     for (std::vector<size_t>::const_iterator idx_it = index_vector.begin(); idx_it != index_vector.end(); ++idx_it)
     {
       const FeatureData & feature = _feature_sets[map_num][*idx_it];
@@ -1359,7 +1369,8 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
     out << "\nBBox Max: " << it->max() << " Min: " << it->min();
 
   out << "\nVar_idx: " << feature._var_idx;
-  out << "\nMin Entitity ID: " << feature._min_feature_id;
+  out << "\nMin Entity ID: " << feature._min_entity_id;
+  out << "\nMerge Flag: " << feature._merged;
   out << "\n\n";
 
   return out;

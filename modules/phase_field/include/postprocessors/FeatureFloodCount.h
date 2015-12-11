@@ -88,32 +88,32 @@ public:
   public:
     FeatureData() :
         _var_idx(std::numeric_limits<unsigned int>::max()),
-        _intersects_boundary(false),
-        _min_feature_id(DofObject::invalid_id),
-        _merged(false)
+        _min_entity_id(DofObject::invalid_id),
+        _merged(false),
+        _intersects_boundary(false)
     {
       _bboxes.resize(1);
     }
 
-    FeatureData(std::set<dof_id_type> & ghosted_ids, unsigned int var_idx) :
-        _ghosted_ids(ghosted_ids),
-        _var_idx(var_idx),
-        _intersects_boundary(false),
-        _min_feature_id(DofObject::invalid_id),
-        _merged(false)
-    {
-      _bboxes.resize(1);
-    }
+//    FeatureData(std::set<dof_id_type> & ghosted_ids, unsigned int var_idx) :
+//        _ghosted_ids(ghosted_ids),
+//        _var_idx(var_idx),
+//        _intersects_boundary(false),
+//        _min_entity_id(DofObject::invalid_id),
+//        _merged(false)
+//    {
+//      _bboxes.resize(1);
+//    }
 
     FeatureData(const FeatureData & f) :
         _ghosted_ids(f._ghosted_ids),
         _local_ids(f._local_ids),
         _periodic_nodes(f._periodic_nodes),
         _var_idx(f._var_idx),
-        _intersects_boundary(f._intersects_boundary),
         _bboxes(f._bboxes),
-        _min_feature_id(f._min_feature_id),
-        _merged(f._merged)
+        _min_entity_id(f._min_entity_id),
+        _merged(f._merged),
+        _intersects_boundary(f._intersects_boundary)
     {}
 
     void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
@@ -136,7 +136,7 @@ public:
 
     bool operator<(const FeatureData & rhs) const
     {
-      return _min_feature_id < rhs._min_feature_id;
+      return _min_entity_id < rhs._min_entity_id;
     }
 
     friend std::ostream & operator<< (std::ostream & out, const FeatureData & feature);
@@ -145,10 +145,10 @@ public:
     std::set<dof_id_type> _local_ids;
     std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
-    bool _intersects_boundary;
     std::vector<MeshTools::BoundingBox> _bboxes;
-    dof_id_type _min_feature_id;
+    dof_id_type _min_entity_id;
     bool _merged;
+    bool _intersects_boundary;
   };
 
 protected:
