@@ -60,9 +60,11 @@ endif
 # Check that we have Asio installed.
 ASIO_FILE := $(MOOSE_DIR)/framework/contrib/asio/include/asio.hpp
 ifneq ("$(wildcard $(ASIO_FILE))","")
+libmeshConfigHeader := $(LIBMESH_DIR)/include/libmesh/libmesh_config.h
+cxx11Enabled := $(shell grep 'define LIBMESH_HAVE_CXX11 ' $(libmeshConfigHeader) | tail -c 2)
 # If it is installed, make sure this is a 
 # build using C++11, if so, then turn on Asio Networking
-ifeq (,$(findstring "-std=gnu++11",$(libmesh_CXXFLAGS)))
+ifeq (1,$(strip $(cxx11Enabled)))
 	ADDITIONAL_CPPFLAGS += "-DASIO_STANDALONE"
 endif
 endif
