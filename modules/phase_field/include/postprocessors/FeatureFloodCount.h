@@ -91,7 +91,9 @@ public:
         _intersects_boundary(false),
         _min_feature_id(DofObject::invalid_id),
         _merged(false)
-    {}
+    {
+      _bboxes.resize(1);
+    }
 
     FeatureData(std::set<dof_id_type> & ghosted_ids, unsigned int var_idx) :
         _ghosted_ids(ghosted_ids),
@@ -99,37 +101,52 @@ public:
         _intersects_boundary(false),
         _min_feature_id(DofObject::invalid_id),
         _merged(false)
-    {}
+    {
+      _bboxes.resize(1);
+    }
 
     FeatureData(const FeatureData & f) :
         _ghosted_ids(f._ghosted_ids),
-        _interior_ids(f._interior_ids),
+        _local_ids(f._local_ids),
         _periodic_nodes(f._periodic_nodes),
         _var_idx(f._var_idx),
         _intersects_boundary(f._intersects_boundary),
-        _bbox(f._bbox),
+        _bboxes(f._bboxes),
         _min_feature_id(f._min_feature_id),
         _merged(f._merged)
     {}
 
+    void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
+    void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
 
-    void updateBBoxMin(const Point & min);
-    void updateBBoxMax(const Point & max);
+    void inflateBoundingBoxes(Real inflation_amount)
+    {
+      Point inflation(inflation_amount, inflation_amount, inflation_amount);
 
-    void inflateBoundingBox(Real inflation_amount)
+      for (unsigned int i = 0; i < _bboxes.size(); ++i)
       {
-        Point inflation(inflation_amount, inflation_amount, inflation_amount);
-
-        _bbox.max() += inflation;
-        _bbox.min() -= inflation;
+        _bboxes[i].max() += inflation;
+        _bboxes[i].min() -= inflation;
       }
+    }
+
+    bool isStichable(const FeatureData & rhs) const;
+
+    void expandBBox(const FeatureData & rhs);
+
+    bool operator<(const FeatureData & rhs) const
+    {
+      return _min_feature_id < rhs._min_feature_id;
+    }
+
+    friend std::ostream & operator<< (std::ostream & out, const FeatureData & feature);
 
     std::set<dof_id_type> _ghosted_ids;
-    std::set<dof_id_type> _interior_ids;
+    std::set<dof_id_type> _local_ids;
     std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
     bool _intersects_boundary;
-    MeshTools::BoundingBox _bbox;
+    std::vector<MeshTools::BoundingBox> _bboxes;
     dof_id_type _min_feature_id;
     bool _merged;
   };
@@ -307,8 +324,11 @@ protected:
   /// This data structure is used to keep track of which bubbles are owned by which variables (index).
   std::vector<unsigned int> _region_to_var_idx;
 
-  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)
-  std::vector<unsigned int> _region_offsets;
+//  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)
+//  std::vector<unsigned int> _region_offsets;
+
+  /// The number of features seen by this object
+  unsigned int _feature_count;
 
   /**
    * The data structure used to hold the feature sets.

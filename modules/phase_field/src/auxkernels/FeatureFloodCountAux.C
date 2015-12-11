@@ -56,6 +56,7 @@ FeatureFloodCountAux::computeValue()
   {
   case 0:  // UNIQUE_REGION
   case 1:  // VARIABLE_COLORING
+//    std::cerr << "Proc " << processor_id() << " : " << (isNodal() ? _current_node->id() : _current_elem->id()) << std::endl;
     return _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _field_type, _var_idx);
   case 2:  // ACTIVE_BOUNDS
     return _flood_counter.getElementalValues(_current_elem->id()).size();
@@ -67,4 +68,3 @@ FeatureFloodCountAux::computeValue()
 
   return 0;
 }
-
