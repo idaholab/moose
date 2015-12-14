@@ -16,7 +16,10 @@
 #define BASICOUTPUT_H
 
 // MOOSE includes
-#include "OversampleOutput.h"
+#include "MooseTypes.h"
+
+// Forward declarations
+class InputParameters;
 
 /**
  * Based class for output objects

@@ -13,6 +13,7 @@
 /****************************************************************/
 #include "MooseUnitApp.h"
 #include "Moose.h"
+#include "MooseSyntax.h"
 
 template<>
 InputParameters validParams<MooseUnitApp>()

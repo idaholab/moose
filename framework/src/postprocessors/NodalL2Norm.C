@@ -14,9 +14,6 @@
 
 #include "NodalL2Norm.h"
 
-#include <algorithm>
-#include <limits>
-
 template<>
 InputParameters validParams<NodalL2Norm>()
 {

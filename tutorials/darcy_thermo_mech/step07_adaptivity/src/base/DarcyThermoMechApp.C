@@ -14,6 +14,7 @@
 #include "DarcyThermoMechApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 #include "ModulesApp.h"
 
 // Kernels
@@ -74,6 +75,6 @@ DarcyThermoMechApp::registerObjects(Factory & factory)
 }
 
 void
-DarcyThermoMechApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+DarcyThermoMechApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

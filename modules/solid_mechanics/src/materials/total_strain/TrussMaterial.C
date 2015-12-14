@@ -10,6 +10,7 @@
 #include "ColumnMajorMatrix.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
+#include "NonlinearSystem.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"

@@ -4,12 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ContactMaster.h"
 
+// MOOSE includes
+#include "ContactMaster.h"
 #include "FrictionalContactProblem.h"
 #include "NodalArea.h"
 #include "SystemBase.h"
 #include "PenetrationInfo.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/sparse_matrix.h"

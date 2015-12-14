@@ -23,6 +23,7 @@
 #include "MooseEnum.h"
 #include "EigenSystem.h"
 #include "MooseObjectAction.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/libmesh.h"

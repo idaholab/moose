@@ -15,13 +15,14 @@
 #ifndef SPLITWAREHOUSE_H
 #define SPLITWAREHOUSE_H
 
-#include <vector>
+// C++ includes
 #include <map>
-#include <set>
 
+// MOOSE includes
 #include "Warehouse.h"
 #include "MooseTypes.h"
 
+// Forward declarations
 class Split;
 
 /**

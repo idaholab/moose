@@ -12,7 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "EqualValueBoundaryConstraint.h"
+#include "MooseMesh.h"
+
+// C++ includes
 #include <limits.h>
 
 template<>

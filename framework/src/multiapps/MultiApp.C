@@ -11,9 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "MultiApp.h"
 
-// Moose
+// MOOSE includes
+#include "MultiApp.h"
 #include "AppFactory.h"
 #include "SetupInterface.h"
 #include "Executioner.h"
@@ -24,17 +24,16 @@
 #include "MooseUtils.h"
 #include "Console.h"
 #include "RestartableDataIO.h"
+#include "MooseMesh.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
 
-#include <iostream>
+// C++ includes
 #include <fstream>
 #include <iomanip>
 #include <iterator>
-#include <fstream>
-#include <vector>
 #include <algorithm>
 
 // Call to "uname"

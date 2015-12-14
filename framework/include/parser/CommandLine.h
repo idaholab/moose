@@ -16,18 +16,24 @@
 #define COMMANDLINE_H
 
 // Moose Includes
-#include "InputParameters.h"
 #include "MooseError.h"
 
+// libMesh includes
+#include "libmesh/getpot.h"
+
+// C++ includes
 #include <vector>
 #include <string>
 #include <map>
 #include <set>
-#include "libmesh/getpot.h"
 
 // Forward Declaration
-class Parser;
+class InputParameters;
 
+/**
+ * This class wraps a GetPot object associated with the command line
+ * used to run the code.
+ */
 class CommandLine
 {
 public:

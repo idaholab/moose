@@ -4,7 +4,9 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "PolycrystalICTools.h"
+#include "MooseMesh.h"
 
 std::vector<Real>
 PolycrystalICTools::assignPointsToVariables(const std::vector<Point> centerpoints, const Real op_num, const MooseMesh & mesh, const MooseVariable & var)

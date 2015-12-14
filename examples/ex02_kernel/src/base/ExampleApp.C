@@ -15,6 +15,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 // Example 2 Includes
 #include "ExampleConvection.h"           // <- New include for our custom kernel

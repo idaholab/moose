@@ -15,17 +15,21 @@
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
+// DTK includes
 #include "DTKInterpolationEvaluator.h"
 #include "DTKInterpolationHelper.h"
 
+// libMesh includes
 #include "libmesh/dof_map.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/fe_compute_data.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/mesh.h"
+#include "libmesh/system.h"
 
-#include <string>
-
-namespace libMesh {
+namespace libMesh
+{
 
 DTKInterpolationEvaluator::DTKInterpolationEvaluator(System & in_sys, std::string var_name, const Point & offset):
     sys(in_sys),

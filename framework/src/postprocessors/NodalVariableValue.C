@@ -16,13 +16,16 @@
 #include "MooseMesh.h"
 #include "SubProblem.h"
 
+// libMesh
+#include "libmesh/node.h"
+
 template<>
 InputParameters validParams<NodalVariableValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
   params.addRequiredParam<unsigned int>("nodeid", "The ID of the node where we monitor");
-  params.addParam<Real>("scale_factor",1, "A scale factor to be applied to the variable");
+  params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the variable");
   return params;
 }
 

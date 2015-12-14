@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "TrackDiracFront.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<TrackDiracFront>()

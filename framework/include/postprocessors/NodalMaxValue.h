@@ -17,14 +17,16 @@
 
 #include "NodalVariablePostprocessor.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalMaxValue;
 
 template<>
 InputParameters validParams<NodalMaxValue>();
 
+/**
+ * This class computes a maximum (over all the nodal values) of the
+ * coupled variable.
+ */
 class NodalMaxValue : public NodalVariablePostprocessor
 {
 public:

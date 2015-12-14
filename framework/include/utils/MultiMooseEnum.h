@@ -12,23 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef VECTORMOOSEENUM_H
-#define VECTORMOOSEENUM_H
+#ifndef MULTIMOOSEENUM_H
+#define MULTIMOOSEENUM_H
 
+// MOOSE includes
 #include "MooseEnumBase.h"
 
-#include "libmesh/parameters.h"
-
+// C++ includes
 #include <set>
+
+// Forward declarations
+namespace libMesh
+{
+class Parameters;
+}
 
 typedef std::set<std::string>::const_iterator MooseEnumIterator;
 
 /**
- * This is a "smart" enum class intended to replace many of the shortcomings in the C++ enum type
- * It should be initialized with a comma-separated list of strings which become the enum values.
- * You may also optionally supply numeric ints for one or more values similar to a C++ enum.  This
- * is done with the "=" sign. It can be used any place where an integer (switch statements), const char*
- * or std::string is expected.  In addition the InputParameters system has full support for this Enum type
+ * This is a "smart" enum class intended to replace many of the
+ * shortcomings in the C++ enum type It should be initialized with a
+ * comma-separated list of strings which become the enum values.  You
+ * may also optionally supply numeric ints for one or more values
+ * similar to a C++ enum.  This is done with the "=" sign. It can be
+ * used any place where an integer (switch statements), const char* or
+ * std::string is expected.  In addition the InputParameters system
+ * has full support for this Enum type
  */
 class MultiMooseEnum : public MooseEnumBase
 {
@@ -206,4 +215,4 @@ private:
   std::vector<std::string> _current_names_preserved;
 };
 
-#endif //VECTORMOOSEENUM_H
+#endif // MULTIMOOSEENUM_H

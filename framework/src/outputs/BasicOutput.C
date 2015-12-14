@@ -18,6 +18,7 @@
 // MOOSE includes
 #include "BasicOutput.h"
 #include "MooseApp.h"
+#include "OversampleOutput.h"
 
 // Define the four possible validParams methods
 template<>

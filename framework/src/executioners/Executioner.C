@@ -12,12 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "Executioner.h"
-
 // Moose includes
+#include "Executioner.h"
 #include "MooseMesh.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "NonlinearSystem.h"
 
 // C++ includes
 #include <vector>

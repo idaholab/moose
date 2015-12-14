@@ -15,23 +15,24 @@
 #ifndef VECTORPOSTPROCESSOR_H
 #define VECTORPOSTPROCESSOR_H
 
-#include <string>
 // MOOSE includes
 #include "InputParameters.h"
-#include "Restartable.h"
-#include "VectorPostprocessorData.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "libmesh/parallel.h"
 
+// Forward declarations
 class SamplerBase;
-
 class VectorPostprocessor;
+class VectorPostprocessorData;
 
 template<>
 InputParameters validParams<VectorPostprocessor>();
 
-
+/**
+ * Base class for Postprocessors that produce a vector of values.
+ */
 class VectorPostprocessor
 {
 public:

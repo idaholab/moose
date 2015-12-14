@@ -5,10 +5,12 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// MOOSE includes
 #include "GrainTracker.h"
 #include "MooseMesh.h"
 #include "GeneratedMesh.h"
 #include "EBSDReader.h"
+#include "NonlinearSystem.h"
 
 // LibMesh includes
 #include "libmesh/periodic_boundary_base.h"

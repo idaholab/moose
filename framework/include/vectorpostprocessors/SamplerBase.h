@@ -15,16 +15,19 @@
 #ifndef SAMPLERBASE_H
 #define SAMPLERBASE_H
 
-#include "NodalVariableVectorPostprocessor.h"
+// MOOSE includes
+#include "InputParameters.h"
 
-//Forward Declarations
+// Forward Declarations
 class SamplerBase;
+class VectorPostprocessor;
 
 template<>
 InputParameters validParams<SamplerBase>();
 
 /**
- * Base class for VectorPostprocessors that need to do "sampling" of values in the domain.
+ * Base class for VectorPostprocessors that need to do "sampling" of
+ * values in the domain.
  */
 class SamplerBase
 {

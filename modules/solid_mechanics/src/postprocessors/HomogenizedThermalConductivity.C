@@ -4,10 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "HomogenizedThermalConductivity.h"
 #include "SymmElasticityTensor.h"
-
 #include "SubProblem.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<HomogenizedThermalConductivity>()

@@ -15,22 +15,22 @@
 #ifndef USEROBJECT_H
 #define USEROBJECT_H
 
-//MOOSE includes
+// MOOSE includes
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
-#include "ParallelUniqueId.h"
-#include "SubProblem.h"
 #include "Restartable.h"
-#include "MooseMesh.h"
 #include "MeshChangedInterface.h"
+#include "ParallelUniqueId.h"
 
-//libMesh includes
-#include "libmesh/libmesh_common.h"
+// libMesh includes
 #include "libmesh/parallel.h"
 
+// Forward declarations
 class UserObject;
 class FEProblem;
+class SubProblem;
+class Assembly;
 
 template<>
 InputParameters validParams<UserObject>();

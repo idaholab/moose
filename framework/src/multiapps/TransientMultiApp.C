@@ -20,6 +20,7 @@
 #include "Output.h"
 #include "Console.h"
 #include "Transient.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"

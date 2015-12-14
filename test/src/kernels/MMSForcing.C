@@ -11,7 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "MMSForcing.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<MMSForcing>()

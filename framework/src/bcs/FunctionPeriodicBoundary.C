@@ -12,9 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "FunctionPeriodicBoundary.h"
 #include "FEProblem.h"
 #include "Function.h"
+#include "MooseMesh.h"
 
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),

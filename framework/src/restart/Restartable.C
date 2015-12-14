@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "InputParameters.h"
 #include "Restartable.h"
 #include "SubProblem.h"
 

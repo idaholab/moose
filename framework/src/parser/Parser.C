@@ -12,23 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include <string>
-#include <map>
-#include <fstream>
-#include <iomanip>
-#include <algorithm>
-
+// MOOSE includes
 #include "MooseUtils.h"
 #include "MooseInit.h"
 #include "InputParameters.h"
-
 #include "ActionFactory.h"
 #include "Action.h"
 #include "Factory.h"
 #include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
 #include "EmptyAction.h"
-
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Executioner.h"
@@ -36,20 +29,25 @@
 #include "MooseEnum.h"
 #include "MultiMooseEnum.h"
 #include "MultiApp.h"
-
 #include "GlobalParamsAction.h"
-
 #include "SyntaxTree.h"
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
-
 #include "MooseTypes.h"
+#include "CommandLine.h"
+
+// libMesh includes
+#include "libmesh/getpot.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
 
-// libMesh
-#include "libmesh/getpot.h"
+// C++ includes
+#include <string>
+#include <map>
+#include <fstream>
+#include <iomanip>
+#include <algorithm>
 
 // Free function for removing cli flags
 bool isFlag(const std::string s)

@@ -12,8 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
+#include "UserObjectWarehouse.h"
 #include "UserObjectIO.h"
 #include "UserObject.h"
+
+// C++ includes
 #include <vector>
 #include <cstring>
 

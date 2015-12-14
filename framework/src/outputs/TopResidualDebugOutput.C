@@ -18,6 +18,9 @@
 #include "MooseApp.h"
 #include "Material.h"
 #include "Console.h"
+#include "Action.h"
+#include "MooseMesh.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"

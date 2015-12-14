@@ -7,6 +7,7 @@
 
 #include "AnisoHeatConductionMaterial.h"
 #include "Function.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"

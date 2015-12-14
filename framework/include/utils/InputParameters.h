@@ -15,48 +15,48 @@
 #ifndef INPUTPARAMETERS_H
 #define INPUTPARAMETERS_H
 
-#include <vector>
-#include <set>
-#include <map>
-#include <sstream>
-
-// libMesh
-#include "libmesh/parameters.h"
-#include "libmesh/parsed_function.h"
-
+// MOOSE includes
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 #include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 
+// libMesh includes
+#include "libmesh/parameters.h"
+#include "libmesh/parsed_function.h"
+
 #ifdef LIBMESH_HAVE_FPARSER
-#include "libmesh/fparser.hh"
+#  include "libmesh/fparser.hh"
 #else
 template <typename T>
 class FunctionParserBase
 {};
 #endif
 
+// Forward declarations
 class MooseObject;
-class GlobalParamsAction;
 class Action;
-class Parser;
 class Problem;
 class MooseApp;
 class InputParameters;
 
+/**
+ * This is the templated validParams() function that every
+ * MooseObject-derived class is required to specialize.
+ */
 template<class T>
 InputParameters validParams();
 
 /**
- *
+ * The main MOOSE class responsible for handling user-defined
+ * parameters in almost every MOOSE system.
  */
 class InputParameters : public Parameters
 {
 public:
-  InputParameters(const InputParameters &rhs);
-  InputParameters(const Parameters &rhs);
+  InputParameters(const InputParameters & rhs);
+  InputParameters(const Parameters & rhs);
 
   virtual ~InputParameters();
 

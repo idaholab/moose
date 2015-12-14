@@ -4,7 +4,9 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "NSImposedVelocityDirectionBC.h"
+#include "MooseMesh.h"
 
 // Full specialization of the validParams function for this object
 template<>

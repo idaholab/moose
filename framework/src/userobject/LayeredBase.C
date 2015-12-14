@@ -12,7 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "LayeredBase.h"
+#include "UserObject.h"
+#include "SubProblem.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/mesh_tools.h"

@@ -11,17 +11,15 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #ifndef DTKINTERPOLATIONADAPTER_H
 #define DTKINTERPOLATIONADAPTER_H
-
-#include "Moose.h"
 
 #include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
-#include "libmesh/dtk_evaluator.h"
-
+// DTK includes
 #include <DTK_MeshManager.hpp>
 #include <DTK_MeshContainer.hpp>
 #include <DTK_MeshTraits.hpp>
@@ -30,6 +28,7 @@
 #include <DTK_FieldContainer.hpp>
 #include <DTK_FieldEvaluator.hpp>
 
+// Trilinos includes
 #include <Teuchos_RCP.hpp>
 #include <Teuchos_ArrayRCP.hpp>
 #include <Teuchos_DefaultMpiComm.hpp>
@@ -39,7 +38,7 @@ class DTKInterpolationAdapter
 public:
   DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim);
 
-  typedef DataTransferKit::MeshContainer<long unsigned int>                                  MeshContainerType;
+  typedef DataTransferKit::MeshContainer<long unsigned int>                    MeshContainerType;
   typedef DataTransferKit::FieldContainer<double>                              FieldContainerType;
   typedef DataTransferKit::MeshTraits<MeshContainerType>::global_ordinal_type  GlobalOrdinal;
   typedef DataTransferKit::FieldEvaluator<GlobalOrdinal,FieldContainerType>    EvaluatorType;

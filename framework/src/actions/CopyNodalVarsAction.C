@@ -12,10 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "CopyNodalVarsAction.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "MooseApp.h"
+#include "NonlinearSystem.h"
 
 #include <map>
 

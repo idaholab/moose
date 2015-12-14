@@ -11,7 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE includes
 #include "VectorMagnitudeAux.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<VectorMagnitudeAux>()

@@ -13,9 +13,9 @@
 /****************************************************************/
 #include "ExampleApp.h"
 #include "Moose.h"
-
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "ExampleConvection.h"
 #include "ExampleDirac.h"

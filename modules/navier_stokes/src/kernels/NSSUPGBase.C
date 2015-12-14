@@ -4,8 +4,9 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "NSSUPGBase.h"
 
+#include "NSSUPGBase.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<NSSUPGBase>()

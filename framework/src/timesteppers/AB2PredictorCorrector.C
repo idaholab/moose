@@ -23,6 +23,7 @@
 
 //libMesh includes
 #include "libmesh/nonlinear_solver.h"
+#include "libmesh/numeric_vector.h"
 
 // C++ Includes
 #include <iomanip>

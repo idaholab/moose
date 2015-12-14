@@ -21,6 +21,8 @@
 #include "Executioner.h"
 #include "MooseApp.h"
 #include "Moose.h"
+#include "FormattedTable.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<Console>()

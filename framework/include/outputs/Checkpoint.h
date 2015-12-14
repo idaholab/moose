@@ -18,15 +18,13 @@
 // MOOSE includes
 #include "BasicOutput.h"
 #include "FileOutput.h"
-#include "MaterialPropertyStorage.h"
-#include "RestartableData.h"
 #include "RestartableDataIO.h"
 
 #include <deque>
 
 // Forward declarations
 class Checkpoint;
-struct CheckpointFileNames;
+class MaterialPropertyStorage;
 
 template<>
 InputParameters validParams<Checkpoint>();

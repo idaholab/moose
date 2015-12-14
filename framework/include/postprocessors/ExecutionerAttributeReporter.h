@@ -20,7 +20,6 @@
 
 // Forward declarations
 class ExecutionerAttributeReporter;
-class EigenExecutionerBase;
 
 template<>
 InputParameters validParams<ExecutionerAttributeReporter>();

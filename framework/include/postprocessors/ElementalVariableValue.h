@@ -15,14 +15,17 @@
 #ifndef ELEMENTALVARIABLEVALUE_H
 #define ELEMENTALVARIABLEVALUE_H
 
+// MOOSE includes
 #include "GeneralPostprocessor.h"
-// libMesh
-#include "libmesh/elem.h"
 
+// Forward Declarations
+class ElementalVariableValue;
 class MooseMesh;
 
-//Forward Declarations
-class ElementalVariableValue;
+namespace libMesh
+{
+class Elem;
+}
 
 template<>
 InputParameters validParams<ElementalVariableValue>();

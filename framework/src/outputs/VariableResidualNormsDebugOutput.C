@@ -17,8 +17,9 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "Material.h"
+#include "NonlinearSystem.h"
 
-// libMesh includesx
+// libMesh includes
 #include "libmesh/transient_system.h"
 
 template<>

@@ -15,21 +15,20 @@
 #ifndef LAYEREDSIDEINTEGRAL_H
 #define LAYEREDSIDEINTEGRAL_H
 
+// MOOSE includes
 #include "SideIntegralVariableUserObject.h"
-
 #include "LayeredBase.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-//Forward Declarations
+// Forward Declarations
 class LayeredSideIntegral;
 
 template<>
 InputParameters validParams<LayeredSideIntegral>();
 
 /**
- * This UserObject computes volume integrals of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
+ * This UserObject computes volume integrals of a variable storing
+ * partial sums for the specified number of intervals in a direction
+ * (x,y,z).
  */
 class LayeredSideIntegral : public SideIntegralVariableUserObject, public LayeredBase
 {

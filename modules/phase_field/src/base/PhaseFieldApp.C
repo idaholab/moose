@@ -7,6 +7,7 @@
 #include "PhaseFieldApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 /*
  * Kernels

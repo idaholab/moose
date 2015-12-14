@@ -15,9 +15,10 @@
 #ifndef MULTIAPPNEARESTNODETRANSFER_H
 #define MULTIAPPNEARESTNODETRANSFER_H
 
+// MOOSE includes
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppNearestNodeTransfer;
 
 template<>

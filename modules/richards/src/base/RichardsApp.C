@@ -9,6 +9,7 @@
 #include "RichardsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 // UserObjects
 #include "RichardsVarNames.h"

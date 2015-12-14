@@ -15,18 +15,16 @@
 #ifndef TRANSFERWAREHOUSE_H
 #define TRANSFERWAREHOUSE_H
 
-#include <vector>
-#include <map>
-#include <set>
-
+// MOOSE includes
 #include "Warehouse.h"
 #include "MooseTypes.h"
 
+// Forward declarations
 class Transfer;
 class MultiAppTransfer;
 
 /**
- * Holds Transfers and provides some services
+ * Holds Transfers and provides some services.
  */
 class TransferWarehouse : public Warehouse<Transfer>
 {

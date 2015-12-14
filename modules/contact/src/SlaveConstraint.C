@@ -4,11 +4,13 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "SlaveConstraint.h"
 #include "FrictionalContactProblem.h"
 
 // Moose includes
 #include "SystemBase.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/plane.h"

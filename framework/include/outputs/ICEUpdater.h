@@ -19,7 +19,9 @@
 #include "AdvancedOutput.h"
 #include "Output.h"
 #include "InputParameters.h"
-#include "Updater.h"
+
+// Forward declarations
+class Updater;
 
 // Currently the ICE Updater requires TBB
 #ifdef LIBMESH_HAVE_TBB_API

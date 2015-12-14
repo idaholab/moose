@@ -4,11 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "SolidMechanicsAction.h"
 
+#include "SolidMechanicsAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<SolidMechanicsAction>()

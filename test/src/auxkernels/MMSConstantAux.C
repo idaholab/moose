@@ -11,7 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "MMSConstantAux.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<MMSConstantAux>()

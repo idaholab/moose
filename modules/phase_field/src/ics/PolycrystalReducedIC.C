@@ -4,9 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "PolycrystalReducedIC.h"
 #include "IndirectSort.h"
 #include "MooseRandom.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<PolycrystalReducedIC>()

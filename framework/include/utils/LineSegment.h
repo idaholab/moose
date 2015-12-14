@@ -15,21 +15,25 @@
 #ifndef LINESEGMENT_H
 #define LINESEGMENT_H
 
-#include "Moose.h"
+// MOOSE includes
+#include "Moose.h" // using namespace libMesh
 
 // libMesh includes
 #include "libmesh/point.h"
 
-// forward declares
-namespace libMesh {
+// forward declarations
+namespace libMesh
+{
   class Plane;
 }
 
-
+/**
+ * The LineSegment class is used by the LineMaterialSamplerBase class
+ * and for some ray tracing stuff.
+ */
 class LineSegment
 {
- public:
-
+public:
   LineSegment (const Point & p0, const Point & p1);
 
   virtual ~LineSegment();
@@ -72,7 +76,7 @@ class LineSegment
    */
   Real length() const { return (_p0 - _p1).size(); }
 
- private:
+private:
   bool closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const;
 
   Point _p0, _p1;

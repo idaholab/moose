@@ -25,6 +25,10 @@
 #include "VectorPostprocessor.h"
 #include "MooseUtils.h"
 #include "InfixIterator.h"
+#include "MooseApp.h"
+#include "PetscOutput.h"
+#include "FileOutput.h"
+#include "OversampleOutput.h"
 
 // A function, only available in this file, for adding the AdvancedOutput parameters. This is
 // used to eliminate code duplication between the difference specializations of the validParams function.

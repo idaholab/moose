@@ -18,9 +18,7 @@
 #include "ElementPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class ElementVariablePostprocessor;
 
 template<>

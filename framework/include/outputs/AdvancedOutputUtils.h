@@ -18,12 +18,9 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "MultiMooseEnum.h"
-#include "InputParameters.h"
 
-// STL includes
-#include <vector>
-#include <string>
-#include <map>
+// Forward declarations
+class InputParameters;
 
 /**
  * A structure for storing the various lists that contain

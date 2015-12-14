@@ -7,6 +7,7 @@
 #include "LinearElasticityApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "LinearElasticityMaterial.h"
 #include "SolidMechX.h"

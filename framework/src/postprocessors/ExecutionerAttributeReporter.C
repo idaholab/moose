@@ -14,7 +14,6 @@
 
 // MOOSE includes
 #include "ExecutionerAttributeReporter.h"
-#include "EigenExecutionerBase.h"
 #include "MooseApp.h"
 
 template<>

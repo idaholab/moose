@@ -4,9 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "GapHeatPointSourceMaster.h"
 #include "SystemBase.h"
 #include "PenetrationInfo.h"
+#include "MooseMesh.h"
 
 #include "libmesh/string_to_enum.h"
 

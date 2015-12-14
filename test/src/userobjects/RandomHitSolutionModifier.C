@@ -13,8 +13,8 @@
 /****************************************************************/
 
 #include "RandomHitSolutionModifier.h"
-
 #include "RandomHitUserObject.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<RandomHitSolutionModifier>()

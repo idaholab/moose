@@ -17,13 +17,16 @@
 
 #include "NodalVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodalProxyMaxValue;
-class MooseMesh;
 
 template<>
 InputParameters validParams<NodalProxyMaxValue>();
 
+/**
+ * Computes the max value at a node and broadcasts it to all
+ * processors.
+ */
 class NodalProxyMaxValue : public NodalVariablePostprocessor
 {
 public:

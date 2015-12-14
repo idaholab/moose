@@ -15,9 +15,10 @@
 #ifndef SIDEINTEGRALUSEROBJECT_H
 #define SIDEINTEGRALUSEROBJECT_H
 
-#include "SidePostprocessor.h"
+// MOOSE includes
+#include "SideUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideIntegralUserObject;
 
 template<>

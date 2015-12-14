@@ -4,11 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "CosseratStressDivergenceTensors.h"
 
+#include "CosseratStressDivergenceTensors.h"
 #include "Material.h"
 #include "ElasticityTensorR4.h"
 #include "RankTwoTensor.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<CosseratStressDivergenceTensors>()

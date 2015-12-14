@@ -14,6 +14,7 @@
 #include "DarcyThermoMechApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 #include "ModulesApp.h"
 
 template<>
@@ -50,11 +51,11 @@ DarcyThermoMechApp::registerApps()
 }
 
 void
-DarcyThermoMechApp::registerObjects(Factory & factory)
+DarcyThermoMechApp::registerObjects(Factory & /*factory*/)
 {
 }
 
 void
-DarcyThermoMechApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+DarcyThermoMechApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

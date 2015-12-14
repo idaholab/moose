@@ -15,21 +15,22 @@
 #ifndef COLUMNMAJORMATRIX_H
 #define COLUMNMAJORMATRIX_H
 
-#include "Moose.h"
-#include "MooseError.h"
+// MOOSE includes
+#include "Moose.h" // using namespace libMesh
+#include "MooseError.h" // mooseAssert
 
-//libMesh
+// libMesh includes
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
 
-#include <vector>
+// C++ includes
 #include <iomanip>
 
 /**
- * This class defines a Tensor that can change it's shape.
- * This means a 3x3x3x3 Tensor can be represented as a 9x9 or an 81x1.
- * Further, the values of this tensor are _COLUMN_ major ordered!
+ * This class defines a Tensor that can change its shape.  This means
+ * a 3x3x3x3 Tensor can be represented as a 9x9 or an 81x1.  Further,
+ * the values of this tensor are _COLUMN_ major ordered!
  */
 class ColumnMajorMatrix
 {
@@ -44,7 +45,7 @@ public:
   /**
    * Copy Constructor defined in terms of operator=()
    */
-  ColumnMajorMatrix(const ColumnMajorMatrix &rhs);
+  ColumnMajorMatrix(const ColumnMajorMatrix & rhs);
 
   /**
    * Constructor that fills in the ColumnMajorMatrix with values from a libMesh TypeTensor
@@ -53,10 +54,10 @@ public:
   ColumnMajorMatrix(const TypeTensor<Real> & tensor);
 
   explicit
-  ColumnMajorMatrix(const DenseMatrix<Real> &rhs);
+  ColumnMajorMatrix(const DenseMatrix<Real> & rhs);
 
   explicit
-  ColumnMajorMatrix(const DenseVector<Real> &rhs);
+  ColumnMajorMatrix(const DenseVector<Real> & rhs);
 
   /**
    * Constructor that takes in 3 vectors and uses them to create columns
@@ -94,13 +95,10 @@ public:
    */
   void print();
 
-
   /**
    * Prints to file
    */
-
   void print_scientific(std::ostream & os);
-
 
   /**
    * Fills the passed in tensor with the values from this tensor.
@@ -112,12 +110,10 @@ public:
    */
   void fill(DenseMatrix<Real> & rhs);
 
-
   /**
    * Fills the passed in dense vector with the values from this tensor.
    */
   void fill(DenseVector<Real> & rhs);
-
 
   /**
    * Returns a matrix that is the transpose of the matrix this
@@ -125,18 +121,17 @@ public:
    */
   ColumnMajorMatrix transpose() const;
 
-    /**
+  /**
    * Returns a matrix that is the deviatoric of the matrix this
    * was called on.
    */
   ColumnMajorMatrix deviatoric();
 
-     /**
+  /**
    * Returns a matrix that is the absolute value of the matrix this
    * was called on.
    */
   ColumnMajorMatrix abs();
-
 
   /**
    * Set the value of each of the diagonals to the passed in value.
@@ -375,7 +370,7 @@ ColumnMajorMatrix::print()
   for (unsigned int i=0; i<_n_rows; i++)
   {
     for (unsigned int j=0; j<_n_cols; j++)
-      Moose::out << std::setw(15) <<s(i,j)<<" ";
+      Moose::out << std::setw(15) << s(i,j) << " ";
 
     Moose::out <<std::endl;
   }
@@ -401,8 +396,8 @@ ColumnMajorMatrix::fill(TypeTensor<Real> & tensor)
 {
   mooseAssert(LIBMESH_DIM*LIBMESH_DIM == _n_entries, "Cannot fill tensor!  The ColumnMajorMatrix doesn't have the same number of entries!");
 
-  for (unsigned int j(0), index(0); j < LIBMESH_DIM; ++j)
-    for (unsigned int i(0); i < LIBMESH_DIM; ++i, ++index)
+  for (unsigned int j=0, index=0; j < LIBMESH_DIM; ++j)
+    for (unsigned int i=0; i < LIBMESH_DIM; ++i, ++index)
       tensor(i,j) = _values[index];
 }
 
@@ -412,8 +407,8 @@ ColumnMajorMatrix::fill(DenseMatrix<Real> &rhs)
 {
   mooseAssert(rhs.n()*rhs.m() == _n_entries, "Cannot fill dense matrix!  The ColumnMajorMatrix doesn't have the same number of entries!");
 
-  for (unsigned int j(0), index(0); j < rhs.m(); ++j)
-    for (unsigned int i(0); i < rhs.n(); ++i, ++index)
+  for (unsigned int j=0, index=0; j < rhs.m(); ++j)
+    for (unsigned int i=0; i < rhs.n(); ++i, ++index)
       rhs(i,j) = _values[index];
 }
 
@@ -424,10 +419,8 @@ ColumnMajorMatrix::fill(DenseVector<Real> &rhs)
 {
   mooseAssert(_n_rows == rhs.size(), "Vectors must be the same shape for a fill!");
 
-
-    for (unsigned int i=0; i<_n_rows; ++i)
-      rhs(i) = (*this)(i);
-
+  for (unsigned int i=0; i<_n_rows; ++i)
+    rhs(i) = (*this)(i);
 }
 
 
@@ -450,32 +443,32 @@ ColumnMajorMatrix::transpose() const
 inline ColumnMajorMatrix
 ColumnMajorMatrix::deviatoric()
 {
-    ColumnMajorMatrix & s = (*this);
+  ColumnMajorMatrix & s = (*this);
 
-    ColumnMajorMatrix ret_matrix(_n_rows, _n_cols), I(_n_rows, _n_cols);
+  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols), I(_n_rows, _n_cols);
 
-    I.identity();
+  I.identity();
 
-    for (unsigned int i=0; i<_n_rows; i++)
-      for (unsigned int j=0; j<_n_cols; j++)
-        ret_matrix(i,j) = s(i,j) - I(i,j) * (s.tr()/3.0);
+  for (unsigned int i=0; i<_n_rows; i++)
+    for (unsigned int j=0; j<_n_cols; j++)
+      ret_matrix(i,j) = s(i,j) - I(i,j) * (s.tr()/3.0);
 
-    return ret_matrix;
+  return ret_matrix;
 }
 
 
 inline ColumnMajorMatrix
 ColumnMajorMatrix::abs()
 {
-    ColumnMajorMatrix & s = (*this);
+  ColumnMajorMatrix & s = (*this);
 
-    ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
 
-    for (unsigned int j=0; j<_n_cols; j++)
-      for (unsigned int i=0; i<_n_rows; i++)
-        ret_matrix(i,j) = std::abs(s(i,j));
+  for (unsigned int j=0; j<_n_cols; j++)
+    for (unsigned int i=0; i<_n_rows; i++)
+      ret_matrix(i,j) = std::abs(s(i,j));
 
-    return ret_matrix;
+  return ret_matrix;
 }
 
 
@@ -707,13 +700,9 @@ ColumnMajorMatrix::operator+=(const TypeTensor<Real> & rhs)
 {
   mooseAssert((_n_rows == LIBMESH_DIM) && (_n_cols == LIBMESH_DIM), "Cannot perform matrix addition and assignment!  The shapes of the two operands are not compatible!");
 
-  for (unsigned int j(0); j < LIBMESH_DIM; ++j)
-  {
-    for (unsigned int i(0); i < LIBMESH_DIM; ++i)
-    {
+  for (unsigned int j=0; j < LIBMESH_DIM; ++j)
+    for (unsigned int i=0; i < LIBMESH_DIM; ++i)
       (*this)(i,j) += rhs(i,j);
-    }
-  }
 
   return *this;
 }

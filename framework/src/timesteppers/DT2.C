@@ -12,15 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "DT2.h"
 #include "FEProblem.h"
 #include "TimeIntegrator.h"
+#include "NonlinearSystem.h"
 
 //libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/transient_system.h"
+#include "libmesh/numeric_vector.h"
 
 // C++ Includes
 #include <iomanip>

@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "BlockAverageValue.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/mesh_tools.h"

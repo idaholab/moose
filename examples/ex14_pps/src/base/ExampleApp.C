@@ -14,6 +14,7 @@
 #include "ExampleApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 // Example 14 Includes
 #include "ExampleFunction.h"

@@ -16,6 +16,7 @@
 #include "BlockRestrictable.h"
 #include "Material.h"
 #include "FEProblem.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<BlockRestrictable>()

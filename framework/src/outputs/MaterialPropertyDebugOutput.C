@@ -19,7 +19,7 @@
 #include "Material.h"
 #include "ConsoleUtils.h"
 
-// libMesh includesx
+// libMesh includes
 #include "libmesh/transient_system.h"
 
 template<>

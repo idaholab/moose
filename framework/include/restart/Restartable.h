@@ -15,16 +15,18 @@
 #ifndef RESTARTABLE_H
 #define RESTARTABLE_H
 
-#include "InputParameters.h"
+// MOOSE includes
 #include "MooseTypes.h"
 #include "RestartableData.h"
 #include "ParallelUniqueId.h"
 
+// Forward declarations
 class PostprocessorData;
 class SubProblem;
+class InputParameters;
 
 /**
- * A  class for creating restricted objects
+ * A class for creating restricted objects
  * \see BlockRestartable BoundaryRestartable
  */
 class Restartable

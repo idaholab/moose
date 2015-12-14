@@ -19,6 +19,8 @@
 #include "MooseApp.h"
 #include "Moose.h"
 #include "Conversion.h"
+#include "MooseMesh.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/fe.h"

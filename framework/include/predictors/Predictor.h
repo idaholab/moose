@@ -15,20 +15,25 @@
 #ifndef PREDICTOR_H
 #define PREDICTOR_H
 
+// MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
-#include "libmesh/numeric_vector.h"
 
+// Forward declarations
 class Predictor;
 class FEProblem;
 class NonlinearSystem;
+
+namespace libMesh
+{
+template <typename T> class NumericVector;
+}
 
 template<>
 InputParameters validParams<Predictor>();
 
 /**
- * Base class for predictors
- *
+ * Base class for predictors.
  */
 class Predictor :
   public MooseObject,
@@ -55,7 +60,7 @@ protected:
   NumericVector<Number> & _solution_older;
   NumericVector<Number> & _solution_predictor;
 
-  ///
+  /// Amount by which to scale the predicted value.  Must be in [0,1].
   Real _scale;
 };
 

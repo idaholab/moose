@@ -12,10 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
+// MOOSE includes
 #include "Nemesis.h"
 #include "MooseApp.h"
 #include "FEProblem.h"
+#include "MooseMesh.h"
+
+// libMesh includes
+#include "libmesh/nemesis_io.h"
 
 template<>
 InputParameters validParams<Nemesis>()

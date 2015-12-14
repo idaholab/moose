@@ -12,12 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include <iomanip>
 
+// MOOSE includes
 #include "CommandLine.h"
 #include "MooseInit.h"
 #include "MooseUtils.h"
 #include "InputParameters.h"
+
+// C++ includes
+#include <iomanip>
+
 
 CommandLine::CommandLine(int argc, char *argv[]) :
     _get_pot(new GetPot(argc, argv)),

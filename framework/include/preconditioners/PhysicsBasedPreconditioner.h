@@ -15,17 +15,17 @@
 #ifndef PHYSICSBASEDPRECONDITIONER_H
 #define PHYSICSBASEDPRECONDITIONER_H
 
-//Global includes
-#include <vector>
 // MOOSE includes
 #include "MoosePreconditioner.h"
-//libMesh includes
+
+// libMesh includes
 #include "libmesh/preconditioner.h"
-#include "libmesh/system.h"
 #include "libmesh/linear_implicit_system.h"
 
+// C++ includes
+#include <vector>
 
-class FEProblem;
+// Forward declarations
 class NonlinearSystem;
 class PhysicsBasedPreconditioner;
 

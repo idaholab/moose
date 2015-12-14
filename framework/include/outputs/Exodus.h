@@ -19,12 +19,14 @@
 #include "AdvancedOutput.h"
 #include "OversampleOutput.h"
 
-// libMesh includes
-#include "libmesh/exodusII.h"
-#include "libmesh/exodusII_io.h"
-
 // Forward declarations
 class Exodus;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class ExodusII_IO;
+}
 
 template<>
 InputParameters validParams<Exodus>();
