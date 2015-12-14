@@ -72,6 +72,7 @@
 #include "Predictor.h"
 #include "Assembly.h"
 #include "Control.h"
+#include "ScalarInitialCondition.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -115,6 +116,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _aux(*this, "aux0"),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
+    _scalar_ics(/*threaded=*/false),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
     _pps_data(*this),
@@ -185,7 +187,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
 
   _functions.resize(n_threads);
-  _ics.resize(n_threads);
   _materials.resize(n_threads);
 
   _material_data.resize(n_threads);
@@ -403,8 +404,9 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    for (unsigned int i = 0; i < n_threads; i++)
-      _ics[i].initialSetup();
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      _ics.initialSetup(tid);
+    _scalar_ics.sort();
     projectSolution();
   }
 
@@ -1508,52 +1510,12 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
   // field IC
   if (hasVariable(var_name))
   {
-    MooseVariable & var = getVariable(0, var_name);
-    parameters.set<SystemBase *>("_sys") = &var.sys();
-
-    const std::vector<SubdomainName> & blocks = parameters.get<std::vector<SubdomainName> >("block");
-    const std::vector<BoundaryName> & boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
-
-    if (blocks.size() > 0 && boundaries.size() > 0)
-      mooseError("Both 'block' and 'boundary' parameters were specified in initial condition '" << name << "'.  You can only you either of them.");
-
-    // boundary-restricted IC
-    else if (boundaries.size() > 0 && blocks.size() == 0)
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      if (var.isNodal())
-        for (unsigned int tid=0; tid < libMesh::n_threads(); tid++)
-          for (unsigned int i = 0; i < boundaries.size(); i++)
-          {
-            BoundaryID bnd_id = _mesh.getBoundaryID(boundaries[i]);
-            std::ostringstream oss;
-            oss << name << "_" << bnd_id;
-            _ics[tid].addBoundaryInitialCondition(var_name, bnd_id,
-                                                  MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, oss.str(), parameters, tid)));
-          }
-
-      else
-        mooseError("You are trying to set a boundary restricted variable on non-nodal variable.  That is not allowed.");
-    }
-
-    // block-restricted IC
-    else
-    {
-      // this means: either no block and no boundary parameters specified or just block specified
-      for (unsigned int tid=0; tid < libMesh::n_threads(); tid++)
-      {
-        if (blocks.size() > 0)
-          for (unsigned int i = 0; i < blocks.size(); i++)
-          {
-            SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-            std::ostringstream oss;
-            oss << name << "_" << blk_id;
-            _ics[tid].addInitialCondition(var_name, blk_id,
-                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, oss.str(), parameters, tid)));
-          }
-        else
-          _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID,
-                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters, tid)));
-      }
+      MooseVariable & var = getVariable(tid, var_name);
+      parameters.set<SystemBase *>("_sys") = &var.sys();
+      MooseSharedPointer<InitialCondition> ic = MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters, tid));
+      _ics.addObject(ic, tid);
     }
   }
 
@@ -1562,11 +1524,10 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
   {
     MooseVariableScalar & var = getScalarVariable(0, var_name);
     parameters.set<SystemBase *>("_sys") = &var.sys();
-
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-      _ics[tid].addScalarInitialCondition(var_name,
-                                          MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create(ic_name, name, parameters, tid)));
+    MooseSharedPointer<ScalarInitialCondition> ic = MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create(ic_name, name, parameters));
+    _scalar_ics.addObject(ic);
   }
+
   else
     mooseError("Variable '" << var_name << "' requested in initial condition '" << name << "' does not exist.");
 }
@@ -1595,14 +1556,12 @@ FEProblem::projectSolution()
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the
   // processor with highest ID
-  if (processor_id() == (n_processors()-1))
+  if (processor_id() == (n_processors()-1) && _scalar_ics.hasActiveObjects())
   {
-    THREAD_ID tid = 0;
-
-    const std::vector<ScalarInitialCondition *> & ics = _ics[tid].activeScalar();
-    for (std::vector<ScalarInitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
+    const std::vector<MooseSharedPointer<ScalarInitialCondition> > & ics = _scalar_ics.getActiveObjects();
+    for (std::vector<MooseSharedPointer<ScalarInitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
     {
-      ScalarInitialCondition * ic = (*it);
+      MooseSharedPointer<ScalarInitialCondition> ic = (*it);
 
       MooseVariableScalar & var = ic->variable();
       var.reinit();
@@ -2650,7 +2609,6 @@ FEProblem::updateActiveObjects()
     _nl.updateActive(tid);
     _aux.updateActive(tid);
   }
-
   _control_storage.updateActive();
   _multi_apps.updateActive();
   _transient_multi_apps.updateActive();

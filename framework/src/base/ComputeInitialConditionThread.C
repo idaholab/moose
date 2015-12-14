@@ -32,6 +32,8 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
+  const InitialConditionStorage & storage = _fe_problem.getInitialConditionStorage();
+
   // Iterate over all the elements in the range
   for (ConstElemRange::const_iterator elem_it=range.begin(); elem_it != range.end(); ++elem_it)
   {
@@ -39,17 +41,17 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
 
     SubdomainID subdomain = elem->subdomain_id();
 
-    _fe_problem._ics[_tid].updateActiveICs(subdomain);
     _fe_problem.prepare(elem, _tid);
 
-    const std::vector<InitialCondition *> & ics = _fe_problem._ics[_tid].active();
-    for (std::vector<InitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
+    if (storage.hasActiveBlockObjects(subdomain, _tid))
     {
-      InitialCondition * ic = (*it);
-      ic->compute();
+      const std::vector<MooseSharedPointer<InitialCondition> > & ics = storage.getActiveBlockObjects(subdomain, _tid);
+      for (std::vector<MooseSharedPointer<InitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
+        (*it)->compute();
     }
   }
 }
+
 
 void
 ComputeInitialConditionThread::join(const ComputeInitialConditionThread & /*y*/)

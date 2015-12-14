@@ -28,7 +28,7 @@
 #include "MarkerWarehouse.h"
 #include "TransferWarehouse.h"
 #include "UserObjectWarehouse.h"
-#include "InitialConditionWarehouse.h"
+#include "InitialConditionStorage.h"
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
@@ -57,6 +57,7 @@ class JacobianBlock;
 class Control;
 class MultiApp;
 class TransientMultiApp;
+class ScalarInitialCondition;
 
 // libMesh forward declarations
 namespace libMesh
@@ -784,6 +785,11 @@ public:
   ///@}
 
   /**
+   * Return InitialCondition storage
+   */
+  const InitialConditionStorage & getInitialConditionStorage() const { return _ics; }
+
+  /**
    * Get the solver parameters
    */
   SolverParams & solverParams();
@@ -992,8 +998,11 @@ protected:
   /// functions
   std::vector<std::map<std::string, MooseSharedPointer<Function> > > _functions;
 
-  /// Initial condition warehouses (one for each thread)
-  std::vector<InitialConditionWarehouse> _ics;
+  ///@{
+  /// Initial condition storage
+  InitialConditionStorage _ics;
+  MooseObjectStorageBase<ScalarInitialCondition> _scalar_ics; // use base b/c of setup methods
+  ///@}
 
   // material properties
   MaterialPropertyStorage & _material_props;
@@ -1146,8 +1155,6 @@ private:
   friend class EigenSystem;
   friend class Resurrector;
   friend class RestartableDataIO;
-  friend class ComputeInitialConditionThread;
-  friend class ComputeBoundaryInitialConditionThread;
   friend class Restartable;
   friend class DisplacedProblem;
 };
