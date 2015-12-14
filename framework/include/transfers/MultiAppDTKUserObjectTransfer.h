@@ -24,6 +24,9 @@
 #include "MooseVariableInterface.h"
 #include "MultiAppDTKUserObjectEvaluator.h"
 
+// libMesh includes
+#include "libmesh/dtk_adapter.h"
+
 // DTK includes
 #include <DTK_VolumeSourceMap.hpp>
 #include <DTK_MeshManager.hpp>
