@@ -23,7 +23,11 @@
 // Forward declarations
 class FEProblem;
 class NonlinearSystem;
-
+class IntegratedBC;
+class DGKernel;
+class TimeKernel;
+class KernelBase;
+class KernelStorage;
 
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -47,6 +51,19 @@ protected:
   NonlinearSystem & _sys;
   Moose::KernelType _kernel_type;
   unsigned int _num_cached;
+
+  /// Reference to BC storage structures
+  const MooseObjectStorage<IntegratedBC> & _integrated_bcs;
+
+  /// Reference to DGKernel storage structure
+  const MooseObjectStorage<DGKernel> & _dg_kernels;
+
+  ///@{
+  /// Reference to Kernel storage structures
+  const KernelStorage & _kernels;
+  const MooseObjectStorage<KernelBase> & _time_kernels;
+  const MooseObjectStorage<KernelBase> & _non_time_kernels;
+  ///@}
 };
 
 #endif //COMPUTERESIDUALTHREAD_H

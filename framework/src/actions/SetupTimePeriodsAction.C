@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "SetupTimePeriodsAction.h"
-#include "TimePeriod.h"
+#include "TimePeriodOld.h"
 #include "FEProblem.h"
 #include "Transient.h"
 
@@ -44,7 +44,10 @@ SetupTimePeriodsAction::act()
 {
   if (_problem.get() != NULL)
   {
-    TimePeriod & tp = _problem->addTimePeriod(_name, getParam<Real>("start"));
+    if (!name().empty()) // empty name indicates the default time period
+      mooseDeprecated("TimePeriods are deprecated, please update your application to use Controls.");
+
+    TimePeriodOld & tp = _problem->addTimePeriod(_name, getParam<Real>("start"));
 
     if (_pars.isParamValid("active_kernels"))
       tp.addActiveObjects("kernels", getParam<std::vector<std::string> >("active_kernels"));
@@ -57,4 +60,3 @@ SetupTimePeriodsAction::act()
       tp.addInactiveObjects("bcs", getParam<std::vector<std::string> >("inactive_bcs"));
   }
 }
-

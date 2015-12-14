@@ -82,6 +82,7 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<std::vector<Point> >("move_positions", "The positions corresponding to each move_app.");
 
+  params.declareControllable("enable");
   params.registerBase("MultiApp");
 
   return params;

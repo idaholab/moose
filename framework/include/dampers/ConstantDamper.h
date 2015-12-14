@@ -25,9 +25,9 @@ template<>
 InputParameters validParams<ConstantDamper>();
 
 /**
- * Simple constant damper
+ * Simple constant damper.
  *
- * Modifies the npn-linear step by a constant damping factor
+ * Modifies the non-linear step by applying a constant damping factor
  */
 class ConstantDamper : public Damper
 {
@@ -35,10 +35,9 @@ public:
   ConstantDamper(const InputParameters & parameters);
 
 protected:
+
   /**
-   * This MUST be overridden by a child ConstantDamper.
-   *
-   * This is where they actually compute a number between 0 and 1.
+   * Return the constant damping value.
    */
   virtual Real computeQpDamping();
 
