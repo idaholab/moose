@@ -17,7 +17,6 @@
 
 #include "SystemBase.h"
 #include "KernelStorage.h"
-#include "DiracKernelWarehouse.h"
 #include "ConstraintStorage.h"
 #include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
@@ -39,6 +38,7 @@ class NodalBC;
 class PresetNodalBC;
 class DGKernel;
 class ScalarKernel;
+class DiracKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -435,7 +435,7 @@ public:
   const MooseObjectStorage<KernelBase> & getNonTimeKernelStorage() { return _non_time_kernels; }
 
   const MooseObjectStorage<DGKernel> & getDGKernelStorage() { return _dg_kernels; }
-  const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
+  const MooseObjectStorage<DiracKernel> & getDiracKernelStorage() { return _dirac_kernels; }
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectStorage<IntegratedBC> & getIntegratedBCStorage() { return _integrated_bcs; }
   const MooseObjectStorage<Damper> & getDamperStorage() { return _dampers; }
@@ -529,7 +529,7 @@ protected:
   ///@}
 
   /// Dirac Kernel storage for each thread
-  std::vector<DiracKernelWarehouse> _dirac_kernels;
+  MooseObjectStorage<DiracKernel> _dirac_kernels;
 
   /// Dampers for each thread
   MooseObjectStorage<Damper> _dampers;
