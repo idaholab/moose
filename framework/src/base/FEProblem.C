@@ -3448,6 +3448,10 @@ FEProblem::computeTransientImplicitResidual(Real time, const NumericVector<Numbe
 void
 FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<Number>& residual, Moose::KernelType type)
 {
+  residual.zero();
+  residualVector(Moose::KT_NONTIME).zero();
+  residualVector(Moose::KT_TIME).zero();
+
   _nl.setSolution(soln);
 
   _nl.zeroVariablesForResidual();
