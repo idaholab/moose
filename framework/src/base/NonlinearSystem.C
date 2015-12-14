@@ -195,7 +195,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 
   unsigned int n_threads = libMesh::n_threads();
   _nodal_kernels.resize(n_threads);
-  _dirac_kernels.resize(n_threads);
 }
 
 NonlinearSystem::~NonlinearSystem()
@@ -326,7 +325,7 @@ NonlinearSystem::initialSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.initialSetup(tid);
-    _dirac_kernels[tid].initialSetup();
+    _dirac_kernels.initialSetup(tid);
     if (_doing_dg)
       _dg_kernels.initialSetup(tid);
 
@@ -345,7 +344,7 @@ NonlinearSystem::timestepSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.timestepSetup(tid);
-    _dirac_kernels[tid].timestepSetup();
+    _dirac_kernels.timestepSetup(tid);
     if (_doing_dg)
       _dg_kernels.timestepSetup(tid);
     _dampers.timestepSetup(tid);
@@ -661,7 +660,7 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
 
     MooseSharedPointer<DiracKernel> kernel = MooseSharedNamespace::static_pointer_cast<DiracKernel>(_factory.create(kernel_name, name, parameters, tid));
 
-    _dirac_kernels[tid].addDiracKernel(kernel);
+    _dirac_kernels.addObject(kernel, tid);
   }
 }
 
@@ -1201,7 +1200,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   {
     _kernels.residualSetup(tid);
 
-    _dirac_kernels[tid].residualSetup();
+    _dirac_kernels.residualSetup(tid);
     if (_doing_dg)
       _dg_kernels.residualSetup(tid);
     _dampers.residualSetup(tid);
@@ -1806,7 +1805,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   {
     _kernels.jacobianSetup(tid);
 
-    _dirac_kernels[tid].jacobianSetup();
+    _dirac_kernels.jacobianSetup(tid);
     if (_doing_dg)
       _dg_kernels.jacobianSetup(tid);
     _dampers.jacobianSetup(tid);
@@ -2141,6 +2140,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   _dampers.updateActive(tid);
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
+  _dirac_kernels.updateActive(tid);
   _kernels.updateActive(tid);
   if (tid == 0)
   {
@@ -2183,17 +2183,20 @@ NonlinearSystem::computeDiracContributions(SparseMatrix<Number> * jacobian)
 
   std::set<const Elem *> dirac_elements;
 
-  // TODO: Need a threading fix... but it's complicated!
-  for (std::vector<DiracKernel *>::const_iterator dirac_kernel_it = _dirac_kernels[0].all().begin();
-      dirac_kernel_it != _dirac_kernels[0].all().end();
-      ++dirac_kernel_it)
+  if (_dirac_kernels.hasActiveObjects())
   {
-    (*dirac_kernel_it)->clearPoints();
-    (*dirac_kernel_it)->addPoints();
-  }
 
-  if (_dirac_kernels[0].all().size() > 0)
-  {
+    // TODO: Need a threading fix... but it's complicated!
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    {
+      const std::vector<MooseSharedPointer<DiracKernel> > & dkernels = _dirac_kernels.getActiveObjects(tid);
+      for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
+      {
+        (*it)->clearPoints();
+        (*it)->addPoints();
+      }
+    }
+
     ComputeDiracThread cd(_fe_problem, *this, jacobian);
 
     _fe_problem.getDiracElements(dirac_elements);
@@ -2422,16 +2425,7 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
 bool
 NonlinearSystem::containsTimeKernel()
 {
-  //bool time_kernels = false;
   return _time_kernels.hasActiveObjects();
-
-  /*
-  for (std::vector<KernelBase *>::const_iterator it = _kernels[0].all().begin(); it != _kernels[0].all().end(); ++it)
-    if (dynamic_cast<TimeKernel *>(*it) != NULL)
-      time_kernels = true;
-
-  return time_kernels;
-  */
 }
 
 void
@@ -2463,11 +2457,4 @@ bool
 NonlinearSystem::doingDG() const
 {
   return _doing_dg;
-}
-
-const DiracKernelWarehouse &
-NonlinearSystem::getDiracKernelWarehouse(THREAD_ID tid)
-{
-  mooseAssert(tid < _dirac_kernels.size(), "Thread ID does not exist.");
-  return _dirac_kernels[tid];
 }

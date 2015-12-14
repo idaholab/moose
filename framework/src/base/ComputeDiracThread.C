@@ -20,7 +20,6 @@
 #include "Problem.h"
 #include "NonlinearSystem.h"
 #include "MooseVariable.h"
-#include "DiracKernelWarehouse.h"
 #include "DiracKernel.h"
 #include "Assembly.h"
 
@@ -32,14 +31,16 @@ ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
                                        SparseMatrix<Number> * jacobian) :
     ThreadedElementLoop<DistElemRange>(feproblem, system),
     _jacobian(jacobian),
-    _sys(system)
+    _sys(system),
+    _dirac_kernels(_sys.getDiracKernelStorage())
 {}
 
 // Splitting Constructor
 ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split) :
     ThreadedElementLoop<DistElemRange>(x, split),
     _jacobian(x._jacobian),
-    _sys(x._sys)
+    _sys(x._sys),
+    _dirac_kernels(x._dirac_kernels)
 {
 }
 
@@ -59,8 +60,8 @@ void
 ComputeDiracThread::subdomainChanged()
 {
   std::set<MooseVariable *> needed_moose_vars;
-  const std::vector<DiracKernel *> & dkernels = _sys.getDiracKernelWarehouse(_tid).all();
-  for (std::vector<DiracKernel *>::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
+  const std::vector<MooseSharedPointer<DiracKernel> > & dkernels = _dirac_kernels.getActiveObjects(_tid);
+  for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
   {
     // Update the dependent variables for the dirac kernel
     const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
@@ -75,6 +76,7 @@ ComputeDiracThread::onElement(const Elem * elem)
 {
   bool has_dirac_kernels_on_elem = _fe_problem.reinitDirac(elem, _tid);
   std::set<MooseVariable *> needed_moose_vars;
+  const std::vector<MooseSharedPointer<DiracKernel> > & dkernels = _dirac_kernels.getActiveObjects(_tid);
 
   if (has_dirac_kernels_on_elem)
   {
@@ -83,15 +85,11 @@ ComputeDiracThread::onElement(const Elem * elem)
     // DiracKernels and check whether this is the case.
     bool need_reinit_materials = false;
     {
-      std::vector<DiracKernel *>::const_iterator
-        dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin(),
-        dirac_kernel_end = _sys.getDiracKernelWarehouse(_tid).all().end();
-
-      for (; dirac_kernel_it != dirac_kernel_end; ++dirac_kernel_it)
+      for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
       {
         // If any of the DiracKernels have had getMaterialProperty()
         // called, we need to reinit Materials.
-        if ((*dirac_kernel_it)->getMaterialPropertyCalled())
+        if ((*it)->getMaterialPropertyCalled())
         {
           need_reinit_materials = true;
           break;
@@ -102,13 +100,9 @@ ComputeDiracThread::onElement(const Elem * elem)
     if (need_reinit_materials)
       _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
 
-    std::vector<DiracKernel *>::const_iterator
-      dirac_kernel_it = _sys.getDiracKernelWarehouse(_tid).all().begin(),
-      dirac_kernel_end = _sys.getDiracKernelWarehouse(_tid).all().end();
-
-    for (; dirac_kernel_it != dirac_kernel_end; ++dirac_kernel_it)
+    for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
     {
-      DiracKernel * dirac_kernel = *dirac_kernel_it;
+      MooseSharedPointer<DiracKernel> dirac_kernel = *it;
 
       if (dirac_kernel->hasPointsOnElem(elem))
       {
