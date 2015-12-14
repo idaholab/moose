@@ -246,7 +246,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
-    _feature_count(std::numeric_limits<unsigned int>::max()),
+    _feature_count(-1),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
@@ -333,7 +333,7 @@ FeatureFloodCount::initialize()
   _communicator.set_union(_ghosted_entity_ids);
 
   // Reset the feature count
-  _feature_count = std::numeric_limits<unsigned int>::max();
+  _feature_count = -1;
 }
 
 void
@@ -452,19 +452,6 @@ FeatureFloodCount::finalize()
 Real
 FeatureFloodCount::getValue()
 {
-  /**
-   * _feature_count normally gets calculated in updateFieldInfo. However
-   * if the user is using this object as a Postprocessor and doesn't need
-   * any field information, we may need to calculate the number on
-   * demand.
-   */
-  if (_feature_count == std::numeric_limits<unsigned int>::max())
-  {
-    _feature_count = 0;
-    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-      _feature_count += _feature_sets[map_num].size();
-  }
-
   return _feature_count;
 }
 
@@ -886,6 +873,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
     _feature_sets[map_num].clear();
 
   // Now consolidate the data structure
+  _feature_count = 0;
   for (processor_id_type rank = 0; rank < n_procs; ++rank)
   {
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
@@ -897,7 +885,10 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 //        std::cout << *it;
 
         if (!it->_merged)
+        {
           _feature_sets[map_num].push_back(MooseSharedPointer<FeatureData>(new FeatureData(*it)));
+          ++_feature_count;
+        }
       }
 
       _partial_feature_sets[rank][map_num].clear();
@@ -1022,8 +1013,8 @@ FeatureFloodCount::updateFieldInfo()
     }
   }
 
-  // Assign the feature number to the class member variable for use later
-  _feature_count = feature_number;
+  mooseAssert(_feature_count == feature_number, "feature_number does not agree with previously calculated _feature_count");
+
 
 //  std::cerr << "Proc " << processor_id() << ": " << _feature_count << std::endl;
 

@@ -321,7 +321,8 @@ protected:
   /// The data structure used to find neighboring elements give a node ID
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
 
-  /// This data structure is used to keep track of which bubbles are owned by which variables (index).
+  /// This data structure is used to keep track of which bubbles are owned by which variables.
+  /// It is used single_map_mode only
   std::vector<unsigned int> _region_to_var_idx;
 
 //  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)

@@ -164,16 +164,16 @@ GrainTracker::finalize()
 
   FeatureFloodCount::finalize();
 
-//  Moose::perf_log.push("trackGrains()","GrainTracker");
-//  trackGrains();
-//  Moose::perf_log.pop("trackGrains()","GrainTracker");
+  Moose::perf_log.push("trackGrains()","GrainTracker");
+  trackGrains();
+  Moose::perf_log.pop("trackGrains()","GrainTracker");
 //
 //  Moose::perf_log.push("remapGrains()","GrainTracker");
 //  if (_remap)
 //    remapGrains();
 //  Moose::perf_log.pop("remapGrains()","GrainTracker");
 
-//  updateFieldInfo();
+  updateFieldInfo();
 //  Moose::perf_log.pop("finalize()","GrainTracker");
 
 //  // Calculate and out output bubble volume data
@@ -355,17 +355,17 @@ GrainTracker::trackGrains()
     }
   }
 
-//  // Print out info on the number of unique grains per variable vs the incoming bubble set sizes
-//  if (_t_step > _tracking_step)
-//  {
-//    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    {
-//      Moose::out << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _feature_sets[map_num].size();
-//      if (map_sizes[map_num] != _feature_sets[map_num].size())
-//        Moose::out << "**";
-//    }
-//    Moose::out << std::endl;
-//  }
+  // Print out info on the number of unique grains per variable vs the incoming bubble set sizes
+  if (_t_step > _tracking_step)
+  {
+    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    {
+      _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _feature_sets[map_num].size();
+      if (map_sizes[map_num] != _feature_sets[map_num].size())
+        _console << "**";
+    }
+    _console << std::endl;
+  }
 
 //  std::vector<UniqueGrain *> new_grains; new_grains.reserve(_unique_grains.size());
 //
@@ -494,13 +494,15 @@ GrainTracker::trackGrains()
     }
     else
     {
-//      for (unsigned int feature_num = 0; feature_num < _features.size(); ++feature_num)
-//      {
-//        MooseSharedPointer<FeatureData> feature_ptr = _features[feature_num];
-//
-//        feature_ptr->_status = MARKED;
-//        _unique_grains[feature_num] = feature_ptr;
-//      }
+      unsigned int counter = 0;
+      for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+        for (unsigned int feature_num = 0; feature_num < _feature_sets[map_num].size(); ++feature_num)
+        {
+          MooseSharedPointer<FeatureData> feature_ptr = _feature_sets[map_num][feature_num];
+
+          feature_ptr->_status = MARKED;
+          _unique_grains[counter++] = feature_ptr;
+        }
     }
     return;  // Return early - no matching or tracking to do
   }
@@ -510,114 +512,120 @@ GrainTracker::trackGrains()
    * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
    * index whose centroid is closest to this unique grain.
    */
-  std::map<unsigned int, std::vector<unsigned int> > new_grain_idx_to_existing_grain_idx;
+  std::map<std::pair<unsigned int, unsigned int>, std::vector<unsigned int> > new_grain_idx_to_existing_grain_idx;
 
-//  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator curr_it = _unique_grains.begin(); curr_it != _unique_grains.end(); ++curr_it)
-//  {
-//    if (curr_it->second->_status == INACTIVE)                         // Don't try to find matches for inactive grains
-//      continue;
-//
-//    unsigned int closest_match_idx;
-//    // bool found_one = false;
-//    Real min_centroid_diff = std::numeric_limits<Real>::max();
-//
-//    for (unsigned int new_grain_idx = 0; new_grain_idx < _features.size(); ++new_grain_idx)
-//    {
-//      if (curr_it->second->_var_idx == _features[new_grain_idx]->_var_idx)  // Do the variables indicies match?
-//      {
-//        Real curr_centroid_diff = 0; //boundingRegionDistance(curr_it->second->sphere_ptrs, new_grains[new_grain_idx]->sphere_ptrs, true);
-//        if (curr_centroid_diff <= min_centroid_diff)
-//        {
-//          // found_one = true;
-//          closest_match_idx = new_grain_idx;
-//          min_centroid_diff = curr_centroid_diff;
-//        }
-//      }
-//    }
-//
-//    // Keep track of which new grains the existing ones want to map to
-//    new_grain_idx_to_existing_grain_idx[closest_match_idx].push_back(curr_it->first);
-//  }
+  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator curr_it = _unique_grains.begin(); curr_it != _unique_grains.end(); ++curr_it)
+  {
+    if (curr_it->second->_status == INACTIVE)                         // Don't try to find matches for inactive grains
+      continue;
 
-//  /**
-//   * It's possible that multiple existing grains will map to a single new grain.  This will happen any time a grain disappears during this time step.
-//   * We need to figure out the rightful owner in this case and inactivate the old grain.
-//   */
-//  for (std::map<unsigned int, std::vector<unsigned int> >::iterator it = new_grain_idx_to_existing_grain_idx.begin();
-//       it != new_grain_idx_to_existing_grain_idx.end(); ++it)
-//  {
-//    // If there is only a single mapping - we've found the correct grain
-//    if (it->second.size() == 1)
-//    {
-//      unsigned int curr_idx = (it->second)[0];
-//      _features[it->first]->_status = MARKED;               // Mark it
-//      _unique_grains[curr_idx] = _features[it->first];       // transfer ownership of new grain
-//    }
-//
-//    // More than one existing grain is mapping to a new one
-//    else
-//    {
-//      Real min_centroid_diff = std::numeric_limits<Real>::max();
-//      unsigned int min_idx = 0;
-//      for (unsigned int i = 0; i < it->second.size(); ++i)
-//      {
-//        Real curr_centroid_diff = 0; // boundingRegionDistance(new_grains[it->first]->sphere_ptrs, _unique_grains[(it->second)[i]]->sphere_ptrs, true);
-//        if (curr_centroid_diff <= min_centroid_diff)
-//        {
-//          min_idx = i;
-//          min_centroid_diff = curr_centroid_diff;
-//        }
-//      }
-//
-//      // One more time over the competing indices.  We will mark the non-winners as inactive and transfer ownership to the winner (the closest centroid).
-//      for (unsigned int i = 0; i < it->second.size(); ++i)
-//      {
-//        unsigned int curr_idx = (it->second)[i];
-//        if (i == min_idx)
-//        {
-//          _features[it->first]->_status = MARKED;               // Mark it
-//          _unique_grains[curr_idx] = _features[it->first];      // transfer ownership of new grain
-//        }
-//        else
-//        {
-//          Moose::out << "Marking Grain " << curr_idx << " as INACTIVE (varible index: "
-//                     << _unique_grains[curr_idx]->_var_idx <<  ")\n";
-//          _unique_grains[curr_idx]->_status = INACTIVE;
-//        }
-//      }
-//    }
-//  }
-//
-//  /**
-//   * Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
-//   */
-//  for (unsigned int i = 0; i < _features.size(); ++i)
-//    if (_features[i]->_status == NOT_MARKED)
-//    {
-//      Moose::out << COLOR_YELLOW
-//                 << "*****************************************************************************\n"
-//                 << "Couldn't find a matching grain while working on variable index: " << _features[i]->_var_idx
-//                 << "\nCreating new unique grain: " << _unique_grains.size()
-//                 << "\n*****************************************************************************\n" << COLOR_DEFAULT;
-//      _features[i]->_status = MARKED;
-//      _unique_grains[_unique_grains.size()] = _features[i];   // transfer ownership
-//    }
-//
-//
-//  /**
-//   * Finally we need to mark any grains in the unique list that aren't marked as inactive.  These are the variables that
-//   * unique grains that didn't match up to any bounding sphere.  Should only happen if it's the last active grain for
-//   * this particular variable.
-//   */
-//  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
-//    if (it->second->_status == NOT_MARKED)
-//    {
-//      Moose::out << "Marking Grain " << it->first << " as INACTIVE (varible index: "
-//                    << it->second->_var_idx <<  ")\n";
-//      it->second->_status = INACTIVE;
-//    }
-//
-//
+    unsigned int closest_match_idx;
+    // bool found_one = false;
+    Real min_centroid_diff = std::numeric_limits<Real>::max();
+
+    // We only need to examine grains that have matching variable indices
+    unsigned int map_idx = _single_map_mode ? 0 : curr_it->second->_var_idx;
+    for (unsigned int new_grain_idx = 0; new_grain_idx < _feature_sets[map_idx].size(); ++new_grain_idx)
+    {
+      if (curr_it->second->_var_idx == _feature_sets[map_idx][new_grain_idx]->_var_idx)  // Do the variables indicies match?
+      {
+        Real curr_centroid_diff = 0; //boundingRegionDistance(curr_it->second->sphere_ptrs, new_grains[new_grain_idx]->sphere_ptrs, true);
+        if (curr_centroid_diff <= min_centroid_diff)
+        {
+          // found_one = true;
+          closest_match_idx = new_grain_idx;
+          min_centroid_diff = curr_centroid_diff;
+        }
+      }
+    }
+
+    // Keep track of which new grains the existing ones want to map to
+    new_grain_idx_to_existing_grain_idx[std::make_pair(map_idx, closest_match_idx)].push_back(curr_it->first);
+  }
+
+  /**
+   * It's possible that multiple existing grains will map to a single new grain.  This will happen any time a grain disappears during this time step.
+   * We need to figure out the rightful owner in this case and inactivate the old grain.
+   */
+  for (std::map<std::pair<unsigned int, unsigned int>, std::vector<unsigned int> >::iterator it = new_grain_idx_to_existing_grain_idx.begin();
+       it != new_grain_idx_to_existing_grain_idx.end(); ++it)
+  {
+    // If there is only a single mapping - we've found the correct grain
+    if (it->second.size() == 1)
+    {
+      unsigned int curr_idx = (it->second)[0];                // map index      feature index
+      MooseSharedPointer<FeatureData> feature_ptr = _feature_sets[it->first.first][it->first.second];
+      feature_ptr->_status = MARKED;                          // Mark it
+      _unique_grains[curr_idx] = feature_ptr;                 // transfer ownership of new grain
+    }
+
+    // More than one existing grain is mapping to a new one
+    else
+    {
+      Real min_centroid_diff = std::numeric_limits<Real>::max();
+      unsigned int min_idx = 0;
+      for (unsigned int i = 0; i < it->second.size(); ++i)
+      {
+        Real curr_centroid_diff = 0; // boundingRegionDistance(new_grains[it->first]->sphere_ptrs, _unique_grains[(it->second)[i]]->sphere_ptrs, true);
+        if (curr_centroid_diff <= min_centroid_diff)
+        {
+          min_idx = i;
+          min_centroid_diff = curr_centroid_diff;
+        }
+      }
+
+      // One more time over the competing indices.  We will mark the non-winners as inactive and transfer ownership to the winner (the closest centroid).
+      for (unsigned int i = 0; i < it->second.size(); ++i)
+      {
+        unsigned int curr_idx = (it->second)[i];
+        if (i == min_idx)
+        {
+          MooseSharedPointer<FeatureData> feature_ptr = _feature_sets[it->first.first][it->first.second];
+          feature_ptr->_status = MARKED;                          // Mark it
+          _unique_grains[curr_idx] = feature_ptr;                 // transfer ownership of new grain
+        }
+        else
+        {
+          _console << "Marking Grain " << curr_idx << " as INACTIVE (varible index: "
+                     << _unique_grains[curr_idx]->_var_idx <<  ")\n";
+          _unique_grains[curr_idx]->_status = INACTIVE;
+        }
+      }
+    }
+  }
+
+  /**
+   * Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
+   */
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    for (unsigned int i = 0; i < _feature_sets[map_num].size(); ++i)
+      if (_feature_sets[map_num][i]->_status == NOT_MARKED)
+      {
+        _console << COLOR_YELLOW
+                 << "*****************************************************************************\n"
+                 << "Couldn't find a matching grain while working on variable index: " << _feature_sets[map_num][i]->_var_idx
+                 << "\nCreating new unique grain: " << _unique_grains.size()
+                 << "\n*****************************************************************************\n" << COLOR_DEFAULT;
+        _feature_sets[map_num][i]->_status = MARKED;
+        _unique_grains[_unique_grains.size()] = _feature_sets[map_num][i];   // transfer ownership
+      }
+
+  /**
+   * Finally we need to mark any grains in the unique list that aren't marked as inactive.  These are the variables that
+   * unique grains that didn't match up to any bounding sphere.  Should only happen if it's the last active grain for
+   * this particular variable.
+   */
+  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
+    if (it->second->_status == NOT_MARKED)
+    {
+      mooseError("Not Possible");
+
+      Moose::out << "Marking Grain " << it->first << " as INACTIVE (varible index: "
+                    << it->second->_var_idx <<  ")\n";
+      it->second->_status = INACTIVE;
+    }
+
+
 ////  // Sanity check to make sure that we consumed all of the bounding sphere datastructures
 ////  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
 ////    if (!_bounding_spheres[map_num].empty())
@@ -832,54 +840,50 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
 void
 GrainTracker::updateFieldInfo()
 {
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    _feature_maps[map_num].clear();
-//
-//  std::map<unsigned int, Real> tmp_map;
-//  MeshBase & mesh = _mesh.getMesh();
-//
-//  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-//  {
-//    unsigned int curr_var = grain_it->second->variable_idx;
-//    unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
-//
-//    if (grain_it->second->status == INACTIVE)
-//      continue;
-//
-//    for (std::set<dof_id_type>::iterator entity_it = grain_it->second->entities_ptr->begin();
-//         entity_it != grain_it->second->entities_ptr->end(); ++entity_it)
-//    {
-//      // Highest variable value at this entity wins
-//      Number entity_value = -std::numeric_limits<Number>::max();
-//      if (_is_elemental)
-//      {
-//        const Elem * elem = mesh.query_elem(*entity_it);
-//        if (elem && elem->is_semilocal(processor_id()))
-//        {
-//          std::vector<Point> centroid(1, elem->centroid());
-//          _fe_problem.reinitElemPhys(elem, centroid, 0);
-//          entity_value = _vars[curr_var]->sln()[0];
-//        }
-//      }
-//      else
-//      {
-//        Node * node = mesh.query_node_ptr(*entity_it);
-//        if (node && _mesh.isSemiLocal(node))
-//          entity_value = _vars[curr_var]->getNodalValue(*node);
-//      }
-//
-//      if (tmp_map.find(*entity_it) == tmp_map.end() || entity_value > tmp_map[*entity_it])
-//      {
-//        // TODO: Add an option for EBSD Reader
-//        _feature_maps[map_idx][*entity_it] = _ebsd_reader ? _unique_grain_to_ebsd_num[grain_it->first] : grain_it->first;
-//
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    _feature_maps[map_num].clear();
+
+  std::map<unsigned int, Real> tmp_map;
+  MeshBase & mesh = _mesh.getMesh();
+
+  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
+  {
+    unsigned int curr_var = grain_it->second->_var_idx;
+    unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
+
+    if (grain_it->second->_status == INACTIVE)
+      continue;
+
+    for (std::set<dof_id_type>::iterator entity_it = grain_it->second->_local_ids.begin();
+         entity_it != grain_it->second->_local_ids.end(); ++entity_it)
+    {
+      // Highest variable value at this entity wins
+      Real entity_value = -std::numeric_limits<Real>::max();
+      if (_is_elemental)
+      {
+        const Elem * elem = mesh.elem(*entity_it);
+        std::vector<Point> centroid(1, elem->centroid());
+        _fe_problem.reinitElemPhys(elem, centroid, 0);
+        entity_value = _vars[curr_var]->sln()[0];
+      }
+      else
+      {
+        Node & node = mesh.node(*entity_it);
+        entity_value = _vars[curr_var]->getNodalValue(node);
+      }
+
+      if (tmp_map.find(*entity_it) == tmp_map.end() || entity_value > tmp_map[*entity_it])
+      {
+        // TODO: Add an option for EBSD Reader
+        _feature_maps[map_idx][*entity_it] = _ebsd_reader ? _unique_grain_to_ebsd_num[grain_it->first] : grain_it->first;
+
 //        if (_var_index_mode)
 //          _var_index_maps[map_idx][*entity_it] = grain_it->second->variable_idx;
-//
-//        tmp_map[*entity_it] = entity_value;
-//      }
-//    }
-//  }
+
+        tmp_map[*entity_it] = entity_value;
+      }
+    }
+  }
 }
 
 Real
