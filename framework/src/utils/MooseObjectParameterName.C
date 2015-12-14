@@ -121,6 +121,8 @@ operator<<(std::ostream & stream, const MooseObjectParameterName & obj)
     return stream << obj._parameter;
   else if (obj._tag.empty())
     return stream << obj._name << "/" << obj._parameter;
+  else if (obj._name.empty())
+    return stream << obj._tag << obj._separator << obj._parameter;
   else
     return stream << obj._tag << obj._separator << obj._name << "/" << obj._parameter;
 }

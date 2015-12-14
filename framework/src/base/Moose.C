@@ -203,7 +203,6 @@
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
 #include "ElementL2Difference.h"
-#include "RealControlParameterReporter.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -327,7 +326,6 @@
 #include "MultiAppProjectionTransfer.h"
 #include "MultiAppPostprocessorToAuxScalarTransfer.h"
 
-
 // Actions
 #include "AddBCAction.h"
 #include "AddDiracKernelAction.h"
@@ -410,6 +408,7 @@
 
 // Controls
 #include "RealFunctionControl.h"
+#include "TimePeriod.h"
 
 // Partitioner
 #include "LibmeshPartitioner.h"
@@ -603,7 +602,6 @@ registerObjects(Factory & factory)
   registerPostprocessor(ExecutionerAttributeReporter);
   registerPostprocessor(PercentChangePostprocessor);
   registerPostprocessor(ElementL2Difference);
-  registerPostprocessor(RealControlParameterReporter);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
@@ -756,6 +754,7 @@ registerObjects(Factory & factory)
 
   // Controls
   registerControl(RealFunctionControl);
+  registerControl(TimePeriod);
 
   // Partitioner
   registerPartitioner(LibmeshPartitioner);

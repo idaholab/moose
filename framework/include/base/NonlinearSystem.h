@@ -16,14 +16,11 @@
 #define NONLINEARSYSTEM_H
 
 #include "SystemBase.h"
-#include "KernelWarehouse.h"
-#include "BCWarehouse.h"
-#include "DiracKernelWarehouse.h"
-#include "DGKernelWarehouse.h"
-#include "DamperWarehouse.h"
-#include "ConstraintWarehouse.h"
+#include "KernelStorage.h"
+#include "ConstraintStorage.h"
 #include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
+#include "MooseObjectStorage.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -35,6 +32,13 @@ class MoosePreconditioner;
 class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
+class Damper;
+class IntegratedBC;
+class NodalBC;
+class PresetNodalBC;
+class DGKernel;
+class ScalarKernel;
+class DiracKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -72,8 +76,6 @@ public:
 
   // Setup Functions ////
   virtual void initialSetup();
-  virtual void initialSetupBCs();
-  virtual void initialSetupKernels();
   virtual void timestepSetup();
 
   void setupFiniteDifferencedPreconditioner();
@@ -274,6 +276,12 @@ public:
 
   virtual void setSolution(const NumericVector<Number> & soln);
 
+
+  /**
+   * Update active objects of Warehouses owned by NonlinearSystem
+   */
+  void updateActive(THREAD_ID tid);
+
   /**
    * Set transient term used by residual and Jacobian evaluation.
    * @param udot transient term
@@ -420,23 +428,17 @@ public:
 
   //@{
   /**
-   * Updates the active kernels/dgkernels in the warehouse for the
-   * passed in subdomain_id and thread
-   */
-  void updateActiveKernels(SubdomainID subdomain_id, THREAD_ID tid);
-  void updateActiveDGKernels(Real t, Real dt, THREAD_ID tid);
-  //@}
-
-  //@{
-  /**
    * Access functions to Warehouses from outside NonlinearSystem
    */
-  const KernelWarehouse & getKernelWarehouse(THREAD_ID tid);
-  const DGKernelWarehouse & getDGKernelWarehouse(THREAD_ID tid);
-  const BCWarehouse & getBCWarehouse(THREAD_ID tid);
-  const DiracKernelWarehouse & getDiracKernelWarehouse(THREAD_ID tid);
-  const DamperWarehouse & getDamperWarehouse(THREAD_ID tid);
+  const KernelStorage & getKernelStorage() { return _kernels; }
+  const MooseObjectStorage<KernelBase> & getTimeKernelStorage() { return _time_kernels; }
+  const MooseObjectStorage<KernelBase> & getNonTimeKernelStorage() { return _non_time_kernels; }
+
+  const MooseObjectStorage<DGKernel> & getDGKernelStorage() { return _dg_kernels; }
+  const MooseObjectStorage<DiracKernel> & getDiracKernelStorage() { return _dirac_kernels; }
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
+  const MooseObjectStorage<IntegratedBC> & getIntegratedBCStorage() { return _integrated_bcs; }
+  const MooseObjectStorage<Damper> & getDamperStorage() { return _dampers; }
   //@}
 
   /**
@@ -509,26 +511,37 @@ protected:
   /// residual vector for non-time contributions
   NumericVector<Number> & _Re_non_time;
 
-  // holders
-  /// Kernel storage for each thread
-  std::vector<KernelWarehouse> _kernels;
-  /// BC storage for each thread
-  std::vector<BCWarehouse> _bcs;
+  ///@{
+  /// Kernel Storage
+  KernelStorage _kernels;
+  MooseObjectStorage<ScalarKernel> _scalar_kernels;
+  MooseObjectStorage<DGKernel> _dg_kernels;
+  MooseObjectStorage<KernelBase> _time_kernels;
+  MooseObjectStorage<KernelBase> _non_time_kernels;
+
+  ///@}
+
+  ///@{
+  /// BoundaryCondition Warhouses
+  MooseObjectStorage<IntegratedBC> _integrated_bcs;
+  MooseObjectStorage<NodalBC> _nodal_bcs;
+  MooseObjectStorage<PresetNodalBC> _preset_nodal_bcs;
+  ///@}
+
   /// Dirac Kernel storage for each thread
-  std::vector<DiracKernelWarehouse> _dirac_kernels;
-  /// DG Kernel storage for each thread
-  std::vector<DGKernelWarehouse> _dg_kernels;
+  MooseObjectStorage<DiracKernel> _dirac_kernels;
+
   /// Dampers for each thread
-  std::vector<DamperWarehouse> _dampers;
+  MooseObjectStorage<Damper> _dampers;
+
   /// NodalKernels for each thread
   std::vector<NodalKernelWarehouse> _nodal_kernels;
 
   /// Decomposition splits
   SplitWarehouse _splits;
 
-public:
-  /// Constraints for each thread
-  std::vector<ConstraintWarehouse> _constraints;
+  /// Constraints storage object
+  ConstraintStorage _constraints;
 
 
 protected:

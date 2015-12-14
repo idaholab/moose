@@ -721,7 +721,7 @@ MooseMesh::cacheInfo()
 
     for (unsigned int side=0; side<elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundaryids = boundaryIDs(elem, side);
+      std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
 
       for (unsigned int i=0; i<boundaryids.size(); i++)
         _subdomain_boundary_ids[subdomain_id].insert(boundaryids[i]);
@@ -1803,7 +1803,7 @@ MooseMesh::dimension() const
 }
 
 std::vector<BoundaryID>
-MooseMesh::boundaryIDs(const Elem *const elem, const unsigned short int side) const
+MooseMesh::getBoundaryIDs(const Elem *const elem, const unsigned short int side) const
 {
   return getMesh().get_boundary_info().boundary_ids(elem, side);
 }

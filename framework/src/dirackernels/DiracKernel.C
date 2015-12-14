@@ -37,6 +37,7 @@ InputParameters validParams<DiracKernel>()
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
+  params.declareControllable("enable");
   params.registerBase("DiracKernel");
 
   return params;

@@ -4,7 +4,6 @@
     type = Exodiff
     input = param.i
     exodiff = param_out.e
-    max_threads = 1
   [../]
 
   [./object_param]
@@ -12,7 +11,6 @@
     type = Exodiff
     input = object_param.i
     exodiff = object_param_out.e
-    max_threads = 1
   [../]
 
   [./system_object_param]
@@ -20,7 +18,6 @@
     type = Exodiff
     input = system_object_param.i
     exodiff = system_object_param_out.e
-    max_threads = 1
   [../]
 
   [./system_asterisk_param]
@@ -28,6 +25,5 @@
     type = Exodiff
     input = system_asterisk_param.i
     exodiff = system_asterisk_param_out.e
-    max_threads = 1
   [../]
 []

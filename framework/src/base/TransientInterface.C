@@ -14,7 +14,7 @@
 
 #include "TransientInterface.h"
 #include "FEProblem.h"
-#include "TimePeriod.h"
+#include "TimePeriodOld.h"
 
 template<>
 InputParameters validParams<TransientInterface>()

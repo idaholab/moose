@@ -134,7 +134,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
 
     // Append replacement object, if it exsits
     if (name_it != _deprecated_name.end())
-      msg << "Upadate your application using the '" << name_it->second << "' object";
+      msg << "Update your application using the '" << name_it->second << "' object";
 
     // Produce the error message
     mooseError(msg.str());
