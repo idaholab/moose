@@ -26,6 +26,7 @@
 #include "libmesh/mesh.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/elem.h"
+#include "libmesh/equation_systems.h"
 
 // DTK includes
 #include <DTK_MeshTypes.hpp>

@@ -19,6 +19,9 @@
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
+// libMesh includes
+#include "libmesh/point.h"
+
 // DTK includes
 #include <DTK_MeshManager.hpp>
 #include <DTK_MeshContainer.hpp>
@@ -33,10 +36,19 @@
 #include <Teuchos_ArrayRCP.hpp>
 #include <Teuchos_DefaultMpiComm.hpp>
 
+// Forward declarations
+namespace libMesh
+{
+class EquationSystems;
+class Elem;
+class MeshBase;
+class System;
+}
+
 class DTKInterpolationAdapter
 {
 public:
-  DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim);
+  DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, libMesh::EquationSystems & in_es, const libMesh::Point & offset, unsigned int from_dim);
 
   typedef DataTransferKit::MeshContainer<long unsigned int>                    MeshContainerType;
   typedef DataTransferKit::FieldContainer<double>                              FieldContainerType;
@@ -66,7 +78,7 @@ protected:
   /**
    * Helper that returns the DTK ElementTopology for a given Elem
    */
-  DataTransferKit::DTK_ElementTopology get_element_topology(const Elem * elem);
+  DataTransferKit::DTK_ElementTopology get_element_topology(const libMesh::Elem * elem);
 
   /**
    * Helper function that fills the std::set with all of the node numbers of
@@ -75,9 +87,9 @@ protected:
   void get_semi_local_nodes(std::set<GlobalOrdinal> & semi_local_nodes);
 
   Teuchos::RCP<const Teuchos::MpiComm<int> > comm;
-  EquationSystems & es;
-  Point _offset;
-  const MeshBase & mesh;
+  libMesh::EquationSystems & es;
+  libMesh::Point _offset;
+  const libMesh::MeshBase & mesh;
   unsigned int dim;
 
   unsigned int num_local_nodes;

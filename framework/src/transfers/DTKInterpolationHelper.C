@@ -20,7 +20,7 @@
 #include "DTKInterpolationHelper.h"
 
 // libMesh includes
-#include "libmesh/system.h"
+#include "libmesh/equation_systems.h"
 
 // Trilinos Includes
 #include <Teuchos_RCP.hpp>
