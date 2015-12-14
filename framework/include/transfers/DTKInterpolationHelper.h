@@ -28,6 +28,9 @@
 namespace libMesh
 {
 
+// Forward declarations
+class Variable;
+
 /**
  * Helper object that uses DTK to interpolate between two libMesh based systems
  */

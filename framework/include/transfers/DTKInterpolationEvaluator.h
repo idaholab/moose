@@ -19,6 +19,9 @@
 
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
 
+// libMesh includes
+#include "libmesh/point.h"
+
 // DTK includes
 #include <DTK_MeshContainer.hpp>
 #include <DTK_FieldEvaluator.hpp>
@@ -34,6 +37,9 @@ namespace libMesh
 class System;
 class EquationSystems;
 class MeshBase;
+template <typename T> class NumericVector;
+class DofMap;
+class FEType;
 
 /**
  * A class for performing interplation transfers via DTK.
