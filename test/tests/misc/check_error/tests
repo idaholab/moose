@@ -438,7 +438,7 @@
   [./ic_bnd_for_non_nodal]
     type = 'RunException'
     input = 'ic_bnd_for_non_nodal.i'
-    expect_err = "You are trying to set a boundary restricted variable on non-nodal variable.  That is not allowed."
+    expect_err = "You are trying to set a boundary restricted variable on non-nodal variable. That is not allowed."
   [../]
 
   [./old_integrity_check]
