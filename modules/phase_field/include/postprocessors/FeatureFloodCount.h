@@ -73,22 +73,20 @@ public:
 
   inline bool isElemental() const { return _is_elemental; }
 
-  class FooBar
+  /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
+  enum STATUS
   {
-  public:
-    std::set<dof_id_type> _entity_ids;
-    unsigned int _var_idx;
-    Point _max;
-    Point _min;
+    NOT_MARKED,
+    MARKED,
+    INACTIVE
   };
 
-
-  class FeatureData
+  struct FeatureData
   {
-  public:
     FeatureData() :
         _var_idx(std::numeric_limits<unsigned int>::max()),
         _min_entity_id(DofObject::invalid_id),
+        _status(NOT_MARKED),
         _merged(false),
         _intersects_boundary(false)
     {
@@ -112,6 +110,7 @@ public:
         _var_idx(f._var_idx),
         _bboxes(f._bboxes),
         _min_entity_id(f._min_entity_id),
+        _status(NOT_MARKED),
         _merged(f._merged),
         _intersects_boundary(f._intersects_boundary)
     {}
@@ -147,6 +146,7 @@ public:
     unsigned int _var_idx;
     std::vector<MeshTools::BoundingBox> _bboxes;
     dof_id_type _min_entity_id;
+    STATUS _status;
     bool _merged;
     bool _intersects_boundary;
   };
@@ -327,14 +327,14 @@ protected:
 //  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)
 //  std::vector<unsigned int> _region_offsets;
 
-  /// The number of features seen by this object
+  // The number of features seen by this object
   unsigned int _feature_count;
 
   /**
-   * The data structure used to hold the feature sets.
-   * The outer vector is index by map. The inner vector is index by feature id.
+   * The data structure used to hold the globally unique features. The outer vector
+   * is indexed by variable number, the inner vector is indexed by feature number
    */
-  std::vector<std::vector<FeatureData> > _feature_sets;
+  std::vector<std::vector<MooseSharedPointer<FeatureData> > > _feature_sets;
 
   /**
    * The data structure used to hold partial and communicated feature data.

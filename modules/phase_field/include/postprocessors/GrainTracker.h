@@ -126,7 +126,7 @@ protected:
   std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
 
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-  std::map<unsigned int, UniqueGrain *> & _unique_grains;
+  std::map<unsigned int, MooseSharedPointer<FeatureData> > & _unique_grains;
 
   /**
    * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
@@ -139,14 +139,6 @@ protected:
   const EBSDReader * _ebsd_reader;
 
 public:
-  /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
-  enum STATUS
-  {
-    NOT_MARKED,
-    MARKED,
-    INACTIVE
-  };
-
   /// This struct holds the nodesets and bounding spheres for each flooded region.
   struct BoundingSphereInfo
   {
@@ -157,21 +149,21 @@ public:
   };
 
   /// This struct hold the information necessary to identify and track a unique grain;
-  struct UniqueGrain
-  {
-    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<dof_id_type> *nodes_pt, STATUS status);
-    ~UniqueGrain();
-
-    unsigned int variable_idx;
-    std::vector<BoundingSphereInfo *> sphere_ptrs;
-    STATUS status;
-    /**
-     * Pointer to the actual nodes ids.  Note: This pointer is not always valid.  It is invalid
-     * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
-     * avoid making unnecessary copies of the set when we don't need it.
-     */
-    const std::set<dof_id_type> *entities_ptr;
-  };
+//  struct UniqueGrain : public FeatureData
+//  {
+//    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<dof_id_type> *nodes_pt, STATUS status);
+//    ~UniqueGrain();
+//
+//    unsigned int variable_idx;
+//    std::vector<BoundingSphereInfo *> sphere_ptrs;
+//    STATUS status;
+//    /**
+//     * Pointer to the actual nodes ids.  Note: This pointer is not always valid.  It is invalid
+//     * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
+//     * avoid making unnecessary copies of the set when we don't need it.
+//     */
+//    const std::set<dof_id_type> *entities_ptr;
+//  };
 
   bool _compute_op_maps;
 

@@ -37,7 +37,7 @@ public:
 
     bool operator()(std::size_t const & lhs, std::size_t const & rhs) const
     {
-      return c[lhs] < c[rhs];
+      return *c[lhs] < *c[rhs];
     }
 
   private:
@@ -595,7 +595,7 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
       FeatureData & feature = _partial_feature_sets[rank][map_num][feature_num];
 
       // The coupled variable index
-      feature._var_idx = _region_to_var_idx[feature_num];
+      feature._var_idx = _single_map_mode ? _region_to_var_idx[feature_num] : map_num;
 
       // Periodic node ids
       appendPeriodicNeighborNodes(feature);
@@ -783,14 +783,15 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
   processor_id_type n_procs = _app.n_processors();
 
-//  // DEBUGGING
+  // DEBUGGING
 //  std::cout << "Before merge:\n";
 //  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
 //    for (processor_id_type rank = 0; rank < n_procs; ++rank)
 //      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
 //           it != _partial_feature_sets[rank][map_num].end(); ++it)
 //        std::cout << *it;
-//  // DEBUGGING
+//  std::cout << "Finish Before merge:\n";
+  // DEBUGGING
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
@@ -826,7 +827,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
                  )
                )
             {
-              std::cout << "Merging " << it1->_min_entity_id << " " << it2->_min_entity_id << " due to " << pb_intersect << '\n';
+//              std::cout << "Merging " << it1->_min_entity_id << " " << it2->_min_entity_id << " due to " << pb_intersect << '\n';
 
               // Merge these two entity sets
               set_union.clear();
@@ -880,24 +881,27 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
     } // rank1 loop
   } // map loop
 
+
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    _feature_sets[map_num].clear();
+
   // Now consolidate the data structure
   for (processor_id_type rank = 0; rank < n_procs; ++rank)
   {
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     {
-      if (rank == 0)
-        _feature_sets[map_num].clear();
-
 //      std::cout << "Consolidating\n";
-
       for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
            it != _partial_feature_sets[rank][map_num].end(); ++it)
       {
 //        std::cout << *it;
 
         if (!it->_merged)
-          _feature_sets[map_num].push_back(*it);
+          _feature_sets[map_num].push_back(MooseSharedPointer<FeatureData>(new FeatureData(*it)));
       }
+
+      _partial_feature_sets[rank][map_num].clear();
+
     }
   }
 
@@ -981,8 +985,6 @@ FeatureFloodCount::updateFieldInfo()
 
   std::vector<size_t> index_vector;
 
-
-  // Finally update the original bubble map with field data from the merged sets
   unsigned int feature_number = 0;
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
@@ -993,23 +995,28 @@ FeatureFloodCount::updateFieldInfo()
      */
     index_vector.resize(_feature_sets[map_num].size());
     std::generate(index_vector.begin(), index_vector.end(), idx_gen<unsigned int>(0));
-    std::sort(index_vector.begin(), index_vector.end(), index_sorter<std::vector<FeatureData> >(_feature_sets[map_num]));
+    std::sort(index_vector.begin(), index_vector.end(), index_sorter<std::vector<MooseSharedPointer<FeatureData> > >(_feature_sets[map_num]));
 
 //    sleep(processor_id());
 
     // Clear out the original markings since they aren't unique globally
     _feature_maps[map_num].clear();
 
-//    std::cerr << "###########################################################################\n";
+
+//    std::cout << "vector: " << index_vector.size() << '\n' << _feature_sets[map_num].size() << '\n';
+
+
+    // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
+    unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : map_num;
     for (std::vector<size_t>::const_iterator idx_it = index_vector.begin(); idx_it != index_vector.end(); ++idx_it)
     {
-      const FeatureData & feature = _feature_sets[map_num][*idx_it];
+      const FeatureData & feature = *_feature_sets[map_num][*idx_it];
 
-//      std::cerr << "Proc " << processor_id() << '\n' << feature;
+      std::cout << "Proc " << processor_id() << "\nmap num: " << map_num << '\n' << feature;
 
       // Loop over the entitiy ids of this feature and update our local map
       for (std::set<dof_id_type>::const_iterator entity_it = feature._local_ids.begin(); entity_it != feature._local_ids.end(); ++entity_it)
-        _feature_maps[map_num][*entity_it] = feature_number;
+        _feature_maps[map_idx][*entity_it] = feature_number;
 
       ++feature_number;
     }
