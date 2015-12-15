@@ -57,6 +57,7 @@ cd build
              --disable-cxx11 \
              --enable-unique-ptr \
              --enable-openmp \
+             --disable-maintainer-mode \
              $DISABLE_TIMESTAMPS $*
 
 # let LIBMESH_JOBS be either MOOSE_JOBS, or 1 if MOOSE_JOBS
