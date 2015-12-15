@@ -178,4 +178,32 @@
     exodiff = 'astabledirk4_3.e'
     cli_args = 'Outputs/file_base=astabledirk4_3 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.015625'
   [../]
+
+
+
+  # Test the LStableDirk4 time integration method.  On this test, the
+  # end_time=1.  This method is slightly more expensive, so we do
+  # fewer timesteps.
+  [./test_lstabledirk4_1]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'lstabledirk4_1.e'
+    cli_args = 'Outputs/file_base=lstabledirk4_1 Executioner/TimeIntegrator/type=LStableDirk4 Executioner/dt=0.5'
+  [../]
+
+  # Same thing with 1/2 timestep.
+  [./test_lstabledirk4_2]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'lstabledirk4_2.e'
+    cli_args = 'Outputs/file_base=lstabledirk4_2 Executioner/TimeIntegrator/type=LStableDirk4 Executioner/dt=0.25'
+  [../]
+
+  # Same thing with 1/4 timestep.
+  [./test_lstabledirk4_3]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'lstabledirk4_3.e'
+    cli_args = 'Outputs/file_base=lstabledirk4_3 Executioner/TimeIntegrator/type=LStableDirk4 Executioner/dt=0.125'
+  [../]
 []
