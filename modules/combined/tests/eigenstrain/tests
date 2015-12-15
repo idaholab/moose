@@ -9,4 +9,9 @@
     input = 'variable_finite.i'
     exodiff = 'variable_finite_out.e'
   [../]
+  [./variable_cahnhilliard]
+    type = 'Exodiff'
+    input = 'variable_cahnhilliard.i'
+    exodiff = 'variable_cahnhilliard_out.e'
+  [../]
 []
