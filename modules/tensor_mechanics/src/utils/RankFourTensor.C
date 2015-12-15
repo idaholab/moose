@@ -619,7 +619,7 @@ RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> & input, bo
     _vals[0][1][1][2] = input[17]; //C2312 //flipped for filling purposes
 
     _vals[0][2][0][2] = input[18]; //C1313
-    _vals[0][1][0][2] = input[19]; //C1312 //flipped for filling purposesc
+    _vals[0][1][0][2] = input[19]; //C1312 //flipped for filling purposes
 
     _vals[0][1][0][1] = input[20]; //C1212
   }

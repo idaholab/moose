@@ -46,8 +46,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
   [../]
 
   [./eta_bulk]
@@ -79,15 +78,26 @@
   [../]
 
   # matrix phase
-  [./eigenstrain_a]
-    type = LinearElasticMaterial
+  [./stiffness_a]
+    type = ComputeElasticityTensor
     base_name = phasea
     block = 0
-    disp_y = disp_y
-    disp_x = disp_x
-    # Stiffness tensor lambda, mu values
+    # lambda, mu values
     C_ijkl = '7 7'
+    # Stiffness tensor is created from lambda=7, mu=7 for symmetric_isotropic fill method
     fill_method = symmetric_isotropic
+    # See RankFourTensor.h for details on fill methods
+  [../]
+  [./strain_a]
+    type = ComputeSmallStrain
+    block = 0
+    displacements = 'disp_x disp_y'
+    base_name = phasea
+  [../]
+  [./stress_a]
+    type = ComputeLinearElasticStress
+    block = 0
+    base_name = phasea
   [../]
   [./elastic_free_energy_a]
     type = ElasticEnergyMaterial
@@ -97,26 +107,32 @@
     args = ''
   [../]
 
-  # oversized phase (simulated using thermal expansion)
-  [./eigenstrain_b]
-    type = LinearElasticMaterial
+  # oversized precipitate phase (simulated using thermal expansion)
+  [./stiffness_b]
+    type = ComputeElasticityTensor
     base_name = phaseb
     block = 0
-
-    # we use thermal expansion with a constant temperature to achieve a 10% oversize
-    # commenting out the following 3 lines will switch off the oversize effect
-    thermal_expansion_coeff = 0.1
-    T0 = 0
-    T = 1
-
-    disp_y = disp_y
-    disp_x = disp_x
-
     # Stiffness tensor lambda, mu values
     # Note that the two phases could have different stiffnesses.
     # Try reducing the precipitate stiffness (to '1 1') rather than making it oversized
     C_ijkl = '7 7'
     fill_method = symmetric_isotropic
+  [../]
+  [./strain_b]
+    type = ComputeSmallStrain
+    block = 0
+    displacements = 'disp_x disp_y'
+    base_name = phaseb
+    # we use thermal expansion with a constant temperature to achieve a 10% oversize
+    # commenting out the following 3 lines will switch off the oversize effect
+    thermal_expansion_coeff = 0.1
+    temperature_ref = 0
+    temperature = 1
+  [../]
+  [./stress_b]
+    type = ComputeLinearElasticStress
+    block = 0
+    base_name = phaseb
   [../]
   [./elastic_free_energy_b]
     type = ElasticEnergyMaterial
@@ -195,8 +211,8 @@
 
   # this gives best performance on 4 cores
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm         101   preonly   lu      1'
+  petsc_options_iname = '-pc_type  -sub_pc_type '
+  petsc_options_value = 'asm       lu'
 
   l_max_its = 30
   nl_max_its = 10
