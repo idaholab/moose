@@ -22,6 +22,7 @@
 
 // Forward declarations
 class AuxiliarySystem;
+class InternalSideIndicators;
 
 class ComputeIndicatorThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -32,7 +33,7 @@ public:
    * @param indicator_whs Warehouse of Indicator objects.
    * @param finalize Whether or not we are just in the "finalize" stage or not.
    */
-  ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<IndicatorWarehouse> & indicator_whs, bool finalize = false);
+  ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, bool finalize = false);
 
   // Splitting Constructor
   ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split);
@@ -51,7 +52,13 @@ public:
 protected:
   FEProblem & _fe_problem;
   AuxiliarySystem & _aux_sys;
-  std::vector<IndicatorWarehouse> & _indicator_whs;
+
+  /// Indicator Storage
+  const MooseObjectWarehouse<Indicator> & _indicator_whs;
+
+  /// InternalSideIndicator Storage
+  const MooseObjectWarehouse<InternalSideIndicator> & _internal_side_indicators;
+
   bool _finalize;
 };
 

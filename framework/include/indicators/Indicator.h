@@ -68,7 +68,6 @@ public:
   // TODO: Fixme
   bool isActive() const { return true; }
 
-  virtual void IndicatorSetup();
 
 protected:
   SubProblem & _subproblem;

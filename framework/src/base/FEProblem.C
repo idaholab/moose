@@ -73,6 +73,7 @@
 #include "Assembly.h"
 #include "Control.h"
 #include "ScalarInitialCondition.h"
+#include "InternalSideIndicator.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -204,7 +205,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   for (unsigned int i=0; i<n_threads; i++)
     _vpps_data[i] = new VectorPostprocessorData(*this, i);
 
-  _indicators.resize(n_threads);
   _markers.resize(n_threads);
 
   _active_elemental_moose_variables.resize(n_threads);
@@ -410,10 +410,11 @@ void FEProblem::initialSetup()
     projectSolution();
   }
 
-  for (unsigned int i=0; i<n_threads; i++)
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _indicators[i].initialSetup();
-    _markers[i].initialSetup();
+    _internal_side_indicators.initialSetup(tid);
+    _indicators.initialSetup(tid);
+    _markers[tid].initialSetup();
   }
 
 #ifdef LIBMESH_ENABLE_AMR
@@ -648,14 +649,15 @@ void FEProblem::timestepSetup()
        ++it)
     it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
-  for (unsigned int i=0; i<n_threads; i++)
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _indicators[i].timestepSetup();
-    _markers[i].timestepSetup();
+    _internal_side_indicators.timestepSetup(tid);
+    _indicators.timestepSetup(tid);
+    _markers[tid].timestepSetup();
 
     // Timestep setup of all UserObjects
     for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
-      _user_objects(Moose::exec_types[j])[i].timestepSetup();
+      _user_objects(Moose::exec_types[j])[tid].timestepSetup();
   }
 
    // Timestep setup of output objects
@@ -2166,20 +2168,20 @@ FEProblem::parentOutputPositionChanged()
 void
 FEProblem::computeIndicatorsAndMarkers()
 {
-  // Zero them out first
-  if (_indicators[0].all().size() || _markers[0].all().size())
+  // Initialize marker and indicator aux variable fields
+  if (_indicators.hasActiveObjects() || _markers[0].all().size() || _internal_side_indicators.hasActiveObjects())
   {
     std::vector<std::string> fields;
 
-    // Add Indicator Fields
-    {
-      const std::vector<Indicator *> & all_indicators = _indicators[0].all();
+    // Indicator Fields
+    const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicators.getActiveObjects();
+    for (std::vector<MooseSharedPointer<Indicator> >::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
+      fields.push_back((*it)->name());
 
-      for (std::vector<Indicator *>::const_iterator i=all_indicators.begin();
-          i != all_indicators.end();
-          ++i)
-        fields.push_back((*i)->name());
-    }
+    // InternalSideIndicator Fields
+    const std::vector<MooseSharedPointer<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveObjects();
+    for (std::vector<MooseSharedPointer<InternalSideIndicator> >::const_iterator it = internal_indicators.begin(); it != internal_indicators.end(); ++it)
+      fields.push_back((*it)->name());
 
     // Add Marker Fields
     {
@@ -2195,19 +2197,15 @@ FEProblem::computeIndicatorsAndMarkers()
   }
 
   // compute Indicators
-  if (_indicators[0].all().size())
+  if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
-    ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators);
+    ComputeIndicatorThread cit(*this, getAuxiliarySystem());
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
     _aux.solution().close();
     _aux.update();
-  }
 
-  // finalize Indicators
-  if (_indicators[0].all().size())
-  {
-    ComputeIndicatorThread cit(*this, getAuxiliarySystem(), _indicators, true);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
+    ComputeIndicatorThread finalize_cit(*this, getAuxiliarySystem(), true);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
     _aux.solution().close();
     _aux.update();
   }
@@ -2619,7 +2617,10 @@ FEProblem::updateActiveObjects()
   {
     _nl.updateActive(tid);
     _aux.updateActive(tid);
+    _indicators.updateActive(tid);
+    _internal_side_indicators.updateActive(tid);
   }
+
   _control_storage.updateActive();
   _multi_apps.updateActive();
   _transient_multi_apps.updateActive();
@@ -2679,15 +2680,17 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<MaterialData *>("_material_data") = _material_data[tid];
-
     parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
     parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
 
     MooseSharedPointer<Indicator> indicator = MooseSharedNamespace::static_pointer_cast<Indicator>(_factory.create(indicator_name, name, parameters, tid));
 
-    std::vector<SubdomainID> block_ids;
-    _indicators[tid].addIndicator(indicator, block_ids);
+    MooseSharedPointer<InternalSideIndicator> isi = MooseSharedNamespace::dynamic_pointer_cast<InternalSideIndicator>(indicator);
+    if (isi)
+      _internal_side_indicators.addObject(isi, tid);
+    else
+      _indicators.addObject(indicator, tid);
+
   }
 }
 

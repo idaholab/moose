@@ -24,7 +24,6 @@
 #include "PostprocessorData.h"
 #include "VectorPostprocessorWarehouse.h"
 #include "Adaptivity.h"
-#include "IndicatorWarehouse.h"
 #include "MarkerWarehouse.h"
 #include "TransferWarehouse.h"
 #include "UserObjectWarehouse.h"
@@ -58,6 +57,8 @@ class Control;
 class MultiApp;
 class TransientMultiApp;
 class ScalarInitialCondition;
+class Indicator;
+class InternalSideIndicator;
 
 // libMesh forward declarations
 namespace libMesh
@@ -784,6 +785,15 @@ public:
   const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
   ///@}
 
+  ///@{
+  /**
+   * Return indicator storage.
+   */
+  const MooseObjectWarehouse<Indicator> & getIndicatorWarehouse() { return _indicators; }
+  const MooseObjectWarehouse<InternalSideIndicator> & getInternalSideIndicatorWarehouse() { return _internal_side_indicators; }
+
+  ///@}
+
   /**
    * Return InitialCondition storage
    */
@@ -1015,8 +1025,11 @@ protected:
   // materials
   std::vector<MaterialWarehouse> _materials;
 
-  // indicators
-  std::vector<IndicatorWarehouse> _indicators;
+  ///@{
+  // Indicator Warehouses
+  MooseObjectWarehouse<Indicator> _indicators;
+  MooseObjectWarehouse<InternalSideIndicator> _internal_side_indicators;
+  ///@}
 
   // markers
   std::vector<MarkerWarehouse> _markers;
