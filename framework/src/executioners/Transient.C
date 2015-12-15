@@ -418,6 +418,7 @@ Transient::solveStep(Real input_dt)
     _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
 
     if ((_xfem_update_count < _max_xfem_update) &&
+        _problem.isUseXFEM() &&
         _problem.xfemUpdateMesh())
     {
       Moose::out << "XFEM modifying mesh, repeating step"<<std::endl;

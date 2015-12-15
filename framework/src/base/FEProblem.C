@@ -132,6 +132,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _adaptivity(*this),
 #endif
     _xfem(_material_data, &_mesh.getMesh()),
+    _is_use_xfem(false),
     _displaced_mesh(NULL),
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),

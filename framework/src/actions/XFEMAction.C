@@ -66,6 +66,7 @@ XFEMAction::act()
 {
 
   XFEM* xfem = _problem->get_xfem();
+  _problem->setUseXFEM();
 
   if(_current_task == "setup_xfem"){
 
