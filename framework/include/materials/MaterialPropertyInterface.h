@@ -19,9 +19,9 @@
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
+#include "FEProblem.h"
 
 // Forward declarations
-class FEProblem;
 class InputParameters;
 
 /**
@@ -89,6 +89,13 @@ public:
   template<typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
   ///@}
+
+  /**
+   * Return a material property that is initialized to zero by default and does
+   * not need to (but can) be declared by another material.
+   */
+  template<typename T>
+  const MaterialProperty<T> & getZeroMaterialProperty(const std::string & prop_name);
 
   /**
    * Retrieve the block ids that the material property is defined
@@ -215,6 +222,27 @@ private:
   const InputParameters & _mi_params;
 };
 
+/**
+ * Helper function templates to set a variable to zero.
+ * Specializations may have to be implemented (for examples see
+ * RankTwoTensor, RankFourTensor, ElasticityTensorR4).
+ */
+template<typename T>
+inline void mooseSetToZero(T & v)
+{
+  /**
+   * The default for non-pointer types is to assign zero.
+   * This should either do something sensible, or throw a compiler error.
+   * Otherwise the T type is designed badly.
+   */
+  v = 0;
+}
+template<typename T>
+inline void mooseSetToZero(T* &)
+{
+  mooseError("Cannot use pointer types for MaterialProperty derivatives.");
+}
+
 template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
@@ -332,6 +360,24 @@ bool
 MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
 {
   return _material_data->haveProperty<T>(name);
+}
+
+template<typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getZeroMaterialProperty(const std::string & prop_name)
+{
+  // static zero property storage
+  static MaterialProperty<T> zero;
+
+  // resize to accomodate maximum number of qpoints
+  unsigned int nqp = _mi_feproblem.getMaxQps();
+  zero.resize(nqp);
+
+  // set values for all qpoints to zero
+  for (unsigned int qp = 0; qp < nqp; ++qp)
+    mooseSetToZero<T>(zero[qp]);
+
+  return zero;
 }
 
 #endif //MATERIALPROPERTYINTERFACE_H

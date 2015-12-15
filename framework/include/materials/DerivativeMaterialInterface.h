@@ -26,27 +26,6 @@
 class FEProblem;
 
 /**
- * Helper function templates to set a variable to zero.
- * Specializations may have to be implemented (for examples see
- * RankTwoTensor, RankFourTensor, ElasticityTensorR4).
- */
-template<typename T>
-void mooseSetToZero(T & v)
-{
-  /**
-   * The default for non-pointer types is to assign zero.
-   * This should either do something sensible, or throw a compiler error.
-   * Otherwise the T type is designed badly.
-   */
-  v = 0;
-}
-template<typename T>
-void mooseSetToZero(T* &)
-{
-  mooseError("Cannot use pointer types for MaterialProperty derivatives.");
-}
-
-/**
  * Interface class ("Veneer") to provide generator methods for derivative
  * material property names
  */
@@ -122,10 +101,6 @@ public:
   ///@}
 
 private:
-  /// Return a constant zero property
-  template<typename U>
-  const MaterialProperty<U> & getZeroMaterialProperty(const std::string & prop_name);
-
   /// Check if a material property is present with the applicable restrictions
   template<typename U>
   bool haveMaterialProperty(const std::string & prop_name);
@@ -154,48 +129,6 @@ DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameter
     _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _dmi_material_data(*parameters.getCheckedPointerParam<MaterialData *>("_material_data"))
 {
-}
-
-template<>
-template<typename U>
-const MaterialProperty<U> &
-DerivativeMaterialInterface<Material>::getZeroMaterialProperty(const std::string & prop_name)
-{
-  // declare this material property
-  MaterialProperty<U> & preload_with_zero = this->template declareProperty<U>(prop_name);
-
-  // resize to accomodate maximum number of qpoints
-  unsigned int nqp = _dmi_fe_problem.getMaxQps();
-  preload_with_zero.resize(nqp);
-
-  // set values for all qpoints to zero
-  for (unsigned int qp = 0; qp < nqp; ++qp)
-    mooseSetToZero<U>(preload_with_zero[qp]);
-
-  return preload_with_zero;
-}
-
-template<class T>
-template<typename U>
-const MaterialProperty<U> &
-DerivativeMaterialInterface<T>::getZeroMaterialProperty(const std::string & /*prop_name*/)
-{
-  static MaterialProperty<U> _zero;
-
-  // make sure _zero is in a sane state
-  unsigned int nqp = _dmi_fe_problem.getMaxQps();
-  if (nqp > _zero.size())
-  {
-    // resize to accomodate maximum number of qpoints
-    _zero.resize(nqp);
-
-    // set values for all qpoints to zero
-    for (unsigned int qp = 0; qp < nqp; ++qp)
-      mooseSetToZero<U>(_zero[qp]);
-  }
-
-  // return a reference to a static zero property
-  return _zero;
 }
 
 template<>
@@ -246,7 +179,7 @@ DerivativeMaterialInterface<T>::getDefaultMaterialPropertyByName(const std::stri
   if (haveMaterialProperty<U>(prop_name))
     return this->template getMaterialPropertyByName<U>(prop_name);
 
-  return getZeroMaterialProperty<U>(prop_name);
+  return this->template getZeroMaterialProperty<U>(prop_name);
 }
 
 
@@ -284,7 +217,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
    * derivatives of constants are zero.
    */
   if (this->template defaultMaterialProperty<U>(prop_name))
-    return getZeroMaterialProperty<U>(prop_name + "_zeroderivative");
+    return this->template getZeroMaterialProperty<U>(prop_name + "_zeroderivative");
 
   return getDefaultMaterialPropertyByName<U>(propertyName(prop_name, c));
 }
@@ -302,7 +235,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
    * derivatives of constants are zero.
    */
   if (this->template defaultMaterialProperty<U>(prop_name))
-    return getZeroMaterialProperty<U>(prop_name + "_zeroderivative");
+    return this->template getZeroMaterialProperty<U>(prop_name + "_zeroderivative");
 
   if (c3 != "")
     return getDefaultMaterialPropertyByName<U>(propertyNameThird(prop_name, c1, c2, c3));
