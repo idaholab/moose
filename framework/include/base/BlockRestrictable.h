@@ -175,7 +175,7 @@ public:
 
   /**
    * Return all of the SubdomainIDs for the mesh
-   * @return A set of all subdomians for the entire domain
+   * @return A set of all subdomians for the entire mesh
    */
   const std::set<SubdomainID> & meshBlockIDs() const;
 

@@ -224,6 +224,8 @@ ExecuteMooseObjectStorage<T>::addObject(MooseSharedPointer<T> object, THREAD_ID 
     for (std::vector<ExecFlagType>::const_iterator it = flags.begin(); it != flags.end(); ++it)
       _execute_objects[*it].addObject(object, tid);
   }
+  else
+    mooseError("The object being added (" << object->name() << ") must inhert from SetupInterface to be added to the ExecuteMooseObjectStorage container.");
 }
 
 

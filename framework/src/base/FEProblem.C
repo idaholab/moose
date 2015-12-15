@@ -2263,7 +2263,7 @@ FEProblem::computeAuxiliaryKernels(const ExecFlagType & type)
 void
 FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group)
 {
-  // Perform Residual/Jacobain setups
+  // Perform Residual/Jacobian setups
   switch (type)
   {
   case EXEC_LINEAR:
