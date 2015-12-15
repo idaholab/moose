@@ -322,20 +322,36 @@ EBSDReader::buildNodeWeightMaps()
     _node_to_phase_weight_map[node_id].resize(getPhaseNum(), 0.0);
 
     // Loop through element indices associated with the current node and record weighted eta value in new map
-    unsigned int n_elems = node_to_elem_map[node_id].size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
+    const unsigned int n_elems = node_to_elem_map[node_id].size();
+    unsigned int used_elems = 0;
 
+    // count number of active elements touching this node
     for (unsigned int ne = 0; ne < n_elems; ++ne)
     {
-      // Current element index
-      unsigned int elem_id = node_to_elem_map[node_id][ne];
+      // Current element index and elment pointer
+      const unsigned int elem_id = node_to_elem_map[node_id][ne];
+      const Elem * elem = mesh.elem(elem_id);
+
+      // skip elements that are not the most refined state
+      if (elem->active()) used_elems++;
+    }
+
+    // apply element weights to the node map
+    for (unsigned int ne = 0; ne < n_elems; ++ne)
+    {
+      // Current element index and elment pointer
+      const unsigned int elem_id = node_to_elem_map[node_id][ne];
+      const Elem * elem = mesh.elem(elem_id);
+
+      // skip elements that are not the most refined state
+      if (!elem->active()) continue;
 
       // Retrieve EBSD grain number for the current element index
-      const Elem * elem = mesh.elem(elem_id);
       const EBSDReader::EBSDPointData & d = getData(elem->centroid());
 
       // Calculate eta value and add to map
-      _node_to_grain_weight_map[node_id][d.global] += 1.0 / n_elems;
-      _node_to_phase_weight_map[node_id][d.phase] += 1.0 / n_elems;
+      _node_to_grain_weight_map[node_id][d.global] += 1.0 / used_elems;
+      _node_to_phase_weight_map[node_id][d.phase] += 1.0 / used_elems;
     }
   }
 }
