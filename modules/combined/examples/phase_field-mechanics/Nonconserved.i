@@ -86,7 +86,7 @@
     C_ijkl = '7 7'
     # Stiffness tensor is created from lambda=7, mu=7 for symmetric_isotropic fill method
     fill_method = symmetric_isotropic
-    #See RankFourTensor.h for details on fill methods
+    # See RankFourTensor.h for details on fill methods
   [../]
   [./strain_a]
     type = ComputeSmallStrain
