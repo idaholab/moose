@@ -5,6 +5,11 @@
   ny = 1
 []
 
+[AuxVariables]
+  [./dummy]
+  [../]
+[]
+
 [Materials]
   [./provider]
     type = DerivativeMaterialInterfaceTestProvider
