@@ -10,18 +10,9 @@
 []
 
 [MeshModifiers]
-  [./SubdomainBoundingBox]
-    type = SubdomainBoundingBox
-    block_id = 1
-    bottom_left = '0 0 0'
-    top_right = '3 3 3'
+  [./ed0]
+     type = ElementDeleterBase
   [../]
-  [./ed0] ## BlockDeleter does not work on multiple processors
-   type = BlockDeleter
-   block_id = 1
-   depends_on = SubdomainBoundingBox
-  [../]
-
 []
 
 [Variables]
