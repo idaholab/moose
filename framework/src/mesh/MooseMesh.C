@@ -108,6 +108,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _is_changed(false),
     _is_nemesis(getParam<bool>("nemesis")),
     _is_prepared(false),
+    _needs_prepare_for_use(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
     _active_local_elem_range(NULL),
@@ -176,6 +177,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _is_changed(false),
     _is_nemesis(false),
     _is_prepared(false),
+    _needs_prepare_for_use(false),
     _refined_elements(NULL),
     _coarsened_elements(NULL),
     _active_local_elem_range(NULL),
@@ -270,14 +272,14 @@ MooseMesh::prepare(bool force)
   {
     // Call prepare_for_use() and allow renumbering
     getMesh().allow_renumbering(true);
-    if (force)
+    if (force || _needs_prepare_for_use)
       getMesh().prepare_for_use();
   }
   else
   {
     // Call prepare_for_use() and DO NOT allow renumbering
     getMesh().allow_renumbering(false);
-    if (force)
+    if (force || _needs_prepare_for_use)
       getMesh().prepare_for_use();
   }
 
@@ -323,6 +325,7 @@ MooseMesh::prepare(bool force)
 
   // Prepared has been called
   _is_prepared = true;
+  _needs_prepare_for_use = false;
 }
 
 void
@@ -1902,6 +1905,12 @@ void
 MooseMesh::prepared(bool state)
 {
   _is_prepared = state;
+}
+
+void
+MooseMesh::needsPrepareForUse()
+{
+  _needs_prepare_for_use = true;
 }
 
 const std::set<SubdomainID> &
