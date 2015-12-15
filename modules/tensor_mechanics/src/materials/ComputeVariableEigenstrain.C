@@ -23,7 +23,7 @@ ComputeVariableEigenstrain::ComputeVariableEigenstrain(const InputParameters & p
     _delastic_strain(_num_args),
     _d2elastic_strain(_num_args)
 {
-  // fetch prerequisite derivatives and build elastic_strain derivatrives and cross-derivatives
+  // fetch prerequisite derivatives and build elastic_strain derivatives and cross-derivatives
   for (unsigned int i = 0; i < _num_args; ++i)
   {
     const VariableName & iname = getVar("args", i)->name();
@@ -50,8 +50,8 @@ ComputeVariableEigenstrain::computeQpStressFreeStrain()
   //Define derivatives of the elastic strain
   for (unsigned int i = 0; i < _num_args; ++i)
   {
-    (*_delastic_strain[i])[_qp] = _eigen_base_tensor * (*_dprefactor[i])[_qp];
+    (*_delastic_strain[i])[_qp] = - _eigen_base_tensor * (*_dprefactor[i])[_qp];
     for (unsigned int j = i; j < _num_args; ++j)
-      (*_d2elastic_strain[i][j])[_qp] = _eigen_base_tensor * (*_d2prefactor[i][j])[_qp];
+      (*_d2elastic_strain[i][j])[_qp] = - _eigen_base_tensor * (*_d2prefactor[i][j])[_qp];
   }
 }
