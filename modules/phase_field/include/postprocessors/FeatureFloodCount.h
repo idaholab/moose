@@ -118,14 +118,12 @@ public:
     void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
     void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
 
-    void inflateBoundingBoxes(Real inflation_amount)
+    void inflateBoundingBoxes(RealVectorValue inflation_amount)
     {
-      Point inflation(inflation_amount, inflation_amount, inflation_amount);
-
       for (unsigned int i = 0; i < _bboxes.size(); ++i)
       {
-        _bboxes[i].max() += inflation;
-        _bboxes[i].min() -= inflation;
+        _bboxes[i].max() += inflation_amount;
+        _bboxes[i].min() -= inflation_amount;
       }
     }
 
@@ -159,7 +157,7 @@ protected:
    */
   virtual void updateFieldInfo();
 
-  void inflateBoundingBoxes(Real inflation_amount = 1.0);
+  void inflateBoundingBoxes(RealVectorValue inflation_amount);
 
   /**
    * This method will "mark" all entities on neighboring elements that

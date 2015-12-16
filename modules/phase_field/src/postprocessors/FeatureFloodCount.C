@@ -246,7 +246,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
-    _feature_count(-1),
+    _feature_count(0),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
@@ -333,7 +333,7 @@ FeatureFloodCount::initialize()
   _communicator.set_union(_ghosted_entity_ids);
 
   // Reset the feature count
-  _feature_count = -1;
+  _feature_count = 0;
 }
 
 void
@@ -414,7 +414,14 @@ FeatureFloodCount::finalize()
    *********************************************************************************
    *********************************************************************************/
 
-  inflateBoundingBoxes();
+  // We'll inflate the bounding boxes by a percentage of the domain
+  RealVectorValue inflation;
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    inflation(i) = _mesh.dimensionWidth(i);
+
+  // Let's try 5%
+  inflation *= 0.05;
+  inflateBoundingBoxes(inflation);
 
   mergeSets(true);
 
@@ -784,23 +791,25 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   {
     for (processor_id_type rank1 = 0; rank1 < n_procs; ++rank1)
     {
+    REPEAT_MERGE_LOOPS:
+
       for (processor_id_type rank2 = 0; rank2 < n_procs; ++rank2)
       {
 //        if (rank1 == rank2 && n_procs > 1)
 //          continue;
-
         for (std::vector<FeatureData>::iterator it1 = _partial_feature_sets[rank1][map_num].begin();
-             it1 != _partial_feature_sets[rank1][map_num].end(); /* no increment */)
+             it1 != _partial_feature_sets[rank1][map_num].end(); ++it1)
         {
           if (it1->_merged)
-          {
-            ++it1;
             continue;
-          }
 
-          bool region_merged = false;
           for (std::vector<FeatureData>::iterator it2 = _partial_feature_sets[rank2][map_num].begin(); it2 != _partial_feature_sets[rank2][map_num].end(); ++it2)
           {
+//            if (map_num == 5)
+//            {
+//              std::cout << "Trying to merge:\n" << *it1 << " AND\n" << *it2;
+//            }
+
             bool pb_intersect = false;
             if (it1 != it2 &&                                                                // Make sure that these iterators aren't pointing at the same set
                 !it2->_merged &&                                                             // and that it2 is not merged (it1 was already checked)
@@ -814,26 +823,27 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
                  )
                )
             {
-//              std::cout << "Merging " << it1->_min_entity_id << " " << it2->_min_entity_id << " due to " << pb_intersect << '\n';
+//              if (map_num == 5)
+//                std::cout << "Merging " << it1->_min_entity_id << " " << it2->_min_entity_id << " due to " << pb_intersect << "\n\n";
 
               // Merge these two entity sets
               set_union.clear();
               std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(), set_union_inserter);
-              it1->_ghosted_ids.swap(set_union);
-              it2->_ghosted_ids.clear();
+              it2->_ghosted_ids.swap(set_union);
+              it1->_ghosted_ids.clear();
 
               set_union.clear();
               std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
-              it1->_periodic_nodes.swap(set_union);
-              it2->_periodic_nodes.clear();
+              it2->_periodic_nodes.swap(set_union);
+              it1->_periodic_nodes.clear();
 
               // Merge local nodes (this case rarely occurs so we'll avoid building the intersection if we can avoid it)
               if (!it1->_local_ids.empty() || !it2->_local_ids.empty())
               {
                 set_union.clear();
                 std::set_union(it1->_local_ids.begin(), it1->_local_ids.end(), it2->_local_ids.begin(), it2->_local_ids.end(), set_union_inserter);
-                it1->_local_ids.swap(set_union);
-                it2->_local_ids.clear();
+                it2->_local_ids.swap(set_union);
+                it1->_local_ids.clear();
               }
 
               /**
@@ -844,24 +854,24 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
                * this intersection isn't physical.
                */
               if (pb_intersect)
-                std::copy(it2->_bboxes.begin(), it2->_bboxes.end(), std::back_inserter(it1->_bboxes));
+                std::copy(it1->_bboxes.begin(), it1->_bboxes.end(), std::back_inserter(it2->_bboxes));
               else
-                it1->expandBBox(*it2);
+                it2->expandBBox(*it1);
 
               // Update the min feature id
-              it1->_min_entity_id = std::min(it1->_min_entity_id, it2->_min_entity_id);
+              it2->_min_entity_id = std::min(it1->_min_entity_id, it2->_min_entity_id);
 
               // Set the flag on the merged set so we don't revisit it again
-              it2->_merged = true;
+              it1->_merged = true;
 
               // Something was merged so we'll need to repeat this loop
-              region_merged = true;
+              goto REPEAT_MERGE_LOOPS;
             }
           } // it2 loop
 
-          // Don't increment if we had a merge, we need to retry earlier candidates again
-          if (!region_merged)
-            ++it1;
+//          // Don't increment if we had a merge, we need to retry earlier candidates again
+//          if (!region_merged)
+//            ++it1;
 
         } // it1 loop
       } // rank2 loop
@@ -1003,11 +1013,16 @@ FeatureFloodCount::updateFieldInfo()
     {
       const FeatureData & feature = *_feature_sets[map_num][*idx_it];
 
-      std::cout << "Proc " << processor_id() << "\nmap num: " << map_num << '\n' << feature;
+//      std::cout << "Proc " << processor_id() << "\nmap num: " << map_num << '\n' << feature;
 
       // Loop over the entitiy ids of this feature and update our local map
       for (std::set<dof_id_type>::const_iterator entity_it = feature._local_ids.begin(); entity_it != feature._local_ids.end(); ++entity_it)
+      {
         _feature_maps[map_idx][*entity_it] = feature_number;
+
+        if (_var_index_mode)
+          _var_index_maps[map_idx][*entity_it] = feature._var_idx;
+      }
 
       ++feature_number;
     }
@@ -1179,7 +1194,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
 //}
 
 void
-FeatureFloodCount::inflateBoundingBoxes(Real inflation_amount)
+FeatureFloodCount::inflateBoundingBoxes(RealVectorValue inflation_amount)
 {
   processor_id_type n_procs = _app.n_processors();
 
@@ -1339,36 +1354,50 @@ FeatureFloodCount::FeatureData::isStichable(const FeatureData & rhs) const
 void
 FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 {
+  bool box_expanded = false;
   for (unsigned int i = 0; i < _bboxes.size(); ++i)
     for (unsigned int j = 0; j < rhs._bboxes.size(); ++j)
       if (_bboxes[i].intersect(rhs._bboxes[j]))
       {
         updateBBoxMin(_bboxes[i], rhs._bboxes[j].min());
         updateBBoxMax(_bboxes[i], rhs._bboxes[j].max());
+        box_expanded = true;
       }
+
+  if (!box_expanded)
+    mooseError("Box failed to expand - this is a catastrophic error");
 }
 
 std::ostream &
 operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 {
-  out << "Ghosted Entities: ";
-  for (std::set<dof_id_type>::const_iterator it = feature._ghosted_ids.begin(); it != feature._ghosted_ids.end(); ++it)
-    out << *it << " ";
+  static const bool debug = false;
 
-  out << "\nLocal Entities: ";
-  for (std::set<dof_id_type>::const_iterator it = feature._local_ids.begin();  it != feature._local_ids.end(); ++it)
-    out << *it << " ";
+  if (debug)
+  {
+    out << "Ghosted Entities: ";
+    for (std::set<dof_id_type>::const_iterator it = feature._ghosted_ids.begin(); it != feature._ghosted_ids.end(); ++it)
+      out << *it << " ";
 
-  out << "\nPeriodic Node IDs: ";
-  for (std::set<dof_id_type>::const_iterator it = feature._periodic_nodes.begin();  it != feature._periodic_nodes.end(); ++it)
-    out << *it << " ";
+    out << "\nLocal Entities: ";
+    for (std::set<dof_id_type>::const_iterator it = feature._local_ids.begin();  it != feature._local_ids.end(); ++it)
+      out << *it << " ";
 
+    out << "\nPeriodic Node IDs: ";
+    for (std::set<dof_id_type>::const_iterator it = feature._periodic_nodes.begin();  it != feature._periodic_nodes.end(); ++it)
+      out << *it << " ";
+  }
+
+  out << "\nBBoxes:";
   for (std::vector<MeshTools::BoundingBox>::const_iterator it = feature._bboxes.begin(); it != feature._bboxes.end(); ++it)
-    out << "\nBBox Max: " << it->max() << " Min: " << it->min();
+    out << "\nMax: " << it->max() << "\nMin: " << it->min();
 
-  out << "\nVar_idx: " << feature._var_idx;
-  out << "\nMin Entity ID: " << feature._min_entity_id;
-  out << "\nMerge Flag: " << feature._merged;
+  if (debug)
+  {
+    out << "\nVar_idx: " << feature._var_idx;
+    out << "\nMin Entity ID: " << feature._min_entity_id;
+    out << "\nMerge Flag: " << feature._merged;
+  }
   out << "\n\n";
 
   return out;

@@ -94,10 +94,10 @@ protected:
   void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, NumericVector<Real> & solution, NumericVector<Real> & solution_old, NumericVector<Real> & solution_older);
 
   /**
-   * This method returns the periodic distance between two spheres.  If ignore_radii is true, then the distance will be between the two
-   * sphere centers.  If ignore_radii is false, then the distance will be between the edges of the two spheres.
+   * This method returns the periodic distance between two bounding boxes.  If use_centroids_only is true, then the distance will be between the two
+   * bounding box centers.  If ignore_radii is false, then the distance will be -1 or 1 depending on whether the intersect or not (respectively).
    */
-  Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const;
+  Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2, bool use_centroids_only) const;
 
   Point centerOfMass(UniqueGrain & grain) const;
 
