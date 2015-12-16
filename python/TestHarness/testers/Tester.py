@@ -42,6 +42,8 @@ class Tester(MooseObject):
     params.addParam('curl',          ['ALL'], "A test that runs only if CURL is detected ('ALL', 'TRUE', 'FALSE')")
     params.addParam('tbb',           ['ALL'], "A test that runs only if TBB is available ('ALL', 'TRUE', 'FALSE')")
 
+    params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
+
     return params
 
   def __init__(self, name, params):
@@ -181,6 +183,12 @@ class Tester(MooseObject):
     for x in self.specs['dof_id_bytes']:
       if x != 'ALL' and not x in checks['dof_id_bytes']:
         return (False, 'skipped (--with-dof-id-bytes!=' + x + ')')
+
+    # Check to make sure depend files exist
+    for file in self.specs['depend_files']:
+      if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
+        reason = 'skipped (DEPEND FILES)'
+        return (False, reason)
 
     # Check the return values of the derived classes
     return self.checkRunnable(options)
