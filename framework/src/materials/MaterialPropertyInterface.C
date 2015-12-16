@@ -14,7 +14,6 @@
 
 // MOOSE includes
 #include "MaterialPropertyInterface.h"
-#include "FEProblem.h"
 #include "MooseApp.h"
 
 // Standard construction

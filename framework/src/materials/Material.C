@@ -130,6 +130,19 @@ Material::createData()
 }
 
 void
+Material::setZeroPropAsRequested(const std::string & prop_name)
+{
+  // look if property name is in _zero_props
+  std::set<std::string>::iterator it = _zero_props.find(prop_name);
+  if (it != _zero_props.end())
+  {
+    // move the property from _zero_props to _requested_props
+    _requested_props.insert(*it);
+    _zero_props.erase(it);
+  }
+}
+
+void
 Material::checkStatefulSanity() const
 {
   for (std::map<std::string, int>::const_iterator it = _props_to_flags.begin(); it != _props_to_flags.end(); ++it)
