@@ -18,7 +18,7 @@
 #include "ExpressionBuilder.h"
 
 //CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "GuardedHelperMacros.h"
 
 class ExpressionBuilderTest : public CppUnit::TestFixture,
                               public ExpressionBuilder

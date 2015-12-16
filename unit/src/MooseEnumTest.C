@@ -283,7 +283,7 @@ MooseEnumTest::testErrors()
   try
   {
     MultiMooseEnum error_check("one two three");
-    unsigned int invalid = error_check.get(3);
+    error_check.get(3);
 
     // Unreachable
     CPPUNIT_ASSERT( false );

@@ -16,7 +16,7 @@
 #define RANKTWOEIGENROUTINESTEST_H
 
 //CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "GuardedHelperMacros.h"
 
 // Moose includes
 #include "RankTwoTensor.h"

@@ -16,7 +16,7 @@
 #define LINESEGMENTTEST_H
 
 //CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "GuardedHelperMacros.h"
 
 // Moose includes
 #include "LineSegment.h"

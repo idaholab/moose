@@ -16,7 +16,7 @@
 #define PERMUTATIONTENSORTEST_H
 
 //CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "GuardedHelperMacros.h"
 
 class PermutationTensorTest : public CppUnit::TestFixture
 {
