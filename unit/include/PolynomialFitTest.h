@@ -16,7 +16,7 @@
 #define POLYNOMIALFITTEST_H
 
 //CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "GuardedHelperMacros.h"
 
 class PolynomialFitTest : public CppUnit::TestFixture
 {

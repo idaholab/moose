@@ -264,7 +264,7 @@ RankTwoEigenRoutinesTest::someIdentitiesTest()
   Real mean = _m3.trace()/3.0;
   Real secondInvariant = _m3.secondInvariant();
   Real shear = std::sqrt(secondInvariant);
-  Real thirdInvariant = _m3.thirdInvariant();
+  _m3.thirdInvariant();
 
   Real lode = std::asin(_m3.sin3Lode(0, 0)/3.0);
 

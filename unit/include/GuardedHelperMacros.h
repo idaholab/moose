@@ -12,21 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SPLITFILENAMETEST_H
-#define SPLITFILENAMETEST_H
-
-//CPPUnit includes
-#include "GuardedHelperMacros.h"
-
-class SplitFileNameTest : public CppUnit::TestFixture
-{
-  CPPUNIT_TEST_SUITE(SplitFileNameTest);
-  CPPUNIT_TEST(validName);
-  CPPUNIT_TEST_SUITE_END();
-
-public:
-  void validName();
-  void invalidName();
-};
-
-#endif  // SPLITFILENAMETEST_H
+// Include CPPUnit headers without warnings
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+#include "cppunit/extensions/HelperMacros.h"
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

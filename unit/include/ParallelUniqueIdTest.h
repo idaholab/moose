@@ -16,7 +16,7 @@
 // #define PARALLELUNIQUEIDTEST_H
 
 // //CPPUnit includes
-// #include "cppunit/extensions/HelperMacros.h"
+// #include "GuardedHelperMacros.h"
 
 // /** This class is testing a class meant to be used in parallel applications,
 //  * however it doesn't test it in parallel.
