@@ -206,4 +206,35 @@
     exodiff = 'lstabledirk4_3.e'
     cli_args = 'Outputs/file_base=lstabledirk4_3 Executioner/TimeIntegrator/type=LStableDirk4 Executioner/dt=0.125'
   [../]
+
+
+
+  # Test the AStableDirk4 time integration method "bootstrapped" with
+  # LStableDirk4.  This is the default behavior for the AStableDirk4
+  # TimeIntegrator.  We use relatively large timesteps here, since
+  # there is not much difference in the final results of AStableDirk4
+  # and bootstrapped AStableDirk4 as dt->0.
+  [./test_astabledirk4_bootstrap_1]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'astabledirk4_bootstrap_1.e'
+    cli_args = 'Outputs/file_base=astabledirk4_bootstrap_1 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.5'
+  [../]
+
+  # Same thing with 1/2 timestep.
+  [./test_astabledirk4_bootstrap_2]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'astabledirk4_bootstrap_2.e'
+    cli_args = 'Outputs/file_base=astabledirk4_bootstrap_2 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.25'
+  [../]
+
+  # Same thing with 1/4 timestep.
+  [./test_astabledirk4_bootstrap_3]
+    type = 'Exodiff'
+    input = 'implicit_convergence.i'
+    exodiff = 'astabledirk4_bootstrap_3.e'
+    cli_args = 'Outputs/file_base=astabledirk4_bootstrap_3 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.125'
+  [../]
+
 []
