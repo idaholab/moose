@@ -299,7 +299,7 @@ EBSDReader::meshChanged()
   // maps are only rebuild for use in initial conditions, which happens in time step zero
   if (_time_step == 0)
     buildNodeWeightMaps();
-};
+}
 
 void
 EBSDReader::buildNodeWeightMaps()
