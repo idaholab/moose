@@ -1,0 +1,7 @@
+[Tests]
+  [./BlockDeleter]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest.i'
+    exodiff = 'BlockDeleterTest_out.e'
+  [../]
+[]
