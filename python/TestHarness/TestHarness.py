@@ -56,6 +56,7 @@ class TestHarness:
     self.num_pending = 0
     self.host_name = gethostname()
     self.moose_dir = moose_dir
+    self.base_dir = os.getcwd()
     self.run_tests_dir = os.path.abspath('.')
     self.code = '2d2d6769726c2d6d6f6465'
     self.error_code = 0x0
@@ -133,10 +134,10 @@ class TestHarness:
         self.processPBSResults()
       else:
         self.options.processingPBS = False
-        base_dir = os.getcwd()
-        for dirpath, dirnames, filenames in os.walk(base_dir, followlinks=True):
+        self.base_dir = os.getcwd()
+        for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
           # Prune submdule paths when searching for tests
-          if base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
+          if self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
             dirnames[:] = []
 
           # walk into directories that aren't contrib directories
@@ -293,6 +294,7 @@ class TestHarness:
     params['executable'] = self.executable
     params['hostname'] = self.host_name
     params['moose_dir'] = self.moose_dir
+    params['base_dir'] = self.base_dir
 
     if params.isValid('prereq'):
       if type(params['prereq']) != list:
