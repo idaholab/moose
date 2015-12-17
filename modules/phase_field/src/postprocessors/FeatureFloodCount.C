@@ -595,6 +595,19 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
       appendPeriodicNeighborNodes(feature);
     }
   }
+
+//  // DEBUGGING
+//  std::cout << "*********************************************************************************************\n"
+//            << "BEGIN POPULATE DATA STRUCTURES\n"
+//            << "*********************************************************************************************\n";
+//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+//    for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
+//         it != _partial_feature_sets[rank][map_num].end(); ++it)
+//      std::cout << *it;
+//  std::cout << "*********************************************************************************************\n"
+//            << "END POPULATE DATA STRUCTURES\n"
+//            << "*********************************************************************************************\n";
+//  // DEBUGGING
 }
 
 void
@@ -777,15 +790,19 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
   processor_id_type n_procs = _app.n_processors();
 
-  // DEBUGGING
-//  std::cout << "Before merge:\n";
+//  // DEBUGGING
+//  std::cout << "*********************************************************************************************\n"
+//            << "BEGIN BEFORE MERGE\n"
+//            << "*********************************************************************************************\n";
 //  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
 //    for (processor_id_type rank = 0; rank < n_procs; ++rank)
 //      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
 //           it != _partial_feature_sets[rank][map_num].end(); ++it)
 //        std::cout << *it;
-//  std::cout << "Finish Before merge:\n";
-  // DEBUGGING
+//  std::cout << "*********************************************************************************************\n"
+//            << "END BEFORE MERGE\n"
+//            << "*********************************************************************************************\n";
+//  // DEBUGGING
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
@@ -814,21 +831,39 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
             if (it1 != it2 &&                                                                // Make sure that these iterators aren't pointing at the same set
                 !it2->_merged &&                                                             // and that it2 is not merged (it1 was already checked)
                 it1->_var_idx == it2->_var_idx &&                                            // and that the sets have matching variable indices
-                 (it1->isStichable(*it2) ||                                                  // and bboxes overlap
-                   (use_periodic_boundary_info &&                                            // or if merging across periodic nodes, do they intersect?
-                     (pb_intersect = setsIntersect(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(),
-                                                   it2->_periodic_nodes.begin(), it2->_periodic_nodes.end())
-                     )
+                ((use_periodic_boundary_info &&                                              // and (if merging across periodic nodes
+                   (pb_intersect = setsIntersect(it1->_periodic_nodes.begin(),               //      do those periodic nodes intersect?
+                                                 it1->_periodic_nodes.end(),
+                                                 it2->_periodic_nodes.begin(),
+                                                 it2->_periodic_nodes.end())))
+                     ||                                                                      //      or
+                   (it1->isStichable(*it2) &&                                                //      if the region bboxes intersect
+                     (setsIntersect(it1->_ghosted_ids.begin(),                               //      do those ghosted nodes intersect?)
+                                    it1->_ghosted_ids.end(),
+                                    it2->_ghosted_ids.begin(),
+                                    it2->_ghosted_ids.end()))
                    )
                  )
                )
             {
-//              if (map_num == 5)
-//                std::cout << "Merging " << it1->_min_entity_id << " " << it2->_min_entity_id << " due to " << pb_intersect << "\n\n";
-
-              // Merge these two entity sets
+              /**
+               * Even though we've determined that these two partial regions need to be merged, we don't necessarily know if the _ghost_ids intersect.
+               * We could be in this branch because the periodic boundaries intersect but that doesn't tell us anything about whether or not the ghost_region
+               * also intersects. If the _ghost_ids intersect, that means that we are merging along a periodic boundary, not across one. In this case the
+               * bounding box(s) need to be expanded.
+               */
               set_union.clear();
               std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(), set_union_inserter);
+
+              // Was there overlap in the physical region?
+              bool physical_intersection = (it1->_ghosted_ids.size() + it2->_ghosted_ids.size() > set_union.size());
+
+//              // DEBUGGING
+//              std::cout << "Var idx: " << it1->_var_idx << ": merging " << it1->_min_entity_id << " and " << it2->_min_entity_id << " due to "
+//                        << (physical_intersection ? " physical intersection.\n" : " virtual intersection.\n");
+//              std::cout << *it1 << *it2;
+//              // DEBUGGING
+
               it2->_ghosted_ids.swap(set_union);
               it1->_ghosted_ids.clear();
 
@@ -837,32 +872,29 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
               it2->_periodic_nodes.swap(set_union);
               it1->_periodic_nodes.clear();
 
-              // Merge local nodes (this case rarely occurs so we'll avoid building the intersection if we can avoid it)
-              if (!it1->_local_ids.empty() || !it2->_local_ids.empty())
-              {
-                set_union.clear();
-                std::set_union(it1->_local_ids.begin(), it1->_local_ids.end(), it2->_local_ids.begin(), it2->_local_ids.end(), set_union_inserter);
-                it2->_local_ids.swap(set_union);
-                it1->_local_ids.clear();
-              }
+              set_union.clear();
+              std::set_union(it1->_local_ids.begin(), it1->_local_ids.end(), it2->_local_ids.begin(), it2->_local_ids.end(), set_union_inserter);
+              it2->_local_ids.swap(set_union);
+              it1->_local_ids.clear();
 
               /**
-               * How we handle merging the bounding boxes depends on what kind of intersection occured. If
-               * the bounding boxes intersected, then we can expand the bounding box since this is a physical
-               * contact in the domain. If the periodic nodes intersected, we need to append the existing
-               * bounding box vectors together to maintain their individual coordinates separately since
-               * this intersection isn't physical.
+               * If we had a physical intersection, we need to expand boxes. If we had a virtual (periodic) intersection we need to preserve
+               * all of the boxes from each of the regions' sets.
                */
-              if (pb_intersect)
-                std::copy(it1->_bboxes.begin(), it1->_bboxes.end(), std::back_inserter(it2->_bboxes));
-              else
+              if (physical_intersection)
                 it2->expandBBox(*it1);
+              else
+                std::copy(it1->_bboxes.begin(), it1->_bboxes.end(), std::back_inserter(it2->_bboxes));
 
               // Update the min feature id
               it2->_min_entity_id = std::min(it1->_min_entity_id, it2->_min_entity_id);
 
               // Set the flag on the merged set so we don't revisit it again
               it1->_merged = true;
+
+//              // DEBUGGING
+//              std::cout << "MERGED ENTITY:\n" << *it2;
+//              // DEBUGGING
 
               // Something was merged so we'll need to repeat this loop
               goto REPEAT_MERGE_LOOPS;
@@ -905,6 +937,20 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
     }
   }
+
+  // DEBUGGING
+  std::cout << "*********************************************************************************************\n"
+            << "BEGIN AFTER MERGE\n"
+            << "*********************************************************************************************\n";
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    for (std::vector<MooseSharedPointer<FeatureData> >::iterator it = _feature_sets[map_num].begin();
+         it != _feature_sets[map_num].end(); ++it)
+      std::cout << **it;
+  std::cout << "*********************************************************************************************\n"
+            << "END AFTER MERGE\n"
+            << "*********************************************************************************************\n";
+  // DEBUGGING
+
 
    /**
     * If map_num <= n_processors (normal case), each processor up to map_num will handle one list
@@ -1354,6 +1400,8 @@ FeatureFloodCount::FeatureData::isStichable(const FeatureData & rhs) const
 void
 FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 {
+  std::vector<bool> intersected_boxes(rhs._bboxes.size(), false);
+
   bool box_expanded = false;
   for (unsigned int i = 0; i < _bboxes.size(); ++i)
     for (unsigned int j = 0; j < rhs._bboxes.size(); ++j)
@@ -1361,17 +1409,36 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
       {
         updateBBoxMin(_bboxes[i], rhs._bboxes[j].min());
         updateBBoxMax(_bboxes[i], rhs._bboxes[j].max());
+        intersected_boxes[j] = true;
         box_expanded = true;
       }
 
+  // Any bounding box in the rhs vector that doesn't intersect
+  // needs to be appended to the lhs vector
+  for (unsigned int j = 0; j < intersected_boxes.size(); ++j)
+    if (!intersected_boxes[j])
+      _bboxes.push_back(rhs._bboxes[j]);
+
+  // Error check
   if (!box_expanded)
-    mooseError("Box failed to expand - this is a catastrophic error");
+  {
+    std::ostringstream oss;
+    oss << "LHS BBoxes:\n";
+    for (unsigned int i = 0; i < _bboxes.size(); ++i)
+      oss << "Max: " << _bboxes[i].max() << " Min: " << _bboxes[i].min() << '\n';
+
+    oss << "RHS BBoxes:\n";
+    for (unsigned int i = 0; i < rhs._bboxes.size(); ++i)
+      oss << "Max: " << rhs._bboxes[i].max() << " Min: " << rhs._bboxes[i].min() << '\n';
+
+    mooseError("Now Boundaing Boxes Expanded - This is a catastrophic error!\n" << oss.str());
+  }
 }
 
 std::ostream &
 operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 {
-  static const bool debug = false;
+  static const bool debug = true;
 
   if (debug)
   {
@@ -1390,7 +1457,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 
   out << "\nBBoxes:";
   for (std::vector<MeshTools::BoundingBox>::const_iterator it = feature._bboxes.begin(); it != feature._bboxes.end(); ++it)
-    out << "\nMax: " << it->max() << "\nMin: " << it->min();
+    out << "\nMax: " << it->max() << " Min: " << it->min();
 
   if (debug)
   {

@@ -50,6 +50,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./ghosts]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -88,6 +92,13 @@
     type = ProcessorIDAux
     variable = proc_id
     execute_on = 'initial timestep_end'
+  [../]
+  [./ghosts]
+    type = FeatureFloodCountAux
+    variable = ghosts
+    field_display = GHOSTED_ELEMS
+    execute_on = 'initial timestep_end'
+    bubble_object = grain_tracker
   [../]
 []
 
@@ -157,4 +168,3 @@
 [Outputs]
   exodus = true
 []
-

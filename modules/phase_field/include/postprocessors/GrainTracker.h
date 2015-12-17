@@ -174,6 +174,8 @@ public:
    * elem_id -> a vector of pairs each containing the grain number and the variable index representing that grain
    */
   std::map<dof_id_type, std::vector<std::pair<unsigned int, unsigned int> > > _elemental_data;
+
+  std::ofstream _outfile;
 };
 
 

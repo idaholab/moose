@@ -98,10 +98,13 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
 
   if (!_is_elemental && _compute_op_maps)
     mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
+
+  _outfile.open("bboxes.txt");
 }
 
 GrainTracker::~GrainTracker()
 {
+  _outfile.close();
 //  for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
 //    delete it->second;
 }
@@ -167,6 +170,29 @@ GrainTracker::finalize()
   Moose::perf_log.push("trackGrains()","GrainTracker");
   trackGrains();
   Moose::perf_log.pop("trackGrains()","GrainTracker");
+
+  // DEBUGGING
+  if (processor_id() == 0)
+  {
+    _outfile << "Time: " << _t << '\n';
+    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
+    {
+      if (it->second->_status == MARKED)
+      {
+        MooseSharedPointer<FeatureData> feature = it->second;
+        for (unsigned int i = 0; i < feature->_bboxes.size(); ++i)
+          _outfile << it->first << ","
+                   << feature->_bboxes[i].min()(0) << "," << feature->_bboxes[i].max()(0) << ","
+                   << feature->_bboxes[i].min()(1) << "," << feature->_bboxes[i].max()(1) << ","
+                   << feature->_bboxes[i].min()(2) << "," << feature->_bboxes[i].max()(2) <<'\n';
+      }
+    }
+    _outfile << '\n';
+    _outfile.flush();
+  }
+  // DEBUGGING
+
+
 //
 //  Moose::perf_log.push("remapGrains()","GrainTracker");
 //  if (_remap)
@@ -646,26 +672,6 @@ GrainTracker::trackGrains()
                << it->second->_var_idx <<  ")\n";
       it->second->_status = INACTIVE;
     }
-
-  // DEBUGGING
-  if (processor_id() == 0)
-  {
-    std::ofstream outfile("bboxes.txt");
-    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
-    {
-      if (it->second->_status == MARKED)
-      {
-        MooseSharedPointer<FeatureData> feature = it->second;
-        for (unsigned int i = 0; i < feature->_bboxes.size(); ++i)
-          outfile << it->first << ","
-                  << feature->_bboxes[i].max()(0) << "," << feature->_bboxes[i].max()(1) << "," << feature->_bboxes[i].max()(2) << ","
-                  << feature->_bboxes[i].min()(0) << "," << feature->_bboxes[i].min()(1) << "," << feature->_bboxes[i].min()(2) <<'\n';
-      }
-    }
-    outfile.close();
-  }
-  // DEBUGGING
-
 
 ////  // Sanity check to make sure that we consumed all of the bounding sphere datastructures
 ////  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
