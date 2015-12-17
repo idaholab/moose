@@ -262,36 +262,4 @@ MooseEnumTest::testErrors()
     std::string msg(e.what());
     CPPUNIT_ASSERT( msg.find("You cannot place whitespace around the '=' character") != std::string::npos );
   }
-
-#ifdef DEBUG
-  // Out of bounds access
-  try
-  {
-    MultiMooseEnum error_check("one two three");
-    std::string invalid = error_check[3];
-
-    // Unreachable
-    CPPUNIT_ASSERT( false );
-  }
-  catch(const std::exception & e)
-  {
-    std::string msg(e.what());
-    CPPUNIT_ASSERT( msg.find("Access out of bounds") != std::string::npos );
-  }
-
-  // Out of bounds access
-  try
-  {
-    MultiMooseEnum error_check("one two three");
-    unsigned int invalid = error_check.get(3);
-
-    // Unreachable
-    CPPUNIT_ASSERT( false );
-  }
-  catch(const std::exception & e)
-  {
-    std::string msg(e.what());
-    CPPUNIT_ASSERT( msg.find("Access out of bounds") != std::string::npos );
-  }
-#endif
 }

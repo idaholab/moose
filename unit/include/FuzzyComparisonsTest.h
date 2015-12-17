@@ -16,7 +16,7 @@
 #define FUZZYCOMPARISONSTEST_H
 
 //CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "GuardedHelperMacros.h"
 
 class FuzzyComparisonsTest : public CppUnit::TestFixture
 {
