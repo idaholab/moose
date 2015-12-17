@@ -1,3 +1,4 @@
+# 2D, non-concave
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -10,8 +11,22 @@
 []
 
 [MeshModifiers]
+  [./SubdomainBoundingBox1]
+    type = SubdomainBoundingBox
+    block_id = 1
+    bottom_left = '0 0 0'
+    top_right = '1 2 1'
+  [../]
+  [./SubdomainBoundingBox2]
+    type = SubdomainBoundingBox
+    block_id = 1
+    bottom_left = '1 1 0'
+    top_right = '3 3 1'
+  [../]
   [./ed0]
-     type = ElementDeleterBase
+    type = BlockDeleter
+    block_id = 1
+    depends_on = 'SubdomainBoundingBox1 SubdomainBoundingBox2'
   [../]
 []
 

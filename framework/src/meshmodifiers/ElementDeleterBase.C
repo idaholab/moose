@@ -14,8 +14,8 @@
 
 #include "ElementDeleterBase.h"
 #include "MooseMesh.h"
-#include "DependencyResolver.h"
-#include "libmesh/ExodusII_IO.h"
+//#include "DependencyResolver.h"
+//#include "libmesh/ExodusII_IO.h"
 
 template<>
 InputParameters validParams<ElementDeleterBase>()
@@ -36,7 +36,8 @@ ElementDeleterBase::modify()
     mooseError("_mesh_ptr must be initialized before calling ElementDeleterBase::modify()");
 
   MeshBase & mesh = _mesh_ptr->getMesh();
-  DependencyResolver<unsigned int> resolver;
+  // ANDY: doesn't think the DependencyResolver is necessary
+  // DependencyResolver<unsigned int> resolver;
 
   // Elements that the deleter will remove
   std::set<Elem *> deleteable_elems;
@@ -68,13 +69,18 @@ ElementDeleterBase::modify()
    *
    * TODO: We need to sort these not because they have to be deleted in a certain order in libMesh,
    *       but because the order of deletion might impact what happens to any existing sidesets or nodesets.
+   *
+   * ANDY: cannot find an example where sorting is necessary
    */
   for (std::set<Elem *>::const_iterator it = deleteable_elems.begin(); it != deleteable_elems.end(); ++it)
     mesh.delete_elem(*it);
 
   /**
    * Now go through and see what nodes have been orphaned and clean them up.
+   *
+   * ANDY: believes the following is not necessary now.
    */
+  /*
   std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh_ptr->nodeToElemMap();
   for (std::set<dof_id_type>::const_iterator it = node_ids_to_check.begin(); it != node_ids_to_check.end(); ++it)
   {
@@ -99,6 +105,7 @@ ElementDeleterBase::modify()
     if (!connected_elem)
       mesh.delete_node(node);
   }
+  */
 
   /**
    * Deleting nodes and elements leaves NULLs in the mesh datastructure. We need to get rid of those.

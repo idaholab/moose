@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef BLOCKDELETER_H
-#define BLOCKDELETER_H
+#ifndef ELEMENTDELETERBASE_H
+#define ELEMENTDELETERBASE_H
 
 #include "MeshModifier.h"
 
@@ -33,4 +33,4 @@ public:
   virtual bool shouldDelete(const Elem * elem);
 };
 
-#endif /* BLOCKDELETER_H */
+#endif /* ELEMENTDELETERBASE_H */
