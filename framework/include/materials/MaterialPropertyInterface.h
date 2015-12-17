@@ -364,7 +364,7 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
 
 template<typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getZeroMaterialProperty(const std::string & prop_name)
+MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_name*/)
 {
   // static zero property storage
   static MaterialProperty<T> zero;
