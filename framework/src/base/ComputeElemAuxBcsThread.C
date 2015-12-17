@@ -23,7 +23,7 @@
 
 ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem,
                                                  AuxiliarySystem & sys,
-                                                 const MooseObjectStorage<AuxKernel> & storage,
+                                                 const MooseObjectWarehouse<AuxKernel> & storage,
                                                  bool need_materials) :
     _problem(problem),
     _sys(sys),

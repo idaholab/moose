@@ -23,9 +23,9 @@
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
     ComputeJacobianThread(fe_problem, sys, jacobian),
-    _integrated_bcs(sys.getIntegratedBCStorage()),
-    _dg_kernels(sys.getDGKernelStorage()),
-    _kernels(sys.getKernelStorage())
+    _integrated_bcs(sys.getIntegratedBCWarehouse()),
+    _dg_kernels(sys.getDGKernelWarehouse()),
+    _kernels(sys.getKernelWarehouse())
 {
 }
 

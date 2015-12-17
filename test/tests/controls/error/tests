@@ -24,7 +24,7 @@
   [../]
 
   [./tid_warehouse_error]
-    # Test tid assert on MooseObjectStorage
+    # Test tid assert on MooseObjectWarehouse
     type = RunException
     input = 'tid_warehouse_error.i'
     expect_err = "Attempting to access a thread id \(12345\) greater than the number allowed by the storage item \(1\)"

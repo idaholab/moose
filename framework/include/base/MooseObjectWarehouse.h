@@ -12,11 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTSTORAGE_H
-#define MOOSEOBJECTSTORAGE_H
+#ifndef MOOSEOBJECTWAREHOUSE_H
+#define MOOSEOBJECTWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectStorageBase.h"
+#include "MooseObjectWarehouseBase.h"
 
 /**
  * A storage container for MooseObjects.
@@ -25,18 +25,18 @@
  * restricted objects. It also, maintains lists of active objects for use by Controls.
  */
 template<typename T>
-class MooseObjectStorage : public MooseObjectStorageBase<T>
+class MooseObjectWarehouse : public MooseObjectWarehouseBase<T>
 {
 public:
 
-  using MooseObjectStorageBase<T>::checkThreadID;
-  using MooseObjectStorageBase<T>::_active_objects;
+  using MooseObjectWarehouseBase<T>::checkThreadID;
+  using MooseObjectWarehouseBase<T>::_active_objects;
 
   /**
    * Constructor.
    * @param threaded When true (default) threaded storage is enabled.
    */
-  MooseObjectStorage(bool threaded = true);
+  MooseObjectWarehouse(bool threaded = true);
 
   ///@{
   /**
@@ -52,14 +52,14 @@ public:
 
 
 template<typename T>
-MooseObjectStorage<T>::MooseObjectStorage(bool threaded /*=true*/) :
-    MooseObjectStorageBase<T>(threaded)
+MooseObjectWarehouse<T>::MooseObjectWarehouse(bool threaded /*=true*/) :
+    MooseObjectWarehouseBase<T>(threaded)
 {
 }
 
 template<typename T>
 void
-MooseObjectStorage<T>::initialSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::initialSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
@@ -70,7 +70,7 @@ MooseObjectStorage<T>::initialSetup(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 void
-MooseObjectStorage<T>::timestepSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::timestepSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
@@ -81,7 +81,7 @@ MooseObjectStorage<T>::timestepSetup(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 void
-MooseObjectStorage<T>::subdomainSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::subdomainSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
@@ -92,7 +92,7 @@ MooseObjectStorage<T>::subdomainSetup(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 void
-MooseObjectStorage<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
@@ -103,7 +103,7 @@ MooseObjectStorage<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 void
-MooseObjectStorage<T>::residualSetup(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouse<T>::residualSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
@@ -111,4 +111,4 @@ MooseObjectStorage<T>::residualSetup(THREAD_ID tid/* = 0*/) const
     (*it)->residualSetup();
 }
 
-#endif // MOOSEOBJECTSTORAGE_H
+#endif // MOOSEOBJECTWAREHOUSE_H

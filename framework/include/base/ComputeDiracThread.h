@@ -52,7 +52,7 @@ protected:
   NonlinearSystem & _sys;
 
   /// Storage for DiracKernel objects
-  const MooseObjectStorage<DiracKernel> & _dirac_kernels;
+  const MooseObjectWarehouse<DiracKernel> & _dirac_kernels;
 };
 
 #endif //COMPUTEDIRACTHREAD_H

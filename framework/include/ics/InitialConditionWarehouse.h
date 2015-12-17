@@ -11,10 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef INITIALCONDITIONSTORAGE_H
-#define INITIALCONDITIONSTORAGE_H
+#ifndef INITIALCONDITIONWAREHOUSE_H
+#define INITIALCONDITIONWAREHOUSE_H
 
-#include "MooseObjectStorageBase.h"
+#include "MooseObjectWarehouseBase.h"
 #include "MooseTypes.h"
 
 class InitialCondition;
@@ -22,10 +22,10 @@ class InitialCondition;
 /**
  * Warehouse for storing initial conditions
  */
-class InitialConditionStorage : public MooseObjectStorageBase<InitialCondition>
+class InitialConditionWarehouse : public MooseObjectWarehouseBase<InitialCondition>
 {
 public:
-  InitialConditionStorage();
+  InitialConditionWarehouse();
 
   /**
    * Initial setup
@@ -47,4 +47,4 @@ protected:
   ///@}
 };
 
-#endif /* INITIALCONDITIONSTORAGE_H */
+#endif /* INITIALCONDITIONWAREHOUSE_H */

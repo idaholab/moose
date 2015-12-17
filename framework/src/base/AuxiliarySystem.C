@@ -321,7 +321,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
   Moose::perf_log.push("update_aux_vars_scalar()","Solve");
 
   // Reference to the current storage container
-  const MooseObjectStorage<AuxScalarKernel> & storage = _aux_scalar_storage[type];
+  const MooseObjectWarehouse<AuxScalarKernel> & storage = _aux_scalar_storage[type];
 
   PARALLEL_TRY {
     // FIXME: run multi-threaded
@@ -356,7 +356,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
   Moose::perf_log.push("update_aux_vars_nodal()","Solve");
 
   // Reference to the Nodal AuxKernel storage
-  const MooseObjectStorage<AuxKernel> & nodal = _nodal_aux_storage[type];
+  const MooseObjectWarehouse<AuxKernel> & nodal = _nodal_aux_storage[type];
 
   // Block Nodal AuxKernels
   PARALLEL_TRY {
@@ -397,7 +397,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
   Moose::perf_log.push("update_aux_vars_elemental()","Solve");
 
   // Reference to the Nodal AuxKernel storage
-  const MooseObjectStorage<AuxKernel> & elemental = _elemental_aux_storage[type];
+  const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
 
   // Block Elemental AuxKernels
   PARALLEL_TRY {

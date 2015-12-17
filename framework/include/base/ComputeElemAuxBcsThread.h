@@ -18,7 +18,7 @@
 
 // MOOSE includes
 #include "ParallelUniqueId.h"
-#include "MooseObjectStorage.h"
+#include "MooseObjectWarehouse.h"
 #include "MooseMesh.h"
 
 // Forward declarations
@@ -29,7 +29,7 @@ class AuxKernel;
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectStorage<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
@@ -43,7 +43,7 @@ protected:
   THREAD_ID _tid;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectStorage<AuxKernel> & _storage;
+  const MooseObjectWarehouse<AuxKernel> & _storage;
 
   bool _need_materials;
 };

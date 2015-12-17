@@ -12,11 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef KERNELSTORAGE_H
-#define KERNELSTORAGE_H
+#ifndef KERNELWAREHOUSE_H
+#define KERNELWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectStorage.h"
+#include "MooseObjectWarehouse.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
 
@@ -28,10 +28,10 @@ class TimeKernel;
 /**
  * Holds kernels and provides some services
  */
-class KernelStorage : public MooseObjectStorage<KernelBase>
+class KernelWarehouse : public MooseObjectWarehouse<KernelBase>
 {
 public:
-  KernelStorage();
+  KernelWarehouse();
 
   /**
    * Add Kernel to the storage structure
@@ -54,8 +54,8 @@ public:
 protected:
 
   /// Variable based storage
-  std::map<unsigned int, MooseObjectStorage<KernelBase> > _variable_kernel_storage;
+  std::map<unsigned int, MooseObjectWarehouse<KernelBase> > _variable_kernel_storage;
 
 };
 
-#endif // KERNELSTORAGE_H
+#endif // KERNELWAREHOUSE_H

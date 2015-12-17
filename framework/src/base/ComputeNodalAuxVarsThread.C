@@ -22,7 +22,7 @@
 
 ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblem & fe_problem,
                                                      AuxiliarySystem & sys,
-                                                     const MooseObjectStorage<AuxKernel> & storage) :
+                                                     const MooseObjectWarehouse<AuxKernel> & storage) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _sys(sys),
     _storage(storage)

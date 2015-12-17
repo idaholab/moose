@@ -27,7 +27,7 @@ class IntegratedBC;
 class DGKernel;
 class TimeKernel;
 class KernelBase;
-class KernelStorage;
+class KernelWarehouse;
 
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -53,16 +53,16 @@ protected:
   unsigned int _num_cached;
 
   /// Reference to BC storage structures
-  const MooseObjectStorage<IntegratedBC> & _integrated_bcs;
+  const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;
 
   /// Reference to DGKernel storage structure
-  const MooseObjectStorage<DGKernel> & _dg_kernels;
+  const MooseObjectWarehouse<DGKernel> & _dg_kernels;
 
   ///@{
   /// Reference to Kernel storage structures
-  const KernelStorage & _kernels;
-  const MooseObjectStorage<KernelBase> & _time_kernels;
-  const MooseObjectStorage<KernelBase> & _non_time_kernels;
+  const KernelWarehouse & _kernels;
+  const MooseObjectWarehouse<KernelBase> & _time_kernels;
+  const MooseObjectWarehouse<KernelBase> & _non_time_kernels;
   ///@}
 };
 

@@ -32,7 +32,7 @@ ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
     ThreadedElementLoop<DistElemRange>(feproblem, system),
     _jacobian(jacobian),
     _sys(system),
-    _dirac_kernels(_sys.getDiracKernelStorage())
+    _dirac_kernels(_sys.getDiracKernelWarehouse())
 {}
 
 // Splitting Constructor

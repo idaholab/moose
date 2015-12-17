@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "SystemBase.h"
-#include "ExecuteMooseObjectStorage.h"
+#include "ExecuteMooseObjectWarehouse.h"
 
 // libMesh include
 #include "libmesh/explicit_system.h"
@@ -156,13 +156,13 @@ protected:
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
 
   // Storage for AuxScalarKernel objects
-  ExecuteMooseObjectStorage<AuxScalarKernel> _aux_scalar_storage;
+  ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
 
   // Storage for AuxKernel objects
-  ExecuteMooseObjectStorage<AuxKernel> _nodal_aux_storage;
+  ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
 
   // Storage for AuxKernel objects
-  ExecuteMooseObjectStorage<AuxKernel> _elemental_aux_storage;
+  ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;

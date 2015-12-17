@@ -28,12 +28,12 @@
 #include "MarkerWarehouse.h"
 #include "TransferWarehouse.h"
 #include "UserObjectWarehouse.h"
-#include "InitialConditionStorage.h"
+#include "InitialConditionWarehouse.h"
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
 #include "MooseApp.h"
-#include "ExecuteMooseObjectStorage.h"
+#include "ExecuteMooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -787,7 +787,7 @@ public:
   /**
    * Return InitialCondition storage
    */
-  const InitialConditionStorage & getInitialConditionStorage() const { return _ics; }
+  const InitialConditionWarehouse & getInitialConditionWarehouse() const { return _ics; }
 
   /**
    * Get the solver parameters
@@ -950,7 +950,7 @@ public:
   /**
    * Reference to the control logic warehouse.
    */
-  ExecuteMooseObjectStorage<Control> & getControlStorage() { return _control_storage; }
+  ExecuteMooseObjectWarehouse<Control> & getControlWarehouse() { return _control_storage; }
 
   /**
    * Performs setup and execute calls for Control objects.
@@ -1000,8 +1000,8 @@ protected:
 
   ///@{
   /// Initial condition storage
-  InitialConditionStorage _ics;
-  MooseObjectStorageBase<ScalarInitialCondition> _scalar_ics; // use base b/c of setup methods
+  InitialConditionWarehouse _ics;
+  MooseObjectWarehouseBase<ScalarInitialCondition> _scalar_ics; // use base b/c of setup methods
   ///@}
 
   // material properties
@@ -1033,10 +1033,10 @@ protected:
   ExecStore<UserObjectWarehouse> _user_objects;
 
   /// MultiApp Warehouse
-  ExecuteMooseObjectStorage<MultiApp> _multi_apps;
+  ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;
 
   /// Storage for TransientMultiApps (only needed for calling 'computeDT')
-  ExecuteMooseObjectStorage<TransientMultiApp> _transient_multi_apps;
+  ExecuteMooseObjectWarehouse<TransientMultiApp> _transient_multi_apps;
 
   /// Normal Transfers
   ExecStore<TransferWarehouse> _transfers;
@@ -1133,7 +1133,7 @@ protected:
   ExecFlagType _current_execute_on_flag;
 
   /// The control logic warehouse
-  ExecuteMooseObjectStorage<Control> _control_storage;
+  ExecuteMooseObjectWarehouse<Control> _control_storage;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage

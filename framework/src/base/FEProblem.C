@@ -2143,7 +2143,7 @@ FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
 void
 FEProblem::parentOutputPositionChanged()
 {
-  std::map<ExecFlagType, MooseObjectStorage<MultiApp> >::const_iterator it;
+  std::map<ExecFlagType, MooseObjectWarehouse<MultiApp> >::const_iterator it;
   for (it = _multi_apps.begin(); it != _multi_apps.end(); ++it)
   {
     const std::vector<MooseSharedPointer<MultiApp> > & objects = it->second.getActiveObjects();

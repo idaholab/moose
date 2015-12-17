@@ -41,13 +41,13 @@ protected:
   virtual void computeInternalFaceJacobian();
 
   // Reference to BC storage structures
-  const MooseObjectStorage<IntegratedBC> & _integrated_bcs;
+  const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;
 
   // Reference to DGKernel storage
-  const MooseObjectStorage<DGKernel> & _dg_kernels;
+  const MooseObjectWarehouse<DGKernel> & _dg_kernels;
 
   // Reference to Kernel stroage
-  const KernelStorage & _kernels;
+  const KernelWarehouse & _kernels;
 };
 
 #endif //COMPUTEFULLJACOBIANTHREAD_H

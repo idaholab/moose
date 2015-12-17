@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "ThreadedElementLoop.h"
-#include "MooseObjectStorage.h"
+#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/elem_range.h"
@@ -45,7 +45,7 @@ public:
 protected:
   Real _damping;
   NonlinearSystem & _nl;
-  const MooseObjectStorage<Damper> & _dampers;
+  const MooseObjectWarehouse<Damper> & _dampers;
 };
 
 #endif //COMPUTEDAMPINGTHREAD_H

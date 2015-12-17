@@ -20,7 +20,7 @@
 
 // MOOSE includes
 #include "ThreadedElementLoop.h"
-#include "MooseObjectStorage.h"
+#include "MooseObjectWarehouse.h"
 #include "AuxKernel.h"
 
 // Forward declarations
@@ -30,7 +30,7 @@ class AuxiliarySystem;
 class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectStorage<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 
@@ -46,7 +46,7 @@ protected:
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectStorage<AuxKernel> & _storage;
+  const MooseObjectWarehouse<AuxKernel> & _storage;
 
   bool _need_materials;
 };

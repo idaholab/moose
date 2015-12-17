@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
-#include "MooseObjectStorage.h"
+#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/node_range.h"
@@ -29,7 +29,7 @@ class AuxiliarySystem;
 class ComputeNodalAuxVarsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxVarsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectStorage<AuxKernel> & storage);
+  ComputeNodalAuxVarsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage);
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 
@@ -41,7 +41,7 @@ protected:
   AuxiliarySystem & _sys;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectStorage<AuxKernel> & _storage;
+  const MooseObjectWarehouse<AuxKernel> & _storage;
 };
 
 #endif //COMPUTENODALAUXVARSTHREAD_H

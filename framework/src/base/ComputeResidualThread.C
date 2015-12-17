@@ -21,7 +21,7 @@
 #include "DGKernel.h"
 #include "Material.h"
 #include "TimeKernel.h"
-#include "KernelStorage.h"
+#include "KernelWarehouse.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -31,11 +31,11 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSy
     _sys(sys),
     _kernel_type(type),
     _num_cached(0),
-    _integrated_bcs(sys.getIntegratedBCStorage()),
-    _dg_kernels(sys.getDGKernelStorage()),
-    _kernels(sys.getKernelStorage()),
-    _time_kernels(sys.getTimeKernelStorage()),
-    _non_time_kernels(sys.getNonTimeKernelStorage())
+    _integrated_bcs(sys.getIntegratedBCWarehouse()),
+    _dg_kernels(sys.getDGKernelWarehouse()),
+    _kernels(sys.getKernelWarehouse()),
+    _time_kernels(sys.getTimeKernelWarehouse()),
+    _non_time_kernels(sys.getNonTimeKernelWarehouse())
 {
 }
 
@@ -101,7 +101,7 @@ ComputeResidualThread::onElement(const Elem *elem)
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
 
-  const MooseObjectStorage<KernelBase> * storage;
+  const MooseObjectWarehouse<KernelBase> * storage;
   switch (_kernel_type)
   {
   case Moose::KT_ALL:

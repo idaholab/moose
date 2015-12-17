@@ -21,7 +21,7 @@
 class ComputeNodalAuxBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectStorage<AuxKernel> & storage);
+  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage);
 
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
@@ -34,7 +34,7 @@ protected:
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectStorage<AuxKernel> & _storage;
+  const MooseObjectWarehouse<AuxKernel> & _storage;
 };
 
 #endif //COMPUTENODALAUXBCSTHREAD_H

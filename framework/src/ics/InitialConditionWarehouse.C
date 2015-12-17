@@ -11,19 +11,19 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "InitialConditionStorage.h"
+#include "InitialConditionWarehouse.h"
 #include "InitialCondition.h"
 
-InitialConditionStorage::InitialConditionStorage() :
-    MooseObjectStorageBase<InitialCondition>()
+InitialConditionWarehouse::InitialConditionWarehouse() :
+    MooseObjectWarehouseBase<InitialCondition>()
 {
 }
 
 
 void
-InitialConditionStorage::initialSetup(THREAD_ID tid)
+InitialConditionWarehouse::initialSetup(THREAD_ID tid)
 {
-  MooseObjectStorageBase<InitialCondition>::sort(tid);
+  MooseObjectWarehouseBase<InitialCondition>::sort(tid);
   std::vector<MooseSharedPointer<InitialCondition> >::const_iterator it;
   for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     (*it)->initialSetup();
@@ -31,7 +31,7 @@ InitialConditionStorage::initialSetup(THREAD_ID tid)
 
 
 void
-InitialConditionStorage::addObject(MooseSharedPointer<InitialCondition> object, THREAD_ID tid)
+InitialConditionWarehouse::addObject(MooseSharedPointer<InitialCondition> object, THREAD_ID tid)
 {
   // Check that when object is boundary restricted that the variable is nodal
   const MooseVariable & var = object->variable();
@@ -70,5 +70,5 @@ InitialConditionStorage::addObject(MooseSharedPointer<InitialCondition> object, 
   }
 
   // Add the IC to the storage
-  MooseObjectStorageBase<InitialCondition>::addObject(object, tid);
+  MooseObjectWarehouseBase<InitialCondition>::addObject(object, tid);
 }

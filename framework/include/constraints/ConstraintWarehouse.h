@@ -12,11 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTRAINTSTORAGE_H
-#define CONSTRAINTSTORAGE_H
+#ifndef CONSTRAINTWAREHOUSE_H
+#define CONSTRAINTWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectStorage.h"
+#include "MooseObjectWarehouse.h"
 #include "MooseTypes.h"
 
 class Constraint;
@@ -27,10 +27,10 @@ class FaceFaceConstraint;
 /**
  * Warehouse for storing constraints
  */
-class ConstraintStorage : public MooseObjectStorage<Constraint>
+class ConstraintWarehouse : public MooseObjectWarehouse<Constraint>
 {
 public:
-  ConstraintStorage();
+  ConstraintWarehouse();
 
   /**
    * Add Constraint object to the warehouse.
@@ -70,16 +70,16 @@ public:
 protected:
 
   /// NodalConstraint objects
-  MooseObjectStorage<NodalConstraint> _nodal_constraints;
+  MooseObjectWarehouse<NodalConstraint> _nodal_constraints;
 
   /// NodeFaceConstraint objects (non-displaced)
-  std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> > _node_face_constraints;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> > _node_face_constraints;
 
   /// NodeFaceConstraint objects (displaced)
-  std::map<BoundaryID, MooseObjectStorage<NodeFaceConstraint> > _displaced_node_face_constraints;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> > _displaced_node_face_constraints;
 
   /// FaceFaceConstraints
-  std::map<std::string, MooseObjectStorage<FaceFaceConstraint> > _face_face_constraints;
+  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> > _face_face_constraints;
 };
 
-#endif // CONSTRAINTSTORAGE_H
+#endif // CONSTRAINTWAREHOUSE_H

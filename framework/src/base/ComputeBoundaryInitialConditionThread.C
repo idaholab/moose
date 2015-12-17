@@ -36,11 +36,11 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
 
   _fe_problem.assembly(_tid).reinit(node);
 
-  const InitialConditionStorage & storage = _fe_problem.getInitialConditionStorage();
+  const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
 
-  if (storage.hasActiveBoundaryObjects(boundary_id, _tid))
+  if (warehouse.hasActiveBoundaryObjects(boundary_id, _tid))
   {
-    const std::vector<MooseSharedPointer<InitialCondition> > & ics = storage.getActiveBoundaryObjects(boundary_id, _tid);
+    const std::vector<MooseSharedPointer<InitialCondition> > & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
     for (std::vector<MooseSharedPointer<InitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
     {
       MooseSharedPointer<InitialCondition> ic = (*it);

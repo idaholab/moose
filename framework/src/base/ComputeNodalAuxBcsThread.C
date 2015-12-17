@@ -24,7 +24,7 @@
 
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblem & fe_problem,
                                                    AuxiliarySystem & sys,
-                                                   const MooseObjectStorage<AuxKernel> & storage) :
+                                                   const MooseObjectWarehouse<AuxKernel> & storage) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(sys),
     _storage(storage)

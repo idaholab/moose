@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTSTORAGEBASE_H
-#define MOOSEOBJECTSTORAGEBASE_H
+#ifndef MOOSEOBJECTWAREHOUSEBASE_H
+#define MOOSEOBJECTWAREHOUSEBASE_H
 
 // MOOSE includes
 #include "DependencyResolverInterface.h"
@@ -26,7 +26,7 @@
  * A base storage container for MooseObjects.
  */
 template<typename T>
-class MooseObjectStorageBase
+class MooseObjectWarehouseBase
 {
 public:
 
@@ -34,12 +34,12 @@ public:
    * Constructor.
    * @param threaded When true (default) threaded storage is enabled.
    */
-  MooseObjectStorageBase(bool threaded = true);
+  MooseObjectWarehouseBase(bool threaded = true);
 
   /**
    * Destructor.
    */
-  virtual ~MooseObjectStorageBase();
+  virtual ~MooseObjectWarehouseBase();
 
   /**
    * Adds an object to the storage structure.
@@ -163,7 +163,7 @@ protected:
 
 
 template<typename T>
-MooseObjectStorageBase<T>::MooseObjectStorageBase(bool threaded /*=true*/) :
+MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/) :
     _num_threads(threaded ? libMesh::n_threads() : 1),
     _all_objects(_num_threads),
     _active_objects(_num_threads),
@@ -176,14 +176,14 @@ MooseObjectStorageBase<T>::MooseObjectStorageBase(bool threaded /*=true*/) :
 
 
 template<typename T>
-MooseObjectStorageBase<T>::~MooseObjectStorageBase()
+MooseObjectWarehouseBase<T>::~MooseObjectWarehouseBase()
 {
 }
 
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid /*= 0*/)
+MooseObjectWarehouseBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid /*= 0*/)
 {
   checkThreadID(tid);
 
@@ -237,7 +237,7 @@ MooseObjectStorageBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid
 
 template<typename T>
 inline const std::vector<MooseSharedPointer<T> > &
-MooseObjectStorageBase<T>::getObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   return _all_objects[tid];
@@ -246,7 +246,7 @@ MooseObjectStorageBase<T>::getObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 inline const std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > &
-MooseObjectStorageBase<T>::getBoundaryObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBoundaryObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   return _all_boundary_objects[tid];
@@ -255,7 +255,7 @@ MooseObjectStorageBase<T>::getBoundaryObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 const std::vector<MooseSharedPointer<T> > &
-MooseObjectStorageBase<T>::getBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _all_boundary_objects[tid].find(id);
@@ -266,7 +266,7 @@ MooseObjectStorageBase<T>::getBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0
 
 template<typename T>
 inline const std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > &
-MooseObjectStorageBase<T>::getBlockObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBlockObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   return _all_block_objects[tid];
@@ -275,7 +275,7 @@ MooseObjectStorageBase<T>::getBlockObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 const std::vector<MooseSharedPointer<T> > &
-MooseObjectStorageBase<T>::getBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _all_block_objects[tid].find(id);
@@ -286,7 +286,7 @@ MooseObjectStorageBase<T>::getBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/
 
 template<typename T>
 inline const std::vector<MooseSharedPointer<T> > &
-MooseObjectStorageBase<T>::getActiveObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   return _active_objects[tid];
@@ -295,7 +295,7 @@ MooseObjectStorageBase<T>::getActiveObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 inline const std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > &
-MooseObjectStorageBase<T>::getActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   return _active_boundary_objects[tid];
@@ -304,7 +304,7 @@ MooseObjectStorageBase<T>::getActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 const std::vector<MooseSharedPointer<T> > &
-MooseObjectStorageBase<T>::getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_boundary_objects[tid].find(id);
@@ -315,7 +315,7 @@ MooseObjectStorageBase<T>::getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid
 
 template<typename T>
 inline const std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > &
-MooseObjectStorageBase<T>::getActiveBlockObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBlockObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   return _active_block_objects[tid];
@@ -324,7 +324,7 @@ MooseObjectStorageBase<T>::getActiveBlockObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 const std::vector<MooseSharedPointer<T> > &
-MooseObjectStorageBase<T>::getActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_block_objects[tid].find(id);
@@ -335,7 +335,7 @@ MooseObjectStorageBase<T>::getActiveBlockObjects(SubdomainID id, THREAD_ID tid/*
 
 template<typename T>
 bool
-MooseObjectStorageBase<T>::hasActiveObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   return !_active_objects[tid].empty();
@@ -344,7 +344,7 @@ MooseObjectStorageBase<T>::hasActiveObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 bool
-MooseObjectStorageBase<T>::hasActiveBlockObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBlockObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   bool has_active_block_objects = false;
@@ -357,7 +357,7 @@ MooseObjectStorageBase<T>::hasActiveBlockObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 bool
-MooseObjectStorageBase<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_block_objects[tid].find(id);
@@ -369,7 +369,7 @@ MooseObjectStorageBase<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid/*
 
 template<typename T>
 bool
-MooseObjectStorageBase<T>::hasActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   bool has_active_boundary_objects = false;
@@ -382,7 +382,7 @@ MooseObjectStorageBase<T>::hasActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
 
 template<typename T>
 bool
-MooseObjectStorageBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_boundary_objects[tid].find(id);
@@ -394,7 +394,7 @@ MooseObjectStorageBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid
 
 template<typename T>
 bool
-MooseObjectStorageBase<T>::hasActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
@@ -407,7 +407,7 @@ MooseObjectStorageBase<T>::hasActiveObject(const std::string & name, THREAD_ID t
 
 template<typename T>
 MooseSharedPointer<T>
-MooseObjectStorageBase<T>::getActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
@@ -420,7 +420,7 @@ MooseObjectStorageBase<T>::getActiveObject(const std::string & name, THREAD_ID t
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::updateActive(THREAD_ID tid /*= 0*/)
+MooseObjectWarehouseBase<T>::updateActive(THREAD_ID tid /*= 0*/)
 {
   checkThreadID(tid);
 
@@ -443,7 +443,7 @@ MooseObjectStorageBase<T>::updateActive(THREAD_ID tid /*= 0*/)
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::updateActiveHelper(std::vector<MooseSharedPointer<T> > & active, const std::vector<MooseSharedPointer<T> > & all)
+MooseObjectWarehouseBase<T>::updateActiveHelper(std::vector<MooseSharedPointer<T> > & active, const std::vector<MooseSharedPointer<T> > & all)
 {
   typename std::vector<MooseSharedPointer<T> >::const_iterator iter;
 
@@ -469,7 +469,7 @@ MooseObjectStorageBase<T>::updateActiveHelper(std::vector<MooseSharedPointer<T> 
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::sort(THREAD_ID tid/* = 0*/)
+MooseObjectWarehouseBase<T>::sort(THREAD_ID tid/* = 0*/)
 {
   checkThreadID(tid);
 
@@ -494,7 +494,7 @@ MooseObjectStorageBase<T>::sort(THREAD_ID tid/* = 0*/)
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
 {
   if (hasActiveObjects(tid))
     updateVariableDependencyHelper(needed_moose_vars, _all_objects[tid]);
@@ -503,7 +503,7 @@ MooseObjectStorageBase<T>::updateVariableDependency(std::set<MooseVariable *> & 
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::updateBlockVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBlockVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
 {
   if (hasActiveBlockObjects(tid))
   {
@@ -516,7 +516,7 @@ MooseObjectStorageBase<T>::updateBlockVariableDependency(std::set<MooseVariable 
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
 {
   if (hasActiveBoundaryObjects(tid))
   {
@@ -529,7 +529,7 @@ MooseObjectStorageBase<T>::updateBoundaryVariableDependency(std::set<MooseVariab
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
+MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
                                                                     const std::vector<MooseSharedPointer<T> > & objects)
 {
   for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
@@ -542,7 +542,7 @@ MooseObjectStorageBase<T>::updateVariableDependencyHelper(std::set<MooseVariable
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid/*=0*/) const
+MooseObjectWarehouseBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid/*=0*/) const
 {
   for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     unique_variables.insert((*it)->variable().name());
@@ -555,7 +555,7 @@ MooseObjectStorageBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomains_
 
 template<typename T>
 void
-MooseObjectStorageBase<T>::sortHelper(std::vector<MooseSharedPointer<T> > & objects)
+MooseObjectWarehouseBase<T>::sortHelper(std::vector<MooseSharedPointer<T> > & objects)
 {
   // Do nothing if the vector is empty
   if (objects.empty())
@@ -577,9 +577,9 @@ MooseObjectStorageBase<T>::sortHelper(std::vector<MooseSharedPointer<T> > & obje
 
 template<typename T>
 inline void
-MooseObjectStorageBase<T>::checkThreadID(THREAD_ID tid) const
+MooseObjectWarehouseBase<T>::checkThreadID(THREAD_ID tid) const
 {
   mooseAssert(tid < _num_threads, "Attempting to access a thread id (" << tid << ") greater than the number allowed by the storage item (" << _num_threads << ")");
 }
 
-#endif // OBJECTSTORAGE_H
+#endif // MOOSEOBJECTWAREHOUSEBASE_H

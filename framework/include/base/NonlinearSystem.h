@@ -16,11 +16,11 @@
 #define NONLINEARSYSTEM_H
 
 #include "SystemBase.h"
-#include "KernelStorage.h"
-#include "ConstraintStorage.h"
+#include "KernelWarehouse.h"
+#include "ConstraintWarehouse.h"
 #include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
-#include "MooseObjectStorage.h"
+#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -430,15 +430,14 @@ public:
   /**
    * Access functions to Warehouses from outside NonlinearSystem
    */
-  const KernelStorage & getKernelStorage() { return _kernels; }
-  const MooseObjectStorage<KernelBase> & getTimeKernelStorage() { return _time_kernels; }
-  const MooseObjectStorage<KernelBase> & getNonTimeKernelStorage() { return _non_time_kernels; }
-
-  const MooseObjectStorage<DGKernel> & getDGKernelStorage() { return _dg_kernels; }
-  const MooseObjectStorage<DiracKernel> & getDiracKernelStorage() { return _dirac_kernels; }
+  const KernelWarehouse & getKernelWarehouse() { return _kernels; }
+  const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
+  const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
+  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
+  const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
   const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
-  const MooseObjectStorage<IntegratedBC> & getIntegratedBCStorage() { return _integrated_bcs; }
-  const MooseObjectStorage<Damper> & getDamperStorage() { return _dampers; }
+  const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
+  const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
   //@}
 
   /**
@@ -513,26 +512,26 @@ protected:
 
   ///@{
   /// Kernel Storage
-  KernelStorage _kernels;
-  MooseObjectStorage<ScalarKernel> _scalar_kernels;
-  MooseObjectStorage<DGKernel> _dg_kernels;
-  MooseObjectStorage<KernelBase> _time_kernels;
-  MooseObjectStorage<KernelBase> _non_time_kernels;
+  KernelWarehouse _kernels;
+  MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
+  MooseObjectWarehouse<DGKernel> _dg_kernels;
+  MooseObjectWarehouse<KernelBase> _time_kernels;
+  MooseObjectWarehouse<KernelBase> _non_time_kernels;
 
   ///@}
 
   ///@{
   /// BoundaryCondition Warhouses
-  MooseObjectStorage<IntegratedBC> _integrated_bcs;
-  MooseObjectStorage<NodalBC> _nodal_bcs;
-  MooseObjectStorage<PresetNodalBC> _preset_nodal_bcs;
+  MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
+  MooseObjectWarehouse<NodalBC> _nodal_bcs;
+  MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
-  MooseObjectStorage<DiracKernel> _dirac_kernels;
+  MooseObjectWarehouse<DiracKernel> _dirac_kernels;
 
   /// Dampers for each thread
-  MooseObjectStorage<Damper> _dampers;
+  MooseObjectWarehouse<Damper> _dampers;
 
   /// NodalKernels for each thread
   std::vector<NodalKernelWarehouse> _nodal_kernels;
@@ -541,7 +540,7 @@ protected:
   SplitWarehouse _splits;
 
   /// Constraints storage object
-  ConstraintStorage _constraints;
+  ConstraintWarehouse _constraints;
 
 
 protected:
