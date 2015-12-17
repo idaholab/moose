@@ -17,7 +17,9 @@
 
 #include "TimeIntegrator.h"
 
+// Forward declarations
 class AStableDirk4;
+class LStableDirk4;
 
 template<>
 InputParameters validParams<AStableDirk4>();
@@ -92,6 +94,14 @@ protected:
   // The Butcher tableau "b" parameters derived from _gamma;
   // 1.2888640051572051e-01, 7.4222719896855893e-01, 1.2888640051572051e-01
   Real _b[3];
+
+  // If true, we use a more expensive method (LStableDirk4) to
+  // "bootstrap" the first timestep of this method and avoid
+  // evaluating residuals before the initial time.
+  bool _safe_start;
+
+  // A pointer to the "bootstrapping" method to use if _safe_start==true.
+  MooseSharedPointer<LStableDirk4> _bootstrap_method;
 };
 
 
