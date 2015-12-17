@@ -318,8 +318,8 @@ EBSDReader::buildNodeWeightMaps()
     const dof_id_type node_id = (*ni)->id();
 
     // Initialize map entries for current node
-    _node_to_grain_weight_map[node_id].resize(getGrainNum(), 0.0);
-    _node_to_phase_weight_map[node_id].resize(getPhaseNum(), 0.0);
+    _node_to_grain_weight_map[node_id].assign(getGrainNum(), 0.0);
+    _node_to_phase_weight_map[node_id].assign(getPhaseNum(), 0.0);
 
     // Loop through element indices associated with the current node and record weighted eta value in new map
     unsigned int n_elems = node_to_elem_map[node_id].size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
