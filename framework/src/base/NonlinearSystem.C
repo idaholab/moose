@@ -753,9 +753,6 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
   try
   {
-    residual.zero();
-    residualVector(Moose::KT_TIME).zero();
-    residualVector(Moose::KT_NONTIME).zero();
     computeResidualInternal(type);
     residualVector(Moose::KT_TIME).close();
     residualVector(Moose::KT_NONTIME).close();
