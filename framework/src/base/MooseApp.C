@@ -170,10 +170,10 @@ void
 MooseApp::setupOptions()
 {
   // Print the header, this is as early as possible
-  std::string hdr = header();
+  std::string hdr(header() + "\n");
   if (multiAppLevel() > 0)
     MooseUtils::indentMessage(_name, hdr);
-  Moose::out << hdr << std::endl;
+  Moose::out << hdr << std::flush;
 
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);

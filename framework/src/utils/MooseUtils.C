@@ -358,7 +358,7 @@ indentMessage(const std::string & prefix, std::string & message, const char* col
   std::string indent = color + prefix + ": " + COLOR_DEFAULT;
 
   // Indent all the lines until the final newline is encountered
-  pcrecpp::RE re("\n(?=.*\n)");
+  pcrecpp::RE re("\n(?=.*\n)"); //(?=.*\n)
   re.GlobalReplace(std::string("\n") + indent, &message);
 
   // Prepend indent string at the front of the message
