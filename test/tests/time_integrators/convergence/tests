@@ -160,7 +160,7 @@
     type = 'Exodiff'
     input = 'implicit_convergence.i'
     exodiff = 'astabledirk4_1.e'
-    cli_args = 'Outputs/file_base=astabledirk4_1 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.0625'
+    cli_args = 'Outputs/file_base=astabledirk4_1 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/TimeIntegrator/safe_start=false Executioner/dt=0.0625'
   [../]
 
   # Same thing with 1/2 timestep.
@@ -168,7 +168,7 @@
     type = 'Exodiff'
     input = 'implicit_convergence.i'
     exodiff = 'astabledirk4_2.e'
-    cli_args = 'Outputs/file_base=astabledirk4_2 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.03125'
+    cli_args = 'Outputs/file_base=astabledirk4_2 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/TimeIntegrator/safe_start=false Executioner/dt=0.03125'
   [../]
 
   # Same thing with 1/4 timestep.
@@ -176,7 +176,7 @@
     type = 'Exodiff'
     input = 'implicit_convergence.i'
     exodiff = 'astabledirk4_3.e'
-    cli_args = 'Outputs/file_base=astabledirk4_3 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/dt=0.015625'
+    cli_args = 'Outputs/file_base=astabledirk4_3 Executioner/TimeIntegrator/type=AStableDirk4 Executioner/TimeIntegrator/safe_start=false Executioner/dt=0.015625'
   [../]
 
 
