@@ -808,18 +808,22 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   {
     for (processor_id_type rank1 = 0; rank1 < n_procs; ++rank1)
     {
-    REPEAT_MERGE_LOOPS:
+//    REPEAT_MERGE_LOOPS:
 
       for (processor_id_type rank2 = 0; rank2 < n_procs; ++rank2)
       {
 //        if (rank1 == rank2 && n_procs > 1)
 //          continue;
         for (std::vector<FeatureData>::iterator it1 = _partial_feature_sets[rank1][map_num].begin();
-             it1 != _partial_feature_sets[rank1][map_num].end(); ++it1)
+             it1 != _partial_feature_sets[rank1][map_num].end(); /* no increment ++it1 */)
         {
           if (it1->_merged)
+          {
+            ++it1;
             continue;
+          }
 
+          bool region_merged = false;
           for (std::vector<FeatureData>::iterator it2 = _partial_feature_sets[rank2][map_num].begin(); it2 != _partial_feature_sets[rank2][map_num].end(); ++it2)
           {
 //            if (map_num == 5)
@@ -864,46 +868,47 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 //              std::cout << *it1 << *it2;
 //              // DEBUGGING
 
-              it2->_ghosted_ids.swap(set_union);
-              it1->_ghosted_ids.clear();
+              it1->_ghosted_ids.swap(set_union);
+              it2->_ghosted_ids.clear();
 
               set_union.clear();
               std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
-              it2->_periodic_nodes.swap(set_union);
-              it1->_periodic_nodes.clear();
+              it1->_periodic_nodes.swap(set_union);
+              it2->_periodic_nodes.clear();
 
               set_union.clear();
               std::set_union(it1->_local_ids.begin(), it1->_local_ids.end(), it2->_local_ids.begin(), it2->_local_ids.end(), set_union_inserter);
-              it2->_local_ids.swap(set_union);
-              it1->_local_ids.clear();
+              it1->_local_ids.swap(set_union);
+              it2->_local_ids.clear();
 
               /**
                * If we had a physical intersection, we need to expand boxes. If we had a virtual (periodic) intersection we need to preserve
                * all of the boxes from each of the regions' sets.
                */
               if (physical_intersection)
-                it2->expandBBox(*it1);
+                it1->expandBBox(*it2);
               else
-                std::copy(it1->_bboxes.begin(), it1->_bboxes.end(), std::back_inserter(it2->_bboxes));
+                std::copy(it2->_bboxes.begin(), it2->_bboxes.end(), std::back_inserter(it1->_bboxes));
 
               // Update the min feature id
-              it2->_min_entity_id = std::min(it1->_min_entity_id, it2->_min_entity_id);
+              it1->_min_entity_id = std::min(it1->_min_entity_id, it2->_min_entity_id);
 
               // Set the flag on the merged set so we don't revisit it again
-              it1->_merged = true;
+              it2->_merged = true;
 
 //              // DEBUGGING
 //              std::cout << "MERGED ENTITY:\n" << *it2;
 //              // DEBUGGING
 
               // Something was merged so we'll need to repeat this loop
-              goto REPEAT_MERGE_LOOPS;
+              region_merged = true;
+//              goto REPEAT_MERGE_LOOPS;
             }
           } // it2 loop
 
-//          // Don't increment if we had a merge, we need to retry earlier candidates again
-//          if (!region_merged)
-//            ++it1;
+          // Don't increment if we had a merge, we need to retry earlier candidates again
+          if (!region_merged)
+            ++it1;
 
         } // it1 loop
       } // rank2 loop
