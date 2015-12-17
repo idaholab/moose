@@ -1,0 +1,57 @@
+[Tests]
+  [./BlockDeleterTest1]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest1.i'
+    exodiff = 'BlockDeleterTest1_out.e'
+  [../]
+  [./BlockDeleterTest2]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest2.i'
+    exodiff = 'BlockDeleterTest2_out.e'
+  [../]
+  [./BlockDeleterTest3]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest3.i'
+    exodiff = 'BlockDeleterTest3_out.e'
+  [../]
+  [./BlockDeleterTest4]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest4.i'
+    exodiff = 'BlockDeleterTest4_out.e'
+  [../]
+  [./BlockDeleterTest5]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest5.i'
+    exodiff = 'BlockDeleterTest5_out.e'
+  [../]
+  [./BlockDeleterTest6]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest6.i'
+    exodiff = 'BlockDeleterTest6_out.e'
+  [../]
+  [./BlockDeleterTest7]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest7.i'
+    exodiff = 'BlockDeleterTest7_out.e'
+  [../]
+  [./BlockDeleterTest8]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest8.i'
+    exodiff = 'BlockDeleterTest8_out.e'
+  [../]
+  [./BlockDeleterTest9]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest9.i'
+    exodiff = 'BlockDeleterTest9_out.e'
+  [../]
+  [./BlockDeleterTest10]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest10.i'
+    exodiff = 'BlockDeleterTest10_out.e'
+  [../]
+  [./BlockDeleterTest11]
+    type = 'Exodiff'
+    input = 'BlockDeleterTest11.i'
+    exodiff = 'BlockDeleterTest11_out.e'
+  [../]
+[]
