@@ -14,8 +14,6 @@
 
 #include "ElementDeleterBase.h"
 #include "MooseMesh.h"
-//#include "DependencyResolver.h"
-//#include "libmesh/ExodusII_IO.h"
 
 template<>
 InputParameters validParams<ElementDeleterBase>()
@@ -36,14 +34,9 @@ ElementDeleterBase::modify()
     mooseError("_mesh_ptr must be initialized before calling ElementDeleterBase::modify()");
 
   MeshBase & mesh = _mesh_ptr->getMesh();
-  // ANDY: doesn't think the DependencyResolver is necessary
-  // DependencyResolver<unsigned int> resolver;
 
   // Elements that the deleter will remove
   std::set<Elem *> deleteable_elems;
-
-  // Nodes that are attched to a deleted elements which may be orphaned
-  std::set<dof_id_type> node_ids_to_check;
 
   // First let's figure out which elements need to be deleted
   const MeshBase::const_element_iterator end = mesh.elements_end();
@@ -51,17 +44,7 @@ ElementDeleterBase::modify()
   {
     Elem * elem = *elem_it;
     if (shouldDelete(elem))
-    {
       deleteable_elems.insert(elem);
-
-      // Also, we need to make sure we save off all of the nodes to check later
-      unsigned int n_nodes = elem->n_vertices();
-      for (unsigned int i = 0; i < n_nodes; ++i)
-      {
-        const Node * node = elem->get_node(i);
-        node_ids_to_check.insert(node->id());
-      }
-    }
   }
 
   /**
@@ -69,43 +52,9 @@ ElementDeleterBase::modify()
    *
    * TODO: We need to sort these not because they have to be deleted in a certain order in libMesh,
    *       but because the order of deletion might impact what happens to any existing sidesets or nodesets.
-   *
-   * ANDY: cannot find an example where sorting is necessary
    */
   for (std::set<Elem *>::const_iterator it = deleteable_elems.begin(); it != deleteable_elems.end(); ++it)
     mesh.delete_elem(*it);
-
-  /**
-   * Now go through and see what nodes have been orphaned and clean them up.
-   *
-   * ANDY: believes the following is not necessary now.
-   */
-  /*
-  std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh_ptr->nodeToElemMap();
-  for (std::set<dof_id_type>::const_iterator it = node_ids_to_check.begin(); it != node_ids_to_check.end(); ++it)
-  {
-    Node * node = mesh.node_ptr(*it);
-
-    std::vector<dof_id_type> & connected_elems = node_to_elem_map[node->id()];
-
-    // If every connected element is deleted, we'll need to remove this node
-    bool connected_elem = false;
-    for (std::vector<dof_id_type>::const_iterator jt = connected_elems.begin(); jt != connected_elems.end(); ++jt)
-    {
-      Elem * elem = mesh.elem(*jt);
-
-      if (deleteable_elems.find(elem) == deleteable_elems.end())
-      {
-        connected_elem = true;
-        break;
-      }
-    }
-
-    // No connected elements, then delete it!
-    if (!connected_elem)
-      mesh.delete_node(node);
-  }
-  */
 
   /**
    * Deleting nodes and elements leaves NULLs in the mesh datastructure. We need to get rid of those.
@@ -114,21 +63,4 @@ ElementDeleterBase::modify()
    */
   mesh.contract();
   _mesh_ptr->needsPrepareForUse();
-}
-
-bool
-ElementDeleterBase::shouldDelete(const Elem * elem)
-{
-  /**
-   * TODO: This method should be removed and this class made pure virtual, for now, we'll just delete a few elements
-   *       out of a well defined 4x4 mesh (all of the middle ones). In a 4x4 GeneratedMesh, the middle elements
-   *       will be numbered 5, 6, 9, 10. This will trigger at least one node removal as well.
-   */
-
-  // Very simple test - do not merge!
-  if (elem->id() == 5 || elem->id() == 6 || elem->id() == 9 || elem->id() == 10)
-    return true;
-
-
-  return false;
 }

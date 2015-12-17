@@ -3,66 +3,55 @@
     type = 'Exodiff'
     input = 'BlockDeleterTest1.i'
     exodiff = 'BlockDeleterTest1_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest2]
     type = 'Exodiff'
     input = 'BlockDeleterTest2.i'
     exodiff = 'BlockDeleterTest2_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest3]
     type = 'Exodiff'
     input = 'BlockDeleterTest3.i'
     exodiff = 'BlockDeleterTest3_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest4]
     type = 'Exodiff'
     input = 'BlockDeleterTest4.i'
     exodiff = 'BlockDeleterTest4_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest5]
     type = 'Exodiff'
     input = 'BlockDeleterTest5.i'
     exodiff = 'BlockDeleterTest5_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest6]
     type = 'Exodiff'
     input = 'BlockDeleterTest6.i'
     exodiff = 'BlockDeleterTest6_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest7]
     type = 'Exodiff'
     input = 'BlockDeleterTest7.i'
     exodiff = 'BlockDeleterTest7_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest8]
     type = 'Exodiff'
     input = 'BlockDeleterTest8.i'
     exodiff = 'BlockDeleterTest8_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest9]
     type = 'Exodiff'
     input = 'BlockDeleterTest9.i'
     exodiff = 'BlockDeleterTest9_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest10]
     type = 'Exodiff'
     input = 'BlockDeleterTest10.i'
     exodiff = 'BlockDeleterTest10_out.e'
-    recover = false
   [../]
   [./BlockDeleterTest11]
     type = 'Exodiff'
     input = 'BlockDeleterTest11.i'
     exodiff = 'BlockDeleterTest11_out.e'
-    recover = false
   [../]
 []

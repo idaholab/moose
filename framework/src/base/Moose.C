@@ -45,7 +45,6 @@
 #include "RenameBlock.h"
 #include "AssignElementSubdomainID.h"
 #include "ImageSubdomain.h"
-#include "ElementDeleterBase.h"
 #include "BlockDeleter.h"
 
 // problems
@@ -450,7 +449,6 @@ registerObjects(Factory & factory)
   registerMeshModifier(RenameBlock);
   registerMeshModifier(AssignElementSubdomainID);
   registerMeshModifier(ImageSubdomain);
-  registerMeshModifier(ElementDeleterBase);
   registerMeshModifier(BlockDeleter);
 
   // problems

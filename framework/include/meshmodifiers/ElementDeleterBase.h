@@ -22,6 +22,13 @@ class ElementDeleterBase;
 template<>
 InputParameters validParams<ElementDeleterBase>();
 
+/**
+ * This class deletes elements from the mesh data structure
+ * after it has been generated or read but before any FEM
+ * data structures are initialized. Users are free to implement
+ * their own derived classes by providing an implementation
+ * for "shouldDelete".
+ */
 class ElementDeleterBase : public MeshModifier
 {
 public:
@@ -29,8 +36,11 @@ public:
 
   virtual void modify();
 
-  // TODO: This should be made pure virtual and overridden by child classes
-  virtual bool shouldDelete(const Elem * elem);
+  /**
+   * Method that returns a Boolean indicating whether an
+   * element should be removed from the mesh.
+   */
+  virtual bool shouldDelete(const Elem * elem) = 0;
 };
 
 #endif /* ELEMENTDELETERBASE_H */

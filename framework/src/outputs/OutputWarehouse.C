@@ -140,10 +140,7 @@ OutputWarehouse::outputStep(ExecFlagType type)
     type = EXEC_FORCED;
 
   for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-  {
-    std::cerr << (*it)->name() << std::endl;
     (*it)->outputStep(type);
-  }
 
   /**
    * This is one of three locations where we explicitly flush the output buffers during a simulation:
