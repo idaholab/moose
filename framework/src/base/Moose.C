@@ -301,6 +301,7 @@
 #include "LStableDirk2.h"
 #include "LStableDirk3.h"
 #include "AStableDirk4.h"
+#include "LStableDirk4.h"
 #include "ImplicitMidpoint.h"
 #include "Heun.h"
 #include "Ralston.h"
@@ -705,6 +706,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(LStableDirk2);
   registerTimeIntegrator(LStableDirk3);
   registerTimeIntegrator(AStableDirk4);
+  registerTimeIntegrator(LStableDirk4);
   registerTimeIntegrator(ImplicitMidpoint);
   registerTimeIntegrator(Heun);
   registerTimeIntegrator(Ralston);
