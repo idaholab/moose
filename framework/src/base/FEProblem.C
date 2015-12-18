@@ -515,12 +515,16 @@ void FEProblem::initialSetup()
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been restored
 
   // Call initialSetup on the MultiApps
+  if (_has_multiapps)
+    _console << COLOR_CYAN << "Initializing MultiApps" << COLOR_DEFAULT << std::endl;
   _multi_apps(EXEC_LINEAR)[0].initialSetup();
   _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
   _multi_apps(EXEC_TIMESTEP_END)[0].initialSetup();
   _multi_apps(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
   _multi_apps(EXEC_INITIAL)[0].initialSetup();
   _multi_apps(EXEC_CUSTOM)[0].initialSetup();
+  if (_has_multiapps)
+    _console << COLOR_CYAN << "Finished Initializing MultiApps" << COLOR_DEFAULT << std::endl;
 
   // Call initialSetup on the transfers
   _transfers(EXEC_LINEAR)[0].initialSetup();
@@ -2780,24 +2784,37 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     std::vector<Transfer *> transfers = _to_multi_app_transfers(type)[0].all();
     if (transfers.size())
+    {
+      _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
       for (unsigned int i=0; i<transfers.size(); i++)
       {
         Moose::perf_log.push(transfers[i]->name(), "Transfers");
         transfers[i]->execute();
         Moose::perf_log.pop(transfers[i]->name(), "Transfers");
       }
+
+      _console << "Waiting For Transfers To Finish" << '\n';
+      MooseUtils::parallelBarrierNotify(_communicator);
+
+      _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished" << COLOR_DEFAULT << std::endl;
+    }
+    else
+    {
+      if (multi_apps.size())
+        _console << COLOR_CYAN << "No Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
+    }
   }
 
   if (multi_apps.size())
   {
-    _console << "Executing MultiApps" << std::endl;
+    _console << COLOR_CYAN << "Executing MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
 
     bool success = true;
 
     for (unsigned int i=0; success && i<multi_apps.size(); i++)
       success = multi_apps[i]->solveStep(_dt, _time, auto_advance);
 
-    _console << "Waiting For Other Processors To Finish" << std::endl;
+    _console << "Waiting For Other Processors To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 
     _communicator.max(success);
@@ -2805,7 +2822,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     if (!success)
       return false;
 
-    _console << "Finished Executing MultiApps" << std::endl;
+    _console << COLOR_CYAN << "Finished Executing MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2813,7 +2830,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     std::vector<Transfer *> transfers = _from_multi_app_transfers(type)[0].all();
     if (transfers.size())
     {
-      _console << "Starting Transfers From MultiApps" << std::endl;
+      _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
       for (unsigned int i=0; i<transfers.size(); i++)
       {
         Moose::perf_log.push(transfers[i]->name(), "Transfers");
@@ -2821,11 +2838,13 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
         Moose::perf_log.pop(transfers[i]->name(), "Transfers");
       }
 
-      _console << "Waiting For Transfers To Finish" << std::endl;
+      _console << "Waiting For Transfers To Finish" << '\n';
       MooseUtils::parallelBarrierNotify(_communicator);
 
-      _console << "Transfers Are Finished" << std::endl;
+      _console << COLOR_CYAN << "Transfers " << Moose::stringify(type) << " Are Finished" << COLOR_DEFAULT << std::endl;
     }
+    else if (multi_apps.size())
+      _console << COLOR_CYAN << "No Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
   }
 
   // If we made it here then everything passed

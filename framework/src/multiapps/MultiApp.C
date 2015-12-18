@@ -114,7 +114,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
   if (_move_apps.size() != _move_positions.size())
-    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp "<<_name);
+    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << _name);
 
   // Fill in the _positions vector
   fillPositions();
@@ -122,12 +122,6 @@ MultiApp::MultiApp(const InputParameters & parameters):
   _total_num_apps = _positions.size();
 
   mooseAssert(_input_files.size() == 1 || _positions.size() == _input_files.size(), "Number of positions and input files are not the same!");
-
-  // Fill in the _positions vector
-  fillPositions();
-
-  if (_move_apps.size() != _move_positions.size())
-    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << name());
 
   /// Set up our Comm and set the number of apps we're going to be working on
   buildComm();
