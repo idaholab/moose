@@ -231,6 +231,13 @@ public:
   void prepared(bool state);
 
   /**
+   * If this method is called, we will call libMesh's prepare_for_use method when we
+   * call Moose's prepare method. This should only be set when the mesh structure is changed
+   * by MeshModifiers (i.e. Element deletion).
+   */
+  void needsPrepareForUse();
+
+  /**
    * Declares that the MooseMesh has changed, invalidates cached data
    * and rebuilds caches.  Sets a flag so that clients of the
    * MooseMesh also know when it has changed.
@@ -756,6 +763,9 @@ protected:
 
   /// True if prepare has been called on the mesh
   bool _is_prepared;
+
+  /// True if prepare_for_use should be called when Mesh is prepared
+  bool _needs_prepare_for_use;
 
   /// The elements that were just refined.
   ConstElemPointerRange * _refined_elements;
