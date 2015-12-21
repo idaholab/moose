@@ -12,157 +12,54 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "KernelWarehouse.h"
 #include "TimeDerivative.h"
 #include "KernelBase.h"
-#include "ScalarKernel.h"
+#include "TimeKernel.h"
 
 KernelWarehouse::KernelWarehouse() :
-    Warehouse<KernelBase>()
+    MooseObjectWarehouse<KernelBase>()
 {
 }
 
-KernelWarehouse::~KernelWarehouse()
-{
-}
 
 void
-KernelWarehouse::initialSetup()
+KernelWarehouse::addObject(MooseSharedPointer<KernelBase> object, THREAD_ID tid)
 {
-  for (std::vector<KernelBase *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->initialSetup();
+  // Add object to the general storage
+  MooseObjectWarehouse<KernelBase>::addObject(object, tid);
+
+  // Add object to the variable based storage
+  _variable_kernel_storage[object->variable().number()].addObject(object, tid);
 }
 
-void
-KernelWarehouse::timestepSetup()
-{
-  for (std::vector<KernelBase *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->timestepSetup();
-}
-
-void
-KernelWarehouse::residualSetup()
-{
-  for (std::vector<KernelBase *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->residualSetup();
-}
-
-void
-KernelWarehouse::jacobianSetup()
-{
-  for (std::vector<KernelBase *>::const_iterator i = all().begin(); i != all().end(); ++i)
-    (*i)->jacobianSetup();
-}
-
-void
-KernelWarehouse::addKernel(MooseSharedPointer<KernelBase> & kernel, const std::set<SubdomainID> & block_ids)
-{
-  _all_ptrs.push_back(kernel);
-
-  KernelBase * kernel_ptr = kernel.get();
-  _all_objects.push_back(kernel_ptr);
-
-  // Non-block restricted
-  if (block_ids.empty() || block_ids.find(Moose::ANY_BLOCK_ID) != block_ids.end())
-  {
-    if (dynamic_cast<TimeKernel *>(kernel_ptr) != NULL)
-      _time_global_kernels.push_back(kernel_ptr);
-    else
-      _nontime_global_kernels.push_back(kernel_ptr);
-  }
-
-  // Block restricted
-  else
-  {
-    for (std::set<SubdomainID>::iterator it = block_ids.begin(); it != block_ids.end(); ++it)
-    {
-      SubdomainID blk_id = *it;
-      if (dynamic_cast<TimeKernel *>(kernel_ptr) != NULL)
-        _time_block_kernels[blk_id].push_back(kernel_ptr);
-      else
-        _nt_block_kernels[blk_id].push_back(kernel_ptr);
-    }
-  }
-}
-
-void
-KernelWarehouse::addScalarKernel(MooseSharedPointer<ScalarKernel> & kernel)
-{
-  _all_scalar_ptrs.push_back(kernel);
-  _scalar_kernels.push_back(kernel.get());
-}
-
-void
-KernelWarehouse::updateActiveKernels(unsigned int subdomain_id)
-{
-  _active_kernels.clear();
-  _active_var_kernels.clear();
-  _time_kernels.clear();
-  _non_time_kernels.clear();
-  // add kernels that live everywhere
-  for (std::vector<KernelBase *>::const_iterator it = _time_global_kernels.begin(); it != _time_global_kernels.end(); ++it)
-  {
-    KernelBase * kernel = *it;
-    if (kernel->isActive())
-    {
-      _time_kernels.push_back(kernel);
-      _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
-    }
-  }
-  for (std::vector<KernelBase *>::const_iterator it = _nontime_global_kernels.begin(); it != _nontime_global_kernels.end(); ++it)
-  {
-    KernelBase * kernel = *it;
-    if (kernel->isActive())
-    {
-      _non_time_kernels.push_back(kernel);
-      _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
-    }
-  }
-  // then kernels that live on a specified block
-  for (std::vector<KernelBase *>::const_iterator it = _time_block_kernels[subdomain_id].begin(); it != _time_block_kernels[subdomain_id].end(); ++it)
-  {
-    KernelBase * kernel = *it;
-    if (kernel->isActive())
-    {
-      _time_kernels.push_back(kernel);
-      _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
-    }
-  }
-
-  for (std::vector<KernelBase *>::const_iterator it = _nt_block_kernels[subdomain_id].begin(); it != _nt_block_kernels[subdomain_id].end(); ++it)
-  {
-    KernelBase * kernel = *it;
-    if (kernel->isActive())
-    {
-      _non_time_kernels.push_back(kernel);
-      _active_kernels.push_back(kernel);
-      _active_var_kernels[kernel->variable().number()].push_back(kernel);
-    }
-  }
-}
 
 bool
-KernelWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const
+KernelWarehouse::hasActiveVariableBlockObjects(unsigned int variable_id, SubdomainID block_id, THREAD_ID tid) const
 {
-  for (std::vector<KernelBase *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    unique_variables.insert((*it)->variable().name());
-  for (std::vector<ScalarKernel *>::const_iterator it = _scalar_kernels.begin(); it != _scalar_kernels.end(); ++it)
-    unique_variables.insert((*it)->variable().name());
+  checkThreadID(tid);
+  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::const_iterator iter = _variable_kernel_storage.find(variable_id);
+  return (iter != _variable_kernel_storage.end() && iter->second.hasActiveBlockObjects(block_id, tid));
+}
 
-  if (!_time_global_kernels.empty() || !_nontime_global_kernels.empty() || !_scalar_kernels.empty())
-    return true;
-  else
-  {
-    for (std::map<SubdomainID, std::vector<KernelBase *> >::const_iterator it = _time_block_kernels.begin();
-         it != _time_block_kernels.end(); ++it)
-      subdomains_covered.insert(it->first);
-    for (std::map<SubdomainID, std::vector<KernelBase *> >::const_iterator it = _nt_block_kernels.begin();
-         it != _nt_block_kernels.end(); ++it)
-      subdomains_covered.insert(it->first);
 
-    return false;
-  }
+const std::vector<MooseSharedPointer<KernelBase> > &
+KernelWarehouse::getActiveVariableBlockObjects(unsigned int variable_id, SubdomainID block_id, THREAD_ID tid) const
+{
+  checkThreadID(tid);
+  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::const_iterator iter = _variable_kernel_storage.find(variable_id);
+  mooseAssert(iter != _variable_kernel_storage.end(), "Unable to located variable kernels for the given variable id: " << variable_id << ".");
+  return iter->second.getActiveBlockObjects(block_id, tid);
+}
+
+
+void
+KernelWarehouse::updateActive(THREAD_ID tid)
+{
+  MooseObjectWarehouse<KernelBase>::updateActive(tid);
+
+  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::iterator it;
+  for (it = _variable_kernel_storage.begin(); it != _variable_kernel_storage.end(); ++it)
+    it->second.updateActive(tid);
 }

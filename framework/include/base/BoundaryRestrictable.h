@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "MaterialData.h"
-#include "FEProblem.h"
 
 // Forward declarations
 class BoundaryRestrictable;
@@ -71,7 +70,7 @@ public:
    * Return the boundary IDs for this object
    * @return A set of all boundary ids for which the object is restricted
    */
-  const std::set<BoundaryID> & boundaryIDs() const;
+  const virtual std::set<BoundaryID> & boundaryIDs() const;
 
   /**
    * Return the boundary names for this object
@@ -158,8 +157,9 @@ public:
 
   /**
    * Returns true if this object has been restricted to a boundary
+   * @see MooseObject
    */
-  bool boundaryRestricted() { return _boundary_restricted; }
+  virtual bool boundaryRestricted() { return _boundary_restricted; }
 
   /**
    * Returns the set of all boundary ids for the entire mesh
@@ -200,6 +200,9 @@ private:
   /// Thread id for this object
   THREAD_ID _bnd_tid;
 
+  /// Pointer to MaterialData for boundary (@see hasBoundaryMaterialProperty)
+  MaterialData * _bnd_material_data;
+
   /**
    * An initialization routine needed for dual constructors
    */
@@ -222,7 +225,7 @@ bool
 BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & prop_name) const
 {
   // If you get here the supplied property is defined on all boundaries, but is still subject existence in the MateialData class
-  return hasBoundaryMaterialPropertyHelper(prop_name) && _bnd_feproblem->getBoundaryMaterialData(_bnd_tid)->haveProperty<T>(prop_name);
+  return hasBoundaryMaterialPropertyHelper(prop_name) && _bnd_material_data->haveProperty<T>(prop_name);
 }
 
 #endif // BOUNDARYRESTRICTABLE_H

@@ -26,7 +26,8 @@ MooseObjectName::MooseObjectName(const std::string & tag, const std::string & na
 {
 }
 
-MooseObjectName::MooseObjectName(std::string name)
+MooseObjectName::MooseObjectName(std::string name) :
+    _separator("::")
 {
   // Tags may be separated by a :: or the last /
   std::size_t idx0 = name.find("::");
@@ -37,7 +38,6 @@ MooseObjectName::MooseObjectName(std::string name)
   {
     _tag = name.substr(0, idx0);
     _name = name.erase(0, idx0+2);
-    _separator = "::";
   }
 
   // Case when a / is found
@@ -56,7 +56,8 @@ MooseObjectName::MooseObjectName(std::string name)
 
 }
 
-MooseObjectName::MooseObjectName()
+MooseObjectName::MooseObjectName() :
+    _separator("/")
 {
 }
 

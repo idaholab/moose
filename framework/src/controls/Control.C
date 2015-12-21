@@ -18,14 +18,32 @@
 template<>
 InputParameters validParams<Control>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
-  params += validParams<ControlInterface>();
+  InputParameters params = validParams<MooseObject>();
+  params += validParams<TransientInterface>();
+  params += validParams<SetupInterface>();
+  params += validParams<FunctionInterface>();
   params.registerBase("Control");
+
+  params.set<MultiMooseEnum>("execute_on") = Control::getExecuteOptions();
+
   return params;
 }
 
 Control::Control(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
-    ControlInterface(parameters)
+    MooseObject(parameters),
+    TransientInterface(parameters, "control"),
+    SetupInterface(parameters),
+    FunctionInterface(parameters),
+    UserObjectInterface(parameters),
+    PostprocessorInterface(parameters),
+    VectorPostprocessorInterface(parameters),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _input_parameter_warehouse(_app.getInputParameterWarehouse())
 {
+}
+
+MultiMooseEnum
+Control::getExecuteOptions()
+{
+  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 timestep_begin=0x10 custom=0x100 subdomain=0x200", "initial timestep_end");
 }

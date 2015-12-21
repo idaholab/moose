@@ -42,6 +42,7 @@
   type = Transient
   num_steps = 10
   dt = 0.1
+  dtmin = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -61,7 +62,7 @@
 [Postprocessors]
   [./coef]
     type = RealControlParameterReporter
-    parameter = 'coef'
+    parameter = 'Kernels/diff/coef'
   [../]
 []
 

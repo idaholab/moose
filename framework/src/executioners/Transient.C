@@ -17,7 +17,7 @@
 // MOOSE includes
 #include "Factory.h"
 #include "SubProblem.h"
-#include "TimePeriod.h"
+#include "TimePeriodOld.h"
 #include "TimeStepper.h"
 #include "MooseApp.h"
 #include "Conversion.h"
@@ -398,6 +398,9 @@ Transient::solveStep(Real input_dt)
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
+  // Update warehouse active objects
+  _problem.updateActiveObjects();
+
   _time_stepper->step();
 
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
@@ -660,7 +663,7 @@ Transient::preExecute()
   */
 
   // Add time period start times to sync times
-  const std::vector<TimePeriod *> time_periods = _problem.getTimePeriods();
+  const std::vector<TimePeriodOld *> time_periods = _problem.getTimePeriods();
   for (unsigned int i = 0; i < time_periods.size(); ++i)
     _time_stepper->addSyncTime(time_periods[i]->start());
 

@@ -30,6 +30,7 @@ InputParameters validParams<AuxScalarKernel>()
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
+  params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("AuxScalarKernel");
 
   return params;
@@ -94,4 +95,3 @@ AuxScalarKernel::isActive()
 {
   return true;
 }
-
