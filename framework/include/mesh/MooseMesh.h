@@ -116,7 +116,7 @@ public:
    * Returns a vector of boundary IDs for the requested element on the
    * requested side.
    */
-  std::vector<BoundaryID> boundaryIDs(const Elem *const elem, const unsigned short int side) const;
+  std::vector<BoundaryID> getBoundaryIDs(const Elem *const elem, const unsigned short int side) const;
 
   /**
    * Returns a const reference to a set of all user-specified

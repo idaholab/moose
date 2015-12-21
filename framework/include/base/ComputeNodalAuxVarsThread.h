@@ -15,8 +15,9 @@
 #ifndef COMPUTENODALAUXVARSTHREAD_H
 #define COMPUTENODALAUXVARSTHREAD_H
 
+// MOOSE includes
 #include "ThreadedNodeLoop.h"
-#include "AuxWarehouse.h"
+#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/node_range.h"
@@ -28,7 +29,7 @@ class AuxiliarySystem;
 class ComputeNodalAuxVarsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxVarsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  ComputeNodalAuxVarsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage);
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 
@@ -39,7 +40,8 @@ public:
 protected:
   AuxiliarySystem & _sys;
 
-  std::vector<AuxWarehouse> & _auxs;
+  /// Storage object containing active AuxKernel objects
+  const MooseObjectWarehouse<AuxKernel> & _storage;
 };
 
 #endif //COMPUTENODALAUXVARSTHREAD_H

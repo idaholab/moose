@@ -15,13 +15,13 @@
 #ifndef COMPUTENODALAUXBCSTHREAD_H
 #define COMPUTENODALAUXBCSTHREAD_H
 
+// MOOSE includes
 #include "ThreadedNodeLoop.h"
-#include "AuxWarehouse.h"
 
 class ComputeNodalAuxBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs);
+  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage);
 
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
@@ -32,7 +32,9 @@ public:
 
 protected:
   AuxiliarySystem & _aux_sys;
-  std::vector<AuxWarehouse> & _auxs;
+
+  /// Storage object containing active AuxKernel objects
+  const MooseObjectWarehouse<AuxKernel> & _storage;
 };
 
 #endif //COMPUTENODALAUXBCSTHREAD_H

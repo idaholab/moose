@@ -4,7 +4,6 @@
     type = Exodiff
     input = base_object_param.i
     exodiff = base_object_param_out.e
-    max_threads = 1
   [../]
 
   [./base_param]
@@ -12,6 +11,5 @@
     type = Exodiff
     input = base_param.i
     exodiff = base_param_out.e
-    max_threads = 1
   [../]
 []

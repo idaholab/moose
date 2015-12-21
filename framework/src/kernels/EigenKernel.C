@@ -151,4 +151,3 @@ EigenKernel::isActive()
   else
     return flag;
 }
-

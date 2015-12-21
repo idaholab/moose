@@ -24,6 +24,7 @@
 
 // Forward declarations
 class NonlinearSystem;
+class DiracKernel;
 
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
 
@@ -49,6 +50,9 @@ public:
 protected:
   SparseMatrix<Number> * _jacobian;
   NonlinearSystem & _sys;
+
+  /// Storage for DiracKernel objects
+  const MooseObjectWarehouse<DiracKernel> & _dirac_kernels;
 };
 
 #endif //COMPUTEDIRACTHREAD_H

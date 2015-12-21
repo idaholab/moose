@@ -23,6 +23,7 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
+#include "MaterialPropertyInterface.h"
 
 // Forward Declarations
 class GeneralUserObject;
@@ -61,8 +62,6 @@ public:
   /**
    * Store dependency among same object types for proper execution order
    */
-
-  // FIXME: This should be const but fails to work when it is const
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 

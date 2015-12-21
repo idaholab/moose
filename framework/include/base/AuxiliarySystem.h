@@ -15,9 +15,9 @@
 #ifndef AUXILIARYSYSTEM_H
 #define AUXILIARYSYSTEM_H
 
+// MOOSE includes
 #include "SystemBase.h"
-#include "ExecStore.h"
-#include "AuxWarehouse.h"
+#include "ExecuteMooseObjectWarehouse.h"
 
 // libMesh include
 #include "libmesh/explicit_system.h"
@@ -27,6 +27,8 @@
 class AuxKernel;
 class FEProblem;
 class TimeIntegrator;
+class AuxScalarKernel;
+class AuxKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -48,8 +50,10 @@ public:
 
   virtual void initialSetup();
   virtual void timestepSetup();
+  virtual void subdomainSetup();
   virtual void residualSetup();
   virtual void jacobianSetup();
+  virtual void updateActive(THREAD_ID tid);
 
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
 
@@ -151,7 +155,14 @@ protected:
   std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
   std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
 
-  ExecStore<AuxWarehouse> _auxs;
+  // Storage for AuxScalarKernel objects
+  ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
+
+  // Storage for AuxKernel objects
+  ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
+
+  // Storage for AuxKernel objects
+  ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;

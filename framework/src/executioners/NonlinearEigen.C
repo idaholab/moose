@@ -66,6 +66,7 @@ NonlinearEigen::init()
                           "", std::numeric_limits<Real>::max(),
                           _eigenvalue, initial_res);
 
+
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
@@ -99,7 +100,6 @@ NonlinearEigen::takeStep()
 {
   _console << " Nonlinear iteration starts"  << std::endl;
 
-  // nonlinear solve
   preSolve();
   _problem.timestepSetup();
   _problem.advanceState();

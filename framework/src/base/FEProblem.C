@@ -71,6 +71,8 @@
 #include "MultiMooseEnum.h"
 #include "Predictor.h"
 #include "Assembly.h"
+#include "Control.h"
+#include "ScalarInitialCondition.h"
 
 // libMesh includes
 #include "libmesh/exodusII_io.h"
@@ -114,6 +116,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _aux(*this, "aux0"),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
+    _scalar_ics(/*threaded=*/false),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
     _pps_data(*this),
@@ -127,7 +130,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
-    _has_multiapps(false),
     _has_initialized_stateful(false),
     _resurrector(NULL),
     _const_jacobian(false),
@@ -185,7 +187,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
 
   _functions.resize(n_threads);
-  _ics.resize(n_threads);
   _materials.resize(n_threads);
 
   _material_data.resize(n_threads);
@@ -403,8 +404,9 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    for (unsigned int i = 0; i < n_threads; i++)
-      _ics[i].initialSetup();
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      _ics.initialSetup(tid);
+    _scalar_ics.sort();
     projectSolution();
   }
 
@@ -465,8 +467,6 @@ void FEProblem::initialSetup()
     _has_initialized_stateful = true;
 
   // Call initialSetup on the nonlinear system
-  _nl.initialSetupBCs();
-  _nl.initialSetupKernels();
   _nl.initialSetup();
 
   // Auxilary variable initialSetup calls
@@ -515,16 +515,12 @@ void FEProblem::initialSetup()
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been restored
 
   // Call initialSetup on the MultiApps
-  if (_has_multiapps)
+  if (_multi_apps.hasActiveObjects())
+  {
     _console << COLOR_CYAN << "Initializing MultiApps" << COLOR_DEFAULT << std::endl;
-  _multi_apps(EXEC_LINEAR)[0].initialSetup();
-  _multi_apps(EXEC_NONLINEAR)[0].initialSetup();
-  _multi_apps(EXEC_TIMESTEP_END)[0].initialSetup();
-  _multi_apps(EXEC_TIMESTEP_BEGIN)[0].initialSetup();
-  _multi_apps(EXEC_INITIAL)[0].initialSetup();
-  _multi_apps(EXEC_CUSTOM)[0].initialSetup();
-  if (_has_multiapps)
+    _multi_apps.initialSetup();
     _console << COLOR_CYAN << "Finished Initializing MultiApps" << COLOR_DEFAULT << std::endl;
+  }
 
   // Call initialSetup on the transfers
   _transfers(EXEC_LINEAR)[0].initialSetup();
@@ -603,6 +599,9 @@ void FEProblem::initialSetup()
                                      _material_props, _bnd_material_props, _materials, _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
+
+  // Control Logic
+  executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -1173,6 +1172,7 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 //    reinitMaterials(subdomain, tid);
   }
 
+
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
     _app.getOutputWarehouse().subdomainSetup();
@@ -1510,52 +1510,12 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
   // field IC
   if (hasVariable(var_name))
   {
-    MooseVariable & var = getVariable(0, var_name);
-    parameters.set<SystemBase *>("_sys") = &var.sys();
-
-    const std::vector<SubdomainName> & blocks = parameters.get<std::vector<SubdomainName> >("block");
-    const std::vector<BoundaryName> & boundaries = parameters.get<std::vector<BoundaryName> >("boundary");
-
-    if (blocks.size() > 0 && boundaries.size() > 0)
-      mooseError("Both 'block' and 'boundary' parameters were specified in initial condition '" << name << "'.  You can only you either of them.");
-
-    // boundary-restricted IC
-    else if (boundaries.size() > 0 && blocks.size() == 0)
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      if (var.isNodal())
-        for (unsigned int tid=0; tid < libMesh::n_threads(); tid++)
-          for (unsigned int i = 0; i < boundaries.size(); i++)
-          {
-            BoundaryID bnd_id = _mesh.getBoundaryID(boundaries[i]);
-            std::ostringstream oss;
-            oss << name << "_" << bnd_id;
-            _ics[tid].addBoundaryInitialCondition(var_name, bnd_id,
-                                                  MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, oss.str(), parameters, tid)));
-          }
-
-      else
-        mooseError("You are trying to set a boundary restricted variable on non-nodal variable.  That is not allowed.");
-    }
-
-    // block-restricted IC
-    else
-    {
-      // this means: either no block and no boundary parameters specified or just block specified
-      for (unsigned int tid=0; tid < libMesh::n_threads(); tid++)
-      {
-        if (blocks.size() > 0)
-          for (unsigned int i = 0; i < blocks.size(); i++)
-          {
-            SubdomainID blk_id = _mesh.getSubdomainID(blocks[i]);
-            std::ostringstream oss;
-            oss << name << "_" << blk_id;
-            _ics[tid].addInitialCondition(var_name, blk_id,
-                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, oss.str(), parameters, tid)));
-          }
-        else
-          _ics[tid].addInitialCondition(var_name, Moose::ANY_BLOCK_ID,
-                                          MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters, tid)));
-      }
+      MooseVariable & var = getVariable(tid, var_name);
+      parameters.set<SystemBase *>("_sys") = &var.sys();
+      MooseSharedPointer<InitialCondition> ic = MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters, tid));
+      _ics.addObject(ic, tid);
     }
   }
 
@@ -1564,11 +1524,10 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
   {
     MooseVariableScalar & var = getScalarVariable(0, var_name);
     parameters.set<SystemBase *>("_sys") = &var.sys();
-
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
-      _ics[tid].addScalarInitialCondition(var_name,
-                                          MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create(ic_name, name, parameters, tid)));
+    MooseSharedPointer<ScalarInitialCondition> ic = MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create(ic_name, name, parameters));
+    _scalar_ics.addObject(ic);
   }
+
   else
     mooseError("Variable '" << var_name << "' requested in initial condition '" << name << "' does not exist.");
 }
@@ -1597,14 +1556,12 @@ FEProblem::projectSolution()
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the
   // processor with highest ID
-  if (processor_id() == (n_processors()-1))
+  if (processor_id() == (n_processors()-1) && _scalar_ics.hasActiveObjects())
   {
-    THREAD_ID tid = 0;
-
-    const std::vector<ScalarInitialCondition *> & ics = _ics[tid].activeScalar();
-    for (std::vector<ScalarInitialCondition *>::const_iterator it = ics.begin(); it != ics.end(); ++it)
+    const std::vector<MooseSharedPointer<ScalarInitialCondition> > & ics = _scalar_ics.getActiveObjects();
+    for (std::vector<MooseSharedPointer<ScalarInitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
     {
-      ScalarInitialCondition * ic = (*it);
+      MooseSharedPointer<ScalarInitialCondition> ic = (*it);
 
       MooseVariableScalar & var = ic->variable();
       var.reinit();
@@ -2186,8 +2143,13 @@ FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
 void
 FEProblem::parentOutputPositionChanged()
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    _multi_apps(Moose::exec_types[i])[0].parentOutputPositionChanged();
+  std::map<ExecFlagType, MooseObjectWarehouse<MultiApp> >::const_iterator it;
+  for (it = _multi_apps.begin(); it != _multi_apps.end(); ++it)
+  {
+    const std::vector<MooseSharedPointer<MultiApp> > & objects = it->second.getActiveObjects();
+    for (std::vector<MooseSharedPointer<MultiApp> >::const_iterator jt = objects.begin(); jt != objects.end(); ++jt)
+      (*jt)->parentOutputPositionChanged();
+  }
 }
 
 void
@@ -2282,6 +2244,11 @@ FEProblem::execute(const ExecFlagType & exec_type)
   Moose::perf_log.push("computeUserObjects()", "Setup");
   computeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
   Moose::perf_log.pop("computeUserObjects()", "Setup");
+
+  // Controls
+  Moose::perf_log.push("computeControls()", "Setup");
+  executeControls(exec_type);
+  Moose::perf_log.pop("computeControls()", "Setup");
 
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
@@ -2625,6 +2592,29 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
 }
 
 void
+FEProblem::executeControls(const ExecFlagType & exec_type)
+{
+  _control_storage.setup(exec_type);
+  const std::vector<MooseSharedPointer<Control> > & objects = _control_storage[exec_type].getActiveObjects();
+  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    (*it)->execute();
+}
+
+void
+FEProblem::updateActiveObjects()
+{
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    _nl.updateActive(tid);
+    _aux.updateActive(tid);
+  }
+  _control_storage.updateActive();
+  _multi_apps.updateActive();
+  _transient_multi_apps.updateActive();
+}
+
+void
 FEProblem::reinitBecauseOfGhostingOrNewGeomObjects()
 {
   // Need to see if _any_ processor has ghosted elems or geometry objects.
@@ -2718,8 +2708,6 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
 void
 FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters)
 {
-  _has_multiapps = true;
-
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
   parameters.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
@@ -2736,45 +2724,35 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-  MooseSharedPointer<MooseObject> mo = _factory.create(multi_app_name, name, parameters);
-
-  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(mo);
-  if (multi_app.get() == NULL)
+  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(_factory.create(multi_app_name, name, parameters));
+  if (!multi_app)
     mooseError("Unknown MultiApp type: " << multi_app_name);
 
-  const std::vector<ExecFlagType> & exec_flags = multi_app->execFlags();
-  for (unsigned int i=0; i<exec_flags.size(); ++i)
-    _multi_apps(exec_flags[i])[0].addMultiApp(multi_app);
+  _multi_apps.addObject(multi_app);
 
-  // TODO: Is this really the right spot to init a multiapp?
-//  multi_app->init();
+  // Store TranseintMultiApp objects in another containter, this is needed for calling computeDT
+  MooseSharedPointer<TransientMultiApp> trans_multi_app = MooseSharedNamespace::dynamic_pointer_cast<TransientMultiApp>(multi_app);
+  if (trans_multi_app)
+    _transient_multi_apps.addObject(trans_multi_app);
 }
 
 bool
 FEProblem::hasMultiApp(const std::string & multi_app_name)
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
-      return true;
-
-  return false;
+  return _multi_apps.hasActiveObject(multi_app_name);
 }
 
 
-MultiApp *
+MooseSharedPointer<MultiApp>
 FEProblem::getMultiApp(const std::string & multi_app_name)
 {
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    if (_multi_apps(Moose::exec_types[i])[0].hasMultiApp(multi_app_name))
-      return _multi_apps(Moose::exec_types[i])[0].getMultiApp(multi_app_name);
-
-  mooseError("MultiApp "<<multi_app_name<<" not found!");
+  return _multi_apps.getActiveObject(multi_app_name);
 }
 
 bool
 FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
   for (unsigned int i=0; i<multi_apps.size(); i++)
@@ -2854,7 +2832,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 void
 FEProblem::advanceMultiApps(ExecFlagType type)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2873,7 +2851,7 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 void
 FEProblem::backupMultiApps(ExecFlagType type)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2892,7 +2870,7 @@ FEProblem::backupMultiApps(ExecFlagType type)
 void
 FEProblem::restoreMultiApps(ExecFlagType type, bool force)
 {
-  std::vector<MultiApp *> multi_apps = _multi_apps(type)[0].all();
+  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2915,7 +2893,7 @@ FEProblem::restoreMultiApps(ExecFlagType type, bool force)
 Real
 FEProblem::computeMultiAppsDT(ExecFlagType type)
 {
-  std::vector<TransientMultiApp *> multi_apps = _multi_apps(type)[0].transient();
+  const std::vector<MooseSharedPointer<TransientMultiApp> > & multi_apps = _transient_multi_apps[type].getActiveObjects();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
@@ -3508,6 +3486,8 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::POST_AUX);
 
+  executeControls(EXEC_LINEAR);
+
   _app.getOutputWarehouse().residualSetup();
 
   _nl.computeResidual(residual, type);
@@ -3556,6 +3536,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _aux.compute(EXEC_NONLINEAR);
 
     computeUserObjects(EXEC_NONLINEAR, UserObjectWarehouse::POST_AUX);
+
+    executeControls(EXEC_NONLINEAR);
 
     _app.getOutputWarehouse().jacobianSetup();
 

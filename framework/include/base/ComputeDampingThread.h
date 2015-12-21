@@ -15,13 +15,16 @@
 #ifndef COMPUTEDAMPINGTHREAD_H
 #define COMPUTEDAMPINGTHREAD_H
 
+// MOOSE includes
 #include "ThreadedElementLoop.h"
+#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/elem_range.h"
 
 // Forward declarations
 class NonlinearSystem;
+class Damper;
 
 class ComputeDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -42,6 +45,7 @@ public:
 protected:
   Real _damping;
   NonlinearSystem & _nl;
+  const MooseObjectWarehouse<Damper> & _dampers;
 };
 
 #endif //COMPUTEDAMPINGTHREAD_H
