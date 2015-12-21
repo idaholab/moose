@@ -150,8 +150,8 @@ SetupMeshAction::act()
       _displaced_mesh->init();
 
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
-      if (displacements.size() != _displaced_mesh->dimension())
-        mooseError("Number of displacements and dimension of mesh MUST be the same!");
+      if (displacements.size() < _displaced_mesh->dimension())
+        mooseError("Number of displacements must be greater than or equal to the dimension of the mesh!");
     }
 
     setupMesh(_mesh.get());
