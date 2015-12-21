@@ -1267,121 +1267,121 @@ FeatureFloodCount::inflateBoundingBoxes(RealVectorValue inflation_amount)
 void
 FeatureFloodCount::calculateBubbleVolumes()
 {
-//  Moose::perf_log.push("calculateBubbleVolume()", "FeatureFloodCount");
-//
-//  // Figure out which bubbles intersect the boundary if the user has enabled that capability.
-//  if (_compute_boundary_intersecting_volume)
-//  {
-//    // Create a std::set of node IDs which are on the boundary called all_boundary_node_ids.
-//    std::set<dof_id_type> all_boundary_node_ids;
-//
-//    // Iterate over the boundary nodes, putting them into the std::set data structure
-//    MooseMesh::bnd_node_iterator
-//      boundary_nodes_it  = _mesh.bndNodesBegin(),
-//      boundary_nodes_end = _mesh.bndNodesEnd();
-//    for (; boundary_nodes_it != boundary_nodes_end; ++boundary_nodes_it)
-//    {
-//      BndNode * boundary_node = *boundary_nodes_it;
-//      all_boundary_node_ids.insert(boundary_node->_node->id());
-//    }
-//
-//    // For each of the _maps_size FeatureData lists, determine if the set
-//    // of nodes includes any boundary nodes.
-//    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    {
-//      std::list<FeatureData>::iterator
-//        bubble_it = _feature_sets[map_num].begin(),
-//        bubble_end = _feature_sets[map_num].end();
-//
-//      // Determine boundary intersection for each FeatureData object
-//      for (; bubble_it != bubble_end; ++bubble_it)
-//        bubble_it->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
-//                                                        bubble_it->_ghosted_ids.begin(), bubble_it->_ghosted_ids.end());
-//    }
-//  }
-//
-//  // Size our temporary data structure
-//  std::vector<std::vector<Real> > bubble_volumes(_maps_size);
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    bubble_volumes[map_num].resize(_feature_sets[map_num].size());
-//
-//  // Clear pre-existing values and allocate space to store the volume
-//  // of the boundary-intersecting grains for each variable.
-//  _total_volume_intersecting_boundary.clear();
-//  _total_volume_intersecting_boundary.resize(_maps_size);
-//
-//  // Loop over the active local elements.  For each variable, and for
-//  // each FeatureData object, check whether a majority of the element's
-//  // nodes belong to that Bubble, and if so assign the element's full
-//  // volume to that bubble.
-//  const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
-//  for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
-//  {
-//    Elem * elem = *el;
-//    unsigned int elem_n_nodes = elem->n_nodes();
-//    Real curr_volume = elem->volume();
-//
-//    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    {
-//      std::list<FeatureData>::const_iterator
-//        bubble_it = _feature_sets[map_num].begin(),
-//        bubble_end = _feature_sets[map_num].end();
-//
-//      for (unsigned int bubble_counter = 0; bubble_it != bubble_end; ++bubble_it, ++bubble_counter)
-//      {
-//        // Count the number of nodes on this element which are flooded.
-//        unsigned int flooded_nodes = 0;
-//        for (unsigned int node = 0; node < elem_n_nodes; ++node)
-//        {
-//          dof_id_type node_id = elem->node(node);
-//          if (bubble_it->_ghosted_ids.find(node_id) != bubble_it->_ghosted_ids.end())
-//            ++flooded_nodes;
-//        }
-//
-//        // If a majority of the nodes for this element are flooded,
-//        // assign its volume to the current bubble_counter entry.
-//        if (flooded_nodes >= elem_n_nodes / 2)
-//        {
-//          bubble_volumes[map_num][bubble_counter] += curr_volume;
-//
-//          // If the current bubble also intersects the boundary, also
-//          // accumlate the volume into the total volume of bubbles
-//          // which intersect the boundary.
-//          if (bubble_it->_intersects_boundary)
-//            _total_volume_intersecting_boundary[map_num] += curr_volume;
-//        }
-//      }
-//    }
-//  }
-//
-//  // If we're calculating boundary-intersecting volumes, we have to normalize it by the
-//  // volume of the entire domain.
-//  if (_compute_boundary_intersecting_volume)
-//  {
-//    // Compute the total area using a bounding box.  FIXME: this
-//    // assumes the domain is rectangular and 2D, and is probably a
-//    // little expensive so we should only do it once if possible.
-//    MeshTools::BoundingBox bbox = MeshTools::bounding_box(_mesh);
-//    Real total_volume = (bbox.max()(0)-bbox.min()(0))*(bbox.max()(1)-bbox.min()(1));
-//
-//    // Sum up the partial boundary grain volume contributions from all processors
-//    _communicator.sum(_total_volume_intersecting_boundary);
-//
-//    // Scale the boundary intersecting grain volumes by the total domain volume
-//    for (unsigned int i = 0; i<_total_volume_intersecting_boundary.size(); ++i)
-//      _total_volume_intersecting_boundary[i] /= total_volume;
-//  }
-//
-//  // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    _all_feature_volumes.insert(_all_feature_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
-//
-//  // do all the sums!
-//  _communicator.sum(_all_feature_volumes);
-//
-//  std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
-//
-//  Moose::perf_log.pop("calculateBubbleVolume()", "FeatureFloodCount");
+  Moose::perf_log.push("calculateBubbleVolume()", "FeatureFloodCount");
+
+  // Figure out which bubbles intersect the boundary if the user has enabled that capability.
+  if (_compute_boundary_intersecting_volume)
+  {
+    // Create a std::set of node IDs which are on the boundary called all_boundary_node_ids.
+    std::set<dof_id_type> all_boundary_node_ids;
+
+    // Iterate over the boundary nodes, putting them into the std::set data structure
+    MooseMesh::bnd_node_iterator
+      boundary_nodes_it  = _mesh.bndNodesBegin(),
+      boundary_nodes_end = _mesh.bndNodesEnd();
+    for (; boundary_nodes_it != boundary_nodes_end; ++boundary_nodes_it)
+    {
+      BndNode * boundary_node = *boundary_nodes_it;
+      all_boundary_node_ids.insert(boundary_node->_node->id());
+    }
+
+    // For each of the _maps_size FeatureData lists, determine if the set
+    // of nodes includes any boundary nodes.
+    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    {
+      std::vector<MooseSharedPointer<FeatureData> >::iterator
+        bubble_it = _feature_sets[map_num].begin(),
+        bubble_end = _feature_sets[map_num].end();
+
+      // Determine boundary intersection for each FeatureData object
+      for (; bubble_it != bubble_end; ++bubble_it)
+        (*bubble_it)->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
+                                                           (*bubble_it)->_local_ids.begin(), (*bubble_it)->_local_ids.end());
+    }
+  }
+
+  // Size our temporary data structure
+  std::vector<std::vector<Real> > bubble_volumes(_maps_size);
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    bubble_volumes[map_num].resize(_feature_sets[map_num].size());
+
+  // Clear pre-existing values and allocate space to store the volume
+  // of the boundary-intersecting grains for each variable.
+  _total_volume_intersecting_boundary.clear();
+  _total_volume_intersecting_boundary.resize(_maps_size);
+
+  // Loop over the active local elements.  For each variable, and for
+  // each FeatureData object, check whether a majority of the element's
+  // nodes belong to that Bubble, and if so assign the element's full
+  // volume to that bubble.
+  const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
+  for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
+  {
+    Elem * elem = *el;
+    unsigned int elem_n_nodes = elem->n_nodes();
+    Real curr_volume = elem->volume();
+
+    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    {
+      std::vector<MooseSharedPointer<FeatureData> >::const_iterator
+        bubble_it = _feature_sets[map_num].begin(),
+        bubble_end = _feature_sets[map_num].end();
+
+      for (unsigned int bubble_counter = 0; bubble_it != bubble_end; ++bubble_it, ++bubble_counter)
+      {
+        // Count the number of nodes on this element which are flooded.
+        unsigned int flooded_nodes = 0;
+        for (unsigned int node = 0; node < elem_n_nodes; ++node)
+        {
+          dof_id_type node_id = elem->node(node);
+          if ((*bubble_it)->_local_ids.find(node_id) != (*bubble_it)->_local_ids.end())
+            ++flooded_nodes;
+        }
+
+        // If a majority of the nodes for this element are flooded,
+        // assign its volume to the current bubble_counter entry.
+        if (flooded_nodes >= elem_n_nodes / 2)
+        {
+          bubble_volumes[map_num][bubble_counter] += curr_volume;
+
+          // If the current bubble also intersects the boundary, also
+          // accumlate the volume into the total volume of bubbles
+          // which intersect the boundary.
+          if ((*bubble_it)->_intersects_boundary)
+            _total_volume_intersecting_boundary[map_num] += curr_volume;
+        }
+      }
+    }
+  }
+
+  // If we're calculating boundary-intersecting volumes, we have to normalize it by the
+  // volume of the entire domain.
+  if (_compute_boundary_intersecting_volume)
+  {
+    // Compute the total area using a bounding box.  FIXME: this
+    // assumes the domain is rectangular and 2D, and is probably a
+    // little expensive so we should only do it once if possible.
+    MeshTools::BoundingBox bbox = MeshTools::bounding_box(_mesh);
+    Real total_volume = (bbox.max()(0)-bbox.min()(0))*(bbox.max()(1)-bbox.min()(1));
+
+    // Sum up the partial boundary grain volume contributions from all processors
+    _communicator.sum(_total_volume_intersecting_boundary);
+
+    // Scale the boundary intersecting grain volumes by the total domain volume
+    for (unsigned int i = 0; i<_total_volume_intersecting_boundary.size(); ++i)
+      _total_volume_intersecting_boundary[i] /= total_volume;
+  }
+
+  // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    _all_feature_volumes.insert(_all_feature_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
+
+  // do all the sums!
+  _communicator.sum(_all_feature_volumes);
+
+  std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
+
+  Moose::perf_log.pop("calculateBubbleVolume()", "FeatureFloodCount");
 }
 
 void
