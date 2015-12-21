@@ -30,7 +30,7 @@ def webBrowser():
 
   # Select the second (index one) form (the first form is a search query box)
   # this changes from web site to web site. GitHub.com/login happens to be the second form
-  br.select_form(nr=1)
+  br.select_form(nr=0)
   return br
 
 def authenticatePage(args):
