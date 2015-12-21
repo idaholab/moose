@@ -364,8 +364,7 @@ FeatureFloodCount::execute()
   }
 }
 
-void
-FeatureFloodCount::finalize()
+void FeatureFloodCount::communicateAndMerge()
 {
   // First we need to transform the raw data into a usable data structure
   populateDataStructuresFromFloodData();
@@ -419,11 +418,17 @@ FeatureFloodCount::finalize()
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     inflation(i) = _mesh.dimensionWidth(i);
 
-  // Let's try 5%
-  inflation *= 0.05;
+  // Let's try 1%
+  inflation *= 0.01;
   inflateBoundingBoxes(inflation);
 
   mergeSets(true);
+}
+
+void
+FeatureFloodCount::finalize()
+{
+  communicateAndMerge();
 
   // Populate _feature_maps and _var_index_maps
   updateFieldInfo();
@@ -506,7 +511,7 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
       return -1;
   }
 
-  case GHOSTED_ELEMS:
+  case GHOSTED_ENTITIES:
     return _ghosted_entity_ids.find(entity_id) != _ghosted_entity_ids.end();
 
   default:
@@ -808,7 +813,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   {
     for (processor_id_type rank1 = 0; rank1 < n_procs; ++rank1)
     {
-//    REPEAT_MERGE_LOOPS:
+    REPEAT_MERGE_LOOPS:
 
       for (processor_id_type rank2 = 0; rank2 < n_procs; ++rank2)
       {
@@ -902,13 +907,14 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
               // Something was merged so we'll need to repeat this loop
               region_merged = true;
-//              goto REPEAT_MERGE_LOOPS;
             }
           } // it2 loop
 
           // Don't increment if we had a merge, we need to retry earlier candidates again
           if (!region_merged)
             ++it1;
+          else
+            goto REPEAT_MERGE_LOOPS;
 
         } // it1 loop
       } // rank2 loop
@@ -943,18 +949,18 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
     }
   }
 
-  // DEBUGGING
-  std::cout << "*********************************************************************************************\n"
-            << "BEGIN AFTER MERGE\n"
-            << "*********************************************************************************************\n";
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-    for (std::vector<MooseSharedPointer<FeatureData> >::iterator it = _feature_sets[map_num].begin();
-         it != _feature_sets[map_num].end(); ++it)
-      std::cout << **it;
-  std::cout << "*********************************************************************************************\n"
-            << "END AFTER MERGE\n"
-            << "*********************************************************************************************\n";
-  // DEBUGGING
+//  // DEBUGGING
+//  std::cout << "*********************************************************************************************\n"
+//            << "BEGIN AFTER MERGE\n"
+//            << "*********************************************************************************************\n";
+//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+//    for (std::vector<MooseSharedPointer<FeatureData> >::iterator it = _feature_sets[map_num].begin();
+//         it != _feature_sets[map_num].end(); ++it)
+//      std::cout << **it;
+//  std::cout << "*********************************************************************************************\n"
+//            << "END AFTER MERGE\n"
+//            << "*********************************************************************************************\n";
+//  // DEBUGGING
 
 
    /**
@@ -1040,6 +1046,8 @@ FeatureFloodCount::updateFieldInfo()
   unsigned int feature_number = 0;
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
+    std::cout << "Working on map_num " << map_num << std::endl;
+
     /**
      * Perform an indexed sort to give a parallel unique sorting to the identified features.
      * We use the "min_entity_id" inside each feature to assign it's position in the
@@ -1461,11 +1469,17 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
   }
 
   out << "\nBBoxes:";
+  Real volume = 0;
   for (std::vector<MeshTools::BoundingBox>::const_iterator it = feature._bboxes.begin(); it != feature._bboxes.end(); ++it)
+  {
     out << "\nMax: " << it->max() << " Min: " << it->min();
+    volume += (it->max()(0) - it->min()(0)) * (it->max()(1) - it->min()(1)) *
+      (MooseUtils::absoluteFuzzyEqual(it->max()(2), it->min()(2)) ? 1 : it->max()(2) - it->min()(2));
+  }
 
   if (debug)
   {
+    out << "\nVolume: " << volume;
     out << "\nVar_idx: " << feature._var_idx;
     out << "\nMin Entity ID: " << feature._min_entity_id;
     out << "\nMerge Flag: " << feature._merged;

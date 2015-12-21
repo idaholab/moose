@@ -165,11 +165,15 @@ GrainTracker::finalize()
   if (_t_step < _tracking_step)
     return;
 
-  FeatureFloodCount::finalize();
+  FeatureFloodCount::communicateAndMerge();
+
+  std::cout << "Finished inside of FeatureFloodCount" << std::endl;
 
   Moose::perf_log.push("trackGrains()","GrainTracker");
   trackGrains();
   Moose::perf_log.pop("trackGrains()","GrainTracker");
+
+  std::cout << "Finished inside of trackGrains" << std::endl;
 
   // DEBUGGING
   if (processor_id() == 0)
@@ -193,14 +197,18 @@ GrainTracker::finalize()
   // DEBUGGING
 
 
-//
-//  Moose::perf_log.push("remapGrains()","GrainTracker");
-//  if (_remap)
-//    remapGrains();
-//  Moose::perf_log.pop("remapGrains()","GrainTracker");
+
+  Moose::perf_log.push("remapGrains()","GrainTracker");
+  if (_remap)
+    remapGrains();
+  Moose::perf_log.pop("remapGrains()","GrainTracker");
 
   updateFieldInfo();
-//  Moose::perf_log.pop("finalize()","GrainTracker");
+
+  std::cout << "Finished inside of updateFieldInfo" << std::endl;
+
+
+  Moose::perf_log.pop("finalize()","GrainTracker");
 
 //  // Calculate and out output bubble volume data
 //  if (_pars.isParamValid("bubble_volume_file"))
@@ -401,12 +409,12 @@ GrainTracker::trackGrains()
     }
     _console << std::endl;
 
-    if (display_them)
-    {
-      for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-        for (unsigned int i = 0; i < _feature_sets[map_num].size(); ++i)
-          std::cout << *_feature_sets[map_num][i] << '\n';
-    }
+//    if (display_them)
+//    {
+//      for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+//        for (unsigned int i = 0; i < _feature_sets[map_num].size(); ++i)
+//          std::cout << *_feature_sets[map_num][i] << '\n';
+//    }
   }
 
 //  std::vector<UniqueGrain *> new_grains; new_grains.reserve(_unique_grains.size());
@@ -609,14 +617,21 @@ GrainTracker::trackGrains()
       _unique_grains[curr_idx] = feature_ptr;                 // transfer ownership of new grain
     }
 
-    // More than one existing grain is mapping to a new one
+    // More than one existing grain is mapping to a new one (i.e. multiple values exist for a single key)
     else
     {
+      std::cout << "New Grain:\n" << *feature_ptr;
+
       Real min_centroid_diff = std::numeric_limits<Real>::max();
       unsigned int min_idx = 0;
+
+      std::cout << "Existing Competing Grains:\n";
       for (unsigned int i = 0; i < it->second.size(); ++i)
       {
         unsigned int curr_idx = (it->second)[i];
+
+        std::cout << *_unique_grains[curr_idx];
+
         Real curr_centroid_diff = boundingRegionDistance(feature_ptr->_bboxes, _unique_grains[curr_idx]->_bboxes, true);
         if (curr_centroid_diff <= min_centroid_diff)
         {
@@ -637,7 +652,8 @@ GrainTracker::trackGrains()
         else
         {
           _console << "Marking Grain " << curr_idx << " as INACTIVE (variable index: "
-                     << _unique_grains[curr_idx]->_var_idx <<  ")\n";
+                   << _unique_grains[curr_idx]->_var_idx << ")\n"
+                   << *_unique_grains[curr_idx];
           _unique_grains[curr_idx]->_status = INACTIVE;
         }
       }
@@ -654,7 +670,7 @@ GrainTracker::trackGrains()
         _console << COLOR_YELLOW
                  << "*****************************************************************************\n"
                  << "Couldn't find a matching grain while working on variable index: " << _feature_sets[map_num][i]->_var_idx
-                 << "\nCreating new unique grain: " << _unique_grains.size() << *_feature_sets[map_num][i]
+                 << "\nCreating new unique grain: " << _unique_grains.size() << '\n' <<  *_feature_sets[map_num][i]
                  << "\n*****************************************************************************\n" << COLOR_DEFAULT;
         _feature_sets[map_num][i]->_status = MARKED;
         _unique_grains[_unique_grains.size()] = _feature_sets[map_num][i];   // transfer ownership
@@ -669,7 +685,8 @@ GrainTracker::trackGrains()
     if (it->second->_status == NOT_MARKED)
     {
       _console << "Marking Grain " << it->first << " as INACTIVE (variable index: "
-               << it->second->_var_idx <<  ")\n";
+               << it->second->_var_idx <<  ")\n"
+               << *it->second;
       it->second->_status = INACTIVE;
     }
 
@@ -686,202 +703,202 @@ GrainTracker::remapGrains()
   if (_t_step < _tracking_step)
     return;
 
-//  /**
-//   * Loop over each grain and see if the bounding spheres of the current grain intersect with the spheres of any other grains
-//   * represented by the same variable.
-//   */
-//  unsigned times_through_loop = 0;
-//  bool variables_remapped;
-//  do
-//  {
-//    Moose::out << "Remap Loop: " << times_through_loop << std::endl;
-//
-//    variables_remapped = false;
-//    for (std::map<unsigned int, UniqueGrain *>::iterator grain_it1 = _unique_grains.begin();
-//         grain_it1 != _unique_grains.end(); ++grain_it1)
-//    {
-//      if (grain_it1->second->status == INACTIVE)
-//        continue;
-//
-//      for (std::map<unsigned int, UniqueGrain *>::iterator grain_it2 = _unique_grains.begin();
-//           grain_it2 != _unique_grains.end(); ++grain_it2)
-//      {
-//        // Don't compare a grain with itself and don't try to remap inactive grains
-//        if (grain_it1 == grain_it2 || grain_it2->second->status == INACTIVE)
-//          continue;
-//
-//        if (grain_it1->second->variable_idx == grain_it2->second->variable_idx &&                  // Are the grains represented by the same variable?
-//            boundingRegionDistance(grain_it1->second->sphere_ptrs, grain_it2->second->sphere_ptrs, false) < 0)  // If so, do their spheres intersect?
-//        {
-//          // If so, remap one of them
-//          swapSolutionValues(grain_it1, grain_it2, times_through_loop);
-//
-//          // Since something was remapped, we need to inspect all the grains again to make sure that previously ok grains
-//          // aren't in some new nearly intersecting state.  Setting this Boolean to true will trigger the loop again
-//          variables_remapped = true;
-//
-//          // Since the current grain has just been remapped we don't want to loop over any more potential grains (the inner for loop)
-//          break;
-//        }
-//      }
-//    }
-//
-//    if (++times_through_loop >= 5 && processor_id() == 0)
-//      mooseError(COLOR_RED << "Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?" << COLOR_DEFAULT);
-//
-//  } while (variables_remapped);
-//  Moose::out << "Done Remapping" << std::endl;
+  /**
+   * Loop over each grain and see if the bounding spheres of the current grain intersect with the spheres of any other grains
+   * represented by the same variable.
+   */
+  unsigned times_through_loop = 0;
+  bool variables_remapped;
+  do
+  {
+    _console << "Remap Loop: " << times_through_loop << std::endl;
+
+    variables_remapped = false;
+    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it1 = _unique_grains.begin();
+         grain_it1 != _unique_grains.end(); ++grain_it1)
+    {
+      if (grain_it1->second->_status == INACTIVE)
+        continue;
+
+      for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it2 = _unique_grains.begin();
+           grain_it2 != _unique_grains.end(); ++grain_it2)
+      {
+        // Don't compare a grain with itself and don't try to remap inactive grains
+        if (grain_it1 == grain_it2 || grain_it2->second->_status == INACTIVE)
+          continue;
+
+        if (grain_it1->second->_var_idx == grain_it2->second->_var_idx &&         // Are the grains represented by the same variable?
+            grain_it1->second->isStichable(*grain_it2->second))                   // If so, do their bboxes intersect?
+        {
+          // If so, remap one of them
+          swapSolutionValues(grain_it1, grain_it2, times_through_loop);
+
+          // Since something was remapped, we need to inspect all the grains again to make sure that previously ok grains
+          // aren't in some new nearly intersecting state.  Setting this Boolean to true will trigger the loop again
+          variables_remapped = true;
+
+          // Since the current grain has just been remapped we don't want to loop over any more potential grains (the inner for loop)
+          break;
+        }
+      }
+    }
+
+    if (++times_through_loop >= 5 && processor_id() == 0)
+      mooseError(COLOR_RED << "Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?" << COLOR_DEFAULT);
+
+  } while (variables_remapped);
+  _console << "Done Remapping" << std::endl;
 }
 
 void
-GrainTracker::swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1,
-                                 std::map<unsigned int, UniqueGrain *>::iterator & grain_it2,
+GrainTracker::swapSolutionValues(std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator & grain_it1,
+                                 std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator & grain_it2,
                                  unsigned int attempt_number)
 {
   NumericVector<Real> & solution         =  _nl.solution();
   NumericVector<Real> & solution_old     =  _nl.solutionOld();
   NumericVector<Real> & solution_older   =  _nl.solutionOlder();
 
-//  unsigned int curr_var_idx = grain_it1->second->_var_idx;
-//  /**
-//   * We have two grains that are getting close represented by the same order parameter.
-//   * We need to map to the variable whose closest grain to this one is furthest away by sphere to sphere distance.
-//   */
-//  std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
-//
-//  // Make sure that we don't attempt to remap to the same variable
-//  min_distances[curr_var_idx] = -std::numeric_limits<Real>::max();
-//
-//  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it3 = _unique_grains.begin();
-//       grain_it3 != _unique_grains.end(); ++grain_it3)
-//  {
-//    if (grain_it3->second->status == INACTIVE || grain_it3->second->_var_idx == curr_var_idx)
-//      continue;
-//
-//    unsigned int potential_var_idx = grain_it3->second->_var_idx;
-//
-//    Real curr_bounding_sphere_diff = boundingRegionDistance(grain_it1->second->sphere_ptrs, grain_it3->second->sphere_ptrs, false);
-//    if (curr_bounding_sphere_diff < min_distances[potential_var_idx])
-//      min_distances[potential_var_idx] = curr_bounding_sphere_diff;
-//  }
-//
-//  /**
-//   * We have a vector of the distances to the closest grains represented by each of our variables.  We just need to pick
-//   * a suitable grain to replace with.  We will start with the maximum of this this list: (max of the mins), but will settle
-//   * for next to largest and so forth as we make more attempts at remapping grains.  This is a graph coloring problem so
-//   * more work will be required to optimize this process.
-//   * Note: We don't have an explicit check here to avoid remapping a  variable to itself.  This is unecessary since the
-//   * min_distance of a variable is explicitly set up above.
-//   */
-//  unsigned int nth_largest_idx = min_distances.size() - attempt_number - 1;
-//
-//  // nth element destroys the original array so we need to copy it first
-//  std::vector<Real> min_distances_copy(min_distances);
-//  std::nth_element(min_distances_copy.begin(), min_distances_copy.end()+nth_largest_idx, min_distances_copy.end());
-//
-//  // Now find the location of the nth element in the original vector
-//  unsigned int new_variable_idx = std::distance(min_distances.begin(),
-//                                                std::find(min_distances.begin(),
-//                                                          min_distances.end(),
-//                                                          min_distances_copy[nth_largest_idx]));
-//
-//  Moose::out
-//    << COLOR_YELLOW
-//    << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
-//    << " (variable index: " << grain_it1->second->variable_idx << ")\n"
-//    << COLOR_DEFAULT;
-//
-//  if (min_distances[new_variable_idx] < 0)
-//  {
-//    Moose::out
-//      << COLOR_YELLOW
-//      << "*****************************************************************************************************\n"
-//      << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary...\n"
-//      << "*****************************************************************************************************\n"
-//      << COLOR_DEFAULT;
-//    return;
-//  }
-//
-//  Moose::out
-//    << COLOR_GREEN
-//    << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n"
-//    << COLOR_DEFAULT;
-//
-//  MeshBase & mesh = _mesh.getMesh();
-//
-//  // Remap the grain
-//  std::set<Node *> updated_nodes_tmp; // Used only in the elemental case
-//  for (std::set<dof_id_type>::const_iterator entity_it = grain_it1->second->entities_ptr->begin();
-//       entity_it != grain_it1->second->entities_ptr->end(); ++entity_it)
-//  {
-//    if (_is_elemental)
-//    {
-//      Elem *elem = mesh.query_elem(*entity_it);
-//      if (!elem)
-//        continue;
-//
-//      for (unsigned int i=0; i < elem->n_nodes(); ++i)
-//      {
-//        Node *curr_node = elem->get_node(i);
-//        if (updated_nodes_tmp.find(curr_node) == updated_nodes_tmp.end())
-//        {
-//          updated_nodes_tmp.insert(curr_node);         // cache this node so we don't attempt to remap it again within this loop
-//          swapSolutionValuesHelper(curr_node, curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
-//        }
-//      }
-//    }
-//    else
-//      swapSolutionValuesHelper(mesh.query_node_ptr(*entity_it), curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
-//  }
-//
-//  // Update the variable index in the unique grain datastructure
-//  grain_it1->second->variable_idx = new_variable_idx;
-//
-//  // Close all of the solution vectors
-//  solution.close();
-//  solution_old.close();
-//  solution_older.close();
-//
-//  _fe_problem.getNonlinearSystem().sys().update();
+  unsigned int curr_var_idx = grain_it1->second->_var_idx;
+  /**
+   * We have two grains that are getting close represented by the same order parameter.
+   * We need to map to the variable whose closest grain to this one is furthest away by sphere to sphere distance.
+   */
+  std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
+
+  // Make sure that we don't attempt to remap to the same variable
+  min_distances[curr_var_idx] = -std::numeric_limits<Real>::max();
+
+  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it3 = _unique_grains.begin();
+       grain_it3 != _unique_grains.end(); ++grain_it3)
+  {
+    if (grain_it3->second->_status == INACTIVE || grain_it3->second->_var_idx == curr_var_idx)
+      continue;
+
+    unsigned int potential_var_idx = grain_it3->second->_var_idx;
+
+    Real curr_bounding_sphere_diff = boundingRegionDistance(grain_it1->second->_bboxes, grain_it3->second->_bboxes, false);
+    if (curr_bounding_sphere_diff < min_distances[potential_var_idx])
+      min_distances[potential_var_idx] = curr_bounding_sphere_diff;
+  }
+
+  /**
+   * We have a vector of the distances to the closest grains represented by each of our variables.  We just need to pick
+   * a suitable grain to replace with.  We will start with the maximum of this this list: (max of the mins), but will settle
+   * for next to largest and so forth as we make more attempts at remapping grains.  This is a graph coloring problem so
+   * more work will be required to optimize this process.
+   * Note: We don't have an explicit check here to avoid remapping a  variable to itself.  This is unecessary since the
+   * min_distance of a variable is explicitly set up above.
+   */
+  unsigned int nth_largest_idx = min_distances.size() - attempt_number - 1;
+
+  // nth element destroys the original array so we need to copy it first
+  std::vector<Real> min_distances_copy(min_distances);
+  std::nth_element(min_distances_copy.begin(), min_distances_copy.end()+nth_largest_idx, min_distances_copy.end());
+
+  // Now find the location of the nth element in the original vector
+  unsigned int new_variable_idx = std::distance(min_distances.begin(),
+                                                std::find(min_distances.begin(),
+                                                          min_distances.end(),
+                                                          min_distances_copy[nth_largest_idx]));
+
+  Moose::out
+    << COLOR_YELLOW
+    << "Grain #: " << grain_it1->first << " intersects Grain #: " << grain_it2->first
+    << " (variable index: " << grain_it1->second->_var_idx << ")\n"
+    << COLOR_DEFAULT;
+
+  if (min_distances[new_variable_idx] < 0)
+  {
+    Moose::out
+      << COLOR_YELLOW
+      << "*****************************************************************************************************\n"
+      << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary...\n"
+      << "*****************************************************************************************************\n"
+      << COLOR_DEFAULT;
+    return;
+  }
+
+  Moose::out
+    << COLOR_GREEN
+    << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n"
+    << COLOR_DEFAULT;
+
+  MeshBase & mesh = _mesh.getMesh();
+
+  // Remap the grain
+  std::set<Node *> updated_nodes_tmp; // Used only in the elemental case
+  for (std::set<dof_id_type>::const_iterator entity_it = grain_it1->second._local_ids.begin();
+       entity_it != grain_it1->second._local_ids.end(); ++entity_it)
+  {
+    if (_is_elemental)
+    {
+      Elem *elem = mesh.query_elem(*entity_it);
+      if (!elem)
+        continue;
+
+      for (unsigned int i=0; i < elem->n_nodes(); ++i)
+      {
+        Node *curr_node = elem->get_node(i);
+        if (updated_nodes_tmp.find(curr_node) == updated_nodes_tmp.end())
+        {
+          updated_nodes_tmp.insert(curr_node);         // cache this node so we don't attempt to remap it again within this loop
+          swapSolutionValuesHelper(curr_node, curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
+        }
+      }
+    }
+    else
+      swapSolutionValuesHelper(mesh.query_node_ptr(*entity_it), curr_var_idx, new_variable_idx, solution, solution_old, solution_older);
+  }
+
+  // Update the variable index in the unique grain datastructure
+  grain_it1->second->_var_idx = new_variable_idx;
+
+  // Close all of the solution vectors
+  solution.close();
+  solution_old.close();
+  solution_older.close();
+
+  _fe_problem.getNonlinearSystem().sys().update();
 
 }
 
 void
 GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, NumericVector<Real> & solution, NumericVector<Real> & solution_old, NumericVector<Real> & solution_older)
 {
-//  if (curr_node && curr_node->processor_id() == processor_id())
-//  {
-//    // Reinit the node so we can get and set values of the solution here
-//    _subproblem.reinitNode(curr_node, 0);
-//
-//    // Swap the values from one variable to the other
-//    {
-//      VariableValue & value = _vars[curr_var_idx]->nodalSln();
-//      VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
-//      VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
-//
-//      // Copy Value from intersecting variable to new variable
-//      dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
-//
-//      // Set the only DOF for this variable on this node
-//      solution.set(dof_index, value[0]);
-//      solution_old.set(dof_index, value_old[0]);
-//      solution_older.set(dof_index, value_older[0]);
-//    }
-//    {
-//      VariableValue & value = _vars[new_var_idx]->nodalSln();
-//      VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
-//      VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
-//
-//      // Copy Value from variable to the intersecting variable
-//      dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
-//
-//      // Set the only DOF for this variable on this node
-//      solution.set(dof_index, value[0]);
-//      solution_old.set(dof_index, value_old[0]);
-//      solution_older.set(dof_index, value_older[0]);
-//    }
-//  }
+  if (curr_node && curr_node->processor_id() == processor_id())
+  {
+    // Reinit the node so we can get and set values of the solution here
+    _subproblem.reinitNode(curr_node, 0);
+
+    // Swap the values from one variable to the other
+    {
+      VariableValue & value = _vars[curr_var_idx]->nodalSln();
+      VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
+      VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
+
+      // Copy Value from intersecting variable to new variable
+      dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
+
+      // Set the only DOF for this variable on this node
+      solution.set(dof_index, value[0]);
+      solution_old.set(dof_index, value_old[0]);
+      solution_older.set(dof_index, value_older[0]);
+    }
+    {
+      VariableValue & value = _vars[new_var_idx]->nodalSln();
+      VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
+      VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
+
+      // Copy Value from variable to the intersecting variable
+      dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+
+      // Set the only DOF for this variable on this node
+      solution.set(dof_index, value[0]);
+      solution_old.set(dof_index, value_old[0]);
+      solution_older.set(dof_index, value_older[0]);
+    }
+  }
 }
 
 void

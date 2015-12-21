@@ -43,12 +43,16 @@
     # Variable used to visualize the grain boundaries in the simulation
   [../]
   [./unique_grains]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./var_indices]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./ghost_regions]
-    family = MONOMIAL
     order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -65,7 +69,7 @@
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
@@ -81,11 +85,11 @@
     field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
   [../]
-  [./ghosted_elems]
+  [./ghosted_entities]
     type = FeatureFloodCountAux
     variable = ghost_regions
     bubble_object = grain_tracker
-    field_display = GHOSTED_ELEMS
+    field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -122,6 +126,7 @@
     enable_var_coloring = true
     condense_map_info = true
     connecting_threshold = 0.08
+    flood_entity_type = ELEMENTAL
     execute_on = 'initial timestep_end'
   [../]
   [./dt]

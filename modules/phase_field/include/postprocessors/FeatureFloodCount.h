@@ -59,7 +59,7 @@ public:
   VARIABLE_COLORING,
   ACTIVE_BOUNDS,
   CENTROID,
-  GHOSTED_ELEMS
+  GHOSTED_ENTITIES
   };
 
   // Retrieve field information
@@ -193,6 +193,8 @@ protected:
    * any bubbles that were counted as unique by multiple processors.
    */
   void mergeSets(bool use_periodic_boundary_info);
+
+  void communicateAndMerge();
 
   /**
    * This routine broadcasts a std::list<FeatureData> to other ranks. It includes both the
