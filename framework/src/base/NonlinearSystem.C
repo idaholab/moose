@@ -29,7 +29,9 @@
 #include "ComputeDiracThread.h"
 #include "ComputeDampingThread.h"
 #include "ComputeNodalKernelsThread.h"
+#include "ComputeNodalKernelBcsThread.h"
 #include "ComputeNodalKernelJacobiansThread.h"
+#include "ComputeNodalKernelBCJacobiansThread.h"
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "PresetNodalBC.h"
@@ -563,15 +565,19 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    // Set the parameters for thread ID and material data
-    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
-
     // Create the kernel object via the factory
     MooseSharedPointer<NodalKernel> kernel = MooseSharedNamespace::static_pointer_cast<NodalKernel>(_factory.create(kernel_name, name, parameters, tid));
 
-    // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-    std::set<SubdomainID> blk_ids = kernel->blockIDs();
+    if (kernel->boundaryRestricted())
+      std::set<BoundaryID> boundary_ids = kernel->boundaryIDs();
+    else
+    {
+      // Set the parameters for thread ID and material data
+      parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
 
+      // Extract the SubdomainIDs from the object (via BlockRestrictable class)
+      std::set<SubdomainID> blk_ids = kernel->blockIDs();
+    }
     // Add the kernel to the warehouse
     _nodal_kernels[tid].addNodalKernel(kernel);
   }
@@ -1245,10 +1251,10 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   }
   PARALLEL_CATCH;
 
-  // residual contributions from NodalKernels
+  // residual contributions from Block NodalKernels
   PARALLEL_TRY
   {
-    if (!_nodal_kernels[0].all().empty())
+    if (!_nodal_kernels[0].allBlockNodalKernels().empty())
     {
       ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
 
@@ -1259,7 +1265,25 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
       Threads::parallel_reduce(range, cnk);
 
       unsigned int n_threads = libMesh::n_threads();
-      for (unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
+      for (unsigned int i = 0; i < n_threads; i++) // Add any cached residuals that might be hanging around
+        _fe_problem.addCachedResidual(i);
+    }
+  }
+  PARALLEL_CATCH;
+
+  // residual contributions from boundary NodalKernels
+  PARALLEL_TRY
+  {
+    if (!_nodal_kernels[0].allBoundaryNodalKernels().empty())
+    {
+      ComputeNodalKernelBcsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
+
+      ConstBndNodeRange & bnd_node_range = *_mesh.getBoundaryNodeRange();
+
+      Threads::parallel_reduce(bnd_node_range, cnk);
+
+      unsigned int n_threads = libMesh::n_threads();
+      for (unsigned int i = 0; i < n_threads; i++) // Add any cached residuals that might be hanging around
         _fe_problem.addCachedResidual(i);
     }
   }
@@ -1833,14 +1857,27 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         for (unsigned int i=0; i<n_threads; i++) // Add any Jacobian contributions still hanging around
           _fe_problem.addCachedJacobian(jacobian, i);
 
-        if (!_nodal_kernels[0].all().empty())
+        // Block restricted Nodal Kernels
+        if (!_nodal_kernels[0].allBlockNodalKernels().empty())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
           unsigned int n_threads = libMesh::n_threads();
-          for (unsigned int i=0; i<n_threads; i++) // Add any cached jacobians that might be hanging around
+          for (unsigned int i = 0; i < n_threads; i++) // Add any cached jacobians that might be hanging around
+            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+        }
+
+        // Boundary restricted Nodal Kernels
+        if (!_nodal_kernels[0].allBoundaryNodalKernels().empty())
+        {
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
+
+          Threads::parallel_reduce(bnd_range, cnkjt);
+          unsigned int n_threads = libMesh::n_threads();
+          for (unsigned int i = 0; i < n_threads; i++) // Add any cached jacobians that might be hanging around
             _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
         }
       }
@@ -1856,14 +1893,28 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         for (unsigned int i=0; i<n_threads; i++)
           _fe_problem.addCachedJacobian(jacobian, i);
 
-        if (!_nodal_kernels[0].all().empty())
+        // Block restricted Nodal Kernels
+        if (!_nodal_kernels[0].allBlockNodalKernels().empty())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
           unsigned int n_threads = libMesh::n_threads();
-          for (unsigned int i=0; i<n_threads; i++) // Add any cached jacobians that might be hanging around
+          for (unsigned int i = 0; i < n_threads; i++) // Add any cached jacobians that might be hanging around
+            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+        }
+
+        // Boundary restricted Nodal Kernels
+        if (!_nodal_kernels[0].allBoundaryNodalKernels().empty())
+        {
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
+
+          Threads::parallel_reduce(bnd_range, cnkjt);
+
+          unsigned int n_threads = libMesh::n_threads();
+          for (unsigned int i = 0; i < n_threads; i++) // Add any cached jacobians that might be hanging around
             _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
         }
       }

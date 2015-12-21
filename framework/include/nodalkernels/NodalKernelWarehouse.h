@@ -40,8 +40,11 @@ public:
   void jacobianSetup();
 
   const std::vector<MooseSharedPointer<NodalKernel> > & allNodalKernels() const { return _all_nodal_kernels; }
+  const std::vector<MooseSharedPointer<NodalKernel> > & allBlockNodalKernels() const { return _all_block_nodal_kernels; }
+  const std::vector<MooseSharedPointer<NodalKernel> > & allBoundaryNodalKernels() const { return _all_boundary_nodal_kernels; }
 
   std::vector<MooseSharedPointer<NodalKernel> > & activeBlockNodalKernels(SubdomainID block) { return _active_block_nodal_kernels[block]; }
+  std::vector<MooseSharedPointer<NodalKernel> > & activeBoundaryNodalKernels(BoundaryID boundary_id) { return _active_boundary_nodal_kernels[boundary_id]; }
 
   /**
    * Adds a nodal kernel
@@ -64,9 +67,14 @@ public:
 protected:
   /// all NodalKernels
   std::vector<MooseSharedPointer<NodalKernel> > _all_nodal_kernels;
+  std::vector<MooseSharedPointer<NodalKernel> > _all_block_nodal_kernels;
+  std::vector<MooseSharedPointer<NodalKernel> > _all_boundary_nodal_kernels;
 
   /// nodal kernels active on a block
   std::map<SubdomainID, std::vector<MooseSharedPointer<NodalKernel> > > _active_block_nodal_kernels;
+
+  /// nodal kernels active on a boundary
+  std::map<BoundaryID, std::vector<MooseSharedPointer<NodalKernel> > > _active_boundary_nodal_kernels;
 };
 
 #endif // NODALKERNELWAREHOUSE_H
