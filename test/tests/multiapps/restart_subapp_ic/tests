@@ -1,0 +1,14 @@
+[Tests]
+  [./first]
+    type = 'RunApp'
+    input = 'master.i'
+  [../]
+
+  [./second]
+    type = 'Exodiff'
+    prereq = 'first'
+    input = 'master2.i'
+    exodiff = 'master2_out_sub_app0.e'
+    abs_zero = 1e-8
+  [../]
+[]
