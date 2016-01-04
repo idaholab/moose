@@ -33,7 +33,7 @@ SystemInfo::SystemInfo(int argc, char *argv[]) :
 }
 
 std::string
-SystemInfo::getInfo()
+SystemInfo::getInfo() const
 {
   std::stringstream oss;
   oss << std::left;
@@ -65,7 +65,7 @@ SystemInfo::getInfo()
 
 // TODO: Update libmesh to handle this function "timestamp.h"
 std::string
-SystemInfo::getTimeStamp(time_t *time_stamp)
+SystemInfo::getTimeStamp(time_t *time_stamp) const
 {
   struct tm *tm_struct;
   time_t local_time;
