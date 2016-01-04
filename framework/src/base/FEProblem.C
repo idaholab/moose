@@ -510,6 +510,17 @@ void FEProblem::initialSetup()
       _app.restoreCachedBackup();
     else
       _resurrector->restartRestartableData();
+
+    // We may have just clobbered initial conditions that were explicitly set
+    // In a _restart_ scenario it is completely valid to specify new initial conditions
+    // for some of the variables which should override what's coming from the restart file
+    if (!_app.isRecovering())
+    {
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+        _ics.initialSetup(tid);
+      _scalar_ics.sort();
+      projectSolution();
+    }
   }
 
   // HUGE NOTE: MultiApp initialSetup() MUST... I repeat MUST be _after_ restartable data has been restored
