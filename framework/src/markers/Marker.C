@@ -109,4 +109,3 @@ Marker::getSuppliedItems()
 {
   return _supplied;
 }
-

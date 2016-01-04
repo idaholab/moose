@@ -66,4 +66,3 @@ ErrorFractionMarker::computeElementMarker()
 
   return DO_NOTHING;
 }
-

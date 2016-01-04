@@ -205,8 +205,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   for (unsigned int i=0; i<n_threads; i++)
     _vpps_data[i] = new VectorPostprocessorData(*this, i);
 
-  _markers.resize(n_threads);
-
   _active_elemental_moose_variables.resize(n_threads);
 
   _block_mat_side_cache.resize(n_threads);
@@ -414,7 +412,8 @@ void FEProblem::initialSetup()
   {
     _internal_side_indicators.initialSetup(tid);
     _indicators.initialSetup(tid);
-    _markers[tid].initialSetup();
+    _markers.sort(tid);
+    _markers.initialSetup(tid);
   }
 
 #ifdef LIBMESH_ENABLE_AMR
@@ -653,7 +652,7 @@ void FEProblem::timestepSetup()
   {
     _internal_side_indicators.timestepSetup(tid);
     _indicators.timestepSetup(tid);
-    _markers[tid].timestepSetup();
+    _markers.timestepSetup(tid);
 
     // Timestep setup of all UserObjects
     for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
@@ -2169,7 +2168,7 @@ void
 FEProblem::computeIndicatorsAndMarkers()
 {
   // Initialize marker and indicator aux variable fields
-  if (_indicators.hasActiveObjects() || _markers[0].all().size() || _internal_side_indicators.hasActiveObjects())
+  if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects() || _markers.hasActiveObjects())
   {
     std::vector<std::string> fields;
 
@@ -2183,15 +2182,10 @@ FEProblem::computeIndicatorsAndMarkers()
     for (std::vector<MooseSharedPointer<InternalSideIndicator> >::const_iterator it = internal_indicators.begin(); it != internal_indicators.end(); ++it)
       fields.push_back((*it)->name());
 
-    // Add Marker Fields
-    {
-      const std::vector<Marker *> & all_markers = _markers[0].all();
-
-      for (std::vector<Marker *>::const_iterator i=all_markers.begin();
-          i != all_markers.end();
-          ++i)
-        fields.push_back((*i)->name());
-    }
+    // Marker Fields
+    const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects();
+    for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = markers.begin(); it != markers.end(); ++it)
+      fields.push_back((*it)->name());
 
     _aux.zeroVariables(fields);
   }
@@ -2211,14 +2205,18 @@ FEProblem::computeIndicatorsAndMarkers()
   }
 
   // compute Markers
-  if (_markers[0].all().size())
+  if (_markers.hasActiveObjects())
   {
     _adaptivity.updateErrorVectors();
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-      _markers[tid].markerSetup();
+    {
+      const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects();
+      for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = markers.begin(); it != markers.end(); ++it)
+        (*it)->markerSetup();
+    }
 
-    ComputeMarkerThread cmt(*this, getAuxiliarySystem(), _markers);
+    ComputeMarkerThread cmt(*this, getAuxiliarySystem());
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
 
     _aux.solution().close();
@@ -2603,8 +2601,8 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
 void
 FEProblem::executeControls(const ExecFlagType & exec_type)
 {
-  _control_storage.setup(exec_type);
-  const std::vector<MooseSharedPointer<Control> > & objects = _control_storage[exec_type].getActiveObjects();
+  _control_warehouse.setup(exec_type);
+  const std::vector<MooseSharedPointer<Control> > & objects = _control_warehouse[exec_type].getActiveObjects();
   for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     (*it)->execute();
 }
@@ -2619,9 +2617,10 @@ FEProblem::updateActiveObjects()
     _aux.updateActive(tid);
     _indicators.updateActive(tid);
     _internal_side_indicators.updateActive(tid);
+    _markers.updateActive(tid);
   }
 
-  _control_storage.updateActive();
+  _control_warehouse.updateActive();
   _multi_apps.updateActive();
   _transient_multi_apps.updateActive();
 }
@@ -2713,9 +2712,7 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     MooseSharedPointer<Marker> marker = MooseSharedNamespace::static_pointer_cast<Marker>(_factory.create(marker_name, name, parameters, tid));
-
-    std::vector<SubdomainID> block_ids;
-    _markers[tid].addMarker(marker, block_ids);
+    _markers.addObject(marker, tid);
   }
 }
 

@@ -25,7 +25,7 @@ class AuxiliarySystem;
 class ComputeMarkerThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeMarkerThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<MarkerWarehouse> & marker_whs);
+  ComputeMarkerThread(FEProblem & fe_problem, AuxiliarySystem & sys);
 
   // Splitting Constructor
   ComputeMarkerThread(ComputeMarkerThread & x, Threads::split split);
@@ -44,7 +44,9 @@ public:
 protected:
   FEProblem & _fe_problem;
   AuxiliarySystem & _aux_sys;
-  std::vector<MarkerWarehouse> & _marker_whs;
+
+  /// Reference to the Marker warhouse in FEProblem
+  const MooseObjectWarehouse<Marker> & _marker_whs;
 };
 
 #endif //COMPUTEMARKERTHREAD_H
