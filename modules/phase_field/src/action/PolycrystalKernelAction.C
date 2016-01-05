@@ -7,6 +7,7 @@
 #include "PolycrystalKernelAction.h"
 #include "Factory.h"
 #include "Parser.h"
+#include "Conversion.h"
 #include "FEProblem.h"
 
 template<>
@@ -16,11 +17,13 @@ InputParameters validParams<PolycrystalKernelAction>()
 
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  params.addParam<VariableName>("c", "NONE", "Name of coupled concentration variable");
+  params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
-  params.addParam<VariableName>("T", "NONE", "Name of temperature variable");
+  params.addParam<VariableName>("T", "Name of temperature variable");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  params.addParam<std::vector<Real> >("stored_energy" , "Optional vector of stored (dislocation) energy for each grain");
+  params.addParam<UserObjectName>("grain_tracker", "Grain tracker object (needed when specifying stored_energy)");
 
   return params;
 }
@@ -29,96 +32,108 @@ PolycrystalKernelAction::PolycrystalKernelAction(const InputParameters & params)
     Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
-    _c(getParam<VariableName>("c")),
-    _implicit(getParam<bool>("implicit")),
-    _T(getParam<VariableName>("T"))
+    _implicit(getParam<bool>("implicit"))
 {
 }
 
 void
 PolycrystalKernelAction::act()
 {
-#ifdef DEBUG
-  Moose::err << "Inside the PolyCrystalKernelAction Object\n";
-  Moose::err << "var name base:" << _var_name_base;
-#endif
-  // Moose::out << "Implicit = " << _implicit << Moose::out;
-
-  for (unsigned int op = 0; op < _op_num; op++)
+  for (unsigned int op = 0; op < _op_num; ++op)
   {
-    //Create variable names
-    std::string var_name = _var_name_base;
-    std::stringstream out;
-    out << op;
-    var_name.append(out.str());
+    //
+    // Create variable names
+    //
 
+    std::string var_name = _var_name_base + Moose::stringify(op);
     std::vector<VariableName> v;
     v.resize(_op_num - 1);
 
     unsigned int ind = 0;
-
-    for (unsigned int j = 0; j < _op_num; j++)
-    {
+    for (unsigned int j = 0; j < _op_num; ++j)
       if (j != op)
-      {
-        std::string coupled_var_name = _var_name_base;
-        std::stringstream out2;
-        out2 << j;
-        coupled_var_name.append(out2.str());
-        v[ind] = coupled_var_name;
-        ind++;
-      }
+        v[ind++] = _var_name_base + Moose::stringify(j);
+
+    //
+    // Set up ACGrGrPoly kernels
+    //
+
+    {
+      InputParameters params = _factory.getValidParams("ACGrGrPoly");
+      params.set<NonlinearVariableName>("variable") = var_name;
+      params.set<std::vector<VariableName> >("v") = v;
+      params.set<bool>("implicit") = _implicit;
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+      if (isParamValid("T"))
+        params.set<std::vector<VariableName> >("T") = std::vector<VariableName>(1, getParam<VariableName>("T"));
+
+      std::string kernel_name = "ACBulk_" + var_name;
+      _problem->addKernel("ACGrGrPoly", kernel_name, params);
     }
 
-    InputParameters poly_params = _factory.getValidParams("ACGrGrPoly");
-    poly_params.set<NonlinearVariableName>("variable") = var_name;
-    poly_params.set<std::vector<VariableName> >("v") = v;
-    poly_params.set<bool>("implicit")=_implicit;
-    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-    if (_T != "NONE")
-      poly_params.set<std::vector<VariableName> >("T").push_back(_T);
+    //
+    // Set up (optional) ACGrGrPolyStoredEnergy kernels
+    //
 
-    std::string kernel_name = "ACBulk_";
-    kernel_name.append(var_name);
-
-    _problem->addKernel("ACGrGrPoly", kernel_name, poly_params);
-
-    /************/
-
-    poly_params = _factory.getValidParams("ACInterface");
-    poly_params.set<NonlinearVariableName>("variable") = var_name;
-    poly_params.set<bool>("implicit")=getParam<bool>("implicit");
-    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-
-    kernel_name = "ACInt_";
-    kernel_name.append(var_name);
-
-    _problem->addKernel("ACInterface", kernel_name, poly_params);
-    //*******************
-
-    poly_params = _factory.getValidParams("TimeDerivative");
-    poly_params.set<NonlinearVariableName>("variable") = var_name;
-    poly_params.set<bool>("implicit") = true;
-    poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-
-    kernel_name = "IE_";
-    kernel_name.append(var_name);
-
-    _problem->addKernel("TimeDerivative", kernel_name, poly_params);
-    /************/
-    if (_c != "NONE")//Add in Bubble interaction kernel, if using bubbles
+    if (isParamValid("stored_energy") && isParamValid("grain_tracker"))
     {
-      poly_params = _factory.getValidParams("ACGBPoly");
-      poly_params.set<NonlinearVariableName>("variable") = var_name;
-      poly_params.set<std::vector<VariableName> >("c").push_back(_c);
-      poly_params.set<Real>("en_ratio") = getParam<Real>("en_ratio");
-      poly_params.set<bool>("implicit")=getParam<bool>("implicit");
-      poly_params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+      InputParameters params = _factory.getValidParams("ACGrGrPolyStoredEnergy");
+      params.set<NonlinearVariableName>("variable") = var_name;
+      params.set<bool>("implicit") = _implicit;
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+      params.set<std::vector<Real> >("stored_energy") = getParam<std::vector<Real> >("stored_energy");
+      params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
+      params.set<unsigned int>("op_index") = op;
 
-      kernel_name = "ACBubInteraction_";
-      kernel_name.append(var_name);
+      std::string kernel_name = "ACStoredEnergy_" + var_name;
+      _problem->addKernel("ACGrGrPolyStoredEnergy", kernel_name, params);
+    }
+    else if (isParamValid("stored_energy") || isParamValid("grain_tracker"))
+      mooseError("Specify both 'stored_energy' and 'grain_tracker' or neither.");
 
-      _problem->addKernel("ACGBPoly", kernel_name, poly_params);
+    //
+    // Set up ACInterface kernels
+    //
+
+    {
+      InputParameters params = _factory.getValidParams("ACInterface");
+      params.set<NonlinearVariableName>("variable") = var_name;
+      params.set<bool>("implicit") = getParam<bool>("implicit");
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+
+      std::string kernel_name = "ACInt_" + var_name;
+      _problem->addKernel("ACInterface", kernel_name, params);
+    }
+
+    //
+    // Set up TimeDerivative kernels
+    //
+
+    {
+      InputParameters params = _factory.getValidParams("TimeDerivative");
+      params.set<NonlinearVariableName>("variable") = var_name;
+      params.set<bool>("implicit") = true;
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+
+      std::string kernel_name = "IE_" + var_name;
+      _problem->addKernel("TimeDerivative", kernel_name, params);
+    }
+
+    //
+    // Set up optional ACGBPoly bubble interaction kernels
+    //
+
+    if (isParamValid("c"))
+    {
+      InputParameters params = _factory.getValidParams("ACGBPoly");
+      params.set<NonlinearVariableName>("variable") = var_name;
+      params.set<std::vector<VariableName> >("c") = std::vector<VariableName>(1, getParam<VariableName>("c"));
+      params.set<Real>("en_ratio") = getParam<Real>("en_ratio");
+      params.set<bool>("implicit") = getParam<bool>("implicit");
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+
+      std::string kernel_name = "ACBubInteraction_" + var_name;
+      _problem->addKernel("ACGBPoly", kernel_name, params);
     }
   }
 }
