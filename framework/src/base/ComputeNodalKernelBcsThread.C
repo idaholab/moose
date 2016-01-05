@@ -1,0 +1,91 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "ComputeNodalKernelBcsThread.h"
+
+#include "AuxiliarySystem.h"
+#include "FEProblem.h"
+#include "NodalKernel.h"
+#include "NodalKernelWarehouse.h"
+
+// libmesh includes
+#include "libmesh/threads.h"
+
+ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(FEProblem & fe_problem,
+                                                         AuxiliarySystem & sys,
+                                                         std::vector<NodalKernelWarehouse> & nodal_kernels) :
+    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _sys(sys),
+    _nodal_kernels(nodal_kernels),
+    _num_cached(0)
+{
+}
+
+// Splitting Constructor
+ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split) :
+    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+    _sys(x._sys),
+    _nodal_kernels(x._nodal_kernels),
+    _num_cached(0)
+{
+}
+
+void
+ComputeNodalKernelBcsThread::pre()
+{
+  _num_cached = 0;
+}
+
+void
+ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
+{
+  const BndNode * bnode = *node_it;
+
+  BoundaryID boundary_id = bnode->_bnd_id;
+
+  // prepare variables
+  for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
+  {
+    MooseVariable * var = it->second;
+    var->prepareAux();
+  }
+
+  if (_nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).size() > 0)
+  {
+    Node * node = bnode->_node;
+    if (node->processor_id() == _fe_problem.processor_id())
+    {
+      _fe_problem.reinitNodeFace(node, boundary_id, _tid);
+
+      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = _nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).begin();
+           nodal_kernel_it != _nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).end();
+           ++nodal_kernel_it)
+        (*nodal_kernel_it)->computeResidual();
+
+      _num_cached++;
+    }
+  }
+
+  if (_num_cached == 20) //cache 20 nodes worth before adding into the residual
+  {
+    _num_cached = 0;
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    _fe_problem.addCachedResidual(_tid);
+  }
+}
+
+void
+ComputeNodalKernelBcsThread::join(const ComputeNodalKernelBcsThread & /*y*/)
+{
+}

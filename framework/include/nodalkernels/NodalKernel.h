@@ -24,6 +24,9 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
+#include "Assembly.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
@@ -48,6 +51,7 @@ InputParameters validParams<NodalKernel>();
 class NodalKernel :
   public MooseObject,
   public BlockRestrictable,
+  public BoundaryRestrictable,
   public SetupInterface,
   public FunctionInterface,
   public UserObjectInterface,

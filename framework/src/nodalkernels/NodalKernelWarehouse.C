@@ -60,15 +60,34 @@ NodalKernelWarehouse::addNodalKernel(MooseSharedPointer<NodalKernel> & nodal_ker
 
   _all_objects.push_back(nodal_kernel.get());
 
-  // Add to elemental/nodal storage
-  _all_nodal_kernels.push_back(nodal_kernel);
+  //Boundary restricted
+  if (nodal_kernel->boundaryRestricted())
+  {
+    // Add to elemental/nodal storage
+    _all_nodal_kernels.push_back(nodal_kernel);
+    _all_boundary_nodal_kernels.push_back(nodal_kernel);
 
-  // Get the SubdomainIDs for this object
-  const std::set<SubdomainID> & block_ids(nodal_kernel->hasBlocks(Moose::ANY_BLOCK_ID) ? nodal_kernel->meshBlockIDs() : nodal_kernel->blockIDs()) ;
+    // Get the BoundaryIDs for this object
+    const std::set<BoundaryID> & boundary_ids = nodal_kernel->boundaryIDs();
 
-  // Populate the elemental and nodal block restricted maps
-  for (std::set<SubdomainID>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
-    _active_block_nodal_kernels[*it].push_back(nodal_kernel);
+    // Populate the elemental and nodal block restricted maps
+    for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+      _active_boundary_nodal_kernels[*it].push_back(nodal_kernel);
+  }
+  //Block restricted
+  else
+  {
+    // Add to elemental/nodal storage
+    _all_nodal_kernels.push_back(nodal_kernel);
+    _all_block_nodal_kernels.push_back(nodal_kernel);
+
+    // Get the SubdomainIDs for this object
+    const std::set<SubdomainID> & block_ids(nodal_kernel->hasBlocks(Moose::ANY_BLOCK_ID) ? nodal_kernel->meshBlockIDs() : nodal_kernel->blockIDs()) ;
+
+    // Populate the elemental and nodal block restricted maps
+    for (std::set<SubdomainID>::const_iterator it = block_ids.begin(); it != block_ids.end(); ++it)
+      _active_block_nodal_kernels[*it].push_back(nodal_kernel);
+  }
 }
 
 bool
