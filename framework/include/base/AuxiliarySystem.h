@@ -173,7 +173,9 @@ protected:
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;
   friend class ComputeNodalKernelsThread;
+  friend class ComputeNodalKernelBcsThread;
   friend class ComputeNodalKernelJacobiansThread;
+  friend class ComputeNodalKernelBCJacobiansThread;
 };
 
 #endif /* EXPLICITSYSTEM_H */
