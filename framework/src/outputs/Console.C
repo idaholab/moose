@@ -134,8 +134,8 @@ Console::Console(const InputParameters & parameters) :
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
     _print_mesh_changed_info(getParam<bool>("print_mesh_changed_info")),
-    _system_info_flags(getParam<MultiMooseEnum>("system_info"))
-
+    _system_info_flags(getParam<MultiMooseEnum>("system_info")),
+    _allow_changing_sysinfo_flag(true)
 {
   // Apply the special common console flags (print_...)
   ActionWarehouse & awh = _app.actionWarehouse();
@@ -239,6 +239,9 @@ Console::~Console()
 void
 Console::initialSetup()
 {
+  // system info flag can be changed only before console initial setup
+  _allow_changing_sysinfo_flag = false;
+
   // If execute_on = 'initial' perform the output
   if (shouldOutput("system_information", EXEC_INITIAL))
     outputSystemInformation();
