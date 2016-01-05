@@ -17,6 +17,9 @@ class PBSJob(Job):
     params.addParam('no_copy', "A list of files specifically not to copy")
     params.addParam('copy_files', "A list of files specifically to copy")
 
+    params.addStringSubParam('pbs_o_workdir', 'PBS_O_WORKDIR', "Move to this directory")
+    params.addStringSubParam('pbs_stdout', 'PBS_STDOUT', "Save stdout to this location")
+    params.addStringSubParam('pbs_stderr', 'PBS_STDERR', "Save stderr to this location")
     params.addStringSubParam('combine_streams', '#PBS -j oe', "Combine stdout and stderror into one file (needed for NO EXPECTED ERR)")
     params.addStringSubParam('threads', '--n-threads=THREADS', "The number of threads to run per MPI process.")
     params.addStringSubParam('queue', '#PBS -q QUEUE', "Which queue to submit this job to.")
@@ -39,6 +42,9 @@ class PBSJob(Job):
   # Called from the current directory to copy files (usually from the parent)
   def copyFiles(self, job_file):
     params = self.specs
+
+    # Save current location as PBS_O_WORKDIR
+    params['pbs_o_workdir'] = os.getcwd()
 
     # Copy files (unless they are listed in "no_copy"
     for file in os.listdir('../'):
@@ -64,6 +70,10 @@ class PBSJob(Job):
     if params.isValid('mpi_procs') and params.isValid('total_mpi_procs'):
       print "ERROR: 'mpi_procs' and 'total_mpi_procs' are exclusive.  Only specify one!"
       sys.exit(1)
+
+    # Set stdout/err writes to PBS_O_WORKDIR
+    params['pbs_stdout'] = os.path.join(params['pbs_o_workdir'], params['job_name'])
+    params['pbs_stderr'] = os.path.join(params['pbs_o_workdir'], params['job_name'])
 
     # Do a few PBS job size calculations
     if params.isValid('mpi_procs'):
