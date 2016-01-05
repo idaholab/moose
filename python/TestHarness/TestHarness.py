@@ -369,8 +369,13 @@ class TestHarness:
     else:
       result = 'FAILED (%s)' % reason
       did_pass = False
-    self.handleTestResult(tester.specs, output, result, start, end)
-    return did_pass
+    if self.options.pbs and self.options.processingPBS == False and did_pass == True:
+      # Handle the launch result, but do not add it to the results table (except if we learned that QSUB failed to launch for some reason)
+      self.handleTestResult(tester.specs, output, result, start, end, False)
+      return did_pass
+    else:
+      self.handleTestResult(tester.specs, output, result, start, end)
+      return did_pass
 
   def getTiming(self, output):
     time = ''
@@ -446,11 +451,10 @@ class TestHarness:
                 tester.parameters()['test_dir'] = '/'.join(job[2].split('/')[:-1])
                 outfile = output_file.read()
                 output_file.close()
+                self.testOutputAndFinish(tester, exit_code, outfile)
               else:
                 # I ran into this scenario when the cluster went down, but launched/completed my job :)
                 self.handleTestResult(tester.specs, '', 'FAILED (NO STDOUT FILE)', 0, 0, True)
-
-              self.testOutputAndFinish(tester, exit_code, outfile)
 
             elif output_value == 'R':
               # Job is currently running
@@ -470,7 +474,7 @@ class TestHarness:
       return ('QSUB NOT FOUND', '')
     else:
       # Get the PBS Job ID using qstat
-      results = re.findall(r'JOB_NAME: (\w+\d+) JOB_ID: (\d+) TEST_NAME: (\S+)', output, re.DOTALL)
+      results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output, re.DOTALL)
       if len(results) != 0:
         file_name = self.options.pbs
         job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
@@ -481,7 +485,7 @@ class TestHarness:
           # Get the Output_Path from qstat stdout
           if qstat_stdout != None:
             output_value = re.search(r'Output_Path(.*?)(^ +)', qstat_stdout, re.S | re.M).group(1)
-            output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '')
+            output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '').strip()
           else:
             job_list.close()
             return ('QSTAT NOT FOUND', '')
@@ -491,7 +495,7 @@ class TestHarness:
         job_list.close()
         return ('', 'LAUNCHED')
       else:
-        return ('QSTAT INVALID RESULTS', '')
+        return ('QSTAT INVALID RESULTS', output)
 
   def cleanPBSBatch(self):
     # Open the PBS batch file and assign it to a list
