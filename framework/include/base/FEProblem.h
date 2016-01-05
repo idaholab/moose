@@ -24,8 +24,6 @@
 #include "PostprocessorData.h"
 #include "VectorPostprocessorWarehouse.h"
 #include "Adaptivity.h"
-#include "IndicatorWarehouse.h"
-#include "MarkerWarehouse.h"
 #include "TransferWarehouse.h"
 #include "UserObjectWarehouse.h"
 #include "InitialConditionWarehouse.h"
@@ -58,6 +56,9 @@ class Control;
 class MultiApp;
 class TransientMultiApp;
 class ScalarInitialCondition;
+class Indicator;
+class InternalSideIndicator;
+class Marker;
 
 // libMesh forward declarations
 namespace libMesh
@@ -784,6 +785,15 @@ public:
   const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
   ///@}
 
+  ///@{
+  /**
+   * Return indicator/marker storage.
+   */
+  const MooseObjectWarehouse<Indicator> & getIndicatorWarehouse() { return _indicators; }
+  const MooseObjectWarehouse<InternalSideIndicator> & getInternalSideIndicatorWarehouse() { return _internal_side_indicators; }
+  const MooseObjectWarehouse<Marker> & getMarkerWarehouse() { return _markers; }
+  ///@}
+
   /**
    * Return InitialCondition storage
    */
@@ -950,7 +960,7 @@ public:
   /**
    * Reference to the control logic warehouse.
    */
-  ExecuteMooseObjectWarehouse<Control> & getControlWarehouse() { return _control_storage; }
+  ExecuteMooseObjectWarehouse<Control> & getControlWarehouse() { return _control_warehouse; }
 
   /**
    * Performs setup and execute calls for Control objects.
@@ -1015,11 +1025,14 @@ protected:
   // materials
   std::vector<MaterialWarehouse> _materials;
 
-  // indicators
-  std::vector<IndicatorWarehouse> _indicators;
+  ///@{
+  // Indicator Warehouses
+  MooseObjectWarehouse<Indicator> _indicators;
+  MooseObjectWarehouse<InternalSideIndicator> _internal_side_indicators;
+  ///@}
 
-  // markers
-  std::vector<MarkerWarehouse> _markers;
+  // Marker Warehouse
+  MooseObjectWarehouse<Marker> _markers;
 
   // postprocessors
   PostprocessorData _pps_data;
@@ -1133,7 +1146,7 @@ protected:
   ExecFlagType _current_execute_on_flag;
 
   /// The control logic warehouse
-  ExecuteMooseObjectWarehouse<Control> _control_storage;
+  ExecuteMooseObjectWarehouse<Control> _control_warehouse;
 
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage

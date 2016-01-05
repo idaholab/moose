@@ -53,14 +53,6 @@ Indicator::Indicator(const InputParameters & parameters) :
     _solution(_sys.solution()),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-
     _mesh(_subproblem.mesh())
-//    _dim(_mesh.dimension())
 {
 }
-
-void
-Indicator::IndicatorSetup()
-{
-}
-
