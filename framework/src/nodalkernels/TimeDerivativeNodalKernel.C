@@ -22,7 +22,7 @@ InputParameters validParams<TimeDerivativeNodalKernel>()
 }
 
 TimeDerivativeNodalKernel::TimeDerivativeNodalKernel(const InputParameters & parameters) :
-    NodalKernel(parameters)
+    TimeNodalKernel(parameters)
 {
 }
 
