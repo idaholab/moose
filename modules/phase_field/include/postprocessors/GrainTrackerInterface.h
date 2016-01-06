@@ -8,7 +8,13 @@
 #ifndef GRAINTRACKERINTERFACE_H
 #define GRAINTRACKERINTERFACE_H
 
+#include "InputParameters.h"
+
+// Forward declarations
 class GrainTrackerInterface;
+
+template<>
+InputParameters validParams<GrainTrackerInterface>();
 
 /**
  * This class is a fake grain tracker object, it will not actually track grains nor remap them
