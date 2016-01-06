@@ -136,7 +136,6 @@
 []
 
 [Outputs]
-  file_base = random_2D
   exodus = true
   csv = true
   [./console]
