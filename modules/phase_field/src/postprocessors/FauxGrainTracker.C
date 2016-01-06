@@ -11,25 +11,9 @@
 template<>
 InputParameters validParams<FauxGrainTracker>()
 {
-  InputParameters params = validParams<FeatureFloodCount>();
+  InputParameters params = validParams<GrainTrackerInterface>();
   params.addClassDescription("Fake grain tracker object for cases where the number of grains is equal to the number of order parameters.");
-  params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
 
-
-  // Ignored parameters (Here to support the same interface for GrainTracker)
-  params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine"
-                                                   "when features intersect");
-  params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
-  params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
-                                                  "hold the active order parameter information"
-                                                  "should be populated or not");
-  params.addParam<bool>("center_of_mass_tracking", false, "Indicates whether the grain tracker uses bounding sphere centers"
-                                                          "or center of mass calculations for tracking grains");
-  params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
-
-  params.addRequiredCoupledVarWithAutoBuild("variable", "var_name_base", "op_num", "Array of coupled variables");
-
-  params.suppressParameter<std::vector<VariableName> >("variable");
   return params;
 }
 
@@ -90,8 +74,8 @@ FauxGrainTracker::initialize()
 void
 FauxGrainTracker::execute()
 {
-  const MeshBase::element_iterator end = _mesh.getMesh().active_elements_end();
-  for (MeshBase::element_iterator el = _mesh.getMesh().active_elements_begin(); el != end; ++el)
+  const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
+  for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
     const Elem * current_elem = *el;
 
