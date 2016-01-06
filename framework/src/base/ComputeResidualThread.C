@@ -62,32 +62,11 @@ ComputeResidualThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
+  // Update variable Dependencies
   std::set<MooseVariable *> needed_moose_vars;
-
-  // Kernel Dependencies
-  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
-  {
-      const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
-      for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-      {
-        const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-        needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-      }
-  }
-
-  // BoundaryCondition Dependencies
+  _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
-
-  // DGKernel Dependencies
-  if (_dg_kernels.hasActiveObjects(_tid))
-  {
-    const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
-    for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
-    {
-      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-  }
+  _dg_kernels.updateVariableDependency(needed_moose_vars, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
@@ -101,25 +80,25 @@ ComputeResidualThread::onElement(const Elem *elem)
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
 
-  const MooseObjectWarehouse<KernelBase> * storage;
+  const MooseObjectWarehouse<KernelBase> * warehouse;
   switch (_kernel_type)
   {
   case Moose::KT_ALL:
-    storage = &_kernels;
+    warehouse = &_kernels;
     break;
 
   case Moose::KT_TIME:
-    storage = &_time_kernels;
+    warehouse = &_time_kernels;
     break;
 
   case Moose::KT_NONTIME:
-    storage = &_non_time_kernels;
+    warehouse = &_non_time_kernels;
     break;
   }
 
-  if (storage->hasActiveBlockObjects(_subdomain, _tid))
+  if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<KernelBase> > & kernels = storage->getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<MooseSharedPointer<KernelBase> > & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
     for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
       (*it)->computeResidual();
   }

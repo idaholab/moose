@@ -86,18 +86,16 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeJacobianThread::computeInternalFaceJacobian()
 {
-  if (_dg_kernels.hasActiveObjects(_tid));
+  // No need to call hasActiveObjects, this is done in the calling method (see onInternalSide)
+  const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
+  for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
   {
-    const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
-    for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
+    MooseSharedPointer<DGKernel> dg = *it;
+    if (dg->isImplicit())
     {
-      MooseSharedPointer<DGKernel> dg = *it;
-      if (dg->isImplicit())
-      {
-        dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
-        dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
-        dg->computeJacobian();
-      }
+      dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
+      dg->subProblem().prepareNeighborShapes(dg->variable().number(), _tid);
+      dg->computeJacobian();
     }
   }
 }
@@ -107,32 +105,11 @@ ComputeJacobianThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
+  // Update variable Dependencies
   std::set<MooseVariable *> needed_moose_vars;
-
-  // Kernels Dependencies
-  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
-  {
-    const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
-    for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-  }
-
-  // BoundaryCondition Dependencies
-  _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars);
-
-  // DGKernel Dependencies
-  if (_dg_kernels.hasActiveObjects(_tid));
-  {
-    const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
-    for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
-    {
-      const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-  }
+  _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
+  _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
+  _dg_kernels.updateVariableDependency(needed_moose_vars, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);

@@ -105,7 +105,7 @@ public:
    * Update variable dependency vector.
    */
   void updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
-  void updateBlockVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
+  void updateBlockVariableDependency(SubdomainID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   void updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   ///@}
 
@@ -503,14 +503,10 @@ MooseObjectWarehouseBase<T>::updateVariableDependency(std::set<MooseVariable *> 
 
 template<typename T>
 void
-MooseObjectWarehouseBase<T>::updateBlockVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBlockVariableDependency(SubdomainID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
 {
-  if (hasActiveBlockObjects(tid))
-  {
-    typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
-    for (it = _active_block_objects[tid].begin(); it != _active_block_objects[tid].end(); ++it)
-      updateVariableDependencyHelper(needed_moose_vars, it->second);
-  }
+  if (hasActiveBlockObjects(id, tid))
+    updateVariableDependencyHelper(needed_moose_vars, getActiveBlockObjects(id, tid));
 }
 
 
