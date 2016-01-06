@@ -38,7 +38,7 @@ public:
   virtual void execute();
 
   /**
-   * Accessor for retrieving nodal field information (unique grains or variable indicies)
+   * Accessor for retrieving nodal field information (unique grains or variable indices)
    * @param node_id the node identifier for which to retrieve field data
    * @param var_idx when using multi-map mode, the map number from which to retrieve data.
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information

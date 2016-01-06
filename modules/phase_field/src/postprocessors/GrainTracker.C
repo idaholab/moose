@@ -69,22 +69,8 @@ template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo
 template<>
 InputParameters validParams<GrainTracker>()
 {
-  InputParameters params = validParams<FeatureFloodCount>();
-  params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
-  params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine"
-                                                   "when features intersect");
-  params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
-  params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
-                                                  "hold the active order parameter information"
-                                                  "should be populated or not");
-  params.addParam<bool>("center_of_mass_tracking", false, "Indicates whether the grain tracker uses bounding sphere centers"
-                                                          "or center of mass calcuations for tracking grains");
-  params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
-
-  params.addRequiredCoupledVarWithAutoBuild("variable", "var_name_base", "op_num", "Array of coupled variables");
-
-  // We are using "addV" to add the variable parameter on the fly
-  params.suppressParameter<std::vector<VariableName> >("variable");
+  InputParameters params = validParams<GrainTrackerInterface>();
+  params.addClassDescription("Grain Tracker object for running reduced order parameter simulations without grain coalescence.");
 
   return params;
 }
