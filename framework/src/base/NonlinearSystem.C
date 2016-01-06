@@ -1782,7 +1782,6 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
   // Compute the diagonal block for scalar variables
   if (_scalar_kernels.hasActiveObjects())
   {
-    const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(/*tid=*/0);
     const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getActiveObjects();
 
     _fe_problem.reinitScalars(/*tid=*/0);
