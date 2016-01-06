@@ -32,7 +32,7 @@ class PeridynamicsMesh : public MooseMesh
 {
 public:
   PeridynamicsMesh(const InputParameters & parameters);
-  PeridynamicsMesh(const PeridynamicsMesh & other_mesh);
+  
   virtual ~PeridynamicsMesh();
 
   virtual MooseMesh & clone() const;
@@ -40,10 +40,12 @@ public:
   virtual void buildMesh();
 
 protected:
-  /// The dimension of the mesh
+  // The dimension of the mesh
   MooseEnum _dim;
-  /// Number of elements in x, y, z direction
-  int _nx, _ny, _nz, _nr, _shape;
+  // Number of elements in x, y, z, R direction
+ int _nx, ny, nz, _shape;
+  // domain size in x, y, z, R direction
+  double _xmin, _ymin, _zmin, _xmax, _ymax, _zmax, _R, MeshSpacing, Horizon; 
 };
 
 #endif /* PERIDYNAMICSMESH_H */

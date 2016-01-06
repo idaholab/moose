@@ -20,30 +20,28 @@ InputParameters validParams<StressDivergenceTrussPD>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
-
   params.set<bool>("use_displaced_mesh") = true;
-
   return params;
 }
 
 
 StressDivergenceTrussPD::StressDivergenceTrussPD(const InputParameters & parameters)
   :Kernel(parameters),
-   _axial_force(getMaterialProperty<Real>("axial_force" + getParam<std::string>("appended_property_name"))),
-   _stiff_elem(getMaterialProperty<Real>("stiff_elem" + getParam<std::string>("appended_property_name"))),
-   _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
-   _bond_status_old(getMaterialPropertyOld<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
-   _bond_stretch(getMaterialProperty<Real>("bond_stretch" + getParam<std::string>("appended_property_name"))),
-   _component(getParam<unsigned int>("component")),
-   _xdisp_coupled(isCoupled("disp_x")),
-   _ydisp_coupled(isCoupled("disp_y")),
-   _zdisp_coupled(isCoupled("disp_z")),
-   _temp_coupled(isCoupled("temp")),
-   _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
-   _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
-   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
-   _temp_var(_temp_coupled ? coupled("temp") : 0),
-   _orientation(NULL)
+  _axial_force(getMaterialProperty<Real>("axial_force" + getParam<std::string>("appended_property_name"))),
+  _stiff_elem(getMaterialProperty<Real>("stiff_elem" + getParam<std::string>("appended_property_name"))),
+  _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
+  _bond_status_old(getMaterialPropertyOld<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
+  _bond_stretch(getMaterialProperty<Real>("bond_stretch" + getParam<std::string>("appended_property_name"))),
+  _component(getParam<unsigned int>("component")),
+  _xdisp_coupled(isCoupled("disp_x")),
+  _ydisp_coupled(isCoupled("disp_y")),
+  _zdisp_coupled(isCoupled("disp_z")),
+  _temp_coupled(isCoupled("temp")),
+  _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
+  _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
+  _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+  _temp_var(_temp_coupled ? coupled("temp") : 0),
+  _orientation(NULL)
 {
 }
 
@@ -68,13 +66,13 @@ StressDivergenceTrussPD::computeResidual()
   int sign(-_test[0][0]/std::abs(_test[0][0]));
   _local_re(0) = sign * force_local(_component);
   _local_re(1) = -_local_re(0);
-
+	
   re += _local_re;
 
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
@@ -86,21 +84,20 @@ StressDivergenceTrussPD::computeStiffness(ColumnMajorMatrix & stiff_global)
   orientation /= orientation.size();
 
   Real k = _stiff_elem[0]*_bond_status_old[0];
-  stiff_global(0,0) = (orientation(0)*orientation(0) + _bond_stretch[0])*k;
+  stiff_global(0,0) = orientation(0)*orientation(0)*k;
   stiff_global(0,1) = orientation(0)*orientation(1)*k;
   stiff_global(0,2) = orientation(0)*orientation(2)*k;
   stiff_global(1,0) = orientation(1)*orientation(0)*k;
-  stiff_global(1,1) = (orientation(1)*orientation(1) + _bond_stretch[0])*k;
+  stiff_global(1,1) = orientation(1)*orientation(1)*k;
   stiff_global(1,2) = orientation(1)*orientation(2)*k;
   stiff_global(2,0) = orientation(2)*orientation(0)*k;
   stiff_global(2,1) = orientation(2)*orientation(1)*k;
-  stiff_global(2,2) = (orientation(2)*orientation(2) + _bond_stretch[0])*k;
+  stiff_global(2,2) = orientation(2)*orientation(2)*k;
 }
 
 void
 StressDivergenceTrussPD::computeJacobian()
 {
-
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
@@ -114,7 +111,7 @@ StressDivergenceTrussPD::computeJacobian()
     {
       int sign( _i == _j ? 1 : -1 );
       _local_ke(_i, _j) += sign * stiff_global(_component, _component);
-    }
+    }	
   }
 
   ke += _local_ke;
@@ -123,12 +120,12 @@ StressDivergenceTrussPD::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
+    for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i,i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i=0; i<_diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+    _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
 
@@ -142,9 +139,7 @@ StressDivergenceTrussPD::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     unsigned int coupled_component = 0;
-
     bool active(false);
-
     if ( _xdisp_coupled && jvar == _xdisp_var )
     {
       coupled_component = 0;
@@ -167,10 +162,9 @@ StressDivergenceTrussPD::computeOffDiagJacobian(unsigned int jvar)
     {
       ColumnMajorMatrix stiff_global(3,3);
       computeStiffness( stiff_global );
-
-      for (_i=0; _i<_test.size(); _i++)
+      for (_i = 0; _i < _test.size(); _i++)
       {
-        for (_j=0; _j<_phi.size(); _j++)
+        for (_j = 0; _j < _phi.size(); _j++)
         {
           int sign( _i == _j ? 1 : -1 );
           ke(_i,_j) += sign * stiff_global(_component, coupled_component);
@@ -180,5 +174,5 @@ StressDivergenceTrussPD::computeOffDiagJacobian(unsigned int jvar)
     else if ( false ) // Need some code here for coupling with temperature
     {
     }
-  }
+  }	
 }
