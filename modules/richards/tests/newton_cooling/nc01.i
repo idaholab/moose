@@ -127,6 +127,6 @@
 [Outputs]
   file_base = nc01
   interval = 100000
-  execute_on = 'timestep_end final'
+  execute_on = 'initial final'
   exodus = true
 []
