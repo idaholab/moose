@@ -221,6 +221,7 @@ namespace Moose
     case EXEC_FINAL:          return "FINAL";
     case EXEC_FORCED:         return "FORCED";
     case EXEC_FAILED:         return "FAILED";
+    case EXEC_SUBDOMAIN:      return "SUBDOMAIN";
     case EXEC_NONE:           return "NONE";
     }
     return "";
