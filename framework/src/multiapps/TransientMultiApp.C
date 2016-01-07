@@ -73,6 +73,10 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters):
   // Transfer interpolation only makes sense for sub-cycling solves
   if (_interpolate_transfers && !_sub_cycling)
     mooseError("MultiApp " << name() << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
+
+  // Subcycling overrides catch up, we don't want to confuse users by allowing them to set both.
+  if (_sub_cycling && _catch_up)
+    mooseError("MultiApp " << name() << " sub_cycling and catch_up cannot both be set to true simultaneously.");
 }
 
 TransientMultiApp::~TransientMultiApp()
