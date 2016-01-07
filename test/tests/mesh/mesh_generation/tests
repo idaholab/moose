@@ -4,4 +4,12 @@
     input = 'mesh_generation_test.i'
     exodiff = 'out.e'
   [../]
+
+  [./mesh_bias]
+    type = 'Exodiff'
+    input = 'mesh_bias.i'
+    cli_args = '--mesh-only'
+    exodiff = 'mesh_bias_in.e'
+    recover = false
+  [../]
 []
