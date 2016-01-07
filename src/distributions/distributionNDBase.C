@@ -168,15 +168,15 @@ std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & 
 }
 
 double returnUpperBound(BasicDistributionND & dist, int dimension){
-	  /**
-	   * this function returns the upper bound of the distribution for a particular dimension
-	   */
+  /**
+   * this function returns the upper bound of the distribution for a particular dimension
+   */
   return dist.returnUpperBound(dimension);
 }
 
 double returnLowerBound(BasicDistributionND & dist, int dimension){
-	  /**
-	   * this function returns the upper lower of the distribution for a particular dimension
-	   */
+   /**
+    * this function returns the upper lower of the distribution for a particular dimension
+    */
   return dist.returnLowerBound(dimension);
 }
