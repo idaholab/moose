@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Material.h"
 #include "SubProblem.h"
 #include "MaterialData.h"
@@ -62,7 +63,7 @@ Material::Material(const InputParameters & parameters) :
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
 
-    // The false flag disables the automatic call  buildOutputVariableHideList;
+    // The false flag disables the automatic call buildOutputVariableHideList;
     // for Material objects the hide lists are handled by MaterialOutputAction
     OutputInterface(parameters, false),
     RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
@@ -92,10 +93,6 @@ Material::Material(const InputParameters & parameters) :
 
   // Update the MaterialData pointer in BlockRestrictable to use the correct MaterialData object
   _blk_material_data = &_material_data;
-}
-
-Material::~Material()
-{
 }
 
 void
@@ -192,8 +189,8 @@ Material::getOutputs()
 bool
 Material::hasBlockMaterialPropertyHelper(const std::string & name)
 {
-  // Reference to MaterialWarehouse for testing and retrieving block ids
-  MaterialWarehouse & material_warehouse = _fe_problem.getMaterialWarehouse(_tid);
+  // Pointer to a constant warehouse object
+  const MooseObjectWarehouse<Material> * warehouse = NULL;
 
   // Complete set of ids that this object is active
   const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
@@ -202,24 +199,13 @@ Material::hasBlockMaterialPropertyHelper(const std::string & name)
   bool neighbor = getParam<bool>("_neighbor");
   bool bnd = getParam<bool>("_bnd");
 
-  // Define function pointers to the correct has/get methods for the type of material
-  bool(MaterialWarehouse::*has_func)(SubdomainID) const;
-  std::vector<Material *> & (MaterialWarehouse::*get_func)(SubdomainID);
+  // Set the warehouse to be used based on the type of Material
   if (bnd && neighbor)
-  {
-    has_func = &MaterialWarehouse::hasNeighborMaterials;
-    get_func = &MaterialWarehouse::getNeighborMaterials;
-  }
+    warehouse = &_fe_problem.getNeighborMaterialWarehouse();
   else if (bnd && !neighbor)
-  {
-    has_func = &MaterialWarehouse::hasFaceMaterials;
-    get_func = &MaterialWarehouse::getFaceMaterials;
-  }
+    warehouse = &_fe_problem.getFaceMaterialWarehouse();
   else
-  {
-    has_func = &MaterialWarehouse::hasMaterials;
-    get_func = &MaterialWarehouse::getMaterials;
-  }
+    warehouse = &_fe_problem.getVolumeMaterialWarehouse();
 
   // Loop over each id for this object
   for (std::set<SubdomainID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
@@ -228,10 +214,10 @@ Material::hasBlockMaterialPropertyHelper(const std::string & name)
     std::set<std::string> declared_props;
 
     // If block materials exist, populated the set of properties that were declared
-    if ((material_warehouse.*has_func)(*id_it))
+    if (warehouse->hasActiveBlockObjects(*id_it))
     {
-      std::vector<Material *> mats = (material_warehouse.*get_func)(*id_it);
-      for (std::vector<Material *>::iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      const std::vector<MooseSharedPointer<Material> > & mats = warehouse->getActiveBlockObjects(*id_it);
+      for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
       {
         const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
         declared_props.insert(mat_props.begin(), mat_props.end());

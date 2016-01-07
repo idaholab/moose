@@ -21,13 +21,13 @@
 
 // Declare the output helper specializations
 template<>
-void MaterialOutputAction::materialOutputHelper<Real>(const std::string & material_name, Material * material);
+void MaterialOutputAction::materialOutputHelper<Real>(const std::string & material_name, MooseSharedPointer<Material> material);
 
 template<>
-void MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & material_name, Material * material);
+void MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & material_name, MooseSharedPointer<Material> material);
 
 template<>
-void MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & material_name, Material * material);
+void MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & material_name, MooseSharedPointer<Material> material);
 
 
 template<>
@@ -40,10 +40,6 @@ InputParameters validParams<MaterialOutputAction>()
 MaterialOutputAction::MaterialOutputAction(InputParameters params) :
     Action(params),
     _output_warehouse(_app.getOutputWarehouse())
-{
-}
-
-MaterialOutputAction::~MaterialOutputAction()
 {
 }
 
@@ -66,7 +62,11 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   _boundary_material_data = problem_ptr->getBoundaryMaterialData(0);
 
   // A complete list of all Material objects
-  std::vector<Material *> materials = problem_ptr->getMaterialWarehouse(0).all();
+  const std::vector<MooseSharedPointer<Material> > & volume_materials = problem_ptr->getVolumeMaterialWarehouse().getObjects();
+  const std::vector<MooseSharedPointer<Material> > & boundary_materials = problem_ptr->getBoundaryMaterialWarehouse().getObjects();
+  std::vector<MooseSharedPointer<Material> > materials;
+  materials.insert(materials.end(), volume_materials.begin(), volume_materials.end());
+  materials.insert(materials.end(), boundary_materials.begin(), boundary_materials.end());
 
   // Handle setting of material property output in [Outputs] sub-blocks
   // Output objects can enable material property output, the following code examines the parameters
@@ -93,7 +93,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   }
 
   // Loop through each material object
-  for (std::vector<Material *>::iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
+  for (std::vector<MooseSharedPointer<Material> >::const_iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
   {
     // Extract the names of the output objects to which the material properties will be exported
     std::set<OutputName> outputs = (*material_iter)->getOutputs();
@@ -166,7 +166,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
 
 MooseSharedPointer<MooseObjectAction>
 MaterialOutputAction::createAction(const std::string & type, const std::string & property_name,
-                                   const std::string & variable_name, Material * material)
+                                   const std::string & variable_name, MooseSharedPointer<Material> material)
 {
   // Append the list of variables to create
   _variable_names.insert(variable_name);
@@ -204,14 +204,14 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
 
 template<>
 void
-MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name, Material * material)
+MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name, MooseSharedPointer<Material> material)
 {
   _awh.addActionBlock(createAction("MaterialRealAux", property_name, property_name, material));
 }
 
 template<>
 void
-MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name, Material * material)
+MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name, MooseSharedPointer<Material> material)
 {
   char suffix[3] = {'x','y','z'};
 
@@ -229,7 +229,7 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
 
 template<>
 void
-MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & property_name, Material * material)
+MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & property_name, MooseSharedPointer<Material> material)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)

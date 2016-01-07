@@ -41,11 +41,6 @@ public:
    */
   MaterialPropertyDebugOutput(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~MaterialPropertyDebugOutput();
-
 protected:
 
   /**
@@ -65,6 +60,7 @@ protected:
    * @param materials Vector of pointers to the Material objects of interest
    */
   void printMaterialProperties(std::stringstream & output, const std::vector<Material * > & materials) const;
+  void printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<Material> > & materials) const;
 
 };
 

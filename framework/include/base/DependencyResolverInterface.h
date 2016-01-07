@@ -54,7 +54,6 @@ public:
 
   /**
    * A helper method for cyclic errors.
-   * @see MaterialWarehouse
    */
   template<typename T>
   static

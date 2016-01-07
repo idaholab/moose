@@ -461,7 +461,7 @@ SolidModel::modifyStrainIncrement()
   const SubdomainID current_block = _current_elem->subdomain_id();
   if (_constitutive_active)
   {
-    ConstitutiveModel * cm = _constitutive_model[current_block];
+    MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];
 
     // Let's be a little careful and check for a non-existent
     // ConstitutiveModel, which could be returned as a default value
@@ -543,7 +543,7 @@ SolidModel::applyVolumetricStrain()
 {
   const Real V0Vold = 1/_element->volumeRatioOld(_qp);
   const SubdomainID current_block = _current_elem->subdomain_id();
-  const std::vector<VolumetricModel*> & vm( _volumetric_models[current_block] );
+  const std::vector<MooseSharedPointer<VolumetricModel> > & vm( _volumetric_models[current_block] );
   for (unsigned int i(0); i < vm.size(); ++i)
   {
     vm[i]->modifyStrain(_qp, V0Vold, _strain_increment, _d_strain_dT);
@@ -742,7 +742,7 @@ SolidModel::computeConstitutiveModelStress()
   if (_t_step == 0) return;
 
   const SubdomainID current_block = _current_elem->subdomain_id();
-  ConstitutiveModel* cm = _constitutive_model[current_block];
+  MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];
 
   mooseAssert(_constitutive_active, "Logic error.  ConstitutiveModel not active.");
 
@@ -791,7 +791,7 @@ SolidModel::updateElasticityTensor(SymmElasticityTensor & tensor)
   if (_constitutive_active)
   {
     const SubdomainID current_block = _current_elem->subdomain_id();
-    ConstitutiveModel* cm = _constitutive_model[current_block];
+    MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];
 
     // Let's be a little careful and check for a non-existent
     // ConstitutiveModel, which could be returned as a default value
@@ -857,20 +857,23 @@ SolidModel::initialSetup()
   for (unsigned i(0); i < _block_id.size(); ++i)
   {
 
-    const std::vector<Material*> * mats_p;
+//    const std::vector<Material*> * mats_p;
+    std::vector<MooseSharedPointer<Material> > const * mats_p;
     std::string suffix;
     if (_bnd)
     {
-      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getFaceMaterials( _block_id[i] );
+      mats_p = &_fe_problem.getFaceMaterialWarehouse().getActiveBlockObjects(_block_id[i], _tid);
       suffix = "_face";
     }
     else
-      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getMaterials( _block_id[i] );
+      mats_p = &_fe_problem.getVolumeMaterialWarehouse().getActiveBlockObjects(_block_id[i], _tid);
 
-    const std::vector<Material*> & mats = *mats_p;
+
+    const std::vector<MooseSharedPointer<Material> > & mats = *mats_p;
+
     for (unsigned int j=0; j < mats.size(); ++j)
     {
-      VolumetricModel * vm(dynamic_cast<VolumetricModel*>(mats[j]));
+      MooseSharedPointer<VolumetricModel> vm = MooseSharedNamespace::dynamic_pointer_cast<VolumetricModel>(mats[j]);
       if (vm)
       {
         const std::vector<std::string> & dep_matl_props = vm->getDependentMaterialProperties();
@@ -887,7 +890,7 @@ SolidModel::initialSetup()
       }
     }
 
-    for (std::map<SubdomainID, ConstitutiveModel*>::iterator iter=_constitutive_model.begin(); iter != _constitutive_model.end(); ++iter)
+    for (std::map<SubdomainID, MooseSharedPointer<ConstitutiveModel> >::iterator iter=_constitutive_model.begin(); iter != _constitutive_model.end(); ++iter)
     {
       iter->second->initialSetup();
     }
@@ -899,7 +902,7 @@ SolidModel::initialSetup()
 
       for (unsigned int j=0; j < mats.size(); ++j)
       {
-        ConstitutiveModel * cm = dynamic_cast<ConstitutiveModel*>(mats[j]);
+        MooseSharedPointer<ConstitutiveModel> cm = MooseSharedNamespace::dynamic_pointer_cast<ConstitutiveModel>(mats[j]);
 
         if (cm && cm->name() ==constitutive_model)
         {
@@ -1496,7 +1499,7 @@ SolidModel::createConstitutiveModel(const std::string & cm_name)
   _constitutive_active = true;
   for (unsigned i(0); i < _block_id.size(); ++i)
   {
-    _constitutive_model[_block_id[i]] = cm.get();
+    _constitutive_model[_block_id[i]] = cm;
   }
 
 }
@@ -1511,7 +1514,7 @@ SolidModel::initStatefulProperties(unsigned n_points)
   if (_constitutive_active)
   {
     const SubdomainID current_block = _current_elem->subdomain_id();
-    ConstitutiveModel* cm = _constitutive_model[current_block];
+    MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];
     cm->initStatefulProperties( n_points );
   }
 }

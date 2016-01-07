@@ -115,9 +115,6 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
-    unsigned int subdomain = elem->subdomain_id();
-    if (subdomain != _subdomain)
-      _fe_problem.subdomainSetupSide(subdomain, _tid);
 
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);

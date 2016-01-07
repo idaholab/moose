@@ -850,10 +850,10 @@ void NonlinearSystem::setPredictor(MooseSharedPointer<Predictor> predictor)
 }
 
 void
-NonlinearSystem::subdomainSetup(unsigned int /*subdomain*/, THREAD_ID tid)
+NonlinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
-  _kernels.subdomainSetup(tid);
-  _dampers.subdomainSetup(tid);
+  _kernels.subdomainSetup(subdomain, tid);
+  _dampers.subdomainSetup(subdomain, tid);
 }
 
 NumericVector<Number> &

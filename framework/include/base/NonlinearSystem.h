@@ -272,7 +272,7 @@ public:
    * @param subdomain ID of the new subdomain
    * @param tid Thread ID
    */
-  virtual void subdomainSetup(unsigned int subdomain, THREAD_ID tid);
+  virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
   virtual void setSolution(const NumericVector<Number> & soln);
 

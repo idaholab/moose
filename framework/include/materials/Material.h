@@ -82,8 +82,6 @@ class Material :
 public:
   Material(const InputParameters & parameters);
 
-  virtual ~Material();
-
   /**
    * All materials must override this virtual.
    * This is where they fill up the vectors with values.

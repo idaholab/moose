@@ -138,9 +138,6 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
-    if (_subdomain != _old_subdomain)
-      _fe_problem.subdomainSetupSide(_subdomain, _tid);
-
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
