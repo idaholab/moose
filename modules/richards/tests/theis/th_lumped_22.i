@@ -187,9 +187,9 @@
   [./usual]
     type = SMP
     full = true
-    petsc_options = '-snes_converged_reason'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-6 1E-10 10000 30'
+    petsc_options = '-snes_converged_reason -ksp_diagonal_scale -ksp_diagonal_scale_fix -ksp_gmres_modifiedgramschmidt -snes_linesearch_monitor'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol -snes_max_it -ksp_rtol -ksp_atol'
+    petsc_options_value = 'gmres      asm      lu           NONZERO                   2               2E-7 1E-10 20 1E-10 1E-100'
   [../]
 []
 
