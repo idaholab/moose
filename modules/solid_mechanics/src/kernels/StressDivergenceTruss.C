@@ -83,18 +83,21 @@ void
 StressDivergenceTruss::computeStiffness(ColumnMajorMatrix & stiff_global)
 {
   RealGradient orientation( (*_orientation)[0] );
+  Real dist = 2.0 * orientation.size(); //orientation.size() only gives half of the actual distance between two nodes
   orientation /= orientation.size();
-
+  
+  //the effect of truss orientation change has been accounted for
+  
   Real k = _E_over_L[0] * _area[0];
-  stiff_global(0,0) = orientation(0)*orientation(0)*k;
-  stiff_global(0,1) = orientation(0)*orientation(1)*k;
-  stiff_global(0,2) = orientation(0)*orientation(2)*k;
-  stiff_global(1,0) = orientation(1)*orientation(0)*k;
-  stiff_global(1,1) = orientation(1)*orientation(1)*k;
-  stiff_global(1,2) = orientation(1)*orientation(2)*k;
-  stiff_global(2,0) = orientation(2)*orientation(0)*k;
-  stiff_global(2,1) = orientation(2)*orientation(1)*k;
-  stiff_global(2,2) = orientation(2)*orientation(2)*k;
+  stiff_global(0,0) = orientation(0) * orientation(0) * k + _axial_stress[0] * _area[0] * (1.0 - orientation(0) * orientation(0)) / dist;
+  stiff_global(0,1) = orientation(0) * orientation(1) * k - _axial_stress[0] * _area[0] * orientation(0) * orientation(1)/dist;
+  stiff_global(0,2) = orientation(0) * orientation(2) * k - _axial_stress[0] * _area[0] * orientation(0) * orientation(2)/dist;
+  stiff_global(1,0) = orientation(1) * orientation(0) * k - _axial_stress[0] * _area[0] * orientation(1) * orientation(0)/dist;
+  stiff_global(1,1) = orientation(1) * orientation(1) * k + _axial_stress[0] * _area[0] * (1.0 - orientation(1) * orientation(1)) / dist;
+  stiff_global(1,2) = orientation(1) * orientation(2) * k - _axial_stress[0] * _area[0] * orientation(1) * orientation(2)/dist;
+  stiff_global(2,0) = orientation(2) * orientation(0) * k - _axial_stress[0] * _area[0] * orientation(2) * orientation(0)/dist;
+  stiff_global(2,1) = orientation(2) * orientation(1) * k - _axial_stress[0] * _area[0] * orientation(2) * orientation(1)/dist;
+  stiff_global(2,2) = orientation(2) * orientation(2) * k + _axial_stress[0] * _area[0] * (1.0 - orientation(2) * orientation(2)) / dist;
 }
 
 void
