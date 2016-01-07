@@ -18,7 +18,7 @@ InputParameters validParams<ACGrGrPolyStoredEnergy>();
 
 /**
  * This kernel adds the residual contribution for stored (dislocation) energy
- * in a polycrystaline system.
+ * in a polycrystaline system. The free nergy term is \f$ E_{\text{stored}}(3\eta^2 - 2\eta^3) \f$
  */
 class ACGrGrPolyStoredEnergy : public ACBulk
 {

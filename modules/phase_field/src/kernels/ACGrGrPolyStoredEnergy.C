@@ -28,26 +28,27 @@ ACGrGrPolyStoredEnergy::ACGrGrPolyStoredEnergy(const InputParameters & parameter
 Real
 ACGrGrPolyStoredEnergy::computeDFDOP(PFFunctionType type)
 {
-  // Calculate either the residual or Jacobian of the stored energy
-  switch (type)
-  {
-    case Residual:
-    {
-      // ID of unique grain at current point and look up stored energy
-      const std::vector<std::pair<unsigned int, unsigned int> > & grains = _grain_tracker.getElementalValues(_current_elem->id());
-      for (unsigned int i = 0; i < grains.size(); ++i)
-        if (grains[i].second == _op_index)
-          return _stored_energy[grains[i].first];
+  // both residual and Jacobian are zero outside of the [0:1] range
+  if (_u[_qp] <= 0.0 || _u[_qp] >= 1.0)
+    return 0.0;
 
-      return 0.0;
-    }
+  // ID of unique grain at current point and look up stored energy
+  const std::vector<std::pair<unsigned int, unsigned int> > & grains = _grain_tracker.getElementalValues(_current_elem->id());
+  for (unsigned int i = 0; i < grains.size(); ++i)
+    if (grains[i].second == _op_index)
+      switch (type)
+      {
+        case Residual:
+          return 6.0 * _stored_energy[grains[i].first] * _u[_qp] * (1.0 - _u[_qp]);
 
-    case Jacobian:
-      return 0.0;
+        case Jacobian:
+          return 6.0 * _stored_energy[grains[i].first] * (1.0 - 2.0 * _u[_qp]);
 
-    default:
-      mooseError("Invalid type passed in");
-  }
+        default:
+          mooseError("Invalid type passed in");
+      }
+
+  return 0.0;
 }
 
 Real
