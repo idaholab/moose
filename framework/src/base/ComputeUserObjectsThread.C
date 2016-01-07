@@ -16,6 +16,7 @@
 #include "Problem.h"
 #include "SystemBase.h"
 #include "ElementUserObject.h"
+#include "ShapeElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
@@ -68,6 +69,31 @@ ComputeUserObjectsThread::subdomainChanged()
       const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
+  }
+
+  // ShapeElementUserObject requested Jacobian variables
+  {
+    std::set<MooseVariable *> jacobian_moose_vars;
+
+    // Get the vectors of element user object pointers
+    const std::vector<ShapeElementUserObject *> global = _user_objects[_tid].shapeElementUserObjects(Moose::ANY_BLOCK_ID, _group);
+    const std::vector<ShapeElementUserObject *> block = _user_objects[_tid].shapeElementUserObjects(_subdomain, _group);
+
+    // Global ElementUserObjects
+    for (std::vector<ShapeElementUserObject *>::const_iterator it = global.begin(); it != global.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->jacobianMooseVariables();
+      jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+
+    // Block Restricted ElementUserObjects
+    for (std::vector<ShapeElementUserObject *>::const_iterator it = block.begin(); it != block.end(); ++it)
+    {
+      const std::set<MooseVariable *> & mv_deps = (*it)->jacobianMooseVariables();
+      jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+
+    _jacobian_moose_vars.assign(jacobian_moose_vars.begin(), jacobian_moose_vars.end());
   }
 
   // InternalSideUserObject dependencies
@@ -178,6 +204,31 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
        ++UserObject_it)
     (*UserObject_it)->execute();
 
+  // UserObject Jacobians
+  if (_fe_problem.currentlyComputingJacobian())
+  {
+    // Prepare shape functions for ShapeElementUserObjects
+    for (std::vector<MooseVariable *>::const_iterator jvar_it = _jacobian_moose_vars.begin();
+         jvar_it != _jacobian_moose_vars.end();
+         ++jvar_it)
+    {
+      unsigned int jvar = (*jvar_it)->number();
+      std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
+
+      _fe_problem.prepareShapes(jvar, _tid);
+
+      for (std::vector<ShapeElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].shapeElementUserObjects(Moose::ANY_BLOCK_ID, _group).begin();
+           UserObject_it != _user_objects[_tid].shapeElementUserObjects(Moose::ANY_BLOCK_ID, _group).end();
+           ++UserObject_it)
+        (*UserObject_it)->executeJacobianWrapper(jvar, dof_indices);
+
+      for (std::vector<ShapeElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].shapeElementUserObjects(_subdomain, _group).begin();
+           UserObject_it != _user_objects[_tid].shapeElementUserObjects(_subdomain, _group).end();
+           ++UserObject_it)
+        (*UserObject_it)->executeJacobianWrapper(jvar, dof_indices);
+    }
+  }
+
   _fe_problem.swapBackMaterials(_tid);
 }
 
@@ -205,7 +256,6 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
 void
 ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-
   // Get vectors of object pointers
   const std::vector<InternalSideUserObject *> & block_uo = _user_objects[_tid].internalSideUserObjects(_subdomain, _group);
   const std::vector<InternalSideUserObject *> & global_uo = _user_objects[_tid].internalSideUserObjects(Moose::ANY_BLOCK_ID, _group);

@@ -55,6 +55,8 @@ protected:
   const NumericVector<Number>& _soln;
   std::vector<UserObjectWarehouse> & _user_objects;
   UserObjectWarehouse::GROUP _group;
+
+  std::vector<MooseVariable *> _jacobian_moose_vars;
 };
 
 #endif //COMPUTEUSEROBJECTSTHREAD_H

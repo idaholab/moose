@@ -90,6 +90,7 @@
 #include "FluxAverageAux.h"
 #include "OldMaterialAux.h"
 #include "DotCouplingAux.h"
+#include "ExampleShapeElementKernel.h"
 
 #include "MTBC.h"
 #include "PolyCoupledDirichletBC.h"
@@ -164,6 +165,8 @@
 #include "BoundaryUserObject.h"
 #include "TestBoundaryRestrictableAssert.h"
 #include "GetMaterialPropertyBoundaryBlockNamesTest.h"
+#include "TestShapeElementUserObject.h"
+#include "ExampleShapeElementUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -317,6 +320,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(WrongJacobianDiffusion);
   registerKernel(DefaultMatPropConsumerKernel);
   registerKernel(DoNotCopyParametersKernel);
+  registerKernel(ExampleShapeElementKernel);
 
   // Aux kernels
   registerAux(CoupledAux);
@@ -435,6 +439,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(BoundaryUserObject);
   registerUserObject(TestBoundaryRestrictableAssert);
   registerUserObject(GetMaterialPropertyBoundaryBlockNamesTest);
+  registerUserObject(TestShapeElementUserObject);
+  registerUserObject(ExampleShapeElementUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
