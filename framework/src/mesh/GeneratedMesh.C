@@ -22,6 +22,9 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/periodic_boundary_base.h"
 
+// C++ includes
+#include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
+
 template<>
 InputParameters validParams<GeneratedMesh>()
 {
@@ -43,6 +46,10 @@ InputParameters validParams<GeneratedMesh>()
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
   params.addParam<MooseEnum>("elem_type", elem_types, "The type of element from libMesh to generate (default: linear element for requested dimension)");
 
+  params.addRangeCheckedParam<Real>("bias_x", 1., "bias_x>=0.5 & bias_x<=2", "The amount by which to grow (or shrink) the cells in the x-direction.");
+  params.addRangeCheckedParam<Real>("bias_y", 1., "bias_y>=0.5 & bias_y<=2", "The amount by which to grow (or shrink) the cells in the y-direction.");
+  params.addRangeCheckedParam<Real>("bias_z", 1., "bias_z>=0.5 & bias_z<=2", "The amount by which to grow (or shrink) the cells in the z-direction.");
+
   params.addParamNamesToGroup("dim", "Main");
 
   return params;
@@ -59,7 +66,10 @@ GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
     _ymin(getParam<Real>("ymin")),
     _ymax(getParam<Real>("ymax")),
     _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax"))
+    _zmax(getParam<Real>("zmax")),
+    _bias_x(getParam<Real>("bias_x")),
+    _bias_y(getParam<Real>("bias_y")),
+    _bias_z(getParam<Real>("bias_z"))
 {
 }
 
@@ -74,7 +84,10 @@ GeneratedMesh::GeneratedMesh(const GeneratedMesh & other_mesh) :
     _ymin(getParam<Real>("ymin")),
     _ymax(getParam<Real>("ymax")),
     _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax"))
+    _zmax(getParam<Real>("zmax")),
+    _bias_x(getParam<Real>("bias_x")),
+    _bias_y(getParam<Real>("bias_y")),
+    _bias_z(getParam<Real>("bias_z"))
 {
 }
 
@@ -132,5 +145,46 @@ GeneratedMesh::buildMesh()
                                       _zmin, _zmax,
                                       elem_type);
     break;
+  }
+
+  // Apply the bias if any exists
+  if (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0)
+  {
+    // Reference to the libmesh mesh
+    MeshBase & mesh = getMesh();
+
+    // Biases
+    Real bias[3] = {_bias_x, _bias_y, _bias_z};
+
+    // "width" of the mesh in each direction
+    Real width[3] = {_xmax - _xmin, _ymax - _ymin, _zmax - _zmin};
+
+    // Min mesh extent in each direction.
+    Real mins[3] = {_xmin, _ymin, _zmin};
+
+    // Number of elements in each direction.
+    int nelem[3] = {_nx, _ny, _nz};
+
+    // Loop over the nodes and move them to the desired location
+    MeshBase::node_iterator       node_it  = mesh.nodes_begin();
+    const MeshBase::node_iterator node_end = mesh.nodes_end();
+
+    for ( ; node_it != node_end; ++node_it)
+    {
+      Node & node = **node_it;
+
+      for (unsigned int dir=0; dir<3; ++dir)
+      {
+        if (width[dir] != 0. && bias[dir] != 1.)
+        {
+          // What "index" we are at in the current direction.  We
+          // round to the nearest integral value to get this.
+          int index = round((node(dir) - mins[dir]) * nelem[dir] / width[dir]);
+
+          // Move node to biased location.
+          node(dir) = mins[dir] + width[dir] * (1. - std::pow(bias[dir], index)) / (1. - std::pow(bias[dir], nelem[dir]));
+        }
+      }
+    }
   }
 }
