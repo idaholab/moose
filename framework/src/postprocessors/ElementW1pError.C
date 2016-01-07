@@ -34,7 +34,8 @@ ElementW1pError::ElementW1pError(const InputParameters & parameters) :
 Real
 ElementW1pError::getValue()
 {
-  return std::pow(ElementIntegralPostprocessor::getValue(), 1./_p);
+  gatherSum(_integral_value);
+  return _scaling * std::pow(_integral_value, 1./_p);
 }
 
 Real

@@ -32,7 +32,8 @@ ElementH1SemiError::ElementH1SemiError(const InputParameters & parameters) :
 Real
 ElementH1SemiError::getValue()
 {
-  return std::sqrt(ElementIntegralVariablePostprocessor::getValue());
+  gatherSum(_integral_value);
+  return _scaling * std::sqrt(_integral_value);
 }
 
 Real

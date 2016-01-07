@@ -32,7 +32,8 @@ ElementL2Error::ElementL2Error(const InputParameters & parameters) :
 Real
 ElementL2Error::getValue()
 {
-  return std::sqrt(ElementIntegralPostprocessor::getValue());
+  gatherSum(_integral_value);
+  return _scaling * std::sqrt(_integral_value);
 }
 
 Real

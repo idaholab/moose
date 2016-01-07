@@ -43,6 +43,8 @@ protected:
   virtual Real computeQpIntegral() = 0;
   virtual Real computeIntegral();
 
+  Real _scaling;
+
   unsigned int _qp;
 
   Real _integral_value;

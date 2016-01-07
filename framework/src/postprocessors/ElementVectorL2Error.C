@@ -42,7 +42,8 @@ ElementVectorL2Error::ElementVectorL2Error(const InputParameters & parameters) :
 Real
 ElementVectorL2Error::getValue()
 {
-  return std::sqrt(ElementIntegralPostprocessor::getValue());
+  gatherSum(_integral_value);
+  return _scaling * std::sqrt(_integral_value);
 }
 
 Real
