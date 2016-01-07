@@ -534,13 +534,8 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    // Set the parameters for thread ID and material data
-    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
-
-    // Create the kernel object via the factory
+    // Create the kernel object via the factory and add to warehouse
     MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters, tid));
-
-    // Add the kernel to the warehouse
     _kernels.addObject(kernel, tid);
 
     // Store time/non-time kernels separately
@@ -549,7 +544,6 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
       _time_kernels.addObject(kernel, tid);
     else
       _non_time_kernels.addObject(kernel, tid);
-
   }
 
   if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
@@ -563,20 +557,8 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    // Create the kernel object via the factory
+    // Create the kernel object via the factory and add to the warehouse
     MooseSharedPointer<NodalKernel> kernel = MooseSharedNamespace::static_pointer_cast<NodalKernel>(_factory.create(kernel_name, name, parameters, tid));
-
-    if (kernel->boundaryRestricted())
-      std::set<BoundaryID> boundary_ids = kernel->boundaryIDs();
-    else
-    {
-      // Set the parameters for thread ID and material data
-      parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
-
-      // Extract the SubdomainIDs from the object (via BlockRestrictable class)
-      std::set<SubdomainID> blk_ids = kernel->blockIDs();
-    }
-    // Add the kernel to the warehouse
     _nodal_kernels[tid].addNodalKernel(kernel);
   }
 
@@ -676,10 +658,7 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
-
     MooseSharedPointer<DiracKernel> kernel = MooseSharedNamespace::static_pointer_cast<DiracKernel>(_factory.create(kernel_name, name, parameters, tid));
-
     _dirac_kernels.addObject(kernel, tid);
   }
 }
@@ -689,9 +668,6 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
-    parameters.set<MaterialData *>("_neighbor_material_data") = _fe_problem._neighbor_material_data[tid];
-
     MooseSharedPointer<DGKernel> dg_kernel = MooseSharedNamespace::static_pointer_cast<DGKernel>(_factory.create(dg_kernel_name, name, parameters, tid));
 
     _dg_kernels.addObject(dg_kernel, tid);
@@ -705,8 +681,6 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 {
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
-
     MooseSharedPointer<Damper> damper = MooseSharedNamespace::static_pointer_cast<Damper>(_factory.create(damper_name, name, parameters, tid));
     _dampers.addObject(damper, tid);
   }

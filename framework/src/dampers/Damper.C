@@ -24,6 +24,7 @@ template<>
 InputParameters validParams<Damper>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<MaterialPropertyInterface>();
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this damper operates on");
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("Damper");

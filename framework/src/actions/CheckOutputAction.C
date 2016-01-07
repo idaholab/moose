@@ -77,7 +77,7 @@ CheckOutputAction::checkMaterialOutput()
     return;
 
   // A complete list of all Material objects
-  const std::vector<MooseSharedPointer<Material> > & materials = _problem->getVolumeMaterialWarehouse().getActiveObjects();
+  const std::vector<MooseSharedPointer<Material> > & materials = _problem->getMaterialWarehouse(Moose::BLOCK_MATERIAL_DATA).getActiveObjects();
 
   // TODO include boundary materials
 

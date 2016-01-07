@@ -58,12 +58,12 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
 {
 
   // Set the pointers to the MaterialData objects (Note, these pointers are not available at construction)
-  _block_material_data = problem_ptr->getMaterialData(0);
-  _boundary_material_data = problem_ptr->getBoundaryMaterialData(0);
+  _block_material_data = problem_ptr->getMaterialData(Moose::BLOCK_MATERIAL_DATA);
+  _boundary_material_data = problem_ptr->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
 
   // A complete list of all Material objects
-  const std::vector<MooseSharedPointer<Material> > & volume_materials = problem_ptr->getVolumeMaterialWarehouse().getObjects();
-  const std::vector<MooseSharedPointer<Material> > & boundary_materials = problem_ptr->getBoundaryMaterialWarehouse().getObjects();
+  const std::vector<MooseSharedPointer<Material> > & volume_materials = problem_ptr->getMaterialWarehouse(Moose::BLOCK_MATERIAL_DATA).getObjects();
+  const std::vector<MooseSharedPointer<Material> > & boundary_materials = problem_ptr->getMaterialWarehouse(Moose::BOUNDARY_MATERIAL_DATA).getObjects();
   std::vector<MooseSharedPointer<Material> > materials;
   materials.insert(materials.end(), volume_materials.begin(), volume_materials.end());
   materials.insert(materials.end(), boundary_materials.begin(), boundary_materials.end());

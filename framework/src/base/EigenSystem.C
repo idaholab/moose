@@ -38,9 +38,6 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    // Set the parameters for thread ID and material data
-    parameters.set<MaterialData *>("_material_data") = _fe_problem._material_data[tid];
-
     // In the case of EigenKernels, we might need to add two to the system
     if (parameters.have_parameter<bool>("eigen"))
     {

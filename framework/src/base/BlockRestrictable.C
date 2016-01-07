@@ -79,7 +79,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
 
   // Populate the MaterialData pointer
   if (_blk_feproblem != NULL)
-    _blk_material_data = _blk_feproblem->getMaterialData(_blk_tid);
+    _blk_material_data = _blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
 
   // The 'block' input is defined
   if (parameters.isParamValid("block"))
@@ -264,7 +264,7 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
 {
 
   // Reference to MaterialWarehouse for testing and retrieving block ids
-  const MooseObjectWarehouse<Material> & volume_materials = _blk_feproblem->getVolumeMaterialWarehouse();
+  const MooseObjectWarehouse<Material> & volume_materials = _blk_feproblem->getMaterialWarehouse(Moose::BLOCK_MATERIAL_DATA);
 
   // Complete set of ids that this object is active
   const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();

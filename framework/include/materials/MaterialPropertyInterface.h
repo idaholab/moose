@@ -22,7 +22,12 @@
 #include "FEProblem.h"
 
 // Forward declarations
+class MaterialPropertyInterface;
 class InputParameters;
+
+template<>
+InputParameters validParams<MaterialPropertyInterface>();
+
 
 /**
  * \class MaterialPropertyInterface
@@ -153,6 +158,9 @@ protected:
 
   /// The name of the object that this interface belongs to
   const std::string _mi_name;
+
+  /// The type of data
+  Moose::MaterialDataType _material_data_type;
 
   /// Pointer to the material data class that stores properties
   MaterialData * _material_data;

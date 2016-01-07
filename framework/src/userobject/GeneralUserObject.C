@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<GeneralUserObject>()
 {
   InputParameters params = validParams<UserObject>();
+  params += validParams<MaterialPropertyInterface>();
   return params;
 }
 
@@ -72,4 +73,3 @@ GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorNa
   _depend_vars.insert(name);
   return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
 }
-

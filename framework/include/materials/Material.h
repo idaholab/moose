@@ -80,6 +80,8 @@ class Material :
   public RandomInterface
 {
 public:
+
+
   Material(const InputParameters & parameters);
 
   /**
@@ -180,15 +182,20 @@ public:
    */
   std::set<OutputName> getOutputs();
 
+  /**
+   * Returns true of the MaterialData type is not associated with volume data
+   */
+  bool isBoundaryMaterial() { return _bnd; }
+
 protected:
   SubProblem & _subproblem;
 
   FEProblem & _fe_problem;
   THREAD_ID _tid;
   Assembly & _assembly;
+
   bool _bnd;
   bool _neighbor;
-  MaterialData & _material_data;
 
   unsigned int _qp;
 
@@ -316,7 +323,7 @@ Material::getMaterialPropertyByName(const std::string & prop_name)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
   _fe_problem.markMatPropRequested(prop_name);
-  return _material_data.getProperty<T>(prop_name);
+  return _material_data->getProperty<T>(prop_name);
 }
 
 template<typename T>
@@ -326,7 +333,7 @@ Material::getMaterialPropertyOldByName(const std::string & prop_name)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLD);
   _fe_problem.markMatPropRequested(prop_name);
-  return _material_data.getPropertyOld<T>(prop_name);
+  return _material_data->getPropertyOld<T>(prop_name);
 }
 
 template<typename T>
@@ -336,7 +343,7 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLDER);
   _fe_problem.markMatPropRequested(prop_name);
-  return _material_data.getPropertyOlder<T>(prop_name);
+  return _material_data->getPropertyOlder<T>(prop_name);
 }
 
 
@@ -345,7 +352,7 @@ MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::CURRENT);
-  return _material_data.declareProperty<T>(prop_name);
+  return _material_data->declareProperty<T>(prop_name);
 }
 
 template<typename T>
@@ -353,7 +360,7 @@ MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::OLD);
-  return _material_data.declarePropertyOld<T>(prop_name);
+  return _material_data->declarePropertyOld<T>(prop_name);
 }
 
 template<typename T>
@@ -361,7 +368,7 @@ MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::OLDER);
-  return _material_data.declarePropertyOlder<T>(prop_name);
+  return _material_data->declarePropertyOlder<T>(prop_name);
 }
 
 template<typename T>
@@ -372,7 +379,7 @@ Material::getZeroMaterialProperty(const std::string & prop_name)
   _zero_props.insert(prop_name);
   // ...but NOT in _supplied_props (hence the is_get = true)
   registerPropName(prop_name, true, Material::CURRENT);
-  MaterialProperty<T> & preload_with_zero = _material_data.declareProperty<T>(prop_name);
+  MaterialProperty<T> & preload_with_zero = _material_data->declareProperty<T>(prop_name);
 
   // resize to accomodate maximum number of qpoints
   unsigned int nqp = _mi_feproblem.getMaxQps();

@@ -16,6 +16,15 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
 
+template<>
+InputParameters validParams<MaterialPropertyInterface>()
+{
+  InputParameters params = emptyInputParameters();
+  params.addPrivateParam<Moose::MaterialDataType>("_material_data_type"); // optionally force the type of MaterialData to utilize
+  return params;
+}
+
+
 // Standard construction
 MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters):
     _mi_name(parameters.get<std::string>("_object_name")),
@@ -73,27 +82,18 @@ MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & par
 void
 MaterialPropertyInterface::initializeMaterialPropertyInterface(const InputParameters & parameters)
 {
-  /* AuxKernels may be boundary or block restricted; however, they are built by the same action and task, add_aux_kernel.
-     The type of material data that should be stored in the interface is not known until the object is constructed. Thus,
-     the private parameter, '_material_data', cannot be set prior to the object creation. To enable the proper
-     construction of AuxKernels a secondary, construction time method for setting the _material_data pointer in this interface
-     exists. */
+  // Set the MaterialDataType flag
+  if (parameters.isParamValid("_material_data_type"))
+    _material_data_type = parameters.get<Moose::MaterialDataType>("_material_data_type");
 
-  // If the _material_data parameter exists, use it
-  if (parameters.isParamValid("_material_data"))
-    _material_data = parameters.get<MaterialData *>("_material_data");
+  else if (!_mi_boundary_ids.empty() && std::find(_mi_boundary_ids.begin(), _mi_boundary_ids.end(), Moose::ANY_BOUNDARY_ID) == _mi_boundary_ids.end())
+    _material_data_type = Moose::BOUNDARY_MATERIAL_DATA;
 
-  // If the _material_data parameter does not exist, figure it out based on the _block_ids and _boundary_ids parameters
   else
-  {
-    THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
+    _material_data_type = Moose::BLOCK_MATERIAL_DATA;
 
-    // Utilize boundary material if (1) _mi_boundary_ids is not empty and (2) it does not contain ANY_BOUNDARY_ID
-    if (!_mi_boundary_ids.empty() && std::find(_mi_boundary_ids.begin(), _mi_boundary_ids.end(), Moose::ANY_BOUNDARY_ID) == _mi_boundary_ids.end())
-      _material_data = _mi_feproblem.getBoundaryMaterialData(tid);
-    else
-      _material_data = _mi_feproblem.getMaterialData(tid);
-  }
+  // Set the pointer to the MaterialData object
+  _material_data = _mi_feproblem.getMaterialData(_material_data_type, parameters.get<THREAD_ID>("_tid"));
 }
 
 std::string

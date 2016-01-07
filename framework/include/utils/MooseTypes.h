@@ -91,6 +91,19 @@ const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
 
 /**
+ * MaterialData types
+ *
+ * @see FEProblem, MaterialPropertyInterface
+ */
+enum MaterialDataType {
+  BLOCK_MATERIAL_DATA,
+  BOUNDARY_MATERIAL_DATA,
+  FACE_MATERIAL_DATA,
+  NEIGHBOR_MATERIAL_DATA
+};
+
+
+/**
  * A static list of all the exec types.
  */
 extern const std::vector<ExecFlagType> exec_types;

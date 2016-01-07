@@ -23,6 +23,7 @@ template<>
 InputParameters validParams<ElementIndicator>()
 {
   InputParameters params = validParams<Indicator>();
+  params += validParams<MaterialPropertyInterface>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this Indicator operates on");
 
   std::vector<SubdomainName> everywhere(1, "ANY_BLOCK_ID");
@@ -65,4 +66,3 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters) :
 
   addMooseVariableDependency(mooseVariable());
 }
-

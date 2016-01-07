@@ -1594,6 +1594,47 @@ FEProblem::projectSolution()
   _aux.solution().localize(*_aux.sys().current_local_solution, _aux.dofMap().get_send_list());
 }
 
+
+MaterialData *
+FEProblem::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
+{
+  MooseSharedPointer<MaterialData> output;
+  switch (type)
+  {
+  case Moose::BLOCK_MATERIAL_DATA:
+    output = _material_data[tid];
+    break;
+  case Moose::NEIGHBOR_MATERIAL_DATA:
+    output = _neighbor_material_data[tid];
+    break;
+  case Moose::BOUNDARY_MATERIAL_DATA:
+  case Moose::FACE_MATERIAL_DATA:
+    output = _bnd_material_data[tid];
+    break;
+  }
+  return output;
+}
+
+
+const MooseObjectWarehouse<Material> &
+FEProblem::getMaterialWarehouse(Moose::MaterialDataType type)
+{
+  switch (type)
+  {
+  case Moose::BLOCK_MATERIAL_DATA:
+    return _volume_materials;
+    break;
+  case Moose::NEIGHBOR_MATERIAL_DATA:
+    return _neighbor_materials;
+    break;
+  case Moose::BOUNDARY_MATERIAL_DATA:
+    return _boundary_materials;
+  case Moose::FACE_MATERIAL_DATA:
+    return _face_materials;
+    break;
+  }
+}
+
 void
 FEProblem::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
 {
@@ -1622,33 +1663,25 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       std::string object_name;
 
       // volume material
-      parameters.set<bool>("_bnd") = false;
-      parameters.set<bool>("_neighbor") = false;
-      parameters.set<MaterialData *>("_material_data") = _material_data[tid];
+      parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::BLOCK_MATERIAL_DATA;
       MooseSharedPointer<Material> volume_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters, tid));
       _volume_materials.addObject(volume_material, tid);
 
       // face material
-      parameters.set<bool>("_bnd") = true;
-      parameters.set<bool>("_neighbor") = false;
-      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+      parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::FACE_MATERIAL_DATA;
       object_name = name + "_face";
       MooseSharedPointer<Material> face_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, parameters, tid));
       _face_materials.addObject(face_material, tid);
 
       // neighbor material
-      parameters.set<bool>("_bnd") = true;
-      parameters.set<bool>("_neighbor") = true;
-      parameters.set<MaterialData *>("_material_data") = _neighbor_material_data[tid];
+      parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::NEIGHBOR_MATERIAL_DATA;
       object_name = name + "_neighbor";
       MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, parameters, tid));
       _neighbor_materials.addObject(neighbor_material, tid);
     }
     else if (boundary_ids.size() > 0)
     {
-      parameters.set<bool>("_bnd") = true;
-      parameters.set<bool>("_neighbor") = false;
-      parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
+      parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
       MooseSharedPointer<Material> bnd_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters, tid));
       _boundary_materials.addObject(bnd_material, tid);
     }
@@ -1837,16 +1870,6 @@ FEProblem::addPostprocessor(std::string pp_name, const std::string & name, Input
 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
-    // to be otherwise
-    MaterialData * mat_data = _material_data[tid];
-    if (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
-       mat_data = _bnd_material_data[tid];
-
-    parameters.set<MaterialData *>("_material_data") = mat_data;
-    if (parameters.isParamValid("use_neighbor_material") && parameters.get<bool>("use_neighbor_material"))
-      parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
-
     MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
     if (!mo)
       mooseError("Unable to determine type for Postprocessor: " + mo->name());
@@ -1956,14 +1979,6 @@ FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name,
   {
     parameters.set<VectorPostprocessorData *>("_vector_postprocessor_data") = _vpps_data[tid];
 
-    // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
-    // to be otherwise
-    MaterialData * mat_data = _material_data[tid];
-    if (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal"))
-       mat_data = _bnd_material_data[tid];
-
-    parameters.set<MaterialData *>("_material_data") = mat_data;
-
     MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
 
     if (!mo)
@@ -2018,17 +2033,6 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    // Set a pointer to the correct material data; assume that it is a non-boundary material unless proven
-    // to be otherwise
-    MaterialData * mat_data = _material_data[tid];
-    if ((parameters.isParamValid("use_bnd_material") && parameters.get<bool>("use_bnd_material")) ||
-        (parameters.have_parameter<std::vector<BoundaryName> >("boundary") && !parameters.have_parameter<bool>("block_restricted_nodal")))
-       mat_data = _bnd_material_data[tid];
-
-    parameters.set<MaterialData *>("_material_data") = mat_data;
-    if (parameters.isParamValid("use_neighbor_material") && parameters.get<bool>("use_neighbor_material"))
-      parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
-
     MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters, tid));
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     {
@@ -2641,9 +2645,6 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<MaterialData *>("_material_data") = _bnd_material_data[tid];
-    parameters.set<MaterialData *>("_neighbor_material_data") = _neighbor_material_data[tid];
-
     MooseSharedPointer<Indicator> indicator = MooseSharedNamespace::static_pointer_cast<Indicator>(_factory.create(indicator_name, name, parameters, tid));
 
     MooseSharedPointer<InternalSideIndicator> isi = MooseSharedNamespace::dynamic_pointer_cast<InternalSideIndicator>(indicator);
