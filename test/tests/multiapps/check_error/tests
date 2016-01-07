@@ -39,4 +39,11 @@
     expect_err = 'Number of entries in \'positions_file\''
     cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions"'
   [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'sub_cycling and catch_up cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+  [../]
 []
