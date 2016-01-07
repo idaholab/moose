@@ -563,7 +563,7 @@ class TestHarness:
       else:
         color = 'GREEN'
       test_name = colorText(specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
-      output = ("\n" + test_name).join(lines)
+      output = test_name + ("\n" + test_name).join(lines)
       print output
 
       # Print result line again at the bottom of the output for failed tests

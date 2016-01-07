@@ -115,8 +115,9 @@ class RunParallel:
     log( 'Command %d done:    %s' % (job_index, command) )
     did_pass = True
 
+    output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
+    output += self.readOutput(f)
     if p.poll() == None: # process has not completed, it timed out
-      output = self.readOutput(f)
       output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
       f.close()
       os.kill(p.pid, SIGTERM)        # Python 2.4 compatibility
@@ -125,8 +126,6 @@ class RunParallel:
       if not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
     else:
-      output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
-      output += self.readOutput(f)
       f.close()
 
       if tester in self.reported_jobs:
