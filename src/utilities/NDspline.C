@@ -75,7 +75,7 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
               _cellDxs.push_back(_discretizations.at(i).at(_discretizations.at(i).size()-1)-_discretizations.at(i).at(0));
             }
 
-         for (int i=0; i<_dimensions; i++){
+         for (unsigned int i=0; i<_dimensions; i++){
              _lowerBound.push_back(_cellPoint0.at(i));
              _upperBound.push_back(_cellPoint0.at(i) + _cellDxs.at(i));
          }
@@ -335,8 +335,10 @@ double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
 
 
 void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing){
- // this function restructures a 1D vector into a 2D vector
- // example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
+    /**
+     * This function restructures a 1D vector into a 2D vector
+     * example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
+     */
 
  if (oneDdata.size()%spacing == 0)
   for (unsigned int i=0; i<oneDdata.size()/spacing; i++){
@@ -505,7 +507,6 @@ double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
                         break;
                 }
 
-        //double scaled_x = down + (x-discretizations[(int)down])/(discretizations[(int)down+1]-discretizations[(int)down]);
         double scaled_x = (double)down + (x-discretizations.at(down))/(discretizations.at(down+1)-discretizations.at(down));
 
         double a = 0.0;

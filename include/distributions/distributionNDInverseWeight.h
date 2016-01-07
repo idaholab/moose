@@ -177,10 +177,16 @@ public:
   }
 
   double returnUpperBound(int dimension){
+	  /**
+	   * this function returns the upper bound of the distribution for a particular dimension
+	   */
     return _interpolator.returnUpperBound(dimension);
   }
 
   double returnLowerBound(int dimension){
+	  /**
+	   * this function returns the lower bound of the distribution for a particular dimension
+	   */
     return _interpolator.returnLowerBound(dimension);
   }
 
