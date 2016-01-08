@@ -17,7 +17,6 @@
 #include "InputParameters.h"
 
 InputParameterWarehouse::InputParameterWarehouse() :
-    Warehouse<InputParameters>(),
     _input_parameters(libMesh::n_threads())
 {
 }
@@ -118,9 +117,27 @@ InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name,
 }
 
 
-const std::vector<InputParameters *> &
-InputParameterWarehouse::all() const
+
+void
+InputParameterWarehouse::addControllableParameterConnection(const MooseObjectParameterName & master, const MooseObjectParameterName & slave)
 {
-  mooseError("The all() method is not active for InputParameterWarehouse");
-  return _all_objects;
+
+  // Test that master exists
+
+  // Test the slave exists
+
+  _input_parameter_links[master].push_back(slave);
+
+  /*
+  std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> >::iterator it = _input_parameter_links.find(master);
+
+  if (it != _input_parameters_links.end())
+
+  else
+    _input_parameters_links[
+  */
+
+
+
+
 }

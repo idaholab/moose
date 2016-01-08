@@ -47,6 +47,12 @@
 []
 
 [Materials]
+
+  [./stateful_on_boundary]
+    type = StatefulSpatialTest
+    boundary = right
+  [../]
+
   [./volatile]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
@@ -54,10 +60,6 @@
     block = 0
   [../]
 
-  [./stateful_on_boundary]
-    type = StatefulSpatialTest
-    boundary = right
-  [../]
 []
 
 [Executioner]

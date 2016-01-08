@@ -186,35 +186,9 @@ template<typename T>
 ControllableParameter<T>
 Control::getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ)
 {
+
   // The ControllableParameter object to return
-  ControllableParameter<T> output;
-
-  // Loop over all threads
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    // Loop over all InputParameter objects
-    for (InputParameterWarehouse::InputParameterIterator it = _input_parameter_warehouse.begin(tid); it != _input_parameter_warehouse.end(tid); ++it)
-    {
-      // If the desired object name does not match the current object name, move on
-      if (desired != it->first)
-        continue;
-
-      // If the parameter is valid and controllable update the output vector with a pointer to the parameter
-      if (it->second->libMesh::Parameters::have_parameter<T>(desired.parameter()))
-      {
-        // Do not allow non-controllable types to be controlled
-        if (!it->second->isControllable(desired.parameter()))
-          mooseError("The desired parameter is not controllable: " << desired);
-
-        // Store pointer to the writable parameter
-        output.insert(MooseObjectParameterName(it->first, desired.parameter()), &(it->second->set<T>(desired.parameter())));
-      }
-    }
-  }
-
-  // Error if nothing was found
-  if (output.size() == 0)
-    mooseError("The controlled parameter was not found: " << desired);
+  ControllableParameter<T> output = _input_parameter_warehouse.getControllableParameter<T>(desired);
 
   // Produce a warning, if the flag is true, when multiple parameters have differing values
   if (warn_when_values_differ)
