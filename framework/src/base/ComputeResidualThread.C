@@ -19,6 +19,7 @@
 #include "KernelBase.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
+#include "InterfaceKernel.h"
 #include "Material.h"
 #include "TimeKernel.h"
 #include "KernelWarehouse.h"
@@ -33,6 +34,7 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSy
     _num_cached(0),
     _integrated_bcs(sys.getIntegratedBCWarehouse()),
     _dg_kernels(sys.getDGKernelWarehouse()),
+    _interface_kernels(sys.getInterfaceKernelWarehouse()),
     _kernels(sys.getKernelWarehouse()),
     _time_kernels(sys.getTimeKernelWarehouse()),
     _non_time_kernels(sys.getNonTimeKernelWarehouse())
@@ -47,6 +49,7 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
     _num_cached(0),
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
+    _interface_kernels(x._interface_kernels),
     _kernels(x._kernels),
     _time_kernels(x._time_kernels),
     _non_time_kernels(x._kernels)
@@ -66,7 +69,8 @@ ComputeResidualThread::subdomainChanged()
   std::set<MooseVariable *> needed_moose_vars;
   _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
-  _dg_kernels.updateVariableDependency(needed_moose_vars, _tid);
+  _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
+  _interface_kernels.updateBoundaryVariableDependency(needed_moose_vars, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
@@ -135,9 +139,48 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 }
 
 void
+ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+{
+  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
+  {
+
+    // Pointer to the neighbor we are currently working on.
+    const Elem * neighbor = elem->neighbor(side);
+
+    if (!(neighbor->level() == elem->level()))
+      mooseError("Sorry, interface kernels do not work with mesh adaptivity");
+
+    // Get the global id of the element and the neighbor
+    const dof_id_type
+      elem_id = elem->id(),
+      neighbor_id = neighbor->id();
+
+    if (neighbor->active())
+    {
+      _fe_problem.reinitNeighbor(elem, side, _tid);
+
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+      const std::vector<MooseSharedPointer<InterfaceKernel> > & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+      for (std::vector<MooseSharedPointer<InterfaceKernel> >::const_iterator it = int_ks.begin(); it != int_ks.end(); ++it)
+        (*it)->computeResidual();
+
+      _fe_problem.swapBackMaterialsFace(_tid);
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
+
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        _fe_problem.addResidualNeighbor(_tid);
+      }
+    }
+  }
+}
+
+void
 ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 {
-  if (_dg_kernels.hasActiveObjects(_tid))
+  if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     // Pointer to the neighbor we are currently working on.
     const Elem * neighbor = elem->neighbor(side);
@@ -149,24 +192,22 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
-      if (_dg_kernels.hasActiveObjects(_tid))
-      {
-        _fe_problem.reinitNeighbor(elem, side, _tid);
+      _fe_problem.reinitNeighbor(elem, side, _tid);
 
-        _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-        _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-        const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
-        for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
+      const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+      for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
+        if ((*it)->hasBlocks(neighbor->subdomain_id()))
           (*it)->computeResidual();
 
-        _fe_problem.swapBackMaterialsFace(_tid);
-        _fe_problem.swapBackMaterialsNeighbor(_tid);
+      _fe_problem.swapBackMaterialsFace(_tid);
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
 
-        {
-          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          _fe_problem.addResidualNeighbor(_tid);
-        }
+      {
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+        _fe_problem.addResidualNeighbor(_tid);
       }
     }
   }

@@ -77,6 +77,15 @@ public:
   virtual void onInternalSide(const Elem *elem, unsigned int side);
 
   /**
+   * Called when doing interface assembling
+   *
+   * @param elem - Element we are on
+   * @param side - local side number of the element 'elem'
+   * @param bnd_id - ID of the interface we are at
+   */
+  virtual void onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id);
+
+  /**
    * Called every time the current subdomain changes (i.e. the subdomain of _this_ element
    * is not the same as the subdomain of the last element).  Beware of over-using this!
    * You might think that you can do some expensive stuff in here and get away with it...
@@ -164,7 +173,12 @@ ThreadedElementLoopBase<RangeType>::operator () (const RangeType & range, bool b
             onBoundary(elem, side, *it);
 
         if (elem->neighbor(side) != NULL)
+        {
           onInternalSide(elem, side);
+          if (boundary_ids.size() > 0)
+            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+              onInterface(elem, side, *it);
+        }
       } // sides
       postElement(elem);
 
@@ -213,6 +227,12 @@ ThreadedElementLoopBase<RangeType>::onBoundary(const Elem * /*elem*/, unsigned i
 template<typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::onInternalSide(const Elem * /*elem*/, unsigned int /*side*/)
+{
+}
+
+template<typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::onInterface(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
 {
 }
 

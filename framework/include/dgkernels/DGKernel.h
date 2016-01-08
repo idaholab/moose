@@ -18,6 +18,8 @@
 // local includes
 #include "MooseArray.h"
 #include "MooseObject.h"
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 #include "SetupInterface.h"
 #include "TransientInterface.h"
 #include "UserObjectInterface.h"
@@ -44,6 +46,8 @@ InputParameters validParams<DGKernel>();
  */
 class DGKernel :
   public MooseObject,
+  public BlockRestrictable,
+  public BoundaryRestrictable,
   public SetupInterface,
   public TransientInterface,
   public FunctionInterface,

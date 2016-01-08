@@ -1455,6 +1455,26 @@ FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & n
   _nl.addDGKernel(dg_kernel_name, name, parameters);
 }
 
+// InterfaceKernels ////
+
+void
+FEProblem::addInterfaceKernel(const std::string & interface_kernel_name, const std::string & name, InputParameters parameters)
+{
+  parameters.set<FEProblem *>("_fe_problem") = this;
+  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    _reinit_displaced_face = true;
+  }
+  else
+  {
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = &_nl;
+  }
+  _nl.addInterfaceKernel(interface_kernel_name, name, parameters);
+}
+
 void
 FEProblem::addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters)
 {
@@ -1604,6 +1624,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
 
       // neighbor material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::NEIGHBOR_MATERIAL_DATA;
+      current_parameters.set<bool>("_neighbor") = true;
       object_name = name + "_neighbor";
       MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, current_parameters, tid));
       _neighbor_materials.addObject(neighbor_material, tid);
