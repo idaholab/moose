@@ -264,7 +264,7 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
 {
 
   // Reference to MaterialWarehouse for testing and retrieving block ids
-  const MooseObjectWarehouse<Material> & volume_materials = _blk_feproblem->getMaterialWarehouse(Moose::BLOCK_MATERIAL_DATA);
+  const MooseObjectWarehouse<Material> & warehouse = _blk_feproblem->getMaterialWarehouse();
 
   // Complete set of ids that this object is active
   const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
@@ -276,9 +276,9 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
     std::set<std::string> declared_props;
 
     // If block materials exist, populated the set of properties that were declared
-    if (volume_materials.hasActiveBlockObjects(*id_it))
+    if (warehouse.hasActiveBlockObjects(*id_it))
     {
-      const std::vector<MooseSharedPointer<Material> > & mats = volume_materials.getActiveBlockObjects(*id_it);
+      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBlockObjects(*id_it);
       for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
       {
         const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();

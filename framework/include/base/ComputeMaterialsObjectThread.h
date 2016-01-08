@@ -59,10 +59,9 @@ protected:
 
   ///@{
   /// References to the various Material object warehouses
-  const MooseObjectWarehouse<Material> & _volume_materials;
+  const MooseObjectWarehouse<Material> & _materials;
   const MooseObjectWarehouse<Material> & _face_materials;
   const MooseObjectWarehouse<Material> & _neighbor_materials;
-  const MooseObjectWarehouse<Material> & _boundary_materials;
   ///@}
 
   std::vector<Assembly *> & _assembly;

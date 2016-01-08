@@ -62,11 +62,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   _boundary_material_data = problem_ptr->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
 
   // A complete list of all Material objects
-  const std::vector<MooseSharedPointer<Material> > & volume_materials = problem_ptr->getMaterialWarehouse(Moose::BLOCK_MATERIAL_DATA).getObjects();
-  const std::vector<MooseSharedPointer<Material> > & boundary_materials = problem_ptr->getMaterialWarehouse(Moose::BOUNDARY_MATERIAL_DATA).getObjects();
-  std::vector<MooseSharedPointer<Material> > materials;
-  materials.insert(materials.end(), volume_materials.begin(), volume_materials.end());
-  materials.insert(materials.end(), boundary_materials.begin(), boundary_materials.end());
+  const std::vector<MooseSharedPointer<Material> > & materials = problem_ptr->getMaterialWarehouse().getObjects();
 
   // Handle setting of material property output in [Outputs] sub-blocks
   // Output objects can enable material property output, the following code examines the parameters

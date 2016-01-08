@@ -52,7 +52,7 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
   // Active materials on block
   {
-    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse(Moose::BLOCK_MATERIAL_DATA);
+    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse();
     const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBlockObjects();
     for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
@@ -63,7 +63,7 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
   // Active face materials on blocks
   {
-    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse(Moose::FACE_MATERIAL_DATA);
+    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getFaceMaterialWarehouse();
     const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBlockObjects();
     for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
@@ -74,7 +74,7 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
   // Active neighbor materials on blocks
   {
-    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse(Moose::NEIGHBOR_MATERIAL_DATA);
+    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getNeighborMaterialWarehouse();
     const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBlockObjects();
     for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
@@ -85,7 +85,7 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
   // Active boundary materials
   {
-    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse(Moose::BOUNDARY_MATERIAL_DATA);
+    const MooseObjectWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse();
     const std::map<BoundaryID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBoundaryObjects();
     for (std::map<BoundaryID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {

@@ -92,7 +92,6 @@ MaterialPropertyInterface::initializeMaterialPropertyInterface(const InputParame
   else
     _material_data_type = Moose::BLOCK_MATERIAL_DATA;
 
-  // Set the pointer to the MaterialData object
   _material_data = _mi_feproblem.getMaterialData(_material_data_type, parameters.get<THREAD_ID>("_tid"));
 }
 

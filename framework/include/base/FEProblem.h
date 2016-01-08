@@ -891,10 +891,15 @@ public:
    */
   unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
+  ///@{
   /*
    * Return a reference to the material warehouse
    */
-  const MooseObjectWarehouse<Material> & getMaterialWarehouse(Moose::MaterialDataType type);
+  const MooseObjectWarehouse<Material> & getMaterialWarehouse() { return _materials; }
+  const MooseObjectWarehouse<Material> & getFaceMaterialWarehouse() { return _face_materials; }
+  const MooseObjectWarehouse<Material> & getNeighborMaterialWarehouse() { return _neighbor_materials; }
+  ///@}
+
   /*
    * Return a pointer to the MaterialData
    */
@@ -1017,10 +1022,9 @@ protected:
 
   ///@{
   // Material Warehouses
-  MooseObjectWarehouse<Material> _volume_materials;
+  MooseObjectWarehouse<Material> _materials;
   MooseObjectWarehouse<Material> _face_materials;
   MooseObjectWarehouse<Material> _neighbor_materials;
-  MooseObjectWarehouse<Material> _boundary_materials;
   ///@}
 
   ///@{
