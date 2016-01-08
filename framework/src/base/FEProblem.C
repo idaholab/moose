@@ -194,9 +194,9 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _neighbor_material_data.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; i++)
   {
-    _material_data[i] = new MaterialData(_material_props);
-    _bnd_material_data[i] = new MaterialData(_bnd_material_props);
-    _neighbor_material_data[i] = new MaterialData(_bnd_material_props);
+    _material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_material_props));
+    _bnd_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_bnd_material_props));
+    _neighbor_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_bnd_material_props));
   }
 
   _vpps_data.resize(n_threads);
@@ -228,10 +228,6 @@ FEProblem::~FEProblem()
   for (unsigned int i = 0; i < n_threads; i++)
   {
     delete _assembly[i];
-
-    delete _material_data[i];
-    delete _bnd_material_data[i];
-    delete _neighbor_material_data[i];
 
     _zero[i].release();
     _grad_zero[i].release();
@@ -1590,7 +1586,7 @@ FEProblem::projectSolution()
 }
 
 
-MaterialData *
+MooseSharedPointer<MaterialData>
 FEProblem::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 {
   MooseSharedPointer<MaterialData> output;

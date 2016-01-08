@@ -903,7 +903,7 @@ public:
   /*
    * Return a pointer to the MaterialData
    */
-  MaterialData * getMaterialData(Moose::MaterialDataType, THREAD_ID tid = 0);
+  MooseSharedPointer<MaterialData> getMaterialData(Moose::MaterialDataType, THREAD_ID tid = 0);
 
   ///@{
   /**
@@ -1016,9 +1016,9 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
 
-  std::vector<MaterialData *> _material_data;
-  std::vector<MaterialData *> _bnd_material_data;
-  std::vector<MaterialData *> _neighbor_material_data;
+  std::vector<MooseSharedPointer<MaterialData> > _material_data;
+  std::vector<MooseSharedPointer<MaterialData> > _bnd_material_data;
+  std::vector<MooseSharedPointer<MaterialData> > _neighbor_material_data;
 
   ///@{
   // Material Warehouses

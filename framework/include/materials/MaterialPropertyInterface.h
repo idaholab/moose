@@ -163,7 +163,7 @@ protected:
   Moose::MaterialDataType _material_data_type;
 
   /// Pointer to the material data class that stores properties
-  MaterialData * _material_data;
+  MooseSharedPointer<MaterialData> _material_data;
 
   /// Reference to the FEProblem class
   FEProblem & _mi_feproblem;

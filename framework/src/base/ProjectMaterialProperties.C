@@ -27,8 +27,10 @@
 #include "libmesh/elem.h"
 
 ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
-                                                     FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
-                                                     std::vector<MaterialData *> & bnd_material_data, MaterialPropertyStorage & material_props,
+                                                     FEProblem & fe_problem, NonlinearSystem & sys,
+                                                     std::vector<MooseSharedPointer<MaterialData> > & material_data,
+                                                     std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
+                                                     MaterialPropertyStorage & material_props,
                                                      MaterialPropertyStorage & bnd_material_props, std::vector<Assembly *> & assembly) :
     ThreadedElementLoop<ConstElemPointerRange>(fe_problem, sys),
     _refine(refine),

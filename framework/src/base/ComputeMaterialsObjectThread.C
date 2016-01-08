@@ -26,9 +26,12 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
-                                                           std::vector<MaterialData *> & bnd_material_data, std::vector<MaterialData *> & neighbor_material_data,
-                                                           MaterialPropertyStorage & material_props, MaterialPropertyStorage & bnd_material_props,
+ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys,
+                                                           std::vector<MooseSharedPointer<MaterialData> > & material_data,
+                                                           std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
+                                                           std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,
+                                                           MaterialPropertyStorage & material_props,
+                                                           MaterialPropertyStorage & bnd_material_props,
                                                            std::vector<Assembly *> & assembly) :
 ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
   _fe_problem(fe_problem),

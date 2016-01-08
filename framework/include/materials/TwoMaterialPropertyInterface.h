@@ -56,7 +56,7 @@ public:
   const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name);
 
 protected:
-  MaterialData & _neighbor_material_data;
+  MooseSharedPointer<MaterialData> _neighbor_material_data;
 };
 
 
@@ -72,7 +72,7 @@ TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & na
   if (default_property)
     return *default_property;
   else
-    return _neighbor_material_data.getProperty<T>(prop_name);
+    return _neighbor_material_data->getProperty<T>(prop_name);
 }
 
 template<typename T>
@@ -87,7 +87,7 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld(const std::string &
   if (default_property)
     return *default_property;
   else
-    return _neighbor_material_data.getPropertyOld<T>(prop_name);
+    return _neighbor_material_data->getPropertyOld<T>(prop_name);
 }
 
 template<typename T>
@@ -102,7 +102,7 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string
   if (default_property)
     return *default_property;
   else
-    return _neighbor_material_data.getPropertyOlder<T>(prop_name);
+    return _neighbor_material_data->getPropertyOlder<T>(prop_name);
 }
 
 #endif //TWOMATERIALPROPERTYINTERFACE_H

@@ -38,7 +38,6 @@ InputParameters validParams<BlockRestrictable>()
 
 // Standard constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
-    _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
@@ -51,7 +50,6 @@ BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
 
 // Dual restricted constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids) :
-    _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),

@@ -46,11 +46,11 @@ CombinedCreepPlasticity::initialSetup()
     std::vector<MooseSharedPointer<Material> > const * mats_p;
     if (_bnd)
     {
-      mats_p = &_fe_problem.getMaterialWarehouse(Moose::FACE_MATERIAL_DATA).getActiveBlockObjects(block_id[i], _tid);
+      mats_p = &_fe_problem.getFaceMaterialWarehouse().getActiveBlockObjects(block_id[i], _tid);
       suffix = "_face";
     }
     else
-      mats_p = &_fe_problem.getMaterialWarehouse(Moose::BLOCK_MATERIAL_DATA).getActiveBlockObjects(block_id[i], _tid);
+      mats_p = &_fe_problem.getMaterialWarehouse().getActiveBlockObjects(block_id[i], _tid);
 
     const std::vector<MooseSharedPointer<Material> > & mats = *mats_p;
     for (unsigned int i_name(0); i_name < submodels.size(); ++i_name)

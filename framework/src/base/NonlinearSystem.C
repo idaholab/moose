@@ -583,7 +583,6 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
   THREAD_ID tid = 0;
 
   // Create the object
-  parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
   MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters, tid));
 
   // Active BoundaryIDs for the object
@@ -625,7 +624,6 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
     for (tid = 1; tid < libMesh::n_threads(); tid++)
     {
       // Create the object
-      parameters.set<MaterialData *>("_material_data") = _fe_problem._bnd_material_data[tid];
       bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters, tid));
 
       // Active BoundaryIDs for the object

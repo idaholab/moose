@@ -85,10 +85,10 @@ private:
                                                      const std::string & variable_name, MooseSharedPointer<Material> material);
 
   /// Pointer the MaterialData object storing the block restricted materials
-  MaterialData * _block_material_data;
+  MooseSharedPointer<MaterialData> _block_material_data;
 
   /// Pointer the MaterialData object storing the boundary restricted materials
-  MaterialData * _boundary_material_data;
+  MooseSharedPointer<MaterialData> _boundary_material_data;
 
   /// Map of variable name that contains the blocks to which the variable should be restricted
   std::map<std::string, std::set<SubdomainID> > _block_variable_map;

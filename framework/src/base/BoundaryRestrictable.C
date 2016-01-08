@@ -258,7 +258,7 @@ BoundaryRestrictable::hasBoundaryMaterialPropertyHelper(const std::string & prop
     // If boundary materials exist, populated the set of properties that were declared
     if (warehouse.hasActiveBoundaryObjects(*id_it))
     {
-      const std::vector<MooseSharedPointer<Material> > & mats = material_warehouse.getActiveBoundaryObjects(*id_it);
+      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBoundaryObjects(*id_it);
       for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
       {
         const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();

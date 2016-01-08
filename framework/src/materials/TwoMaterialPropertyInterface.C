@@ -27,12 +27,12 @@ InputParameters validParams<TwoMaterialPropertyInterface>()
 
 TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters) :
     MaterialPropertyInterface(parameters),
-    _neighbor_material_data(*_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
+    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
 {
 }
 
 TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids) :
     MaterialPropertyInterface(parameters, block_ids),
-    _neighbor_material_data(*_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
+    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
 {
 }
