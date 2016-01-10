@@ -15,17 +15,19 @@ class BndsCalcAux;
 template<>
 InputParameters validParams<BndsCalcAux>();
 
+/**
+ * Visualize the location of grain boundaries in a polycrystalline simulation.
+ */
 class BndsCalcAux : public AuxKernel
 {
 public:
-
   BndsCalcAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
-  std::vector<VariableValue *> _vals;
   unsigned int _ncrys;
+  std::vector<VariableValue *> _vals;
 };
 
 #endif //BNDSCALCAUX_H

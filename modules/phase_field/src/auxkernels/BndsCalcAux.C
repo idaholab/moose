@@ -16,23 +16,21 @@ InputParameters validParams<BndsCalcAux>()
 }
 
 BndsCalcAux::BndsCalcAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
+    AuxKernel(parameters),
+    _ncrys(coupledComponents("v")),
+    _vals(_ncrys)
 {
-  _ncrys = coupledComponents("v");
-  _vals.resize(_ncrys);
-
-  for (unsigned int i=0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _ncrys; ++i)
     _vals[i] = &coupledValue("v", i);
 }
 
 Real
 BndsCalcAux::computeValue()
 {
-  Real value = 0;
+  Real value = 0.0;
 
-  for (unsigned int i=0; i < _ncrys; ++i)
-    value += (*_vals[i])[_qp]*(*_vals[i])[_qp];
+  for (unsigned int i = 0; i < _ncrys; ++i)
+    value += (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
   return value;
 }
-
