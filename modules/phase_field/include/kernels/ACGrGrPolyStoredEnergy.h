@@ -5,13 +5,13 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ACBulk.h"
-#include "GrainTrackerInterface.h"
 
 #ifndef ACGRGRPOLYSTOREDENERGY_H
 #define ACGRGRPOLYSTOREDENERGY_H
 
 //Forward Declarations
 class ACGrGrPolyStoredEnergy;
+class GrainTrackerInterface;
 
 template<>
 InputParameters validParams<ACGrGrPolyStoredEnergy>();
@@ -20,7 +20,7 @@ InputParameters validParams<ACGrGrPolyStoredEnergy>();
  * This kernel adds the residual contribution for stored (dislocation) energy
  * in a polycrystaline system. The free nergy term is \f$ E_{\text{stored}}(3\eta^2 - 2\eta^3) \f$
  */
-class ACGrGrPolyStoredEnergy : public ACBulk
+class ACGrGrPolyStoredEnergy : public ACBulk<Real>
 {
 public:
   ACGrGrPolyStoredEnergy(const InputParameters & parameters);

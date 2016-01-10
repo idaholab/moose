@@ -5,11 +5,12 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ACGrGrPolyStoredEnergy.h"
+#include "GrainTrackerInterface.h"
 
 template<>
 InputParameters validParams<ACGrGrPolyStoredEnergy>()
 {
-  InputParameters params = validParams<ACBulk>();
+  InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Stored energy contribution for the poly crystaline Allen-Cahn Kernel");
   params.addRequiredParam<std::vector<Real> >("stored_energy", "list of stored energies for each grain in the simulation");
   params.addRequiredParam<UserObjectName>("grain_tracker", "GrainTracker user object");
@@ -18,7 +19,7 @@ InputParameters validParams<ACGrGrPolyStoredEnergy>()
 }
 
 ACGrGrPolyStoredEnergy::ACGrGrPolyStoredEnergy(const InputParameters & parameters) :
-    ACBulk(parameters),
+    ACBulk<Real>(parameters),
     _stored_energy(getParam<std::vector<Real> >("stored_energy")),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _op_index(getParam<unsigned int>("op_index"))
