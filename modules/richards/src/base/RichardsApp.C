@@ -14,6 +14,7 @@
 // UserObjects
 #include "RichardsVarNames.h"
 #include "RichardsDensityConstBulk.h"
+#include "RichardsDensityConstBulkCut.h"
 #include "RichardsDensityIdeal.h"
 #include "RichardsDensityMethane20degC.h"
 #include "RichardsDensityVDW.h"
@@ -23,6 +24,8 @@
 #include "RichardsRelPermVG1.h"
 #include "RichardsRelPermBW.h"
 #include "RichardsRelPermPowerGas.h"
+#include "Q2PRelPermPower.h"
+#include "Q2PRelPermPowerGas.h"
 #include "RichardsSeff1VG.h"
 #include "RichardsSeff1VGcut.h"
 #include "RichardsSeff1BWsmall.h"
@@ -56,10 +59,12 @@
 #include "RichardsMaterial.h"
 #include "PoroFullSatMaterial.h" // Used for mechanical coupling
 #include "DarcyMaterial.h"
+#include "Q2PMaterial.h"
 
 // DiracKernels
 #include "RichardsBorehole.h"
 #include "RichardsPolyLineSink.h"
+#include "Q2PBorehole.h"
 
 // Functions
 #include "RichardsExcavGeom.h"
@@ -82,11 +87,18 @@
 #include "RichardsPPenalty.h"
 #include "PoroFullSatTimeDerivative.h" // Used for mechanical coupling
 #include "DarcyFlux.h"
+#include "Q2PPorepressureFlux.h"
+#include "Q2PPorepressureDiffusion.h"
+#include "Q2PSaturationFlux.h"
+#include "Q2PSaturationDiffusion.h"
+#include "Q2PSaturationDiffusionFunction.h"
+#include "Q2PMassChange.h"
 
   // BoundaryConditions
 #include "RichardsExcav.h"
 #include "RichardsPiecewiseLinearSink.h"
 #include "RichardsHalfGaussianSink.h"
+#include "Q2PPiecewiseLinearSink.h"
 
 // Problems
 #include "RichardsMultiphaseProblem.h"
@@ -126,6 +138,7 @@ RichardsApp::registerObjects(Factory & factory)
   // UserObjects
   registerUserObject(RichardsVarNames);
   registerUserObject(RichardsDensityConstBulk);
+  registerUserObject(RichardsDensityConstBulkCut);
   registerUserObject(RichardsDensityIdeal);
   registerUserObject(RichardsDensityMethane20degC);
   registerUserObject(RichardsDensityVDW);
@@ -135,6 +148,8 @@ RichardsApp::registerObjects(Factory & factory)
   registerUserObject(RichardsRelPermVG1);
   registerUserObject(RichardsRelPermBW);
   registerUserObject(RichardsRelPermPowerGas);
+  registerUserObject(Q2PRelPermPower);
+  registerUserObject(Q2PRelPermPowerGas);
   registerUserObject(RichardsSeff1VG);
   registerUserObject(RichardsSeff1VGcut);
   registerUserObject(RichardsSeff1BWsmall);
@@ -168,10 +183,12 @@ RichardsApp::registerObjects(Factory & factory)
   registerMaterial(RichardsMaterial);
   registerMaterial(PoroFullSatMaterial); // Used for mechanical coupling
   registerMaterial(DarcyMaterial);
+  registerMaterial(Q2PMaterial);
 
   // DiracKernels
   registerDiracKernel(RichardsPolyLineSink);
   registerDiracKernel(RichardsBorehole);
+  registerDiracKernel(Q2PBorehole);
 
   // Functions
   registerFunction(RichardsExcavGeom);
@@ -194,11 +211,18 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(RichardsPPenalty);
   registerKernel(PoroFullSatTimeDerivative); // Used for mechanical coupling
   registerKernel(DarcyFlux);
+  registerKernel(Q2PPorepressureFlux);
+  registerKernel(Q2PPorepressureDiffusion);
+  registerKernel(Q2PSaturationFlux);
+  registerKernel(Q2PSaturationDiffusion);
+  registerKernel(Q2PSaturationDiffusionFunction);
+  registerKernel(Q2PMassChange);
 
   // BoundaryConditions
   registerBoundaryCondition(RichardsExcav);
   registerBoundaryCondition(RichardsPiecewiseLinearSink);
   registerBoundaryCondition(RichardsHalfGaussianSink);
+  registerBoundaryCondition(Q2PPiecewiseLinearSink);
 
   // Problems
   registerProblem(RichardsMultiphaseProblem);
