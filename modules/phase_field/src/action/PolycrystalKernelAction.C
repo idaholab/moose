@@ -22,8 +22,13 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<VariableName>("T", "Name of temperature variable");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-  params.addParam<std::vector<Real> >("stored_energy" , "Optional vector of stored (dislocation) energy for each grain");
+
+  params.addParam<std::vector<Real> >("stored_energy", "Optional vector of stored (dislocation) energy for each grain");
   params.addParam<UserObjectName>("grain_tracker", "Grain tracker object (needed when specifying stored_energy)");
+  params.addParamNamesToGroup("stored_energy grain_tracker", "ACGrGrPolyStoredEnergy");
+
+  params.addParam<Real>("penalty", "Activate penalty term to constrain the sum of order parameters to one");
+  params.addParamNamesToGroup("penalty", "ACGrGrPolyConstraint");
 
   return params;
 }
@@ -90,6 +95,23 @@ PolycrystalKernelAction::act()
     }
     else if (isParamValid("stored_energy") || isParamValid("grain_tracker"))
       mooseError("Specify both 'stored_energy' and 'grain_tracker' or neither.");
+
+    //
+    // Set up (optional) ACGrGrPolyConstraint kernels
+    //
+
+    if (isParamValid("penalty"))
+    {
+      InputParameters params = _factory.getValidParams("ACGrGrPolyConstraint");
+      params.set<NonlinearVariableName>("variable") = var_name;
+      params.set<std::vector<VariableName> >("v") = v;
+      params.set<bool>("implicit") = _implicit;
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+      params.set<Real>("penalty") = getParam<Real>("penalty");
+
+      std::string kernel_name = "ACConstraint_" + var_name;
+      _problem->addKernel("ACGrGrPolyConstraint", kernel_name, params);
+    }
 
     //
     // Set up ACInterface kernels
