@@ -165,6 +165,16 @@ GeneratedMesh::buildMesh()
     // Number of elements in each direction.
     int nelem[3] = {_nx, _ny, _nz};
 
+    // We will need the biases raised to integer powers in each
+    // direction, so let's pre-compute those...
+    std::vector<std::vector<Real> > pows(3);
+    for (unsigned int dir=0; dir<3; ++dir)
+    {
+      pows[dir].resize(nelem[dir] + 1);
+      for (unsigned int i=0; i<pows[dir].size(); ++i)
+        pows[dir][i] = std::pow(bias[dir], static_cast<int>(i));
+    }
+
     // Loop over the nodes and move them to the desired location
     MeshBase::node_iterator       node_it  = mesh.nodes_begin();
     const MeshBase::node_iterator node_end = mesh.nodes_end();
@@ -177,12 +187,47 @@ GeneratedMesh::buildMesh()
       {
         if (width[dir] != 0. && bias[dir] != 1.)
         {
-          // What "index" we are at in the current direction.  We
-          // round to the nearest integral value to get this.
-          int index = round((node(dir) - mins[dir]) * nelem[dir] / width[dir]);
+          // Compute the scaled "index" of the current point.  This
+          // will either be close to a whole integer or a whole
+          // integer+0.5 for quadratic nodes.
+          Real float_index = (node(dir) - mins[dir]) * nelem[dir] / width[dir];
 
-          // Move node to biased location.
-          node(dir) = mins[dir] + width[dir] * (1. - std::pow(bias[dir], index)) / (1. - std::pow(bias[dir], nelem[dir]));
+          Real integer_part = 0;
+          Real fractional_part = std::modf(float_index, &integer_part);
+
+          // Figure out where to move the node...
+          if (std::abs(fractional_part) < TOLERANCE || std::abs(fractional_part - 1.0) < TOLERANCE)
+          {
+            // If the fractional_part ~ 0.0 or 1.0, this is a vertex node, so
+            // we don't need an average.
+            //
+            // Compute the "index" we are at in the current direction.  We
+            // round to the nearest integral value to get this instead
+            // of using "integer_part", since that could be off by a
+            // lot (e.g. we want 3.9999 to map to 4.0 instead of 3.0).
+            int index = round(float_index);
+
+            // Move node to biased location.
+            node(dir) = mins[dir] + width[dir] * (1. - pows[dir][index]) / (1. - pows[dir][nelem[dir]]);
+          }
+          else if (std::abs(fractional_part - 0.5) < TOLERANCE)
+          {
+            // If the fractional_part ~ 0.5, this is a midedge/face
+            // (i.e. quadratic) node.  We don't move those with the same
+            // bias as the vertices, instead we put them midway between
+            // their respective vertices.
+            //
+            // Also, since the fractional part is nearly 0.5, we know that
+            // the integer_part will be the index of the vertex to the
+            // left, and integer_part+1 will be the index of the
+            // vertex to the right.
+            node(dir) = mins[dir] + width[dir] * (1. - 0.5 * (pows[dir][integer_part] + pows[dir][integer_part+1])) / (1. - pows[dir][nelem[dir]]);
+          }
+          else
+          {
+            // We don't yet handle anything higher order than quadratic...
+            mooseError("Unable to bias node at node(" << dir << ")=" << node(dir));
+          }
         }
       }
     }
