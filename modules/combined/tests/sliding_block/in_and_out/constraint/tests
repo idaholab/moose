@@ -8,6 +8,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+    deleted = '#6139'
   [../]
 
   [./frictional_mu04_penalty]
@@ -18,6 +19,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+    deleted = '#6139'
   [../]
 
   [./frictionless_kinematic]
