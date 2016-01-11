@@ -4,4 +4,20 @@
     input = 'mesh_generation_test.i'
     exodiff = 'out.e'
   [../]
+
+  [./mesh_bias]
+    type = 'Exodiff'
+    input = 'mesh_bias.i'
+    cli_args = '--mesh-only'
+    exodiff = 'mesh_bias_in.e'
+    recover = false
+  [../]
+
+  [./mesh_bias_quadratic]
+    type = 'Exodiff'
+    input = 'mesh_bias.i'
+    cli_args = 'Mesh/elem_type=HEX27 --mesh-only mesh_bias_quadratic_in.e'
+    exodiff = 'mesh_bias_quadratic_in.e'
+    recover = false
+  [../]
 []
