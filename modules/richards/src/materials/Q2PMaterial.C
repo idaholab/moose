@@ -26,15 +26,11 @@ InputParameters validParams<Q2PMaterial>()
 
 Q2PMaterial::Q2PMaterial(const InputParameters & parameters) :
     Material(parameters),
-
     _material_por(getParam<Real>("mat_porosity")),
     _por_change(coupledValue("por_change")),
     _por_change_old(isCoupled("por_change") ? coupledValueOld("por_change") : _zero),
-
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
-
     _material_gravity(getParam<RealVectorValue>("gravity")),
-
     _porosity_old(declareProperty<Real>("porosity_old")),
     _porosity(declareProperty<Real>("porosity")),
     _permeability(declareProperty<RealTensorValue>("permeability")),

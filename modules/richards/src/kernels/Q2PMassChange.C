@@ -25,13 +25,10 @@ InputParameters validParams<Q2PMassChange>()
 Q2PMassChange::Q2PMassChange(const InputParameters & parameters) :
     TimeKernel(parameters),
     _density(getUserObject<RichardsDensity>("fluid_density")),
-
     _other_var_nodal(coupledNodalValue("other_var")),
     _other_var_nodal_old(coupledNodalValueOld("other_var")),
     _other_var_num(coupled("other_var")),
-
     _var_is_pp(getParam<bool>("var_is_porepressure")),
-
     _porosity(getMaterialProperty<Real>("porosity")),
     _porosity_old(getMaterialProperty<Real>("porosity_old"))
 {

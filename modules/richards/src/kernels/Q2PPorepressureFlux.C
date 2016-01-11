@@ -86,7 +86,6 @@ void
 Q2PPorepressureFlux::computeResidual()
 {
   upwind(true, false, 0);
-  return;
 }
 
 
@@ -110,7 +109,6 @@ void
 Q2PPorepressureFlux::computeJacobian()
 {
   upwind(false, true, _var.number());
-  return;
 }
 
 
@@ -118,7 +116,6 @@ void
 Q2PPorepressureFlux::computeOffDiagJacobian(unsigned int jvar)
 {
   upwind(false, true, jvar);
-  return;
 }
 
 

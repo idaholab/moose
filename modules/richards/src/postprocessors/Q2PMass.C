@@ -24,7 +24,6 @@ InputParameters validParams<Q2PMass>()
 
 Q2PMass::Q2PMass(const InputParameters & parameters) :
     ElementIntegralVariablePostprocessor(parameters),
-
     _porosity(getMaterialProperty<Real>("porosity")),
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _other_var(coupledValue("other_var")),

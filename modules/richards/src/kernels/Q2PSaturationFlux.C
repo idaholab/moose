@@ -88,7 +88,6 @@ void
 Q2PSaturationFlux::computeResidual()
 {
   upwind(true, false, 0);
-  return;
 }
 
 
@@ -112,7 +111,6 @@ void
 Q2PSaturationFlux::computeJacobian()
 {
   upwind(false, true, _var.number());
-  return;
 }
 
 
@@ -120,7 +118,6 @@ void
 Q2PSaturationFlux::computeOffDiagJacobian(unsigned int jvar)
 {
   upwind(false, true, jvar);
-  return;
 }
 
 

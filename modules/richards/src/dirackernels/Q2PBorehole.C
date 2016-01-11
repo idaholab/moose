@@ -33,7 +33,6 @@ InputParameters validParams<Q2PBorehole>()
 
 Q2PBorehole::Q2PBorehole(const InputParameters & parameters) :
     DiracKernel(parameters),
-
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _relperm(getUserObject<RichardsRelPerm>("fluid_relperm")),
     _other_var_nodal(coupledNodalValue("other_var")),
@@ -41,28 +40,21 @@ Q2PBorehole::Q2PBorehole(const InputParameters & parameters) :
     _var_is_pp(getParam<bool>("var_is_porepressure")),
     _viscosity(getParam<Real>("fluid_viscosity")),
     _permeability(getMaterialProperty<RealTensorValue>("permeability")),
-
-
     _character(getFunction("character")),
     _p_bot(getParam<Real>("bottom_pressure")),
     _unit_weight(getParam<RealVectorValue>("unit_weight")),
-
     _re_constant(getParam<Real>("re_constant")),
     _well_constant(getParam<Real>("well_constant")),
-
     _borehole_length(getParam<Real>("borehole_length")),
     _borehole_direction(getParam<RealVectorValue>("borehole_direction")),
-
     _num_nodes(0),
     _pp(0),
     _sat(0),
     _mobility(0),
     _dmobility_dp(0),
     _dmobility_ds(0),
-
     _total_outflow_mass(const_cast<RichardsSumQuantity &>(getUserObject<RichardsSumQuantity>("SumQuantityUO"))),
     _point_file(getParam<std::string>("point_file"))
-
 {
   // zero the outflow mass
   _total_outflow_mass.zero();

@@ -33,12 +33,8 @@ Q2PPiecewiseLinearSink::Q2PPiecewiseLinearSink(const InputParameters & parameter
     IntegratedBC(parameters),
     _use_mobility(getParam<bool>("use_mobility")),
     _use_relperm(getParam<bool>("use_relperm")),
-
     _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("bare_fluxes")),
-
     _m_func(getFunction("multiplying_fcn")),
-
-
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _relperm(getUserObject<RichardsRelPerm>("fluid_relperm")),
     _other_var_nodal(coupledNodalValue("other_var")),
@@ -46,7 +42,6 @@ Q2PPiecewiseLinearSink::Q2PPiecewiseLinearSink(const InputParameters & parameter
     _var_is_pp(getParam<bool>("var_is_porepressure")),
     _viscosity(getParam<Real>("fluid_viscosity")),
     _permeability(getMaterialProperty<RealTensorValue>("permeability")),
-
     _num_nodes(0),
     _pp(0),
     _sat(0),

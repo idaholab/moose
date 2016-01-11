@@ -52,10 +52,10 @@ protected:
   bool _var_is_pp;
 
   /// current value of the porosity
-  const MaterialProperty<Real> &_porosity;
+  const MaterialProperty<Real> & _porosity;
 
   /// value of the porosity at the start of the timestep
-  const MaterialProperty<Real> &_porosity_old;
+  const MaterialProperty<Real> & _porosity_old;
 };
 
 #endif //Q2PMASSCHANGE
