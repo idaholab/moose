@@ -164,4 +164,12 @@
     rel_err = 1e-5
     use_old_floor = True
   [../]
+
+  [./ghQ2P_pgas]
+    type = 'CSVDiff'
+    input = 'ghQ2P_pgas.i'
+    csvdiff = 'ghQ2P_pgas.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
 []
