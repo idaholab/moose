@@ -98,4 +98,10 @@
     csvdiff = 'st01.csv'
     rel_err = 1E-5
   [../]
+
+  [./Q2P01]
+    type = 'CSVDiff'
+    input = 'q2p01.i'
+    csvdiff = 'q2p01.csv'
+  [../]
 []
