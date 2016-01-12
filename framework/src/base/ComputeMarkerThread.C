@@ -52,7 +52,6 @@ ComputeMarkerThread::subdomainChanged()
   std::set<MooseVariable *> needed_moose_vars;
   _marker_whs.updateVariableDependency(needed_moose_vars, _tid);
 
-
   for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
   {
     MooseVariable * var = it->second;
