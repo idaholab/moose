@@ -3,6 +3,9 @@
   nx = 10
   ny = 10
   dim = 2
+
+  # DataStructIC creates an IC based on node numbering
+  distribution = serial
 []
 
 [Variables]

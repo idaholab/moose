@@ -22,6 +22,7 @@ class Exodiff(RunApp):
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
 
+
   def prepare(self):
     if self.specs['delete_output_before_running'] == True:
       for file in self.specs['exodiff']:
@@ -29,6 +30,7 @@ class Exodiff(RunApp):
           os.remove(os.path.join(self.specs['test_dir'], file))
         except:
           pass
+
 
   def processResultsCommand(self, moose_dir, options):
     commands = []

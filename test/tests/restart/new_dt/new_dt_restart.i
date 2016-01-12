@@ -1,6 +1,5 @@
 [Mesh]
   file = new_dt_out_cp/0010_mesh.cpr
-  distribution = serial
 []
 
 [Variables]

@@ -50,7 +50,7 @@ class VTKDiff(RunApp):
 
       # Perform diff
       else:
-        output = 'Running XMLDiffer.py'
+        output += 'Running XMLDiffer.py'
         for file in self.specs['vtkdiff']:
           gold = os.path.join(specs['test_dir'], specs['gold_dir'], file)
           test = os.path.join(specs['test_dir'], file)
