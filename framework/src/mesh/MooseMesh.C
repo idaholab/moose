@@ -1718,6 +1718,12 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
       }
     }
   }
+
+  // Remove any remaining references to the old ID from the
+  // BoundaryInfo object.  This prevents things like empty sidesets
+  // from showing up when printing information, etc.
+  if (delete_prev)
+    boundary_info.remove_id(old_id);
 }
 
 const RealVectorValue &
