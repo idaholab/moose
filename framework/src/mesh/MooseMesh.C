@@ -1043,6 +1043,9 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
   // A typedef makes the code below easier to read...
   typedef std::multimap<dof_id_type, dof_id_type>::iterator IterType;
 
+  // Container to catch IDs passed back from the BoundaryInfo object
+  std::vector<boundary_id_type> bc_ids;
+
   for (; it != it_end; ++it)
   {
     const Elem *elem = *it;
@@ -1051,7 +1054,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
       if (elem->neighbor(s))
         continue;
 
-      const std::vector<boundary_id_type>& bc_ids = boundary_info.boundary_ids (elem, s);
+      boundary_info.boundary_ids (elem, s, bc_ids);
       for (std::vector<boundary_id_type>::const_iterator id_it = bc_ids.begin(); id_it!=bc_ids.end(); ++id_it)
       {
         const boundary_id_type boundary_id = *id_it;
@@ -1214,6 +1217,10 @@ MooseMesh::detectPairedSidesets()
   boundary_info.build_node_list_from_side_list();
   unsigned int dim = getMesh().mesh_dimension();
   unsigned int z_dim = dim == 3 ? 2 : 1;  // Determine how many z loops there are, we always need to loop at least once!
+
+  // Container to catch IDs passed back from the BoundaryInfo object
+  std::vector<BoundaryID> bounds_ids;
+
   for (unsigned int curr_dim=0; curr_dim < dim; ++curr_dim)
   {
     std::pair<BoundaryID, BoundaryID> paired_boundary;
@@ -1223,8 +1230,7 @@ MooseMesh::detectPairedSidesets()
       for (unsigned int j=0; j<2; ++j)
         for (unsigned int k=0; k<z_dim; ++k)
         {
-          std::vector<BoundaryID> bounds_ids =
-            boundary_info.boundary_ids(_extreme_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]]);
+          boundary_info.boundary_ids(_extreme_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]], bounds_ids);
 
           for (unsigned int l=0; l<bounds_ids.size(); ++l)
             ++boundary_counts[bounds_ids[l]];
@@ -1694,6 +1700,9 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
   // Get a reference to our BoundaryInfo object, we will use it several times below...
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
+  // Container to catch ids passed back from BoundaryInfo
+  std::vector<boundary_id_type> old_ids;
+
   // Only level-0 elements store BCs.  Loop over them.
   MeshBase::element_iterator           el = getMesh().level_elements_begin(0);
   const MeshBase::element_iterator end_el = getMesh().level_elements_end(0);
@@ -1703,7 +1712,7 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
     unsigned int n_sides = elem->n_sides();
     for (unsigned int s=0; s != n_sides; ++s)
     {
-      const std::vector<boundary_id_type>& old_ids = boundary_info.boundary_ids(elem, s);
+      boundary_info.boundary_ids(elem, s, old_ids);
       if (std::find(old_ids.begin(), old_ids.end(), old_id) != old_ids.end())
       {
         std::vector<boundary_id_type> new_ids(old_ids);
@@ -1718,6 +1727,12 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
       }
     }
   }
+
+  // Remove any remaining references to the old ID from the
+  // BoundaryInfo object.  This prevents things like empty sidesets
+  // from showing up when printing information, etc.
+  if (delete_prev)
+    boundary_info.remove_id(old_id);
 }
 
 const RealVectorValue &
@@ -1808,7 +1823,9 @@ MooseMesh::dimension() const
 std::vector<BoundaryID>
 MooseMesh::getBoundaryIDs(const Elem *const elem, const unsigned short int side) const
 {
-  return getMesh().get_boundary_info().boundary_ids(elem, side);
+  std::vector<BoundaryID> ids;
+  getMesh().get_boundary_info().boundary_ids(elem, side, ids);
+  return ids;
 }
 
 const std::set<BoundaryID> &
