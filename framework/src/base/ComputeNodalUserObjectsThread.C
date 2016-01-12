@@ -56,7 +56,8 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   }
 
   // Boundary Restricted UserObjects
-  std::vector<BoundaryID> nodeset_ids = _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node);
+  std::vector<BoundaryID> nodeset_ids;
+  _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node, nodeset_ids);
 
   for (std::vector<BoundaryID>::iterator it = nodeset_ids.begin(); it != nodeset_ids.end(); ++it)
   {
