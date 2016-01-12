@@ -1,6 +1,7 @@
 [Mesh]
   type = FileMesh
   file = double_square.e
+  distribution = serial
 []
 
 [Variables]

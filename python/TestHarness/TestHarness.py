@@ -700,9 +700,15 @@ class TestHarness:
     parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
     parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
     parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
-    parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help="Pass --parallel-mesh to executable")
-    parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors')
+
+    # Options that pass straight through to the executable
+    parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Pass "--parallel-mesh" to executable')
+    parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
+    parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
+
+    # Option to use for passing unwrapped options to the executable
     parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
+
     parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
 
     outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')

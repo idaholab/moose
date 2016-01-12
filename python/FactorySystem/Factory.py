@@ -34,7 +34,10 @@ class Factory:
       for file in os.listdir(dir):
         if file[-2:] == 'py':
           module_name = file[:-3]
-          __import__(module_name)
+          try:
+            __import__(module_name)
+          except:
+            print '\nERROR: Your Plugin Tester "' + module_name + '" failed to import. (skipping)\n\n'
 
     classes = self.getClassHierarchy(module.__subclasses__())
     for aclass in classes:
