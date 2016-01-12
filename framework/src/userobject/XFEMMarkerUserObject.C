@@ -15,6 +15,7 @@
 #include "XFEMMarkerUserObject.h"
 
 #include "XFEM.h"
+#include "MooseMesh.h"
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel.h"

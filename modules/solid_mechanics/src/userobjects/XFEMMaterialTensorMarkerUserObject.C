@@ -14,6 +14,8 @@
 
 #include "XFEMMaterialTensorMarkerUserObject.h"
 
+#include "libmesh/quadrature.h"
+
 template<>
 InputParameters validParams<XFEMMaterialTensorMarkerUserObject>()
 {

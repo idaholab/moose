@@ -99,8 +99,8 @@ Transient::Transient(const InputParameters & parameters) :
     _unconstrained_dt(declareRecoverableData<Real>("unconstrained_dt", -1)),
     _at_sync_point(declareRecoverableData<bool>("at_sync_point", false)),
     _first(declareRecoverableData<bool>("first", true)),
-    _multiapps_converged(declareRestartableData<bool>("multiapps_converged", true)),
-    _last_solve_converged(declareRestartableData<bool>("last_solve_converged", true)),
+    _multiapps_converged(declareRecoverableData<bool>("multiapps_converged", true)),
+    _last_solve_converged(declareRecoverableData<bool>("last_solve_converged", true)),
     _xfem_repeat_step(false),
     _xfem_update_count(0),
     _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
@@ -417,9 +417,9 @@ Transient::solveStep(Real input_dt)
   {
     _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
 
-    if ((_xfem_update_count < _max_xfem_update) &&
-        _problem.isUseXFEM() &&
-        _problem.xfemUpdateMesh())
+    if ( _problem.isUseXFEM() &&
+         _problem.xfemUpdateMesh() &&
+         (_xfem_update_count < _max_xfem_update))
     {
       Moose::out << "XFEM modifying mesh, repeating step"<<std::endl;
       _xfem_repeat_step = true;
@@ -430,17 +430,11 @@ Transient::solveStep(Real input_dt)
       _xfem_repeat_step = false;
       _xfem_update_count = 0;
       Moose::out << "XFEM not modifying mesh, continuing"<<std::endl;
+
       if (_picard_max_its <= 1)
         _time_stepper->acceptStep();
 
       _solution_change_norm = _problem.solutionChangeNorm();
-
-      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::PRE_AUX);
-#if 0
-    // User definable callback
-    if (_estimate_error)
-      estimateTimeError();
-#endif
 
       _problem.onTimestepEnd();
       _problem.execute(EXEC_TIMESTEP_END);
@@ -448,13 +442,9 @@ Transient::solveStep(Real input_dt)
       _problem.execTransfers(EXEC_TIMESTEP_END);
       _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
 
-      _problem.computeAuxiliaryKernels(EXEC_TIMESTEP_END);
-      _problem.computeUserObjects(EXEC_TIMESTEP_END, UserObjectWarehouse::POST_AUX);
-      _problem.execTransfers(EXEC_TIMESTEP_END);
-      _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
-
       if (!_multiapps_converged)
         return;
+
     }
   }
   else
