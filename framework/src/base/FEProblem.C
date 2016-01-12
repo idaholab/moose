@@ -2211,7 +2211,7 @@ FEProblem::computeIndicatorsAndMarkers()
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects();
+      const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects(tid);
       for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = markers.begin(); it != markers.end(); ++it)
         (*it)->markerSetup();
     }
@@ -3888,10 +3888,8 @@ FEProblem::meshChanged()
 
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
 
-  for (std::vector<MeshChangedInterface *>::iterator it = _notify_when_mesh_changes.begin();
-       it != _notify_when_mesh_changes.end();
-       ++it)
-    (*it)->meshChanged();
+  for (std::vector<MeshChangedInterface *>::iterator it = _notify_when_mesh_changes.begin(); it != _notify_when_mesh_changes.end(); ++it)
+      (*it)->meshChanged();
 }
 
 void
