@@ -37,6 +37,7 @@
 #include "LibcurlUtils.h"
 
 #ifdef LIBMESH_HAVE_TBB_API
+#if !TBB_VERSION_LESS_THAN(4,0)
 #include <tbb/tick_count.h>
 #include <tbb/tbb_thread.h>
 
@@ -602,4 +603,5 @@ void Updater::initialize(std::string propertyString)
     errorLoggerPtr->dumpErrors();
 }
 
+#endif // #if !TBB_VERSION_LESS_THAN(4,0)
 #endif // LIBMESH_HAVE_TBB_API
