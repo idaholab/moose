@@ -33,6 +33,7 @@ InputParameters validParams<MultiAppNearestNodeTransfer>()
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   params.addParam<BoundaryName>("source_boundary", "The boundary we are transferring from (if not specified, whole domain is used).");
+  params.addParam<BoundaryName>("target_boundary", "The boundary we are transferring to (if not specified, whole domain is used).");
   params.addParam<bool>("displaced_source_mesh", false, "Whether or not to use the displaced mesh for the source mesh.");
   params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
   params.addParam<bool>("fixed_meshes", false, "Set to true when the meshes are not changing (ie, no movement or adaptivity).  This will cache nearest node neighbors to greatly speed up the transfer.");
@@ -111,10 +112,32 @@ MultiAppNearestNodeTransfer::execute()
 
       if (is_nodal)
       {
-        MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
+        std::vector<Node *> target_local_nodes;
 
-        for (; node_it != node_end; ++node_it)
+        if (isParamValid("target_boundary"))
+        {
+          BoundaryID target_bnd_id = _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
+
+          ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
+          for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin(); nd != bnd_nodes.end(); ++nd)
+          {
+            const BndNode * bnode = *nd;
+            if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
+              target_local_nodes.push_back(bnode->_node);
+          }
+        }
+        else
+        {
+          target_local_nodes.resize(to_mesh->n_local_nodes());
+          MeshBase::const_node_iterator nodes_begin = to_mesh->local_nodes_begin();
+          MeshBase::const_node_iterator nodes_end = to_mesh->local_nodes_end();
+
+          unsigned int i = 0;
+          for (MeshBase::const_node_iterator nodes_it = nodes_begin; nodes_it != nodes_end; ++nodes_it, ++i)
+            target_local_nodes[i] = *nodes_it;
+        }
+
+        for (std::vector<Node *>::iterator node_it = target_local_nodes.begin(); node_it != target_local_nodes.end(); ++node_it)
         {
           Node * node = *node_it;
 
@@ -352,10 +375,32 @@ MultiAppNearestNodeTransfer::execute()
 
     if (is_nodal)
     {
-      MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
-      MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
+      std::vector<Node *> target_local_nodes;
 
-      for (; node_it != node_end; ++node_it)
+      if (isParamValid("target_boundary"))
+      {
+        BoundaryID target_bnd_id = _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
+
+        ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
+        for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin(); nd != bnd_nodes.end(); ++nd)
+        {
+          const BndNode * bnode = *nd;
+          if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
+            target_local_nodes.push_back(bnode->_node);
+        }
+      }
+      else
+      {
+        target_local_nodes.resize(to_mesh->n_local_nodes());
+        MeshBase::const_node_iterator nodes_begin = to_mesh->local_nodes_begin();
+        MeshBase::const_node_iterator nodes_end = to_mesh->local_nodes_end();
+
+        unsigned int i = 0;
+        for (MeshBase::const_node_iterator nodes_it = nodes_begin; nodes_it != nodes_end; ++nodes_it, ++i)
+          target_local_nodes[i] = *nodes_it;
+      }
+
+      for (std::vector<Node *>::iterator node_it = target_local_nodes.begin(); node_it != target_local_nodes.end(); ++node_it)
       {
         Node * node = *node_it;
 
