@@ -119,7 +119,7 @@ ComputeFiniteStrain::computeQpStrain(const RankTwoTensor & Fhat)
   //Remove the Eigen strain increment
   _strain_increment[_qp] -= _stress_free_strain_increment[_qp];
 
-  RankTwoTensor D = _strain_increment[_qp]/_t_step;
+  RankTwoTensor D = _strain_increment[_qp]/_dt;
   _strain_rate[_qp] = D;
 
   //Calculate rotation R_incr

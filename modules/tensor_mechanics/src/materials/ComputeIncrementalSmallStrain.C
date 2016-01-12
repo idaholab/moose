@@ -72,7 +72,7 @@ ComputeIncrementalSmallStrain::computeProperties()
     _strain_increment[_qp] -= _stress_free_strain_increment[_qp];
 
     // strain rate
-    _strain_rate[_qp] = _strain_increment[_qp]/_t_step;
+    _strain_rate[_qp] = _strain_increment[_qp]/_dt;
 
     //Update strain in intermediate configuration: rotations are not needed
     _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
