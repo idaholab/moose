@@ -2,19 +2,19 @@
 #
 # The test consists of a 2D rectangular block divided into two Quad elements
 # (along its height) which have different material properties.
-# A ramped displacement is applied to the top surface of the block and the
-# bottom surface is fixed.
+# A displacement of 2 m is applied to the top surface of the block in x direction and the
+# bottom surface is held fixed.
 # The nodes of the interface between the two elements will tend to move as
 # dictated by the material models of the two elements.
 
 # LinearNodalConstraint forces the interface nodes to move as a linear combination
 # of the nodes on the top and bottom of the block.
-# Mmaster node ids and the corresponding weights are taken as input by the LinearNodalConstraint
+# master node ids and the corresponding weights are taken as input by the LinearNodalConstraint
 # along with the slave node set or slave node ids.
 # The constraint can be applied using either penalty or kinematic formulation.
 
-# In this example, the final displacement of the top surface is 2m and bottom surface is 0m.
-# Therefore, the final displacement of the interface nodes would be 0.25*top+0.75*bottom = 0.5m
+# In this example, the final x displacement of the top surface is 2m and bottom surface is 0m.
+# Therefore, the final x displacement of the interface nodes would be 0.25*top+0.75*bottom = 0.5m
 
 [Mesh]
   file=rect_mid.e
@@ -28,79 +28,24 @@
   [../]
 []
 
-[AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-[]
-
 [Kernels]
-  [./DynamicTensorMechanics]
+  [./TensorMechanics]
     displacements = 'disp_x disp_y'
   [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-    beta = 0.25
-    gamma = 0.5
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-    beta = 0.25
-    gamma = 0.5
-  [../]
 []
-
-[AuxKernels]
-  [./accel_x]
-    type = NewmarkAccelAux
-    variable = accel_x
-    displacement = disp_x
-    velocity = vel_x
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_x]
-    type = NewmarkVelAux
-    variable = vel_x
-    acceleration = accel_x
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_y]
-    type = NewmarkAccelAux
-    variable = accel_y
-    displacement = disp_y
-    velocity = vel_y
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_y]
-    type = NewmarkVelAux
-    variable = vel_y
-    acceleration = accel_y
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-[]
-
 
 [BCs]
-  [./top_2]
-    type = FunctionDirichletBC
+  [./top_2x]
+    type = DirichletBC
     variable = disp_x
     boundary = 10
-    function = displacement_bc_2
+    value = 2.0
+  [../]
+  [./top_2y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 10
+    value = 0.0
   [../]
   [./bottom_1]
     type = DirichletBC
@@ -172,12 +117,11 @@
 []
 
 [Executioner]
-  type = Transient
-  start_time = 0
-  end_time = 2.0
-  l_tol = 1e-8
-  nl_rel_tol = 1e-8
-  dt = 0.01
+  type = Steady
+  solve_type = 'PJFNK'
+  petsc_options_iname = ''
+  petsc_options_value = ''
+  line_search = 'none'
 []
 
 [Constraints]
@@ -191,13 +135,15 @@
     penalty = 1e8
     formulation = kinematic
   [../]
-[]
-
-[Functions]
-  [./displacement_bc_2]
-    type = PiecewiseLinear
-    x = '0.0 0.5 2.0'
-    y = '0.0 2.0 2.0'
+  [./disp_y_1]
+    type = LinearNodalConstraint
+    variable = disp_y
+    master = '0 5'
+    weights = '0.25 0.75'
+#    slave_node_set = '2'
+    slave_node_ids = '2 3'
+    penalty = 1e8
+    formulation = kinematic
   [../]
 []
 
