@@ -1,4 +1,4 @@
-cd[Tests]
+[Tests]
   [./files_serial]
     # Check that the files are being created (serial)
     type = 'CheckFiles'
@@ -45,5 +45,6 @@ cd[Tests]
     vtk = true
     cli_args = Outputs/file_base=vtk_diff_parallel_mesh_out
     mesh_mode = PARALLEL
+    deleted = "#6149"
   [../]
 []

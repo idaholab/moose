@@ -76,8 +76,21 @@ class RunApp(Tester):
     else:
       default_ncpus = options.parallel
 
-    if options.error and not specs["allow_warnings"]:
+    if options.parallel_mesh and '--parallel-mesh' not in specs['cli_args']:
+      # The user has passed the parallel-mesh option to the test harness
+      # and it is NOT supplied already in the cli-args option
+      specs['cli_args'].append('--parallel-mesh')
+
+    if options.error and '--error' not in specs['cli_args'] and not specs["allow_warnings"]:
+      # The user has passed the error option to the test harness
+      # and it is NOT supplied already in the cli-args option\
       specs['cli_args'].append('--error')
+
+    if options.error_unused and '--error-unused' not in specs['cli_args'] and '--warn-unused' not in specs['cli_args']:
+      # The user has passed the error-unused option to the test harness
+      # and it is NOT supplied already in the cli-args option
+      # also, neither is the conflicting option "warn-unused"
+      specs['cli_args'].append('--error-unused')
 
     timing_string = ' '
     if options.timing:
