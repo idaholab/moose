@@ -18,6 +18,5 @@
     type = CSVDiff
     input = 'control.i'
     csvdiff = control_out.csv
-    max_parallel = 1 # Examines number of iterations, which changes with MPI
   [../]
 []
