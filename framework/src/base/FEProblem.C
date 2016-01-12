@@ -1738,8 +1738,6 @@ FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool s
 {
   if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
   {
-    std::cout << "IN HERE" << std::endl;
-
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();

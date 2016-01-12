@@ -66,13 +66,14 @@ public:
   bool operator<(const MooseObjectParameterName & rhs) const;
   ///@}
 
-  /// Allow printing with std:: cout
+  // Allow printing with std:: cout
   friend std::ostream & operator<<(std::ostream & stream, const MooseObjectParameterName & obj);
 
 protected:
 
   /// The name of the input parameter
   std::string _parameter;
+
 };
 
 #endif // MOOSEOBJECTPARAMETERNAME_H

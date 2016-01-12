@@ -42,7 +42,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
 
   // The object name defined by the base class name, this method of storing is used for
   // determining the uniqueness of the name
-  MooseObjectName unique_name(ptr->get<std::string>("_moose_base"), name);
+  MooseObjectName unique_name(ptr->get<std::string>("_moose_base"), name, "::");
 
   // Check that the Parameters do not already exist
   if (_input_parameters[tid].find(unique_name) != _input_parameters[tid].end())
@@ -54,7 +54,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
   // Store the object according to the control tags
   if (ptr->isParamValid("control_tags"))
   {
-    std::vector<std::string> tags = ptr->get<std::vector<std::string> >("control_tags");
+    const std::vector<std::string> & tags = ptr->get<std::vector<std::string> >("control_tags");
     for (std::vector<std::string>::const_iterator it = tags.begin(); it != tags.end(); ++it)
       _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(*it, name),  ptr));
   }
@@ -117,27 +117,15 @@ InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name,
 }
 
 
+const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > &
+InputParameterWarehouse::getInputParameters(THREAD_ID tid) const
+{
+  return _input_parameters[tid];
+}
+
 
 void
 InputParameterWarehouse::addControllableParameterConnection(const MooseObjectParameterName & master, const MooseObjectParameterName & slave)
 {
-
-  // Test that master exists
-
-  // Test the slave exists
-
   _input_parameter_links[master].push_back(slave);
-
-  /*
-  std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> >::iterator it = _input_parameter_links.find(master);
-
-  if (it != _input_parameters_links.end())
-
-  else
-    _input_parameters_links[
-  */
-
-
-
-
 }

@@ -57,16 +57,23 @@ public:
   const InputParameters & getInputParametersObject(const std::string & tag, const std::string & name, THREAD_ID tid = 0 ) const;
   const InputParameters & getInputParametersObject(const MooseObjectName & object_name, THREAD_ID tid = 0 ) const;
   ///@{
-
+  /**
+   * Return const reference to the map containing the InputParameter objects
+   */
+  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & getInputParameters(THREAD_ID tid = 0) const;
 
   /**
    * Returns a ControllableParameter object
    * @see Control
    */
   template<typename T>
-  ControllableParameter<T> getControllableParameter(const MooseObjectParameterName & desired) const;
+  ControllableParameter<T> getControllableParameter(const MooseObjectParameterName & desired, bool mark_as_controlled = false);
 
+  /**
+   * Method for linking control parameters of different names
+   */
   void addControllableParameterConnection(const MooseObjectParameterName & master, const MooseObjectParameterName & slave);
+
 
 private:
 
@@ -75,6 +82,9 @@ private:
 
   /// InputParameter links
   std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> > _input_parameter_links;
+
+  /// A list of parameters that were controlled (only used for output)
+  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > _controlled_parameters;
 
   /**
    * Method for adding a new InputParameters object
@@ -108,10 +118,17 @@ private:
   InputParameters & getInputParameters(const MooseObjectName & object_name, THREAD_ID tid = 0 ) const;
   ///@{
 
+  /**
+   * Return the list of controlled parameters (used for output)
+   * @see ControlOutput
+   */
+  const std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > & getControlledParameters() { return _controlled_parameters; }
+  void clearControlledParameters() { _controlled_parameters.clear(); }
 
   friend class Factory;
   friend class ActionFactory;
   friend class Control;
+  friend class ControlOutput;
 
   // RELAP-7 Control Logic (This will go away when the MOOSE system is created)
   friend class Component;
@@ -122,8 +139,9 @@ private:
 
 template<typename T>
 ControllableParameter<T>
-InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input) const
+InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input, bool mark_as_controlled /*=false*/)
 {
+
   // The ControllableParameter object to return
   ControllableParameter<T> output;
 
@@ -143,10 +161,10 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
     for (iter = _input_parameters[tid].begin(); iter != _input_parameters[tid].end(); ++iter)
     {
       // Loop of all desired params
-      for (std::vector<MooseObjectParameterName>::const_iterator it = params.begin(); it != params.end(); ++it)
+      for (std::vector<MooseObjectParameterName>::iterator it = params.begin(); it != params.end(); ++it)
       {
         // If the desired object name does not match the current object name, move on
-        const MooseObjectParameterName & desired = *it;
+        MooseObjectParameterName desired = *it;
 
         if (desired != iter->first)
           continue;
@@ -159,7 +177,10 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
             mooseError("The desired parameter is not controllable: " << desired);
 
           // Store pointer to the writable parameter
-          output.insert(MooseObjectParameterName(iter->first, desired.parameter()), &(iter->second->set<T>(desired.parameter())));
+          output.insert(desired, iter->second);
+
+          if (mark_as_controlled && tid == 0)
+            _controlled_parameters[iter->second].insert(desired);
         }
       }
     }

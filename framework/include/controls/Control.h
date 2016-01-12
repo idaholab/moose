@@ -121,7 +121,7 @@ private:
 
   /// Helper method for retrieving controllable parameters
   template<typename T>
-  ControllableParameter<T> getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ);
+  ControllableParameter<T> getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ, bool mark_as_set = false);
 
 };
 
@@ -167,7 +167,7 @@ void
 Control::setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ)
 {
   MooseObjectParameterName desired(name);
-  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true);
   helper.set(value);
 }
 
@@ -177,18 +177,18 @@ void
 Control::setControllableValueByName(const std::string & tag, const std::string & param_name, const T & value, bool warn_when_values_differ)
 {
   MooseObjectParameterName desired(tag, param_name);
-  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
+  ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true);
   helper.set(value);
 }
 
 
 template<typename T>
 ControllableParameter<T>
-Control::getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ)
+Control::getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ, bool mark_as_set)
 {
 
   // The ControllableParameter object to return
-  ControllableParameter<T> output = _input_parameter_warehouse.getControllableParameter<T>(desired);
+  ControllableParameter<T> output = _input_parameter_warehouse.getControllableParameter<T>(desired, mark_as_set);
 
   // Produce a warning, if the flag is true, when multiple parameters have differing values
   if (warn_when_values_differ)

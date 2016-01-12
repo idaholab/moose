@@ -447,5 +447,4 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
   return max_base;
 }
 
-
 } // MooseUtils namespace
