@@ -3,7 +3,7 @@
    type = 'Exodiff'
    input = 'generalized_plane_strain_tm_contact_field.i'
    exodiff = 'generalized_plane_strain_tm_contact_field_out.e'
-   max_parallel = 1
+   min_parallel = 2
    custom_cmp = 'generalized.exodiff'
  [../]
 []
