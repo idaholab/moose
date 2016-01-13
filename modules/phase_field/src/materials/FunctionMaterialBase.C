@@ -18,9 +18,7 @@ InputParameters validParams<FunctionMaterialBase>()
 FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
     _F_name(getParam<std::string>("f_name")),
-    _prop_F(&declareProperty<Real>(_F_name)),
-    _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
-    _arg_index(_number_of_nl_variables)
+    _prop_F(&declareProperty<Real>(_F_name))
 {
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
@@ -50,9 +48,12 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters) :
       _arg_numbers.push_back(number);
       _arg_param_names.push_back(*it);
 
-      // populate number -> arg index lookup table skipping aux variables
-      if (number < _number_of_nl_variables)
-        _arg_index[number] = _args.size();
+      // populate number -> arg index lookup table
+      unsigned int idx = libMeshVarNumberRemap(number);
+      if (idx >= _arg_index.size())
+        _arg_index.resize(idx + 1, -1);
+
+      _arg_index[idx] = _args.size();
 
       // get variable value
       _args.push_back(&coupledValue(*it, j));
@@ -61,4 +62,3 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters) :
 
   _nargs = _arg_names.size();
 }
-
