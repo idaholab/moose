@@ -66,21 +66,16 @@
 
 
 
-[Kernels]
-  [./liquid_mass_dot]
-    type = Q2PMassChange
-    variable = sat
-    other_var = pp
-    var_is_porepressure = false
-    fluid_density = DensityWater
-  [../]
-  [./gas_mass_dot]
-    type = Q2PMassChange
-    variable = pp
-    other_var = sat
-    var_is_porepressure = true
-    fluid_density = DensityGas
-  [../]
+[Q2P]
+  porepressure = pp
+  saturation = sat
+  water_density = DensityWater
+  water_relperm = RelPermWater
+  water_viscosity = 1
+  gas_density = DensityGas
+  gas_relperm = RelPermGas
+  gas_viscosity = 1
+  diffusivity = 0
 []
 
 
@@ -121,8 +116,8 @@
   [./rock]
     type = Q2PMaterial
     block = 0
-    mat_porosity = 0 #1E-12 # just so we get virtually no contributions from the time derivatives
-    mat_permeability = '1.1 0 0  0 2.2 0  0 0 3.3'
+    mat_porosity = 0 # just so we get virtually no contributions from the time derivatives
+    mat_permeability = '1.1E-20 0 0  0 2.2E-20 0  0 0 3.3E-20'
     gravity = '1 2 3'
   [../]
 []
