@@ -16,18 +16,40 @@ class GapConductance :
   public Material
 {
 public:
+  enum GAP_GEOMETRY
+  {
+    PLATE,
+    CYLINDER,
+    SPHERE
+  };
 
   GapConductance(const InputParameters & parameters);
 
   virtual ~GapConductance(){}
 
-  static Real gapLength(const Moose::CoordinateSystemType & system, Real radius, Real r1, Real r2, Real min_gap, Real max_gap);
+  static Real gapLength(const GAP_GEOMETRY & gap_geom, Real radius, Real r1, Real r2, Real min_gap, Real max_gap);
 
   static Real gapRect(Real distance, Real min_gap, Real max_gap);
 
   static Real gapCyl( Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
 
   static Real gapSphere( Real radius, Real r1, Real r2, Real min_denom, Real max_denom);
+
+  static void setGapGeometryParameters(const InputParameters & params,
+                                       const Moose::CoordinateSystemType coord_sys,
+                                       GAP_GEOMETRY & gap_geometry_type,
+                                       Point & p1,
+                                       Point & p2);
+
+  static void computeGapRadii(const GAP_GEOMETRY gap_geometry_type,
+                              const Point & current_point,
+                              const Point & p1,
+                              const Point & p2,
+                              const Real & gap_distance,
+                              const Point & current_normal,
+                              Real & r1,
+                              Real & r2,
+                              Real & radius);
 
 protected:
 
@@ -52,8 +74,8 @@ protected:
 
   const VariableValue & _temp;
 
-  bool _gap_type_set;
-  Moose::CoordinateSystemType _gap_type;
+  bool _gap_geometry_params_set;
+  GAP_GEOMETRY _gap_geometry_type;
 
   bool _quadrature;
 
@@ -85,6 +107,9 @@ protected:
   const NumericVector<Number> * * _serialized_solution;
   DofMap * _dof_map;
   const bool _warnings;
+
+  Point _p1;
+  Point _p2;
 };
 
 template<>
