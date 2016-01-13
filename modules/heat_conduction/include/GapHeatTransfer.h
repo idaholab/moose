@@ -8,6 +8,7 @@
 #define GAPHEATTRANSFER_H
 
 #include "IntegratedBC.h"
+#include "GapConductance.h"
 
 //Forward Declarations
 class GapHeatTransfer;
@@ -39,8 +40,8 @@ protected:
 
   virtual void computeGapValues();
 
-  bool _gap_type_set;
-  Moose::CoordinateSystemType _gap_type;
+  bool _gap_geometry_params_set;
+  GapConductance::GAP_GEOMETRY _gap_geometry_type;
 
   bool _quadrature;
 
@@ -77,6 +78,9 @@ protected:
 
   PenetrationLocator * _penetration_locator;
   const bool _warnings;
+
+  Point _p1;
+  Point _p2;
 };
 
 #endif //GAPHEATTRANSFER_H

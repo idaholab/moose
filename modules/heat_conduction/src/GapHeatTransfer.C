@@ -7,7 +7,6 @@
 
 // MOOSE includes
 #include "GapHeatTransfer.h"
-#include "GapConductance.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
 #include "Assembly.h"
@@ -30,8 +29,16 @@ InputParameters validParams<GapHeatTransfer>()
   params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
 
-  MooseEnum coord_types("default XYZ", "default");
-  params.addParam<MooseEnum>("coord_type", coord_types, "Gap calculation type (default or XYZ).");
+  //Deprecated parameter
+  MooseEnum coord_types("default XYZ cyl", "default");
+  params.addDeprecatedParam<MooseEnum>("coord_type", coord_types, "Gap calculation type (default or XYZ).","The functionality of this parameter is replaced by 'gap_geometry_type'.");
+
+  MooseEnum gap_geom_types("PLATE CYLINDER SPHERE");
+  params.addParam<MooseEnum>("gap_geometry_type", gap_geom_types, "Gap calculation type. Choices are: "+gap_geom_types.getRawNames());
+
+  params.addParam<RealVectorValue>("cylinder_axis_point_1", "Start point for line defining cylindrical axis");
+  params.addParam<RealVectorValue>("cylinder_axis_point_2", "End point for line defining cylindrical axis");
+  params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
   // Quadrature based
   params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required.");
@@ -48,8 +55,8 @@ InputParameters validParams<GapHeatTransfer>()
 
 GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
   :IntegratedBC(parameters),
-   _gap_type_set(false),
-   _gap_type(Moose::COORD_XYZ),
+   _gap_geometry_params_set(false),
+   _gap_geometry_type(GapConductance::PLATE),
    _quadrature(getParam<bool>("quadrature")),
    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
    _gap_conductance(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name"))),
@@ -91,19 +98,10 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
 void
 GapHeatTransfer::computeResidual()
 {
-  if (!_gap_type_set)
+  if (!_gap_geometry_params_set)
   {
-    _gap_type_set = true;
-    if (getParam<MooseEnum>("coord_type") == "XYZ")
-    {
-      _gap_type = Moose::COORD_XYZ;
-    }
-    else
-    {
-      _gap_type = _assembly.coordSystem();
-    }
-    if (_gap_type == Moose::COORD_XYZ && _assembly.coordSystem() == Moose::COORD_RSPHERICAL)
-      mooseError("The 'XYZ' coord_type and a spherical coordinate system are not compatible.");
+    _gap_geometry_params_set = true;
+    GapConductance::setGapGeometryParameters(_pars, _assembly.coordSystem(), _gap_geometry_type, _p1, _p2);
   }
 
   IntegratedBC::computeResidual();
@@ -219,7 +217,7 @@ Real
 GapHeatTransfer::gapLength() const
 {
   if (_has_info)
-    return GapConductance::gapLength( _gap_type, _radius, _r1, _r2, _min_gap, _max_gap );
+    return GapConductance::gapLength( _gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap );
 
   return 1;
 }
@@ -291,28 +289,7 @@ GapHeatTransfer::computeGapValues()
     }
   }
 
-  if (_gap_type == Moose::COORD_RZ || _gap_type == Moose::COORD_RSPHERICAL)
-  {
-    if (_normals[_qp](0) > 0)
-    {
-      _r1 = _q_point[_qp](0);
-      _r2 = _q_point[_qp](0) - _gap_distance; // note, _gap_distance is negative
-      _radius = _r1;
-    }
-    else if (_normals[_qp](0) < 0)
-    {
-      _r1 = _q_point[_qp](0) + _gap_distance;
-      _r2 = _q_point[_qp](0);
-      _radius = _r2;
-    }
-    else
-      mooseError( "Issue with cylindrical or spherical flux calc. normals. \n");
-  }
-  else
-  {
-    _r2 = -_gap_distance;
-    _r1 = 0;
-    _radius = 0;
-  }
+  Point current_point(_q_point[_qp]);
+  GapConductance::computeGapRadii(_gap_geometry_type, current_point, _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
 }
 
