@@ -35,7 +35,7 @@
                iterative_steady_sequence_out.e-s010
                iterative_steady_sequence_out.e-s011
                iterative_steady_sequence_out.e-s012
-               iterative_steady_sequence_out.e-s013'
+               iterative_steady_sequence_out.e-s013
                iterative_steady_sequence_out.e-s014'
 
     # This test relies on number of residuals being the same, so run it serially
