@@ -628,8 +628,16 @@ InputParameters::applyParameters(const InputParameters & common, const std::vect
   _show_deprecated_message = true;
 }
 
+///Deprecated method
 bool
 InputParameters::paramSetByUser(const std::string & name) const
+{
+  mooseDeprecated("paramSetByUser() is deprecated. Use isParamSetByUser() instead.");
+  return isParamSetByUser(name);
+}
+
+bool
+InputParameters::isParamSetByUser(const std::string & name) const
 {
   if (!isParamValid(name))
     // if the parameter is invalid, it is for sure not set by the user
