@@ -32,10 +32,6 @@ CheckOutputAction::CheckOutputAction(InputParameters params) :
 {
 }
 
-CheckOutputAction::~CheckOutputAction()
-{
-}
-
 void
 CheckOutputAction::act()
 {
@@ -81,10 +77,12 @@ CheckOutputAction::checkMaterialOutput()
     return;
 
   // A complete list of all Material objects
-  std::vector<Material *> materials = _problem->getMaterialWarehouse(0).all();
+  const std::vector<MooseSharedPointer<Material> > & materials = _problem->getMaterialWarehouse().getActiveObjects();
+
+  // TODO include boundary materials
 
   // Loop through each material object
-  for (std::vector<Material *>::iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
+  for (std::vector<MooseSharedPointer<Material> >::const_iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
   {
     // Extract the names of the output objects to which the material properties will be exported
     std::set<OutputName> outputs = (*material_iter)->getOutputs();

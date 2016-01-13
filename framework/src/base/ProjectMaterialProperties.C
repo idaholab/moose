@@ -11,12 +11,12 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "ProjectMaterialProperties.h"
 
+// MOOSE includes
+#include "ProjectMaterialProperties.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
-#include "MaterialWarehouse.h"
 #include "MaterialPropertyStorage.h"
 #include "MaterialData.h"
 #include "Assembly.h"
@@ -27,10 +27,11 @@
 #include "libmesh/elem.h"
 
 ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
-                                                     FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
-                                                     std::vector<MaterialData *> & bnd_material_data, MaterialPropertyStorage & material_props,
-                                                     MaterialPropertyStorage & bnd_material_props, std::vector<MaterialWarehouse> & materials,
-                                                     std::vector<Assembly *> & assembly) :
+                                                     FEProblem & fe_problem, NonlinearSystem & sys,
+                                                     std::vector<MooseSharedPointer<MaterialData> > & material_data,
+                                                     std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
+                                                     MaterialPropertyStorage & material_props,
+                                                     MaterialPropertyStorage & bnd_material_props, std::vector<Assembly *> & assembly) :
     ThreadedElementLoop<ConstElemPointerRange>(fe_problem, sys),
     _refine(refine),
     _fe_problem(fe_problem),
@@ -39,7 +40,6 @@ ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
     _bnd_material_data(bnd_material_data),
     _material_props(material_props),
     _bnd_material_props(bnd_material_props),
-    _materials(materials),
     _assembly(assembly),
     _need_internal_side_material(false)
 {
@@ -55,7 +55,6 @@ ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties &
     _bnd_material_data(x._bnd_material_data),
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
-    _materials(x._materials),
     _assembly(x._assembly),
     _need_internal_side_material(x._need_internal_side_material)
 {

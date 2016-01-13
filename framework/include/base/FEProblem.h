@@ -19,7 +19,6 @@
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
 #include "GeometricSearchData.h"
-#include "MaterialWarehouse.h"
 #include "PostprocessorWarehouse.h"
 #include "PostprocessorData.h"
 #include "VectorPostprocessorWarehouse.h"
@@ -59,6 +58,7 @@ class ScalarInitialCondition;
 class Indicator;
 class InternalSideIndicator;
 class Marker;
+class Material;
 
 // libMesh forward declarations
 namespace libMesh
@@ -288,7 +288,6 @@ public:
   virtual void clearDiracInfo();
 
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
-  virtual void subdomainSetupSide(SubdomainID subdomain, THREAD_ID tid);
 
   /**
    * Whether or not this problem should utilize FE shape function caching.
@@ -892,20 +891,19 @@ public:
    */
   unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
+  ///@{
   /*
-   * Return a reference to the MaterialWarehouse
+   * Return a reference to the material warehouse
    */
-  MaterialWarehouse & getMaterialWarehouse(THREAD_ID tid);
+  const MooseObjectWarehouse<Material> & getMaterialWarehouse() { return _materials; }
+  const MooseObjectWarehouse<Material> & getFaceMaterialWarehouse() { return _face_materials; }
+  const MooseObjectWarehouse<Material> & getNeighborMaterialWarehouse() { return _neighbor_materials; }
+  ///@}
 
   /*
    * Return a pointer to the MaterialData
    */
-  MaterialData * getMaterialData(THREAD_ID tid) { return _material_data[tid]; }
-
-  /*
-   * Return a pointer to the MaterialData for boundary properties
-   */
-  MaterialData * getBoundaryMaterialData(THREAD_ID tid) { return _bnd_material_data[tid]; }
+  MooseSharedPointer<MaterialData> getMaterialData(Moose::MaterialDataType, THREAD_ID tid = 0);
 
   ///@{
   /**
@@ -1018,12 +1016,16 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
 
-  std::vector<MaterialData *> _material_data;
-  std::vector<MaterialData *> _bnd_material_data;
-  std::vector<MaterialData *> _neighbor_material_data;
+  std::vector<MooseSharedPointer<MaterialData> > _material_data;
+  std::vector<MooseSharedPointer<MaterialData> > _bnd_material_data;
+  std::vector<MooseSharedPointer<MaterialData> > _neighbor_material_data;
 
-  // materials
-  std::vector<MaterialWarehouse> _materials;
+  ///@{
+  // Material Warehouses
+  MooseObjectWarehouse<Material> _materials;
+  MooseObjectWarehouse<Material> _face_materials;
+  MooseObjectWarehouse<Material> _neighbor_materials;
+  ///@}
 
   ///@{
   // Indicator Warehouses
@@ -1074,6 +1076,12 @@ protected:
 
   void checkUserObjects();
 
+  /**
+   * Helper method for checking Material object dependency.
+   *
+   * @see checkProblemIntegrity
+   */
+  static void checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & materials_map);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();

@@ -201,7 +201,7 @@ private:
   THREAD_ID _bnd_tid;
 
   /// Pointer to MaterialData for boundary (@see hasBoundaryMaterialProperty)
-  MaterialData * _bnd_material_data;
+  MooseSharedPointer<MaterialData> _bnd_material_data;
 
   /**
    * An initialization routine needed for dual constructors

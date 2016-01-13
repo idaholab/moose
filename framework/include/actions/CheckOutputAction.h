@@ -38,11 +38,6 @@ public:
   CheckOutputAction(InputParameters params);
 
   /**
-   * Class destructor
-   */
-  virtual ~CheckOutputAction();
-
-  /**
    * Preforms a set of checks on various Output objects
    */
   virtual void act();

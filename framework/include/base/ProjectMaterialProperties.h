@@ -15,8 +15,8 @@
 #ifndef PROJECTMATERIALPROPERTIES_H
 #define PROJECTMATERIALPROPERTIES_H
 
+// MOOSE includes
 #include "ThreadedElementLoop.h"
-#include "MaterialWarehouse.h"
 
 // libMesh includes
 #include "libmesh/elem_range.h"
@@ -31,9 +31,11 @@ class ProjectMaterialProperties : public ThreadedElementLoop<ConstElemPointerRan
 {
 public:
   ProjectMaterialProperties(bool refine,
-                            FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
-                            std::vector<MaterialData *> & bmd_material_data, MaterialPropertyStorage & material_props,
-                            MaterialPropertyStorage & bnd_material_props, std::vector<MaterialWarehouse> & materials,
+                            FEProblem & fe_problem, NonlinearSystem & sys,
+                            std::vector<MooseSharedPointer<MaterialData> > & material_data,
+                            std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
+                            MaterialPropertyStorage & material_props,
+                            MaterialPropertyStorage & bnd_material_props,
                             std::vector<Assembly *> & assembly);
 
   // Splitting Constructor
@@ -53,11 +55,10 @@ protected:
   bool _refine;
   FEProblem & _fe_problem;
   NonlinearSystem & _sys;
-  std::vector<MaterialData *> & _material_data;
-  std::vector<MaterialData *> & _bnd_material_data;
+  std::vector<MooseSharedPointer<MaterialData> > & _material_data;
+  std::vector<MooseSharedPointer<MaterialData> > & _bnd_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
-  std::vector<MaterialWarehouse> & _materials;
   std::vector<Assembly *> & _assembly;
   bool _need_internal_side_material;
 };

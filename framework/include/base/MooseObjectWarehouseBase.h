@@ -82,6 +82,11 @@ public:
   bool hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
   ///@}
 
+  /**
+   * Return a set of active SubdomainsIDs
+   */
+  std::set<SubdomainID> getActiveBlocks(THREAD_ID tid = 0) const;
+
   ///@{
   /**
    * Convenience functions for checking/getting specific objects
@@ -107,6 +112,7 @@ public:
   void updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   void updateBlockVariableDependency(SubdomainID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   void updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
+  void updateBoundaryVariableDependency(BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   ///@}
 
   /**
@@ -419,6 +425,19 @@ MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID
 
 
 template<typename T>
+std::set<SubdomainID>
+MooseObjectWarehouseBase<T>::getActiveBlocks(THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  std::set<SubdomainID> ids;
+  typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator it;
+  for (it = _active_block_objects[tid].begin(); it != _active_block_objects[tid].end(); ++it)
+    ids.insert(it->first);
+  return ids;
+}
+
+
+template<typename T>
 void
 MooseObjectWarehouseBase<T>::updateActive(THREAD_ID tid /*= 0*/)
 {
@@ -520,6 +539,15 @@ MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(std::set<MooseVari
     for (it = _active_boundary_objects[tid].begin(); it != _active_boundary_objects[tid].end(); ++it)
       updateVariableDependencyHelper(needed_moose_vars, it->second);
   }
+}
+
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+{
+  if (hasActiveBoundaryObjects(id, tid))
+    updateVariableDependencyHelper(needed_moose_vars, getActiveBoundaryObjects(id, tid));
 }
 
 

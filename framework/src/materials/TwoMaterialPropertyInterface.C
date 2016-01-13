@@ -16,14 +16,23 @@
 #include "MaterialData.h"
 #include "InputParameters.h"
 
+template<>
+InputParameters validParams<TwoMaterialPropertyInterface>()
+{
+  // Objects inheriting from TwoMaterialPropertyInterface rely on Boundary MaterialData
+  InputParameters params = validParams<MaterialPropertyInterface>();
+  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::BOUNDARY_MATERIAL_DATA;
+  return params;
+}
+
 TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters) :
     MaterialPropertyInterface(parameters),
-    _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data"))
+    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
 {
 }
 
 TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids) :
     MaterialPropertyInterface(parameters, block_ids),
-    _neighbor_material_data(*parameters.get<MaterialData *>("_neighbor_material_data"))
+    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
 {
 }
