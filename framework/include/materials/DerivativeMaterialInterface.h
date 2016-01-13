@@ -118,16 +118,13 @@ private:
   /// Reference to FEProblem
   FEProblem & _dmi_fe_problem;
 
-  /// Reference to this objects MaterialData object
-  MaterialData & _dmi_material_data;
 };
 
 
 template<class T>
 DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameters & parameters) :
     T(parameters),
-    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _dmi_material_data(*parameters.getCheckedPointerParam<MaterialData *>("_material_data"))
+    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
 }
 

@@ -31,6 +31,8 @@ public:
 
   using MooseObjectWarehouseBase<T>::checkThreadID;
   using MooseObjectWarehouseBase<T>::_active_objects;
+  using MooseObjectWarehouseBase<T>::hasActiveBlockObjects;
+  using MooseObjectWarehouseBase<T>::getActiveBlockObjects;
 
   /**
    * Constructor.
@@ -45,6 +47,7 @@ public:
   virtual void initialSetup(THREAD_ID tid = 0) const;
   virtual void timestepSetup(THREAD_ID tid = 0) const;
   virtual void subdomainSetup(THREAD_ID tid = 0) const;
+  virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
   virtual void jacobianSetup(THREAD_ID tid = 0) const;
   virtual void residualSetup(THREAD_ID tid = 0) const;
   ///@}
@@ -76,6 +79,20 @@ MooseObjectWarehouse<T>::timestepSetup(THREAD_ID tid/* = 0*/) const
   typename std::vector<MooseSharedPointer<T> >::const_iterator it;
   for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
     (*it)->timestepSetup();
+}
+
+
+template<typename T>
+void
+MooseObjectWarehouse<T>::subdomainSetup(SubdomainID id, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  if (hasActiveBlockObjects(id, tid))
+  {
+    const std::vector<MooseSharedPointer<T> > & objects = getActiveBlockObjects(id, tid);
+    for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+      (*it)->subdomainSetup();
+  }
 }
 
 

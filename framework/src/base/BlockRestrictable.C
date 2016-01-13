@@ -38,7 +38,6 @@ InputParameters validParams<BlockRestrictable>()
 
 // Standard constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
-    _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
@@ -51,7 +50,6 @@ BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
 
 // Dual restricted constructor
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids) :
-    _blk_material_data(NULL),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
@@ -79,7 +77,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
 
   // Populate the MaterialData pointer
   if (_blk_feproblem != NULL)
-    _blk_material_data = _blk_feproblem->getMaterialData(_blk_tid);
+    _blk_material_data = _blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
 
   // The 'block' input is defined
   if (parameters.isParamValid("block"))
@@ -263,8 +261,8 @@ bool
 BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
 {
 
-// Reference to MaterialWarehouse for testing and retrieving block ids
-  MaterialWarehouse & material_warehouse = _blk_feproblem->getMaterialWarehouse(_blk_tid);
+  // Reference to MaterialWarehouse for testing and retrieving block ids
+  const MooseObjectWarehouse<Material> & warehouse = _blk_feproblem->getMaterialWarehouse();
 
   // Complete set of ids that this object is active
   const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
@@ -276,10 +274,10 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
     std::set<std::string> declared_props;
 
     // If block materials exist, populated the set of properties that were declared
-    if (material_warehouse.hasMaterials(*id_it))
+    if (warehouse.hasActiveBlockObjects(*id_it))
     {
-      std::vector<Material *> mats = material_warehouse.getMaterials(*id_it);
-      for (std::vector<Material *>::iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBlockObjects(*id_it);
+      for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
       {
         const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
         declared_props.insert(mat_props.begin(), mat_props.end());

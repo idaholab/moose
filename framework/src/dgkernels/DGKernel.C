@@ -35,6 +35,8 @@ template<>
 InputParameters validParams<DGKernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<TwoMaterialPropertyInterface>();
+
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
   params.addPrivateParam<BoundaryID>("_boundary_id", DGKernel::InternalBndId);
 

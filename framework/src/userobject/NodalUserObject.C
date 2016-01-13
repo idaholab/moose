@@ -25,8 +25,7 @@ InputParameters validParams<NodalUserObject>()
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
   params += validParams<RandomInterface>();
-
-  /// \todo{The default for both Boundary and Block Restrictable should be ANY...}
+  params += validParams<MaterialPropertyInterface>();
   return params;
 }
 
@@ -51,4 +50,3 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
   for (unsigned int i=0; i<coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }
-

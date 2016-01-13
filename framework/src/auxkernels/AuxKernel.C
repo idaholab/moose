@@ -34,6 +34,7 @@ InputParameters validParams<AuxKernel>()
   params += validParams<BoundaryRestrictable>();
   params += validParams<RandomInterface>();
   params += validParams<MeshChangedInterface>();
+  params += validParams<MaterialPropertyInterface>();
 
   // Add the SetupInterface parameter, 'execute_on', the default is 'linear'
   params += validParams<SetupInterface>();

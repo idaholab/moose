@@ -26,6 +26,7 @@ template<>
 InputParameters validParams<DiracKernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<MaterialPropertyInterface>();
   params.addRequiredParam<NonlinearVariableName>("variable",
                                                  "The name of the variable that this kernel operates on");
 

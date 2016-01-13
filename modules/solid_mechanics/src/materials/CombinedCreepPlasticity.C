@@ -43,22 +43,22 @@ CombinedCreepPlasticity::initialSetup()
   for (unsigned i(0); i < block_id.size(); ++i)
   {
     std::string suffix;
-    const std::vector<Material*> * mats_p;
+    std::vector<MooseSharedPointer<Material> > const * mats_p;
     if (_bnd)
     {
-      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getFaceMaterials( block_id[i] );
+      mats_p = &_fe_problem.getFaceMaterialWarehouse().getActiveBlockObjects(block_id[i], _tid);
       suffix = "_face";
     }
     else
-      mats_p = &_fe_problem.getMaterialWarehouse(_tid).getMaterials( block_id[i] );
+      mats_p = &_fe_problem.getMaterialWarehouse().getActiveBlockObjects(block_id[i], _tid);
 
-    const std::vector<Material*> & mats = *mats_p;
+    const std::vector<MooseSharedPointer<Material> > & mats = *mats_p;
     for (unsigned int i_name(0); i_name < submodels.size(); ++i_name)
     {
       bool found = false;
       for (unsigned int j=0; j < mats.size(); ++j)
       {
-        ReturnMappingModel * rmm = dynamic_cast<ReturnMappingModel*>(mats[j]);
+        MooseSharedPointer<ReturnMappingModel> rmm = MooseSharedNamespace::dynamic_pointer_cast<ReturnMappingModel>(mats[j]);
         if (rmm && rmm->name() == submodels[i_name] + suffix)
         {
           _submodels[block_id[i]].push_back( rmm );
@@ -105,7 +105,7 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
   stress_new += stress_old;
 
   const SubdomainID current_block = current_elem.subdomain_id();
-  const std::vector<ReturnMappingModel*> & rmm( _submodels[current_block] );
+  const std::vector<MooseSharedPointer<ReturnMappingModel> > & rmm( _submodels[current_block] );
   const unsigned num_submodels = rmm.size();
 
   SymmTensor inelastic_strain_increment;
@@ -170,7 +170,7 @@ CombinedCreepPlasticity::modifyStrainIncrement(const Elem & current_elem, unsign
 {
   bool modified = false;
   const SubdomainID current_block = current_elem.subdomain_id();
-  const std::vector<ReturnMappingModel*> & rmm( _submodels[current_block] );
+  const std::vector<MooseSharedPointer<ReturnMappingModel> > & rmm( _submodels[current_block] );
   const unsigned num_submodels = rmm.size();
 
   for (unsigned i_rmm(0); i_rmm < num_submodels; ++i_rmm)
@@ -179,4 +179,3 @@ CombinedCreepPlasticity::modifyStrainIncrement(const Elem & current_elem, unsign
   }
   return modified;
 }
-
