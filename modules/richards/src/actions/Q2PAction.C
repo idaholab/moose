@@ -133,7 +133,7 @@ Q2PAction::act()
     params.set<NonlinearVariableName>("variable") = _sat_var;
     params.set<std::vector<VariableName> >("porepressure_variable") = std::vector<VariableName>(1, _pp_var);
     params.set<UserObjectName>("fluid_density") = _water_density;
-    params.set<Real>("fluid_viscosity") = _gas_viscosity;
+    params.set<Real>("fluid_viscosity") = _water_viscosity;
     params.set<Real>("diffusivity") = _diffusivity;
     _problem->addKernel(kernel_type, kernel_name, params);
   }
@@ -157,20 +157,20 @@ Q2PAction::act()
   {
     // user wants total masses, so need to build Functions to do this
     InputParameters params = _factory.getValidParams("ParsedFunction");
-    
+
     params.set<std::string>("value") = "a*b";
-    
+
     std::vector<std::string> vars;
     vars.push_back("a");
     vars.push_back("b");
     params.set<std::vector<std::string> >("vars") = vars;
-    
+
     std::vector<std::string> vals_water;
     vals_water.push_back("Q2P_mass_water_divided_by_dt");
     vals_water.push_back("Q2P_dt");
     params.set<std::vector<std::string> >("vals") = vals_water;
     _problem->addFunction("ParsedFunction", "Q2P_water_mass_fcn", params, /*auto_parsed=*/ true);
-    
+
     std::vector<std::string> vals_gas;
     vals_gas.push_back("Q2P_mass_gas_divided_by_dt");
     vals_gas.push_back("Q2P_dt");
@@ -183,7 +183,7 @@ Q2PAction::act()
     // user wants total masses, so need to build Postprocessors to do this
 
     InputParameters params = _factory.getValidParams("TimestepSize");
-    
+
     params.set<MultiMooseEnum>("execute_on") = "timestep_begin";
     params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
     _problem->addPostprocessor("TimestepSize", "Q2P_dt", params);
