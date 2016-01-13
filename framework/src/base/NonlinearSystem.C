@@ -1983,10 +1983,13 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 
           const std::vector<MooseVariable *> & coupled_moose_vars = bc->getCoupledMooseVars();
 
-          // Create the set of "involved" MOOSE vars, which includes all coupled vars and the BC's own variable
+          // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars and the BC's own variable
           std::set<unsigned int> & var_set = bc_involved_vars[bc->name()];
           for (unsigned int var = 0; var < coupled_moose_vars.size(); ++var)
-            var_set.insert(coupled_moose_vars[var]->number());
+          {
+            if (coupled_moose_vars[var]->kind() == Moose::VAR_NONLINEAR)
+              var_set.insert(coupled_moose_vars[var]->number());
+          }
 
           var_set.insert(bc->variable().number());
         }
