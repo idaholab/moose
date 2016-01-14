@@ -59,8 +59,7 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
 
     // for each coupled variable we need to know if it was coupled through "etas"
     // and - if so - which coupled component of "etas" it comes from
-    if (_eta_vars[i] < _number_of_nl_variables)
-      _eta_index[argIndex(_eta_vars[i])] = i;
+    _eta_index[argIndex(_eta_vars[i])] = i;
 
     // barrier function derivatives
     _dg[i] = &getMaterialPropertyDerivative<Real>("g", _eta_names[i]);

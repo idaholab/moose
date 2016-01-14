@@ -43,18 +43,12 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParame
   // initialize derivatives
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    // skip all derivatives w.r.t. auxiliary variables
-    if (_arg_numbers[i] >= _number_of_nl_variables) continue;
-
     // first derivatives
     _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
     // second derivatives
     for (unsigned int j = i; j < _nargs; ++j)
     {
-      // skip all derivatives w.r.t. auxiliary variables
-      if (_arg_numbers[j] >= _number_of_nl_variables) continue;
-
       _prop_d2F[i][j] =
       _prop_d2F[j][i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i], _arg_names[j]);
 
@@ -63,9 +57,6 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParame
       {
         for (unsigned int k = j; k < _nargs; ++k)
         {
-          // skip all derivatives w.r.t. auxiliary variables
-          if (_arg_numbers[k] >= _number_of_nl_variables) continue;
-
           // filling all permutations does not cost us much and simplifies access
           // (no need to check i<=j<=k)
           _prop_d3F[i][j][k] =
@@ -156,4 +147,3 @@ DerivativeFunctionMaterialBase::computeProperties()
     }
   }
 }
-
