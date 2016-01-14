@@ -29,8 +29,8 @@ public:
 
 protected:
 
-  std::map<unsigned int,Real> _IntactBonds;
-  std::map<unsigned int,Real> _BondsNumPerNode;
+  NumericVector<Number> & _IntactBonds;
+  NumericVector<Number> & _TotalBonds;
   const MaterialProperty<Real> & _bond_status_old;
 
 };

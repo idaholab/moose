@@ -7,6 +7,8 @@
 #include "HeatSourcePD.h"
 
 #include "Material.h"
+#include "Function.h"
+#include "Assembly.h"
 #include "SymmElasticityTensor.h"
 using namespace std;
 

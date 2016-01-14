@@ -7,6 +7,7 @@
 #include "StressDivergenceTrussPD.h"
 
 #include "Material.h"
+#include "Assembly.h"
 #include "SymmElasticityTensor.h"
 using namespace std;
 
