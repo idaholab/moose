@@ -63,7 +63,7 @@
     block = 0
   [../]
   [./free_energy]
-    type = MathFreeEnergy
+    type = MathEBFreeEnergy
     block = 0
     f_name = F
     c = c
@@ -90,9 +90,8 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./circle_oversample]
+  [./oversample]
     type = Exodus
-    file_base = MathFreeEnergy_test_oversample
     refinements = 2
   [../]
 []

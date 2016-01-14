@@ -1,0 +1,25 @@
+[Tests]
+  [./MathFreeEnergy]
+    type = 'Exodiff'
+    input = 'MathFreeEnergy.i'
+    exodiff = 'MathFreeEnergy_oversample.e'
+  [../]
+  [./MathFreeEnergy_split]
+    type = 'Exodiff'
+    input = 'MathFreeEnergy_split.i'
+    exodiff = 'MathFreeEnergy_split_out.e'
+    max_parallel = 1                              # -pc_type lu
+  [../]
+
+  [./MathEBFreeEnergy]
+    type = 'Exodiff'
+    input = 'MathEBFreeEnergy.i'
+    exodiff = 'MathEBFreeEnergy_oversample.e'
+  [../]
+  [./MathEBFreeEnergy_split]
+    type = 'Exodiff'
+    input = 'MathEBFreeEnergy_split.i'
+    exodiff = 'MathEBFreeEnergy_split_out.e'
+    max_parallel = 1                              # -pc_type lu
+  [../]
+[]
