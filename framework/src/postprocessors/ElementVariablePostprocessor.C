@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<ElementVariablePostprocessor>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addCoupledVar("variable", "The name of the variable that this postprocessor operates on");
+  params.addRequiredCoupledVar("variable", "The name of the variable that this postprocessor operates on");
   return params;
 }
 
@@ -45,4 +45,3 @@ ElementVariablePostprocessor::execute()
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
     computeQpValue();
 }
-

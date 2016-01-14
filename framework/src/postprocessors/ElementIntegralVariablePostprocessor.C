@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<ElementIntegralVariablePostprocessor>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addCoupledVar("variable", "The name of the variable that this object operates on");
+  params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
@@ -37,4 +37,3 @@ ElementIntegralVariablePostprocessor::computeQpIntegral()
 {
   return _u[_qp];
 }
-
