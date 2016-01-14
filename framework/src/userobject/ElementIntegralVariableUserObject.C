@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<ElementIntegralVariableUserObject>()
 {
   InputParameters params = validParams<ElementIntegralUserObject>();
-  params.addCoupledVar("variable", "The name of the variable that this object operates on");
+  params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
@@ -36,4 +36,3 @@ ElementIntegralVariableUserObject::computeQpIntegral()
 {
   return _u[_qp];
 }
-
