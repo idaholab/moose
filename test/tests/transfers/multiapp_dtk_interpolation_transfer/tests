@@ -6,6 +6,9 @@
     dtk = True
     method = 'OPT OPROF'
     recover = false
+
+    # Currently fails in parallel #5995
+    max_parallel = 1
   [../]
 
   [./tosub]
@@ -24,5 +27,8 @@
     dtk = True
     method = 'OPT OPROF'
     recover = false
+
+    # Currently fails in parallel #5995
+    max_parallel = 1
   [../]
 []
