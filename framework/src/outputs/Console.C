@@ -142,7 +142,7 @@ Console::Console(const InputParameters & parameters) :
   Action * common_action = awh.getActionsByName("common_output")[0];
 
   // Honor the 'print_linear_residuals' option, only if 'execute_on' has not been set by the user
-  if (!parameters.paramSetByUser("execute_on"))
+  if (!parameters.isParamSetByUser("execute_on"))
   {
     if (common_action->getParam<bool>("print_linear_residuals"))
       _execute_on.push_back("linear");
@@ -150,7 +150,7 @@ Console::Console(const InputParameters & parameters) :
       _execute_on.erase("linear");
   }
 
-  if (!_pars.paramSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
+  if (!_pars.isParamSetByUser("perf_log") && common_action->getParam<bool>("print_perf_log"))
   {
     _perf_log = true;
     _solve_log = true;
@@ -269,11 +269,11 @@ Console::initialSetup()
   // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
   if (_execute_on.contains("final"))
   {
-    if (!_pars.paramSetByUser("postprocessor_execute_on"))
+    if (!_pars.isParamSetByUser("postprocessor_execute_on"))
       _advanced_execute_on["postprocessors"].push_back("final");
-    if (!_pars.paramSetByUser("scalars_execute_on"))
+    if (!_pars.isParamSetByUser("scalars_execute_on"))
       _advanced_execute_on["scalars"].push_back("final");
-    if (!_pars.paramSetByUser("vector_postprocessor_execute_on"))
+    if (!_pars.isParamSetByUser("vector_postprocessor_execute_on"))
       _advanced_execute_on["vector_postprocessors"].push_back("final");
   }
 }
