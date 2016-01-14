@@ -16,6 +16,20 @@
 #include "MooseException.h"
 #include "NonlinearSystem.h"
 
+#include "libmesh/threads.h"
+
+/**
+ * Class static initialization:
+ * These members are used to create easily accessed shared memory among threads
+ * without polluting framework classes.
+ *
+ * Note: Due to the use of statics, multiple ExceptionKernels will not
+ * perform independently if used in the same simulation. That case isn't
+ * intended to work anyway.
+ */
+bool ExceptionKernel::_res_has_thrown = false;
+bool ExceptionKernel::_jac_has_thrown = false;
+
 template<>
 InputParameters validParams<ExceptionKernel>()
 {
@@ -28,15 +42,16 @@ InputParameters validParams<ExceptionKernel>()
 
 ExceptionKernel::ExceptionKernel(const InputParameters & parameters) :
     Kernel(parameters),
-    _when(static_cast<WhenType>((int) getParam<MooseEnum>("when"))),
-    _res_has_thrown(false),
-    _jac_has_thrown(false)
+    _when(static_cast<WhenType>((int) getParam<MooseEnum>("when")))
 {
 }
 
 Real
 ExceptionKernel::computeQpResidual()
 {
+  // We need a thread lock here so that we don't introduce a race condition when inspecting or changing the static variable
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mutex);
+
   if (_when == INITIAL_CONDITION)
     throw MooseException("MooseException thrown during initial condition computation");
 
@@ -57,6 +72,9 @@ ExceptionKernel::computeQpResidual()
 Real
 ExceptionKernel::computeQpJacobian()
 {
+  // We need a thread lock here so that we don't introduce a race condition when inspecting or changing the static variable
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mutex);
+
   // Throw on the first nonlinear step of the first timestep -- should
   // hopefully be the same in both serial and parallel.
   if (_when == JACOBIAN && !_jac_has_thrown && time_to_throw())
