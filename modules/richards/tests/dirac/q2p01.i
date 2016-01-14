@@ -67,21 +67,17 @@
 []
 
 
-[Kernels]
-  [./liquid_mass_dot]
-    type = Q2PMassChange
-    variable = sat
-    other_var = pp
-    var_is_porepressure = false
-    fluid_density = DensityWater
-  [../]
-  [./gas_mass_dot]
-    type = Q2PMassChange
-    variable = pp
-    other_var = sat
-    var_is_porepressure = true
-    fluid_density = DensityGas
-  [../]
+[Q2P]
+  porepressure = pp
+  saturation = sat
+  water_density = DensityWater
+  water_relperm = RelPermWater
+  water_viscosity = 0.8
+  gas_density = DensityGas
+  gas_relperm = RelPermGas
+  gas_viscosity = 0.5
+  diffusivity = 0.0
+  output_total_masses_to = 'CSV'
 []
 
 [DiracKernels]
@@ -116,6 +112,7 @@
 []
 
 
+
 [Postprocessors]
   [./bh_report_water]
     type = RichardsPlotQuantity
@@ -125,22 +122,6 @@
     type = RichardsPlotQuantity
     uo = borehole_total_outflow_gas
   [../]
-
-  [./mass_water]
-    type = Q2PMass
-    fluid_density = DensityWater
-    variable = sat
-    var_is_porepressure = false
-    other_var = pp
-  [../]
-  [./mass_gas]
-    type = Q2PMass
-    fluid_density = DensityGas
-    variable = pp
-    var_is_porepressure = true
-    other_var = sat
-  [../]
-
 
   [./p0]
     type = PointValue
@@ -197,8 +178,9 @@
 
 [Outputs]
   file_base = q2p01
-  exodus = false
-  csv = true
+  [./CSV]
+    type = CSV
+  [../]
 []
 
 [Problem]

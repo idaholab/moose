@@ -115,6 +115,12 @@ setting $D=0$ leads to shocks forming in most problems so it is not
 recommended.
 
 
+\section{Actions}
+
+The {\tt Q2P} action includes all the Q2P Kernels below, as well as,
+optionally, nodal mass AuxVariables and total fluid mass
+Postprocessors for mass-balance calculations.
+
 \section{Kernels}
 
 Eqn~(\ref{q2p.eqn}) has five terms (along with the source terms) which
@@ -122,10 +128,25 @@ are encoded in the following kernels.
 
 \begin{itemize}
 
-\item {\tt Q2PMassChange} encodes both $\phi \frac{\partial}{\partial t}
-  \left( \rho_{w} S_{w} \right)$ and $\phi \frac{\partial}{\partial t}
-  \left( \rho_{g} (1 - S_{w}) \right)$.  It is lumped to the nodes.
-  This Kernel requires:
+\item {\tt Q2PNodalMass} encodes both $\phi \rho_{w}
+  S_{w}/{\mathrm{d}}t$ and $\phi \rho_{g} (1 - S_{w})/{\mathrm{d}}t$.
+  It is lumped to the nodes.  It is designed to work with the {\tt
+    Q2PNegativeNodalMassOld} in order to form the time derivative of
+  the fluid masses.  This Kernel requires:
+\begin{itemize}
+\item A Material that defines ``porosity''.
+\item The user to define ``fluid\_density'' which is a RichardsDensity
+  UserObject that defines $\rho$ as a function of $P_{g}$.
+\item The names of the Variables $S_{w}$ and $P_{g}$.
+\item Whether the Variable is porepressure.  This latter flag should
+  be false for the water equation, and true for the gas equation.
+\end{itemize}
+
+\item {\tt Q2PNegativeNodalMassOld} encodes the old values of both
+  $-\phi \rho_{w} S_{w}/{\mathrm{d}}t$ and $-\phi \rho_{g} (1 -
+  S_{w})/{\mathrm{d}}t$.  It is lumped to the nodes.  It is designed
+  to work with the {\tt Q2PNodalMass} in order to form the
+  time derivative of the fluid masses.  This Kernel requires:
 \begin{itemize}
 \item A Material that defines ``porosity''.
 \item The user to define ``fluid\_density'' which is a RichardsDensity

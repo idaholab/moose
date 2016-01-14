@@ -52,38 +52,16 @@
   [../]
 []
 
-
-[Kernels]
-  [./liquid_mass_dot]
-    type = Q2PMassChange
-    variable = swater
-    other_var = pgas
-    var_is_porepressure = false
-    fluid_density = DensityWater
-  [../]
-  [./gas_mass_dot]
-    type = Q2PMassChange
-    variable = pgas
-    other_var = swater
-    var_is_porepressure = true
-    fluid_density = DensityGas
-  [../]
-  [./gas_flux]
-    type = Q2PPorepressureFlux
-    variable = pgas
-    fluid_density = DensityGas
-    saturation_variable = swater
-    fluid_relperm = RelPermGas
-    fluid_viscosity = 1
-  [../]
-  [./water_flux]
-    type = Q2PSaturationFlux
-    variable = swater
-    fluid_density = DensityWater
-    porepressure_variable = pgas
-    fluid_relperm = RelPermWater
-    fluid_viscosity = 1
-  [../]
+[Q2P]
+  porepressure = pgas
+  saturation = swater
+  water_density = DensityWater
+  water_relperm = RelPermWater
+  water_viscosity = 1
+  gas_density = DensityGas
+  gas_relperm = RelPermGas
+  gas_viscosity = 1
+  diffusivity = 0
 []
 
 [Postprocessors]

@@ -135,7 +135,7 @@ Transient::Transient(const InputParameters & parameters) :
   // Either a start_time has been forced on us, or we want to tell the App about what our start time is (in case anyone else is interested.
   if (_app.hasStartTime())
     _start_time = _app.getStartTime();
-  else if (parameters.paramSetByUser("start_time"))
+  else if (parameters.isParamSetByUser("start_time"))
     _app.setStartTime(_start_time);
 
   _time = _time_old = _start_time;

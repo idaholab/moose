@@ -498,10 +498,15 @@ public:
   void applyParameters(const InputParameters & common, std::vector<std::string> exclude = std::vector<std::string>());
 
   /**
+   * Deprecated method.  Use isParamSetByUser() instead.
+   */
+  bool paramSetByUser(const std::string & name) const;
+
+  /**
    * Method returns true if the parameter was by the user
    * @param name The parameter name
    */
-  bool paramSetByUser(const std::string & name) const;
+  bool isParamSetByUser(const std::string & name) const;
 
   ///@{
   /*

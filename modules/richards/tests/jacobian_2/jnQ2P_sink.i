@@ -92,37 +92,16 @@
   [../]
 []
 
-[Kernels]
-  [./liquid_mass_dot]
-    type = Q2PMassChange
-    variable = sat
-    other_var = pp
-    var_is_porepressure = false
-    fluid_density = DensityWater
-  [../]
-  [./gas_mass_dot]
-    type = Q2PMassChange
-    variable = pp
-    other_var = sat
-    var_is_porepressure = true
-    fluid_density = DensityGas
-  [../]
-  [./liquid_flux]
-    type = Q2PSaturationFlux
-    variable = sat
-    fluid_density = DensityWater
-    porepressure_variable = pp
-    fluid_relperm = RelPermWater
-    fluid_viscosity = 1
-  [../]
-  [./gas_flux]
-    type = Q2PPorepressureFlux
-    variable = pp
-    fluid_density = DensityGas
-    saturation_variable = sat
-    fluid_relperm = RelPermGas
-    fluid_viscosity = 1
-  [../]
+[Q2P]
+  porepressure = pp
+  saturation = sat
+  water_density = DensityWater
+  water_relperm = RelPermWater
+  water_viscosity = 1
+  gas_density = DensityGas
+  gas_relperm = RelPermGas
+  gas_viscosity = 1
+  diffusivity = 0
 []
 
 [Materials]
