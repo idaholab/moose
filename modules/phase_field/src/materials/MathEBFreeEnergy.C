@@ -11,7 +11,7 @@ InputParameters validParams<MathEBFreeEnergy>()
 {
   InputParameters params = validParams<DerivativeParsedMaterialHelper>();
   params.addClassDescription("Material that implements the math free energy using the expression builder and automatric differentiation");
-  params.addRequiredCoupledVar("c","Concentration variable");
+  params.addRequiredCoupledVar("c", "Concentration variable");
   return params;
 }
 
@@ -20,10 +20,9 @@ MathEBFreeEnergy::MathEBFreeEnergy(const InputParameters & parameters) :
     _c("c")
 {
   EBFunction free_energy;
-  //Definition of the free energy for the expression builder
-  free_energy(_c) = 1.0/4.0*( 1.0 + _c )*( 1.0 + _c )*( 1.0 - _c )*( 1.0 - _c );
+  // Definition of the free energy for the expression builder
+  free_energy(_c) = 1.0 / 4.0 * (1.0 + _c) * (1.0 + _c) * (1.0 - _c) * (1.0 - _c);
 
-  //Parse function for automatic differentiation
+  // Parse function for automatic differentiation
   functionParse(free_energy);
 }
-
