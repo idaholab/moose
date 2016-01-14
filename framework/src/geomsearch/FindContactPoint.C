@@ -222,7 +222,8 @@ findContactPoint(PenetrationInfo & p_info,
   else
   {
     p_info._normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
-    p_info._normal /= p_info._normal.size();
+    if (std::fabs(p_info._normal.size()) > 1e-15)
+      p_info._normal /= p_info._normal.size();
   }
 
   // If the point has not penetrated the face, make the distance negative
