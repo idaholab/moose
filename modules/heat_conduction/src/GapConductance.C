@@ -124,15 +124,14 @@ void GapConductance::setGapGeometryParameters(const InputParameters & params,
                                               Point & p1,
                                               Point & p2)
 {
-  if (params.isParamValid("gap_geometry_type"))
+  if (params.isParamSetByUser("gap_geometry_type"))
   {
     gap_geometry_type = GapConductance::GAP_GEOMETRY(int(params.get<MooseEnum>("gap_geometry_type")));
-    if (params.isParamValid("coord_type"))
+    if (params.isParamSetByUser("coord_type"))
       mooseError("Deprecated parameter 'coord_type' cannot be used together with 'gap_geometry_type' in GapConductance");
   }
-  else if (params.isParamValid("coord_type"))
+  else if (params.isParamSetByUser("coord_type"))
   {
-    mooseWarning("Parameter 'coord_type' in GapConductance is deprecated.  Use 'gap_geometry_type' instead.");
     if (params.get<MooseEnum>("coord_type") == "XYZ")
       gap_geometry_type = GapConductance::PLATE;
     else
