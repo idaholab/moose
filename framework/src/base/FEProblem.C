@@ -3363,6 +3363,7 @@ FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector
   }
   catch(MooseException & e)
   {
+    mooseError("Impossible");
     // Blank on purpose because this error should have already been dealt with
   }
 }

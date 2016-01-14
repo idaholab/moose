@@ -23,6 +23,15 @@
 class SystemBase;
 
 /**
+ * This mutex is used by all derived classes of the ThreadedElementLoop. It
+ * is necessary to protect the creation of the strings used in the propogation
+ * of the error messages.  It's possible for a thread to have acquired the
+ * commonly used mutex in the Threads namespace so this one is here to
+ * avoid any deadlocking.
+ */
+static Threads::spin_mutex threaded_element_mutex;
+
+/**
  * Base class for assembly-like calculations.
  */
 template<typename RangeType>
@@ -35,7 +44,7 @@ public:
 
   virtual ~ThreadedElementLoop();
 
-  virtual void caughtMooseException(MooseException & e) { std::string what(e.what()); _fe_problem.setException(what); };
+  virtual void caughtMooseException(MooseException & e);
 
   virtual bool keepGoing() { return !_fe_problem.hasException(); }
 protected:
@@ -64,5 +73,16 @@ template<typename RangeType>
 ThreadedElementLoop<RangeType>::~ThreadedElementLoop()
 {
 }
+
+template<typename RangeType>
+void
+ThreadedElementLoop<RangeType>::caughtMooseException(MooseException & e)
+{
+  Threads::spin_mutex::scoped_lock lock(threaded_element_mutex);
+
+  std::string what(e.what());
+  _fe_problem.setException(what);
+};
+
 
 #endif //THREADEDELEMENTLOOP_H
