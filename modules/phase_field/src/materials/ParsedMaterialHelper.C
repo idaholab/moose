@@ -64,9 +64,10 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   addFParserConstants(_func_F, constant_names, constant_expressions);
 
   // add further constants coming from default value coupling
-  for (std::vector<std::string>::iterator it = _arg_constant_defaults.begin(); it != _arg_constant_defaults.end(); ++it)
-    if (!_func_F->AddConstant(*it, _pars.defaultCoupledValue(*it)))
-      mooseError("Invalid constant name in parsed function object");
+  if (_map_mode == USE_PARAM_NAMES)
+    for (std::vector<std::string>::iterator it = _arg_constant_defaults.begin(); it != _arg_constant_defaults.end(); ++it)
+      if (!_func_F->AddConstant(*it, _pars.defaultCoupledValue(*it)))
+        mooseError("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
   switch (_map_mode)
