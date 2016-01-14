@@ -22,4 +22,26 @@
     exodiff = 'MathEBFreeEnergy_split_out.e'
     max_parallel = 1                              # -pc_type lu
   [../]
+
+  [./RegularSolutionFreeEnergy]
+    type = 'Exodiff'
+    input = 'RegularSolutionFreeEnergy.i'
+    exodiff = 'RegularSolutionFreeEnergy_out.e'
+  [../]
+
+  [./RegularSolutionFreeEnergy_const_T_default]
+    type = 'Exodiff'
+    prereq =
+    input = 'RegularSolutionFreeEnergy_const_T.i'
+    exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
+    Materials/free_energy/T=301
+  [../]
+
+  [./RegularSolutionFreeEnergy_const_T_specified]
+    type = 'Exodiff'
+    prereq = 'RegularSolutionFreeEnergy_const_T_default'
+    input = 'RegularSolutionFreeEnergy_const_T.i'
+    exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
+    cli_args = Materials/free_energy/T=300
+  [../]
 []
