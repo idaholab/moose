@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<SideIntegralVariableUserObject>()
 {
   InputParameters params = validParams<SideIntegralUserObject>();
-  params.addCoupledVar("variable", "The name of the variable that this boundary condition applies to");
+  params.addRequiredCoupledVar("variable", "The name of the variable that this boundary condition applies to");
   return params;
 }
 
@@ -36,4 +36,3 @@ SideIntegralVariableUserObject::computeQpIntegral()
 {
   return _u[_qp];
 }
-
