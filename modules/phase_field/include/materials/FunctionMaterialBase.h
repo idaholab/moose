@@ -68,6 +68,9 @@ protected:
   /// String vector of the input file coupling parameter name for each argument.
   std::vector<std::string> _arg_param_names;
 
+  /// coupled variables with default values
+  std::vector<std::string> _arg_constant_defaults;
+
   /// Calculate (and allocate memory for) the third derivatives of the free energy.
   bool _third_derivatives;
 

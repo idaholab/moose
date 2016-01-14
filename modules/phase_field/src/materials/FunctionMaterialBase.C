@@ -24,11 +24,18 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters) :
   _mapping_is_unique = true;
   for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin(); it != _pars.coupledVarsEnd(); ++it)
   {
+    // find the variable in the list of coupled variables
     std::map<std::string, std::vector<MooseVariable *> >::iterator vars = _coupled_vars.find(*it);
 
-    // no MOOSE variable was provided for this coupling, skip derivatives w.r.t. this variable
+    // no MOOSE variable was provided for this coupling, add to a list of variables set to constant default values
     if (vars == _coupled_vars.end())
+    {
+      // check if a default value was provided
+      std::map<std::string, VariableValue *>::iterator default_value_it = Coupleable::_default_value.find(*it);
+      if (default_value_it != Coupleable::_default_value.end())
+        _arg_constant_defaults.push_back(*it);
       continue;
+    }
 
     // check if we have a 1:1 mapping between parameters and variables
     if (vars->second.size() != 1)
