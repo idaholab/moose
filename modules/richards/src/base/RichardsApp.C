@@ -11,6 +11,9 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// Actions
+#include "Q2PAction.h"
+
 // UserObjects
 #include "RichardsVarNames.h"
 #include "RichardsDensityConstBulk.h"
@@ -77,7 +80,6 @@
 #include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
 #include "RichardsPlotQuantity.h"
-#include "Q2PMass.h"
 
 // Kernels
 #include "RichardsMassChange.h"
@@ -90,7 +92,8 @@
 #include "Q2PPorepressureFlux.h"
 #include "Q2PSaturationFlux.h"
 #include "Q2PSaturationDiffusion.h"
-#include "Q2PMassChange.h"
+#include "Q2PNodalMass.h"
+#include "Q2PNegativeNodalMassOld.h"
 
   // BoundaryConditions
 #include "RichardsExcav.h"
@@ -199,7 +202,6 @@ RichardsApp::registerObjects(Factory & factory)
   registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
   registerPostprocessor(RichardsPlotQuantity);
-  registerPostprocessor(Q2PMass);
 
   // Kernels
   registerKernel(RichardsMassChange);
@@ -212,7 +214,8 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(Q2PPorepressureFlux);
   registerKernel(Q2PSaturationFlux);
   registerKernel(Q2PSaturationDiffusion);
-  registerKernel(Q2PMassChange);
+  registerKernel(Q2PNodalMass);
+  registerKernel(Q2PNegativeNodalMassOld);
 
   // BoundaryConditions
   registerBoundaryCondition(RichardsExcav);
@@ -225,6 +228,15 @@ RichardsApp::registerObjects(Factory & factory)
 }
 
 void
-RichardsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_kernel");
+  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_aux_variable");
+  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_function");
+  syntax.registerActionSyntax("Q2PAction", "Q2P", "add_postprocessor");
+
+  registerAction(Q2PAction, "add_kernel");
+  registerAction(Q2PAction, "add_aux_variable");
+  registerAction(Q2PAction, "add_function");
+  registerAction(Q2PAction, "add_postprocessor");
 }
