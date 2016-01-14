@@ -161,9 +161,9 @@ class RunApp(Tester):
     # Lower the ceiling
     ncpus = min(ncpus, int(self.specs['max_parallel']))
 
-    #Set number of threads to be used lower bound
+    # Set number of threads to be used lower bound
     nthreads = max(options.nthreads, int(self.specs['min_threads']))
-    #Set number of threads to be used upper bound
+    # Set number of threads to be used upper bound
     nthreads = min(nthreads, int(self.specs['max_threads']))
 
     extra_args = ''
@@ -199,6 +199,12 @@ class RunApp(Tester):
 
     # Convert TEST_NAME to input tests file name (normally just 'tests')
     self.specs['no_copy'] = options.input_file_name
+
+    # Are we using the PBS Emulator? Make this param valid if so.
+    # The cluster_launcher will fill in the rest
+    if options.PBSEmulator:
+      self.specs['pbs_stdout'] = 'PBS_EMULATOR'
+      self.specs['pbs_stderr'] = 'PBS_EMULATOR'
 
     # Do all of the replacements for the valid parameters
     for spec in self.specs.valid_keys():
