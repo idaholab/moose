@@ -61,4 +61,11 @@
     exodiff = 'PLC_LSH_plc_out.e'
     prereq = plc
   [../]
+
+  [./tempdepys]
+    type = Exodiff
+    input = PLSH_smallstrain_tempdepyield.i
+    exodiff = PLSH_smallstrain_tempdepyield_out.e
+    abs_zero = 1e-9
+  [../]
 []
