@@ -38,8 +38,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
     _tangential_tolerance(0.0),
     _do_normal_smoothing(false),
     _normal_smoothing_distance(0.0),
-    _normal_smoothing_method(NSM_EDGE_BASED),
-    _skip_off_process_slaves(false)
+    _normal_smoothing_method(NSM_EDGE_BASED)
 {
   // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional element
   // This is a time savings so that the thread objects don't do this themselves multiple times
@@ -106,8 +105,7 @@ PenetrationLocator::detectPenetration()
                        _mesh.nodeToElemMap(),
                        elem_list,
                        side_list,
-                       id_list,
-                       _skip_off_process_slaves);
+                       id_list);
 
   Threads::parallel_reduce(slave_node_range, pt);
 
@@ -182,9 +180,4 @@ PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
   else
     mooseError("Invalid normal_smoothing_method: "<<nsmString);
   _do_normal_smoothing = true;
-}
-
-void PenetrationLocator::skipOffProcessSlaveNodes( bool skip_them )
-{
-  _skip_off_process_slaves = skip_them;
 }
