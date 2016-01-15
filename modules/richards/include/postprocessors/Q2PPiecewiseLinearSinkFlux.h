@@ -66,7 +66,7 @@ protected:
 
   /// saturation variable, optional
   VariableValue & _sat;
-    
+
   /// medium permeability
   const MaterialProperty<RealTensorValue> & _permeability;
 };
