@@ -9,14 +9,14 @@
 template<>
 InputParameters validParams<AllenCahn>()
 {
-  InputParameters params = validParams<ACBulk>();
+  InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
   params.addRequiredParam<MaterialPropertyName>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;
 }
 
 AllenCahn::AllenCahn(const InputParameters & parameters) :
-    ACBulk(parameters),
+    ACBulk<Real>(parameters),
     _nvar(_coupled_moose_vars.size()),
     _dFdEta(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _d2FdEta2(getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name()))

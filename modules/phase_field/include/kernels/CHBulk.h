@@ -11,11 +11,14 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-/** This is the Cahn-Hilliard equation base class that implements the bulk or local energy term of the equation.
- *  See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
- *  Note that the function computeGradDFDCons MUST be overridden in any kernel that inherits from
- *  CHBulk.  Use CHMath as an example of how this works.
- **/
+/**
+ * This is the Cahn-Hilliard equation base class that implements the bulk or
+ * local energy term of the equation. It is templated on the type of the mobility,
+ * which can be either a number (Real) or a tensor (RealValueTensor).
+ * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
+ * Note that the function computeGradDFDCons MUST be overridden in any kernel that inherits from
+ * CHBulk. Use CHMath as an example of how this works.
+ */
 template<typename T>
 class CHBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
 {
@@ -23,6 +26,7 @@ public:
   CHBulk(const InputParameters & parameters);
 
   static InputParameters validParams();
+  virtual void initialSetup();
 
 protected:
   virtual RealGradient precomputeQpResidual();
@@ -37,11 +41,16 @@ protected:
 
   virtual RealGradient computeGradDFDCons(PFFunctionType type) = 0;
 
+  /// Mobility
   const MaterialProperty<T> & _M;
+
+  /// Mobility derivative w.r.t. concentration
   const MaterialProperty<T> & _dMdc;
 
+  /// Mobility derivative w.r.t coupled variables
   std::vector<const MaterialProperty<T> *> _dMdarg;
 };
+
 
 template<typename T>
 CHBulk<T>::CHBulk(const InputParameters & parameters) :
@@ -69,6 +78,13 @@ CHBulk<T>::validParams()
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
   params.addCoupledVar("args", "Vector of arguments of the mobility");
   return params;
+}
+
+template<typename T>
+void
+CHBulk<T>::initialSetup()
+{
+  validateNonlinearCoupling<Real>("mob_name");
 }
 
 template<typename T>

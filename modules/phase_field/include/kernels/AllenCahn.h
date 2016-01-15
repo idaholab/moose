@@ -20,7 +20,7 @@ InputParameters validParams<AllenCahn>();
  * provided by a DerivativeParsedMaterial to computer the
  * residual for the bulk part of the Allen-Cahn equation.
  */
-class AllenCahn : public ACBulk
+class AllenCahn : public ACBulk<Real>
 {
 public:
   AllenCahn(const InputParameters & parameters);

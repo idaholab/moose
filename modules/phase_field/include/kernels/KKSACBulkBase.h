@@ -21,7 +21,7 @@ InputParameters validParams<KKSACBulkBase>();
  *
  * The non-linear variable for this Kernel is the order parameter 'eta'.
  */
-class KKSACBulkBase : public ACBulk
+class KKSACBulkBase : public ACBulk<Real>
 {
 public:
   KKSACBulkBase(const InputParameters & parameters);
