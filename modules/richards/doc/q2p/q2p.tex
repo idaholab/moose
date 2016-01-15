@@ -261,7 +261,9 @@ entries in the Q2P setting.
 
 \subsection{Postprocessors}
 
-The ``Q2PMass'' records the water or gas mass.  It is not lumped.
+The ``Q2PPiecewiseLinearSinkFlux'' records the water or gas mass flow
+into a Q2PPiecewiseLinearSink, in the same way as
+RichardsPiecewiseLinearSinkFlux.
 
 
 
@@ -269,12 +271,19 @@ The ``Q2PMass'' records the water or gas mass.  It is not lumped.
 \chapter{Tests}
 %%%
 
+\section{Jacobians}
+
 The Jacobian of all the Kernels, DiracKernels and BCs are tested.
 
+\section{Hydrostatic head}
+
 It is demonstrated that Q2P's steady-state is hydrostatic head as
-expected.
+expected (the test is called gravity\_head\_2.ghQ2P\_pgas).
+
+\section{Q2PBorehole}
 
 The flow rates of gas and water into a production borehole are tested
+(in test dirac.q2p01)
 and found to be in agreement with expectations as shown in
 Figure~\ref{bh.fig}.  At the same time, mass conservation is tested.
 
@@ -285,6 +294,24 @@ Figure~\ref{bh.fig}.  At the same time, mass conservation is tested.
   MOOSE implementation agrees with the expected results.}
 \label{bh.fig}
 \end{figure}
+
+\section{Q2PPiecewiseLinearSink}
+
+The flow rates from Q2PPiecewiseLinearSink, and those recorded by
+Q2PPiecewiseLinearSinkFlux, are tested in sinks.q2p01.  Mass balances
+are shown to be correct.  Fluxes of water and gas with and without
+relative permeability and density contributions are shown to be as
+expected.  See an example in Figure~\ref{q2p01_sink.fig}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=8cm]{q2p01_sink.eps}
+\caption{Flux into a Q2PPiecewiseLinearSink as calculated by one of
+  the sinks in sinks.q2p01.  The
+  MOOSE implementation agrees with the expected results.}
+\label{q2p01_sink.fig}
+\end{figure}
+
 
 
 
