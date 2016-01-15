@@ -52,7 +52,7 @@
     variable = gr0
   [../]
   [./gr0bulk]
-    type = ACParsed
+    type = AllenCahn
     variable = gr0
     f_name = F
     args = gr1
@@ -67,7 +67,7 @@
     variable = gr1
   [../]
   [./gr1bulk]
-    type = ACParsed
+    type = AllenCahn
     variable = gr1
     f_name = F
     args = gr0

@@ -57,8 +57,8 @@
     variable = w
     mob_name = M
   [../]
-  [./ACParsed]
-    type = ACParsed
+  [./AllenCahn]
+    type = AllenCahn
     variable = w
     mob_name = M
     f_name = fbulk
