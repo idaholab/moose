@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ACParsed.h"
+#include "AllenCahn.h"
 
 template<>
-InputParameters validParams<ACParsed>()
+InputParameters validParams<AllenCahn>()
 {
   InputParameters params = validParams<ACBulk>();
   params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
@@ -15,7 +15,7 @@ InputParameters validParams<ACParsed>()
   return params;
 }
 
-ACParsed::ACParsed(const InputParameters & parameters) :
+AllenCahn::AllenCahn(const InputParameters & parameters) :
     ACBulk(parameters),
     _nvar(_coupled_moose_vars.size()),
     _dFdEta(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
@@ -30,14 +30,14 @@ ACParsed::ACParsed(const InputParameters & parameters) :
 }
 
 void
-ACParsed::initialSetup()
+AllenCahn::initialSetup()
 {
   ACBulk::initialSetup();
   validateNonlinearCoupling<Real>("f_name");
 }
 
 Real
-ACParsed::computeDFDOP(PFFunctionType type)
+AllenCahn::computeDFDOP(PFFunctionType type)
 {
   switch (type)
   {
@@ -52,7 +52,7 @@ ACParsed::computeDFDOP(PFFunctionType type)
 }
 
 Real
-ACParsed::computeQpOffDiagJacobian(unsigned int jvar)
+AllenCahn::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
   unsigned int cvar;

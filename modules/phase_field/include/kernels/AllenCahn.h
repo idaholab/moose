@@ -4,26 +4,26 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef ACPARSED_H
-#define ACPARSED_H
+#ifndef ALLENCAHN_H
+#define ALLENCAHN_H
 
 #include "ACBulk.h"
 
 //Forward Declarations
-class ACParsed;
+class AllenCahn;
 
 template<>
-InputParameters validParams<ACParsed>();
+InputParameters validParams<AllenCahn>();
 
 /**
- * ACParsed uses the Free Energy function and derivatives
+ * AllenCahn uses the Free Energy function and derivatives
  * provided by a DerivativeParsedMaterial to computer the
  * residual for the bulk part of the Allen-Cahn equation.
  */
-class ACParsed : public ACBulk
+class AllenCahn : public ACBulk
 {
 public:
-  ACParsed(const InputParameters & parameters);
+  AllenCahn(const InputParameters & parameters);
 
   virtual void initialSetup();
 
@@ -39,4 +39,4 @@ private:
   std::vector<const MaterialProperty<Real> *> _d2FdEtadarg;
 };
 
-#endif // ACPARSED_H
+#endif //ALLENCAHN_H
