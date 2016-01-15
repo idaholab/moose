@@ -80,6 +80,7 @@
 #include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
 #include "RichardsPlotQuantity.h"
+#include "Q2PPiecewiseLinearSinkFlux.h"
 
 // Kernels
 #include "RichardsMassChange.h"
@@ -202,6 +203,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
   registerPostprocessor(RichardsPlotQuantity);
+  registerPostprocessor(Q2PPiecewiseLinearSinkFlux);
 
   // Kernels
   registerKernel(RichardsMassChange);
