@@ -129,6 +129,10 @@ class TestHarness:
 
     try:
       # PBS STUFF
+      if self.options.pbs:
+        # Check to see if we are using the PBS Emulator.
+        # Its expensive, so it must remain outside of the os.walk for loop.
+        self.options.PBSEmulator = self.checkPBSEmulator()
       if self.options.pbs and os.path.exists(self.options.pbs):
         self.options.processingPBS = True
         self.processPBSResults()
@@ -397,6 +401,21 @@ class TestHarness:
       return True
 
 # PBS Defs
+
+  def checkPBSEmulator(self):
+    try:
+      qstat_process = subprocess.Popen(['qstat', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      qstat_output = qstat_process.communicate()
+    except OSError:
+      # qstat binary is not available
+      print 'qstat not available. Perhaps you need to load the PBS module?'
+      sys.exit(1)
+    if len(qstat_output[1]):
+      # The PBS Emulator has no --version argument, and thus returns output to stderr
+      return True
+    else:
+      return False
+
   def processPBSResults(self):
     # If batch file exists, check the contents for pending tests.
     if os.path.exists(self.options.pbs):
