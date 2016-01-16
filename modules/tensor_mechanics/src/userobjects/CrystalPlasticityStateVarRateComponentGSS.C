@@ -4,29 +4,31 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "CrystalPlasticityStateVariableEvolutionRateComponentGSS.h"
+#include "CrystalPlasticityStateVarRateComponentGSS.h"
 
 template<>
-InputParameters validParams<CrystalPlasticityStateVariableEvolutionRateComponentGSS>()
+InputParameters validParams<CrystalPlasticityStateVarRateComponentGSS>()
 {
-  InputParameters params = validParams<CrystalPlasticityStateVariableEvolutionRateComponent>();
+  InputParameters params = validParams<CrystalPlasticityStateVarRateComponent>();
   params.addParam<std::string>("uo_slip_rate_name", "Name of slip rate property: Same as slip rate user object specified in input file.");
   params.addParam<std::string>("uo_state_var_name", "Name of state variable property: Same as state variable user object specified in input file.");
+  params.addParam<FileName>("slip_sys_hard_prop_file_name", "", "Name of the file containing the values of hardness evolution parameters");
   params.addParam<std::vector<Real> >("hprops", "Hardening properties");
   params.addClassDescription("Phenomenological constitutive model state variable evolution rate component base class.  Override the virtual functions in your class");
   return params;
 }
 
-CrystalPlasticityStateVariableEvolutionRateComponentGSS::CrystalPlasticityStateVariableEvolutionRateComponentGSS(const InputParameters & parameters) :
-    CrystalPlasticityStateVariableEvolutionRateComponent(parameters),
+CrystalPlasticityStateVarRateComponentGSS::CrystalPlasticityStateVarRateComponentGSS(const InputParameters & parameters) :
+    CrystalPlasticityStateVarRateComponent(parameters),
     _mat_prop_slip_rate(getMaterialProperty<std::vector<Real> >(parameters.get<std::string>("uo_slip_rate_name"))),
     _mat_prop_state_var(getMaterialProperty<std::vector<Real> >(parameters.get<std::string>("uo_state_var_name"))),
+    _slip_sys_hard_prop_file_name(getParam<FileName>("slip_sys_hard_prop_file_name")),
     _hprops(getParam<std::vector<Real> >("hprops"))
 {
 }
 
 bool
-CrystalPlasticityStateVariableEvolutionRateComponentGSS::calcStateVariableEvolutionRateComponent(unsigned int qp, std::vector<Real> & val) const
+CrystalPlasticityStateVarRateComponentGSS::calcStateVariableEvolutionRateComponent(unsigned int qp, std::vector<Real> & val) const
 {
   val.assign(_variable_size, 0.0);
 

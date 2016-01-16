@@ -168,6 +168,12 @@ public:
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
+  virtual void rotate(RealTensorValue & R);
+
+  /**
+   * Rotate the tensor using
+   * C_ijkl = R_im R_in R_ko R_lp C_mnop
+   */
   virtual void rotate(const RankTwoTensor & R);
 
   /**
@@ -327,6 +333,5 @@ RankFourTensor::rotate(T & R)
           _vals[i][j][k][l] = sum;
         }
 }
-
 
 #endif //RANKFOURTENSOR_H

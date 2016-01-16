@@ -4,22 +4,22 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef CRYSTALPLASTICITYSTATEVARIABLEEVOLUTIONRATECOMPONENTGSS_H
-#define CRYSTALPLASTICITYSTATEVARIABLEEVOLUTIONRATECOMPONENTGSS_H
+#ifndef CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H
+#define CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H
 
-#include "CrystalPlasticityStateVariableEvolutionRateComponent.h"
+#include "CrystalPlasticityStateVarRateComponent.h"
 
-class CrystalPlasticityStateVariableEvolutionRateComponentGSS;
+class CrystalPlasticityStateVarRateComponentGSS;
 
-template<>InputParameters validParams<CrystalPlasticityStateVariableEvolutionRateComponentGSS>();
+template<>InputParameters validParams<CrystalPlasticityStateVarRateComponentGSS>();
 
 /**
  * Phenomenological constitutive model state variable evolution rate component userobject class.
  */
-class CrystalPlasticityStateVariableEvolutionRateComponentGSS : public CrystalPlasticityStateVariableEvolutionRateComponent
+class CrystalPlasticityStateVarRateComponentGSS : public CrystalPlasticityStateVarRateComponent
 {
  public:
-  CrystalPlasticityStateVariableEvolutionRateComponentGSS(const InputParameters & parameters);
+  CrystalPlasticityStateVarRateComponentGSS(const InputParameters & parameters);
 
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp, std::vector<Real> & val) const;
 
@@ -27,7 +27,10 @@ class CrystalPlasticityStateVariableEvolutionRateComponentGSS : public CrystalPl
   const MaterialProperty<std::vector<Real> > &  _mat_prop_slip_rate;
   const MaterialProperty<std::vector<Real> > & _mat_prop_state_var;
 
+  /// The hardening parameters in this class are read from .i file. The user can override to read from file.
+  std::string _slip_sys_hard_prop_file_name;
+
   std::vector<Real> _hprops;
 };
 
-#endif // CRYSTALPLASTICITYSTATEVARIABLEEVOLUTIONRATECOMPONENTGSS_H
+#endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H

@@ -98,7 +98,7 @@
 #include "CrystalPlasticitySlipRateGSS.h"
 #include "CrystalPlasticitySlipResistanceGSS.h"
 #include "CrystalPlasticityStateVariableGSS.h"
-#include "CrystalPlasticityStateVariableEvolutionRateComponentGSS.h"
+#include "CrystalPlasticityStateVarRateComponentGSS.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -207,7 +207,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrystalPlasticitySlipRateGSS);
   registerUserObject(CrystalPlasticitySlipResistanceGSS);
   registerUserObject(CrystalPlasticityStateVariableGSS);
-  registerUserObject(CrystalPlasticityStateVariableEvolutionRateComponentGSS);
+  registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);

@@ -914,6 +914,42 @@ RankTwoTensor::syev(const char * calculation_type, std::vector<PetscScalar> & ei
 }
 
 void
+RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
+{
+  const RankTwoTensor &a = *this;
+  RankTwoTensor c, diag, evec;
+  PetscScalar cmat[N][N], work[10];
+  PetscReal w[N];
+
+  // prepare data for the LAPACKsyev_ routine (which comes from petscblaslapack.h)
+  PetscBLASInt nd = N,
+               lwork = 10,
+               info;
+
+  c = a.transpose() * a;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      cmat[i][j] = c(i,j);
+
+  LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
+
+  if (info != 0)
+    mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
+
+  diag.zero();
+
+  for (unsigned int i = 0; i < N; ++i)
+    diag(i,i) = std::pow(w[i], 0.5);
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      evec(i,j) = cmat[i][j];
+
+  rot = a * ((evec.transpose() * diag * evec).inverse());
+}
+
+void
 RankTwoTensor::initRandom( unsigned int rand_seed )
 {
   MooseRandom::seed( rand_seed );

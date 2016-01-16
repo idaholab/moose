@@ -4,26 +4,26 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef CRYSTALPLASTICITYSTATEVARIABLEEVOLUTIONRATECOMPONENT_H
-#define CRYSTALPLASTICITYSTATEVARIABLEEVOLUTIONRATECOMPONENT_H
+#ifndef CRYSTALPLASTICITYSTATEVARRATECOMPONENT_H
+#define CRYSTALPLASTICITYSTATEVARRATECOMPONENT_H
 
 #include "CrystalPlasticityUOBase.h"
 
-class CrystalPlasticityStateVariableEvolutionRateComponent;
+class CrystalPlasticityStateVarRateComponent;
 
-template<>InputParameters validParams<CrystalPlasticityStateVariableEvolutionRateComponent>();
+template<>InputParameters validParams<CrystalPlasticityStateVarRateComponent>();
 
 /**
  * Crystal plasticity state variable evolution rate component userobject base class.
  * The virtual functions written below must be
  * over-ridden in derived classes to provide actual values
  */
-class CrystalPlasticityStateVariableEvolutionRateComponent : public CrystalPlasticityUOBase
+class CrystalPlasticityStateVarRateComponent : public CrystalPlasticityUOBase
 {
- public:
-   CrystalPlasticityStateVariableEvolutionRateComponent(const InputParameters & parameters);
+public:
+   CrystalPlasticityStateVarRateComponent(const InputParameters & parameters);
 
    virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp, std::vector<Real> & val) const = 0;
 };
 
-#endif // CRYSTALPLASTICITYSTATEVARIABLEEVOLUTIONRATECOMPONENT_H
+#endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENT_H

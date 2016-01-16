@@ -152,7 +152,7 @@
     scale_factor = 1.0
   [../]
   [./state_var_evol_rate_comp_gss]
-    type = CrystalPlasticityStateVariableEvolutionRateComponentGSS
+    type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 60.8 109.8 2.5'
     uo_slip_rate_name = slip_rate_gss

@@ -119,26 +119,26 @@
     block = 0
   [../]
   [./euler1]
-    type = MaterialStdVectorAux
+    type = MaterialRealVectorValueAux
     variable = euler1
-    property = euler_ang
-    index = 0
+    property = Euler_angles
+    component = 0
     execute_on = timestep_end
     block = 0
   [../]
   [./euler2]
-    type = MaterialStdVectorAux
+    type = MaterialRealVectorValueAux
     variable = euler2
-    property = euler_ang
-    index = 1
+    property = Euler_angles
+    component = 1
     execute_on = timestep_end
     block = 0
   [../]
   [./euler3]
-    type = MaterialStdVectorAux
+    type = MaterialRealVectorValueAux
     variable = euler3
-    property = euler_ang
-    index = 2
+    property = Euler_angles
+    component = 2
     execute_on = timestep_end
     block = 0
   [../]
@@ -187,7 +187,7 @@
     scale_factor = 1.0
   [../]
   [./state_var_evol_rate_comp_gss]
-    type = CrystalPlasticityStateVariableEvolutionRateComponentGSS
+    type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 60.8 109.8 2.5'
     uo_slip_rate_name = slip_rate_gss
@@ -201,7 +201,6 @@
     block = 0
     stol = 1e-2
     tan_mod_type = exact
-    save_euler_angle = true
     uo_slip_rates = 'slip_rate_gss'
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'

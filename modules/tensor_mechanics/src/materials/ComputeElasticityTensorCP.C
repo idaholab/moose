@@ -19,32 +19,34 @@ InputParameters validParams<ComputeElasticityTensorCP>()
 ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & parameters) :
     ComputeElasticityTensor(parameters),
     _read_prop_user_object(isParamValid("read_prop_user_object") ? & getUserObject<ElementPropertyReadFile>("read_prop_user_object") : NULL),
-    _local_Euler_angles(declareProperty<RealVectorValue>("Euler_angles")),
+    _Euler_angles_mat_prop(declareProperty<RealVectorValue>("Euler_angles")),
     _crysrot(declareProperty<RankTwoTensor>("crysrot")),
     _R(_Euler_angles)
 {
 }
 
 void
+ComputeElasticityTensorCP::assignEulerAngles()
+{
+  if (_read_prop_user_object)
+  {
+    _Euler_angles_mat_prop[_qp](0) = _read_prop_user_object->getData(_current_elem, 0);
+    _Euler_angles_mat_prop[_qp](1) = _read_prop_user_object->getData(_current_elem, 1);
+    _Euler_angles_mat_prop[_qp](2) = _read_prop_user_object->getData(_current_elem, 2);
+  }
+  else
+    _Euler_angles_mat_prop[_qp] = _Euler_angles;
+}
+
+void
 ComputeElasticityTensorCP::computeQpElasticityTensor()
 {
   //Properties assigned at the beginning of every call to material calculation
-  if ( _read_prop_user_object )
-  {
-    _local_Euler_angles[_qp](0) = _read_prop_user_object->getData( _current_elem , 0 );
-    _local_Euler_angles[_qp](1) = _read_prop_user_object->getData( _current_elem , 1 );
-    _local_Euler_angles[_qp](2) = _read_prop_user_object->getData( _current_elem , 2 );
-  }
+  assignEulerAngles();
 
-  RealVectorValue euler_angles;
-  euler_angles(0) = _local_Euler_angles[_qp](0);
-  euler_angles(1) = _local_Euler_angles[_qp](1);
-  euler_angles(2) = _local_Euler_angles[_qp](2);
-
-  _R.update(euler_angles);
+  _R.update(_Euler_angles_mat_prop[_qp]);
 
   _crysrot[_qp] = _R.transpose();
-
   _elasticity_tensor[_qp] = _Cijkl;
   _elasticity_tensor[_qp].rotate(_crysrot[_qp]);
 }

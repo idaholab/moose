@@ -7,7 +7,7 @@
 #ifndef CRYSTALPLASTICITYUOBASE_H
 #define CRYSTALPLASTICITYUOBASE_H
 
-#include "ElementUserObject.h"
+#include "DiscreteElementUserObject.h"
 
 class CrystalPlasticityUOBase;
 
@@ -17,7 +17,7 @@ InputParameters validParams<CrystalPlasticityUOBase>();
 /**
  * Crystal plasticity system userobject base class.
  */
-class CrystalPlasticityUOBase : public ElementUserObject
+class CrystalPlasticityUOBase : public DiscreteElementUserObject
 {
  public:
   CrystalPlasticityUOBase(const InputParameters & parameters);

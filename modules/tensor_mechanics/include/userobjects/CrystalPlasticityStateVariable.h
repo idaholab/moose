@@ -38,9 +38,6 @@ protected:
   /// File should contain initial values of the slip system resistances.
   std::string _slip_sys_res_prop_file_name;
 
-  /// The hardening parameters in this class are read from .i file. The user can override to read from file.
-  std::string _slip_sys_hard_prop_file_name;
-
   /// Read from options for initial values of internal variables
   MooseEnum _intvar_read_type;
 

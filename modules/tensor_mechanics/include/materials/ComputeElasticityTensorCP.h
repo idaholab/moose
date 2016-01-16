@@ -23,13 +23,15 @@ public:
 protected:
   virtual void computeQpElasticityTensor();
 
+  virtual void assignEulerAngles();
+
   /**
    * Element property read user object
    * Presently used to read Euler angles -  see test
    */
   const ElementPropertyReadFile * _read_prop_user_object;
 
-  MaterialProperty<RealVectorValue> & _local_Euler_angles;
+  MaterialProperty<RealVectorValue> & _Euler_angles_mat_prop;
 
   /// Crystal Rotation Matrix
   MaterialProperty<RankTwoTensor> & _crysrot;

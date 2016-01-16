@@ -36,8 +36,6 @@ class CrystalPlasticitySlipRate : public CrystalPlasticityUOBase
 
   virtual void getFlowRateParams();
 
-  bool _read_from_slip_sys_file;
-
   /// Number of slip system specific properties provided in the file containing slip system normals and directions
   unsigned int _num_slip_sys_props;
 
