@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<KKSACBulkBase>()
 {
-  InputParameters params = validParams<ACBulk>();
+  InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("KKS model kernel for the Bulk Allen-Cahn. This operates on the order parameter 'eta' as the non-linear variable");
   params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
   params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function F (f_base in the corresponding KKSBaseMaterial)");
@@ -18,7 +18,7 @@ InputParameters validParams<KKSACBulkBase>()
 }
 
 KKSACBulkBase::KKSACBulkBase(const InputParameters & parameters) :
-    ACBulk(parameters),
+    ACBulk<Real>(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _eta_name(_var.name()),

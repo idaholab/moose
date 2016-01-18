@@ -20,7 +20,7 @@ InputParameters validParams<ACGrGrPoly>();
  * It calculates the residual of the ith order parameter, and the values of
  * all other order parameters are coupled variables and are stored in vals.
  */
-class ACGrGrPoly : public ACBulk
+class ACGrGrPoly : public ACBulk<Real>
 {
 public:
   ACGrGrPoly(const InputParameters & parameters);

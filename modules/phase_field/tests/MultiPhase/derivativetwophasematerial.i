@@ -50,7 +50,7 @@
     variable = eta
   [../]
   [./ACBulk]
-    type = ACParsed
+    type = AllenCahn
     variable = eta
     args = c
     f_name = F

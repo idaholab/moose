@@ -44,7 +44,7 @@
     variable = op
   [../]
   [./op_bulk]
-    type = ACParsed
+    type = AllenCahn
     variable = op
     f_name = F
     mob_name = L

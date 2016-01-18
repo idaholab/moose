@@ -17,9 +17,9 @@
 #include "ACGrGrPoly.h"
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
-#include "ACParsed.h"
 #include "ACInterfaceKobayashi1.h"
 #include "ACInterfaceKobayashi2.h"
+#include "AllenCahn.h"
 #include "CahnHilliard.h"
 #include "CahnHilliardAniso.h"
 #include "CHBulkPFCTrad.h"
@@ -238,9 +238,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACGrGrPoly);
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
-  registerKernel(ACParsed);
   registerKernel(ACInterfaceKobayashi1);
   registerKernel(ACInterfaceKobayashi2);
+  registerKernel(AllenCahn);
   registerKernel(CahnHilliard);
   registerKernel(CahnHilliardAniso);
   registerKernel(CHBulkPFCTrad);
@@ -277,6 +277,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
+  registerDeprecatedObjectName(AllenCahn, "ACParsed", "15/04/2016 00:00");
   registerDeprecatedObjectName(CahnHilliard, "CHParsed", "11/01/2015 00:00");
 
   registerInitialCondition(ClosePackIC);

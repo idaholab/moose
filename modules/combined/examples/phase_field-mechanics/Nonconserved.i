@@ -50,7 +50,7 @@
   [../]
 
   [./eta_bulk]
-    type = ACParsed
+    type = AllenCahn
     variable = eta
     f_name = F
   [../]

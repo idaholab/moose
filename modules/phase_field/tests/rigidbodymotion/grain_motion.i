@@ -84,7 +84,7 @@
     kappa_name = kappa_eta
   [../]
   [./acbulk_eta]
-    type = ACParsed
+    type = AllenCahn
     variable = eta
     mob_name = M
     f_name = F

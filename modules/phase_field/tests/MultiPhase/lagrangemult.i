@@ -62,7 +62,7 @@
     variable = eta1
   [../]
   [./ACBulk1]
-    type = ACParsed
+    type = AllenCahn
     variable = eta1
     args = 'c eta2'
     f_name = F
@@ -84,7 +84,7 @@
     variable = eta2
   [../]
   [./ACBulk2]
-    type = ACParsed
+    type = AllenCahn
     variable = eta2
     args = 'c eta1'
     f_name = F
