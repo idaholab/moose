@@ -14,7 +14,8 @@ class FailureIndexPD;
 template<>
 InputParameters validParams<FailureIndexPD>();
 
-class FailureIndexPD : public ElementUserObject
+class FailureIndexPD :
+  public ElementUserObject
 {
 public:
   FailureIndexPD(const InputParameters & parameters);
@@ -29,8 +30,10 @@ public:
 
 protected:
 
-  NumericVector<Number> & _IntactBonds;
-  NumericVector<Number> & _TotalBonds;
+  AuxiliarySystem & _aux;
+
+  MooseVariable * _IntactBondsVar;
+  MooseVariable * _TotalBondsVar;
   const MaterialProperty<Real> & _bond_status_old;
 
 };
