@@ -115,6 +115,7 @@
 #include "PFMobility.h"
 #include "PFParamsPolyFreeEnergy.h"
 #include "PolynomialFreeEnergy.h"
+#include "RegularSolutionFreeEnergy.h"
 #include "StrainGradDispDerivatives.h"
 #include "SwitchingFunctionMaterial.h"
 #include "CrossTermBarrierFunctionMaterial.h"
@@ -325,6 +326,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFParamsPolyFreeEnergy);
   registerMaterial(PolynomialFreeEnergy);
+  registerMaterial(RegularSolutionFreeEnergy);
   registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(CrossTermBarrierFunctionMaterial);
