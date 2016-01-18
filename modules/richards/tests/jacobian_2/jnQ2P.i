@@ -33,6 +33,11 @@
     simm = 0.2
     n = 2
   [../]
+  [./RelPermWaterCubic]
+    type = RichardsRelPermMonomial
+    simm = 0.05
+    n = 3
+  [../]
   [./RelPermGas]
     type = Q2PRelPermPowerGas
     simm = 0.1
@@ -68,6 +73,7 @@
   saturation = sat
   water_density = DensityWater
   water_relperm = RelPermWater
+  water_relperm_for_diffusion = RelPermWaterCubic
   water_viscosity = 1
   gas_density = DensityGas
   gas_relperm = RelPermGas

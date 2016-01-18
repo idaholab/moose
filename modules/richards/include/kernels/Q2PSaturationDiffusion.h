@@ -40,8 +40,11 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// fluid density
+  /// water density
   const RichardsDensity & _density;
+
+  /// water relative permeability
+  const RichardsRelPerm & _relperm;
 
   /// porepressure at the quadpoints
   VariableValue & _pp;

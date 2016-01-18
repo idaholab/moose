@@ -26,6 +26,7 @@ private:
   VariableName _sat_var;
   UserObjectName _water_density;
   UserObjectName _water_relperm;
+  UserObjectName _water_relperm_for_diffusivity;
   Real _water_viscosity;
   UserObjectName _gas_density;
   UserObjectName _gas_relperm;
