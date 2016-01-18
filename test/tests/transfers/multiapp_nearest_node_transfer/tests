@@ -36,6 +36,12 @@
     exodiff = 'boundary_tosub_master_out_sub0.e'
   [../]
 
+  [./boundary_tomaster]
+    type = 'Exodiff'
+    input = 'boundary_tomaster_master.i'
+    exodiff = 'boundary_tomaster_master_out.e'
+  [../]
+  
   [./two_way_many_apps]
     type = 'Exodiff'
     input = 'two_way_many_apps_master.i'
