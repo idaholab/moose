@@ -10,6 +10,8 @@
 #include "Function.h"
 #include "Assembly.h"
 #include "SymmElasticityTensor.h"
+#include "Function.h"
+#include "Assembly.h"
 using namespace std;
 
 template<>

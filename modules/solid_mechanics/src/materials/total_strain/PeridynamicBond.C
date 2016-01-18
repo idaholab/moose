@@ -5,12 +5,13 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "PeridynamicBond.h"
-
 #include "Material.h"
 #include "ColumnMajorMatrix.h"
 #include "SymmIsotropicElasticityTensor.h"
 #include "VolumetricModel.h"
 #include "NonlinearSystem.h"
+
+// libmesh includes
 #include "libmesh/quadrature.h"
 
 using namespace std;
@@ -128,7 +129,6 @@ PeridynamicBond::PeridynamicBond(const InputParameters & parameters)
   _stiff_elem(declareProperty<Real>("stiff_elem")),
   _bond_status(declareProperty<Real>("bond_status")),
   _bond_status_old(declarePropertyOld<Real>("bond_status")),
-  _bond_stretch(declareProperty<Real>("bond_stretch")),
   _critical_stretch(declareProperty<Real>("critical_stretch")),
   _critical_stretch_old(declarePropertyOld<Real>("critical_stretch")),
   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
@@ -189,9 +189,6 @@ PeridynamicBond::PeridynamicBond(const InputParameters & parameters)
     _AvgArea = AvgArea3D(_MeshSpacing);
   }
   setRandomResetFrequency(EXEC_INITIAL);
-  //cout << _PDdim << endl;
-  //cout << _AvgArea << endl;
-  //cout << _lamda << endl;
   /***********************************************************************************************/
 }
 
@@ -262,48 +259,48 @@ PeridynamicBond::computeProperties()
   double Varying_Thermal_Conductivity;
   double t;
 
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  for (_qp=0; _qp < _qrule->n_points(); ++_qp)
   {
-    /* Generate randomized critical stretch by Box-Muller method */
-    if(_critical_stretch_old[_qp] > 1.0)
+  /* Generate randomized critical stretch by Box-Muller method */
+  if(_critical_stretch_old[_qp] > 1.0)
+  {
+    _critical_stretch_old[_qp] = sqrt(-2.0*log(getRandomReal()))*cos(2.0*Pi*getRandomReal());
+    _critical_stretch_old[_qp] /= 1.0/_StandardDeviation;
+    _critical_stretch_old[_qp] += _CriticalStretch;
+  }
+    _critical_stretch[_qp] = _critical_stretch_old[_qp];
+  if (_has_temp)
+  {
+    thermal_strain = _alpha * (_temp[_qp] - _t_ref);
+    mechanics_strain = strain - thermal_strain;
+    //_thermal_conductivity = _bond_status_old * _my_thermal_conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
+    t = _temp[_qp] / 1000.0;
+    Varying_Thermal_Conductivity = 100.0 / (6.548 + 23.533*t) + 6400.0 * exp(-16.35/t) / pow(t,2.5);
+    _thermal_conductivity[_qp] = _bond_status_old[_qp] * Varying_Thermal_Conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
+    _thermal_conductivity[_qp] *= (double) _PDdim;
+   // _thermal_conductivity[0] = _thermal_conductivity[0] * (double) _PDdim * (double) _PDdim;
+  }
+  else
+  {
+    mechanics_strain = strain;
+  }
+  _axial_force[_qp] = (_youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _lamda) * mechanics_strain;
+  _stiff_elem[_qp] = (_youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _lamda) / orig_length;
+  _bond_volume[_qp] = exp(-orig_length / _MaterialRegion) * _AvgArea * orig_length;
+  if (_bond_status_old[_qp] == 1.0)
+  {
+    if (std::abs(mechanics_strain) > _critical_stretch_old[_qp])
     {
-      _critical_stretch_old[_qp] = sqrt(-2.0*log(getRandomReal()))*cos(2.0*Pi*getRandomReal());
-      _critical_stretch_old[_qp] /= 1.0/_StandardDeviation;
-      _critical_stretch_old[_qp] += _CriticalStretch;
-    }
-      _critical_stretch[_qp] = _critical_stretch_old[_qp];
-    if (_has_temp)
-    {
-      thermal_strain = _alpha * (_temp[_qp] - _t_ref);
-      mechanics_strain = strain - thermal_strain;
-      //_thermal_conductivity[_qp] = _bond_status_old[_qp] * _my_thermal_conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
-      t = _temp[_qp] / 1000.0;
-      Varying_Thermal_Conductivity = 100.0 / (6.548 + 23.533*t) + 6400.0 * exp(-16.35/t) / pow(t,2.5);
-      _thermal_conductivity[_qp] = _bond_status_old[_qp] * Varying_Thermal_Conductivity * exp(-orig_length / _MaterialRegion) * _AvgArea;
-      _thermal_conductivity[_qp] *= (double) _PDdim;
-    }
-    else
-    {
-      mechanics_strain = strain;
-    }
-    _axial_force[_qp] = (_youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _lamda) * mechanics_strain;
-   _stiff_elem[_qp] = (_youngs_modulus * exp(-orig_length / _MaterialRegion) / _MeshSpacing / _lamda) / orig_length;
-    _bond_stretch[_qp] = mechanics_strain;
-    _bond_volume[_qp] = exp(-orig_length / _MaterialRegion) * _AvgArea * orig_length;
-    if (_bond_status_old[_qp] == 1.0)
-    {
-      if (std::abs(mechanics_strain) > _critical_stretch_old[_qp])
-      {
-        _bond_status[_qp] = 0.0;
-      }
-      else
-      {
-        _bond_status[_qp] = 1.0;
-      }
+      _bond_status[_qp] = 0.0;
     }
     else
     {
-      _bond_status[_qp] = _bond_status_old[_qp];
+      _bond_status[_qp] = 1.0;
     }
+  }
+  else
+  {
+    _bond_status[_qp] = _bond_status_old[_qp];
+  }
   }
 }

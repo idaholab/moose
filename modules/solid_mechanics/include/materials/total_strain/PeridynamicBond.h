@@ -38,7 +38,6 @@ protected:
   MaterialProperty<Real> & _stiff_elem;
   MaterialProperty<Real> & _bond_status;
   MaterialProperty<Real> & _bond_status_old;
-  MaterialProperty<Real> & _bond_stretch;
   MaterialProperty<Real> & _critical_stretch;
   MaterialProperty<Real> & _critical_stretch_old;
   MaterialProperty<Real> & _thermal_conductivity;

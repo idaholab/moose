@@ -5,10 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "StressDivergenceTrussPD.h"
-
 #include "Material.h"
 #include "Assembly.h"
 #include "SymmElasticityTensor.h"
+#include "Assembly.h"
 using namespace std;
 
 template<>
@@ -32,7 +32,6 @@ StressDivergenceTrussPD::StressDivergenceTrussPD(const InputParameters & paramet
   _stiff_elem(getMaterialProperty<Real>("stiff_elem" + getParam<std::string>("appended_property_name"))),
   _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
   _bond_status_old(getMaterialPropertyOld<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
-  _bond_stretch(getMaterialProperty<Real>("bond_stretch" + getParam<std::string>("appended_property_name"))),
   _component(getParam<unsigned int>("component")),
   _xdisp_coupled(isCoupled("disp_x")),
   _ydisp_coupled(isCoupled("disp_y")),
@@ -82,18 +81,21 @@ void
 StressDivergenceTrussPD::computeStiffness(ColumnMajorMatrix & stiff_global)
 {
   RealGradient orientation( (*_orientation)[0] );
+  Real dist = 2.0 * orientation.size(); //orientation.size() only gives half of the actual distance between two nodes
   orientation /= orientation.size();
-
-  Real k = _stiff_elem[0]*_bond_status_old[0];
-  stiff_global(0,0) = orientation(0)*orientation(0)*k;
-  stiff_global(0,1) = orientation(0)*orientation(1)*k;
-  stiff_global(0,2) = orientation(0)*orientation(2)*k;
-  stiff_global(1,0) = orientation(1)*orientation(0)*k;
-  stiff_global(1,1) = orientation(1)*orientation(1)*k;
-  stiff_global(1,2) = orientation(1)*orientation(2)*k;
-  stiff_global(2,0) = orientation(2)*orientation(0)*k;
-  stiff_global(2,1) = orientation(2)*orientation(1)*k;
-  stiff_global(2,2) = orientation(2)*orientation(2)*k;
+  
+  //the effect of truss orientation change has been accounted for
+  
+  Real k = _stiff_elem[0] * _bond_status_old[0];
+  stiff_global(0,0) = orientation(0) * orientation(0) * k + _axial_force[0] * _bond_status_old[0] * (1.0 - orientation(0) * orientation(0)) / dist;
+  stiff_global(0,1) = orientation(0) * orientation(1) * k - _axial_force[0] * _bond_status_old[0] * orientation(0) * orientation(1) / dist;
+  stiff_global(0,2) = orientation(0) * orientation(2) * k - _axial_force[0] * _bond_status_old[0] * orientation(0) * orientation(2) / dist;
+  stiff_global(1,0) = orientation(1) * orientation(0) * k - _axial_force[0] * _bond_status_old[0] * orientation(1) * orientation(0) / dist;
+  stiff_global(1,1) = orientation(1) * orientation(1) * k + _axial_force[0] * _bond_status_old[0] * (1.0 - orientation(1) * orientation(1)) / dist;
+  stiff_global(1,2) = orientation(1) * orientation(2) * k - _axial_force[0] * _bond_status_old[0] * orientation(1) * orientation(2) / dist;
+  stiff_global(2,0) = orientation(2) * orientation(0) * k - _axial_force[0] * _bond_status_old[0] * orientation(2) * orientation(0) / dist;
+  stiff_global(2,1) = orientation(2) * orientation(1) * k - _axial_force[0] * _bond_status_old[0] * orientation(2) * orientation(1) / dist;
+  stiff_global(2,2) = orientation(2) * orientation(2) * k + _axial_force[0] * _bond_status_old[0] * (1.0 - orientation(2) * orientation(2)) / dist;
 }
 
 void
