@@ -3,13 +3,8 @@
   family = LAGRANGE
 []
 
-[Problem]
-  type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
-[]
-
 [XFEM]
+  #             x0   y0   x1   y1   t0    t1  
   cut_data = ' 1.0  0.5  0.7  0.5  0.0   0.0'
   qrule = volfrac
   output_cut_plane = true
@@ -17,7 +12,7 @@
   crack_growth_increment = 0.2
   [./xfem_marker_uo]
     type = XFEMMaterialTensorMarkerUserObject
-    execute_on = timestep
+    execute_on = timestep_end
     tensor = stress
     quantity = MaxPrincipal
     threshold = 5e+1
@@ -45,23 +40,10 @@
   [../]
 []
 
-[AuxVariables]
- [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-  [./saved_z]
-  [../]
-  [./saved_t]
-  [../]
-[]
-
 [SolidMechanics]
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
   [../]
 []
 
@@ -111,11 +93,6 @@
     thermal_expansion = 0.02
     t_ref = 0.5
   [../]
-  [./density]
-    type = Density
-    block = 0
-    density = 1.0
-  [../]
 []
 
 [Executioner]
@@ -138,8 +115,8 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-4
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-14
+  nl_abs_tol = 1e-12
 
 # time control
   start_time = 0.0
@@ -152,11 +129,11 @@
 
 [Outputs]
   file_base = crack_propagation_2d_out
-  output_initial = true
   exodus = true
+  execute_on = timestep_end
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_linear = true
   [../]
 []

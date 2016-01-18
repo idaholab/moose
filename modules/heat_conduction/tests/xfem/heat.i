@@ -40,11 +40,6 @@
     type = HeatConduction
     variable = temp
   [../]
-  [./diff]
-    type = Diffusion
-    variable = temp
-  [../]
-
 []
 
 [BCs]
@@ -89,14 +84,13 @@
   l_tol = 8e-3
 
   nl_max_its = 15
-  nl_rel_tol = 1e-4
+  nl_rel_tol = 1e-10
   nl_abs_tol = 1e-10
 
   start_time = 0.0
   dt = 1.0
   end_time = 2.0
   num_steps = 2
-
 []
 
 [Outputs]
@@ -104,11 +98,11 @@
 
   file_base = heat_out
   interval = 1
-  output_initial = true
+  execute_on = timestep_end
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_linear = true
   [../]
 []

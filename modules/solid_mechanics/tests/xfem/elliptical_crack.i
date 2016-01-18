@@ -3,12 +3,6 @@
   family = LAGRANGE
 []
 
-[Problem]
-  type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y disp_z'
-  reference_residual_variables = 'saved_x saved_y saved_z'
-[]
-
 [XFEM]
   cut_type = 'ellipse_cut_3d' # elliptical cut plane
   cut_data = '-0.5 -0.5 0
@@ -33,12 +27,6 @@
   []
 
 [AuxVariables]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-  [./saved_z]
-  [../]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -66,9 +54,6 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
-    save_in_disp_z = saved_z
     use_displaced_mesh = true
   [../]
 []
@@ -169,11 +154,6 @@
     youngs_modulus = 207000
     compute_JIntegral = true
   [../]
-  [./density]
-    type = Density
-    block = 1
-    density = 1.0
-  [../]
 []
 
 [Executioner]
@@ -196,7 +176,7 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-4
+  nl_rel_tol = 1e-10
   nl_abs_tol = 1e-10
 
 # time control
@@ -207,11 +187,11 @@
 
 [Outputs]
   file_base = elliptical_crack_out
-  output_initial = true
   exodus = true
+  execute_on = timestep_end
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_linear = true
   [../]
 []

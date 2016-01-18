@@ -1,2 +1,28 @@
 [Tests]
+  [./crack_propagation]
+    type = Exodiff
+    input = crack_propagation_2d.i
+    exodiff = 'crack_propagation_2d_out.e crack_propagation_2d_out.e-s002'
+    abs_zero = 1e-8
+    map = false
+  [../]
+  [./edge_crack_3d]
+    type = Exodiff
+    input = edge_crack_3d.i
+    exodiff = 'edge_crack_3d_out.e'
+    abs_zero = 1e-8
+    map = false
+  [../]
+  [./elliptical_crack]
+    type = Exodiff
+    input = elliptical_crack.i
+    exodiff = 'elliptical_crack_out.e'
+    map = false
+  [../]
+  [./penny_crack]
+    type = Exodiff
+    input = penny_crack.i
+    exodiff = 'penny_crack_out.e'
+    map = false
+  [../]
 []
