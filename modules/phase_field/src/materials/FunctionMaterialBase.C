@@ -30,9 +30,7 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters) :
     // no MOOSE variable was provided for this coupling, add to a list of variables set to constant default values
     if (vars == _coupled_vars.end())
     {
-      // check if a default value was provided
-      std::map<std::string, VariableValue *>::iterator default_value_it = Coupleable::_default_value.find(*it);
-      if (default_value_it != Coupleable::_default_value.end())
+      if (_pars.hasDefaultCoupledValue(*it))
         _arg_constant_defaults.push_back(*it);
       continue;
     }
