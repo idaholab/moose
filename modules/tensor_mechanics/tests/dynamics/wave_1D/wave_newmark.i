@@ -284,8 +284,8 @@
   type = Transient
   start_time = 0
   end_time = 6.0
-  l_tol = 1e-8
-  nl_rel_tol = 1e-8
+  l_tol = 1e-12
+  nl_rel_tol = 1e-12
   dt = 0.1
 []
 

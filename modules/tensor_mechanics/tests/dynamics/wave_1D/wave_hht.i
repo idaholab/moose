@@ -255,8 +255,8 @@
   type = Transient
   start_time = 0
   end_time = 6.0
-  l_tol = 1e-8
-  nl_rel_tol = 1e-8
+  l_tol = 1e-12
+  nl_rel_tol = 1e-12
   dt = 0.1
 []
 
@@ -277,22 +277,22 @@
   [./disp_1]
     type = NodalVariableValue
     nodeid = 1
-    variable = disp_y
+    variable = vel_y
   [../]
   [./disp_2]
     type = NodalVariableValue
     nodeid = 3
-    variable = disp_y
+    variable = vel_y
   [../]
   [./disp_3]
     type = NodalVariableValue
     nodeid = 10
-    variable = disp_y
+    variable = vel_y
   [../]
   [./disp_4]
     type = NodalVariableValue
     nodeid = 14
-    variable = disp_y
+    variable = vel_y
   [../]
 []
 
