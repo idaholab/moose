@@ -21,6 +21,7 @@ InputParameters validParams<Q2PAction>()
   params.addRequiredParam<NonlinearVariableName>("saturation", "The water saturation variable");
   params.addRequiredParam<UserObjectName>("water_density", "A RichardsDensity UserObject that defines the water density as a function of porepressure.");
   params.addRequiredParam<UserObjectName>("water_relperm", "A RichardsRelPerm UserObject that defines the water relative permeability as a function of water saturation (eg RichardsRelPermPower).");
+  params.addParam<UserObjectName>("water_relperm_for_diffusion", "A RichardsRelPerm UserObject that defines the water relative permeability as a function of water saturation that will be used in the diffusivity Kernel (eg RichardsRelPermPower).  If not given, water_relperm will be used instead, which is the most common use-case.");
   params.addRequiredParam<Real>("water_viscosity", "The water viscosity");
   params.addRequiredParam<UserObjectName>("gas_density", "A RichardsDensity UserObject that defines the gas density as a function of porepressure.");
   params.addRequiredParam<UserObjectName>("gas_relperm", "A RichardsRelPerm UserObject that defines the gas relative permeability as a function of water saturation (eg Q2PRelPermPowerGas).");
@@ -38,6 +39,7 @@ Q2PAction::Q2PAction(const InputParameters & params) :
     _sat_var(getParam<NonlinearVariableName>("saturation")),
     _water_density(getParam<UserObjectName>("water_density")),
     _water_relperm(getParam<UserObjectName>("water_relperm")),
+    _water_relperm_for_diffusivity(isParamValid("water_relperm_for_diffusivity") ? getParam<UserObjectName>("water_relperm_for_diffusivity") : getParam<UserObjectName>("water_relperm")),
     _water_viscosity(getParam<Real>("water_viscosity")),
     _gas_density(getParam<UserObjectName>("gas_density")),
     _gas_relperm(getParam<UserObjectName>("gas_relperm")),
@@ -133,6 +135,7 @@ Q2PAction::act()
     params.set<NonlinearVariableName>("variable") = _sat_var;
     params.set<std::vector<VariableName> >("porepressure_variable") = std::vector<VariableName>(1, _pp_var);
     params.set<UserObjectName>("fluid_density") = _water_density;
+    params.set<UserObjectName>("fluid_relperm") = _water_relperm_for_diffusivity;
     params.set<Real>("fluid_viscosity") = _water_viscosity;
     params.set<Real>("diffusivity") = _diffusivity;
     _problem->addKernel(kernel_type, kernel_name, params);
