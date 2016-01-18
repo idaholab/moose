@@ -105,9 +105,17 @@ $P_{g}$.
 
 Often $\rho_{w}$ is almost constant compared with the range of $P_{g}$
 in the problems, so that the first of Eqn~(\ref{q2p.eqn}) looks very
-similar to a diffusion equation with diffusivity $D$.  While $D$ is in
-reality a function of $S_{w}$, in the Q2P module it is taken to be
-{\em constant}.  Hence the capillary suction is rather obscured,
+similar to a diffusion equation with diffusivity $D$.  In the Q2P
+module it is assumed that
+\begin{equation}
+D = \tilde{D}\tilde{\kappa}^{\mathrm{rel}}_{w}(S_{w})
+\ ,
+\label{diffusivity.eqn}
+\end{equation}
+where $\tilde{D}$ is a {\em constant} and $\tilde{\kappa}$ defaults to
+be the water relative permeability function, but may be set to another
+relative permeability curve (eg, a constant), if desired.
+Hence the capillary suction is rather obscured,
 although $D$ is directly proportional to $P_{c}$ and has the same
 units as it.  The Q2P module can handle very small $D$ (ie, very small
 $P_{c}$) more efficiently than the full Richards module.  However,
@@ -201,7 +209,9 @@ upwinded.  This Kernel requires:
 \item The ``fluid\_density'' which is a RichardsDensity
   UserObject that defines $\rho_{w}$ as a function of $P_{g}$.
 \item The fluid dynamic viscosity $\mu_{w}$.
-\item The diffusivity $D$.
+\item The diffusivity constant $\tilde{D}$.
+\item the ``fluid\_relperm'' which is a RichardsRelPerm UserObject
+  that defines the diffusivity as per Eqn~(\ref{diffusivity.eqn}).
 \end{itemize}
 
 \end{itemize}
