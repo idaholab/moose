@@ -1004,7 +1004,7 @@ protected:
   std::vector<Assembly *> _assembly;
 
   /// functions
-  std::vector<std::map<std::string, MooseSharedPointer<Function> > > _functions;
+  MooseObjectWarehouse<Function>_functions;
 
   ///@{
   /// Initial condition storage

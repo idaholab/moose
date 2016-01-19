@@ -187,8 +187,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   }
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
 
-  _functions.resize(n_threads);
-
   _material_data.resize(n_threads);
   _bnd_material_data.resize(n_threads);
   _neighbor_material_data.resize(n_threads);
@@ -385,14 +383,12 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_CUSTOM)[i].initialSetup();
   }
 
-  // Initialize scalars so they are properly sized for use as input into ParsedFunctions
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
-    reinitScalars(tid);
-
   // Call the initialSetup methods for functions
-  for (unsigned int i=0; i<n_threads; i++)
-    for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[i].begin(); vit != _functions[i].end(); ++vit)
-      vit->second->initialSetup();
+  for (THREAD_ID tid = 0; tid <n_threads; tid++)
+  {
+    reinitScalars(tid); // initialize scalars so they are properly sized for use as input into ParsedFunctions
+    _functions.initialSetup(tid);
+  }
 
 
   if (!_app.isRecovering())
@@ -639,11 +635,7 @@ void FEProblem::timestepSetup()
     _materials.timestepSetup(tid);
     _face_materials.timestepSetup(tid);
     _neighbor_materials.timestepSetup(tid);
-
-    for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[tid].begin();
-        vit != _functions[tid].end();
-        ++vit)
-      vit->second->timestepSetup();
+    _functions.timestepSetup(tid);
   }
 
   _aux.timestepSetup();
@@ -1202,22 +1194,14 @@ FEProblem::addFunction(std::string type, const std::string & name, InputParamete
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     MooseSharedPointer<Function> func = MooseSharedNamespace::static_pointer_cast<Function>(_factory.create(type, name, parameters, tid));
-    if (_functions[tid].find(name) != _functions[tid].end())
-      mooseError("Duplicate function name added to FEProblem: " << name);
-
-    // When default parsed functions are added the name() method can cause problems because of the
-    // division side causing it to be stored incorrectly.
-    if (auto_parsed)
-      _functions[tid][name] = func;
-    else
-      _functions[tid][func->name()] = func;
+    _functions.addObject(func, tid);
   }
 }
 
 bool
 FEProblem::hasFunction(const std::string & name, THREAD_ID tid)
 {
-  return (_functions[tid].find(name) != _functions[tid].end());
+  return _functions.hasActiveObject(name, tid);
 }
 
 Function &
@@ -1258,7 +1242,7 @@ FEProblem::getFunction(const std::string & name, THREAD_ID tid)
       mooseError("Unable to find function " + name);
   }
 
-  return *(_functions[tid][name]);
+  return *(_functions.getActiveObject(name, tid));
 }
 
 void
@@ -3409,11 +3393,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
     _materials.residualSetup(tid);
     _face_materials.residualSetup(tid);
     _neighbor_materials.residualSetup(tid);
-
-    for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[tid].begin();
-        vit != _functions[tid].end();
-        ++vit)
-      vit->second->residualSetup();
+    _functions.residualSetup(tid);
   }
   _aux.residualSetup();
 
@@ -3463,11 +3443,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
       _materials.jacobianSetup(tid);
       _face_materials.jacobianSetup(tid);
       _neighbor_materials.jacobianSetup(tid);
-
-      for (std::map<std::string, MooseSharedPointer<Function> >::iterator vit = _functions[tid].begin();
-          vit != _functions[tid].end();
-          ++vit)
-        vit->second->jacobianSetup();
+      _functions.jacobianSetup(tid);
     }
 
     _aux.jacobianSetup();
