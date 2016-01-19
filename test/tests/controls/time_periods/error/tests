@@ -24,4 +24,10 @@
     expect_err = "Either or both of the 'enable_objects' and 'disable_objects' parameters must be set."
     match_literal = true
   [../]
+  [./start_greater_than_end_error]
+    type = RunException
+    input = 'control.i'
+    cli_args = "Controls/damping_control/start_time=0.55 Controls/damping_control/end_time=0.25"
+    expect_err = "The start time\(s\) must be less than the end time\(s\)\."
+  [../]
 []

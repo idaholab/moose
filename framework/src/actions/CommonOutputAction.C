@@ -48,6 +48,7 @@ InputParameters validParams<CommonOutputAction>()
    params.addParam<bool>("gnuplot", false, "Output the scalar and postprocessor results using the default settings for GNUPlot output");
    params.addParam<bool>("solution_history", false, "Print a solution history file (.slh) using the default settings");
    params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
+   params.addParam<bool>("controls", false, "Enable the screen output of Control systems.");
 
    // Common parameters
 
@@ -146,6 +147,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("dofmap"))
     create("DOFMap");
+
+  if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
+    create("ControlOutput");
 
   if (!getParam<bool>("color"))
     Moose::_color_console = false;

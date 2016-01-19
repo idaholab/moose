@@ -1626,7 +1626,6 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     MooseSharedPointer<Material> material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters, tid));
     _materials.addObject(material, tid);
 
-
     if (!material->boundaryRestricted())
     {
       // The name of the object being created, this is changed multiple times as objects are created below
@@ -1646,6 +1645,13 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       object_name = name + "_neighbor";
       MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, current_parameters, tid));
       _neighbor_materials.addObject(neighbor_material, tid);
+
+      // link enabled parameter of face and neighbor materials
+      MooseObjectParameterName name(MooseObjectName("Material", material->name()), "enabled");
+      MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()), "enabled");
+      MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()), "enabled");
+      _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name);
+      _app.getInputParameterWarehouse().addControllableParameterConnection(name, neighbor_name);
     }
   }
 }
@@ -2544,6 +2550,9 @@ FEProblem::updateActiveObjects()
     _indicators.updateActive(tid);
     _internal_side_indicators.updateActive(tid);
     _markers.updateActive(tid);
+    _materials.updateActive(tid);
+    _face_materials.updateActive(tid);
+    _neighbor_materials.updateActive(tid);
   }
 
   _control_warehouse.updateActive();

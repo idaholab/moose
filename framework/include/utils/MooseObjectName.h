@@ -33,7 +33,7 @@ public:
    * @param tag The tag to apply the object
    * @param name The name of the object
    */
-  MooseObjectName(const std::string & tag, const std::string & name);
+  MooseObjectName(const std::string & tag, const std::string & name, const std::string & separator = std::string("/"));
 
   /**
    * Build an object given a raw parameter name (e.g., from an input file parameter)

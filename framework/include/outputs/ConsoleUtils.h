@@ -38,6 +38,11 @@ static const unsigned int console_field_width = 27;
 static const unsigned int console_line_length = 100;
 
 /**
+ * Create empty string for indenting
+ */
+std::string indent(unsigned int spaces);
+
+/**
  * Outputs framework information
  *
  * This includes the versions and timestamps
@@ -48,7 +53,6 @@ std::string outputFrameworkInformation(MooseApp & app);
  * Output the mesh information
  */
 std::string outputMeshInformation(FEProblem & problem, bool verbose = true);
-
 
 /**
  * Output the Auxiliary system information
@@ -81,6 +85,7 @@ std::string outputLegacyInformation(MooseApp & app, FEProblem & problem);
  * @see outputAuxiliarySystemInformation outputNonlinearSystemInformation
  */
 std::string outputSystemInformationHelper(const System & system);
+
 
 /**
  * Helper function function for stringstream formatting

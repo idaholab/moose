@@ -57,6 +57,7 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<bool>("show_input", "--show-input", false, "Shows the parsed input file before running the simulation.");
   params.addCommandLineParam<bool>("show_outputs", "--show-outputs", false, "Shows the output execution time information.");
+  params.addCommandLineParam<bool>("show_controls", "--show-controls", false, "Shows the Control logic available and executed.");
 
   params.addCommandLineParam<bool>("no_color", "--no-color", false, "Disable coloring of all Console outputs.");
 

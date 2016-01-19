@@ -18,11 +18,11 @@
 // STL includes
 #include <iostream>
 
-MooseObjectName::MooseObjectName(const std::string & tag, const std::string & name) :
+MooseObjectName::MooseObjectName(const std::string & tag, const std::string & name, const std::string & separator) :
     _tag(tag),
     _name(name),
     _combined(tag + name),
-    _separator("::")
+    _separator(separator)
 {
 }
 
@@ -64,7 +64,7 @@ MooseObjectName::MooseObjectName() :
 MooseObjectName::MooseObjectName(const MooseObjectName & rhs) :
     _tag(rhs._tag),
     _name(rhs._name),
-    _combined(_tag + _name),
+    _combined(rhs._combined),
     _separator(rhs._separator)
 {
 }

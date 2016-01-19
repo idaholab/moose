@@ -72,7 +72,6 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) :
   _combined = _tag + _name + _parameter;
 }
 
-
 bool
 MooseObjectParameterName::operator==(const MooseObjectParameterName & rhs) const
 {

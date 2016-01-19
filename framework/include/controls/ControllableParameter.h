@@ -70,7 +70,7 @@ public:
    *
    * @see ControlInterface
    */
-  void insert(const MooseObjectParameterName & name, T* param_ptr);
+  void insert(const MooseObjectParameterName & name, MooseSharedPointer<InputParameters> param_object);
 
 private:
 
@@ -79,6 +79,7 @@ private:
 
   /// Map of the possible names associated with the parameters stored for control.
   std::multimap<T*, MooseObjectParameterName> _parameter_names;
+
 };
 
 template<typename T>
@@ -88,8 +89,11 @@ ControllableParameter<T>::ControllableParameter()
 
 template<typename T>
 void
-ControllableParameter<T>::insert(const MooseObjectParameterName & name, T* param_ptr)
+ControllableParameter<T>::insert(const MooseObjectParameterName & name, MooseSharedPointer<InputParameters> param_object)
 {
+  // Get a pointer to the Parameter
+  T* param_ptr = &param_object-> template set<T>(name.parameter());
+
   // Search for the pointer in the existing multimap
   typename std::multimap<T*, MooseObjectParameterName>::iterator iter = _parameter_names.find(param_ptr);
 
@@ -106,8 +110,8 @@ void
 ControllableParameter<T>::set(const T & value)
 {
   typename std::vector<T*>::iterator iter;
-  for (iter = _parameter_values.begin(); iter != _parameter_values.end(); iter++)
-    **iter = value;
+  for (unsigned int i = 0; i < _parameter_values.size(); i++)
+    *_parameter_values[i] = value;
 }
 
 template<typename T>

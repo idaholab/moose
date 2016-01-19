@@ -92,6 +92,7 @@ Steady::execute()
     preSolve();
     _problem.timestepSetup();
     _problem.execute(EXEC_TIMESTEP_BEGIN);
+    _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
     // Update warehouse active objects
     _problem.updateActiveObjects();

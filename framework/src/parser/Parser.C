@@ -242,7 +242,7 @@ Parser::parse(const std::string &input_filename)
 
           // extract the MooseObject params if necessary
           MooseSharedPointer<MooseObjectAction> object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action_obj);
-          if (object_action.get())
+          if (object_action)
           {
             extractParams(curr_identifier, object_action->getObjectParams());
             object_action->getObjectParams().set<std::vector<std::string> >("control_tags").push_back(MooseUtils::baseName(curr_identifier));
