@@ -57,4 +57,19 @@
     max_parallel = 1
     max_threads = 1
   [../]
+
+  [./ClosePackIC]
+    # Test close pack ic generator (2D)
+    type = Exodiff
+    input = ClosePackIC.i
+    exodiff = ClosePackIC_out.e
+  [../]
+
+  [./ClosePackIC_3D]
+    # Test close pack ic generator (3D)
+    type = Exodiff
+    input = ClosePackIC_3D.i
+    exodiff = ClosePackIC_3D_out.e
+    method = 'opt oprof' # This test is too slow in debug
+  [../]
 []
