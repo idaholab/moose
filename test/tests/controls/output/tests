@@ -1,0 +1,20 @@
+[Tests]
+  [./test]
+    type = RunApp
+    input = controllable.i
+    expect_out = "Controls:.*Active Controls:.*Active Controls:"
+  [../]
+  [./clear]
+    type = RunApp
+    input = controllable_clear.i
+    expect_out = "Controls:.*Active Controls:"
+    absent_out = "Controls:.*Active Controls:.*Active Controls:"
+  [../]
+  [./cli_args]
+    type = RunApp
+    input = controllable.i
+    cli_args = "Outputs/controls=false --show-controls"
+    expect_out = "Controls:.*Active Controls:"
+    absent_out = "Controls:.*Active Controls:.*Active Controls:"
+  [../]
+[]

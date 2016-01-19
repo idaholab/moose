@@ -29,6 +29,12 @@
 namespace ConsoleUtils
 {
 
+std::string
+indent(unsigned int spaces)
+{
+  return std::string(spaces, ' ');
+}
+
 
 std::string
 outputFrameworkInformation(MooseApp & app)

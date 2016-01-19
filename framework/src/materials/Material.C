@@ -42,6 +42,8 @@ InputParameters validParams<Material>()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.registerBase("Material");
 
+  params.declareControllable("enable");
+
   return params;
 }
 

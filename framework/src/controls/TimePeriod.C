@@ -68,6 +68,11 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
   }
   else if (_end_time.size() != _disable.size() && _end_time.size() != _enable.size())
     mooseError("The start/end time input must be a scalar or the same length as the enable/disable lists.");
+
+  // Test that start and end times are in proper order
+  for (unsigned int i = 0; i < _start_time.size(); ++i)
+    if (_start_time[i] >= _end_time[i])
+      mooseError("The start time(s) must be less than the end time(s).");
 }
 
 

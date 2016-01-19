@@ -51,4 +51,3 @@ GenericConstantMaterial::computeQpProperties()
   for (unsigned int i=0; i<_num_props; i++)
     (*_properties[i])[_qp] = _prop_values[i];
 }
-

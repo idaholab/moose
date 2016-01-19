@@ -358,6 +358,11 @@ public:
   void declareControllable(const std::string & name);
 
   /**
+   * Marker a parameter that has been changed by the Control system (this is for output purposes)
+   */
+  void markControlled(const std::string & name);
+
+  /**
    * Returns a Boolean indicating whether the specified parameter is controllable
    */
   bool isControllable(const std::string & name);
@@ -521,6 +526,12 @@ public:
   static
   const std::vector<T> & getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>* the_type);
   ///@}
+
+  /**
+   * Return list of controllable parameters
+   */
+  const std::set<std::string> & getControllableParameters() { return _controllable_params; }
+
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
