@@ -31,7 +31,7 @@
 #include "CHSplitVar.h"
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
-#include "CoupledTimeDerivative.h"
+#include "CoupledAllenCahn.h"
 #include "GradientComponent.h"
 #include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
@@ -252,6 +252,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHSplitVar);
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
+  registerKernel(CoupledAllenCahn);
   registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
