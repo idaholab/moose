@@ -5,29 +5,29 @@
     csvdiff = 'matproptest_out.csv'
   [../]
 
-  [./CHParsed]
+  [./CahnHilliard]
     type = 'Exodiff'
-    input = 'CHParsed_test.i'
-    exodiff = 'CHParsed_test_OverSampling.e'
+    input = 'CahnHilliard.i'
+    exodiff = 'CahnHilliard_out.e'
   [../]
 
-  [./SplitCHParsed]
+  [./SplitCahnHilliard]
     type = 'Exodiff'
-    input = 'SplitCHParsed_test.i'
-    exodiff = 'SplitCHParsed_test_out.e'
+    input = 'SplitCahnHilliard.i'
+    exodiff = 'SplitCahnHilliard_out.e'
     max_parallel = 1                      # -pc_type lu
   [../]
 
-  [./ACParsed]
+  [./AllenCahn]
     type = 'Exodiff'
-    input = 'ACParsed_test.i'
-    exodiff = 'ACParsed_test_out.e'
+    input = 'AllenCahn.i'
+    exodiff = 'AllenCahn_out.e'
   [../]
 
-  [./analyzejacobian_ACParsed]
+  [./analyzejacobian_AllenCahn]
     type = 'AnalyzeJacobian'
-    input = 'ACParsed_test.i'
-    prereq = 'ACParsed'
+    input = 'AllenCahn.i'
+    prereq = 'AllenCahn'
     expect_out = '\nNo errors detected. :-\)\n'
     resize_mesh = true
     recover = false
@@ -36,8 +36,8 @@
 
   [./ParsedMaterial]
     type = 'Exodiff'
-    input = 'ParsedMaterial_test.i'
-    exodiff = 'ParsedMaterial_test_out.e'
+    input = 'ParsedMaterial.i'
+    exodiff = 'ParsedMaterial_out.e'
   [../]
   [./ConstructionOrder]
     type = 'Exodiff'
