@@ -60,13 +60,7 @@ void
 ComputeDiracThread::subdomainChanged()
 {
   std::set<MooseVariable *> needed_moose_vars;
-  const std::vector<MooseSharedPointer<DiracKernel> > & dkernels = _dirac_kernels.getActiveObjects(_tid);
-  for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
-  {
-    // Update the dependent variables for the dirac kernel
-    const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-  }
+  _dirac_kernels.updateVariableDependency(needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 }
 
