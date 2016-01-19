@@ -212,6 +212,5 @@
  # []
 
 [Outputs]
-  file_base = Small_IN100_1_partitioned_Marmot
   exodus = true
 []
