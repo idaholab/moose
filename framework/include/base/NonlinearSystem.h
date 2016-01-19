@@ -18,7 +18,6 @@
 #include "SystemBase.h"
 #include "KernelWarehouse.h"
 #include "ConstraintWarehouse.h"
-#include "SplitWarehouse.h"
 #include "NodalKernelWarehouse.h"
 #include "MooseObjectWarehouse.h"
 
@@ -39,6 +38,7 @@ class PresetNodalBC;
 class DGKernel;
 class ScalarKernel;
 class DiracKernel;
+class Split;
 
 // libMesh forward declarations
 namespace libMesh
@@ -176,7 +176,7 @@ public:
    * Retrieves a split by name
    * @param name The name of the split
    */
-  Split* getSplit(const std::string & name);
+  MooseSharedPointer<Split> getSplit(const std::string & name);
 
 
   /**
@@ -537,7 +537,7 @@ protected:
   std::vector<NodalKernelWarehouse> _nodal_kernels;
 
   /// Decomposition splits
-  SplitWarehouse _splits;
+  MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods
 
   /// Constraints storage object
   ConstraintWarehouse _constraints;
