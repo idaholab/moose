@@ -87,7 +87,7 @@
 []
 
 [Outputs]
-  [./OverSampling]
+  [./out]
     type = Exodus
     refinements = 1
   [../]
