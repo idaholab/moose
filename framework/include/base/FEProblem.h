@@ -23,7 +23,6 @@
 #include "PostprocessorData.h"
 #include "VectorPostprocessorWarehouse.h"
 #include "Adaptivity.h"
-#include "TransferWarehouse.h"
 #include "UserObjectWarehouse.h"
 #include "InitialConditionWarehouse.h"
 #include "Restartable.h"
@@ -59,6 +58,7 @@ class Indicator;
 class InternalSideIndicator;
 class Marker;
 class Material;
+class Transfer;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1054,13 +1054,13 @@ protected:
   ExecuteMooseObjectWarehouse<TransientMultiApp> _transient_multi_apps;
 
   /// Normal Transfers
-  ExecStore<TransferWarehouse> _transfers;
+  ExecuteMooseObjectWarehouse<Transfer> _transfers;
 
   /// Transfers executed just before MultiApps to transfer data to them
-  ExecStore<TransferWarehouse> _to_multi_app_transfers;
+  ExecuteMooseObjectWarehouse<Transfer> _to_multi_app_transfers;
 
   /// Transfers executed just after MultiApps to transfer data from them
-  ExecStore<TransferWarehouse> _from_multi_app_transfers;
+  ExecuteMooseObjectWarehouse<Transfer> _from_multi_app_transfers;
 
   /// A map of objects that consume random numbers
   std::map<std::string, RandomData *> _random_data_objects;
