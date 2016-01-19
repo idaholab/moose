@@ -1,0 +1,55 @@
+[Tests]
+  [./matproptest]
+    type = CSVDiff
+    input = 'matproptest.i'
+    csvdiff = 'matproptest_out.csv'
+  [../]
+
+  [./CahnHilliard]
+    type = 'Exodiff'
+    input = 'CahnHilliard.i'
+    exodiff = 'CahnHilliard_out.e'
+  [../]
+
+  [./SplitCahnHilliard]
+    type = 'Exodiff'
+    input = 'SplitCahnHilliard.i'
+    exodiff = 'SplitCahnHilliard_out.e'
+    max_parallel = 1                      # -pc_type lu
+  [../]
+
+  [./AllenCahn]
+    type = 'Exodiff'
+    input = 'AllenCahn.i'
+    exodiff = 'AllenCahn_out.e'
+  [../]
+
+  # This coupled formulation should give the same result as the direct Allen-Cahn
+  [./CoupledAllenCahn]
+    type = 'Exodiff'
+    prereq = 'AllenCahn'
+    input = 'CoupledAllenCahn.i'
+    exodiff = 'AllenCahn_out.e'
+  [../]
+
+  [./analyzejacobian_AllenCahn]
+    type = 'AnalyzeJacobian'
+    input = 'AllenCahn.i'
+    prereq = 'CoupledAllenCahn'
+    expect_out = '\nNo errors detected. :-\)\n'
+    resize_mesh = true
+    recover = false
+    #skip = 'see #3847'
+  [../]
+
+  [./ParsedMaterial]
+    type = 'Exodiff'
+    input = 'ParsedMaterial.i'
+    exodiff = 'ParsedMaterial_out.e'
+  [../]
+  [./ConstructionOrder]
+    type = 'Exodiff'
+    input = 'ConstructionOrder.i'
+    exodiff = 'ConstructionOrder_out.e'
+  [../]
+[]
