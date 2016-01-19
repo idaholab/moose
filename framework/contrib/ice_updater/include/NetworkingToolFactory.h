@@ -29,43 +29,46 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
 *******************************************************************************/
-#ifndef PROPERTYTYPE_H
-#define PROPERTYTYPE_H
+#ifndef NETWORKINGTOOLFACTORY_H_
+#define NETWORKINGTOOLFACTORY_H_
+
+#include "INetworkingTool.h"
+#include "LibcurlUtils.h"
+#include "MooseTypes.h"
+
+#ifdef ASIO_STANDALONE
+#include "AsioNetworkingTool.h"
+#endif
 
 /**
- * The PropertyType enumeration consists of literals representing each type of
- * configuration property used by Updater.
+ * This factory decouples clients from the act of creating new
+ * implementations of INetworkingTool.
+ *
  */
-enum PropertyType
-{
-  /**
-   * This literal indicates a url.
-   */
-  URL = 0,
+class NetworkingToolFactory {
 
-  /**
-   * This literal indicates a simulation item id.
-   */
-  ITEM_ID,
+public:
 
-  /**
-   * This literal indicates a unique client key.
-   */
-  CLIENT_KEY,
-
-  /**
-   * This literal represents the username that should be used for
-   * authenticating with the server.
-   */
-  USERNAME,
-
-  /**
-   * This literal represents the username that should be used for
-   * authenticating with the server.
-   */
-  PASSWORD,
-
-  NETWORKING_TOOL
+	/**
+	 * This method returns the INetworkingTool with the provided name.
+	 */
+	MooseSharedPointer<INetworkingTool> createNetworkingTool(std::string toolName) {
+		if (toolName == "curl") 
+		{
+			return MooseSharedPointer<INetworkingTool>(new LibcurlUtils());
+		}
+#ifdef ASIO_STANDALONE
+		else if (toolName == "asio") 
+		{
+			return MooseSharedPointer<INetworkingTool>(new AsioNetworkingTool());
+		} 
+#endif
+		else 
+		{
+			return MooseSharedPointer<INetworkingTool>(new INetworkingTool());
+		}
+	}
 };
+
 
 #endif
