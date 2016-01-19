@@ -14,5 +14,6 @@
     max_time = 60
     min_parallel = 2
     prereq = test_failure
+    superlu = true
   [../]
 []
