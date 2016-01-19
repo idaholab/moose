@@ -24,10 +24,18 @@
     exodiff = 'AllenCahn_out.e'
   [../]
 
+  # This coupled formulation should give the same result as the direct Allen-Cahn
+  [./CoupledAllenCahn]
+    type = 'Exodiff'
+    prereq = 'AllenCahn'
+    input = 'CoupledAllenCahn.i'
+    exodiff = 'AllenCahn_out.e'
+  [../]
+
   [./analyzejacobian_AllenCahn]
     type = 'AnalyzeJacobian'
     input = 'AllenCahn.i'
-    prereq = 'AllenCahn'
+    prereq = 'CoupledAllenCahn'
     expect_out = '\nNo errors detected. :-\)\n'
     resize_mesh = true
     recover = false
