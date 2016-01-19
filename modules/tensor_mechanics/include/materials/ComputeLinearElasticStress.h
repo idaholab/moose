@@ -16,12 +16,12 @@ class ComputeLinearElasticStress : public ComputeStressBase
 {
 public:
   ComputeLinearElasticStress(const InputParameters & parameters);
+  virtual void initialSetup();
 
 protected:
   virtual void computeQpStress();
 
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
-  const bool _is_finite_strain;
 };
 
 #endif //COMPUTELINEARELASTICSTRESS_H
