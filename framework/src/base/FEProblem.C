@@ -2535,6 +2535,9 @@ FEProblem::updateActiveObjects()
   _control_warehouse.updateActive();
   _multi_apps.updateActive();
   _transient_multi_apps.updateActive();
+  _transfers.updateActive();
+  _to_multi_app_transfers.updateActive();
+  _from_multi_app_transfers.updateActive();
 }
 
 void

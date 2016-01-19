@@ -63,7 +63,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters) :
     _displaced_source_mesh(false),
     _displaced_target_mesh(false)
 {
-  if (Transfer::execFlags() != _multi_app->execFlags())
+  if (execFlags() != _multi_app->execFlags())
       mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
 }
 
