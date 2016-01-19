@@ -15,7 +15,7 @@ class ACGBPoly;
 template<>
 InputParameters validParams<ACGBPoly>();
 
-class ACGBPoly : public ACBulk
+class ACGBPoly : public ACBulk<Real>
 {
 public:
   ACGBPoly(const InputParameters & parameters);

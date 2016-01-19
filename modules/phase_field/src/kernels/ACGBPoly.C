@@ -10,7 +10,7 @@
 template<>
 InputParameters validParams<ACGBPoly>()
 {
-  InputParameters params = validParams<ACBulk>();
+  InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Grain-Boundary model concentration dependent residual");
   params.addRequiredCoupledVar("c", "Other species concentration");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface energy to GB energy");
@@ -18,7 +18,7 @@ InputParameters validParams<ACGBPoly>()
 }
 
 ACGBPoly::ACGBPoly(const InputParameters & parameters) :
-    ACBulk(parameters),
+    ACBulk<Real>(parameters),
     _c(coupledValue("c")),
     _c_var(coupled("c")),
     _mu(getMaterialProperty<Real>("mu")),
@@ -69,4 +69,3 @@ ACGBPoly::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
-

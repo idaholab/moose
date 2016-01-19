@@ -7,14 +7,14 @@
 template<>
 InputParameters validParams<ACGrGrElasticDrivingForce>()
 {
-  InputParameters params = validParams<ACBulk>();
+  InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Adds elastic energy contribution to the Allen-Cahn equation");
   params.addRequiredParam<MaterialPropertyName>("D_tensor_name","The elastic tensor derivative for the specific order parameter");
   return params;
 }
 
 ACGrGrElasticDrivingForce::ACGrGrElasticDrivingForce(const InputParameters & parameters) :
-    ACBulk(parameters),
+    ACBulk<Real>(parameters),
     _D_elastic_tensor(getMaterialProperty<ElasticityTensorR4>("D_tensor_name")),
     _elastic_strain(getMaterialPropertyByName<RankTwoTensor>("elastic_strain"))
 {

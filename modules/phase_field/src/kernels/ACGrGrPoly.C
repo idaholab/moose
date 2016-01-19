@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<ACGrGrPoly>()
 {
-  InputParameters params = validParams<ACBulk>();
+  InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Grain-Boundary model poly crystaline interface Allen-Cahn Kernel");
   params.addRequiredCoupledVar("v", "Array of coupled variable names");
   params.addCoupledVar("T", "temperature");
@@ -17,7 +17,7 @@ InputParameters validParams<ACGrGrPoly>()
 }
 
 ACGrGrPoly::ACGrGrPoly(const InputParameters & parameters) :
-    ACBulk(parameters),
+    ACBulk<Real>(parameters),
     _mu(getMaterialProperty<Real>("mu")),
     _gamma(getMaterialProperty<Real>("gamma_asymm")),
     _tgrad_corr_mult(getMaterialProperty<Real>("tgrad_corr_mult")),

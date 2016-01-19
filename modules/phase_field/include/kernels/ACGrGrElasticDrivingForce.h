@@ -15,7 +15,7 @@ InputParameters validParams<ACGrGrElasticDrivingForce>();
  * Must access the elastic_strain stored as a material property
  * Requires the name of the elastic tensor derivative as an input.
  */
-class ACGrGrElasticDrivingForce : public ACBulk
+class ACGrGrElasticDrivingForce : public ACBulk<Real>
 {
 public:
   ACGrGrElasticDrivingForce(const InputParameters & parameters);

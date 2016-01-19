@@ -146,7 +146,7 @@
     variable = eta1
   [../]
   [./ACBulk1]
-    type = ACParsed
+    type = AllenCahn
     variable = eta1
     args = 'eta2 eta3 c'
     mob_name = L1
@@ -174,7 +174,7 @@
     variable = eta2
   [../]
   [./ACBulk2]
-    type = ACParsed
+    type = AllenCahn
     variable = eta2
     args = 'eta1 eta3 c'
     mob_name = L2
@@ -202,7 +202,7 @@
     variable = eta3
   [../]
   [./ACBulk3]
-    type = ACParsed
+    type = AllenCahn
     variable = eta3
     args = 'eta1 eta2 c'
     mob_name = L3

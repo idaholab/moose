@@ -17,7 +17,7 @@ InputParameters validParams<DoubleWellPotential>()
 }
 
 DoubleWellPotential::DoubleWellPotential(const InputParameters & parameters) :
-    ACBulk(parameters)
+    ACBulk<Real>(parameters)
 {
 }
 

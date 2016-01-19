@@ -42,7 +42,7 @@
   [../]
 
   [./ACBulk]
-    type = ACParsed
+    type = AllenCahn
     variable = eta
     f_name = F
   [../]
