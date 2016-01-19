@@ -25,4 +25,22 @@
     exodiff = 'penny_crack_out.e'
     map = false
   [../]
+  [./square_branch_quad_2d]
+    type = Exodiff
+    input = square_branch_quad_2d.i
+    exodiff = 'square_branch_quad_2d_out.e square_branch_quad_2d_out.e-s002 square_branch_quad_2d_out.e-s003'
+    map = false
+  [../]
+  [./square_branch_tri_2d]
+    type = Exodiff
+    input = square_branch_tri_2d.i
+    exodiff = 'square_branch_tri_2d_out.e square_branch_tri_2d_out.e-s002 square_branch_tri_2d_out.e-s003'
+    map = false
+  [../]
+  [./square_moment_fitting]
+    type = Exodiff
+    input = square_moment_fitting.i
+    exodiff = 'square_moment_fitting_out.e square_moment_fitting_out.e-s002'
+    map = false
+  [../]
 []

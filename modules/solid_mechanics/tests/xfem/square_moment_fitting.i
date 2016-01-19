@@ -95,11 +95,6 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e6
   [../]
-  [./density]
-    type = Density
-    block = 0
-    density = 1.0
-  [../]
 []
 
 [Executioner]
@@ -108,8 +103,6 @@
   solve_type = 'PJFNK'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      8'
-#  petsc_options_iname = '-ksp_gmres_restart -pc_type'
-#  petsc_options_value = '201        lu'
 
   line_search = 'none'
 
@@ -129,7 +122,7 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-4
+  nl_rel_tol = 1e-16
   nl_abs_tol = 1e-10
 
 # time control
@@ -156,11 +149,10 @@
 
 [Outputs]
   file_base = square_moment_fitting_out
-  output_initial = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    output_linear = false
+    output_linear = true
   [../]
 []

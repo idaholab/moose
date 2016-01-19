@@ -3,12 +3,6 @@
   family = LAGRANGE
 []
 
-[Problem]
-  type = ReferenceResidualProblem
-  solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
-[]
-
 [XFEM]
   cut_type = 'line_segment_2d'
   cut_data = '-1.0000e-10   6.6340e-01   6.6340e-01  -1.0000e-10   0.0000e+00   1.0000e+00
@@ -37,19 +31,10 @@
   [../]
 []
 
-[AuxVariables]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-[]
-
 [SolidMechanics]
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
     use_displaced_mesh = false
   [../]
 []
@@ -103,11 +88,6 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e6
   [../]
-  [./density]
-    type = Density
-    block = 0
-    density = 1.0
-  [../]
 []
 
 [Executioner]
@@ -130,7 +110,7 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-4
+  nl_rel_tol = 1e-16
   nl_abs_tol = 1e-10
 
 # time control
@@ -142,17 +122,10 @@
 
 [Outputs]
   file_base = square_branch_quad_2d_out
-  output_initial = true
   exodus = true
-#  vtk = true
-#  gnuplot = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_linear = true
   [../]
-#  [./vtk]
-#    type = GNUPlot
-#    output_initial = true    
-#  [../]
 []
