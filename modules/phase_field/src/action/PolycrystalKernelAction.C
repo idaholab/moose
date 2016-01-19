@@ -22,8 +22,6 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<VariableName>("T", "Name of temperature variable");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-  params.addParam<std::vector<Real> >("stored_energy" , "Optional vector of stored (dislocation) energy for each grain");
-  params.addParam<UserObjectName>("grain_tracker", "Grain tracker object (needed when specifying stored_energy)");
 
   return params;
 }
@@ -70,26 +68,6 @@ PolycrystalKernelAction::act()
       std::string kernel_name = "ACBulk_" + var_name;
       _problem->addKernel("ACGrGrPoly", kernel_name, params);
     }
-
-    //
-    // Set up (optional) ACGrGrPolyStoredEnergy kernels
-    //
-
-    if (isParamValid("stored_energy") && isParamValid("grain_tracker"))
-    {
-      InputParameters params = _factory.getValidParams("ACGrGrPolyStoredEnergy");
-      params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<bool>("implicit") = _implicit;
-      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-      params.set<std::vector<Real> >("stored_energy") = getParam<std::vector<Real> >("stored_energy");
-      params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
-      params.set<unsigned int>("op_index") = op;
-
-      std::string kernel_name = "ACStoredEnergy_" + var_name;
-      _problem->addKernel("ACGrGrPolyStoredEnergy", kernel_name, params);
-    }
-    else if (isParamValid("stored_energy") || isParamValid("grain_tracker"))
-      mooseError("Specify both 'stored_energy' and 'grain_tracker' or neither.");
 
     //
     // Set up ACInterface kernels
