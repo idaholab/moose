@@ -6,24 +6,23 @@
 /****************************************************************/
 #include "ACBulk.h"
 
-#ifndef ACGRGRPOLY_H
-#define ACGRGRPOLY_H
+#ifndef ACGRGRPOLYCONSTRAINT_H
+#define ACGRGRPOLYCONSTRAINT_H
 
 //Forward Declarations
-class ACGrGrPoly;
+class ACGrGrPolyConstraint;
 
 template<>
-InputParameters validParams<ACGrGrPoly>();
+InputParameters validParams<ACGrGrPolyConstraint>();
 
 /**
- * This kernel calculates the residual for grain growth.
- * It calculates the residual of the ith order parameter, and the values of
- * all other order parameters are coupled variables and are stored in vals.
+ * This kernel calculates a penalty based on the square of the deviation of the
+ * order parameter sum deviating from unity.
  */
-class ACGrGrPoly : public ACBulk<Real>
+class ACGrGrPolyConstraint : public ACBulk<Real>
 {
 public:
-  ACGrGrPoly(const InputParameters & parameters);
+  ACGrGrPolyConstraint(const InputParameters & parameters);
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);
@@ -34,11 +33,7 @@ protected:
   std::vector<VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
 
-  const MaterialProperty<Real> & _mu;
-  const MaterialProperty<Real> & _gamma;
-  const MaterialProperty<Real> & _tgrad_corr_mult;
-
-  VariableGradient * _grad_T;
+  const Real _penalty;
 };
 
-#endif //ACGRGRPOLY_H
+#endif //ACGRGRPOLYCONSTRAINT_H

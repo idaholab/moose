@@ -23,7 +23,10 @@ FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step"))
 {
-  _faux_data.resize(1);
+  // initialize faux data with identity map
+  _faux_data.resize(_vars.size());
+  for (unsigned int var_num = 0; var_num < _faux_data.size(); ++var_num)
+    _faux_data[var_num] = std::make_pair(var_num, var_num);
 }
 
 FauxGrainTracker::~FauxGrainTracker()

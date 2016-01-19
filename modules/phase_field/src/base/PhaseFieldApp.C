@@ -15,6 +15,8 @@
 #include "ACGBPoly.h"
 #include "ACGrGrElasticDrivingForce.h"
 #include "ACGrGrPoly.h"
+#include "ACGrGrPolyConstraint.h"
+#include "ACGrGrPolyStoredEnergy.h"
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
 #include "ACInterfaceKobayashi1.h"
@@ -139,6 +141,7 @@
 #include "KKSGlobalFreeEnergy.h"
 #include "PFCEnergyDensity.h"
 #include "PFCRFFEnergyDensity.h"
+#include "PolyStoredEnergyAux.h"
 #include "TestEBSDAux.h"
 #include "TotalFreeEnergy.h"
 #include "OutputEulerAngles.h"
@@ -237,6 +240,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACGBPoly);
   registerKernel(ACGrGrElasticDrivingForce);
   registerKernel(ACGrGrPoly);
+  registerKernel(ACGrGrPolyConstraint);
+  registerKernel(ACGrGrPolyStoredEnergy);
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
   registerKernel(ACInterfaceKobayashi1);
@@ -347,6 +352,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(KKSGlobalFreeEnergy);
   registerAux(PFCEnergyDensity);
   registerAux(PFCRFFEnergyDensity);
+  registerAux(PolyStoredEnergyAux);
   registerAux(TestEBSDAux);
   registerAux(TotalFreeEnergy);
   registerAux(OutputEulerAngles);

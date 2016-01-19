@@ -26,6 +26,12 @@
     exodiff = 'hex.e'
   [../]
 
+  [./stored_energy]
+    type = 'Exodiff'
+    input = 'stored_energy.i'
+    exodiff = 'stored_energy_out.e'
+  [../]
+
   [./GrGrVoronoi_test]
     type = 'Exodiff'
     input = 'GrGr_voronoi_test.i'

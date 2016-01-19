@@ -140,7 +140,6 @@ active = 'dt '
 []
 
 [Outputs]
-  file_base = voronoi_2D
   exodus = true
   csv = true
   [./console]

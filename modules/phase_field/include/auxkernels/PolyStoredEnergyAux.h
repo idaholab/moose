@@ -4,30 +4,30 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef BNDSCALCAUX_H
-#define BNDSCALCAUX_H
+#ifndef POLYSTOREDENERGYAUX_H
+#define POLYSTOREDENERGYAUX_H
 
 #include "AuxKernel.h"
 
 //Forward Declarations
-class BndsCalcAux;
+class PolyStoredEnergyAux;
+class GrainTrackerInterface;
 
 template<>
-InputParameters validParams<BndsCalcAux>();
+InputParameters validParams<PolyStoredEnergyAux>();
 
-/**
- * Visualize the location of grain boundaries in a polycrystalline simulation.
- */
-class BndsCalcAux : public AuxKernel
+class PolyStoredEnergyAux : public AuxKernel
 {
 public:
-  BndsCalcAux(const InputParameters & parameters);
+  PolyStoredEnergyAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
   unsigned int _ncrys;
   std::vector<VariableValue *> _vals;
+  std::vector<Real> _stored_energy;
+  const GrainTrackerInterface & _grain_tracker;
 };
 
-#endif //BNDSCALCAUX_H
+#endif //POLYSTOREDENERGYAUX_H
