@@ -156,6 +156,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _scalar_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
+    _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _pc_side(Moose::PCS_RIGHT),
     _use_finite_differenced_preconditioner(false),
@@ -479,7 +480,7 @@ void
 NonlinearSystem::setupDecomposition()
 {
   if (!_have_decomposition) return;
-  Split* top_split = getSplit(_decomposition_split);
+  MooseSharedPointer<Split> top_split = getSplit(_decomposition_split);
   top_split->setup();
 }
 
@@ -688,15 +689,13 @@ void
 NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
 {
   MooseSharedPointer<Split> split = MooseSharedNamespace::static_pointer_cast<Split>(_factory.create(split_name, name, parameters));
-  _splits.addSplit(name, split);
+  _splits.addObject(split);
 }
 
-Split*
+MooseSharedPointer<Split>
 NonlinearSystem::getSplit(const std::string & name)
 {
-
-  Split *split = _splits.getSplit(name);
-  return split;
+  return _splits.getActiveObject(name);
 }
 
 NumericVector<Number> &
