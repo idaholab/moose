@@ -1988,20 +1988,20 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 }
 
 const UserObject &
-FEProblem::getUserObjectBase(const std::string & name)
+FEProblem::getUserObjectBase(const std::string & name, THREAD_ID tid/*=0*/)
 {
   for (unsigned int i = 0; i < Moose::exec_types.size(); ++i)
-    if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
-      return *_user_objects(Moose::exec_types[i])[0].getUserObjectByName(name);
+    if (_user_objects(Moose::exec_types[i])[tid].hasUserObject(name))
+      return *_user_objects(Moose::exec_types[i])[tid].getUserObjectByName(name);
 
   mooseError("Unable to find user object with name '" + name + "'");
 }
 
 bool
-FEProblem::hasUserObject(const std::string & name)
+FEProblem::hasUserObject(const std::string & name, THREAD_ID tid/*=0*/)
 {
   for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
+    if (_user_objects(Moose::exec_types[i])[tid].hasUserObject(name))
       return true;
   return false;
 }
