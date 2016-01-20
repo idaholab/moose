@@ -225,7 +225,7 @@ ExecuteMooseObjectWarehouse<T>::addObject(MooseSharedPointer<T> object, THREAD_I
       _execute_objects[*it].addObject(object, tid);
   }
   else
-    mooseError("The object being added (" << object->name() << ") must inhert from SetupInterface to be added to the ExecuteMooseObjectWarehouse container.");
+    mooseError("The object being added (" << object->name() << ") must inherit from SetupInterface to be added to the ExecuteMooseObjectWarehouse container.");
 }
 
 

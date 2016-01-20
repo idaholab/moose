@@ -1,6 +1,6 @@
 #
 # In this test , which is set up similarly to 2phase_reconstruction_test2.i
-# we demonstarte that the feature numbers in teh EBSD file can be chosen arbitrarily.
+# we demonstrate that the feature numbers in teh EBSD file can be chosen arbitrarily.
 # There is no need for then to start at a certain index or even to be contiguous!
 # The TestEBSDAux AuxKernel outputs the original feature IDs (grain numbers)
 #
