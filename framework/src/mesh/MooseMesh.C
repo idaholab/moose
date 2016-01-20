@@ -1990,47 +1990,6 @@ MooseMesh::getGhostedBoundaryInflation()
   return _ghosted_boundaries_inflation;
 }
 
-namespace // Anonymous namespace for helper
-{
-  // A class for templated methods that expect output iterator
-  // arguments, which adds objects to the Mesh.
-  // Although any mesh_inserter_iterator can add any object, we
-  // template it around object type so that type inference and
-  // iterator_traits will work.
-  // This object specifically is used to insert extra ghost elems into the mesh
-  template <typename T>
-  struct extra_ghost_elem_inserter
-    : std::iterator<std::output_iterator_tag, T>
-  {
-    extra_ghost_elem_inserter(ParallelMesh& m) : mesh(m) {}
-
-    void operator=(Elem* e) { mesh.add_extra_ghost_elem(e); }
-
-    void operator=(Node* n) { mesh.add_node(n); }
-
-    void operator=(Point* p) { mesh.add_point(*p); }
-
-    extra_ghost_elem_inserter& operator++() {
-      return *this;
-    }
-
-    extra_ghost_elem_inserter operator++(int) {
-      return extra_ghost_elem_inserter(*this);
-    }
-
-    // We don't return a reference-to-T here because we don't want to
-    // construct one or have any of its methods called.  We just want
-    // to allow the returned object to be able to do mesh insertions
-    // with operator=().
-    extra_ghost_elem_inserter& operator*() { return *this; }
-  private:
-
-    ParallelMesh& mesh;
-  };
-
-} // anonymous namespace
-
-
 void
 MooseMesh::ghostGhostedBoundaries()
 {
@@ -2079,8 +2038,8 @@ MooseMesh::ghostGhostedBoundaries()
     }
   }
 
-  mesh.comm().allgather_packed_range(&mesh, connected_nodes_to_ghost.begin(), connected_nodes_to_ghost.end(), extra_ghost_elem_inserter<Node>(mesh));
-  mesh.comm().allgather_packed_range(&mesh, boundary_elems_to_ghost.begin(), boundary_elems_to_ghost.end(), extra_ghost_elem_inserter<Elem>(mesh));
+  mesh.comm().allgather_packed_range(&mesh, connected_nodes_to_ghost.begin(), connected_nodes_to_ghost.end(), mesh_inserter_iterator<Node>(mesh));
+  mesh.comm().allgather_packed_range(&mesh, boundary_elems_to_ghost.begin(), boundary_elems_to_ghost.end(), mesh_inserter_iterator<Elem>(mesh));
 
   Moose::perf_log.pop("ghostGhostedBoundaries()","MooseMesh");
 }
