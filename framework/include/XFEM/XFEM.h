@@ -49,7 +49,8 @@ public:
    * Constructor
    */
   explicit
-  XFEM(std::vector<MaterialData *> & material_data, MeshBase* mesh, MeshBase* mesh2=NULL);
+  XFEM(std::vector<MooseSharedPointer<MaterialData> > & material_data, MeshBase* mesh, MeshBase* mesh2=NULL);
+
 
   /**
    * Destructor
@@ -131,7 +132,7 @@ private:
                       std::vector<std::vector<Point> > &frag_faces) const;
 
 private:
-  std::vector<MaterialData *> & _material_data;
+  std::vector<MooseSharedPointer<MaterialData> > & _material_data;
 
   /**
    * XFEM cut type and data

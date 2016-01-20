@@ -44,7 +44,7 @@
 #endif // DEBUG
 
 // XFEM mesh modification methods
-XFEM::XFEM (std::vector<MaterialData *> & material_data, MeshBase* m, MeshBase* m2) :
+XFEM::XFEM (std::vector<MooseSharedPointer<MaterialData> > & material_data, MeshBase* m, MeshBase* m2) :
   _material_data(material_data),
   _mesh(m),
   _mesh2(m2)
