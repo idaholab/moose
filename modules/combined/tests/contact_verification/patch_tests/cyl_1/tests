@@ -7,6 +7,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    superlu = true
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -16,6 +17,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    superlu = true
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -25,6 +27,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    superlu = true
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -34,6 +37,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    superlu = true
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -43,6 +47,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    superlu = true
   [../]
   [./mu_0_2_kin]
     type = 'CSVDiff'
@@ -50,6 +55,7 @@
     csvdiff = 'cyl1_mu_0_2_kin_check.csv cyl1_mu_0_2_kin_check_cont_press_0001.csv cyl1_mu_0_2_kin_check_x_disp_0001.csv'
     rel_err = 1e-5
     abs_zero = 1e-6
+    superlu = true
     max_parallel = 1
   [../]
   [./mu_0_2_pen]
@@ -59,5 +65,6 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
+    superlu = true
   [../]
 []

@@ -301,7 +301,7 @@ GrainTracker::buildBoundingSpheres()
         else
           p_ptr = mesh.query_node_ptr(*it2);
         if (p_ptr)
-          for (unsigned int i = 0; i < mesh.spatial_dimension(); ++i)
+          for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
           {
             min_points[set_counter*3+i] = std::min(min_points[set_counter*3+i], (*p_ptr)(i));
             max_points[set_counter*3+i] = std::max(max_points[set_counter*3+i], (*p_ptr)(i));
