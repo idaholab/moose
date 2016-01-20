@@ -28,93 +28,62 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
-*******************************************************************************/
-#ifndef LIBCURLUTILS_H
-#define LIBCURLUTILS_H
+ *******************************************************************************/
+#ifndef ASIONETWORKINGTOOL_H_
+#define ASIONETWORKINGTOOL_H_
 
-#include <iostream>
-#include <string>
 #include "INetworkingTool.h"
+#include "MooseTypes.h"
 
-#include "libmesh/libmesh_config.h"
-
-#ifdef LIBMESH_HAVE_CURL
-#  include <curl/curl.h>
-#  include <curl/curlver.h>
-
-// A macro to help determine if the version of curl is new enough
-#define CURL_VERSION_LESS_THAN(major,minor,patch)                       \
-  ((LIBCURL_VERSION_MAJOR < (major) ||                                  \
-    (LIBCURL_VERSION_MAJOR == (major) && (LIBCURL_VERSION_MINOR < (minor) || \
-                                          (LIBCURL_VERSION_MINOR == (minor) && \
-                                           LIBCURL_VERSION_PATCH < (patch))))) ? 1 : 0)
-
-#endif
+#ifdef ASIO_STANDALONE
+#include "asio.hpp"
 
 /**
- * LibcurlUtils is a utility class used to transmit and receive information
- * with the POST and GET HTTP methods using the C library libcurl.
+ * The AsioNetworkignTool is a realization of the INetworkingTool
+ * interface that uses the stand-alone Asio library to post/get
+ * http requests.
  */
-class LibcurlUtils : public INetworkingTool
+class AsioNetworkingTool: public INetworkingTool
 {
 
 private:
 
-#ifdef LIBMESH_HAVE_CURL
   /**
-   * A handle to the cURL object.
+   * Reference to the io_service used by the client socket.
    */
-  CURL * curl;
+  MooseSharedPointer<asio::io_service> io_service;
 
   /**
-   * The result of the last curl call.
+   * Reference to the client socket used in communicating with
+   * the remote server.
    */
-  CURLcode result;
-
-  /**
-   * A char array an error from the last curl call.
-   */
-  char error[CURL_ERROR_SIZE];
-#endif
-
-  /**
-   * A flag indicating whether or not cURL calls will skip peer
-   * certificate verification for HTTPS urls. This flag should
-   * only be set to true for testing purposes.
-   */
-  bool ignoreSslPeerVerification;
-
-  /**
-   * True by default.  When true, set (CURLOPT_NOPROXY, "*") when
-   * calling libcurl APIs.  Call the setNoProxyFlag() setter to change
-   * the value.
-   */
-  bool noProxyFlag;
+  MooseSharedPointer<asio::ip::tcp::socket> socket;
 
 public:
 
   /**
-   * The Constructor.
+   * The constructor
    */
-  LibcurlUtils();
+  AsioNetworkingTool();
 
   /**
-   * The Destructor.
+   * The destructor
    */
-  ~LibcurlUtils();
+  ~AsioNetworkingTool();
 
   /**
-   * Uses libcurl and GET to return the contents located at url.
+   * Use Asio Library to perform HTTP GET to return the contents located at url.
    *
    * @param url The URL of the GET request.
    * @param username The username. It is ignored if it is empty. It may not be null.
    * @param password The password. It is ignored if it is empty. It may not be null.
    * @return The contents at the URL or an error message if one took place.
    */
-  std::string get(std::string url, std::string username, std::string password);
+  std::string get(std::string url, std::string username,
+	  	std::string password);
 
   /**
-   * Uses libcurl and POST to transmit value at url.
+   * Use Asio library to perform HTTP POST to transmit value at url.
    *
    * @param url The url that is used to post the value.
    * @param username The username. It is ignored if it is empty. It may not be null.
@@ -122,7 +91,8 @@ public:
    * @param value The value that is posted to the url.
    * @return A std::string containing the error if one took place. Else returns an empty std::string.
    */
-  std::string post(std::string url, std::string value, std::string username, std::string password);
+  std::string post(std::string url, std::string value, std::string username,
+		std::string password);
 
   /**
    * Sets the ignoreSslPeerVerification flag. If ignoreSslPeerVerification flag is
@@ -131,25 +101,46 @@ public:
    *
    * @param ignoreSslPeerVerification The value for the ignoreSslPeerVerification flag.
    */
-  virtual void setIgnoreSslPeerVerification(bool ignoreSslPeerVerification);
+  virtual void setIgnoreSslPeerVerification(bool ignoreSslPeerVerification)
+  {
+	  return;
+  }
 
   /**
    * Sets the noProxyFlag's value to 'val'.
    *
    * @param val The new value for the noProxyFlag.
    */
-  virtual void setNoProxyFlag(bool val) { noProxyFlag = val; }
+  virtual void setNoProxyFlag(bool val)
+  {
+     return;
+  }
+};
+
+#else // !ASIO_STANDALONE
+
+/**
+ * If we aren't using cxx11, build a stub AsioNetworkingTool class that does nothing
+ * but throw errors if used.
+ */
+class AsioNetworkingTool
+{
+public:
+  /**
+   * The constructors all throw errors.
+   */
+  AsioNetworkingTool() { mooseError("Asio Networking Tool requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
+  AsioNetworkingTool(std::istream &stream) { mooseError("Asio Networking Tool requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
 
   /**
-   * A callback required by the C libcurl library to write the contents returned by get() to a buffer.
-   *
-   * @param data The get data.
-   * @param size The size of each item.
-   * @param nmemb The number of items in memory.
-   * @param buffer The buffer to store the get() contents.
-   * @return The amount written which should be size * nmemb.
+   * The following functions do nothing, and will never be called.
    */
-  static int writeGetData(char * data, size_t size, size_t nmemb, std::string buffer);
+  std::string get(std::string url, std::string username,
+			std::string password) {return "";}
+  std::string post(std::string url, std::string value, std::string username,
+  			std::string password) {return "";}
 };
+
+#endif // ASIO_STANDALONE
 
 #endif

@@ -41,16 +41,13 @@
 [Mesh]
   type = FileMesh
   file = mug.e
-#dim = 3
-#  nx = 10
-#  ny = 10
 []
 [Outputs]
   file_base = out
   [./ICEUpdater]
     item_id = 1
     type = ICEUpdater
-    url = http://localhost:8181/ice/update
+    url = http://localhost:8080/ice/update
   [../]
 []
 [Postprocessors]
