@@ -16,7 +16,7 @@
 /**
  * This is a RealTensor version of a rotation matrix
  * It is instantiated with the Euler angles, which are measured in degrees.
- * R = Z0*X1*Z2
+ * R = Z0 *X1 * Z2
  * where Z0 = anticlockwise rotation about Z axis through Euler_angles(0) degrees
  * where X1 = anticlockwise rotation about X axis through Euler_angles(1) degress
  * where Z2 = anticlockwise rotation about Z axis through Euler_angles(2) degrees
@@ -31,6 +31,5 @@ public:
   /// reforms the rotation matrix according to the Euler angles.
   void update(const RealVectorValue & Euler_angles);
 };
-
 
 #endif //ROTATIONTENSOR_H
