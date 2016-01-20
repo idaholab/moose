@@ -38,6 +38,8 @@ InputParameters validParams<Transfer>()
   params.registerBase("Transfer");
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+
+  params.declareControllable("enable");
   return params;
 }
 
