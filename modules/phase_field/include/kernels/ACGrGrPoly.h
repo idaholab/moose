@@ -29,7 +29,8 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
+  const unsigned int _ncrys;
+
   std::vector<VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
 
@@ -37,11 +38,7 @@ private:
   const MaterialProperty<Real> & _gamma;
   const MaterialProperty<Real> & _tgrad_corr_mult;
 
-  bool _has_T;
   VariableGradient * _grad_T;
-
-  unsigned int _ncrys;
-  // Real _gamma;
 };
 
 #endif //ACGRGRPOLY_H
