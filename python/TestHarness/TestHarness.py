@@ -89,6 +89,8 @@ class TestHarness:
       self.checks['curl'] = set(['ALL'])
       self.checks['tbb'] = set(['ALL'])
       self.checks['superlu'] = set(['ALL'])
+      self.checks['cxx11'] = set(['ALL'])
+      self.checks['asio'] =  set(['ALL'])
     else:
       self.checks['compiler'] = getCompilers(self.libmesh_dir)
       self.checks['petsc_version'] = getPetscVersion(self.libmesh_dir)
@@ -103,6 +105,8 @@ class TestHarness:
       self.checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
       self.checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
       self.checks['superlu'] =  getLibMeshConfigOption(self.libmesh_dir, 'superlu')
+      self.checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
+      self.checks['asio'] =  getIfAsioExists(self.moose_dir)
 
     # Override the MESH_MODE option if using '--parallel-mesh' option
     if self.options.parallel_mesh == True or \

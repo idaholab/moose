@@ -34,12 +34,9 @@
 #include <sstream>
 
 #include "Updater.h"
-#include "LibcurlUtils.h"
 
-#ifdef LIBMESH_HAVE_TBB_API
-#if !TBB_VERSION_LESS_THAN(4,0)
-#include <tbb/tick_count.h>
-#include <tbb/tbb_thread.h>
+#ifdef LIBMESH_HAVE_CXX11
+#include "NetworkingToolFactory.h"
 
 std::vector<std::string> &split(const std::string &s, char delim,
                                 std::vector<std::string> &elems)
@@ -203,7 +200,8 @@ void Updater::updateProgress(int status)
 void Updater::addPostToQueue(PostType type, std::string message)
 {
   // Lock the thread using a lock_guard object
-  tbb::mutex::scoped_lock lock(mutex);
+  std::mutex mutex;
+  std::lock_guard<std::mutex> lock(mutex);
 
   // Create a new post
   MooseSharedPointer<Post> postPtr(new Post(type, message));
@@ -240,8 +238,8 @@ bool Updater::start()
     // using the current innermost cancellation group.  Believe it or
     // not, this is "idiomatic TBB code".
     // https://www.threadingbuildingblocks.org/docs/help/reference/task_scheduler/task_allocation.htm
-    updaterThread = new (tbb::task::allocate_root()) UpdaterThread(propertyMap, errorLoggerPtr, ignoreSslPeerVerification, noProxyFlag);
-    tbb::task::enqueue(*updaterThread);
+    updaterThread = new UpdaterThread(propertyMap, errorLoggerPtr, ignoreSslPeerVerification, noProxyFlag);
+    updaterThread->execute();
 
     // Set flag to true
     threadCreated = true;
@@ -269,7 +267,7 @@ bool Updater::stop()
     addPostToQueue(UPDATER_STOPPED, "");
 
     // Pause this thread for sleepTime seconds
-    tbb::this_tbb_thread::sleep(tbb::tick_count::interval_t(1.0));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 
     // Stop the thread
     updaterThread->stopThread();
@@ -291,8 +289,10 @@ bool Updater::stop()
  * Posts in the posts queue to url with cURL in JSON format.
  * The thread is then put to sleep for 1000 milliseconds.
  */
-tbb::task * UpdaterThread::execute()
+void UpdaterThread::runThreaded()
 {
+  NetworkingToolFactory factory;
+
   // Get the item id from the propertyMap
   std::string itemId = propertyMap.at(ITEM_ID);
 
@@ -302,12 +302,14 @@ tbb::task * UpdaterThread::execute()
   // Get the url from the propertyMap
   std::string url = propertyMap.at(URL);
 
-  // Create a new LibcurlUtils object to transmit posts
-  MooseSharedPointer<LibcurlUtils> libcurlUtilsPtr(new LibcurlUtils());
+  std::string tool = propertyMap.at(NETWORKING_TOOL);
 
-  // Set the ignoreSslPeerVerification flag in libcurlUtilsPtr
-  libcurlUtilsPtr->setIgnoreSslPeerVerification(ignoreSslPeerVerification);
-  libcurlUtilsPtr->setNoProxyFlag(noProxyFlag);
+  // Create a new INetworkingTool object to transmit posts
+  networkingTool = factory.createNetworkingTool(tool);
+
+  // Set the ignoreSslPeerVerification flag in networkTool
+  networkingTool->setIgnoreSslPeerVerification(ignoreSslPeerVerification);
+  networkingTool->setNoProxyFlag(noProxyFlag);
 
   // Start an infinite loop
   while (!stop)
@@ -316,55 +318,52 @@ tbb::task * UpdaterThread::execute()
     if (!empty())
     {
       // Lock the thread using a lock_guard object
-      // lock_guard<std::mutex> lock(mutex);
-      tbb::mutex::scoped_lock lock(mutex);
+      std::mutex mutex;
+      std::lock_guard<std::mutex> lock(mutex);
 
       // Create the transmission string and add initial json string to it
       std::string transmission = "{\"item_id\":\"" + itemId
         + "\", \"client_key\":\"" + clientKey + "\", \"posts\":[";
 
-      // Cycle over all posts in posts queue
-      while (!empty())
+      // Get the first post
+      PostPtr postPtr;
+
+      if (this->pop(postPtr))
       {
-        // Get the first post
-        PostPtr postPtr;
+        // Get the JSON from the post
+        std::string json = postPtr->getJSON();
 
-        if (this->try_pop(postPtr))
+        // Add the json to the posts array in the transmission
+        transmission += json;
+
+        // If posts is still non empty, add a comma separator
+        if (!empty())
+          transmission += ",";
+
+        // Add the final characters to the transmission
+        transmission += "]}";
+
+        // Transmit post to url and return an error if there is one
+        std::string error = networkingTool->post(url,
+                                              transmission,
+                                              propertyMap[USERNAME],
+                                              propertyMap[PASSWORD]);
+
+        // Check to see if there was an error, and log it.
+        if (error != "")
         {
-          // Get the JSON from the post
-          std::string json = postPtr->getJSON();
-
-          // Add the json to the posts array in the transmission
-          transmission += json;
-
-          // Remove the post from the queue
-          // pop();
-
-          // If posts is still non empty, add a comma separator
-          if (!empty())
-            transmission += ",";
+           errorLoggerPtr->logError(error + "\nStopping ICE HTTP Update.");
+           stop.store(true);
         }
+
       }
-
-      // Add the final characters to the transmission
-      transmission += "]}";
-
-      // Transmit post to url and return an error if there is one
-      std::string error = libcurlUtilsPtr->post(url,
-                                                transmission,
-                                                propertyMap[USERNAME],
-                                                propertyMap[PASSWORD]);
-
-      // Check to see if there was an error, and log it.
-      if (error != "")
-        errorLoggerPtr->logError(error);
     }
 
     // Pause this thread for sleepTime seconds
-    tbb::this_tbb_thread::sleep(tbb::tick_count::interval_t(0.2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
-  return NULL;
+  return;
 }
 
 /**
@@ -468,6 +467,8 @@ PropertyMap Updater::getPropertyMap(std::string propertyString)
       {
         // Insert the password into the map
         propertyMap.insert(PropertyMap::value_type(PASSWORD, value));
+      } else if (property == "networkingTool") {
+    	  propertyMap.insert(PropertyMap::value_type(NETWORKING_TOOL, value));
       }
     }
   }
@@ -603,5 +604,4 @@ void Updater::initialize(std::string propertyString)
     errorLoggerPtr->dumpErrors();
 }
 
-#endif // #if !TBB_VERSION_LESS_THAN(4,0)
-#endif // LIBMESH_HAVE_TBB_API
+#endif // LIBMESH_HAVE_CXX11

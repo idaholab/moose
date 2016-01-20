@@ -41,12 +41,14 @@
 #include "ErrorLogger.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
+#include "INetworkingTool.h"
 
-#ifdef LIBMESH_HAVE_TBB_API
-#if !TBB_VERSION_LESS_THAN(4,0)
-#include <tbb/mutex.h>
-#include <tbb/concurrent_queue.h>
+#ifdef LIBMESH_HAVE_CXX11
 
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#include <atomic>
 
 class UpdaterThread;
 
@@ -66,11 +68,6 @@ typedef MooseSharedPointer<ErrorLogger> ErrorLoggerPtr;
 typedef std::map<PropertyType, std::string> PropertyMap;
 
 /**
- * A PostPtrQueue is a queue template typed for PostPtr objects.
- */
-typedef tbb::concurrent_queue<PostPtr> PostPtrQueue;
-
-/**
  * The Updater allows ICE users to transmit information concerning the ongoing simulation in near real-time.
  * The information will be transmitted to a URL with the POST method using the HTTP or HTTPS protocol and cURL.
  * After instantiation of Updater, the user program can call start() and stop() to begin and end the transmission
@@ -83,6 +80,7 @@ typedef tbb::concurrent_queue<PostPtr> PostPtrQueue;
 class Updater
 {
 private:
+
   /**
    * A smart pointer to an ErrorLogger instance.
    */
@@ -100,11 +98,6 @@ private:
    * only be set to true for testing purposes.
    */
   bool ignoreSslPeerVerification;
-
-  /**
-   * A mutex to synchronize the posts queue.</p>
-   */
-  tbb::mutex mutex;
 
   /**
    * A standard template library map container keyed on
@@ -267,14 +260,79 @@ public:
   void setNoProxyFlag(bool val) { noProxyFlag = val; }
 };
 
+/**
+ * This queue class serves as a thread-safe wrapper around
+ * the std queue.
+ */
+template <typename T>
+class Queue
+{
+ public:
 
+  T pop()
+  {
+    std::unique_lock<std::mutex> mlock(mutex_);
+    while (queue_.empty())
+    {
+      cond_.wait(mlock);
+    }
+    auto item = queue_.front();
+    queue_.pop();
+    return item;
+  }
+
+  bool pop(T& item)
+  {
+    std::unique_lock<std::mutex> mlock(mutex_);
+    while (queue_.empty())
+    {
+      cond_.wait(mlock);
+    }
+    item = queue_.front();
+    queue_.pop();
+    return item != nullptr;
+  }
+
+  void push(const T& item)
+  {
+    std::unique_lock<std::mutex> mlock(mutex_);
+    queue_.push(item);
+    mlock.unlock();
+    cond_.notify_one();
+  }
+
+  void push(T& item)
+  {
+    std::unique_lock<std::mutex> mlock(mutex_);
+    queue_.push(std::move(item));
+    mlock.unlock();
+    cond_.notify_one();
+  }
+
+  bool empty() {
+	  std::unique_lock<std::mutex> mlock(mutex_);
+	  bool empty = queue_.empty();
+	  mlock.unlock();
+	  cond_.notify_one();
+	  return empty;
+  }
+
+ private:
+  std::queue<T> queue_;
+  std::mutex mutex_;
+  std::condition_variable cond_;
+};
+
+/**
+ * A PostPtrQueue is a queue template typed for PostPtr objects.
+ */
+typedef Queue<PostPtr> PostPtrQueue;
 
 /**
  * UpdaterThread is a subclass of TBB Task and TBB concurrent queue
  * that executes the event loop for posting updates to the ICE Core.
  */
-class UpdaterThread: public tbb::task,
-                     public PostPtrQueue
+class UpdaterThread: public PostPtrQueue
 {
 private:
 
@@ -303,15 +361,17 @@ private:
   bool noProxyFlag;
 
   /**
-   * A mutex to synchronize the posts queue.</p>
-   */
-  tbb::mutex mutex;
-
-  /**
    * Stop flag.
    */
-  tbb::atomic<bool> stop;
+//  tbb::atomic<bool> stop;
+   std::atomic<bool> stop;
 
+  /**
+   *
+   */
+  MooseSharedPointer<INetworkingTool> networkingTool;
+
+  MooseSharedPointer<std::thread> processThread;
 public:
 
   /**
@@ -334,7 +394,15 @@ public:
    * posts queue to url with cURL in JSON format.
    * The thread is then put to sleep for 1000 milliseconds.
    */
-  tbb::task* execute();
+  void execute() {
+	  processThread = MooseSharedPointer<std::thread>(new std::thread(&UpdaterThread::runThreaded, this));
+  }
+
+  /**
+   * This method is passed to the std thread to start the
+   * post loop.
+   */
+  void runThreaded();
 
   /**
    * Stop the thread
@@ -344,14 +412,13 @@ public:
 
 
 
-#else // !LIBMESH_HAVE_TBB_API
+#else // !LIBMESH_HAVE_CXX11
 
 
 
 /**
- * If we don't haev TBB, build a stub Updater class that does nothing
- * but throw errors if used.  This is a temporary workaround until the
- * Updater can be made TBB-agnostic.
+ * If we aren't using cxx11, build a stub Updater class that does nothing
+ * but throw errors if used.
  */
 class Updater
 {
@@ -359,8 +426,8 @@ public:
   /**
    * The constructors all throw errors.
    */
-  Updater() { mooseError("Updater requires TBB."); }
-  Updater(std::istream &stream) { mooseError("Updater requires TBB."); }
+  Updater() { mooseError("Updater requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
+  Updater(std::istream &stream) { mooseError("Updater requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
 
   /**
    * The following functions do nothing, and will never be called.
@@ -376,7 +443,6 @@ public:
   void updateProgress(int) {}
 };
 
-#endif // #if !TBB_VERSION_LESS_THAN(4,0)
-#endif // LIBMESH_HAVE_TBB_API
+#endif // LIBMESH_HAVE_CXX11
 
 #endif

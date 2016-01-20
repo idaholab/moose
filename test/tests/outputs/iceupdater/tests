@@ -1,18 +1,30 @@
 [Tests]
-  [./testupdater]
+  [./testupdater_asio]
     type = 'ICEUpdaterTester'
-    input = 'ice_updater_test.i'
-    nPosts = 4 # start, stop, 2 postprocessor posts
+    input = 'ice_updater_test_asio.i'
+    nPosts = 5 # start, stop, 3 postprocessor posts
+
+    # If you change this, make sure you change
+    # it in ice_updater_test_asio.i:Outputs/ICEUpdater/url
+    port = 8080
+
+    # Only run this test if C++ 11 is enabled
+    cxx11 = true
+    asio = true
+  [../]
+  [./testupdater_curl]
+    type = 'ICEUpdaterTester'
+    input = 'ice_updater_test_curl.i'
+    nPosts = 5 # start, stop, 3 postprocessor posts
 
     # If you change this, make sure you change
     # it in ice_updater_test.i:Outputs/ICEUpdater/url
-    port = 8181
+    port = 8081
 
     # This test should only run if libmesh has been configured with
-    # both TBB and curl enabled.
+    # curl and C++ 11 enabled.
     curl = true
-    tbb = true
+    cxx11 = true
 
-    deleted = '#5741'
   [../]
 []

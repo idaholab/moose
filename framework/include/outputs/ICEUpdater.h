@@ -23,9 +23,8 @@
 // Forward declarations
 class Updater;
 
-// Currently the ICE Updater requires TBB
-#ifdef LIBMESH_HAVE_TBB_API
-#if !TBB_VERSION_LESS_THAN(4,0)
+// Currently the ICE Updater requires C++11
+#ifdef LIBMESH_HAVE_CXX11
 
 // Forward declarations
 class ICEUpdater;
@@ -74,5 +73,4 @@ protected:
 
 #endif
 
-#endif // #if !TBB_VERSION_LESS_THAN(4,0)
-#endif // LIBMESH_HAVE_TBB_API
+#endif // LIBMESH_HAVE_CXX11

@@ -408,8 +408,10 @@
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
-#include "ICEUpdater.h"
 #include "ControlOutput.h"
+#ifdef LIBMESH_HAVE_CXX11
+#include "ICEUpdater.h"
+#endif
 
 // Controls
 #include "RealFunctionControl.h"
@@ -758,7 +760,7 @@ registerObjects(Factory & factory)
   registerOutput(ControlOutput);
 
   // Currently the ICE Updater requires TBB
-  #ifdef LIBMESH_HAVE_TBB_API
+  #ifdef LIBMESH_HAVE_CXX11
   registerOutput(ICEUpdater);
   #endif
 

@@ -71,6 +71,10 @@ LIBMESH_OPTIONS = {
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
+  'cxx11' :        { 're_option' : r'#define\s+LIBMESH_HAVE_CXX11\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
 }
 
 
@@ -262,6 +266,13 @@ def checkPetscVersion(checks, test):
       return (True, None, version)
   return (False, logic, version)
 
+def getIfAsioExists(moose_dir):
+  option_set = set(['ALL'])
+  if os.path.exists(moose_dir+"/framework/contrib/asio/include/asio.hpp"):
+    option_set.add('TRUE')
+  else:
+    option_set.add('FALSE')
+  return option_set
 
 def getLibMeshConfigOption(libmesh_dir, option):
   # Some tests work differently with parallel mesh enabled
