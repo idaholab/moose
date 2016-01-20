@@ -201,10 +201,12 @@ class RunApp(Tester):
     self.specs['no_copy'] = options.input_file_name
 
     # Are we using the PBS Emulator? Make this param valid if so.
-    # The cluster_launcher will fill in the rest
+    # Add the substitution string here so it is not visable to the user
+    self.specs.addStringSubParam('pbs_stdout', 'PBS_STDOUT', "Save stdout to this location")
+    self.specs.addStringSubParam('pbs_stderr', 'PBS_STDERR', "Save stderr to this location")
     if options.PBSEmulator:
-      self.specs['pbs_stdout'] = 'PBS_EMULATOR'
-      self.specs['pbs_stderr'] = 'PBS_EMULATOR'
+      self.specs['pbs_stdout'] = 'pbs_stdout = PBS_EMULATOR'
+      self.specs['pbs_stderr'] = 'pbs_stderr = PBS_EMULATOR'
 
     # Do all of the replacements for the valid parameters
     for spec in self.specs.valid_keys():
