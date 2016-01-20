@@ -26,11 +26,11 @@ UserObjectInterface::UserObjectInterface(const InputParameters & params) :
 const UserObject &
 UserObjectInterface::getUserObjectBase(const std::string & name)
 {
-  return _uoi_feproblem.getUserObjectBase(_uoi_params.get<UserObjectName>(name));
+  return _uoi_feproblem.getUserObjectBase(_uoi_params.get<UserObjectName>(name), _uoi_tid);
 }
 
 const UserObject &
 UserObjectInterface::getUserObjectBaseByName(const std::string & name)
 {
-  return _uoi_feproblem.getUserObjectBase(name);
+  return _uoi_feproblem.getUserObjectBase(name, _uoi_tid);
 }

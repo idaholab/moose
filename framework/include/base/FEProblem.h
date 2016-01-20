@@ -481,12 +481,12 @@ public:
    * @return Const reference to the user object
    */
   template <class T>
-  const T & getUserObject(const std::string & name)
+  const T & getUserObject(const std::string & name, THREAD_ID tid = 0)
   {
     for (unsigned int i = 0; i < Moose::exec_types.size(); ++i)
-      if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
+      if (_user_objects(Moose::exec_types[i])[tid].hasUserObject(name))
       {
-        UserObject * user_object = _user_objects(Moose::exec_types[i])[0].getUserObjectByName(name);
+        UserObject * user_object = _user_objects(Moose::exec_types[i])[tid].getUserObjectByName(name);
         return dynamic_cast<const T &>(*user_object);
       }
 
@@ -497,14 +497,14 @@ public:
    * @param name The name of the user object being retrieved
    * @return Const reference to the user object
    */
-  const UserObject & getUserObjectBase(const std::string & name);
+  const UserObject & getUserObjectBase(const std::string & name, THREAD_ID tid = 0);
 
   /**
    * Check if there if a user object of given name
    * @param name The name of the user object being checked for
    * @return true if the user object exists, false otherwise
    */
-  bool hasUserObject(const std::string & name);
+  bool hasUserObject(const std::string & name, THREAD_ID tid = 0);
 
   /**
    * Check existence of the postprocessor.
