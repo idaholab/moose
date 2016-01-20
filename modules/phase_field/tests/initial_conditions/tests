@@ -1,0 +1,75 @@
+[Tests]
+  [./RampIC]
+    # Test ramp ic generator
+    type = Exodiff
+    input = 'RampIC.i'
+    exodiff = 'RampIC_out.e'
+  [../]
+
+  [./BoundingBoxIC]
+    type = Exodiff
+    input = 'BoundingBoxIC.i'
+    exodiff = 'BoundingBoxIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./CrossIC]
+    type = Exodiff
+    input = 'CrossIC.i'
+    exodiff = 'CrossIC_out.e'
+    scale_refine = 1
+  [../]
+
+  [./SmoothCircleIC]
+    type = Exodiff
+    input = 'SmoothCircleIC.i'
+    exodiff = 'SmoothCircleIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./RndBoundingBoxIC]
+    type = Exodiff
+    input = 'RndBoundingBoxIC.i'
+    exodiff = 'RndBoundingBoxIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+    max_parallel = 1
+    max_threads = 1
+    recover = false # See #5207
+  [../]
+
+  [./SmoothCircleIC_3D]
+    type = Exodiff
+    input = 'SmoothCircleIC_3D.i'
+    exodiff = 'SmoothCircleIC_3D_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./RndSmoothCircleIC]
+    type = Exodiff
+    input = 'RndSmoothCircleIC.i'
+    exodiff = 'RndSmoothCircleIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+    max_parallel = 1
+    max_threads = 1
+  [../]
+
+  [./ClosePackIC]
+    # Test close pack ic generator (2D)
+    type = Exodiff
+    input = ClosePackIC.i
+    exodiff = ClosePackIC_out.e
+  [../]
+
+  [./ClosePackIC_3D]
+    # Test close pack ic generator (3D)
+    type = Exodiff
+    input = ClosePackIC_3D.i
+    exodiff = ClosePackIC_3D_out.e
+    method = 'opt oprof' # This test is too slow in debug
+  [../]
+[]
