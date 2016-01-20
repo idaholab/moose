@@ -10,6 +10,7 @@
     <PBS_STDERR>
     walltime = <WALLTIME>
     no_copy = <NO_COPY>
+    no_copy_pattern = 'pbs_\d+.cluster'
     copy_files = gold
     combine_streams = True
     cli_args = <CLI_ARGS>
