@@ -5,5 +5,6 @@
    exodiff = 'generalized_plane_strain_tm_contact_field_out.e'
    min_parallel = 2
    custom_cmp = 'generalized.exodiff'
+   superlu = true
  [../]
 []

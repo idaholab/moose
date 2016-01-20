@@ -8,6 +8,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
+    superlu = true
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -18,6 +19,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
+    superlu = true
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -28,6 +30,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
+    superlu = true
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -38,6 +41,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
+    superlu = true
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -48,6 +52,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
+    superlu = true
   [../]
   [./mu_1_0_kin]
     type = 'CSVDiff'
@@ -57,5 +62,6 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
+    superlu = true
   [../]
 []
