@@ -82,7 +82,7 @@ ThreadedElementLoop<RangeType>::caughtMooseException(MooseException & e)
 
   std::string what(e.what());
   _fe_problem.setException(what);
-};
+}
 
 
 #endif //THREADEDELEMENTLOOP_H
