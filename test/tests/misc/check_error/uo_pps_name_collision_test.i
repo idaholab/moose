@@ -42,8 +42,6 @@
     type = Diffusion
     variable = u
   [../]
-
-  # this kernel will user user data object from above
   [./ffn]
     type = UserObjectKernel
     variable = u
@@ -52,8 +50,6 @@
 []
 
 [BCs]
-  active = 'all'
-
   [./all]
     type = FunctionDirichletBC
     variable = u
@@ -64,8 +60,6 @@
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 []
 

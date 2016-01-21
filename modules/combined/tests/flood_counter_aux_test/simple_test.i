@@ -101,6 +101,7 @@
     variable = 'u v'
     threshold = 0.3
     execute_on = timestep_end
+    outputs = none
   [../]
 []
 

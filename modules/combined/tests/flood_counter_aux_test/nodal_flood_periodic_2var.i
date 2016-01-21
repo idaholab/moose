@@ -164,6 +164,7 @@
     execute_on = timestep_end
     use_single_map = false
     use_global_numbering = true
+    outputs = none
   [../]
 []
 
