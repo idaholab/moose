@@ -14,7 +14,6 @@
 
 #include "ICEUpdater.h"
 #include "FEProblem.h"
-#include "PostprocessorWarehouse.h"
 #include "Postprocessor.h"
 #include "Updater.h"
 #include <sstream>

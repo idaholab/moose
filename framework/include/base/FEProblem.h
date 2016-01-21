@@ -19,9 +19,8 @@
 #include "SubProblem.h"
 #include "AuxiliarySystem.h"
 #include "GeometricSearchData.h"
-#include "PostprocessorWarehouse.h"
 #include "PostprocessorData.h"
-#include "VectorPostprocessorWarehouse.h"
+#include "VectorPostprocessorData.h"
 #include "Adaptivity.h"
 #include "UserObjectWarehouse.h"
 #include "InitialConditionWarehouse.h"
@@ -533,11 +532,6 @@ public:
   PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
 
   /**
-   * Get a reference to the PostprocessorWarehouse ExecStore object
-   */
-  ExecStore<PostprocessorWarehouse> & getPostprocessorWarehouse();
-
-  /**
    * Get a reference to the UserObjectWarehouse ExecStore object
    */
   ExecStore<UserObjectWarehouse> & getUserObjectWarehouse();
@@ -572,16 +566,18 @@ public:
   VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name);
 
   /**
+   * Declare a new VectorPostprocessor vector
+   * @param name The name of the post-processor
+   * @param vector_name The name of the post-processor
+   * @return The reference to the vector declared
+   */
+  VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name, const std::string & vector_name);
+
+  /**
    * Get the vectors for a specific VectorPostprocessor.
    * @param vpp_name The name of the VectorPostprocessor
    */
   const std::map<std::string, VectorPostprocessorValue*> & getVectorPostprocessorVectors(const std::string & vpp_name);
-
-  /**
-   * Get a reference to the VectorPostprocessorWarehouse ExecStore object
-   */
-  ExecStore<VectorPostprocessorWarehouse> & getVectorPostprocessorWarehouse();
-
 
   // Dampers /////
   void addDamper(std::string damper_name, const std::string & name, InputParameters parameters);
@@ -971,6 +967,15 @@ public:
   void updateActiveObjects();
 
 protected:
+
+  ///@{
+  /**
+   *
+   */
+  VectorPostprocessorData & getVectorPostprocessorData();
+  ///@}
+
+
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
@@ -1038,11 +1043,9 @@ protected:
 
   // postprocessors
   PostprocessorData _pps_data;
-  ExecStore<PostprocessorWarehouse> _pps;
 
   // VectorPostprocessors
-  std::vector<VectorPostprocessorData *> _vpps_data;
-  ExecStore<VectorPostprocessorWarehouse> _vpps;
+  VectorPostprocessorData _vpps_data;
 
   // user objects
   ExecStore<UserObjectWarehouse> _user_objects;
