@@ -21,6 +21,8 @@ class RunApp(Tester):
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
     params.addParam('no_copy',            "The tests file as pbs understands it")
+    params.addStringSubParam('pbs_stdout', 'PBS_STDOUT', "Save stdout to this location")
+    params.addStringSubParam('pbs_stderr', 'PBS_STDERR', "Save stderr to this location")
 
     # Parallel/Thread testing
     params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
