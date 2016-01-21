@@ -2004,7 +2004,7 @@ namespace // Anonymous namespace for helper
   {
     extra_ghost_elem_inserter(ParallelMesh& m) : mesh(m) {}
 
-    void operator=(Elem* e) { mesh.add_extra_ghost_elem(e); }
+    void operator=(const Elem* e) { mesh.add_extra_ghost_elem(const_cast<Elem *>(e)); }
 
     void operator=(Node* n) { mesh.add_node(n); }
 
