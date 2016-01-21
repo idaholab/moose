@@ -692,24 +692,34 @@ FEProblem::get_xfem_weights(const Elem * elem, THREAD_ID tid)
   } 
   else
     undisplaced_elem = elem;
-
-  std::string xfem_qrule = _xfem.get_xfem_qrule();
   
   _xfem_JxW[elem->id()].resize((_assembly[tid]->qRule())->n_points(), 1.0);
 
   for (unsigned qp = 0; qp < (_assembly[tid]->qRule())->n_points(); qp++)
   {
-    if (xfem_qrule == "volfrac")
-      _xfem_JxW[elem->id()][qp] = _xfem.get_elem_phys_volfrac(undisplaced_elem);
-    else if (xfem_qrule == "moment_fitting"){
-      std::vector<Point> gauss_points = (_assembly[tid]->qRule())->get_points();
-      std::vector<Real>  gauss_weights = (_assembly[tid]->qRule())->get_weights();
-      _xfem_JxW[elem->id()][qp] = _xfem.get_elem_new_weights(undisplaced_elem, qp, gauss_points, gauss_weights);
+    switch (_xfem.get_xfem_qrule())
+    {
+      case 0: // volfrac
+        {
+          _xfem_JxW[elem->id()][qp] = _xfem.get_elem_phys_volfrac(undisplaced_elem);
+          break;
+        }
+      case MOMENT_FITTING: //moment_fitting
+        { 
+          std::vector<Point> gauss_points = (_assembly[tid]->qRule())->get_points();
+          std::vector<Real>  gauss_weights = (_assembly[tid]->qRule())->get_weights();
+          _xfem_JxW[elem->id()][qp] = _xfem.get_elem_new_weights(undisplaced_elem, qp, gauss_points, gauss_weights);
+          break;
+        }
+      case DIRECT: //direct
+        {
+          // remove q-points outside the elem real domain by force
+          _xfem_JxW[elem->id()][qp] = _xfem.flag_qp_inside(undisplaced_elem, (_assembly[tid]->qPoints())[qp]);
+          break;
+        }
+      default:
+        _xfem_JxW[elem->id()][qp] = 1.0;
     }
-    else if (xfem_qrule == "direct") // remove q-points outside the elem real domain by force
-      _xfem_JxW[elem->id()][qp] = _xfem.flag_qp_inside(undisplaced_elem, (_assembly[tid]->qPoints())[qp]);
-    else
-      _xfem_JxW[elem->id()][qp] = 1.0;
   }
 }
 
@@ -718,7 +728,8 @@ FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 { 
   _assembly[tid]->reinit(elem);
 
-  if (elem->is_semilocal(_mesh.processor_id()) && _xfem_JxW[elem->id()].size() == 0){
+  if (elem->is_semilocal(_mesh.processor_id()) && _xfem_JxW[elem->id()].size() == 0)
+  {
     get_xfem_weights(elem,tid);
   }
   _assembly[tid]->setXFEMWeights(_xfem_JxW[elem->id()],elem);

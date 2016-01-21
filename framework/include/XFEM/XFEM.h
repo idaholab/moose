@@ -30,6 +30,13 @@ enum XFEM_CUTPLANE_QUANTITY
   XCC_NORMAL_Z
 };
 
+enum XFEM_QRULE
+{
+  VOLFRAC,
+  MOMENT_FITTING,
+  DIRECT
+};
+
 class XFEM_geometric_cut;
 
 /**
@@ -120,7 +127,7 @@ public:
   void set_xfem_cut_data(std::vector<Real> &cut_data);
   std::string & get_xfem_cut_type();
   void set_xfem_cut_type(std::string & cut_type);
-  std::string & get_xfem_qrule();
+  XFEM_QRULE & get_xfem_qrule();
   void set_xfem_qrule(std::string & xfem_qrule);
   void set_crack_growth_method(bool use_crack_growth_increment, Real crack_growth_increment);
 
@@ -140,7 +147,7 @@ private:
   std::vector<Real> _XFEM_cut_data;
   std::string _XFEM_cut_type;
 
-  std::string _XFEM_qrule;
+  XFEM_QRULE _XFEM_qrule;
 
   bool _use_crack_growth_increment;
   Real _crack_growth_increment;

@@ -468,8 +468,6 @@ public:
 
   void updateXFEMWeights(const Elem* elem);
 
-  void reinitXFEMWeights();
-
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -550,8 +548,6 @@ protected:
   MooseArray<Real> _current_JxW;
   /// The XFEM integration weights
   std::map<dof_id_type, MooseArray<Real> > _xfem_weights_map;
-  /// XFEM weights update flag
-  std::map<dof_id_type,bool> _xfem_weights_have_been_updated;
   /// The coordinate system
   Moose::CoordinateSystemType _coord_type;
   /// The current coordinate transformation coefficients

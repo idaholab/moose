@@ -332,8 +332,6 @@ Assembly::invalidateCache()
 
   for (; it!=end; ++it)
     it->second->_invalidated = true;
-
-  reinitXFEMWeights();
 }
 
 void
@@ -1560,7 +1558,6 @@ Assembly::updateXFEMWeights(const Elem *elem)
       for(unsigned i = 0; i < _xfem_weights_map[elem->id()].size(); i++){ 
         _current_JxW[i] = _current_JxW[i] * _xfem_weights_map[elem->id()][i]; 
       }
-      _xfem_weights_have_been_updated[elem->id()] = true;
    } 
 }
 
@@ -1573,13 +1570,3 @@ Assembly::setXFEMWeights(std::vector<Real> & xfem_weights, const Elem * elem)
     _xfem_weights_map[elem->id()][i] = xfem_weights[i]; 
 }
 
-void
-Assembly::reinitXFEMWeights()
-{ 
-  std::map<dof_id_type, bool >::iterator
-  it  = _xfem_weights_have_been_updated.begin(),
-  end = _xfem_weights_have_been_updated.end();
-
-  for (; it!=end; ++it)
-    it->second = false;
-}

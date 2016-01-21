@@ -1418,7 +1418,7 @@ XFEM::set_xfem_cut_type(std::string & cut_type)
   _XFEM_cut_type = cut_type;
 }
 
-std::string &
+XFEM_QRULE &
 XFEM::get_xfem_qrule()
 {
   return _XFEM_qrule;
@@ -1427,7 +1427,12 @@ XFEM::get_xfem_qrule()
 void
 XFEM::set_xfem_qrule(std::string & xfem_qrule)
 {
-  _XFEM_qrule = xfem_qrule;
+  if (xfem_qrule == "volfrac")
+    _XFEM_qrule = VOLFRAC;
+  else if (xfem_qrule == "moment_fitting")
+    _XFEM_qrule = MOMENT_FITTING;
+  else if (xfem_qrule == "direct")
+    _XFEM_qrule = DIRECT;
 }
 
 void
