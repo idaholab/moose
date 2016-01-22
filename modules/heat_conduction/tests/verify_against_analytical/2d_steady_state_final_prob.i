@@ -8,13 +8,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-<<<<<<< HEAD
   nx = 30
   ny = 30
-=======
-  nx = 150
-  ny = 150
->>>>>>> e11ad5035a691c2840134ea8ad7ba6ef4a6bb2b4
   xmax = 2
   ymax = 2
 []
@@ -24,7 +19,6 @@
   [../]
 []
 
-<<<<<<< HEAD
 [Functions]
   [./fun_1]
     type = ParsedFunction
@@ -36,8 +30,6 @@
   [../]
 []
 
-=======
->>>>>>> e11ad5035a691c2840134ea8ad7ba6ef4a6bb2b4
 [Kernels]
   active = 'HeatDiff'
   [./HeatDiff]
@@ -73,11 +65,8 @@
     type = FunctionDirichletBC
     variable = T
     boundary = top
-<<<<<<< HEAD
     function = top_bound
-=======
-    function = 10*sin(3.14159265*x*0.5)
->>>>>>> e11ad5035a691c2840134ea8ad7ba6ef4a6bb2b4
+
   [../]
 []
 
@@ -106,20 +95,12 @@
 [Postprocessors]
   [./nodal_error]
     type = NodalL2Error
-<<<<<<< HEAD
     function = 'fun_1'
-=======
-    function = '10/(sinh(3.14159265))*sin(3.14159265*x*0.5)*sinh(3.14159265*y*0.5)'
->>>>>>> e11ad5035a691c2840134ea8ad7ba6ef4a6bb2b4
     variable = T
   [../]
   [./elemental_error]
     type = ElementL2Error
-<<<<<<< HEAD
     function = 'fun_1'
-=======
-    function = '10/(sinh(3.14159265))*sin(3.14159265*x*0.5)*sinh(3.14159265*y*0.5)'
->>>>>>> e11ad5035a691c2840134ea8ad7ba6ef4a6bb2b4
     variable = T
   [../]
 []
