@@ -39,7 +39,7 @@ MaterialUserObject::finalize()
 }
 
 void
-MaterialUserObject::threadJoin()
+MaterialUserObject::threadJoin(const UserObject &)
 {
   mooseError("MaterialUserObjects must be called explicitly from Materials");
 }

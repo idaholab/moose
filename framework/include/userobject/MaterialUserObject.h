@@ -31,8 +31,10 @@ public:
   MaterialUserObject(const InputParameters & parameters);
 
   /// @{ Block all methods that are not used in explicitly called UOs
-  virtual void execute()
-  virtual void finalize()
-  virtual void threadJoin(const UserObject & uo);
+  virtual void execute();
+  virtual void finalize();
+  virtual void threadJoin(const UserObject &);
   /// @}
 };
+
+#endif //MATERIALUSEROBJECT_H
