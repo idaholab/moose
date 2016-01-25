@@ -43,31 +43,30 @@
 /**
  * This factory decouples clients from the act of creating new
  * implementations of INetworkingTool.
- *
  */
-class NetworkingToolFactory {
-
+class NetworkingToolFactory
+{
 public:
-
-	/**
-	 * This method returns the INetworkingTool with the provided name.
-	 */
-	MooseSharedPointer<INetworkingTool> createNetworkingTool(std::string toolName) {
-		if (toolName == "curl")
-		{
-			return MooseSharedPointer<INetworkingTool>(new LibcurlUtils());
-		}
+  /**
+   * This method returns the INetworkingTool with the provided name.
+   */
+  MooseSharedPointer<INetworkingTool> createNetworkingTool(std::string toolName)
+  {
+    if (toolName == "curl")
+    {
+      return MooseSharedPointer<INetworkingTool>(new LibcurlUtils());
+    }
 #ifdef ASIO_STANDALONE
-		else if (toolName == "asio")
-		{
-			return MooseSharedPointer<INetworkingTool>(new AsioNetworkingTool());
-		}
+    else if (toolName == "asio")
+    {
+      return MooseSharedPointer<INetworkingTool>(new AsioNetworkingTool());
+    }
 #endif
-		else
-		{
-			return MooseSharedPointer<INetworkingTool>(new INetworkingTool());
-		}
-	}
+    else
+    {
+      return MooseSharedPointer<INetworkingTool>(new INetworkingTool());
+    }
+  }
 };
 
 

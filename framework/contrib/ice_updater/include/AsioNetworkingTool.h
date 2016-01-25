@@ -45,9 +45,7 @@
  */
 class AsioNetworkingTool: public INetworkingTool
 {
-
 private:
-
   /**
    * Reference to the io_service used by the client socket.
    */
@@ -60,7 +58,6 @@ private:
   MooseSharedPointer<asio::ip::tcp::socket> socket;
 
 public:
-
   /**
    * The constructor
    */
@@ -79,8 +76,9 @@ public:
    * @param password The password. It is ignored if it is empty. It may not be null.
    * @return The contents at the URL or an error message if one took place.
    */
-  std::string get(std::string url, std::string username,
-	  	std::string password);
+  std::string get(std::string url,
+                  std::string username,
+                  std::string password);
 
   /**
    * Use Asio library to perform HTTP POST to transmit value at url.
@@ -91,8 +89,10 @@ public:
    * @param value The value that is posted to the url.
    * @return A std::string containing the error if one took place. Else returns an empty std::string.
    */
-  std::string post(std::string url, std::string value, std::string username,
-		std::string password);
+  std::string post(std::string url,
+                   std::string value,
+                   std::string username,
+                   std::string password);
 
   /**
    * Sets the ignoreSslPeerVerification flag. If ignoreSslPeerVerification flag is
@@ -103,7 +103,7 @@ public:
    */
   virtual void setIgnoreSslPeerVerification(bool ignoreSslPeerVerification)
   {
-	  return;
+    return;
   }
 
   /**
@@ -113,7 +113,7 @@ public:
    */
   virtual void setNoProxyFlag(bool val)
   {
-     return;
+    return;
   }
 };
 
@@ -130,15 +130,21 @@ public:
    * The constructors all throw errors.
    */
   AsioNetworkingTool() { mooseError("Asio Networking Tool requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
-  AsioNetworkingTool(std::istream &stream) { mooseError("Asio Networking Tool requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
+  AsioNetworkingTool(std::istream & /*stream*/) { mooseError("Asio Networking Tool requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
 
   /**
    * The following functions do nothing, and will never be called.
    */
-  std::string get(std::string url, std::string username,
-			std::string password) {return "";}
-  std::string post(std::string url, std::string value, std::string username,
-  			std::string password) {return "";}
+  std::string get(std::string /*url*/,
+                  std::string /*username*/,
+                  std::string /*password*/)
+    { return std::string(""); }
+
+  std::string post(std::string /*url*/,
+                   std::string /*value*/,
+                   std::string /*username*/,
+                   std::string /*password*/)
+    { return std::string(""); }
 };
 
 #endif // ASIO_STANDALONE

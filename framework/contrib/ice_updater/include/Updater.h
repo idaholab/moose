@@ -309,12 +309,13 @@ class Queue
     cond_.notify_one();
   }
 
-  bool empty() {
-	  std::unique_lock<std::mutex> mlock(mutex_);
-	  bool empty = queue_.empty();
-	  mlock.unlock();
-	  cond_.notify_one();
-	  return empty;
+  bool empty()
+  {
+    std::unique_lock<std::mutex> mlock(mutex_);
+    bool empty = queue_.empty();
+    mlock.unlock();
+    cond_.notify_one();
+    return empty;
   }
 
  private:
@@ -394,8 +395,9 @@ public:
    * posts queue to url with cURL in JSON format.
    * The thread is then put to sleep for 1000 milliseconds.
    */
-  void execute() {
-	  processThread = MooseSharedPointer<std::thread>(new std::thread(&UpdaterThread::runThreaded, this));
+  void execute()
+  {
+    processThread = MooseSharedPointer<std::thread>(new std::thread(&UpdaterThread::runThreaded, this));
   }
 
   /**
