@@ -72,18 +72,6 @@
 []
 
 [AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
@@ -167,11 +155,11 @@
 
   l_max_its = 100
   nl_max_its = 100
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-6
   nl_abs_tol = 1e-10
-  l_tol = 1e-9
+  l_tol = 1e-4
   start_time = 0.0
-  end_time = 0.1
+  end_time = 0.5
   dt = 0.01
 []
 
@@ -203,7 +191,6 @@
 []
 
 [Outputs]
-  exodus = true
   csv = true
   print_linear_residuals = false
   print_perf_log = true

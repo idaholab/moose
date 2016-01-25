@@ -279,6 +279,7 @@
     yield_strength = yield_strength
     yield_function_tolerance = 1.0E2
     internal_constraint_tolerance = 1.0E-7
+    use_custom_returnMap = false
   [../]
 
 
