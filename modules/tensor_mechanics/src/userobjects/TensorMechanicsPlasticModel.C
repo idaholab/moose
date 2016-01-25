@@ -41,13 +41,12 @@ TensorMechanicsPlasticModel::numberSurfaces() const
   return 1;
 }
 
-
-
 Real
 TensorMechanicsPlasticModel::yieldFunction(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
 {
   return 0.0;
 }
+
 void
 TensorMechanicsPlasticModel::yieldFunctionV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & f) const
 {
@@ -61,6 +60,7 @@ TensorMechanicsPlasticModel::dyieldFunction_dstress(const RankTwoTensor & /*stre
 {
   return RankTwoTensor();
 }
+
 void
 TensorMechanicsPlasticModel::dyieldFunction_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & df_dstress) const
 {
@@ -157,7 +157,8 @@ TensorMechanicsPlasticModel::dhardPotential_dintnlV(const RankTwoTensor & stress
 
 
 void
-TensorMechanicsPlasticModel::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & /*stress*/, const Real & /*intnl*/, const RankFourTensor & /*Eijkl*/, std::vector<bool> & act, RankTwoTensor & /*returned_stress*/) const
+TensorMechanicsPlasticModel::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & /*stress*/, const Real & /*intnl*/,
+                                const RankFourTensor & /*Eijkl*/, std::vector<bool> & act, RankTwoTensor & /*returned_stress*/) const
 {
   mooseAssert(f.size() == numberSurfaces(), "f incorrectly sized at " << f.size() << " in activeConstraints");
   act.resize(numberSurfaces());
@@ -171,3 +172,30 @@ TensorMechanicsPlasticModel::modelName() const
   return "None";
 }
 
+bool
+TensorMechanicsPlasticModel::returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & /*E_ijkl*/,
+                                Real /*ep_plastic_tolerance*/, RankTwoTensor & /*returned_stress*/, Real & /*returned_intnl*/,
+                                std::vector<Real> & /*dpm*/, RankTwoTensor & /*delta_dp*/, std::vector<Real> & yf,
+                                unsigned & trial_stress_inadmissible) const
+{
+  trial_stress_inadmissible = 0;
+  yieldFunctionV(trial_stress, intnl_old, yf);
+
+  for (unsigned sf = 0 ; sf < numberSurfaces() ; ++sf)
+    if (yf[sf] > _f_tol)
+      trial_stress_inadmissible = 1;
+
+  // example of checking Kuhn-Tucker
+  std::vector<Real> dpm(numberSurfaces(), 0);
+  for (unsigned sf = 0 ; sf < numberSurfaces() ; ++sf)
+    if (!( (dpm[sf] == 0 && yf[sf] <= _f_tol) || (dpm[sf] > 0 && yf[sf] <= _f_tol && yf[sf] >= -_f_tol) ))
+      return false;
+  return true;
+}
+
+RankFourTensor
+TensorMechanicsPlasticModel::consistentTangentOperator(const RankTwoTensor & /*stress*/, const Real & /*intnl*/,
+                                                       const RankFourTensor & E_ijkl, const std::vector<Real> & /*cumulative_pm*/) const
+{
+  return E_ijkl;
+}

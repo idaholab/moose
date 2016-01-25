@@ -77,6 +77,9 @@ protected:
   /// rotation matrix that takes _n to (0, 0, 1)
   RealTensorValue _rot;
 
+  /// whether to perform the rotations necessary in finite-strain simulations
+  bool _perform_finite_strain_rotations;
+
 
   /// plastic strain
   MaterialProperty<RankTwoTensor> & _plastic_strain;
@@ -141,6 +144,7 @@ protected:
    * counts the number of active constraints
    */
   virtual unsigned int numberActive(const std::vector<bool> & active);
+
 
   /**
    * The residual-squared
@@ -322,25 +326,35 @@ protected:
   // gets called after return-map
   virtual void postReturnMap();
 
-  /*
-   * performs an elastic step
+  /**
+   * Attempts to find an admissible (stress, intnl) by using the
+   * customized return-map algorithms defined through the
+   * TensorMechanicsPlasticXXXX.returnMap functions.
    *
    * @param stress_old The value of stress at the previous "time" step
-   * @param[out] stress  stress = E_ijkl*plastic_strain
+   * @param[out] stress If returnvalue=true then this is the returned value of stress.  Otherwise, this is undefined
    * @param intnl_old The internal variables at the previous "time" step
-   * @param[out] intnl   intnl = intnl_old
+   * @param[out] intnl If returnvalue=true then this is the value of the internal parameters after returning.  Otherwise, this is undefined
+   * @param[out] pm If returnvalue=true, this is the plastic multipliers needed to bring aout the return.  Otherwise, this is undefined
+   * @param[in/out] cumulative_pm If returnvalue=true, this is cumulative plastic multipliers, updated with pm.  Otherwise, this is untouched by the algorithm
    * @param plastic_strain_old The value of plastic strain at the previous "time" step
-   * @param[out] plastic_strain    plastic_strain = plastic_strain_old
+   * @param[out] plastic_strain  If returnvalue=true, this is the new plastic strain.  Otherwise it is set to plastic_strain_old
    * @param E_ijkl   The elasticity tensor.
    * @param strain_increment   The applied strain increment
-   * @param[out] yf   All the yield functions at (stress, intnl)
-   * @param[out] iterations  zero
-   * @param[out] consistent_tangent_operator  The consistent tangent operator d(stress_rate)/d(strain_rate)
-   * @return true if the (stress, intnl) are admissible
+   * @param[out] yf If returnvalue=true, then all the yield functions at (stress, intnl).  Otherwise, all the yield functions at (stress_old, intnl_old)
+   * @param[out] iterations Number of NR iterations used, which is always zero in the current implementation.
+   * @param called_from This can be called from computeQpStress, in which case it can actually provde an answer to the returnmap algorithm, or from returnMap in which case it is probably only providing an answer to a particular subdivision of the returnmap algorithm.  The consistent tangent operator is calculated idfferently in each case
+   * @param final_step  The consistent tangent operator is calculated if this is true
+   * @param[out] consistent_tangent_operator If final_step==true and returnvalue=true, then this is the consistent tangent operator d(stress_rate)/d(strain_rate).  Otherwise it is undefined.
+   * @return true if the (stress, intnl) are admissible, in which case the (stress_old, intnl_old) could have been admissible, or exactly one of the plastic models successfully used its custom returnMap function to provide the returned (stress, intnl) values and all other plastic models are admissible at that configuration.  Or, false, then (stress_old, intnl_old) is not admissible according to >=1 plastic model and the custom returnMap functions failed in some way.
    */
-  virtual bool elasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, RankFourTensor & consistent_tangent_operator);
+  virtual bool quickStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old,
+                        std::vector<Real> & intnl, std::vector<Real> & pm, std::vector<Real> & cumulative_pm,
+                        const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl,
+                        const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations,
+                         RankFourTensor & consistent_tangent_operator, const std::string & called_from, const bool & final_step);
 
-  /*
+  /**
    * performs a plastic step
    *
    * @param stress_old The value of stress at the previous "time" step
@@ -377,7 +391,7 @@ protected:
 
   unsigned int activeCombinationNumber(const std::vector<bool> & act);
 
-  /*
+  /**
    * Computes the consistent tangent operator
    * (another name for the jacobian = d(stress_rate)/d(strain_rate)
    *
