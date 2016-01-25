@@ -1172,7 +1172,7 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 }
 
 void
-FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters, bool auto_parsed /*=false*/)
+FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters, bool /*auto_parsed=false*/)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
