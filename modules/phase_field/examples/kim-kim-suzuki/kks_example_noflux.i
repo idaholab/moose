@@ -129,7 +129,7 @@
 []
 
 [Kernels]
-  active = 'PhaseConc ChemPotVacancies CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
+  active = 'PhaseConc ChemPotSolute CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
 
   # enforce c = (1-h(eta))*cl + h(eta)*cs
   [./PhaseConc]
@@ -141,7 +141,7 @@
   [../]
 
   # enforce pointwise equality of chemical potentials
-  [./ChemPotVacancies]
+  [./ChemPotSolute]
     type = KKSPhaseChemicalPotential
     variable = cl
     cb       = cs
@@ -216,8 +216,8 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_factor_shift_type'
-  petsc_options_value = 'nonzero'
+  petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      ilu          nonzero'
 
   l_max_its = 100
   nl_max_its = 100
