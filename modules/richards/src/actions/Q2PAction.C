@@ -172,13 +172,13 @@ Q2PAction::act()
     vals_water.push_back("Q2P_mass_water_divided_by_dt");
     vals_water.push_back("Q2P_dt");
     params.set<std::vector<std::string> >("vals") = vals_water;
-    _problem->addFunction("ParsedFunction", "Q2P_water_mass_fcn", params, /*auto_parsed=*/ true);
+    _problem->addFunction("ParsedFunction", "Q2P_water_mass_fcn", params);
 
     std::vector<std::string> vals_gas;
     vals_gas.push_back("Q2P_mass_gas_divided_by_dt");
     vals_gas.push_back("Q2P_dt");
     params.set<std::vector<std::string> >("vals") = vals_gas;
-    _problem->addFunction("ParsedFunction", "Q2P_gas_mass_fcn", params, /*auto_parsed=*/ true);
+    _problem->addFunction("ParsedFunction", "Q2P_gas_mass_fcn", params);
   }
 
   if (_current_task == "add_postprocessor" && _output_total_masses_to.size() > 0)
@@ -214,4 +214,3 @@ Q2PAction::act()
 
 
 }
-
