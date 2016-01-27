@@ -26,7 +26,6 @@ ACInterface::ACInterface(const InputParameters & parameters) :
     _L(getMaterialProperty<Real>("mob_name")),
     _kappa(getMaterialProperty<Real>("kappa_name")),
     _variable_L(getParam<bool>("variable_L")),
-    _variable_kappa(getParam<bool>("variable_kappa")),
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
     _d2Ldop2(getMaterialPropertyDerivative<Real>("mob_name", _var.name(), _var.name())),
     _dkappadop(getMaterialPropertyDerivative<Real>("kappa_name", _var.name())),
@@ -82,38 +81,27 @@ ACInterface::gradL()
 }
 
 RealGradient
-ACInterface::gradKappa()
+ACInterface::kappaNablaLPsi()
 {
-  RealGradient g = _grad_u[_qp] * _dkappadop[_qp];
-  for (unsigned int i = 0; i < _nvar; ++i)
-    g += (*_gradarg[i])[_qp] * (*_dkappadarg[i])[_qp];
-  return g;
-}
-
-RealGradient
-ACInterface::nablaLKappaPsi()
-{
-  // sum is the product rule gradient \f$ \nabla (L\kappa\psi) \f$
-  RealGradient sum = _kappa[_qp] * _L[_qp] * _grad_test[_i][_qp];
+  // sum is the product rule gradient \f$ \nabla (L\psi) \f$
+  RealGradient sum = _L[_qp] * _grad_test[_i][_qp];
 
   if (_variable_L)
-    sum += _kappa[_qp] * gradL() * _test[_i][_qp];
+    sum += gradL() * _test[_i][_qp];
 
-  if (_variable_kappa)
-    sum += gradKappa() * _L[_qp] * _test[_i][_qp];
-
-  return sum;
+  return _kappa[_qp] * sum;
 }
 
 Real
 ACInterface::computeQpResidual()
 {
-  return _grad_u[_qp] * nablaLKappaPsi();
+  return _grad_u[_qp] * kappaNablaLPsi();
 }
 
 Real
 ACInterface::computeQpJacobian()
 {
+  // dsum is the derivative \f$ \frac\partial{\partial \eta} \left( \nabla (L\psi) \right) \f$
   RealGradient dsum = (_dkappadop[_qp] * _L[_qp] + _kappa[_qp] * _dLdop[_qp]) * _phi[_j][_qp] * _grad_test[_i][_qp];
 
   // compute the gradient of the mobility
@@ -121,22 +109,14 @@ ACInterface::computeQpJacobian()
   {
     RealGradient dgradL =   _grad_phi[_j][_qp] * _dLdop[_qp]
                           + _grad_u[_qp] * _phi[_j][_qp] * _d2Ldop2[_qp];
+
     for (unsigned int i = 0; i < _nvar; ++i)
       dgradL += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2Ldargdop[i])[_qp];
-    dsum += (_kappa[_qp] * dgradL + _dkappadop[_qp] * gradL()) * _test[_i][_qp];
+
+    dsum += (_kappa[_qp] * dgradL + _dkappadop[_qp] * _phi[_j][_qp] * gradL()) * _test[_i][_qp];
   }
 
-  // compute the gradient of the mobility
-  if (_variable_kappa)
-  {
-    RealGradient dgradKappa =   _grad_phi[_j][_qp] * _dkappadop[_qp]
-                              + _grad_u[_qp] * _phi[_j][_qp] * _d2kappadop2[_qp];
-    for (unsigned int i = 0; i < _nvar; ++i)
-      dgradKappa += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2kappadargdop[i])[_qp];
-    dsum += (dgradKappa * _L[_qp] + gradKappa() * _dLdop[_qp]) * _test[_i][_qp];
-  }
-
-  return _grad_phi[_j][_qp] * nablaLKappaPsi() + _grad_u[_qp] * dsum;
+  return _grad_phi[_j][_qp] * kappaNablaLPsi() + _grad_u[_qp] * dsum;
 }
 
 Real
@@ -147,6 +127,6 @@ ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  // Set off-diagonal jaocbian terms from mobility dependence
+  // Set off-diagonal jaocbian terms from mobility dependence TODO: kappa!!!
   return _kappa[_qp] * (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }

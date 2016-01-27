@@ -16,6 +16,10 @@ class ACInterface;
 template<>
 InputParameters validParams<ACInterface>();
 
+/**
+ * Compute the Allen-Cahn interfac term with the weak form residual
+ * \f$ \left( \kappa_i \nabla\eta_i, \nabla (L_i \psi) \right) \f$
+ */
 class ACInterface : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
 {
 public:
@@ -30,8 +34,8 @@ protected:
   RealGradient gradL();
   RealGradient gradKappa();
 
-  /// the \f$ \nabla(L\kappa\psi) \f$ term
-  RealGradient nablaLKappaPsi();
+  /// the \f$ \kappa\nabla(L\psi) \f$ term
+  RealGradient kappaNablaLPsi();
 
   /// Mobility
   const MaterialProperty<Real> & _L;
@@ -41,9 +45,6 @@ protected:
 
   /// flag set if L is a function of non-linear variables in args
   bool _variable_L;
-
-  /// flag set if kappa is a function of non-linear variables in args
-  bool _variable_kappa;
 
   /// @{ Mobility derivatives w.r.t. order parameter
   const MaterialProperty<Real> & _dLdop;
