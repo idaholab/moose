@@ -206,7 +206,7 @@
 
   line_search = 'none'
   nl_max_its = 10
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-15
 
   dt = 0.05
   dtmin = 0.05
