@@ -104,7 +104,7 @@ ACInterface::computeQpJacobian()
   // dsum is the derivative \f$ \frac\partial{\partial \eta} \left( \nabla (L\psi) \right) \f$
   RealGradient dsum = (_dkappadop[_qp] * _L[_qp] + _kappa[_qp] * _dLdop[_qp]) * _phi[_j][_qp] * _grad_test[_i][_qp];
 
-  // compute the gradient of the mobility
+  // compute the derivative of the gradient of the mobility
   if (_variable_L)
   {
     RealGradient dgradL =   _grad_phi[_j][_qp] * _dLdop[_qp]
@@ -127,6 +127,20 @@ ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  // Set off-diagonal jaocbian terms from mobility dependence TODO: kappa!!!
-  return _kappa[_qp] * (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
+  // dsum is the derivative \f$ \frac\partial{\partial \eta} \left( \nabla (L\psi) \right) \f$
+  RealGradient dsum = ((*_dkappadarg[cvar])[_qp] * _L[_qp] + _kappa[_qp] * (*_dLdarg[cvar])[_qp]) * _phi[_j][_qp] * _grad_test[_i][_qp];
+
+  // compute the derivative of the gradient of the mobility
+  if (_variable_L)
+  {
+    RealGradient dgradL =   _grad_phi[_j][_qp] * (*_dLdarg[cvar])[_qp]
+                          + _grad_u[_qp] * _phi[_j][_qp] * (*_d2Ldargdop[cvar])[_qp];
+
+    for (unsigned int i = 0; i < _nvar; ++i)
+      dgradL += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2Ldarg2[cvar][i])[_qp];
+
+    dsum += (_kappa[_qp] * dgradL + _dkappadop[_qp] * _phi[_j][_qp] * gradL()) * _test[_i][_qp];
+  }
+
+  return _grad_u[_qp] * dsum;
 }
