@@ -38,6 +38,9 @@ protected:
   /// Variable gradient for temperature
   VariableGradient & _grad_T;
 
+  /// is the kernel used in a coupled form?
+  const bool _is_coupled;
+
   /// int label for the Concentration
   unsigned int _c_var;
 
@@ -51,7 +54,7 @@ protected:
   const MaterialProperty<Real> & _Q;
 
   /// Boltzmann constant
-  const Real _kb;
+  const Real _kB;
 };
 
 #endif //SORETDIFFUSION_H
