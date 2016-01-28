@@ -9,6 +9,7 @@
 #define GRAINTRACKERINTERFACE_H
 
 #include "InputParameters.h"
+#include "FeatureFloodCount.h"
 
 // Forward declarations
 class GrainTrackerInterface;
