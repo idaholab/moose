@@ -35,9 +35,10 @@
 
 using namespace asio;
 
-static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		"abcdefghijklmnopqrstuvwxyz"
-		"0123456789+/";
+static const std::string base64_chars =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  "abcdefghijklmnopqrstuvwxyz"
+  "0123456789+/";
 
 std::string base64_encode(char const* bytes_to_encode, int in_len)
 {
@@ -47,46 +48,49 @@ std::string base64_encode(char const* bytes_to_encode, int in_len)
   unsigned char char_array_3[3];
   unsigned char char_array_4[4];
 
-  while (in_len--) {
-  char_array_3[i++] = *(bytes_to_encode++);
-  if (i == 3) {
-	char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-	char_array_4[1] = ((char_array_3[0] & 0x03) << 4)
-			+ ((char_array_3[1] & 0xf0) >> 4);
-	char_array_4[2] = ((char_array_3[1] & 0x0f) << 2)
-			+ ((char_array_3[2] & 0xc0) >> 6);
-	char_array_4[3] = char_array_3[2] & 0x3f;
+  while (in_len--)
+  {
+    char_array_3[i++] = *(bytes_to_encode++);
+    if (i == 3)
+    {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4)
+        + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2)
+        + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
 
-	for (i = 0; (i < 4); i++)
-	  ret += base64_chars[char_array_4[i]];
-	  i = 0;
+      for (i = 0; (i < 4); i++)
+        ret += base64_chars[char_array_4[i]];
+      i = 0;
     }
   }
 
-  if (i) {
-	for (j = i; j < 3; j++)
-		char_array_3[j] = '\0';
+  if (i)
+  {
+    for (j = i; j < 3; j++)
+      char_array_3[j] = '\0';
 
-	char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
-	char_array_4[1] = ((char_array_3[0] & 0x03) << 4)
-			+ ((char_array_3[1] & 0xf0) >> 4);
-	char_array_4[2] = ((char_array_3[1] & 0x0f) << 2)
-			+ ((char_array_3[2] & 0xc0) >> 6);
-	char_array_4[3] = char_array_3[2] & 0x3f;
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4)
+      + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2)
+      + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
 
-	for (j = 0; (j < i + 1); j++)
-		ret += base64_chars[char_array_4[j]];
+    for (j = 0; (j < i + 1); j++)
+      ret += base64_chars[char_array_4[j]];
 
-	while ((i++ < 3))
-		ret += '=';
-	}
+    while ((i++ < 3))
+      ret += '=';
+  }
 
-	return ret;
-
+return ret;
 }
 
-std::vector<std::string> &splitStr(const std::string &s, char delim,
-                                std::vector<std::string> &elems)
+std::vector<std::string> & splitStr(const std::string & s,
+                                    char delim,
+                                    std::vector<std::string> & elems)
 {
   std::stringstream ss(s);
   std::string item;
@@ -95,7 +99,7 @@ std::vector<std::string> &splitStr(const std::string &s, char delim,
   return elems;
 }
 
-std::vector<std::string> splitStr(const std::string &s, char delim)
+std::vector<std::string> splitStr(const std::string & s, char delim)
 {
   std::vector<std::string> elems;
   splitStr(s, delim, elems);
@@ -114,15 +118,18 @@ AsioNetworkingTool::~AsioNetworkingTool()
   io_service->stop();
 }
 
-std::string AsioNetworkingTool::get(std::string url, std::string username,
-		std::string password)
+std::string AsioNetworkingTool::get(std::string /*url*/,
+                                    std::string /*username*/,
+                                    std::string /*password*/)
 {
-	// To be implemented
+  // To be implemented
   return "";
 }
 
-std::string AsioNetworkingTool::post(std::string url, std::string value,
-		std::string username, std::string password)
+std::string AsioNetworkingTool::post(std::string /*url*/,
+                                     std::string /*value*/,
+                                     std::string /*username*/,
+                                     std::string /*password*/)
 {
 
   // Local error code
@@ -131,7 +138,7 @@ std::string AsioNetworkingTool::post(std::string url, std::string value,
   // Get the hostname and the port
   if (url.find("http://") != std::string::npos)
   {
-	  url = url.erase(0, std::string("http://").size());
+  url = url.erase(0, std::string("http://").size());
   }
   // Get rid of the /ice/update...
   int index = url.find_first_of("/");
@@ -150,7 +157,7 @@ std::string AsioNetworkingTool::post(std::string url, std::string value,
 
     if (errorCode)
     {
-	  return "Error in connecting the socket to " + url + ".\n";
+      return "Error in connecting the socket to " + url + ".\n";
     }
   }
 
@@ -160,7 +167,7 @@ std::string AsioNetworkingTool::post(std::string url, std::string value,
     std::string message = "post=" + value;
     std::string uNamePassword = "ice:veryice";
     std::string credentials = base64_encode(uNamePassword.c_str(),
-		uNamePassword.length());
+                                            uNamePassword.length());
 
     // Form the request
     streambuf request;

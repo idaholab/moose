@@ -50,7 +50,6 @@
   [./c_soret]
     type = SoretDiffusion
     variable = c
-    c = c
     T = T
     diff_name = D
     Q_name = Qstar

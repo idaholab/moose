@@ -120,7 +120,7 @@ InputParameters::getClassDescription() const
 }
 
 InputParameters &
-InputParameters::operator=(const InputParameters &rhs)
+InputParameters::operator=(const InputParameters & rhs)
 {
   // An error to help minimize the segmentation faults that occure when MooseObjects do not have the correct constructor
   if (!rhs._allow_copy)
@@ -156,7 +156,7 @@ InputParameters::operator=(const InputParameters &rhs)
 }
 
 InputParameters &
-InputParameters::operator+=(const InputParameters &rhs)
+InputParameters::operator+=(const InputParameters & rhs)
 {
   Parameters::operator+=(rhs);
 
@@ -180,7 +180,7 @@ InputParameters::operator+=(const InputParameters &rhs)
 }
 
 void
-InputParameters::addCoupledVar(const std::string &name, Real value, const std::string &doc_string)
+InputParameters::addCoupledVar(const std::string & name, Real value, const std::string & doc_string)
 {
   //std::vector<VariableName>(1, Moose::stringify(value)),
   addParam<std::vector<VariableName> >(name, doc_string);
@@ -189,14 +189,17 @@ InputParameters::addCoupledVar(const std::string &name, Real value, const std::s
 }
 
 void
-InputParameters::addCoupledVar(const std::string &name, const std::string &doc_string)
+InputParameters::addCoupledVar(const std::string & name, const std::string & doc_string)
 {
   addParam<std::vector<VariableName> >(name, doc_string);
   _coupled_vars.insert(name);
 }
 
 void
-InputParameters::addCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string)
+InputParameters::addCoupledVarWithAutoBuild(const std::string & name,
+                                            const std::string & base_name,
+                                            const std::string & num_name,
+                                            const std::string & doc_string)
 {
   addParam<std::vector<VariableName> >(name, doc_string);
   _coupled_vars.insert(name);
@@ -208,7 +211,10 @@ InputParameters::addCoupledVarWithAutoBuild(const std::string &name, const std::
 }
 
 void
-InputParameters::addRequiredCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string)
+InputParameters::addRequiredCoupledVarWithAutoBuild(const std::string & name,
+                                                    const std::string & base_name,
+                                                    const std::string & num_name,
+                                                    const std::string & doc_string)
 {
   addRequiredParam<std::vector<VariableName> >(name, doc_string);
 
@@ -216,14 +222,14 @@ InputParameters::addRequiredCoupledVarWithAutoBuild(const std::string &name, con
 }
 
 void
-InputParameters::addRequiredCoupledVar(const std::string &name, const std::string &doc_string)
+InputParameters::addRequiredCoupledVar(const std::string & name, const std::string & doc_string)
 {
   addRequiredParam<std::vector<VariableName> >(name, doc_string);
   _coupled_vars.insert(name);
 }
 
 std::string
-InputParameters::getDocString(const std::string &name) const
+InputParameters::getDocString(const std::string & name) const
 {
   std::string doc_string;
   std::map<std::string, std::string>::const_iterator doc_string_it = _doc_string.find(name);
@@ -241,13 +247,13 @@ InputParameters::getDocString(const std::string &name) const
 }
 
 bool
-InputParameters::isParamRequired(const std::string &name) const
+InputParameters::isParamRequired(const std::string & name) const
 {
   return _required_params.find(name) != _required_params.end();
 }
 
 bool
-InputParameters::isParamValid(const std::string &name) const
+InputParameters::isParamValid(const std::string & name) const
 {
   if (have_parameter<MooseEnum>(name))
     return get<MooseEnum>(name).isValid();
@@ -258,7 +264,7 @@ InputParameters::isParamValid(const std::string &name) const
 }
 
 bool
-InputParameters::isParamSetByAddParam(const std::string &name) const
+InputParameters::isParamSetByAddParam(const std::string & name) const
 {
   return _set_by_add_param.find(name) != _set_by_add_param.end();
 }
@@ -273,7 +279,7 @@ InputParameters::areAllRequiredParamsValid() const
 }
 
 bool
-InputParameters::isPrivate(const std::string &name) const
+InputParameters::isPrivate(const std::string & name) const
 {
   return _private_params.find(name) != _private_params.end();
 }
@@ -452,7 +458,7 @@ InputParameters::type(const std::string &name)
 }
 
 std::string
-InputParameters::getMooseType(const std::string &name) const
+InputParameters::getMooseType(const std::string & name) const
 {
   std::string var;
 
@@ -479,7 +485,7 @@ InputParameters::getMooseType(const std::string &name) const
 }
 
 std::vector<std::string>
-InputParameters::getVecMooseType(const std::string &name) const
+InputParameters::getVecMooseType(const std::string & name) const
 {
   std::vector<std::string> svars;
 
@@ -513,7 +519,7 @@ InputParameters::getVecMooseType(const std::string &name) const
 }
 
 void
-InputParameters::addParamNamesToGroup(const std::string &space_delim_names, const std::string group_name)
+InputParameters::addParamNamesToGroup(const std::string & space_delim_names, const std::string group_name)
 {
   std::vector<std::string> elements;
   MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r");  // tokenize on whitespace
@@ -524,13 +530,13 @@ InputParameters::addParamNamesToGroup(const std::string &space_delim_names, cons
 }
 
 std::vector<std::string>
-InputParameters::getSyntax(const std::string &name)
+InputParameters::getSyntax(const std::string & name)
 {
   return _syntax[name];
 }
 
 std::string
-InputParameters::getGroupName(const std::string &param_name) const
+InputParameters::getGroupName(const std::string & param_name) const
 {
   std::map<std::string, std::string>::const_iterator it = _group.find(param_name);
 
@@ -658,7 +664,9 @@ InputParameters::getDescription(const std::string & name)
 
 template <>
 void
-InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string)
+InputParameters::addRequiredParam<MooseEnum>(const std::string & name,
+                                             const MooseEnum & moose_enum,
+                                             const std::string & doc_string)
 {
   InputParameters::set<MooseEnum>(name) = moose_enum;                    // valid parameter is set by set_attributes
   _required_params.insert(name);
@@ -667,7 +675,9 @@ InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const Moos
 
 template <>
 void
-InputParameters::addRequiredParam<MultiMooseEnum>(const std::string &name, const MultiMooseEnum &moose_enum, const std::string &doc_string)
+InputParameters::addRequiredParam<MultiMooseEnum>(const std::string & name,
+                                                  const MultiMooseEnum & moose_enum,
+                                                  const std::string & doc_string)
 {
   InputParameters::set<MultiMooseEnum>(name) = moose_enum;               // valid parameter is set by set_attributes
   _required_params.insert(name);
@@ -676,7 +686,9 @@ InputParameters::addRequiredParam<MultiMooseEnum>(const std::string &name, const
 
 template <>
 void
-InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string)
+InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string & name,
+                                                           const std::vector<MooseEnum> & moose_enums,
+                                                           const std::string & doc_string)
 {
   InputParameters::set<std::vector<MooseEnum> >(name) = moose_enums;    // valid parameter is set by set_attributes
   _required_params.insert(name);
@@ -685,49 +697,60 @@ InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &na
 
 template <>
 void
-InputParameters::addParam<MooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
+InputParameters::addParam<MooseEnum>(const std::string & /*name*/,
+                                     const std::string & /*doc_string*/)
 {
   mooseError("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
 }
 
 template <>
 void
-InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/, const std::string & /*doc_string*/)
+InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/,
+                                          const std::string & /*doc_string*/)
 {
   mooseError("You must supply a MultiMooseEnum object when using addParam, even if the parameter is not required!");
 }
 
 template <>
 void
-InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/, const std::string & /*doc_string*/)
+InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/,
+                                                   const std::string & /*doc_string*/)
 {
   mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the parameter is not required!");
 }
 
 template <>
 void
-InputParameters::addDeprecatedParam<MooseEnum>(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+InputParameters::addDeprecatedParam<MooseEnum>(const std::string & /*name*/,
+                                               const std::string & /*doc_string*/,
+                                               const std::string & /*deprecation_message*/)
 {
   mooseError("You must supply a MooseEnum object and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
 }
 
 template <>
 void
-InputParameters::addDeprecatedParam<MultiMooseEnum>(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+InputParameters::addDeprecatedParam<MultiMooseEnum>(const std::string & /*name*/,
+                                                    const std::string & /*doc_string*/,
+                                                    const std::string & /*deprecation_message*/)
 {
   mooseError("You must supply a MultiMooseEnum object and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
 }
 
 template <>
 void
-InputParameters::addDeprecatedParam<std::vector<MooseEnum> >(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+InputParameters::addDeprecatedParam<std::vector<MooseEnum> >(const std::string & /*name*/,
+                                                             const std::string & /*doc_string*/,
+                                                             const std::string & /*deprecation_message*/)
 {
   mooseError("You must supply a vector of MooseEnum object(s) and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
 }
 
 template<>
 void
-InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name, PostprocessorName & l_value, const Real &r_value)
+InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & name,
+                                                         PostprocessorName & l_value,
+                                                         const Real & r_value)
 {
   // Store the default value
   _default_postprocessor_value[name] = r_value;
@@ -740,7 +763,9 @@ InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name
 
 template<>
 void
-InputParameters::setParamHelper<PostprocessorName, int>(const std::string &name, PostprocessorName & l_value, const int &r_value)
+InputParameters::setParamHelper<PostprocessorName, int>(const std::string & name,
+                                                        PostprocessorName & l_value,
+                                                        const int & r_value)
 {
   // Store the default value
   _default_postprocessor_value[name] = r_value;
@@ -753,7 +778,7 @@ InputParameters::setParamHelper<PostprocessorName, int>(const std::string &name,
 
 template<>
 void
-InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/, FunctionName & l_value, const Real &r_value)
+InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/, FunctionName & l_value, const Real & r_value)
 {
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -763,7 +788,7 @@ InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/
 
 template<>
 void
-InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/, FunctionName & l_value, const int &r_value)
+InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/, FunctionName & l_value, const int & r_value)
 {
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -773,7 +798,7 @@ InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/,
 
 template<>
 void
-InputParameters::setParamHelper<MaterialPropertyName, Real>(const std::string & /*name*/, MaterialPropertyName & l_value, const Real &r_value)
+InputParameters::setParamHelper<MaterialPropertyName, Real>(const std::string & /*name*/, MaterialPropertyName & l_value, const Real & r_value)
 {
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -783,7 +808,7 @@ InputParameters::setParamHelper<MaterialPropertyName, Real>(const std::string & 
 
 template<>
 void
-InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/, MaterialPropertyName & l_value, const int &r_value)
+InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/, MaterialPropertyName & l_value, const int & r_value)
 {
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;

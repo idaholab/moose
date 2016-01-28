@@ -467,8 +467,10 @@ PropertyMap Updater::getPropertyMap(std::string propertyString)
       {
         // Insert the password into the map
         propertyMap.insert(PropertyMap::value_type(PASSWORD, value));
-      } else if (property == "networkingTool") {
-    	  propertyMap.insert(PropertyMap::value_type(NETWORKING_TOOL, value));
+      }
+      else if (property == "networkingTool")
+      {
+        propertyMap.insert(PropertyMap::value_type(NETWORKING_TOOL, value));
       }
     }
   }
