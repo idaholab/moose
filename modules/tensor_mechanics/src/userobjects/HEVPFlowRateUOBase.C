@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<HEVPFlowRateUOBase>()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = validParams<MaterialUserObject>();
   params.addParam<std::string>("strength_prop_name", "Name of strength property: Same as strength user object specified in input file");
   params.addParam<std::string>("base_name", "Base name of tensor properties to fetch");
   params.addClassDescription("User object to evaluate flow rate");
@@ -18,7 +18,7 @@ InputParameters validParams<HEVPFlowRateUOBase>()
 }
 
 HEVPFlowRateUOBase::HEVPFlowRateUOBase(const InputParameters & parameters) :
-    ElementUserObject(parameters),
+    MaterialUserObject(parameters),
     _strength_prop_name(getParam<std::string>("strength_prop_name")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _strength(getMaterialPropertyByName<Real>(_strength_prop_name)),
