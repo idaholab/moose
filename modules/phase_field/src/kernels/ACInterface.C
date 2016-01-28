@@ -14,10 +14,7 @@ InputParameters validParams<ACInterface>()
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");
   params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
-
-  params.addParam<bool>("variable_L", true, "The mobility is a function of any non-linear variable");
-  params.addParam<bool>("variable_kappa", false, "Kappa is a function of any non-linear variable (must use ACInterfaceKappa Kernel along with this option)");
-
+  params.addParam<bool>("variable_L", true, "The mobility is a function of any MOOSE variable (if this is set to false L must be constant over the entire domain!)");
   return params;
 }
 
