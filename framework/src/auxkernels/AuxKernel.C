@@ -98,7 +98,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
     _current_elem_volume(_assembly.elemVolume()),
     _current_side_volume(_assembly.sideElemVolume()),
 
-    _current_node(_var.node()),
+    _current_node(_assembly.node()),
 
     _solution(_aux_sys.solution())
 {
