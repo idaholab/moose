@@ -26,14 +26,11 @@ ACInterface::ACInterface(const InputParameters & parameters) :
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
     _d2Ldop2(getMaterialPropertyDerivative<Real>("mob_name", _var.name(), _var.name())),
     _dkappadop(getMaterialPropertyDerivative<Real>("kappa_name", _var.name())),
-    _d2kappadop2(getMaterialPropertyDerivative<Real>("kappa_name", _var.name(), _var.name())),
     _nvar(_coupled_moose_vars.size()),
     _dLdarg(_nvar),
     _d2Ldargdop(_nvar),
     _d2Ldarg2(_nvar),
     _dkappadarg(_nvar),
-    _d2kappadargdop(_nvar),
-    _d2kappadarg2(_nvar),
     _gradarg(_nvar)
 {
   // Get mobility and kappa derivatives and coupled variable gradients
@@ -45,19 +42,12 @@ ACInterface::ACInterface(const InputParameters & parameters) :
     _dkappadarg[i] = &getMaterialPropertyDerivative<Real>("kappa_name", ivar->name());
 
     _d2Ldargdop[i] = &getMaterialPropertyDerivative<Real>("mob_name", ivar->name(), _var.name());
-    _d2kappadargdop[i] = &getMaterialPropertyDerivative<Real>("kappa_name", ivar->name(), _var.name());
 
     _gradarg[i] = &(ivar->gradSln());
 
     _d2Ldarg2[i].resize(_nvar);
-    _d2kappadarg2[i].resize(_nvar);
     for (unsigned int j = 0; j < _nvar; ++j)
-    {
-      MooseVariable *jvar = _coupled_moose_vars[j];
-
-      _d2Ldarg2[i][j] = &getMaterialPropertyDerivative<Real>("mob_name", ivar->name(), jvar->name());
-      _d2kappadarg2[i][j] = &getMaterialPropertyDerivative<Real>("kappa_name", ivar->name(), jvar->name());
-    }
+      _d2Ldarg2[i][j] = &getMaterialPropertyDerivative<Real>("mob_name", ivar->name(), _coupled_moose_vars[j]->name());
   }
 }
 

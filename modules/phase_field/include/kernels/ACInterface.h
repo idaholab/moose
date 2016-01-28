@@ -39,7 +39,6 @@ protected:
 
   /// Mobility
   const MaterialProperty<Real> & _L;
-
   /// Interfacial parameter
   const MaterialProperty<Real> & _kappa;
 
@@ -51,10 +50,8 @@ protected:
   const MaterialProperty<Real> & _d2Ldop2;
   /// @}
 
-  /// @{ kappa derivatives w.r.t. order parameter
+  /// kappa derivative w.r.t. order parameter
   const MaterialProperty<Real> & _dkappadop;
-  const MaterialProperty<Real> & _d2kappadop2;
-  /// @}
 
   /// number of coupled variables
   unsigned int _nvar;
@@ -65,11 +62,8 @@ protected:
   std::vector<std::vector<const MaterialProperty<Real> *> > _d2Ldarg2;
   /// @}
 
-  /// @{ kappa derivative w.r.t. other coupled variables
+  /// kappa derivative w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dkappadarg;
-  std::vector<const MaterialProperty<Real> *> _d2kappadargdop;
-  std::vector<std::vector<const MaterialProperty<Real> *> > _d2kappadarg2;
-  /// @}
 
   /// Gradients for all coupled variables
   std::vector<VariableGradient *> _gradarg;
