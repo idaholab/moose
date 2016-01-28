@@ -63,38 +63,38 @@ private:
   T i;
 };
 
-/**
- * container inserter for use with packed range communicators.
- */
-template <typename T>
-struct string_vector_inserter
-  : std::iterator<std::output_iterator_tag, T>
-{
-  explicit string_vector_inserter(std::vector<T *> & vector) : _vector(vector)
-    {
-    }
-
-  template <typename T2>
-  void operator=(const T2 & value)
-    {
-      _vector.push_back(value);
-    }
-
-  string_vector_inserter& operator++() {
-    return *this;
-  }
-
-  string_vector_inserter operator++(int) {
-    return string_vector_inserter(*this);
-  }
-
-  // We don't return a reference-to-T here because we don't want to
-  // construct one or have any of its methods called.
-  string_vector_inserter& operator*() { return *this; }
-
-private:
-  std::vector<T *> & _vector;
-};
+///**
+// * container inserter for use with packed range communicators.
+// */
+//template <typename T>
+//struct string_vector_inserter
+//  : std::iterator<std::output_iterator_tag, T>
+//{
+//  explicit string_vector_inserter(std::vector<T *> & vector) : _vector(vector)
+//    {
+//    }
+//
+//  template <typename T2>
+//  void operator=(const T2 & value)
+//    {
+//      _vector.push_back(value);
+//    }
+//
+//  string_vector_inserter& operator++() {
+//    return *this;
+//  }
+//
+//  string_vector_inserter operator++(int) {
+//    return string_vector_inserter(*this);
+//  }
+//
+//  // We don't return a reference-to-T here because we don't want to
+//  // construct one or have any of its methods called.
+//  string_vector_inserter& operator*() { return *this; }
+//
+//private:
+//  std::vector<T *> & _vector;
+//};
 
 
 /**
@@ -104,74 +104,74 @@ private:
  */
 namespace libMesh {
 namespace Parallel {
+template <typename T>
+class Packing<std::basic_string<T> > {
+public:
 
-/// BufferType<> specializations to return a buffer datatype to handle communication of std::strings
-template <>
-struct BufferType<const std::string *> {
-  typedef char type;
+  static const unsigned int size_bytes = 4;
+
+  typedef T buffer_type;
+
+static unsigned int get_string_len
+  (typename std::vector<T>::const_iterator in)
+{
+  unsigned int string_len = reinterpret_cast<const unsigned char &>(in[size_bytes-1]);
+  for (signed int i=size_bytes-2; i >= 0; --i)
+    {
+      string_len *= 256;
+      string_len += reinterpret_cast<const unsigned char &>(in[i]);
+    }
+  return string_len;
+}
+
+
+static unsigned int packed_size
+  (typename std::vector<T>::const_iterator in)
+{
+  return get_string_len(in) + size_bytes;
+}
+
+static unsigned int packable_size
+  (const std::basic_string<T> & s,
+   const void *)
+{
+  return s.size() + size_bytes;
+}
+
+
+template <typename Iter>
+static void pack (const std::basic_string<T> & b, Iter data_out,
+                  const void *)
+{
+  unsigned int string_len = b.size();
+  for (unsigned int i=0; i != size_bytes; ++i)
+    {
+      *data_out++ = (string_len % 256);
+      string_len /= 256;
+    }
+  std::copy(b.begin(), b.end(), data_out);
+}
+
+static std::basic_string<T> unpack
+  (typename std::vector<T>::const_iterator in, void *)
+{
+  unsigned int string_len = get_string_len(in);
+
+  std::ostringstream oss;
+  for (unsigned int i = 0; i < string_len; ++i)
+    oss << reinterpret_cast<const unsigned char &>(in[i+size_bytes]);
+
+  in += size_bytes + string_len;
+
+//  std::cout << oss.str() << std::endl;
+  return std::string(oss.str());
+}
+
 };
 
-///@{
-/// packed_size to return the size of the packed (serialized) string
-template<>
-unsigned int packed_size(const std::string *, std::vector<char>::const_iterator in)
-{
-  // std::string is encoded as a 32-bit length followed by the content (char)
-  return (static_cast<unsigned char>(in[0]) << 24) | (static_cast<unsigned char>(in[1]) << 16) | (static_cast<unsigned char>(in[2]) << 8) | (static_cast<unsigned char>(in[3]) << 0);
+} // namespace Parallel
 
-}
-
-template<>
-unsigned int packed_size(const std::string * s, std::vector<char>::iterator in)
-{
-  return packed_size(s, std::vector<char>::const_iterator(in));
-}
-///@}
-
-/// packable size is called prior to serializing the string
-template<>
-unsigned int packable_size(const std::string * s, const void *)
-{
-  // String is encoded as a 32-bit length followed by the content (char)
-  return s->size() + sizeof(uint32_t);
-}
-
-/// pack a single variable sized string onto the data buffer
-template <>
-void pack (const std::string * b, std::vector<char> & data, const void *)
-{
-  uint32_t size = sizeof(uint32_t) + b->size();
-
-  data.push_back(size >> 24);
-  data.push_back(size >> 16);
-  data.push_back(size >> 8);
-  data.push_back(size);
-
-  // Copy the content to the buffer
-  std::copy(b->begin(), b->end(), std::back_inserter(data));
-}
-
-/// unpack a single variable sized string from the data buffer
-template <>
-void unpack(std::vector<char>::const_iterator in, std::string ** out, void *)
-{
-//  uint32_t size = ((unsigned char)in[0] << 24) | (unsigned char)(in[1] << 16) | (unsigned char)(in[2] << 8) | (unsigned char)(in[3] << 0);
-  uint32_t size = (static_cast<unsigned char>(in[0]) << 24) | (static_cast<unsigned char>(in[1]) << 16) | (static_cast<unsigned char>(in[2]) << 8) | (static_cast<unsigned char>(in[3]) << 0);
-
-  /**
-   * Start at the right place in the string (after the length parameter) and adjust the
-   * size of the content by the same amount.
-   */
-  std::string * out_string = new std::string(&in[sizeof(uint32_t)], size - sizeof(uint32_t));
-
-  // Advance the position in the buffer
-  in += size;
-
-  (*out) = out_string;
-}
-
-}
-}
+} // namespace libMesh
 
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
@@ -376,7 +376,7 @@ void FeatureFloodCount::communicateAndMerge()
    *********************************************************************************/
 
   // The processor local byte buffer
-  std::string serialized_buffer;
+//  std::string serialized_buffer;
 
   /**
    * The libMesh packed range routines handle the communication of the individual
@@ -385,7 +385,7 @@ void FeatureFloodCount::communicateAndMerge()
    * byte stream of all the data to other processors. The stream need not be
    * the same size on all processors.
    */
-  std::vector<std::string *> send_buffers(1, &serialized_buffer);
+  std::vector<std::string> send_buffers(1);
 
   /**
    * Additionally we need to create a different container to hold the received
@@ -393,17 +393,17 @@ void FeatureFloodCount::communicateAndMerge()
    * However, We do know the number of incoming buffers (num processors) so we'll
    * go ahead and use a vector.
    */
-  std::vector<std::string *> recv_buffers;
+  std::vector<std::string> recv_buffers;
   recv_buffers.reserve(_app.n_processors());
 
-  serialize(&serialized_buffer);
+  serialize(send_buffers[0]);
 
   /**
    * Each processor needs information from all other processors to create a complete
    * global feature map.
    */
   _communicator.allgather_packed_range((void *)(NULL), send_buffers.begin(), send_buffers.end(),
-                                       string_vector_inserter<std::string>(recv_buffers));
+                                       std::back_inserter(recv_buffers));
 
   deserialize(recv_buffers);
 
@@ -616,7 +616,7 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
 }
 
 void
-FeatureFloodCount::serialize(std::string * serialized_buffer)
+FeatureFloodCount::serialize(std::string & serialized_buffer)
 {
   // stream for serializing the _partial_feature_sets data structure to a byte stream
   std::ostringstream oss;
@@ -628,7 +628,7 @@ FeatureFloodCount::serialize(std::string * serialized_buffer)
   dataStore(oss, _partial_feature_sets[processor_id()], this);
 
   // Populate the passed in string pointer with the string stream's buffer contents
-  serialized_buffer->assign(oss.str());
+  serialized_buffer.assign(oss.str());
 }
 
 /**
@@ -639,7 +639,7 @@ FeatureFloodCount::serialize(std::string * serialized_buffer)
  * data structure so it is not cleared before insertion.
  */
 void
-FeatureFloodCount::deserialize(std::vector<std::string *> & serialized_buffers)
+FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
 {
   // The input string stream used for deserialization
   std::istringstream iss;
@@ -655,7 +655,7 @@ FeatureFloodCount::deserialize(std::vector<std::string *> & serialized_buffers)
     if (rank == processor_id())
       continue;
 
-    iss.str(*serialized_buffers[rank]);   // populate the stream with a new buffer
+    iss.str(serialized_buffers[rank]);    // populate the stream with a new buffer
     iss.clear();                          // reset the string stream state
 
     // Load the communicated data into all of the other processors' slots

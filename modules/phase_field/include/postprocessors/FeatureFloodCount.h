@@ -185,8 +185,8 @@ protected:
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void serialize(std::string * serialized_buffer);
-  void deserialize(std::vector<std::string *> & serialized_buffers);
+  void serialize(std::string & serialized_buffer);
+  void deserialize(std::vector<std::string> & serialized_buffers);
 
   /**
    * This routine merges the data in _feature_sets from separate threads/processes to resolve
