@@ -40,9 +40,9 @@ ELEMENT VARIABLES relative 1.e-6 floor 1e-8
 	stress_xx floor 1e-3 # min:               0 @ t1,b1,e1	max:   1.1912688e+08 @ t74,b1,e1
 	stress_yy floor 1e-3 # min:               0 @ t1,b1,e1	max:   0.00076062232 @ t76,b1,e1
 	stress_zz floor 1e-3 # min:               0 @ t1,b1,e1	max:   0.00076061487 @ t76,b1,e1
-	stress_xy  # min:               0 @ t1,b1,e1	max:   2.0685288e-09 @ t75,b1,e1
-	stress_yz  # min:               0 @ t1,b1,e1	max:   6.9827494e-09 @ t1192,b1,e1
-	stress_zx  # min:               0 @ t1,b1,e1	max:   2.4007849e-09 @ t72,b1,e1
+	stress_xy floor 1e-6 # min:               0 @ t1,b1,e1	max:   2.0685288e-09 @ t75,b1,e1
+	stress_yz floor 1e-6 # min:               0 @ t1,b1,e1	max:   6.9827494e-09 @ t1192,b1,e1
+	stress_zx floor 1e-6 # min:               0 @ t1,b1,e1	max:   2.4007849e-09 @ t72,b1,e1
 
 # No NODESET VARIABLES
 
