@@ -1172,7 +1172,7 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 }
 
 void
-FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters, bool /*auto_parsed=false*/)
+FEProblem::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
@@ -1213,13 +1213,13 @@ FEProblem::getFunction(const std::string & name, THREAD_ID tid)
     else
     {
       FunctionParserBase<Real> fp;
-      std::string vars = "x,y,z,t";
+      std::string vars = "x,y,z,t,NaN,pi,e";
       if (fp.Parse(name, vars) == -1) // -1 for success
       {
         // It parsed ok, so build a MooseParsedFunction
         InputParameters params = _factory.getValidParams("ParsedFunction");
         params.set<std::string>("value") = name;
-        addFunction("ParsedFunction", name, params, /*auto_parsed=*/ true);
+        addFunction("ParsedFunction", name, params);
       }
     }
 
