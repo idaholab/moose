@@ -259,25 +259,6 @@ protected:
    */
   virtual QpData * createData();
 
-  /**
-   * Get a apecial MaterialUserObject which can be explicitly called by the material
-   * during the material property calculation.
-   * @param name The name of the parameter key of the user object to retrieve
-   * @return The user object with name associated with the parameter 'name'
-   */
-  template<class T>
-  const T & getMaterialUserObject(const std::string & name);
-
-  /**
-   * Get a apecial MaterialUserObject which can be explicitly called by the material
-   * during the material property calculation.
-   * This function is most likely not what you want and works only for FunctionElementUserObjects!
-   * @param name The name of the user object to retrieve
-   * @return The user object with the name
-   */
-  template<class T>
-  const T & getMaterialUserObjectByName(const std::string & name);
-
   std::map<unsigned int, std::vector<QpData *> > _qp_prev;
   std::map<unsigned int, std::vector<QpData *> > _qp_curr;
 
@@ -410,26 +391,6 @@ Material::getZeroMaterialProperty(const std::string & prop_name)
     mooseSetToZero<T>(preload_with_zero[qp]);
 
   return preload_with_zero;
-}
-
-template<class T>
-const T &
-Material::getMaterialUserObject(const std::string & name)
-{
-  const T & uo = _fe_problem.getUserObject<T>(_pars.template get<UserObjectName>(name), _tid);
-  if (dynamic_cast<const MaterialUserObject *>(&uo) == NULL)
-    mooseError("Can only fetch thread copies of MaterialUserObject user objects");
-  return uo;
-}
-
-template<class T>
-const T &
-Material::getMaterialUserObjectByName(const std::string & name)
-{
-  const T & uo = _fe_problem.getUserObject<T>(name, _tid);
-  if (dynamic_cast<const MaterialUserObject *>(&uo) == NULL)
-    mooseError("Can only fetch thread copies of MaterialUserObject user objects");
-  return uo;
 }
 
 #endif //MATERIAL_H
