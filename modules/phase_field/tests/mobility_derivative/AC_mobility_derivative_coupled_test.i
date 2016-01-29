@@ -76,7 +76,8 @@
     function = 'l:=0.1+1*(v+op)^2; if(l<0.01, 0.01, l)'
     args = 'op v'
     outputs = exodus
-    derivative_order = 1
+    output_properties = 'L dL/dop dL/dv'
+    derivative_order = 2
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
