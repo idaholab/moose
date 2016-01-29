@@ -37,7 +37,7 @@ UserObjectInterface::getUserObjectBaseByName(const std::string & name)
 }
 
 bool
-UserObjectInterface::isLocalElementUserObject(const UserObject & uo) const
+UserObjectInterface::isLocalUserObject(const UserObject & uo) const
 {
   return dynamic_cast<const LocalElementUserObject *>(&uo) != NULL;
 }

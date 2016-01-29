@@ -79,7 +79,7 @@ private:
   const InputParameters & _uoi_params;
 
   /// Check if the user object is a LocalElementUserObject
-  bool isLocalElementUserObject(const UserObject & uo) const;
+  bool isLocalUserObject(const UserObject & uo) const;
 };
 
 
@@ -87,7 +87,7 @@ template<class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
-  unsigned int tid = isLocalElementUserObject(getUserObjectBase(name)) ? _uoi_tid : 0;
+  unsigned int tid = isLocalUserObject(getUserObjectBase(name)) ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), tid);
 }
 
@@ -95,7 +95,7 @@ template<class T>
 const T &
 UserObjectInterface::getUserObjectByName(const std::string & name)
 {
-  unsigned int tid = isLocalElementUserObject(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
+  unsigned int tid = isLocalUserObject(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObject<T>(name, tid);
 }
 
