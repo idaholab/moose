@@ -34,7 +34,7 @@ protected:
 
   MooseVariable * _IntactBondsVar;
   MooseVariable * _TotalBondsVar;
-  const MaterialProperty<Real> & _bond_status_old;
+  const MaterialProperty<Real> & _bond_status;
 
 };
 

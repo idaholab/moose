@@ -71,9 +71,9 @@
 #include "StressDivergenceRZ.h"
 #include "StressDivergenceRSpherical.h"
 #include "StressDivergenceTruss.h"
-#include "StressDivergenceTrussPD.h"
+#include "StressDivergencePD.h"
 #include "TrussMaterial.h"
-#include "PeridynamicBond.h"
+#include "LinearIsotropicMaterialPD.h"
 #include "RateDepSmearCrackModel.h"
 #include "RateDepSmearIsoCrackModel.h"
 
@@ -149,7 +149,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(PowerLawCreepModel);
   registerMaterial(SolidModel);
   registerMaterial(TrussMaterial);
-  registerMaterial(PeridynamicBond);
+  registerMaterial(LinearIsotropicMaterialPD);
   registerMaterial(RateDepSmearCrackModel);
   registerMaterial(RateDepSmearIsoCrackModel);
 
@@ -160,7 +160,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceRZ);
   registerKernel(StressDivergenceRSpherical);
   registerKernel(StressDivergenceTruss);
-  registerKernel(StressDivergenceTrussPD);
+  registerKernel(StressDivergencePD);
   registerKernel(HomogenizationHeatConduction);
 
   registerPostprocessor(HomogenizedThermalConductivity);

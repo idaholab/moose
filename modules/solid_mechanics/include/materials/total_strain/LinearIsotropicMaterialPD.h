@@ -4,64 +4,54 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef PERIDYNAMICBOND_H
-#define PERIDYNAMICBOND_H
+#ifndef LINEARISOTROPICMATERIALPD_H
+#define LINEARISOTROPICMATERIALPD_H
 
 #include "Material.h"
 
 //Forward Declarations
-class PeridynamicBond;
+class LinearIsotropicMaterialPD;
 
 template<>
-InputParameters validParams<PeridynamicBond>();
+InputParameters validParams<LinearIsotropicMaterialPD>();
 
 /**
  * LinearIsotropic material for use in simple applications that don't need material properties.
  */
-class PeridynamicBond : public Material
+class LinearIsotropicMaterialPD : public Material
 {
 public:
-  PeridynamicBond(const InputParameters & parameters);
-  virtual ~PeridynamicBond();
+  LinearIsotropicMaterialPD(const InputParameters & parameters);
+  virtual ~LinearIsotropicMaterialPD();
 
 protected:
 
   MooseVariable * _disp_x_var;
   MooseVariable * _disp_y_var;
   MooseVariable * _disp_z_var;
+  MooseVariable * _temp_var;
 
 
   virtual void computeProperties();
   virtual void initQpStatefulProperties();
 
-  MaterialProperty<Real> & _axial_force;
-  MaterialProperty<Real> & _stiff_elem;
+  MaterialProperty<Real> & _bond_force;
+  MaterialProperty<Real> & _bond_force_dif;
   MaterialProperty<Real> & _bond_status;
   MaterialProperty<Real> & _bond_status_old;
   MaterialProperty<Real> & _critical_stretch;
-  MaterialProperty<Real> & _critical_stretch_old;
-  MaterialProperty<Real> & _thermal_conductivity;
-  MaterialProperty<Real> & _bond_volume;
 
-  const int _PDdim;
+  const int _pddim;
   const Real _youngs_modulus;
   const Real _poissons_ratio;
-  const Real _MeshSpacing;
-  const Real _ThicknessPerLayer;
-  const Real _CriticalStretch;
-  const Real _StandardDeviation;
-  Real _MaterialRegion;
-  Real _VolumePerNode;
-  Real _lamda;
+  const Real _mesh_spacing;
+  const Real _domain_thickness;
+  const Real _my_critical_stretch;
+  const Real _standard_deviation;
 
   bool _has_temp;
-  VariableValue & _temp;
-  const Real _t_ref;
-  const Real _alpha;
-  const Real _my_thermal_conductivity;
-  Real _AvgArea;
-
-  unsigned int _dim;
+  const Real _temp_ref;
+  const Real _thermal_expansion;
 };
 
-#endif //PERIDYNAMICBOND_H
+#endif //LINEARISOTROPICMATERIALPD_H

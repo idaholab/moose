@@ -4,26 +4,30 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef STRESSDIVERGENCETRUSSPD_H
-#define STRESSDIVERGENCETRUSSPD_H
+#ifndef STRESSDIVERGENCEPD_H
+#define STRESSDIVERGENCEPD_H
 
 #include "Kernel.h"
 
 //Forward Declarations
 class ColumnMajorMatrix;
-class SymmElasticityTensor;
-class SymmTensor;
+class StressDivergencePD;
 
-class StressDivergenceTrussPD : public Kernel
+template<>
+InputParameters validParams<StressDivergencePD>();
+
+class StressDivergencePD : public Kernel
 {
 public:
 
-  StressDivergenceTrussPD(const InputParameters & parameters);
-  virtual ~StressDivergenceTrussPD() {}
+  StressDivergencePD(const InputParameters & parameters);
+  virtual ~StressDivergencePD() {}
 
 protected:
   virtual void initialSetup();
+
   virtual void computeResidual();
+
   virtual Real computeQpResidual() {return 0;}
 
   virtual void computeJacobian();
@@ -32,10 +36,8 @@ protected:
 
   void computeStiffness(ColumnMajorMatrix & stiff_global);
 
-  const MaterialProperty<Real> & _axial_force;
-  const MaterialProperty<Real> & _stiff_elem;
-  const MaterialProperty<Real> & _bond_status;
-  const MaterialProperty<Real> & _bond_status_old;
+  const MaterialProperty<Real> & _bond_force;
+  const MaterialProperty<Real> & _bond_force_dif;
 
 private:
   const unsigned int _component;
@@ -51,10 +53,6 @@ private:
   const unsigned int _temp_var;
 
   const std::vector<RealGradient> * _orientation;
-
 };
 
-template<>
-InputParameters validParams<StressDivergenceTrussPD>();
-
-#endif //STRESSDIVERGENCETRUSSPD_H
+#endif //STRESSDIVERGENCEPD_H

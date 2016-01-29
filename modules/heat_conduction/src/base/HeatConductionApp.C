@@ -30,6 +30,8 @@
 #include "HeatSourcePD.h"
 #include "ThermalCond.h"
 #include "CoupledConvectiveFlux.h"
+#include "HeatConductionPD.h"
+#include "HeatConductionMaterialPD.h"
 
 template<>
 InputParameters validParams<HeatConductionApp>()
@@ -72,6 +74,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
   registerKernel(HeatSourcePD);
+  registerKernel(HeatConductionPD);
   registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
@@ -79,6 +82,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
   registerMaterial(AnisoHeatConductionMaterial);
+  registerMaterial(HeatConductionMaterialPD);
   registerDiracKernel(GapHeatPointSourceMaster);
   registerPostprocessor(ThermalCond);
   registerConstraint(GapConductanceConstraint);

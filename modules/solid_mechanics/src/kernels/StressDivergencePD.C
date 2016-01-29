@@ -4,15 +4,13 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "StressDivergenceTrussPD.h"
+#include "StressDivergencePD.h"
+#include "MooseMesh.h"
 #include "Material.h"
 #include "Assembly.h"
-#include "SymmElasticityTensor.h"
-#include "Assembly.h"
-using namespace std;
 
 template<>
-InputParameters validParams<StressDivergenceTrussPD>()
+InputParameters validParams<StressDivergencePD>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
@@ -25,13 +23,10 @@ InputParameters validParams<StressDivergenceTrussPD>()
   return params;
 }
 
-
-StressDivergenceTrussPD::StressDivergenceTrussPD(const InputParameters & parameters)
+StressDivergencePD::StressDivergencePD(const InputParameters & parameters)
   :Kernel(parameters),
-  _axial_force(getMaterialProperty<Real>("axial_force" + getParam<std::string>("appended_property_name"))),
-  _stiff_elem(getMaterialProperty<Real>("stiff_elem" + getParam<std::string>("appended_property_name"))),
-  _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
-  _bond_status_old(getMaterialPropertyOld<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
+  _bond_force(getMaterialProperty<Real>("bond_force" + getParam<std::string>("appended_property_name"))),
+  _bond_force_dif(getMaterialProperty<Real>("bond_force_dif" + getParam<std::string>("appended_property_name"))),
   _component(getParam<unsigned int>("component")),
   _xdisp_coupled(isCoupled("disp_x")),
   _ydisp_coupled(isCoupled("disp_y")),
@@ -46,14 +41,14 @@ StressDivergenceTrussPD::StressDivergenceTrussPD(const InputParameters & paramet
 }
 
 void
-StressDivergenceTrussPD::initialSetup()
+StressDivergencePD::initialSetup()
 {
   // Assume that all trusses are one dimensional in the call below
   _orientation = &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
 }
 
 void
-StressDivergenceTrussPD::computeResidual()
+StressDivergencePD::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   mooseAssert(re.size() == 2, "Truss elements must have two nodes");
@@ -62,7 +57,7 @@ StressDivergenceTrussPD::computeResidual()
 
   RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
-  VectorValue<Real> force_local = _axial_force[0] * _bond_status_old[0] * orientation;
+  VectorValue<Real> force_local = _bond_force[0] * orientation;
   int sign(-_test[0][0]/std::abs(_test[0][0]));
   _local_re(0) = sign * force_local(_component);
   _local_re(1) = -_local_re(0);
@@ -78,28 +73,26 @@ StressDivergenceTrussPD::computeResidual()
 }
 
 void
-StressDivergenceTrussPD::computeStiffness(ColumnMajorMatrix & stiff_global)
+StressDivergencePD::computeStiffness(ColumnMajorMatrix & stiff_global)
 {
   RealGradient orientation( (*_orientation)[0] );
   Real dist = 2.0 * orientation.size(); //orientation.size() only gives half of the actual distance between two nodes
   orientation /= orientation.size();
   
   //the effect of truss orientation change has been accounted for
-  
-  Real k = _stiff_elem[0] * _bond_status_old[0];
-  stiff_global(0,0) = orientation(0) * orientation(0) * k + _axial_force[0] * _bond_status_old[0] * (1.0 - orientation(0) * orientation(0)) / dist;
-  stiff_global(0,1) = orientation(0) * orientation(1) * k - _axial_force[0] * _bond_status_old[0] * orientation(0) * orientation(1) / dist;
-  stiff_global(0,2) = orientation(0) * orientation(2) * k - _axial_force[0] * _bond_status_old[0] * orientation(0) * orientation(2) / dist;
-  stiff_global(1,0) = orientation(1) * orientation(0) * k - _axial_force[0] * _bond_status_old[0] * orientation(1) * orientation(0) / dist;
-  stiff_global(1,1) = orientation(1) * orientation(1) * k + _axial_force[0] * _bond_status_old[0] * (1.0 - orientation(1) * orientation(1)) / dist;
-  stiff_global(1,2) = orientation(1) * orientation(2) * k - _axial_force[0] * _bond_status_old[0] * orientation(1) * orientation(2) / dist;
-  stiff_global(2,0) = orientation(2) * orientation(0) * k - _axial_force[0] * _bond_status_old[0] * orientation(2) * orientation(0) / dist;
-  stiff_global(2,1) = orientation(2) * orientation(1) * k - _axial_force[0] * _bond_status_old[0] * orientation(2) * orientation(1) / dist;
-  stiff_global(2,2) = orientation(2) * orientation(2) * k + _axial_force[0] * _bond_status_old[0] * (1.0 - orientation(2) * orientation(2)) / dist;
+  stiff_global(0,0) = orientation(0) * orientation(0) * _bond_force_dif[0] + _bond_force[0] * (1.0 - orientation(0) * orientation(0)) / dist;
+  stiff_global(0,1) = orientation(0) * orientation(1) * _bond_force_dif[0] - _bond_force[0] * orientation(0) * orientation(1) / dist;
+  stiff_global(0,2) = orientation(0) * orientation(2) * _bond_force_dif[0] - _bond_force[0] * orientation(0) * orientation(2) / dist;
+  stiff_global(1,0) = orientation(1) * orientation(0) * _bond_force_dif[0] - _bond_force[0] * orientation(1) * orientation(0) / dist;
+  stiff_global(1,1) = orientation(1) * orientation(1) * _bond_force_dif[0] + _bond_force[0] * (1.0 - orientation(1) * orientation(1)) / dist;
+  stiff_global(1,2) = orientation(1) * orientation(2) * _bond_force_dif[0] - _bond_force[0] * orientation(1) * orientation(2) / dist;
+  stiff_global(2,0) = orientation(2) * orientation(0) * _bond_force_dif[0] - _bond_force[0] * orientation(2) * orientation(0) / dist;
+  stiff_global(2,1) = orientation(2) * orientation(1) * _bond_force_dif[0] - _bond_force[0] * orientation(2) * orientation(1) / dist;
+  stiff_global(2,2) = orientation(2) * orientation(2) * _bond_force_dif[0] + _bond_force[0] * (1.0 - orientation(2) * orientation(2)) / dist;
 }
 
 void
-StressDivergenceTrussPD::computeJacobian()
+StressDivergencePD::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
@@ -133,7 +126,7 @@ StressDivergenceTrussPD::computeJacobian()
 }
 
 void
-StressDivergenceTrussPD::computeOffDiagJacobian(unsigned int jvar)
+StressDivergencePD::computeOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var.number())
   {

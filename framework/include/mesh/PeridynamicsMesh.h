@@ -16,7 +16,6 @@
 #define PERIDYNAMICSMESH_H
 
 #include "MooseMesh.h"
-
 #include "MooseEnum.h"
 
 class PeridynamicsMesh;
@@ -45,7 +44,7 @@ protected:
   // Number of elements in x, y, z, R direction
  int _nx, ny, nz, _shape;
   // domain size in x, y, z, R direction
-  double _xmin, _ymin, _zmin, _xmax, _ymax, _zmax, _R, MeshSpacing, Horizon; 
+  double _xmin, _ymin, _zmin, _xmax, _ymax, _zmax, _R, mesh_spacing, horizon; 
 };
 
 #endif /* PERIDYNAMICSMESH_H */

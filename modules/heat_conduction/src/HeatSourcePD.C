@@ -9,53 +9,45 @@
 #include "Material.h"
 #include "Function.h"
 #include "Assembly.h"
-#include "SymmElasticityTensor.h"
-#include "Function.h"
-#include "Assembly.h"
 using namespace std;
 
 template<>
 InputParameters validParams<HeatSourcePD>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addCoupledVar("temp", "The temperature");
-  params.addParam<Real>("PowerDensity", 1.0, "PowerDensity");
+  params.addParam<Real>("power_density", 1.0, "power_density");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
-  params.addParam<FunctionName>("function", "1", "Function describing the volumetric heat source");
+  params.addParam<FunctionName>("power_density_function", "", "Function describing the volumetric heat source");
   return params;
 }
 
-
 HeatSourcePD::HeatSourcePD(const InputParameters & parameters)
   :Kernel(parameters),
-   _power_density(isParamValid("PowerDensity") ? getParam<Real>("PowerDensity") : 0),
-   _bond_volume(getMaterialProperty<Real>("bond_volume" + getParam<std::string>("appended_property_name"))),
-   _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name"))),
-   _function(getFunction("function")),
-   _temp_coupled(isCoupled("temp")),
-   _temp_var(_temp_coupled ? coupled("temp") : 0)
+   _power_density(isParamValid("power_density") ? getParam<Real>("power_density") : 0),
+   _power_density_function(getParam<FunctionName>("power_density_function") != "" ? &getFunction("power_density_function") : NULL),
+   _bond_volume(getMaterialProperty<Real>("bond_volume" + getParam<std::string>("appended_property_name")))
 {
 }
 
-Real
-HeatSourcePD::computeQpResidual()
+HeatSourcePD::~HeatSourcePD()
 {
-  Real factor = _function.value(_t, _q_point[_qp]);
-  return factor;
 }
 
 void
 HeatSourcePD::computeResidual()
 {
+  if(_power_density_function)
+  {
+    Point p;
+    _power_density = _power_density_function->value(_t, p);
+  }
+
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   mooseAssert(re.size() == 2, "Truss elements must have two nodes");
   _local_re.resize(re.size());
   _local_re.zero();
 
-  //_local_re(0) = _power_density * _bond_volume[0] * _bond_status[0] / 2.0;
-  //_local_re(0) = -_power_density * _bond_volume[0] / 2.0;
-  _qp = 0;
-  _local_re(0) = -computeQpResidual() * _bond_volume[0] / 2.0;
+  _local_re(0) = _power_density * _bond_volume[0];
   _local_re(1) = _local_re(0);
 
   re += _local_re;
@@ -63,7 +55,7 @@ HeatSourcePD::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
