@@ -109,7 +109,7 @@ FiniteStrainHyperElasticViscoPlastic::initUserObjects(const std::vector<UserObje
     mooseError("Specify atleast one user object of type" << typeid(T).name());
 
   for (unsigned int i = 0; i < uo_num; ++i)
-    uo[i] = &getMaterialUserObjectByName<T>(uo_names[i]);
+    uo[i] = &getUserObjectByName<T>(uo_names[i]);
 }
 
 void
