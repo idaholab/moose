@@ -50,7 +50,8 @@
     function = 'if(op<0, 0.01, if(op>1, 0.01, 1*op^2*(1-op)^2+0.01))'
     args = 'op'
     outputs = exodus
-    derivative_order = 1
+    output_properties = 'L dL/dop dL/dv'
+    derivative_order = 2
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
