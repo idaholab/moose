@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "UserObjectInterface.h"
-#include "MaterialUserObject.h"
+#include "LocalElementUserObject.h"
 #include "InputParameters.h"
 
 UserObjectInterface::UserObjectInterface(const InputParameters & params) :
@@ -37,7 +37,7 @@ UserObjectInterface::getUserObjectBaseByName(const std::string & name)
 }
 
 bool
-UserObjectInterface::isMaterialUserObject(const UserObject & uo) const
+UserObjectInterface::isLocalElementUserObject(const UserObject & uo) const
 {
-  return dynamic_cast<const MaterialUserObject *>(&uo) != NULL;
+  return dynamic_cast<const LocalElementUserObject *>(&uo) != NULL;
 }

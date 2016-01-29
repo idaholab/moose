@@ -33,7 +33,6 @@
 #include "MeshChangedInterface.h"
 #include "OutputInterface.h"
 #include "RandomInterface.h"
-#include "MaterialUserObject.h"
 
 #include "MaterialProperty.h"
 

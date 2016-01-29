@@ -12,23 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATERIALUSEROBJECT_H
-#define MATERIALUSEROBJECT_H
+#ifndef LocalElementUserObject_H
+#define LocalElementUserObject_H
 
 // MOOSE includes
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class MaterialUserObject;
+class LocalElementUserObject;
 
 template<>
-InputParameters validParams<MaterialUserObject>();
+InputParameters validParams<LocalElementUserObject>();
 
-class MaterialUserObject :
+class LocalElementUserObject :
   public ElementUserObject
 {
 public:
-  MaterialUserObject(const InputParameters & parameters);
+  LocalElementUserObject(const InputParameters & parameters);
 
   /// @{ Block all methods that are not used in explicitly called UOs
   virtual void execute();
@@ -37,4 +37,4 @@ public:
   /// @}
 };
 
-#endif //MATERIALUSEROBJECT_H
+#endif //LocalElementUserObject_H

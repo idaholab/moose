@@ -7,7 +7,7 @@
 #ifndef HEVPSTRENGTHUOBASE_H
 #define HEVPSTRENGTHUOBASE_H
 
-#include "MaterialUserObject.h"
+#include "LocalElementUserObject.h"
 #include "RankTwoTensor.h"
 
 class HEVPStrengthUOBase;
@@ -19,7 +19,7 @@ InputParameters validParams<HEVPStrengthUOBase>();
  * This user object is a pure virtual base classs
  * Derived classes computes material resistances and derivatives
  */
-class HEVPStrengthUOBase : public MaterialUserObject
+class HEVPStrengthUOBase : public LocalElementUserObject
 {
 public:
   HEVPStrengthUOBase(const InputParameters & parameters);
