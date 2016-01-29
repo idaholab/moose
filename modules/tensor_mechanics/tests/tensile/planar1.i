@@ -266,7 +266,7 @@
     block = 0
     ep_plastic_tolerance = 1E-5
     plastic_models = tens
-    debug_fspb = 1
+    debug_fspb = crash
     debug_jac_at_stress = '1 2 3 2 -4 -5 3 -5 10'
     debug_jac_at_pm = '0.1 0.2 0.3'
     debug_jac_at_intnl = 1E-6

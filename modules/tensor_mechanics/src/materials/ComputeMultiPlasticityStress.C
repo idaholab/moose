@@ -43,6 +43,10 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
 
     _epp_tol(getParam<Real>("ep_plastic_tolerance")),
 
+    _dummy_pm(0),
+
+    _cumulative_pm(0),
+
     _deactivation_scheme((DeactivationSchemeEnum)(int)getParam<MooseEnum>("deactivation_scheme")),
 
     _n_supplied(parameters.isParamValid("transverse_direction")),
@@ -103,6 +107,8 @@ ComputeMultiPlasticityStress::initQpStatefulProperties()
 
   _yf[_qp].assign(_num_surfaces, 0);
 
+  _dummy_pm.assign(_num_surfaces, 0);
+
   _iter[_qp] = 0.0; // this is really an unsigned int, but for visualisation i convert it to Real
   _linesearch_needed[_qp] = 0;
   _ld_encountered[_qp] = 0;
@@ -111,7 +117,7 @@ ComputeMultiPlasticityStress::initQpStatefulProperties()
   _n[_qp] = _n_input;
   _n_old[_qp] = _n_input;
 
-  if (_fspb_debug == 2)
+  if (_fspb_debug == "jacobian")
   {
     checkDerivatives();
     mooseError("Finite-differencing completed.  Exiting with no error");
@@ -125,7 +131,7 @@ ComputeMultiPlasticityStress::computeQpStress()
   _my_elasticity_tensor = _elasticity_tensor[_qp];
   _my_strain_increment = _strain_increment[_qp];
 
-  if (_fspb_debug == 3)
+  if (_fspb_debug == "jacobian_and_linear_system")
   {
     // cannot do this at initQpStatefulProperties level since E_ijkl is not defined
     checkJacobian(_elasticity_tensor[_qp].invSymm(), _intnl_old[_qp]);
@@ -140,15 +146,9 @@ ComputeMultiPlasticityStress::computeQpStress()
   bool ld_encountered = false;
   bool constraints_added = false;
 
-  // plastic multipliers and cumulative plastic multipliers.
-  // Here they are used by quickStep below and are unimportant dummies
-  std::vector<Real> pm;
-  pm.assign(_num_surfaces, 0);
-  std::vector<Real> cumulative_pm;
-  cumulative_pm.assign(_num_surfaces, 0);
-
+  _cumulative_pm.assign(_num_surfaces, 0);
   // try a "quick" return first - this can be purely elastic, or a customised plastic return defined by a TensorMechanicsPlasticXXXX UserObject
-  bool found_solution = quickStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], pm, cumulative_pm, _plastic_strain_old[_qp], _plastic_strain[_qp], _my_elasticity_tensor, _my_strain_increment, _yf[_qp], number_iterations, _Jacobian_mult[_qp], "computeQpStress", true);
+  const bool found_solution = quickStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _dummy_pm, _cumulative_pm, _plastic_strain_old[_qp], _plastic_strain[_qp], _my_elasticity_tensor, _my_strain_increment, _yf[_qp], number_iterations, _Jacobian_mult[_qp], computeQpStress_function, true);
 
   // if not purely elastic or the customised stuff failed, do some plastic return
   if (!found_solution)
@@ -222,7 +222,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
                                         std::vector<Real> & intnl, std::vector<Real> & pm, std::vector<Real> & cumulative_pm,
                                         const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl,
                                         const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations,
-                                        RankFourTensor & consistent_tangent_operator, const std::string & called_from, const bool & final_step)
+                                        RankFourTensor & consistent_tangent_operator, const quickStep_called_from_t called_from, const bool & final_step)
 {
   iterations = 0;
 
@@ -248,7 +248,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
     plastic_strain = plastic_strain_old;
     if (successful_return && final_step)
     {
-      if (called_from.compare("computeQpStress") == 0)
+      if (called_from == computeQpStress_function)
         consistent_tangent_operator = E_ijkl;
       else // cannot necessarily use E_ijkl since different plastic models may have been active during other substeps
         consistent_tangent_operator = consistentTangentOperator(stress, intnl, E_ijkl, pm, cumulative_pm);
@@ -263,7 +263,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
     plastic_strain = plastic_strain_old + delta_dp;
     if (final_step)
     {
-      if (called_from.compare("computeQpStress") == 0)
+      if (called_from == computeQpStress_function)
       {
         if (_tangent_operator_type == elastic)
           consistent_tangent_operator = E_ijkl;
@@ -332,17 +332,14 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
   RankTwoTensor dep = step_size*this_strain_increment;
 
 
-  // the sum of the plastic multipliers over all the sub-steps.
-  // This is used for calculating the consistent tangent operator
-  std::vector<Real> cumulative_pm;
-  cumulative_pm.assign(_num_surfaces, 0);
+  _cumulative_pm.assign(_num_surfaces, 0);
 
 
   unsigned int num_consecutive_successes = 0;
   while (time_simulated < 1.0 && step_size >= _min_stepsize)
   {
     iter = 0;
-    return_successful = returnMap(stress_good, stress, intnl_good, intnl, plastic_strain_good, plastic_strain, E_ijkl, dep, yf, iter, step_size <= _max_stepsize_for_dumb, linesearch_needed, ld_encountered, constraints_added, time_simulated + step_size >= 1, consistent_tangent_operator, cumulative_pm);
+    return_successful = returnMap(stress_good, stress, intnl_good, intnl, plastic_strain_good, plastic_strain, E_ijkl, dep, yf, iter, step_size <= _max_stepsize_for_dumb, linesearch_needed, ld_encountered, constraints_added, time_simulated + step_size >= 1, consistent_tangent_operator, _cumulative_pm);
     iterations += iter;
 
     if (return_successful)
@@ -421,7 +418,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   std::vector<Real> pm;
   pm.assign(_num_surfaces, 0.0);
 
-  bool successful_return = quickStep(stress_old, stress, intnl_old, intnl, pm, cumulative_pm, plastic_strain_old, plastic_strain, E_ijkl, strain_increment, f, iter, consistent_tangent_operator, "returnMap", final_step);
+  bool successful_return = quickStep(stress_old, stress, intnl_old, intnl, pm, cumulative_pm, plastic_strain_old, plastic_strain, E_ijkl, strain_increment, f, iter, consistent_tangent_operator, returnMap_function, final_step);
 
 
   if (successful_return)

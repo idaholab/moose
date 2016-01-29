@@ -200,7 +200,7 @@
     # the rest of this stuff is irrelevant for this test
     ep_plastic_tolerance = 1E-5
     plastic_models = mc
-    debug_fspb = 1
+    debug_fspb = crash
   [../]
 []
 

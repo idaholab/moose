@@ -102,7 +102,7 @@ bool
 TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
                                     Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
                                     std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                    unsigned & trial_stress_inadmissible) const
+                                    bool & trial_stress_inadmissible) const
 {
   if (!(_use_custom_returnMap))
     return TensorMechanicsPlasticModel::returnMap(trial_stress, intnl_old, E_ijkl, ep_plastic_tolerance, returned_stress, returned_intnl, dpm, delta_dp, yf, trial_stress_inadmissible);
@@ -117,11 +117,11 @@ TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, const Re
   if (yf_orig < _f_tol)
   {
     // the trial_stress is admissible
-    trial_stress_inadmissible = 0;
+    trial_stress_inadmissible = false;
     return true;
   }
 
-  trial_stress_inadmissible = 1;
+  trial_stress_inadmissible = true;
   Real mu = E_ijkl(0,1,0,1);
 
 

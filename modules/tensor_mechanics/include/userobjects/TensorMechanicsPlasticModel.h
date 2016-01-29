@@ -141,7 +141,7 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl,
                                   const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
 
-  /// Returns the model name (eg "MohrCoulom")
+  /// Returns the model name (eg "MohrCoulomb")
   virtual std::string modelName() const;
 
   /// Tolerance on yield function
@@ -166,14 +166,14 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
     *
     * (1) Denoting the return value of the function by "successful_return",
     * the only possible output values should be:
-    *   (A) trial_stress_inadmissible=0, successful_return=true.
+    *   (A) trial_stress_inadmissible=false, successful_return=true.
     *       That is, (trial_stress, intnl_old) is in fact admissible
     *       (in the elastic domain).
-    *   (B) trial_stress_inadmissible=1, successful_return=false.
+    *   (B) trial_stress_inadmissible=true, successful_return=false.
     *       That is (trial_stress, intnl_old) is inadmissible
     *       (outside the yield surface), and you didn't return
     *       to the yield surface.
-    *   (C) trial_stress_inadmissible=1, successful_return=true.
+    *   (C) trial_stress_inadmissible=true, successful_return=true.
     *       That is (trial_stress, intnl_old) is inadmissible
     *       (outside the yield surface), but you did return
     *       to the yield surface.
@@ -215,13 +215,13 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
     * @param[out] dpm  In case (C): the plastic multipliers needed to bring about the return.  Otherwise: not defined
     * @param[out] delta_dp In case (C): The change in plastic strain induced by the return process.  Otherwise: not defined
     * @param[out] yf In case (C): the yield function at (returned_stress, returned_intnl).  Otherwise: the yield function at (trial_stress, intnl_old)
-    * @param[out] trial_stress_inadmissible Should be set to 0 if the trial_stress is admissible, and 1 if the trial_stress is inadmissible.  This can be used by the calling prorgram
+    * @param[out] trial_stress_inadmissible Should be set to false if the trial_stress is admissible, and true if the trial_stress is inadmissible.  This can be used by the calling prorgram
     * @return true if a successful return (or a return-map not needed), false if the trial_stress is inadmissible but the return process failed
     */
   virtual bool returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
                                   Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
                                   std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                  unsigned & trial_stress_inadmissible) const;
+                                  bool & trial_stress_inadmissible) const;
 
   /**
     * Calculates a custom consistent tangent operator.

@@ -173,7 +173,7 @@
     ep_plastic_tolerance = 1E-6
     min_stepsize = 1E-3
     plastic_models = mc
-    debug_fspb = 1
+    debug_fspb = crash
     deactivation_scheme = safe
   [../]
 []

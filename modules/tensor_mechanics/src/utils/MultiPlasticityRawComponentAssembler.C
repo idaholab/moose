@@ -511,7 +511,7 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
   std::vector<Real> model_f;
   RankTwoTensor model_delta_dp;
   std::vector<Real> model_pm;
-  unsigned trial_stress_inadmissible;
+  bool trial_stress_inadmissible;
   bool successful_return = true;
   unsigned the_single_plastic_model = 0;
   bool using_custom_return_map = true;
@@ -554,7 +554,8 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
         // succeeded.
         // record the first returned_stress and delta_dp if everything is going OK
         // as they could be the actual answer
-        num_successful_plastic_returns += trial_stress_inadmissible;
+        if (trial_stress_inadmissible)
+          num_successful_plastic_returns++;
         the_single_plastic_model = model;
         stress = returned_stress;
         // note that i break here, and don't push_back
@@ -604,7 +605,7 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
     {
       // no need to spend time calculating the yield function: we know its admissible
       for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
-        yf_at_returned_stress.push_back(0.0);
+        yf_at_returned_stress.push_back(model_f[model_surface]);
       continue;
     }
     _f[model]->yieldFunctionV(stress, intnl_old[model], model_f);

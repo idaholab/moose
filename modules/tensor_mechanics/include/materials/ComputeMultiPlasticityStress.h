@@ -56,6 +56,16 @@ protected:
   /// Tolerance on the plastic strain increment ("direction") constraint
   Real _epp_tol;
 
+  /// dummy "consistency parameters" (plastic multipliers) used in quickStep when called from computeQpStress
+  std::vector<Real> _dummy_pm;
+
+  /**
+   * the sum of the plastic multipliers over all the sub-steps.
+   * This is used for calculating the consistent tangent operator
+   */
+  std::vector<Real> _cumulative_pm;
+
+
   /*
    * Scheme by which constraints are deactivated.
    * This enum is defined here for computational
@@ -326,6 +336,9 @@ protected:
   // gets called after return-map
   virtual void postReturnMap();
 
+  /// The functions from which quickStep can be called
+  enum quickStep_called_from_t {computeQpStress_function, returnMap_function};
+
   /**
    * Attempts to find an admissible (stress, intnl) by using the
    * customized return-map algorithms defined through the
@@ -352,7 +365,7 @@ protected:
                         std::vector<Real> & intnl, std::vector<Real> & pm, std::vector<Real> & cumulative_pm,
                         const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl,
                         const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations,
-                         RankFourTensor & consistent_tangent_operator, const std::string & called_from, const bool & final_step);
+                         RankFourTensor & consistent_tangent_operator, const quickStep_called_from_t called_from, const bool & final_step);
 
   /**
    * performs a plastic step

@@ -114,14 +114,14 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
     *
     * (1) Denoting the return value of the function by "successful_return",
     * the only possible output values should be:
-    *   (A) trial_stress_inadmissible=0, successful_return=true.
+    *   (A) trial_stress_inadmissible=false, successful_return=true.
     *       That is, (trial_stress, intnl_old) is in fact admissible
     *       (in the elastic domain).
-    *   (B) trial_stress_inadmissible=1, successful_return=false.
+    *   (B) trial_stress_inadmissible=true, successful_return=false.
     *       That is (trial_stress, intnl_old) is inadmissible
     *       (outside the yield surface), and you didn't return
     *       to the yield surface.
-    *   (C) trial_stress_inadmissible=1, successful_return=true.
+    *   (C) trial_stress_inadmissible=true, successful_return=true.
     *       That is (trial_stress, intnl_old) is inadmissible
     *       (outside the yield surface), but you did return
     *       to the yield surface.
@@ -143,28 +143,33 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
     * quite expensive, and it's not very optimal for the calling
     * function to have to re-calculate them.
     *
-    * (5) In case (C), you will want to set:
+    * (5) In case (C), you need to set:
     *   returned_stress (the returned value of stress)
     *   returned_intnl  (the returned value of the internal variable)
     *   delta_dp   (the change in plastic strain)
     *   dpm (the plastic multipliers needed to bring about the return)
     *   yf (yield function values at the returned configuration)
     *
+    * (Note, if you over-ride returnMap, you will probably
+    * want to override consistentTangentOpertor too, otherwise
+    * it will default to E_ijkl.)
+    *
     * @param trial_stress The trial stress
     * @param intnl_old Value of the internal parameter
     * @param E_ijkl Elasticity tensor
     * @param ep_plastic_tolerance Tolerance defined by the user for the plastic strain
-    * @param[out] returned_stress Lies on the yield surface after returning and produces the correct plastic strain (normality condition)
-    * @param[out] returned_intnl The value of the internal parameter after returning
-    * @param[out] dpm   plastic multipliers needed to ring about the return
-    * @param[out] delta_dp The change in plastic strain induced by the return process
-    * @param[out] The value of the yield function, evaluated at (trial_stress, intnl_old) in the case of return value = false (failure), or at (returned_stress, returned_intnl) for return value = true (success)
-    * @param[out] trial_stress_inadmissible Should be set to 0 if the trial_stress is admissible, and 1 if the trial_stress is inadmissible.  This can be used by the calling prorgram
+    * @param[out] returned_stress In case (C): lies on the yield surface after returning and produces the correct plastic strain (normality condition).  Otherwise: not defined
+    * @param[out] returned_intnl In case (C): the value of the internal parameter after returning.  Otherwise: not defined
+    * @param[out] dpm  In case (C): the plastic multipliers needed to bring about the return.  Otherwise: not defined
+    * @param[out] delta_dp In case (C): The change in plastic strain induced by the return process.  Otherwise: not defined
+    * @param[out] yf In case (C): the yield function at (returned_stress, returned_intnl).  Otherwise: the yield function at (trial_stress, intnl_old)
+    * @param[out] trial_stress_inadmissible Should be set to false if the trial_stress is admissible, and true if the trial_stress is inadmissible.  This can be used by the calling prorgram
     * @return true if a successful return (or a return-map not needed), false if the trial_stress is inadmissible but the return process failed
     */
-  bool returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl, Real ep_plastic_tolerance,
-                        RankTwoTensor & returned_stress, Real & returned_intnl, std::vector<Real> & dpm, RankTwoTensor & delta_dp,
-                        std::vector<Real> & yf, unsigned & trial_stress_inadmissible) const;
+  virtual bool returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
+                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                                  bool & trial_stress_inadmissible) const;
 
   /**
     * Calculates a custom consistent tangent operator.

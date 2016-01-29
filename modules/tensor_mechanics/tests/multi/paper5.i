@@ -322,7 +322,7 @@
     max_stepsize_for_dumb = 1
     tangent_operator = elastic # tangent operator is unimportant in this test
 
-    debug_fspb = 1
+    debug_fspb = crash
     debug_jac_at_stress = '10E6 0 0 0 10E6 0 0 0 10E6'
     debug_jac_at_pm = '1E-2 1E-2'
     debug_jac_at_intnl = '0.05 0.05'

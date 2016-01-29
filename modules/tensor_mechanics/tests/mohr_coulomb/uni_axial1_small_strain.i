@@ -241,7 +241,7 @@
     ep_plastic_tolerance = 1E-10
     plastic_models = mc
     max_NR_iterations = 1000
-    debug_fspb = 1
+    debug_fspb = crash
   [../]
 []
 

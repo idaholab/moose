@@ -407,7 +407,7 @@
     max_NR_iterations = 20
     min_stepsize = 1E-4
     max_stepsize_for_dumb = 1E-3
-    debug_fspb = 1
+    debug_fspb = crash
     debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
     debug_jac_at_pm = '1 1 1 1'
     debug_jac_at_intnl = '1 1 1 1'
