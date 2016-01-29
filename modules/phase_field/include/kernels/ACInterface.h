@@ -43,7 +43,7 @@ protected:
   const MaterialProperty<Real> & _kappa;
 
   /// flag set if L is a function of non-linear variables in args
-  bool _variable_L;
+  const bool _variable_L;
 
   /// @{ Mobility derivatives w.r.t. order parameter
   const MaterialProperty<Real> & _dLdop;
@@ -54,7 +54,7 @@ protected:
   const MaterialProperty<Real> & _dkappadop;
 
   /// number of coupled variables
-  unsigned int _nvar;
+  const unsigned int _nvar;
 
   /// @{ Mobility derivative w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;
@@ -66,7 +66,7 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dkappadarg;
 
   /// Gradients for all coupled variables
-  std::vector<VariableGradient *> _gradarg;
+  std::vector<const VariableGradient *> _gradarg;
 };
 
 #endif //ACInterface_H
