@@ -88,7 +88,7 @@ public:
 private:
 #ifdef LIBMESH_HAVE_TBB_API
   static tbb::concurrent_bounded_queue<unsigned int> _ids;
-#elif LIBMESH_HAVE_PTHREAD
+#elif !defined(LIBMESH_HAVE_OPENMP) && defined(LIBMESH_HAVE_PTHREAD)
   static std::queue<unsigned int> _ids;
   static Threads::spin_mutex _pthread_id_mutex;
 #endif
