@@ -170,7 +170,7 @@ clean::
 #    dependency and object files when you upgrade OSX versions or as
 #    source files are deleted over time.
 clobber:: clean
-	$(shell find $(CURDIR) \( -path $(CURDIR)/moose -or -path $(CURDIR)/.git -or -path $(CURDIR)/.svn \) -prune -or \
+	$(shell find $(CURDIR) -depth \( -path $(CURDIR)/moose -or -path $(CURDIR)/.git -or -path $(CURDIR)/.svn \) -prune -or \
           \( -name "*~" -or -name "*.lo" -or -name "*.la" -or -name "*.dylib" -or -name "*.so*" -or -name "*.a" \
           -or -name "*-opt" -or -name "*-dbg" -or -name "*-oprof" \
           -or -name "*.d" -or -name "*.pyc" -or -name "*.plugin" -or -name "*.mod" -or -name "*.plist" \
