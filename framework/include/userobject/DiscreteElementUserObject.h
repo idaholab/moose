@@ -12,29 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef LocalElementUserObject_H
-#define LocalElementUserObject_H
+#ifndef DISCRETEELEMENTUSEROBJECT_H
+#define DISCRETEELEMENTUSEROBJECT_H
 
 // MOOSE includes
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class LocalElementUserObject;
+class DiscreteElementUserObject;
 
 template<>
-InputParameters validParams<LocalElementUserObject>();
+InputParameters validParams<DiscreteElementUserObject>();
 
-class LocalElementUserObject :
+class DiscreteElementUserObject :
   public ElementUserObject
 {
 public:
-  LocalElementUserObject(const InputParameters & parameters);
+  DiscreteElementUserObject(const InputParameters & parameters);
 
   /// @{ Block all methods that are not used in explicitly called UOs
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject &);
+  virtual void execute(); // libmesh_final;
+  virtual void finalize(); // libmesh_final;
+  virtual void threadJoin(const UserObject &); // libmesh_final;
   /// @}
 };
 
-#endif //LocalElementUserObject_H
+#endif //DISCRETEELEMENTUSEROBJECT_H

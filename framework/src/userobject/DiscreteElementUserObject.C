@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "LocalElementUserObject.h"
+#include "DiscreteElementUserObject.h"
 
 template<>
-InputParameters validParams<LocalElementUserObject>()
+InputParameters validParams<DiscreteElementUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
 
@@ -26,25 +26,25 @@ InputParameters validParams<LocalElementUserObject>()
   return params;
 }
 
-LocalElementUserObject::LocalElementUserObject(const InputParameters & parameters) :
+DiscreteElementUserObject::DiscreteElementUserObject(const InputParameters & parameters) :
     ElementUserObject(parameters)
 {
 }
 
 void
-LocalElementUserObject::execute()
+DiscreteElementUserObject::execute()
 {
-  mooseError("LocalElementUserObjects must be called explicitly from Materials");
+  mooseError("DiscreteElementUserObjects must be called explicitly from Materials");
 }
 
 void
-LocalElementUserObject::finalize()
+DiscreteElementUserObject::finalize()
 {
-  mooseError("LocalElementUserObjects must be called explicitly from Materials");
+  mooseError("DiscreteElementUserObjects must be called explicitly from Materials");
 }
 
 void
-LocalElementUserObject::threadJoin(const UserObject &)
+DiscreteElementUserObject::threadJoin(const UserObject &)
 {
-  mooseError("LocalElementUserObjects must be called explicitly from Materials");
+  mooseError("DiscreteElementUserObjects must be called explicitly from Materials");
 }

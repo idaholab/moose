@@ -7,7 +7,7 @@
 #ifndef HEVPINTERNALVARRATEUOBASE_H
 #define HEVPINTERNALVARRATEUOBASE_H
 
-#include "LocalElementUserObject.h"
+#include "DiscreteElementUserObject.h"
 #include "RankTwoTensor.h"
 
 class HEVPInternalVarRateUOBase;
@@ -19,7 +19,7 @@ InputParameters validParams<HEVPInternalVarRateUOBase>();
  * This user object is a pure virtual base classs
  * Derived classes computes internal variable rate and derivatives
  */
-class HEVPInternalVarRateUOBase : public LocalElementUserObject
+class HEVPInternalVarRateUOBase : public DiscreteElementUserObject
 {
 public:
   HEVPInternalVarRateUOBase(const InputParameters & parameters);

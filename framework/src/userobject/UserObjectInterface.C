@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "UserObjectInterface.h"
-#include "LocalElementUserObject.h"
+#include "DiscreteElementUserObject.h"
 #include "InputParameters.h"
 
 UserObjectInterface::UserObjectInterface(const InputParameters & params) :
@@ -37,7 +37,7 @@ UserObjectInterface::getUserObjectBaseByName(const std::string & name)
 }
 
 bool
-UserObjectInterface::isLocalUserObject(const UserObject & uo) const
+UserObjectInterface::isDiscreteUserObject(const UserObject & uo) const
 {
-  return dynamic_cast<const LocalElementUserObject *>(&uo) != NULL;
+  return dynamic_cast<const DiscreteElementUserObject *>(&uo) != NULL;
 }

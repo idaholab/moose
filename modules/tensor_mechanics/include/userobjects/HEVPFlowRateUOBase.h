@@ -7,7 +7,7 @@
 #ifndef HEVPFLOWRATEUOBASE_H
 #define HEVPFLOWRATEUOBASE_H
 
-#include "LocalElementUserObject.h"
+#include "DiscreteElementUserObject.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
@@ -20,7 +20,7 @@ InputParameters validParams<HEVPFlowRateUOBase>();
  * This user object is a pure virtual base classs
  * Derived classes computes flow rate, direction and derivatives
  */
-class HEVPFlowRateUOBase : public LocalElementUserObject
+class HEVPFlowRateUOBase : public DiscreteElementUserObject
 {
 public:
   HEVPFlowRateUOBase(const InputParameters & parameters);
