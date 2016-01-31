@@ -7,7 +7,7 @@
 #ifndef HEVPINTERNALVARUOBASE_H
 #define HEVPINTERNALVARUOBASE_H
 
-#include "MaterialUserObject.h"
+#include "DiscreteElementUserObject.h"
 #include "RankTwoTensor.h"
 
 class HEVPInternalVarUOBase;
@@ -20,7 +20,7 @@ InputParameters validParams<HEVPInternalVarUOBase>();
  * Derived classes integrate internal variables
  * Currently only old state is retrieved to use backward Euler
  */
-class HEVPInternalVarUOBase : public MaterialUserObject
+class HEVPInternalVarUOBase : public DiscreteElementUserObject
 {
 public:
   HEVPInternalVarUOBase(const InputParameters & parameters);

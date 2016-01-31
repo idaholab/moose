@@ -77,6 +77,9 @@ private:
 
   /// Parameters of the object with this interface
   const InputParameters & _uoi_params;
+
+  /// Check if the user object is a DiscreteElementUserObject
+  bool isDiscreteUserObject(const UserObject & uo) const;
 };
 
 
@@ -84,14 +87,16 @@ template<class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
-  return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name));
+  unsigned int tid = isDiscreteUserObject(getUserObjectBase(name)) ? _uoi_tid : 0;
+  return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), tid);
 }
 
 template<class T>
 const T &
 UserObjectInterface::getUserObjectByName(const std::string & name)
 {
-  return _uoi_feproblem.getUserObject<T>(name);
+  unsigned int tid = isDiscreteUserObject(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
+  return _uoi_feproblem.getUserObject<T>(name, tid);
 }
 
 #endif //USEROBJECTINTERFACE_H
