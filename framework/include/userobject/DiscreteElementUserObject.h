@@ -12,29 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATERIALUSEROBJECT_H
-#define MATERIALUSEROBJECT_H
+#ifndef DISCRETEELEMENTUSEROBJECT_H
+#define DISCRETEELEMENTUSEROBJECT_H
 
 // MOOSE includes
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class MaterialUserObject;
+class DiscreteElementUserObject;
 
 template<>
-InputParameters validParams<MaterialUserObject>();
+InputParameters validParams<DiscreteElementUserObject>();
 
-class MaterialUserObject :
+class DiscreteElementUserObject :
   public ElementUserObject
 {
 public:
-  MaterialUserObject(const InputParameters & parameters);
+  DiscreteElementUserObject(const InputParameters & parameters);
 
   /// @{ Block all methods that are not used in explicitly called UOs
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject &);
+  virtual void execute(); // libmesh_final;
+  virtual void finalize(); // libmesh_final;
+  virtual void threadJoin(const UserObject &); // libmesh_final;
   /// @}
 };
 
-#endif //MATERIALUSEROBJECT_H
+#endif //DISCRETEELEMENTUSEROBJECT_H

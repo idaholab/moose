@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<MatPropUserObjectAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("material_user_object", "The MaterialUserObject to retrieve values from.");
+  params.addRequiredParam<UserObjectName>("material_user_object", "The MaterialPropertyUserObject to retrieve values from.");
   return params;
 }
 
