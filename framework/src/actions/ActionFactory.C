@@ -85,6 +85,7 @@ ActionFactory::getValidParams(const std::string & name)
   InputParameters params = (iter->second._params_pointer)();
   params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
   params.addPrivateParam("_moose_app", &_app);
+  params.addPrivateParam<ActionWarehouse *>("awh", &_app.actionWarehouse());
 
   return params;
 }

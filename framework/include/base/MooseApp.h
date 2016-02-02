@@ -601,6 +601,33 @@ public:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
+
+  /** Method for creating the minimum required actions for an application (no input file)
+   *
+   * Mimics the following input file:
+   *
+   * [Mesh]
+   *   type = GeneratedMesh
+   *   dim = 1
+   *   nx = 1
+   * []
+   *
+   * [Executioner]
+   *   type = Transient
+   *   num_steps = 1
+   *   dt = 1
+   * []
+   *
+   * [Problem]
+   *   solve = false
+   * []
+   *
+   * [Outputs]
+   *   console = false
+   * []
+   */
+  void createMinimalApp();
+
   /// Where the restartable data is held (indexed on tid)
   RestartableDatas _restartable_data;
 
