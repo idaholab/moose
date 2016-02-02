@@ -32,6 +32,7 @@
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
+#include "CoupledCoefReaction.h"
 #include "CoupledReaction.h"
 #include "GradientComponent.h"
 #include "HHPFCRFF.h"
@@ -254,6 +255,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
+  registerKernel(CoupledCoefReaction);
   registerKernel(CoupledReaction);
   registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
