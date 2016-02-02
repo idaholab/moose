@@ -47,12 +47,12 @@ public:
   /**
    * Returns the next random number (long) from the generator tied to this object (elem/node).
    */
-  unsigned long getRandomLong();
+  unsigned long getRandomLong() const;
 
   /**
    * Returns the next random number (Real) from the generator tied to this object (elem/node).
    */
-  Real getRandomReal();
+  Real getRandomReal() const;
 
   /**
    * Get the seed for the passed in elem/node id.
@@ -72,7 +72,7 @@ public:
 
 private:
   RandomData *_random_data;
-  MooseRandom *_generator;
+  mutable MooseRandom *_generator;
 
   FEProblem & _ri_problem;
   const std::string _ri_name;
