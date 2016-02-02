@@ -96,7 +96,7 @@ public:
   /**
    * Whether or not this variable is computing any second derivatives.
    */
-  bool computingSecond() { return _need_second || _need_second_old || _need_second_older; }
+  bool computingSecond() { return _need_second || _need_second_old || _need_second_older || _need_second_previous_nl; }
 
   const VariablePhiValue & phi();
   const VariablePhiGradient & gradPhi();
@@ -122,12 +122,15 @@ public:
   const VariableValue & sln() { return _u; }
   const VariableValue & slnOld() { _need_u_old = true; return _u_old; }
   const VariableValue & slnOlder() { _need_u_older = true;return _u_older; }
+  const VariableValue & slnPreviousNL() { _need_u_previous_nl = true; return _u_previous_nl; }
   const VariableGradient & gradSln() { return _grad_u; }
   const VariableGradient & gradSlnOld() { _need_grad_old = true; return _grad_u_old; }
   const VariableGradient & gradSlnOlder() { _need_grad_older = true; return _grad_u_older; }
+  const VariableGradient & gradSlnPreviousNL() { _need_grad_previous_nl = true; return _grad_u_previous_nl; }
   const VariableSecond & secondSln() { _need_second = true; secondPhi(); secondPhiFace(); return _second_u; }
   const VariableSecond & secondSlnOld() { _need_second_old = true; secondPhi(); secondPhiFace(); return _second_u_old; }
   const VariableSecond & secondSlnOlder() { _need_second_older = true; secondPhi(); secondPhiFace(); return _second_u_older; }
+  const VariableSecond & secondSlnPreviousNL() { _need_second_previous_nl = true; secondPhi(); secondPhiFace(); return _second_u_previous_nl; }
 
   const VariableValue & uDot() { return _u_dot; }
   const VariableValue & duDotDu() { return _du_dot_du; }
@@ -138,28 +141,34 @@ public:
   const VariableValue & nodalSln() { return _nodal_u; }
   const VariableValue & nodalSlnOld() { return _nodal_u_old; }
   const VariableValue & nodalSlnOlder() { return _nodal_u_older; }
+  const VariableValue & nodalSlnPreviousNL() { _need_nodal_u_previous_nl = true; return _nodal_u_previous_nl; }
   const VariableValue & nodalSlnDot() { return _nodal_u_dot; }
   const VariableValue & nodalSlnDuDotDu() { return _nodal_du_dot_du; }
 
   const VariableValue & nodalValue();
   const VariableValue & nodalValueOld();
   const VariableValue & nodalValueOlder();
+  const VariableValue & nodalValuePreviousNL();
   const VariableValue & nodalValueDot();
 
   const VariableValue & nodalValueNeighbor();
   const VariableValue & nodalValueOldNeighbor();
   const VariableValue & nodalValueOlderNeighbor();
+  const VariableValue & nodalValuePreviousNLNeighbor();
   const VariableValue & nodalValueDotNeighbor();
 
   const VariableValue & slnNeighbor() { return _u_neighbor; }
   const VariableValue & slnOldNeighbor() { _need_u_old_neighbor = true; return _u_old_neighbor; }
   const VariableValue & slnOlderNeighbor() { _need_u_older_neighbor = true; return _u_older_neighbor; }
+  const VariableValue & slnPreviousNLNeighbor() { _need_u_previous_nl_neighbor = true; return _u_previous_nl_neighbor; }
   const VariableGradient & gradSlnNeighbor() { return _grad_u_neighbor; }
   const VariableGradient & gradSlnOldNeighbor() { _need_grad_old_neighbor = true; return _grad_u_old_neighbor; }
   const VariableGradient & gradSlnOlderNeighbor() { _need_grad_older_neighbor = true; return _grad_u_older_neighbor; }
+  const VariableGradient & gradSlnPreviousNLNeighbor() { _need_grad_previous_nl_neighbor = true; return _grad_u_previous_nl_neighbor; }
   const VariableSecond & secondSlnNeighbor() { _need_second_neighbor = true; secondPhiFaceNeighbor(); return _second_u_neighbor; }
   const VariableSecond & secondSlnOldNeighbor() { _need_second_old_neighbor = true; secondPhiFaceNeighbor(); return _second_u_old_neighbor; }
   const VariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
+  const VariableSecond & secondSlnPreviousNLNeighbor() { _need_second_previous_nl_neighbor = true; secondPhiFaceNeighbor(); return _second_u_previous_nl_neighbor; }
 
   const VariableValue & uDotNeighbor() { return _u_dot_neighbor; }
   const VariableValue & duDotDuNeighbor() { return _du_dot_du_neighbor; }
@@ -170,6 +179,7 @@ public:
   const VariableValue & nodalSlnNeighbor() { return _nodal_u_neighbor; }
   const VariableValue & nodalSlnOldNeighbor() { return _nodal_u_old_neighbor; }
   const VariableValue & nodalSlnOlderNeighbor() { return _nodal_u_older_neighbor; }
+  const VariableValue & nodalSlnPreviousNLNeighbor() { _need_nodal_u_previous_nl_neighbor = true; return _nodal_u_previous_nl_neighbor; }
   const VariableValue & nodalSlnDotNeighbor() { return _nodal_u_dot_neighbor; }
   const VariableValue & nodalSlnDuDotDuNeighbor() { return _nodal_du_dot_du_neighbor; }
 
@@ -332,33 +342,41 @@ protected:
 
   bool _need_u_old;
   bool _need_u_older;
+  bool _need_u_previous_nl;
 
   bool _need_grad_old;
   bool _need_grad_older;
+  bool _need_grad_previous_nl;
 
   bool _need_second;
   bool _need_second_old;
   bool _need_second_older;
+  bool _need_second_previous_nl;
 
 
   bool _need_u_old_neighbor;
   bool _need_u_older_neighbor;
+  bool _need_u_previous_nl_neighbor;
 
   bool _need_grad_old_neighbor;
   bool _need_grad_older_neighbor;
+  bool _need_grad_previous_nl_neighbor;
 
   bool _need_second_neighbor;
   bool _need_second_old_neighbor;
   bool _need_second_older_neighbor;
+  bool _need_second_previous_nl_neighbor;
 
   bool _need_nodal_u;
   bool _need_nodal_u_old;
   bool _need_nodal_u_older;
+  bool _need_nodal_u_previous_nl;
   bool _need_nodal_u_dot;
 
   bool _need_nodal_u_neighbor;
   bool _need_nodal_u_old_neighbor;
   bool _need_nodal_u_older_neighbor;
+  bool _need_nodal_u_previous_nl_neighbor;
   bool _need_nodal_u_dot_neighbor;
 
   // Shape function values, gradients. second derivatives
@@ -387,22 +405,28 @@ protected:
   VariableValue _u, _u_bak;
   VariableValue _u_old, _u_old_bak;
   VariableValue _u_older, _u_older_bak;
+  VariableValue _u_previous_nl;
   VariableGradient  _grad_u, _grad_u_bak;
   VariableGradient  _grad_u_old, _grad_u_old_bak;
   VariableGradient  _grad_u_older, _grad_u_older_bak;
+  VariableGradient  _grad_u_previous_nl;
   VariableSecond _second_u, _second_u_bak;
   VariableSecond _second_u_old, _second_u_old_bak;
   VariableSecond _second_u_older, _second_u_older_bak;
+  VariableSecond _second_u_previous_nl;
 
   VariableValue _u_neighbor;
   VariableValue _u_old_neighbor;
   VariableValue _u_older_neighbor;
+  VariableValue _u_previous_nl_neighbor;
   VariableGradient _grad_u_neighbor;
   VariableGradient _grad_u_old_neighbor;
   VariableGradient _grad_u_older_neighbor;
+  VariableGradient _grad_u_previous_nl_neighbor;
   VariableSecond _second_u_neighbor;
   VariableSecond _second_u_old_neighbor;
   VariableSecond _second_u_older_neighbor;
+  VariableSecond _second_u_previous_nl_neighbor;
 
   // time derivatives
 
@@ -426,6 +450,7 @@ protected:
   VariableValue _nodal_u;
   VariableValue _nodal_u_old;
   VariableValue _nodal_u_older;
+  VariableValue _nodal_u_previous_nl;
 
   /// nodal values of u_dot
   VariableValue _nodal_u_dot;
@@ -439,6 +464,7 @@ protected:
   VariableValue _nodal_u_neighbor;
   VariableValue _nodal_u_old_neighbor;
   VariableValue _nodal_u_older_neighbor;
+  VariableValue _nodal_u_previous_nl_neighbor;
   VariableValue _nodal_u_dot_neighbor;
   VariableValue _nodal_du_dot_du_neighbor;
 

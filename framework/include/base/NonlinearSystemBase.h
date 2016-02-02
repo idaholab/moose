@@ -475,6 +475,10 @@ public:
 
   virtual System & system() override { return _sys; }
 
+  virtual NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
+
+  virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -521,6 +525,9 @@ protected:
 
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
+
+  /// Solution vector of the previous nonlinear iterate
+  NumericVector<Number> * _solution_previous_nl;
 
   /// Copy of the residual vector
   NumericVector<Number> & _residual_copy;

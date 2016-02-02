@@ -650,6 +650,8 @@ SystemBase::copySolutionsBackwards()
   system().update();
   solutionOlder() = *currentSolution();
   solutionOld()   = *currentSolution();
+  if (solutionPreviousNewton())
+    *solutionPreviousNewton() = *currentSolution();
 }
 
 /**
@@ -660,6 +662,8 @@ SystemBase::copyOldSolutions()
 {
   solutionOlder() = solutionOld();
   solutionOld()   = *currentSolution();
+  if (solutionPreviousNewton())
+    *solutionPreviousNewton() = *currentSolution();
 }
 
 
@@ -671,5 +675,7 @@ SystemBase::restoreSolutions()
 {
   *(const_cast<NumericVector<Number> * &>(currentSolution())) = solutionOld();
   solution() = solutionOld();
+  if (solutionPreviousNewton())
+    *solutionPreviousNewton() = solutionOld();
   system().update();
 }

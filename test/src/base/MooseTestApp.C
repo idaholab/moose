@@ -65,6 +65,7 @@
 #include "BlkResTestDiffusion.h"
 #include "DiffTensorKernel.h"
 #include "OptionallyCoupledForce.h"
+#include "CoupledForceLagged.h"
 #include "FDDiffusion.h"
 #include "FDAdvection.h"
 #include "MaterialEigenKernel.h"
@@ -353,6 +354,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(DiffTensorKernel);
   registerKernel(ScalarLagrangeMultiplier);
   registerKernel(OptionallyCoupledForce);
+  registerKernel(CoupledForceLagged);
   registerKernel(FDDiffusion);
   registerKernel(FDAdvection);
   registerKernel(MaterialEigenKernel);

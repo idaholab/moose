@@ -82,6 +82,8 @@ public:
 
   virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
 
+  virtual NumericVector<Number> * solutionPreviousNewton() override { return NULL; }
+
   virtual TransientExplicitSystem & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }

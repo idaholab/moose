@@ -1040,6 +1040,17 @@ public:
    */
   virtual void computeAuxiliaryKernels(const ExecFlagType & type);
 
+  /**
+   * Set a flag that indicated that user required values for the previous Newton iterate
+   */
+  void needsPreviousNewtonIteration(bool state);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous Newton iterate
+   * @return true if the user required values of the previous Newton iterate
+   */
+  bool needsPreviousNewtonIteration();
+
 public:
 
   ///@{
@@ -1256,6 +1267,9 @@ protected:
 
   /// Indicates if the Jacobian was computed
   bool _has_jacobian;
+
+  /// Indicates that we need to compute variable values for previous Newton iteration
+  bool _needs_old_newton_iter;
 
   /// Indicates if nonlocal coupling is required/exists
   bool _has_nonlocal_coupling;
