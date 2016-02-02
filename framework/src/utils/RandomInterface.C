@@ -68,7 +68,7 @@ RandomInterface::getSeed(unsigned int id)
 }
 
 unsigned long
-RandomInterface::getRandomLong()
+RandomInterface::getRandomLong() const
 {
   mooseAssert(_generator, "Random Generator is NULL, did you call setRandomResetFrequency()?");
 
@@ -82,7 +82,7 @@ RandomInterface::getRandomLong()
 }
 
 Real
-RandomInterface::getRandomReal()
+RandomInterface::getRandomReal() const
 {
   mooseAssert(_generator, "Random Generator is NULL, did you call setRandomResetFrequency()?");
 
