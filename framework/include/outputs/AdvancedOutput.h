@@ -346,7 +346,8 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
 {
 
   // Get the UserObjectWarhouse
-  ExecStore<UserObjectWarehouse> & warehouse = T::_problem_ptr->getUserObjectWarehouse();
+  const MooseObjectWarehouseBase<UserObject> & warehouse = T::_problem_ptr->_all_user_objects;
+  //ExecStore<UserObjectWarehouse> & warehouse = T::_problem_ptr->getUserObjectWarehouse();
 
   // Convenience reference to the OutputData being operated on (should used "postprocessors" or "vector_postprocessors")
   OutputData & execute_data = _execute_data[execute_data_name];
@@ -360,41 +361,37 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
   bool has_limited_pps = false;
 
   // Loop through each of the execution flags
-  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
+  const std::vector<MooseSharedPointer<UserObject> > & objects = warehouse.getActiveObjects();
+  for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++ it)
+//  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
-    // Loop through each of the postprocessors
-    for (std::vector<UserObject *>::const_iterator it = warehouse(Moose::exec_types[i])[0].all().begin();
-         it != warehouse(Moose::exec_types[i])[0].all().end();
-         ++it)
+    // Store the name in the available postprocessors, if it does not already exist in the list
+    MooseSharedPointer<postprocessor_type> pps = MooseSharedNamespace::dynamic_pointer_cast<postprocessor_type>(*it);
+    if (!pps)
+      continue;
+
+    execute_data.available.insert(pps->PPName());
+
+    // Extract the list of outputs
+    std::set<OutputName> pps_outputs = pps->getOutputs();
+
+    // Check that the outputs lists are valid
+    T::_app.getOutputWarehouse().checkOutputs(pps_outputs);
+
+    // Check that the output object allows postprocessor output,
+    // account for "all" keyword (if it is present assume "all" was desired)
+    if (pps_outputs.find(T::name()) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end())
     {
-      // Store the name in the available postprocessors, if it does not already exist in the list
-      postprocessor_type * pps = dynamic_cast<postprocessor_type *>(*it);
-      if (!pps)
-        continue;
-
-      execute_data.available.insert(pps->PPName());
-
-      // Extract the list of outputs
-      std::set<OutputName> pps_outputs = pps->getOutputs();
-
-      // Check that the outputs lists are valid
-      T::_app.getOutputWarehouse().checkOutputs(pps_outputs);
-
-      // Check that the output object allows postprocessor output,
-      // account for "all" keyword (if it is present assume "all" was desired)
-      if (pps_outputs.find(T::name()) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end())
-      {
-        if (!T::_advanced_execute_on.contains(execute_data_name) ||
-            (T::_advanced_execute_on[execute_data_name].isValid() && T::_advanced_execute_on[execute_data_name].contains("none")))
-          mooseWarning("Postprocessor '" << pps->PPName()
-                       << "' has requested to be output by the '" << T::name()
-                       << "' output, but postprocessor output is not support by this type of output object.");
-      }
-
-      // Set the flag state for postprocessors that utilize 'outputs' parameter
-      if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
-        has_limited_pps = true;
+      if (!T::_advanced_execute_on.contains(execute_data_name) ||
+          (T::_advanced_execute_on[execute_data_name].isValid() && T::_advanced_execute_on[execute_data_name].contains("none")))
+        mooseWarning("Postprocessor '" << pps->PPName()
+                     << "' has requested to be output by the '" << T::name()
+                     << "' output, but postprocessor output is not support by this type of output object.");
     }
+
+    // Set the flag state for postprocessors that utilize 'outputs' parameter
+    if (!pps_outputs.empty() && pps_outputs.find("all") == pps_outputs.end())
+      has_limited_pps = true;
   }
 
   // Produce the warning when 'outputs' is used, but postprocessor output is disabled

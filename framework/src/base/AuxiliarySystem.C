@@ -304,6 +304,35 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
   return depend_objects;
 }
 
+std::set<std::string>
+AuxiliarySystem::getDependObjects()
+{
+  std::set<std::string> depend_objects;
+
+  // Elemental AuxKernels
+  {
+    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_storage.getActiveObjects();
+    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
+    {
+      const std::set<std::string> & uo = (*it)->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  // Nodal AuxKernels
+  {
+    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_storage.getActiveObjects();
+    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
+    {
+      const std::set<std::string> & uo = (*it)->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  return depend_objects;
+}
+
+
 NumericVector<Number> &
 AuxiliarySystem::addVector(const std::string & vector_name, const bool project, const ParallelType type)
 {

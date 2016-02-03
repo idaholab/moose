@@ -29,6 +29,7 @@
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "ExecuteMooseObjectWarehouse.h"
+#include "UserObjectWarehouseBase.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -58,6 +59,7 @@ class InternalSideIndicator;
 class Marker;
 class Material;
 class Transfer;
+class GeneralUserObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -491,6 +493,10 @@ public:
         UserObject * user_object = _user_objects(Moose::exec_types[i])[tid].getUserObjectByName(name);
         return dynamic_cast<const T &>(*user_object);
       }
+
+    if (_all_user_objects.hasActiveObject(name))
+      return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name))).get();
+
 
     mooseError("Unable to find user object with name '" + name + "'");
   }
@@ -1052,6 +1058,10 @@ protected:
 
   // user objects
   ExecStore<UserObjectWarehouse> _user_objects;
+public:
+  MooseObjectWarehouseBase<UserObject> _all_user_objects;
+protected:
+  UserObjectWarehouseBase<GeneralUserObject> _general_user_objects;
 
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;

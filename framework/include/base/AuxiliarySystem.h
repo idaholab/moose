@@ -108,7 +108,7 @@ public:
    * @return a set of dependent user objects
    */
   std::set<std::string> getDependObjects(ExecFlagType type);
-
+  std::set<std::string> getDependObjects();
   /**
    * Adds a solution length vector to the system.
    *
