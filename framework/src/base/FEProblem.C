@@ -121,6 +121,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
     _pps_data(*this),
     _vpps_data(*this),
+    _general_user_objects(/*threaded=*/false),
     _transfers(/*threaded=*/false),
     _to_multi_app_transfers(/*threaded=*/false),
     _from_multi_app_transfers(/*threaded=*/false),
@@ -361,6 +362,12 @@ void FEProblem::initialSetup()
   unsigned int n_threads = libMesh::n_threads();
 
   // UserObject initialSetup
+  std::set<std::string> depend_objects = _aux.getDependObjects();
+
+  _general_user_objects.sort();
+  _general_user_objects.initialSetup(depend_objects);
+
+
   for (unsigned int i=0; i<n_threads; i++)
   {
     _user_objects(EXEC_LINEAR)[i].updateDependObjects(_aux.getDependObjects(EXEC_LINEAR));
@@ -636,6 +643,7 @@ void FEProblem::timestepSetup()
     // Timestep setup of all UserObjects
     for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
       _user_objects(Moose::exec_types[j])[tid].timestepSetup();
+    _general_user_objects.timestepSetup();
   }
 
    // Timestep setup of output objects
@@ -1871,10 +1879,8 @@ void
 FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
   // Check for name collision
-  const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
-  for (unsigned int i=0; i<exec_flags.size(); ++i)
-    if (_user_objects(exec_flags[i])[0].getUserObjectByName(name))
-      mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
+  if (_all_user_objects.hasActiveObject(name))
+    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
   initPostprocessorData(name);
@@ -1884,10 +1890,8 @@ void
 FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
   // Check for name collision
-  const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
-  for (unsigned int i=0; i<exec_flags.size(); ++i)
-    if (_user_objects(exec_flags[i])[0].getUserObjectByName(name))
-      mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+  if (_all_user_objects.hasActiveObject(name))
+    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -1901,9 +1905,12 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
   else
     parameters.set<SubProblem *>("_subproblem") = this;
 
+
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters, tid));
+    _all_user_objects.addObject(user_object, tid);
+
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     {
       MooseSharedPointer<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(user_object);
@@ -1915,9 +1922,21 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
         _reinit_displaced_face = true;
     }
 
-    const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
-    for (unsigned int i=0; i<exec_flags.size(); ++i)
-      _user_objects(exec_flags[i])[tid].addUserObject(user_object);
+    MooseSharedPointer<GeneralUserObject> guo = MooseSharedNamespace::dynamic_pointer_cast<GeneralUserObject>(user_object);
+    if (guo)
+    {
+      std::cout << "Adding: " << guo->name() << std::endl;
+      _general_user_objects.addObject(guo);
+      break;
+    }
+
+    else
+    {
+      const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
+      for (unsigned int i=0; i<exec_flags.size(); ++i)
+        _user_objects(exec_flags[i])[tid].addUserObject(user_object);
+
+    }
   }
 }
 
@@ -1927,6 +1946,10 @@ FEProblem::getUserObjectBase(const std::string & name)
   for (unsigned int i = 0; i < Moose::exec_types.size(); ++i)
     if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
       return *_user_objects(Moose::exec_types[i])[0].getUserObjectByName(name);
+
+  if (_general_user_objects.hasActiveObject(name))
+    return *(_general_user_objects.getActiveObject(name).get());
+
 
   mooseError("Unable to find user object with name '" + name + "'");
 }
@@ -2124,11 +2147,13 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
   case EXEC_LINEAR:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
       _user_objects(type)[tid].residualSetup();
+    _general_user_objects[group][type].residualSetup();
     break;
 
   case EXEC_NONLINEAR:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
       _user_objects(type)[tid].jacobianSetup();
+    _general_user_objects[group][type].jacobianSetup();
     break;
 
   default:
@@ -2429,20 +2454,19 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
   }
 
   // Compute and store generic user_objects values
-  for (std::vector<GeneralUserObject *>::const_iterator generic_user_object_it = pps[0].genericUserObjects(group).begin();
-      generic_user_object_it != pps[0].genericUserObjects(group).end();
-      ++generic_user_object_it)
+  if (_general_user_objects[group][type].hasActiveObjects())
   {
-    std::string name = (*generic_user_object_it)->name();
-    (*generic_user_object_it)->initialize();
-    (*generic_user_object_it)->execute();
+    const std::vector<MooseSharedPointer<GeneralUserObject> > & objects = _general_user_objects[group][type].getActiveObjects();
+    for (std::vector<MooseSharedPointer<GeneralUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    {
+      (*it)->initialize();
+      (*it)->execute();
+      (*it)->finalize();
 
-    (*generic_user_object_it)->finalize();
-
-    Postprocessor * pp = getPostprocessorPointer<GeneralUserObject, GeneralPostprocessor>(*generic_user_object_it);
-
-    if (pp)
-      _pps_data.storeValue(name, pp->getValue());
+      MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(*it);
+      if (pp)
+        _pps_data.storeValue((*it)->name(), pp->getValue());
+    }
   }
 }
 
@@ -3858,6 +3882,11 @@ FEProblem::checkUserObjects()
 
     user_objects_blocks.insert(_user_objects(Moose::exec_types[i])[0].blockIds().begin(), _user_objects(Moose::exec_types[i])[0].blockIds().end());
   }
+
+  const std::vector<MooseSharedPointer<UserObject> > & objects = _all_user_objects.getActiveObjects();
+  for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    names.insert((*it)->name());
+
 
   // See if all referenced blocks are covered
   mesh_subdomains.insert(Moose::ANY_BLOCK_ID);

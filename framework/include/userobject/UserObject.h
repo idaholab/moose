@@ -50,6 +50,11 @@ public:
   virtual ~UserObject();
 
   /**
+   * Execute method.
+   */
+  virtual void execute() = 0;
+
+  /**
    * Called before execute() is ever called so that data can be cleared.
    */
   virtual void initialize() = 0;
