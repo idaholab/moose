@@ -141,7 +141,7 @@
     C_ijkl = '121154 80769.2'
   [../]
   [./strain]
-    type = ComputeFiniteStrain
+    type = ComputeIncrementalSmallStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
@@ -151,6 +151,7 @@
     ep_plastic_tolerance = 1E-9
     plastic_models = j2
     tangent_operator = elastic
+    perform_finite_strain_rotations = false
   [../]
 []
 

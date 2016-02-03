@@ -197,7 +197,7 @@
     block = 0
     plastic_models = wps
     transverse_direction = '0 0 1'
-    debug_fspb = 1
+    debug_fspb = crash
   [../]
 []
 

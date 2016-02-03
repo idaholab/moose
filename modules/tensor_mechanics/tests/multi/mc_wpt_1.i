@@ -228,7 +228,7 @@
     C_ijkl = '0 1E7'
     ep_plastic_tolerance = 1E-9
     plastic_models = 'mc wpt'
-    debug_fspb = 1
+    debug_fspb = crash
     debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
     debug_jac_at_pm = 1
     debug_jac_at_intnl = 1

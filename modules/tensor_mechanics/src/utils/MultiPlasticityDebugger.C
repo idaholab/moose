@@ -10,7 +10,8 @@ template<>
 InputParameters validParams<MultiPlasticityDebugger>()
 {
   InputParameters params = validParams<MultiPlasticityLinearSystem>();
-  params.addParam<int>("debug_fspb", 0, "Debug parameter for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian, and check Ax=b");
+  MooseEnum debug_fspb_type("none crash jacobian jacobian_and_linear_system" "none");
+  params.addParam<MooseEnum>("debug_fspb", debug_fspb_type, "Debug types for use by developers when creating new plasticity models, not for general use.  2 = debug Jacobian entries, 3 = check the entire Jacobian, and check Ax=b");
   params.addParam<RealTensorValue>("debug_jac_at_stress", RealTensorValue(), "Debug Jacobian entries at this stress.  For use by developers");
   params.addParam<std::vector<Real> >("debug_jac_at_pm", "Debug Jacobian entries at these plastic multipliers");
   params.addParam<std::vector<Real> >("debug_jac_at_intnl", "Debug Jacobian entries at these internal parameters");
@@ -22,7 +23,7 @@ InputParameters validParams<MultiPlasticityDebugger>()
 
 MultiPlasticityDebugger::MultiPlasticityDebugger(const InputParameters & parameters):
     MultiPlasticityLinearSystem(parameters),
-    _fspb_debug(parameters.get<int>("debug_fspb")),
+    _fspb_debug(parameters.get<MooseEnum>("debug_fspb")),
     _fspb_debug_stress(parameters.get<RealTensorValue>("debug_jac_at_stress")),
     _fspb_debug_pm(parameters.get<std::vector<Real> >("debug_jac_at_pm")),
     _fspb_debug_intnl(parameters.get<std::vector<Real> >("debug_jac_at_intnl")),

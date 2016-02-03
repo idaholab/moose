@@ -171,7 +171,7 @@
     max_NR_iterations = 10
     ep_plastic_tolerance = 1E-6
     plastic_models = mc
-    debug_fspb = 1
+    debug_fspb = crash
     deactivation_scheme = optimized_to_dumb
     min_stepsize = 1
     max_stepsize_for_dumb = 1

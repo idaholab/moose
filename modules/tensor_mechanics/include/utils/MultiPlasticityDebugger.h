@@ -51,8 +51,13 @@ public:
 
  protected:
 
-  /// Debug parameter - useful for coders, not for users (hopefully!)
-  int _fspb_debug;
+  /**
+   * none - don't do any debugging
+   * crash - currently inactive
+   * jacobian - check the jacobian entries
+   * jacobian_and_linear_system - check entire jacobian and check that Ax=b
+   */
+  MooseEnum _fspb_debug;
 
   /// Debug the Jacobian entries at this stress
   RankTwoTensor _fspb_debug_stress;
