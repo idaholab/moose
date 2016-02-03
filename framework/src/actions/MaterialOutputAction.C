@@ -56,6 +56,9 @@ MaterialOutputAction::act()
 void
 MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
 {
+  // Do nothing if the application does not have output
+  if (!_app.actionWarehouse().hasActions("add_output"))
+    return;
 
   // Set the pointers to the MaterialData objects (Note, these pointers are not available at construction)
   _block_material_data = problem_ptr->getMaterialData(Moose::BLOCK_MATERIAL_DATA);

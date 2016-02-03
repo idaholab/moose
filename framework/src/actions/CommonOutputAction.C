@@ -80,8 +80,6 @@ CommonOutputAction::CommonOutputAction(InputParameters params) :
     Action(params),
     _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
-  // Set the ActionWarehouse pointer in the parameters that will be passed to the actions created with this action
-  _action_params.set<ActionWarehouse *>("awh") = &_awh;
 }
 
 void
