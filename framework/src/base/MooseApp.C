@@ -62,6 +62,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("no_color", "--no-color", false, "Disable coloring of all Console outputs.");
 
   params.addCommandLineParam<bool>("help", "-h --help", false, "Displays CLI usage statement.");
+  params.addCommandLineParam<bool>("minimal", "--minimal", false, "Ignore input file and build a minimal application with Transient executioner.");
 
   params.addCommandLineParam<std::string>("dump", "--dump [search_string]", "Shows a dump of available input file syntax.");
   params.addCommandLineParam<std::string>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
@@ -198,7 +199,11 @@ MooseApp::setupOptions()
   Moose::_warnings_are_errors = getParam<bool>("error");
   Moose::_color_console = !getParam<bool>("no_color");
 
-  if (getParam<bool>("help"))
+  // Build a minimal running application, ignoring the input file.
+  if (getParam<bool>("minimal"))
+    createMinimalApp();
+
+  else if (getParam<bool>("help"))
   {
     _command_line->printUsage();
     _ready_to_exit = true;
@@ -326,7 +331,7 @@ MooseApp::runInputFile()
   if (error_unused || warn_unused)
   {
     MooseSharedPointer<FEProblem> fe_problem= _action_warehouse.problem();
-    if (fe_problem.get() && name() == "main")
+    if (fe_problem.get() && name() == "main" && !getParam<bool>("minimal"))
     {
       // Check the CLI parameters
       std::vector<std::string> all_vars = _command_line->getPot()->get_variable_names();
@@ -948,4 +953,90 @@ MooseApp::restoreCachedBackup()
 
   // Release our hold on this Backup
   _cached_backup.reset();
+}
+
+
+void
+MooseApp::createMinimalApp()
+{
+  // SetupMeshAction (setup_mesh)
+  {
+    // Build the Action parameters
+    InputParameters action_params = _action_factory.getValidParams("SetupMeshAction");
+    action_params.set<std::string>("type") = "GeneratedMesh";
+    action_params.set<std::string>("task") = "setup_mesh";
+
+    // Create The Action
+    MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("SetupMeshAction", "Mesh", action_params));
+
+    // Set the object parameters
+    InputParameters & params = action->getObjectParams();
+    params.set<MooseEnum>("dim") = "1";
+    params.set<int>("nx") = 1;
+
+    // Add Action to the warehouse
+    _action_warehouse.addActionBlock(action);
+  }
+
+  // SetupMeshAction (init_mesh)
+  {
+    // Action parameters
+    InputParameters action_params = _action_factory.getValidParams("SetupMeshAction");
+    action_params.set<std::string>("type") = "GeneratedMesh";
+    action_params.set<std::string>("task") = "init_mesh";
+
+    // Build the action
+    MooseSharedPointer<Action> action = _action_factory.create("SetupMeshAction", "Mesh", action_params);
+    _action_warehouse.addActionBlock(action);
+  }
+
+  // Executioner
+  {
+    // Build the Action parameters
+    InputParameters action_params = _action_factory.getValidParams("CreateExecutionerAction");
+    action_params.set<std::string>("type") = "Transient";
+
+    // Create the action
+    MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("CreateExecutionerAction", "Executioner", action_params));
+
+    // Set the object parameters
+    InputParameters & params = action->getObjectParams();
+    params.set<unsigned int>("num_steps") = 1;
+    params.set<Real>("dt") = 1;
+
+    // Add Action to the warehouse
+    _action_warehouse.addActionBlock(action);
+  }
+
+  // Problem
+  {
+    // Build the Action parameters
+    InputParameters action_params = _action_factory.getValidParams("CreateProblemAction");
+    action_params.set<std::string>("type") = "FEProblem";
+
+    // Create the action
+    MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("CreateProblemAction", "Problem", action_params));
+
+    // Set the object parameters
+    InputParameters & params = action->getObjectParams();
+    params.set<bool>("solve") = false;
+
+    // Add Action to the warehouse
+    _action_warehouse.addActionBlock(action);
+  }
+
+  // Outputs
+  {
+    // Build the Action parameters
+    InputParameters action_params = _action_factory.getValidParams("CommonOutputAction");
+    action_params.set<bool>("console") = false;
+
+    // Create action
+    MooseSharedPointer<Action> action = _action_factory.create("CommonOutputAction", "Outputs", action_params);
+
+    // Add Action to the warehouse
+    _action_warehouse.addActionBlock(action);
+  }
+
+  _action_warehouse.build();
 }
