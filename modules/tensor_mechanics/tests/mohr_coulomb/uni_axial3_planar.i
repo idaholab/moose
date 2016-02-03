@@ -225,7 +225,7 @@
     deactivation_scheme = 'safe'
     min_stepsize = 1
     max_stepsize_for_dumb = 1
-    debug_fspb = 1
+    debug_fspb = crash
   [../]
 []
 

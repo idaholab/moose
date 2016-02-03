@@ -216,7 +216,7 @@
     plastic_models = wps
     transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-3
-    debug_fspb = 1
+    debug_fspb = crash
   [../]
 []
 

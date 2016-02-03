@@ -159,7 +159,7 @@
     max_NR_iterations = 1000
     ep_plastic_tolerance = 1E-6
     plastic_models = mc
-    debug_fspb = 1
+    debug_fspb = crash
     deactivation_scheme = safe
   [../]
 []

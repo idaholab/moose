@@ -1,14 +1,14 @@
 [Tests]
   [./j2_hard1_mod]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'j2_hard1_mod.i'
-    exodiff = 'j2_hard1_mod_out.e'
+    csvdiff = 'j2_hard1_mod_out.csv'
     heavy = true
   [../]
   [./LSH_mod]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'LSH_mod.i'
-    exodiff = 'LSH_mod_out.e'
+    csvdiff = 'LSH_mod_out.csv'
     heavy = true
   [../]
 []

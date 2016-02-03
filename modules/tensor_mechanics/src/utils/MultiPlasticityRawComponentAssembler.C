@@ -451,6 +451,211 @@ MultiPlasticityRawComponentAssembler::buildActiveConstraintsRock(const std::vect
 }
 
 
+/**
+ * Performs a returnMap for each plastic model.
+ *
+ * If all models actually signal "elastic" by
+ * returning true from their returnMap, and
+ * by returning model_plastically_active=0, then
+ *   yf will contain the yield function values
+ *   num_successful_plastic_returns will be zero
+ *   intnl = intnl_old
+ *   delta_dp will be unchanged from its input value
+ *   stress will be set to trial_stress
+ *   pm will be zero
+ *   cumulative_pm will be unchanged
+ *   return value will be true
+ *   num_successful_plastic_returns = 0
+ *
+ * If only one model signals "plastically active"
+ * by returning true from its returnMap,
+ * and by returning model_plastically_active=1, then
+ *   yf will contain the yield function values
+ *   num_successful_plastic_returns will be one
+ *   intnl will be set by the returnMap algorithm
+ *   delta_dp will be set by the returnMap algorithm
+ *   stress will be set by the returnMap algorithm
+ *   pm will be nonzero for the single model, and zero for other models
+ *   cumulative_pm will be updated
+ *   return value will be true
+ *   num_successful_plastic_returns = 1
+ *
+ * If >1 model signals "plastically active"
+ * or if >=1 model's returnMap fails, then
+ *   yf will contain the yield function values
+ *   num_successful_plastic_returns will be set appropriately
+ *   intnl = intnl_old
+ *   delta_dp will be unchanged from its input value
+ *   stress will be set to trial_stress
+ *   pm will be zero
+ *   cumulative_pm will be unchanged
+ *   return value will be true if all returnMap functions returned true, otherwise it will be false
+ *   num_successful_plastic_returns is set appropriately
+ */
+bool
+MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_stress, const std::vector<Real> & intnl_old,
+                                      const RankFourTensor & E_ijkl, Real ep_plastic_tolerance, RankTwoTensor & stress,
+                                      std::vector<Real> & intnl, std::vector<Real> & pm, std::vector<Real> & cumulative_pm,
+                                      RankTwoTensor & delta_dp, std::vector<Real> & yf, unsigned & num_successful_plastic_returns,
+                                      unsigned & custom_model)
+{
+  mooseAssert(intnl_old.size() == _num_models, "returnMapAll: Incorrect size of internal parameters");
+  mooseAssert(intnl.size() == _num_models, "returnMapAll: Incorrect size of internal parameters");
+  mooseAssert(pm.size() == _num_surfaces, "returnMapAll: Incorrect size of pm");
+
+  num_successful_plastic_returns = 0;
+  yf.resize(0);
+  pm.assign(_num_surfaces, 0.0);
+
+  RankTwoTensor returned_stress; // each model will give a returned_stress.  if only one model is plastically active, i set stress=returned_stress, so as to record this returned value
+  std::vector<Real> model_f;
+  RankTwoTensor model_delta_dp;
+  std::vector<Real> model_pm;
+  bool trial_stress_inadmissible;
+  bool successful_return = true;
+  unsigned the_single_plastic_model = 0;
+  bool using_custom_return_map = true;
+
+
+  // run through all the plastic models, performing their
+  // returnMap algorithms.
+  // If one finds (trial_stress, intnl) inadmissible and
+  // successfully returns, break from the loop to evaluate
+  // all the others at that returned stress
+  for (unsigned model = 0 ; model < _num_models ; ++model)
+  {
+    if (using_custom_return_map)
+    {
+      model_pm.assign(_f[model]->numberSurfaces(), 0.0);
+      bool model_returned = _f[model]->returnMap(trial_stress, intnl_old[model], E_ijkl, ep_plastic_tolerance, returned_stress, intnl[model], model_pm, model_delta_dp, model_f, trial_stress_inadmissible);
+      if (!trial_stress_inadmissible)
+      {
+        // in the elastic zone: record the yield-function values (returned_stress, intnl, model_pm and model_delta_dp are undefined)
+        for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+          yf.push_back(model_f[model_surface]);
+      }
+      else if (trial_stress_inadmissible && !model_returned)
+      {
+        // in the plastic zone, and the customized returnMap failed
+        // for some reason (or wasn't implemented).  The coder
+        // should have correctly returned model_f(trial_stress, intnl_old)
+        // so record them
+        // (returned_stress, intnl, model_pm and model_delta_dp are undefined)
+        for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+          yf.push_back(model_f[model_surface]);
+        // now there's almost zero point in using the custom
+        // returnMap functions
+        using_custom_return_map = false;
+        successful_return = false;
+      }
+      else
+      {
+        // in the plastic zone, and the customized returnMap
+        // succeeded.
+        // record the first returned_stress and delta_dp if everything is going OK
+        // as they could be the actual answer
+        if (trial_stress_inadmissible)
+          num_successful_plastic_returns++;
+        the_single_plastic_model = model;
+        stress = returned_stress;
+        // note that i break here, and don't push_back
+        // model_f to yf.  So now yf contains only the values of
+        // model_f from previous models to the_single_plastic_model
+        // also i don't set delta_dp = model_delta_dp yet, because
+        // i might find problems later on
+        // also, don't increment cumulative_pm for the same reason
+
+        break;
+      }
+    }
+    else
+    {
+      // not using custom returnMap functions because one
+      // has already failed and that one said trial_stress
+      // was inadmissible.  So now calculate the yield functions
+      // at the trial stress
+      _f[model]->yieldFunctionV(trial_stress, intnl_old[model], model_f);
+      for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+        yf.push_back(model_f[model_surface]);
+    }
+  }
+
+  if (num_successful_plastic_returns == 0)
+  {
+    // here either all the models were elastic (successful_return=true),
+    // or some were plastic and either the customized returnMap failed
+    // or wasn't implemented (successful_return=false).
+    // In either case, have to set the following:
+    stress = trial_stress;
+    for (unsigned model = 0 ; model < _num_models ; ++model)
+      intnl[model] = intnl_old[model];
+    return successful_return;
+  }
+
+
+  // Now we know that num_successful_plastic_returns == 1 and all the other
+  // models (with model number < the_single_plastic_model) must have been
+  // admissible at (trial_stress, intnl).  However, all models might
+  // not be admissible at (trial_stress, intnl), so must check that
+  std::vector<Real> yf_at_returned_stress(0);
+  bool all_admissible = true;
+  for (unsigned model = 0 ; model < _num_models ; ++model)
+  {
+    if (model == the_single_plastic_model)
+    {
+      // no need to spend time calculating the yield function: we know its admissible
+      for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+        yf_at_returned_stress.push_back(model_f[model_surface]);
+      continue;
+    }
+    _f[model]->yieldFunctionV(stress, intnl_old[model], model_f);
+    for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+    {
+      if (model_f[model_surface] > _f[model]->_f_tol)
+        // bummer, this model is not admissible at the returned_stress
+        all_admissible = false;
+      yf_at_returned_stress.push_back(model_f[model_surface]);
+    }
+    if (!all_admissible)
+      // no point in continuing computing yield functions
+      break;
+  }
+
+  if (!all_admissible)
+  {
+    // we tried using the returned value of stress predicted by
+    // the_single_plastic_model, but it wasn't admissible according
+    // to other plastic models.  We need to set:
+    stress = trial_stress;
+    for (unsigned model = 0 ; model < _num_models ; ++model)
+      intnl[model] = intnl_old[model];
+    // and calculate the remainder of the yield functions at trial_stress
+    for (unsigned model = the_single_plastic_model ; model < _num_models ; ++model)
+    {
+      _f[model]->yieldFunctionV(trial_stress, intnl[model], model_f);
+      for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+        yf.push_back(model_f[model_surface]);
+    }
+    num_successful_plastic_returns = 0;
+    return false;
+  }
+
+  // So the customized returnMap algorithm can provide a returned
+  // (stress, intnl) configuration, and that is admissible according
+  // to all plastic models
+  yf.resize(0);
+  for (unsigned surface = 0 ; surface < yf_at_returned_stress.size() ; ++surface)
+    yf.push_back(yf_at_returned_stress[surface]);
+  delta_dp = model_delta_dp;
+  for (unsigned model_surface = 0 ; model_surface < _f[the_single_plastic_model]->numberSurfaces() ; ++model_surface)
+  {
+    cumulative_pm[_surfaces_given_model[the_single_plastic_model][model_surface]] += model_pm[model_surface];
+    pm[_surfaces_given_model[the_single_plastic_model][model_surface]] = model_pm[model_surface];
+  }
+  custom_model = the_single_plastic_model;
+  return true;
+}
+
 
 unsigned int
 MultiPlasticityRawComponentAssembler::modelNumber(unsigned int surface)

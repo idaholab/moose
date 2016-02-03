@@ -232,7 +232,7 @@
     ep_plastic_tolerance = 1E-9
     deactivation_scheme = safe
     plastic_models = mc
-    debug_fspb = 1
+    debug_fspb = crash
     debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
     debug_jac_at_pm = 1
     debug_jac_at_intnl = 1

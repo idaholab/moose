@@ -141,7 +141,7 @@
     C_ijkl = '121154 80769.2'
   [../]
   [./strain]
-    type = ComputeFiniteStrain
+    type = ComputeIncrementalSmallStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
@@ -150,7 +150,14 @@
     block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = j2
-    tangent_operator = elastic
+    perform_finite_strain_rotations = false
+  [../]
+[]
+
+[Preconditioning]
+  [./andy]
+    type = SMP
+    full = true
   [../]
 []
 
@@ -159,13 +166,13 @@
   type = Transient
 
   #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+  solve_type = NEWTON
 
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
 
-  line_search = 'none'
+  #line_search = 'none'
 
   l_max_its = 100
   nl_max_its = 100
@@ -174,7 +181,7 @@
   l_tol = 1e-4
   start_time = 0.0
   end_time = 0.5
-  dt = 0.01
+  dt = 0.5
 []
 
 [Postprocessors]

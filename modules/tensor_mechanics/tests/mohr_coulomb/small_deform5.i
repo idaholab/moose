@@ -254,7 +254,7 @@
     block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = mc
-    debug_fspb = 1
+    debug_fspb = crash
   [../]
 []
 

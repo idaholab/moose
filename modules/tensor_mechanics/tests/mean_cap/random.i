@@ -165,7 +165,7 @@
     max_NR_iterations = 2
     ep_plastic_tolerance = 1E-6
     plastic_models = 'cap1 cap2'
-    debug_fspb = 1
+    debug_fspb = crash
     deactivation_scheme = optimized
     min_stepsize = 1
     max_stepsize_for_dumb = 1

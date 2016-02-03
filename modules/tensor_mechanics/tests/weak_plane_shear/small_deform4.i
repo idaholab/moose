@@ -215,7 +215,7 @@
     block = 0
     plastic_models = wps
     transverse_direction = '0 0 1'
-    debug_fspb = 1
+    debug_fspb = crash
     debug_jac_at_stress = '1E4 2E4 3E4 2E4 -4E4 5E4 3E4 5E4 6E8'
     debug_jac_at_pm = 1
     debug_jac_at_intnl = 1
