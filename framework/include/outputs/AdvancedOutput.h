@@ -18,6 +18,7 @@
 // MOOSE includes
 #include "AdvancedOutputUtils.h" // OutputDataWarehouse
 #include "MooseTypes.h"
+#include "FEProblem.h"
 
 // Forward declarations
 class OutputWarehouse;
@@ -280,9 +281,9 @@ private:
    * @param execute_data_name Name of the OutputData struct to initialize
    * @param warehouse Reference to the postprocessor or vector postprocessor warehouse
    */
-  template <typename warehouse_type, typename postprocessor_type>
+  template <typename postprocessor_type>
   void
-  initPostprocessorOrVectorPostprocessorLists(const std::string & execute_data_name, warehouse_type & warehouse);
+  initPostprocessorOrVectorPostprocessorLists(const std::string & execute_data_name);
 
   /**
    * Initializes the list of items to be output using the available, show, and hide lists
@@ -339,12 +340,15 @@ private:
 
 // Helper function for initAvailableLists, templated on warehouse type and postprocessor_type
 template <class T>
-template <typename warehouse_type, typename postprocessor_type>
+template <typename postprocessor_type>
 void
-AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string & execute_data_name, warehouse_type & warehouse)
+AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string & execute_data_name)
 {
 
-  // Convience reference to the OutputData being operated on (should used "postprocessors" or "vector_postprocessors")
+  // Get the UserObjectWarhouse
+  ExecStore<UserObjectWarehouse> & warehouse = T::_problem_ptr->getUserObjectWarehouse();
+
+  // Convenience reference to the OutputData being operated on (should used "postprocessors" or "vector_postprocessors")
   OutputData & execute_data = _execute_data[execute_data_name];
 
   // Build the input file parameter name (i.e. "output_postprocessors_on" or "output_vector_postprocessors_on")
@@ -359,12 +363,15 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
   for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
     // Loop through each of the postprocessors
-    for (typename std::vector<postprocessor_type *>::const_iterator postprocessor_it = warehouse(Moose::exec_types[i])[0].all().begin();
-         postprocessor_it != warehouse(Moose::exec_types[i])[0].all().end();
-         ++postprocessor_it)
+    for (std::vector<UserObject *>::const_iterator it = warehouse(Moose::exec_types[i])[0].all().begin();
+         it != warehouse(Moose::exec_types[i])[0].all().end();
+         ++it)
     {
       // Store the name in the available postprocessors, if it does not already exist in the list
-      postprocessor_type *pps = *postprocessor_it;
+      postprocessor_type * pps = dynamic_cast<postprocessor_type *>(*it);
+      if (!pps)
+        continue;
+
       execute_data.available.insert(pps->PPName());
 
       // Extract the list of outputs
@@ -377,7 +384,8 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
       // account for "all" keyword (if it is present assume "all" was desired)
       if (pps_outputs.find(T::name()) != pps_outputs.end() || pps_outputs.find("all") != pps_outputs.end())
       {
-        if (!T::_advanced_execute_on.contains("postprocessors") || (T::_advanced_execute_on["postprocessors"].isValid() && T::_advanced_execute_on["postprocessors"].contains("none")))
+        if (!T::_advanced_execute_on.contains(execute_data_name) ||
+            (T::_advanced_execute_on[execute_data_name].isValid() && T::_advanced_execute_on[execute_data_name].contains("none")))
           mooseWarning("Postprocessor '" << pps->PPName()
                        << "' has requested to be output by the '" << T::name()
                        << "' output, but postprocessor output is not support by this type of output object.");
