@@ -1,3 +1,4 @@
+
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
@@ -47,7 +48,10 @@ public:
 
   const ExecuteMooseObjectWarehouse<T> & operator[](UserObjectWarehouse::GROUP group) const;
 
-  void initialSetup(const std::set<std::string> & depend_uo, THREAD_ID tid = 0);
+  void updateDependObjects(const std::set<std::string> & depend_uo, THREAD_ID tid = 0);
+
+//  void initialize(
+
 
   //MooseSharedPointer<Postprocessor> getPostprocessor(MooseSharedPointer<T> object, THREAD_ID tid = 0) const;
 
@@ -120,11 +124,9 @@ UserObjectWarehouseBase<T>::getPostprocessor(MooseSharedPointer<T> object, THREA
 
 template<typename T>
 void
-UserObjectWarehouseBase<T>::initialSetup(const std::set<std::string> & depend_uo, THREAD_ID tid)
+UserObjectWarehouseBase<T>::updateDependObjects(const std::set<std::string> & depend_uo, THREAD_ID tid)
 {
   checkThreadID(tid);
-
-  ExecuteMooseObjectWarehouse<T>::initialSetup(tid);
 
   for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
   {

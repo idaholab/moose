@@ -67,4 +67,3 @@ VerifyNodalUniqueID::finalize()
   if (it_end != _all_ids.end())
     mooseError("Duplicate unique_ids found!");
 }
-

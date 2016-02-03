@@ -1076,6 +1076,7 @@ public:
   MooseObjectWarehouseBase<UserObject> _all_user_objects;
 protected:
   UserObjectWarehouseBase<GeneralUserObject> _general_user_objects;
+  UserObjectWarehouseBase<NodalUserObject> _nodal_user_objects;
 
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;

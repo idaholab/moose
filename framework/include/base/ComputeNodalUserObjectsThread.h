@@ -16,7 +16,6 @@
 #define COMPUTENODALUserObjectsTHREAD_H
 
 #include "ThreadedNodeLoop.h"
-#include "UserObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/node_range.h"
@@ -27,7 +26,7 @@ class SubProblem;
 class ComputeNodalUserObjectsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalUserObjectsThread(FEProblem & fe_problem, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group);
+  ComputeNodalUserObjectsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects);
   // Splitting Constructor
   ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
@@ -38,8 +37,8 @@ public:
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
 protected:
-  std::vector<UserObjectWarehouse> & _user_objects;
-  UserObjectWarehouse::GROUP _group;
+  const MooseObjectWarehouse<NodalUserObject> & _user_objects;
+
 };
 
 #endif //COMPUTENODALUserObjectsTHREAD_H
