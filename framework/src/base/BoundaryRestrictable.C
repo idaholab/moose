@@ -41,7 +41,6 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
-    _boundary_restricted(false),
     _block_ids(_empty_block_ids),
     _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
@@ -56,7 +55,6 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, c
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
-    _boundary_restricted(false),
     _block_ids(block_ids),
     _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
@@ -106,8 +104,6 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
     _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
     _boundary_names = std::vector<BoundaryName>(1, "ANY_BOUNDARY_ID");
   }
-  else
-    _boundary_restricted = true;
 
   // If this object is block restricted, check that defined blocks exist on the mesh
   if (_bnd_ids.find(Moose::ANY_BOUNDARY_ID) == _bnd_ids.end())
@@ -149,6 +145,14 @@ BoundaryRestrictable::numBoundaryIDs() const
 {
   return (unsigned int) _bnd_ids.size();
 }
+
+
+bool
+BoundaryRestrictable::boundaryRestricted()
+{
+  return _bnd_ids.find(Moose::ANY_BOUNDARY_ID) == _bnd_ids.end();
+}
+
 
 bool
 BoundaryRestrictable::hasBoundary(BoundaryName name) const
