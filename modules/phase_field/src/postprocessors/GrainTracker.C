@@ -69,7 +69,8 @@ template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo
 template<>
 InputParameters validParams<GrainTracker>()
 {
-  InputParameters params = validParams<GrainTrackerInterface>();
+  InputParameters params = validParams<FeatureFloodCount>();
+  params += validParams<GrainTrackerInterface>();
   params.addClassDescription("Grain Tracker object for running reduced order parameter simulations without grain coalescence.");
 
   return params;

@@ -228,6 +228,7 @@
     compute_op_maps = true
     execute_on = 'initial timestep_begin'
     flood_entity_type = elemental
+    outputs = none
   [../]
   [./euler_angle_file]
     type = EulerAngleFileReader

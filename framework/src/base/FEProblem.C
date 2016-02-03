@@ -14,7 +14,6 @@
 
 #include "FEProblem.h"
 #include "MaterialPropertyStorage.h"
-#include "VectorPostprocessorData.h"
 #include "MooseEnum.h"
 #include "Resurrector.h"
 #include "Factory.h"
@@ -121,6 +120,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
     _pps_data(*this),
+    _vpps_data(*this),
     _transfers(/*threaded=*/false),
     _to_multi_app_transfers(/*threaded=*/false),
     _from_multi_app_transfers(/*threaded=*/false),
@@ -200,11 +200,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _neighbor_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_bnd_material_props));
   }
 
-  _vpps_data.resize(n_threads);
-
-  for (unsigned int i=0; i<n_threads; i++)
-    _vpps_data[i] = new VectorPostprocessorData(*this, i);
-
   _active_elemental_moose_variables.resize(n_threads);
 
   _block_mat_side_cache.resize(n_threads);
@@ -237,9 +232,6 @@ FEProblem::~FEProblem()
   }
 
   delete &_nl;
-
-  for (unsigned int i=0; i<n_threads; i++)
-    delete _vpps_data[i];
 
   delete _resurrector;
 
@@ -1795,66 +1787,11 @@ getPostprocessorPointer(UO_TYPE * uo)
   return NULL;
 }
 
-void
-FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
-{
-  parameters.set<FEProblem *>("_fe_problem") = this;
-  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-  else
-    parameters.set<SubProblem *>("_subproblem") = this;
-
-  for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
-    if (!mo)
-      mooseError("Unable to determine type for Postprocessor: " + mo->name());
-
-    MooseSharedPointer<Postprocessor> pp = getPostprocessorPointer(mo);
-
-    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-    {
-      MooseSharedPointer<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(mo);
-      MooseSharedPointer<SideUserObject> suo = MooseSharedNamespace::dynamic_pointer_cast<SideUserObject>(mo);
-      MooseSharedPointer<NodalUserObject> nuo = MooseSharedNamespace::dynamic_pointer_cast<NodalUserObject>(mo);
-      if (euo.get() != NULL || nuo.get() != NULL)
-        _reinit_displaced_elem = true;
-      else if (suo.get() != NULL)
-        _reinit_displaced_face = true;
-    }
-
-    // Postprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
-    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
-    for (unsigned int i=0; i<exec_flags.size(); ++i)
-    {
-      // Check for name collision
-      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(mo->name()))
-        mooseError(std::string("A UserObject with the name \"") + mo->name() + "\" already exists.  You may not add a Postprocessor by the same name.");
-      _pps(exec_flags[i])[tid].addPostprocessor(pp);
-
-      // Add it to the user object warehouse as well...
-      MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
-      if (!user_object.get())
-        mooseError("Unknown user object type: " + pp_name);
-
-      _user_objects(exec_flags[i])[tid].addUserObject(user_object);
-    }
-
-    if (tid == 0)
-      _pps_data.init(mo->name());
-  }
-}
 
 void
 FEProblem::initPostprocessorData(const std::string & name)
 {
   _pps_data.init(name);
-}
-
-ExecStore<PostprocessorWarehouse> &
-FEProblem::getPostprocessorWarehouse()
-{
-  return _pps;
 }
 
 ExecStore<UserObjectWarehouse> &
@@ -1903,59 +1840,28 @@ getVectorPostprocessorPointer(MooseSharedPointer<MooseObject> mo)
 }
 
 void
-FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
+FEProblem::addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblem *>("_fe_problem") = this;
-  if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-  else
-    parameters.set<SubProblem *>("_subproblem") = this;
+  // Check for name collision
+  const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
+  for (unsigned int i=0; i<exec_flags.size(); ++i)
+    if (_user_objects(exec_flags[i])[0].getUserObjectByName(name))
+      mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
 
-  for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    parameters.set<VectorPostprocessorData *>("_vector_postprocessor_data") = _vpps_data[tid];
-
-    MooseSharedPointer<MooseObject> mo = _factory.create(pp_name, name, parameters, tid);
-
-    if (!mo)
-      mooseError("Unable to determine type for VectorPostprocessor: " + mo->name());
-
-    MooseSharedPointer<VectorPostprocessor> pp = getVectorPostprocessorPointer(mo);
-
-    if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
-    {
-      MooseSharedPointer<ElementVectorPostprocessor> evp = MooseSharedNamespace::dynamic_pointer_cast<ElementVectorPostprocessor>(mo);
-      MooseSharedPointer<SideVectorPostprocessor> svp = MooseSharedNamespace::dynamic_pointer_cast<SideVectorPostprocessor>(mo);
-      MooseSharedPointer<NodalVectorPostprocessor> nvp = MooseSharedNamespace::dynamic_pointer_cast<NodalVectorPostprocessor>(mo);
-      if (evp.get() != NULL || nvp.get() != NULL)
-        _reinit_displaced_elem = true;
-      else if (svp.get() != NULL)
-        _reinit_displaced_face = true;
-    }
-
-    // VectorPostprocessor does not inherit from SetupInterface so we need to retrieve the exec_flags from the parameters directory
-    const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
-    for (unsigned int i=0; i<exec_flags.size(); ++i)
-    {
-      // Check for name collision
-      if (_user_objects(exec_flags[i])[tid].getUserObjectByName(mo->name()))
-        mooseError(std::string("A UserObject with the name \"") + mo->name() + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
-      _vpps(exec_flags[i])[tid].addVectorPostprocessor(pp);
-
-      // Add it to the user object warehouse as well...
-      MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::dynamic_pointer_cast<UserObject>(mo);
-      if (!user_object.get())
-        mooseError("Unknown user object type: " + pp_name);
-
-      _user_objects(exec_flags[i])[tid].addUserObject(user_object);
-    }
-  }
+  addUserObject(pp_name, name, parameters);
+  initPostprocessorData(name);
 }
 
-ExecStore<VectorPostprocessorWarehouse> &
-FEProblem::getVectorPostprocessorWarehouse()
+void
+FEProblem::addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters)
 {
-  return _vpps;
+  // Check for name collision
+  const std::vector<ExecFlagType> exec_flags = Moose::vectorStringsToEnum<ExecFlagType>(parameters.get<MultiMooseEnum>("execute_on"));
+  for (unsigned int i=0; i<exec_flags.size(); ++i)
+    if (_user_objects(exec_flags[i])[0].getUserObjectByName(name))
+      mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+
+  addUserObject(pp_name, name, parameters);
 }
 
 void
@@ -2030,28 +1936,40 @@ FEProblem::getPostprocessorValueOlder(const std::string & name)
   return _pps_data.getPostprocessorValueOlder(name);
 }
 
+VectorPostprocessorData &
+FEProblem::getVectorPostprocessorData()
+{
+  return _vpps_data;
+}
+
 bool
 FEProblem::hasVectorPostprocessor(const std::string & name)
 {
-  return _vpps_data[0]->hasVectorPostprocessor(name);
+  return _vpps_data.hasVectorPostprocessor(name);
 }
 
 VectorPostprocessorValue &
 FEProblem::getVectorPostprocessorValue(const VectorPostprocessorName & name, const std::string & vector_name)
 {
-  return _vpps_data[0]->getVectorPostprocessorValue(name, vector_name);
+  return _vpps_data.getVectorPostprocessorValue(name, vector_name);
 }
 
 VectorPostprocessorValue &
 FEProblem::getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name)
 {
-  return _vpps_data[0]->getVectorPostprocessorValueOld(name, vector_name);
+  return _vpps_data.getVectorPostprocessorValueOld(name, vector_name);
+}
+
+VectorPostprocessorValue &
+FEProblem::declareVectorPostprocessorVector(const VectorPostprocessorName & name, const std::string & vector_name)
+{
+  return _vpps_data.declareVector(name, vector_name);
 }
 
 const std::map<std::string, VectorPostprocessorValue*> &
 FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
 {
-  return _vpps_data[0]->vectors(vpp_name);
+  return _vpps_data.vectors(vpp_name);
 }
 
 void

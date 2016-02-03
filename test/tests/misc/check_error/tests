@@ -409,6 +409,12 @@
     expect_err = 'A UserObject with the name "\w+" already exists'
   [../]
 
+  [./uo_vector_pps_name_collision_test]
+    type = 'RunException'
+    input = 'uo_vector_pps_name_collision_test.i'
+    expect_err = 'A UserObject with the name "\w+" already exists'
+  [../]
+
   [./wrong_object_test]
     type = 'RunException'
     input = 'wrong_moose_object_test.i'

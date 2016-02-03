@@ -52,8 +52,15 @@ public:
   /**
    * Get a complete set of all output object names
    * @return A set of output names for each output object
+   *
+   * Note, if this method is called prior to the creation of outputs in AddOutputAction it will
+   * create the proxy list of names from the action system. The main use is for the OutputInterface,
+   * specifically, when used with Postprocessors in the UserObjects block of the input file.
+   * UserObjects are created prior to Outputs objects, but OutputInterface needs the list
+   * of output names to operate correctly.
+   *
    */
-  const std::set<OutputName> & getOutputNames() const;
+  const std::set<OutputName> & getOutputNames();
 
   /**
    * Returns true if the output object exists

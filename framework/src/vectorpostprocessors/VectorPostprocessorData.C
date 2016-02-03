@@ -15,8 +15,8 @@
 #include "VectorPostprocessorData.h"
 #include "FEProblem.h"
 
-VectorPostprocessorData::VectorPostprocessorData(FEProblem & fe_problem, THREAD_ID tid) :
-    Restartable("values", "VectorPostprocessorData", fe_problem, tid)
+VectorPostprocessorData::VectorPostprocessorData(FEProblem & fe_problem) :
+    Restartable("values", "VectorPostprocessorData", fe_problem, 0)
 {
 }
 

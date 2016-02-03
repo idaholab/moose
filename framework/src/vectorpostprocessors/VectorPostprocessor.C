@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "VectorPostprocessor.h"
 #include "SubProblem.h"
 #include "Conversion.h"
 #include "UserObject.h"
 #include "VectorPostprocessorData.h"
-
-// libMesh includes
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<VectorPostprocessor>()
@@ -27,7 +27,6 @@ InputParameters validParams<VectorPostprocessor>()
 
   params.addParamNamesToGroup("outputs", "Advanced");
   params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of this VectorPostprocessor (empty outputs to all)");
-  params.addPrivateParam<VectorPostprocessorData *>("_vector_postprocessor_data");
 
   params.registerBase("VectorPostprocessor");
   return params;
@@ -36,18 +35,18 @@ InputParameters validParams<VectorPostprocessor>()
 VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters) :
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
     _outputs(parameters.get<std::vector<OutputName> >("outputs")),
-    _vpp_data(*parameters.getCheckedPointerParam<VectorPostprocessorData *>("_vector_postprocessor_data"))
+    _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
 }
 
 VectorPostprocessorValue &
 VectorPostprocessor::getVector(const std::string & vector_name)
 {
-  return _vpp_data.getVectorPostprocessorValue(_vpp_name, vector_name);
+  return _vpp_fe_problem->getVectorPostprocessorValue(_vpp_name, vector_name);
 }
 
 VectorPostprocessorValue &
 VectorPostprocessor::declareVector(const std::string & vector_name)
 {
-  return _vpp_data.declareVector(_vpp_name, vector_name);
+  return _vpp_fe_problem->declareVectorPostprocessorVector(_vpp_name, vector_name);
 }

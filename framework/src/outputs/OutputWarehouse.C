@@ -122,8 +122,14 @@ OutputWarehouse::hasOutput(const std::string & name) const
 }
 
 const std::set<OutputName> &
-OutputWarehouse::getOutputNames() const
+OutputWarehouse::getOutputNames()
 {
+  if (_object_names.empty())
+  {
+    std::vector<Action *> actions =  _app.actionWarehouse().getActionsByName("add_output");
+    for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+      _object_names.insert((*it)->name());
+  }
   return _object_names;
 }
 

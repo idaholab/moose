@@ -26,6 +26,7 @@
 class SamplerBase;
 class VectorPostprocessor;
 class VectorPostprocessorData;
+class FEProblem;
 
 template<>
 InputParameters validParams<VectorPostprocessor>();
@@ -62,13 +63,14 @@ protected:
    */
   VectorPostprocessorValue & declareVector(const std::string & vector_name);
 
+  /// The name of the VectorPostprocessor
   std::string _vpp_name;
 
   /// Vector of output names
   std::vector<OutputName> _outputs;
 
-  /// The VectorPostprocessorData backend that is holding the vectors for this object...
-  VectorPostprocessorData & _vpp_data;
+  /// Pointer to FEProblem
+  FEProblem * _vpp_fe_problem;
 
   friend class SamplerBase;
 };

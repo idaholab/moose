@@ -451,14 +451,12 @@ AdvancedOutput<T>::initAvailableLists()
   // Initialize Postprocessor list
   // This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
   // to produce an warning if postprocessor output is disabled
-  ExecStore<PostprocessorWarehouse> & warehouse = T::_problem_ptr->getPostprocessorWarehouse();
-  initPostprocessorOrVectorPostprocessorLists<ExecStore<PostprocessorWarehouse>, Postprocessor>("postprocessors", warehouse);
+  initPostprocessorOrVectorPostprocessorLists<Postprocessor>("postprocessors");
 
   // Initialize vector postprocessor list
   // This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is then used
   // to produce an warning if vector postprocessor output is disabled
-  ExecStore<VectorPostprocessorWarehouse> & vector_warehouse = T::_problem_ptr->getVectorPostprocessorWarehouse();
-  initPostprocessorOrVectorPostprocessorLists<ExecStore<VectorPostprocessorWarehouse>, VectorPostprocessor>("vector_postprocessors", vector_warehouse);
+  initPostprocessorOrVectorPostprocessorLists<VectorPostprocessor>("vector_postprocessors");
 
   // Get a list of the available variables
   std::vector<VariableName> variables = T::_problem_ptr->getVariableNames();

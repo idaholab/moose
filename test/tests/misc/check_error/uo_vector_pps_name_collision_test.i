@@ -63,10 +63,10 @@
   solve_type = 'PJFNK'
 []
 
-[Postprocessors]
+[VectorPostprocessors]
   [./ud]
-    type = NumDOFs
-    variable = u
+    type = ConstantVectorPostprocessor
+    value = 1
   []
 []
 
