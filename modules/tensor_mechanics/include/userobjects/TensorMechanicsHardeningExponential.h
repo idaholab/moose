@@ -30,6 +30,8 @@ class TensorMechanicsHardeningExponential : public TensorMechanicsHardeningModel
 
   virtual Real derivative(const Real & intnl) const;
 
+  virtual std::string modelName() const;
+
  private:
 
   /// The value = _val_res + (val_0 - val_res)*exp(-rate*internal_parameter)

@@ -272,7 +272,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
           std::vector<Real> custom_model_pm;
           for (unsigned surface = 0 ; surface < _f[custom_model]->numberSurfaces() ; ++surface)
             custom_model_pm.push_back(cumulative_pm[_surfaces_given_model[custom_model][surface]]);
-          consistent_tangent_operator = _f[custom_model]->consistentTangentOperator(stress, intnl[custom_model], E_ijkl, custom_model_pm);
+          consistent_tangent_operator = _f[custom_model]->consistentTangentOperator(stress_old, stress, intnl[custom_model], E_ijkl, custom_model_pm);
         }
       }
       else // cannot necessarily use the custom consistentTangentOperator since different plastic models may have been active during other substeps

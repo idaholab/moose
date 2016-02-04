@@ -30,6 +30,8 @@ class TensorMechanicsHardeningCutExponential : public TensorMechanicsHardeningMo
 
   virtual Real derivative(const Real & intnl) const;
 
+  virtual std::string modelName() const;
+
  private:
 
   /// The value = _val_res + (val_0 - val_res)*exp(-rate*(internal_parameter - _intnl_0)), for internal_parameter >= _intnl_0, otherwise value = _val_0

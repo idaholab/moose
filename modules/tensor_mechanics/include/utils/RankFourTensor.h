@@ -71,7 +71,8 @@ public:
     symmetric_isotropic,
     antisymmetric_isotropic,
     axisymmetric_rz,
-    general
+    general,
+    principal
   };
 
   /// Default constructor; fills to zero
@@ -163,6 +164,12 @@ public:
   virtual void rotate(RealTensorValue & R);
 
   /**
+   * Rotate the tensor using
+   * C_ijkl = R_im R_in R_ko R_lp C_mnop
+   */
+  virtual void rotate(const RankTwoTensor & R);
+
+  /**
    * Transpose the tensor by swapping the first pair with the second pair of indices
    * @return C_klji
    */
@@ -196,6 +203,7 @@ public:
    *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
    *             axisymmetric_rz (use fillAxisymmetricRZFromInputVector)
    *             general (use fillGeneralFromInputVector)
+   *             principal (use fillPrincipalFromInputVector)
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
 
@@ -278,6 +286,21 @@ protected:
    * @param input this is C1111, C1122, C1133, C3333, C2323.
    */
   void fillGeneralFromInputVector(const std::vector<Real> & input);
+
+  /**
+   * fillPrincipalFromInputVector takes 9 inputs to fill a Rank-4 tensor
+   * C1111 = input0
+   * C1122 = input1
+   * C1133 = input2
+   * C2211 = input3
+   * C2222 = input4
+   * C2233 = input5
+   * C3311 = input6
+   * C3322 = input7
+   * C3333 = input8
+   * with all other components being zero
+   */
+  void fillPrincipalFromInputVector(const std::vector<Real> & input);
 };
 
 inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
