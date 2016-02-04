@@ -81,6 +81,46 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   [../]
+  [./planar4]
+    type = 'CSVDiff'
+    input = 'planar4.i'
+    csvdiff = 'planar4.csv'
+    abs_zero = 1.0E-8
+    rel_err = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./planar5]
+    type = 'CSVDiff'
+    input = 'planar5.i'
+    csvdiff = 'planar5.csv'
+    abs_zero = 1.0E-8
+    rel_err = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./planar6]
+    type = 'CSVDiff'
+    input = 'planar6.i'
+    csvdiff = 'planar6.csv'
+    abs_zero = 1.0E-8
+    rel_err = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./planar7]
+    type = 'CSVDiff'
+    input = 'planar7.i'
+    csvdiff = 'planar7.csv'
+    abs_zero = 1.0E-8
+    rel_err = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./planar8]
+    type = 'CSVDiff'
+    input = 'planar8.i'
+    csvdiff = 'planar8.csv'
+    abs_zero = 1.0E-8
+    rel_err = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
 
   [./random_smoothed]
     type = CSVDiff
@@ -113,7 +153,7 @@
     csvdiff = 'random_planar.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
+    cli_args = '--no-trap-fpe Mesh/nx=40 Mesh/ny=40 Mesh/xmax=40 Mesh/ymax=40'
     heavy = true
   [../]
 

@@ -350,17 +350,17 @@ TensorMechanicsPlasticTensileMulti::returnMap(const RankTwoTensor & trial_stress
   bool nr_converged;
   for (trial = 0 ; trial < 3 ; ++trial)
   {
-    switch(trial_order[trial])
+    switch (trial_order[trial])
     {
-    case(tip):
-      nr_converged = returnTip(eigvals, n, dpm, returned_stress, intnl_old);
-      break;
-    case(edge):
-      nr_converged = returnEdge(eigvals, n, dpm, returned_stress, intnl_old);
-      break;
-    case(plane):
-      nr_converged = returnPlane(eigvals, n, dpm, returned_stress, intnl_old);
-      break;
+      case tip:
+        nr_converged = returnTip(eigvals, n, dpm, returned_stress, intnl_old);
+        break;
+      case edge:
+        nr_converged = returnEdge(eigvals, n, dpm, returned_stress, intnl_old);
+        break;
+      case plane:
+        nr_converged = returnPlane(eigvals, n, dpm, returned_stress, intnl_old);
+        break;
     }
     str = tensile_strength(intnl_old + dpm[0] + dpm[1] + dpm[2]);
     if (nr_converged && KuhnTuckerOK(returned_stress, dpm, str))
