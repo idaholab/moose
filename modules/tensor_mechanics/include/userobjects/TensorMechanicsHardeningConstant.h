@@ -28,6 +28,8 @@ class TensorMechanicsHardeningConstant : public TensorMechanicsHardeningModel
 
   virtual Real derivative(const Real & intnl) const;
 
+  virtual std::string modelName() const;
+
  private:
 
   /// The value that the parameter will take

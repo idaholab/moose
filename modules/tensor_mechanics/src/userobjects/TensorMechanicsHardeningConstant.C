@@ -35,3 +35,9 @@ TensorMechanicsHardeningConstant::derivative(const Real & /*intnl*/) const
   return 0.0;
 }
 
+std::string
+TensorMechanicsHardeningConstant::modelName() const
+{
+  return "Constant";
+}
+
