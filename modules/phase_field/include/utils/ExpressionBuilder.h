@@ -550,4 +550,14 @@ ExpressionBuilder::EBNumberNode<T>::stringify() const
   return s.str();
 }
 
+template<class Node_T>
+ExpressionBuilder::EBTermNode * ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(const ExpressionBuilder::EBTermNode * node) const
+{
+  const Node_T * match_node = dynamic_cast<const Node_T *>(node);
+  if (match_node == NULL)
+    return NULL;
+  else
+    return substitute(*match_node);
+}
+
 #endif //EXPRESSIONBUILDER_H
