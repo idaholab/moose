@@ -11,12 +11,15 @@
   nx = 30
   ny = 30
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   nx = 150
   ny = 150
 >>>>>>> e11ad50... -m for issue number 6181 this is a code shows a 2d heat equation which is compared to the analytical solution for error calcuation.  Note the the ElementL2Error and NodalL2Error are oders of magnitude in difference, but both show very small error
 =======
 >>>>>>> acbf775... sorry for all the commits
+=======
+>>>>>>> acbf775553052f92547d627204c319ff87a53433
   xmax = 2
   ymax = 2
 []
@@ -38,10 +41,13 @@
 []
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> e11ad50... -m for issue number 6181 this is a code shows a 2d heat equation which is compared to the analytical solution for error calcuation.  Note the the ElementL2Error and NodalL2Error are oders of magnitude in difference, but both show very small error
 =======
 >>>>>>> acbf775... sorry for all the commits
+=======
+>>>>>>> acbf775553052f92547d627204c319ff87a53433
 [Kernels]
   active = 'HeatDiff'
   [./HeatDiff]
@@ -79,12 +85,16 @@
     boundary = top
     function = top_bound
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     function = 10*sin(3.14159265*x*0.5)
 >>>>>>> e11ad50... -m for issue number 6181 this is a code shows a 2d heat equation which is compared to the analytical solution for error calcuation.  Note the the ElementL2Error and NodalL2Error are oders of magnitude in difference, but both show very small error
 =======
 
 >>>>>>> acbf775... sorry for all the commits
+=======
+
+>>>>>>> acbf775553052f92547d627204c319ff87a53433
   [../]
 []
 
@@ -115,22 +125,28 @@
     type = NodalL2Error
     function = 'fun_1'
 <<<<<<< HEAD
-=======
-    function = '10/(sinh(3.14159265))*sin(3.14159265*x*0.5)*sinh(3.14159265*y*0.5)'
->>>>>>> e11ad50... -m for issue number 6181 this is a code shows a 2d heat equation which is compared to the analytical solution for error calcuation.  Note the the ElementL2Error and NodalL2Error are oders of magnitude in difference, but both show very small error
-=======
->>>>>>> acbf775... sorry for all the commits
-    variable = T
-  [../]
-  [./elemental_error]
-    type = ElementL2Error
-    function = 'fun_1'
 <<<<<<< HEAD
 =======
     function = '10/(sinh(3.14159265))*sin(3.14159265*x*0.5)*sinh(3.14159265*y*0.5)'
 >>>>>>> e11ad50... -m for issue number 6181 this is a code shows a 2d heat equation which is compared to the analytical solution for error calcuation.  Note the the ElementL2Error and NodalL2Error are oders of magnitude in difference, but both show very small error
 =======
 >>>>>>> acbf775... sorry for all the commits
+=======
+>>>>>>> acbf775553052f92547d627204c319ff87a53433
+    variable = T
+  [../]
+  [./elemental_error]
+    type = ElementL2Error
+    function = 'fun_1'
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    function = '10/(sinh(3.14159265))*sin(3.14159265*x*0.5)*sinh(3.14159265*y*0.5)'
+>>>>>>> e11ad50... -m for issue number 6181 this is a code shows a 2d heat equation which is compared to the analytical solution for error calcuation.  Note the the ElementL2Error and NodalL2Error are oders of magnitude in difference, but both show very small error
+=======
+>>>>>>> acbf775... sorry for all the commits
+=======
+>>>>>>> acbf775553052f92547d627204c319ff87a53433
     variable = T
   [../]
 []
