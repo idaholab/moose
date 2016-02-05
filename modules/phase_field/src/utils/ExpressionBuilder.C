@@ -431,16 +431,6 @@ ExpressionBuilder::EBTerm::substitute(const EBSubstitutionRuleList & rules)
   return _root->substitute(rules);
 }
 
-template<class Node_T>
-ExpressionBuilder::EBTermNode * ExpressionBuilder::EBSubstitutionRuleTyped<Node_T>::apply(const ExpressionBuilder::EBTermNode * node) const
-{
-  const Node_T * match_node = dynamic_cast<const Node_T *>(node);
-  if (match_node == NULL)
-    return NULL;
-  else
-    return substitute(*match_node);
-}
-
 ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & find, const EBTerm & replace)
 {
   // the expression we want to substitute (has to be a symbol node)
