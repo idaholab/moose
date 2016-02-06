@@ -92,11 +92,15 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
   /// yield strength, from user input
   const TensorMechanicsHardeningModel & _strength;
 
-  /// whether to use the custom return-map
-  bool _use_custom_returnMap;
-
   /// max iters for custom return map loop
   unsigned _max_iters;
+
+  /// Whether to use the custom returnMap algorithm
+  bool _use_custom_returnMap;
+
+  /// Whether to use the custom consistent tangent operator algorithm
+  bool _use_custom_cto;
+
 
   /**
     * Performs a custom return-map.
@@ -176,13 +180,15 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
     * You may choose to over-ride this in your
     * derived TensorMechanicsPlasticXXXX class.
     *
+    * @param stress_old trial stress before returning
     * @param stress current stress state
     * @param intnl internal parameter
     * @param E_ijkl elasticity tensor
     * @param cumulative_pm the cumulative plastic multipliers
     * @return the consistent tangent operator for J2 (radial return) case
     */
-  RankFourTensor consistentTangentOperator(const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
+  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, const Real & intnl,
+                                                   const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
 
 };
 

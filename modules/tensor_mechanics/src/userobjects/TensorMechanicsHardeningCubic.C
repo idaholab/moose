@@ -56,3 +56,8 @@ TensorMechanicsHardeningCubic::derivative(const Real & intnl) const
     return 3*_alpha*std::pow(x - _half_intnl_limit, 2) + _beta;
 }
 
+std::string
+TensorMechanicsHardeningCubic::modelName() const
+{
+  return "Cubic";
+}

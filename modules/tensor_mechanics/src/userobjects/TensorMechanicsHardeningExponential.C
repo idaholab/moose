@@ -37,3 +37,8 @@ TensorMechanicsHardeningExponential::derivative(const Real & intnl) const
   return -_rate*(_val_0 - _val_res)*std::exp(-_rate*intnl);
 }
 
+std::string
+TensorMechanicsHardeningExponential::modelName() const
+{
+  return "Exponential";
+}

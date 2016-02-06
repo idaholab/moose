@@ -144,6 +144,12 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
   /// Returns the model name (eg "MohrCoulomb")
   virtual std::string modelName() const;
 
+  /// Returns _use_custom_returnMap
+  bool use_custom_returnMap() const;
+
+  /// Returns _use_custom_cto, ie, whether to use the custom consistent tangent operator algorithm
+  bool use_custom_cto() const;
+
   /// Tolerance on yield function
   Real _f_tol;
 
@@ -232,15 +238,17 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
     * want to override consistentTangentOpertor too, otherwise
     * it will default to E_ijkl.)
     *
-    * @param stress current stress state
+    * @param stress_old trial stress before returning
+    * @param stress current returned stress state
     * @param intnl internal parameter
     * @param E_ijkl elasticity tensor
     * @param cumulative_pm the cumulative plastic multipliers
     * @return the consistent tangent operator: E_ijkl if not over-ridden
     */
-  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & stress, const Real & intnl,
+  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, const Real & intnl,
                                                    const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
 
+  bool KuhnTuckerSingleSurface(const Real & yf, const Real & dpm) const;
 
  protected:
 
