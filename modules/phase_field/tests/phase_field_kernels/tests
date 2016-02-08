@@ -34,7 +34,7 @@
 
   # This is also a coupled formulation of Allen-Cahn equation, using variable mobility
   # Primarily here to test CoupledCoefReaction kernel
-  [./CoupledAllenCahn]
+  [./CoupledCoefAllenCahn]
     type = 'Exodiff'
     input = 'CoupledCoefAllenCahn.i'
     exodiff = 'CoupledCoefAllenCahn_out.e'
