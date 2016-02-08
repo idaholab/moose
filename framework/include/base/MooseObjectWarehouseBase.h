@@ -208,7 +208,8 @@ MooseObjectWarehouseBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID t
   // Boundary Restricted
   if (bnd && bnd->boundaryRestricted())
   {
-    for (std::set<BoundaryID>::const_iterator it = bnd->boundaryIDs().begin(); it != bnd->boundaryIDs().end(); ++it)
+    const std::set<BoundaryID> & ids = bnd->boundaryIDs();
+    for (std::set<BoundaryID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     {
       _all_boundary_objects[tid][*it].push_back(object);
       if (enabled)
@@ -219,10 +220,7 @@ MooseObjectWarehouseBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID t
   // Block Restricted
   else if (blk)
   {
-    // Get a copy of the Subdomains on which this object is active
     const std::set<SubdomainID> & ids = blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
-
-    // Store the object for each domain on which it is active
     for (std::set<SubdomainID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     {
       _all_block_objects[tid][*it].push_back(object);
