@@ -44,7 +44,7 @@ public:
 
   UserObjectWarehouseBase(bool thread = true);
 
-  virtual void addObject(MooseSharedPointer<T> object, THREAD_ID tid = 0);
+  //virtual void addObject(MooseSharedPointer<T> object, THREAD_ID tid = 0);
 
   const ExecuteMooseObjectWarehouse<T> & operator[](UserObjectWarehouse::GROUP group) const;
 
@@ -93,18 +93,14 @@ UserObjectWarehouseBase<T>::operator[](UserObjectWarehouse::GROUP group) const
   return iter->second;
 }
 
-
+/*
 template<typename T>
 void
 UserObjectWarehouseBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid)
 {
   ExecuteMooseObjectWarehouse<T>::addObject(object, tid);
-
-  MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(object);
-  if (pp)
-    _postprocessors[tid][object] = pp;
 }
-
+*/
 /*
 template<typename T>
 MooseSharedPointer<Postprocessor>
@@ -131,9 +127,9 @@ UserObjectWarehouseBase<T>::updateDependObjects(const std::set<std::string> & de
   for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
   {
     if (depend_uo.find((*it)->name()) != depend_uo.end())
-      _group_objects[UserObjectWarehouse::PRE_AUX].addObject((*it));
+      _group_objects[UserObjectWarehouse::PRE_AUX].addObject(*it, tid);
     else
-      _group_objects[UserObjectWarehouse::POST_AUX].addObject((*it));
+      _group_objects[UserObjectWarehouse::POST_AUX].addObject(*it, tid);
   }
 }
 

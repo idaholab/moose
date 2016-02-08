@@ -23,11 +23,16 @@
 #include "libmesh/numeric_vector.h"
 
 
-ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBase & sys, const NumericVector<Number>& in_soln, std::vector<UserObjectWarehouse> & user_objects, UserObjectWarehouse::GROUP group) :
+ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem,
+                                                   SystemBase & sys,
+                                                   const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
+                                                   const MooseObjectWarehouse<SideUserObject> & side_user_objects,
+                                                   const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects) :
     ThreadedElementLoop<ConstElemRange>(problem, sys),
-    _soln(in_soln),
-    _user_objects(user_objects),
-    _group(group)
+    _soln(*sys.currentSolution()),
+    _elemental_user_objects(elemental_user_objects),
+    _side_user_objects(side_user_objects),
+    _internal_side_user_objects(internal_side_user_objects)
 {
 }
 
@@ -35,8 +40,9 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem, SystemBa
 ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split) :
     ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
     _soln(x._soln),
-    _user_objects(x._user_objects),
-    _group(x._group)
+    _elemental_user_objects(x._elemental_user_objects),
+    _side_user_objects(x._side_user_objects),
+    _internal_side_user_objects(x._internal_side_user_objects)
 {
 }
 
@@ -48,7 +54,18 @@ void
 ComputeUserObjectsThread::subdomainChanged()
 {
   std::set<MooseVariable *> needed_moose_vars;
+  _elemental_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
 
+  _side_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
+  _side_user_objects.updateBoundaryVariableDependency(needed_moose_vars, _tid);
+  _side_user_objects.updateVariableDependency(needed_moose_vars, _tid);
+
+  _internal_side_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
+  //_internal_side_user_objects.updateBoundaryVariableDependency(needed_moose_vars);
+  //_internal_side_user_objects.updateVariableDependency(needed_moose_vars);
+
+
+  /*
   // ElementUserObject dependencies
   {
     // Get the vectors of element user object pointers
@@ -93,11 +110,6 @@ ComputeUserObjectsThread::subdomainChanged()
 
   // NodalUserObject dependencies (block restricted)
   {
-    /**
-     * NOTE: NodalUserObject with Moose::ANY_BLOCK_ID should not exist; the default behavior is for the NodalUserObject
-     * to be boundary restricted; see UserObjectWarehouse::addUserObject
-     */
-
     // Get the vectors of element user object pointers
     const std::vector<NodalUserObject *> block = _user_objects[_tid].blockNodalUserObjects(_subdomain, _group);
 
@@ -146,7 +158,7 @@ ComputeUserObjectsThread::subdomainChanged()
         const std::set<MooseVariable *> & mv_deps = (*it)->getMooseVariableDependencies();
         needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
       }
-
+mk
       // Boundary Restricted InternalSideUserObjects
       for (std::vector<NodalUserObject *>::const_iterator it = boundary.begin(); it != boundary.end(); ++it)
       {
@@ -155,7 +167,7 @@ ComputeUserObjectsThread::subdomainChanged()
       }
     }
   }
-
+  */
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
@@ -167,6 +179,39 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
+  if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    const std::vector<MooseSharedPointer<ElementUserObject> > & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
+    for (std::vector<MooseSharedPointer<ElementUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+      (*it)->execute();
+  }
+
+
+  /*
+  if (elem->on_boundary())
+  {
+    std::vector<BoundaryID> ids;
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(elem, side, ids);
+
+    std::set<BoundaryID> bnd_ids(ids.begin(), ids.end());
+
+    for (std::set<BoundaryID>::const_iterator bnd_it = bnd_ids.begin(); bnd_it != bnd_ids.end(); ++bnd_it)
+    {
+      if (_elemental_user_objects.hasActiveBoundaryObjects(*bnd_it, _tid))
+      {
+        const std::vector<MooseSharedPointer<ElementUserObject> > & objects = _elemental_user_objects.getActiveBoundaryObjects(*bnd_it, _tid);
+        for (std::vector<MooseSharedPointer<ElementUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+          (*it)->execute();
+      }
+    }
+  }
+  */
+
+
+  _fe_problem.swapBackMaterials(_tid);
+
+  /*
   //Global UserObjects
   for (std::vector<ElementUserObject *>::const_iterator UserObject_it = _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).begin();
        UserObject_it != _user_objects[_tid].elementUserObjects(Moose::ANY_BLOCK_ID, _group).end();
@@ -177,13 +222,46 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
        UserObject_it != _user_objects[_tid].elementUserObjects(_subdomain, _group).end();
        ++UserObject_it)
     (*UserObject_it)->execute();
+  */
 
-  _fe_problem.swapBackMaterials(_tid);
+
 }
 
 void
 ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
 {
+  bool has_side = _side_user_objects.hasActiveBoundaryObjects(bnd_id, _tid);
+  bool has_elemental = _elemental_user_objects.hasActiveBoundaryObjects(bnd_id, _tid);
+
+  if (has_side || has_elemental)
+  {
+    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
+    _fe_problem.reinitMaterialsFace(_subdomain, _tid);
+    _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+    _fe_problem.setCurrentBoundaryID(bnd_id);
+
+    /*
+    if (has_elemental)
+    {
+      const std::vector<MooseSharedPointer<ElementUserObject> > & objects = _elemental_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
+      for (std::vector<MooseSharedPointer<ElementUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+        (*it)->execute();
+    }
+    */
+
+    if (has_side)
+    {
+      const std::vector<MooseSharedPointer<SideUserObject> > & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
+      for (std::vector<MooseSharedPointer<SideUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+        (*it)->execute();
+    }
+
+    _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
+    _fe_problem.swapBackMaterialsFace(_tid);
+  }
+
+
+  /*
   if (_user_objects[_tid].sideUserObjects(bnd_id).size() > 0)
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
@@ -200,12 +278,67 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
     _fe_problem.swapBackMaterialsFace(_tid);
   }
+  */
 }
 
 void
 ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
 {
+  //
+  //const std::vector<MooseSharedPointer<InternalSideUserObject> > & global = _internal_side_user_objects.getActiveBlockObjects(Moose::ANY_BLOCK_ID, _tid);
+  //const std::vector<MooseSharedPointer<InternalSideUserObject> > & blocks = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
 
+  bool has_global = _internal_side_user_objects.hasActiveBlockObjects(Moose::ANY_BLOCK_ID, _tid);
+  bool has_blocks = _internal_side_user_objects.hasActiveBlockObjects(_subdomain, _tid);
+
+  // Pointer to the neighbor we are currently working on.
+  const Elem * neighbor = elem->neighbor(side);
+
+  // Get the global id of the element and the neighbor
+  const dof_id_type
+    elem_id = elem->id(),
+    neighbor_id = neighbor->id();
+
+  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+  {
+
+    if (has_global || has_blocks)
+    {
+      _fe_problem.prepareFace(elem, _tid);
+      _fe_problem.reinitNeighbor(elem, side, _tid);
+      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+      // Global
+      if (has_global)
+      {
+        //   const std::vector<MooseSharedPointer<InternalSideUserObject> > & objects = _internal_side_user_objects.getActiveBlockObjects(Moose::ANY_BLOCK_ID, _tid);
+        //for (std::vector<MooseSharedPointer<InternalSideUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+        //  (*it)->execute();
+      }
+
+      if (has_blocks)
+      {
+        const std::vector<MooseSharedPointer<InternalSideUserObject> > & objects = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
+        for (std::vector<MooseSharedPointer<InternalSideUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+        {
+          if ( !(*it)->blockRestricted())
+            (*it)->execute();
+
+          else if ( (*it)->hasBlocks(neighbor->subdomain_id()) )
+            (*it)->execute();
+        }
+      }
+
+      _fe_problem.swapBackMaterialsFace(_tid);
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
+
+    }
+  }
+
+
+
+  /*
   // Get vectors of object pointers
   const std::vector<InternalSideUserObject *> & block_uo = _user_objects[_tid].internalSideUserObjects(_subdomain, _group);
   const std::vector<InternalSideUserObject *> & global_uo = _user_objects[_tid].internalSideUserObjects(Moose::ANY_BLOCK_ID, _group);
@@ -245,6 +378,8 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
       _fe_problem.swapBackMaterialsNeighbor(_tid);
     }
   }
+  */
+
 }
 
 void

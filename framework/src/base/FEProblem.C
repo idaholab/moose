@@ -374,6 +374,16 @@ void FEProblem::initialSetup()
     _nodal_user_objects.updateDependObjects(depend_objects, tid);
     _nodal_user_objects.initialSetup(tid);
 
+    _elemental_user_objects.initialSetup(tid);
+    _elemental_user_objects.updateDependObjects(depend_objects, tid);
+
+    _side_user_objects.initialSetup(tid);
+    _side_user_objects.updateDependObjects(depend_objects, tid);
+
+    _internal_side_user_objects.initialSetup(tid);
+    _internal_side_user_objects.updateDependObjects(depend_objects, tid);
+
+/*
     _user_objects(EXEC_LINEAR)[tid].updateDependObjects(_aux.getDependObjects(EXEC_LINEAR));
     _user_objects(EXEC_NONLINEAR)[tid].updateDependObjects(_aux.getDependObjects(EXEC_NONLINEAR));
     _user_objects(EXEC_TIMESTEP_END)[tid].updateDependObjects(_aux.getDependObjects(EXEC_TIMESTEP_END));
@@ -387,6 +397,7 @@ void FEProblem::initialSetup()
     _user_objects(EXEC_TIMESTEP_BEGIN)[tid].initialSetup();
     _user_objects(EXEC_INITIAL)[tid].initialSetup();
     _user_objects(EXEC_CUSTOM)[tid].initialSetup();
+*/
   }
 
   // Call the initialSetup methods for functions
@@ -645,9 +656,12 @@ void FEProblem::timestepSetup()
     _markers.timestepSetup(tid);
 
     // Timestep setup of all UserObjects
-    for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
-      _user_objects(Moose::exec_types[j])[tid].timestepSetup();
+    //for (unsigned int j = 0; j < Moose::exec_types.size(); j++)
+    //  _user_objects(Moose::exec_types[j])[tid].timestepSetup();
     _nodal_user_objects.timestepSetup(tid);
+    _elemental_user_objects.timestepSetup(tid);
+    _side_user_objects.timestepSetup(tid);
+    _internal_side_user_objects.timestepSetup(tid);
   }
   _general_user_objects.timestepSetup();
 
@@ -1835,11 +1849,13 @@ FEProblem::initPostprocessorData(const std::string & name)
   _pps_data.init(name);
 }
 
+/*
 ExecStore<UserObjectWarehouse> &
-FEProblem::getUserObjectWarehouse()
+FEProblem::getUser58ObjectWarehouse()
 {
   return _user_objects;
 }
+*/
 
 /**
  * Small helper function used by addVectorPostprocessor to try to get a VectorPostprocessor pointer from a MooseObject
@@ -1918,15 +1934,16 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
     MooseSharedPointer<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(user_object);
     MooseSharedPointer<SideUserObject> suo = MooseSharedNamespace::dynamic_pointer_cast<SideUserObject>(user_object);
+    MooseSharedPointer<InternalSideUserObject> isuo = MooseSharedNamespace::dynamic_pointer_cast<InternalSideUserObject>(user_object);
     MooseSharedPointer<NodalUserObject> nuo = MooseSharedNamespace::dynamic_pointer_cast<NodalUserObject>(user_object);
     MooseSharedPointer<GeneralUserObject> guo = MooseSharedNamespace::dynamic_pointer_cast<GeneralUserObject>(user_object);
 
 
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     {
-      if (euo.get() != NULL || nuo.get() != NULL)
+      if (euo || nuo)
         _reinit_displaced_elem = true;
-      else if (suo.get() != NULL)
+      else if (suo)
         _reinit_displaced_face = true;
     }
 
@@ -1934,12 +1951,22 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
     if (guo)
     {
       _general_user_objects.addObject(guo);
-      break;
+      break; // not threaded
     }
 
     else if (nuo)
       _nodal_user_objects.addObject(nuo, tid);
 
+    else if (suo)
+      _side_user_objects.addObject(suo, tid);
+
+    else if (isuo)
+      _internal_side_user_objects.addObject(isuo, tid);
+
+    else if (euo)
+      _elemental_user_objects.addObject(euo, tid);
+
+    /*
     else
     {
       const std::vector<ExecFlagType> & exec_flags = user_object->execFlags();
@@ -1947,15 +1974,18 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
         _user_objects(exec_flags[i])[tid].addUserObject(user_object);
 
     }
+    */
   }
 }
 
 const UserObject &
 FEProblem::getUserObjectBase(const std::string & name)
 {
+  /*
   for (unsigned int i = 0; i < Moose::exec_types.size(); ++i)
     if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
       return *_user_objects(Moose::exec_types[i])[0].getUserObjectByName(name);
+  */
 
   if (_all_user_objects.hasActiveObject(name))
     return *(_all_user_objects.getActiveObject(name).get());
@@ -1967,10 +1997,13 @@ FEProblem::getUserObjectBase(const std::string & name)
 bool
 FEProblem::hasUserObject(const std::string & name)
 {
+  /*
   for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
     if (_user_objects(Moose::exec_types[i])[0].hasUserObject(name))
       return true;
   return false;
+  */
+  return _all_user_objects.hasActiveObject(name);
 }
 
 bool
@@ -2156,37 +2189,48 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
   {
   case EXEC_LINEAR:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _user_objects(type)[tid].residualSetup();
+    {
+      //_user_objects(type)[tid].residualSetup();
+      _nodal_user_objects[group][type].residualSetup(tid);
+      _elemental_user_objects[group][type].residualSetup(tid);
+      _side_user_objects[group][type].residualSetup(tid);
+      _internal_side_user_objects[group][type].residualSetup(tid);
+    }
+
     _general_user_objects[group][type].residualSetup();
-    _nodal_user_objects[group][type].residualSetup();
     break;
 
   case EXEC_NONLINEAR:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-      _user_objects(type)[tid].jacobianSetup();
+    {
+      //_user_objects(type)[tid].jacobianSetup();
+      _nodal_user_objects[group][type].jacobianSetup(tid);
+      _elemental_user_objects[group][type].jacobianSetup(tid);
+      _side_user_objects[group][type].jacobianSetup(tid);
+      _internal_side_user_objects[group][type].jacobianSetup(tid);
+
+    }
     _general_user_objects[group][type].jacobianSetup();
-    _nodal_user_objects[group][type].jacobianSetup();
+
     break;
 
   default:
     break;
   }
 
-
+  /*
   std::vector<UserObjectWarehouse> & pps = _user_objects(type);
   if (pps[0].blockIds().size() || pps[0].boundaryIds().size() || pps[0].nodesetIds().size() || pps[0].blockNodalIds().size() || pps[0].internalSideUserObjects(group).size())
   {
     if (!pps[0].nodesetIds().size())
     {
+      std::cout << "computeUserObjects::serializeSolution() " << group << " " << type << std::endl;
+
       serializeSolution();
 
       if (_displaced_problem != NULL)
         _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-      /**
-       * Legacy behavior requires that we compute the RESIDUAL set of AuxKernels when
-       * we compute user objects.
-       */
       if (_use_legacy_uo_aux_computation)
         _aux.compute(EXEC_LINEAR);
     }
@@ -2249,8 +2293,8 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
     // compute
     if (have_elemental_uo || have_side_uo || have_internal_uo)
     {
-      ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps, group);
-      Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+//      ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), *getNonlinearSystem().currentSolution(), pps, group);
+//      Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
 
       // Store side user_objects values
       already_gathered.clear();
@@ -2350,37 +2394,49 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const UserObjectWarehou
       }
     }
   }
+*/
+
+  // Get convenience reference to active warehouse
+  const MooseObjectWarehouse<ElementUserObject> & elemental = _elemental_user_objects[group][type];
+  const MooseObjectWarehouse<SideUserObject> & side = _side_user_objects[group][type];
+  const MooseObjectWarehouse<InternalSideUserObject> & internal_side = _internal_side_user_objects[group][type];
+  const MooseObjectWarehouse<NodalUserObject> & nodal = _nodal_user_objects[group][type];
+
+  // If any UserObjects exist, serialize the solution vector
+  if (elemental.hasActiveObjects() || side.hasActiveObjects() || internal_side.hasActiveObjects() || nodal.hasActiveObjects())
+  {
+    serializeSolution();
+    if (_displaced_problem != NULL)
+      _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+  }
+
+  // Initialize (ordered as in issue #5972)
+  initializeUserObjects<ElementUserObject>(elemental);
+  initializeUserObjects<SideUserObject>(side);
+  initializeUserObjects<InternalSideUserObject>(internal_side);
+
+  // Execute Elemental/Side/InternalSideUserObjects
+  if (elemental.hasActiveObjects() || side.hasActiveObjects() || internal_side.hasActiveObjects())
+  {
+    ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), elemental, side, internal_side);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+  }
+
+  finalizeUserObjects<SideUserObject>(side);
+  finalizeUserObjects<InternalSideUserObject>(internal_side);
+  finalizeUserObjects<ElementUserObject>(elemental);
+
+  initializeUserObjects<NodalUserObject>(nodal);
 
   // Execute NodalUserObjects
-  const MooseObjectWarehouse<NodalUserObject> & warehouse = _nodal_user_objects[group][type];
-  if (warehouse.hasActiveObjects())
+  if (nodal.hasActiveObjects())
   {
-    // Initialize
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    {
-      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = warehouse.getActiveObjects(tid);
-      for (std::vector<MooseSharedPointer<NodalUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->initialize();
-    }
-
-    // Execute
-    ComputeNodalUserObjectsThread cnppt(*this, warehouse);
+    ComputeNodalUserObjectsThread cnppt(*this, nodal);
     Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
-
-    // threadJoin / finalize
-    const std::vector<MooseSharedPointer<NodalUserObject> > & objects = warehouse.getActiveObjects(0);
-    for (unsigned int i = 0; i < objects.size(); ++i)
-    {
-      for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-        objects[i]->threadJoin(*(warehouse.getActiveObjects(tid)[i]));
-
-      objects[i]->finalize();
-
-      MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(objects[i]);
-      if (pp)
-        _pps_data.storeValue(pp->PPName(), pp->getValue());
-    }
   }
+
+  // Finalize (ordered as in issue #5972)
+  finalizeUserObjects<NodalUserObject>(nodal);
 
   // Execute GeneralUserObjects
   if (_general_user_objects[group][type].hasActiveObjects())
@@ -3804,6 +3860,8 @@ FEProblem::checkUserObjects()
   // gather names of all user_objects that were defined in the input file
   // and the blocks that they are defined on
   std::set<std::string> names;
+
+  /*
   for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
     for (std::vector<UserObject *>::const_iterator it = _user_objects(Moose::exec_types[i])[0].all().begin(); it != _user_objects(Moose::exec_types[i])[0].all().end(); ++it)
@@ -3811,6 +3869,7 @@ FEProblem::checkUserObjects()
 
     user_objects_blocks.insert(_user_objects(Moose::exec_types[i])[0].blockIds().begin(), _user_objects(Moose::exec_types[i])[0].blockIds().end());
   }
+  */
 
   const std::vector<MooseSharedPointer<UserObject> > & objects = _all_user_objects.getActiveObjects();
   for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
@@ -4082,8 +4141,12 @@ FEProblem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 
     if (_nl.needMaterialOnSide(bnd_id, tid) || _aux.needMaterialOnSide(bnd_id))
       _bnd_mat_side_cache[tid][bnd_id] = true;
-    else
-    {
+
+    else if (_side_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
+      _bnd_mat_side_cache[tid][bnd_id] = true;
+
+
+      /*
       for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
         if (!_user_objects(Moose::exec_types[i])[tid].sideUserObjects(bnd_id).empty() ||
             !_user_objects(Moose::exec_types[i])[tid].sideUserObjects(Moose::ANY_BOUNDARY_ID).empty())
@@ -4091,7 +4154,8 @@ FEProblem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
           _bnd_mat_side_cache[tid][bnd_id] = true;
           break;
         }
-    }
+      */
+
   }
 
   return _bnd_mat_side_cache[tid][bnd_id];
@@ -4106,8 +4170,10 @@ FEProblem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
 
     if (_nl.needMaterialOnSide(subdomain_id, tid))
       _block_mat_side_cache[tid][subdomain_id] = true;
-    else
-    {
+    else if (_internal_side_user_objects.hasActiveBlockObjects(subdomain_id, tid))
+      _block_mat_side_cache[tid][subdomain_id] = true;
+
+      /*
       for (unsigned int i=0; i < Moose::exec_types.size(); ++i)
         if (!_user_objects(Moose::exec_types[i])[tid].internalSideUserObjects(subdomain_id).empty() ||
             !_user_objects(Moose::exec_types[i])[tid].internalSideUserObjects(Moose::ANY_BLOCK_ID).empty())
@@ -4115,7 +4181,8 @@ FEProblem::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
           _block_mat_side_cache[tid][subdomain_id] = true;
           break;
         }
-    }
+      */
+
   }
 
   return _block_mat_side_cache[tid][subdomain_id];

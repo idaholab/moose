@@ -488,15 +488,17 @@ public:
   template <class T>
   const T & getUserObject(const std::string & name, unsigned int tid = 0)
   {
+    /*
     for (unsigned int i = 0; i < Moose::exec_types.size(); ++i)
       if (_user_objects(Moose::exec_types[i])[tid].hasUserObject(name))
       {
         UserObject * user_object = _user_objects(Moose::exec_types[i])[tid].getUserObjectByName(name);
         return dynamic_cast<const T &>(*user_object);
       }
+    */
 
-    if (_all_user_objects.hasActiveObject(name))
-      return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name))).get();
+    if (_all_user_objects.hasActiveObject(name, tid))
+      return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid))).get();
 
 
     mooseError("Unable to find user object with name '" + name + "'");
@@ -544,7 +546,7 @@ public:
   /**
    * Get a reference to the UserObjectWarehouse ExecStore object
    */
-  ExecStore<UserObjectWarehouse> & getUserObjectWarehouse();
+//  ExecStore<UserObjectWarehouse> & getUserObjectWarehouse();
 
   /**
    * Returns whether or not the current simulation has any multiapps
@@ -954,6 +956,8 @@ public:
    * Call compute methods on UserObjects.
    */
   virtual void computeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group);
+  template<typename T> void initializeUserObjects(const MooseObjectWarehouse<T> & warehouse);
+  template<typename T> void finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse);
 
   /**
    * Call compute methods on AuxKernels
@@ -1071,12 +1075,15 @@ protected:
   VectorPostprocessorData _vpps_data;
 
   // user objects
-  ExecStore<UserObjectWarehouse> _user_objects;
+//  ExecStore<UserObjectWarehouse> _user_objects;
 public:
   MooseObjectWarehouseBase<UserObject> _all_user_objects;
 protected:
   UserObjectWarehouseBase<GeneralUserObject> _general_user_objects;
   UserObjectWarehouseBase<NodalUserObject> _nodal_user_objects;
+  UserObjectWarehouseBase<ElementUserObject> _elemental_user_objects;
+  UserObjectWarehouseBase<SideUserObject> _side_user_objects;
+  UserObjectWarehouseBase<InternalSideUserObject> _internal_side_user_objects;
 
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;
@@ -1220,5 +1227,44 @@ FEProblem::allowOutput(bool state)
 {
   _app.getOutputWarehouse().allowOutput<T>(state);
 }
+
+
+template<typename T>
+void
+FEProblem::initializeUserObjects(const MooseObjectWarehouse<T> & warehouse)
+{
+  if (warehouse.hasActiveObjects())
+  {
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    {
+      const std::vector<MooseSharedPointer<T> > & objects = warehouse.getActiveObjects(tid);
+      for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+        (*it)->initialize();
+    }
+  }
+}
+
+
+template<typename T>
+void
+FEProblem::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
+{
+  if (warehouse.hasActiveObjects())
+  {
+    const std::vector<MooseSharedPointer<T> > & objects = warehouse.getActiveObjects(0);
+    for (unsigned int i = 0; i < objects.size(); ++i)
+    {
+      for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+        objects[i]->threadJoin(*(warehouse.getActiveObjects(tid)[i]));
+
+      objects[i]->finalize();
+
+      MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(objects[i]);
+      if (pp)
+        _pps_data.storeValue(pp->PPName(), pp->getValue());
+    }
+  }
+}
+
 
 #endif /* FEPROBLEM_H */

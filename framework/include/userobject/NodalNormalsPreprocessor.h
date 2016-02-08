@@ -46,6 +46,10 @@ public:
   virtual void execute();
   virtual void threadJoin(const UserObject & uo);
 
+
+  virtual bool boundaryRestricted() { return false; }
+
+
 protected:
   AuxiliarySystem & _aux;
   FEType _fe_type;
