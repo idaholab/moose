@@ -854,6 +854,7 @@ SolidModel::initialSetup()
   createElasticityTensor();
 
   // Load in the volumetric models and constitutive models
+  bool set_constitutive_active = false;
   for (unsigned i(0); i < _block_id.size(); ++i)
   {
 
@@ -907,15 +908,17 @@ SolidModel::initialSetup()
         if (cm && cm->name() ==constitutive_model)
         {
           _constitutive_model[_block_id[i]] = cm;
-          _constitutive_active = true;
+          set_constitutive_active = true;
           break;
         }
       }
 
-      if (!_constitutive_active)
+      if (!set_constitutive_active)
         mooseError("Unable to find constitutive model " + constitutive_model);
     }
   }
+  if (set_constitutive_active)
+    _constitutive_active = true;
 
   if (_compute_JIntegral && _alpha_function)
   {
