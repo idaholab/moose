@@ -107,7 +107,7 @@ public:
   void zero();
 
   /// Print the rank four tensor
-  void print() const;
+  void print(std::ostream & stm = Moose::out) const;
 
   /// copies values from a into this tensor
   RankFourTensor & operator= (const RankFourTensor & a);

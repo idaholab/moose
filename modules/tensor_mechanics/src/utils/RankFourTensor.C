@@ -467,20 +467,20 @@ RankFourTensor::rotate(const RankTwoTensor & R)
 }
 
 void
-RankFourTensor::print() const
+RankFourTensor::print(std::ostream & stm) const
 {
   const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
     {
-      Moose::out << "i = " << i << " j = " << j << '\n';
+      stm << "i = " << i << " j = " << j << '\n';
       for (unsigned int k = 0; k < N; ++k)
       {
         for (unsigned int l = 0; l < N; ++l)
-          Moose::out << std::setw(15) << a(i,j,k,l) << " ";
+          stm << std::setw(15) << a(i,j,k,l) << " ";
 
-        Moose::out << '\n';
+        stm << '\n';
       }
     }
 }

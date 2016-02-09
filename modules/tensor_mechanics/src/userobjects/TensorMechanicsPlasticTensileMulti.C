@@ -300,9 +300,9 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
 
   if (trial == 3)
   {
-    Moose::out << "Trial stress = \n";
-    trial_stress.print();
-    Moose::out << "Internal parameter = " << intnl_old << "\n";
+    Moose::err << "Trial stress = \n";
+    trial_stress.print(Moose::err);
+    Moose::err << "Internal parameter = " << intnl_old << "\n";
     mooseError("TensorMechanicsPlasticTensileMulti: FAILURE!  You probably need to implement a line search\n");
     // failure - must place yield function values at trial stress into yf
     str = tensile_strength(intnl_old);
