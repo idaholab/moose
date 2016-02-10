@@ -578,7 +578,17 @@ void
 Console::meshChanged()
 {
   if (_print_mesh_changed_info)
+  {
     _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false );
+
+    std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
+    if (!output.empty())
+      _console << "Nonlinear System:\n" << output;
+
+    output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
+    if (!output.empty())
+      _console << "Auxiliary System:\n" << output;
+  }
 }
 
 void
