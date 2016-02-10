@@ -165,7 +165,7 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var, std::vector<unsigned int
 void
 PhysicsBasedPreconditioner::init ()
 {
-  Moose::perf_log.push("init()","PhysicsBasedPreconditioner");
+  Moose::perf_log.push("init()", "PhysicsBasedPreconditioner");
 
   // Tell libMesh that this is initialized!
   _is_initialized = true;
@@ -196,7 +196,7 @@ PhysicsBasedPreconditioner::init ()
     preconditioner->init();
   }
 
-  Moose::perf_log.pop("init()","PhysicsBasedPreconditioner");
+  Moose::perf_log.pop("init()", "PhysicsBasedPreconditioner");
 }
 
 void
@@ -236,7 +236,7 @@ PhysicsBasedPreconditioner::setup()
 void
 PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector<Number> & y)
 {
-  Moose::perf_log.push("apply()","PhysicsBasedPreconditioner");
+  Moose::perf_log.push("apply()", "PhysicsBasedPreconditioner");
 
   const unsigned int num_systems = _systems.size();
 
@@ -297,11 +297,10 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 
   y.close();
 
-  Moose::perf_log.pop("apply()","PhysicsBasedPreconditioner");
+  Moose::perf_log.pop("apply()", "PhysicsBasedPreconditioner");
 }
 
 void
 PhysicsBasedPreconditioner::clear ()
 {
 }
-

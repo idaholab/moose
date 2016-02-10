@@ -189,9 +189,7 @@ Transient::init()
   if (_app.isRestarting())
     _time_old = _time;
 
-  Moose::setup_perf_log.push("Output Initial Condition","Setup");
   _problem.outputStep(EXEC_INITIAL);
-  Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 
   // If this is the first step
   if (_t_step == 0)

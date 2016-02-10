@@ -156,8 +156,6 @@ IntegratedBC::computeJacobian()
 void
 IntegratedBC::computeJacobianBlock(unsigned int jvar)
 {
-//  Moose::perf_log.push("computeJacobianBlock()","IntegratedBC");
-
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   for (_qp=0; _qp<_qrule->n_points(); _qp++)
@@ -169,8 +167,6 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
         else
           ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(jvar);
       }
-
-//  Moose::perf_log.pop("computeJacobianBlock()","IntegratedBC");
 }
 
 void

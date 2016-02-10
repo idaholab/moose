@@ -512,9 +512,15 @@ MooseApp::legacyUoInitializationDefault()
 void
 MooseApp::run()
 {
+  Moose::perf_log.push("Full Runtime", "Application");
+
+  Moose::perf_log.push("Application Setup", "Setup");
   setupOptions();
   runInputFile();
+  Moose::perf_log.pop("Application Setup", "Setup");
+
   executeExecutioner();
+  Moose::perf_log.pop("Full Runtime", "Application");
 }
 
 void

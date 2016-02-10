@@ -304,6 +304,8 @@ void FEProblem::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 
 void FEProblem::initialSetup()
 {
+  Moose::perf_log.push("initialSetup()", "Setup");
+
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
 
@@ -329,9 +331,9 @@ void FEProblem::initialSetup()
   // Build Refinement and Coarsening maps for stateful material projections if necessary
   if (_adaptivity.isOn() && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
-    Moose::setup_perf_log.push("mesh.buildRefinementAndCoarseningMaps()", "Setup");
+    Moose::perf_log.push("mesh.buildRefinementAndCoarseningMaps()", "Setup");
     _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
-    Moose::setup_perf_log.pop("mesh.buildRefinementAndCoarseningMaps()", "Setup");
+    Moose::perf_log.pop("mesh.buildRefinementAndCoarseningMaps()", "Setup");
   }
 
   if (!_app.isRecovering())
@@ -346,9 +348,9 @@ void FEProblem::initialSetup()
       if (!_app.isUltimateMaster())
         mooseError("Doing extra refinements when restarting is NOT supported for sub-apps of a MultiApp");
 
-      Moose::setup_perf_log.push("Uniformly Refine Mesh","Setup");
+      Moose::perf_log.push("Uniformly Refine Mesh", "Setup");
       adaptivity().uniformRefineWithProjection();
-      Moose::setup_perf_log.pop("Uniformly Refine Mesh","Setup");
+      Moose::perf_log.pop("Uniformly Refine Mesh", "Setup");
     }
   }
 
@@ -406,7 +408,7 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    Moose::setup_perf_log.push("initial adaptivity", "Setup");
+    Moose::perf_log.push("initial adaptivity", "Setup");
     unsigned int n = adaptivity().getInitialSteps();
 
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
@@ -423,7 +425,7 @@ void FEProblem::initialSetup()
       //reproject the initial condition
       projectSolution();
     }
-    Moose::setup_perf_log.pop("initial adaptivity","Setup");
+    Moose::perf_log.pop("initial adaptivity", "Setup");
   }
 
 #endif //LIBMESH_ENABLE_AMR
@@ -431,9 +433,7 @@ void FEProblem::initialSetup()
   if (!_app.isRecovering() && !_app.isRestarting())
   {
     // During initial setup the solution is copied to solution_old and solution_older
-    Moose::setup_perf_log.push("copySolutionsBackwards()","Setup");
     copySolutionsBackwards();
-    Moose::setup_perf_log.pop("copySolutionsBackwards()","Setup");
   }
 
   // Materials
@@ -470,29 +470,29 @@ void FEProblem::initialSetup()
 
   _nl.setSolution(*(_nl.sys().current_local_solution.get()));
 
-  Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
+  Moose::perf_log.push("Initial updateGeomSearch()", "Setup");
   // Update the nearest node searches (has to be called after the problem is all set up)
   // We do this here because this sets up the Element's DoFs to ghost
   updateGeomSearch(GeometricSearchData::NEAREST_NODE);
-  Moose::setup_perf_log.pop("Initial updateGeomSearch()","Setup");
+  Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
-  Moose::setup_perf_log.push("Initial updateActiveSemiLocalNodeRange()","Setup");
+  Moose::perf_log.push("Initial updateActiveSemiLocalNodeRange()", "Setup");
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if (_displaced_mesh)
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
-  Moose::setup_perf_log.pop("Initial updateActiveSemiLocalNodeRange()","Setup");
+  Moose::perf_log.pop("Initial updateActiveSemiLocalNodeRange()", "Setup");
 
-  Moose::setup_perf_log.push("reinit() after updateGeomSearch()","Setup");
+  Moose::perf_log.push("reinit() after updateGeomSearch()", "Setup");
   // Possibly reinit one more time to get ghosting correct
   reinitBecauseOfGhostingOrNewGeomObjects();
-  Moose::setup_perf_log.pop("reinit() after updateGeomSearch()","Setup");
+  Moose::perf_log.pop("reinit() after updateGeomSearch()", "Setup");
 
   if (_displaced_mesh)
     _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
-  Moose::setup_perf_log.push("Initial updateGeomSearch()","Setup");
+  Moose::perf_log.push("Initial updateGeomSearch()", "Setup");
   updateGeomSearch(); // Call all of the rest of the geometric searches
-  Moose::setup_perf_log.pop("Initial updateGeomSearch()","Setup");
+  Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
   // Random interface objects
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
@@ -536,25 +536,27 @@ void FEProblem::initialSetup()
 
   if (!_app.isRecovering())
   {
-    Moose::setup_perf_log.push("Initial execTransfers()","Setup");
+    Moose::perf_log.push("execTransfers()", "Setup");
     execTransfers(EXEC_INITIAL);
-    Moose::setup_perf_log.pop("Initial execTransfers()","Setup");
+    Moose::perf_log.pop("execTransfers()", "Setup");
 
-    Moose::setup_perf_log.push("Initial execMultiApps()","Setup");
+    Moose::perf_log.push("execMultiApps()", "Setup");
     //TODO: we did not check the convergence of the multiapps on initial
     execMultiApps(EXEC_INITIAL);
-    Moose::setup_perf_log.pop("Initial execMultiApps()","Setup");
+    Moose::perf_log.pop("execMultiApps()", "Setup");
   }
 
   // Yak is currently relying on doing this after initial Transfers
   if (!_app.isRecovering())
   {
-    Moose::setup_perf_log.push("Initial computeUserObjects()","Setup");
+    Moose::setup_perf_log.push("computeUserObjects()", "Setup");
 
     //TODO: user object evaluation could fail.
     computeUserObjects(EXEC_INITIAL, UserObjectWarehouse::PRE_AUX);
 
+    Moose::setup_perf_log.push("computeAux()", "Setup");
     _aux.compute(EXEC_INITIAL);
+    Moose::setup_perf_log.pop("computeAux()", "Setup");
 
     if (_use_legacy_uo_initialization)
     {
@@ -570,7 +572,7 @@ void FEProblem::initialSetup()
       computeUserObjects(EXEC_TIMESTEP_BEGIN, UserObjectWarehouse::ALL);
       computeUserObjects(EXEC_LINEAR, UserObjectWarehouse::ALL);
     }
-    Moose::setup_perf_log.pop("Initial computeUserObjects()","Setup");
+    Moose::setup_perf_log.pop("computeUserObjects()", "Setup");
   }
 
 
@@ -602,6 +604,8 @@ void FEProblem::initialSetup()
 
   // Writes all calls to _console from initialSetup() methods
   _app.getOutputWarehouse().mooseConsole();
+
+  Moose::perf_log.pop("initialSetup()", "Setup");
 }
 
 void FEProblem::timestepSetup()
@@ -1494,6 +1498,8 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
 void
 FEProblem::projectSolution()
 {
+  Moose::perf_log.push("projectSolution()", "Utility");
+
   Moose::enableFPE();
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -1545,6 +1551,8 @@ FEProblem::projectSolution()
 
   _aux.solution().close();
   _aux.solution().localize(*_aux.sys().current_local_solution, _aux.dofMap().get_send_list());
+
+  Moose::perf_log.pop("projectSolution()", "Utility");
 }
 
 
@@ -2058,24 +2066,24 @@ FEProblem::execute(const ExecFlagType & exec_type)
   _current_execute_on_flag = exec_type;
 
   // Pre-aux UserObjects
-  Moose::perf_log.push("computeUserObjects()", "Setup");
+  Moose::perf_log.push("computeUserObjects()", "Execution");
   computeUserObjects(exec_type, UserObjectWarehouse::PRE_AUX);
-  Moose::perf_log.pop("computeUserObjects()", "Setup");
+  Moose::perf_log.pop("computeUserObjects()", "Execution");
 
   // AuxKernels
-  Moose::perf_log.push("computeAuxiliaryKernels()", "Setup");
+  Moose::perf_log.push("computeAuxiliaryKernels()", "Execution");
   computeAuxiliaryKernels(exec_type);
-  Moose::perf_log.pop("computeAuxiliaryKernels()", "Setup");
+  Moose::perf_log.pop("computeAuxiliaryKernels()", "Execution");
 
   // Post-aux UserObjects
-  Moose::perf_log.push("computeUserObjects()", "Setup");
+  Moose::perf_log.push("computeUserObjects()", "Execution");
   computeUserObjects(exec_type, UserObjectWarehouse::POST_AUX);
-  Moose::perf_log.pop("computeUserObjects()", "Setup");
+  Moose::perf_log.pop("computeUserObjects()", "Execution");
 
   // Controls
-  Moose::perf_log.push("computeControls()", "Setup");
+  Moose::perf_log.push("computeControls()", "Execution");
   executeControls(exec_type);
-  Moose::perf_log.pop("computeControls()", "Setup");
+  Moose::perf_log.pop("computeControls()", "Execution");
 
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
@@ -2863,10 +2871,8 @@ FEProblem::createQRules(QuadratureType type, Order order, Order volume_order, Or
   if (order == INVALID_ORDER)
   {
     // automatically determine the integration order
-    Moose::setup_perf_log.push("getMinQuadratureOrder()","Setup");
     order = _nl.getMinQuadratureOrder();
     if (order<_aux.getMinQuadratureOrder()) order = _aux.getMinQuadratureOrder();
-    Moose::setup_perf_log.pop("getMinQuadratureOrder()","Setup");
   }
 
   if (volume_order == INVALID_ORDER)
@@ -2883,12 +2889,10 @@ FEProblem::createQRules(QuadratureType type, Order order, Order volume_order, Or
 
   // Find the maximum number of quadrature points
   {
-    Moose::setup_perf_log.push("maxQps()","Setup");
     MaxQpsThread mqt(*this, type, std::max(order, volume_order), face_order);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
     _max_qps = mqt.max();
     _max_shape_funcs = mqt.max_shape_funcs();
-    Moose::setup_perf_log.pop("maxQps()","Setup");
   }
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -2976,23 +2980,21 @@ FEProblem::init()
   if (_solve && n_vars == 0)
     mooseError("No variables specified in the FEProblem '" << name() << "'.");
 
-  Moose::setup_perf_log.push("eq.init()","ghostGhostedBoundaries");
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
-  Moose::setup_perf_log.pop("eq.init()","ghostGhostedBoundaries");
 
-  Moose::setup_perf_log.push("eq.init()","Setup");
+  Moose::perf_log.push("eq.init()", "Setup");
   _eq.init();
-  Moose::setup_perf_log.pop("eq.init()","Setup");
+  Moose::perf_log.pop("eq.init()", "Setup");
 
-  Moose::setup_perf_log.push("FEProblem::init::meshChanged()","Setup");
+  Moose::perf_log.push("FEProblem::init::meshChanged()", "Setup");
   _mesh.meshChanged();
   if (_displaced_problem)
     _displaced_mesh->meshChanged();
-  Moose::setup_perf_log.pop("FEProblem::init::meshChanged()","Setup");
+  Moose::perf_log.pop("FEProblem::init::meshChanged()", "Setup");
 
-  Moose::setup_perf_log.push("NonlinearSystem::update()","Setup");
+  Moose::perf_log.push("NonlinearSystem::update()", "Setup");
   _nl.update();
-  Moose::setup_perf_log.pop("NonlinearSystem::update()","Setup");
+  Moose::perf_log.pop("NonlinearSystem::update()", "Setup");
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _assembly[tid]->init();
@@ -3010,6 +3012,8 @@ FEProblem::init()
 void
 FEProblem::solve()
 {
+  Moose::perf_log.push("solve()", "Execution");
+
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
 #endif
@@ -3019,14 +3023,10 @@ FEProblem::solve()
   // Setup the output system for printing linear/nonlinear iteration information
   initPetscOutput();
 
-  Moose::perf_log.push("solve()","Solve");
-
   possiblyRebuildGeomSearchPatches();
 
   if (_solve)
     _nl.solve();
-
-  Moose::perf_log.pop("solve()","Solve");
 
   if (_solve)
     _nl.update();
@@ -3034,6 +3034,8 @@ FEProblem::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
+
+  Moose::perf_log.pop("solve()", "Execution");
 }
 
 
@@ -3467,7 +3469,7 @@ FEProblem::computePostCheck(NonlinearImplicitSystem & sys,
   // 3.) Recreate the code in PetscSupport::dampedCheck() to actually update
   //     the solution vector based on the damping, and set the "changed" flags
   //     appropriately.
-  Moose::perf_log.push("computePostCheck()","Solve");
+  Moose::perf_log.push("computePostCheck()", "Execution");
 
   // MOOSE's FEProblem doesn't update the solution during the
   // postcheck, but FEProblem-derived classes (see e.g.
@@ -3520,13 +3522,13 @@ FEProblem::computePostCheck(NonlinearImplicitSystem & sys,
   // MOOSE doesn't change the search_direction
   changed_search_direction = false;
 
-  Moose::perf_log.pop("computePostCheck()","Solve");
+  Moose::perf_log.pop("computePostCheck()", "Execution");
 }
 
 Real
 FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector<Number>& update)
 {
-  Moose::perf_log.push("compute_dampers()","Solve");
+  Moose::perf_log.push("compute_dampers()", "Execution");
 
   // Default to no damping
   Real damping = 1.0;
@@ -3548,7 +3550,7 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
     _nl.setSolution(*_saved_current_solution);
   }
 
-  Moose::perf_log.pop("compute_dampers()","Solve");
+  Moose::perf_log.pop("compute_dampers()", "Execution");
 
   return damping;
 }

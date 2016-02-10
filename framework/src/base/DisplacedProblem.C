@@ -104,13 +104,13 @@ DisplacedProblem::init()
   _displaced_nl.init();
   _displaced_aux.init();
 
-  Moose::setup_perf_log.push("DisplacedProblem::init::eq.init()","Setup");
+  Moose::perf_log.push("DisplacedProblem::init::eq.init()", "Setup");
   _eq.init();
-  Moose::setup_perf_log.pop("DisplacedProblem::init::eq.init()","Setup");
+  Moose::perf_log.pop("DisplacedProblem::init::eq.init()", "Setup");
 
-  Moose::setup_perf_log.push("DisplacedProblem::init::meshChanged()","Setup");
+  Moose::perf_log.push("DisplacedProblem::init::meshChanged()", "Setup");
   _mesh.meshChanged();
-  Moose::setup_perf_log.pop("DisplacedProblem::init::meshChanged()","Setup");
+  Moose::perf_log.pop("DisplacedProblem::init::meshChanged()", "Setup");
 }
 
 void
@@ -128,7 +128,7 @@ DisplacedProblem::syncSolutions(const NumericVector<Number> & soln, const Numeri
 void
 DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
 {
-  Moose::perf_log.push("updateDisplacedMesh()","Solve");
+  Moose::perf_log.push("updateDisplacedMesh()", "Execution");
 
   unsigned int n_threads = libMesh::n_threads();
 
@@ -150,7 +150,7 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln, const NumericVe
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);
 
-  Moose::perf_log.pop("updateDisplacedMesh()","Solve");
+  Moose::perf_log.pop("updateDisplacedMesh()", "Execution");
 }
 
 bool

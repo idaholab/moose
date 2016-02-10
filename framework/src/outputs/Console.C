@@ -52,8 +52,8 @@ InputParameters validParams<Console>()
 
   // Performance Logging
   params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
-  params.addParam<bool>("setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled if ""perf_log"" is false");
-  params.addParam<bool>("setup_log", "Toggles the printing of the 'Setup Performance' log");
+  params.addDeprecatedParam<bool>("setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled if ""perf_log"" is false", "This parameter is being removed due to lack of usage.");
+  params.addDeprecatedParam<bool>("setup_log", "Toggles the printing of the 'Setup Performance' log", "This parameter is being removed due to lack of usage.");
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
   params.addParam<bool>("perf_header", "Print the libMesh performance log header (requires that 'perf_log = true')");
 
@@ -157,6 +157,9 @@ Console::Console(const InputParameters & parameters) :
     _setup_log = true;
   }
 
+  // Deprecate the setup perf log
+  Moose::setup_perf_log.disable_logging();
+
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
   const MultiMooseEnum & common_execute_on = common_action->getParam<MultiMooseEnum>("execute_on");
@@ -168,10 +171,7 @@ Console::Console(const InputParameters & parameters) :
   {
     // Disable performance logging (all log input options must be false)
     if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
-    {
       Moose::perf_log.disable_logging();
-      Moose::setup_perf_log.disable_logging();
-    }
 
     // Disable libMesh log
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
@@ -207,10 +207,6 @@ Console::~Console()
   if (_solve_log)
     write(Moose::perf_log.get_perf_info(), false);
 
-  // Write the setup log (Setup Performance)
-  if (_setup_log)
-    write(Moose::setup_perf_log.get_perf_info(), false);
-
   // Write the libMesh log
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
   if (_libmesh_log)
@@ -228,7 +224,6 @@ Console::~Console()
     /* Disable the logs, without this the logs will be printed
        during the destructors of the logs themselves */
     Moose::perf_log.disable_logging();
-    Moose::setup_perf_log.disable_logging();
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     libMesh::perflog.disable_logging();
 #endif
@@ -260,10 +255,6 @@ Console::initialSetup()
   // Display a message to indicate the application is running (useful for MultiApps)
   if (_problem_ptr->hasMultiApps() || _app.multiAppLevel() > 0)
     write(std::string("\nRunning App: ") + _app.name() + "\n");
-
-  // Output the performance log early
-  if (getParam<bool>("setup_log_early"))
-    write(Moose::setup_perf_log.get_perf_info());
 
   // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc., but only
   // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
