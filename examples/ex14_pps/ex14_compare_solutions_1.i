@@ -48,6 +48,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
   xda = true #XDA writes out the perfect internal state of all variables, allowing SolutionUserObject to read back in higher order solutions and adapted meshes
 []
