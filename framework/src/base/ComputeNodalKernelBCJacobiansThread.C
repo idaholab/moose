@@ -90,7 +90,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
 
         // See if this NodalKernel is coupled to the jvar
         const std::vector<MooseVariable *> & coupled_vars = (*nodal_kernel_it)->getCoupledMooseVars();
-        for (std::vector<MooseVariable *>::iterator var_it; var_it != coupled_vars.end(); ++var_it)
+        for (std::vector<MooseVariable *>::const_iterator var_it = coupled_vars.begin(); var_it != coupled_vars.end(); ++var_it)
         {
           if ( (*var_it)->number() == jvar )
           {
