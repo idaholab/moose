@@ -253,7 +253,7 @@ void NavierStokesMaterial::compute_h_supg(unsigned qp)
   // .) The denominator will be identically zero only if the velocity
   //    is identically zero, in which case we can't divide by it.
   if (denom != 0.0)
-    _hsupg[qp] = 2.* sqrt( U.size_sq() / denom );
+    _hsupg[qp] = 2.* sqrt( U.norm_sq() / denom );
   else
     _hsupg[qp] = 0.;
 
@@ -380,7 +380,7 @@ void NavierStokesMaterial::compute_strong_residuals(unsigned qp)
   RealVectorValue zero(0., 0., 0.);
 
   // Velocity vector magnitude squared
-  Real velmag2 = vel.size_sq();
+  Real velmag2 = vel.norm_sq();
 
   // Debugging: How large are the time derivative parts of the strong residuals?
 //  Moose::out << "drho_dt=" << _drho_dt

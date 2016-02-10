@@ -39,7 +39,7 @@ Real NSStagnationTemperatureBC::computeQpResidual()
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Mach number, squared
-  Real M2 = vel.size_sq() / (_gamma * _R * _temperature[_qp]);
+  Real M2 = vel.norm_sq() / (_gamma * _R * _temperature[_qp]);
 
   // T_0 = T*(1 + 0.5*(gam-1)*M^2)
   Real computed_stagnation_temperature = _temperature[_qp] * (1. + 0.5*(_gamma-1.)*M2);

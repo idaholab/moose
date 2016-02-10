@@ -449,8 +449,8 @@ XFEM::correctCrackExtensionDirection(const Elem * elem,
       edge1_to_tip = (edge_ends[0]*0.95 + edge_ends[1]*0.05) - crack_tip_origin;
       edge2_to_tip = (edge_ends[0]*0.05 + edge_ends[1]*0.95) - crack_tip_origin;
 
-      edge1_to_tip /= pow(edge1_to_tip.size_sq(),0.5);
-      edge2_to_tip /= pow(edge2_to_tip.size_sq(),0.5);
+      edge1_to_tip /= pow(edge1_to_tip.norm_sq(),0.5);
+      edge2_to_tip /= pow(edge2_to_tip.norm_sq(),0.5);
 
       edge1_to_tip_normal(0) = -edge1_to_tip(1);
       edge1_to_tip_normal(1) = edge1_to_tip(0);
@@ -606,7 +606,7 @@ XFEM::markCutEdgesByState(Real time)
           edge_center /= 2.0;
           crack_tip_origin = edge_center;
           crack_tip_direction = elem_center - edge_center;
-          crack_tip_direction /= pow(crack_tip_direction.size_sq(),0.5);
+          crack_tip_direction /= pow(crack_tip_direction.norm_sq(),0.5);
         }
         else
           continue; // skip this elem if specified boundary edge is phantom
@@ -637,7 +637,7 @@ XFEM::markCutEdgesByState(Real time)
         edge_center /= 2.0;
         crack_tip_origin = edge_center;
         crack_tip_direction = elem_center - edge_center;
-        crack_tip_direction /= pow(crack_tip_direction.size_sq(),0.5);
+        crack_tip_direction /= pow(crack_tip_direction.norm_sq(),0.5);
       }
       else
         mooseError ("element " << elem->id() << " flagged for state-based growth, but has no edge intersections");
@@ -680,7 +680,7 @@ XFEM::markCutEdgesByState(Real time)
     }
 
     Point between_two_cuts = (cut_edge_point - crack_tip_origin);
-    between_two_cuts /= pow(between_two_cuts.size_sq(),0.5);
+    between_two_cuts /= pow(between_two_cuts.norm_sq(),0.5);
     Real angle_between_two_cuts = between_two_cuts * crack_tip_direction;
 
     if (angle_between_two_cuts > std::cos(45.0/180.0*3.14159)) //original cut direction is good

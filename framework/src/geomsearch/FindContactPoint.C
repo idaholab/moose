@@ -212,18 +212,18 @@ findContactPoint(PenetrationInfo & p_info,
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
-  p_info._distance = d.size();
+  p_info._distance = d.norm();
 
   if (dim-1 == 2)
   {
     p_info._normal = dxyz_dxi[0].cross(dxyz_deta[0]);
-    p_info._normal /= p_info._normal.size();
+    p_info._normal /= p_info._normal.norm();
   }
   else
   {
     p_info._normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
-    if (std::fabs(p_info._normal.size()) > 1e-15)
-      p_info._normal /= p_info._normal.size();
+    if (std::fabs(p_info._normal.norm()) > 1e-15)
+      p_info._normal /= p_info._normal.norm();
   }
 
   // If the point has not penetrated the face, make the distance negative
@@ -245,7 +245,7 @@ findContactPoint(PenetrationInfo & p_info,
     Point closest_point_on_face(phys_point[0]);
 
     RealGradient off_face = closest_point_on_face - p_info._closest_point;
-    Real tangential_distance = off_face.size();
+    Real tangential_distance = off_face.norm();
     p_info._tangential_distance = tangential_distance;
     if (tangential_distance <= tangential_tolerance)
     {

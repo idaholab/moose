@@ -82,7 +82,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     {
       dof_id_type master_id = _trial_master_nodes[k];
       const Node * cur_node = &_mesh.node(master_id);
-      Real distance = ((*cur_node) - node).size();
+      Real distance = ((*cur_node) - node).norm();
 
       neighbors.push(std::make_pair(master_id, distance));
     }

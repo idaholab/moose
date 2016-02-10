@@ -155,7 +155,7 @@ LineMaterialSamplerBase<T>::execute()
   Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), plb, intersected_elems, segments);
 
   const RealVectorValue line_vec = _end - _start;
-  const Real line_length(line_vec.size());
+  const Real line_length(line_vec.norm());
   const RealVectorValue line_unit_vec = line_vec / line_length;
   std::vector<Real> values(_material_properties.size());
 

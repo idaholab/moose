@@ -83,10 +83,10 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
   if (_n_supplied)
   {
     // normalise the inputted transverse_direction
-    if (_n_input.size() == 0)
+    if (_n_input.norm() == 0)
       mooseError("ComputeMultiPlasticityStress: transverse_direction vector must not have zero length");
     else
-      _n_input /= _n_input.size();
+      _n_input /= _n_input.norm();
   }
 
   if (_num_surfaces == 1)

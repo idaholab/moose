@@ -42,7 +42,7 @@ Real NSSUPGMomentum::computeQpResidual()
     RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
     // Velocity vector magnitude squared
-    Real velmag2 = vel.size_sq();
+    Real velmag2 = vel.norm_sq();
 
     // Velocity vector, dotted with the test function gradient
     Real U_grad_phi = vel*_grad_test[_i][_qp];
@@ -117,7 +117,7 @@ Real NSSUPGMomentum::compute_jacobian(unsigned var)
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Velocity vector magnitude squared
-  Real velmag2 = vel.size_sq();
+  Real velmag2 = vel.norm_sq();
 
   // Shortcuts for shape function gradients at current qp.
   RealVectorValue grad_test_i = _grad_test[_i][_qp];

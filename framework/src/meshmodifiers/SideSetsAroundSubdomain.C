@@ -44,8 +44,8 @@ SideSetsAroundSubdomain::SideSetsAroundSubdomain(const InputParameters & paramet
   if (_using_normal)
   {
     // normalize
-    mooseAssert(_normal.size() >= 1E-5, "Normal is zero");
-    _normal /= _normal.size();
+    mooseAssert(_normal.norm() >= 1E-5, "Normal is zero");
+    _normal /= _normal.norm();
   }
 }
 

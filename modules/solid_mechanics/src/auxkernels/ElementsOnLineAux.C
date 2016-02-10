@@ -39,7 +39,7 @@ ElementsOnLineAux::compute()
   const Point elem_pos(_current_elem->centroid());
 
   const Point line_vec(_line2 - _line1);
-  const Real length(line_vec.size());
+  const Real length(line_vec.norm());
   const Point line_unit_vec(line_vec / length);
 
   const Point line1_to_elem_vec(elem_pos - _line1);
@@ -47,7 +47,7 @@ ElementsOnLineAux::compute()
   const Point proj_vec(proj * line_unit_vec);
   const Point dist_vec(line1_to_elem_vec - proj_vec);
 
-  const Real distance(dist_vec.size());
+  const Real distance(dist_vec.norm());
 
   if (distance < _dist_tol)
   {

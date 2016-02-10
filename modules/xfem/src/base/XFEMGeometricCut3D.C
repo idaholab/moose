@@ -152,7 +152,7 @@ Real
 XFEMGeometricCut3D::getRelativePosition(Point p1, Point p2, Point p)
 {
   // get the relative position of p from p1
-  Real full_len = (p2 - p1).size();
-  Real len_p1_p = (p - p1).size();
+  Real full_len = (p2 - p1).norm();
+  Real len_p1_p = (p - p1).norm();
   return len_p1_p / full_len;
 }

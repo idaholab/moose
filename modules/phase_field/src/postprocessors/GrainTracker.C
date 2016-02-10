@@ -327,7 +327,7 @@ GrainTracker::buildBoundingSpheres()
 
       // The radius is the different between the outer edge of the "bounding box"
       // and the center plus the "hull buffer" value
-      Real radius = (max - center).size() + _hull_buffer;
+      Real radius = (max - center).norm() + _hull_buffer;
 
       unsigned int some_node_id = *(it1->_entity_ids.begin());
       _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));

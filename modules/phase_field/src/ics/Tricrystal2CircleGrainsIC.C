@@ -52,8 +52,8 @@ Tricrystal2CircleGrainsIC::value(const Point & p)
   grain_center_right(2) = _bottom_left(2) + _range(2)/2.0;
 
   Real radius = _range(0)/5.0;
-  Real dist_left = (p - grain_center_left).size();
-  Real dist_right = (p - grain_center_right).size();
+  Real dist_left = (p - grain_center_left).norm();
+  Real dist_right = (p - grain_center_right).norm();
 
   if ((dist_left <= radius && _op_index == 1) || (dist_right <= radius && _op_index == 2) || (dist_left > radius && dist_right > radius && _op_index == 0))
     return 1.0;

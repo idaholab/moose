@@ -38,7 +38,7 @@ TotalFreeEnergy::computeValue()
 
   // Calculate interfacial energy of each variable
   for (unsigned int i = 0; i < _nvars; ++i)
-    total_energy += (*_kappas[i])[_qp] / 2.0 * (*_grad_vars[i])[_qp].size_sq();
+    total_energy += (*_kappas[i])[_qp] / 2.0 * (*_grad_vars[i])[_qp].norm_sq();
 
   return total_energy;
 }

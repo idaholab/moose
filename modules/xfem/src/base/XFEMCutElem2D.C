@@ -140,7 +140,7 @@ XFEMCutElem2D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh
     Point cut_line_p1 = getNodeCoordinates(cut_line_nodes[plane_id][0], displaced_mesh);
     Point cut_line_p2 = getNodeCoordinates(cut_line_nodes[plane_id][1], displaced_mesh);
     Point cut_line = cut_line_p2 - cut_line_p1;
-    Real len = std::sqrt(cut_line.size_sq());
+    Real len = std::sqrt(cut_line.norm_sq());
     cut_line *= (1.0/len);
     normal = Point(cut_line(1), -cut_line(0), 0.0);
   }
@@ -179,7 +179,7 @@ XFEMCutElem2D::getCrackTipOriginAndDirection(unsigned tip_id, Point & origin, Po
   Point cut_line_p1 = getNodeCoordinates(cut_line_nodes[0]);
   Point cut_line_p2 = getNodeCoordinates(cut_line_nodes[1]);
   Point cut_line = cut_line_p2 - cut_line_p1;
-  Real len = std::sqrt(cut_line.size_sq());
+  Real len = std::sqrt(cut_line.norm_sq());
   cut_line *= (1.0/len);
   origin = cut_line_p2;
   direction = Point(cut_line(0), cut_line(1), 0.0);
