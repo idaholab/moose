@@ -12,7 +12,8 @@ InputParameters validParams<TensorMechanicsPlasticJ2>()
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
   params.addRequiredParam<UserObjectName>("yield_strength", "A TensorMechanicsHardening UserObject that defines hardening of the yield strength");
   params.addRangeCheckedParam<unsigned>("max_iterations", 10, "max_iterations>0", "Maximum iterations for custom J2 return map");
-  params.addParam<bool>("use_custom_returnMap", true, "The custom return-map algorithm should only be used for isotropic elasticity");
+  params.addParam<bool>("use_custom_returnMap", true, "Whether to use the custom returnMap algorithm.  Set to true if you are using isotropic elasticity.");
+  params.addParam<bool>("use_custom_cto", true, "Whether to use the custom consistent tangent operator computations.  Set to true if you are using isotropic elasticity.");
   params.addClassDescription("J2 plasticity, associative, with hardening");
 
   return params;
@@ -21,8 +22,9 @@ InputParameters validParams<TensorMechanicsPlasticJ2>()
 TensorMechanicsPlasticJ2::TensorMechanicsPlasticJ2(const InputParameters & parameters) :
     TensorMechanicsPlasticModel(parameters),
     _strength(getUserObject<TensorMechanicsHardeningModel>("yield_strength")),
+    _max_iters(getParam<unsigned>("max_iterations")),
     _use_custom_returnMap(getParam<bool>("use_custom_returnMap")),
-    _max_iters(getParam<unsigned>("max_iterations"))
+    _use_custom_cto(getParam<bool>("use_custom_cto"))
 {
 }
 
@@ -153,9 +155,12 @@ TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, const Re
 }
 
 RankFourTensor
-TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & stress, const Real & intnl,
+TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, const Real & intnl,
                                                     const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
 {
+  if (!_use_custom_cto)
+    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, stress, intnl, E_ijkl, cumulative_pm);
+
   Real mu = E_ijkl(0,1,0,1);
 
   Real h = 3*mu + dyieldStrength(intnl);

@@ -47,3 +47,8 @@ TensorMechanicsHardeningGaussian::derivative(const Real & intnl) const
     return -_rate*x*(_val_0 - _val_res)*std::exp(-0.5*_rate*x*x);
 }
 
+std::string
+TensorMechanicsHardeningGaussian::modelName() const
+{
+  return "Gaussian";
+}

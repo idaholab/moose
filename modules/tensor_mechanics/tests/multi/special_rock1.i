@@ -268,6 +268,7 @@
     yield_function_tolerance = 1.0E+2  # Note larger value
     shift = 1.0E+2                     # Note larger value
     internal_constraint_tolerance = 1.0E-7
+    use_custom_returnMap = false
   [../]
   [./tensile_smooth]
     type = TensorMechanicsPlasticTensile

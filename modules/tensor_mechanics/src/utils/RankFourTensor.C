@@ -25,7 +25,7 @@ void mooseSetToZero<RankFourTensor>(RankFourTensor & v)
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {
-  return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic antisymmetric_isotropic axisymmetric_rz general");
+  return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic antisymmetric_isotropic axisymmetric_rz general principal");
 }
 
 RankFourTensor::RankFourTensor()
@@ -446,20 +446,41 @@ RankFourTensor::rotate(RealTensorValue & R)
 }
 
 void
-RankFourTensor::print() const
+RankFourTensor::rotate(const RankTwoTensor & R)
+{
+  RankFourTensor old = *this;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+        {
+          Real sum = 0.0;
+          for (unsigned int m = 0; m < N; ++m)
+            for (unsigned int n = 0; n < N; ++n)
+              for (unsigned int o = 0; o < N; ++o)
+                for (unsigned int p = 0; p < N; ++p)
+                  sum += R(i,m) * R(j,n) * R(k,o) * R(l,p) * old(m,n,o,p);
+
+          _vals[i][j][k][l] = sum;
+        }
+}
+
+void
+RankFourTensor::print(std::ostream & stm) const
 {
   const RankFourTensor & a = *this;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
     {
-      Moose::out << "i = " << i << " j = " << j << '\n';
+      stm << "i = " << i << " j = " << j << '\n';
       for (unsigned int k = 0; k < N; ++k)
       {
         for (unsigned int l = 0; l < N; ++l)
-          Moose::out << std::setw(15) << a(i,j,k,l) << " ";
+          stm << std::setw(15) << a(i,j,k,l) << " ";
 
-        Moose::out << '\n';
+        stm << '\n';
       }
     }
 }
@@ -553,6 +574,9 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
       break;
     case general:
       fillGeneralFromInputVector(input);
+      break;
+    case principal:
+      fillPrincipalFromInputVector(input);
       break;
     default:
       mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
@@ -769,4 +793,26 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
           ind = i * N*N*N + j * N*N + k * N + l;
           _vals[i][j][k][l] = input[ind];
         }
+}
+
+
+
+
+void
+RankFourTensor::fillPrincipalFromInputVector(const std::vector<Real> & input)
+{
+  if (input.size() != 9)
+    mooseError("To use fillPrincipalFromInputVector, your input must have size 9. Yours has size " << input.size());
+
+  zero();
+
+  _vals[0][0][0][0] = input[0];
+  _vals[0][0][1][1] = input[1];
+  _vals[0][0][2][2] = input[2];
+  _vals[1][1][0][0] = input[3];
+  _vals[1][1][1][1] = input[4];
+  _vals[1][1][2][2] = input[5];
+  _vals[2][2][0][0] = input[6];
+  _vals[2][2][1][1] = input[7];
+  _vals[2][2][2][2] = input[8];
 }

@@ -47,3 +47,8 @@ TensorMechanicsHardeningCutExponential::derivative(const Real & intnl) const
     return -_rate*(_val_0 - _val_res)*std::exp(-_rate*x);
 }
 
+std::string
+TensorMechanicsHardeningCutExponential::modelName() const
+{
+  return "CutExponential";
+}

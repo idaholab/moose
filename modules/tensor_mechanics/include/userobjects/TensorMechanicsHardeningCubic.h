@@ -31,6 +31,8 @@ class TensorMechanicsHardeningCubic : public TensorMechanicsHardeningModel
 
   virtual Real derivative(const Real & intnl) const;
 
+  virtual std::string modelName() const;
+
  private:
 
   /// value is cubic between _val_0 at internal_parameter=_intnl_0, at _val_res at internal_parameter=_intnl_limit
