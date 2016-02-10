@@ -34,7 +34,7 @@ protected:
   const MaterialProperty<Real> & _prop_g;
 
   /// Barrier term height
-  Real _w;
+  const Real _w;
 
   /// Gradient interface free energy coefficients
   std::vector<const MaterialProperty<Real> *> _kappas;

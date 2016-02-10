@@ -16,7 +16,7 @@ InputParameters validParams<KKSGlobalFreeEnergy>()
   params.addParam<MaterialPropertyName>("h_name", "h", "Base name for the switching function h(eta)");
   params.addParam<MaterialPropertyName>("g_name", "g", "Base name for the double well function g(eta)");
   params.addRequiredParam<Real>("w", "Double well height parameter");
-  params.addParam< std::vector<std::string> >("kappa_names", std::vector<std::string>(), "Vector of kappa names corresponding to each variable name in interfacial_vars in the same order. For basic KKS, there is 1 kappa, 1 interfacial_var.");
+  params.addParam< std::vector<MaterialPropertyName> >("kappa_names", std::vector<MaterialPropertyName>(), "Vector of kappa names corresponding to each variable name in interfacial_vars in the same order. For basic KKS, there is 1 kappa, 1 interfacial_var.");
   return params;
 }
 
@@ -41,19 +41,15 @@ KKSGlobalFreeEnergy::KKSGlobalFreeEnergy(const InputParameters & parameters) :
 Real
 KKSGlobalFreeEnergy::computeValue()
 {
-  Real h = _prop_h[_qp];
+  const Real h = _prop_h[_qp];
 
   // Include bulk energy and additional contributions
   Real total_energy = _prop_fa[_qp] * h + _prop_fb[_qp] * (1.0 - h)
                       + _w * _prop_g[_qp] + _additional_free_energy[_qp];
 
   // Calculate interfacial energy of each variable
-
   for (unsigned int i = 0; i < _nvars; ++i)
-  {
-    Real abs_grad_var = (*_grad_vars[i])[_qp].size();
-    total_energy += (*_kappas[i])[_qp]/2.0*abs_grad_var*abs_grad_var;
-  }
+    total_energy += (*_kappas[i])[_qp] / 2.0 * (*_grad_vars[i])[_qp].size_sq();
 
   return total_energy;
 }

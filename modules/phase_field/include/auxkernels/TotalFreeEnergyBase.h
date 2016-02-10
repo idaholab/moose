@@ -32,7 +32,7 @@ protected:
   std::vector<VariableGradient *> _grad_vars;
 
   /// Gradient free energy prefactor kappa
-  std::vector<std::string> _kappa_names;
+  std::vector<MaterialPropertyName> _kappa_names;
   unsigned int _nkappas;
 
   /// Additional free energy contribution

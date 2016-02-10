@@ -20,7 +20,7 @@ TotalFreeEnergyBase::TotalFreeEnergyBase(const InputParameters & parameters) :
     _nvars(coupledComponents("interfacial_vars")),
     _vars(_nvars),
     _grad_vars(_nvars),
-    _kappa_names(getParam<std::vector<std::string> >("kappa_names")),
+    _kappa_names(getParam<std::vector<MaterialPropertyName> >("kappa_names")),
     _nkappas(_kappa_names.size()),
     _additional_free_energy(coupledValue("additional_free_energy"))
 {
