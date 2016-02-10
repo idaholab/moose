@@ -292,7 +292,7 @@ public:
   RankTwoTensor inverse() const;
 
   /// Print the rank two tensor
-  void print() const;
+  void print(std::ostream & stm = Moose::out) const;
 
   /// Add identity times a to _vals
   void addIa(const Real a);

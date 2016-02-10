@@ -1,22 +1,28 @@
-# Plasticity models:
-# Planar tensile with strength = 1MPa
+# A single unit element is stretched by (0.5, 0.4, 0.3)E-6m
+# with Lame lambda = 0.6E6 and Lame mu (shear) = 1E6
+# stress_xx = 1.72 Pa
+# stress_yy = 1.52 Pa
+# stress_zz = 1.32 Pa
+# tensile_strength is set to 1.3Pa hardening to 2Pa over intnl=1E-6
 #
-# Lame lambda = 1GPa.  Lame mu = 1.3GPa
-#
-# A line of elements is perturbed randomly, and return to the yield surface at each quadpoint is checked
+# The return should be to the edge (the algorithm will first try the tip) with
+# according to mathematica
+# internal = 1.67234152669E-7
+# stress_xx = stress_yy = 1.3522482794
+# stress_zz = 1.2195929084
 
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1000
-  ny = 1250
+  nx = 1
+  ny = 1
   nz = 1
-  xmin = 0
-  xmax = 1000
-  ymin = 0
-  ymax = 1250
-  zmin = 0
-  zmax = 1
+  xmin = -0.5
+  xmax = 0.5
+  ymin = -0.5
+  ymax = 0.5
+  zmin = -0.5
+  zmax = 0.5
 []
 
 
@@ -36,45 +42,24 @@
 []
 
 
-[ICs]
-  [./x]
-    type = RandomIC
-    min = -0.1
-    max = 0.1
-    variable = disp_x
-  [../]
-  [./y]
-    type = RandomIC
-    min = -0.1
-    max = 0.1
-    variable = disp_y
-  [../]
-  [./z]
-    type = RandomIC
-    min = -0.1
-    max = 0.1
-    variable = disp_z
-  [../]
-[]
-
 [BCs]
   [./x]
     type = FunctionPresetBC
     variable = disp_x
     boundary = 'front back'
-    function = '0'
+    function = '0.5E-6*x'
   [../]
   [./y]
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'front back'
-    function = '0'
+    function = '0.4E-6*y'
   [../]
   [./z]
     type = FunctionPresetBC
     variable = disp_z
     boundary = 'front back'
-    function = '0'
+    function = '0.3E-6*z'
   [../]
 []
 
@@ -115,11 +100,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./int0]
+  [./iter]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [./intnl]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -168,112 +153,108 @@
     index_i = 2
     index_j = 2
   [../]
-  [./f0]
+  [./f0_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 0
     variable = f0
   [../]
-  [./f1]
+  [./f1_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 1
     variable = f1
   [../]
-  [./f2]
+  [./f2_auxk]
     type = MaterialStdVectorAux
     property = plastic_yield_function
     index = 2
     variable = f2
-  [../]
-  [./int0]
-    type = MaterialStdVectorAux
-    property = plastic_internal_parameter
-    factor = 1E6
-    index = 0
-    variable = int0
   [../]
   [./iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
   [../]
+  [./intnl_auxk]
+    type = MaterialStdVectorAux
+    property = plastic_internal_parameter
+    index = 0
+    variable = intnl
+  [../]
 []
 
 [Postprocessors]
-  [./tot_iters]
-    type = ElementIntegralMaterialProperty
-    mat_prop = plastic_NR_iterations
-    outputs = console
+  [./s_xx]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_xx
   [../]
-  [./raw_f0]
-    type = ElementExtremeValue
-    variable = f0
-    outputs = console
+  [./s_xy]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_xy
   [../]
-  [./raw_f1]
-    type = ElementExtremeValue
-    variable = f1
-    outputs = console
+  [./s_xz]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_xz
   [../]
-  [./raw_f2]
-    type = ElementExtremeValue
-    variable = f2
-    outputs = console
+  [./s_yy]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_yy
   [../]
-  [./iter]
-    type = ElementExtremeValue
-    variable = iter
-    outputs = console
+  [./s_yz]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_yz
+  [../]
+  [./s_zz]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_zz
   [../]
   [./f0]
-    type = FunctionValuePostprocessor
-    function = should_be_zero0_fcn
+    type = PointValue
+    point = '0 0 0'
+    variable = f0
   [../]
   [./f1]
-    type = FunctionValuePostprocessor
-    function = should_be_zero1_fcn
+    type = PointValue
+    point = '0 0 0'
+    variable = f1
   [../]
   [./f2]
-    type = FunctionValuePostprocessor
-    function = should_be_zero2_fcn
+    type = PointValue
+    point = '0 0 0'
+    variable = f2
   [../]
-[]
-
-[Functions]
-  [./should_be_zero0_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f0'
+  [./iter]
+    type = PointValue
+    point = '0 0 0'
+    variable = iter
   [../]
-  [./should_be_zero1_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f1'
-  [../]
-  [./should_be_zero2_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f2'
+  [./intnl]
+    type = PointValue
+    point = '0 0 0'
+    variable = intnl
   [../]
 []
 
 [UserObjects]
   [./hard]
     type = TensorMechanicsHardeningCubic
-    value_0 = 1E6
-    value_residual = 0
-    internal_limit = 1
+    value_0 = 1.3
+    value_residual = 2
+    internal_limit = 1E-6
   [../]
-  [./tensile]
+  [./tens]
     type = TensorMechanicsPlasticTensileMulti
     tensile_strength = hard
-    yield_function_tolerance = 1.0E-1
-    shift = 1.0E-1
-    internal_constraint_tolerance = 1.0E-7
+    shift = 1E-6
+    yield_function_tolerance = 1E-6
+    internal_constraint_tolerance = 1E-5
   [../]
 []
 
@@ -282,29 +263,25 @@
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
-    C_ijkl = '1E9 1.3E9'
+    C_ijkl = '0.6E6 1E6'
   [../]
   [./strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
-  [./multi]
+  [./mc]
     type = ComputeMultiPlasticityStress
     block = 0
-    deactivation_scheme = 'safe_to_dumb'
-    ep_plastic_tolerance = 1E-7
-    plastic_models = 'tensile'
-    max_NR_iterations = 5
-    min_stepsize = 1E-3
-    max_stepsize_for_dumb = 1
-    debug_fspb = crash
-    debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
-    debug_jac_at_pm = '1 1 1'
-    debug_jac_at_intnl = '1 1 1'
-    debug_stress_change = 1E1
+    ep_plastic_tolerance = 1E-5
+    plastic_models = tens
+    debug_fspb = none
+    debug_jac_at_stress = '1 2 3 2 -4 -5 3 -5 10'
+    debug_jac_at_pm = '0.1 0.2 0.3'
+    debug_jac_at_intnl = 1E-6
+    debug_stress_change = 1E-6
     debug_pm_change = '1E-6 1E-6 1E-6'
-    debug_intnl_change = '1E-6 1E-6 1E-6'
+    debug_intnl_change = 1E-6
   [../]
 []
 
@@ -317,7 +294,7 @@
 
 
 [Outputs]
-  file_base = random_planar
+  file_base = planar8
   exodus = false
   [./csv]
     type = CSV

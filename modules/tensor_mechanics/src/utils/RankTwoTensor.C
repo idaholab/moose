@@ -748,14 +748,14 @@ RankTwoTensor::inverse() const
 }
 
 void
-RankTwoTensor::print() const
+RankTwoTensor::print(std::ostream & stm) const
 {
   const RankTwoTensor &a = *this;
   for (unsigned int i = 0; i < N; ++i)
   {
     for (unsigned int j = 0; j < N; ++j)
-      Moose::out << std::setw(15) << a(i,j) << ' ';
-    Moose::out <<std::endl;
+      stm << std::setw(15) << a(i,j) << ' ';
+    stm << std::endl;
   }
 }
 

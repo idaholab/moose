@@ -1,22 +1,25 @@
+# Jacobian check for nonlinear, multi-surface plasticity.
+# Returns to the tip of the tensile yield surface
+# This is a very nonlinear test and a delicate test because it perturbs around
+# a tip of the yield function where some derivatives are not well defined
+#
 # Plasticity models:
-# Planar tensile with strength = 1MPa
+# Tensile with strength = 1MPa softening to 0.5MPa in 2E-2 strain
 #
 # Lame lambda = 1GPa.  Lame mu = 1.3GPa
 #
-# A line of elements is perturbed randomly, and return to the yield surface at each quadpoint is checked
-
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1000
-  ny = 1250
+  nx = 1
+  ny = 1
   nz = 1
-  xmin = 0
-  xmax = 1000
-  ymin = 0
-  ymax = 1250
-  zmin = 0
-  zmax = 1
+  xmin = -0.5
+  xmax = 0.5
+  ymin = -0.5
+  ymax = 0.5
+  zmin = -0.5
+  zmax = 0.5
 []
 
 
@@ -36,47 +39,6 @@
 []
 
 
-[ICs]
-  [./x]
-    type = RandomIC
-    min = -0.1
-    max = 0.1
-    variable = disp_x
-  [../]
-  [./y]
-    type = RandomIC
-    min = -0.1
-    max = 0.1
-    variable = disp_y
-  [../]
-  [./z]
-    type = RandomIC
-    min = -0.1
-    max = 0.1
-    variable = disp_z
-  [../]
-[]
-
-[BCs]
-  [./x]
-    type = FunctionPresetBC
-    variable = disp_x
-    boundary = 'front back'
-    function = '0'
-  [../]
-  [./y]
-    type = FunctionPresetBC
-    variable = disp_y
-    boundary = 'front back'
-    function = '0'
-  [../]
-  [./z]
-    type = FunctionPresetBC
-    variable = disp_z
-    boundary = 'front back'
-    function = '0'
-  [../]
-[]
 
 [AuxVariables]
   [./stress_xx]
@@ -103,23 +65,31 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f0]
+  [./linesearch]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f1]
+  [./ld]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f2]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./int0]
+  [./constr_added]
     order = CONSTANT
     family = MONOMIAL
   [../]
   [./iter]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./int1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./int2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./int0]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -168,111 +138,102 @@
     index_i = 2
     index_j = 2
   [../]
-  [./f0]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 0
-    variable = f0
+  [./linesearch]
+    type = MaterialRealAux
+    property = plastic_linesearch_needed
+    variable = linesearch
   [../]
-  [./f1]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 1
-    variable = f1
+  [./ld]
+    type = MaterialRealAux
+    property = plastic_linear_dependence_encountered
+    variable = ld
   [../]
-  [./f2]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 2
-    variable = f2
-  [../]
-  [./int0]
-    type = MaterialStdVectorAux
-    property = plastic_internal_parameter
-    factor = 1E6
-    index = 0
-    variable = int0
+  [./constr_added]
+    type = MaterialRealAux
+    property = plastic_constraints_added
+    variable = constr_added
   [../]
   [./iter]
     type = MaterialRealAux
     property = plastic_NR_iterations
     variable = iter
   [../]
+  [./int0]
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    variable = int0
+    index = 0
+  [../]
+  [./int1]
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    variable = int1
+    index = 1
+  [../]
+  [./int2]
+    type = MaterialStdVectorAux
+    property = plastic_yield_function
+    variable = int2
+    index = 2
+  [../]
 []
 
 [Postprocessors]
-  [./tot_iters]
-    type = ElementIntegralMaterialProperty
-    mat_prop = plastic_NR_iterations
-    outputs = console
-  [../]
-  [./raw_f0]
+  [./max_int0]
     type = ElementExtremeValue
-    variable = f0
+    variable = int0
     outputs = console
   [../]
-  [./raw_f1]
+  [./max_int1]
     type = ElementExtremeValue
-    variable = f1
+    variable = int1
     outputs = console
   [../]
-  [./raw_f2]
+  [./max_int2]
     type = ElementExtremeValue
-    variable = f2
+    variable = int2
     outputs = console
   [../]
-  [./iter]
+  [./max_iter]
     type = ElementExtremeValue
     variable = iter
     outputs = console
   [../]
-  [./f0]
-    type = FunctionValuePostprocessor
-    function = should_be_zero0_fcn
+  [./av_linesearch]
+    type = ElementAverageValue
+    variable = linesearch
+    outputs = 'console csv'
   [../]
-  [./f1]
-    type = FunctionValuePostprocessor
-    function = should_be_zero1_fcn
+  [./av_ld]
+    type = ElementAverageValue
+    variable = ld
+    outputs = 'console csv'
   [../]
-  [./f2]
-    type = FunctionValuePostprocessor
-    function = should_be_zero2_fcn
+  [./av_constr_added]
+    type = ElementAverageValue
+    variable = constr_added
+    outputs = 'console csv'
+  [../]
+  [./av_iter]
+    type = ElementAverageValue
+    variable = iter
+    outputs = 'console csv'
   [../]
 []
 
-[Functions]
-  [./should_be_zero0_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f0'
-  [../]
-  [./should_be_zero1_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f1'
-  [../]
-  [./should_be_zero2_fcn]
-    type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f2'
-  [../]
-[]
 
 [UserObjects]
-  [./hard]
+  [./ts]
     type = TensorMechanicsHardeningCubic
-    value_0 = 1E6
-    value_residual = 0
-    internal_limit = 1
+    value_0 = 1
+    value_residual = 0.5
+    internal_limit = 2E-2
   [../]
   [./tensile]
     type = TensorMechanicsPlasticTensileMulti
-    tensile_strength = hard
-    yield_function_tolerance = 1.0E-1
-    shift = 1.0E-1
+    tensile_strength = ts
+    yield_function_tolerance = 1.0E-6  # Note larger value
+    shift = 1.0E-6                     # Note larger value
     internal_constraint_tolerance = 1.0E-7
   [../]
 []
@@ -282,44 +243,45 @@
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
-    C_ijkl = '1E9 1.3E9'
+    C_ijkl = '1.0E3 1.3E3'
   [../]
   [./strain]
-    type = ComputeFiniteStrain
+    type = ComputeIncrementalSmallStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./multi]
     type = ComputeMultiPlasticityStress
     block = 0
-    deactivation_scheme = 'safe_to_dumb'
     ep_plastic_tolerance = 1E-7
+
     plastic_models = 'tensile'
     max_NR_iterations = 5
-    min_stepsize = 1E-3
-    max_stepsize_for_dumb = 1
-    debug_fspb = crash
-    debug_jac_at_stress = '10 0 0 0 10 0 0 0 10'
-    debug_jac_at_pm = '1 1 1'
-    debug_jac_at_intnl = '1 1 1'
-    debug_stress_change = 1E1
-    debug_pm_change = '1E-6 1E-6 1E-6'
-    debug_intnl_change = '1E-6 1E-6 1E-6'
+    deactivation_scheme = 'safe'
+    min_stepsize = 1
+    tangent_operator = nonlinear
+    initial_stress = '15 1 0.2  1 10 -0.3  -0.3 0.2 8'
   [../]
 []
 
 
+[Preconditioning]
+  [./andy]
+    type = SMP
+    full = true
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
+    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
+  [../]
+[]
+
 [Executioner]
-  end_time = 1
-  dt = 1
   type = Transient
+  solve_type = Newton
 []
 
 
 [Outputs]
-  file_base = random_planar
+  file_base = cto16
   exodus = false
-  [./csv]
-    type = CSV
-    [../]
+  csv = true
 []

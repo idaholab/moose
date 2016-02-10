@@ -33,6 +33,8 @@ class TensorMechanicsHardeningModel : public GeneralUserObject
 
   virtual Real derivative(const Real & intnl) const;
 
+  virtual std::string modelName() const = 0;
+
 };
 
 #endif // TENSORMECHANICSHARDENINGMODEL_H

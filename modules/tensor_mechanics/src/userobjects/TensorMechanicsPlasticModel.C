@@ -172,6 +172,7 @@ TensorMechanicsPlasticModel::modelName() const
   return "None";
 }
 
+
 bool
 TensorMechanicsPlasticModel::returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & /*E_ijkl*/,
                                 Real /*ep_plastic_tolerance*/, RankTwoTensor & /*returned_stress*/, Real & /*returned_intnl*/,
@@ -188,13 +189,19 @@ TensorMechanicsPlasticModel::returnMap(const RankTwoTensor & trial_stress, const
   // example of checking Kuhn-Tucker
   std::vector<Real> dpm(numberSurfaces(), 0);
   for (unsigned sf = 0 ; sf < numberSurfaces() ; ++sf)
-    if (!( (dpm[sf] == 0 && yf[sf] <= _f_tol) || (dpm[sf] > 0 && yf[sf] <= _f_tol && yf[sf] >= -_f_tol) ))
+    if (!KuhnTuckerSingleSurface(yf[sf], dpm[sf]))
       return false;
   return true;
 }
 
+bool
+TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(const Real & yf, const Real & dpm) const
+{
+  return (dpm == 0 && yf <= _f_tol) || (dpm > 0 && yf <= _f_tol && yf >= -_f_tol);
+}
+
 RankFourTensor
-TensorMechanicsPlasticModel::consistentTangentOperator(const RankTwoTensor & /*stress*/, const Real & /*intnl*/,
+TensorMechanicsPlasticModel::consistentTangentOperator(const RankTwoTensor & /*trial_stress*/, const RankTwoTensor & /*stress*/, const Real & /*intnl*/,
                                                        const RankFourTensor & E_ijkl, const std::vector<Real> & /*cumulative_pm*/) const
 {
   return E_ijkl;
