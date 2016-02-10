@@ -18,6 +18,11 @@
 #include "Function.h"
 #include "MooseMesh.h"
 
+// A mutex we can acquire to prevent simultaneous ParsedFunction
+// evaluation on multiple threads.  ParsedFunction evaluation is
+// currently not thread-safe.
+Threads::spin_mutex parsed_function_mutex;
+
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),
     _tr_x(&feproblem.getFunction(fn_names[0])),
@@ -47,6 +52,9 @@ FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundar
 Point
 FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
 {
+  // Force thread-safe evaluation of what could be ParsedFunctions.
+  Threads::spin_mutex::scoped_lock lock(parsed_function_mutex);
+
   Real t = 0.;
   Point p;
   switch (_dim)
