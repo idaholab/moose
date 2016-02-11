@@ -137,7 +137,7 @@
   [./function_file_test1]
     type = 'RunException'
     input = 'function_file_test1.i'
-    expect_err = "In Piecewise \S+: Read more than two rows of data from file '\S+'.  Did you mean to use \"format = columns\"?"
+    expect_err = "In Piecewise \S+: Read more than two rows of data from file '\S+'.  Did you mean to use \"format = columns\" or set \"xy_in_file_only\" to false?"
   [../]
 
   [./function_file_test2]
@@ -192,6 +192,48 @@
     type = 'RunException'
     input = 'function_file_test10.i'
     expect_err = "In Piecewise \S+: axis=3 outside allowable range \(0-2\)."
+  [../]
+
+  [./function_file_test11]
+    type = 'RunException'
+    input = 'function_file_test11.i'
+    expect_err = "In Piecewise \S+: Read more than 2 columns of data from file '\S+'.  Did you mean to use \"format = rows\" or set \"xy_in_file_only\" to false?"
+  [../]
+
+  [./function_file_test12]
+    type = 'RunException'
+    input = 'function_file_test12.i'
+    expect_err = "In Piecewise \S+: column 3 for y does not exist on line 0"
+  [../]
+
+  [./function_file_test13]
+    type = 'RunException'
+    input = 'function_file_test13.i'
+    expect_err = "In Piecewise \S+: column 3 for x does not exist on line 0"
+  [../]
+
+  [./function_file_test14]
+    type = 'RunException'
+    input = 'function_file_test14.i'
+    expect_err = "In Piecewise \S+: Read more than two rows of data from file '\S+'.  Did you mean to use \"format = columns\" or set \"xy_in_file_only\" to false?"
+  [../]
+
+  [./function_file_test15]
+    type = 'RunException'
+    input = 'function_file_test15.i'
+    expect_err = "In Piecewise \S+: File '\S+' with 3 valid rows contains no x data."
+  [../]
+
+  [./function_file_test16]
+    type = 'RunException'
+    input = 'function_file_test16.i'
+    expect_err = "In Piecewise \S+: File '\S+' with 3 valid rows contains no y data."
+  [../]
+
+  [./function_file_test17]
+    type = 'RunException'
+    input = 'function_file_test17.i'
+    expect_err = "In Piecewise \S+: 'x_index_in_file' and 'y_index_in_file' are set to the same value."
   [../]
 
   [./incomplete_kernel_block_coverage_test]
