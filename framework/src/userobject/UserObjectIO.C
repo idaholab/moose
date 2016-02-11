@@ -13,7 +13,6 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "UserObjectWarehouse.h"
 #include "UserObjectIO.h"
 #include "UserObject.h"
 

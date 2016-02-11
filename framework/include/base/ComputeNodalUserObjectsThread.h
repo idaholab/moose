@@ -37,6 +37,8 @@ public:
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
 protected:
+
+  /// Storage for NodalUserObjects (see FEProblem::cmputeUserObjects)
   const MooseObjectWarehouse<NodalUserObject> & _user_objects;
 
 };

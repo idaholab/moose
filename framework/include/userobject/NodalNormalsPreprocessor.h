@@ -46,7 +46,17 @@ public:
   virtual void execute();
   virtual void threadJoin(const UserObject & uo);
 
-
+  /**
+   * Forces object to be stored as a block object.
+   *
+   * This object inherits from BoundaryRestrictable to utilize the "boundary" parameter and other
+   * methods that come with this interface class. However, this object is an ElementUserObject and must
+   * execute on each element (see ComputeUserObjectsThread::onElement).
+   *
+   * The MooseObjectWarehouseBase object that stores the objects uses this method to determine whether
+   * the object should be stored as boundary or block. Since this object needs to execute on elements, it must
+   * be stored as a block object, overloading this method to always return false has such effect.
+   */
   virtual bool boundaryRestricted() { return false; }
 
 
