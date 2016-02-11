@@ -21,14 +21,14 @@ template<>
 InputParameters validParams<SideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  params += validParams<BoundaryRestrictable>();
+  params += validParams<BoundaryRestrictableRequired>();
   params += validParams<MaterialPropertyInterface>();
   return params;
 }
 
 SideUserObject::SideUserObject(const InputParameters & parameters) :
     UserObject(parameters),
-    BoundaryRestrictable(parameters),
+    BoundaryRestrictableRequired(parameters),
     MaterialPropertyInterface(parameters, boundaryIDs()),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
