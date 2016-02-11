@@ -25,6 +25,7 @@ class FEProblem;
 class NonlinearSystem;
 class IntegratedBC;
 class DGKernel;
+class InterfaceKernel;
 class TimeKernel;
 class KernelBase;
 class KernelWarehouse;
@@ -41,6 +42,7 @@ public:
   virtual void subdomainChanged();
   virtual void onElement(const Elem *elem );
   virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
+  virtual void onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id);
   virtual void onInternalSide(const Elem *elem, unsigned int side);
   virtual void postElement(const Elem * /*elem*/);
   virtual void post();
@@ -57,6 +59,9 @@ protected:
 
   /// Reference to DGKernel storage structure
   const MooseObjectWarehouse<DGKernel> & _dg_kernels;
+
+  /// Reference to interface kernel storage structure
+  const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
 
   ///@{
   /// Reference to Kernel storage structures

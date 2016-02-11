@@ -38,7 +38,8 @@ public:
 protected:
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);
-  virtual void computeInternalFaceJacobian();
+  virtual void computeInternalFaceJacobian(const Elem * neighbor);
+  virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 
   // Reference to BC storage structures
   const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;
@@ -46,7 +47,10 @@ protected:
   // Reference to DGKernel storage
   const MooseObjectWarehouse<DGKernel> & _dg_kernels;
 
-  // Reference to Kernel stroage
+  // Reference to interface kernel storage
+  const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
+
+  // Reference to Kernel storage
   const KernelWarehouse & _kernels;
 };
 

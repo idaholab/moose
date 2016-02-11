@@ -433,6 +433,9 @@ public:
   // DG /////
   void addDGKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
+  // Interface /////
+  void addInterfaceKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
   // IC /////
   void addInitialCondition(const std::string & ic_name, const std::string & name, InputParameters parameters);
 

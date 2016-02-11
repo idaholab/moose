@@ -111,6 +111,8 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("AddDGKernelAction", "DGKernels/*");
 
+  syntax.registerActionSyntax("AddInterfaceKernelAction", "InterfaceKernels/*");
+
   syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
 
   syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*");
