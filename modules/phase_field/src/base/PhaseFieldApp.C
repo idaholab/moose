@@ -115,6 +115,7 @@
 #include "MathEBFreeEnergy.h"
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
+#include "OPInterfaceBarrierMaterial.h"
 #include "ParsedMaterial.h"
 #include "PFCRFFMaterial.h"
 #include "PFCTradMaterial.h"
@@ -337,6 +338,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(MathEBFreeEnergy);
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
+  registerMaterial(OPInterfaceBarrierMaterial);
   registerMaterial(ParsedMaterial);
   registerMaterial(PFCRFFMaterial);
   registerMaterial(PFCTradMaterial);
