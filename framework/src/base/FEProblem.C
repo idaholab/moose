@@ -1861,18 +1861,20 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
     parameters.set<SubProblem *>("_subproblem") = this;
 
 
-  for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
+    // Create the UserObject
     MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters, tid));
     _all_user_objects.addObject(user_object, tid);
 
+    // Attempt to create all the possible UserObject types
     MooseSharedPointer<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(user_object);
     MooseSharedPointer<SideUserObject> suo = MooseSharedNamespace::dynamic_pointer_cast<SideUserObject>(user_object);
     MooseSharedPointer<InternalSideUserObject> isuo = MooseSharedNamespace::dynamic_pointer_cast<InternalSideUserObject>(user_object);
     MooseSharedPointer<NodalUserObject> nuo = MooseSharedNamespace::dynamic_pointer_cast<NodalUserObject>(user_object);
     MooseSharedPointer<GeneralUserObject> guo = MooseSharedNamespace::dynamic_pointer_cast<GeneralUserObject>(user_object);
 
-
+    // Account for displaced mesh use
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     {
       if (euo || nuo)
@@ -1881,22 +1883,18 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
         _reinit_displaced_face = true;
     }
 
-
+    // Add the object to the correct warehouse
     if (guo)
     {
       _general_user_objects.addObject(guo);
       break; // not threaded
     }
-
     else if (nuo)
       _nodal_user_objects.addObject(nuo, tid);
-
     else if (suo)
       _side_user_objects.addObject(suo, tid);
-
     else if (isuo)
       _internal_side_user_objects.addObject(isuo, tid);
-
     else if (euo)
       _elemental_user_objects.addObject(euo, tid);
   }
