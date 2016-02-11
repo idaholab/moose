@@ -1,0 +1,14 @@
+[Tests]
+  [./smallStrain_1DSphere]
+    type = Exodiff
+    input = 'smallStrain_1DSphere.i'
+    exodiff = 'smallStrain_1DSphere_out.e'
+    compiler = 'CLANG GCC'
+  [../]
+  [./finiteStrain_1DSphere_hollow]
+    type = Exodiff
+    input = 'finiteStrain_1DSphere_hollow.i'
+    exodiff = 'finiteStrain_1DSphere_hollow_out.e'
+    compiler = 'CLANG GCC'
+  [../]
+[]
