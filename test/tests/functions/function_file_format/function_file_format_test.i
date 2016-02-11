@@ -30,21 +30,23 @@
 [Variables]
 
   [./a]
-    order = FIRST
-    family = LAGRANGE
   [../]
+
   [./b]
-    order = FIRST
-    family = LAGRANGE
   [../]
+
   [./c]
-    order = FIRST
-    family = LAGRANGE
   [../]
+
   [./d]
-    order = FIRST
-    family = LAGRANGE
   [../]
+
+  [./e]
+  [../]
+
+  [./f]
+  [../]
+
 []
 
 [Functions]
@@ -70,6 +72,24 @@
     data_file = columns_space.dat
     format = columns
   [../]
+  [./e]
+    type = PiecewiseLinear
+    data_file = rows_more_data.csv
+    format = rows
+    xy_in_file_only = false
+    x_index_in_file = 2
+    y_index_in_file = 0
+  [../]
+  [./f]
+    type = PiecewiseLinear
+    data_file = columns_more_data.csv
+    format = columns
+    xy_in_file_only = false
+    x_index_in_file = 2
+    y_index_in_file = 0
+  [../]
+
+
 []
 
 [Kernels]
@@ -90,6 +110,15 @@
     type = Diffusion
     variable = d
   [../]
+  [./diffe]
+    type = Diffusion
+    variable = e
+  [../]
+  [./difff]
+    type = Diffusion
+    variable = f
+  [../]
+
 []
 
 [BCs]
@@ -118,6 +147,19 @@
     boundary = '1'
     function = d
   [../]
+  [./e]
+    type = FunctionDirichletBC
+    variable = e
+    boundary = '1'
+    function = e
+  [../]
+  [./f]
+    type = FunctionDirichletBC
+    variable = f
+    boundary = '1'
+    function = f
+  [../]
+
 []
 
 [Executioner]
