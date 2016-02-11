@@ -50,3 +50,10 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
   for (unsigned int i=0; i<coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }
+
+
+void
+NodalUserObject::subdomainSetup()
+{
+  mooseError("NodalUserObjects do not execute subdomainSetup method, this function does nothing and should not be used.");
+}

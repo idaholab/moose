@@ -58,6 +58,10 @@ ComputeUserObjectsThread::subdomainChanged()
   _side_user_objects.updateBoundaryVariableDependency(needed_moose_vars, _tid);
   _internal_side_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
 
+  _elemental_user_objects.subdomainSetup(_subdomain, _tid);
+  _side_user_objects.subdomainSetup(_tid);
+  _internal_side_user_objects.subdomainSetup(_subdomain, _tid);
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }

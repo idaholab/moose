@@ -56,6 +56,8 @@ class NodalUserObject :
 public:
   NodalUserObject(const InputParameters & parameters);
 
+  virtual void subdomainSetup() /*final*/;
+
 protected:
   /// The mesh that is being iterated over
   MooseMesh & _mesh;
