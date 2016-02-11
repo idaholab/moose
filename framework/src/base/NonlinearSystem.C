@@ -38,6 +38,7 @@
 #include "NodalBC.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
+#include "InterfaceKernel.h"
 #include "Damper.h"
 #include "DisplacedProblem.h"
 #include "NearestNodeLocator.h"
@@ -331,7 +332,7 @@ NonlinearSystem::initialSetup()
     _dirac_kernels.initialSetup(tid);
     if (_doing_dg)
       _dg_kernels.initialSetup(tid);
-
+    _interface_kernels.initialSetup(tid);
     _dampers.initialSetup(tid);
     _integrated_bcs.initialSetup(tid);
   }
@@ -349,6 +350,7 @@ NonlinearSystem::timestepSetup()
     _dirac_kernels.timestepSetup(tid);
     if (_doing_dg)
       _dg_kernels.timestepSetup(tid);
+    _interface_kernels.timestepSetup(tid);
     _dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
   }
@@ -668,8 +670,24 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     MooseSharedPointer<DGKernel> dg_kernel = MooseSharedNamespace::static_pointer_cast<DGKernel>(_factory.create(dg_kernel_name, name, parameters, tid));
-
     _dg_kernels.addObject(dg_kernel, tid);
+  }
+
+  _doing_dg = true;
+}
+
+void
+NonlinearSystem::addInterfaceKernel(std::string interface_kernel_name, const std::string & name, InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    MooseSharedPointer<InterfaceKernel> interface_kernel = MooseSharedNamespace::static_pointer_cast<InterfaceKernel>(_factory.create(interface_kernel_name, name, parameters, tid));
+
+    const std::set<BoundaryID> & boundary_ids = interface_kernel->boundaryIDs();
+    _vars[tid].addBoundaryVar(boundary_ids, &interface_kernel->variable());
+
+    _interface_kernels.addObject(interface_kernel, tid);
+    _vars[tid].addBoundaryVars(boundary_ids, interface_kernel->getCoupledVars());
   }
 
   _doing_dg = true;
@@ -1186,6 +1204,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     _dirac_kernels.residualSetup(tid);
     if (_doing_dg)
       _dg_kernels.residualSetup(tid);
+    _interface_kernels.residualSetup(tid);
     _dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
   }
@@ -1808,6 +1827,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     _dirac_kernels.jacobianSetup(tid);
     if (_doing_dg)
       _dg_kernels.jacobianSetup(tid);
+    _interface_kernels.jacobianSetup(tid);
     _dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
   }
@@ -2169,6 +2189,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   _dampers.updateActive(tid);
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
+  _interface_kernels.updateActive(tid);
   _dirac_kernels.updateActive(tid);
   _kernels.updateActive(tid);
   if (tid == 0)

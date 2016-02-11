@@ -18,6 +18,7 @@
 #include "KernelBase.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
+#include "InterfaceKernel.h"
 // libmesh includes
 #include "libmesh/threads.h"
 
@@ -25,6 +26,7 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, Non
     ComputeJacobianThread(fe_problem, sys, jacobian),
     _integrated_bcs(sys.getIntegratedBCWarehouse()),
     _dg_kernels(sys.getDGKernelWarehouse()),
+    _interface_kernels(sys.getInterfaceKernelWarehouse()),
     _kernels(sys.getKernelWarehouse())
 {
 }
@@ -34,6 +36,7 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
     ComputeJacobianThread(x, split),
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
+    _interface_kernels(x._interface_kernels),
     _kernels(x._kernels)
 {
 }
@@ -162,24 +165,53 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 }
 
 void
-ComputeFullJacobianThread::computeInternalFaceJacobian()
+ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 {
-  if (_dg_kernels.hasActiveObjects(_tid))
+  if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
     for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
     {
-      const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveObjects(_tid);
+      const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
       for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator dg_it = dgks.begin(); dg_it != dgks.end(); ++dg_it)
       {
-        unsigned int ivar = (*it).first->number();
+        MooseVariable & ivariable = *(*it).first;
+        MooseVariable & jvariable = *(*it).second;
+
+        unsigned int ivar = ivariable.number();
+        unsigned int jvar = jvariable.number();
         MooseSharedPointer<DGKernel> dg = *dg_it;
-        if (dg->variable().number() == ivar && dg->isImplicit())
+
+        if (dg->variable().number() == ivar && dg->isImplicit() && dg->hasBlocks(neighbor->subdomain_id()) && jvariable.activeOnSubdomain(_subdomain))
         {
-          unsigned int jvar = (*it).second->number();
-          dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
+          dg->subProblem().prepareFaceShapes(jvar, _tid);
           dg->subProblem().prepareNeighborShapes(jvar, _tid);
           dg->computeOffDiagJacobian(jvar);
+        }
+      }
+    }
+  }
+}
+
+void
+ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
+{
+  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
+  {
+    std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+    for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
+    {
+      const std::vector<MooseSharedPointer<InterfaceKernel> > & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+      for (std::vector<MooseSharedPointer<InterfaceKernel> >::const_iterator int_it = int_ks.begin(); int_it != int_ks.end(); ++int_it)
+      {
+        unsigned int ivar = (*it).first->number();
+        MooseSharedPointer<InterfaceKernel> inter = *int_it;
+        if (inter->variable().number() == ivar && inter->isImplicit())
+        {
+          unsigned int jvar = (*it).second->number();
+          inter->subProblem().prepareFaceShapes(jvar, _tid);
+          inter->subProblem().prepareNeighborShapes(jvar, _tid);
+          inter->computeOffDiagJacobian(jvar);
         }
       }
     }

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'dg_block_restrict.i'
+    exodiff = 'dg_block_restrict_out.e'
+  [../]
+[]
