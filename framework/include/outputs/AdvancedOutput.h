@@ -19,6 +19,7 @@
 #include "AdvancedOutputUtils.h" // OutputDataWarehouse
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "UserObject.h"
 
 // Forward declarations
 class OutputWarehouse;
@@ -346,8 +347,7 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
 {
 
   // Get the UserObjectWarhouse
-  const MooseObjectWarehouseBase<UserObject> & warehouse = T::_problem_ptr->_all_user_objects;
-  //ExecStore<UserObjectWarehouse> & warehouse = T::_problem_ptr->getUserObjectWarehouse();
+  const MooseObjectWarehouseBase<UserObject> & warehouse = T::_problem_ptr->getUserObjects();
 
   // Convenience reference to the OutputData being operated on (should used "postprocessors" or "vector_postprocessors")
   OutputData & execute_data = _execute_data[execute_data_name];
@@ -363,7 +363,6 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
   // Loop through each of the execution flags
   const std::vector<MooseSharedPointer<UserObject> > & objects = warehouse.getActiveObjects();
   for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++ it)
-//  for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
   {
     // Store the name in the available postprocessors, if it does not already exist in the list
     MooseSharedPointer<postprocessor_type> pps = MooseSharedNamespace::dynamic_pointer_cast<postprocessor_type>(*it);

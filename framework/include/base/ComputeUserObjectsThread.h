@@ -15,8 +15,8 @@
 #ifndef COMPUTEUSEROBJECTSTHREAD_H
 #define COMPUTEUSEROBJECTSTHREAD_H
 
+// MOOSE includes
 #include "ThreadedElementLoop.h"
-#include "UserObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/elem_range.h"
@@ -53,9 +53,13 @@ public:
 
 protected:
   const NumericVector<Number>& _soln;
+
+  ///@{
+  /// Storage for UserObjects (see FEProblem::computeUserObjects)
   const MooseObjectWarehouse<ElementUserObject> & _elemental_user_objects;
   const MooseObjectWarehouse<SideUserObject> & _side_user_objects;
   const MooseObjectWarehouse<InternalSideUserObject> & _internal_side_user_objects;
+  ///@}
 };
 
 #endif //COMPUTEUSEROBJECTSTHREAD_H

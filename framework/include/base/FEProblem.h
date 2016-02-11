@@ -22,14 +22,13 @@
 #include "PostprocessorData.h"
 #include "VectorPostprocessorData.h"
 #include "Adaptivity.h"
-#include "UserObjectWarehouse.h"
 #include "InitialConditionWarehouse.h"
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "ExecuteMooseObjectWarehouse.h"
-#include "UserObjectWarehouseBase.h"
+#include "AuxGroupExecuteMooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -60,7 +59,12 @@ class Marker;
 class Material;
 class Transfer;
 class XFEMInterface;
+class SideUserObject;
+class NodalUserObject;
+class ElementUserObject;
+class InternalSideUserObject;
 class GeneralUserObject;
+class Function;
 
 // libMesh forward declarations
 namespace libMesh
@@ -481,6 +485,13 @@ public:
   virtual void addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);
 
   /**
+   * Return the storage of all UserObjects.
+   *
+   * @see AdvancedOutput::initPostprocessorOrVectorPostprocessorLists
+   */
+  const MooseObjectWarehouseBase<UserObject> & getUserObjects() { return _all_user_objects; }
+
+  /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
    * @return Const reference to the user object
@@ -488,15 +499,6 @@ public:
   template <class T>
   const T & getUserObject(const std::string & name, unsigned int tid = 0)
   {
-    /*
-    for (unsigned int i = 0; i < Moose::exec_types.size(); ++i)
-      if (_user_objects(Moose::exec_types[i])[tid].hasUserObject(name))
-      {
-        UserObject * user_object = _user_objects(Moose::exec_types[i])[tid].getUserObjectByName(name);
-        return dynamic_cast<const T &>(*user_object);
-      }
-    */
-
     if (_all_user_objects.hasActiveObject(name, tid))
       return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid))).get();
 
@@ -542,11 +544,6 @@ public:
    * @return The reference to the old value
    */
   PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
-
-  /**
-   * Get a reference to the UserObjectWarehouse ExecStore object
-   */
-//  ExecStore<UserObjectWarehouse> & getUserObjectWarehouse();
 
   /**
    * Returns whether or not the current simulation has any multiapps
@@ -955,7 +952,7 @@ public:
   /**
    * Call compute methods on UserObjects.
    */
-  virtual void computeUserObjects(const ExecFlagType & type, const UserObjectWarehouse::GROUP & group);
+  virtual void computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group);
   template<typename T> void initializeUserObjects(const MooseObjectWarehouse<T> & warehouse);
   template<typename T> void finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse);
 
@@ -1036,7 +1033,7 @@ protected:
   std::vector<Assembly *> _assembly;
 
   /// functions
-  MooseObjectWarehouse<Function>_functions;
+  MooseObjectWarehouse<Function> _functions;
 
   ///@{
   /// Initial condition storage
@@ -1074,16 +1071,15 @@ protected:
   // VectorPostprocessors
   VectorPostprocessorData _vpps_data;
 
-  // user objects
-//  ExecStore<UserObjectWarehouse> _user_objects;
-public:
+  ///@{
+  /// Storage for UserObjects
   MooseObjectWarehouseBase<UserObject> _all_user_objects;
-protected:
-  UserObjectWarehouseBase<GeneralUserObject> _general_user_objects;
-  UserObjectWarehouseBase<NodalUserObject> _nodal_user_objects;
-  UserObjectWarehouseBase<ElementUserObject> _elemental_user_objects;
-  UserObjectWarehouseBase<SideUserObject> _side_user_objects;
-  UserObjectWarehouseBase<InternalSideUserObject> _internal_side_user_objects;
+  AuxGroupExecuteMooseObjectWarehouse<GeneralUserObject> _general_user_objects;
+  AuxGroupExecuteMooseObjectWarehouse<NodalUserObject> _nodal_user_objects;
+  AuxGroupExecuteMooseObjectWarehouse<ElementUserObject> _elemental_user_objects;
+  AuxGroupExecuteMooseObjectWarehouse<SideUserObject> _side_user_objects;
+  AuxGroupExecuteMooseObjectWarehouse<InternalSideUserObject> _internal_side_user_objects;
+  ///@}
 
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;
