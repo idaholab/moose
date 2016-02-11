@@ -150,5 +150,6 @@
 []
 
 [Outputs]
+  file_base = 'ex18_out'
   exodus = true
 []
