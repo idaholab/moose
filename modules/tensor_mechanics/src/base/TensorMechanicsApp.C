@@ -18,6 +18,7 @@
 #include "StressDivergenceTensors.h"
 #include "CosseratStressDivergenceTensors.h"
 #include "StressDivergenceRZTensors.h"
+#include "StressDivergenceRSphericalTensors.h"
 #include "MomentBalancing.h"
 #include "PoroMechanicsCoupling.h"
 #include "InertialForce.h"
@@ -44,9 +45,11 @@
 #include "ComputePlaneSmallStrain.h"
 #include "ComputePlaneFiniteStrain.h"
 #include "ComputeAxisymmetricRZSmallStrain.h"
+#include "ComputeRSphericalSmallStrain.h"
 #include "ComputeIncrementalSmallStrain.h"
 #include "ComputeFiniteStrain.h"
 #include "ComputeAxisymmetricRZFiniteStrain.h"
+#include "ComputeRSphericalFiniteStrain.h"
 #include "ComputeLinearElasticStress.h"
 #include "ComputeFiniteStrainElasticStress.h"
 #include "ComputeEigenstrain.h"
@@ -129,6 +132,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceTensors);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(StressDivergenceRZTensors);
+  registerKernel(StressDivergenceRSphericalTensors);
   registerKernel(MomentBalancing);
   registerKernel(StressDivergencePFFracTensors);
   registerKernel(PoroMechanicsCoupling);
@@ -156,9 +160,11 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputePlaneSmallStrain);
   registerMaterial(ComputePlaneFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZSmallStrain);
+  registerMaterial(ComputeRSphericalSmallStrain);
   registerMaterial(ComputeIncrementalSmallStrain);
   registerMaterial(ComputeFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZFiniteStrain);
+  registerMaterial(ComputeRSphericalFiniteStrain);
   registerMaterial(ComputeLinearElasticStress);
   registerMaterial(ComputeFiniteStrainElasticStress);
   registerMaterial(ComputeEigenstrain);
