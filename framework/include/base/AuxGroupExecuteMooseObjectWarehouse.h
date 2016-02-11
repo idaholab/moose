@@ -34,6 +34,7 @@ public:
   /// Using these from base class
   using MooseObjectWarehouse<T>::checkThreadID;
   using ExecuteMooseObjectWarehouse<T>::_all_objects;
+  using ExecuteMooseObjectWarehouse<T>::_execute_objects;
   using ExecuteMooseObjectWarehouse<T>::_num_threads;
 
   /**
@@ -79,6 +80,9 @@ template<typename T>
 const ExecuteMooseObjectWarehouse<T> &
 AuxGroupExecuteMooseObjectWarehouse<T>::operator[](Moose::AuxGroup group) const
 {
+  if (group == Moose::ALL)
+    return *this;
+
   typename std::map<Moose::AuxGroup, ExecuteMooseObjectWarehouse<T> >::const_iterator iter = _group_objects.find(group);
   if (iter == _group_objects.end())
     mooseError("Unable to locate the desired group flag, objects only exists for PRE_AUX and POST_AUX groups.");
