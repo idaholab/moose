@@ -23,6 +23,7 @@
 // libMesh includes
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/parallel.h"
 
 // C++ includes
 #include <string>
@@ -494,5 +495,74 @@ loadHelper(std::istream & stream, HashMap<P,Q> & data, void * context)
   // Moose::out<<"HashMap loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
+
+
+/**
+ * The following methods are specializations for using the libMesh::Parallel::packed_range_* routines
+ * for std::strings. These are here because the dataLoad/dataStore routines create raw string
+ * buffers that can be communicated in a standard way using packed ranges.
+ */
+namespace libMesh {
+namespace Parallel {
+template <typename T>
+class Packing<std::basic_string<T> > {
+public:
+
+  static const unsigned int size_bytes = 4;
+
+  typedef T buffer_type;
+
+  static unsigned int get_string_len(typename std::vector<T>::const_iterator in)
+  {
+    unsigned int string_len = reinterpret_cast<const unsigned char &>(in[size_bytes-1]);
+    for (signed int i=size_bytes-2; i >= 0; --i)
+    {
+      string_len *= 256;
+      string_len += reinterpret_cast<const unsigned char &>(in[i]);
+    }
+    return string_len;
+  }
+
+  static unsigned int packed_size(typename std::vector<T>::const_iterator in)
+  {
+    return get_string_len(in) + size_bytes;
+  }
+
+  static unsigned int packable_size(const std::basic_string<T> & s, const void *)
+  {
+    return s.size() + size_bytes;
+  }
+
+  template <typename Iter>
+  static void pack (const std::basic_string<T> & b, Iter data_out, const void *)
+  {
+    unsigned int string_len = b.size();
+    for (unsigned int i=0; i != size_bytes; ++i)
+    {
+      *data_out++ = (string_len % 256);
+      string_len /= 256;
+    }
+
+    std::copy(b.begin(), b.end(), data_out);
+  }
+
+  static std::basic_string<T> unpack(typename std::vector<T>::const_iterator in, void *)
+  {
+    unsigned int string_len = get_string_len(in);
+
+    std::ostringstream oss;
+    for (unsigned int i = 0; i < string_len; ++i)
+      oss << reinterpret_cast<const unsigned char &>(in[i+size_bytes]);
+
+    in += size_bytes + string_len;
+
+    return std::string(oss.str());
+  }
+
+};
+
+} // namespace Parallel
+
+} // namespace libMesh
 
 #endif /* DATAIO_H */

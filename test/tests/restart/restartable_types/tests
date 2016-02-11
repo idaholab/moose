@@ -12,4 +12,21 @@
     prereq = first
     recover = false
   [../]
+
+  [./first_parallel]
+    type = 'RunApp'
+    input = 'restartable_types.i'
+    recover = false
+    min_parallel = 2
+    prereq = second
+  [../]
+
+  [./second_parallel]
+    # Using RunApp here because the error checking happens _in_ the app
+    type = 'RunApp'
+    input = 'restartable_types2.i'
+    prereq = first_parallel
+    min_parallel = 2
+    recover = false
+  [../]
 []
