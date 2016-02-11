@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "UserObject.h"
-#include "BoundaryRestrictable.h"
+#include "BoundaryRestrictableRequired.h"
 #include "MaterialPropertyInterface.h"
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
@@ -34,7 +34,7 @@ InputParameters validParams<SideUserObject>();
 
 class SideUserObject :
   public UserObject,
-  public BoundaryRestrictable,
+  public BoundaryRestrictableRequired,
   public MaterialPropertyInterface,
   public Coupleable,
   public MooseVariableDependencyInterface,
