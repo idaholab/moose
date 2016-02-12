@@ -70,6 +70,9 @@ InterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType type)
   case Moose::NeighborNeighbor:
     jac += 0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
     break;
+
+  default:
+    mooseError("Unrecognized type = " << type << " in InterfaceDiffusion::computeQpJacobian().");
   }
 
   return jac;
