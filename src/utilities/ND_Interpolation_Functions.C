@@ -519,6 +519,8 @@ double NDInterpolation::averageCellValue(std::vector<double> center, std::vector
 }
 
 std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
+ std::cout<<"NDinverseFunctionGrid F: " << F << std::endl;
+ std::cout<<"NDinverseFunctionGrid G: " << g << std::endl;
 
  int last_divisions = (int)round(1.0/_tolerance);
 
@@ -546,6 +548,8 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  int pickedCell = CDFweightedPicking(coarseCell,g);
 
+ std::cout<<"pickedCell: " << pickedCell << std::endl;
+
  std::vector<std::vector<std::vector<double> > > refinedCell;
 
  refinedCellDivision(refinedCell, coarseCell.at(pickedCell), last_divisions);
@@ -554,6 +558,7 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  //std::vector<std::vector<double> > pivotSubcell = pickNewCell(refinedCell,g);
  int pickedSubCell = CDFweightedPicking(refinedCell,F);
+ std::cout<<"pickedSubCell: " << pickedSubCell << std::endl;
  std::vector<double> randomVector = getCellCenter(refinedCell.at(pickedSubCell));
 
  return randomVector;
