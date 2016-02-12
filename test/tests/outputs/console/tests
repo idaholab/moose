@@ -63,15 +63,6 @@
     file_expect_out = 'Moose\sTest\sPerformance:'
     recover = false
   [../]
-  [./file_setup_log]
-    # Test that file contains regex
-    type = CheckFiles
-    input = 'console.i'
-    cli_args = 'Outputs/screen/output_file=true Outputs/screen/setup_log=true Outputs/screen/file_base=console_file_setup_log_out'
-    check_files = 'console_file_setup_log_out.txt'
-    file_expect_out = 'Setup\sPerformance:'
-    recover = false
-  [../]
   [./norms]
     # Test that the variable norms are being output
     type = RunApp

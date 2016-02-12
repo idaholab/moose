@@ -130,15 +130,11 @@ DGKernel::computeElemNeighResidual(Moose::DGResidualType type)
 void
 DGKernel::computeResidual()
 {
-//  Moose::perf_log.push("computeResidual()","DGKernel");
-
   // Compute the residual for this element
   computeElemNeighResidual(Moose::Element);
 
   // Compute the residual for the neighbor
   computeElemNeighResidual(Moose::Neighbor);
-
-//  Moose::perf_log.pop("computeResidual()","DGKernel");
 }
 
 void
@@ -163,8 +159,6 @@ DGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 void
 DGKernel::computeJacobian()
 {
-//  Moose::perf_log.push("computeJacobian()","DGKernel");
-
   // Compute element-element Jacobian
   computeElemNeighJacobian(Moose::ElementElement);
 
@@ -176,8 +170,6 @@ DGKernel::computeJacobian()
 
   // Compute neighbor-neighbor Jacobian
   computeElemNeighJacobian(Moose::NeighborNeighbor);
-
-//  Moose::perf_log.pop("computeJacobian()","DGKernel");
 }
 
 void

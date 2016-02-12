@@ -318,7 +318,7 @@ AuxiliarySystem::addVector(const std::string & vector_name, const bool project, 
 void
 AuxiliarySystem::computeScalarVars(ExecFlagType type)
 {
-  Moose::perf_log.push("update_aux_vars_scalar()","Solve");
+  Moose::perf_log.push("update_aux_vars_scalar()", "Execution");
 
   // Reference to the current storage container
   const MooseObjectWarehouse<AuxScalarKernel> & storage = _aux_scalar_storage[type];
@@ -344,7 +344,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
     }
   }
   PARALLEL_CATCH;
-  Moose::perf_log.pop("update_aux_vars_scalar()","Solve");
+  Moose::perf_log.pop("update_aux_vars_scalar()", "Execution");
 
   solution().close();
   _sys.update();
@@ -353,7 +353,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 void
 AuxiliarySystem::computeNodalVars(ExecFlagType type)
 {
-  Moose::perf_log.push("update_aux_vars_nodal()","Solve");
+  Moose::perf_log.push("update_aux_vars_nodal()", "Execution");
 
   // Reference to the Nodal AuxKernel storage
   const MooseObjectWarehouse<AuxKernel> & nodal = _nodal_aux_storage[type];
@@ -371,10 +371,10 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
     }
   }
   PARALLEL_CATCH;
-  Moose::perf_log.pop("update_aux_vars_nodal()","Solve");
+  Moose::perf_log.pop("update_aux_vars_nodal()", "Execution");
 
   // Boundary Nodal AuxKernels
-  Moose::perf_log.push("update_aux_vars_nodal_bcs()","Solve");
+  Moose::perf_log.push("update_aux_vars_nodal_bcs()", "Execution");
   PARALLEL_TRY {
     if (nodal.hasActiveBoundaryObjects())
     {
@@ -388,13 +388,13 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
   }
   PARALLEL_CATCH;
 
-  Moose::perf_log.pop("update_aux_vars_nodal_bcs()","Solve");
+  Moose::perf_log.pop("update_aux_vars_nodal_bcs()", "Execution");
 }
 
 void
 AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
-  Moose::perf_log.push("update_aux_vars_elemental()","Solve");
+  Moose::perf_log.push("update_aux_vars_elemental()", "Execution");
 
   // Reference to the Nodal AuxKernel storage
   const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
@@ -424,7 +424,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
 
   }
   PARALLEL_CATCH;
-  Moose::perf_log.pop("update_aux_vars_elemental()","Solve");
+  Moose::perf_log.pop("update_aux_vars_elemental()", "Execution");
 }
 
 void

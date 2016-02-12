@@ -66,7 +66,7 @@ NearestNodeLocator::~NearestNodeLocator()
 void
 NearestNodeLocator::findNodes()
 {
-  Moose::perf_log.push("NearestNodeLocator::findNodes()","Solve");
+  Moose::perf_log.push("NearestNodeLocator::findNodes()", "Execution");
 
   /**
    * If this is the first time through we're going to build up a "neighborhood" of nodes
@@ -165,7 +165,7 @@ NearestNodeLocator::findNodes()
 
   _nearest_node_info = nnt._nearest_node_info;
 
-  Moose::perf_log.pop("NearestNodeLocator::findNodes()","Solve");
+  Moose::perf_log.pop("NearestNodeLocator::findNodes()", "Execution");
 }
 
 void

@@ -75,7 +75,7 @@ PenetrationLocator::~PenetrationLocator()
 void
 PenetrationLocator::detectPenetration()
 {
-  Moose::perf_log.push("detectPenetration()","Solve");
+  Moose::perf_log.push("detectPenetration()", "Execution");
 
   // Data structures to hold the element boundary information
   std::vector<dof_id_type> elem_list;
@@ -109,7 +109,7 @@ PenetrationLocator::detectPenetration()
 
   Threads::parallel_reduce(slave_node_range, pt);
 
-  Moose::perf_log.pop("detectPenetration()","Solve");
+  Moose::perf_log.pop("detectPenetration()", "Execution");
 }
 
 void

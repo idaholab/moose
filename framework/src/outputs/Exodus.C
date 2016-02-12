@@ -282,7 +282,7 @@ Exodus::output(const ExecFlagType & type)
     return;
 
   // Start the performance log
-  Moose::perf_log.push("output()", "Exodus");
+  Moose::perf_log.push("Exodus::output()", "Output");
 
   // Prepare the ExodusII_IO object
   outputSetup();
@@ -317,7 +317,7 @@ Exodus::output(const ExecFlagType & type)
   _exodus_mesh_changed = false;
 
   // Stop the logging
-  Moose::perf_log.pop("output()", "Exodus");
+  Moose::perf_log.pop("Exodus::output()", "Output");
 }
 
 std::string

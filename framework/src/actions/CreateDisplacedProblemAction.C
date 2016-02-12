@@ -43,8 +43,6 @@ CreateDisplacedProblemAction::act()
     if (!_displaced_mesh)
       mooseError("displacements were set but a displaced mesh wasn't created!");
 
-    Moose::setup_perf_log.push("Create DisplacedProblem", "Setup");
-
     // Define the parameters
     InputParameters object_params = _factory.getValidParams("DisplacedProblem");
     object_params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
@@ -56,7 +54,5 @@ CreateDisplacedProblemAction::act()
 
     // Add the Displaced Problem to FEProblem
     _problem->addDisplacedProblem(disp_problem);
-
-    Moose::setup_perf_log.pop("Create DisplacedProblem","Setup");
   }
 }

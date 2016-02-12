@@ -84,7 +84,7 @@ void
 Checkpoint::output(const ExecFlagType & /*type*/)
 {
   // Start the performance log
-  Moose::perf_log.push("output()", "Checkpoint");
+  Moose::perf_log.push("Checkpoint::output()", "Output");
 
   // Create the output directory
   std::string cp_dir = directory();
@@ -129,7 +129,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   updateCheckpointFiles(current_file_struct);
 
   // Stop the logging
-  Moose::perf_log.pop("output()", "Checkpoint");
+  Moose::perf_log.pop("Checkpoint::output()", "Output");
 }
 
 void
