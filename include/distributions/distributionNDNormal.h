@@ -70,6 +70,7 @@ public:
 
   std::vector<double> coordinateInTransformedSpace(int rank);
   std::vector<double> coordinateInverseTransformed(std::vector<double> &coordinate);
+  std::vector<double> coordinateInverseTransformed(std::vector<double> &coordinate,std::vector<int> index);
 
   double cellProbabilityWeight(std::vector<double> center, std::vector<double> dx);
   double inverseMarginalForPCA(double F);

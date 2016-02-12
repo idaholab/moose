@@ -531,6 +531,40 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
   return originalCoordinate;
 }
 
+std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::vector<double> & coordinate,std::vector<int> index) {
+  /**
+   * This function will transform the coordinate back to the original space
+   * input parameter
+   * - index, the index set associated with the provied coordinate
+   * - coordinate, the coordinate in the transformed space
+   * output
+   * - originalCoordinate, and the coordinate in the full space.
+   */
+  std::vector<double> originalCoordinate;
+  for(unsigned int irow = 0; irow < _svdTransformedMatrix.size(); ++irow) {
+    double tempSum = 0.0;
+    for(unsigned int icol = 0; icol < index.size(); ++icol) {
+      if (index[icol] < 0) {
+        throwError("Negative value is not allowed for the index set.");
+      }
+      tempSum = tempSum + _svdTransformedMatrix.at(irow).at(index.at(icol)) * coordinate.at(icol);
+    }
+    originalCoordinate.push_back(tempSum);
+  }
+  if(_covarianceType == "abs") {
+    for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
+      originalCoordinate.at(idim) += _mu.at(idim);
+    }
+  } else if (_covarianceType == "rel") {
+    for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
+      originalCoordinate.at(idim) = _mu.at(idim)*(1.0 + originalCoordinate.at(idim));
+    }
+  } else {
+    throwError("MultivariateNormal Error: covariance type is not available");
+  }
+  return originalCoordinate;
+}
+
 double BasicMultivariateNormal::cellProbabilityWeight(std::vector<double> center, std::vector<double> dx){
     /**
      * This function calculates the integral of the pdf in a cell region
