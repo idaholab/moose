@@ -298,6 +298,8 @@ int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<doub
         for(unsigned int i=0; i<vertices.size(); i++){
                 cumulativeIndex += cellAvgValues.at(i);
                 if (cumulativeIndex > g){
+                	    std::cout<<"cumulativeIndex: "<<cumulativeIndex<< std::endl;
+                	    std::cout<<"g: "<<g<< std::endl;
                         index=i;
                         break;
                 }
