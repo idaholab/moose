@@ -38,6 +38,9 @@ public:
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar);
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
+  // Don't let our computeJacobian(unsigned) hide DGKernel::computeJacobian(void)
+  using DGKernel::computeJacobian;
+
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) = 0;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;

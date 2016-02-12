@@ -150,11 +150,6 @@ ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, Boundary
     if (!(neighbor->level() == elem->level()))
       mooseError("Sorry, interface kernels do not work with mesh adaptivity");
 
-    // Get the global id of the element and the neighbor
-    const dof_id_type
-      elem_id = elem->id(),
-      neighbor_id = neighbor->id();
-
     if (neighbor->active())
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
