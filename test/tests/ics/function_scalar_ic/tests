@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'function_scalar_ic.i'
+    csvdiff = 'function_scalar_ic_out.csv'
+  [../]
+[]

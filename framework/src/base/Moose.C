@@ -125,6 +125,7 @@
 #include "RandomIC.h"
 #include "ScalarConstantIC.h"
 #include "ScalarComponentIC.h"
+#include "FunctionScalarIC.h"
 
 // executioners
 #include "Steady.h"
@@ -529,6 +530,7 @@ registerObjects(Factory & factory)
   registerInitialCondition(RandomIC);
   registerInitialCondition(ScalarConstantIC);
   registerInitialCondition(ScalarComponentIC);
+  registerInitialCondition(FunctionScalarIC);
 
   // executioners
   registerExecutioner(Steady);
