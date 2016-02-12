@@ -270,6 +270,26 @@ std::vector<double> BasicMultivariateNormal::getTransformationMatrix() {
   return returnVectors;
 }
 
+std::vector<double> BasicMultivariateNormal::getTransformationMatrix(std::vector<int> index) {
+  /**
+   * this function returns the transformation matrix
+   * input parameters
+   * - index: the index of transformation matrix
+   * output
+   * - returnVectors: the vector stores the left singular vectors associated with the provided index
+   */
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < _svdTransformedMatrix.size(); ++i) {
+    for(unsigned int j = 0; j < index.size(); ++j) {
+      if (index.at(j) < 0) {
+        throwError("Negative value is not allowed in the provided column index vector");
+      }
+      returnVectors.push_back(_svdTransformedMatrix.at(i).at(index.at(j)));
+    }
+  }
+  return returnVectors;
+}
+
 std::vector<int> BasicMultivariateNormal::getTransformationMatrixDimensions() {
   /**
    * return the row and colum of the transformation matrix stored in returnVector.at(0) and returnVector.at(1) respectively
@@ -277,6 +297,20 @@ std::vector<int> BasicMultivariateNormal::getTransformationMatrixDimensions() {
   std::vector<int> returnVector;
   returnVector.push_back(_svdTransformedMatrix.size());
   returnVector.push_back(_svdTransformedMatrix.at(0).size());
+  return returnVector;
+}
+
+std::vector<int> BasicMultivariateNormal::getTransformationMatrixDimensions(std::vector<int> index) {
+  /**
+   * return the row and colum of the transformation matrix
+   * input parameter
+   * - index, the index of transformation matrix
+   * output
+   * - row stored in returnVector.at(0), and column stored in returnVector.at(1).
+   */
+  std::vector<int> returnVector;
+  returnVector.push_back(_svdTransformedMatrix.size());
+  returnVector.push_back(index.size());
   return returnVector;
 }
 
@@ -290,6 +324,26 @@ std::vector<double> BasicMultivariateNormal::getLeftSingularVectors() {
   for(unsigned int i = 0; i < _leftSingularVectors.size(); ++i) {
     for(unsigned int j = 0; j < _leftSingularVectors.at(0).size(); ++j) {
       returnVectors.push_back(_leftSingularVectors.at(i).at(j));
+    }
+  }
+  return returnVectors;
+}
+
+std::vector<double> BasicMultivariateNormal::getLeftSingularVectors(std::vector<int> index) {
+  /**
+   * this function returns the left singular vectors associated with index
+   * input parameters:
+   * - index, the index of left singular vectors
+   * output
+   * returnVectors: the vector stores the left singular vectors associated with index
+   */
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < _leftSingularVectors.size(); ++i) {
+    for(unsigned int j = 0; j < index.size(); ++j) {
+      if (index.at(j) < 0) {
+        throwError("Negative value is not allowed in the provided column index vector");
+      }
+      returnVectors.push_back(_leftSingularVectors.at(i).at(index.at(j)));
     }
   }
   return returnVectors;
@@ -310,6 +364,26 @@ std::vector<double> BasicMultivariateNormal::getRightSingularVectors() {
   return returnVectors;
 }
 
+std::vector<double> BasicMultivariateNormal::getRightSingularVectors(std::vector<int> index) {
+  /**
+   * this function returns the right singular vectors associated with the provided index
+   * input parameters:
+   * - index, the index of left singular vectors
+   * output
+   * returnVectors: the vector stores the right singular vectors
+   */
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < _rightSingularVectors.size(); ++i) {
+    for(unsigned int j = 0; j < index.size(); ++j) {
+      if (index.at(j)< 0) {
+        throwError("Negative value is not allowed in the provided column index vector");
+      }
+      returnVectors.push_back(_rightSingularVectors.at(i).at(index.at(j)));
+    }
+  }
+  return returnVectors;
+}
+
 std::vector<double> BasicMultivariateNormal::getSingularValues() {
   /**
    * this function returns the singular values
@@ -319,6 +393,24 @@ std::vector<double> BasicMultivariateNormal::getSingularValues() {
   return _singularValues;
 }
 
+std::vector<double> BasicMultivariateNormal::getSingularValues(std::vector<int> index) {
+  /**
+   * this function returns the singular values associated with the provided index
+   * input parameters:
+   * - index, the  index of left singular vectors
+   * output
+   * - returnVector: the vector stores the singular values associated with the provided inde
+   */
+  std::vector<double> returnVector;
+  for(unsigned int i = 0; i < index.size(); ++i) {
+    if (index.at(i) < 0) {
+      throwError("Negative value is not allowed in the provided index vector");
+    }
+    returnVector.push_back(_singularValues.at(index.at(i)));
+  }
+  return returnVector;
+}
+
 std::vector<int> BasicMultivariateNormal::getLeftSingularVectorsDimensions() {
   /**
    * return the row and column of left singular vectors stored in returnVector.at(0) and returnVector.at(1) respectively
@@ -326,6 +418,20 @@ std::vector<int> BasicMultivariateNormal::getLeftSingularVectorsDimensions() {
   std::vector<int> returnVector;
   returnVector.push_back(_leftSingularVectors.size());
   returnVector.push_back(_leftSingularVectors.at(0).size());
+  return returnVector;
+}
+
+std::vector<int> BasicMultivariateNormal::getLeftSingularVectorsDimensions(std::vector<int> index) {
+  /**
+   * return the row and column of left singular vectors stored in returnVector.at(0) and returnVector.at(1) respectively
+   * input parameter
+   * - index, the index of left singular vectors
+   * output
+   * - returnVector, return the row and column of left singular vectors with provided index  stored in returnVector.at(0) and returnVector.at(1) respectively
+   */
+  std::vector<int> returnVector;
+  returnVector.push_back(_leftSingularVectors.size());
+  returnVector.push_back(index.size());
   return returnVector;
 }
 
@@ -339,11 +445,36 @@ std::vector<int> BasicMultivariateNormal::getRightSingularVectorsDimensions() {
   return returnVector;
 }
 
+std::vector<int> BasicMultivariateNormal::getRightSingularVectorsDimensions(std::vector<int> index) {
+  /**
+   * return the row and column of right singular vectors stored in returnVector.at(0) and returnVector.at(1) respectively
+   * input parameter
+   * - index, the index of right singular vectors
+   * output
+   * - returnVector, return the row and column of right singular vectors with provided index  stored in returnVector.at(0) and returnVector.at(1) respectively
+   */
+  std::vector<int> returnVector;
+  returnVector.push_back(_rightSingularVectors.size());
+  returnVector.push_back(index.size());
+  return returnVector;
+}
+
 int  BasicMultivariateNormal::getSingularValuesDimension() {
   /**
    * return the dimension of  singular value vector stored
    */
   return _singularValues.size();
+}
+
+int  BasicMultivariateNormal::getSingularValuesDimension(std::vector<int> index) {
+  /**
+   * return the dimension of  singular value vector with provided index set.
+   * input parameter
+   * - index, the index of singular values
+   * output
+   * return the size of singular value vector with provided index set
+   */
+  return index.size();
 }
 
 std::vector<double> BasicMultivariateNormal::coordinateInTransformedSpace(int rank) {
