@@ -1,0 +1,39 @@
+[Tests]
+  [./GeneralUserObject]
+    type = CSVDiff
+    input = general.i
+    csvdiff = general_out.csv
+    min_threads = 2
+    max_threads = 2
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+  [./ElementUserObject]
+    type = CSVDiff
+    input = element.i
+    csvdiff = element_out.csv
+    min_threads = 2
+    max_threads = 2
+  [../]
+  [./SideUserObject]
+    type = CSVDiff
+    input = side.i
+    csvdiff = side_out.csv
+    min_threads = 2
+    max_threads = 2
+  [../]
+  [./InternalSideUserObject]
+    type = CSVDiff
+    input = internal_side.i
+    csvdiff = internal_side_out.csv
+    min_threads = 2
+    max_threads = 2
+  [../]
+  [./NodalSideUserObject]
+    type = CSVDiff
+    input = nodal.i
+    csvdiff = nodal_out.csv
+    min_threads = 2
+    max_threads = 2
+  [../]
+[]

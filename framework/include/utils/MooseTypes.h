@@ -102,6 +102,15 @@ enum MaterialDataType {
   NEIGHBOR_MATERIAL_DATA
 };
 
+/**
+ * Flag for AuxKernel related exeuction type.
+ */
+enum AuxGroup
+{
+  ALL,
+  PRE_AUX,
+  POST_AUX
+};
 
 /**
  * A static list of all the exec types.

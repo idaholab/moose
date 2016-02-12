@@ -15,8 +15,8 @@
 #ifndef COMPUTEUSEROBJECTSTHREAD_H
 #define COMPUTEUSEROBJECTSTHREAD_H
 
+// MOOSE includes
 #include "ThreadedElementLoop.h"
-#include "UserObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/elem_range.h"
@@ -35,9 +35,9 @@ class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 public:
   ComputeUserObjectsThread(FEProblem & problem,
                            SystemBase & sys,
-                           const NumericVector<Number>& in_soln,
-                           std::vector<UserObjectWarehouse> & user_objects,
-                           UserObjectWarehouse::GROUP);
+                           const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
+                           const MooseObjectWarehouse<SideUserObject> & side_user_objects,
+                           const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects);
   // Splitting Constructor
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
 
@@ -53,8 +53,13 @@ public:
 
 protected:
   const NumericVector<Number>& _soln;
-  std::vector<UserObjectWarehouse> & _user_objects;
-  UserObjectWarehouse::GROUP _group;
+
+  ///@{
+  /// Storage for UserObjects (see FEProblem::computeUserObjects)
+  const MooseObjectWarehouse<ElementUserObject> & _elemental_user_objects;
+  const MooseObjectWarehouse<SideUserObject> & _side_user_objects;
+  const MooseObjectWarehouse<InternalSideUserObject> & _internal_side_user_objects;
+  ///@}
 };
 
 #endif //COMPUTEUSEROBJECTSTHREAD_H

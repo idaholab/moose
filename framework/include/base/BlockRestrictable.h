@@ -183,7 +183,7 @@ public:
    * Returns true if this object has been restricted to a boundary
    * @see MooseObject
    */
-  virtual bool blockRestricted() { return _block_restricted; }
+  virtual bool blockRestricted();
 
 protected:
 
@@ -222,9 +222,6 @@ private:
 
   /// Thread id for this object
   THREAD_ID _blk_tid;
-
-  /// Flag indicating if the class is block restricted
-  bool _block_restricted;
 
   /**
    * An initialization routine needed for dual constructors
