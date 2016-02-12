@@ -17,13 +17,14 @@
 
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
+#include "FunctionInterface.h"
 #include "DependencyResolverInterface.h"
 
 #include "libmesh/dense_vector.h"
 
 //forward declarations
 class ScalarInitialCondition;
-class SubProblem;
+class FeProblem;
 class SystemBase;
 class Assembly;
 class MooseVariableScalar;
@@ -37,6 +38,7 @@ InputParameters validParams<ScalarInitialCondition>();
 class ScalarInitialCondition :
   public MooseObject,
   public ScalarCoupleable,
+  public FunctionInterface,
   public DependencyResolverInterface
 {
 public:
@@ -68,11 +70,14 @@ public:
   virtual const std::set<std::string> & getSuppliedItems();
 
 protected:
-  SubProblem & _subproblem;
+  FEProblem & _fe_problem;
   SystemBase & _sys;
   THREAD_ID _tid;
 
   Assembly & _assembly;
+  /// Time
+  Real & _t;
+
   /// Scalar variable this initial condition works on
   MooseVariableScalar & _var;
 
