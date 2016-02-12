@@ -60,4 +60,9 @@
   requires_swig2 = True
  [../]
 
+ [./test_svd_index]
+  type = 'CrowPython'
+  input = 'test_svd_index.py'
+  requires_swig2 = True
+ [../]
 []
