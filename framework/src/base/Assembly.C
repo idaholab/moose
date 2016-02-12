@@ -22,6 +22,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
+#include "XFEM.h"
 
 // libMesh
 #include "libmesh/quadrature_gauss.h"
@@ -39,6 +40,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _tid(tid),
     _mesh(sys.mesh()),
     _mesh_dimension(_mesh.dimension()),
+    _xfem(NULL),
     _current_qrule(NULL),
     _current_qrule_volume(NULL),
     _current_qrule_arbitrary(NULL),
@@ -420,9 +422,10 @@ Assembly::reinitFE(const Elem * elem)
   }
 
   if (do_caching)
-    efesd->_invalidated = false; 
+    efesd->_invalidated = false;
 
-  updateXFEMWeights(elem);
+  if (_xfem != NULL)
+    modifyWeightsDueToXFEM(elem);
 }
 
 void
@@ -1551,22 +1554,20 @@ Assembly::clearCachedJacobianContributions()
 }
 
 void
-Assembly::updateXFEMWeights(const Elem *elem)
+Assembly::modifyWeightsDueToXFEM(const Elem *elem)
 {
- if((_xfem_weights_map.find(elem->id()) != _xfem_weights_map.end())){
-    mooseAssert(_xfem_weights_map[elem->id()].size()==_current_JxW.size(),"wrong number of entries in xfem_weights"); 
-      for(unsigned i = 0; i < _xfem_weights_map[elem->id()].size(); i++){ 
-        _current_JxW[i] = _current_JxW[i] * _xfem_weights_map[elem->id()][i]; 
-      }
-   } 
+  mooseAssert(_xfem != NULL, "This function should be called if xfem is inactive");
+
+  if (_current_qrule == _current_qrule_arbitrary)
+    return;
+
+  MooseArray<Real> xfem_weight_multipliers;
+  if (_xfem->getXFEMWeights(xfem_weight_multipliers, elem, _current_qrule))
+  {
+    mooseAssert(xfem_weight_multipliers.size() == _current_JxW.size(),"Size of weight multipliers in xfem doesn't match number of quadrature points");
+    for(unsigned i = 0; i < xfem_weight_multipliers.size(); i++)
+    {
+      _current_JxW[i] = _current_JxW[i] * xfem_weight_multipliers[i];
+    }
+  }
 }
-
-void
-Assembly::setXFEMWeights(std::vector<Real> & xfem_weights, const Elem * elem)
-{
-  _xfem_weights_map[elem->id()].resize(xfem_weights.size());
-
-  for(unsigned i = 0; i < xfem_weights.size(); i++)
-    _xfem_weights_map[elem->id()][i] = xfem_weights[i]; 
-}
-

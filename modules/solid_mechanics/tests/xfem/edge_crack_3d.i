@@ -68,9 +68,9 @@
   disp_z = disp_z
   crack_front_points = '0.4 0.5 0.0
                         0.4 0.5 0.1
-                        0.4 0.5 0.2'  
+                        0.4 0.5 0.2'
   crack_direction_method = CrackDirectionVector
-  crack_direction_vector = '1 0 0' 
+  crack_direction_vector = '1 0 0'
   radius_inner = '0.2'
   radius_outer = '0.4'
   poissons_ratio = 0.3
@@ -88,7 +88,7 @@
 []
 
 [AuxKernels]
-  [./stress_xx]       
+  [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xx
@@ -136,7 +136,7 @@
 [BCs]
   [./top_y]
     type = FunctionNeumannBC
-    boundary = top 
+    boundary = top
     variable = disp_y
     function = top_trac_y
   [../]

@@ -73,11 +73,7 @@
 #include "Control.h"
 #include "ScalarInitialCondition.h"
 #include "InternalSideIndicator.h"
-#include "XFEM_geometric_cut.h"
-#include "XFEM_geometric_cut_2d.h"
-#include "XFEM_square_cut.h"
-#include "XFEM_circle_cut.h"
-#include "XFEM_ellipse_cut.h"
+#include "XFEM.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -131,8 +127,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
-    _xfem(_material_data, &_mesh.getMesh()),
-    _is_use_xfem(false),
+    _xfem(NULL),
     _displaced_mesh(NULL),
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
@@ -245,6 +240,8 @@ FEProblem::~FEProblem()
        it != _random_data_objects.end(); ++it)
     delete it->second;
 
+  if (_xfem != NULL)
+    delete _xfem;
 }
 
 Moose::CoordinateSystemType
@@ -672,67 +669,9 @@ FEProblem::getMaxScalarOrder() const
 }
 
 void
-FEProblem::reinitXFEMWeights()
-{
-  std::map<dof_id_type, std::vector<Real> > ::iterator it  = _xfem_JxW.begin();
-  std::map<dof_id_type, std::vector<Real> > ::iterator end  = _xfem_JxW.end();
-
-  for (;it != end; ++it)
-    (it->second).clear();
-}
-
-void
-FEProblem::get_xfem_weights(const Elem * elem, THREAD_ID tid)
-{
-  _xfem_JxW[elem->id()].clear();
-  const Elem * undisplaced_elem  = NULL;
-  if(_displaced_problem != NULL)
-  {
-    undisplaced_elem = _displaced_problem->refMesh().elem(elem->id());
-  } 
-  else
-    undisplaced_elem = elem;
-  
-  _xfem_JxW[elem->id()].resize((_assembly[tid]->qRule())->n_points(), 1.0);
-
-  for (unsigned qp = 0; qp < (_assembly[tid]->qRule())->n_points(); qp++)
-  {
-    switch (_xfem.get_xfem_qrule())
-    {
-      case 0: // volfrac
-        {
-          _xfem_JxW[elem->id()][qp] = _xfem.get_elem_phys_volfrac(undisplaced_elem);
-          break;
-        }
-      case MOMENT_FITTING: //moment_fitting
-        { 
-          std::vector<Point> gauss_points = (_assembly[tid]->qRule())->get_points();
-          std::vector<Real>  gauss_weights = (_assembly[tid]->qRule())->get_weights();
-          _xfem_JxW[elem->id()][qp] = _xfem.get_elem_new_weights(undisplaced_elem, qp, gauss_points, gauss_weights);
-          break;
-        }
-      case DIRECT: //direct
-        {
-          // remove q-points outside the elem real domain by force
-          _xfem_JxW[elem->id()][qp] = _xfem.flag_qp_inside(undisplaced_elem, (_assembly[tid]->qPoints())[qp]);
-          break;
-        }
-      default:
-        _xfem_JxW[elem->id()][qp] = 1.0;
-    }
-  }
-}
-
-void
 FEProblem::prepare(const Elem * elem, THREAD_ID tid)
-{ 
+{
   _assembly[tid]->reinit(elem);
-
-  if (elem->is_semilocal(_mesh.processor_id()) && _xfem_JxW[elem->id()].size() == 0)
-  {
-    get_xfem_weights(elem,tid);
-  }
-  _assembly[tid]->setXFEMWeights(_xfem_JxW[elem->id()],elem);
 
   _nl.prepare(tid);
   _aux.prepare(tid);
@@ -3662,7 +3601,6 @@ FEProblem::addDisplacedProblem(MooseSharedPointer<DisplacedProblem> displaced_pr
 {
   _displaced_mesh = &displaced_problem->mesh();
   _displaced_problem = displaced_problem;
-  _xfem.setSecondMesh(&_displaced_mesh->getMesh());
 }
 
 void
@@ -3725,20 +3663,44 @@ FEProblem::adaptMesh()
       meshChanged();
   }
 }
+#endif //LIBMESH_ENABLE_AMR
+
+XFEM *
+FEProblem::createXFEM()
+{
+  if (_xfem == NULL)
+  {
+    if (!_displaced_mesh)
+      _xfem = new XFEM(getMooseApp(), _material_data, &_mesh.getMesh());
+    else
+      _xfem = new XFEM(getMooseApp(), _material_data, &_mesh.getMesh(), &_displaced_mesh->getMesh());
+  }
+  unsigned int n_threads = libMesh::n_threads();
+  for (unsigned int i = 0; i < n_threads; ++i)
+  {
+    _assembly[i]->setXFEM(_xfem);
+    if (_displaced_problem != NULL)
+      _displaced_problem->assembly(i).setXFEM(_xfem);
+  }
+  return _xfem;
+}
 
 bool
-FEProblem::xfemUpdateMesh()
+FEProblem::updateMeshXFEM()
 {
-  bool updated = _xfem.update(_time);
-  if (updated)
+  bool updated = false;
+  if (haveXFEM())
   {
-    meshChanged();
-    _xfem.initSolution(_nl, _aux);
-    restoreSolutions();
+    updated = _xfem->update(_time);
+    if (updated)
+    {
+      meshChanged();
+      _xfem->initSolution(_nl, _aux);
+      restoreSolutions();
+    }
   }
   return updated;
 }
-#endif //LIBMESH_ENABLE_AMR
 
 void
 FEProblem::meshChanged()
@@ -3763,8 +3725,6 @@ FEProblem::meshChanged()
   for (unsigned int i = 0; i < n_threads; ++i){
     _assembly[i]->invalidateCache();
   }
-
-  reinitXFEMWeights(); // reinitialize xfem weights
 
   // Need to redo ghosting
   _geometric_search_data.reinit();

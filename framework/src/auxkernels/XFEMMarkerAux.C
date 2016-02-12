@@ -29,7 +29,7 @@ XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters)
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
   if (fe_problem == NULL)
     mooseError("Problem casting _subproblem to FEProblem in XFEMMarkerAux");
-  _xfem = fe_problem->get_xfem();
+  _xfem = fe_problem->getXFEM();
   if (isNodal())
     mooseError("XFEMMarkerAux can only be run on an element variable");
 }
@@ -37,7 +37,7 @@ XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters)
 Real
 XFEMMarkerAux::computeValue()
 {
-  bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
+  bool isCTE = _xfem->isElemAtCrackTip(_current_elem);
   Real value = 0.0;
   if (isCTE)
   {

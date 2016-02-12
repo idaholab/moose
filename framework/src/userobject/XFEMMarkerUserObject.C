@@ -37,7 +37,7 @@ XFEMMarkerUserObject::XFEMMarkerUserObject(const InputParameters & parameters)
   FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
   if (fe_problem == NULL)
     mooseError("Problem casting _subproblem to FEProblem in XFEMMarkerUserObject");
-  _xfem = fe_problem->get_xfem();
+  _xfem = fe_problem->getXFEM();
   if (isNodal())
     mooseError("XFEMMarkerUserObject can only be run on an element variable");
 
@@ -60,8 +60,8 @@ void
 XFEMMarkerUserObject::execute()
 {
   RealVectorValue direction;
-  bool isCut = _xfem->is_elem_cut(_current_elem);
-  bool isCTE = _xfem->is_elem_at_crack_tip(_current_elem);
+  bool isCut = _xfem->isElemCut(_current_elem);
+  bool isCTE = _xfem->isElemAtCrackTip(_current_elem);
   bool isOnBoundary = false;
   unsigned int boundarySide = 99999;
   unsigned int _current_eid = _current_elem->id();
@@ -139,7 +139,7 @@ XFEMMarkerUserObject::finalize()
   _communicator.set_union(_marked_elems);
   _communicator.set_union(_marked_frags);
   _communicator.set_union(_marked_elem_sides);
- 
+
   _xfem->clearStateMarkedElems();
   std::map<unsigned int, RealVectorValue>::iterator mit;
   for (mit = _marked_elems.begin(); mit != _marked_elems.end(); ++mit)

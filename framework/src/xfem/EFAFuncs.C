@@ -1,0 +1,50 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "EFAFuncs.h"
+
+double
+linearQuadShape2D(unsigned int node_id, std::vector<double> &xi_2d)
+{
+  double node_xi[4][2] = {{-1.0,-1.0},{1.0,-1.0},{1.0,1.0},{-1.0,1.0}};
+  return 0.25*(1.0 + node_xi[node_id][0]*xi_2d[0])*(1.0 + node_xi[node_id][1]*xi_2d[1]);
+}
+
+double
+linearTriShape2D(unsigned int node_id, std::vector<double> &xi_2d)
+{
+  std::vector<double> area_xi(3,0.0);
+  area_xi[0] = xi_2d[0];
+  area_xi[1] = xi_2d[1];
+  area_xi[2] = 1.0 - xi_2d[0] - xi_2d[1];
+  return area_xi[node_id];
+}
+
+double
+linearHexShape3D(unsigned int node_id, std::vector<double> &xi_3d)
+{
+  double node_xi[8][3] = {{-1.0,-1.0,-1.0},{1.0,-1.0,-1.0},{1.0,1.0,-1.0},{-1.0,1.0,-1.0},
+                          {-1.0,-1.0, 1.0},{1.0,-1.0, 1.0},{1.0,1.0, 1.0},{-1.0,1.0, 1.0}};
+  return 0.125*(1.0 + node_xi[node_id][0]*xi_3d[0])*(1.0 + node_xi[node_id][1]*xi_3d[1])*(1.0 + node_xi[node_id][2]*xi_3d[2]);
+}
+
+double
+linearTetShape3D(unsigned int node_id, std::vector<double> &xi_3d)
+{
+  std::vector<double> vol_xi(4,0.0);
+  for (unsigned int i = 0; i < 3; ++i)
+    vol_xi[i] = xi_3d[i];
+  vol_xi[3] = 1.0 - xi_3d[0] - xi_3d[1] - xi_3d[2];
+  return vol_xi[node_id];
+}

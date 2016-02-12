@@ -206,6 +206,6 @@
   [../]
 #  [./vtk]
 #    type = GNUPlot
-#    output_initial = true    
+#    output_initial = true
 #  [../]
 []

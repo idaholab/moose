@@ -16,8 +16,7 @@
 #define XFEMCUTPLANEAUX_H
 
 #include "AuxKernel.h"
-
-class XFEM;
+#include "XFEM.h"
 
 /**
  * Coupled auxiliary value

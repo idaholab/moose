@@ -4,7 +4,7 @@
 []
 
 [XFEM]
-  #             x0   y0   x1   y1   t0    t1  
+  #             x0   y0   x1   y1   t0    t1
   cut_data = ' 1.0  0.5  0.7  0.5  0.0   0.0'
   qrule = volfrac
   output_cut_plane = true

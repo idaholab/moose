@@ -59,7 +59,7 @@
 []
 
 [AuxKernels]
-  [./stress_xx]       
+  [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xx
@@ -107,7 +107,7 @@
 [BCs]
   [./top_z]
     type = FunctionNeumannBC
-    boundary = 2 
+    boundary = 2
     variable = disp_z
     function = top_trac_z
   [../]

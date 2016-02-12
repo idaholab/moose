@@ -225,9 +225,6 @@ void
 DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem);
-
-  _assembly[tid]->setXFEMWeights(_mproblem.xfem_weights(elem->id()),elem);
-
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
   _assembly[tid]->prepare();

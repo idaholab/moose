@@ -58,9 +58,9 @@
                         -0.25 -0.07 0
                         -0.15 -0.15 0
                         -0.07 -0.25 0
-                         0 -0.5 0'  
+                         0 -0.5 0'
   crack_end_direction_method = CrackDirectionVector
-  crack_direction_vector_end_1 = '0 1 0' 
+  crack_direction_vector_end_1 = '0 1 0'
   crack_direction_vector_end_2 = '1 0 0'
   crack_direction_method = CurvedCrackFront
   intersecting_boundary = '3 4'
@@ -81,7 +81,7 @@
 []
 
 [AuxKernels]
-  [./stress_xx]       
+  [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xx
@@ -129,7 +129,7 @@
 [BCs]
   [./top_z]
     type = FunctionNeumannBC
-    boundary = 2 
+    boundary = 2
     variable = disp_z
     function = top_trac_z
   [../]

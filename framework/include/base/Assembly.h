@@ -30,6 +30,7 @@ class MooseMesh;
 class ArbitraryQuadrature;
 class SystemBase;
 class MooseVariable;
+class XFEM;
 
 // libMesh forward declarations
 namespace libMesh
@@ -462,11 +463,9 @@ public:
   void addCachedJacobianContributions(SparseMatrix<Number> & jacobian);
 
   /**
-  * Set  XFEM integration weights
-  */
-  void setXFEMWeights(std::vector<Real> & xfem_weights, const Elem* elem);
-
-  void updateXFEMWeights(const Elem* elem);
+   * Set the pointer to the XFEM controller object
+   */
+  void setXFEM(XFEM * xfem) { _xfem = xfem; }
 
 protected:
   /**
@@ -503,6 +502,13 @@ protected:
    */
   void clearCachedJacobianContributions();
 
+  /**
+   * Update the integration weights for XFEM partial elements.
+   * This only affects the weights if XFEM is used and if the element is cut.
+   * @param elem The element for which the weights are adjusted
+  */
+  void modifyWeightsDueToXFEM(const Elem* elem);
+
   SystemBase & _sys;
   /// Reference to coupling matrix
   CouplingMatrix * & _cm;
@@ -520,6 +526,9 @@ protected:
   MooseMesh & _mesh;
 
   unsigned int _mesh_dimension;
+
+  /// The XFEM controller
+  XFEM * _xfem;
 
   /// The "volume" fe object that matches the current elem
   std::map<FEType, FEBase *> _current_fe;
@@ -546,8 +555,6 @@ protected:
   MooseArray<Point> _current_q_points;
   /// The current list of transformed jacobian weights
   MooseArray<Real> _current_JxW;
-  /// The XFEM integration weights
-  std::map<dof_id_type, MooseArray<Real> > _xfem_weights_map;
   /// The coordinate system
   Moose::CoordinateSystemType _coord_type;
   /// The current coordinate transformation coefficients
@@ -675,7 +682,7 @@ protected:
    * Ok - here's the design.  One ElementFEShapeData class will be stored per element in _fe_shape_data_cache.
    * When reinit() is called on an element we will retrieve the ElementFEShapeData class associated with that
    * element.  If it's NULL we'll make one.  Then we'll store a copy of the shape functions computed on that
-   * element within shape_data and JxW and q_points within EleementFEShapeData.
+   * element within shape_data and JxW and q_points within ElementFEShapeData.
    */
   class ElementFEShapeData
   {

@@ -82,7 +82,7 @@ JIntegral::computeQpIntegral()
   grad_of_vector_q(2,2) = crack_direction(2)*_grad_of_scalar_q[_qp](2);
 
   Real eq = _Eshelby_tensor[_qp].doubleContraction(grad_of_vector_q);
-  
+
   //Thermal component
   Real eq_thermal = 0.0;
   if (_J_thermal_term_vec)

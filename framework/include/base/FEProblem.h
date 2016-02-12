@@ -29,7 +29,6 @@
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "ExecuteMooseObjectWarehouse.h"
-#include "XFEM.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -59,6 +58,7 @@ class InternalSideIndicator;
 class Marker;
 class Material;
 class Transfer;
+class XFEM;
 
 // libMesh forward declarations
 namespace libMesh
@@ -120,13 +120,6 @@ class FEProblem :
 public:
   FEProblem(const InputParameters & parameters);
   virtual ~FEProblem();
-
-  XFEM * get_xfem(){return &_xfem;}
-  void get_xfem_weights(const Elem * elem, THREAD_ID tid);
-  std::vector<Real> & xfem_weights(dof_id_type id){return _xfem_JxW[id];}
-  void reinitXFEMWeights();
-  bool isUseXFEM() {return _is_use_xfem;}
-  void setUseXFEM() {_is_use_xfem = true;}
 
   virtual EquationSystems & es() { return _eq; }
   virtual MooseMesh & mesh() { return _mesh; }
@@ -814,8 +807,20 @@ public:
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void adaptMesh();
-  virtual bool xfemUpdateMesh();
 #endif //LIBMESH_ENABLE_AMR
+
+  /// Create XFEM controller object
+  XFEM * createXFEM();
+
+  /// Get a pointer to the XFEM controller object
+  XFEM * getXFEM(){return _xfem;}
+
+  /// Find out whether the current analysis is using XFEM
+  bool haveXFEM() { return _xfem != NULL; }
+
+  /// Update the mesh due to changing XFEM cuts
+  virtual bool updateMeshXFEM();
+
   virtual void meshChanged();
 
   /**
@@ -1110,9 +1115,11 @@ protected:
   Adaptivity _adaptivity;
 #endif
 
-  XFEM _xfem;
-  std::map<dof_id_type, std::vector<Real> > _xfem_JxW;
-  bool _is_use_xfem;
+  /// Pointer to XFEM controller
+  XFEM * _xfem;
+
+  ///Weight factors used by XFEM to modify qp weights for partial elements
+  std::map<dof_id_type, MooseArray<Real> > _xfem_weights;
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;
