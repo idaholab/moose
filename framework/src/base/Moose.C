@@ -1126,7 +1126,6 @@ enableFPE(bool on)
     libMesh::enableFPE(on);
 }
 
-
 PerfLog setup_perf_log("Setup");
 
 /**

@@ -123,8 +123,6 @@ EigenExecutionerBase::init()
   /* a time step check point */
   _problem.onTimestepEnd();
 
-  Moose::setup_perf_log.push("Output Initial Condition","Setup");
-
   // Write the initial.
   // Note: We need to tempararily change the system time to make the output system work properly.
   _problem.timeStep() = 0;
@@ -132,7 +130,6 @@ EigenExecutionerBase::init()
   _problem.time() = _problem.timeStep();
   _problem.outputStep(EXEC_INITIAL);
   _problem.time() = t;
-  Moose::setup_perf_log.pop("Output Initial Condition","Setup");
 }
 
 void

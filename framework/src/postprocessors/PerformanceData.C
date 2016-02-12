@@ -39,7 +39,7 @@ PerformanceData::PerformanceData(const InputParameters & parameters) :
 Real
 PerformanceData::getValue()
 {
-  PerfData perf_data = Moose::perf_log.get_perf_data(_event, "Solve");
+  PerfData perf_data = Moose::perf_log.get_perf_data(_event, "Execution");
   double total_time = Moose::perf_log.get_active_time();
 
   if (perf_data.count == 0)
@@ -62,4 +62,3 @@ PerformanceData::getValue()
 
   mooseError("Invalid column!");
 }
-

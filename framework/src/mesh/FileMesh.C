@@ -63,7 +63,7 @@ FileMesh::buildMesh()
 {
   std::string _file_name = getParam<MeshFileName>("file");
 
-  Moose::setup_perf_log.push("Read Mesh","Setup");
+  Moose::perf_log.push("Read Mesh", "Setup");
   if (_is_nemesis)
   {
     // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
@@ -100,7 +100,7 @@ FileMesh::buildMesh()
       getMesh().read(_file_name);
   }
 
-  Moose::setup_perf_log.pop("Read Mesh","Setup");
+  Moose::perf_log.pop("Read Mesh", "Setup");
 }
 
 void
