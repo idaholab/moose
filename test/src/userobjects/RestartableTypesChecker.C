@@ -42,6 +42,79 @@ void RestartableTypesChecker::timestepSetup()
 void
 RestartableTypesChecker::execute()
 {
+  // First we need to check that the data has been restored properly
+  checkData();
+
+  /**
+   * For testing the packed range routines, we'll make sure that we can pack up several types
+   * into a single string and send it as a packed range and successfully restore it.
+   */
+
+  // Buffers for parallel communication
+  std::vector<std::string> send_buffers(1);
+  std::vector<std::string> recv_buffers;
+
+  // String streams for serialization and deserialization
+  std::ostringstream oss;
+  std::istringstream iss;
+
+  /**
+   * Serialize
+   */
+  dataStore(oss, _real_data, this);
+  dataStore(oss, _vector_data, this);
+  dataStore(oss, _vector_vector_data, this);
+  dataStore(oss, _pointer_data, this);
+  dataStore(oss, _custom_data, this);
+  dataStore(oss, _set_data, this);
+  dataStore(oss, _map_data, this);
+  dataStore(oss, _dense_vector_data, this);
+  dataStore(oss, _dense_matrix_data, this);
+
+  send_buffers[0] = oss.str();
+
+  /**
+   * Communicate
+   */
+  recv_buffers.reserve(_app.n_processors());
+  _communicator.allgather_packed_range((void *)(NULL), send_buffers.begin(), send_buffers.end(),
+                                       std::back_inserter(recv_buffers));
+
+  if (recv_buffers.size() != _app.n_processors())
+    mooseError("Error in sizes of communicated buffers");
+
+  /**
+   * Deserialize and check
+   */
+  for (unsigned int i = 0; i < recv_buffers.size(); ++i)
+  {
+    iss.str(recv_buffers[i]);
+    // reset the stream state
+    iss.clear();
+
+    // Clear types (just to make sure we don't get any false positives in our testing)
+    clearTypes();
+
+    // Now load the values
+    dataLoad(iss, _real_data, this);
+    dataLoad(iss, _vector_data, this);
+    dataLoad(iss, _vector_vector_data, this);
+    dataLoad(iss, _pointer_data, this);
+    dataLoad(iss, _custom_data, this);
+    dataLoad(iss, _set_data, this);
+    dataLoad(iss, _map_data, this);
+    dataLoad(iss, _dense_vector_data, this);
+    dataLoad(iss, _dense_matrix_data, this);
+    dataLoad(iss, *this, this);
+
+    // Finally confirm that the data is sane
+    checkData();
+  }
+}
+
+void
+RestartableTypesChecker::checkData()
+{
   if (_real_data != 3)
     mooseError("Error reading restartable Real expected 3 got " << _real_data);
 
@@ -99,4 +172,18 @@ RestartableTypesChecker::execute()
     for (unsigned int j = 0; j < _dense_matrix_data.n(); j++)
       if (_dense_matrix_data(i,j) != static_cast<Real>(i + j + 1))
         mooseError("Error reading restartable DenseMatrix data!");
+}
+
+void
+RestartableTypesChecker::clearTypes()
+{
+  _real_data = 0;
+  _vector_data.clear();
+  _vector_vector_data.clear();
+  _pointer_data->_i = 0;
+  _custom_data._i = 0;
+  _set_data.clear();
+  _map_data.clear();
+  _dense_vector_data.zero();
+  _dense_matrix_data.zero();
 }
