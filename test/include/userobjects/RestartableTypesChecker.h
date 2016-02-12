@@ -38,6 +38,9 @@ public:
   virtual void initialize() {};
   virtual void execute();
   virtual void finalize() {};
+
+  void checkData();
+  void clearTypes();
 };
 
 
