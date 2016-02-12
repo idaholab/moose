@@ -285,6 +285,7 @@ int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<doub
 
         for(unsigned int i=0; i<vertices.size(); i++){
                 cellAvgValues.at(i) = integralCellValue(vertices.at(i));
+                std::cout<<"cellAvgValues.at(i): "<<cellAvgValues.at(i)<< std::endl;
                 cumulativeValue += cellAvgValues.at(i);
         }
 
