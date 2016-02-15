@@ -173,6 +173,12 @@ public:
   Real & endTime() { return _end_time; }
 
   /**
+   * Get the number of steps
+   * @return The number of steps
+   */
+  unsigned int & numSteps() { return _num_steps; }
+
+  /**
    * Get the timestep tolerance
    * @return The timestep tolerance
    */
