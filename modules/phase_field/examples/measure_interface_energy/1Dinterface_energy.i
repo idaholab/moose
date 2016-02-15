@@ -7,9 +7,6 @@
   elem_type = EDGE
 []
 
-[GlobalParams]
-[]
-
 [AuxVariables]
   [./local_energy]
     order = CONSTANT
@@ -69,7 +66,7 @@
   [./Int_energy]
     type = ParsedFunction
     vals = 'total_solute Cleft Cright Fleft Fright volume'
-    value = ((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft
+    value = '((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft'
     vars = 'total_solute Cleft Cright Fleft Fright volume'
   [../]
   [./Diff]
@@ -90,7 +87,7 @@
   [./Free_energy]
     type = DerivativeParsedMaterial
     f_name = F
-    function = c^2*(c-1)^2
+    function = 'c^2*(c-1)^2'
     args = c
     derivative_order = 2
     block = 0
@@ -178,7 +175,8 @@
   nl_abs_tol = 1.0e-4
 
   start_time = 0.0
-  end_time   = 20
+  # make sure that the result obtained for the interfacial free energy is fully converged
+  end_time   = 40
 
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT

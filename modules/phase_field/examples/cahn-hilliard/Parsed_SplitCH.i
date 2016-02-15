@@ -10,7 +10,6 @@
   ny = 150
   xmax = 60
   ymax = 60
-  elem_type = QUAD4
 []
 
 [Variables]
@@ -31,8 +30,8 @@
   [./cIC]
     type = RandomIC
     variable = c
-    max = 0.1
     min = -0.1
+    max =  0.1
   [../]
 []
 
@@ -78,9 +77,9 @@
 [Materials]
   [./mat]
     type = GenericConstantMaterial
+    block = 0
     prop_names  = 'M kappa_c'
     prop_values = '1.0 0.5'
-    block = 0
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
@@ -115,21 +114,23 @@
 []
 
 [Executioner]
-  # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  # petsc_options_value = 'hypre boomeramg 31'
   type = Transient
-  scheme = bdf2
-  dt = 2.0
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm         31   preonly   lu      1'
+  scheme = bdf2
+
+  petsc_options_iname = '-pc_type -sub_pc_type'
+  petsc_options_value = 'asm      lu          '
+
   l_max_its = 30
   l_tol = 1e-4
   nl_max_its = 20
   nl_rel_tol = 1e-9
+
+  dt = 2.0
   end_time = 20.0
 []
 
 [Outputs]
   exodus = true
+  print_perf_log = true
 []

@@ -5,7 +5,6 @@
   ny = 100
   xmax = 60
   ymax = 60
-  elem_type = QUAD4
 []
 
 [Variables]
@@ -13,9 +12,9 @@
     order = THIRD
     family = HERMITE
     [./InitialCondition]
-      max = .1
       type = RandomIC
-      min = -.1
+      min = -0.1
+      max =  0.1
     [../]
   [../]
 []
@@ -48,9 +47,9 @@
 [Materials]
   [./mat]
     type = GenericConstantMaterial
-    prop_names  = 'M kappa_c'
-    prop_values = '1.0 0.5'
     block = 0
+    prop_names  = 'M   kappa_c'
+    prop_values = '1.0 0.5'
   [../]
 []
 
@@ -64,22 +63,25 @@
 
 [Executioner]
   type = Transient
-  dt = 2.0
+  solve_type = 'NEWTON'
+  scheme = bdf2
+
+  # Preconditioning using the additive Schwartz method and LU decomposition
+  petsc_options_iname = '-pc_type -sub_ksp_type -sub_pc_type'
+  petsc_options_value = 'asm      preonly       lu          '
+
+  # Alternative preconditioning options using Hypre (algebraic multi-grid)
+  #petsc_options_iname = '-pc_type -pc_hypre_type'
+  #petsc_options_value = 'hypre    boomeramg'
+
+  l_tol = 1e-4
   l_max_its = 30
 
-  solve_type = 'NEWTON'
-
-
-  #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  #petsc_options_value = 'hypre boomeramg 101'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm         31   preonly   lu      1'
-  l_tol = 1e-4
+  dt = 2.0
   end_time = 80.0
-  scheme = bdf2
 []
 
 [Outputs]
   exodus = true
-  active = console
+  print_perf_log = true
 []

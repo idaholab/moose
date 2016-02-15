@@ -9,11 +9,11 @@
   dim = 2 # Problem dimension
   nx = 11 # Number of elements in the x-direction
   ny = 11 # Number of elements in the y-direction
-  xmin = 0 # minimum x-coordinate of the mesh
+  xmin = 0    # minimum x-coordinate of the mesh
   xmax = 1000 # maximum x-coordinate of the mesh
-  ymin = 0 # minimum y-coordinate of the mesh
+  ymin = 0    # minimum y-coordinate of the mesh
   ymax = 1000 # maximum y-coordinate of the mesh
-  elem_type = QUAD4 # Type of elements used in the mesh
+  elem_type = QUAD4  # Type of elements used in the mesh
   uniform_refine = 3 # Initial uniform refinement of the mesh
 []
 
@@ -129,17 +129,21 @@
   # Uses newton iteration to solve the problem.
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
   petsc_options_value = 'hypre boomeramg 101 ds'
+
   l_max_its = 30 # Max number of linear iterations
   l_tol = 1e-4 # Relative tolerance for linear solves
   nl_max_its = 40 # Max number of nonlinear iterations
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
+
   start_time = 0.0
   end_time = 4000
+
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 25 # Initial time step.  In this simulation it changes.
     optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
   [../]
+
   [./Adaptivity]
     # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
     initial_adaptivity = 2 # Number of times mesh is adapted to initial condition
