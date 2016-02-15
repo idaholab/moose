@@ -26,6 +26,10 @@
     type = ParsedFunction
     value = (-1/3)*exp(-t)+(4/3)*exp(5*t)
   [../]
+  [./exact_y_fn]
+    type = ParsedFunction
+    value = (2/3)*exp(-t)+(4/3)*exp(5*t)
+  [../]
 []
 
 [Variables]
@@ -99,14 +103,14 @@
 
 
 [BCs]
-  [./left]
+  [./right]
     type = ScalarDirichletBC
     variable = diffused
     boundary = 1
     scalar_var = x
   [../]
 
-  [./right]
+  [./left]
     type = ScalarDirichletBC
     variable = diffused
     boundary = 3
@@ -132,11 +136,26 @@
     function = exact_x_fn
     execute_on = timestep_end
   [../]
-  # measure the error from exact solution in L2 norm
+
+  [./exact_y]
+    type = FunctionValuePostprocessor
+    function = exact_y_fn
+    execute_on = timestep_end
+    point = '0 0 0'
+  [../]
+
+  # Measure the error in ODE solution for 'x'.
   [./l2err_x]
     type = ScalarL2Error
     variable = x
     function = exact_x_fn
+  [../]
+
+  # Measure the error in ODE solution for 'y'.
+  [./l2err_y]
+    type = ScalarL2Error
+    variable = y
+    function = exact_y_fn
   [../]
 []
 
