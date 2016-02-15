@@ -74,6 +74,7 @@
     [./error]
       type = GradientJumpIndicator
       variable = convected
+      outputs = none
     [../]
   [../]
   [./Markers]
@@ -82,10 +83,12 @@
       refine = 0.5
       coarsen = 0
       indicator = error
+      outputs = none
     [../]
   [../]
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
 []

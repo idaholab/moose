@@ -37,5 +37,5 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 # Additional special case targets should be added here
 
 test: all
-	$(call TEST_exodiff,ex18.i,out.e)
-	$(call TEST_exodiff,ex18_parsed.i,out.e)
+	$(call TEST_exodiff,ex18.i,ex18_out.e)
+	$(call TEST_exodiff,ex18_parsed.i,ex18_out.e) # input file has file_base='ex18_out'

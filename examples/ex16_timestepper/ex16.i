@@ -89,7 +89,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 40
+  num_steps = 12
 
   # Use our custom TimeStepper
   [./TimeStepper]
@@ -101,5 +101,6 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
 []
