@@ -1,5 +1,6 @@
 #
-# Test the parsed function free enery Allen-Cahn Bulk kernel
+# Test the CoefReaction kernel (which adds -L*v to the residual) for the case
+# where v is a coupled variable
 #
 
 [Mesh]
@@ -48,11 +49,12 @@
     mob_name = 1
   [../]
   [./W]
-    type = Reaction
+    type = CoefReaction
     variable = w
+    mob_name = -1
   [../]
   [./CoupledBulk]
-    type = CoupledCoefReaction
+    type = CoefReaction
     variable = eta
     v = w
     mob_name = L

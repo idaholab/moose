@@ -1,5 +1,5 @@
 #
-# Test the parsed function free enery Allen-Cahn Bulk kernel
+# Test the coupled Allen-Cahn Bulk kernel
 #
 
 [Mesh]
@@ -56,7 +56,7 @@
   [../]
 
   [./CoupledBulk]
-    type = CoupledReaction
+    type = CoefReaction
     variable = eta
     v = w
   [../]

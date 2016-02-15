@@ -4,25 +4,27 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COUPLEDCOEFREACTION_H
-#define COUPLEDCOEFREACTION_H
+#ifndef COEFREACTION_H
+#define COEFREACTION_H
 
-#include "CoupledReaction.h"
+#include "Kernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declaration
-class CoupledCoefReaction;
+class CoefReaction;
 
 template<>
-InputParameters validParams<CoupledCoefReaction>();
+InputParameters validParams<CoefReaction>();
 
-// This kernel adds to the residual a contribution of -L*v where L is a material
-// property and v is a coupled variable
-class CoupledCoefReaction : public DerivativeMaterialInterface<JvarMapInterface<CoupledReaction> >
+/**
+ * This kernel adds to the residual a contribution of \f$ -L*v \f$ where \f$ L \f$ is a material
+ * property and \f$ v \f$ is a variable (nonlinear or coupled).
+ */
+class CoefReaction : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
 {
 public:
-  CoupledCoefReaction(const InputParameters & parameters);
+  CoefReaction(const InputParameters & parameters);
   virtual void initialSetup();
 
 protected:
@@ -30,30 +32,33 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// Coupled variable (For constrained Allen-Cahn problems, v = lambda
+  /// is the kernel used in a coupled form?
+  const bool _is_coupled;
+
+  /// Kernel variable (can be nonlinear or coupled variable)
+  /// (For constrained Allen-Cahn problems, v = lambda
   /// where lambda is the Lagrange multiplier)
   std::string _v_name;
   VariableValue & _v;
   unsigned int _v_var;
 
-  /// Mobility
+  /// Reaction rate
   const MaterialProperty<Real> & _L;
 
   /// name of the order parameter (needed to retrieve the derivative material properties)
   VariableName _eta_name;
 
-  ///  Mobility derivative w.r.t. order parameter
+  ///  Reaction rate derivative w.r.t. order parameter
   const MaterialProperty<Real> & _dLdop;
 
-  ///  Mobility derivative w.r.t. the coupled variable being added by this kernel
+  ///  Reaction rate derivative w.r.t. the variable being added by this kernel
   const MaterialProperty<Real> & _dLdv;
 
   /// number of coupled variables
   const unsigned int _nvar;
 
-  ///  Mobility derivatives w.r.t. other coupled variables
+  ///  Reaction rate derivatives w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;
-
 };
 
-#endif //COUPLEDCOEFREACTION_H
+#endif //COEFREACTION_H
