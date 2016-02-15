@@ -47,6 +47,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
   [./refine_2]
     type = Exodus

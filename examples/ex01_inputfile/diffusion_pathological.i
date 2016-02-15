@@ -5,7 +5,7 @@
 
 # Note: This output block is out of its normal place (should be at the bottom)
 [Outputs]
-  file_base = out
+  execute_on = 'timestep_end'
   exodus = true
 []
 
