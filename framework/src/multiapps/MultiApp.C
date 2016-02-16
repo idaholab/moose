@@ -57,8 +57,8 @@ InputParameters validParams<MultiApp>()
 
   params.addRequiredParam<MooseEnum>("app_type", app_types_options, "The type of application to build (applications not registered can be loaded with dynamic libraries.");
   params.addParam<std::string>("library_path", "", "Path to search for dynamic libraries (please avoid committing absolute paths in addition to MOOSE_LIBRARY_PATH)");
-  params.addParam<std::vector<Point> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  Either this must be supplied or 'positions_file'");
-  params.addParam<std::vector<FileName> >("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  Either this must be supplied or 'positions'");
+  params.addParam<std::vector<Point> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  This and 'positions_file' cannot be both supplied. If this and 'positions_file' are not supplied, a single position (0,0,0) will be used");
+  params.addParam<std::vector<FileName> >("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  This and 'positions' cannot be both supplied");
 
   params.addRequiredParam<std::vector<FileName> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.  When using 'positions_from_file' it is also admissable to provide one input_file per file.");
   params.addParam<Real>("bounding_box_inflation", 0.01, "Relative amount to 'inflate' the bounding box of this MultiApp.");
@@ -234,7 +234,12 @@ MultiApp::fillPositions()
     }
   }
   else
-    mooseError("Must supply either 'positions' or 'positions_file' for MultiApp " << name());
+  {
+    _positions = std::vector<Point>(1, Point());
+
+    if (_positions.size() < _input_files.size())
+      mooseError("Not enough positions for the number of input files provided in MultiApp " << name());
+  }
 }
 
 
