@@ -108,10 +108,10 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor
   dtau(1, 2) = dtau(2, 1) = 0.25*(stress(1, 2) + stress(2, 1))/tau;
   dtau(2, 2) = 0.5*dsmooth(stress)/tau;
 
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
-      for (unsigned k = 0 ; k < 3 ; ++k)
-        for (unsigned l = 0 ; l < 3 ; ++l)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
+      for (unsigned k = 0; k < 3; ++k)
+        for (unsigned l = 0; l < 3; ++l)
           dr_dstress(i, j, k, l) = -dtau(i, j)*dtau(k, l)/tau;
 
   // note that i explicitly symmeterise

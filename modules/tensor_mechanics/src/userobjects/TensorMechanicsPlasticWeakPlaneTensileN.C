@@ -31,8 +31,8 @@ TensorMechanicsPlasticWeakPlaneTensileN::TensorMechanicsPlasticWeakPlaneTensileN
      _input_n /= _input_n.size();
   _rot = RotationMatrix::rotVecToZ(_input_n);
 
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
       _df_dsig(i, j) = _rot(2, i)*_rot(2, j);
 }
 
@@ -41,8 +41,8 @@ Real
 TensorMechanicsPlasticWeakPlaneTensileN::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
 {
   Real s22 = 0;
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
       s22 += _rot(2, i)*_rot(2, j)*stress(i, j);
   return s22 - tensile_strength(intnl);
 }

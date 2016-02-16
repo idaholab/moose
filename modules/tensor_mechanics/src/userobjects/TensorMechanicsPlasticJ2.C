@@ -68,10 +68,10 @@ TensorMechanicsPlasticJ2::dflowPotential_dstress(const RankTwoTensor & stress, c
   RankFourTensor dfp = 0.5*std::pow(3/sII, 0.5)*stress.d2secondInvariant();
   Real pre = -0.25*std::pow(3, 0.5)*std::pow(sII, -1.5);
   RankTwoTensor dII = stress.dsecondInvariant();
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
-      for (unsigned k = 0 ; k < 3 ; ++k)
-        for (unsigned l = 0 ; l < 3 ; ++l)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
+      for (unsigned k = 0; k < 3; ++k)
+        for (unsigned l = 0; l < 3; ++l)
           dfp(i, j, k, l) += pre*dII(i, j)*dII(k, l);
   return dfp;
 }

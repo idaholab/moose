@@ -70,8 +70,8 @@ TensorMechanicsPlasticTensileMulti::dyieldFunction_dstressV(const RankTwoTensor 
     RankTwoTensor shifted_stress = stress;
     while (eigvals[0] > eigvals[1] - 0.1*_shift || eigvals[1] > eigvals[2] - 0.1*_shift)
     {
-      for (unsigned i = 0 ; i < 3 ; ++i)
-        for (unsigned j = 0 ; j <= i ; ++j)
+      for (unsigned i = 0; i < 3; ++i)
+        for (unsigned j = 0; j <= i; ++j)
         {
           small_perturbation = 0.1*_shift*2*(MooseRandom::rand() - 0.5);
           shifted_stress(i, j) += small_perturbation;

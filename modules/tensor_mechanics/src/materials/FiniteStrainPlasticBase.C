@@ -66,13 +66,13 @@ FiniteStrainPlasticBase::initQpStatefulProperties()
   // won't be correctly overriden.
   if (_f_tol.size() != numberOfYieldFunctions())
     mooseError("The number of yield_function_tolerance parameters must match the number of yield functions");
-  for (unsigned alpha = 0 ; alpha < _f_tol.size() ; ++alpha)
+  for (unsigned alpha = 0; alpha < _f_tol.size(); ++alpha)
     if (_f_tol[alpha] <= 0)
       mooseError("The yield_function_tolerance must be positive");
 
   if (_ic_tol.size() != numberOfInternalParameters())
     mooseError("The number of internal_constraint_tolerance parameters (" << _ic_tol.size() << ") must match the number of internal parameters (" << numberOfInternalParameters() << ")");
-  for (unsigned a = 0 ; a < _ic_tol.size() ; ++a)
+  for (unsigned a = 0; a < _ic_tol.size(); ++a)
     if (_ic_tol[a] <= 0)
       mooseError("The internal_constraint_tolerance must be positive");
 
@@ -134,7 +134,7 @@ FiniteStrainPlasticBase::computeQpStress()
 
 
     // now do the work: apply the "dep" over num_subdivisions "substeps"
-    for (unsigned substep = 0 ; substep < num_subdivisions ; ++substep)
+    for (unsigned substep = 0; substep < num_subdivisions; ++substep)
     {
       return_successful = returnMap(stress_previous, plastic_strain_previous, _intnl_old[_qp], dep, _elasticity_tensor[_qp], _stress[_qp], _plastic_strain[_qp], _intnl[_qp], _f[_qp], _iter[_qp]);
       if (return_successful)
@@ -159,7 +159,7 @@ FiniteStrainPlasticBase::computeQpStress()
     _fspb_debug_stress = _stress_old[_qp];
     _fspb_debug_pm.assign(numberOfYieldFunctions(), 1); // this is chosen arbitrarily - please change if a more suitable value occurs to you!
     _fspb_debug_intnl.resize(numberOfInternalParameters());
-    for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+    for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
       _fspb_debug_intnl[a] = _intnl_old[_qp][a];
     checkDerivatives();
     checkJacobian();
@@ -265,14 +265,14 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
   // This is the elastic-predictor
   stress = stress_old + E_ijkl * delta_d; // the trial stress
   plastic_strain = plastic_strain_old;
-  for (unsigned i = 0; i < intnl_old.size() ; ++i)
+  for (unsigned i = 0; i < intnl_old.size(); ++i)
     intnl[i] = intnl_old[i];
   iter = 0;
 
   yieldFunction(stress, intnl, f);
 
   Real nr_res2 = 0;
-  for (unsigned i = 0 ; i < f.size() ; ++i)
+  for (unsigned i = 0; i < f.size(); ++i)
     nr_res2 += 0.5*std::pow( std::max(f[i], 0.0)/_f_tol[i], 2);
 
   if (nr_res2 < 0.5)
@@ -343,7 +343,7 @@ FiniteStrainPlasticBase::returnMap(const RankTwoTensor & stress_old, const RankT
   if (iter >= _max_iter || !ls_success)
   {
     stress = stress_old;
-    for (unsigned i = 0; i < intnl_old.size() ; ++i)
+    for (unsigned i = 0; i < intnl_old.size(); ++i)
       intnl[i] = intnl_old[i];
     return false;
   }
@@ -367,7 +367,7 @@ FiniteStrainPlasticBase::calculateConstraints(const RankTwoTensor & stress, cons
   flowPotential(stress, intnl, r);
 
   epp = RankTwoTensor();
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     epp += pm[alpha]*r[alpha];
   epp -= delta_dp;
 
@@ -377,10 +377,10 @@ FiniteStrainPlasticBase::calculateConstraints(const RankTwoTensor & stress, cons
   hardPotential(stress, intnl, h);
 
   ic.resize(numberOfInternalParameters());
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
   {
     ic[a] = intnl[a] - intnl_old[a];
-    for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
       ic[a] += pm[alpha]*h[a][alpha];
   }
 }
@@ -403,12 +403,12 @@ FiniteStrainPlasticBase::calculateRHS(const RankTwoTensor & stress, const std::v
   // notice the appearance of only the i>=j components
 
   unsigned ind = 0;
-  for (unsigned i = 0 ; i < dim ; ++i)
-    for (unsigned j = 0 ; j <= i ; ++j)
+  for (unsigned i = 0; i < dim; ++i)
+    for (unsigned j = 0; j <= i; ++j)
       rhs[ind++] = -epp(i, j);
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     rhs[ind++] = -f[alpha];
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
     rhs[ind++] = -ic[a];
 }
 
@@ -417,10 +417,10 @@ Real
 FiniteStrainPlasticBase::residual2(const std::vector<Real> & f, const RankTwoTensor & epp, const std::vector<Real> & ic)
 {
   Real nr_res2 = 0;
-  for (unsigned alpha = 0 ; alpha < f.size() ; ++alpha)
+  for (unsigned alpha = 0; alpha < f.size(); ++alpha)
     nr_res2 += 0.5*std::pow( f[alpha]/_f_tol[alpha], 2); // NOTE: have to change for multi-surface, since f could be negative!
   nr_res2 += 0.5*std::pow(epp.L2norm()/_epp_tol, 2);
-  for (unsigned a = 0 ; a < ic.size() ; ++a)
+  for (unsigned a = 0; a < ic.size(); ++a)
     nr_res2 += 0.5*std::pow(ic[a]/_ic_tol[a], 2);
   return nr_res2;
 }
@@ -465,19 +465,19 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
   // ic = intnl - intnl_old + pm*h
 
   RankFourTensor depp_dstress;
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     depp_dstress += pm[alpha]*dr_dstress[alpha];
   depp_dstress += E_inv;
 
   std::vector<RankTwoTensor> depp_dpm;
   depp_dpm.resize(numberOfYieldFunctions());
-  for (unsigned alpha = 0; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     depp_dpm[alpha] = r[alpha];
 
   std::vector<RankTwoTensor> depp_dintnl;
   depp_dintnl.assign(numberOfInternalParameters(), RankTwoTensor());
-  for (unsigned a = 0; a < numberOfInternalParameters() ; ++a)
-    for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
+    for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
       depp_dintnl[a] += pm[alpha]*dr_dintnl[alpha][a];
 
   // df_dstress has been calculated above
@@ -486,26 +486,26 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
 
   std::vector<RankTwoTensor> dic_dstress;
   dic_dstress.assign(numberOfInternalParameters(), RankTwoTensor());
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
-    for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
+    for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
       dic_dstress[a] += pm[alpha]*dh_dstress[a][alpha];
 
   std::vector<std::vector<Real> > dic_dpm;
   dic_dpm.resize(numberOfInternalParameters());
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
   {
     dic_dpm[a].resize(numberOfYieldFunctions());
-    for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
       dic_dpm[a][alpha] = h[a][alpha];
   }
 
   std::vector<std::vector<Real> > dic_dintnl;
   dic_dintnl.resize(numberOfInternalParameters());
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
   {
     dic_dintnl[a].assign(numberOfInternalParameters(), 0);
-    for (unsigned b = 0 ; b < numberOfInternalParameters() ; ++b)
-      for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    for (unsigned b = 0; b < numberOfInternalParameters(); ++b)
+      for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
         dic_dintnl[a][b] += pm[alpha]*dh_dintnl[a][alpha][b];
     dic_dintnl[a][a] += 1;
   }
@@ -523,46 +523,46 @@ FiniteStrainPlasticBase::calculateJacobian(const RankTwoTensor & stress, const s
   unsigned int dim = 3;
   unsigned int system_size = 6 + numberOfYieldFunctions() + numberOfInternalParameters(); // "6" comes from symmeterizing epp
   jac.resize(system_size);
-  for (unsigned i = 0 ; i < system_size ; ++i)
+  for (unsigned i = 0; i < system_size; ++i)
     jac[i].resize(system_size);
 
   unsigned int row_num = 0;
   unsigned int col_num = 0;
-  for (unsigned i = 0 ; i < dim ; ++i)
-    for (unsigned j = 0 ; j <= i ; ++j)
+  for (unsigned i = 0; i < dim; ++i)
+    for (unsigned j = 0; j <= i; ++j)
     {
-      for (unsigned k = 0 ; k < dim ; ++k)
-        for (unsigned l = 0 ; l <= k ; ++l)
+      for (unsigned k = 0; k < dim; ++k)
+        for (unsigned l = 0; l <= k; ++l)
           jac[col_num][row_num++] = depp_dstress(i, j, k, l) + (k != l ? depp_dstress(i, j, l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
-      for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+      for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
         jac[col_num][row_num++] = depp_dpm[alpha](i, j);
-      for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+      for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
         jac[col_num][row_num++] = depp_dintnl[a](i, j);
       row_num = 0;
       col_num++;
     }
 
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
   {
-    for (unsigned k = 0 ; k < dim ; ++k)
-      for (unsigned l = 0 ; l <= k ; ++l)
+    for (unsigned k = 0; k < dim; ++k)
+      for (unsigned l = 0; l <= k; ++l)
         jac[col_num][row_num++] = df_dstress[alpha](k, l) + (k != l ? df_dstress[alpha](l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
-    for (unsigned beta = 0 ; beta < numberOfYieldFunctions() ; ++beta)
+    for (unsigned beta = 0; beta < numberOfYieldFunctions(); ++beta)
       jac[col_num][row_num++] = 0;
-    for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+    for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
       jac[col_num][row_num++] = df_dintnl[alpha][a];
     row_num = 0;
     col_num++;
   }
 
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
   {
-    for (unsigned k = 0 ; k < dim ; ++k)
-      for (unsigned l = 0 ; l <= k ; ++l)
+    for (unsigned k = 0; k < dim; ++k)
+      for (unsigned l = 0; l <= k; ++l)
         jac[col_num][row_num++] = dic_dstress[a](k, l) + (k != l ? dic_dstress[a](l, k) : 0); // extra part is needed because i assume dstress(i, j) = dstress(j, i)
-    for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
       jac[col_num][row_num++] = dic_dpm[a][alpha];
-    for (unsigned b = 0 ; b < numberOfInternalParameters() ; ++b)
+    for (unsigned b = 0; b < numberOfInternalParameters(); ++b)
       jac[col_num][row_num++] = dic_dintnl[a][b];
     row_num = 0;
     col_num++;
@@ -585,8 +585,8 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
   std::vector<double> a(system_size*system_size);
   // Fill in the a "matrix" by going down columns
   unsigned ind = 0;
-  for (int col = 0 ; col < system_size ; ++col)
-    for (int row = 0 ; row < system_size ; ++row)
+  for (int col = 0; col < system_size; ++col)
+    for (int row = 0; row < system_size; ++row)
       a[ind++] = jac[row][col];
 
   int nrhs = 1;
@@ -600,14 +600,14 @@ FiniteStrainPlasticBase::nrStep(const RankTwoTensor & stress, const std::vector<
   // Extract the results back to dstress, dpm and dintnl
   unsigned int dim = 3;
   ind = 0;
-  for (unsigned i = 0 ; i < dim ; ++i)
-    for (unsigned j = 0 ; j <= i ; ++j)
+  for (unsigned i = 0; i < dim; ++i)
+    for (unsigned j = 0; j <= i; ++j)
       dstress(i, j) = dstress(j, i) = rhs[ind++];
   dpm.resize(numberOfYieldFunctions());
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     dpm[alpha] = rhs[ind++];
   dintnl.resize(numberOfInternalParameters());
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
     dintnl[a] = rhs[ind++];
 }
 
@@ -648,10 +648,10 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
   while (true)
   {
     // update the variables using this line-search parameter
-    for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
       ls_pm[alpha] = pm[alpha] + dpm[alpha]*lam;
     ls_delta_dp = delta_dp - E_inv*dstress*lam;
-    for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++ a)
+    for (unsigned a = 0; a < numberOfInternalParameters(); ++ a)
       ls_intnl[a] = intnl[a] + dintnl[a]*lam;
     ls_stress = stress + dstress*lam;
 
@@ -668,10 +668,10 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
     {
       success = false;
       // restore plastic multipliers, yield functions, etc to original values
-      for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+      for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
         ls_pm[alpha] = pm[alpha];
       ls_delta_dp = delta_dp;
-      for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++ a)
+      for (unsigned a = 0; a < numberOfInternalParameters(); ++ a)
         ls_intnl[a] = intnl[a];
       ls_stress = stress;
       calculateConstraints(ls_stress, intnl_old, ls_intnl, ls_pm, ls_delta_dp, f, epp, ic);
@@ -712,10 +712,10 @@ FiniteStrainPlasticBase::lineSearch(Real & nr_res2, RankTwoTensor & stress, cons
 
   // assign the quantities found in the line-search
   // back to the originals
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     pm[alpha] = ls_pm[alpha];
   delta_dp = ls_delta_dp;
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++ a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++ a)
     intnl[a] = ls_intnl[a];
   stress = ls_stress;
 
@@ -741,7 +741,7 @@ FiniteStrainPlasticBase::checkDerivatives()
   std::vector<RankTwoTensor> fddf_dstress;
   dyieldFunction_dstress(_fspb_debug_stress, _fspb_debug_intnl, df_dstress);
   fddyieldFunction_dstress(_fspb_debug_stress, _fspb_debug_intnl, fddf_dstress);
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
   {
     _console << "alpha = " << alpha << " Relative L2norm = " << 2*(df_dstress[alpha] - fddf_dstress[alpha]).L2norm()/(df_dstress[alpha] + fddf_dstress[alpha]).L2norm() << "\n";
     _console << "Coded:\n";
@@ -755,7 +755,7 @@ FiniteStrainPlasticBase::checkDerivatives()
   std::vector<RankFourTensor> fddr_dstress;
   dflowPotential_dstress(_fspb_debug_stress, _fspb_debug_intnl, dr_dstress);
   fddflowPotential_dstress(_fspb_debug_stress, _fspb_debug_intnl, fddr_dstress);
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
   {
     _console << "alpha = " << alpha << " Relative L2norm = " << 2*(dr_dstress[alpha] - fddr_dstress[alpha]).L2norm()/(dr_dstress[alpha] + fddr_dstress[alpha]).L2norm() << "\n";
     _console << "Coded:\n";
@@ -769,9 +769,9 @@ FiniteStrainPlasticBase::checkDerivatives()
   std::vector<std::vector<RankTwoTensor> > fddr_dintnl;
   dflowPotential_dintnl(_fspb_debug_stress, _fspb_debug_intnl, dr_dintnl);
   fddflowPotential_dintnl(_fspb_debug_stress, _fspb_debug_intnl, fddr_dintnl);
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
   {
-    for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+    for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
     {
       _console << "alpha = " << alpha << " a = " << a << " Relative L2norm = " << 2*(dr_dintnl[alpha][a] - fddr_dintnl[alpha][a]).L2norm()/(dr_dintnl[alpha][a] + fddr_dintnl[alpha][a]).L2norm() << "\n";
       _console << "Coded:\n";
@@ -791,8 +791,8 @@ FiniteStrainPlasticBase::fddyieldFunction_dstress(const RankTwoTensor & stress, 
   Real ep = _fspb_debug_stress_change;
   RankTwoTensor stressep;
   std::vector<Real> fep, fep_minus;
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
     {
       stressep = stress;
       // do a central difference to attempt to capture discontinuities
@@ -801,7 +801,7 @@ FiniteStrainPlasticBase::fddyieldFunction_dstress(const RankTwoTensor & stress, 
       yieldFunction(stressep, intnl, fep);
       stressep(i, j) -= ep;
       yieldFunction(stressep, intnl, fep_minus);
-      for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+      for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
         df_dstress[alpha](i, j) = (fep[alpha] - fep_minus[alpha])/ep;
     }
 }
@@ -814,17 +814,17 @@ FiniteStrainPlasticBase::fddflowPotential_dstress(const RankTwoTensor & stress, 
   Real ep = _fspb_debug_stress_change;
   RankTwoTensor stressep;
   std::vector<RankTwoTensor> rep, rep_minus;
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
     {
       stressep = stress;
       stressep(i, j) += ep/2.0;
       flowPotential(stressep, intnl, rep);
       stressep(i, j) -= ep;
       flowPotential(stressep, intnl, rep_minus);
-      for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned l = 0 ; l < 3 ; ++l)
+      for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned l = 0; l < 3; ++l)
             dr_dstress[alpha](k, l, i, j) = (rep[alpha](k, l) - rep_minus[alpha](k, l))/ep;
     }
 }
@@ -833,7 +833,7 @@ void
 FiniteStrainPlasticBase::fddflowPotential_dintnl(const RankTwoTensor & stress, const std::vector<Real> & intnl, std::vector<std::vector<RankTwoTensor> > & dr_dintnl)
 {
   dr_dintnl.resize(numberOfYieldFunctions());
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     dr_dintnl[alpha].assign(numberOfInternalParameters(), RankTwoTensor());
 
   std::vector<RankTwoTensor> origr;
@@ -841,16 +841,16 @@ FiniteStrainPlasticBase::fddflowPotential_dintnl(const RankTwoTensor & stress, c
 
   std::vector<Real> intnlep;
   intnlep.resize(numberOfInternalParameters());
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
     intnlep[a] = intnl[a];
   Real ep;
   std::vector<RankTwoTensor> rep;
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
   {
     ep = _fspb_debug_intnl_change[a];
     intnlep[a] += ep;
     flowPotential(stress, intnlep, rep);
-    for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+    for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
       dr_dintnl[alpha][a] = (rep[alpha] - origr[alpha])/ep;
     intnlep[a] -= ep;
   }
@@ -873,17 +873,17 @@ FiniteStrainPlasticBase::checkJacobian()
   fdJacobian(_fspb_debug_stress, _intnl_old[_qp], _fspb_debug_intnl, _fspb_debug_pm, delta_dp, E_inv, fdjac);
 
   _console << "Hand-coded Jacobian:\n";
-  for (unsigned row = 0 ; row < jac.size() ; ++row)
+  for (unsigned row = 0; row < jac.size(); ++row)
   {
-    for (unsigned col = 0 ; col < jac.size() ; ++col)
+    for (unsigned col = 0; col < jac.size(); ++col)
       _console << jac[row][col] << " ";
     _console << "\n";
   }
 
   _console << "Finite difference Jacobian:\n";
-  for (unsigned row = 0 ; row < fdjac.size() ; ++row)
+  for (unsigned row = 0; row < fdjac.size(); ++row)
   {
-    for (unsigned col = 0 ; col < fdjac.size() ; ++col)
+    for (unsigned col = 0; col < fdjac.size(); ++col)
       _console << fdjac[row][col] << " ";
     _console << "\n";
   }
@@ -897,7 +897,7 @@ FiniteStrainPlasticBase::fdJacobian(const RankTwoTensor & stress, const std::vec
 
   unsigned int system_size = orig_rhs.size();
   jac.resize(system_size);
-  for (unsigned row = 0 ; row < system_size ; ++row)
+  for (unsigned row = 0; row < system_size; ++row)
     jac[row].resize(system_size);
 
 
@@ -907,37 +907,37 @@ FiniteStrainPlasticBase::fdJacobian(const RankTwoTensor & stress, const std::vec
   RankTwoTensor stressep;
   RankTwoTensor delta_dpep;
   Real ep = _fspb_debug_stress_change;
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j <= i ; ++j)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j <= i; ++j)
     {
       stressep = stress;
       stressep(i, j) += ep;
       if (i != j)
         stressep(j, i) += ep;
       delta_dpep = delta_dp;
-      for (unsigned k = 0; k < 3 ; ++k)
-        for (unsigned l = 0 ; l < 3 ; ++l)
+      for (unsigned k = 0; k < 3; ++k)
+        for (unsigned l = 0; l < 3; ++l)
         {
           delta_dpep(k, l) -= E_inv(k, l, i, j)*ep;
           if (i != j)
             delta_dpep(k, l) -= E_inv(k, l, j, i)*ep;
         }
       calculateRHS(stressep, intnl_old, intnl, pm, delta_dpep, rhs_ep);
-      for (unsigned row = 0 ; row < system_size ; ++row)
+      for (unsigned row = 0; row < system_size; ++row)
         jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
       col++;
     }
 
   std::vector<Real> pmep;
   pmep.resize(numberOfYieldFunctions());
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     pmep[alpha] = pm[alpha];
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
   {
     ep = _fspb_debug_pm_change[alpha];
     pmep[alpha] += ep;
     calculateRHS(stress, intnl_old, intnl, pmep, delta_dp, rhs_ep);
-    for (unsigned row = 0 ; row < system_size ; ++row)
+    for (unsigned row = 0; row < system_size; ++row)
       jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
     pmep[alpha] -= ep;
     col++;
@@ -945,14 +945,14 @@ FiniteStrainPlasticBase::fdJacobian(const RankTwoTensor & stress, const std::vec
 
   std::vector<Real> intnlep;
   intnlep.resize(numberOfInternalParameters());
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
     intnlep[a] = intnl[a];
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
   {
     ep = _fspb_debug_intnl_change[a];
     intnlep[a] += ep;
     calculateRHS(stress, intnl_old, intnlep, pm, delta_dp, rhs_ep);
-    for (unsigned row = 0 ; row < system_size ; ++row)
+    for (unsigned row = 0; row < system_size; ++row)
       jac[row][col] = -(rhs_ep[row] - orig_rhs[row])/ep; // remember jacobian = -d(rhs)/d(something)
     intnlep[a] -= ep;
     col++;
@@ -970,19 +970,19 @@ FiniteStrainPlasticBase::outputAndCheckDebugParameters()
     mooseError("The debug parameters have the wrong size\n");
 
   _console << "plastic multipliers =\n";
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     _console << _fspb_debug_pm[alpha] << "\n";
 
   _console << "internal parameters =\n";
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
     _console << _fspb_debug_intnl[a] << "\n";
 
   _console << "finite-differencing parameter for stress-changes:\n" << _fspb_debug_stress_change  << "\n";
   _console << "finite-differencing parameter(s) for plastic-multiplier(s):\n";
-  for (unsigned alpha = 0 ; alpha < numberOfYieldFunctions() ; ++alpha)
+  for (unsigned alpha = 0; alpha < numberOfYieldFunctions(); ++alpha)
     _console << _fspb_debug_pm_change[alpha] << "\n";
   _console << "finite-differencing parameter(s) for internal-parameter(s):\n";
-  for (unsigned a = 0 ; a < numberOfInternalParameters() ; ++a)
+  for (unsigned a = 0; a < numberOfInternalParameters(); ++a)
     _console << _fspb_debug_intnl_change[a] << "\n";
 }
 

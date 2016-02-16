@@ -679,10 +679,10 @@ RankTwoTensor::d2sin3Lode(const Real r0) const
   RankTwoTensor dIII = dthirdInvariant();
   RankFourTensor deriv = d2thirdInvariant()/std::pow(bar, 1.5) - 1.5*d2secondInvariant()*J3/std::pow(bar, 2.5);
 
-  for (unsigned i = 0 ; i < N ; ++i)
-    for (unsigned j = 0 ; j < N ; ++j)
-      for (unsigned k = 0 ; k < N ; ++k)
-        for (unsigned l = 0 ; l < N ; ++l)
+  for (unsigned i = 0; i < N; ++i)
+    for (unsigned j = 0; j < N; ++j)
+      for (unsigned k = 0; k < N; ++k)
+        for (unsigned l = 0; l < N; ++l)
           deriv(i, j, k, l) += (-1.5*dII(i, j)*dIII(k, l) -1.5 * dIII(i, j) * dII(k, l)) / std::pow(bar, 2.5) + 1.5*2.5*dII(i, j) * dII(k, l) * J3 / std::pow(bar, 3.5);
 
   deriv *= -1.5 * std::sqrt(3.0);
@@ -911,6 +911,42 @@ RankTwoTensor::syev(const char * calculation_type, std::vector<PetscScalar> & ei
 
   if (info != 0)
     mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
+}
+
+void
+RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
+{
+  const RankTwoTensor &a = *this;
+  RankTwoTensor c, diag, evec;
+  PetscScalar cmat[N][N], work[10];
+  PetscReal w[N];
+
+  // prepare data for the LAPACKsyev_ routine (which comes from petscblaslapack.h)
+  PetscBLASInt nd = N,
+               lwork = 10,
+               info;
+
+  c = a.transpose() * a;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      cmat[i][j] = c(i,j);
+
+  LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
+
+  if (info != 0)
+    mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
+
+  diag.zero();
+
+  for (unsigned int i = 0; i < N; ++i)
+    diag(i,i) = std::pow(w[i], 0.5);
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      evec(i,j) = cmat[i][j];
+
+  rot = a * ((evec.transpose() * diag * evec).inverse());
 }
 
 void

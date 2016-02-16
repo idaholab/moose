@@ -65,7 +65,7 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const InputParameters & paramet
     mooseError("Either zero or " << 3*3 << " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied " << num << "\n");
 
   _initial_stress.resize(num);
-  for (unsigned i = 0 ; i < num ; ++i)
+  for (unsigned i = 0; i < num; ++i)
     _initial_stress[i] = &getFunctionByName(fcn_names[i]);
 }
 
@@ -74,8 +74,8 @@ TensorMechanicsMaterial::initQpStatefulProperties()
 {
   _stress[_qp].zero();
   if (_initial_stress.size() == 3*3)
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
         _stress[_qp](i, j) = _initial_stress[i*3 + j]->value(_t, _q_point[_qp]);
 
   _total_strain[_qp].zero();
