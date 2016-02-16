@@ -30,7 +30,8 @@ ReturnMappingModel::ReturnMappingModel( const InputParameters & parameters)
    _output_iteration_info(getParam<bool>("output_iteration_info")),
    _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
    _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-   _absolute_tolerance(parameters.get<Real>("absolute_tolerance"))
+   _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+   _effective_strain_increment(0)
 {
 }
 
@@ -72,6 +73,12 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
 
   computeStressInitialize(qp, effective_trial_stress, elasticityTensor);
+
+  // compute effective strain increment
+  SymmTensor dev_strain_increment(strain_increment);
+  dev_strain_increment.addDiag( -strain_increment.trace()/3.0);
+  _effective_strain_increment = dev_strain_increment.doubleContraction(dev_strain_increment);
+  _effective_strain_increment = std::sqrt(2.0/3.0 * _effective_strain_increment);
 
   // Use Newton sub-iteration to determine inelastic strain increment
 
