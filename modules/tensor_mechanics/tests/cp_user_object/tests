@@ -1,0 +1,27 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'crysp.i'
+    exodiff = 'out.e'
+  [../]
+  [./test_user_object]
+    type = 'Exodiff'
+    input = 'crysp_user_object.i'
+    exodiff = 'crysp_user_object_out.e'
+  [../]
+  [./test_save_euler]
+    type = 'Exodiff'
+    input = 'crysp_save_euler.i'
+    exodiff = 'crysp_save_euler_out.e'
+  [../]
+  [./test_substep]
+    type = 'Exodiff'
+    input = 'crysp_substep.i'
+    exodiff = 'crysp_substep_out.e'
+  [../]
+  [./test_linesearch]
+    type = 'Exodiff'
+    input = 'crysp_linesearch.i'
+    exodiff = 'crysp_lsearch_out.e'
+  [../]
+[]

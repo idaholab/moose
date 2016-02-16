@@ -338,7 +338,7 @@ public:
    */
   void d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const;
 
-   /**
+  /**
    * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
    *  (1) the eigenvalues (if calculation_type == "N")
    *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
@@ -348,6 +348,11 @@ public:
    * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
    */
   void syev(const char * calculation_type, std::vector<PetscScalar> & eigvals, std::vector<PetscScalar> & a) const;
+
+  /**
+   * Uses the petscblaslapack.h LAPACKsyev_ routine to perform RU decomposition and obtain the rotation tensor.
+   */
+  void getRUDecompositionRotation(RankTwoTensor & rot) const;
 
   /**
    * This function initializes random seed based on a user-defined number.

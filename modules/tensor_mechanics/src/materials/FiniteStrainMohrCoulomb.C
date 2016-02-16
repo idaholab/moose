@@ -238,10 +238,10 @@ FiniteStrainMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & stress, co
 
     dr_dstress.assign(1, 0.25*tmp*(d2eigvals[2] - d2eigvals[0] + (d2eigvals[2] + d2eigvals[0])*sin_angle)/denom);
     Real pre = (0.25 - std::pow(0.25*tmp/denom, 2))/denom;
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned l = 0 ; l < 3 ; ++l)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned l = 0; l < 3; ++l)
             dr_dstress[0](i, j, k, l) += pre*dtmp(i, j)*dtmp(k, l);
   }
   else
@@ -253,10 +253,10 @@ FiniteStrainMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & stress, co
     Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
     RankTwoTensor dkk = (bbb + 2*ccc*sin3Lode)*dsin3Lode;
     RankFourTensor d2kk = (bbb + 2*ccc*sin3Lode)*stress.d2sin3Lode(_lode_cutoff);
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned l = 0 ; l < 3 ; ++l)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned l = 0; l < 3; ++l)
             d2kk(i, j, k, l) += 2*ccc*dsin3Lode(i, j)*dsin3Lode(k, l);
 
     Real sibar2 = stress.secondInvariant();
@@ -265,10 +265,10 @@ FiniteStrainMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & stress, co
 
     Real denom = std::sqrt(_small_smoother2 + sibar2*std::pow(kk, 2));
     dr_dstress.assign(1, (0.5*d2sibar2*std::pow(kk, 2) + sibar2*kk*d2kk)/denom);
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned l = 0 ; l < 3 ; ++l)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned l = 0; l < 3; ++l)
           {
             dr_dstress[0](i, j, k, l) += (dsibar2(i, j)*dkk(k, l)*kk + dkk(i, j)*dsibar2(k, l)*kk + sibar2*dkk(i, j)*dkk(k, l))/denom;
             dr_dstress[0](i, j, k, l) -= (0.5*dsibar2(i, j)*std::pow(kk, 2) + sibar2*kk*dkk(i, j))*(0.5*dsibar2(k, l)*std::pow(kk, 2) + sibar2*kk*dkk(k, l))/std::pow(denom, 3);

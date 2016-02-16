@@ -10,9 +10,9 @@
   nx = 12 # Number of elements in the x-direction
   ny = 12 # Number of elements in the y-direction
   nz = 0 # Number of elements in the z-direction
-  xmin = 0 # minimum x-coordinate of the mesh
+  xmin = 0    # minimum x-coordinate of the mesh
   xmax = 1000 # maximum x-coordinate of the mesh
-  ymin = 0 # minimum y-coordinate of the mesh
+  ymin = 0    # minimum y-coordinate of the mesh
   ymax = 1000 # maximum y-coordinate of the mesh
   zmin = 0
   zmax = 0
@@ -103,25 +103,28 @@
 
 [Executioner]
   type = Transient # Type of executioner, here it is transient with an adaptive time step
-  [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 25 # Initial time step.  In this simulation it changes.
-  [../]
-  num_steps = 3
   scheme = bdf2 # Type of time integration (2nd order backward euler), defaults to 1st order backward euler
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
-  petsc_options_value = 'hypre boomeramg 101 ds'
+  petsc_options_value = 'hypre    boomeramg      101                ds'
+
   l_max_its = 30 # Max number of linear iterations
   l_tol = 1e-4 # Relative tolerance for linear solves
   nl_max_its = 40 # Max number of nonlinear iterations
   nl_abs_tol = 1e-11 # Relative tolerance for nonlienar solves
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
+
+  [./TimeStepper]
+    type = SolutionTimeAdaptiveDT
+    dt = 25 # Initial time step.  In this simulation it changes.
+  [../]
+
   start_time = 0.0
   end_time = 4000
+  num_steps = 3
 []
 
 [Adaptivity]

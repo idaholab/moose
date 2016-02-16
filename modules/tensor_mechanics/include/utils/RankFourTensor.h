@@ -161,6 +161,13 @@ public:
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
+  template <class T>
+  void rotate(T & R);
+
+  /**
+   * Rotate the tensor using
+   * C_ijkl = R_im R_in R_ko R_lp C_mnop
+   */
   virtual void rotate(RealTensorValue & R);
 
   /**
@@ -304,5 +311,27 @@ protected:
 };
 
 inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
+
+template<class T>
+void
+RankFourTensor::rotate(T & R)
+{
+  RankFourTensor old = *this;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+        {
+          Real sum = 0.0;
+          for (unsigned int m = 0; m < N; ++m)
+            for (unsigned int n = 0; n < N; ++n)
+              for (unsigned int o = 0; o < N; ++o)
+                for (unsigned int p = 0; p < N; ++p)
+                  sum += R(i,m) * R(j,n) * R(k,o) * R(l,p) * old(m,n,o,p);
+
+          _vals[i][j][k][l] = sum;
+        }
+}
 
 #endif //RANKFOURTENSOR_H

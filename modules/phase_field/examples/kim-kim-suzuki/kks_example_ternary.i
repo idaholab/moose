@@ -311,13 +311,14 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
+
   petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      ilu          nonzero'
 
   l_max_its = 100
   nl_max_its = 100
-  num_steps = 50
 
+  num_steps = 50
   dt = 0.1
 []
 

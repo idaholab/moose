@@ -92,11 +92,6 @@
   [../]
 []
 
-#[BCs]
-#  [./Periodic]
-#  [../]
-#[]
-#
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial

@@ -93,16 +93,16 @@ TensorMechanicsPlasticWeakPlaneTensile::activeConstraints(const std::vector<Real
   Real str = tensile_strength(intnl);
 
   RankTwoTensor n; // flow direction
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
       n(i, j) = Eijkl(i, j, 2, 2);
 
   // returned_stress = stress - alpha*n
   // where alpha = (stress(2, 2) - str)/n(2, 2)
   Real alpha = (stress(2, 2) - str)/n(2, 2);
 
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
       returned_stress(i, j) = stress(i, j) - alpha*n(i, j);
 
   act[0] = true;
