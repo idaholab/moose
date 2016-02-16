@@ -56,7 +56,7 @@
   [../]
 
   [./CoupledBulk]
-    type = CoefReaction
+    type = MatReaction
     variable = eta
     v = w
   [../]

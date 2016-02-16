@@ -4,27 +4,27 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COEFREACTION_H
-#define COEFREACTION_H
+#ifndef MATREACTION_H
+#define MATREACTION_H
 
 #include "Kernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declaration
-class CoefReaction;
+class MatReaction;
 
 template<>
-InputParameters validParams<CoefReaction>();
+InputParameters validParams<MatReaction>();
 
 /**
  * This kernel adds to the residual a contribution of \f$ -L*v \f$ where \f$ L \f$ is a material
  * property and \f$ v \f$ is a variable (nonlinear or coupled).
  */
-class CoefReaction : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
+class MatReaction : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
 {
 public:
-  CoefReaction(const InputParameters & parameters);
+  MatReaction(const InputParameters & parameters);
   virtual void initialSetup();
 
 protected:
@@ -61,4 +61,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dLdarg;
 };
 
-#endif //COEFREACTION_H
+#endif //MATREACTION_H

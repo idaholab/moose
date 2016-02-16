@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "CoefReaction.h"
+#include "MatReaction.h"
 
 template<>
-InputParameters validParams<CoefReaction>()
+InputParameters validParams<MatReaction>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("v", "Set this to make v a coupled variable, otherwise it will use the kernel's nonlinear variable for v");
@@ -17,7 +17,7 @@ InputParameters validParams<CoefReaction>()
   return params;
 }
 
-CoefReaction::CoefReaction(const InputParameters & parameters) :
+MatReaction::MatReaction(const InputParameters & parameters) :
   DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
     _is_coupled(isCoupled("v")),
     _v_name(_is_coupled ? getVar("v", 0)->name() : _var.name()),
@@ -39,19 +39,19 @@ CoefReaction::CoefReaction(const InputParameters & parameters) :
 }
 
 void
-CoefReaction::initialSetup()
+MatReaction::initialSetup()
 {
   validateNonlinearCoupling<Real>("mob_name");
 }
 
 Real
-CoefReaction::computeQpResidual()
+MatReaction::computeQpResidual()
 {
   return - _L[_qp] * _test[_i][_qp] * _v[_qp];
 }
 
 Real
-CoefReaction::computeQpJacobian()
+MatReaction::computeQpJacobian()
 {
   if (_is_coupled)
     return - _dLdop[_qp] * _v[_qp] * _phi[_j][_qp] * _test[_i][_qp];
@@ -60,7 +60,7 @@ CoefReaction::computeQpJacobian()
 }
 
 Real
-CoefReaction::computeQpOffDiagJacobian(unsigned int jvar)
+MatReaction::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // first handle the case where jvar is a coupled variable v being added to residual
   // the first term in the sum just multiplies by L which is always needed

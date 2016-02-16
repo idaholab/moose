@@ -30,7 +30,6 @@
 #include "CHPFCRFF.h"
 #include "CHSplitVar.h"
 #include "CoefCoupledTimeDerivative.h"
-#include "CoefReaction.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
 #include "GradientComponent.h"
@@ -45,6 +44,7 @@
 #include "MaskedBodyForce.h"
 #include "MatAnisoDiffusion.h"
 #include "MatDiffusion.h"
+#include "MatReaction.h"
 #include "MultiGrainRigidBodyMotion.h"
 #include "PFFracBulkRate.h"
 #include "PFFracCoupledInterface.h"
@@ -252,7 +252,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHPFCRFF);
   registerKernel(CHSplitVar);
   registerKernel(CoefCoupledTimeDerivative);
-  registerKernel(CoefReaction);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
   registerKernel(GradientComponent);
@@ -267,6 +266,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MaskedBodyForce);
   registerKernel(MatAnisoDiffusion);
   registerKernel(MatDiffusion);
+  registerKernel(MatReaction);
   registerKernel(MultiGrainRigidBodyMotion);
   registerKernel(PFFracBulkRate);
   registerKernel(PFFracCoupledInterface);

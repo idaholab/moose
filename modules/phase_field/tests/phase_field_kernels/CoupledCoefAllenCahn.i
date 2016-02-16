@@ -49,12 +49,12 @@
     mob_name = 1
   [../]
   [./W]
-    type = CoefReaction
+    type = MatReaction
     variable = w
     mob_name = -1
   [../]
   [./CoupledBulk]
-    type = CoefReaction
+    type = MatReaction
     variable = eta
     v = w
     mob_name = L
