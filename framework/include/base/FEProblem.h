@@ -58,7 +58,7 @@ class InternalSideIndicator;
 class Marker;
 class Material;
 class Transfer;
-class XFEM;
+class XFEMInterface;
 
 // libMesh forward declarations
 namespace libMesh
@@ -810,10 +810,10 @@ public:
 #endif //LIBMESH_ENABLE_AMR
 
   /// Create XFEM controller object
-  XFEM * createXFEM();
+  void initXFEM(MooseSharedPointer<XFEMInterface> xfem);
 
   /// Get a pointer to the XFEM controller object
-  XFEM * getXFEM(){return _xfem;}
+  MooseSharedPointer<XFEMInterface> getXFEM(){return _xfem;}
 
   /// Find out whether the current analysis is using XFEM
   bool haveXFEM() { return _xfem != NULL; }
@@ -1116,10 +1116,7 @@ protected:
 #endif
 
   /// Pointer to XFEM controller
-  XFEM * _xfem;
-
-  ///Weight factors used by XFEM to modify qp weights for partial elements
-  std::map<dof_id_type, MooseArray<Real> > _xfem_weights;
+  MooseSharedPointer<XFEMInterface> _xfem;
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;

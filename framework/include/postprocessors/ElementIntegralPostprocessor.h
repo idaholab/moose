@@ -46,6 +46,6 @@ protected:
   unsigned int _qp;
 
   Real _integral_value;
-  };
+};
 
 #endif

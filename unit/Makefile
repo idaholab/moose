@@ -28,6 +28,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 SOLID_MECHANICS   := yes
 TENSOR_MECHANICS  := yes
 PHASE_FIELD       := yes
+XFEM              := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 

@@ -417,18 +417,22 @@ Transient::solveStep(Real input_dt)
   {
     _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
 
-    if ( _problem.updateMeshXFEM() &&
+    if ( _problem.haveXFEM() &&
+         _problem.updateMeshXFEM() &&
          (_xfem_update_count < _max_xfem_update))
     {
-      Moose::out << "XFEM modifying mesh, repeating step"<<std::endl;
+      _console << "XFEM modifying mesh, repeating step"<<std::endl;
       _xfem_repeat_step = true;
       ++_xfem_update_count;
     }
     else
     {
-      _xfem_repeat_step = false;
-      _xfem_update_count = 0;
-      Moose::out << "XFEM not modifying mesh, continuing"<<std::endl;
+      if (_problem.haveXFEM())
+      {
+        _xfem_repeat_step = false;
+        _xfem_update_count = 0;
+        _console << "XFEM not modifying mesh, continuing"<<std::endl;
+      }
 
       if (_picard_max_its <= 1)
         _time_stepper->acceptStep();

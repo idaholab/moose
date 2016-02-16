@@ -106,9 +106,6 @@
 #include "VectorMagnitudeAux.h"
 #include "ConstantScalarAux.h"
 #include "QuotientAux.h"
-#include "XFEMVolFracAux.h"
-#include "XFEMCutPlaneAux.h"
-#include "XFEMMarkerAux.h"
 #include "NormalizationAux.h"
 #include "VariableGradientComponent.h"
 #include "ParsedAux.h"
@@ -238,7 +235,6 @@
 #ifdef LIBMESH_HAVE_FPARSER
 #include "Terminator.h"
 #endif
-#include "XFEMMarkerUserObject.h"
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -393,7 +389,6 @@
 #include "CheckOutputAction.h"
 #include "SetupRecoverFileBaseAction.h"
 #include "AddNodalKernelAction.h"
-#include "XFEMAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -523,9 +518,6 @@ registerObjects(Factory & factory)
   registerAux(VectorMagnitudeAux);
   registerAux(ConstantScalarAux);
   registerAux(QuotientAux);
-  registerAux(XFEMVolFracAux);
-  registerAux(XFEMCutPlaneAux);
-  registerAux(XFEMMarkerAux);
   registerAux(NormalizationAux);
   registerAux(FunctionScalarAux);
   registerAux(VariableGradientComponent);
@@ -648,7 +640,6 @@ registerObjects(Factory & factory)
 #ifdef LIBMESH_HAVE_FPARSER
   registerUserObject(Terminator);
 #endif
-  registerUserObject(XFEMMarkerUserObject);
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
@@ -895,7 +886,6 @@ addActionTypes(Syntax & syntax)
   registerTask("set_global_params", false);
   registerTask("setup_time_periods", true);
   registerTask("setup_adaptivity", false);
-  registerTask("setup_xfem",false);
   registerTask("meta_action", false);
   registerTask("setup_debug", false);
   registerTask("setup_residual_debug", false);
@@ -957,7 +947,6 @@ addActionTypes(Syntax & syntax)
 "(add_user_object)"
 "(setup_function_complete)"
 "(setup_adaptivity)"
-"(setup_xfem)"
 "(set_adaptivity_options)"
 "(add_ic)"
 "(add_preconditioning, add_constraint, add_split)"
@@ -1092,10 +1081,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 #endif
 
   registerAction(PartitionerAction, "add_partitioner");
-  registerAction(XFEMAction,"setup_xfem");
-  registerAction(XFEMAction,"add_aux_variable");
-  registerAction(XFEMAction,"add_aux_kernel");
-
   registerAction(AddDiracKernelAction, "add_dirac_kernel");
   registerAction(SetupDebugAction, "setup_debug");
   registerAction(SetupResidualDebugAction, "setup_residual_debug");

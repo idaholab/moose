@@ -1,0 +1,8 @@
+[Tests]
+  [./heat_conduction_xfem]
+    type = Exodiff
+    input = heat.i
+    exodiff = 'heat_out.e'
+    map = false
+  [../]
+[]

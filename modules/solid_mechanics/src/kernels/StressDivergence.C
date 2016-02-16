@@ -57,7 +57,7 @@ StressDivergence::computeQpResidual()
       - (_alpha + (1+2*_alpha)*_zeta/_dt)*_stress_old[_qp].rowDot(_component, _grad_test[_i][_qp])
       + (_alpha * _zeta/_dt)*_stress_older[_qp].rowDot(_component,_grad_test[_i][_qp]);
   else
-    return  _stress[_qp].rowDot(_component, _grad_test[_i][_qp]);
+    return _stress[_qp].rowDot(_component, _grad_test[_i][_qp]);
 }
 
 Real

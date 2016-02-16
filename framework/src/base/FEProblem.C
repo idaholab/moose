@@ -73,7 +73,7 @@
 #include "Control.h"
 #include "ScalarInitialCondition.h"
 #include "InternalSideIndicator.h"
-#include "XFEM.h"
+#include "XFEMInterface.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -127,7 +127,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
 #endif
-    _xfem(NULL),
     _displaced_mesh(NULL),
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
@@ -239,9 +238,6 @@ FEProblem::~FEProblem()
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
        it != _random_data_objects.end(); ++it)
     delete it->second;
-
-  if (_xfem != NULL)
-    delete _xfem;
 }
 
 Moose::CoordinateSystemType
@@ -3665,16 +3661,15 @@ FEProblem::adaptMesh()
 }
 #endif //LIBMESH_ENABLE_AMR
 
-XFEM *
-FEProblem::createXFEM()
+void
+FEProblem::initXFEM(MooseSharedPointer<XFEMInterface> xfem)
 {
-  if (_xfem == NULL)
-  {
-    if (!_displaced_mesh)
-      _xfem = new XFEM(getMooseApp(), _material_data, &_mesh.getMesh());
-    else
-      _xfem = new XFEM(getMooseApp(), _material_data, &_mesh.getMesh(), &_displaced_mesh->getMesh());
-  }
+  _xfem = xfem;
+  _xfem->setMesh(&_mesh.getMesh());
+  if (_displaced_mesh)
+    _xfem->setSecondMesh(&_displaced_mesh->getMesh());
+  _xfem->setMaterialData(&_material_data);
+
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; ++i)
   {
@@ -3682,7 +3677,6 @@ FEProblem::createXFEM()
     if (_displaced_problem != NULL)
       _displaced_problem->assembly(i).setXFEM(_xfem);
   }
-  return _xfem;
 }
 
 bool
@@ -3722,9 +3716,8 @@ FEProblem::meshChanged()
 
   unsigned int n_threads = libMesh::n_threads();
 
-  for (unsigned int i = 0; i < n_threads; ++i){
+  for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i]->invalidateCache();
-  }
 
   // Need to redo ghosting
   _geometric_search_data.reinit();

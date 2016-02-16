@@ -37,7 +37,6 @@
 #include "InteractionIntegral.h"
 #include "InteractionIntegralAuxFields.h"
 #include "MixedModeEquivalentK.h"
-#include "XFEMMaterialTensorMarkerUserObject.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
@@ -73,6 +72,7 @@
 #include "TrussMaterial.h"
 #include "RateDepSmearCrackModel.h"
 #include "RateDepSmearIsoCrackModel.h"
+
 
 template<>
 InputParameters validParams<SolidMechanicsApp>()
@@ -173,8 +173,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(MaterialTensorOnLine);
   registerUserObject(CavityPressureUserObject);
   registerUserObject(CrackFrontDefinition);
-
-  registerUserObject(XFEMMaterialTensorMarkerUserObject);
 }
 
 // External entry point for dynamic syntax association

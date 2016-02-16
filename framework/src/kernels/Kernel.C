@@ -16,7 +16,6 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 #include "Problem.h"
-#include "DisplacedProblem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 
@@ -55,7 +54,7 @@ Kernel::computeResidual()
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
   re += _local_re;
 
@@ -77,7 +76,7 @@ Kernel::computeJacobian()
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
   ke += _local_ke;
 
@@ -140,3 +139,4 @@ void
 Kernel::precalculateResidual()
 {
 }
+

@@ -10,11 +10,6 @@
 #include "Diffusion.h"
 #include "Material.h"
 
-namespace libMesh
-{
-class XFEM;
-}
-
 //Forward Declarations
 class HeatConductionKernel;
 

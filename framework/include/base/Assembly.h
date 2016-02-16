@@ -30,7 +30,7 @@ class MooseMesh;
 class ArbitraryQuadrature;
 class SystemBase;
 class MooseVariable;
-class XFEM;
+class XFEMInterface;
 
 // libMesh forward declarations
 namespace libMesh
@@ -116,7 +116,7 @@ public:
    * Returns the reference to the transformed jacobian weights
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & JxW(){ return _current_JxW; }
+  const MooseArray<Real> & JxW() { return _current_JxW; }
 
   /**
    * Returns the reference to the coordinate transformation coefficients
@@ -465,7 +465,7 @@ public:
   /**
    * Set the pointer to the XFEM controller object
    */
-  void setXFEM(XFEM * xfem) { _xfem = xfem; }
+  void setXFEM(MooseSharedPointer<XFEMInterface> xfem) { _xfem = xfem; }
 
 protected:
   /**
@@ -528,7 +528,7 @@ protected:
   unsigned int _mesh_dimension;
 
   /// The XFEM controller
-  XFEM * _xfem;
+  MooseSharedPointer<XFEMInterface> _xfem;
 
   /// The "volume" fe object that matches the current elem
   std::map<FEType, FEBase *> _current_fe;
