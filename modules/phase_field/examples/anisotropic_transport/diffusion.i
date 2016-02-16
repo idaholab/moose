@@ -7,7 +7,6 @@
   ymin = -15.0
   xmax = 15.0
   ymax = 15.0
-  elem_type = QUAD4
 []
 
 [Variables]
@@ -56,11 +55,11 @@
 
 [Executioner]
   type = Transient
-  scheme = 'BDF2'
-
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm         31      lu      1'
+  scheme = bdf2
+
+  petsc_options_iname = '-pc_type -sub_pc_type'
+  petsc_options_value = 'asm      lu'
 
   l_max_its = 30
   l_tol = 1.0e-4
@@ -73,6 +72,5 @@
 
 [Outputs]
   exodus = true
-  print_linear_residuals = true
   print_perf_log = true
 []

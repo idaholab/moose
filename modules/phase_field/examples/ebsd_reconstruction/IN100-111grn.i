@@ -79,11 +79,11 @@
     type = GBEvolution
     block = 0
     T = T
-    wGB = 0.6 # um
-    GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
-    Q = 0.23 # Migration energy in eV
-    GBenergy = 0.708 # GB energy in J/m^2
-    molar_volume = 7.11e-6; # Molar volume in m^3/mol
+    wGB = 0.6               # um
+    GBmob0 = 2.5e-6         # m^4/(Js) from Schoenfelder 1997
+    Q = 0.23                # Migration energy in eV
+    GBenergy = 0.708        # GB energy in J/m^2
+    molar_volume = 7.11e-6  # Molar volume in m^3/mol
     length_scale = 1.0e-6
     time_scale = 1.0e-6
   [../]
@@ -105,7 +105,6 @@
     type = NumDOFs
   [../]
   [./grain_tracker]
-    # ebsd_reader = ebsd
     type = GrainTracker
     threshold = 0.1
     convex_hull_buffer = -3
@@ -122,25 +121,21 @@
 []
 
 [Executioner]
-  # [./Adaptivity]
-  # initial_adaptivity = 3
-  # refine_fraction = 0.7
-  # coarsen_fraction = 0.1
-  # max_h_level = 4
-  # print_changed_info = true
-  # [../]
   type = Transient
   scheme = bdf2
-  solve_type = PJFNK # Preconditioned JFNK (default)
+  solve_type = PJFNK
+
   petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_strong_threshold'
-  petsc_options_value = '  hypre    boomeramg                   0.7'
+  petsc_options_value = 'hypre    boomeramg      0.7'
+
   l_tol = 1.0e-4
   l_max_its = 20
   nl_max_its = 20
   nl_rel_tol = 1.0e-8
+
   start_time = 0.0
   num_steps = 30
-  dt = 10
+
   [./TimeStepper]
     type = IterationAdaptiveDT
     cutback_factor = 0.9
@@ -148,6 +143,14 @@
     growth_factor = 1.1
     optimal_iterations = 7
   [../]
+
+  #[./Adaptivity]
+  #  initial_adaptivity = 3
+  #  refine_fraction = 0.7
+  #  coarsen_fraction = 0.1
+  #  max_h_level = 4
+  #  print_changed_info = true
+  #[../]
 []
 
 [Outputs]
