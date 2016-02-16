@@ -52,6 +52,12 @@
     family = LAGRANGE
   [../]
   [./unique_grains]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./ghost_elements]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -75,6 +81,13 @@
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
+    bubble_object = ngrains
+  [../]
+  [./ghost_elements]
+    type = FeatureFloodCountAux
+    variable = ghost_elements
+    field_display = GHOSTED_ENTITIES
+    execute_on = timestep_end
     bubble_object = ngrains
   [../]
 []
@@ -105,10 +118,12 @@
   # Scalar postprocessors
   [./ngrains]
     # Counts the number of grains in the polycrystal
-    type = FeatureFloodCount
+#    type = FeatureFloodCount
+    type = GrainTracker
     variable = bnds
     threshold = 0.7
     execute_on = 'initial timestep_end'
+    flood_entity_type = ELEMENTAL
   [../]
   [./dt]
     # Outputs the current time step
@@ -154,4 +169,3 @@
     max_rows = 20
   [../]
 []
-

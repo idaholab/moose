@@ -63,116 +63,6 @@ private:
   T i;
 };
 
-///**
-// * container inserter for use with packed range communicators.
-// */
-//template <typename T>
-//struct string_vector_inserter
-//  : std::iterator<std::output_iterator_tag, T>
-//{
-//  explicit string_vector_inserter(std::vector<T *> & vector) : _vector(vector)
-//    {
-//    }
-//
-//  template <typename T2>
-//  void operator=(const T2 & value)
-//    {
-//      _vector.push_back(value);
-//    }
-//
-//  string_vector_inserter& operator++() {
-//    return *this;
-//  }
-//
-//  string_vector_inserter operator++(int) {
-//    return string_vector_inserter(*this);
-//  }
-//
-//  // We don't return a reference-to-T here because we don't want to
-//  // construct one or have any of its methods called.
-//  string_vector_inserter& operator*() { return *this; }
-//
-//private:
-//  std::vector<T *> & _vector;
-//};
-
-
-/**
- * The following methods are specializations for using the libMesh::Parallel::packed_range_* routines
- * for std::strings. These are here because the dataLoad/dataStore routines create raw string
- * buffers that can be communicated in a standard way using packed ranges.
- */
-namespace libMesh {
-namespace Parallel {
-template <typename T>
-class Packing<std::basic_string<T> > {
-public:
-
-  static const unsigned int size_bytes = 4;
-
-  typedef T buffer_type;
-
-static unsigned int get_string_len
-  (typename std::vector<T>::const_iterator in)
-{
-  unsigned int string_len = reinterpret_cast<const unsigned char &>(in[size_bytes-1]);
-  for (signed int i=size_bytes-2; i >= 0; --i)
-    {
-      string_len *= 256;
-      string_len += reinterpret_cast<const unsigned char &>(in[i]);
-    }
-  return string_len;
-}
-
-
-static unsigned int packed_size
-  (typename std::vector<T>::const_iterator in)
-{
-  return get_string_len(in) + size_bytes;
-}
-
-static unsigned int packable_size
-  (const std::basic_string<T> & s,
-   const void *)
-{
-  return s.size() + size_bytes;
-}
-
-
-template <typename Iter>
-static void pack (const std::basic_string<T> & b, Iter data_out,
-                  const void *)
-{
-  unsigned int string_len = b.size();
-  for (unsigned int i=0; i != size_bytes; ++i)
-    {
-      *data_out++ = (string_len % 256);
-      string_len /= 256;
-    }
-  std::copy(b.begin(), b.end(), data_out);
-}
-
-static std::basic_string<T> unpack
-  (typename std::vector<T>::const_iterator in, void *)
-{
-  unsigned int string_len = get_string_len(in);
-
-  std::ostringstream oss;
-  for (unsigned int i = 0; i < string_len; ++i)
-    oss << reinterpret_cast<const unsigned char &>(in[i+size_bytes]);
-
-  in += size_bytes + string_len;
-
-//  std::cout << oss.str() << std::endl;
-  return std::string(oss.str());
-}
-
-};
-
-} // namespace Parallel
-
-} // namespace libMesh
-
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
@@ -315,23 +205,6 @@ FeatureFloodCount::initialize()
 
   _ghosted_entity_ids.clear();
 
-  // Populate the global ghosted entity data structure
-  const MeshBase::element_iterator end = _mesh.getMesh().ghost_elements_end();
-  for (MeshBase::element_iterator el = _mesh.getMesh().ghost_elements_begin(); el != end; ++el)
-  {
-    const Elem * current_elem = *el;
-
-    if (_is_elemental)
-      _ghosted_entity_ids.insert(current_elem->id());
-    else
-    {
-      unsigned int n_nodes = current_elem->n_vertices();
-      for (unsigned int i = 0; i < n_nodes; ++i)
-        _ghosted_entity_ids.insert(current_elem->get_node(i)->id());
-    }
-  }
-  _communicator.set_union(_ghosted_entity_ids);
-
   // Reset the feature count
   _feature_count = 0;
 }
@@ -366,6 +239,9 @@ FeatureFloodCount::execute()
 
 void FeatureFloodCount::communicateAndMerge()
 {
+  // First we need to finalize our ghosted elems data structure
+  _communicator.set_union(_ghosted_entity_ids);
+
   // First we need to transform the raw data into a usable data structure
   populateDataStructuresFromFloodData();
 
@@ -1185,10 +1061,16 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live
     for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin(); neighbor_it != all_active_neighbors.end(); ++neighbor_it)
     {
       const Elem * neighbor = *neighbor_it;
+      processor_id_type my_proc_id = processor_id();
 
       // Only recurse on elems this processor can see
-      if (neighbor && neighbor->is_semilocal(processor_id()))
+      if (neighbor && neighbor->is_semilocal(my_proc_id))
+      {
+        if (neighbor->processor_id() != my_proc_id)
+          _ghosted_entity_ids.insert(elem->id());
+
         flood(neighbor, current_idx, _feature_maps[map_num][entity_id]);
+      }
     }
   }
   else
@@ -1198,9 +1080,17 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live
     // Flood neighboring nodes that are also above this threshold with recursion
     for (unsigned int i = 0; i < neighbors.size(); ++i)
     {
+      const Node * neighbor_node = neighbors[i];
+      processor_id_type my_proc_id = processor_id();
+
       // Only recurse on nodes this processor can see
-      if (_mesh.isSemiLocal(const_cast<Node *>(neighbors[i])))
+      if (_mesh.isSemiLocal(const_cast<Node *>(neighbor_node)))
+      {
+        if (neighbor_node->processor_id() != my_proc_id)
+          _ghosted_entity_ids.insert(neighbor_node->id());
+
         flood(neighbors[i], current_idx, _feature_maps[map_num][entity_id]);
+      }
     }
   }
 }
