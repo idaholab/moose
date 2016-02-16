@@ -1,0 +1,11 @@
+This folder contains documents and scripts for generating
+the documents related to the MOOSE framework software project:
+
+Software Requirements Specification
+Software Design Document
+  To generate run make
+  requires pdflatex and make
+
+Requirements Tracability Matrix
+  To generate run ./tracability_matrix.py
+  requires Python 2.7 and ReportLab (installable through conda)
