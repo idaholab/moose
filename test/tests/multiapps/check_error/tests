@@ -8,7 +8,7 @@
   [./positions]
     type = 'RunException'
     input = 'check_error.i'
-    expect_err = 'Must supply either \'positions\' or \'positions_file\''
+    expect_err = 'Not enough positions for the number of input files'
     cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i"'
   [../]
 
