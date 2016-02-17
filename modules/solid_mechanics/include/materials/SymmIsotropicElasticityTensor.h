@@ -80,6 +80,10 @@ public:
    */
   Real shearModulus() const;
 
+  /**
+   * Return the youngs  modulus
+   */
+  Real youngsModulus() const;
 
   virtual Real stiffness(const unsigned i,
                          const unsigned j,
