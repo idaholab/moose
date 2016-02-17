@@ -35,9 +35,12 @@ protected:
   /// is the kernel used in a coupled form?
   const bool _is_coupled;
 
-  /// Kernel variable (can be nonlinear or coupled variable)
-  /// (For constrained Allen-Cahn problems, v = lambda
-  /// where lambda is the Lagrange multiplier)
+  /**
+   * Kernel variable (can be nonlinear or coupled variable)
+   * (For constrained Allen-Cahn problems, v = lambda
+   * where lambda is the Lagrange multiplier)
+   */
+
   std::string _v_name;
   VariableValue & _v;
   unsigned int _v_var;
