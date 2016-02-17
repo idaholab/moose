@@ -68,6 +68,15 @@ SymmIsotropicElasticityTensor::shearModulus() const
 }
 
 Real
+SymmIsotropicElasticityTensor::youngsModulus() const
+{
+  if (!_E_set)
+    mooseError("Youngs modulus not set");
+
+  return _E;
+}
+
+Real
 SymmIsotropicElasticityTensor::mu() const
 {
   if (!_mu_set)

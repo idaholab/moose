@@ -54,6 +54,7 @@ protected:
   const bool _output_iteration_info_on_error;
   const Real _relative_tolerance;
   const Real _absolute_tolerance;
+  Real _effective_strain_increment;
 
 private:
 
