@@ -1,12 +1,13 @@
 #
-# Test the coupled Allen-Cahn Bulk kernel
+# Test the CoefReaction kernel (which adds -L*v to the residual) for the case
+# where v is a coupled variable
 #
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
+  nx = 15
+  ny = 15
   nz = 0
   xmin = 0
   xmax = 50
@@ -15,8 +16,6 @@
   zmin = 0
   zmax = 50
   elem_type = QUAD4
-
-  uniform_refine = 1
 []
 
 [Variables]
@@ -30,8 +29,8 @@
       x1 = 25.0
       y1 = 25.0
       radius = 6.0
-      invalue = 0.9
-      outvalue = 0.1
+      invalue = 1.0
+      outvalue = 0.0
       int_width = 3.0
     [../]
   [../]
@@ -42,46 +41,48 @@
     type = TimeDerivative
     variable = eta
   [../]
-
   [./ACBulk]
     type = CoupledAllenCahn
     variable = w
     v = eta
     f_name = F
+    mob_name = 1
   [../]
-
   [./W]
-    type = Reaction
+    type = MatReaction
     variable = w
+    mob_name = -1
   [../]
-
   [./CoupledBulk]
     type = MatReaction
     variable = eta
     v = w
+    mob_name = L
   [../]
-
   [./ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = 1
+    mob_name = L
+    args = w
   [../]
 []
 
 [Materials]
-  [./consts]
-    type = GenericConstantMaterial
+  [./mobility]
+    type = DerivativeParsedMaterial
     block = 0
-    prop_names  = 'L'
-    prop_values = '1'
+    f_name  = L
+    args = 'eta w'
+    function = '(1.5-eta)^2+(1.5-w)^2'
+    derivative_order = 2
   [../]
-
   [./free_energy]
     type = DerivativeParsedMaterial
     block = 0
     f_name = F
     args = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
+    function = 'eta^2 * (1-eta)^2'
     derivative_order = 2
   [../]
 []
@@ -111,12 +112,7 @@
   dt = 0.5
 []
 
-[Debug]
-  show_var_residual_norms = true
-[]
-
 [Outputs]
   hide = w
-  file_base = AllenCahn_out
   exodus = true
 []
