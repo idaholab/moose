@@ -20,8 +20,8 @@ template<>
 InputParameters validParams<FunctionDT>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addParam<std::vector<Real> >("time_t", "The values of t");
-  params.addParam<std::vector<Real> >("time_dt", "The values of dt");
+  params.addRequiredParam<std::vector<Real> >("time_t", "The values of t");
+  params.addRequiredParam<std::vector<Real> >("time_dt", "The values of dt");
   params.addParam<Real>("growth_factor", 2, "Maximum ratio of new to previous timestep sizes following a step that required the time step to be cut due to a failed solve.");
   params.addParam<Real>("min_dt", 0, "The minimal dt to take.");
   params.addParam<bool>("interpolate", true, "Whether or not to interpolate DT between times.  This is true by default for historical reasons.");
@@ -76,10 +76,17 @@ FunctionDT::computeDT()
     local_dt = _time_ipol.sample(_time);
   else // Find where we are
   {
-    unsigned int i=0;
-    for (; i < _time_t.size(); i++)
-      if (MooseUtils::relativeFuzzyGreaterEqual(_time, _time_t[i]))
-        break;
+    unsigned int i = 0;
+    if (MooseUtils::relativeFuzzyGreaterEqual(_time, _time_t.back()))
+    {
+      i = _time_t.size();
+    }
+    else
+    {
+      for (; i < _time_t.size() - 1; i++)
+        if (MooseUtils::relativeFuzzyLessThan(_time, _time_t[i + 1]))
+          break;
+    }
 
     // Use the last dt after the end
     if (i == _time_t.size())
