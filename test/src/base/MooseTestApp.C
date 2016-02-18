@@ -109,6 +109,7 @@
 #include "MatTestNeumannBC.h"
 #include "MatDivergenceBC.h"
 #include "CoupledDirichletBC.h"
+#include "TestLapBC.h"
 
 // ICs
 #include "TEIC.h"
@@ -376,6 +377,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerBoundaryCondition(DivergenceBC);
   registerBoundaryCondition(MatDivergenceBC);
   registerBoundaryCondition(CoupledDirichletBC);
+  registerBoundaryCondition(TestLapBC);
 
   // Initial conditions
   registerInitialCondition(TEIC);

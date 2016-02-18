@@ -133,11 +133,29 @@ protected:
   virtual VariableTestSecond & secondTest();
 
   /**
-   * The second derivative of the shape function.
+   * The second derivative of the test function on the current face.
+   * This should be called in e.g. IntegratedBC when you need second
+   * derivatives of the test function function on the boundary.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual VariableTestSecond & secondTestFace();
+
+  /**
+   * The second derivative of the trial function.
    *
    * @return The reference to be stored off and used later.
    */
   virtual VariablePhiSecond & secondPhi();
+
+  /**
+   * The second derivative of the trial function on the current face.
+   * This should be called in e.g. IntegratedBC when you need second
+   * derivatives of the trial function function on the boundary.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual VariablePhiSecond & secondPhiFace();
 
   /// Whether or not this object is acting only at nodes
   bool _nodal;
