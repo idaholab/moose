@@ -18,6 +18,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
+#include "NonlinearSystem.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -90,6 +91,9 @@ KernelBase::KernelBase(const InputParameters & parameters) :
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
+    if (_fe_problem.getNonlinearSystem().hasVariable(_save_in_strings[i]))
+      mooseError("Trying to use solution variable "+_save_in_strings[i]+" as a save_in variable in "+name());
+
     if (var->feType() != _var.feType())
       mooseError("Error in " + name() + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
 
@@ -104,6 +108,9 @@ KernelBase::KernelBase(const InputParameters & parameters) :
   for (unsigned int i=0; i<_diag_save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+
+    if (_fe_problem.getNonlinearSystem().hasVariable(_diag_save_in_strings[i]))
+      mooseError("Trying to use solution variable "+_diag_save_in_strings[i]+" as a diag_save_in variable in "+name());
 
     if (var->feType() != _var.feType())
       mooseError("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
