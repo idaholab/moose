@@ -58,6 +58,7 @@
 
 [Executioner]
   type = Steady
+  nl_rel_tol = 1.e-11
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'

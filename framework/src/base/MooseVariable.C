@@ -989,6 +989,9 @@ MooseVariable::computeElemValuesFace()
     _u[i] = 0;
     _grad_u[i] = 0;
 
+    if (_need_second)
+      _second_u[i] = 0;
+
     if (_subproblem.isTransient())
     {
       _u_dot[i] = 0;
@@ -1005,9 +1008,6 @@ MooseVariable::computeElemValuesFace()
 
       if (_need_grad_older)
         _grad_u_older[i] = 0;
-
-      if (_need_second)
-        _second_u[i] = 0;
 
       if (_need_second_old)
         _second_u_old[i] = 0;
@@ -1314,6 +1314,9 @@ MooseVariable::computeNeighborValues()
   {
     _u_neighbor[i] = 0;
     _grad_u_neighbor[i] = 0;
+
+    if (_need_second_neighbor)
+      _second_u_neighbor[i] = 0;
 
     if (_subproblem.isTransient())
     {
