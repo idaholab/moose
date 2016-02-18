@@ -177,6 +177,9 @@ protected:
   /// State for all performance logging
   bool _perf_log;
 
+  /// The interval at which the performance log is printed
+  unsigned int _perf_log_interval;
+
   /// State for solve performance log
   bool _solve_log;
 
