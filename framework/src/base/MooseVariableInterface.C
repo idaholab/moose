@@ -155,6 +155,16 @@ MooseVariableInterface::secondTest()
   return const_cast<VariableTestSecond &>(_variable->secondPhi());
 }
 
+VariableTestSecond &
+MooseVariableInterface::secondTestFace()
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+
+  return const_cast<VariableTestSecond &>(_variable->secondPhiFace());
+}
+
+
 VariablePhiSecond &
 MooseVariableInterface::secondPhi()
 {
@@ -162,4 +172,13 @@ MooseVariableInterface::secondPhi()
     mooseError("Nodal variables do not have second derivatives");
 
   return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhi());
+}
+
+VariablePhiSecond &
+MooseVariableInterface::secondPhiFace()
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+
+  return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhiFace());
 }
