@@ -719,6 +719,9 @@ public:
   bool isCustomPartitionerRequested() const;
   void setIsCustomPartitionerRequested(bool cpr);
 
+  /// Getter to query if the mesh was detected to be regular and orthogonal
+  bool isRegularOrthogonal() { return _regular_orthogonal_mesh; }
+
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.
