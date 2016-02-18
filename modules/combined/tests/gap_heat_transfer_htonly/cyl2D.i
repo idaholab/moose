@@ -36,6 +36,24 @@
 # but converges as mesh refinement increases.
 # Note that the 2D and 3D results are the same.
 #
+# Simulating contact is challenging. Regression tests that exercise
+# contact features can be difficult to solve consistently across multiple
+# platforms. While designing these tests, we felt it worth while to note
+# some aspects of these tests. The following applies to:
+# sphere3D.i, sphere2DRZ.i, cyl2D.i, and cyl3D.i.
+# 1. We decided that to perform consistently across multiple platforms we
+# would use very small convergence tolerance. In this test we chose an
+# nl_rel_tol of 1e-12.
+# 2. Due to such a high value for thermal conductivity (used here so that the
+# domains come to a uniform temperature) the integrated flux at time = 0
+# was relatively large (the value coming from SideIntegralFlux =
+#  -_diffusion_coef[_qp]*_grad_u[_qp]*_normals[_qp] where the diffusion coefficient
+# here is thermal conductivity).
+# Even though _grad_u[_qp] is small, in this case the diffusion coefficient
+# is large. The result is a number that isn't exactly zero and tends to
+# fail exodiff. For this reason the parameter execute_on = initial should not
+# be used. That parameter is left to default settings in these regression tests.
+#
  [GlobalParams]
   order = SECOND
   family = LAGRANGE
@@ -138,8 +156,8 @@
   dtmin = 0.01
   end_time = 1
 
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-6
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-7
 
   [./Quadrature]
      order = fifth
@@ -161,14 +179,12 @@
     type = SideAverageValue
     boundary = 2
     variable = temp
-    execute_on = 'initial timestep_end'
   [../]
 
   [./temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
-    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_left]
@@ -176,7 +192,6 @@
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_right]
@@ -184,6 +199,5 @@
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 []
