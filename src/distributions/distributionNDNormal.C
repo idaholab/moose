@@ -637,12 +637,8 @@ double BasicMultivariateNormal::pdfInTransformedSpace(std::vector<double> x){
    */
   double value = 1.0;
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
-  if (x.size() == _rank) {
-    for (unsigned int i = 0; i < x.size(); ++i) {
-      value *=  normalDistribution->Pdf(x.at(i));
-    }
-  } else {
-    throwError("MultivariateNormal PDF in the PCA transformed space error: evaluate point dimensionality is not correct! ")
+  for (unsigned int i = 0; i < x.size(); ++i) {
+    value *=  normalDistribution->Pdf(x.at(i));
   }
   delete normalDistribution;
   return value;
