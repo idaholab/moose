@@ -1,11 +1,32 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 200
-  ny = 200
+  nx = 16
+  ny = 16
   xmax = 9
   ymax = 9
   elem_type = QUAD4
+[]
+
+[Adaptivity]
+  initial_marker = marker
+  initial_steps = 3
+  max_h_level = 3
+  marker = marker
+  [./Markers]
+    [./marker]
+      type = ErrorFractionMarker
+      refine = 0.85
+      coarsen = 0.1
+      indicator = indicator
+    [../]
+  [../]
+  [./Indicators]
+    [./indicator]
+      type = GradientJumpIndicator
+      variable = w
+    [../]
+  [../]
 []
 
 [Variables]
@@ -132,9 +153,8 @@
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-    interval = 10
-  [../]
-  print_perf_log = true
+   [./out]
+     type = Exodus
+     interval = 10
+   [../]
 []
