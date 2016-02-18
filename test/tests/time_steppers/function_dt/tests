@@ -1,0 +1,12 @@
+[Tests]
+  [./function_dt_min]
+    type = 'Exodiff'
+    input = 'function_dt_min.i'
+    exodiff = 'function_dt_min_out.e'
+  [../]
+  [./function_dt_no_interpolation]
+    type = 'Exodiff'
+    input = 'function_dt_no_interpolation.i'
+    exodiff = 'function_dt_no_interpolation_out.e'
+  [../]
+[]
