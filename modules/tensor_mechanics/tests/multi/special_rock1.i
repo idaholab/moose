@@ -244,6 +244,7 @@
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi
+    use_custom_returnMap = false
     yield_function_tolerance = 1.0E+2  # Note larger value
     shift = 1.0E+2                     # Note larger value
     internal_constraint_tolerance = 1.0E-7
@@ -269,6 +270,7 @@
     shift = 1.0E+2                     # Note larger value
     internal_constraint_tolerance = 1.0E-7
     use_custom_returnMap = false
+    use_custom_cto = false
   [../]
   [./tensile_smooth]
     type = TensorMechanicsPlasticTensile

@@ -1,15 +1,10 @@
-# A single unit element is stretched by (0.5, 0.4, 0.3)E-6m
-# with Lame lambda = 0.6E6 and Lame mu (shear) = 1E6
-# stress_xx = 1.72 Pa
-# stress_yy = 1.52 Pa
-# stress_zz = 1.32 Pa
-# tensile_strength is set to 1.3Pa
-#
-# The return should be to the edge (the algorithm will first try the tip) with
-# plastic_multiplier0 = 0, plastic_multiplier1 = 5E-8, plastic_multiplier2 = 1.5E-7
-# internal = 2E-7
-# stress_xx = stress_yy = 1.3
-# stress_zz = 1.2
+# apply uniform stretches in x, y and z directions.
+# let friction_angle = 60deg, friction_angle_residual=10deg, friction_angle_rate = 0.5E4
+# With cohesion = C, friction_angle = phi, the
+# algorithm should return to
+# sigma_m = C*Cos(phi)/Sin(phi)
+# Or, when T=C,
+# phi = arctan(C/sigma_m)
 
 [Mesh]
   type = GeneratedMesh
@@ -47,19 +42,19 @@
     type = FunctionPresetBC
     variable = disp_x
     boundary = 'front back'
-    function = '0.5E-6*x'
+    function = '1E-6*x*t'
   [../]
   [./y]
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'front back'
-    function = '0.4E-6*y'
+    function = '1E-6*y*t'
   [../]
   [./z]
     type = FunctionPresetBC
     variable = disp_z
     boundary = 'front back'
-    function = '0.3E-6*z'
+    function = '1E-6*z*t'
   [../]
 []
 
@@ -88,23 +83,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f0]
+  [./mc_int]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f1]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./f2]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./iter]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./intnl]
+  [./yield_fcn]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -153,34 +136,17 @@
     index_i = 2
     index_j = 2
   [../]
-  [./f0_auxk]
+  [./mc_int_auxk]
     type = MaterialStdVectorAux
-    property = plastic_yield_function
     index = 0
-    variable = f0
-  [../]
-  [./f1_auxk]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 1
-    variable = f1
-  [../]
-  [./f2_auxk]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 2
-    variable = f2
-  [../]
-  [./iter]
-    type = MaterialRealAux
-    property = plastic_NR_iterations
-    variable = iter
-  [../]
-  [./intnl_auxk]
-    type = MaterialStdVectorAux
     property = plastic_internal_parameter
+    variable = mc_int
+  [../]
+  [./yield_fcn_auxk]
+    type = MaterialStdVectorAux
     index = 0
-    variable = intnl
+    property = plastic_yield_function
+    variable = yield_fcn
   [../]
 []
 
@@ -215,44 +181,43 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
-  [./f0]
+  [./internal]
     type = PointValue
     point = '0 0 0'
-    variable = f0
+    variable = mc_int
   [../]
-  [./f1]
+  [./f]
     type = PointValue
     point = '0 0 0'
-    variable = f1
-  [../]
-  [./f2]
-    type = PointValue
-    point = '0 0 0'
-    variable = f2
-  [../]
-  [./iter]
-    type = PointValue
-    point = '0 0 0'
-    variable = iter
-  [../]
-  [./intnl]
-    type = PointValue
-    point = '0 0 0'
-    variable = intnl
+    variable = yield_fcn
   [../]
 []
 
 [UserObjects]
-  [./hard]
+  [./mc_coh]
     type = TensorMechanicsHardeningConstant
-    value = 1.3
+    value = 10
   [../]
-  [./tens]
-    type = TensorMechanicsPlasticTensileMulti
-    tensile_strength = hard
-    shift = 1E-6
-    yield_function_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-5
+  [./mc_phi]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 1.04719755 # 60deg
+    value_residual = 0.17453293 # 10deg
+    rate = 0.5E4
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 5
+    convert_to_radians = true
+  [../]
+  [./mc]
+    type = TensorMechanicsPlasticMohrCoulombMulti
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
+    shift = 1E-12
+    use_custom_returnMap = true
+    yield_function_tolerance = 1E-5
+    internal_constraint_tolerance = 1E-9
   [../]
 []
 
@@ -261,7 +226,7 @@
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
-    C_ijkl = '0.6E6 1E6'
+    C_ijkl = '0.0E7 1E7'
   [../]
   [./strain]
     type = ComputeFiniteStrain
@@ -272,29 +237,23 @@
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-12
-    plastic_models = tens
-    debug_fspb = none
-    debug_jac_at_stress = '1 2 3 2 -4 -5 3 -5 10'
-    debug_jac_at_pm = '0.1 0.2 0.3'
-    debug_jac_at_intnl = 1E-6
-    debug_stress_change = 1E-6
-    debug_pm_change = '1E-6 1E-6 1E-6'
-    debug_intnl_change = 1E-6
+    plastic_models = mc
   [../]
 []
 
 
 [Executioner]
-  end_time = 1
+  end_time = 10
   dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = planar7
+  file_base = planar_hard2
   exodus = false
   [./csv]
     type = CSV
+    execute_on = timestep_end
     [../]
 []
