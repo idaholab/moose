@@ -96,6 +96,12 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
   /// Returns the model name (TensileMulti)
   virtual std::string modelName() const;
 
+  /// Returns _use_custom_returnMap
+  virtual bool useCustomReturnMap() const;
+
+  /// Returns _use_custom_cto
+  virtual bool useCustomCTO() const;
+
   /**
     * Performs a custom return-map.
     * You may choose to over-ride this in your
@@ -173,17 +179,17 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
  protected:
   const TensorMechanicsHardeningModel & _strength;
 
-  /// whether to use the custom return-map algorithm
-  bool _use_custom_returnMap;
-
-  /// whether to use the custom consistent tangent operator algorithm
-  bool _use_custom_cto;
-
   /// maximum iterations allowed in the custom return-map algorithm
   unsigned int _max_iters;
 
   /// yield function is shifted by this amount to avoid problems with stress-derivatives at equal eigenvalues
   Real _shift;
+
+  /// Whether to use the custom return-map algorithm
+  bool _use_custom_returnMap;
+
+  /// Whether to use the custom consistent tangent operator calculation
+  bool _use_custom_cto;
 
   /// tensile strength as a function of residual value, rate, and internal_param
   virtual Real tensile_strength(const Real internal_param) const;
@@ -247,8 +253,9 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param returned_diagonal_stress The eigenvalues (sorted in ascending order as is standard in this Class) are stored in the diagonal components
    * @param dpm The three plastic multipliers
    * @param str The yield strength
+   * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is classified as "non-negative" in the Kuhn-Tucker conditions).
    */
-  bool KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, const Real & str) const;
+  bool KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, const Real & str, const Real & ep_plastic_tolerance) const;
 
   /**
    * Just like returnMap, but a protected interface

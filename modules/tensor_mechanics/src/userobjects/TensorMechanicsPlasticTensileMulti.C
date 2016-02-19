@@ -25,10 +25,10 @@ InputParameters validParams<TensorMechanicsPlasticTensileMulti>()
 TensorMechanicsPlasticTensileMulti::TensorMechanicsPlasticTensileMulti(const InputParameters & parameters) :
     TensorMechanicsPlasticModel(parameters),
     _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
-    _use_custom_returnMap(getParam<bool>("use_custom_returnMap")),
-    _use_custom_cto(getParam<bool>("use_custom_cto")),
     _max_iters(getParam<unsigned int>("max_iterations")),
-    _shift(parameters.isParamValid("shift") ? getParam<Real>("shift") : _f_tol)
+    _shift(parameters.isParamValid("shift") ? getParam<Real>("shift") : _f_tol),
+    _use_custom_returnMap(getParam<bool>("use_custom_returnMap")),
+    _use_custom_cto(getParam<bool>("use_custom_cto"))
 {
   if (_shift < 0)
     mooseError("Value of 'shift' in TensorMechanicsPlasticTensileMulti must not be negative\n");
@@ -182,7 +182,7 @@ TensorMechanicsPlasticTensileMulti::returnMap(const RankTwoTensor & trial_stress
 
 bool
 TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
-                                                Real /*ep_plastic_tolerance*/, RankTwoTensor & returned_stress, Real & returned_intnl,
+                                                Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
                                                 std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
                                                 bool & trial_stress_inadmissible) const
 {
@@ -258,13 +258,13 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
   // trial_order[1] = type of return to try second
   // trial_order[2] = type of return to try third
   std::vector<int> trial_order(3);
-  if (yf[0] > 0) // all the yield functions are positive, since eigvals are ordered eigvals[0] <= eigvals[1] <= eigvals[2]
+  if (yf[0] > _f_tol) // all the yield functions are positive, since eigvals are ordered eigvals[0] <= eigvals[1] <= eigvals[2]
   {
     trial_order[0] = tip;
     trial_order[1] = edge;
     trial_order[2] = plane;
   }
-  else if (yf[1] > 0)  // two yield functions are positive
+  else if (yf[1] > _f_tol)  // two yield functions are positive
   {
     trial_order[0] = edge;
     trial_order[1] = tip;
@@ -294,7 +294,7 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
         break;
     }
     str = tensile_strength(intnl_old + dpm[0] + dpm[1] + dpm[2]);
-    if (nr_converged && KuhnTuckerOK(returned_stress, dpm, str))
+    if (nr_converged && KuhnTuckerOK(returned_stress, dpm, str, ep_plastic_tolerance))
       break;
   }
 
@@ -498,10 +498,10 @@ TensorMechanicsPlasticTensileMulti::returnPlane(const std::vector<Real> & eigval
 }
 
 bool
-TensorMechanicsPlasticTensileMulti::KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, const Real & str) const
+TensorMechanicsPlasticTensileMulti::KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, const Real & str, const Real & ep_plastic_tolerance) const
 {
   for (unsigned i = 0 ; i < 3 ; ++i)
-    if (!TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(returned_diagonal_stress(i, i) - str, dpm[i]))
+    if (!TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(returned_diagonal_stress(i, i) - str, dpm[i], ep_plastic_tolerance))
       return false;
   return true;
 }
@@ -660,3 +660,17 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
   return cto + ans;
 
 }
+
+
+bool
+TensorMechanicsPlasticTensileMulti::useCustomReturnMap() const
+{
+  return _use_custom_returnMap;
+}
+
+bool
+TensorMechanicsPlasticTensileMulti::useCustomCTO() const
+{
+  return _use_custom_cto;
+}
+

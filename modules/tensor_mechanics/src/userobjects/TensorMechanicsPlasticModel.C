@@ -19,9 +19,9 @@ InputParameters validParams<TensorMechanicsPlasticModel>()
 }
 
 TensorMechanicsPlasticModel::TensorMechanicsPlasticModel(const InputParameters & parameters) :
-  GeneralUserObject(parameters),
-  _f_tol(getParam<Real>("yield_function_tolerance")),
-  _ic_tol(getParam<Real>("internal_constraint_tolerance"))
+    GeneralUserObject(parameters),
+    _f_tol(getParam<Real>("yield_function_tolerance")),
+    _ic_tol(getParam<Real>("internal_constraint_tolerance"))
 {}
 
 void
@@ -172,6 +172,18 @@ TensorMechanicsPlasticModel::modelName() const
   return "None";
 }
 
+bool
+TensorMechanicsPlasticModel::useCustomReturnMap() const
+{
+  return false;
+}
+
+bool
+TensorMechanicsPlasticModel::useCustomCTO() const
+{
+  return false;
+}
+
 
 bool
 TensorMechanicsPlasticModel::returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & /*E_ijkl*/,
@@ -189,15 +201,15 @@ TensorMechanicsPlasticModel::returnMap(const RankTwoTensor & trial_stress, const
   // example of checking Kuhn-Tucker
   std::vector<Real> dpm(numberSurfaces(), 0);
   for (unsigned sf = 0 ; sf < numberSurfaces() ; ++sf)
-    if (!KuhnTuckerSingleSurface(yf[sf], dpm[sf]))
+    if (!KuhnTuckerSingleSurface(yf[sf], dpm[sf], 0))
       return false;
   return true;
 }
 
 bool
-TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(const Real & yf, const Real & dpm) const
+TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(const Real & yf, const Real & dpm, const Real & dpm_tol) const
 {
-  return (dpm == 0 && yf <= _f_tol) || (dpm > 0 && yf <= _f_tol && yf >= -_f_tol);
+  return (dpm == 0 && yf <= _f_tol) || (dpm > -dpm_tol && yf <= _f_tol && yf >= -_f_tol);
 }
 
 RankFourTensor

@@ -144,11 +144,11 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
   /// Returns the model name (eg "MohrCoulomb")
   virtual std::string modelName() const;
 
-  /// Returns _use_custom_returnMap
-  bool use_custom_returnMap() const;
+  /// Returns false.  You will want to override this in your derived class if you write a custom returnMap function
+  virtual bool useCustomReturnMap() const;
 
-  /// Returns _use_custom_cto, ie, whether to use the custom consistent tangent operator algorithm
-  bool use_custom_cto() const;
+  /// Returns false.  You will want to override this in your derived class if you write a custom consistent tangent operator function
+  virtual bool useCustomCTO() const;
 
   /// Tolerance on yield function
   Real _f_tol;
@@ -248,7 +248,14 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
   virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, const Real & intnl,
                                                    const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
 
-  bool KuhnTuckerSingleSurface(const Real & yf, const Real & dpm) const;
+  /**
+   * Returns true if the Kuhn-Tucker conditions for the
+   * single surface are satisfied.
+   * @param yf Yield function value
+   * @param dpm plastic multiplier
+   * @param dpm_tol tolerance on plastic multiplier: viz dpm>-dpm_tol means "dpm is non-negative"
+   */
+  bool KuhnTuckerSingleSurface(const Real & yf, const Real & dpm, const Real & dpm_tol) const;
 
  protected:
 

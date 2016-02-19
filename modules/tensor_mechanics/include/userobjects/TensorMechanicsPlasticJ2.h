@@ -29,6 +29,12 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
   /// returns the model name (J2)
   virtual std::string modelName() const;
 
+  /// Returns _use_custom_returnMap
+  virtual bool useCustomReturnMap() const;
+
+  /// Returns _use_custom_cto
+  virtual bool useCustomCTO() const;
+
  protected:
 
   /**
@@ -95,12 +101,11 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
   /// max iters for custom return map loop
   unsigned _max_iters;
 
-  /// Whether to use the custom returnMap algorithm
+  /// Whether to use the custom return-map algorithm
   bool _use_custom_returnMap;
 
-  /// Whether to use the custom consistent tangent operator algorithm
+  /// Whether to use the custom consistent tangent operator calculation
   bool _use_custom_cto;
-
 
   /**
     * Performs a custom return-map.

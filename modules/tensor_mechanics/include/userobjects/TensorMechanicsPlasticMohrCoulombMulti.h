@@ -98,6 +98,9 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
   /// Returns the model name (MohrCoulombMulti)
   virtual std::string modelName() const;
 
+  /// Returns _use_custom_returnMap
+  virtual bool useCustomReturnMap() const;
+
 
  protected:
 
@@ -110,8 +113,14 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
   /// Hardening model for psi
   const TensorMechanicsHardeningModel & _psi;
 
+  /// Maximum Newton-Raphison iterations in the custom returnMap algorithm
+  unsigned int _max_iters;
+
   /// yield function is shifted by this amount to avoid problems with stress-derivatives at equal eigenvalues
   Real _shift;
+
+  /// Whether to use the custom return-map algorithm
+  bool _use_custom_returnMap;
 
   /// cohesion as a function of residual value, rate, and internal_param
   virtual Real cohesion(const Real internal_param) const;
@@ -130,6 +139,94 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
 
   /// d(psi)/d(internal_param) as a function of residual value, rate, and internal_param
   virtual Real dpsi(const Real internal_param) const;
+
+
+  /**
+   * Calculates the yield functions given the eigenvalues of stress
+   * @param e0 Smallest eigenvalue
+   * @param e1 Middle eigenvalue
+   * @param e2 Largest eigenvalue
+   * @param sinphi sin(friction angle)
+   * @param cohcos cohesion*cos(friction angle)
+   * @param[out] f the yield functions
+   */
+  void yieldFunctionEigvals(const Real & e0, const Real & e1, const Real & e2, const Real & sinphi, const Real & cohcos, std::vector<Real> & f) const;
+
+
+  /**
+    * Performs a custom return-map.
+    * You may choose to over-ride this in your
+    * derived TensorMechanicsPlasticXXXX class,
+    * and you may implement the return-map
+    * algorithm in any way that suits you.  Eg, using
+    * a Newton-Raphson approach, or a radial-return,
+    * etc.
+    * This may also be used as a quick way of ascertaining
+    * whether (trial_stress, intnl_old) is in fact admissible.
+    *
+    * For over-riding this function, please note the
+    * following.
+    *
+    * (1) Denoting the return value of the function by "successful_return",
+    * the only possible output values should be:
+    *   (A) trial_stress_inadmissible=false, successful_return=true.
+    *       That is, (trial_stress, intnl_old) is in fact admissible
+    *       (in the elastic domain).
+    *   (B) trial_stress_inadmissible=true, successful_return=false.
+    *       That is (trial_stress, intnl_old) is inadmissible
+    *       (outside the yield surface), and you didn't return
+    *       to the yield surface.
+    *   (C) trial_stress_inadmissible=true, successful_return=true.
+    *       That is (trial_stress, intnl_old) is inadmissible
+    *       (outside the yield surface), but you did return
+    *       to the yield surface.
+    * The default implementation only handles case (A) and (B):
+    * it does not attempt to do a return-map algorithm.
+    *
+    * (2) you must correctly signal "successful_return" using the
+    * return value of this function.  Don't assume the calling function
+    * will do Kuhn-Tucker checking and so forth!
+    *
+    * (3) In cases (A) and (B) you needn't set returned_stress,
+    * returned_intnl, delta_dp, or dpm.  This is for computational
+    * efficiency.
+    *
+    * (4) In cases (A) and (B), you MUST place the yield function
+    * values at (trial_stress, intnl_old) into yf so the calling
+    * function can use this information optimally.  You will have
+    * already calculated these yield function values, which can be
+    * quite expensive, and it's not very optimal for the calling
+    * function to have to re-calculate them.
+    *
+    * (5) In case (C), you need to set:
+    *   returned_stress (the returned value of stress)
+    *   returned_intnl  (the returned value of the internal variable)
+    *   delta_dp   (the change in plastic strain)
+    *   dpm (the plastic multipliers needed to bring about the return)
+    *   yf (yield function values at the returned configuration)
+    *
+    * (Note, if you over-ride returnMap, you will probably
+    * want to override consistentTangentOpertor too, otherwise
+    * it will default to E_ijkl.)
+    *
+    * @param trial_stress The trial stress
+    * @param intnl_old Value of the internal parameter
+    * @param E_ijkl Elasticity tensor
+    * @param ep_plastic_tolerance Tolerance defined by the user for the plastic strain
+    * @param[out] returned_stress In case (C): lies on the yield surface after returning and produces the correct plastic strain (normality condition).  Otherwise: not defined
+    * @param[out] returned_intnl In case (C): the value of the internal parameter after returning.  Otherwise: not defined
+    * @param[out] dpm  In case (C): the plastic multipliers needed to bring about the return.  Otherwise: not defined
+    * @param[out] delta_dp In case (C): The change in plastic strain induced by the return process.  Otherwise: not defined
+    * @param[out] yf In case (C): the yield function at (returned_stress, returned_intnl).  Otherwise: the yield function at (trial_stress, intnl_old)
+    * @param[out] trial_stress_inadmissible Should be set to false if the trial_stress is admissible, and true if the trial_stress is inadmissible.  This can be used by the calling prorgram
+    * @return true if a successful return (or a return-map not needed), false if the trial_stress is inadmissible but the return process failed
+    */
+  virtual bool returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
+                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                                  bool & trial_stress_inadmissible) const;
+
+
 
  private:
 
@@ -157,6 +254,125 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
 
   /// triple product of three 3-dimensional vectors
   Real triple(const std::vector<Real> & a, const std::vector<Real> & b, const std::vector<Real> & c) const;
+
+
+  /**
+   * Returns true if the Kuhn-Tucker conditions are satisfied
+   * @param yf The six yield function values
+   * @param dpm The six plastic multipliers
+   * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is classified as "non-negative" in the Kuhn-Tucker conditions).
+   */
+  bool KuhnTuckerOK(const std::vector<Real> & yf, const std::vector<Real> & dpm, const Real & ep_plastic_tolerance) const;
+
+  /**
+   * See doco for returnMap function.  The interface is identical
+   * to this one.  This one can be called internally regardless of
+   * the value of _use_custom_returnMap
+   */
+  bool doReturnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
+                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                                  bool & trial_stress_inadmissible) const;
+
+  /**
+   * Tries to return-map to the MC tip using the THREE directions
+   * given in n, and THREE dpm values are returned.
+   * Note that you must supply THREE suitale n vectors out of the
+   * total of SIX flow directions, and then interpret the THREE
+   * dpm values appropriately.
+   * The return value is true if the internal Newton-Raphson
+   * process has converged and Kuhn-Tucker is satisfied, otherwise it is false
+   * If the return value is false and/or nr_converged=false then the
+   * "out" parameters (sinphi, cohcos, yf, returned_stress, dpm) will be junk.
+   * @param eigvals The three stress eigenvalues, sorted in ascending order
+   * @param n The three return directions, n=E_ijkl*r.  Note this algorithm assumes isotropic elasticity, so these are 3 vectors in principal stress space
+   * @param dpm[out] The three plastic multipliers resulting from the return-map to the tip.
+   * @param returned_stress[out] The returned stress.  This will be diagonal, with the return-mapped eigenvalues in the diagonal positions, sorted in ascending order
+   * @param intnl_old The internal parameter at stress=eigvals.  This algorithm doesn't form the plastic strain, so you will have to use intnl=intnl_old+sum(dpm) if you need the new internal-parameter value at the returned point.
+   * @param sinphi[out] The new value of sin(friction angle) after returning.
+   * @param cohcos[out] The new value of cohesion*cos(friction angle) after returning.
+   * @param initial_guess A guess for sum(dpm)
+   * @param nr_converged[out] Whether the internal Newton-Raphson process converged
+   * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
+   * @param yf[out] The yield functions after return
+   */
+  bool returnTip(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
+                 std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
+                 Real & sinphi, Real & cohcos, const Real & initial_guess, bool & nr_converged,
+                 const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+
+  /**
+   * Tries to return-map to the MC plane using the n[3] direction
+   * The return value is true if the internal Newton-Raphson
+   * process has converged and Kuhn-Tucker is satisfied, otherwise it is false
+   * If the return value is false and/or nr_converged=false then the
+   * "out" parameters (sinphi, cohcos, yf, returned_stress) will be junk.
+   * @param eigvals The three stress eigenvalues, sorted in ascending order
+   * @param n The six return directions, n=E_ijkl*r.  Note this algorithm assumes isotropic elasticity, so these are vectors in principal stress space
+   * @param dpm[out] The six plastic multipliers resulting from the return-map to the plane
+   * @param returned_stress[out] The returned stress.  This will be diagonal, with the return-mapped eigenvalues in the diagonal positions, sorted in ascending order
+   * @param intnl_old The internal parameter at stress=eigvals.  This algorithm doesn't form the plastic strain, so you will have to use intnl=intnl_old+sum(dpm) if you need the new internal-parameter value at the returned point.
+   * @param sinphi[out] The new value of sin(friction angle) after returning.
+   * @param cohcos[out] The new value of cohesion*cos(friction angle) after returning.
+   * @param initial_guess A guess for sum(dpm)
+   * @param nr_converged[out] Whether the internal Newton-Raphson process converged
+   * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
+   * @param yf[out] The yield functions after return
+   */
+  bool returnPlane(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
+                   std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
+                   Real & sinphi, Real & cohcos, const Real & initial_guess, bool & nr_converged,
+                   const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+
+  /**
+   * Tries to return-map to the MC edge using the n[4] and n[6] directions
+   * The return value is true if the internal Newton-Raphson
+   * process has converged and Kuhn-Tucker is satisfied, otherwise it is false
+   * If the return value is false and/or nr_converged=false then the
+   * "out" parameters (sinphi, cohcos, yf, returned_stress) will be junk.
+   * @param eigvals The three stress eigenvalues, sorted in ascending order
+   * @param n The six return directions, n=E_ijkl*r.  Note this algorithm assumes isotropic elasticity, so these are vectors in principal stress space
+   * @param dpm[out] The six plastic multipliers resulting from the return-map to the edge
+   * @param returned_stress[out] The returned stress.  This will be diagonal, with the return-mapped eigenvalues in the diagonal positions, sorted in ascending order
+   * @param intnl_old The internal parameter at stress=eigvals.  This algorithm doesn't form the plastic strain, so you will have to use intnl=intnl_old+sum(dpm) if you need the new internal-parameter value at the returned point.
+   * @param sinphi[out] The new value of sin(friction angle) after returning.
+   * @param cohcos[out] The new value of cohesion*cos(friction angle) after returning.
+   * @param mag_E An approximate value for the magnitude of the Young's modulus.  This is used to set appropriate tolerances in the Newton-Raphson procedure
+   * @param initial_guess A guess for sum(dpm)
+   * @param nr_converged[out] Whether the internal Newton-Raphson process converged
+   * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
+   * @param yf[out] The yield functions after return
+   */
+  bool returnEdge000101(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
+                        std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
+                        Real & sinphi, Real & cohcos, const Real & initial_guess, const Real & mag_E,
+                        bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+
+  /**
+   * Tries to return-map to the MC edge using the n[1] and n[3] directions
+   * The return value is true if the internal Newton-Raphson
+   * process has converged and Kuhn-Tucker is satisfied, otherwise it is false
+   * If the return value is false and/or nr_converged=false then the
+   * "out" parameters (sinphi, cohcos, yf, returned_stress) will be junk.
+   * @param eigvals The three stress eigenvalues, sorted in ascending order
+   * @param n The six return directions, n=E_ijkl*r.  Note this algorithm assumes isotropic elasticity, so these are vectors in principal stress space
+   * @param dpm[out] The six plastic multipliers resulting from the return-map to the edge
+   * @param returned_stress[out] The returned stress.  This will be diagonal, with the return-mapped eigenvalues in the diagonal positions, sorted in ascending order
+   * @param intnl_old The internal parameter at stress=eigvals.  This algorithm doesn't form the plastic strain, so you will have to use intnl=intnl_old+sum(dpm) if you need the new internal-parameter value at the returned point.
+   * @param sinphi[out] The new value of sin(friction angle) after returning.
+   * @param cohcos[out] The new value of cohesion*cos(friction angle) after returning.
+   * @param mag_E An approximate value for the magnitude of the Young's modulus.  This is used to set appropriate tolerances in the Newton-Raphson procedure
+   * @param initial_guess A guess for sum(dpm)
+   * @param nr_converged[out] Whether the internal Newton-Raphson process converged
+   * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
+   * @param yf[out] The yield functions after return
+   */
+  bool returnEdge010100(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
+                        std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
+                        Real & sinphi, Real & cohcos, const Real & initial_guess, const Real & mag_E,
+                        bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+
+  enum return_type { tip110100=0, tip010101=1, edge010100=2, edge000101=3, plane000100=4 };
 
 };
 

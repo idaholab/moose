@@ -171,3 +171,16 @@ TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & trial_
 
   return E_ijkl - 3*mu*mu/sII/h*sij.outerProduct(sij) - 4*mu*mu*zeta*dflowPotential_dstress(stress, intnl);
 }
+
+bool
+TensorMechanicsPlasticJ2::useCustomReturnMap() const
+{
+  return _use_custom_returnMap;
+}
+
+bool
+TensorMechanicsPlasticJ2::useCustomCTO() const
+{
+  return _use_custom_cto;
+}
+

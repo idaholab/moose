@@ -17,7 +17,7 @@ InputParameters validParams<ComputeMultiPlasticityStress>()
   params += validParams<MultiPlasticityDebugger>();
   params.addClassDescription("Base class for multi-surface finite-strain plasticity");
   params.addRangeCheckedParam<unsigned int>("max_NR_iterations", 20, "max_NR_iterations>0", "Maximum number of Newton-Raphson iterations allowed");
-  params.addRequiredRangeCheckedParam<Real>("ep_plastic_tolerance", "ep_plastic_tolerance>0", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
+  params.addRequiredParam<Real>("ep_plastic_tolerance", "The Newton-Raphson process is only deemed converged if the plastic strain increment constraints have L2 norm less than this.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
   params.addRangeCheckedParam<Real>("max_stepsize_for_dumb", 0.01, "max_stepsize_for_dumb>0 & max_stepsize_for_dumb<=1", "If your deactivation_scheme is 'something_to_dumb', then 'dumb' will only be used if the stepsize falls below this value.  This parameter is useful because the 'dumb' scheme is computationally expensive");
   MooseEnum deactivation_scheme("optimized safe dumb optimized_to_safe safe_to_dumb optimized_to_safe_to_dumb optimized_to_dumb", "optimized");
@@ -77,6 +77,9 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _my_elasticity_tensor(RankFourTensor()),
     _my_strain_increment(RankTwoTensor())
 {
+  if (_epp_tol <= 0)
+    mooseError("ComputeMultiPlasticityStress: ep_plastic_tolerance must be positive");
+
   if (_n_supplied)
   {
     // normalise the inputted transverse_direction
@@ -263,7 +266,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
     plastic_strain = plastic_strain_old + delta_dp;
     if (final_step)
     {
-      if (called_from == computeQpStress_function)
+      if (called_from == computeQpStress_function && _f[custom_model]->useCustomCTO())
       {
         if (_tangent_operator_type == elastic)
           consistent_tangent_operator = E_ijkl;
@@ -275,7 +278,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
           consistent_tangent_operator = _f[custom_model]->consistentTangentOperator(stress_old, stress, intnl[custom_model], E_ijkl, custom_model_pm);
         }
       }
-      else // cannot necessarily use the custom consistentTangentOperator since different plastic models may have been active during other substeps
+      else // cannot necessarily use the custom consistentTangentOperator since different plastic models may have been active during other substeps or the custom model says not to use its custom CTO algorithm
         consistent_tangent_operator = consistentTangentOperator(stress, intnl, E_ijkl, pm, cumulative_pm);
     }
     return true;
