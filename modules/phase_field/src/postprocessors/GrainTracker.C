@@ -856,6 +856,8 @@ GrainTracker::updateFieldInfo()
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     _feature_maps[map_num].clear();
 
+  _halo_ids.clear();
+
   std::map<unsigned int, Real> tmp_map;
   MeshBase & mesh = _mesh.getMesh();
 
@@ -897,6 +899,9 @@ GrainTracker::updateFieldInfo()
         tmp_map[*entity_it] = entity_value;
       }
     }
+    for (std::set<dof_id_type>::const_iterator entity_it = grain_it->second->_halo_ids.begin();
+         entity_it != grain_it->second->_halo_ids.end(); ++entity_it)
+      _halo_ids[*entity_it] = grain_it->second->_var_idx;
   }
 }
 

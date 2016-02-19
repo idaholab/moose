@@ -26,6 +26,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./halos]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./proc_id]
     order = CONSTANT
     family = MONOMIAL
@@ -73,7 +77,14 @@
   [./ghosts]
     type = FeatureFloodCountAux
     variable = ghosts
-    field_display = GHOSTED_ELEMS
+    field_display = GHOSTED_ENTITIES
+    execute_on = 'initial timestep_end'
+    bubble_object = features
+  [../]
+  [./halos]
+    type = FeatureFloodCountAux
+    variable = halos
+    field_display = HALOS
     execute_on = 'initial timestep_end'
     bubble_object = features
   [../]
@@ -105,4 +116,3 @@
 [Outputs]
   exodus = true
 []
-

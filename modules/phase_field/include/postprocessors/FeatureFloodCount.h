@@ -57,9 +57,10 @@ public:
   {
   UNIQUE_REGION,
   VARIABLE_COLORING,
+  GHOSTED_ENTITIES,
+  HALOS,
   ACTIVE_BOUNDS,
   CENTROID,
-  GHOSTED_ENTITIES
   };
 
   // Retrieve field information
@@ -106,6 +107,7 @@ public:
     FeatureData(const FeatureData & f) :
         _ghosted_ids(f._ghosted_ids),
         _local_ids(f._local_ids),
+        _halo_ids(f._halo_ids),
         _periodic_nodes(f._periodic_nodes),
         _var_idx(f._var_idx),
         _bboxes(f._bboxes),
@@ -140,6 +142,7 @@ public:
 
     std::set<dof_id_type> _ghosted_ids;
     std::set<dof_id_type> _local_ids;
+    std::set<dof_id_type> _halo_ids;
     std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
     std::vector<MeshTools::BoundingBox> _bboxes;
@@ -354,6 +357,8 @@ protected:
   const PostprocessorValue & _element_average_value;
 
   std::set<dof_id_type> _ghosted_entity_ids;
+
+  std::map<dof_id_type, int> _halo_ids;
 
   /**
    * The data structure which is a list of nodes that are constrained to other nodes

@@ -59,6 +59,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./halos]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -90,6 +94,13 @@
     execute_on = timestep_end
     bubble_object = ngrains
   [../]
+  [./halos]
+    type = FeatureFloodCountAux
+    variable = halos
+    field_display = HALOS
+    execute_on = 'initial timestep_end'
+    bubble_object = ngrains
+  [../]
 []
 
 [BCs]
@@ -119,10 +130,16 @@
   [./ngrains]
     # Counts the number of grains in the polycrystal
 #    type = FeatureFloodCount
+#    variable = bnds
     type = GrainTracker
-    variable = bnds
-    threshold = 0.7
+    threshold = 0.1
+    convex_hull_buffer = 0.0
+    use_single_map = false
+    enable_var_coloring = true
+    condense_map_info = true
+    connecting_threshold = 0.05
     execute_on = 'initial timestep_end'
+    tracking_step = 0
     flood_entity_type = ELEMENTAL
   [../]
   [./dt]

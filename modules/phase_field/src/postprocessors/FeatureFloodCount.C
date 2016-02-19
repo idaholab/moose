@@ -240,6 +240,7 @@ FeatureFloodCount::execute()
 void FeatureFloodCount::communicateAndMerge()
 {
   // First we need to finalize our ghosted elems data structure
+  // TODO: We don't really need to do this, we can do better...
   _communicator.set_union(_ghosted_entity_ids);
 
   // First we need to transform the raw data into a usable data structure
@@ -390,6 +391,16 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
   case GHOSTED_ENTITIES:
     return _ghosted_entity_ids.find(entity_id) != _ghosted_entity_ids.end();
 
+  case HALOS:
+  {
+    std::map<dof_id_type, int>::const_iterator entity_it = _halo_ids.find(entity_id);
+
+    if (entity_it != _halo_ids.end())
+      return entity_it->second;
+    else
+      return -1;
+  }
+
   default:
     return 0;
   };
@@ -429,39 +440,50 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
     {
       // Local variables for clarity
       dof_id_type entity_id = entity_it->first;
-      int feature_num = entity_it->second;
+
+      // Is this an odd number?
+      bool isHaloMarking = entity_it->second % 2 == 1;
+
+      // Divide by two to obtain the feature number
+      int feature_num = entity_it->second >> 1;
+
       FeatureData & feature = _partial_feature_sets[rank][map_num][feature_num];
 
-      /**
-       * Processors only need enough information to stitch together the regions.
-       * We'll keep ids on ghosted regions (overlap areas) separate from the
-       * local ids.
-       *
-       * Note: The local ids also include the processor's ghosted nodes. This
-       * allows us to ignore the ghosted entities when rebuilding the processor's local
-       * field data as well when determining the set of periodic nodes relevant to
-       * each processor.
-       */
-      if (_ghosted_entity_ids.find(entity_id) != _ghosted_entity_ids.end())
-        feature._ghosted_ids.insert(entity_id);
+      if (isHaloMarking)
+        feature._halo_ids.insert(entity_id);
+      else
+      {
+        /**
+         * Processors only need enough information to stitch together the regions.
+         * We'll keep ids on ghosted regions (overlap areas) separate from the
+         * local ids.
+         *
+         * Note: The local ids also include the processor's ghosted nodes. This
+         * allows us to ignore the ghosted entities when rebuilding the processor's local
+         * field data as well when determining the set of periodic nodes relevant to
+         * each processor.
+         */
+        if (_ghosted_entity_ids.find(entity_id) != _ghosted_entity_ids.end())
+          feature._ghosted_ids.insert(entity_id);
 
-      // Save all local nodes to the inter
-      feature._local_ids.insert(entity_id);
+        // Save all local nodes to the inter
+        feature._local_ids.insert(entity_id);
 
-      // Now retrieve the location of this entity for determining the bounding box region
-      const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
+        // Now retrieve the location of this entity for determining the bounding box region
+        const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
 
-      /**
-       * Update the bounding box.
-       *
-       * Note: There will always be one and only one bbox while we are building up our
-       * data structures because we haven't started to stitch together any regions yet.
-       */
-      feature.updateBBoxMin(feature._bboxes[0], entity_point);
-      feature.updateBBoxMax(feature._bboxes[0], entity_point);
+        /**
+         * Update the bounding box.
+         *
+         * Note: There will always be one and only one bbox while we are building up our
+         * data structures because we haven't started to stitch together any regions yet.
+         */
+        feature.updateBBoxMin(feature._bboxes[0], entity_point);
+        feature.updateBBoxMax(feature._bboxes[0], entity_point);
 
-      // Finally save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
-      feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
+        // Finally save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
+        feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
+      }
     }
 
     // Populate the remaining feature data structure members.
@@ -762,6 +784,11 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
               it1->_local_ids.swap(set_union);
               it2->_local_ids.clear();
 
+              set_union.clear();
+              std::set_union(it1->_halo_ids.begin(), it1->_halo_ids.end(), it2->_halo_ids.begin(), it2->_halo_ids.end(), set_union_inserter);
+              it1->_halo_ids.swap(set_union);
+              it2->_halo_ids.clear();
+
               /**
                * If we had a physical intersection, we need to expand boxes. If we had a virtual (periodic) intersection we need to preserve
                * all of the boxes from each of the regions' sets.
@@ -916,14 +943,13 @@ FeatureFloodCount::updateFieldInfo()
 {
   // This variable is only relevant in single map mode
 //  _region_to_var_idx.resize(_feature_sets[0].size());
+  _halo_ids.clear();
 
   std::vector<size_t> index_vector;
 
   unsigned int feature_number = 0;
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
-    std::cout << "Working on map_num " << map_num << std::endl;
-
     /**
      * Perform an indexed sort to give a parallel unique sorting to the identified features.
      * We use the "min_entity_id" inside each feature to assign it's position in the
@@ -958,6 +984,10 @@ FeatureFloodCount::updateFieldInfo()
         if (_var_index_mode)
           _var_index_maps[map_idx][*entity_it] = feature._var_idx;
       }
+
+      // Loop over the halo ids to update cells with halo information
+      for (std::set<dof_id_type>::const_iterator entity_it = feature._halo_ids.begin(); entity_it != feature._halo_ids.end(); ++entity_it)
+        _halo_ids[*entity_it] = feature_number;
 
       ++feature_number;
     }
@@ -1036,11 +1066,19 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live
   // Yay! A bubble -> Mark it!
   unsigned int map_num = _single_map_mode ? 0 : current_idx;
   if (live_region > -1)
+    // Existing bubble
     _feature_maps[map_num][entity_id] = live_region;
   else
   {
-    _feature_maps[map_num][entity_id] = _region_counts[map_num]++;
-    _region_to_var_idx.push_back(current_idx);
+    _feature_maps[map_num][entity_id] = _region_counts[map_num] << 1;
+    ++_region_counts[map_num];
+
+    /**
+     * Also save the variable number (which will be indexed by feature number)
+     * if we are using single map mode.
+     */
+    if (_single_map_mode)
+      _region_to_var_idx.push_back(current_idx);
   }
 
   if (_is_elemental)
@@ -1056,6 +1094,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live
         // Retrieve only the active neighbors for each side of this element, append them to the list of active neighbors
         neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
     }
+    const unsigned int current_feature_num = _feature_maps[map_num][entity_id];
 
     // Loop over all active neighbors
     for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin(); neighbor_it != all_active_neighbors.end(); ++neighbor_it)
@@ -1066,10 +1105,27 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live
       // Only recurse on elems this processor can see
       if (neighbor && neighbor->is_semilocal(my_proc_id))
       {
+        // TODO: This can be smarter, we don't need to mirror all ghosted entities to every other
+        // processor. We can just save off the entities that are flooded in a separate data structure
         if (neighbor->processor_id() != my_proc_id)
           _ghosted_entity_ids.insert(elem->id());
 
-        flood(neighbor, current_idx, _feature_maps[map_num][entity_id]);
+        /**
+         * Premark unmarked entities with a halo mark (next largest odd number)
+         * for the current feature. We will not update the _entities_visited
+         * data structure here. If we encounter a real mark on one of these
+         * halo markings, we will update it later.
+         *
+         *
+         * TODO: We may need to mark point neighbors here. It's possible that by
+         * only looking at edge neighbors we could be creating an un-handled
+         * corner case (literally) for intersection in the grain tracker.
+         */
+        if (_feature_maps[map_num].find(neighbor->id()) == _feature_maps[map_num].end())
+          _feature_maps[map_num][neighbor->id()] = current_feature_num + 1; // Next odd number
+
+        // recurse
+        flood(neighbor, current_idx, current_feature_num);
       }
     }
   }
@@ -1077,6 +1133,8 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live
   {
     std::vector<const Node *> neighbors;
     MeshTools::find_nodal_neighbors(_mesh.getMesh(), *static_cast<const Node *>(dof_object), _nodes_to_elem_map, neighbors);
+    const unsigned int current_feature_num = _feature_maps[map_num][entity_id];
+
     // Flood neighboring nodes that are also above this threshold with recursion
     for (unsigned int i = 0; i < neighbors.size(); ++i)
     {
@@ -1089,7 +1147,12 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, int live
         if (neighbor_node->processor_id() != my_proc_id)
           _ghosted_entity_ids.insert(neighbor_node->id());
 
-        flood(neighbors[i], current_idx, _feature_maps[map_num][entity_id]);
+        // Premark (Halo value)
+        if (_feature_maps[map_num].find(neighbor_node->id()) == _feature_maps[map_num].end())
+          _feature_maps[map_num][neighbor_node->id()] = current_feature_num + 1; // Next odd number
+
+        // recurse
+        flood(neighbors[i], current_idx, current_feature_num);
       }
     }
   }
