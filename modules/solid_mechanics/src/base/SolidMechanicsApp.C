@@ -11,6 +11,7 @@
 
 #include "AbaqusCreepMaterial.h"
 #include "AbaqusUmatMaterial.h"
+#include "BondStatusPDAux.h"
 #include "CLSHPlasticMaterial.h"
 #include "CLSHPlasticModel.h"
 #include "CombinedCreepPlasticity.h"
@@ -123,6 +124,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerAux(DomainIntegralTopologicalQFunction);
   registerAux(ElementsOnLineAux);
   registerAux(FailureIndexPDAux);
+  registerAux(BondStatusPDAux);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);

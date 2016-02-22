@@ -30,7 +30,10 @@ protected:
   virtual void computeJacobian();
 
   const MaterialProperty<Real> & _bond_response;
-  const MaterialProperty<Real> & _bond_response_dif;
+  const MaterialProperty<Real> & _bond_response_dif_temp;
+
+  VariableValue & _bond_status;
+
 };
 
 #endif //HEATCONDUCTIONPD_H

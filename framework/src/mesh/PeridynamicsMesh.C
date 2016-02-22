@@ -19,15 +19,9 @@
 #include "libmesh/getpot.h"
 #include "libmesh/mesh_generation.h"
 #include "libmesh/string_to_enum.h"
-#include "libmesh/periodic_boundaries.h"
-#include "libmesh/periodic_boundary_base.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/boundary_info.h"
-using namespace std;
 
-/***********************************************************************************************/
-/* Peridynamic Code */
-/***********************************************************************************************/
 struct node_structure2D
 {	
   double X;
@@ -51,7 +45,7 @@ struct node_structure3D
   }bond[122]; // horizon = 3*MeshSpacing
 };
 
-int CountNodeNum(double R,double dx,int nd) //applicable to disk shape only, 2, remove the nodes outside the circular domain
+int CountNodeNum(double R,double dx,int nd)
 {
   int node_num = 0;
   double X = 0, Y = 0, dis = 0;
@@ -199,9 +193,7 @@ PeridynamicsMesh::buildMesh()
   mesh.clear();
   mesh.set_mesh_dimension(1);
   BoundaryInfo& boundary_info = mesh.get_boundary_info();
-  /***********************************************************************************************/
-  /* Peridynamic Mesh */
-  /***********************************************************************************************/
+  
   double dis, X, Y, Z;
   int i, j, k, node_id;
   int node_num = 0, bond_num = 0, node_per_layer, search_range;
@@ -277,11 +269,16 @@ PeridynamicsMesh::buildMesh()
         {
           boundary_info.add_node(mesh.node_ptr(node_id),3);
         }
+        if (std::abs((_xmax - _xmin) * (_ymin - node[node_id].Y) - (_xmin - node[node_id].X) * (_ymax - _ymin)) / std::sqrt(std::pow(_xmax - _xmin,2) + std::pow(_ymax - _ymin,2)) < 0.1*mesh_spacing)
+        {
+          boundary_info.add_node(mesh.node_ptr(node_id),4);
+        }
       }
       boundary_info.nodeset_name(0) = "Left";
       boundary_info.nodeset_name(1) = "Right";
       boundary_info.nodeset_name(2) = "Bottom";
       boundary_info.nodeset_name(3) = "Top";
+      boundary_info.nodeset_name(4) = "Diag";
     }
     else if (_shape == 2) //disk-like domain
     {
@@ -348,19 +345,19 @@ PeridynamicsMesh::buildMesh()
         {
           boundary_info.add_node(mesh.node_ptr(node_id),1);
         }
-        if(abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X < 0.0)
+        if(std::abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X < 0.0)
         {
           boundary_info.add_node(mesh.node_ptr(node_id),2);
         }
-        if (abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X > 0.0)
+        if (std::abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X > 0.0)
         {
           boundary_info.add_node(mesh.node_ptr(node_id),3);
         }
-        if(abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y < 0.0)
+        if(std::abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y < 0.0)
         {
           boundary_info.add_node(mesh.node_ptr(node_id),4);
         }
-        if(abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y > 0.0)
+        if(std::abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y > 0.0)
         {
           boundary_info.add_node(mesh.node_ptr(node_id),5);
         }
@@ -458,6 +455,10 @@ PeridynamicsMesh::buildMesh()
           {
             boundary_info.add_node(mesh.node_ptr(node_id),5);
           }
+          if (std::sqrt(((std::pow(_xmin - node[node_id].X,2) + std::pow(_ymin - node[node_id].Y,2) + std::pow(_zmin - node[node_id].Z,2)) * (std::pow(_xmax - _xmin,2) + std::pow(_ymax - _ymin,2) + std::pow(_zmax - _zmin,2)) - std::pow((_xmin - node[node_id].X) * (_xmax - _xmin) + (_ymin - node[node_id].Y) * (_ymax - _ymin) + (_zmin - node[node_id].Z) * (_zmax - _zmin),2)) / (std::pow(_xmax - _xmin,2) + std::pow(_ymax - _ymin,2) + std::pow(_zmax - _zmin,2))) < 0.1*mesh_spacing)
+          {
+            boundary_info.add_node(mesh.node_ptr(node_id),6);
+          }
         }
         boundary_info.nodeset_name(0) = "Left";
         boundary_info.nodeset_name(1) = "Right";
@@ -465,6 +466,7 @@ PeridynamicsMesh::buildMesh()
         boundary_info.nodeset_name(3) = "Top";
         boundary_info.nodeset_name(4) = "Back";
         boundary_info.nodeset_name(5) = "Front";
+        boundary_info.nodeset_name(6) = "Diag";
       }
       else if (_shape == 2) // cylinder shape
       {
@@ -539,39 +541,44 @@ PeridynamicsMesh::buildMesh()
           {
             boundary_info.add_node(mesh.node_ptr(node_id),1);
           }
-          if (abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X < 0.0)
+          if (dis < 0.001 * mesh_spacing && std::abs(Z - (_zmax + _zmin) / 2) < mesh_spacing)
           {
             boundary_info.add_node(mesh.node_ptr(node_id),2);
           }
-          if (abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X > 0.0)
+          if (std::abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X < 0.0)
           {
             boundary_info.add_node(mesh.node_ptr(node_id),3);
           }
-          if (abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y < 0.0)
+          if (std::abs(Y) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && X > 0.0)
           {
             boundary_info.add_node(mesh.node_ptr(node_id),4);
           }
-          if (abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y > 0.0)
+          if (std::abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y < 0.0)
           {
             boundary_info.add_node(mesh.node_ptr(node_id),5);
           }
-          if (Z < _zmin + mesh_spacing)
+          if (std::abs(X) < 0.001 * mesh_spacing && dis > _R - mesh_spacing && Y > 0.0)
           {
             boundary_info.add_node(mesh.node_ptr(node_id),6);
           }
-          if (Z > _zmax - mesh_spacing)
+          if (Z < _zmin + mesh_spacing)
           {
             boundary_info.add_node(mesh.node_ptr(node_id),7);
+          }
+          if (Z > _zmax - mesh_spacing)
+          {
+            boundary_info.add_node(mesh.node_ptr(node_id),8);
           }
         }
         boundary_info.nodeset_name(0) = "PeripheralSurface";
         boundary_info.nodeset_name(1) = "CenterLine";
-        boundary_info.nodeset_name(2) = "LeftLine";
-        boundary_info.nodeset_name(3) = "RightLine";
-        boundary_info.nodeset_name(4) = "BackLine";
-        boundary_info.nodeset_name(5) = "FrontLine";
-        boundary_info.nodeset_name(6) = "Bottom";
-        boundary_info.nodeset_name(7) = "Top";
+        boundary_info.nodeset_name(2) = "Center";
+        boundary_info.nodeset_name(3) = "LeftLine";
+        boundary_info.nodeset_name(4) = "RightLine";
+        boundary_info.nodeset_name(5) = "BackLine";
+        boundary_info.nodeset_name(6) = "FrontLine";
+        boundary_info.nodeset_name(7) = "Bottom";
+        boundary_info.nodeset_name(8) = "Top";
       }
     }
     std::cout << "Total Node Number: " << node_num << std::endl;

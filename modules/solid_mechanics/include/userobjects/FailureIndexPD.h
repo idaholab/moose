@@ -20,21 +20,25 @@ class FailureIndexPD :
 public:
   FailureIndexPD(const InputParameters & parameters);
 
-  ~FailureIndexPD(); // the destructor closes the output file
+  virtual ~FailureIndexPD();
 
   virtual void initialize();
   virtual void execute();
   virtual void threadJoin(const UserObject & u );
   virtual void finalize();
-  virtual Real ComputeFailureIndex(unsigned int nodeid) const;
+  virtual Real computeFailureIndex(unsigned int nodeid) const;
 
 protected:
 
   AuxiliarySystem & _aux;
 
-  MooseVariable * _IntactBondsVar;
-  MooseVariable * _TotalBondsVar;
-  const MaterialProperty<Real> & _bond_status;
+  MooseVariable * _intact_bonds_var;
+  MooseVariable * _total_bonds_var;
+
+  const MaterialProperty<Real> & _bond_critical_strain; 
+  const MaterialProperty<Real> & _bond_mechanic_strain; 
+
+  VariableValue & _bond_status_old;
 
 };
 

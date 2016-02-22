@@ -17,15 +17,20 @@ InputParameters validParams<FailureIndexPD>()
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.addCoupledVar("intact_bonds","Variable to contain number of intact bonds connected to node");
   params.addCoupledVar("total_bonds","Variable to contain total number of bonds connected to node");
+  params.addCoupledVar("bond_status","Auxiliary variable contains bond status");
   return params;
 }
 
 FailureIndexPD :: FailureIndexPD(const InputParameters & parameters) :
   ElementUserObject(parameters),
   _aux(_fe_problem.getAuxiliarySystem()),
-  _IntactBondsVar(getVar("intact_bonds",0)),
-  _TotalBondsVar(getVar("total_bonds",0)),
-  _bond_status(getMaterialProperty<Real>("bond_status" + getParam<std::string>("appended_property_name")))
+  _intact_bonds_var(getVar("intact_bonds",0)),
+  _total_bonds_var(getVar("total_bonds",0)),
+
+  _bond_critical_strain(getMaterialProperty<Real>("bond_critical_strain" + getParam<std::string>("appended_property_name"))),
+  _bond_mechanic_strain(getMaterialProperty<Real>("bond_mechanic_strain" + getParam<std::string>("appended_property_name"))),
+
+  _bond_status_old(coupledValueOld("bond_status"))
 {
 }
 
@@ -50,12 +55,22 @@ FailureIndexPD::execute()
   const Node* const node0 = _current_elem->get_node(0);
   const Node* const node1 = _current_elem->get_node(1);
 
-  long int ib_dof0 = node0->dof_number(_aux.number(), _IntactBondsVar->number(), 0);
-  long int ib_dof1 = node1->dof_number(_aux.number(), _IntactBondsVar->number(), 0);
-  long int tb_dof0 = node0->dof_number(_aux.number(), _TotalBondsVar->number(), 0);
-  long int tb_dof1 = node1->dof_number(_aux.number(), _TotalBondsVar->number(), 0);
-  sln.add(ib_dof0,_bond_status[0]);
-  sln.add(ib_dof1,_bond_status[0]);
+  long int ib_dof0 = node0->dof_number(_aux.number(), _intact_bonds_var->number(), 0);
+  long int ib_dof1 = node1->dof_number(_aux.number(), _intact_bonds_var->number(), 0);
+  long int tb_dof0 = node0->dof_number(_aux.number(), _total_bonds_var->number(), 0);
+  long int tb_dof1 = node1->dof_number(_aux.number(), _total_bonds_var->number(), 0);
+
+  if (std::abs(_bond_status_old[0] - 1.0) < 0.01 && std::abs(_bond_mechanic_strain[0]) < _bond_critical_strain[0])
+  {
+    sln.add(ib_dof0,1.0);
+    sln.add(ib_dof1,1.0);
+  }
+  else
+  {
+    sln.add(ib_dof0,0.0);
+    sln.add(ib_dof1,0.0);
+  }
+
   sln.add(tb_dof0,1.0);
   sln.add(tb_dof1,1.0);
 }
@@ -73,12 +88,13 @@ FailureIndexPD::finalize()
 }
 
 Real
-FailureIndexPD::ComputeFailureIndex(unsigned int nodeid) const
+FailureIndexPD::computeFailureIndex(unsigned int nodeid) const
 {
   NumericVector<Number> & sln = _aux.solution();
   const Node* const node = _mesh.nodePtr(nodeid);
-  long int ib_dof = node->dof_number(_aux.number(), _IntactBondsVar->number(), 0);
-  long int tb_dof = node->dof_number(_aux.number(), _TotalBondsVar->number(), 0);
+  long int ib_dof = node->dof_number(_aux.number(), _intact_bonds_var->number(), 0);
+  long int tb_dof = node->dof_number(_aux.number(), _total_bonds_var->number(), 0);
 
   return 1.0 - sln(ib_dof)/sln(tb_dof);
 }
+

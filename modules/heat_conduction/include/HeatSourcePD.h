@@ -25,13 +25,15 @@ public:
 protected:
   virtual void computeResidual();
 
-  virtual Real computeQpResidual() {return 0;}
-
+  virtual Real computeQpResidual();
+ 
+  const MaterialProperty<Real> & _bond_volume;
+ 
+  const int _pddim;
+  
   Real _power_density;
 
   Function * _power_density_function;
-
-  const MaterialProperty<Real> & _bond_volume;
 
 };
 

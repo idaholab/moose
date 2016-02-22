@@ -34,10 +34,13 @@ protected:
 
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
-  void computeStiffness(ColumnMajorMatrix & stiff_global);
+  virtual void computeStiffness(DenseVector<Real> & stiff_elem);
+
+  virtual void computeOffDiagStiffness(DenseMatrix<Real> & off_stiff_elem);
 
   const MaterialProperty<Real> & _bond_force;
-  const MaterialProperty<Real> & _bond_force_dif;
+  const MaterialProperty<Real> & _bond_force_dif_disp;
+  const MaterialProperty<Real> & _bond_force_dif_temp;
 
 private:
   const unsigned int _component;
@@ -52,7 +55,10 @@ private:
   const unsigned int _zdisp_var;
   const unsigned int _temp_var;
 
+  VariableValue & _bond_status;
+
   const std::vector<RealGradient> * _orientation;
+
 };
 
 #endif //STRESSDIVERGENCEPD_H

@@ -15,17 +15,19 @@ template<>
 InputParameters validParams<HeatSourcePD>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<Real>("power_density", 1.0, "power_density");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addRequiredParam<int>("pddim","Peridynamic dimension is required in Heat Source Block");
+  params.addParam<Real>("power_density", 1.0, "power_density");
   params.addParam<FunctionName>("power_density_function", "", "Function describing the volumetric heat source");
   return params;
 }
 
 HeatSourcePD::HeatSourcePD(const InputParameters & parameters)
   :Kernel(parameters),
+   _bond_volume(getMaterialProperty<Real>("bond_volume" + getParam<std::string>("appended_property_name"))),
+   _pddim(isParamValid("pddim") ? getParam<int>("pddim") : 3),
    _power_density(isParamValid("power_density") ? getParam<Real>("power_density") : 0),
-   _power_density_function(getParam<FunctionName>("power_density_function") != "" ? &getFunction("power_density_function") : NULL),
-   _bond_volume(getMaterialProperty<Real>("bond_volume" + getParam<std::string>("appended_property_name")))
+   _power_density_function(getParam<FunctionName>("power_density_function") != "" ? &getFunction("power_density_function") : NULL)
 {
 }
 
@@ -46,8 +48,8 @@ HeatSourcePD::computeResidual()
   mooseAssert(re.size() == 2, "Truss elements must have two nodes");
   _local_re.resize(re.size());
   _local_re.zero();
-
-  _local_re(0) = _power_density * _bond_volume[0];
+  
+  _local_re(0) = -_power_density * _bond_volume[0];
   _local_re(1) = _local_re(0);
 
   re += _local_re;
@@ -58,4 +60,10 @@ HeatSourcePD::computeResidual()
     for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
+}
+
+Real
+HeatSourcePD::computeQpResidual()
+{
+  return 0;
 }

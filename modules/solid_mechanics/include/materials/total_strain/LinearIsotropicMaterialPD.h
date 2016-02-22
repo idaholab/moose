@@ -15,9 +15,6 @@ class LinearIsotropicMaterialPD;
 template<>
 InputParameters validParams<LinearIsotropicMaterialPD>();
 
-/**
- * LinearIsotropic material for use in simple applications that don't need material properties.
- */
 class LinearIsotropicMaterialPD : public Material
 {
 public:
@@ -29,27 +26,29 @@ protected:
   MooseVariable * _disp_x_var;
   MooseVariable * _disp_y_var;
   MooseVariable * _disp_z_var;
-  MooseVariable * _temp_var;
-
 
   virtual void computeProperties();
   virtual void initQpStatefulProperties();
 
   MaterialProperty<Real> & _bond_force;
-  MaterialProperty<Real> & _bond_force_dif;
-  MaterialProperty<Real> & _bond_status;
-  MaterialProperty<Real> & _bond_status_old;
-  MaterialProperty<Real> & _critical_stretch;
+  MaterialProperty<Real> & _bond_force_dif_disp;
+  MaterialProperty<Real> & _bond_force_dif_temp;
+  MaterialProperty<Real> & _bond_mechanic_strain;
+  MaterialProperty<Real> & _bond_critical_strain;
+  MaterialProperty<Real> & _bond_critical_strain_old;
 
   const int _pddim;
   const Real _youngs_modulus;
   const Real _poissons_ratio;
   const Real _mesh_spacing;
-  const Real _domain_thickness;
-  const Real _my_critical_stretch;
+  const Real _critical_strain;
   const Real _standard_deviation;
 
+  bool _is_plane_strain;
+  bool _is_vary_stiffness;
+
   bool _has_temp;
+  VariableValue & _temp;
   const Real _temp_ref;
   const Real _thermal_expansion;
 };

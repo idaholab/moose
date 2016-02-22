@@ -18,15 +18,16 @@ InputParameters validParams<StressDivergencePD>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
-  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addCoupledVar("bond_status","Auxiliary variable contains bond status");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 StressDivergencePD::StressDivergencePD(const InputParameters & parameters)
   :Kernel(parameters),
-  _bond_force(getMaterialProperty<Real>("bond_force" + getParam<std::string>("appended_property_name"))),
-  _bond_force_dif(getMaterialProperty<Real>("bond_force_dif" + getParam<std::string>("appended_property_name"))),
+  _bond_force(getMaterialProperty<Real>("bond_force")),
+  _bond_force_dif_disp(getMaterialProperty<Real>("bond_force_dif_disp")),
+  _bond_force_dif_temp(getMaterialProperty<Real>("bond_force_dif_temp")),
   _component(getParam<unsigned int>("component")),
   _xdisp_coupled(isCoupled("disp_x")),
   _ydisp_coupled(isCoupled("disp_y")),
@@ -36,6 +37,7 @@ StressDivergencePD::StressDivergencePD(const InputParameters & parameters)
   _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
   _temp_var(_temp_coupled ? coupled("temp") : 0),
+  _bond_status(coupledValue("bond_status")),
   _orientation(NULL)
 {
 }
@@ -43,7 +45,6 @@ StressDivergencePD::StressDivergencePD(const InputParameters & parameters)
 void
 StressDivergencePD::initialSetup()
 {
-  // Assume that all trusses are one dimensional in the call below
   _orientation = &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
 }
 
@@ -57,10 +58,9 @@ StressDivergencePD::computeResidual()
 
   RealGradient orientation( (*_orientation)[0] );
   orientation /= orientation.size();
-  VectorValue<Real> force_local = _bond_force[0] * orientation;
-  int sign(-_test[0][0]/std::abs(_test[0][0]));
-  _local_re(0) = sign * force_local(_component);
-  _local_re(1) = -_local_re(0);
+  VectorValue<Real> force_local = _bond_force[0] * orientation * _bond_status[0];
+  _local_re(0) = - force_local(_component);
+  _local_re(1) = - _local_re(0);
 	
   re += _local_re;
 
@@ -73,22 +73,38 @@ StressDivergencePD::computeResidual()
 }
 
 void
-StressDivergencePD::computeStiffness(ColumnMajorMatrix & stiff_global)
+StressDivergencePD::computeStiffness(DenseVector<Real> & stiff_elem)
 {
   RealGradient orientation( (*_orientation)[0] );
   Real dist = 2.0 * orientation.size(); //orientation.size() only gives half of the actual distance between two nodes
   orientation /= orientation.size();
   
   //the effect of truss orientation change has been accounted for
-  stiff_global(0,0) = orientation(0) * orientation(0) * _bond_force_dif[0] + _bond_force[0] * (1.0 - orientation(0) * orientation(0)) / dist;
-  stiff_global(0,1) = orientation(0) * orientation(1) * _bond_force_dif[0] - _bond_force[0] * orientation(0) * orientation(1) / dist;
-  stiff_global(0,2) = orientation(0) * orientation(2) * _bond_force_dif[0] - _bond_force[0] * orientation(0) * orientation(2) / dist;
-  stiff_global(1,0) = orientation(1) * orientation(0) * _bond_force_dif[0] - _bond_force[0] * orientation(1) * orientation(0) / dist;
-  stiff_global(1,1) = orientation(1) * orientation(1) * _bond_force_dif[0] + _bond_force[0] * (1.0 - orientation(1) * orientation(1)) / dist;
-  stiff_global(1,2) = orientation(1) * orientation(2) * _bond_force_dif[0] - _bond_force[0] * orientation(1) * orientation(2) / dist;
-  stiff_global(2,0) = orientation(2) * orientation(0) * _bond_force_dif[0] - _bond_force[0] * orientation(2) * orientation(0) / dist;
-  stiff_global(2,1) = orientation(2) * orientation(1) * _bond_force_dif[0] - _bond_force[0] * orientation(2) * orientation(1) / dist;
-  stiff_global(2,2) = orientation(2) * orientation(2) * _bond_force_dif[0] + _bond_force[0] * (1.0 - orientation(2) * orientation(2)) / dist;
+  stiff_elem(0) = orientation(0) * orientation(0) * _bond_force_dif_disp[0] + _bond_force[0] * (1.0 - orientation(0) * orientation(0)) / dist;
+  stiff_elem(1) = orientation(1) * orientation(1) * _bond_force_dif_disp[0] + _bond_force[0] * (1.0 - orientation(1) * orientation(1)) / dist;
+  stiff_elem(2) = orientation(2) * orientation(2) * _bond_force_dif_disp[0] + _bond_force[0] * (1.0 - orientation(2) * orientation(2)) / dist;
+}
+
+void
+StressDivergencePD::computeOffDiagStiffness(DenseMatrix<Real> & off_stiff_elem)
+{
+  RealGradient orientation( (*_orientation)[0] );
+  Real dist = 2.0 * orientation.size(); //orientation.size() only gives half of the actual distance between two nodes
+  orientation /= orientation.size();
+  
+  //the effect of truss orientation change has been accounted for
+  off_stiff_elem(0,0) = orientation(0) * orientation(0) * _bond_force_dif_disp[0] + _bond_force[0] * (1.0 - orientation(0) * orientation(0)) / dist;
+  off_stiff_elem(0,1) = orientation(0) * orientation(1) * _bond_force_dif_disp[0] - _bond_force[0] * orientation(0) * orientation(1) / dist;
+  off_stiff_elem(0,2) = orientation(0) * orientation(2) * _bond_force_dif_disp[0] - _bond_force[0] * orientation(0) * orientation(2) / dist;
+  off_stiff_elem(0,3) = orientation(0) * _bond_force_dif_temp[0];
+  off_stiff_elem(1,0) = orientation(1) * orientation(0) * _bond_force_dif_disp[0] - _bond_force[0] * orientation(1) * orientation(0) / dist;
+  off_stiff_elem(1,1) = orientation(1) * orientation(1) * _bond_force_dif_disp[0] + _bond_force[0] * (1.0 - orientation(1) * orientation(1)) / dist;
+  off_stiff_elem(1,2) = orientation(1) * orientation(2) * _bond_force_dif_disp[0] - _bond_force[0] * orientation(1) * orientation(2) / dist;
+  off_stiff_elem(1,3) = orientation(1) * _bond_force_dif_temp[0];
+  off_stiff_elem(2,0) = orientation(2) * orientation(0) * _bond_force_dif_disp[0] - _bond_force[0] * orientation(2) * orientation(0) / dist;
+  off_stiff_elem(2,1) = orientation(2) * orientation(1) * _bond_force_dif_disp[0] - _bond_force[0] * orientation(2) * orientation(1) / dist;
+  off_stiff_elem(2,2) = orientation(2) * orientation(2) * _bond_force_dif_disp[0] + _bond_force[0] * (1.0 - orientation(2) * orientation(2)) / dist;
+  off_stiff_elem(2,3) = orientation(2) * _bond_force_dif_temp[0];
 }
 
 void
@@ -98,24 +114,19 @@ StressDivergencePD::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  ColumnMajorMatrix stiff_global(3,3);
-  computeStiffness( stiff_global );
+  DenseVector<Real> stiff_elem(3);
+  computeStiffness( stiff_elem );
 
   for (_i = 0; _i < _test.size(); _i++)
-  {
     for (_j = 0; _j < _phi.size(); _j++)
-    {
-      int sign( _i == _j ? 1 : -1 );
-      _local_ke(_i, _j) += sign * stiff_global(_component, _component);
-    }	
-  }
+       _local_ke(_i, _j) += (_i == _j ? 1 : -1) * stiff_elem(_component) * _bond_status[0];
 
   ke += _local_ke;
 
   if (_has_diag_save_in)
   {
     unsigned int rows = ke.m();
-    DenseVector<Number> diag(rows);
+    DenseVector<Real> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i,i);
 
@@ -129,13 +140,12 @@ void
 StressDivergencePD::computeOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var.number())
-  {
     computeJacobian();
-  }
   else
   {
     unsigned int coupled_component = 0;
     bool active(false);
+
     if ( _xdisp_coupled && jvar == _xdisp_var )
     {
       coupled_component = 0;
@@ -151,24 +161,22 @@ StressDivergencePD::computeOffDiagJacobian(unsigned int jvar)
       coupled_component = 2;
       active = true;
     }
+    else if ( _temp_coupled && jvar == _temp_var )
+    {
+      coupled_component = 3;
+      active = true;
+    }
 
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
     if (active)
     {
-      ColumnMajorMatrix stiff_global(3,3);
-      computeStiffness( stiff_global );
+      DenseMatrix<Real> off_stiff_elem(3,4);
+      computeOffDiagStiffness( off_stiff_elem );
+
       for (_i = 0; _i < _test.size(); _i++)
-      {
         for (_j = 0; _j < _phi.size(); _j++)
-        {
-          int sign( _i == _j ? 1 : -1 );
-          ke(_i,_j) += sign * stiff_global(_component, coupled_component);
-        }
-      }
+          ke(_i,_j) += (_i == _j ? 1 : -1) * off_stiff_elem(_component, coupled_component) * _bond_status[0];
     }
-    else if ( false ) // Need some code here for coupling with temperature
-    {
-    }
-  }	
+  }
 }

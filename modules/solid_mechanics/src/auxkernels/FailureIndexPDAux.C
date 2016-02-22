@@ -17,7 +17,7 @@ InputParameters validParams<FailureIndexPDAux>()
 
 FailureIndexPDAux::FailureIndexPDAux(const InputParameters & parameters) :
   AuxKernel(parameters),
-    _failure_index_pd(&getUserObject<FailureIndexPD>("failure_index_pd"))
+  _failure_index_pd(&getUserObject<FailureIndexPD>("failure_index_pd"))
 {
 }
 
@@ -27,5 +27,5 @@ FailureIndexPDAux::computeValue()
   if (!isNodal())
     mooseError("must run on a nodal variable");
 
-  return _failure_index_pd->ComputeFailureIndex(_current_node->id());
+  return _failure_index_pd->computeFailureIndex(_current_node->id());
 }
