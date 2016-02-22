@@ -20,7 +20,7 @@ public:
 protected:
   Real computeValue();
 
-  VariableValue & _area;
+  const VariableValue & _area;
 };
 
 

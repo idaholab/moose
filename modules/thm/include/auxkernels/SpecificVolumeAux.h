@@ -20,9 +20,9 @@ public:
 protected:
   Real computeValue();
 
-  VariableValue & _rhoA;
-  VariableValue & _area;
-  VariableValue & _alpha;
+  const VariableValue & _rhoA;
+  const VariableValue & _area;
+  const VariableValue & _alpha;
 };
 
 

@@ -22,9 +22,9 @@ protected:
   virtual Real computeValue();
 
   /// Specific volume
-  VariableValue & _v;
+  const VariableValue & _v;
   /// Specific internal energy
-  VariableValue & _e;
+  const VariableValue & _e;
 
   const IAPWS95FluidProperties & _fp;
 };

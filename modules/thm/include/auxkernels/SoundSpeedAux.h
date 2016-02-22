@@ -21,9 +21,9 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _rho;
-  VariableValue & _rhou;
-  VariableValue & _rhoE;
+  const VariableValue & _rho;
+  const VariableValue & _rhou;
+  const VariableValue & _rhoE;
 
   const SinglePhaseCommonFluidProperties & _spfp;
 };

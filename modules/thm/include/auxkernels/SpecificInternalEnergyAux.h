@@ -21,11 +21,11 @@ protected:
   virtual Real computeValue();
 
   /// density, rho
-  VariableValue & _rho;
+  const VariableValue & _rho;
   /// momentum, rhou
-  VariableValue & _rhou;
+  const VariableValue & _rhou;
   /// total energy, rhoE
-  VariableValue & _rhoE;
+  const VariableValue & _rhoE;
 };
 
 #endif /* SPECIFICINTERNALENERGYAUX_H */

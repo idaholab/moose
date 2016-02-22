@@ -22,17 +22,17 @@ protected:
   virtual Real computeValue();
 
   /// Volume fraction
-  VariableValue & _alpha;
+  const VariableValue & _alpha;
   /// Density of the phase
-  VariableValue & _rho;
+  const VariableValue & _rho;
   /// Velocity of the phase
-  VariableValue & _u_vel;
+  const VariableValue & _u_vel;
   /// Hydraulic diameter
-  VariableValue & _Dh;
+  const VariableValue & _Dh;
   /// Specific volume
-  VariableValue & _v;
+  const VariableValue & _v;
   /// Specific internal energy
-  VariableValue & _e;
+  const VariableValue & _e;
 
   const IAPWS95FluidProperties & _fp;
 };
