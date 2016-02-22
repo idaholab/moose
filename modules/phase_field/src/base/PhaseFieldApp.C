@@ -135,6 +135,7 @@
  */
 #include "BndsCalcAux.h"
 #include "CrossTermGradientFreeEnergy.h"
+#include "Euler2RGBAux.h"
 #include "FeatureFloodCountAux.h"
 #include "KKSGlobalFreeEnergy.h"
 #include "PFCEnergyDensity.h"
@@ -343,6 +344,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
+  registerAux(Euler2RGBAux);
   registerAux(FeatureFloodCountAux);
   registerAux(KKSGlobalFreeEnergy);
   registerAux(PFCEnergyDensity);

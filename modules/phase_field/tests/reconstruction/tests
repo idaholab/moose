@@ -1,4 +1,12 @@
 [Tests]
+  [./euler2rgbaux]
+    type = 'Exodiff'
+    input = 'euler2rgbaux.i'
+    exodiff = 'euler2rgbaux_out.e'
+    max_time = 1000
+    recover = false
+  [../]
+
   [./1phase_reconstruction]
     type = 'Exodiff'
     input = '1phase_reconstruction.i'

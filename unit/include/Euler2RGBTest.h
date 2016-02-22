@@ -12,31 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEUTILSTEST_H
-#define MOOSEUTILSTEST_H
+#ifndef EULER2RGBTEST_H
+#define EULER2RGBTEST_H
 
 //CPPUnit includes
-#include "GuardedHelperMacros.h"
+#include "cppunit/extensions/HelperMacros.h"
 
-// Forward declarations
-class MooseMesh;
-class FEProblem;
-class Factory;
-class MooseApp;
-
-class MooseUtilsTest : public CppUnit::TestFixture
+class Euler2RGBTest : public CppUnit::TestFixture
 {
+  CPPUNIT_TEST_SUITE( Euler2RGBTest );
 
-  CPPUNIT_TEST_SUITE( MooseUtilsTest );
-
-  CPPUNIT_TEST( camelCaseToUnderscore );
-  CPPUNIT_TEST( underscoreToCamelCase );
+  CPPUNIT_TEST( test );
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void camelCaseToUnderscore();
-  void underscoreToCamelCase();
+  void setUp();
+  void tearDown();
+
+  void test();
+
+private:
 };
 
-#endif //MOOSEUTILSTEST_H
+#endif //EULER2RGBTEST_H
