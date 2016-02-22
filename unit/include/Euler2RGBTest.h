@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MATHUTILSTEST_H
-#define MATHUTILSTEST_H
+#ifndef EULER2RGBTEST_H
+#define EULER2RGBTEST_H
 
 //CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
@@ -35,4 +35,4 @@ public:
 private:
 };
 
-#endif //MATHUTILSTEST_H
+#endif //EULER2RGBTEST_H

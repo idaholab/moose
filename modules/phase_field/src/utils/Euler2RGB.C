@@ -1,42 +1,43 @@
-/******************************************************************************/
-/*  Filename: Euler2RGB.C                                                     */
-/*                                                                            */
-/*  Summary:  This function rotates a set of three Bunge Euler angles into    */
-/*            the standard Stereographic triangle, interpolates the RGB color */
-/*            value based on a user selected reference sample direction, and  */
-/*            outputs an integer value representing the RGB tuplet usable for */
-/*            plotting inverse pole figure colored grain maps.  The program   */
-/*            can accommodate any of the seven crystal systems.               */
-/*                                                                            */
-/*  Inputs:   1) Reference sample direction (sd) input as an integer between  */
-/*               1 and 3.  Options are [100], [010], and [001] with [001]     */
-/*               being the most common choice found in the literature. Input  */
-/*               "1" to select [100], "2" to select [010], and "3" to select  */
-/*               the [001] sample direction.                                  */
-/*            2) Set of three Euler angles (phi1, PHI, phi2) in the Bunge     */
-/*               notation (must be in radians)                                */
-/*            3) Phase number "phase" used to assign black color values to    */
-/*               voids (phase = 0)                                            */
-/*            4) Integer value of crystal class as defined by OIM Software:   */
-/*                    "43" for cubic                                          */
-/*                    "62" for hexagonal                                      */
-/*                    "42" for tetragonal                                     */
-/*                    "32" for trigonal                                       */
-/*                    "22" for orthorhombic                                   */
-/*                     "2" for monoclinic                                     */
-/*                     "1" for triclinic                                      */
-/*                     "0" for unindexed points (bad data point)              */
-/*                                                                            */
-/*  Output:  Integer value of RGB calculated from:                            */
-/*           RGB = red*256^2 + green*256 + blue (where red, green, and blue   */
-/*           are integer values between 0 and 255)                            */
-/*                                                                            */
-/******************************************************************************/
-
-// Include files
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "Euler2RGB.h"
 #include "MathUtils.h"
 
+/**
+ * This function rotates a set of three Bunge Euler angles into
+ * the standard Stereographic triangle, interpolates the RGB color
+ * value based on a user selected reference sample direction, and
+ * outputs an integer value representing the RGB tuplet usable for
+ * plotting inverse pole figure colored grain maps.  The program
+ * can accommodate any of the seven crystal systems.
+ *
+ *  Inputs:   1) Reference sample direction (sd) input as an integer between
+ *               1 and 3.  Options are [100], [010], and [001] with [001]
+ *               being the most common choice found in the literature. Input
+ *               "1" to select [100], "2" to select [010], and "3" to select
+ *               the [001] sample direction.
+ *            2) Set of three Euler angles (phi1, PHI, phi2) in the Bunge
+ *               notation (must be in radians)
+ *            3) Phase number "phase" used to assign black color values to
+ *               voids (phase = 0)
+ *            4) Integer value of crystal class as defined by OIM Software:
+ *                    "43" for cubic
+ *                    "62" for hexagonal
+ *                    "42" for tetragonal
+ *                    "32" for trigonal
+ *                    "22" for orthorhombic
+ *                     "2" for monoclinic
+ *                     "1" for triclinic
+ *                     "0" for unindexed points (bad data point)
+ *
+ *  Output:  Integer value of RGB calculated from:
+ *           RGB = red*256^2 + green*256 + blue (where red, green, and blue
+ *           are integer values between 0 and 255)
+ */
 Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, unsigned int sym)
 {
   // Define Constants
