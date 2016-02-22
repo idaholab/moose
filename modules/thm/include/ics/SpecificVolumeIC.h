@@ -20,9 +20,9 @@ public:
   virtual Real value(const Point & p);
 
 protected:
-  VariableValue & _rhoA;
-  VariableValue & _area;
-  VariableValue & _alpha;
+  const VariableValue & _rhoA;
+  const VariableValue & _area;
+  const VariableValue & _alpha;
 };
 
 
