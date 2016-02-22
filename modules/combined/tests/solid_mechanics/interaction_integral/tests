@@ -27,6 +27,13 @@
    abs_zero = 1e-7
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
  [../]
+ [./ii_3d_points]
+   type = 'Exodiff'
+   input = 'interaction_integral_3d_points.i'
+   exodiff = 'interaction_integral_3d_points_out.e'
+   abs_zero = 1e-7
+   max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
+ [../]
  [./ii_3d_rot]
    type = 'Exodiff'
    input = 'interaction_integral_3d_rot.i'
