@@ -27,7 +27,7 @@ protected:
   MaterialProperty<Real> & _density;
 
   /// Temperature in the solid structure
-  VariableValue & _temp;
+  const VariableValue & _temp;
   /// User object with material properties
   const SolidMaterialProperties & _props;
 };
