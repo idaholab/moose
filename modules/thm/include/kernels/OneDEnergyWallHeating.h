@@ -26,9 +26,9 @@ protected:
   const MaterialProperty<Real> & _dT_drhouA;
   const MaterialProperty<Real> & _dT_drhoEA;
 
-  VariableValue & _heat_transfer_coefficient;
-  VariableValue & _Tw;
-  VariableValue & _Phf;
+  const VariableValue & _heat_transfer_coefficient;
+  const VariableValue & _Tw;
+  const VariableValue & _Phf;
 
   // For Jacobian terms
   unsigned _rhoA_var_number;

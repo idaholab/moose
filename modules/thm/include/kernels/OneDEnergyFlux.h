@@ -24,10 +24,10 @@ protected:
 
   bool _is_liquid;
   Real _sign;
-  VariableValue & _rhouA;
-  VariableValue & _area;
-  VariableValue & _u_vel;
-  VariableValue & _enthalpy;
+  const VariableValue & _rhouA;
+  const VariableValue & _area;
+  const VariableValue & _u_vel;
+  const VariableValue & _enthalpy;
   const MaterialProperty<Real> & _pressure;
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
@@ -37,7 +37,7 @@ protected:
   bool _has_alpha_A;
   unsigned int _alpha_A_liquid_var_number;
   const MaterialProperty<Real> * _dp_daAL;
-  VariableValue & _alpha;
+  const VariableValue & _alpha;
 };
 
 #endif /* ONEDENERGYFLUX_H */

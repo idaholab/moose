@@ -22,7 +22,7 @@ protected:
   virtual Real computeQpResidual();
 
   const Real & _power_fraction;
-  VariableValue & _total_power;
+  const VariableValue & _total_power;
   const Real & _volume;
   Function & _power_shape_function;
 };
