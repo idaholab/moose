@@ -22,7 +22,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _rhouA;
+  const VariableValue & _rhouA;
   unsigned int _rhouA_var_number;
 };
 
