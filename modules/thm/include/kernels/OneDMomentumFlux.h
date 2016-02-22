@@ -24,13 +24,13 @@ protected:
 
   bool _is_liquid;
   Real _sign;
-  VariableValue & _alpha;
-  VariableValue & _u_vel;
+  const VariableValue & _alpha;
+  const VariableValue & _u_vel;
   const MaterialProperty<Real> & _pressure;
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
   const MaterialProperty<Real> & _dp_darhoEA;
-  VariableValue & _area;
+  const VariableValue & _area;
 
   unsigned int _rhoA_var_number;
   unsigned int _rhoEA_var_number;
