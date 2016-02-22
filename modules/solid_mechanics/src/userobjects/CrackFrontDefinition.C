@@ -386,13 +386,6 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> &nodes)
       last_node = _ordered_crack_front_nodes.back();
     }
   }
-  //Store the ordered crack front nodes into _crack_front_points
-  _crack_front_points.resize(_ordered_crack_front_nodes.size());
-  for (unsigned int nit = 0; nit != _ordered_crack_front_nodes.size(); ++nit)
-  {
-    Node & crack_front_node = _mesh.node(_ordered_crack_front_nodes[nit]);
-    _crack_front_points[nit] = crack_front_node;
-  }
 }
 
 void
@@ -833,8 +826,8 @@ CrackFrontDefinition::updateDataForCrackDirection()
     _crack_plane_normal.zero();
 
     //Get 3 nodes on crack front
-    unsigned int num_nodes(_ordered_crack_front_nodes.size());
-    if (num_nodes<3)
+    unsigned int num_points = getNumCrackFrontPoints();
+    if (num_points < 3)
     {
       mooseError("Crack front must contain at least 3 nodes to use CurvedCrackFront option");
     }
@@ -845,22 +838,22 @@ CrackFrontDefinition::updateDataForCrackDirection()
     if (_closed_loop)
     {
       start_id = 0;
-      mid_id = (num_nodes-1)/3;
-      end_id = 2*mid_id;
+      mid_id = (num_points - 1) / 3;
+      end_id = 2 * mid_id;
     }
     else
     {
       start_id = 0;
-      mid_id = (num_nodes-1)/2;
-      end_id = num_nodes-1;
+      mid_id = (num_points - 1) / 2;
+      end_id = num_points - 1;
     }
-    Node & start = _mesh.node(_ordered_crack_front_nodes[start_id]);
-    Node & mid   = _mesh.node(_ordered_crack_front_nodes[mid_id]);
-    Node & end   = _mesh.node(_ordered_crack_front_nodes[end_id]);
+    const Point *start = getCrackFrontPoint(start_id);
+    const Point *mid   = getCrackFrontPoint(mid_id);
+    const Point *end   = getCrackFrontPoint(end_id);
 
     //Create two vectors connecting them
-    RealVectorValue v1 = mid-start;
-    RealVectorValue v2 = end-mid;
+    RealVectorValue v1 = *mid - *start;
+    RealVectorValue v2 = *end - *mid;
 
     //Take cross product to get normal
     _crack_plane_normal = v1.cross(v2);
@@ -1058,8 +1051,7 @@ CrackFrontDefinition::rotateToCrackFrontCoords(const ColumnMajorMatrix tensor, c
 void
 CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned int point_index, Real & r, Real & theta) const
 {
-  unsigned int num_points(_crack_front_points.size());
-  Point p = qp;
+  unsigned int num_points = getNumCrackFrontPoints();
   Point closest_point(0.0);
   RealVectorValue closest_point_to_p;
 
@@ -1068,7 +1060,7 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
 
   RealVectorValue crack_front_edge = rotateToCrackFrontCoords(_tangent_directions[point_index],point_index);
 
-  Point p_rot = rotateToCrackFrontCoords(p,point_index);
+  Point p_rot = rotateToCrackFrontCoords(qp,point_index);
   p_rot = p_rot - crack_front_point_rot;
 
   if (_treat_as_2d)
@@ -1085,18 +1077,18 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
   }
   else
   {
-    // Loop over crack front nodes to find the one closest to the point qp
+    // Loop over crack front points to find the one closest to the point qp
     Real min_dist = std::numeric_limits<Real>::max();
-    for (unsigned int nit = 0; nit != num_points; ++nit)
+    for (unsigned int pit = 0; pit != num_points; ++pit)
     {
-      const Point & crack_front_point = _crack_front_points[nit];
-      RealVectorValue crack_point_to_current_point = p - crack_front_point;
+      const Point* crack_front_point = getCrackFrontPoint(pit);
+      RealVectorValue crack_point_to_current_point = qp - *crack_front_point;
       Real dist = crack_point_to_current_point.size();
 
       if (dist < min_dist)
       {
         min_dist = dist;
-        closest_point = crack_front_point;
+        closest_point = *crack_front_point;
       }
     }
 
@@ -1118,10 +1110,10 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
   RealVectorValue crack_plane_normal = rotateToCrackFrontCoords(_crack_plane_normal,point_index);
   Real p_to_plane_dist = std::abs(closest_point_to_p*crack_plane_normal);
 
-  //Determine if p is above or below the crack plane
+  //Determine if qp is above or below the crack plane
   Real y_local = p_rot(1) - closest_point(1);
 
-  //Determine if p is in front of or behind the crack front
+  //Determine if qp is in front of or behind the crack front
   RealVectorValue p2(p_rot);
   p2(1) = 0;
   RealVectorValue p2_vec = p2 - closest_point;
