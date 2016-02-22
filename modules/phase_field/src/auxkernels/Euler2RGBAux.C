@@ -5,7 +5,8 @@ template<>
 InputParameters validParams<Euler2RGBAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<unsigned int>("sd", 3, "An integer representing reference sample direction");
+  MooseEnum sd_enum = MooseEnum("100=1 010=2 001=3", "001");
+  params.addParam<MooseEnum>("sd", sd_enum, "Reference sample direction");
   return params;
 }
 

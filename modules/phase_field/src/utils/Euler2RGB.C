@@ -72,19 +72,19 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
   // Assign reference sample direction
   switch (sd)
   {
-    case 1:
+    case 1: // 100
       ref_dir[0] = 1;
       ref_dir[1] = 0;
       ref_dir[2] = 0;
       break;
 
-    case 2:
+    case 2: // 010
       ref_dir[0] = 0;
       ref_dir[1] = 1;
       ref_dir[2] = 0;
       break;
 
-    case 3:
+    case 3: // 001
       ref_dir[0] = 0;
       ref_dir[1] = 0;
       ref_dir[2] = 1;
@@ -256,7 +256,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
 
   // Start of main routine //
   // Assign black RGB values for bad data points (nsym = 0) or voids (phase = 0)
-  if ((nsym == 0) || (phase == 0))
+  if (nsym == 0 || phase == 0)
   {
     RGB[0] = 0;
     RGB[1] = 0;
@@ -264,7 +264,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
   }
 
   // Assign black RGB value for Euler angles outside of allowable range
-  else if ((phi1 > pi_x2) || (PHI > pi) || (phi2 > pi_x2))
+  else if (phi1 > pi_x2 || PHI > pi || phi2 > pi_x2)
   {
     RGB[0] = 0;
     RGB[1] = 0;
@@ -291,25 +291,19 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     {
       // Form orientation matrix
       for (unsigned int i = 0; i < 3; ++i)
-      {
         for (unsigned int j = 0; j < 3; ++j)
         {
           S[i][j] = 0.0;
           for (unsigned int k = 0; k < 3; ++k)
-          {
             S[i][j] += SymOps[index][i][k] * g[k][j];
-          }
         }
-      }
 
       // Multiple orientation matrix by reference sample direction
-      for (unsigned int i = 0; i < 3; i++)
+      for (unsigned int i = 0; i < 3; ++i)
       {
         hkl[i] = 0;
-        for (unsigned int j = 0; j < 3; j++)
-        {
+        for (unsigned int j = 0; j < 3; ++j)
           hkl[i] += S[i][j] * ref_dir[j];
-        }
       }
 
       // Convert to spherical coordinates (ignore "r" variable since r=1)
@@ -344,23 +338,15 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     RGB[2] = std::sqrt(blue);
 
     // Find maximum value of red, green, or blue
-    maxRGB = RGB[0];
-    for (unsigned int i = 0; i < 2; i++)
-    {
-      if (RGB[i + 1] > maxRGB)
-      {
-        maxRGB = RGB[i + 1];
-      }
-    }
+    maxRGB = std::max(RGB[0], std::max(RGB[1], RGB[2]));
 
     //  Adjust RGB values to enforce white center point instead of black
     for (unsigned int i = 0; i < 3; i++)
-    {
-      RGB[i] = RGB[i] / maxRGB;
-    }
+      RGB[i] /= maxRGB;
 
     //  Convert RGB tuple to scalar and return integer value
-    RGBint = (MathUtils::round(RGB[0] * 255) * std::pow( 256.0, 2)) + (MathUtils::round(RGB[1] * 255) * 256) + MathUtils::round(RGB[2] *255);
+    for (unsigned int i = 0; i < 3; ++i)
+      RGBint = 256 * RGBint + (RGB[i] >= 1 ? 255 : std::floor(RGB[i] * 256.0));
   }
 
   return RGBint;
