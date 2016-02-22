@@ -42,7 +42,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
   // Define Constants
   const Real pi = libMesh::pi;
   const Real pi_x2 = 2.0 * pi;
-  const Real a = (std::sqrt(3.0)) / 2.0;
+  const Real a = std::sqrt(3.0) / 2.0;
 
   // Preallocate and zero variables
   unsigned int index = 0;

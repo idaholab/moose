@@ -25,17 +25,17 @@ private:
   /// Reference direction of the sample
   const unsigned int _sd;
 
-  ///@{ Euler angle material properties to visualize
-  const MaterialProperty<Real> & _phi1;
-  const MaterialProperty<Real> & _phi;
-  const MaterialProperty<Real> & _phi2;
+  ///@{ Euler angles to visualize
+  const VariableValue & _phi1;
+  const VariableValue & _phi;
+  const VariableValue & _phi2;
   ///@}
 
   /// EBSD Phase index
-  const MaterialProperty<unsigned int> & _phase;
+  const VariableValue & _phase;
 
   /// EBSD Crystal symmetry identifier
-  const MaterialProperty<unsigned int> & _sym;
+  const VariableValue & _sym;
 };
 
 #endif //EULER2RGBAUX_H
