@@ -42,10 +42,10 @@ Euler2RGBTest::test()
   {
     // symmetries 43 62 42 32 22 2 0
     { 0.1, 1.5, 0.7, 1, 43, {6225789,16738084,5635933} },
-    { 2.1, 2.5, 1.4, 1, 43, {2117887,10534399,9240454} },
+    { 2.1, 2.5, 1.4, 1, 43, {2052351,10534399,9240454} },
     { 5.9, 0.5, 4.4, 1, 43, {9437124,3112447,16776397} },
 
-    { 0.1, 1.5, 0.7, 1, 62, {5422079,16729118,4521910} },
+    { 0.1, 1.5, 0.7, 1, 62, {5422335,16729118,4521910} },
     { 2.1, 2.5, 1.4, 1, 62, {16711664,9043825,16756345} },
     { 5.9, 0.5, 4.4, 1, 62, {7012242,14211583,16740231} },
 
@@ -80,7 +80,7 @@ Euler2RGBTest::test()
   for (unsigned int i = 0; i < nsamples; ++i)
     for (unsigned int sd = 1; i <= 3; ++i)
       CPPUNIT_ASSERT_DOUBLES_EQUAL(
-        Euler2RGB(sd, samples[i].phi1, samples[i].phi, samples[i].phi2, samples[i].phase,  samples[i].sym),
         samples[i].expect[sd-1],
+        Euler2RGB(sd, samples[i].phi1, samples[i].phi, samples[i].phi2, samples[i].phase,  samples[i].sym),
       0.00001);
 }
