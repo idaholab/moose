@@ -170,7 +170,6 @@
     input = 'planar1.i'
     csvdiff = 'planar1.csv'
     rel_err = 1.0E-5
-    abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   [../]
   [./planar3]
@@ -178,7 +177,6 @@
     input = 'planar3.i'
     csvdiff = 'planar3.csv'
     rel_err = 1.0E-5
-    abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   [../]
   [./random_planar]
@@ -214,6 +212,34 @@
     rel_err = 4.0E-3
     abs_zero = 1.0E-3
     heavy = true
+  [../]
+
+  [./planar_hard1]
+    type = 'CSVDiff'
+    input = 'planar_hard1.i'
+    csvdiff = 'planar_hard1.csv'
+    abs_zero = 1.0E-8
+  [../]
+  [./planar_hard2]
+    type = 'CSVDiff'
+    input = 'planar_hard2.i'
+    csvdiff = 'planar_hard2.csv'
+    abs_zero = 1.0E-8
+  [../]
+  [./planar_hard3]
+    type = 'CSVDiff'
+    input = 'planar_hard3.i'
+    csvdiff = 'planar_hard3.csv'
+  [../]
+  [./planar_hard4]
+    type = 'CSVDiff'
+    input = 'planar_hard4.i'
+    csvdiff = 'planar_hard4.csv'
+  [../]
+  [./planar_hard5]
+    type = 'CSVDiff'
+    input = 'planar_hard5.i'
+    csvdiff = 'planar_hard5.csv'
   [../]
 
 []

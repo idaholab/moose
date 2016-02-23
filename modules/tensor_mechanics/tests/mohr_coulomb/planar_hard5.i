@@ -1,15 +1,8 @@
-# A single unit element is stretched by (0.5, 0.4, 0.3)E-6m
-# with Lame lambda = 0.6E6 and Lame mu (shear) = 1E6
-# stress_xx = 1.72 Pa
-# stress_yy = 1.52 Pa
-# stress_zz = 1.32 Pa
-# tensile_strength is set to 1.3Pa
+# apply repeated stretches in z direction, and smaller stretches along the y direction, and compression along x direction
+# Both return to the plane and edge (lode angle = 30deg, ie 010100) are experienced.
 #
-# The return should be to the edge (the algorithm will first try the tip) with
-# plastic_multiplier0 = 0, plastic_multiplier1 = 5E-8, plastic_multiplier2 = 1.5E-7
-# internal = 2E-7
-# stress_xx = stress_yy = 1.3
-# stress_zz = 1.2
+# It is checked that the yield functions are less than their tolerance values
+# It is checked that the cohesion hardens correctly
 
 [Mesh]
   type = GeneratedMesh
@@ -47,20 +40,46 @@
     type = FunctionPresetBC
     variable = disp_x
     boundary = 'front back'
-    function = '0.5E-6*x'
+    function = '-1E-6*x*t'
   [../]
   [./y]
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'front back'
-    function = '0.4E-6*y'
+    function = '0.05E-6*y*t'
   [../]
   [./z]
     type = FunctionPresetBC
     variable = disp_z
     boundary = 'front back'
-    function = '0.3E-6*z'
+    function = '1E-6*z*t'
   [../]
+[]
+
+[Functions]
+  [./should_be_zero_fcn]
+    type = ParsedFunction
+    value = 'if((a<1E-5)&(b<1E-5)&(c<1E-5)&(d<1E-5)&(g<1E-5)&(h<1E-5),0,abs(a)+abs(b)+abs(c)+abs(d)+abs(g)+abs(h))'
+    vars = 'a b c d g h'
+    vals = 'f0 f1 f2 f3 f4 f5'
+  [../]
+  [./coh_analytic]
+    type = ParsedFunction
+    value = '20-10*exp(-1E6*intnl)'
+    vars = intnl
+    vals = internal
+  [../]
+  [./coh_from_yieldfcns]
+    type = ParsedFunction
+    value = '(f0+f1-(sxx+syy)*sin(phi))/(-2)/cos(phi)'
+    vars = 'f0 f1 sxx syy phi'
+    vals = 'f0 f1 s_xx s_yy 0.8726646'
+  [../]
+  [./should_be_zero_coh]
+    type = ParsedFunction
+    value = 'if(abs(a-b)<1E-6,0,1E6*abs(a-b))'
+    vars = 'a b'
+    vals = 'Coh_analytic Coh_moose'
 []
 
 [AuxVariables]
@@ -88,23 +107,31 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f0]
+  [./mc_int]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f1]
+  [./yield_fcn0]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./f2]
+  [./yield_fcn1]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./iter]
+  [./yield_fcn2]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./intnl]
+  [./yield_fcn3]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./yield_fcn4]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./yield_fcn5]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -153,34 +180,47 @@
     index_i = 2
     index_j = 2
   [../]
-  [./f0_auxk]
+  [./mc_int_auxk]
     type = MaterialStdVectorAux
-    property = plastic_yield_function
     index = 0
-    variable = f0
-  [../]
-  [./f1_auxk]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 1
-    variable = f1
-  [../]
-  [./f2_auxk]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 2
-    variable = f2
-  [../]
-  [./iter]
-    type = MaterialRealAux
-    property = plastic_NR_iterations
-    variable = iter
-  [../]
-  [./intnl_auxk]
-    type = MaterialStdVectorAux
     property = plastic_internal_parameter
+    variable = mc_int
+  [../]
+  [./yield_fcn0]
+    type = MaterialStdVectorAux
     index = 0
-    variable = intnl
+    property = plastic_yield_function
+    variable = yield_fcn0
+  [../]
+  [./yield_fcn1]
+    type = MaterialStdVectorAux
+    index = 1
+    property = plastic_yield_function
+    variable = yield_fcn1
+  [../]
+  [./yield_fcn2]
+    type = MaterialStdVectorAux
+    index = 2
+    property = plastic_yield_function
+    variable = yield_fcn2
+  [../]
+  [./yield_fcn3]
+    type = MaterialStdVectorAux
+    index = 3
+    property = plastic_yield_function
+    variable = yield_fcn3
+  [../]
+  [./yield_fcn4]
+    type = MaterialStdVectorAux
+    index = 4
+    property = plastic_yield_function
+    variable = yield_fcn4
+  [../]
+  [./yield_fcn5]
+    type = MaterialStdVectorAux
+    index = 5
+    property = plastic_yield_function
+    variable = yield_fcn5
   [../]
 []
 
@@ -215,44 +255,82 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./internal]
+    type = PointValue
+    point = '0 0 0'
+    variable = mc_int
+  [../]
   [./f0]
     type = PointValue
     point = '0 0 0'
-    variable = f0
+    variable = yield_fcn0
   [../]
   [./f1]
     type = PointValue
     point = '0 0 0'
-    variable = f1
+    variable = yield_fcn1
   [../]
   [./f2]
     type = PointValue
     point = '0 0 0'
-    variable = f2
+    variable = yield_fcn2
   [../]
-  [./iter]
+  [./f3]
     type = PointValue
     point = '0 0 0'
-    variable = iter
+    variable = yield_fcn3
   [../]
-  [./intnl]
+  [./f4]
     type = PointValue
     point = '0 0 0'
-    variable = intnl
+    variable = yield_fcn4
+  [../]
+  [./f5]
+   type = PointValue
+    point = '0 0 0'
+    variable = yield_fcn5
+  [../]
+  [./yfcns_should_be_zero]
+    type = FunctionValuePostprocessor
+    function = should_be_zero_fcn
+  [../]
+  [./Coh_analytic]
+    type = FunctionValuePostprocessor
+    function = coh_analytic
+  [../]
+  [./Coh_moose]
+    type = FunctionValuePostprocessor
+    function = coh_from_yieldfcns
+  [../]
+  [./cohesion_difference_should_be_zero]
+    type = FunctionValuePostprocessor
+    function = should_be_zero_coh
   [../]
 []
 
 [UserObjects]
-  [./hard]
-    type = TensorMechanicsHardeningConstant
-    value = 1.3
+  [./mc_coh]
+    type = TensorMechanicsHardeningExponential
+    value_0 = 10
+    value_residual = 20
+    rate = 1E6
   [../]
-  [./tens]
-    type = TensorMechanicsPlasticTensileMulti
-    tensile_strength = hard
-    shift = 1E-6
-    yield_function_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-5
+  [./mc_phi]
+    type = TensorMechanicsHardeningConstant
+    value = 0.8726646
+  [../]
+  [./mc_psi]
+    type = TensorMechanicsHardeningConstant
+    value = 1 #0.8726646 # 50deg
+  [../]
+  [./mc]
+    type = TensorMechanicsPlasticMohrCoulombMulti
+    cohesion = mc_coh
+    friction_angle = mc_phi
+    dilation_angle = mc_psi
+    use_custom_returnMap = true
+    yield_function_tolerance = 1E-5
+    internal_constraint_tolerance = 1E-9
   [../]
 []
 
@@ -261,7 +339,7 @@
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
-    C_ijkl = '0.6E6 1E6'
+    C_ijkl = '0 1E7'
   [../]
   [./strain]
     type = ComputeFiniteStrain
@@ -272,29 +350,24 @@
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-12
-    plastic_models = tens
-    debug_fspb = none
-    debug_jac_at_stress = '1 2 3 2 -4 -5 3 -5 10'
-    debug_jac_at_pm = '0.1 0.2 0.3'
-    debug_jac_at_intnl = 1E-6
-    debug_stress_change = 1E-6
-    debug_pm_change = '1E-6 1E-6 1E-6'
-    debug_intnl_change = 1E-6
+    plastic_models = mc
   [../]
 []
 
 
 [Executioner]
-  end_time = 1
+  end_time = 5
   dt = 1
   type = Transient
 []
 
 
 [Outputs]
-  file_base = planar7
+  file_base = planar_hard5
   exodus = false
   [./csv]
     type = CSV
-    [../]
+    hide = 'f0 f1 f2 f3 f4 f5 s_xy s_xz s_yz Coh_analytic Coh_moose'
+    execute_on = 'timestep_end'
+  [../]
 []

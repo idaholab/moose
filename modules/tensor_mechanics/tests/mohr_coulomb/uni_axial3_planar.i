@@ -200,6 +200,7 @@
     dilation_angle = dil
     yield_function_tolerance = 1.0 # THIS IS HIGHER THAN THE SMOOTH CASE TO AVOID PRECISION-LOSS PROBLEMS!
     shift =  1.0
+    use_custom_returnMap = false
     internal_constraint_tolerance = 1E-9
   [../]
 []

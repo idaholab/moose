@@ -33,13 +33,13 @@ void TensorMechanicsHardeningModel::finalize()
 {}
 
 Real
-TensorMechanicsHardeningModel::value(const Real & /*intnl*/) const
+TensorMechanicsHardeningModel::value(Real /*intnl*/) const
 {
   return 1.0;
 }
 
 Real
-TensorMechanicsHardeningModel::derivative(const Real & /*intnl*/) const
+TensorMechanicsHardeningModel::derivative(Real /*intnl*/) const
 {
   return 0.0;
 }

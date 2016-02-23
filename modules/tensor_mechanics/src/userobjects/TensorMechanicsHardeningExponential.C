@@ -26,13 +26,13 @@ TensorMechanicsHardeningExponential::TensorMechanicsHardeningExponential(const I
 }
 
 Real
-TensorMechanicsHardeningExponential::value(const Real & intnl) const
+TensorMechanicsHardeningExponential::value(Real intnl) const
 {
   return _val_res + (_val_0 - _val_res)*std::exp(-_rate*intnl);
 }
 
 Real
-TensorMechanicsHardeningExponential::derivative(const Real & intnl) const
+TensorMechanicsHardeningExponential::derivative(Real intnl) const
 {
   return -_rate*(_val_0 - _val_res)*std::exp(-_rate*intnl);
 }

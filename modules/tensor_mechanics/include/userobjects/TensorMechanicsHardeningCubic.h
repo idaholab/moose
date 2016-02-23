@@ -27,9 +27,9 @@ class TensorMechanicsHardeningCubic : public TensorMechanicsHardeningModel
  public:
   TensorMechanicsHardeningCubic(const InputParameters & parameters);
 
-  virtual Real value(const Real & intnl) const;
+  virtual Real value(Real intnl) const;
 
-  virtual Real derivative(const Real & intnl) const;
+  virtual Real derivative(Real intnl) const;
 
   virtual std::string modelName() const;
 
