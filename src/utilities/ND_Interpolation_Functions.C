@@ -244,40 +244,14 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
                         sign = sign * (-1.0);
                 }
         }
-        if (value<0.0)
-    	    std::cout<< "value " << value << std::endl;
-            for(int i=numberOfVerteces; i>0; i--)
-            	std::cout<< "vertx " << interpolateAt(cell.at(i-1)) << " -- " << cell.at(i-1).at(0) << " " << cell.at(i-1).at(1) <<std::endl;
+       // if (value<0.0)
+    	    //std::cout<< "value " << value << std::endl;
+            //for(int i=numberOfVerteces; i>0; i--)
+            //	std::cout<< "vertx " << interpolateAt(cell.at(i-1)) << " -- " << cell.at(i-1).at(0) << " " << cell.at(i-1).at(1) <<std::endl;
 
 
         return value;
 }
-
-//double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
-//  double value = 0.0;
-//
-//  int numberOfVerteces = cell.size();
-//  double sign = 1.0;
-//
-//  for(int i=numberOfVerteces; i>0; i--){
-//    value += interpolateAt(cell.at(i-1)) * sign;
-//    sign = sign * (-1.0);
-//  }
-//  std::cout<< cell.at(0).at(0) << " " << cell.at(3).at(1) << " " << value << std::endl;
-//  return value;
-//}
-
-//double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell){
-//  double value = 0.0;
-//
-//  int numberOfVerteces = cell.size();
-//
-//  for(int i=0; i<numberOfVerteces; i++){
-//    value += interpolateAt(cell.at(i));
-//  }
-//  //std::cout<< cell.at(3).at(0) << " " << cell.at(3).at(1) << " " << value/(double)numberOfVerteces << std::endl;
-//  return value/(double)numberOfVerteces;
-//}
 
 
 int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices,double g){
@@ -363,9 +337,6 @@ void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<do
  for (int n=0; n<_dimensions; n++){
   int loc = (int)pow(2,n);
   dxs[n] = (double)(cell[loc][n]-cell[0][n])/(double)divisions;
-  //std::cout<< "cell[loc][n]: "<< cell[loc][n] << std::endl;
-  //std::cout<< "cell[0][n]: "<< cell[0][n] << std::endl;
-  //std::cout<< "dx: "<< dxs[n] << std::endl;
  }
 
  int numberNewCells = (int)pow(divisions,_dimensions);
@@ -492,8 +463,6 @@ double NDInterpolation::derivativeStep(std::vector<double> coordinate, int loop)
 }
 
 
-
-
 std::vector<double> int2binary(int value, int size){
         std::vector<double> binary(size);
         for (int i = 0; i < size; i++) {
@@ -531,13 +500,10 @@ std::vector<double> NDInterpolation::NDinverseFunctionGrid(double F, double g){
 
  int last_divisions = (int)round(1.0/_tolerance);
 
- //std::cout<<"last_divisions " << last_divisions << std::endl;
-
  std::vector<double> pointMax(_dimensions);
  for(int i=0; i< _dimensions; i++)
          pointMax.at(i) = _cellPoint0.at(i)+_cellDxs.at(i);
 
- //F = interpolateAt(_cellPoint0) + F * (interpolateAt(pointMax) - interpolateAt(_cellPoint0));
 
  std::vector<std::vector<double> > basic_cell;
  std::vector<int> NDcoordinate (_dimensions);
