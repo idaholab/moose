@@ -114,9 +114,9 @@ public:
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
 protected:
-  virtual VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
 
-  virtual VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
 
   virtual Real computeValue() = 0;
 
@@ -150,11 +150,11 @@ protected:
   const MooseArray<Real> & _coord;
 
   /// Holds the solution at current quadrature points
-  VariableValue & _u;
+  const VariableValue & _u;
   /// Holds the previous solution at the current quadrature point.
-  VariableValue & _u_old;
+  const VariableValue & _u_old;
   /// Holds the t-2 solution at the current quadrature point.
-  VariableValue & _u_older;
+  const VariableValue & _u_older;
   /// holds the the test functions
   const VariableTestValue & _test;
 

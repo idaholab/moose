@@ -22,7 +22,8 @@ template<>
 InputParameters validParams<VectorMagnitudeAux>();
 
 /**
- *
+ * Computes the magnitude of a vector whose components are given by up
+ * to three coupled variables.
  */
 class VectorMagnitudeAux : public AuxKernel
 {
@@ -33,9 +34,9 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _x;
-  VariableValue & _y;
-  VariableValue & _z;
+  const VariableValue & _x;
+  const VariableValue & _y;
+  const VariableValue & _z;
 };
 
 #endif /* VECTORMAGNITUDEAUX_H */

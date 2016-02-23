@@ -40,7 +40,7 @@ protected:
 
 private:
   unsigned int _v_var;
-  VariableValue & _v;
+  const VariableValue & _v;
 };
 
 #endif //COUPLEDFORCE_H

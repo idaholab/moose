@@ -38,7 +38,7 @@ public:
 
 protected:
   /// Holds the solution at current quadrature points
-  VariableValue & _u;
+  const VariableValue & _u;
 };
 
 #endif

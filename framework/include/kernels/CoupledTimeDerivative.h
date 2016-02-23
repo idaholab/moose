@@ -37,8 +37,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  VariableValue & _v_dot;
-  VariableValue & _dv_dot;
+  const VariableValue & _v_dot;
+  const VariableValue & _dv_dot;
   unsigned int _v_var;
 };
 

@@ -72,13 +72,13 @@ protected:
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
 
   /// Value of the unknown variable this BC is action on
-  VariableValue & _u_slave;
+  const VariableValue & _u_slave;
   /// node IDs connected to the master node (slave nodes)
   std::vector<dof_id_type> _connected_nodes;
   /// node IDs of the master node
   std::vector<dof_id_type> _master_node_vector;
   /// Holds the current solution at the current quadrature point
-  VariableValue & _u_master;
+  const VariableValue & _u_master;
   /// Specifies formulation type used to apply constraints
   Moose::ConstraintFormulationType _formulation;
   /**

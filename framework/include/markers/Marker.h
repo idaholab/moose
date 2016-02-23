@@ -103,7 +103,7 @@ protected:
    * @param name The name of the _other_ Marker that you want to have access to.
    * @return A _reference_ that will hold the value of the marker in it's 0 (zeroth) position.
    */
-  VariableValue & getMarkerValue(std::string name);
+  const VariableValue & getMarkerValue(std::string name);
 
   SubProblem & _subproblem;
   FEProblem & _fe_problem;

@@ -128,26 +128,26 @@ public:
 protected:
   /// coupling interface:
 
-  virtual VariableValue & coupledSlaveValue(const std::string & var_name, unsigned int comp = 0) { return coupledValue(var_name, comp); }
-  virtual VariableValue & coupledSlaveValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledValueOld(var_name, comp); }
-  virtual VariableValue & coupledSlaveValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledValueOlder(var_name, comp); }
+  virtual const VariableValue & coupledSlaveValue(const std::string & var_name, unsigned int comp = 0) { return coupledValue(var_name, comp); }
+  virtual const VariableValue & coupledSlaveValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledValueOld(var_name, comp); }
+  virtual const VariableValue & coupledSlaveValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledValueOlder(var_name, comp); }
 
-  virtual VariableGradient & coupledSlaveGradient(const std::string & var_name, unsigned int comp = 0){ return coupledGradient(var_name, comp); }
-  virtual VariableGradient & coupledSlaveGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOld(var_name, comp); }
-  virtual VariableGradient & coupledSlaveGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOlder(var_name, comp); }
+  virtual const VariableGradient & coupledSlaveGradient(const std::string & var_name, unsigned int comp = 0){ return coupledGradient(var_name, comp); }
+  virtual const VariableGradient & coupledSlaveGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOld(var_name, comp); }
+  virtual const VariableGradient & coupledSlaveGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledGradientOlder(var_name, comp); }
 
-  virtual VariableSecond & coupledSlaveSecond(const std::string & var_name, unsigned int comp = 0){ return coupledSecond(var_name, comp); }
+  virtual const VariableSecond & coupledSlaveSecond(const std::string & var_name, unsigned int comp = 0){ return coupledSecond(var_name, comp); }
 
 
-  virtual VariableValue & coupledMasterValue(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValue(var_name, comp); }
-  virtual VariableValue & coupledMasterValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOld(var_name, comp); }
-  virtual VariableValue & coupledMasterValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOlder(var_name, comp); }
+  virtual const VariableValue & coupledMasterValue(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValue(var_name, comp); }
+  virtual const VariableValue & coupledMasterValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOld(var_name, comp); }
+  virtual const VariableValue & coupledMasterValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborValueOlder(var_name, comp); }
 
-  virtual VariableGradient & coupledMasterGradient(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradient(var_name, comp); }
-  virtual VariableGradient & coupledMasterGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOld(var_name, comp); }
-  virtual VariableGradient & coupledMasterGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOlder(var_name, comp); }
+  virtual const VariableGradient & coupledMasterGradient(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradient(var_name, comp); }
+  virtual const VariableGradient & coupledMasterGradientOld(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOld(var_name, comp); }
+  virtual const VariableGradient & coupledMasterGradientOlder(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborGradientOlder(var_name, comp); }
 
-  virtual VariableSecond & coupledMasterSecond(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborSecond(var_name, comp); }
+  virtual const VariableSecond & coupledMasterSecond(const std::string & var_name, unsigned int comp = 0){ return coupledNeighborSecond(var_name, comp); }
 
 
   /// Boundary ID for the slave surface
@@ -168,7 +168,7 @@ protected:
   const Elem * & _current_master;
 
   /// Value of the unknown variable this BC is action on
-  VariableValue & _u_slave;
+  const VariableValue & _u_slave;
   /// Shape function on the slave side.  This will always
   VariablePhiValue _phi_slave;
   /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
@@ -191,9 +191,9 @@ protected:
   const VariableTestGradient & _grad_test_master;
 
   /// Holds the current solution at the current quadrature point
-  VariableValue & _u_master;
+  const VariableValue & _u_master;
   /// Holds the current solution gradient at the current quadrature point
-  VariableGradient & _grad_u_master;
+  const VariableGradient & _grad_u_master;
 
   /// DOF map
   const DofMap & _dof_map;

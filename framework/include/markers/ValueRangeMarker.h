@@ -39,7 +39,7 @@ protected:
   MarkerValue _inside;
   MarkerValue _outside;
 
-  VariableValue & _u;
+  const VariableValue & _u;
 };
 
 #endif /* VALUERANGEMARKER_H */

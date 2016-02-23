@@ -36,7 +36,7 @@ protected:
 
   std::vector<MarkerName> _names;
 
-  std::vector<VariableValue *> _markers;
+  std::vector<const VariableValue *> _markers;
 };
 
 #endif /* COMBOMARKER_H */
