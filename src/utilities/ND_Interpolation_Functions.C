@@ -236,16 +236,25 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
 
         int counter = 1;
 
-        for(int i=numberOfVerteces; i>0; i--){
-                value += interpolateAt(cell.at(i-1)) * sign;
-                //std::cout<<interpolateAt(cell.at(i-1))<<std::endl;
-                sign = sign * (-1.0);
-                counter++;
-                if (counter%2){
-                        sign = sign * (-1.0);
-                }
-        }
+//        for(int i=numberOfVerteces; i>0; i--){
+//                value += interpolateAt(cell.at(i-1)) * sign;
+//                //std::cout<<interpolateAt(cell.at(i-1))<<std::endl;
+//                sign = sign * (-1.0);
+//                counter++;
+//                if (counter%2){
+//                        sign = sign * (-1.0);
+//                }
+//        }
 
+        int min=0;
+        int max=0;
+        for(int i=1; i<numberOfVerteces; i++){
+        	if (interpolateAt(cell.at(i))>interpolateAt(cell.at(max)))
+        			max=i;
+        	if (interpolateAt(cell.at(i))<interpolateAt(cell.at(min)))
+        		    min=i;
+        }
+        value=interpolateAt(cell.at(max)) - interpolateAt(cell.at(min));
         return value;
 }
 
