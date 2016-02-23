@@ -52,6 +52,7 @@ InputParameters validParams<Console>()
 
   // Performance Logging
   params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
+  params.addParam<unsigned int>("perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
   params.addDeprecatedParam<bool>("setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled if ""perf_log"" is false", "This parameter is being removed due to lack of usage.");
   params.addDeprecatedParam<bool>("setup_log", "Toggles the printing of the 'Setup Performance' log", "This parameter is being removed due to lack of usage.");
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
@@ -118,6 +119,7 @@ Console::Console(const InputParameters & parameters) :
     _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
     _perf_log(getParam<bool>("perf_log")),
+    _perf_log_interval(getParam<unsigned int>("perf_log_interval")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
     _setup_log(isParamValid("setup_log") ? getParam<bool>("setup_log") : _perf_log),
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
@@ -319,7 +321,12 @@ Console::output(const ExecFlagType & type)
 
   // Write variable norms
   else if (type == EXEC_TIMESTEP_END)
+  {
+    if (_perf_log_interval && _t_step % _perf_log_interval == 0)
+      write(Moose::perf_log.get_perf_info(), false);
     writeVariableNorms();
+  }
+
 
   // Write Postprocessors and Scalars
   if (shouldOutput("postprocessors", type))

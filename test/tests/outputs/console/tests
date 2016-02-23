@@ -83,6 +83,13 @@
     input = 'console_transient.i'
     expect_out = 'Time Step  4, time = -0.600000'
   [../]
+  [./transient_perf_int]
+    # Test the transient console output with a perf log interval
+    type = RunApp
+    input = 'console_transient.i'
+    cli_args = 'Outputs/screen/perf_log_interval=6'
+    expect_out = 'Time Step  6.*?Moose Test Performance.*?Time Step  7'
+  [../]
   [./_console]
     # Test the used of MooseObject::_console method
     type = RunApp
