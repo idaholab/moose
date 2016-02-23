@@ -1860,7 +1860,6 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
   else
     parameters.set<SubProblem *>("_subproblem") = this;
 
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // Create the UserObject
@@ -2129,15 +2128,19 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup &
     break;
   }
 
-  // If any UserObjects exist, serialize the solution vector
-  if (elemental.hasActiveObjects() || side.hasActiveObjects() || internal_side.hasActiveObjects() || nodal.hasActiveObjects())
+  // Legacy AuxKernel computation
+  if (_elemental_user_objects[Moose::ALL][type].hasActiveBlockObjects() ||
+      _internal_side_user_objects[Moose::ALL][type].hasActiveBlockObjects() ||
+      _side_user_objects[Moose::ALL][type].hasActiveBoundaryObjects() ||
+      _internal_side_user_objects[Moose::ALL][type].hasActiveObjects() ||
+      _nodal_user_objects[Moose::ALL][type].hasActiveBlockObjects() )
   {
     serializeSolution();
     if (_displaced_problem != NULL)
-      _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
 
     if (_use_legacy_uo_aux_computation)
-      _aux.compute(EXEC_LINEAR);
+        _aux.compute(EXEC_LINEAR);
   }
 
   // Initialize Elemental/Side/InternalSideUserObjects
