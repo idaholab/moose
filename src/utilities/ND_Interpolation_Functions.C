@@ -238,7 +238,7 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
 
         for(int i=numberOfVerteces; i>0; i--){
                 value += interpolateAt(cell.at(i-1)) * sign;
-                std::cout<<interpolateAt(cell.at(i-1))<<std::endl;
+                //std::cout<<interpolateAt(cell.at(i-1))<<std::endl;
                 sign = sign * (-1.0);
                 counter++;
                 if (counter%2){
