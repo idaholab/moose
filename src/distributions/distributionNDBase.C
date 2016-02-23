@@ -27,11 +27,6 @@ using boost::math::normal;
 
 #define _USE_MATH_DEFINES
 
-//#include <boost/numeric/ublas/matrix.hpp>
-//#include <boost/numeric/ublas/lu.hpp>
-//#include <boost/numeric/ublas/io.hpp>
-
-//using namespace boost::numeric::ublas;
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
@@ -113,28 +108,30 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
   return value;
 }
 
-//double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector<double> dx){
-//  double value=0.0;
-//
-//  int numberOfVerteces = (int)pow(2,center.size());
-//
-//  for(int i=0; i<numberOfVerteces; i++){
-//    std::vector<double> index = int2binary(i,center.size());
-//    std::vector<double> NDcoordinate(center.size());
-//
-//    for(unsigned int j=0; j<center.size(); j++){
-//      if (index[j]==0)
-//        NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
-//      else
-//        NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
-//    }
-//    value += Cdf(NDcoordinate);
-//  }
-//
-//  value = value/numberOfVerteces;
-//
-//  return value;
-//}
+std::vector<int> BasicDistributionND::oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
+  /**
+   *  This function makes a conversion of a 1D array into an ND array.
+   *  The objective it to determine the coordinates of an ND point from its coordinate in a 1D vector.
+   *  The weights are needed since I do not know a priori the range of ND component.
+   */
+    int n_dimensions = indexes.size();
+    std::vector<int> NDcoordinates (n_dimensions);
+    std::vector<int> weights (n_dimensions);
+
+    weights.at(0)=1;
+    for (int nDim=1; nDim<n_dimensions; nDim++)
+ weights.at(nDim)=weights.at(nDim-1)*indexes.at(nDim-1);
+
+    for (int nDim=(n_dimensions-1); nDim>=0; nDim--){
+ if (nDim>0){
+   NDcoordinates.at(nDim) = oneDcoordinate/weights.at(nDim);
+   oneDcoordinate -= NDcoordinates.at(nDim)*weights.at(nDim);
+ }
+ else
+   NDcoordinates.at(0) = oneDcoordinate;
+    }
+    return NDcoordinates;
+};
 
 
 double

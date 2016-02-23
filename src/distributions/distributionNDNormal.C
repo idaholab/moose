@@ -74,9 +74,9 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
 
    computeInverse(_cov_matrix, inverseCovMatrix);
 
-   for (int i=0;i<rows;i++){
+   for (unsigned int i=0;i<rows;i++){
     std::vector<double> temp;
-    for (int j=0;j<columns;j++)
+    for (unsigned int j=0;j<columns;j++)
      temp.push_back(inverseCovMatrix.at(i).at(j));
     _inverse_cov_matrix.push_back(temp);
    }
@@ -102,7 +102,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
 
    int numberOfDiscretizations = 10;
 
-   for(int i=0; i<dimensions; i++){
+   for(unsigned int i=0; i<dimensions; i++){
      alpha.at(i) = 0.0;
      beta.at(i)  = 0.0;
 
@@ -111,7 +111,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
      std::vector<double> discretization_temp;
      double sigma = sqrt(_cov_matrix[i][i]);
      double deltaSigma = 12.0*sigma/(double)numberOfDiscretizations;
-     for(unsigned int n=0; n<numberOfDiscretizations; n++){
+     for(int n=0; n<numberOfDiscretizations; n++){
        double disc_value = mu.at(i) - 6.0 * sigma + deltaSigma * (double)n;
        discretization_temp.push_back(disc_value);
      }
@@ -228,9 +228,9 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
   if (_rank == _mu.size()) {
     std::vector<std::vector<double> > inverseCovMatrix (rows,std::vector< double >(columns));
     computeInverse(_cov_matrix, inverseCovMatrix);
-    for (int i=0;i<rows;i++){
+    for (unsigned int i=0;i<rows;i++){
       std::vector<double> temp;
-      for (int j=0;j<columns;j++)
+      for (unsigned int j=0;j<columns;j++)
       temp.push_back(inverseCovMatrix.at(i).at(j));
       _inverse_cov_matrix.push_back(temp);
     }

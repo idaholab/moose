@@ -244,6 +244,11 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
                         sign = sign * (-1.0);
                 }
         }
+        if (value<0.0)
+    	    std::cout<< "value " << value << std::endl;
+            for(int i=numberOfVerteces; i>0; i--)
+            	std::cout<< "vertx " << interpolateAt(cell.at(i-1)) << " -- " << cell.at(i-1).at(0) << " " << cell.at(i-1).at(1) <<std::endl;
+
 
         return value;
 }
@@ -285,7 +290,6 @@ int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<doub
 
         for(unsigned int i=0; i<vertices.size(); i++){
                 cellAvgValues.at(i) = integralCellValue(vertices.at(i));
-                std::cout<<"cellAvgValues.at(i): "<<cellAvgValues.at(i)<< std::endl;
                 cumulativeValue += cellAvgValues.at(i);
         }
 

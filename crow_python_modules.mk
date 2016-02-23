@@ -17,9 +17,6 @@ $(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix): $(CROW_DIR)/src/dis
 $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionFunctions.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
-#$(CROW_DIR)/src/distributions/distribution_base_ND.$(obj-suffix): $(CROW_DIR)/src/distributions/distribution_base_ND.C
-#	$(DISTRIBUTION_COMPILE_COMMAND)
-
 $(CROW_DIR)/src/distributions/distributionNDBase.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDBase.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
@@ -30,6 +27,9 @@ $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix): $(CROW_DIR)/
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
 $(CROW_DIR)/src/distributions/randomClass.$(obj-suffix): $(CROW_DIR)/src/distributions/randomClass.C
+	$(DISTRIBUTION_COMPILE_COMMAND)
+	
+$(CROW_DIR)/src/distributions/distributionNDCartesianSpline.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDCartesianSpline.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
 $(CROW_DIR)/install/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy2.so : $(CROW_DIR)/crow_modules/distribution1Dpy2.i $(CROW_DIR)/crow_modules/interpolationNDpy2.i $(DISTRIBUTION_SOURCE) $(INTERPOLATION_SOURCE)

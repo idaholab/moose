@@ -42,30 +42,7 @@ public:
 
    std::string & getType();
 
-   std::vector<int> oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
-     /**
-      *  This function makes a conversion of a 1D array into an ND array.
-      *  The objective it to determine the coordinates of an ND point from its coordinate in a 1D vector.
-      *  The weights are needed since I do not know a priori the range of ND component.
-      */
-       int n_dimensions = indexes.size();
-       std::vector<int> NDcoordinates (n_dimensions);
-       std::vector<int> weights (n_dimensions);
-
-       weights.at(0)=1;
-       for (int nDim=1; nDim<n_dimensions; nDim++)
-    weights.at(nDim)=weights.at(nDim-1)*indexes.at(nDim-1);
-
-       for (int nDim=(n_dimensions-1); nDim>=0; nDim--){
-    if (nDim>0){
-      NDcoordinates.at(nDim) = oneDcoordinate/weights.at(nDim);
-      oneDcoordinate -= NDcoordinates.at(nDim)*weights.at(nDim);
-    }
-    else
-      NDcoordinates.at(0) = oneDcoordinate;
-       }
-       return NDcoordinates;
-   };
+   std::vector<int> oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
 
 protected:
    std::string _type; ///< Distribution type

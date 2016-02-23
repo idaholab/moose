@@ -75,7 +75,7 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
               _cellDxs.push_back(_discretizations.at(i).at(_discretizations.at(i).size()-1)-_discretizations.at(i).at(0));
             }
 
-         for (unsigned int i=0; i<_dimensions; i++){
+         for (int i=0; i<_dimensions; i++){
              _lowerBound.push_back(_cellPoint0.at(i));
              _upperBound.push_back(_cellPoint0.at(i) + _cellDxs.at(i));
          }
@@ -131,7 +131,7 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
   }
   interpolated_value = _values.at(minIndex);
  }
-
+ std::cout<<"value " << interpolated_value << std::endl;
  return interpolated_value;
 }
 
