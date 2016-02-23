@@ -167,6 +167,12 @@ public:
   Real & dtMin() { return _dtmin; }
 
   /**
+   * Return the start time
+   * @return The start time
+   */
+  Real getStartTime() { return _start_time; }
+
+  /**
    * Get the end time
    * @return The end time
    */
