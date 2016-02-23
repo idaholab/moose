@@ -90,7 +90,7 @@
         for (int j=0; j<numberOfDimensions; j++)
           NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
         CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
-        std::cout<< NDcoordinate.at(0) << " " << NDcoordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
+        //std::cout<< NDcoordinate.at(0) << " " << NDcoordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
       }
       _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
     }

@@ -69,6 +69,8 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
           calculateCoefficients();
          else
           _spline_coefficients = getCoefficients(_values, _hj.at(0), _alpha.at(0), _beta.at(0));
+          for(int i=0; i<_spline_coefficients.size();i++)
+        	  std::cout<<_spline_coefficients.at(i)<<std::endl;
 
             for (int i=0; i<_dimensions; i++){
               _cellPoint0.push_back(_discretizations.at(i).at(0));
