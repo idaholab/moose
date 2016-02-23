@@ -39,7 +39,7 @@ ElasticityTensorR4::elasticJacobian(const unsigned int i, const unsigned int k, 
 }
 
 Real
-ElasticityTensorR4::elasticJacobianwc(const unsigned int i, const unsigned int k, const RealGradient & grad_test, const Real & phi) const
+ElasticityTensorR4::elasticJacobianwc(const unsigned int i, const unsigned int k, const RealGradient & grad_test, Real phi) const
 {
   // d(stress_ij*d(test)/dx_j)/dw_k = d(C_ijmn*eps_mnp*w_p*dtest/dx_j)/dw_k (only nonzero for p=k)
   Real the_sum = 0.0;
@@ -51,7 +51,7 @@ ElasticityTensorR4::elasticJacobianwc(const unsigned int i, const unsigned int k
 }
 
 Real
-ElasticityTensorR4::momentJacobian(const unsigned int i, const unsigned int k, const Real & test, const RealGradient & grad_phi) const
+ElasticityTensorR4::momentJacobian(const unsigned int i, const unsigned int k, Real test, const RealGradient & grad_phi) const
 {
   // Jacobian entry: d(eps_ijm*stress_jm*test)/du_k = d(eps_ijm*C_jmln*du_l/dx_n*test)/du_k (only nonzero for l=k)
   Real the_sum = 0.0;
@@ -63,7 +63,7 @@ ElasticityTensorR4::momentJacobian(const unsigned int i, const unsigned int k, c
 }
 
 Real
-ElasticityTensorR4::momentJacobianwc(const unsigned int i, const unsigned int k, const Real & test, const Real & phi) const
+ElasticityTensorR4::momentJacobianwc(const unsigned int i, const unsigned int k, Real test, Real phi) const
 {
   // Jacobian entry: d(eps_ijm*stress_jm*test)/dw_k = d(eps_ijm*C_jmln*eps_lnp*w_p*test)/dw_k (only nonzero for p=k)
   Real the_sum = 0.0;

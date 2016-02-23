@@ -209,7 +209,7 @@
     friction_angle = phi
     dilation_angle = psi
     yield_function_tolerance = 1E-3
-    shift = 1E-4
+    shift = 1E-12
     internal_constraint_tolerance = 1E-9
   [../]
 []
@@ -229,7 +229,7 @@
   [./mc]
     type = ComputeMultiPlasticityStress
     block = 0
-    ep_plastic_tolerance = 1E-9
+    ep_plastic_tolerance = 1E-10
     deactivation_scheme = safe
     plastic_models = mc
     debug_fspb = crash

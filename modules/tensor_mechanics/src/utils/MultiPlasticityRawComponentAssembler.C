@@ -522,7 +522,7 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
   // If one finds (trial_stress, intnl) inadmissible and
   // successfully returns, break from the loop to evaluate
   // all the others at that returned stress
-  for (unsigned model = 0 ; model < _num_models ; ++model)
+  for (unsigned model = 0; model < _num_models; ++model)
   {
     if (using_custom_return_map)
     {
@@ -531,7 +531,7 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
       if (!trial_stress_inadmissible)
       {
         // in the elastic zone: record the yield-function values (returned_stress, intnl, model_pm and model_delta_dp are undefined)
-        for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+        for (unsigned model_surface = 0; model_surface < _f[model]->numberSurfaces(); ++model_surface)
           yf.push_back(model_f[model_surface]);
       }
       else if (trial_stress_inadmissible && !model_returned)
@@ -541,7 +541,7 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
         // should have correctly returned model_f(trial_stress, intnl_old)
         // so record them
         // (returned_stress, intnl, model_pm and model_delta_dp are undefined)
-        for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+        for (unsigned model_surface = 0; model_surface < _f[model]->numberSurfaces(); ++model_surface)
           yf.push_back(model_f[model_surface]);
         // now there's almost zero point in using the custom
         // returnMap functions
@@ -575,7 +575,7 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
       // was inadmissible.  So now calculate the yield functions
       // at the trial stress
       _f[model]->yieldFunctionV(trial_stress, intnl_old[model], model_f);
-      for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+      for (unsigned model_surface = 0; model_surface < _f[model]->numberSurfaces(); ++model_surface)
         yf.push_back(model_f[model_surface]);
     }
   }
@@ -587,7 +587,7 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
     // or wasn't implemented (successful_return=false).
     // In either case, have to set the following:
     stress = trial_stress;
-    for (unsigned model = 0 ; model < _num_models ; ++model)
+    for (unsigned model = 0; model < _num_models; ++model)
       intnl[model] = intnl_old[model];
     return successful_return;
   }
@@ -599,17 +599,17 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
   // not be admissible at (trial_stress, intnl), so must check that
   std::vector<Real> yf_at_returned_stress(0);
   bool all_admissible = true;
-  for (unsigned model = 0 ; model < _num_models ; ++model)
+  for (unsigned model = 0; model < _num_models; ++model)
   {
     if (model == the_single_plastic_model)
     {
       // no need to spend time calculating the yield function: we know its admissible
-      for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+      for (unsigned model_surface = 0; model_surface < _f[model]->numberSurfaces(); ++model_surface)
         yf_at_returned_stress.push_back(model_f[model_surface]);
       continue;
     }
     _f[model]->yieldFunctionV(stress, intnl_old[model], model_f);
-    for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+    for (unsigned model_surface = 0; model_surface < _f[model]->numberSurfaces(); ++model_surface)
     {
       if (model_f[model_surface] > _f[model]->_f_tol)
         // bummer, this model is not admissible at the returned_stress
@@ -627,13 +627,13 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
     // the_single_plastic_model, but it wasn't admissible according
     // to other plastic models.  We need to set:
     stress = trial_stress;
-    for (unsigned model = 0 ; model < _num_models ; ++model)
+    for (unsigned model = 0; model < _num_models; ++model)
       intnl[model] = intnl_old[model];
     // and calculate the remainder of the yield functions at trial_stress
-    for (unsigned model = the_single_plastic_model ; model < _num_models ; ++model)
+    for (unsigned model = the_single_plastic_model; model < _num_models; ++model)
     {
       _f[model]->yieldFunctionV(trial_stress, intnl[model], model_f);
-      for (unsigned model_surface = 0 ; model_surface < _f[model]->numberSurfaces() ; ++model_surface)
+      for (unsigned model_surface = 0; model_surface < _f[model]->numberSurfaces(); ++model_surface)
         yf.push_back(model_f[model_surface]);
     }
     num_successful_plastic_returns = 0;
@@ -644,10 +644,10 @@ MultiPlasticityRawComponentAssembler::returnMapAll(const RankTwoTensor & trial_s
   // (stress, intnl) configuration, and that is admissible according
   // to all plastic models
   yf.resize(0);
-  for (unsigned surface = 0 ; surface < yf_at_returned_stress.size() ; ++surface)
+  for (unsigned surface = 0; surface < yf_at_returned_stress.size(); ++surface)
     yf.push_back(yf_at_returned_stress[surface]);
   delta_dp = model_delta_dp;
-  for (unsigned model_surface = 0 ; model_surface < _f[the_single_plastic_model]->numberSurfaces() ; ++model_surface)
+  for (unsigned model_surface = 0; model_surface < _f[the_single_plastic_model]->numberSurfaces(); ++model_surface)
   {
     cumulative_pm[_surfaces_given_model[the_single_plastic_model][model_surface]] += model_pm[model_surface];
     pm[_surfaces_given_model[the_single_plastic_model][model_surface]] = model_pm[model_surface];

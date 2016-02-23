@@ -270,7 +270,7 @@
   [./mc]
     type = ComputeMultiPlasticityStress
     block = 0
-    ep_plastic_tolerance = 1E-5
+    ep_plastic_tolerance = 1E-12
     plastic_models = tens
     debug_fspb = none
     debug_jac_at_stress = '1 2 3 2 -4 -5 3 -5 10'

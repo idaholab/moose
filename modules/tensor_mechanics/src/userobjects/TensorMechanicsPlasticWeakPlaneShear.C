@@ -45,14 +45,14 @@ TensorMechanicsPlasticWeakPlaneShear::TensorMechanicsPlasticWeakPlaneShear(const
 
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticWeakPlaneShear::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
   // note that i explicitly symmeterise in preparation for Cosserat
   return std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + smooth(stress)) + stress(2,2)*tan_phi(intnl) - cohesion(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticWeakPlaneShear::df_dsig(const RankTwoTensor & stress, const Real & _tan_phi_or_psi) const
+TensorMechanicsPlasticWeakPlaneShear::df_dsig(const RankTwoTensor & stress, Real _tan_phi_or_psi) const
 {
   RankTwoTensor deriv; // the constructor zeroes this
 
@@ -76,26 +76,26 @@ TensorMechanicsPlasticWeakPlaneShear::df_dsig(const RankTwoTensor & stress, cons
 }
 
 RankTwoTensor
-TensorMechanicsPlasticWeakPlaneShear::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticWeakPlaneShear::dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const
 {
   return df_dsig(stress, tan_phi(intnl));
 }
 
 
 Real
-TensorMechanicsPlasticWeakPlaneShear::dyieldFunction_dintnl(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticWeakPlaneShear::dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const
 {
   return stress(2,2)*dtan_phi(intnl) - dcohesion(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticWeakPlaneShear::flowPotential(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticWeakPlaneShear::flowPotential(const RankTwoTensor & stress, Real intnl) const
 {
   return df_dsig(stress, tan_psi(intnl));
 }
 
 RankFourTensor
-TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
+TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
 {
   RankFourTensor dr_dstress;
   Real tau = std::sqrt(std::pow((stress(0,2) + stress(2,0))/2, 2) + std::pow((stress(1,2) + stress(2,1))/2, 2) + smooth(stress));
@@ -129,7 +129,7 @@ TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dstress(const RankTwoTensor
 }
 
 RankTwoTensor
-TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & intnl) const
+TensorMechanicsPlasticWeakPlaneShear::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, Real intnl) const
 {
   RankTwoTensor dr_dintnl;
   dr_dintnl(2, 2) = dtan_psi(intnl);
@@ -230,7 +230,7 @@ TensorMechanicsPlasticWeakPlaneShear::d2smooth(const RankTwoTensor & stress) con
 }
 
 void
-TensorMechanicsPlasticWeakPlaneShear::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+TensorMechanicsPlasticWeakPlaneShear::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
 {
   act.assign(1, false);
   returned_stress = stress;

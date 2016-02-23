@@ -45,7 +45,7 @@ TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const InputParamete
 
 
 Real
-TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
   Real mean_stress = stress.trace()/3.0;
   Real sin3Lode = stress.sin3Lode(_lode_cutoff, 0);
@@ -67,7 +67,7 @@ TensorMechanicsPlasticTensile::yieldFunction(const RankTwoTensor & stress, const
 
 
 RankTwoTensor
-TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
+TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
@@ -95,20 +95,20 @@ TensorMechanicsPlasticTensile::dyieldFunction_dstress(const RankTwoTensor & stre
 
 
 Real
-TensorMechanicsPlasticTensile::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, const Real & intnl) const
+TensorMechanicsPlasticTensile::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, Real intnl) const
 {
   return -dtensile_strength(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticTensile::flowPotential(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticTensile::flowPotential(const RankTwoTensor & stress, Real intnl) const
 {
   // This plasticity is associative so
   return dyieldFunction_dstress(stress, intnl);
 }
 
 RankFourTensor
-TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
+TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
 {
   Real mean_stress = stress.trace()/3.0;
   RankTwoTensor dmean_stress = stress.dtrace()/3.0;
@@ -177,7 +177,7 @@ TensorMechanicsPlasticTensile::dflowPotential_dstress(const RankTwoTensor & stre
 }
 
 RankTwoTensor
-TensorMechanicsPlasticTensile::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticTensile::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   return RankTwoTensor();
 }

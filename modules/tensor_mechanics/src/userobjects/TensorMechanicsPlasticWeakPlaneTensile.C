@@ -27,13 +27,13 @@ TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(c
 
 
 Real
-TensorMechanicsPlasticWeakPlaneTensile::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticWeakPlaneTensile::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
   return stress(2,2) - tensile_strength(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticWeakPlaneTensile::dyieldFunction_dstress(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticWeakPlaneTensile::dyieldFunction_dstress(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   RankTwoTensor df_dsig;
   df_dsig(2, 2) = 1.0;
@@ -42,13 +42,13 @@ TensorMechanicsPlasticWeakPlaneTensile::dyieldFunction_dstress(const RankTwoTens
 
 
 Real
-TensorMechanicsPlasticWeakPlaneTensile::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, const Real & intnl) const
+TensorMechanicsPlasticWeakPlaneTensile::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, Real intnl) const
 {
   return -dtensile_strength(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticWeakPlaneTensile::flowPotential(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticWeakPlaneTensile::flowPotential(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   RankTwoTensor df_dsig;
   df_dsig(2, 2) = 1.0;
@@ -56,13 +56,13 @@ TensorMechanicsPlasticWeakPlaneTensile::flowPotential(const RankTwoTensor & /*st
 }
 
 RankFourTensor
-TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dstress(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dstress(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   return RankFourTensor();
 }
 
 RankTwoTensor
-TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticWeakPlaneTensile::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   return RankTwoTensor();
 }
@@ -80,7 +80,7 @@ TensorMechanicsPlasticWeakPlaneTensile::dtensile_strength(const Real internal_pa
 }
 
 void
-TensorMechanicsPlasticWeakPlaneTensile::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+TensorMechanicsPlasticWeakPlaneTensile::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
 {
   act.assign(1, false);
 
