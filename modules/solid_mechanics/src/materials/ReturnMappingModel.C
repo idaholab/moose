@@ -72,13 +72,13 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
   Real effective_trial_stress = std::sqrt(1.5 * dts_squared);
 
-  computeStressInitialize(qp, effective_trial_stress, elasticityTensor);
-
   // compute effective strain increment
   SymmTensor dev_strain_increment(strain_increment);
   dev_strain_increment.addDiag( -strain_increment.trace()/3.0);
   _effective_strain_increment = dev_strain_increment.doubleContraction(dev_strain_increment);
   _effective_strain_increment = std::sqrt(2.0/3.0 * _effective_strain_increment);
+
+  computeStressInitialize(qp, effective_trial_stress, elasticityTensor);
 
   // Use Newton sub-iteration to determine inelastic strain increment
 

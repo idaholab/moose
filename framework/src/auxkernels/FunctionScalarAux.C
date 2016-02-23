@@ -19,15 +19,19 @@ template<>
 InputParameters validParams<FunctionScalarAux>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
-  params.addRequiredParam<FunctionName>("function", "The function to set the scalar variable value.");
+  params.addRequiredParam<std::vector<FunctionName> >("function", "The functions to set the scalar variable components.");
 
   return params;
 }
 
 FunctionScalarAux::FunctionScalarAux(const InputParameters & parameters) :
-    AuxScalarKernel(parameters),
-    _function(getFunction("function"))
+    AuxScalarKernel(parameters)
 {
+  std::vector<FunctionName> funcs = getParam<std::vector<FunctionName> >("function");
+  if (funcs.size() != _var.order())
+    mooseError("number of functions is not equal to the number of scalar variable components");
+  for (unsigned int i = 0; i < funcs.size(); ++i)
+    _functions.push_back(&getFunctionByName(funcs[i]));
 }
 
 FunctionScalarAux::~FunctionScalarAux()
@@ -37,6 +41,6 @@ FunctionScalarAux::~FunctionScalarAux()
 Real
 FunctionScalarAux::computeValue()
 {
-  return _function.value(_t, Point(0, 0, 0));
+  return _functions[_i]->value(_t, Point(0, 0, 0));
 }
 
