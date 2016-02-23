@@ -45,7 +45,7 @@
 //   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 //
 //   // Coupled vars
-//   VariableValue & _pressure;
+//   const VariableValue & _pressure;
 //
 //   // Required parameters
 //   unsigned _component;

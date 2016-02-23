@@ -32,34 +32,34 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Velocity
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
 
   // Old Velocity
-  VariableValue& _u_vel_old;
-  VariableValue& _v_vel_old;
-  VariableValue& _w_vel_old;
+  const VariableValue & _u_vel_old;
+  const VariableValue & _v_vel_old;
+  const VariableValue & _w_vel_old;
 
   // Star Velocity
-  VariableValue& _u_vel_star;
-  VariableValue& _v_vel_star;
-  VariableValue& _w_vel_star;
+  const VariableValue & _u_vel_star;
+  const VariableValue & _v_vel_star;
+  const VariableValue & _w_vel_star;
 
   // Velocity Gradients
-  VariableGradient& _grad_u_vel;
-  VariableGradient& _grad_v_vel;
-  VariableGradient& _grad_w_vel;
+  const VariableGradient & _grad_u_vel;
+  const VariableGradient & _grad_v_vel;
+  const VariableGradient & _grad_w_vel;
 
   // Old Velocity Gradients
-  VariableGradient& _grad_u_vel_old;
-  VariableGradient& _grad_v_vel_old;
-  VariableGradient& _grad_w_vel_old;
+  const VariableGradient & _grad_u_vel_old;
+  const VariableGradient & _grad_v_vel_old;
+  const VariableGradient & _grad_w_vel_old;
 
   // Star Velocity Gradients
-  VariableGradient& _grad_u_vel_star;
-  VariableGradient& _grad_v_vel_star;
-  VariableGradient& _grad_w_vel_star;
+  const VariableGradient & _grad_u_vel_star;
+  const VariableGradient & _grad_v_vel_star;
+  const VariableGradient & _grad_w_vel_star;
 
   // Variable numberings
   unsigned _u_vel_var_number;

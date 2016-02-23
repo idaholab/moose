@@ -40,9 +40,9 @@ protected:
 
   ///@{
   /// Variables for second order derivatives
-  VariableSecond & _second_u;
-  VariableTestSecond & _second_test;
-  VariablePhiSecond & _second_phi;
+  const VariableSecond & _second_u;
+  const VariableTestSecond & _second_test;
+  const VariablePhiSecond & _second_phi;
   ///@}
 
   ///Number of variables
@@ -56,7 +56,7 @@ protected:
   ///@}
 
   /// Coupled variables used in mobility
-  std::vector<VariableGradient *> _coupled_grad_vars;
+  std::vector<const VariableGradient *> _coupled_grad_vars;
 };
 
 template<typename T>

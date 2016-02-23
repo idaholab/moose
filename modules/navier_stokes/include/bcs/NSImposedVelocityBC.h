@@ -36,7 +36,7 @@ protected:
 
   // We need the density, since we are actually setting essential values of
   // *momentum* not essential values of velocity.
-  VariableValue & _rho;
+  const VariableValue & _rho;
 
   // The desired value for the velocity component
   Real _desired_velocity;

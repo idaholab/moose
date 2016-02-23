@@ -34,7 +34,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Coupled variables
-  VariableValue & _pressure;
+  const VariableValue & _pressure;
 
   // Parameters
   unsigned _component;

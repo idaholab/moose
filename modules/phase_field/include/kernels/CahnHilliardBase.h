@@ -46,7 +46,7 @@ private:
   std::vector<const MaterialProperty<Real>* > _second_derivatives;
   std::vector<const MaterialProperty<Real>* > _third_derivatives;
   std::vector<std::vector<const MaterialProperty<Real>* > > _third_cross_derivatives;
-  std::vector<VariableGradient *> _grad_vars;
+  std::vector<const VariableGradient *> _grad_vars;
 };
 
 template<typename T>

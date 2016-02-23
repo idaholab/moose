@@ -44,20 +44,20 @@ protected:
   ElasticityTensorR4 _Bijkl;
 
 private:
-  VariableValue & _T;
+  const VariableValue & _T;
 
   Real _thermal_expansion_coeff;
   const Real _T0;
   std::vector<Real> _applied_strain_vector;
   RankTwoTensor _applied_strain_tensor;
 
-  VariableValue & _wc_x;
-  VariableValue & _wc_y;
-  VariableValue & _wc_z;
+  const VariableValue & _wc_x;
+  const VariableValue & _wc_y;
+  const VariableValue & _wc_z;
 
-  VariableGradient & _grad_wc_x;
-  VariableGradient & _grad_wc_y;
-  VariableGradient & _grad_wc_z;
+  const VariableGradient & _grad_wc_x;
+  const VariableGradient & _grad_wc_y;
+  const VariableGradient & _grad_wc_z;
 
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;

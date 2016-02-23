@@ -40,7 +40,7 @@ protected:
   virtual Real computeQpResidual();
 
   // Coupled variables
-  VariableValue& _pressure;
+  const VariableValue & _pressure;
 
   // Required paramters
   Real _desired_stagnation_pressure;

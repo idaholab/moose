@@ -93,7 +93,7 @@ protected:
   const RichardsDensity & _density;
 
   /// saturation at the nodes
-  VariableValue & _sat;
+  const VariableValue & _sat;
 
   /// variable number of the saturation variable
   unsigned int _sat_var;
@@ -130,7 +130,6 @@ protected:
    * These are used in the jacobian calculations
    */
   std::vector<Real> _dmobility_ds;
-
 };
 
 #endif //Q2PPOREPRESSUREFLUX

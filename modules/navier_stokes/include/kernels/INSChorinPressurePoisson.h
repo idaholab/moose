@@ -33,9 +33,9 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Gradients of the "star" velocity
-  VariableGradient& _grad_u_star;
-  VariableGradient& _grad_v_star;
-  VariableGradient& _grad_w_star;
+  const VariableGradient & _grad_u_star;
+  const VariableGradient & _grad_v_star;
+  const VariableGradient & _grad_w_star;
 
   // Variable numberings
   unsigned _u_vel_star_var_number;

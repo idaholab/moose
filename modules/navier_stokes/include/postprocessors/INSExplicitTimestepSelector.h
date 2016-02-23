@@ -34,7 +34,7 @@ protected:
   Real _value;
 
   /// Velocity magnitude.  Hint: Use VectorMagnitudeAux in Moose for this
-  VariableValue& _vel_mag;
+  const VariableValue & _vel_mag;
 
   /// Material properties:  the explicit time scheme limit for the viscous
   /// problem also depends on the kinematic viscosity.

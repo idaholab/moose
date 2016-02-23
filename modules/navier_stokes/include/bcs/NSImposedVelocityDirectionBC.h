@@ -56,10 +56,10 @@ protected:
   virtual Real computeQpResidual();
 
   // Coupled variables
-  VariableValue& _rho;
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
+  const VariableValue & _rho;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
 
   // The desired value for the unit velocity component
   Real _desired_unit_velocity_component;

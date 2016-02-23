@@ -44,9 +44,9 @@ private:
   unsigned int _disp_y_var;
   unsigned int _disp_z_var;
 
-  VariableValue & _disp_x_dot;
-  VariableValue & _disp_y_dot;
-  VariableValue & _disp_z_dot;
+  const VariableValue & _disp_x_dot;
+  const VariableValue & _disp_y_dot;
+  const VariableValue & _disp_z_dot;
 };
 
 #endif //DASHPOTBC_H

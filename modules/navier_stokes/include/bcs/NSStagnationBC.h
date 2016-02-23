@@ -40,11 +40,11 @@ protected:
   // virtual Real computeQpResidual();
 
   // Coupled variables
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
 
-  VariableValue& _temperature;
+  const VariableValue & _temperature;
 
   // Required paramters
   Real _gamma;

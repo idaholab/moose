@@ -24,12 +24,12 @@ public:
 
   virtual ~NonlinearRZ();
 
-  VariableGradient & _grad_disp_r;
-  VariableGradient & _grad_disp_z;
-  VariableGradient & _grad_disp_r_old;
-  VariableGradient & _grad_disp_z_old;
-  VariableValue & _disp_r;
-  VariableValue & _disp_r_old;
+  const VariableGradient & _grad_disp_r;
+  const VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_r_old;
+  const VariableGradient & _grad_disp_z_old;
+  const VariableValue & _disp_r;
+  const VariableValue & _disp_r_old;
 
 protected:
 
@@ -43,9 +43,6 @@ protected:
   virtual Real volumeRatioOld(unsigned qp) const;
 
   virtual void computeIncrementalDeformationGradient( std::vector<ColumnMajorMatrix> & Fhat);
-
-
-
 };
 
 } // namespace solid_mechanics

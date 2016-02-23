@@ -53,8 +53,10 @@ KineticDisPreRateAux::computeValue()
   {
     for (unsigned int i=0; i<_vals.size(); ++i)
     {
-      if ((*_vals[i])[_qp] < 0.0) (*_vals[i])[_qp] =0.0;
-      omega *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+      if ((*_vals[i])[_qp] < 0.0)
+        omega *= std::pow(0.0, _sto_v[i]);
+      else
+        omega *= std::pow((*_vals[i])[_qp], _sto_v[i]);
     }
   }
 

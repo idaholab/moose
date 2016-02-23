@@ -33,7 +33,7 @@ protected:
   virtual Real computeQpResidual();
 
   RealVectorValue _beta;
-  VariableValue & _var2;
+  const VariableValue & _var2;
 };
 
 #endif /* COUPLEDKERNELGRADBC_H */

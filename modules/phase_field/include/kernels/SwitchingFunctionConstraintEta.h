@@ -39,7 +39,7 @@ protected:
   const MaterialProperty<Real> & _d2h;
 
   /// Lagrange multiplier
-  VariableValue & _lambda;
+  const VariableValue & _lambda;
   unsigned int _lambda_var;
 };
 

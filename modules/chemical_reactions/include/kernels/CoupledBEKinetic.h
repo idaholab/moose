@@ -57,8 +57,8 @@ private:
   std::vector<Real> _weight;
 //  std::vector<unsigned int> _vars;
   /// Coupled kinetic mineral concentrations.
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
   /// Coupled old values of kinetic mineral concentrations.
-  std::vector<VariableValue *> _vals_old;
+  std::vector<const VariableValue *> _vals_old;
 };
 #endif //COUPLEDBEKINETIC_H

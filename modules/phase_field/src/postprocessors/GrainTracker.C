@@ -825,9 +825,9 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
 
     // Swap the values from one variable to the other
     {
-      VariableValue & value = _vars[curr_var_idx]->nodalSln();
-      VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
-      VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
+      const VariableValue & value = _vars[curr_var_idx]->nodalSln();
+      const VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
+      const VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
 
       // Copy Value from intersecting variable to new variable
       dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
@@ -838,9 +838,9 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
       solution_older.set(dof_index, value_older[0]);
     }
     {
-      VariableValue & value = _vars[new_var_idx]->nodalSln();
-      VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
-      VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
+      const VariableValue & value = _vars[new_var_idx]->nodalSln();
+      const VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
+      const VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
 
       // Copy Value from variable to the intersecting variable
       dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();

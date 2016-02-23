@@ -33,11 +33,11 @@ private:
   const unsigned int _mesh_dimension;
 
   unsigned int _y_var;
-  VariableValue  & _y;
-  VariableGradient & _grad_y;
+  const VariableValue & _y;
+  const VariableGradient & _grad_y;
 
   unsigned int _z_var;
-  VariableValue  & _z;
-  VariableGradient & _grad_z;
+  const VariableValue & _z;
+  const VariableGradient & _grad_z;
 };
 #endif //SOLIDMECHX

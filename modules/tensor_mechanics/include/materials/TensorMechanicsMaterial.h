@@ -40,13 +40,13 @@ protected:
   virtual void computeQpStrain() = 0;
   virtual void computeQpStress() = 0;
 
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
 
-  VariableGradient & _grad_disp_x_old;
-  VariableGradient & _grad_disp_y_old;
-  VariableGradient & _grad_disp_z_old;
+  const VariableGradient & _grad_disp_x_old;
+  const VariableGradient & _grad_disp_y_old;
+  const VariableGradient & _grad_disp_z_old;
 
   /// Material property base name to allow for multiple TensorMechanicsMaterial to coexist in the same simulation
   std::string _base_name;

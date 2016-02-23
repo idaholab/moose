@@ -26,8 +26,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _u_old;
-  VariableValue & _u_older;
+  const VariableValue & _u_old;
+  const VariableValue & _u_older;
 };
 
 #endif //SECONDDERIVATIVEIMPLICITEULER_H

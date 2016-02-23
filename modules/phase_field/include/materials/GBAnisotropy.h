@@ -42,7 +42,7 @@ private:
 
   bool _inclination_anisotropy;
 
-  VariableValue & _T;
+  const VariableValue & _T;
 
   std::vector<std::vector<Real> > _sigma;
   std::vector<std::vector<Real> > _mob;
@@ -66,8 +66,8 @@ private:
 
   unsigned int _ncrys;
 
-  std::vector<VariableValue *> _vals;
-  std::vector<VariableGradient *> _grad_vals;
+  std::vector<const VariableValue *> _vals;
+  std::vector<const VariableGradient *> _grad_vals;
 };
 
 #endif //GBANISOTROPY_H

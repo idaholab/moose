@@ -33,7 +33,7 @@ public:
   virtual Real value(const Point & /*p*/);
 
 protected:
-  VariableValue & _var1;
+  const VariableValue & _var1;
   Real _factor;
 };
 

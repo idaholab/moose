@@ -34,7 +34,7 @@ public:
 protected:
   unsigned int _qp;
   unsigned int _ncrys;
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
   unsigned int _ncomp;
   ///@{ storing volumes and centers of all the grains
   std::vector<Real> _grain_data;

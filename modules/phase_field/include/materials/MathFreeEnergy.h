@@ -32,7 +32,7 @@ protected:
 
 private:
   /// Coupled variable value for the concentration \f$ c \f$.
-  VariableValue & _c;
+  const VariableValue & _c;
   unsigned int _c_var;
 };
 

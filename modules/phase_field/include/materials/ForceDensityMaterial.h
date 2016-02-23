@@ -30,7 +30,7 @@ protected:
 
 private:
   /// concentration field considered to be the density of particles
-  VariableValue & _c;
+  const VariableValue & _c;
   VariableName _c_name;
   /// equilibrium density at the grain boundaries
   Real _ceq;
@@ -40,8 +40,8 @@ private:
   Real _k;
 
   unsigned int _ncrys;
-  std::vector<VariableValue *> _vals;
-  std::vector<VariableGradient *> _grad_vals;
+  std::vector<const VariableValue *> _vals;
+  std::vector<const VariableGradient *> _grad_vals;
 
   std::vector<Real> _product_etas;
   std::vector<RealGradient> _sum_grad_etas;

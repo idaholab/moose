@@ -34,7 +34,7 @@ protected:
 
 private:
 
-  VariableGradient & _grad_advector;
+  const VariableGradient & _grad_advector;
 };
 
 #endif //FDADVECTION_H

@@ -29,9 +29,9 @@ public:
 protected:
   virtual void initialSetup();
   virtual Real computeQpIntegral();
-  VariableValue & _scalar_q;
+  const VariableValue & _scalar_q;
   /// The gradient of the scalar q field
-  VariableGradient & _grad_of_scalar_q;
+  const VariableGradient & _grad_of_scalar_q;
   const CrackFrontDefinition * const _crack_front_definition;
   bool _has_crack_front_point_index;
   const unsigned int _crack_front_point_index;
@@ -42,7 +42,6 @@ protected:
   bool _has_symmetry_plane;
   Real _poissons_ratio;
   Real _youngs_modulus;
-
 };
 
 #endif //JINTEGRAL3D_H

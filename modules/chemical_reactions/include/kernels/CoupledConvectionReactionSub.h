@@ -85,13 +85,13 @@ private:
   /// Material property of hydraulic conductivity.
   const MaterialProperty<Real> & _cond;
   /// Coupled gradient of hydraulic head.
-  VariableGradient & _grad_p;
+  const VariableGradient & _grad_p;
 
   std::vector<unsigned int> _vars;
   /// Coupled primary species concentrations.
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
   /// Coupled gradients of primary species concentrations.
-  std::vector<VariableGradient *> _grad_vals;
+  std::vector<const VariableGradient *> _grad_vals;
 
 };
 #endif //COUPLEDCONVECTIONREACTIONSUB_H

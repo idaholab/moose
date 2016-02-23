@@ -30,7 +30,7 @@ protected:
   virtual Real computeQpResidual();
 
   unsigned int _rho_var;
-  VariableValue & _rho;
+  const VariableValue & _rho;
 
   Real _initial;
   Real _final;

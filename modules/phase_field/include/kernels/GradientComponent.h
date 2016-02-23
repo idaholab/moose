@@ -28,7 +28,7 @@ protected:
   unsigned int _v_var;
 
   /// Gradient of the coupled variable
-  VariableGradient & _grad_v;
+  const VariableGradient & _grad_v;
 
   /// Component of the gradient vector to match
   unsigned int _component;

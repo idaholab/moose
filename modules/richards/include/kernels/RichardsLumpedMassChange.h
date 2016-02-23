@@ -81,10 +81,10 @@ protected:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
    * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i]
    */
-  std::vector<VariableValue *> _ps_at_nodes;
+  std::vector<const VariableValue *> _ps_at_nodes;
 
   /// Holds the nodal values of pressures at timestep_begin, in same way as _ps_at_nodes
-  std::vector<VariableValue *> _ps_old_at_nodes;
+  std::vector<const VariableValue *> _ps_old_at_nodes;
 
   /// holds nodal values of d(Seff)/dP_i
   std::vector<Real> _dseff;

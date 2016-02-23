@@ -47,7 +47,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Coupled gradients
-  VariableGradient& _grad_temperature;
+  const VariableGradient & _grad_temperature;
 
   // Material properties
   const MaterialProperty<Real>& _thermal_conductivity;
@@ -70,7 +70,7 @@ protected:
 
   // Single vector to refer to all gradients.  Initialized in
   // the ctor.
-  std::vector<VariableGradient*> _gradU;
+  std::vector<const VariableGradient *> _gradU;
 };
 
 

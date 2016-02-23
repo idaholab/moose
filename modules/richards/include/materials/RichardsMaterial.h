@@ -35,8 +35,8 @@ protected:
   Real _material_por;
 
   /// porosity changes.  if not entered they default to zero
-  VariableValue & _por_change;
-  VariableValue & _por_change_old;
+  const VariableValue & _por_change;
+  const VariableValue & _por_change_old;
 
   /// permeability as entered by the user
   RealTensorValue _material_perm;
@@ -61,7 +61,7 @@ protected:
   std::vector<const RichardsDensity *> _material_density_UO;
   std::vector<const RichardsSUPG *> _material_SUPG_UO;
 
-  std::vector<VariableValue *> _perm_change;
+  std::vector<const VariableValue *> _perm_change;
 
 
 
@@ -221,9 +221,9 @@ protected:
 
 
 
-  std::vector<VariableValue *> _pressure_vals;
-  std::vector<VariableValue *> _pressure_old_vals;
-  std::vector<VariableGradient *> _grad_p;
+  std::vector<const VariableValue *> _pressure_vals;
+  std::vector<const VariableValue *> _pressure_old_vals;
+  std::vector<const VariableGradient *> _grad_p;
 
 
   /**

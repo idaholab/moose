@@ -24,7 +24,7 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _c;
+  const VariableValue & _c;
   unsigned int _c_var;
 
   const MaterialProperty<Real> & _mu;

@@ -37,7 +37,7 @@ public:
   /// Biot coefficient
   const MaterialProperty<Real> & _coefficient;
 
-  VariableValue & _porepressure;
+  const VariableValue & _porepressure;
 
   unsigned int _porepressure_var_num;
 
