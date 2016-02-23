@@ -250,7 +250,7 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
             //	std::cout<< "vertx " << interpolateAt(cell.at(i-1)) << " -- " << cell.at(i-1).at(0) << " " << cell.at(i-1).at(1) <<std::endl;
 
 
-        return value;
+        return fabs(value);
 }
 
 
