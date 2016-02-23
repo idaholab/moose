@@ -56,7 +56,6 @@
     type = Console
     verbose = true
     perf_log = true
-    setup_log_early = true
     time_precision = 6
     execute_on = 'failed nonlinear linear timestep_end'
   [../]
