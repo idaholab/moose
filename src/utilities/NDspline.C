@@ -69,8 +69,6 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
           calculateCoefficients();
          else
           _spline_coefficients = getCoefficients(_values, _hj.at(0), _alpha.at(0), _beta.at(0));
-          for(int i=0; i<_spline_coefficients.size();i++)
-        	  std::cout<<_spline_coefficients.at(i)<<std::endl;
 
             for (int i=0; i<_dimensions; i++){
               _cellPoint0.push_back(_discretizations.at(i).at(0));
@@ -362,11 +360,11 @@ double NDSpline::phi(double t){
  // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
  double phi_value=0;
 
- if ((std::abs(t)<=2) & (std::abs(t)>=1))
-  phi_value = std::pow(2-std::abs(t),3);
+ if ((fabs(t)<=2) & (fabs(t)>=1))
+  phi_value = std::pow(2-fabs(t),3);
 
- if ((std::abs(t))<1)
-  phi_value = 4 - 6*std::pow(std::abs(t),2) + 3*std::pow(std::abs(t),3);
+ if ((fabs(t))<1)
+  phi_value = 4 - 6*std::pow(fabs(t),2) + 3*std::pow(fabs(t),3);
 
  return phi_value;
 }
