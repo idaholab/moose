@@ -12,6 +12,7 @@
 #include "TensorMechanicsAction.h"
 #include "DynamicTensorMechanicsAction.h"
 #include "TensorMechanicsAxisymmetricRZAction.h"
+#include "TensorMechanicsRSphericalAction.h"
 #include "PoroMechanicsAction.h"
 #include "PressureAction.h"
 
@@ -229,7 +230,8 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
   syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
-  syntax.registerActionSyntax("TensorMechanicsAxisymmetricRZAction", "Kernels/AxisymmetricRZ");
+  syntax.registerActionSyntax("TensorMechanicsAxisymmetricRZAction", "Kernels/StressDivergence2DAxisymmetricRZ");
+  syntax.registerActionSyntax("TensorMechanicsRSphericalAction", "Kernels/StressDivergence1DRSpherical");
 
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
@@ -238,5 +240,6 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
+  registerAction(TensorMechanicsRSphericalAction, "add_kernel");
   registerAction(PressureAction, "add_bc");
 }

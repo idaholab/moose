@@ -4,20 +4,20 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef TENSORMECHANICSAXISYMMETRICRZACTION_H
-#define TENSORMECHANICSAXISYMMETRICRZACTION_H
+#ifndef TENSORMECHANICSRSPHERICALACTION_H
+#define TENSORMECHANICSRSPHERICALACTION_H
 
 #include "Action.h"
 
-class TensorMechanicsAxisymmetricRZAction;
+class TensorMechanicsRSphericalAction;
 
 template<>
-InputParameters validParams<TensorMechanicsAxisymmetricRZAction>();
+InputParameters validParams<TensorMechanicsRSphericalAction>();
 
-class TensorMechanicsAxisymmetricRZAction : public Action
+class TensorMechanicsRSphericalAction : public Action
 {
 public:
-  TensorMechanicsAxisymmetricRZAction(const InputParameters & params);
+  TensorMechanicsRSphericalAction(const InputParameters & params);
 
   virtual void act();
 
@@ -26,4 +26,4 @@ private:
   std::string _base_name;
 };
 
-#endif //TENSORMECHANICSAXISYMMETRICRZACTION_H
+#endif //TENSORMECHANICSRSPHERICALACTION_H
