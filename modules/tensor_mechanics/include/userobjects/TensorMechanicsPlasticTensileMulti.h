@@ -34,7 +34,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @param[out] f the yield functions
    */
-  virtual void yieldFunctionV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & f) const;
+  virtual void yieldFunctionV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & f) const;
 
   /**
    * The derivative of yield functions with respect to stress
@@ -42,7 +42,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @param[out] df_dstress df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
    */
-  virtual void dyieldFunction_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & df_dstress) const;
+  virtual void dyieldFunction_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & df_dstress) const;
 
   /**
    * The derivative of yield functions with respect to the internal parameter
@@ -50,7 +50,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @param[out] df_dintnl df_dintnl[alpha] = df[alpha]/dintnl
    */
-  virtual void dyieldFunction_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & df_dintnl) const;
+  virtual void dyieldFunction_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & df_dintnl) const;
 
   /**
    * The flow potentials
@@ -58,7 +58,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @param[out] r r[alpha] is the flow potential for the "alpha" yield function
    */
-  virtual void flowPotentialV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & r) const;
+  virtual void flowPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & r) const;
 
   /**
    * The derivative of the flow potential with respect to stress
@@ -66,7 +66,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @param[out] dr_dstress dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
    */
-  virtual void dflowPotential_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankFourTensor> & dr_dstress) const;
+  virtual void dflowPotential_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankFourTensor> & dr_dstress) const;
 
   /**
    * The derivative of the flow potential with respect to the internal parameter
@@ -74,7 +74,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @param[out] dr_dintnl  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl
    */
-  virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
+  virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
 
   /**
    * The active yield surfaces, given a vector of yield functions.
@@ -91,7 +91,9 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param[out] act act[i] = true if the i_th yield function is active
    * @param[out] returned_stress Approximate value of the returned stress
    */
-  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
+  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress,
+                                 Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act,
+                                 RankTwoTensor & returned_stress) const;
 
   /// Returns the model name (TensileMulti)
   virtual std::string modelName() const;
@@ -170,32 +172,53 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
     * @param[out] trial_stress_inadmissible Should be set to false if the trial_stress is admissible, and true if the trial_stress is inadmissible.  This can be used by the calling prorgram
     * @return true if a successful return (or a return-map not needed), false if the trial_stress is inadmissible but the return process failed
     */
-  virtual bool returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
-                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                  bool & trial_stress_inadmissible) const;
+  virtual bool returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
+                         Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                         std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                         bool & trial_stress_inadmissible) const;
 
+  /**
+    * Calculates a custom consistent tangent operator.
+    * You may choose to over-ride this in your
+    * derived TensorMechanicsPlasticXXXX class.
+    *
+    * (Note, if you over-ride returnMap, you will probably
+    * want to override consistentTangentOpertor too, otherwise
+    * it will default to E_ijkl.)
+    *
+    * @param stress_old trial stress before returning
+    * @param stress current returned stress state
+    * @param intnl internal parameter
+    * @param E_ijkl elasticity tensor
+    * @param cumulative_pm the cumulative plastic multipliers
+    * @return the consistent tangent operator: E_ijkl if not over-ridden
+    */
+  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
+                                                   const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
 
  protected:
-  const TensorMechanicsHardeningModel & _strength;
-
-  /// maximum iterations allowed in the custom return-map algorithm
-  unsigned int _max_iters;
-
-  /// yield function is shifted by this amount to avoid problems with stress-derivatives at equal eigenvalues
-  Real _shift;
-
-  /// Whether to use the custom return-map algorithm
-  bool _use_custom_returnMap;
-
-  /// Whether to use the custom consistent tangent operator calculation
-  bool _use_custom_cto;
 
   /// tensile strength as a function of residual value, rate, and internal_param
   virtual Real tensile_strength(const Real internal_param) const;
 
   /// d(tensile strength)/d(internal_param) as a function of residual value, rate, and internal_param
   virtual Real dtensile_strength(const Real internal_param) const;
+
+ private:
+
+  const TensorMechanicsHardeningModel & _strength;
+
+  /// maximum iterations allowed in the custom return-map algorithm
+  const unsigned int _max_iters;
+
+  /// yield function is shifted by this amount to avoid problems with stress-derivatives at equal eigenvalues
+  const Real _shift;
+
+  /// Whether to use the custom return-map algorithm
+  const bool _use_custom_returnMap;
+
+  /// Whether to use the custom consistent tangent operator calculation
+  const bool _use_custom_cto;
 
   /// dot product of two 3-dimensional vectors
   Real dot(const std::vector<Real> & a, const std::vector<Real> & b) const;
@@ -214,9 +237,9 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl_old The internal parameter at stress=eigvals.  This algorithm doesn't form the plastic strain, so you will have to use intnl=intnl_old+sum(dpm) if you need the new internal-parameter value at the returned point.
    * @param initial_guess A guess of dpm[0]+dpm[1]+dpm[2]
    */
-  bool returnTip(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
-                 std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
-                 const Real & initial_guess) const;
+  bool returnTip(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                 std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                 Real initial_guess) const;
 
   /**
    * Tries to return-map to the Tensile edge.
@@ -229,9 +252,9 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl_old The internal parameter at stress=eigvals.  This algorithm doesn't form the plastic strain, so you will have to use intnl=intnl_old+sum(dpm) if you need the new internal-parameter value at the returned point.
    * @param initial_guess A guess of dpm[1]+dpm[2]
    */
-  bool returnEdge(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
-                  std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
-                  const Real & initial_guess) const;
+  bool returnEdge(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                  std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                  Real initial_guess) const;
 
   /**
    * Tries to return-map to the Tensile plane
@@ -244,9 +267,9 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param intnl_old The internal parameter at stress=eigvals.  This algorithm doesn't form the plastic strain, so you will have to use intnl=intnl_old+sum(dpm) if you need the new internal-parameter value at the returned point.
    * @param initial_guess A guess of dpm[2]
    */
-  bool returnPlane(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
-                   std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
-                   const Real & initial_guess) const;
+  bool returnPlane(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                   std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                   Real initial_guess) const;
 
   /**
    * Returns true if the Kuhn-Tucker conditions are satisfied
@@ -255,35 +278,17 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param str The yield strength
    * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is classified as "non-negative" in the Kuhn-Tucker conditions).
    */
-  bool KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, const Real & str, const Real & ep_plastic_tolerance) const;
+  bool KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, Real str, Real ep_plastic_tolerance) const;
 
   /**
    * Just like returnMap, but a protected interface
    * that definitely uses the algorithm, since returnMap itself
    * does not use the algorithm if _use_returnMap=false
    */
-  virtual bool doReturnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
-                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                  bool & trial_stress_inadmissible) const;
-  /**
-    * Calculates a custom consistent tangent operator.
-    * You may choose to over-ride this in your
-    * derived TensorMechanicsPlasticXXXX class.
-    *
-    * (Note, if you over-ride returnMap, you will probably
-    * want to override consistentTangentOpertor too, otherwise
-    * it will default to E_ijkl.)
-    *
-    * @param stress_old trial stress before returning
-    * @param stress current returned stress state
-    * @param intnl internal parameter
-    * @param E_ijkl elasticity tensor
-    * @param cumulative_pm the cumulative plastic multipliers
-    * @return the consistent tangent operator: E_ijkl if not over-ridden
-    */
-  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, const Real & intnl,
-                                                   const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
+  virtual bool doReturnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
+                           Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                           std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                           bool & trial_stress_inadmissible) const;
 
   enum return_type { tip=0, edge=1, plane=2 };
 

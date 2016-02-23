@@ -225,7 +225,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
                                         std::vector<Real> & intnl, std::vector<Real> & pm, std::vector<Real> & cumulative_pm,
                                         const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl,
                                         const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations,
-                                        RankFourTensor & consistent_tangent_operator, const quickStep_called_from_t called_from, const bool & final_step)
+                                        RankFourTensor & consistent_tangent_operator, const quickStep_called_from_t called_from, bool final_step)
 {
   iterations = 0;
 
@@ -273,7 +273,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
         else
         {
           std::vector<Real> custom_model_pm;
-          for (unsigned surface = 0 ; surface < _f[custom_model]->numberSurfaces() ; ++surface)
+          for (unsigned surface = 0; surface < _f[custom_model]->numberSurfaces(); ++surface)
             custom_model_pm.push_back(cumulative_pm[_surfaces_given_model[custom_model][surface]]);
           consistent_tangent_operator = _f[custom_model]->consistentTangentOperator(stress_old, stress, intnl[custom_model], E_ijkl, custom_model_pm);
         }
@@ -412,7 +412,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
 }
 
 bool
-ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added, const bool & final_step, RankFourTensor & consistent_tangent_operator, std::vector<Real> & cumulative_pm)
+ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & f, unsigned int & iter, bool can_revert_to_dumb, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added, bool final_step, RankFourTensor & consistent_tangent_operator, std::vector<Real> & cumulative_pm)
 {
 
   // The "consistency parameters" (plastic multipliers)
@@ -759,7 +759,7 @@ ComputeMultiPlasticityStress::canAddConstraints(const std::vector<bool> & act,
 
 bool
 ComputeMultiPlasticityStress::canChangeScheme(DeactivationSchemeEnum current_deactivation_scheme,
-                                              const bool & can_revert_to_dumb)
+                                              bool can_revert_to_dumb)
 {
   if (   current_deactivation_scheme == optimized
       && _deactivation_scheme == optimized_to_safe)
@@ -789,7 +789,7 @@ ComputeMultiPlasticityStress::canChangeScheme(DeactivationSchemeEnum current_dea
 
 void
 ComputeMultiPlasticityStress::changeScheme(const std::vector<bool> & initial_act,
-                                           const bool & can_revert_to_dumb,
+                                           bool can_revert_to_dumb,
                                            const RankTwoTensor & initial_stress,
                                            const std::vector<Real> & intnl_old,
                                            DeactivationSchemeEnum & current_deactivation_scheme,
@@ -1261,7 +1261,7 @@ ComputeMultiPlasticityStress::incrementDumb(int & dumb_iteration,
 }
 
 bool
-ComputeMultiPlasticityStress::canIncrementDumb(const int & dumb_iteration)
+ComputeMultiPlasticityStress::canIncrementDumb(int dumb_iteration)
 {
   // (1 << _num_surfaces) = 2^_num_surfaces
   return ((dumb_iteration + 1) < (1 << _num_surfaces));

@@ -34,6 +34,8 @@ TensorMechanicsPlasticTensileMulti::TensorMechanicsPlasticTensileMulti(const Inp
     mooseError("Value of 'shift' in TensorMechanicsPlasticTensileMulti must not be negative\n");
   if (_shift > _f_tol)
     _console << "WARNING: value of 'shift' in TensorMechanicsPlasticTensileMulti is probably set too high\n";
+  if (LIBMESH_DIM != 3)
+    mooseError("TensorMechanicsPlasticTensileMulti is only defined for LIBMESH_DIM=3");
   MooseRandom::seed(0);
 }
 
@@ -43,13 +45,12 @@ TensorMechanicsPlasticTensileMulti::numberSurfaces() const
   return 3;
 }
 
-
 void
-TensorMechanicsPlasticTensileMulti::yieldFunctionV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & f) const
+TensorMechanicsPlasticTensileMulti::yieldFunctionV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & f) const
 {
   std::vector<Real> eigvals;
   stress.symmetricEigenvalues(eigvals);
-  Real str = tensile_strength(intnl);
+  const Real str = tensile_strength(intnl);
 
   f.resize(3);
   f[0] = eigvals[0] + _shift - str;
@@ -57,9 +58,8 @@ TensorMechanicsPlasticTensileMulti::yieldFunctionV(const RankTwoTensor & stress,
   f[2] = eigvals[2] - _shift - str;
 }
 
-
 void
-TensorMechanicsPlasticTensileMulti::dyieldFunction_dstressV(const RankTwoTensor & stress, const Real & /*intnl*/, std::vector<RankTwoTensor> & df_dstress) const
+TensorMechanicsPlasticTensileMulti::dyieldFunction_dstressV(const RankTwoTensor & stress, Real /*intnl*/, std::vector<RankTwoTensor> & df_dstress) const
 {
   std::vector<Real> eigvals;
   stress.dsymmetricEigenvalues(eigvals, df_dstress);
@@ -82,31 +82,27 @@ TensorMechanicsPlasticTensileMulti::dyieldFunction_dstressV(const RankTwoTensor 
   }
 }
 
-
 void
-TensorMechanicsPlasticTensileMulti::dyieldFunction_dintnlV(const RankTwoTensor & /*stress*/, const Real & intnl, std::vector<Real> & df_dintnl) const
+TensorMechanicsPlasticTensileMulti::dyieldFunction_dintnlV(const RankTwoTensor & /*stress*/, Real intnl, std::vector<Real> & df_dintnl) const
 {
   df_dintnl.assign(3, -dtensile_strength(intnl));
 }
 
-
 void
-TensorMechanicsPlasticTensileMulti::flowPotentialV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & r) const
+TensorMechanicsPlasticTensileMulti::flowPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & r) const
 {
   // This plasticity is associative so
   dyieldFunction_dstressV(stress, intnl, r);
 }
 
-
 void
-TensorMechanicsPlasticTensileMulti::dflowPotential_dstressV(const RankTwoTensor & stress, const Real & /*intnl*/, std::vector<RankFourTensor> & dr_dstress) const
+TensorMechanicsPlasticTensileMulti::dflowPotential_dstressV(const RankTwoTensor & stress, Real /*intnl*/, std::vector<RankFourTensor> & dr_dstress) const
 {
   stress.d2symmetricEigenvalues(dr_dstress);
 }
 
-
 void
-TensorMechanicsPlasticTensileMulti::dflowPotential_dintnlV(const RankTwoTensor & /*stress*/, const Real & /*intnl*/, std::vector<RankTwoTensor> & dr_dintnl) const
+TensorMechanicsPlasticTensileMulti::dflowPotential_dintnlV(const RankTwoTensor & /*stress*/, Real /*intnl*/, std::vector<RankTwoTensor> & dr_dintnl) const
 {
   dr_dintnl.assign(3, RankTwoTensor());
 }
@@ -123,9 +119,8 @@ TensorMechanicsPlasticTensileMulti::dtensile_strength(const Real internal_param)
   return _strength.derivative(internal_param);
 }
 
-
 void
-TensorMechanicsPlasticTensileMulti::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+TensorMechanicsPlasticTensileMulti::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
 {
   act.assign(3, false);
 
@@ -142,7 +137,7 @@ TensorMechanicsPlasticTensileMulti::activeConstraints(const std::vector<Real> & 
   bool trial_stress_inadmissible;
   doReturnMap(stress, intnl, Eijkl, 0.0, returned_stress, returned_intnl, dpm, delta_dp, yf, trial_stress_inadmissible);
 
-  for (unsigned i = 0 ; i < 3 ; ++i)
+  for (unsigned i = 0; i < 3; ++i)
     act[i] = (dpm[i] > 0);
 }
 
@@ -164,9 +159,8 @@ TensorMechanicsPlasticTensileMulti::modelName() const
   return "TensileMulti";
 }
 
-
 bool
-TensorMechanicsPlasticTensileMulti::returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
+TensorMechanicsPlasticTensileMulti::returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
                                               Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
                                               std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
                                               bool & trial_stress_inadmissible) const
@@ -179,9 +173,8 @@ TensorMechanicsPlasticTensileMulti::returnMap(const RankTwoTensor & trial_stress
   return doReturnMap(trial_stress, intnl_old, E_ijkl,ep_plastic_tolerance, returned_stress, returned_intnl, dpm, delta_dp, yf, trial_stress_inadmissible);
 }
 
-
 bool
-TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
+TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
                                                 Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
                                                 std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
                                                 bool & trial_stress_inadmissible) const
@@ -233,19 +226,16 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
   // In the anisotropic situation, we couldn't express
   // the flow directions as vectors in the same principal
   // stress space as the stress: they'd be full rank-2 tensors
-  std::vector<std::vector<Real> > n(3);
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    n[i].resize(3);
-  n[0][0] = E_ijkl(0,0,0,0);
-  n[0][1] = E_ijkl(1,1,0,0);
-  n[0][2] = E_ijkl(2,2,0,0);
-  n[1][0] = E_ijkl(0,0,1,1);
-  n[1][1] = E_ijkl(1,1,1,1);
-  n[1][2] = E_ijkl(2,2,1,1);
-  n[2][0] = E_ijkl(0,0,2,2);
-  n[2][1] = E_ijkl(1,1,2,2);
-  n[2][2] = E_ijkl(2,2,2,2);
-
+  std::vector<RealVectorValue> n(3);
+  n[0](0) = E_ijkl(0,0,0,0);
+  n[0](1) = E_ijkl(1,1,0,0);
+  n[0](2) = E_ijkl(2,2,0,0);
+  n[1](0) = E_ijkl(0,0,1,1);
+  n[1](1) = E_ijkl(1,1,1,1);
+  n[1](2) = E_ijkl(2,2,1,1);
+  n[2](0) = E_ijkl(0,0,2,2);
+  n[2](1) = E_ijkl(1,1,2,2);
+  n[2](2) = E_ijkl(2,2,2,2);
 
   // With non-zero Poisson's ratio and hardening
   // it is not computationally cheap to know whether
@@ -257,7 +247,8 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
   // trial_order[0] = type of return to try first
   // trial_order[1] = type of return to try second
   // trial_order[2] = type of return to try third
-  std::vector<int> trial_order(3);
+  const unsigned int number_of_return_paths = 3;
+  std::vector<int> trial_order(number_of_return_paths);
   if (yf[0] > _f_tol) // all the yield functions are positive, since eigvals are ordered eigvals[0] <= eigvals[1] <= eigvals[2]
   {
     trial_order[0] = tip;
@@ -279,7 +270,7 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
 
   unsigned trial;
   bool nr_converged;
-  for (trial = 0 ; trial < 3 ; ++trial)
+  for (trial = 0; trial < number_of_return_paths; ++trial)
   {
     switch (trial_order[trial])
     {
@@ -298,7 +289,7 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
       break;
   }
 
-  if (trial == 3)
+  if (trial == number_of_return_paths)
   {
     Moose::err << "Trial stress = \n";
     trial_stress.print(Moose::err);
@@ -315,7 +306,7 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
   // success
 
   returned_intnl = intnl_old;
-  for (unsigned i = 0 ; i < 3 ; ++i)
+  for (unsigned i = 0; i < 3; ++i)
   {
     yf[i] = returned_stress(i, i) - str;
     delta_dp(i, i) = dpm[i];
@@ -327,7 +318,9 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
 }
 
 bool
-TensorMechanicsPlasticTensileMulti::returnTip(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n, std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old, const Real & initial_guess) const
+TensorMechanicsPlasticTensileMulti::returnTip(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                                              std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                                              Real initial_guess) const
 {
   // The returned point is defined by f0=f1=f2=0.
   // that is, returned_stress = diag(str, str, str), where
@@ -348,7 +341,7 @@ TensorMechanicsPlasticTensileMulti::returnTip(const std::vector<Real> & eigvals,
   // In the following, i specialise to the isotropic situation.
 
   Real x = initial_guess;
-  Real denom = (n[0][0] - n[0][1])*(n[0][0] + 2*n[0][1]);
+  const Real denom = (n[0](0) - n[0](1))*(n[0](0) + 2*n[0](1));
   Real str = tensile_strength(intnl_old + x);
 
   if (_strength.modelName().compare("Constant") != 0)
@@ -361,8 +354,8 @@ TensorMechanicsPlasticTensileMulti::returnTip(const std::vector<Real> & eigvals,
     //
     // However, for nontrivial Hardening, the following
     // is necessary
-    Real eig = eigvals[0] + eigvals[1] + eigvals[2];
-    Real bul = (n[0][0] + 2*n[0][1]);
+    const Real eig = eigvals[0] + eigvals[1] + eigvals[2];
+    const Real bul = (n[0](0) + 2*n[0](1));
 
     // and finally, the equation we want to solve is:
     // bul*x - eig + 3*str = 0
@@ -387,15 +380,17 @@ TensorMechanicsPlasticTensileMulti::returnTip(const std::vector<Real> & eigvals,
   // The following is the solution (A) written above
   // (dpm[0] = triple(eigvals - str, n[1], n[2])/trip, etc)
   // in the isotropic situation
-  dpm[0] = (n[0][0]*(eigvals[0] - str) + n[0][1]*(eigvals[0] - eigvals[1] - eigvals[2] + str))/denom;
-  dpm[1] = (n[0][0]*(eigvals[1] - str) + n[0][1]*(eigvals[1] - eigvals[2] - eigvals[0] + str))/denom;
-  dpm[2] = (n[0][0]*(eigvals[2] - str) + n[0][1]*(eigvals[2] - eigvals[0] - eigvals[1] + str))/denom;
+  dpm[0] = (n[0](0)*(eigvals[0] - str) + n[0](1)*(eigvals[0] - eigvals[1] - eigvals[2] + str))/denom;
+  dpm[1] = (n[0](0)*(eigvals[1] - str) + n[0](1)*(eigvals[1] - eigvals[2] - eigvals[0] + str))/denom;
+  dpm[2] = (n[0](0)*(eigvals[2] - str) + n[0](1)*(eigvals[2] - eigvals[0] - eigvals[1] + str))/denom;
   returned_stress(0, 0) = returned_stress(1, 1) = returned_stress(2, 2) = str;
   return true;
 }
 
 bool
-TensorMechanicsPlasticTensileMulti::returnEdge(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n, std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old, const Real & initial_guess) const
+TensorMechanicsPlasticTensileMulti::returnEdge(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                                               std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                                               Real initial_guess) const
 {
   // work out the point to which we would return, "a".  It is defined by
   // f1 = 0 = f2, and the normality condition:
@@ -420,7 +415,7 @@ TensorMechanicsPlasticTensileMulti::returnEdge(const std::vector<Real> & eigvals
   // Notice that the RHS is a function of x, so we solve using
   // Newton-Raphson starting with x=initial_guess
   Real x = initial_guess;
-  Real denom = n[0][0] + n[0][1];
+  const Real denom = n[0](0) + n[0](1);
   Real str = tensile_strength(intnl_old + x);
 
   if (_strength.modelName().compare("Constant") != 0)
@@ -433,7 +428,7 @@ TensorMechanicsPlasticTensileMulti::returnEdge(const std::vector<Real> & eigvals
     //
     // However, for nontrivial Hardening, the following
     // is necessary
-    Real eig = eigvals[1] + eigvals[2];
+    const Real eig = eigvals[1] + eigvals[2];
     Real residual = denom*x - eig + 2*str;
     Real jacobian;
     unsigned int iter = 0;
@@ -449,16 +444,18 @@ TensorMechanicsPlasticTensileMulti::returnEdge(const std::vector<Real> & eigvals
   }
 
   dpm[0] = 0;
-  dpm[1] = ((eigvals[1]*n[0][0] - eigvals[2]*n[0][1])/(n[0][0] - n[0][1]) - str)/denom;
-  dpm[2] = ((eigvals[2]*n[0][0] - eigvals[1]*n[0][1])/(n[0][0] - n[0][1]) - str)/denom;
+  dpm[1] = ((eigvals[1]*n[0](0) - eigvals[2]*n[0](1))/(n[0](0) - n[0](1)) - str)/denom;
+  dpm[2] = ((eigvals[2]*n[0](0) - eigvals[1]*n[0](1))/(n[0](0) - n[0](1)) - str)/denom;
 
-  returned_stress(0, 0) = eigvals[0] - n[0][1]*(dpm[1] + dpm[2]);
+  returned_stress(0, 0) = eigvals[0] - n[0](1)*(dpm[1] + dpm[2]);
   returned_stress(1, 1) = returned_stress(2, 2) = str;
   return true;
 }
 
 bool
-TensorMechanicsPlasticTensileMulti::returnPlane(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n, std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old, const Real & initial_guess) const
+TensorMechanicsPlasticTensileMulti::returnPlane(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                                                std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                                                Real initial_guess) const
 {
   // the returned point, "a", is defined by f2=0 and
   // a = p - dpm[2]*n2.
@@ -477,39 +474,38 @@ TensorMechanicsPlasticTensileMulti::returnPlane(const std::vector<Real> & eigval
   // and we want to solve for dpm[2].
   // Use Newton-Raphson with initial guess dpm[2] = initial_guess
   dpm[2] = initial_guess;
-  Real residual = n[2][2]*dpm[2] - eigvals[2] + tensile_strength(intnl_old + dpm[2]);
+  Real residual = n[2](2)*dpm[2] - eigvals[2] + tensile_strength(intnl_old + dpm[2]);
   Real jacobian;
   unsigned int iter = 0;
   do {
-    jacobian = n[2][2] + dtensile_strength(intnl_old + dpm[2]);
+    jacobian = n[2](2) + dtensile_strength(intnl_old + dpm[2]);
     dpm[2] += -residual/jacobian;
     if (iter > _max_iters) // not converging
       return false;
-    residual = n[2][2]*dpm[2] - eigvals[2] + tensile_strength(intnl_old + dpm[2]);
+    residual = n[2](2)*dpm[2] - eigvals[2] + tensile_strength(intnl_old + dpm[2]);
     iter ++;
   } while (residual*residual > _f_tol*_f_tol);
 
   dpm[0] = 0;
   dpm[1] = 0;
-  returned_stress(0, 0) = eigvals[0] - dpm[2]*n[2][0];
-  returned_stress(1, 1) = eigvals[1] - dpm[2]*n[2][1];
-  returned_stress(2, 2) = eigvals[2] - dpm[2]*n[2][2];
+  returned_stress(0, 0) = eigvals[0] - dpm[2]*n[2](0);
+  returned_stress(1, 1) = eigvals[1] - dpm[2]*n[2](1);
+  returned_stress(2, 2) = eigvals[2] - dpm[2]*n[2](2);
   return true;
 }
 
 bool
-TensorMechanicsPlasticTensileMulti::KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, const Real & str, const Real & ep_plastic_tolerance) const
+TensorMechanicsPlasticTensileMulti::KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, Real str, Real ep_plastic_tolerance) const
 {
-  for (unsigned i = 0 ; i < 3 ; ++i)
+  for (unsigned i = 0; i < 3; ++i)
     if (!TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(returned_diagonal_stress(i, i) - str, dpm[i], ep_plastic_tolerance))
       return false;
   return true;
 }
 
-
 RankFourTensor
-TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, const Real & intnl,
-                                                       const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
+TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
+                                                              const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
 {
   if (!_use_custom_cto)
     return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, stress, intnl, E_ijkl, cumulative_pm);
@@ -518,7 +514,6 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
 
   if (cumulative_pm[2] <= 0) // All cumulative_pm are non-positive, so this is admissible
     return E_ijkl;
-
 
   // Need the eigenvalues at the returned configuration
   std::vector<Real> eigvals;
@@ -560,17 +555,17 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
   // is called sec below.
 
   RankFourTensor cto;
-  Real hard = dtensile_strength(intnl);
-  Real la = E_ijkl(0,0,1,1);
-  Real mu = 0.5*(E_ijkl(0,0,0,0) - la);
+  const Real hard = dtensile_strength(intnl);
+  const Real la = E_ijkl(0,0,1,1);
+  const Real mu = 0.5*(E_ijkl(0,0,0,0) - la);
 
   if (cumulative_pm[1] <= 0)
   {
     // only cumulative_pm[2] is positive, so this is return to the Plane
-    Real denom = hard + la + 2*mu;
-    Real al = la*la/denom;
-    Real be = la*(la + 2*mu)/denom;
-    Real ga = hard*(la + 2*mu)/denom;
+    const Real denom = hard + la + 2*mu;
+    const Real al = la*la/denom;
+    const Real be = la*(la + 2*mu)/denom;
+    const Real ga = hard*(la + 2*mu)/denom;
     std::vector<Real> comps(9);
     comps[0] = comps[4] = la + 2*mu - al;
     comps[1] = comps[3] = la - al;
@@ -581,9 +576,9 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
   else if (cumulative_pm[0] <= 0)
   {
     // both cumulative_pm[2] and cumulative_pm[1] are positive, so Edge
-    Real denom = 2*hard + 2*la + 2*mu;
-    Real al = hard*2*la/denom;
-    Real be = hard*(2*la + 2*mu)/denom;
+    const Real denom = 2*hard + 2*la + 2*mu;
+    const Real al = hard*2*la/denom;
+    const Real be = hard*(2*la + 2*mu)/denom;
     std::vector<Real> comps(9);
     comps[0] = la + 2*mu - 2*la*la/denom;
     comps[1] = comps[2] = al;
@@ -594,7 +589,7 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
   else
   {
     // all cumulative_pm are positive, so Tip
-    Real denom = 3*hard + 3*la + 2*mu;
+    const Real denom = 3*hard + 3*la + 2*mu;
     std::vector<Real> comps(2);
     comps[0] = hard*(3*la + 2*mu)/denom;
     comps[1] = 0;
@@ -602,7 +597,6 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
   }
 
   cto.rotate(trial_eigvecs);
-
 
   // drdsig = change in eigenvectors under a small stress change
   // drdsig(i,j,m,n) = dR(i,j)/dS_mn
@@ -620,18 +614,16 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
   // (sum over b!=k).
 
   RankFourTensor drdsig;
-  for (unsigned k = 0 ; k < 3 ; ++k)
-    for (unsigned b = 0 ; b < 3 ; ++b)
+  for (unsigned k = 0; k < 3; ++k)
+    for (unsigned b = 0; b < 3; ++b)
     {
       if (b == k)
         continue;
-      for (unsigned m = 0 ; m < 3 ; ++m)
-        for (unsigned n = 0 ; n < 3 ; ++n)
-          for (unsigned i = 0 ; i < 3 ; ++i)
+      for (unsigned m = 0; m < 3; ++m)
+        for (unsigned n = 0; n < 3; ++n)
+          for (unsigned i = 0; i < 3; ++i)
             drdsig(i, k, m, n) += trial_eigvecs(m, b)*trial_eigvecs(n, k)*trial_eigvecs(i, b)/(trial_eigvals[k] - trial_eigvals[b]);
     }
-
-
 
   // With diagla = diag(eigvals[0], eigvals[1], digvals[2])
   // The following implements
@@ -639,28 +631,25 @@ TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTenso
   // (sum over k, l, m and n)
 
   RankFourTensor ans;
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
-      for (unsigned a = 0 ; a < 3 ; ++a)
-        for (unsigned k = 0 ; k < 3 ; ++k)
-          for (unsigned m = 0 ; m < 3 ; ++m)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
+      for (unsigned a = 0; a < 3; ++a)
+        for (unsigned k = 0; k < 3; ++k)
+          for (unsigned m = 0; m < 3; ++m)
             ans(i, j, a, a) += (drdsig(i, k, m, m)*trial_eigvecs(j, k) + trial_eigvecs(i, k)*drdsig(j, k, m, m))*eigvals[k]*la;  //E_ijkl(m, n, a, b) = la*(m==n)*(a==b);
 
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    for (unsigned j = 0 ; j < 3 ; ++j)
-      for (unsigned a = 0 ; a < 3 ; ++a)
-        for (unsigned b = 0 ; b < 3 ; ++b)
-          for (unsigned k = 0 ; k < 3 ; ++k)
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 3; ++j)
+      for (unsigned a = 0; a < 3; ++a)
+        for (unsigned b = 0; b < 3; ++b)
+          for (unsigned k = 0; k < 3; ++k)
           {
             ans(i, j, a, b) += (drdsig(i, k, a, b)*trial_eigvecs(j, k) + trial_eigvecs(i, k)*drdsig(j, k, a, b))*eigvals[k]*mu;  //E_ijkl(m, n, a, b) = mu*(m==a)*(n==b)
             ans(i, j, a, b) += (drdsig(i, k, b, a)*trial_eigvecs(j, k) + trial_eigvecs(i, k)*drdsig(j, k, b, a))*eigvals[k]*mu;  //E_ijkl(m, n, a, b) = mu*(m==b)*(n==a)
           }
 
-
   return cto + ans;
-
 }
-
 
 bool
 TensorMechanicsPlasticTensileMulti::useCustomReturnMap() const

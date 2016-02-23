@@ -28,7 +28,7 @@ TensorMechanicsHardeningCutExponential::TensorMechanicsHardeningCutExponential(c
 }
 
 Real
-TensorMechanicsHardeningCutExponential::value(const Real & intnl) const
+TensorMechanicsHardeningCutExponential::value(Real intnl) const
 {
   Real x = intnl - _intnl_0;
   if (x <= 0)
@@ -38,7 +38,7 @@ TensorMechanicsHardeningCutExponential::value(const Real & intnl) const
 }
 
 Real
-TensorMechanicsHardeningCutExponential::derivative(const Real & intnl) const
+TensorMechanicsHardeningCutExponential::derivative(Real intnl) const
 {
   Real x = intnl - _intnl_0;
   if (x <= 0)

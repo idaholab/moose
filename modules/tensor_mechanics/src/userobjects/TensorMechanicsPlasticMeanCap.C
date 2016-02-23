@@ -26,38 +26,38 @@ TensorMechanicsPlasticMeanCap::TensorMechanicsPlasticMeanCap(const InputParamete
 
 
 Real
-TensorMechanicsPlasticMeanCap::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMeanCap::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
   return _a_over_3*stress.trace() - _strength.value(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMeanCap::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
+TensorMechanicsPlasticMeanCap::dyieldFunction_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
 {
   return _a_over_3*stress.dtrace();
 }
 
 
 Real
-TensorMechanicsPlasticMeanCap::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, const Real & intnl) const
+TensorMechanicsPlasticMeanCap::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, Real intnl) const
 {
   return -_strength.derivative(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMeanCap::flowPotential(const RankTwoTensor & stress, const Real & /*intnl*/) const
+TensorMechanicsPlasticMeanCap::flowPotential(const RankTwoTensor & stress, Real /*intnl*/) const
 {
   return _a_over_3*stress.dtrace();
 }
 
 RankFourTensor
-TensorMechanicsPlasticMeanCap::dflowPotential_dstress(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticMeanCap::dflowPotential_dstress(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   return RankFourTensor();
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMeanCap::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticMeanCap::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   return RankTwoTensor();
 }

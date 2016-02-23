@@ -37,6 +37,8 @@ TensorMechanicsPlasticMohrCoulombMulti::TensorMechanicsPlasticMohrCoulombMulti(c
     mooseError("Value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti must not be negative\n");
   if (_shift > _f_tol)
     _console << "WARNING: value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti is probably set too high\n";
+  if (LIBMESH_DIM != 3)
+    mooseError("TensorMechanicsPlasticMohrCoulombMulti is only defined for LIBMESH_DIM=3");
   MooseRandom::seed(0);
 }
 
@@ -47,22 +49,22 @@ TensorMechanicsPlasticMohrCoulombMulti::numberSurfaces() const
 }
 
 void
-TensorMechanicsPlasticMohrCoulombMulti::yieldFunctionV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & f) const
+TensorMechanicsPlasticMohrCoulombMulti::yieldFunctionV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & f) const
 {
   std::vector<Real> eigvals;
   stress.symmetricEigenvalues(eigvals);
   eigvals[0] += _shift;
   eigvals[2] -= _shift;
 
-  Real sinphi = std::sin(phi(intnl));
-  Real cosphi = std::cos(phi(intnl));
-  Real cohcos = cohesion(intnl)*cosphi;
+  const Real sinphi = std::sin(phi(intnl));
+  const Real cosphi = std::cos(phi(intnl));
+  const Real cohcos = cohesion(intnl)*cosphi;
 
   yieldFunctionEigvals(eigvals[0], eigvals[1], eigvals[2], sinphi, cohcos, f);
 }
 
 void
-TensorMechanicsPlasticMohrCoulombMulti::yieldFunctionEigvals(const Real & e0, const Real & e1, const Real & e2, const Real & sinphi, const Real & cohcos, std::vector<Real> & f) const
+TensorMechanicsPlasticMohrCoulombMulti::yieldFunctionEigvals(Real e0, Real e1, Real e2, Real sinphi, Real cohcos, std::vector<Real> & f) const
 {
   // Naively it seems a shame to have 6 yield functions active instead of just
   // 3.  But 3 won't do.  Eg, think of a loading with eigvals[0]=eigvals[1]=eigvals[2]
@@ -96,9 +98,8 @@ TensorMechanicsPlasticMohrCoulombMulti::perturbStress(const RankTwoTensor & stre
   }
 }
 
-
 void
-TensorMechanicsPlasticMohrCoulombMulti::df_dsig(const RankTwoTensor & stress, const Real & sin_angle, std::vector<RankTwoTensor> & df) const
+TensorMechanicsPlasticMohrCoulombMulti::df_dsig(const RankTwoTensor & stress, Real sin_angle, std::vector<RankTwoTensor> & df) const
 {
   std::vector<Real> eigvals;
   std::vector<RankTwoTensor> deigvals;
@@ -117,26 +118,25 @@ TensorMechanicsPlasticMohrCoulombMulti::df_dsig(const RankTwoTensor & stress, co
 }
 
 void
-TensorMechanicsPlasticMohrCoulombMulti::dyieldFunction_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & df_dstress) const
+TensorMechanicsPlasticMohrCoulombMulti::dyieldFunction_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & df_dstress) const
 {
-  Real sinphi = std::sin(phi(intnl));
+  const Real sinphi = std::sin(phi(intnl));
   df_dsig(stress, sinphi, df_dstress);
 }
 
-
 void
-TensorMechanicsPlasticMohrCoulombMulti::dyieldFunction_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & df_dintnl) const
+TensorMechanicsPlasticMohrCoulombMulti::dyieldFunction_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & df_dintnl) const
 {
   std::vector<Real> eigvals;
   stress.symmetricEigenvalues(eigvals);
   eigvals[0] += _shift;
   eigvals[2] -= _shift;
 
-  Real sin_angle = std::sin(phi(intnl));
-  Real cos_angle = std::cos(phi(intnl));
-  Real dsin_angle = cos_angle*dphi(intnl);
-  Real dcos_angle = -sin_angle*dphi(intnl);
-  Real dcohcos = dcohesion(intnl)*cos_angle + cohesion(intnl)*dcos_angle;
+  const Real sin_angle = std::sin(phi(intnl));
+  const Real cos_angle = std::cos(phi(intnl));
+  const Real dsin_angle = cos_angle*dphi(intnl);
+  const Real dcos_angle = -sin_angle*dphi(intnl);
+  const Real dcohcos = dcohesion(intnl)*cos_angle + cohesion(intnl)*dcos_angle;
 
   df_dintnl.resize(6);
   df_dintnl[0] = df_dintnl[1] = 0.5*(eigvals[0] + eigvals[1])*dsin_angle - dcohcos;
@@ -145,19 +145,19 @@ TensorMechanicsPlasticMohrCoulombMulti::dyieldFunction_dintnlV(const RankTwoTens
 }
 
 void
-TensorMechanicsPlasticMohrCoulombMulti::flowPotentialV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & r) const
+TensorMechanicsPlasticMohrCoulombMulti::flowPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & r) const
 {
-  Real sinpsi = std::sin(psi(intnl));
+  const Real sinpsi = std::sin(psi(intnl));
   df_dsig(stress, sinpsi, r);
 }
 
 void
-TensorMechanicsPlasticMohrCoulombMulti::dflowPotential_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankFourTensor> & dr_dstress) const
+TensorMechanicsPlasticMohrCoulombMulti::dflowPotential_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankFourTensor> & dr_dstress) const
 {
   std::vector<RankFourTensor> d2eigvals;
   stress.d2symmetricEigenvalues(d2eigvals);
 
-  Real sinpsi = std::sin(psi(intnl));
+  const Real sinpsi = std::sin(psi(intnl));
 
   dr_dstress.resize(6);
   dr_dstress[0] = 0.5*(d2eigvals[0] - d2eigvals[1]) + 0.5*(d2eigvals[0] + d2eigvals[1])*sinpsi;
@@ -168,12 +168,11 @@ TensorMechanicsPlasticMohrCoulombMulti::dflowPotential_dstressV(const RankTwoTen
   dr_dstress[5] = 0.5*(d2eigvals[2] - d2eigvals[1]) + 0.5*(d2eigvals[1] + d2eigvals[2])*sinpsi;
 }
 
-
 void
-TensorMechanicsPlasticMohrCoulombMulti::dflowPotential_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & dr_dintnl) const
+TensorMechanicsPlasticMohrCoulombMulti::dflowPotential_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & dr_dintnl) const
 {
-  Real cos_angle = std::cos(psi(intnl));
-  Real dsin_angle = cos_angle*dpsi(intnl);
+  const Real cos_angle = std::cos(psi(intnl));
+  const Real dsin_angle = cos_angle*dpsi(intnl);
 
   std::vector<Real> eigvals;
   std::vector<RankTwoTensor> deigvals;
@@ -188,9 +187,8 @@ TensorMechanicsPlasticMohrCoulombMulti::dflowPotential_dintnlV(const RankTwoTens
   dr_dintnl[4] = dr_dintnl[5] = 0.5*(deigvals[1] + deigvals[2])*dsin_angle;
 }
 
-
 void
-TensorMechanicsPlasticMohrCoulombMulti::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+TensorMechanicsPlasticMohrCoulombMulti::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
 {
   act.assign(6, false);
 
@@ -207,30 +205,8 @@ TensorMechanicsPlasticMohrCoulombMulti::activeConstraints(const std::vector<Real
   bool trial_stress_inadmissible;
   doReturnMap(stress, intnl, Eijkl, 0.0, returned_stress, returned_intnl, dpm, delta_dp, yf, trial_stress_inadmissible);
 
-  for (unsigned i = 0 ; i < 6 ; ++i)
+  for (unsigned i = 0; i < 6; ++i)
     act[i] = (dpm[i] > 0);
-}
-
-Real
-TensorMechanicsPlasticMohrCoulombMulti::dot(const std::vector<Real> & a, const std::vector<Real> & b) const
-{
-  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
-}
-
-void
-TensorMechanicsPlasticMohrCoulombMulti::cross(const std::vector<Real> & a, const std::vector<Real> & b, std::vector<Real> & c) const
-{
-  c.resize(3);
-  c[0] = a[1]*b[2] - a[2]*b[1];
-  c[1] = a[2]*b[0] - a[0]*b[2];
-  c[2] = a[0]*b[1] - a[1]*b[0];
-}
-
-
-Real
-TensorMechanicsPlasticMohrCoulombMulti::triple(const std::vector<Real> & a, const std::vector<Real> & b, const std::vector<Real> & c) const
-{
-  return a[0]*(b[1]*c[2] - b[2]*c[1]) - a[1]*(b[0]*c[2] - b[2]*c[0]) + a[2]*(b[0]*c[1] - b[1]*c[0]);
 }
 
 Real
@@ -275,12 +251,11 @@ TensorMechanicsPlasticMohrCoulombMulti::modelName() const
   return "MohrCoulombMulti";
 }
 
-
 bool
-TensorMechanicsPlasticMohrCoulombMulti::returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
-                                Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                                std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                bool & trial_stress_inadmissible) const
+TensorMechanicsPlasticMohrCoulombMulti::returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
+                                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                                                  bool & trial_stress_inadmissible) const
 {
   if (!_use_custom_returnMap)
     return TensorMechanicsPlasticModel::returnMap(trial_stress, intnl_old, E_ijkl,
@@ -291,10 +266,10 @@ TensorMechanicsPlasticMohrCoulombMulti::returnMap(const RankTwoTensor & trial_st
 }
 
 bool
-TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
-                                Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                                std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                bool & trial_stress_inadmissible) const
+TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
+                                                    Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                                                    std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                                                    bool & trial_stress_inadmissible) const
 {
   mooseAssert(dpm.size() == 6, "TensorMechanicsPlasticMohrCoulombMulti size of dpm should be 6 but it is " << dpm.size());
 
@@ -322,24 +297,17 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
   delta_dp.zero();
   returned_stress = RankTwoTensor();
 
-
-  // these are the normals to the 6 yield surfaces
-  std::vector<std::vector<Real> > norm(6);
-  Real sinpsi = std::sin(psi(intnl_old));
-  Real oneminus = 0.5*(1 - sinpsi);
-  Real oneplus = 0.5*(1 + sinpsi);
-  norm[0].resize(3);
-  norm[0][0] = oneplus; norm[0][1] = -oneminus; norm[0][2] = 0;
-  norm[1].resize(3);
-  norm[1][0] = -oneminus; norm[1][1] = oneplus; norm[1][2] = 0;
-  norm[2].resize(3);
-  norm[2][0] = oneplus; norm[2][1] = 0; norm[2][2] = -oneminus;
-  norm[3].resize(3);
-  norm[3][0] = -oneminus; norm[3][1] = 0; norm[3][2] = oneplus;
-  norm[4].resize(3);
-  norm[4][0] = 0; norm[4][1] = oneplus; norm[4][2] = -oneminus;
-  norm[5].resize(3);
-  norm[5][0] = 0; norm[5][1] = -oneminus; norm[5][2] = oneplus;
+  // these are the normals to the 6 yield surfaces, which are const because of the assumption of no psi hardening
+  std::vector<RealVectorValue> norm(6);
+  const Real sinpsi = std::sin(psi(intnl_old));
+  const Real oneminus = 0.5*(1 - sinpsi);
+  const Real oneplus = 0.5*(1 + sinpsi);
+  norm[0](0) = oneplus; norm[0](1) = -oneminus; norm[0](2) = 0;
+  norm[1](0) = -oneminus; norm[1](1) = oneplus; norm[1](2) = 0;
+  norm[2](0) = oneplus; norm[2](1) = 0; norm[2](2) = -oneminus;
+  norm[3](0) = -oneminus; norm[3](1) = 0; norm[3](2) = oneplus;
+  norm[4](0) = 0; norm[4](1) = oneplus; norm[4](2) = -oneminus;
+  norm[5](0) = 0; norm[5](1) = -oneminus; norm[5](2) = oneplus;
 
   // the flow directions are these norm multiplied by Eijkl.
   // I call the flow directions "n".
@@ -347,15 +315,12 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
   // for an isotropic situation.  Then I don't have to
   // rotate to the principal-stress frame, and i don't
   // have to worry about strange off-diagonal things
-  std::vector<std::vector<Real> > n(6);
+  std::vector<RealVectorValue> n(6);
   for (unsigned ys = 0; ys < 6; ++ys)
-  {
-    n[ys].assign(3, 0);
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        n[ys][i] += E_ijkl(i,i,j,j)*norm[ys][j];
-  }
-  Real mag_E = E_ijkl(0, 0, 0, 0);
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        n[ys](i) += E_ijkl(i,i,j,j)*norm[ys](j);
+  const Real mag_E = E_ijkl(0, 0, 0, 0);
 
   // With non-zero Poisson's ratio and hardening
   // it is not computationally cheap to know whether
@@ -367,7 +332,12 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
   // trial_order[2] = type of return to try third
   // trial_order[3] = type of return to try fourth
   // trial_order[4] = type of return to try fifth
-  std::vector<int> trial_order(5);
+  // In the following the "binary" stuff indicates the
+  // deactive (0) and active (1) surfaces, eg
+  // 110100 means that surfaces 0, 1 and 3 are active
+  // and 2, 4 and 5 are deactive
+  const unsigned int number_of_return_paths = 5;
+  std::vector<int> trial_order(number_of_return_paths);
   if (yf[1] > _f_tol && yf[3] > _f_tol && yf[5] > _f_tol)
   {
     trial_order[0] = tip110100;
@@ -404,22 +374,19 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
   unsigned trial;
   bool nr_converged;
   bool kt_success;
-  std::vector<std::vector<Real> > ntip(3);
-  ntip[0].resize(3);
-  ntip[1].resize(3);
-  ntip[2].resize(3);
+  std::vector<RealVectorValue> ntip(3);
   std::vector<Real> dpmtip(3);
 
-  for (trial = 0 ; trial < 5 ; ++trial)
+  for (trial = 0; trial < number_of_return_paths; ++trial)
   {
     switch (trial_order[trial])
     {
     case tip110100:
-      for (unsigned i = 0 ; i < 3 ; ++i)
+      for (unsigned i = 0; i < 3; ++i)
       {
-        ntip[0][i] = n[0][i];
-        ntip[1][i] = n[1][i];
-        ntip[2][i] = n[3][i];
+        ntip[0](i) = n[0](i);
+        ntip[1](i) = n[1](i);
+        ntip[2](i) = n[3](i);
       }
       kt_success = returnTip(eigvals, ntip, dpmtip, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
       if (nr_converged && kt_success)
@@ -431,11 +398,11 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
       }
       break;
     case tip010101:
-      for (unsigned i = 0 ; i < 3 ; ++i)
+      for (unsigned i = 0; i < 3; ++i)
       {
-        ntip[0][i] = n[1][i];
-        ntip[1][i] = n[3][i];
-        ntip[2][i] = n[5][i];
+        ntip[0](i) = n[1](i);
+        ntip[1](i) = n[3](i);
+        ntip[2](i) = n[5](i);
       }
       kt_success = returnTip(eigvals, ntip, dpmtip, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
       if (nr_converged && kt_success)
@@ -460,7 +427,7 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
       break;
   }
 
-  if (trial == 5)
+  if (trial == number_of_return_paths)
   {
     sinphi = std::sin(phi(intnl_old));
     cosphi = std::cos(phi(intnl_old));
@@ -479,20 +446,21 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
   // success
 
   returned_intnl = intnl_old;
-  for (unsigned i = 0 ; i < 6 ; ++i)
+  for (unsigned i = 0; i < 6; ++i)
     returned_intnl += dpm[i];
-  for (unsigned i = 0 ; i < 6 ; ++i)
-      for (unsigned j = 0 ; j < 3 ; ++j)
-        delta_dp(j, j) += dpm[i]*norm[i][j];
+  for (unsigned i = 0; i < 6; ++i)
+    for (unsigned j = 0; j < 3; ++j)
+      delta_dp(j, j) += dpm[i]*norm[i](j);
   returned_stress = eigvecs*returned_stress*(eigvecs.transpose());
   delta_dp = eigvecs*delta_dp*(eigvecs.transpose());
   return true;
 }
 
-
-
 bool
-TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n, std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old, Real & sinphi, Real & cohcos, const Real & initial_guess, bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const
+TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                                                  std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                                                  Real & sinphi, Real & cohcos, Real initial_guess, bool & nr_converged,
+                                                  Real ep_plastic_tolerance, std::vector<Real> & yf) const
 {
   // This returns to the Mohr-Coulomb tip using the THREE directions
   // given in n, and yields the THREE dpm values.  Note that you
@@ -533,7 +501,7 @@ TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigv
   mooseAssert(yf.size() == 6, "TensorMechanicsPlasticMohrCoulombMulti: Custom tip-return algorithm must be supplied with yf of size 6, whereas yours is " << yf.size());
 
   Real x = initial_guess;
-  Real trip = triple(n[0], n[1], n[2]);
+  const Real trip = triple_product(n[0], n[1], n[2]);
   sinphi = std::sin(phi(intnl_old + x));
   Real cosphi = std::cos(phi(intnl_old + x));
   Real coh = cohesion(intnl_old + x);
@@ -551,11 +519,11 @@ TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigv
     // However, for nontrivial Hardening, the following
     // is necessary
     // cohcot_coeff = [1,1,1].(Cross[n[1], n[2]] + Cross[n[2], n[0]] + Cross[n[0], n[1]])/trip
-    Real cohcot_coeff = (n[0][0]*(n[1][1] - n[1][2] - n[2][1]) + (n[1][2] - n[1][1])*n[2][0] + (n[1][0] - n[1][2])*n[2][1] + n[0][2]*(n[1][0] - n[1][1] - n[2][0] + n[2][1]) + n[0][1]*(n[1][2] - n[1][0] + n[2][0] - n[2][2]) + (n[0][0] - n[1][0] + n[1][1])*n[2][2])/trip;
+    Real cohcot_coeff = (n[0](0)*(n[1](1) - n[1](2) - n[2](1)) + (n[1](2) - n[1](1))*n[2](0) + (n[1](0) - n[1](2))*n[2](1) + n[0](2)*(n[1](0) - n[1](1) - n[2](0) + n[2](1)) + n[0](1)*(n[1](2) - n[1](0) + n[2](0) - n[2](2)) + (n[0](0) - n[1](0) + n[1](1))*n[2](2))/trip;
     // eig_term = eigvals.(Cross[n[1], n[2]] + Cross[n[2], n[0]] + Cross[n[0], n[1]])/trip
-    Real eig_term = eigvals[0]*(-n[0][2]*n[1][1] + n[0][1]*n[1][2] + n[0][2]*n[2][1] - n[1][2]*n[2][1] - n[0][1]*n[2][2] + n[1][1]*n[2][2])/trip;
-    eig_term += eigvals[1]*(n[0][2]*n[1][0] - n[0][0]*n[1][2] - n[0][2]*n[2][0] + n[1][2]*n[2][0] + n[0][0]*n[2][2] - n[1][0]*n[2][2])/trip;
-    eig_term += eigvals[2]*(n[0][0]*n[1][1] - n[1][1]*n[2][0] + n[0][1]*n[2][0] - n[0][1]*n[1][0] - n[0][0]*n[2][1] + n[1][0]*n[2][1])/trip;
+    Real eig_term = eigvals[0]*(-n[0](2)*n[1](1) + n[0](1)*n[1](2) + n[0](2)*n[2](1) - n[1](2)*n[2](1) - n[0](1)*n[2](2) + n[1](1)*n[2](2))/trip;
+    eig_term += eigvals[1]*(n[0](2)*n[1](0) - n[0](0)*n[1](2) - n[0](2)*n[2](0) + n[1](2)*n[2](0) + n[0](0)*n[2](2) - n[1](0)*n[2](2))/trip;
+    eig_term += eigvals[2]*(n[0](0)*n[1](1) - n[1](1)*n[2](0) + n[0](1)*n[2](0) - n[0](1)*n[1](0) - n[0](0)*n[2](1) + n[1](0)*n[2](1))/trip;
     // and finally, the equation we want to solve is:
     // x - eig_term + cohcot*cohcot_coeff = 0
     // but i divide by cohcot_coeff so the result has the units of
@@ -599,13 +567,13 @@ TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigv
   // The following is the solution (A) written above
   // (dpm[0] = triple(eigvals - cohcot, n[1], n[2])/trip, etc)
   // in the isotropic situation
-  std::vector<Real> v(3);
-  v[0] = eigvals[0] - cohcot;
-  v[1] = eigvals[1] - cohcot;
-  v[2] = eigvals[2] - cohcot;
-  dpm[0] = triple(v, n[1], n[2])/trip;
-  dpm[1] = triple(v, n[2], n[0])/trip;
-  dpm[2] = triple(v, n[0], n[1])/trip;
+  RealVectorValue v;
+  v(0) = eigvals[0] - cohcot;
+  v(1) = eigvals[1] - cohcot;
+  v(2) = eigvals[2] - cohcot;
+  dpm[0] = triple_product(v, n[1], n[2])/trip;
+  dpm[1] = triple_product(v, n[2], n[0])/trip;
+  dpm[2] = triple_product(v, n[0], n[1])/trip;
 
   if (dpm[0] < -ep_plastic_tolerance || dpm[1] < -ep_plastic_tolerance || dpm[2] < -ep_plastic_tolerance)
     // Kuhn-Tucker failure.  No point in proceeding
@@ -621,7 +589,10 @@ TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigv
 }
 
 bool
-TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n, std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old, Real & sinphi, Real & cohcos, const Real & initial_guess, bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const
+TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                                                    std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                                                    Real & sinphi, Real & cohcos, Real initial_guess, bool & nr_converged,
+                                                    Real ep_plastic_tolerance, std::vector<Real> & yf) const
 {
   // This returns to the Mohr-Coulomb plane using n[3] (ie 000100)
   //
@@ -635,7 +606,7 @@ TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & ei
   // a[2]*(1+sinphi) + a[0]*(-1+sinphi) - 2*coh*cosphi = 0
   // which gives dpm[3] as the solution of
   //     alpha*dpm[3] + eigvals[2] - eigvals[0] + beta*sinphi - 2*coh*cosphi = 0
-  // with alpha = n[3][0] - n[3][2] - (n[3][2] + n[3][0])*sinphi
+  // with alpha = n[3](0) - n[3](2) - (n[3](2) + n[3](0))*sinphi
   //      beta = eigvals[2] + eigvals[0]
 
   mooseAssert(n.size() == 6, "TensorMechanicsPlasticMohrCoulombMulti: Custom plane-return algorithm must be supplied with n of size 6, whereas yours is " << n.size());
@@ -648,17 +619,17 @@ TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & ei
   Real coh = cohesion(intnl_old + dpm[3]);
   cohcos = coh*cosphi;
 
-  Real alpha = n[3][0] - n[3][2] - (n[3][2] + n[3][0])*sinphi;
+  Real alpha = n[3](0) - n[3](2) - (n[3](2) + n[3](0))*sinphi;
   Real deriv_phi;
   Real dalpha;
-  Real beta = eigvals[2] + eigvals[0];
+  const Real beta = eigvals[2] + eigvals[0];
   Real residual = alpha*dpm[3] + eigvals[2] - eigvals[0] + beta*sinphi - 2*cohcos; // this is 2*yf[3]
   Real deriv_coh;
   Real jacobian;
   unsigned int iter = 0;
   do {
     deriv_phi = dphi(intnl_old + dpm[3]);
-    dalpha = -(n[3][2] + n[3][0])*cosphi*deriv_phi;
+    dalpha = -(n[3](2) + n[3](0))*cosphi*deriv_phi;
     deriv_coh = dcohesion(intnl_old + dpm[3]);
     jacobian = alpha + dalpha*dpm[3] + beta*cosphi*deriv_phi - 2*deriv_coh*cosphi + 2*coh*sinphi*deriv_phi;
 
@@ -673,7 +644,7 @@ TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & ei
     cosphi = std::cos(phi(intnl_old + dpm[3]));
     coh = cohesion(intnl_old + dpm[3]);
     cohcos = coh*cosphi;
-    alpha = n[3][0] - n[3][2] - (n[3][2] + n[3][0])*sinphi;
+    alpha = n[3](0) - n[3](2) - (n[3](2) + n[3](0))*sinphi;
     residual = alpha*dpm[3] + eigvals[2] - eigvals[0] + beta*sinphi - 2*cohcos;
     iter ++;
   } while (residual*residual > _f_tol*_f_tol);
@@ -685,8 +656,8 @@ TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & ei
     // Kuhn-Tucker failure
     return false;
 
-  for (unsigned i = 0 ; i < 3 ; ++i)
-    returned_stress(i, i) = eigvals[i] - dpm[3]*n[3][i];
+  for (unsigned i = 0; i < 3; ++i)
+    returned_stress(i, i) = eigvals[i] - dpm[3]*n[3](i);
   yieldFunctionEigvals(returned_stress(0, 0), returned_stress(1, 1), returned_stress(2, 2), sinphi, cohcos, yf);
 
   // by construction abs(yf[3]) = abs(residual/2) < _f_tol/2
@@ -699,10 +670,11 @@ TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & ei
   return true;
 }
 
-
-
 bool
-TensorMechanicsPlasticMohrCoulombMulti::returnEdge000101(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n, std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old, Real & sinphi, Real & cohcos, const Real & initial_guess, const Real & mag_E, bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const
+TensorMechanicsPlasticMohrCoulombMulti::returnEdge000101(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                                                         std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                                                         Real & sinphi, Real & cohcos, Real initial_guess, Real mag_E,
+                                                         bool & nr_converged, Real ep_plastic_tolerance, std::vector<Real> & yf) const
 {
   // This returns to the Mohr-Coulomb edge
   // with 000101 being active.  This means that
@@ -725,19 +697,19 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge000101(const std::vector<Real>
   Real coh = cohesion(intnl_old + x);
   cohcos = coh*cosphi;
 
-  Real numer_const = - n[3][2]*eigvals[0] - n[5][1]*eigvals[0] + n[5][2]*eigvals[0] + n[3][2]*eigvals[1] + n[5][0]*eigvals[1] - n[5][2]*eigvals[1] - n[5][0]*eigvals[2] + n[5][1]*eigvals[2] + n[3][0]*(-eigvals[1] + eigvals[2]) - n[3][1]*(-eigvals[0] + eigvals[2]);
-  Real numer_coeff1 = 2*(-n[3][0] + n[3][1] + n[5][0] - n[5][1]);
-  Real numer_coeff2 = n[5][2]*(eigvals[0] - eigvals[1]) + n[3][2]*(-eigvals[0] + eigvals[1]) + n[5][1]*(eigvals[0] + eigvals[2]) + (n[3][0] - n[5][0])*(eigvals[1] + eigvals[2]) - n[3][1]*(eigvals[0] + eigvals[2]);
+  const Real numer_const = - n[3](2)*eigvals[0] - n[5](1)*eigvals[0] + n[5](2)*eigvals[0] + n[3](2)*eigvals[1] + n[5](0)*eigvals[1] - n[5](2)*eigvals[1] - n[5](0)*eigvals[2] + n[5](1)*eigvals[2] + n[3](0)*(-eigvals[1] + eigvals[2]) - n[3](1)*(-eigvals[0] + eigvals[2]);
+  const Real numer_coeff1 = 2*(-n[3](0) + n[3](1) + n[5](0) - n[5](1));
+  const Real numer_coeff2 = n[5](2)*(eigvals[0] - eigvals[1]) + n[3](2)*(-eigvals[0] + eigvals[1]) + n[5](1)*(eigvals[0] + eigvals[2]) + (n[3](0) - n[5](0))*(eigvals[1] + eigvals[2]) - n[3](1)*(eigvals[0] + eigvals[2]);
   Real numer = numer_const + numer_coeff1*cohcos + numer_coeff2*sinphi;
-  Real denom_const = -n[3][2]*(n[5][0] - n[5][1]) - n[3][1]*(-n[5][0] + n[5][2]) + n[3][0]*(-n[5][1] + n[5][2]);
-  Real denom_coeff = -n[3][2]*(n[5][0] - n[5][1]) - n[3][1]*(n[5][0] + n[5][2]) + n[3][0]*(n[5][1] + n[5][2]);
+  const Real denom_const = -n[3](2)*(n[5](0) - n[5](1)) - n[3](1)*(-n[5](0) + n[5](2)) + n[3](0)*(-n[5](1) + n[5](2));
+  const Real denom_coeff = -n[3](2)*(n[5](0) - n[5](1)) - n[3](1)*(n[5](0) + n[5](2)) + n[3](0)*(n[5](1) + n[5](2));
   Real denom = denom_const + denom_coeff*sinphi;
   Real residual = -x + numer/denom;
 
   Real deriv_phi;
   Real deriv_coh;
   Real jacobian;
-  Real tol = std::pow(_f_tol/mag_E/10.0, 2);
+  const Real tol = std::pow(_f_tol/mag_E/10.0, 2);
   unsigned int iter = 0;
   do {
     do {
@@ -762,15 +734,14 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge000101(const std::vector<Real>
     } while (residual*residual > tol);
 
     // now must ensure that yf[3] and yf[5] are both "zero"
-    Real dpm3minusdpm5 = (2*(eigvals[0] - eigvals[1]) + x*(n[3][1] - n[3][0] + n[5][1] - n[5][0]))/(n[3][0] - n[3][1] + n[5][1] - n[5][0]);
+    const Real dpm3minusdpm5 = (2*(eigvals[0] - eigvals[1]) + x*(n[3](1) - n[3](0) + n[5](1) - n[5](0)))/(n[3](0) - n[3](1) + n[5](1) - n[5](0));
     dpm[3] = (x + dpm3minusdpm5)/2.0;
     dpm[5] = (x - dpm3minusdpm5)/2.0;
 
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      returned_stress(i, i) = eigvals[i] - dpm[3]*n[3][i] - dpm[5]*n[5][i];
+    for (unsigned i = 0; i < 3; ++i)
+      returned_stress(i, i) = eigvals[i] - dpm[3]*n[3](i) - dpm[5]*n[5](i);
     yieldFunctionEigvals(returned_stress(0, 0), returned_stress(1, 1), returned_stress(2, 2), sinphi, cohcos, yf);
   } while (yf[3]*yf[3] > _f_tol*_f_tol && yf[5]*yf[5] > _f_tol*_f_tol);
-
 
   // so the NR process converged, but we must
   // check Kuhn-Tucker
@@ -789,9 +760,11 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge000101(const std::vector<Real>
   return true;
 }
 
-
 bool
-TensorMechanicsPlasticMohrCoulombMulti::returnEdge010100(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n, std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old, Real & sinphi, Real & cohcos, const Real & initial_guess, const Real & mag_E, bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const
+TensorMechanicsPlasticMohrCoulombMulti::returnEdge010100(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                                                         std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                                                         Real & sinphi, Real & cohcos, Real initial_guess, Real mag_E,
+                                                         bool & nr_converged, Real ep_plastic_tolerance, std::vector<Real> & yf) const
 {
   // This returns to the Mohr-Coulomb edge
   // with 010100 being active.  This means that
@@ -814,19 +787,19 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge010100(const std::vector<Real>
   Real coh = cohesion(intnl_old + x);
   cohcos = coh*cosphi;
 
-  Real numer_const = - n[1][2]*eigvals[0] - n[3][1]*eigvals[0] + n[3][2]*eigvals[0] - n[1][0]*eigvals[1] + n[1][2]*eigvals[1] + n[3][0]*eigvals[1] - n[3][2]*eigvals[1] + n[1][0]*eigvals[2] - n[3][0]*eigvals[2] + n[3][1]*eigvals[2] - n[1][1]*(-eigvals[0] + eigvals[2]);
-  Real numer_coeff1 = 2*(n[1][1] - n[1][2] - n[3][1] + n[3][2]);
-  Real numer_coeff2 = n[3][2]*(-eigvals[0] - eigvals[1]) + n[1][2]*(eigvals[0] + eigvals[1]) + n[3][1]*(eigvals[0] + eigvals[2]) + (n[1][0] - n[3][0])*(eigvals[1] - eigvals[2]) - n[1][1]*(eigvals[0] + eigvals[2]);
+  const Real numer_const = - n[1](2)*eigvals[0] - n[3](1)*eigvals[0] + n[3](2)*eigvals[0] - n[1](0)*eigvals[1] + n[1](2)*eigvals[1] + n[3](0)*eigvals[1] - n[3](2)*eigvals[1] + n[1](0)*eigvals[2] - n[3](0)*eigvals[2] + n[3](1)*eigvals[2] - n[1](1)*(-eigvals[0] + eigvals[2]);
+  const Real numer_coeff1 = 2*(n[1](1) - n[1](2) - n[3](1) + n[3](2));
+  const Real numer_coeff2 = n[3](2)*(-eigvals[0] - eigvals[1]) + n[1](2)*(eigvals[0] + eigvals[1]) + n[3](1)*(eigvals[0] + eigvals[2]) + (n[1](0) - n[3](0))*(eigvals[1] - eigvals[2]) - n[1](1)*(eigvals[0] + eigvals[2]);
   Real numer = numer_const + numer_coeff1*cohcos + numer_coeff2*sinphi;
-  Real denom_const = -n[1][0]*(n[3][1] - n[3][2]) + n[1][2]*(-n[3][0] + n[3][1]) + n[1][1]*(-n[3][2] + n[3][0]);
-  Real denom_coeff = n[1][0]*(n[3][1] - n[3][2]) + n[1][2]*(n[3][0] + n[3][1]) - n[1][1]*(n[3][0] + n[3][2]);
+  const Real denom_const = -n[1](0)*(n[3](1) - n[3](2)) + n[1](2)*(-n[3](0) + n[3](1)) + n[1](1)*(-n[3](2) + n[3](0));
+  const Real denom_coeff = n[1](0)*(n[3](1) - n[3](2)) + n[1](2)*(n[3](0) + n[3](1)) - n[1](1)*(n[3](0) + n[3](2));
   Real denom = denom_const + denom_coeff*sinphi;
   Real residual = -x + numer/denom;
 
   Real deriv_phi;
   Real deriv_coh;
   Real jacobian;
-  Real tol = std::pow(_f_tol/mag_E/10.0, 2);
+  const Real tol = std::pow(_f_tol/mag_E/10.0, 2);
   unsigned int iter = 0;
   do {
     do {
@@ -851,12 +824,12 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge010100(const std::vector<Real>
     } while (residual*residual > tol);
 
     // now must ensure that yf[1] and yf[3] are both "zero"
-    Real dpm1minusdpm3 = (2*(eigvals[1] - eigvals[2]) + x*(n[1][2] - n[1][1] + n[3][2] - n[3][1]))/(n[1][1] - n[1][2] + n[3][2] - n[3][1]);
+    Real dpm1minusdpm3 = (2*(eigvals[1] - eigvals[2]) + x*(n[1](2) - n[1](1) + n[3](2) - n[3](1)))/(n[1](1) - n[1](2) + n[3](2) - n[3](1));
     dpm[1] = (x + dpm1minusdpm3)/2.0;
     dpm[3] = (x - dpm1minusdpm3)/2.0;
 
-    for (unsigned i = 0 ; i < 3 ; ++i)
-      returned_stress(i, i) = eigvals[i] - dpm[1]*n[1][i] - dpm[3]*n[3][i];
+    for (unsigned i = 0; i < 3; ++i)
+      returned_stress(i, i) = eigvals[i] - dpm[1]*n[1](i) - dpm[3]*n[3](i);
     yieldFunctionEigvals(returned_stress(0, 0), returned_stress(1, 1), returned_stress(2, 2), sinphi, cohcos, yf);
   } while (yf[1]*yf[1] > _f_tol*_f_tol && yf[3]*yf[3] > _f_tol*_f_tol);
 
@@ -877,13 +850,12 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge010100(const std::vector<Real>
   return true;
 }
 
-
 bool
-TensorMechanicsPlasticMohrCoulombMulti::KuhnTuckerOK(const std::vector<Real> & yf, const std::vector<Real> & dpm, const Real & ep_plastic_tolerance) const
+TensorMechanicsPlasticMohrCoulombMulti::KuhnTuckerOK(const std::vector<Real> & yf, const std::vector<Real> & dpm, Real ep_plastic_tolerance) const
 {
   mooseAssert(yf.size() == 6, "TensorMechanicsPlasticMohrCoulomb::KuhnTuckerOK requires yf to be size 6, but your is " << yf.size());
   mooseAssert(dpm.size() == 6, "TensorMechanicsPlasticMohrCoulomb::KuhnTuckerOK requires dpm to be size 6, but your is " << dpm.size());
-  for (unsigned i = 0 ; i < 6 ; ++i)
+  for (unsigned i = 0; i < 6; ++i)
     if (!TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(yf[i], dpm[i], ep_plastic_tolerance))
       return false;
   return true;

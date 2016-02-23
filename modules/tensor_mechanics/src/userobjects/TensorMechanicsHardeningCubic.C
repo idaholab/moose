@@ -33,7 +33,7 @@ TensorMechanicsHardeningCubic::TensorMechanicsHardeningCubic(const InputParamete
 }
 
 Real
-TensorMechanicsHardeningCubic::value(const Real & intnl) const
+TensorMechanicsHardeningCubic::value(Real intnl) const
 {
   Real x = intnl - _intnl_0;
   if (x <= 0)
@@ -45,7 +45,7 @@ TensorMechanicsHardeningCubic::value(const Real & intnl) const
 }
 
 Real
-TensorMechanicsHardeningCubic::derivative(const Real & intnl) const
+TensorMechanicsHardeningCubic::derivative(Real intnl) const
 {
   Real x = intnl - _intnl_0;
   if (x <= 0)

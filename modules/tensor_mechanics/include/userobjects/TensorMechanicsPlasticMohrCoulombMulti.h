@@ -10,9 +10,7 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticMohrCoulombMulti;
-
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulombMulti>();
@@ -36,7 +34,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param intnl internal parameter
    * @param[out] f the yield functions
    */
-  virtual void yieldFunctionV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & f) const;
+  virtual void yieldFunctionV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & f) const;
 
   /**
    * The derivative of yield functions with respect to stress
@@ -44,7 +42,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param intnl internal parameter
    * @param[out] df_dstress df_dstress[alpha](i, j) = dyieldFunction[alpha]/dstress(i, j)
    */
-  virtual void dyieldFunction_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & df_dstress) const;
+  virtual void dyieldFunction_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & df_dstress) const;
 
   /**
    * The derivative of yield functions with respect to the internal parameter
@@ -52,7 +50,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param intnl internal parameter
    * @param[out] df_dintnl df_dintnl[alpha] = df[alpha]/dintnl
    */
-  virtual void dyieldFunction_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<Real> & df_dintnl) const;
+  virtual void dyieldFunction_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & df_dintnl) const;
 
   /**
    * The flow potentials
@@ -60,7 +58,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param intnl internal parameter
    * @param[out] r r[alpha] is the flow potential for the "alpha" yield function
    */
-  virtual void flowPotentialV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & r) const;
+  virtual void flowPotentialV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & r) const;
 
   /**
    * The derivative of the flow potential with respect to stress
@@ -68,7 +66,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param intnl internal parameter
    * @param[out] dr_dstress dr_dstress[alpha](i, j, k, l) = dr[alpha](i, j)/dstress(k, l)
    */
-  virtual void dflowPotential_dstressV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankFourTensor> & dr_dstress) const;
+  virtual void dflowPotential_dstressV(const RankTwoTensor & stress, Real intnl, std::vector<RankFourTensor> & dr_dstress) const;
 
   /**
    * The derivative of the flow potential with respect to the internal parameter
@@ -76,7 +74,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param intnl internal parameter
    * @param[out] dr_dintnl  dr_dintnl[alpha](i, j) = dr[alpha](i, j)/dintnl
    */
-  virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, const Real & intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
+  virtual void dflowPotential_dintnlV(const RankTwoTensor & stress, Real intnl, std::vector<RankTwoTensor> & dr_dintnl) const;
 
   /**
    * The active yield surfaces, given a vector of yield functions.
@@ -93,65 +91,13 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param[out] act act[i] = true if the i_th yield function is active
    * @param[out] returned_stress Approximate value of the returned stress
    */
-  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, const Real & intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
+  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
 
   /// Returns the model name (MohrCoulombMulti)
   virtual std::string modelName() const;
 
   /// Returns _use_custom_returnMap
   virtual bool useCustomReturnMap() const;
-
-
- protected:
-
-  /// Hardening model for cohesion
-  const TensorMechanicsHardeningModel & _cohesion;
-
-  /// Hardening model for phi
-  const TensorMechanicsHardeningModel & _phi;
-
-  /// Hardening model for psi
-  const TensorMechanicsHardeningModel & _psi;
-
-  /// Maximum Newton-Raphison iterations in the custom returnMap algorithm
-  unsigned int _max_iters;
-
-  /// yield function is shifted by this amount to avoid problems with stress-derivatives at equal eigenvalues
-  Real _shift;
-
-  /// Whether to use the custom return-map algorithm
-  bool _use_custom_returnMap;
-
-  /// cohesion as a function of residual value, rate, and internal_param
-  virtual Real cohesion(const Real internal_param) const;
-
-  /// d(cohesion)/d(internal_param) as a function of residual value, rate, and internal_param
-  virtual Real dcohesion(const Real internal_param) const;
-
-  /// phi as a function of residual value, rate, and internal_param
-  virtual Real phi(const Real internal_param) const;
-
-  /// d(phi)/d(internal_param) as a function of residual value, rate, and internal_param
-  virtual Real dphi(const Real internal_param) const;
-
-  /// psi as a function of residual value, rate, and internal_param
-  virtual Real psi(const Real internal_param) const;
-
-  /// d(psi)/d(internal_param) as a function of residual value, rate, and internal_param
-  virtual Real dpsi(const Real internal_param) const;
-
-
-  /**
-   * Calculates the yield functions given the eigenvalues of stress
-   * @param e0 Smallest eigenvalue
-   * @param e1 Middle eigenvalue
-   * @param e2 Largest eigenvalue
-   * @param sinphi sin(friction angle)
-   * @param cohcos cohesion*cos(friction angle)
-   * @param[out] f the yield functions
-   */
-  void yieldFunctionEigvals(const Real & e0, const Real & e1, const Real & e2, const Real & sinphi, const Real & cohcos, std::vector<Real> & f) const;
-
 
   /**
     * Performs a custom return-map.
@@ -221,21 +167,68 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
     * @param[out] trial_stress_inadmissible Should be set to false if the trial_stress is admissible, and true if the trial_stress is inadmissible.  This can be used by the calling prorgram
     * @return true if a successful return (or a return-map not needed), false if the trial_stress is inadmissible but the return process failed
     */
-  virtual bool returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
-                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                  bool & trial_stress_inadmissible) const;
+  virtual bool returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
+                         Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                         std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                         bool & trial_stress_inadmissible) const;
 
+ protected:
 
+  /// cohesion as a function of residual value, rate, and internal_param
+  virtual Real cohesion(const Real internal_param) const;
+
+  /// d(cohesion)/d(internal_param) as a function of residual value, rate, and internal_param
+  virtual Real dcohesion(const Real internal_param) const;
+
+  /// phi as a function of residual value, rate, and internal_param
+  virtual Real phi(const Real internal_param) const;
+
+  /// d(phi)/d(internal_param) as a function of residual value, rate, and internal_param
+  virtual Real dphi(const Real internal_param) const;
+
+  /// psi as a function of residual value, rate, and internal_param
+  virtual Real psi(const Real internal_param) const;
+
+  /// d(psi)/d(internal_param) as a function of residual value, rate, and internal_param
+  virtual Real dpsi(const Real internal_param) const;
 
  private:
+
+  /// Hardening model for cohesion
+  const TensorMechanicsHardeningModel & _cohesion;
+
+  /// Hardening model for phi
+  const TensorMechanicsHardeningModel & _phi;
+
+  /// Hardening model for psi
+  const TensorMechanicsHardeningModel & _psi;
+
+  /// Maximum Newton-Raphison iterations in the custom returnMap algorithm
+  const unsigned int _max_iters;
+
+  /// yield function is shifted by this amount to avoid problems with stress-derivatives at equal eigenvalues
+  const Real _shift;
+
+  /// Whether to use the custom return-map algorithm
+  const bool _use_custom_returnMap;
+
+  /**
+   * Calculates the yield functions given the eigenvalues of stress
+   * @param e0 Smallest eigenvalue
+   * @param e1 Middle eigenvalue
+   * @param e2 Largest eigenvalue
+   * @param sinphi sin(friction angle)
+   * @param cohcos cohesion*cos(friction angle)
+   * @param[out] f the yield functions
+   */
+  void yieldFunctionEigvals(Real e0, Real e1, Real e2, Real sinphi, Real cohcos, std::vector<Real> & f) const;
 
   /**
    * this is exactly dyieldFunction_dstress, or flowPotential,
    * depending on whether sin_angle = sin(phi), or sin_angle = sin(psi),
    * respectively
    */
-  void df_dsig(const RankTwoTensor & stress, const Real & sin_angle, std::vector<RankTwoTensor> & df) const;
+  void df_dsig(const RankTwoTensor & stress, Real sin_angle, std::vector<RankTwoTensor> & df) const;
 
   /**
    * perturbs the stress tensor in the case of almost-equal eigenvalues.
@@ -246,33 +239,23 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    */
   void perturbStress(const RankTwoTensor & stress, std::vector<Real> & eigvals, std::vector<RankTwoTensor> & deigvals) const;
 
-  /// dot product of two 3-dimensional vectors
-  Real dot(const std::vector<Real> & a, const std::vector<Real> & b) const;
-
-  /// cross product of two 3-dimensional vectors.  c = axb
-  void cross(const std::vector<Real> & a, const std::vector<Real> & b, std::vector<Real> & c) const;
-
-  /// triple product of three 3-dimensional vectors
-  Real triple(const std::vector<Real> & a, const std::vector<Real> & b, const std::vector<Real> & c) const;
-
-
   /**
    * Returns true if the Kuhn-Tucker conditions are satisfied
    * @param yf The six yield function values
    * @param dpm The six plastic multipliers
    * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is classified as "non-negative" in the Kuhn-Tucker conditions).
    */
-  bool KuhnTuckerOK(const std::vector<Real> & yf, const std::vector<Real> & dpm, const Real & ep_plastic_tolerance) const;
+  bool KuhnTuckerOK(const std::vector<Real> & yf, const std::vector<Real> & dpm, Real ep_plastic_tolerance) const;
 
   /**
    * See doco for returnMap function.  The interface is identical
    * to this one.  This one can be called internally regardless of
    * the value of _use_custom_returnMap
    */
-  bool doReturnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
-                                  Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                                  std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                  bool & trial_stress_inadmissible) const;
+  bool doReturnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
+                   Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
+                   std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+                   bool & trial_stress_inadmissible) const;
 
   /**
    * Tries to return-map to the MC tip using the THREE directions
@@ -296,10 +279,10 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
    * @param yf[out] The yield functions after return
    */
-  bool returnTip(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
-                 std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
-                 Real & sinphi, Real & cohcos, const Real & initial_guess, bool & nr_converged,
-                 const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+  bool returnTip(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                 std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                 Real & sinphi, Real & cohcos, Real initial_guess, bool & nr_converged,
+                 Real ep_plastic_tolerance, std::vector<Real> & yf) const;
 
   /**
    * Tries to return-map to the MC plane using the n[3] direction
@@ -319,10 +302,10 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
    * @param yf[out] The yield functions after return
    */
-  bool returnPlane(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
-                   std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
-                   Real & sinphi, Real & cohcos, const Real & initial_guess, bool & nr_converged,
-                   const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+  bool returnPlane(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                   std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                   Real & sinphi, Real & cohcos, Real initial_guess, bool & nr_converged,
+                   Real ep_plastic_tolerance, std::vector<Real> & yf) const;
 
   /**
    * Tries to return-map to the MC edge using the n[4] and n[6] directions
@@ -343,10 +326,10 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
    * @param yf[out] The yield functions after return
    */
-  bool returnEdge000101(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
-                        std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
-                        Real & sinphi, Real & cohcos, const Real & initial_guess, const Real & mag_E,
-                        bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+  bool returnEdge000101(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                        std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                        Real & sinphi, Real & cohcos, Real initial_guess, Real mag_E,
+                        bool & nr_converged, Real ep_plastic_tolerance, std::vector<Real> & yf) const;
 
   /**
    * Tries to return-map to the MC edge using the n[1] and n[3] directions
@@ -367,10 +350,10 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * @param ep_plastic_tolerance The user-set tolerance on the plastic strain.
    * @param yf[out] The yield functions after return
    */
-  bool returnEdge010100(const std::vector<Real> & eigvals, const std::vector<std::vector<Real> > & n,
-                        std::vector<Real> & dpm, RankTwoTensor & returned_stress, const Real & intnl_old,
-                        Real & sinphi, Real & cohcos, const Real & initial_guess, const Real & mag_E,
-                        bool & nr_converged, const Real & ep_plastic_tolerance, std::vector<Real> & yf) const;
+  bool returnEdge010100(const std::vector<Real> & eigvals, const std::vector<RealVectorValue> & n,
+                        std::vector<Real> & dpm, RankTwoTensor & returned_stress, Real intnl_old,
+                        Real & sinphi, Real & cohcos, Real initial_guess, Real mag_E,
+                        bool & nr_converged, Real ep_plastic_tolerance, std::vector<Real> & yf) const;
 
   enum return_type { tip110100=0, tip010101=1, edge010100=2, edge000101=3, plane000100=4 };
 

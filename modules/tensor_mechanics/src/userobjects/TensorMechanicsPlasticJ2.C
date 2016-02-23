@@ -28,15 +28,14 @@ TensorMechanicsPlasticJ2::TensorMechanicsPlasticJ2(const InputParameters & param
 {
 }
 
-
 Real
-TensorMechanicsPlasticJ2::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticJ2::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
   return std::pow(3*stress.secondInvariant(), 0.5) - yieldStrength(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticJ2::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
+TensorMechanicsPlasticJ2::dyieldFunction_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
 {
   Real sII = stress.secondInvariant();
   if (sII == 0.0)
@@ -45,21 +44,20 @@ TensorMechanicsPlasticJ2::dyieldFunction_dstress(const RankTwoTensor & stress, c
     return 0.5*std::pow(3/sII, 0.5)*stress.dsecondInvariant();
 }
 
-
 Real
-TensorMechanicsPlasticJ2::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, const Real & intnl) const
+TensorMechanicsPlasticJ2::dyieldFunction_dintnl(const RankTwoTensor & /*stress*/, Real intnl) const
 {
   return -dyieldStrength(intnl);
 }
 
 RankTwoTensor
-TensorMechanicsPlasticJ2::flowPotential(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticJ2::flowPotential(const RankTwoTensor & stress, Real intnl) const
 {
   return dyieldFunction_dstress(stress, intnl);
 }
 
 RankFourTensor
-TensorMechanicsPlasticJ2::dflowPotential_dstress(const RankTwoTensor & stress, const Real & /*intnl*/) const
+TensorMechanicsPlasticJ2::dflowPotential_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
 {
   Real sII = stress.secondInvariant();
   if (sII == 0)
@@ -77,19 +75,19 @@ TensorMechanicsPlasticJ2::dflowPotential_dstress(const RankTwoTensor & stress, c
 }
 
 RankTwoTensor
-TensorMechanicsPlasticJ2::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, const Real & /*intnl*/) const
+TensorMechanicsPlasticJ2::dflowPotential_dintnl(const RankTwoTensor & /*stress*/, Real /*intnl*/) const
 {
   return RankTwoTensor();
 }
 
 Real
-TensorMechanicsPlasticJ2::yieldStrength(const Real & intnl) const
+TensorMechanicsPlasticJ2::yieldStrength(Real intnl) const
 {
   return _strength.value(intnl);
 }
 
 Real
-TensorMechanicsPlasticJ2::dyieldStrength(const Real & intnl) const
+TensorMechanicsPlasticJ2::dyieldStrength(Real intnl) const
 {
   return _strength.derivative(intnl);
 }
@@ -101,14 +99,13 @@ TensorMechanicsPlasticJ2::modelName() const
 }
 
 bool
-TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, const Real & intnl_old, const RankFourTensor & E_ijkl,
+TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
                                     Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
                                     std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
                                     bool & trial_stress_inadmissible) const
 {
   if (!(_use_custom_returnMap))
     return TensorMechanicsPlasticModel::returnMap(trial_stress, intnl_old, E_ijkl, ep_plastic_tolerance, returned_stress, returned_intnl, dpm, delta_dp, yf, trial_stress_inadmissible);
-
 
   yf.resize(1);
 
@@ -125,7 +122,6 @@ TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, const Re
 
   trial_stress_inadmissible = true;
   Real mu = E_ijkl(0,1,0,1);
-
 
   // Perform a Newton-Raphson to find dpm when
   // residual = 3*mu*dpm - trial_equivalent_stress + yieldStrength(intnl_old + dpm) = 0
@@ -155,7 +151,7 @@ TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, const Re
 }
 
 RankFourTensor
-TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, const Real & intnl,
+TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
                                                     const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
 {
   if (!_use_custom_cto)

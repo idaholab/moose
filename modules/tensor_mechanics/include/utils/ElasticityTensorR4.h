@@ -56,19 +56,19 @@ public:
    * This is used for the standard kernel stress_ij*d(test)/dx_j, when varied wrt w_k (the cosserat rotation)
    * Jacobian entry: d(stress_ij*d(test)/dx_j)/dw_k = d(C_ijmn*eps_mnp*w_p*dtest/dx_j)/dw_k
    */
-  virtual Real elasticJacobianwc(const unsigned int i, const unsigned int k, const RealGradient & grad_test, const Real & phi) const;
+  virtual Real elasticJacobianwc(const unsigned int i, const unsigned int k, const RealGradient & grad_test, Real phi) const;
 
   /**
    * This is used for the moment-balancing kernel eps_ijk*stress_jk*test, when varied wrt u_k
    * Jacobian entry: d(eps_ijm*stress_jm*test)/du_k = d(eps_ijm*C_jmln*du_l/dx_n*test)/du_k
    */
-  virtual Real momentJacobian(const unsigned int i, const unsigned int k, const Real & test, const RealGradient & grad_phi) const;
+  virtual Real momentJacobian(const unsigned int i, const unsigned int k, Real test, const RealGradient & grad_phi) const;
 
   /**
    * This is used for the moment-balancing kernel eps_ijk*stress_jk*test, when varied wrt w_k (the cosserat rotation)
    * Jacobian entry: d(eps_ijm*stress_jm*test)/dw_k = d(eps_ijm*C_jmln*eps_lnp*w_p*test)/dw_k
    */
-  virtual Real momentJacobianwc(const unsigned int i, const unsigned int k, const Real & test, const Real & phi) const;
+  virtual Real momentJacobianwc(const unsigned int i, const unsigned int k, Real test, Real phi) const;
 };
 
 #endif //ELASTICITYTENSORR4_H

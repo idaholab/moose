@@ -200,9 +200,9 @@ protected:
                          const std::vector<Real> & intnl_old, std::vector<Real> & intnl,
                          const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain,
                          const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment,
-                         std::vector<Real> & f, unsigned int & iter, const bool & can_revert_to_dumb,
+                         std::vector<Real> & f, unsigned int & iter, bool can_revert_to_dumb,
                          bool & linesearch_needed, bool & ld_encountered, bool & constraints_added,
-                         const bool & final_step, RankFourTensor & consistent_tangent_operator,
+                         bool final_step, RankFourTensor & consistent_tangent_operator,
                          std::vector<Real> & cumulative_pm);
 
 
@@ -365,7 +365,7 @@ protected:
                         std::vector<Real> & intnl, std::vector<Real> & pm, std::vector<Real> & cumulative_pm,
                         const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl,
                         const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations,
-                         RankFourTensor & consistent_tangent_operator, const quickStep_called_from_t called_from, const bool & final_step);
+                         RankFourTensor & consistent_tangent_operator, const quickStep_called_from_t called_from, bool final_step);
 
   /**
    * performs a plastic step
@@ -389,13 +389,13 @@ protected:
   virtual bool plasticStep(const RankTwoTensor & stress_old, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, const RankTwoTensor & plastic_strain_old, RankTwoTensor & plastic_strain, const RankFourTensor & E_ijkl, const RankTwoTensor & strain_increment, std::vector<Real> & yf, unsigned int & iterations, bool & linesearch_needed, bool & ld_encountered, bool & constraints_added, RankFourTensor & consistent_tangent_operator);
 
 
-  //  bool checkAndModifyConstraints(const bool & nr_exit_condition, const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const std::vector<bool> & initial_act, const bool & can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, const std::vector<Real> & f, DeactivationSchemeEnum deact_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> dumb_order, bool & die);
+  //  bool checkAndModifyConstraints(bool nr_exit_condition, const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const std::vector<bool> & initial_act, bool can_revert_to_dumb, const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old, const std::vector<Real> & f, DeactivationSchemeEnum deact_scheme, std::vector<bool> & act, int & dumb_iteration, std::vector<unsigned int> dumb_order, bool & die);
 
-  bool canChangeScheme(DeactivationSchemeEnum current_deactivation_scheme, const bool & can_revert_to_dumb);
+  bool canChangeScheme(DeactivationSchemeEnum current_deactivation_scheme, bool can_revert_to_dumb);
 
-  bool canIncrementDumb(const int & dumb_iteration);
+  bool canIncrementDumb(int dumb_iteration);
 
-  void changeScheme(const std::vector<bool> & initial_act, const bool & can_revert_to_dumb,
+  void changeScheme(const std::vector<bool> & initial_act, bool can_revert_to_dumb,
                     const RankTwoTensor & initial_stress, const std::vector<Real> & intnl_old,
                     DeactivationSchemeEnum & current_deactivation_scheme, std::vector<bool> & act,
                     int & dumb_iteration, std::vector<unsigned int> & dumb_order);

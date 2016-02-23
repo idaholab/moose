@@ -69,7 +69,7 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const Input
 
 
 Real
-TensorMechanicsPlasticMohrCoulomb::yieldFunction(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMohrCoulomb::yieldFunction(const RankTwoTensor & stress, Real intnl) const
 {
   Real mean_stress = stress.trace()/3.0;
   Real sinphi = std::sin(phi(intnl));
@@ -125,7 +125,7 @@ TensorMechanicsPlasticMohrCoulomb::df_dsig(const RankTwoTensor & stress, const R
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dstress(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const
 {
   Real sinphi = std::sin(phi(intnl));
   return df_dsig(stress, sinphi);
@@ -133,7 +133,7 @@ TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dstress(const RankTwoTensor & 
 
 
 Real
-TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dintnl(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const
 {
   Real sin_angle = std::sin(phi(intnl));
   Real cos_angle = std::cos(phi(intnl));
@@ -168,14 +168,14 @@ TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dintnl(const RankTwoTensor & s
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMohrCoulomb::flowPotential(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMohrCoulomb::flowPotential(const RankTwoTensor & stress, Real intnl) const
 {
   Real sinpsi = std::sin(psi(intnl));
   return df_dsig(stress, sinpsi);
 }
 
 RankFourTensor
-TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const
 {
   RankFourTensor dr_dstress;
   Real sin_angle = std::sin(psi(intnl));
@@ -249,7 +249,7 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMohrCoulomb::dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const
+TensorMechanicsPlasticMohrCoulomb::dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const
 {
   Real sin_angle = std::sin(psi(intnl));
   Real dsin_angle = std::cos(psi(intnl))*dpsi(intnl);
