@@ -35,7 +35,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  Function & _function;
+  std::vector<Function *> _functions;
 };
 
 
