@@ -72,4 +72,10 @@
     exodiff = ClosePackIC_3D_out.e
     method = 'opt oprof' # This test is too slow in debug
   [../]
+
+  [./HexPolycrystalIC]
+    type = Exodiff
+    input = HexPolycrystalIC.i
+    exodiff = HexPolycrystalIC_out.e
+  [../]
 []
