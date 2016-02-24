@@ -131,7 +131,7 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
   }
   interpolated_value = _values.at(minIndex);
  }
- //std::cout<<"value " << interpolated_value << std::endl;
+
  return interpolated_value;
 }
 
