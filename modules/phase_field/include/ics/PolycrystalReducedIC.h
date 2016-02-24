@@ -46,6 +46,10 @@ public:
   virtual void initialSetup();
 
   MooseMesh & _mesh;
+
+  /// mesh dimension
+  unsigned int _dim;
+
   /// A reference to the nonlinear system
   NonlinearSystem & _nl;
 
