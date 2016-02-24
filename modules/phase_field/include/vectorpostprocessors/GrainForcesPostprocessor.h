@@ -27,10 +27,8 @@ public:
   GrainForcesPostprocessor(const InputParameters & parameters);
 
   virtual ~GrainForcesPostprocessor() {}
-  virtual void initialize(){};
+  virtual void initialize() {};
   virtual void execute();
-  virtual void finalize() {}
-  virtual void threadJoin(const UserObject &) {}
 
 protected:
   /// The VectorPostprocessorValue object where the results are stored
