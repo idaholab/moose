@@ -287,7 +287,7 @@ int NDInterpolation::CDFweightedPicking(std::vector<std::vector<std::vector<doub
                   std::cout<<"cumulativeIndex: "<<cumulativeIndex<< std::endl;
                   std::cout<<"g: "<<g<< std::endl;
                   index=i;
-                  reak;
+                  break;
                 }
         }
 
