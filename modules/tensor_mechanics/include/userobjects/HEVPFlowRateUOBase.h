@@ -24,12 +24,6 @@ class HEVPFlowRateUOBase : public DiscreteElementUserObject
 {
 public:
   HEVPFlowRateUOBase(const InputParameters & parameters);
-  virtual ~HEVPFlowRateUOBase() {}
-
-  void initialize() {}
-  void execute() {}
-  void finalize() {}
-  void threadJoin(const UserObject &) {}
 
   virtual bool computeValue(unsigned int, Real &) const = 0;
   virtual bool computeDirection(unsigned int, RankTwoTensor &) const = 0;

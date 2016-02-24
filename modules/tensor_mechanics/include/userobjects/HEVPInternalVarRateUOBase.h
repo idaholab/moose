@@ -23,12 +23,6 @@ class HEVPInternalVarRateUOBase : public DiscreteElementUserObject
 {
 public:
   HEVPInternalVarRateUOBase(const InputParameters & parameters);
-  virtual ~HEVPInternalVarRateUOBase() {}
-
-  void initialize() {}
-  void execute() {}
-  void finalize() {}
-  void threadJoin(const UserObject &) {}
 
   virtual bool computeValue(unsigned int, Real &) const = 0;
   virtual bool computeDerivative(unsigned int, const std::string &, Real &) const = 0;
