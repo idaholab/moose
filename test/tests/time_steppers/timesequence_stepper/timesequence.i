@@ -69,7 +69,7 @@
   end_time = 4.0
   [./TimeStepper]
     type = TimeSequenceStepper
-    time_sequence  = '0   0.85 2 4'
+    time_sequence  = '0   0.85 1.3 2 4'
   [../]
 []
 

@@ -41,7 +41,7 @@ protected:
   /// the step that the time stepper is currently at
   unsigned int & _current_step;
   /// stores the sequence of time points
-  std::vector<Real> _time_sequence;
+  std::vector<Real> & _time_sequence;
 };
 
 #endif /* TimeSequenceStepper_H_ */
