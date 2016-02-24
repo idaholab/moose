@@ -22,7 +22,6 @@ class HEVPRambergOsgoodHardening : public HEVPStrengthUOBase
 {
 public:
   HEVPRambergOsgoodHardening(const InputParameters & parameters);
-  virtual ~HEVPRambergOsgoodHardening() {}
 
   virtual bool computeValue(unsigned int, Real &) const;
   virtual bool computeDerivative(unsigned int, const std::string &, Real &) const;

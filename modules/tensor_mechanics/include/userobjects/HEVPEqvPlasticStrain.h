@@ -22,7 +22,6 @@ class HEVPEqvPlasticStrain : public HEVPInternalVarUOBase
 {
 public:
   HEVPEqvPlasticStrain(const InputParameters & parameters);
-  virtual ~HEVPEqvPlasticStrain() {}
 
   virtual bool computeValue(unsigned int, Real, Real &) const;
   virtual bool computeDerivative(unsigned int, Real, const std::string &, Real &) const;
