@@ -360,10 +360,10 @@ double NDSpline::phi(double t){
  // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
  double phi_value=0.0;
 
- if ((fabs(t)<=2.0) & (fabs(t)>=1.0))
+ if (((fabs(t)-2.0)<=0.00001) & ((fabs(t)-1.0)>=0.00001))
   phi_value = std::pow(2.0-fabs(t),3);
-
- if ((fabs(t))<1.0)
+ else
+ //if ((fabs(t))<1.0)
   phi_value = 4.0 - 6.0*std::pow(fabs(t),2) + 3.0*std::pow(fabs(t),3);
 
  return phi_value;
