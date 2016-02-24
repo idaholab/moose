@@ -249,6 +249,7 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
         int min=0;
         int max=0;
         for(int i=1; i<numberOfVerteces; i++){
+        	std::cout<<cell.at(i).at(0)<<" , "<<cell.at(i).at(1)<<" , "<<interpolateAt(cell.at(i))<<std::endl;
         	if (interpolateAt(cell.at(i))>interpolateAt(cell.at(max)))
         			max=i;
         	if (interpolateAt(cell.at(i))<interpolateAt(cell.at(min)))
