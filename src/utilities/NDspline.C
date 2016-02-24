@@ -327,7 +327,7 @@ double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
 
   double a = 0.0;
   double h = 1.0;
-  return phi((scaled_x-a)/h - (k-2));
+  return phi((scaled_x-a)/h - (k-2.0));
 
   //return phi((x-discretizations[0])/h - (k-2));
 }
@@ -366,8 +366,8 @@ double NDSpline::phi(double t){
  if ((fabs(t))<1)
   phi_value = 4.0 - 6.0*std::pow(fabs(t),2) + 3.0*std::pow(fabs(t),3);
 
- if (phi_value!=0.0)
-	 std::cout<< t <<" , "<< phi_value <<std::endl;
+ //if (phi_value!=0.0)
+	 //std::cout<< t <<" , "<< phi_value <<std::endl;
 
  return phi_value;
 }
