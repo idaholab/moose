@@ -30,6 +30,8 @@ class DiscreteElementUserObject :
 public:
   DiscreteElementUserObject(const InputParameters & parameters);
 
+  virtual void initialize();
+
   /// @{ Block all methods that are not used in explicitly called UOs
   virtual void execute(); // libmesh_final;
   virtual void finalize(); // libmesh_final;

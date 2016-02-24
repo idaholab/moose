@@ -22,8 +22,6 @@ class CrystalPlasticityUOBase : public DiscreteElementUserObject
  public:
   CrystalPlasticityUOBase(const InputParameters & parameters);
 
-  void initialize() {}
-
   /// Returns the size of variable
   virtual unsigned int variableSize() const;
 

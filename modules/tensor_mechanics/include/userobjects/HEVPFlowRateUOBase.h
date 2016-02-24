@@ -25,8 +25,6 @@ class HEVPFlowRateUOBase : public DiscreteElementUserObject
 public:
   HEVPFlowRateUOBase(const InputParameters & parameters);
 
-  void initialize() {}
-
   virtual bool computeValue(unsigned int, Real &) const = 0;
   virtual bool computeDirection(unsigned int, RankTwoTensor &) const = 0;
   virtual bool computeDerivative(unsigned int, const std::string &, Real &) const = 0;

@@ -32,6 +32,11 @@ DiscreteElementUserObject::DiscreteElementUserObject(const InputParameters & par
 }
 
 void
+DiscreteElementUserObject::initialize()
+{
+}
+
+void
 DiscreteElementUserObject::execute()
 {
   mooseError("DiscreteElementUserObjects must be called explicitly from Materials");
