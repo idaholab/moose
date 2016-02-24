@@ -33,8 +33,14 @@ class TestHarness:
 
     harness.findAndRunTests()
 
+    sys.exit(harness.error_code)
+
+
   def __init__(self, argv, app_name, moose_dir):
     self.factory = Factory()
+
+    # Build a Warehouse to hold the MooseObjects
+    self.warehouse = Warehouse()
 
     # Get dependant applications and load dynamic tester plugins
     # If applications have new testers, we expect to find them in <app_dir>/scripts/TestHarness/testers
@@ -128,7 +134,7 @@ class TestHarness:
   0x0* - Parser error
   0x1* - TestHarness error
   """
-  def findAndRunTests(self):
+  def findAndRunTests(self, find_only=False):
     self.error_code = 0x0
     self.preRun()
     self.start_time = clock()
@@ -164,25 +170,30 @@ class TestHarness:
                 if self.prunePath(file):
                   continue
 
-                # Build a Warehouse to hold the MooseObjects
-                warehouse = Warehouse()
-
                 # Build a Parser to parse the objects
-                parser = Parser(self.factory, warehouse)
+                parser = Parser(self.factory, self.warehouse)
 
                 # Parse it
                 self.error_code = self.error_code | parser.parse(file)
 
                 # Retrieve the tests from the warehouse
-                testers = warehouse.getAllObjects()
+                testers = self.warehouse.getActiveObjects()
 
                 # Augment the Testers with additional information directly from the TestHarness
                 for tester in testers:
                   self.augmentParameters(file, tester)
 
+                # Short circuit this loop if we've only been asked to parse Testers
+                # Note: The warehouse will accumulate all testers in this mode
+                if find_only:
+                  self.warehouse.markAllObjectsInactive()
+                  continue
+
+                # Clear out the testers, we won't need them to stick around in the warehouse
+                self.warehouse.clear()
+
                 if self.options.enable_recover:
                   testers = self.appendRecoverableTests(testers)
-
 
                 # Handle PBS tests.cluster file
                 if self.options.pbs:
@@ -233,8 +244,7 @@ class TestHarness:
     if self.num_failed:
       self.error_code = self.error_code | 0x10
 
-    sys.exit(self.error_code)
-
+    return
 
   def createClusterLauncher(self, dirpath, testers):
     self.options.test_serial_number = 0

@@ -52,6 +52,10 @@ class Tester(MooseObject):
     MooseObject.__init__(self, name, params)
     self.specs = params
 
+  # Method to return the input file if applicable to this Tester
+  def getInputFile(self):
+    return None
+
 
   def setValgrindMode(self, mode):
     # Increase the alloted time for tests when running with the valgrind option

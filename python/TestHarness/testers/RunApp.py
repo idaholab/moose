@@ -46,6 +46,9 @@ class RunApp(Tester):
       self.force_mpi = False
 
 
+  def getInputFile(self):
+    return self.specs['input'].strip()
+
 
   def checkRunnable(self, options):
     if options.enable_recover:
