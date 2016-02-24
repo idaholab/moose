@@ -21,7 +21,7 @@
 \section{Introduction}
 \subsection{Purpose}
 The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a tool for solving complex coupled Multiphysics equations
-using the finite element method. MOOSE uses an object-oriented design to abstract data structure managment, parallelism,
+using the finite element method. MOOSE uses an object-oriented design to abstract data structure management, parallelism,
 threading and compiling while providing an easy to use interface targeted at engineers that may not have a lot of
 software development experience. MOOSE will require extreme scalability and flexibility when compared to other FEM
 frameworks. For instance, MOOSE needs the ability to run extremely complex material models, or even third-party applications
@@ -53,7 +53,7 @@ in an accurate, consistent way. An example of this would be the effect of temper
 material. While the JFNK numerical method is very effective at solving fully-coupled equations, it can also be computationally
 expensive. Plus, not all physical phenomena in a given model are truly coupled to one another. For instance, in a reactor, the
 speed of the coolant flow may not have any direct effect on the complex chemical reactions taking place inside the fuel rods.
-We call such models “loosely-coupled.” A robust, scalable system must strike the proper balance between the various modeling
+We call such models ``loosely-coupled''. A robust, scalable system must strike the proper balance between the various modeling
 strategies to avoid performing unnecessary computations or incorrectly predicting behavior in situations such as these.
 
 MOOSE’s Multiapp system will allow modelers to group physics into logical categories where MOOSE can solve some groups
@@ -76,7 +76,7 @@ inception, the MOOSE project has focused on both developer and computational eff
 achieved by leveraging existing algorithms and technologies from several leading open-source packages. Additionally, MOOSE uses
 several complementary parallel technologies (both the distributed-memory message passing paradigm and shared-memory thread-based
 approaches are used) to lay an efficient computational foundation for development. Using existing open technologies in this
-manner helps the developers reduce the scope of the project and keeps the size of the MOOSE codebase maintainable. This approach
+manner helps the developers reduce the scope of the project and keeps the size of the MOOSE code base maintainable. This approach
 provides users with state-of-the-art finite element and solver technology as a basis for the advanced coupling and solution
 strategies mentioned previously.
 
@@ -95,10 +95,10 @@ scientific discovery.
 
 \item Developers: A Scientist or Engineer that utilizes the framework to build his or her own application. This user
   will typically have a background in modeling and simulation techniques and/or numerical analysis but may only have
-  a limited skill-set when it comes to object-oriented coding and the C++ langauge. This is our primary focus group.
+  a limited skill-set when it comes to object-oriented coding and the C++ language. This is our primary focus group.
   In many cases these developers will be encouraged to give their code back to the framework maintainers.
 
-\item Analyists: These are users that will run the code and perform various analyses on the simulations they perform.
+\item Analysts: These are users that will run the code and perform various analysis on the simulations they perform.
   These users may interact with developers of the system requesting new features and reporting bugs found and will
   typically make heavy use of the input file format.
 \end{itemize}
@@ -106,17 +106,17 @@ scientific discovery.
 
 \subsubsection{Assumptions and Dependencies}
 The software should be designed with the fewest possible constraints. Ideally the software should run on a wide
-variety of evolving hardware so it should follow well-adopted standards and guidlines. The software should run
+variety of evolving hardware so it should follow well-adopted standards and guidelines. The software should run
 on any POSIX compliant system. The software will also make use FEM and numerical libraries that run on POSIX
-systems as well. The main interface for the software will be command line based with no assumptions requiing advanced
+systems as well. The main interface for the software will be command line based with no assumptions requiring advanced
 terminal capabilities such as coloring and line control.
 
 \section{References}
 
 \begin{itemize}
-\item ASME NQA 1 2008 with the NQA-1a-2009 addenda, “Quality Assurance Requirements for Nuclear Facility Applications,” First Edition, August 31, 2009.
-\item ISO/IEC/IEEE 24765:2010(E), “Systems and software engineering — Vocabulary,” First Edition, December 15, 2010.
-\item LWP 13620, “Managing Information Technology Assets,” Rev. ?, ?.
+\item ASME NQA 1 2008 with the NQA-1a-2009 addenda, ``Quality Assurance Requirements for Nuclear Facility Applications,'' First Edition, August 31, 2009.
+\item ISO/IEC/IEEE 24765:2010(E), ``Systems and software engineering — Vocabulary,'' First Edition, December 15, 2010.
+\item LWP 13620, ``Managing Information Technology Assets''
 \end{itemize}
 
 \section{Definitions and Acronyms}
@@ -124,11 +124,16 @@ terminal capabilities such as coloring and line control.
 \subsection{Definitions}
 
 \begin{itemize}
-\item \textit{Baseline}. A specification or product (e.g., project plan, maintenance and operations [M\&O] plan, requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as the basis for use and further development, and that can be changed only by using an approved change control process. [ASME NQA-1-2008 with the NQA-1a-2009 addenda edited]
+\item \textit{Baseline}. A specification or product (e.g., project plan, maintenance and operations [M\&O] plan, requirements,
+  or design) that has been formally reviewed and agreed upon, that thereafter serves as the basis for use and further development,
+  and that can be changed only by using an approved change control process. [ASME NQA-1-2008 with the NQA-1a-2009 addenda edited]
 
-\item \textit{Validation}. Confirmation, through the provision of objective evidence (e.g., acceptance test), that the requirements for a specific intended use or application have been fulfilled. [ISO/IEC/IEEE 24765:2010(E) edited]
+\item \textit{Validation}. Confirmation, through the provision of objective evidence (e.g., acceptance test), that the requirements
+  for a specific intended use or application have been fulfilled. [ISO/IEC/IEEE 24765:2010(E) edited]
 
-\item \textit{Verification}. (1) The process of: evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews, system tests). [ISO/IEC/IEEE 24765:2010(E) edited]
+\item \textit{Verification}. (1) The process of: evaluating a system or component to determine whether the products of a given
+  development phase satisfy the conditions imposed at the start of that phase. (2) Formal proof of program correctness (e.g.,
+  requirements, design, implementation reviews, system tests). [ISO/IEC/IEEE 24765:2010(E) edited]
 \end{itemize}
 
 \subsection{Acronyms}
@@ -137,7 +142,7 @@ terminal capabilities such as coloring and line control.
   ASME    & American Society of Mechanical Engineers \\
   DOE     & Department of Energy \\
   FEM     & Finite Element Modeling \\
-  IEC     & International Electrotechnical Commission \\
+  IEC     & International Electromechanical Commission \\
   IEEE    & Institute of Electrical and Electronics Engineers \\
   INL     & Idaho National Laboratory \\
   ISO     & International Organization for Standardization \\
@@ -162,7 +167,7 @@ terminal capabilities such as coloring and line control.
     \item A POSIX compliant Unix including the two most recent versions of OS X and most current versions of Linux.
     \item RAM: 4 GB for optimized compilation (8 GB for debug compilation), 2 GB per core execution
     \item Disk: 100 GB
-    \item Compilers: GCC, Clang, and Intel
+    \item Compilers: GCC, Clang, or Intel
     \item Python 2.6+
     \item Git
     \end{itemize} \\
@@ -175,8 +180,6 @@ terminal capabilities such as coloring and line control.
 
 \begin{table}[!htbp]
   \caption{Function Name: Core Framework, I/O and Execution Control.\label{tab:core}}
-  \newcounter{MyFirstTableCounter}
-  \setcounter{MyFirstTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\
@@ -184,18 +187,16 @@ terminal capabilities such as coloring and line control.
     F1.20 & The system shall allow for user-defined time step selection for simulations using a time-based execution scheme. \\ \hline
     F1.30 & The system shall allow for user-defined time step integration schemes for simulations using a time-based execution scheme. \\ \hline
     F1.40 & The system shall support user-defined matrix preconditioning that may be applied during the solve stages. \\ \hline
-    F1.50 & The system should support a programatic method for building up the necessary objects necessary for a simulation. \\ \hline
+    F1.50 & The system should support a programmatic method for building up the necessary objects necessary for a simulation. \\ \hline
     F1.60 & The system shall provide the ability to resume a previous simulation due to fault or intentional termination. \\ \hline
     F1.70 & The system shall allow for user-defined output types for simulation data. \\ \hline
-    F1.80 & Predictors \\ \hline
-    F1.90 & The system shall support the creation of constraints relating otherwise indepent degrees of freedom. \\ \hline
+    F1.80 & The system shall provide a method of providing improved initial guesses (also known as "predictions") for the solution at subsequent time steps. \\ \hline
+    F1.90 & The system shall support the creation of constraints relating otherwise independent degrees of freedom. \\ \hline
   \end{tabular}
 \end{table}
 
 \begin{table}[!htbp]
   \caption{Function Name: Mesh and Mesh Refinement.\label{tab:core}}
-  \newcounter{MySecondTableCounter}
-  \setcounter{MySecondTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
@@ -210,24 +211,20 @@ terminal capabilities such as coloring and line control.
 
 \begin{table}[!htbp]
   \caption{Function Name: Finite Element Assembly.\label{tab:fem}}
-  \newcounter{MyThirdTableCounter}
-  \setcounter{MyThirdTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
     F3.10 & The system shall allow for the creation of many independently discretized nonlinear field variables. \\ \hline
     F3.20 & The system shall provide a mechanism for setting values of all implicit field variables prior to the start of a simulation. \\ \hline
-    F3.30 & The system shall allow the input of ``weak-form'' operaters for computing element-wise volume integrals. \\ \hline
+    F3.30 & The system shall allow the input of ``weak-form'' operators for computing element-wise volume integrals. \\ \hline
     F3.40 & The system shall allow the input of ``weak-form'' operators for computing side integrals along individual boundaries. \\ \hline
     F3.50 & The system shall allow the input of ``Dirac delta functions'' contributions into simulation. \\ \hline
-    F3.60 & The system shall support weak-form contributions from internal boundaries necessary for ``Discontinous Galerkin'' approaches. \\ \hline
+    F3.60 & The system shall support weak-form contributions from internal boundaries necessary for ``Discontinuous Galerkin'' approaches. \\ \hline
   \end{tabular}
 \end{table}
 
 \begin{table}[!htbp]
   \caption{Function Name: Materials System.\label{tab:mat}}
-  \newcounter{MyFourthTableCounter}
-  \setcounter{MyFourthTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
@@ -237,22 +234,18 @@ terminal capabilities such as coloring and line control.
 
 
 \begin{table}[!htbp]
-  \caption{Function Name: Auxilary Calculations.\label{tab:aux}}
-  \newcounter{MyFifthTableCounter}
-  \setcounter{MyFifthTableCounter}{1}
+  \caption{Function Name: Auxiliary Calculations.\label{tab:aux}}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
-    F5.10 & The system shall allow for the creation of many independently discretized and explicitly calcuated ``field'' variables. \\ \hline
+    F5.10 & The system shall allow for the creation of many independently discretized and explicitly calculated ``field'' variables. \\ \hline
     F5.20 & The system shall provide a mechanism for setting values of all explicit field variables prior to the start of a simulation. \\ \hline
     F5.30 & The system shall allow for the creation of operators for explicitly calculating spatial quantities. \\ \hline
   \end{tabular}
 \end{table}
 
 \begin{table}[!htbp]
-  \caption{Function Name: User-defined logic, functions and postprocessing.\label{tab:pp}}
-  \newcounter{MySixthTableCounter}
-  \setcounter{MySixthTableCounter}{1}
+  \caption{Function Name: User-defined logic, functions and post-processing.\label{tab:pp}}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
@@ -265,9 +258,7 @@ terminal capabilities such as coloring and line control.
 \end{table}
 
 \begin{table}[!htbp]
-  \caption{Function Name: Multiple Application Excecution and Communcation.\label{tab:multiapp}}
-  \newcounter{MySeventhTableCounter}
-  \setcounter{MySeventhTableCounter}{1}
+  \caption{Function Name: Multiple Application Execution and Communication.\label{tab:multiapp}}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
@@ -278,8 +269,6 @@ terminal capabilities such as coloring and line control.
 
 \begin{table}[!htbp]
   \caption{Function Name: Control Logic.\label{tab:cl}}
-  \newcounter{MyEighthTableCounter}
-  \setcounter{MyEighthTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
@@ -292,13 +281,11 @@ terminal capabilities such as coloring and line control.
 
 \begin{table}[!htbp]
   \caption{Core Framework\label{tab:usabilty_core}}
-  \newcounter{UseFirstTableCounter}
-  \setcounter{UseFirstTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
     U1.10 & The system will be command-line and input file driven. \\ \hline
-    U1.20 & The system shall return usage messages when unidentified arguments or incorrectly used arguements are passed. \\ \hline
+    U1.20 & The system shall return usage messages when unidentified arguments or incorrectly used arguments are passed. \\ \hline
     U1.30 & The system shall provide diagnostics when the input file fails to parse, or the format is incorrect. \\ \hline
     U1.40 & The system will provide on screen information about the simulation and performance characteristics of the solves under normal operating conditions. \\ \hline
   \end{tabular}
@@ -310,8 +297,6 @@ terminal capabilities such as coloring and line control.
 
 \begin{table}[!htbp]
   \caption{Core Framework\label{tab:perf_core}}
-  \newcounter{PerfFirstTableCounter}
-  \setcounter{PerfFirstTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
@@ -329,8 +314,6 @@ terminal capabilities such as coloring and line control.
 
 \begin{table}[!htbp]
   \caption{Core Framework\label{tab:perf_core}}
-  \newcounter{SysFirstTableCounter}
-  \setcounter{SysFirstTableCounter}{1}
   \begin{tabular}{|l|p{12cm}|}
     \rowcolor{gray}
     Number & Requirement Description \\ \hline
@@ -353,20 +336,20 @@ The command line interface shall support the ability to toggle any supported col
 \label{Maintainability}
 \begin{enumerate}
 \item The latest working version (defined as the version that passes all tests in the current regression test suite)
-      shall be publically available at all times through the repository host provider.
+      shall be publicly available at all times through the repository host provider.
 \item Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The technical lead
       will determine the severity and priority of all reported issues and assign resources at his or her discretion to
       resolve identified issues.
 \item The software maintainers will entertain all proposed changes to the system in a timely manner (within two business days).
-\item The core framework in its entirity will be made publically available under the LGPL version 2.0 license.
+\item The core framework in its entirety will be made publicly available under the LGPL version 2.0 license.
 \end{enumerate}
 
 \subsubsection{Reliability}
 The regression test suite will cover at least 80\% of all lines of code at all times. Known regressions will be recorded
-and tracked (see \ref{Maintainability}) through to an independent and satisfactory resolution.
+and tracked (see \ref{Maintainability}) to an independent and satisfactory resolution.
 
 \subsection{Information Management}
-The core framework in its entirety will be made publically available on an appropriate repository hosting site. Backups and
+The core framework in its entirety will be made publicly available on an appropriate repository hosting site. Backups and
 security services will be provided by the hosting service.
 
 \section{Verification}
@@ -378,7 +361,7 @@ manufactured solutions, and convergence rate analysis.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Software Design Description
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Software Design Descripion}
+\section{Software Design Description}
 
 \subsection{Introduction}
 Frameworks are a software development construct aiming to simplify the creation of specific classes of applications
@@ -388,7 +371,10 @@ Object Oriented Simulation Environment (MOOSE), mission is just that: provide a 
 to build state-of-the-art, computationally scalable finite element based simulation tools.
 
 MOOSE was conceived with one major objective: to be as easy and straightforward to use by scientists and engineers as possible.
-MOOSE is meant to be approachable by non-computational scientists who have systems of partial differential equations (PDEs) they need to solve. Every single aspect of MOOSE was driven by this singular principle from the build system to the API to the software development cycle.  At every turn, decisions were made to enable this class of users to be successful with the framework.  The pursuit of this goal has led to many of the unique features of MOOSE:
+MOOSE is meant to be approachable by non-computational scientists who have systems of partial differential equations (PDEs)
+they need to solve. Every single aspect of MOOSE was driven by this singular principle from the build system to the API to the
+software development cycle.  At every turn, decisions were made to enable this class of users to be successful with the framework.
+The pursuit of this goal has led to many of the unique features of MOOSE:
 
 \begin{itemize}
   \item A streamlined build system
@@ -397,7 +383,7 @@ MOOSE is meant to be approachable by non-computational scientists who have syste
   \item Integrated, automatic, and rigorous testing
   \item Rapid, continuous integration development cycle
   \item Codified, rigorous path for contributing
-  \item Applications are modular and composeable
+  \item Applications are modular and composable
 \end{itemize}
 
 Each of these characteristics is meant to build trust in the framework by those attempting to use it. For instance,
@@ -425,15 +411,24 @@ level of experience with coding but typically very little formal software develo
 group is Users. Those who intend to use an application built upon the framework without writing any computer
 code themselves. Instead they may modify or create input files for driving a simulation, run the application, and
 analyze the results. All interactions through MOOSE are primarily through the command-line interface and through
-a customizable block-based input file described later (REFERENCE NEEDED).
+a customizable block-based input file.
 
 \subsection{Software Overview}
 
 \subsubsection{Introduction}
-The MOOSE framework itself is composed of a wide range of plugable systems. Each system is generally composed of a single or small set of C++ objects intended to be specialized by a Developer to solve a specific problem. To accomplish this design goal, MOOSE uses several modern object-oriented design patterns. The primary overarching pattern is the ``Factory Pattern''. User's needing to extend MOOSE may inherit from one of the public interfaces overridden the designated methods to accomplish a specific task. The design of each of these systems is documented on the mooseframework.org wiki in the Tutorial section. Additionally, up-to-date documentation extracted from the source is maintained on the the mooseframework.org documentation site after every successful merge to MOOSE's stable branch. After these objects are created, the can be registered with the framework and used immediately in a MOOSE input file.
+The MOOSE framework itself is composed of a wide range of pluggable systems. Each system is generally composed of a
+single or small set of C++ objects intended to be specialized by a Developer to solve a specific problem. To accomplish
+this design goal, MOOSE uses several modern object-oriented design patterns. The primary overarching pattern is the
+``Factory Pattern''. Users needing to extend MOOSE may inherit from one of MOOSE's systems to providing an implementation
+meeting his or her needs. The design of each of these systems is documented on the mooseframework.org wiki in the Tutorial
+section. Additionally, up-to-date documentation extracted from the source is maintained on the the mooseframework.org
+documentation site after every successful merge to MOOSE's stable branch. After these objects are created, the can be
+registered with the framework and used immediately in a MOOSE input file.
 
 \subsubsection{System Architecture}
-The MOOSE framework architecture consists of a core and several plugable systems. The core of MOOSE consists of a number of key objects responsible for setting up and managing the user-defined objects of a finite element simulation. This core set of objects has limited extendability and exist for every simulation configuration that the framework is capable of running.
+The MOOSE framework architecture consists of a core and several pluggable systems. The core of MOOSE consists of a number
+of key objects responsible for setting up and managing the user-defined objects of a finite element simulation. This core
+set of objects has limited extendability and exist for every simulation configuration that the framework is capable of running.
 
 \begin{itemize}
 \item MooseApp
@@ -446,9 +441,22 @@ The MOOSE framework architecture consists of a core and several plugable systems
 \item ThreadedComputeLoops
 \end{itemize}
 
-The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a normal simulation a single MooseApp object is created and ``run()''. This object uses it's Factory objects to build user defined objects which are stored in a series of Warehouse objects and executed. The Finite Element data is stored in the Systems and Assembly object while the domain information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run parallel calculations on the objects created and stored within the warehouses.
+The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a normal simulation a single
+MooseApp object is created and ``run()''. This object uses it's Factory objects to build user defined objects which are stored
+in a series of Warehouse objects and executed. The Finite Element data is stored in the Systems and Assembly object while the
+domain information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run parallel calculations
+on the objects created and stored within the warehouses.
 
 \subsection{Pluggable Systems}
-MOOSE's pluggable systems are documented on the mooseframework.org wiki. Each of these systems has set of defined polymorphic interfaces and are designed to accomplish a specific task within the simulation. The design of these systems is fluid and is managed through agile methods and ticket request system on the Github.org website.
+MOOSE's pluggable systems are documented on the mooseframework.org wiki. Each of these systems has set of defined polymorphic
+interfaces and are designed to accomplish a specific task within the simulation. The design of these systems is fluid and is
+managed through agile methods and ticket request system on the Github.org website.
 
 \end{document}
+
+%%  LocalWords:  Multiphysics MOOSE's Jacobian Krylov JFNK Multiapp
+%%  LocalWords:  POSIX ASME NQA LWP IEC IEEE INL OOP QA GCC Galerkin
+%%  LocalWords:  discretized multi MPI pthreads TBB OpenMP LGPL PDEs
+%%  LocalWords:  API APIs composable libMesh PETSc multiphysics wiki
+%%  LocalWords:  pluggable mooseframework MooseApp Github
+%%  LocalWords:  ThreadedComputeLoops
