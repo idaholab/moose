@@ -75,6 +75,7 @@
                         635           0             0'
   radius_inner = '12.5 25.0 37.5'
   radius_outer = '25.0 37.5 50.0'
+  intersecting_boundary = '1 2'
   symmetry_plane = 2
   position_type = angle
 []
