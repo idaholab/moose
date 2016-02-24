@@ -177,6 +177,12 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
   }
 }
 
+VariableValue &
+Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp)
+{
+  return const_cast<VariableValue &>(coupledValue(var_name, comp));
+}
+
 const VariableValue &
 Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
