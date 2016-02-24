@@ -115,8 +115,10 @@
     else
       value = _CDFinterpolator.interpolateAt(x);
 
-    if (value > 1.0)
+    if (value > 1.0){
+      std::cout<<x.at(0)<<" , "<<x.at(1) << " , " << value << std::endl;
       throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value calculated is above 1.0");
+    }
 
      return value;
   };

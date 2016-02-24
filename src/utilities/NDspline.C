@@ -640,17 +640,30 @@ double NDSpline::val6(double t){
 double NDSpline::PHI(double t){
         double PHI_value=-1;
 
-        if (t<=-2.0)
+//        if (t<=-2.0)
+//                PHI_value = val1(t);
+//        else if ((t>-2.0) and (t<=-1.0))
+//                PHI_value = val2(t) - val2(-2.0);
+//        else if ((t>-1.0) and (t<=-0.0))
+//                PHI_value = val2(-1.0) - val2(-2.0) + val3(t) - val3(-1.0);
+//        else if ((t>0.0) and (t<=1.0))
+//                PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(t) - val4(0.0);
+//        else if ((t>1.0) and (t<=2.0))
+//                PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(1.0) - val4(0.0) + (val5(t)-val5(1.0));
+//        else if (t>2.0)
+//                PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(1.0) - val4(0.0) + val5(2.0)-val5(1.0) + (val6(t)-val6(2.0));
+
+        if ((t+2.0)<0.00001)
                 PHI_value = val1(t);
-        else if ((t>-2.0) and (t<=-1.0))
+        else if (((t+2.0)>0.00001) and ((t+1.0)<=0.00001))
                 PHI_value = val2(t) - val2(-2.0);
-        else if ((t>-1.0) and (t<=-0.0))
+        else if (((t+1.0)>0.00001) and (t<=0.0))
                 PHI_value = val2(-1.0) - val2(-2.0) + val3(t) - val3(-1.0);
-        else if ((t>0.0) and (t<=1.0))
-                PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(t)-val4(0.0);
-        else if ((t>1.0) and (t<=2.0))
+        else if ((t>0.0) and ((t-1.0)<=0.00001))
+                PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(t) - val4(0.0);
+        else if (((t-1.0)>0.00001) and ((t-2.0)<0.00001))
                 PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(1.0) - val4(0.0) + (val5(t)-val5(1.0));
-        else if (t>2.0)
+        else if (((t-2.0)>0.00001))
                 PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(1.0) - val4(0.0) + val5(2.0)-val5(1.0) + (val6(t)-val6(2.0));
 
         return PHI_value;
