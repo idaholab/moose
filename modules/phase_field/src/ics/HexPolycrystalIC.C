@@ -8,8 +8,7 @@
 #include "HexPolycrystalIC.h"
 #include "MooseRandom.h"
 #include "MooseMesh.h"
-
-#include <cmath>
+#include "MathUtils.h"
 
 template<>
 InputParameters validParams<HexPolycrystalIC>()
@@ -36,20 +35,18 @@ HexPolycrystalIC::HexPolycrystalIC(const InputParameters & parameters) :
 void
 HexPolycrystalIC::initialSetup()
 {
-  unsigned int root = std::floor(std::pow(_grain_num, 1.0 / _mesh.dimension()));
+  const unsigned int root = MathUtils::round(std::pow(_grain_num, 1.0 / _dim));
 
-  if (_grain_num != std::pow((float)root, (float)_mesh.dimension()))
-  {
-    root++;  // Try "ceiling due to round off error
-    if (_grain_num != std::pow((float)root, (float)_mesh.dimension()))
-      mooseError("HexPolycrystalIC requires a square or cubic number depending on the mesh dimension");
-  }
+  // integer power the rounded root and check if we recover the grain number
+  unsigned int grain_pow = root;
+  for (unsigned int i = 1; i < _dim; ++i)
+    grain_pow *= root;
 
-  unsigned int third_dimension_iterations = _mesh.dimension() == 3 ? root : 1;
-  Real ndist = 1.0/root;
+  if (_grain_num != grain_pow)
+    mooseError("HexPolycrystalIC requires a square or cubic number depending on the mesh dimension");
 
   // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);
@@ -61,37 +58,39 @@ HexPolycrystalIC::initialSetup()
 
   _centerpoints.resize(_grain_num);
   _assigned_op.resize(_grain_num);
-  std::vector<Real> distances(_grain_num);
 
+  std::vector<Real> distances(_grain_num);
   std::vector<Point> holder(_grain_num);
 
-  unsigned int count = 0;
+  const Real ndist = 1.0 / root;
+
   // Assign the relative center points positions, defining the grains according to a hexagonal pattern
-  for (unsigned int k = 0; k < third_dimension_iterations; ++k)
-    for (unsigned int j = 0; j < root; ++j)
+  unsigned int count = 0;
+  for (unsigned int k = 0; k < (_dim == 3 ? root : 1); ++k)
+    for (unsigned int j = 0; j < (_dim >= 2 ? root : 1); ++j)
       for (unsigned int i = 0; i < root; ++i)
       {
         // set x-coordinate
-        holder[count](0) = i*ndist + (0.5 * ndist * (j % 2)) + _x_offset*ndist;
+        holder[count](0) = i * ndist + (0.5 * ndist * (j % 2)) + _x_offset * ndist;
 
         // set y-coordinate
-        holder[count](1) = j*ndist + (0.5 * ndist * (k % 2));
+        holder[count](1) = j * ndist + (0.5 * ndist * (k % 2));
 
         // set z-coordinate
-        holder[count](2) = k*ndist;
+        holder[count](2) = k * ndist;
 
-        //increment counter
+        // increment counter
         count++;
       }
 
   // Assign center point values
-  for (unsigned int grain=0; grain < _grain_num; ++grain)
+  for (unsigned int grain = 0; grain < _grain_num; ++grain)
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       if (_range(i) == 0)
         continue;
 
-      Real perturbation_dist = (_range(i)/root * (_random.rand(_tid) * 2 - 1.0)) * _perturbation_percent;  // Perturb -100 to 100%
+      Real perturbation_dist = (_range(i) / root * (_random.rand(_tid) * 2 - 1.0)) * _perturbation_percent;  // Perturb -100 to 100%
       _centerpoints[grain](i) = _bottom_left(i) + _range(i) * holder[grain](i) + perturbation_dist;
 
       if (_centerpoints[grain](i) > _top_right(i))

@@ -1,0 +1,462 @@
+\documentclass{INLreport}
+\SANDnum{MOOSE-SRS}
+\SANDprintDate{February 2016}
+\SANDreleaseType{Unlimited Release}
+\SANDauthor{Cody Permann}
+\title{Multiphysics Object Oriented Simulation Environment (MOOSE) Software Requirements Specification and Software Design Description}
+
+\usepackage[table]{xcolor}
+
+\usepackage{caption}
+\captionsetup{labelsep=space,justification=justified,labelfont=bf,singlelinecheck=off}
+
+% Use for numbering rows of tables.
+\newcommand{\TableRowNum}[1]{\thetable.\arabic{#1}\stepcounter{#1}}
+
+\begin{document}
+\maketitle
+
+\SANDmain
+
+\section{Introduction}
+\subsection{Purpose}
+The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a tool for solving complex coupled Multiphysics equations
+using the finite element method. MOOSE uses an object-oriented design to abstract data structure management, parallelism,
+threading and compiling while providing an easy to use interface targeted at engineers that may not have a lot of
+software development experience. MOOSE will require extreme scalability and flexibility when compared to other FEM
+frameworks. For instance, MOOSE needs the ability to run extremely complex material models, or even third-party applications
+within a parallel simulation without sacrificing parallelism. This capability is in contrast to what is often seen in
+commercial packages, where custom material models can limit the parallel scalability, forcing serial runs in the most severe
+cases. When comparing high-end capabilities, many MOOSE competitors target modest-sized clusters with just a few thousand
+processing cores. MOOSE, however, will be required to routinely executed on much larger clusters with scalability to clusters
+available in the top 500 systems. (top500.org). MOOSE will also be targeted at smaller systems such as high-end laptop
+computers.
+
+The design goal of MOOSE is to give developers ultimate control over their physical models and applications. Designing new
+models or solving completely new classes of problems will be accomplished by writing standard C++ source code within the
+framework’s class hierarchy. Scientists and engineers will be free to implement completely new algorithms using pieces of the
+framework where possible, and extending the framework’s capabilities where it makes sense to do so. Commercial applications do
+not have this capability, and instead opt for either a more rigid parameter system or a limited application-specific metalanguage.
+
+\subsection{Scope}
+MOOSE's scope is to provide a set of interfaces for building Finite Element Modeling (FEM) simulations. Abstractions to all
+underlying libraries are provided.
+
+Solving coupled problems where competing physical phenomena impact one and other in a significant nonlinear fashion represents a
+serious challenge to
+several solution strategies. Small perturbations in strongly-coupled parameters often have very large adverse effects on
+convergence behavior. These adverse effects are compounded as additional physics are added to a model. To overcome these
+challenges, MOOSE employs three distinct yet compatible systems for solving these types of problems.
+
+First, an advanced numerical technique called the Jacobian-Free Newton-Krylov (JFNK) method is employed to solve the most fully-coupled physics
+in an accurate, consistent way. An example of this would be the effect of temperature on the expansion or contraction of a
+material. While the JFNK numerical method is very effective at solving fully-coupled equations, it can also be computationally
+expensive. Plus, not all physical phenomena in a given model are truly coupled to one another. For instance, in a reactor, the
+speed of the coolant flow may not have any direct effect on the complex chemical reactions taking place inside the fuel rods.
+We call such models ``loosely-coupled''. A robust, scalable system must strike the proper balance between the various modeling
+strategies to avoid performing unnecessary computations or incorrectly predicting behavior in situations such as these.
+
+MOOSE’s Multiapp system will allow modelers to group physics into logical categories where MOOSE can solve some groups
+fully-coupled and others loosely-coupled. The Multiapp system goes even further by also supporting a “tightly-coupled”
+strategy, which falls somewhere between the “fully-coupled” and “loosely-coupled” approaches. Several sets of physics can then
+be linked together into logical hierarchies using any one of these coupling strategies, allowing for several potential solution
+strategies. For instance, a complex nuclear reactor model might consist of several tightly-coupled systems of fully-coupled
+equations.
+
+Finally, MOOSE’s Transfers system ties all of the physics groups contained within the Multiapp system together and allows for
+full control over the flow of information among the various groups. This capability bridges physical phenomena from several
+different complementary scales simultaneously. When these three MOOSE systems are combined, myriad coupling combinations are
+possible. In all cases, the MOOSE framework handles the parallel communication, input, output and execution of the underlying
+simulation. By handling these computer science tasks, the MOOSE framework keeps modelers focused on doing research.
+
+MOOSE innovates by building advanced simulation capabilities on top of the very best available software technologies in a way that
+makes them widely accessible for innovative research. MOOSE is equally capable of solving small models on common laptops and
+the very biggest FEM models ever attempted -- all without any major changes to configuration or source code. Since its
+inception, the MOOSE project has focused on both developer and computational efficiency. Improved developer efficiency is
+achieved by leveraging existing algorithms and technologies from several leading open-source packages. Additionally, MOOSE uses
+several complementary parallel technologies (both the distributed-memory message passing paradigm and shared-memory thread-based
+approaches are used) to lay an efficient computational foundation for development. Using existing open technologies in this
+manner helps the developers reduce the scope of the project and keeps the size of the MOOSE code base maintainable. This approach
+provides users with state-of-the-art finite element and solver technology as a basis for the advanced coupling and solution
+strategies mentioned previously.
+
+MOOSE’s developers work openly with other package developers to make sure that cutting-edge
+technologies are available through MOOSE, providing researchers with competitive research opportunities. MOOSE maintains a set
+of objects that hide parallel interfaces while exposing advanced spatial and temporal coupling algorithms in the framework.
+This accessible approach places developmental technology into the hands of scientists and engineers, which can speed the pace of
+scientific discovery.
+
+\subsection{Overview}
+\subsubsection{User Characteristics}
+\begin{itemize}
+\item Framework Developers: These are the core developers of the framework. They will be responsible for following
+  and enforcing the appropriate software development standards. They will be responsible for designing, implementing
+  and maintaining the software.
+
+\item Developers: A Scientist or Engineer that utilizes the framework to build his or her own application. This user
+  will typically have a background in modeling and simulation techniques and/or numerical analysis but may only have
+  a limited skill-set when it comes to object-oriented coding and the C++ language. This is our primary focus group.
+  In many cases these developers will be encouraged to give their code back to the framework maintainers.
+
+\item Analysts: These are users that will run the code and perform various analysis on the simulations they perform.
+  These users may interact with developers of the system requesting new features and reporting bugs found and will
+  typically make heavy use of the input file format.
+\end{itemize}
+
+
+\subsubsection{Assumptions and Dependencies}
+The software should be designed with the fewest possible constraints. Ideally the software should run on a wide
+variety of evolving hardware so it should follow well-adopted standards and guidelines. The software should run
+on any POSIX compliant system. The software will also make use FEM and numerical libraries that run on POSIX
+systems as well. The main interface for the software will be command line based with no assumptions requiring advanced
+terminal capabilities such as coloring and line control.
+
+\section{References}
+
+\begin{itemize}
+\item ASME NQA 1 2008 with the NQA-1a-2009 addenda, ``Quality Assurance Requirements for Nuclear Facility Applications,'' First Edition, August 31, 2009.
+\item ISO/IEC/IEEE 24765:2010(E), ``Systems and software engineering — Vocabulary,'' First Edition, December 15, 2010.
+\item LWP 13620, ``Managing Information Technology Assets''
+\end{itemize}
+
+\section{Definitions and Acronyms}
+
+\subsection{Definitions}
+
+\begin{itemize}
+\item \textit{Baseline}. A specification or product (e.g., project plan, maintenance and operations [M\&O] plan, requirements,
+  or design) that has been formally reviewed and agreed upon, that thereafter serves as the basis for use and further development,
+  and that can be changed only by using an approved change control process. [ASME NQA-1-2008 with the NQA-1a-2009 addenda edited]
+
+\item \textit{Validation}. Confirmation, through the provision of objective evidence (e.g., acceptance test), that the requirements
+  for a specific intended use or application have been fulfilled. [ISO/IEC/IEEE 24765:2010(E) edited]
+
+\item \textit{Verification}. (1) The process of: evaluating a system or component to determine whether the products of a given
+  development phase satisfy the conditions imposed at the start of that phase. (2) Formal proof of program correctness (e.g.,
+  requirements, design, implementation reviews, system tests). [ISO/IEC/IEEE 24765:2010(E) edited]
+\end{itemize}
+
+\subsection{Acronyms}
+
+\begin{tabular}{l l}
+  ASME    & American Society of Mechanical Engineers \\
+  DOE     & Department of Energy \\
+  FEM     & Finite Element Modeling \\
+  IEC     & International Electromechanical Commission \\
+  IEEE    & Institute of Electrical and Electronics Engineers \\
+  INL     & Idaho National Laboratory \\
+  ISO     & International Organization for Standardization \\
+  IT      & Information Technology \\
+  M\&O    & Maintenance and Operations \\
+  MOOSE   & Multiphysics Object Oriented Simulation Environment \\
+  NQA     & Nuclear Quality Assurance \\
+  OOP     & Object Oriented Programming \\
+  QA      & Quality Assurance \\
+  V\&V    & Verification and Validation \\
+\end{tabular}
+
+
+\section{System Requirements}
+
+\begin{table}[!htbp]
+  \caption{Minimum Requirements.\label{tab:req}}
+  \begin{tabular}{|p{12cm}|}
+    \rowcolor{gray}
+    Minimum Requirements \\
+    \begin{itemize}
+    \item A POSIX compliant Unix including the two most recent versions of OS X and most current versions of Linux.
+    \item RAM: 4 GB for optimized compilation (8 GB for debug compilation), 2 GB per core execution
+    \item Disk: 100 GB
+    \item Compilers: GCC, Clang, or Intel
+    \item Python 2.6+
+    \item Git
+    \end{itemize} \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Functional Requirements}
+
+\begin{table}[!htbp]
+  \caption{Function Name: Core Framework, I/O and Execution Control.\label{tab:core}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\
+    F1.10 & The system shall allow support for user-defined object for controlling the execution stages of a simulation. \\ \hline
+    F1.20 & The system shall allow for user-defined time step selection for simulations using a time-based execution scheme. \\ \hline
+    F1.30 & The system shall allow for user-defined time step integration schemes for simulations using a time-based execution scheme. \\ \hline
+    F1.40 & The system shall support user-defined matrix preconditioning that may be applied during the solve stages. \\ \hline
+    F1.50 & The system should support a programmatic method for building up the necessary objects necessary for a simulation. \\ \hline
+    F1.60 & The system shall provide the ability to resume a previous simulation due to fault or intentional termination. \\ \hline
+    F1.70 & The system shall allow for user-defined output types for simulation data. \\ \hline
+    F1.80 & The system shall provide a method of providing improved initial guesses (also known as "predictions") for the solution at subsequent time steps. \\ \hline
+    F1.90 & The system shall support the creation of constraints relating otherwise independent degrees of freedom. \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \caption{Function Name: Mesh and Mesh Refinement.\label{tab:core}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    F2.10 & The system shall support user-defined mesh creation. \\ \hline
+    F2.20 & The system shall support user-defined mesh modification. \\ \hline
+    F2.30 & The system shall support user-defined mesh partitioning. \\ \hline
+    F2.40 & The system shall allow for the computation of user-defined quantities for the purpose of mesh refinement. \\ \hline
+    F2.50 & The system shall allow for the computation of user-defined element markings for the purpose of mesh refinement. \\ \hline
+  \end{tabular}
+\end{table}
+
+
+\begin{table}[!htbp]
+  \caption{Function Name: Finite Element Assembly.\label{tab:fem}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    F3.10 & The system shall allow for the creation of many independently discretized nonlinear field variables. \\ \hline
+    F3.20 & The system shall provide a mechanism for setting values of all implicit field variables prior to the start of a simulation. \\ \hline
+    F3.30 & The system shall allow the input of ``weak-form'' operators for computing element-wise volume integrals. \\ \hline
+    F3.40 & The system shall allow the input of ``weak-form'' operators for computing side integrals along individual boundaries. \\ \hline
+    F3.50 & The system shall allow the input of ``Dirac delta functions'' contributions into simulation. \\ \hline
+    F3.60 & The system shall support weak-form contributions from internal boundaries necessary for ``Discontinuous Galerkin'' approaches. \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \caption{Function Name: Materials System.\label{tab:mat}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    F4.10 & The system shall allow for the creation of objects that represent physical material properties based on physical quantities. \\ \hline
+  \end{tabular}
+\end{table}
+
+
+\begin{table}[!htbp]
+  \caption{Function Name: Auxiliary Calculations.\label{tab:aux}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    F5.10 & The system shall allow for the creation of many independently discretized and explicitly calculated ``field'' variables. \\ \hline
+    F5.20 & The system shall provide a mechanism for setting values of all explicit field variables prior to the start of a simulation. \\ \hline
+    F5.30 & The system shall allow for the creation of operators for explicitly calculating spatial quantities. \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \caption{Function Name: User-defined logic, functions and post-processing.\label{tab:pp}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    F6.10 & The system shall provide interfaces for computing single value domain calculations based on other system information or field variables. \\ \hline
+    F6.20 & The system shall allow for the creation and use of arbitrary functions of space and time for use by other objects in the simulation. \\ \hline
+    F6.30 & The system shall provide interfaces for computing multiple value domain calculations based on other system information or field variables. \\ \hline
+    F6.40 & The system shall support additional user-defined algorithms that run during the simulation and may be used by other system objects. \\ \hline
+    F6.50 & The system shall support interfaces for handling mathematical operations among geometric entities. \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \caption{Function Name: Multiple Application Execution and Communication.\label{tab:multiapp}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    F7.10 & The system shall support loose coupling mechanisms and execution of multiple applications in a coordinated fashion. \\ \hline
+    F7.20 & The system shall support solution transfer between multiple mesh structures. \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \caption{Function Name: Control Logic.\label{tab:cl}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    F8.10 & The system should support a way to inspect variable values and change simulation parameters during a simulation. \\ \hline
+  \end{tabular}
+\end{table}
+
+
+\subsection{Usability Requirements}
+
+\begin{table}[!htbp]
+  \caption{Core Framework\label{tab:usabilty_core}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    U1.10 & The system will be command-line and input file driven. \\ \hline
+    U1.20 & The system shall return usage messages when unidentified arguments or incorrectly used arguments are passed. \\ \hline
+    U1.30 & The system shall provide diagnostics when the input file fails to parse, or the format is incorrect. \\ \hline
+    U1.40 & The system will provide on screen information about the simulation and performance characteristics of the solves under normal operating conditions. \\ \hline
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+    \subsection{Performance Requirements}
+
+\begin{table}[!htbp]
+  \caption{Core Framework\label{tab:perf_core}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    P1.10 & The system will support multi-process distributed memory execution. \\ \hline
+    P1.20 & The system will support multi-process shared memory execution. \\ \hline
+    P1.30 & The system will support execution on Unix-based laptops. \\ \hline
+    P1.40 & The system will support execution on Unix-based workstation systems. \\ \hline
+    P1.50 & The system will support execution on large Unix-based cluster systems. \\ \hline
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\subsection{System Interfaces}
+
+\begin{table}[!htbp]
+  \caption{Core Framework\label{tab:perf_core}}
+  \begin{tabular}{|l|p{12cm}|}
+    \rowcolor{gray}
+    Number & Requirement Description \\ \hline
+    S1.10 & The system shall support POSIX compliant systems. \\ \hline
+    S1.20 & The system shall support the Message Passing Interface (MPI) standard. \\ \hline
+    S1.30 & The system shall support POSIX ``pthreads''. \\ \hline
+    S1.40 & The system shall support Intel Threaded Building Blocks (TBB) interface. \\ \hline
+    S1.50 & The system shall support the OpenMP threading interface. \\ \hline
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\subsection{System Operations}
+
+\subsubsection{Human System Integration Requirements}
+The command line interface shall support the ability to toggle any supported coloring schemes on or off pursuant to section 508 of the Rehabilitation Act of 1973.
+
+\subsubsection{Maintainability}
+\label{Maintainability}
+\begin{enumerate}
+\item The latest working version (defined as the version that passes all tests in the current regression test suite)
+      shall be publicly available at all times through the repository host provider.
+\item Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The technical lead
+      will determine the severity and priority of all reported issues and assign resources at his or her discretion to
+      resolve identified issues.
+\item The software maintainers will entertain all proposed changes to the system in a timely manner (within two business days).
+\item The core framework in its entirety will be made publicly available under the LGPL version 2.0 license.
+\end{enumerate}
+
+\subsubsection{Reliability}
+The regression test suite will cover at least 80\% of all lines of code at all times. Known regressions will be recorded
+and tracked (see \ref{Maintainability}) to an independent and satisfactory resolution.
+
+\subsection{Information Management}
+The core framework in its entirety will be made publicly available on an appropriate repository hosting site. Backups and
+security services will be provided by the hosting service.
+
+\section{Verification}
+
+The regression test suite will employ several verification tests using comparison against known analytical solutions, the method of
+manufactured solutions, and convergence rate analysis.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Software Design Description
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Software Design Description}
+
+\subsection{Introduction}
+Frameworks are a software development construct aiming to simplify the creation of specific classes of applications
+through abstraction of low-level details. The main object of creating a framework is to provide an interface to
+application developers that saves time and provides advanced capabilities not attainable otherwise. The Multiphysics
+Object Oriented Simulation Environment (MOOSE), mission is just that: provide a framework for engineers and scientists
+to build state-of-the-art, computationally scalable finite element based simulation tools.
+
+MOOSE was conceived with one major objective: to be as easy and straightforward to use by scientists and engineers as possible.
+MOOSE is meant to be approachable by non-computational scientists who have systems of partial differential equations (PDEs)
+they need to solve. Every single aspect of MOOSE was driven by this singular principle from the build system to the API to the
+software development cycle.  At every turn, decisions were made to enable this class of users to be successful with the framework.
+The pursuit of this goal has led to many of the unique features of MOOSE:
+
+\begin{itemize}
+  \item A streamlined build system
+  \item An API aimed at extensible
+  \item Straightforward APIs providing sensible default information
+  \item Integrated, automatic, and rigorous testing
+  \item Rapid, continuous integration development cycle
+  \item Codified, rigorous path for contributing
+  \item Applications are modular and composable
+\end{itemize}
+
+Each of these characteristics is meant to build trust in the framework by those attempting to use it. For instance,
+the build system is the first thing potential framework users come into contact with when they download a new
+software framework. Onerous dependency issues, complicated, hard to follow instructions or build failure can all
+result in a user passing on the platform. Ultimately, the decision to utilize a framework comes down to whether or
+not you trust the code in the framework and those developing it to be able to support your desired use-case.
+No matter the technical capabilities of a framework, without trust users will look elsewhere. This is especially
+true of those not trained in software development or computational science.
+
+Developing trust in a framework goes beyond utilizing ``best practices'' for the code developed, it is equally
+important that the framework itself is built upon tools that are trusted. For this reason, MOOSE relies on a
+well-established code base of libMesh and PETSc.
+The libMesh library provides foundational capability for the finite element method and provides interfaces to
+leading-edge numerical solution packages such as PETSc.
+
+With these principles in mind, an open source, massively parallel, finite element, multiphysics framework has been conceived.
+MOOSE is an on-going project started in 2008 aimed toward a common platform for creation of new multiphysics tools.
+This document provides design details pertinent to application developers as well as framework developers.
+
+\subsection{Use Cases}
+The MOOSE Framework is targeted at two main groups of actors: Developers and Users. Developers are the main
+use case. These are typically students and professionals trained in science and engineering fields with some
+level of experience with coding but typically very little formal software development training. The other user
+group is Users. Those who intend to use an application built upon the framework without writing any computer
+code themselves. Instead they may modify or create input files for driving a simulation, run the application, and
+analyze the results. All interactions through MOOSE are primarily through the command-line interface and through
+a customizable block-based input file.
+
+\subsection{Software Overview}
+
+\subsubsection{Introduction}
+The MOOSE framework itself is composed of a wide range of pluggable systems. Each system is generally composed of a
+single or small set of C++ objects intended to be specialized by a Developer to solve a specific problem. To accomplish
+this design goal, MOOSE uses several modern object-oriented design patterns. The primary overarching pattern is the
+``Factory Pattern''. Users needing to extend MOOSE may inherit from one of MOOSE's systems to providing an implementation
+meeting his or her needs. The design of each of these systems is documented on the mooseframework.org wiki in the Tutorial
+section. Additionally, up-to-date documentation extracted from the source is maintained on the the mooseframework.org
+documentation site after every successful merge to MOOSE's stable branch. After these objects are created, the can be
+registered with the framework and used immediately in a MOOSE input file.
+
+\subsubsection{System Architecture}
+The MOOSE framework architecture consists of a core and several pluggable systems. The core of MOOSE consists of a number
+of key objects responsible for setting up and managing the user-defined objects of a finite element simulation. This core
+set of objects has limited extendability and exist for every simulation configuration that the framework is capable of running.
+
+\begin{itemize}
+\item MooseApp
+\item Problem
+\item System(s)
+\item Mesh
+\item Factory(s)
+\item Warehouses
+\item Assembly
+\item ThreadedComputeLoops
+\end{itemize}
+
+The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a normal simulation a single
+MooseApp object is created and ``run()''. This object uses it's Factory objects to build user defined objects which are stored
+in a series of Warehouse objects and executed. The Finite Element data is stored in the Systems and Assembly object while the
+domain information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run parallel calculations
+on the objects created and stored within the warehouses.
+
+\subsection{Pluggable Systems}
+MOOSE's pluggable systems are documented on the mooseframework.org wiki. Each of these systems has set of defined polymorphic
+interfaces and are designed to accomplish a specific task within the simulation. The design of these systems is fluid and is
+managed through agile methods and ticket request system on the Github.org website.
+
+\end{document}
+
+%%  LocalWords:  Multiphysics MOOSE's Jacobian Krylov JFNK Multiapp
+%%  LocalWords:  POSIX ASME NQA LWP IEC IEEE INL OOP QA GCC Galerkin
+%%  LocalWords:  discretized multi MPI pthreads TBB OpenMP LGPL PDEs
+%%  LocalWords:  API APIs composable libMesh PETSc multiphysics wiki
+%%  LocalWords:  pluggable mooseframework MooseApp Github
+%%  LocalWords:  ThreadedComputeLoops
