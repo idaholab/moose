@@ -364,8 +364,8 @@ void FEProblem::initialSetup()
   // UserObject initialSetup
   std::set<std::string> depend_objects = _aux.getDependObjects();
 
-  _general_user_objects.initialSetup();
   _general_user_objects.updateDependObjects(depend_objects);
+  _general_user_objects.initialSetup();
   _general_user_objects.sort();
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
@@ -373,14 +373,14 @@ void FEProblem::initialSetup()
     _nodal_user_objects.updateDependObjects(depend_objects, tid);
     _nodal_user_objects.initialSetup(tid);
 
-    _elemental_user_objects.initialSetup(tid);
     _elemental_user_objects.updateDependObjects(depend_objects, tid);
+    _elemental_user_objects.initialSetup(tid);
 
-    _side_user_objects.initialSetup(tid);
     _side_user_objects.updateDependObjects(depend_objects, tid);
+    _side_user_objects.initialSetup(tid);
 
-    _internal_side_user_objects.initialSetup(tid);
     _internal_side_user_objects.updateDependObjects(depend_objects, tid);
+    _internal_side_user_objects.initialSetup(tid);
   }
 
   // Call the initialSetup methods for functions

@@ -347,7 +347,7 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
 {
 
   // Get the UserObjectWarhouse
-  const MooseObjectWarehouseBase<UserObject> & warehouse = T::_problem_ptr->getUserObjects();
+  const ExecuteMooseObjectWarehouse<UserObject> & warehouse = T::_problem_ptr->getUserObjects();
 
   // Convenience reference to the OutputData being operated on (should used "postprocessors" or "vector_postprocessors")
   OutputData & execute_data = _execute_data[execute_data_name];

@@ -1,0 +1,22 @@
+[Tests]
+  [./nodal_sum]
+    # Tests non-block restricted NodalUserObject (only visit nodes once on block boundary)
+    type = CSVDiff
+    input = nodal_sum.i
+    csvdiff = nodal_sum_out.csv
+  [../]
+
+  [./nodal_sum_block]
+    # Tests block restricted NodalUserObject (visit nodes once on block boundary)
+    type = CSVDiff
+    input = nodal_sum_block.i
+    csvdiff = nodal_sum_block_out.csv
+  [../]
+
+  [./nodal_sum_block_non_unique]
+    # Tests block restricted NodalUserObject (visit nodes twice on block boundary)
+    type = CSVDiff
+    input = nodal_sum_block_non_unique.i
+    csvdiff = nodal_sum_block_non_unique_out.csv
+  [../]
+[]

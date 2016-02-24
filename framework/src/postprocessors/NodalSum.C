@@ -20,6 +20,7 @@ template<>
 InputParameters validParams<NodalSum>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
+  params.set<bool>("unique_block_execute") = true;
   return params;
 }
 
@@ -55,4 +56,3 @@ NodalSum::threadJoin(const UserObject & y)
   const NodalSum & pps = static_cast<const NodalSum &>(y);
   _sum += pps._sum;
 }
-

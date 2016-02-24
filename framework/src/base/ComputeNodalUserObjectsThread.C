@@ -57,6 +57,13 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   }
 
   // Block Restricted
+  // NodalUserObjects may be block restricted, in this case by default the execute() method is called for
+  // each subdomain that the node "belongs". This may be disabled in the NodalUserObject by setting
+  // "unique_block_execute = true".
+
+  // To inforce the unique execution this vector is populated and checked if the unique flag is enabled.
+  std::vector<MooseSharedPointer<NodalUserObject> > computed;
+
   const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
   for (std::set<SubdomainID>::const_iterator blk_it = block_ids.begin(); blk_it != block_ids.end(); ++blk_it)
   {
@@ -64,7 +71,13 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
     {
       const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBlockObjects(*blk_it, _tid);
       for (std::vector<MooseSharedPointer<NodalUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->execute();
+      {
+        if (!(*it)->isUniqueBlockExecute() || std::count(computed.begin(), computed.end(), *it) == 0)
+        {
+          (*it)->execute();
+          computed.push_back(*it);
+        }
+      }
     }
   }
 }

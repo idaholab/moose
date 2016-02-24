@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<NodalL2Norm>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
+  params.set<bool>("unique_block_execute") = true;
   return params;
 }
 
@@ -52,4 +53,3 @@ NodalL2Norm::threadJoin(const UserObject & y)
   const NodalL2Norm & pps = static_cast<const NodalL2Norm &>(y);
   _sum_of_squares += pps._sum_of_squares;
 }
-

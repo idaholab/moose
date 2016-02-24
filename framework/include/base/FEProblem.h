@@ -489,7 +489,7 @@ public:
    *
    * @see AdvancedOutput::initPostprocessorOrVectorPostprocessorLists
    */
-  const MooseObjectWarehouseBase<UserObject> & getUserObjects() { return _all_user_objects; }
+  const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() { return _all_user_objects; }
 
   /**
    * Get the user object by its name
@@ -1073,7 +1073,7 @@ protected:
 
   ///@{
   /// Storage for UserObjects
-  MooseObjectWarehouseBase<UserObject> _all_user_objects;
+  ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<GeneralUserObject> _general_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<NodalUserObject> _nodal_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<ElementUserObject> _elemental_user_objects;

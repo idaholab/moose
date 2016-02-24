@@ -58,6 +58,8 @@ public:
 
   virtual void subdomainSetup() /*final*/;
 
+  bool isUniqueBlockExecute(){ return _unique_block_execute; }
+
 protected:
   /// The mesh that is being iterated over
   MooseMesh & _mesh;
@@ -67,6 +69,9 @@ protected:
 
   /// Reference to current node pointer
   const Node * & _current_node;
+
+  // Flag for enable/disabling multiple execute calls on nodes that share block ids
+  const bool & _unique_block_execute;
 };
 
 #endif
