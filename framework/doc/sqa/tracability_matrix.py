@@ -24,6 +24,7 @@ def buildTable(data):
   keys = sorted(data.keys())
 
   for key in keys:
+    data[key][2] = '\n'.join(data[key][2])
     pdf_data.append([Paragraph(cell, s) for cell in data[key]])
 
 
@@ -71,7 +72,7 @@ def extractRequirements(filename):
         else:
           # Store the requirment number and description in the data structure
           #data.append([req.group(1), req.group(2)])
-          data[req.group(1)] = [req.group(1), req.group(2), ""]
+          data[req.group(1)] = [req.group(1), req.group(2), set()]
 
   return data
 
@@ -108,6 +109,7 @@ def extractTestedRequirements(data):
   testers = harness.warehouse.getAllObjects()
 
   for tester in testers:
+    print tester.specs['test_name']
     input_filename = tester.getInputFile()
     if input_filename == None:
       continue
@@ -128,7 +130,7 @@ def extractTestedRequirements(data):
       if requirement not in data:
         print 'Unable to find referenced requirement "' + requirement + '" in ' + input_path
       else:
-        data[requirement][2] = input_path
+        data[requirement][2].add(os.path.relpath(input_path, MOOSE_DIR))
 
   os.chdir(saved_cwd)
 
