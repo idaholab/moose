@@ -31,6 +31,8 @@ CoupledScalarAux::CoupledScalarAux(const InputParameters & parameters) :
     _coupled_val(coupledScalarValue("coupled")),
     _component(getParam<unsigned int>("component"))
 {
+  if (_component >= coupledScalarOrder("coupled"))
+    mooseError("component is higher than or equal to the scalar variable order");
 }
 
 Real

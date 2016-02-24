@@ -90,6 +90,15 @@ ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
   return getScalarVar(var_name, comp)->number();
 }
 
+Order
+ScalarCoupleable::coupledScalarOrder(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupledScalar(var_name, comp))
+    return _sc_fe_problem.getMaxScalarOrder();
+
+  return getScalarVar(var_name, comp)->order();
+}
+
 VariableValue *
 ScalarCoupleable::getDefaultValue(const std::string & var_name)
 {
