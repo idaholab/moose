@@ -358,13 +358,13 @@ void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDd
 
 double NDSpline::phi(double t){
  // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
- double phi_value=0;
+ double phi_value=0.0;
 
- if ((fabs(t)<=2) & (fabs(t)>=1))
-  phi_value = std::pow(2-fabs(t),3);
+ if ((fabs(t)<=2.0) & (fabs(t)>=1.0))
+  phi_value = std::pow(2.0-fabs(t),3.0);
 
  if ((fabs(t))<1)
-  phi_value = 4 - 6*std::pow(fabs(t),2) + 3*std::pow(fabs(t),3);
+  phi_value = 4.0 - 6.0*std::pow(fabs(t),2.0) + 3.0*std::pow(fabs(t),3.0);
 
  return phi_value;
 }
