@@ -28,11 +28,10 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _disp_old;
-  VariableValue & _disp;
-  VariableValue & _vel_old;
+  const VariableValue & _disp_old;
+  const VariableValue & _disp;
+  const VariableValue & _vel_old;
   Real _beta;
-
 };
 
 #endif //NEWMARKACCELAUX_H

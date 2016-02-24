@@ -54,7 +54,7 @@ protected:
    * where N is the number of arguments that the _seff_UO requires)
    * Eg, for twophase simulations N=2
    */
-  std::vector<VariableValue *> _pressure_vals;
+  std::vector<const VariableValue *> _pressure_vals;
 
   /// matrix of 2nd derivtives: This auxkernel returns _mat[_wrt1][_wrt2];
   std::vector<std::vector<Real> > _mat;

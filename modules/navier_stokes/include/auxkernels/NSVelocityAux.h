@@ -33,8 +33,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _rho;
-  VariableValue & _momentum;
+  const VariableValue & _rho;
+  const VariableValue & _momentum;
 
 };
 

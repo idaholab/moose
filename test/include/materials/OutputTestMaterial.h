@@ -49,7 +49,7 @@ protected:
   MaterialProperty<RealVectorValue> & _vector_property;
   MaterialProperty<RealTensorValue> & _tensor_property;
   Real _factor;
-  VariableValue & _variable;
+  const VariableValue & _variable;
 };
 
 #endif //OUTPUTTESTMATERIAL_H

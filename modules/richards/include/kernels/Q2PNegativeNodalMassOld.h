@@ -36,7 +36,7 @@ protected:
   const RichardsDensity & _density;
 
   /// old value of the other variable (this is porepressure if the Variable is saturation)
-  VariableValue & _other_var_nodal_old;
+  const VariableValue & _other_var_nodal_old;
 
   /// whether the "other variable" is actually porepressure
   bool _var_is_pp;

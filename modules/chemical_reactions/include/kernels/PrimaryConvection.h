@@ -67,7 +67,7 @@ private:
    * constructor!
    */
   /// Coupled gradient of hydraulic head.
-  VariableGradient & _grad_p;
+  const VariableGradient & _grad_p;
 };
 
 #endif //PRIMARYCONVECTION_H

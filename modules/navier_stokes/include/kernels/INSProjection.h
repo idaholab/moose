@@ -35,12 +35,12 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Coupled variables
-  VariableValue& _a1;
-  VariableValue& _a2;
-  VariableValue& _a3;
+  const VariableValue & _a1;
+  const VariableValue & _a2;
+  const VariableValue & _a3;
 
   // Gradients
-  VariableGradient& _grad_p;
+  const VariableGradient & _grad_p;
 
   // Variable numberings
   unsigned _a1_var_number;

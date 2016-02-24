@@ -38,13 +38,12 @@ protected:
 
   const bool _large_strain;
 
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
   bool _have_strain_zz;
-  VariableValue & _strain_zz;
+  const VariableValue & _strain_zz;
   bool _have_scalar_strain_zz;
-  VariableValue & _scalar_strain_zz;
-
+  const VariableValue & _scalar_strain_zz;
 };
 
 }

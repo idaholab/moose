@@ -46,7 +46,7 @@ protected:
   MooseEnum _operator;                          ///< Operator being applied on this variable and coupled variable
 
   int _coupled;                                 ///< The number of the coupled variable
-  VariableValue & _coupled_val;                 ///< Coupled variable
+  const VariableValue & _coupled_val;           ///< Coupled variable
 };
 
 #endif //COUPLEDAUX_H

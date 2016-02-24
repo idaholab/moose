@@ -34,14 +34,14 @@ RichardsSeff2gasRSC::RichardsSeff2gasRSC(const InputParameters & parameters) :
 
 
 Real
-RichardsSeff2gasRSC::seff(std::vector<VariableValue *> p, unsigned int qp) const
+RichardsSeff2gasRSC::seff(std::vector<const VariableValue *> p, unsigned int qp) const
 {
   Real pc = (*p[1])[qp] - (*p[0])[qp];
   return 1 - RichardsSeffRSC::seff(pc, _shift, _scale);
 }
 
 void
-RichardsSeff2gasRSC::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
+RichardsSeff2gasRSC::dseff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
 {
   Real pc = (*p[1])[qp] - (*p[0])[qp];
   result[1] = -RichardsSeffRSC::dseff(pc, _shift, _scale);
@@ -49,7 +49,7 @@ RichardsSeff2gasRSC::dseff(std::vector<VariableValue *> p, unsigned int qp, std:
 }
 
 void
-RichardsSeff2gasRSC::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
+RichardsSeff2gasRSC::d2seff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
 {
   Real pc = (*p[1])[qp] - (*p[0])[qp];
   result[1][1] = -RichardsSeffRSC::d2seff(pc, _shift, _scale);

@@ -60,7 +60,7 @@ protected:
   const MaterialProperty<Real> & _prop_d2h;
 
   /// Gradients for all coupled variables
-  std::vector<VariableGradient*> _grad_args;
+  std::vector<const VariableGradient *> _grad_args;
 };
 
 #endif //KKSACBULKBASE_H

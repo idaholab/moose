@@ -72,7 +72,7 @@ protected:
   const RichardsRelPerm & _relperm;
 
   /// the other variable in the 2-phase system (this is saturation if Variable=porepressure, and viceversa)
-  VariableValue & _other_var_nodal;
+  const VariableValue & _other_var_nodal;
 
   /// the variable number of the other variable
   unsigned int _other_var_num;

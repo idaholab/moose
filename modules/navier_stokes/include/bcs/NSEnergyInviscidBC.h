@@ -50,7 +50,7 @@ protected:
 //  virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Aux vars
-  VariableValue& _temperature;
+  const VariableValue & _temperature;
 
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself

@@ -44,15 +44,12 @@ protected:
 
   /// Coupled displacement variables
   unsigned int _ndisp;
-  std::vector<VariableValue *> _disp;
+  std::vector<const VariableValue *> _disp;
   std::vector<unsigned int> _disp_var;
 
   const bool _temp_coupled;
 
   const unsigned int _temp_var;
-
-private:
-
 };
 
 #endif //STRESSDIVERGENCETENSORS_H

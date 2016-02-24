@@ -27,7 +27,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   unsigned int _momentum_var;
-  VariableValue & _momentum;
+  const VariableValue & _momentum;
 
   Real _acceleration;
 };

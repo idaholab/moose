@@ -35,9 +35,9 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Gradients of the accleration vector, 'a'
-  VariableGradient& _grad_a1;
-  VariableGradient& _grad_a2;
-  VariableGradient& _grad_a3;
+  const VariableGradient & _grad_a1;
+  const VariableGradient & _grad_a2;
+  const VariableGradient & _grad_a3;
 
   // Variable numberings
   unsigned _a1_var_number;

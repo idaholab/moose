@@ -27,15 +27,15 @@ public:
 
 protected:
   const std::string _appended_property_name;
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
 
   bool _has_temp;
-  VariableValue & _temp;
+  const VariableValue & _temp;
 
   bool _has_c;
-  VariableValue & _c;
+  const VariableValue & _c;
 
   std::vector<VolumetricModel*> _volumetric_models;
 

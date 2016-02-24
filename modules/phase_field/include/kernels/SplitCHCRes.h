@@ -28,7 +28,7 @@ protected:
 
   const MaterialProperty<Real> & _kappa;
   unsigned int _w_var;
-  VariableValue & _w;
+  const VariableValue & _w;
 };
 
 #endif //SPLITCHCRES_H

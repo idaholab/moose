@@ -47,7 +47,7 @@ protected:
   bool _stream_open;
 
 private:
-  VariableValue & _elem_line_id;
+  const VariableValue & _elem_line_id;
 };
 
 #endif

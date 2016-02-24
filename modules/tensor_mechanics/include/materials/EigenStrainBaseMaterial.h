@@ -26,7 +26,7 @@ protected:
   virtual void computeEigenStrain() = 0;
   virtual RankTwoTensor computeStressFreeStrain();
 
-  VariableValue & _c;
+  const VariableValue & _c;
   VariableName _c_name;
 
   std::string _eigenstrain_name;

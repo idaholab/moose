@@ -79,7 +79,7 @@ class RichardsVarNames :
    * (*richards_vals(1))[qp] = pgas evaluated at quadpoint qp
    * Also richards_vals(i) = &coupledValue
    */
-  VariableValue * richards_vals(unsigned int richards_var_num) const;
+  const VariableValue * richards_vals(unsigned int richards_var_num) const;
 
   /**
    * a vector of pointers to old VariableValues
@@ -88,7 +88,7 @@ class RichardsVarNames :
    * (*richards_vals_old(1))[qp] = old pgas evaluated at quadpoint qp
    * Also richards_vals_old(i) = &coupledValueOld
    */
-  VariableValue * richards_vals_old(unsigned int richards_var_num) const;
+  const VariableValue * richards_vals_old(unsigned int richards_var_num) const;
 
   /**
    * a vector of pointers to grad(Variable)
@@ -97,7 +97,7 @@ class RichardsVarNames :
    * (*grad_var(1))[qp] = grad(pgas) evaluated at quadpoint qp
    * Also grad_var(i) = &coupledGradient
    */
-  VariableGradient * grad_var(unsigned int richards_var_num) const;
+  const VariableGradient * grad_var(unsigned int richards_var_num) const;
 
   /**
    * The moose variable for the given richards_var_num
@@ -106,7 +106,7 @@ class RichardsVarNames :
    * used in mass lumping.
    * @param richards_var_num the richards variable number
    */
-  MooseVariable * raw_var(unsigned int richards_var_num) const;
+  const MooseVariable * raw_var(unsigned int richards_var_num) const;
 
   /**
    * The nodal variable values for the given richards_var_num
@@ -114,13 +114,13 @@ class RichardsVarNames :
    * node i, use (*RichardsVarNames.nodal_var(pvar))[i]
    * @param richards_var_num the richards variable number
    */
-  VariableValue * nodal_var(unsigned int richards_var_num) const;
+  const VariableValue * nodal_var(unsigned int richards_var_num) const;
 
   /**
    * The old nodal variable values for the given richards_var_num
    * @param richards_var_num the richards variable number
    */
-  VariableValue * nodal_var_old(unsigned int richards_var_num) const;
+  const VariableValue * nodal_var_old(unsigned int richards_var_num) const;
 
   /// return the _var_types string
   std::string var_types() const;
@@ -144,23 +144,22 @@ class RichardsVarNames :
   std::vector<unsigned int> _ps_var_num;
 
   /// moose_var_value[i] = values of richards variable i
-  std::vector<VariableValue *> _moose_var_value; // this is a vector of pointers to VariableValues
+  std::vector<const VariableValue *> _moose_var_value; // this is a vector of pointers to VariableValues
 
   /// moose_var_value_old[i] = old values of richards variable i
-  std::vector<VariableValue *> _moose_var_value_old;
+  std::vector<const VariableValue *> _moose_var_value_old;
 
   /// moose_var_value[i] = values of richards variable i
-  std::vector<VariableValue *> _moose_nodal_var_value; // this is a vector of pointers to VariableValues
+  std::vector<const VariableValue *> _moose_nodal_var_value; // this is a vector of pointers to VariableValues
 
   /// moose_var_value_old[i] = old values of richards variable i
-  std::vector<VariableValue *> _moose_nodal_var_value_old;
+  std::vector<const VariableValue *> _moose_nodal_var_value_old;
 
   /// moose_grad_var[i] = gradient values of richards variable i
-  std::vector<VariableGradient *> _moose_grad_var;
+  std::vector<const VariableGradient *> _moose_grad_var;
 
   /// _moose_raw_var[i] = getVar of richards variable i
-  std::vector<MooseVariable *> _moose_raw_var;
-
+  std::vector<const MooseVariable *> _moose_raw_var;
 };
 
 #endif // RICHARDSVARNAMES_H

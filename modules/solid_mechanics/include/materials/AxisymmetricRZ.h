@@ -32,14 +32,13 @@ protected:
     return 1;
   }
 
-  VariableValue & _disp_r;
-  VariableValue & _disp_z;
+  const VariableValue & _disp_r;
+  const VariableValue & _disp_z;
 
   const bool _large_strain;
 
-  VariableGradient & _grad_disp_r;
-  VariableGradient & _grad_disp_z;
-
+  const VariableGradient & _grad_disp_r;
+  const VariableGradient & _grad_disp_z;
 };
 
 }

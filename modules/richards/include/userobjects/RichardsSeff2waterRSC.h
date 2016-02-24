@@ -35,7 +35,7 @@ public:
    * @param p porepressures.  Here (*p[0])[qp] is the water pressure at quadpoint qp, and (*p[1])[qp] is the gas porepressure
    * @param qp the quadpoint to evaluate effective saturation at
    */
-  Real seff(std::vector<VariableValue *> p, unsigned int qp) const;
+  Real seff(std::vector<const VariableValue *> p, unsigned int qp) const;
 
   /**
    * derivative of effective saturation as a function of porepressure
@@ -43,7 +43,7 @@ public:
    * @param qp the quad point to evaluate effective saturation at
    * @param result the derivtives will be placed in this array
    */
-  void dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const;
+  void dseff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<Real> & result) const;
 
   /**
    * second derivative of effective saturation as a function of porepressure
@@ -51,7 +51,7 @@ public:
    * @param qp the quad point to evaluate effective saturation at
    * @param result the derivtives will be placed in this array
    */
-  void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const;
+  void d2seff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const;
 
 protected:
 

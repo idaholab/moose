@@ -38,7 +38,7 @@ protected:
 
   virtual Real computeQpIntegral();
 
-  VariableValue & _u_old;
+  const VariableValue & _u_old;
 };
 
 #endif //ELEMENTL2DIFF_H

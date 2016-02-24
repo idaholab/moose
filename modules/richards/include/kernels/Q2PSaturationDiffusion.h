@@ -47,7 +47,7 @@ protected:
   const RichardsRelPerm & _relperm;
 
   /// porepressure at the quadpoints
-  VariableValue & _pp;
+  const VariableValue & _pp;
 
   /// variable number of the porepressure variable
   unsigned int _pp_var_num;
@@ -59,7 +59,6 @@ protected:
   const MaterialProperty<RealTensorValue> & _permeability;
 
   Real _diffusivity;
-
 };
 
 #endif //Q2PSATURATIONDIFFUSION

@@ -39,22 +39,22 @@ protected:
   // virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Coupled variables
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
 
-  VariableValue& _rho;
-  VariableValue& _rho_u;
-  VariableValue& _rho_v;
-  VariableValue& _rho_w;
-  VariableValue& _rho_e;
+  const VariableValue & _rho;
+  const VariableValue & _rho_u;
+  const VariableValue & _rho_v;
+  const VariableValue & _rho_w;
+  const VariableValue & _rho_e;
 
   // Gradients
-  VariableGradient& _grad_rho;
-  VariableGradient& _grad_rho_u;
-  VariableGradient& _grad_rho_v;
-  VariableGradient& _grad_rho_w;
-  VariableGradient& _grad_rho_e;
+  const VariableGradient & _grad_rho;
+  const VariableGradient & _grad_rho_u;
+  const VariableGradient & _grad_rho_v;
+  const VariableGradient & _grad_rho_w;
+  const VariableGradient & _grad_rho_e;
 
   // Variable numberings
   unsigned _rho_var_number;

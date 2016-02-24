@@ -27,7 +27,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Coupled variables
-  VariableValue & _enthalpy;
+  const VariableValue & _enthalpy;
 };
 
 #endif

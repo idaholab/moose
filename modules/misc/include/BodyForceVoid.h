@@ -28,7 +28,7 @@ protected:
   virtual Real computeQpResidual();
 
   Real _value;
-  MooseArray<Real> & _c;
+  const VariableValue & _c;
   const bool _has_function;
   Function * const _function;
 };

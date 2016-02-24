@@ -28,7 +28,7 @@ protected:
   const MaterialProperty<Real> & _prop;
 
   bool _has_coupled_var;
-  VariableValue * _coupled_var;
+  const VariableValue * _coupled_var;
   unsigned int _coupled_var_var;
 };
 

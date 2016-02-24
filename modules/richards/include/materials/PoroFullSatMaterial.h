@@ -48,7 +48,7 @@ protected:
   bool _constant_porosity;
 
   /// porepressure variable
-  VariableValue & _porepressure;
+  const VariableValue & _porepressure;
 
   /// name given by user to the porepressure variable
   std::string _porepressure_name;
@@ -57,7 +57,7 @@ protected:
   unsigned int _ndisp;
 
   /// grad(displacement)
-  std::vector<VariableGradient *> _grad_disp;
+  std::vector<const VariableGradient *> _grad_disp;
 
   /// volumetric strain = strain_ii
   MaterialProperty<Real> & _vol_strain;

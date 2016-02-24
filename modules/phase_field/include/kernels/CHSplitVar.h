@@ -24,7 +24,7 @@ protected:
 
 private:
   Real _var_c;
-  VariableGradient & _grad_c;
+  const VariableGradient & _grad_c;
 };
 
 #endif //CHSPLITVAR_H

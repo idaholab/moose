@@ -47,7 +47,7 @@ protected:
   Function & _m_func;
 
   /// the porepressure variable
-  VariableValue & _pp;
+  const VariableValue & _pp;
 
   /// whether to include density*permeability_nn/viscosity in the flux
   bool _use_mobility;
@@ -65,7 +65,7 @@ protected:
   const RichardsRelPerm * _relperm;
 
   /// saturation variable, optional
-  VariableValue & _sat;
+  const VariableValue & _sat;
 
   /// medium permeability
   const MaterialProperty<RealTensorValue> & _permeability;

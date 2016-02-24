@@ -49,7 +49,7 @@ protected:
   std::vector<Real> _sto_v;
 
   /// Coupled primary species
-  std::vector<VariableValue *>  _vals;
+  std::vector<const VariableValue *>  _vals;
 };
 
 #endif //AQUEOUSEQUILIBRIUMRXNAUX_H

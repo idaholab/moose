@@ -30,7 +30,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  VariableValue & _v;
+  const VariableValue & _v;
 };
 
 #endif //COUPLEDEIGENKERNEL_H

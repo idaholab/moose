@@ -96,9 +96,9 @@ protected:
   // std::map<Point, unsigned> _cracked_this_step;
 
   const bool _has_temp;
-  VariableValue & _temperature;
-  VariableValue & _temperature_old;
-  VariableGradient & _temp_grad;
+  const VariableValue & _temperature;
+  const VariableValue & _temperature_old;
+  const VariableGradient & _temp_grad;
   const Real _alpha;
   Function * _alpha_function;
   PiecewiseLinear * _piecewise_linear_alpha_function;

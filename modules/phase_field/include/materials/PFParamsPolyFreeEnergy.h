@@ -21,8 +21,8 @@ protected:
   virtual void computeQpProperties();
 
   ///Variable values
-  VariableValue & _c;
-  VariableValue & _T;
+  const VariableValue & _c;
+  const VariableValue & _T;
 
   ///Mateiral property declarations
   MaterialProperty<Real> & _M;

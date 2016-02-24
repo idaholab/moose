@@ -200,7 +200,7 @@ HomogenizedElasticConstants::computeQpIntegral()
 
     value = 0.0;
 
-    VariableGradient * grad[6][3];
+    const VariableGradient * grad[6][3];
     grad[0][0] = &_grad_disp_x_xx;
     grad[0][1] = &_grad_disp_y_xx;
     grad[0][2] = &_grad_disp_z_xx;

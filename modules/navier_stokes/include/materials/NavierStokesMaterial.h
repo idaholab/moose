@@ -45,9 +45,9 @@ protected:
 
   const unsigned int _mesh_dimension;
 
-  VariableGradient& _grad_u;
-  VariableGradient& _grad_v;
-  VariableGradient& _grad_w;
+  const VariableGradient & _grad_u;
+  const VariableGradient & _grad_v;
+  const VariableGradient & _grad_w;
 
   MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
   MaterialProperty<Real>&            _thermal_conductivity;
@@ -70,7 +70,7 @@ protected:
 
   // Convenient storage for all of the velocity gradient components so
   // we can refer to them in a loop.
-  std::vector<VariableGradient*> _vel_grads;
+  std::vector<const VariableGradient *> _vel_grads;
 
   // Specific heat at constant volume, treated as single
   // constant values.
@@ -80,36 +80,36 @@ protected:
 
   // Coupled values needed to compute strong form residuals
   // for SUPG stabilization...
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
 
   // Temperature is needed to compute speed of sound
-  VariableValue& _temperature;
+  const VariableValue & _temperature;
 
   // Enthalpy is needed in computing energy equation strong residuals
-  VariableValue& _enthalpy;
+  const VariableValue & _enthalpy;
 
   // Main solution variables are all needed for computing strong residuals
-  VariableValue& _rho;
-  VariableValue& _rho_u;
-  VariableValue& _rho_v;
-  VariableValue& _rho_w;
-  VariableValue& _rho_e;
+  const VariableValue & _rho;
+  const VariableValue & _rho_u;
+  const VariableValue & _rho_v;
+  const VariableValue & _rho_w;
+  const VariableValue & _rho_e;
 
   // Time derivative values for dependent variables
-  VariableValue& _drho_dt;
-  VariableValue& _drhou_dt;
-  VariableValue& _drhov_dt;
-  VariableValue& _drhow_dt;
-  VariableValue& _drhoe_dt;
+  const VariableValue & _drho_dt;
+  const VariableValue & _drhou_dt;
+  const VariableValue & _drhov_dt;
+  const VariableValue & _drhow_dt;
+  const VariableValue & _drhoe_dt;
 
   // Gradients
-  VariableGradient& _grad_rho;
-  VariableGradient& _grad_rho_u;
-  VariableGradient& _grad_rho_v;
-  VariableGradient& _grad_rho_w;
-  VariableGradient& _grad_rho_e;
+  const VariableGradient & _grad_rho;
+  const VariableGradient & _grad_rho_u;
+  const VariableGradient & _grad_rho_v;
+  const VariableGradient & _grad_rho_w;
+  const VariableGradient & _grad_rho_e;
 
   // The real-valued material properties representing the element stabilization
   // parameters for each of the equations.

@@ -20,7 +20,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _T_infinity;
+  const VariableValue & _T_infinity;
   const Real _coefficient;
 };
 

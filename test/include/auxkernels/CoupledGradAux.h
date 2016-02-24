@@ -47,7 +47,7 @@ protected:
   /// The number of coupled variable
   int _coupled;
   /// The value of coupled gradient
-  VariableGradient & _coupled_grad;
+  const VariableGradient & _coupled_grad;
 };
 
 #endif //COUPLEDGRADAUX_H

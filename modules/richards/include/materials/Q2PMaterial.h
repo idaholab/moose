@@ -31,8 +31,8 @@ protected:
   Real _material_por;
 
   /// porosity changes.  if not entered they default to zero
-  VariableValue & _por_change;
-  VariableValue & _por_change_old;
+  const VariableValue & _por_change;
+  const VariableValue & _por_change_old;
 
   /// permeability as entered by the user
   RealTensorValue _material_perm;
@@ -46,7 +46,7 @@ protected:
   MaterialProperty<RealTensorValue> & _permeability;
   MaterialProperty<RealVectorValue> & _gravity;
 
-  std::vector<VariableValue *> _perm_change;
+  std::vector<const VariableValue *> _perm_change;
 
   virtual void computeQpProperties();
 };

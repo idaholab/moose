@@ -41,7 +41,7 @@ protected:
   virtual Real computeValue();
 
   /// gradient of the pressure
-  VariableGradient & _grad_pp;
+  const VariableGradient & _grad_pp;
 
   /// fluid weight (gravity*density) as a vector pointing downwards, eg '0 0 -10000'
   RealVectorValue _fluid_weight;

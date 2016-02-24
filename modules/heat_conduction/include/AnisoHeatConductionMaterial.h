@@ -25,7 +25,7 @@ protected:
   virtual void computeProperties();
 
   const bool _has_temp;
-  VariableValue & _temperature;
+  const VariableValue & _temperature;
 
   const Real _my_thermal_conductivity_x;
   const Real _my_thermal_conductivity_y;

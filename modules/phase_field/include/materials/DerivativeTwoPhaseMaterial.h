@@ -35,7 +35,7 @@ protected:
   virtual Real computeD3F(unsigned int i_var, unsigned int j_var, unsigned int k_var);
 
   /// Phase parameter (0=A-phase, 1=B-phase)
-  VariableValue & _eta;
+  const VariableValue & _eta;
 
   /// name of the order parameter variable
   VariableName _eta_name;

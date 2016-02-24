@@ -31,14 +31,14 @@ protected:
 
   const unsigned int _ncrys;
 
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
 
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _gamma;
   const MaterialProperty<Real> & _tgrad_corr_mult;
 
-  VariableGradient * _grad_T;
+  const VariableGradient * _grad_T;
 };
 
 #endif //ACGRGRPOLY_H

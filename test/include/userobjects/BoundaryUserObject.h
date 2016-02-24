@@ -39,7 +39,7 @@ public:
   Real getValue() const { return _value; }
 
 protected:
-  VariableValue & _u;
+  const VariableValue & _u;
 
   Real _value;
 
