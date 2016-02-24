@@ -23,8 +23,9 @@
 #include "libmesh/dof_map.h"
 
 
-MooseVariableBase::MooseVariableBase(unsigned int var_num, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
     _var_num(var_num),
+    _fe_type(fe_type),
     _var_kind(var_kind),
     _subproblem(sys.subproblem()),
     _sys(sys),
@@ -45,9 +46,9 @@ MooseVariableBase::name() const
   return _sys.system().variable(_var_num).name();
 }
 
-unsigned int
+Order
 MooseVariableBase::order() const
 {
-  return static_cast<unsigned int>(_sys.system().variable_type(_var_num).order);
+  return _fe_type.order;
 }
 

@@ -440,6 +440,7 @@ public:
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
+      //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
       MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
@@ -463,7 +464,8 @@ public:
     unsigned int var_num = _sys.add_variable(var_name, type, active_subdomains);
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
-      MooseVariableScalar * var = new MooseVariableScalar(var_num, *this, _subproblem.assembly(tid), _var_kind);
+      //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
+      MooseVariableScalar * var = new MooseVariableScalar(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }

@@ -18,9 +18,6 @@
 #include "MooseVariableBase.h"
 #include "ParallelUniqueId.h"
 
-// libMesh includes
-#include "libmesh/fe_type.h"
-
 // Forward declarations
 class Assembly;
 class SubProblem;
@@ -74,16 +71,6 @@ public:
    * @return true if active on subdomain, false otherwise
    */
   bool activeOnSubdomain(SubdomainID subdomain) const;
-
-  /**
-   * Get the type of finite element object
-   */
-  const FEType feType() const { return _fe_type; }
-
-  /**
-   * Get the order of this variable
-   */
-  Order getOrder() const { return _fe_type.order; }
 
   /**
    * Is this variable nodal
@@ -313,8 +300,6 @@ protected:
 protected:
   /// Thread ID
   THREAD_ID _tid;
-  /// The FEType associated with this variable
-  FEType _fe_type;
 
   /// Quadrature rule for interior
   QBase * & _qrule;

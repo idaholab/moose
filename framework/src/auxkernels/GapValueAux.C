@@ -56,7 +56,7 @@ GapValueAux::GapValueAux(const InputParameters & parameters) :
   if (parameters.isParamValid("normal_smoothing_method"))
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
 
-  Order pairedVarOrder(_moose_var.getOrder());
+  Order pairedVarOrder(_moose_var.order());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   if (pairedVarOrder != gvaOrder && pairedVarOrder != CONSTANT)
     mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
