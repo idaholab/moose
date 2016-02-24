@@ -45,8 +45,7 @@
 
   BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline():_interpolator()
     {
-
-	};
+    };
 
 
   void BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline_init(){

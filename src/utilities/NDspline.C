@@ -366,9 +366,6 @@ double NDSpline::phi(double t){
  if ((fabs(t))<1.0)
   phi_value = 4.0 - 6.0*std::pow(fabs(t),2) + 3.0*std::pow(fabs(t),3);
 
- //if (phi_value!=0.0)
-	 //std::cout<< t <<" , "<< phi_value <<std::endl;
-
  return phi_value;
 }
 
