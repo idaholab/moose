@@ -66,7 +66,7 @@
 
 [Executioner]
   type = Transient
-  end_time = 2000.0
+  end_time = 3000.0
   [./TimeStepper]
     type = TimeSequenceStepper
     time_sequence  = '0  1000.0 2000.0'
