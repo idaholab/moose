@@ -22,5 +22,6 @@
     type = 'Exodiff'
     input = 'transient.i'
     exodiff = 'out_transient.e'
+    group = 'requirements'
   [../]
 []

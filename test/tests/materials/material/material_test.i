@@ -1,3 +1,15 @@
+###########################################################
+# This is a simple test of the Material System. A
+# user-defined Material (MTMaterial) is providing a
+# Real property named "matp" that varies spatially
+# throughout the domain. This property is used as a
+# coefficient by MatDiffusion. It is also output
+# by MaterialRealAux for visualization purposes.
+#
+# @Requirement F4.10
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -57,6 +69,7 @@
   [../]
 []
 
+# Materials System
 [Materials]
   [./mat]
     type = MTMaterial

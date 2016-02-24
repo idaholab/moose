@@ -1,3 +1,15 @@
+###########################################################
+# This is a simple test of the AuxKernel System.
+# Several explicit calculations are being done
+# using spatial variables.
+# This simulation demonstrates coupling, and dependency
+# resolution. For simplicity all AuxVariables in this
+# simulation are constant.
+#
+# @Requirement F5.20
+###########################################################
+
+
 [Mesh]
   file = square.e
 []
@@ -46,6 +58,7 @@
   [../]
 []
 
+# AuxKernel System
 [AuxKernels]
   #Simple Aux Kernel
   [./constant]

@@ -19,5 +19,6 @@
     input = 'hermite-3-1d.i'
     exodiff = 'hermite-3-1d_out.e'
     abs_zero = 1e-07
+    group = 'requirements'
   [../]
 []

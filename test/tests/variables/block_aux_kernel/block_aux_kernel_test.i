@@ -1,3 +1,13 @@
+###########################################################
+# This is a simple test of the AuxVariable System.
+# A single discretized explicit variable is added to the
+# system which is independent of the nonlinear variables
+# being solved for by the solver.
+#
+# @Requirement F5.10
+###########################################################
+
+
 [Mesh]
   file = gap_test.e
   # This test uses the geometric search system, which does not currently work

@@ -1,3 +1,12 @@
+###########################################################
+# This is a test of the custom partitioner system. It
+# demonstrates the usage of a linear partitioner on the
+# elements of a mesh.
+#
+# @Requirement F2.30
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -11,6 +20,7 @@
   ymin = 0.0
   ymax = 10.0
 
+  # Custom linear partitioner
   [./Partitioner]
     type = LibmeshPartitioner
     partitioner = linear
