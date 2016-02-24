@@ -27,25 +27,35 @@ InputParameters validParams<TimeSequenceStepper>()
 
 TimeSequenceStepper::TimeSequenceStepper(const InputParameters & parameters) :
     TimeStepper(parameters),
-    _current_step(declareRestartableData("current_step", (unsigned int) 0))
+    _current_step(declareRestartableData("current_step", (unsigned int) 0)),
+    _time_sequence(declareRestartableData<std::vector<Real> >("time_sequence"))
 {
-  // sync _executioner.startTime and endTime with _time_sequence
-  Real start_time = _executioner.getStartTime();
-  Real end_time = _executioner.endTime();
+  // In case of half transient, transient's end time needs to be reset to
+  // be able to imprint TimeSequenceStepper's end time
+  if (_app.halfTransient())
+    _executioner.endTime() *= 2.0;
 
-  // make sure time sequence is in ascending order
-  std::vector<Real> times = getParam<std::vector<Real> >("time_sequence");
-  for (unsigned int j = 0; j < times.size() - 1; j++)
-    if (times[j + 1] <= times[j])
-      mooseError("time_sequence must be in ascending order.");
-
-  _time_sequence.push_back(start_time);
-  for (unsigned int j = 0; j < times.size(); j++)
+  // only set up _time_sequence if the app is _not_ restarting or recovering
+  if (!_app.isRecovering() && ! _app.isRestarting())
   {
-    if (times[j] > start_time && times[j] < end_time)
-      _time_sequence.push_back(times[j]);
+    // sync _executioner.startTime and endTime with _time_sequence
+    Real start_time = _executioner.getStartTime();
+    Real end_time = _executioner.endTime();
+
+    // make sure time sequence is in ascending order
+    std::vector<Real> times = getParam<std::vector<Real> >("time_sequence");
+    for (unsigned int j = 0; j < times.size() - 1; j++)
+      if (times[j + 1] <= times[j])
+        mooseError("time_sequence must be in ascending order.");
+
+    _time_sequence.push_back(start_time);
+    for (unsigned int j = 0; j < times.size(); j++)
+    {
+      if (times[j] > start_time && times[j] < end_time)
+        _time_sequence.push_back(times[j]);
+    }
+    _time_sequence.push_back(end_time);
   }
-  _time_sequence.push_back(end_time);
 
   if (_app.halfTransient())
   {
