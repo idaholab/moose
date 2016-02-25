@@ -22,6 +22,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
+#include "XFEMInterface.h"
 
 // libMesh
 #include "libmesh/quadrature_gauss.h"
@@ -421,6 +422,9 @@ Assembly::reinitFE(const Elem * elem)
 
   if (do_caching)
     efesd->_invalidated = false;
+
+  if (_xfem != NULL)
+    modifyWeightsDueToXFEM(elem);
 }
 
 void
@@ -1546,4 +1550,23 @@ Assembly::clearCachedJacobianContributions()
   _cached_jacobian_contribution_rows.reserve(1.2*orig_size);
   _cached_jacobian_contribution_cols.reserve(1.2*orig_size);
   _cached_jacobian_contribution_vals.reserve(1.2*orig_size);
+}
+
+void
+Assembly::modifyWeightsDueToXFEM(const Elem *elem)
+{
+  mooseAssert(_xfem != NULL, "This function should not be called if xfem is inactive");
+
+  if (_current_qrule == _current_qrule_arbitrary)
+    return;
+
+  MooseArray<Real> xfem_weight_multipliers;
+  if (_xfem->getXFEMWeights(xfem_weight_multipliers, elem, _current_qrule,_current_q_points))
+  {
+    mooseAssert(xfem_weight_multipliers.size() == _current_JxW.size(),"Size of weight multipliers in xfem doesn't match number of quadrature points");
+    for (unsigned i = 0; i < xfem_weight_multipliers.size(); i++)
+    {
+      _current_JxW[i] = _current_JxW[i] * xfem_weight_multipliers[i];
+    }
+  }
 }

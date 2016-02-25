@@ -247,6 +247,11 @@ protected:
   /// Whether or not the last solve converged
   bool & _last_solve_converged;
 
+  /// Whether step should be repeated due to xfem modifying the mesh
+  bool _xfem_repeat_step;
+  unsigned int _xfem_update_count;
+  unsigned int _max_xfem_update;
+
   Real _end_time;
   Real _dtmin;
   Real _dtmax;
