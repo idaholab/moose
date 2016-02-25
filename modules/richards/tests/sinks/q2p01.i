@@ -73,6 +73,7 @@
     pressures = '0 1'
     bare_fluxes = '0 1.5'
     multiplying_fcn = 0.1
+    execute_on = 'initial timestep_end'
   [../]
   [./right_water_out]
     type = Q2PPiecewiseLinearSinkFlux
@@ -84,6 +85,7 @@
     fluid_viscosity = 0.8
     fluid_relperm = RelPermWater
     saturation = sat
+    execute_on = 'initial timestep_end'
   [../]
   [./right_gas_out]
     type = Q2PPiecewiseLinearSinkFlux
@@ -95,26 +97,31 @@
     fluid_viscosity = 0.5
     fluid_relperm = RelPermGas
     saturation = sat
+    execute_on = 'initial timestep_end'
   [../]
   [./p_left]
     type = PointValue
     point = '0 0 0'
     variable = pp
+    execute_on = 'initial timestep_end'
   [../]
   [./sat_left]
     type = PointValue
     point = '0 0 0'
     variable = sat
+    execute_on = 'initial timestep_end'
   [../]
   [./p_right]
     type = PointValue
     point = '1 0 0'
     variable = pp
+    execute_on = 'initial timestep_end'
   [../]
   [./sat_right]
     type = PointValue
     point = '1 0 0'
     variable = sat
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -198,8 +205,4 @@
   [./CSV]
     type = CSV
   [../]
-[]
-
-[Problem]
-  use_legacy_uo_initialization = true
 []

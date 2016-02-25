@@ -196,8 +196,5 @@
 [Outputs]
   file_base = s03
   csv = true
-[]
-
-[Problem]
-  use_legacy_uo_initialization = true
+  execute_on = timestep_end
 []

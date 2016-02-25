@@ -72,20 +72,23 @@
   [./area_left]
     type = AreaPostprocessor
     boundary = left
+    execute_on = initial
   [../]
   [./area_right]
     type = AreaPostprocessor
     boundary = right
+    execute_on = initial
   [../]
   [./mass_fin]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
   [./p0]
     type = PointValue
     point = '0 0 0'
     variable = pressure
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -152,8 +155,4 @@
 [Outputs]
   file_base = s_fu_04
   csv = true
-[]
-
-[Problem]
-  use_legacy_uo_initialization = true
 []
