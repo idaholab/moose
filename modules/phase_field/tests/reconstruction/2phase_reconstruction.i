@@ -52,6 +52,10 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+  [./APHI2]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
   [./PHI2]
     family = MONOMIAL
     order = CONSTANT
@@ -89,6 +93,13 @@
     variable = PHASE
     ebsd_reader = ebsd
     data_name = 'phase'
+    execute_on = 'initial'
+  [../]
+  [./avg_phi_aux]
+    type = EBSDReaderAvgDataAux
+    variable = APHI2
+    ebsd_reader = ebsd
+    data_name = 'phi2'
     execute_on = 'initial'
   [../]
 []
