@@ -37,9 +37,9 @@ protected:
   //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Material properties
-  const MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
-  const MaterialProperty<Real>& _dynamic_viscosity;
-  const MaterialProperty<Real>& _thermal_conductivity;
+  const MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
+  const MaterialProperty<Real> & _dynamic_viscosity;
+  const MaterialProperty<Real> & _thermal_conductivity;
 
   // SUPG-related material properties.
   const MaterialProperty<Real> & _hsupg;
@@ -58,25 +58,25 @@ protected:
   const MaterialProperty<std::vector<std::vector<RealTensorValue> > >& _calE;
 
   // "Old" (from previous timestep) coupled variable values.
-//  VariableValue& _rho_old;
-//  VariableValue& _rho_u_old;
-//  VariableValue& _rho_v_old;
-//  VariableValue& _rho_w_old;
-//  VariableValue& _rho_e_old;
+  // const VariableValue & _rho_old;
+  // const VariableValue & _rho_u_old;
+  // const VariableValue & _rho_v_old;
+  // const VariableValue & _rho_w_old;
+  // const VariableValue & _rho_e_old;
 
   // The derivative of "udot" wrt u for each of the momentum variables.
   // This is always 1/dt unless you are using BDF2...
-  VariableValue& _d_rhodot_du;
-  VariableValue& _d_rhoudot_du;
-  VariableValue& _d_rhovdot_du;
-  VariableValue& _d_rhowdot_du;
-  VariableValue& _d_rhoedot_du;
+  const VariableValue & _d_rhodot_du;
+  const VariableValue & _d_rhoudot_du;
+  const VariableValue & _d_rhovdot_du;
+  const VariableValue & _d_rhowdot_du;
+  const VariableValue & _d_rhoedot_du;
 
   // Temperature is need to compute speed of sound
-  VariableValue & _temperature;
+  const VariableValue & _temperature;
 
   // Enthalpy aux variable
-  VariableValue& _enthalpy;
+  const VariableValue & _enthalpy;
 };
 
 #endif //  NSSUPGBASE_H

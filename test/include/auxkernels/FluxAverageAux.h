@@ -43,7 +43,7 @@ protected:
   Real _diffusivity;
 
   /// Coupled gradient
-  VariableGradient & _coupled_gradient;
+  const VariableGradient & _coupled_gradient;
 
   /// The variable we're coupled to
   MooseVariable & _coupled_var;

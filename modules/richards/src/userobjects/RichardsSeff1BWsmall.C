@@ -113,7 +113,7 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
 }
 
 Real
-RichardsSeff1BWsmall::seff(std::vector<VariableValue *> p, unsigned int qp) const
+RichardsSeff1BWsmall::seff(std::vector<const VariableValue *> p, unsigned int qp) const
 {
   Real pp = (*p[0])[qp];
   if (pp >= 0)
@@ -125,7 +125,7 @@ RichardsSeff1BWsmall::seff(std::vector<VariableValue *> p, unsigned int qp) cons
 }
 
 void
-RichardsSeff1BWsmall::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
+RichardsSeff1BWsmall::dseff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<Real> &result) const
 {
   result[0] = 0.0;
 
@@ -139,7 +139,7 @@ RichardsSeff1BWsmall::dseff(std::vector<VariableValue *> p, unsigned int qp, std
 }
 
 void
-RichardsSeff1BWsmall::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
+RichardsSeff1BWsmall::d2seff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const
 {
   result[0][0] = 0.0;
 

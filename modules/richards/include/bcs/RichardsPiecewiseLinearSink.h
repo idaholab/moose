@@ -156,7 +156,7 @@ protected:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
    * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = porepressure of pressure-variable _pvar at node i
    */
-  std::vector<VariableValue *> _ps_at_nodes;
+  std::vector<const VariableValue *> _ps_at_nodes;
 
 
   /// calculates the nodal values of pressure, mobility, and derivatives thereof

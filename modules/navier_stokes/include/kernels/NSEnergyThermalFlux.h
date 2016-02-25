@@ -34,7 +34,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Gradients
-  VariableGradient& _grad_temp;
+  const VariableGradient & _grad_temp;
 
   // Material properties
   const MaterialProperty<Real> &_thermal_conductivity;
@@ -61,7 +61,7 @@ private:
   // Single vector to refer to all gradients.  We have to store
   // pointers since you can't have a vector<Foo&>.  Initialized in
   // the ctor.
-  std::vector<VariableGradient*> _gradU;
+  std::vector<const VariableGradient *> _gradU;
 };
 
 

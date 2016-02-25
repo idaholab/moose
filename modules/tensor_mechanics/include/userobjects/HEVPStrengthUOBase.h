@@ -23,12 +23,6 @@ class HEVPStrengthUOBase : public DiscreteElementUserObject
 {
 public:
   HEVPStrengthUOBase(const InputParameters & parameters);
-  virtual ~HEVPStrengthUOBase() {}
-
-  void initialize() {}
-  void execute() {}
-  void finalize() {}
-  void threadJoin(const UserObject &) {}
 
   virtual bool computeValue(unsigned int, Real &) const = 0;
   virtual bool computeDerivative(unsigned int, const std::string &, Real &) const = 0;

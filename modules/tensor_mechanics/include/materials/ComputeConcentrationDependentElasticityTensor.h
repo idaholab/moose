@@ -25,7 +25,7 @@ protected:
   /// Elasticity tensor for phase with concentration 1.
   ElasticityTensorR4 _Cijkl1;
   /// Concentration variable.
-  VariableValue & _c;
+  const VariableValue & _c;
   VariableName _c_name;
 
   /// Derivative of elasticity tensor with respect to concentration.

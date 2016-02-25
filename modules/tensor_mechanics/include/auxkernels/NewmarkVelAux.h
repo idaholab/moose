@@ -19,8 +19,8 @@ class NewmarkVelAux : public AuxKernel
 public:
 
   /**
-  *Calcualtes velocity using Newmark time integration scheme
-  */
+   * Calcualtes velocity using Newmark time integration scheme
+   */
   NewmarkVelAux(const InputParameters & parameters);
 
   virtual ~NewmarkVelAux() {}
@@ -28,10 +28,9 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _accel_old;
-  VariableValue & _accel;
+  const VariableValue & _accel_old;
+  const VariableValue & _accel;
   Real _gamma;
-
 };
 
 #endif //NEWMARKVELAUX_H

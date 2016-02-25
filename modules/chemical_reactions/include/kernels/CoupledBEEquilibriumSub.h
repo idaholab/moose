@@ -78,10 +78,10 @@ private:
 
   std::vector<unsigned int> _vars;
   /// Coupled primary species concentrations.
-  std::vector<VariableValue *> _v_vals;
+  std::vector<const VariableValue *> _v_vals;
   /// Coupled old values of primary species concentrations.
-  std::vector<VariableValue *> _v_vals_old;
+  std::vector<const VariableValue *> _v_vals_old;
   /// The old values of the primary species concentration.
-  VariableValue & _u_old;
+  const VariableValue & _u_old;
 };
 #endif //COUPLEDBEEQUILIBRIUMSUB_H

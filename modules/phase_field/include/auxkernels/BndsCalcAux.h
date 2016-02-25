@@ -27,7 +27,7 @@ protected:
   virtual Real computeValue();
 
   unsigned int _ncrys;
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
 };
 
 #endif //BNDSCALCAUX_H

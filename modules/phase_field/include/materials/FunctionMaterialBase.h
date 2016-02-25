@@ -45,7 +45,7 @@ protected:
   }
 
   /// Coupled variables for function arguments
-  std::vector<VariableValue *> _args;
+  std::vector<const VariableValue *> _args;
 
   /**
    * Name of the function value material property and used as a base name to

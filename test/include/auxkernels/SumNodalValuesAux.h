@@ -36,7 +36,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _sum_var;
+  const VariableValue & _sum_var;
 };
 
 #endif /* SUMNODALVALUESAUX_H_ */

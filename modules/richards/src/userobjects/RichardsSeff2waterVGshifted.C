@@ -33,7 +33,7 @@ RichardsSeff2waterVGshifted::RichardsSeff2waterVGshifted(const InputParameters &
 
 
 Real
-RichardsSeff2waterVGshifted::seff(std::vector<VariableValue *> p, unsigned int qp) const
+RichardsSeff2waterVGshifted::seff(std::vector<const VariableValue *> p, unsigned int qp) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
   negpc = negpc - _shift;
@@ -41,7 +41,7 @@ RichardsSeff2waterVGshifted::seff(std::vector<VariableValue *> p, unsigned int q
 }
 
 void
-RichardsSeff2waterVGshifted::dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> & result) const
+RichardsSeff2waterVGshifted::dseff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<Real> & result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
   negpc = negpc - _shift;
@@ -50,7 +50,7 @@ RichardsSeff2waterVGshifted::dseff(std::vector<VariableValue *> p, unsigned int 
 }
 
 void
-RichardsSeff2waterVGshifted::d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const
+RichardsSeff2waterVGshifted::d2seff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > & result) const
 {
   Real negpc = (*p[0])[qp] - (*p[1])[qp];
   negpc = negpc - _shift;

@@ -34,7 +34,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Aux Variables
-  VariableValue& _pressure;
+  const VariableValue & _pressure;
 
   // Required parameters
   Real _specified_density;

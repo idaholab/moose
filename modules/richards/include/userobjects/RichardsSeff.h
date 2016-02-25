@@ -35,7 +35,7 @@ public:
    * @param p the porepressure(s).  Eg (*p[0])[qp] is the zeroth pressure evaluated at quadpoint qp
    * @param qp the quad point of the element to evaluate effective saturation at.
    */
-  virtual Real seff(std::vector<VariableValue *> p, unsigned int qp) const = 0;
+  virtual Real seff(std::vector<const VariableValue *> p, unsigned int qp) const = 0;
 
   /**
    * derivative(s) of effective saturation as a function of porepressure(s) at given quadpoint of the element
@@ -44,7 +44,7 @@ public:
    * @param qp the quad point of the element to evaluate the derivative at
    * @param result the derivtives will be placed in this array
    */
-  virtual void dseff(std::vector<VariableValue *> p, unsigned int qp, std::vector<Real> &result) const = 0;
+  virtual void dseff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<Real> &result) const = 0;
 
   /**
    * second derivative(s) of effective saturation as a function of porepressure(s) at given quadpoint of the element
@@ -53,8 +53,8 @@ public:
    * @param qp the quad point of the element to evaluate the derivative at
    * @param result the derivtives will be placed in this array
    */
-  //virtual std::vector<std::vector<Real> > d2seff(std::vector<VariableValue *> p, unsigned int qp) const = 0;
-  virtual void d2seff(std::vector<VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const = 0;
+  //virtual std::vector<std::vector<Real> > d2seff(std::vector<const VariableValue *> p, unsigned int qp) const = 0;
+  virtual void d2seff(std::vector<const VariableValue *> p, unsigned int qp, std::vector<std::vector<Real> > &result) const = 0;
 
 };
 

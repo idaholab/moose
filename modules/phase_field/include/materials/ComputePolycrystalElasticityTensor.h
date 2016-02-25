@@ -47,7 +47,7 @@ protected:
   unsigned int _stiffness_buffer;
 
   /// Order parameters
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
 
   /// vector of elasticity tensor material properties
   std::vector< MaterialProperty<ElasticityTensorR4> *> _D_elastic_tensor;

@@ -40,9 +40,9 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _rho;
-  VariableValue & _rhoe;
-  VariableValue & _pressure;
+  const VariableValue & _rho;
+  const VariableValue & _rhoe;
+  const VariableValue & _pressure;
 
   Real _gamma;
 };

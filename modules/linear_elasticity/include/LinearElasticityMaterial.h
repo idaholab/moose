@@ -24,7 +24,7 @@ protected:
 private:
 
   bool _has_temp;
-  VariableValue & _temp;
+  const VariableValue & _temp;
 
   Real _my_thermal_expansion;
   Real _my_youngs_modulus;

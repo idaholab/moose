@@ -48,8 +48,8 @@ public:
 protected:
 
   const bool _has_temp;
-  VariableValue & _temperature;
-  VariableValue & _temperature_old;
+  const VariableValue & _temperature;
+  const VariableValue & _temperature_old;
   const Real _alpha;
   Function * _alpha_function;
   bool _has_stress_free_temp;

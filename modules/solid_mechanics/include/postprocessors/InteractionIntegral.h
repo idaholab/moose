@@ -32,7 +32,7 @@ protected:
   virtual void initialSetup();
   virtual Real computeQpIntegral();
   /// The gradient of the scalar q field
-  VariableGradient & _grad_of_scalar_q;
+  const VariableGradient & _grad_of_scalar_q;
   const CrackFrontDefinition * const _crack_front_definition;
   bool _has_crack_front_point_index;
   const unsigned int _crack_front_point_index;
@@ -40,9 +40,9 @@ protected:
   const MaterialProperty<ColumnMajorMatrix> & _Eshelby_tensor;
   const MaterialProperty<SymmTensor> & _stress;
   const MaterialProperty<SymmTensor> & _strain;
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
   std::string _aux_stress_name;
   const MaterialProperty<ColumnMajorMatrix> & _aux_stress;
   std::string _aux_grad_disp_name;

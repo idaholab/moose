@@ -30,7 +30,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _deformation_gradient;
 
   const MaterialProperty<RankTwoTensor> & _stress_free_strain_increment;
-  VariableValue & _T_old;
+  const VariableValue & _T_old;
 };
 
 #endif //COMPUTEINCREMENTALSMALLSTRAIN_H

@@ -29,9 +29,9 @@ protected:
   virtual Real computeQpIntegral();
 
 private:
-  VariableGradient & _grad_temp_x;
-  VariableGradient & _grad_temp_y;
-  VariableGradient & _grad_temp_z;
+  const VariableGradient & _grad_temp_x;
+  const VariableGradient & _grad_temp_y;
+  const VariableGradient & _grad_temp_z;
   const unsigned int _component;
   const MaterialProperty<Real> & _diffusion_coefficient;
   Real _volume;

@@ -30,9 +30,9 @@ protected:
 
   const bool _large_strain;
 
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
 
 };
 

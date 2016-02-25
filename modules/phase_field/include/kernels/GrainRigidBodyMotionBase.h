@@ -32,15 +32,15 @@ protected:
   unsigned int _c_var;
 
   /// Variable value for the concentration
-  VariableValue & _c;
+  const VariableValue & _c;
 
   /// Variable gradient for the concentration
-  VariableGradient & _grad_c;
+  const VariableGradient & _grad_c;
 
   VariableName _c_name;
   unsigned int _ncrys;
   /// Variable value for the order parameters
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
 
   /// type of force density material

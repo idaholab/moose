@@ -28,11 +28,11 @@ protected:
 
   /// Coupled displacement variables
   unsigned int _ndisp;
-  std::vector<VariableValue *> _disp;
-  std::vector<VariableGradient *> _grad_disp;
-  std::vector<VariableGradient *> _grad_disp_old;
+  std::vector<const VariableValue *> _disp;
+  std::vector<const VariableGradient *> _grad_disp;
+  std::vector<const VariableGradient *> _grad_disp_old;
 
-  VariableValue & _T;
+  const VariableValue & _T;
   const Real _T0;
   const Real _thermal_expansion_coeff;
 

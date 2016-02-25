@@ -42,7 +42,7 @@ protected:
    */
 
   std::string _v_name;
-  VariableValue & _v;
+  const VariableValue & _v;
   unsigned int _v_var;
 
   /// Reaction rate

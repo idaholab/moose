@@ -30,7 +30,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _u_old;
+  const VariableValue & _u_old;
 };
 
 #endif //MMSIMPLICITEULER_H_

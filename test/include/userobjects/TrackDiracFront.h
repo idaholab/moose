@@ -67,7 +67,7 @@ protected:
 
   std::vector<std::pair<Elem *, Point> > _dirac_points;
 
-  VariableValue & _var_value;
+  const VariableValue & _var_value;
 };
 
 #endif //TRACKDIRACFRONT_H

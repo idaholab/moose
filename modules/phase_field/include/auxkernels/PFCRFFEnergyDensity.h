@@ -19,7 +19,7 @@ protected:
   virtual Real computeValue();
 
   unsigned int _order;
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
 
   Real _a;
   Real _b;

@@ -36,7 +36,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _accumulate_from;
+  const VariableValue & _accumulate_from;
 };
 
 #endif //ACCUMULATEAUX_H

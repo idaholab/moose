@@ -109,25 +109,25 @@ RichardsVarNames::richards_names() const
   return _the_names;
 }
 
-VariableValue *
+const VariableValue *
 RichardsVarNames::richards_vals(unsigned int richards_var_num) const
 {
   return _moose_var_value[richards_var_num]; // moose_var_value is a vector of pointers to VariableValuees
 }
 
-VariableValue *
+const VariableValue *
 RichardsVarNames::richards_vals_old(unsigned int richards_var_num) const
 {
   return _moose_var_value_old[richards_var_num];
 }
 
-VariableGradient *
+const VariableGradient *
 RichardsVarNames::grad_var(unsigned int richards_var_num) const
 {
   return _moose_grad_var[richards_var_num];
 }
 
-MooseVariable *
+const MooseVariable *
 RichardsVarNames::raw_var(unsigned int richards_var_num) const
 {
   return _moose_raw_var[richards_var_num];
@@ -139,13 +139,13 @@ RichardsVarNames::var_types() const
   return _var_types;
 }
 
-VariableValue *
+const VariableValue *
 RichardsVarNames::nodal_var(unsigned int richards_var_num) const
 {
   return _moose_nodal_var_value[richards_var_num];
 }
 
-VariableValue *
+const VariableValue *
 RichardsVarNames::nodal_var_old(unsigned int richards_var_num) const
 {
   return _moose_nodal_var_value_old[richards_var_num];

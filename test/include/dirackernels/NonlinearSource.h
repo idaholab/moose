@@ -40,7 +40,7 @@ public:
 
 protected:
   // A coupled variable this kernel depends on
-  VariableValue & _coupled_var;
+  const VariableValue & _coupled_var;
   unsigned _coupled_var_num;
 
   // A constant factor which controls the strength of the source.

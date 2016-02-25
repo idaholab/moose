@@ -39,7 +39,7 @@ protected:
   const RichardsDensity & _density;
 
   /// the other variable (this is porepressure if the Variable is saturation)
-  VariableValue & _other_var_nodal;
+  const VariableValue & _other_var_nodal;
 
   /// variable number of the other variable
   unsigned int _other_var_num;
@@ -49,7 +49,6 @@ protected:
 
   /// current value of the porosity
   const MaterialProperty<Real> & _porosity;
-
 };
 
 #endif //Q2PNODALMASS

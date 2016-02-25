@@ -35,13 +35,13 @@ private:
   Function & _force_z;
 
   /// concentration field considered to be the density of particles
-  VariableValue & _c;
+  const VariableValue & _c;
   VariableName _c_name;
   /// stiffness constant
   Real _k;
 
   unsigned int _ncrys;
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
 
   /// force density material
   MaterialProperty<std::vector<RealGradient> > & _dF;

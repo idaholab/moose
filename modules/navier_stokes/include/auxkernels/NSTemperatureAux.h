@@ -37,11 +37,11 @@ protected:
   virtual Real computeValue();
 
   // The temperature depends on velocities and total energy
-  VariableValue & _rho;
-  VariableValue & _u_vel;
-  VariableValue & _v_vel;
-  VariableValue & _w_vel;
-  VariableValue & _rhoe;
+  const VariableValue & _rho;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
+  const VariableValue & _rhoe;
 
   // Specific heat at constant volume, treated as a single
   // constant value.

@@ -33,8 +33,8 @@ protected:
   virtual RealGradient precomputeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _c;
-  VariableGradient & _grad_c;
+  const VariableValue & _c;
+  const VariableGradient & _grad_c;
   unsigned int _c_var;
 
 private:

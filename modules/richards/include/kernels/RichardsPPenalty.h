@@ -39,11 +39,10 @@ private:
   Real _a;
 
   /// Kernel = a*(_lower - variable) for variable<lower and zero otherwise
-  VariableValue & _lower;
+  const VariableValue & _lower;
 
   /// moose variable number of the _lower variable (needed for OffDiagJacobian)
   unsigned int _lower_var_num;
-
 };
 
 #endif //RICHARDSPPENALTY

@@ -31,7 +31,7 @@ protected:
   virtual Real computeValue();
 
   /// porepressure
-  VariableValue & _pressure_var;
+  const VariableValue & _pressure_var;
 
   /// userobject that defines density as a fcn of porepressure
   const RichardsDensity & _density_UO;

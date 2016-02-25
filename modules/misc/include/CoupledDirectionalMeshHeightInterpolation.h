@@ -45,7 +45,7 @@ protected:
   virtual Real computeValue();
 
   /// The value of a coupled variable to modulate
-  VariableValue & _coupled_val;
+  const VariableValue & _coupled_val;
 
   /// The direction to interpolate in
   unsigned int _direction;

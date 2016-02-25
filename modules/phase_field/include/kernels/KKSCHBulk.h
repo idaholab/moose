@@ -58,7 +58,7 @@ private:
   std::vector<const MaterialProperty<Real> *> _third_derivatives_ca;
 
   /// Gradients for all coupled variables
-  std::vector<VariableGradient *> _grad_args;
+  std::vector<const VariableGradient *> _grad_args;
 
   /// h(eta) material property
   const MaterialProperty<Real> & _prop_h;

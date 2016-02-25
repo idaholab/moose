@@ -35,7 +35,7 @@ public:
 protected:
 
   /// old variable value at quad points
-  VariableValue & _u_old;
+  const VariableValue & _u_old;
 
   /// max(abs(_u - _u_old))
   Real _value;

@@ -31,28 +31,34 @@
     compiler = 'CLANG GCC'
   [../]
 
+  # None of these tests are stable on Intel
+  # See #6347
   [./cyl3D]
     type = Exodiff
     input = 'cyl3D.i'
     exodiff = 'cyl3D_out.e'
     superlu = true
+    compiler = "GCC CLANG"
   [../]
   [./cyl2D]
     type = Exodiff
     input = 'cyl2D.i'
     exodiff = 'cyl2D_out.e'
     superlu = true
+    compiler = "GCC CLANG"
   [../]
   [./sphere3D]
     type = Exodiff
     input = 'sphere3D.i'
     exodiff = 'sphere3D_out.e'
     superlu = true
+    compiler = "GCC CLANG"
   [../]
   [./sphere2DRZ]
     type = Exodiff
     input = 'sphere2DRZ.i'
     exodiff = 'sphere2DRZ_out.e'
     superlu = true
+    compiler = "GCC CLANG"
   [../]
 []

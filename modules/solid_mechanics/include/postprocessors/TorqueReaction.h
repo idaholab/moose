@@ -37,9 +37,9 @@ protected:
   MooseVariable & _react_y_var;
   MooseVariable & _react_z_var;
 
-  VariableValue & _react_x;
-  VariableValue & _react_y;
-  VariableValue & _react_z;
+  const VariableValue & _react_x;
+  const VariableValue & _react_y;
+  const VariableValue & _react_z;
 
   const Point _axis_origin;
   const Point _axis_direction;

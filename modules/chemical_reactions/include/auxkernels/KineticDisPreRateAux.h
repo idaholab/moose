@@ -36,7 +36,7 @@ protected:
   Real _log_k,_r_area,_ref_kconst,_e_act,_gas_const,_ref_temp,_sys_temp;
   std::vector<Real> _sto_v;
 
-  std::vector<VariableValue *> _vals;
+  std::vector<const VariableValue *> _vals;
 };
 
 #endif //KINETICDISPRERATEAUX_H

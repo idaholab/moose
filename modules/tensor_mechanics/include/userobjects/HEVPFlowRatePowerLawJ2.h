@@ -23,7 +23,6 @@ class HEVPFlowRatePowerLawJ2 : public HEVPFlowRateUOBase
 {
 public:
   HEVPFlowRatePowerLawJ2(const InputParameters & parameters);
-  virtual ~HEVPFlowRatePowerLawJ2() {}
 
   virtual bool computeValue(unsigned int, Real &) const;
   virtual bool computeDirection(unsigned int, RankTwoTensor &) const;

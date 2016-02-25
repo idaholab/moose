@@ -33,8 +33,8 @@ public:
   virtual Real value(const Point & /*p*/);
 
 protected:
-  VariableValue & _var1;
-  VariableValue & _var2;
+  const VariableValue & _var1;
+  const VariableValue & _var2;
 };
 
 

@@ -72,10 +72,10 @@ protected:
 
 
   /// grad_i grad_j porepressure.  This is used in SUPG
-  VariableSecond & _second_u;
+  const VariableSecond & _second_u;
 
   /// interpolation function for the _second_u
-  VariablePhiSecond & _second_phi;
+  const VariablePhiSecond & _second_phi;
 
   /// SUPGtau*SUPGvel (a vector of these if multiphase)
   const MaterialProperty<std::vector<RealVectorValue> >&_tauvel_SUPG;

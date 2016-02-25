@@ -50,7 +50,6 @@ private:
 
   const VariableValue & _area;
   const std::vector<RealGradient> * _orientation;
-
 };
 
 template<>

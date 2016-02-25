@@ -50,8 +50,8 @@ private:
   Real _mr;
 
   unsigned int _ncrys;
-  std::vector<VariableValue *> _vals;
-  std::vector<VariableGradient *> _grad_vals;
+  std::vector<const VariableValue *> _vals;
+  std::vector<const VariableGradient *> _grad_vals;
   VariableName _c_name;
   /// type of force density material
   std::string _base_name;

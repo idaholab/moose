@@ -40,13 +40,13 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  VariableValue & _ca;
+  const VariableValue & _ca;
   unsigned int _ca_var;
 
-  VariableValue & _c;
+  const VariableValue & _c;
   unsigned int _c_var;
 
-  VariableValue & _eta;
+  const VariableValue & _eta;
   unsigned int _eta_var;
 
   /// Switching function \f$ h(\eta) \f$

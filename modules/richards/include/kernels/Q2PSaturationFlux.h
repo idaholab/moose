@@ -93,13 +93,13 @@ protected:
   const RichardsDensity & _density;
 
   /// porepressure at the quadpoints
-  VariableValue & _pp;
+  const VariableValue & _pp;
 
   /// grad(porepressure) at the quadpoints
-  VariableGradient & _grad_pp;
+  const VariableGradient & _grad_pp;
 
   /// porepressure at the nodes
-  VariableValue & _pp_nodal;
+  const VariableValue & _pp_nodal;
 
   /// variable number of the porepressure variable
   unsigned int _pp_var;

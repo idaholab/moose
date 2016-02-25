@@ -22,7 +22,6 @@ class HEVPLinearHardening : public HEVPStrengthUOBase
 {
 public:
   HEVPLinearHardening(const InputParameters & parameters);
-  virtual ~HEVPLinearHardening() {}
 
   virtual bool computeValue(unsigned int, Real &) const;
   virtual bool computeDerivative(unsigned int, const std::string &, Real &) const;

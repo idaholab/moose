@@ -30,8 +30,8 @@ private:
   MaterialProperty<Real> & _eps;
   MaterialProperty<Real> & _deps;
 
-  VariableValue & _u;
-  VariableGradient & _grad_u;
+  const VariableValue & _u;
+  const VariableGradient & _grad_u;
 };
 
 #endif //INTERFACEORIENTATIONMATERIAL_H

@@ -33,10 +33,10 @@ protected:
   unsigned int _T_var;
 
   /// Coupled variable for the temperature
-  VariableValue & _T;
+  const VariableValue & _T;
 
   /// Variable gradient for temperature
-  VariableGradient & _grad_T;
+  const VariableGradient & _grad_T;
 
   /// is the kernel used in a coupled form?
   const bool _is_coupled;
@@ -45,7 +45,7 @@ protected:
   unsigned int _c_var;
 
   /// Variable value for the concentration
-  VariableValue & _c;
+  const VariableValue & _c;
 
   /// Diffusivity material property
   const MaterialProperty<Real> & _D;
