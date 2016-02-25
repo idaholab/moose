@@ -45,7 +45,7 @@ protected:
   int _component;
 
   /// The gradient of a coupled variable
-  VariableGradient & _pressure_gradient;
+  const VariableGradient & _pressure_gradient;
 
   /// Holds the permeability and viscosity from the material system
   const MaterialProperty<Real> & _permeability;

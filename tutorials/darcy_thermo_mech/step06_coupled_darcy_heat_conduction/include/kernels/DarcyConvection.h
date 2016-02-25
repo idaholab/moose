@@ -41,7 +41,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// The gradient of pressure
-  VariableGradient & _pressure_gradient;
+  const VariableGradient & _pressure_gradient;
 
   /// Coupling identifier for the pressure.  This is used to uniquely
   /// identify a coupled variable
