@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'layered_integral_test.i'
     exodiff = 'out.e'
+    group = 'requirements'
   [../]
 
   [./average_sample]

@@ -11,6 +11,7 @@
     input = 'console.i'
     expect_out = '| time           | num_aux        | num_vars       |'
     match_literal = True
+    group = 'requirements'
   [../]
   [./scalar_variables]
     # Test that the first header line for the wrapped scalar AuxVariable table is correct
@@ -35,6 +36,7 @@
     check_files = 'console_file_system_information_out.txt'
     file_expect_out = 'Num\s*DOFs:\s*242'
     recover = false
+    group = 'requirements'
   [../]
   [./file_postprocessor]
     # Test that file contains regex
@@ -44,6 +46,7 @@
     check_files = 'console_file_postprocessor_out.txt'
     file_expect_out = '\| time\s*\| num_aux\s*\| num_vars\s*\|\n'
     recover = false
+    group = 'requirements'
   [../]
   [./file_scalar_aux]
     # Test that file contains regex
@@ -53,6 +56,7 @@
     check_files = 'console_file_scalar_aux_out.txt'
     file_expect_out = '\| time\s*?\| aux0_0\s*?\|\n'
     recover = false
+    group = 'requirements'
   [../]
   [./file_solve_log]
     # Test that file contains regex
@@ -62,6 +66,7 @@
     check_files = 'console_file_solve_log_out.txt'
     file_expect_out = 'Moose\sTest\sPerformance:'
     recover = false
+    group = 'requirements'
   [../]
   [./norms]
     # Test that the variable norms are being output
@@ -69,6 +74,7 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/all_variable_norms=true'
     expect_out = 'Variable Residual Norms:'
+    group = 'requirements'
   [../]
   [./timing]
     # Tests that the --timing enables all logs
@@ -76,6 +82,7 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/perf_log=false --timing'
     expect_out = 'Moose\sTest\sPerformance:'
+    group = 'requirements'
   [../]
   [./transient]
     # Test the transient console output, with negative start-time
@@ -108,6 +115,7 @@
     input = 'console.i'
     cli_args = '--show-input'
     expect_out = '\[\./screen\]'
+    group = 'requirements'
   [../]
   [./print_linear_residuals_disable]
     # Tests that using 'output_on' inside console disables flag to show linear residuals
@@ -147,5 +155,6 @@
     type = RunApp
     input = 'console_final.i'
     expect_out = 'Time\sStep\s11'
+    group = 'requirements'
   [../]
 []

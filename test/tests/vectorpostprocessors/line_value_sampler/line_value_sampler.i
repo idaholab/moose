@@ -1,3 +1,12 @@
+###########################################################
+# This is a simple test of the Vector Postprocessor
+# System. A LineValueSampler is placed inside of a 2D
+# domain to sample solution points uniformly along a line.
+#
+# @Requirement F6.30
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -50,6 +59,7 @@
   [../]
 []
 
+# Vector Postprocessor System
 [VectorPostprocessors]
   [./line_sample]
     type = LineValueSampler

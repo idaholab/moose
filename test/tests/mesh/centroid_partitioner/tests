@@ -6,5 +6,6 @@
     max_parallel = 4
     min_parallel = 4
     scale_refine = 2
+    group = 'requirements'
   [../]
 []

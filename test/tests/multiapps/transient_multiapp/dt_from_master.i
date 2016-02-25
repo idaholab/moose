@@ -1,3 +1,12 @@
+###########################################################
+# This is a test of the Multiapp System. This test solves
+# four independent applications spaced throughout a
+# master domain interleaved with a master solve.
+#
+# @Requirement F7.10
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

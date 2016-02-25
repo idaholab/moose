@@ -1,3 +1,13 @@
+###########################################################
+# This test exercises the parallel computation aspect of
+# the framework. A Centroid partitioner is used to split
+# the mesh into chunks for several processors along a
+# vector (y-axis).
+#
+# @Requirement F2.30
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

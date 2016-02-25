@@ -1,3 +1,16 @@
+###########################################################
+# This test exercises the restart system and verifies
+# correctness with parallel computation, but distributed
+# and with threading.
+#
+# See kernel_restartable.i
+#
+# @Requirement F1.60
+# @Requirement P1.10
+# @Requirement P1.20
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
