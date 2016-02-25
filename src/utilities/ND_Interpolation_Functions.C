@@ -301,16 +301,12 @@ bool NDInterpolation::pivotCellCheck(std::vector<std::vector<double> >& cell, do
 
  bool outcome = true;
 
- //std::cout<< cell[0][0] << ";"<< cell[0][1] << ";"<< cell[1][0] << ";"<< cell[1][1];
-
  for (unsigned int n=1; n<cell.size(); n++){
   if (vertexOutcome(cell.at(n-1),F) == vertexOutcome(cell.at(n),F))
    outcome = outcome && true;
   else
    outcome = outcome && false;
  }
-
- //std::cout<<" out: " << outcome << std::endl;
  return outcome;
 }
 
@@ -352,8 +348,6 @@ void NDInterpolation::refinedCellDivision(std::vector<std::vector<std::vector<do
   std::vector<std::vector<double> > newCell = generateNewCell(NDcoordinate, cell.at(0), dxs, _dimensions);
   refinedCell.push_back(newCell);
  }
-
- //std::cout<< "refinedCell.size: "<< refinedCell.size() << std::endl;
 }
 
 std::vector<int> NDInterpolation::arrayConverter(int oneDcoordinate, int divisions, int n_dimensions){
@@ -415,10 +409,6 @@ std::vector<double> NDInterpolation::getCellCenter(std::vector<std::vector<doubl
 
  std::vector<double> dxs (_dimensions);
  std::vector<double> center (_dimensions);
-
-// for (unsigned int i=0; i<cell.size(); i++){
-//       std::cout<< "cc: " << cell.at(i).at(0) << " " << cell.at(i).at(1) << std::endl;
-// }
 
  for (int i=0; i<_dimensions; i++){
   int vertexLoc = (int)pow(2,i);
