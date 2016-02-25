@@ -5,6 +5,7 @@
     exodiff = 'custom_linear_partitioner_test_out.e'
     min_parallel = 2
     max_parallel = 4
+    group = 'requirements'
   [../]
   [./custom_linear_partitioner_restart]
     type = 'Exodiff'
@@ -12,5 +13,6 @@
     exodiff = 'custom_linear_partitioner_restart_test_out.e'
     min_parallel = 2
     max_parallel = 4
+    group = 'requirements'
   [../]
 []

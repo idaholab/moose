@@ -3,6 +3,7 @@
     type = 'RunApp'
     input = 'restartable_types.i'
     recover = false
+    group = 'requirements'
   [../]
 
   [./second]
@@ -11,6 +12,7 @@
     input = 'restartable_types2.i'
     prereq = first
     recover = false
+    group = 'requirements'
   [../]
 
   [./first_parallel]
@@ -19,6 +21,7 @@
     recover = false
     min_parallel = 2
     prereq = second
+    group = 'requirements'
   [../]
 
   [./second_parallel]
@@ -28,5 +31,6 @@
     prereq = first_parallel
     min_parallel = 2
     recover = false
+    group = 'requirements'
   [../]
 []

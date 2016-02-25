@@ -1,6 +1,12 @@
+###########################################################
+# This is a simple test with a time-dependent problem
+# demonstrating the use of the TimeIntegrator system.
 #
-# Testing a solution that is second order in space and first order in time
+# Testing a solution that is second order in space
+# and first order in time
 #
+# @Requirement F1.30
+###########################################################
 
 [Mesh]
   type = GeneratedMesh
@@ -75,17 +81,13 @@
 
 [Executioner]
   type = Transient
+
+  # Test of the TimeIntegrator System
   scheme = 'implicit-euler'
 
   start_time = 0.0
   num_steps = 5
   dt = 0.25
-
-#  [./Adaptivity]
-#    refine_fraction = 0.2
-#    coarsen_fraction = 0.3
-#    max_h_level = 4
-#  [../]
 []
 
 [Outputs]

@@ -4,7 +4,7 @@
     type = RunApp
     cli_args = '--minimal --list-constructed-objects'
     expect_out = "FEProblem\nGeneratedMesh"
-    input = ''
+    input = 'IGNORED'
     input_switch = ''
   [../]
 []

@@ -1,3 +1,11 @@
+###########################################################
+# This is a simple test demonstrating the use of the
+# Hierarchic variable type.
+#
+# @Requirement F3.10
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -29,6 +37,7 @@
   [../]
 []
 
+# Hierarchic Variable type
 [Variables]
   [./u]
     order = FIRST
