@@ -152,9 +152,9 @@ void  vectorToMatrix(unsigned int &rows,unsigned int &columns,std::vector<double
         columns = dimensions;
         if(rows*columns != vecMatrix.size())
                       throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
-        for (int row = 0; row < rows; ++row) {
+        for (unsigned int row = 0; row < rows; ++row) {
                 std::vector<double> temp;
-                for (int colm = 0; colm < columns; ++colm) {
+                for (unsigned int colm = 0; colm < columns; ++colm) {
                         temp.push_back(vecMatrix.at(colm+row*columns));
                 }
                 _cov_matrix.push_back(temp);

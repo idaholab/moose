@@ -42,6 +42,9 @@ public:
 
   int returnDimensionality(){return _dimensions;};
 
+  double returnUpperBound(int dimension){return _upperBound.at(dimension);};
+  double returnLowerBound(int dimension){return _lowerBound.at(dimension);};
+
   NDInterpolation();
   virtual ~NDInterpolation();
 
@@ -56,6 +59,9 @@ protected:
 
   std::vector<double> _cellPoint0;
   std::vector<double> _cellDxs;
+
+  std::vector<double> _upperBound;
+  std::vector<double> _lowerBound;
 
   double minkowskiDistance(std::vector<double> point1, std::vector<double> point2, double p);
   double vectorNorm(std::vector<double> point, double p);
