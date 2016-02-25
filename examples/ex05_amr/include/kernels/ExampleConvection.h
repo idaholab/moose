@@ -36,7 +36,7 @@ protected:
 
 private:
 
-  VariableGradient & _some_variable;
+  const VariableGradient & _some_variable;
 };
 
 #endif //EXAMPLECONVECTION_H
