@@ -79,7 +79,7 @@ protected:
   /**
    * Coupled scalar variable values
    */
-  VariableValue & _y;
+  const VariableValue & _y;
 };
 
 
