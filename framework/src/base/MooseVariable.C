@@ -28,8 +28,7 @@
 #include "libmesh/dense_vector.h"
 
 MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    MooseVariableBase(var_num, sys, assembly, var_kind),
-    _fe_type(fe_type),
+    MooseVariableBase(var_num, fe_type, sys, assembly, var_kind),
 
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),

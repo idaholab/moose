@@ -67,6 +67,14 @@ protected:
   virtual unsigned int coupledScalar(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns the order for a scalar coupled variable by name
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Order of coupled variable
+   */
+  virtual Order coupledScalarOrder(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Returns value of a scalar coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables

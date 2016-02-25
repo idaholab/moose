@@ -41,7 +41,7 @@ DGMDDBC::DGMDDBC(const InputParameters & parameters) :
 Real
 DGMDDBC::computeQpResidual()
 {
-  const unsigned int elem_b_order = static_cast<unsigned int> (_var.getOrder());
+  const unsigned int elem_b_order = _var.order();
   const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
 
   Real fn = _func.value(_t, _q_point[_qp]);
@@ -56,7 +56,7 @@ DGMDDBC::computeQpResidual()
 Real
 DGMDDBC::computeQpJacobian()
 {
-  const unsigned int elem_b_order = static_cast<unsigned int> (_var.getOrder());
+  const unsigned int elem_b_order = _var.order();
   const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
 
   Real r = 0;
