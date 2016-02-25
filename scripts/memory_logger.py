@@ -1,73 +1,55 @@
 #!/usr/bin/env python
 from tempfile import TemporaryFile, SpooledTemporaryFile
-import os, sys, re, socket, time, pickle, csv, uuid, subprocess, argparse, decimal, select, platform
+import os, sys, re, socket, time, pickle, csv, uuid, subprocess, argparse, decimal, select, platform, signal
 
 class LLDB:
-  def __init__(self):
-    self.debugger = lldb.SBDebugger.Create()
-    self.command_interpreter = self.debugger.GetCommandInterpreter()
-    self.target = self.debugger.CreateTargetWithFileAndArch(None, None)
-    self.listener = lldb.SBListener("event_listener")
-    self.error = lldb.SBError()
-
-  def __del__(self):
-    lldb.SBDebugger.Destroy(self.debugger)
-
-  def _parseStackTrace(self, gibberish):
-    return gibberish
-
-  def _run_commands(self, commands):
-    tmp_text = ''
-    return_obj = lldb.SBCommandReturnObject()
-    for command in commands:
-      self.command_interpreter.HandleCommand(command, return_obj)
-      if return_obj.Succeeded():
-        if command == 'process status':
-          tmp_text += '\n########################################################\n## Process Status:\n##\n'
-          tmp_text += return_obj.GetOutput()
-        elif command == 'bt':
-          tmp_text += '\n########################################################\n## Backtrace:\n##\n'
-          tmp_text += return_obj.GetOutput()
-    return tmp_text
-
-  def getStackTrace(self, pid):
-    event = lldb.SBEvent()
-    lldb_results = ''
-    state = 0
-    attach_info = lldb.SBAttachInfo(int(pid))
-    process = self.target.Attach(attach_info, self.error)
-    process.GetBroadcaster().AddListener(self.listener, lldb.SBProcess.eBroadcastBitStateChanged)
-    done = False
-    while not done:
-      if self.listener.WaitForEvent(lldb.UINT32_MAX, event):
-        state = lldb.SBProcess.GetStateFromEvent(event)
-        if state == lldb.eStateExited:
-          done = True
-        elif state == lldb.eStateStopped:
-          lldb_results = self._run_commands(['process status', 'bt', 'cont'])
-          done = True
-        elif state == lldb.eStateRunning:
-          self._run_commands(['process interrupt'])
-      if state == lldb.eStateCrashed or state == lldb.eStateInvalid or state == lldb.eStateExited:
-        return 'Binary exited before sample could be taken'
-      time.sleep(0.03)
-
-    # Due to some strange race condition we have to wait until eState is running
-    # before we can pass the 'detach, quit' command. Why we can not do this all in
-    # one go... bug?
-    done = False
-    while not done:
-      if self.listener.WaitForEvent(lldb.UINT32_MAX, event):
-        state = lldb.SBProcess.GetStateFromEvent(event)
-        if state == lldb.eStateRunning:
-          self._run_commands(['detach', 'quit'])
-          done = True
-      if state == lldb.eStateCrashed or state == lldb.eStateInvalid or state == lldb.eStateExited:
-        return 'Binary exited before sample could be taken'
-      time.sleep(0.03)
-    return self._parseStackTrace(lldb_results)
+  def getProcess(self, pid):
+    debugger = lldb.SBDebugger.Create()
+    debugger.SetAsync(False)
+    target = debugger.CreateTargetWithFileAndArch(None, None)
+    return target, pid
+  def getStackTrace(self, process_tuple):
+    target, pid = process_tuple
+    lldb_results = []
+    if target.process.id is not 0:
+      process = target.Attach(lldb.SBAttachInfo(target.process.id), lldb.SBError())
+    else:
+      process = target.Attach(lldb.SBAttachInfo(int(pid)), lldb.SBError())
+    lldb_results.append(process.GetThreadAtIndex(0).__str__())
+    for i in xrange(process.GetThreadAtIndex(0).GetNumFrames()):
+      lldb_results.append(process.GetThreadAtIndex(0).GetFrameAtIndex(i).__str__())
+    process.Detach()
+    return '\n'.join(lldb_results)
 
 class GDB:
+  def __init__(self):
+    self.last_position = 0
+
+  def __detach__(self, process):
+    process, gdb_stdout = process
+    for command in ['quit\n', 'y\n']:
+      if self._waitForResponse(gdb_stdout):
+        try:
+          process.stdin.write(command)
+        except:
+          process.send_signal(signal.SIGKILL)
+          return False
+      else:
+        return True
+
+  def __attach__(self, pid):
+    gdb_stdout = SpooledTemporaryFile()
+    process = subprocess.Popen([which('gdb'), '-nx'], stdin=subprocess.PIPE, stdout=gdb_stdout, stderr=gdb_stdout)
+    for command in [ 'attach ' + pid + '\n', 'set verbose off\n', 'thread\n']:
+      if self._waitForResponse(gdb_stdout):
+        try:
+          process.stdin.write(command)
+        except:
+          return (False, 'GDB quit unexpectedly')
+      else:
+        return (False, 'could not attach to process in allotted time')
+    return (process, gdb_stdout)
+
   def _parseStackTrace(self, gibberish):
     not_gibberish = re.findall(r'\(gdb\) (#.*)\(gdb\)', gibberish, re.DOTALL)
     if len(not_gibberish) != 0:
@@ -75,36 +57,36 @@ class GDB:
     else:
       return 'Stack Trace failed:', gibberish
 
-  def _waitForResponse(self, wait=True):
-    while wait:
-      self.gdb_stdout.seek(self.last_position)
-      for line in self.gdb_stdout:
+  def _waitForResponse(self, gdb_stdout, delta=float(5)):
+    end_queue = time.time() + float(delta)
+    while time.time() < end_queue:
+      gdb_stdout.seek(self.last_position)
+      for line in gdb_stdout:
         if line == '(gdb) ':
-          self.last_position = self.gdb_stdout.tell()
+          self.last_position = gdb_stdout.tell()
           return True
-      time.sleep(0.05)
-    time.sleep(0.05)
-    return True
+      time.sleep(0.01)
+    return False
 
-  def getStackTrace(self, pid):
-    gdb_commands = [ 'attach ' + pid + '\n', 'set verbose off\n', 'thread\n', 'apply\n', 'all\n', 'bt\n', 'quit\n', 'y\n' ]
-    self.gdb_stdout = SpooledTemporaryFile()
-    self.last_position = 0
-    gdb_process = subprocess.Popen([which('gdb'), '-nx'], stdin=subprocess.PIPE, stdout=self.gdb_stdout, stderr=self.gdb_stdout)
-    while gdb_process.poll() == None:
-      for command in gdb_commands:
-        if command == gdb_commands[-1]:
-          gdb_commands = []
-        elif self._waitForResponse():
-          # I have seen GDB exit out from under us
-          try:
-            gdb_process.stdin.write(command)
-          except:
-            pass
-    self.gdb_stdout.seek(0)
-    stack_trace = self._parseStackTrace(self.gdb_stdout.read())
-    self.gdb_stdout.close()
-    return stack_trace
+  def getProcess(self, pid):
+    return self.__attach__(pid)
+
+  def getStackTrace(self, process_tuple):
+    process, gdb_stdout = process_tuple
+    batch_position = gdb_stdout.tell()
+    for command in ['ctrl-c', 'bt\n', 'c\n']:
+      if command == 'ctrl-c':
+        process.send_signal(signal.SIGINT)
+      else:
+        if self._waitForResponse(gdb_stdout):
+          process.stdin.write(command)
+        else:
+          return self.__detach__(process_tuple)
+    gdb_stdout.seek(batch_position)
+    return self._parseStackTrace(gdb_stdout.read())
+
+  def detachProcess(self, process):
+    return self.__detach__(process)
 
 class Server:
   def __init__(self, arguments):
@@ -409,7 +391,7 @@ based on supplied arguments
     if self.connection == None and self.arguments.call_back_host != None:
       self.CREATED_CONNECTION = True
       self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      self.connection.settimeout(15)
+      self.connection.settimeout(150)
       self.connection.connect((self.arguments.call_back_host[0], int(self.arguments.call_back_host[1])))
 
   # read all data sent by an agent
@@ -503,6 +485,7 @@ machine_id is supplied by the client class. This allows for multiple agents if d
     self.arguments = arguments
     self.my_uuid = machine_id
     self.track_process = ''
+    self.process = None
 
     # This log object is for stdout purposes
     self.log = TemporaryFile()
@@ -558,6 +541,11 @@ machine_id is supplied by the client class. This allows for multiple agents if d
                         }
                       }
 
+    if self._darwin() == True:
+      self.stack_trace = LLDB()
+    else:
+      self.stack_trace = GDB()
+
   # NOTE: This is the only function that should be called in this class
   def takeSample(self):
     if self.arguments.pstack:
@@ -599,16 +587,17 @@ machine_id is supplied by the client class. This allows for multiple agents if d
     return 0
 
   def _getStack(self):
-    if self._darwin() == True:
-      stack_trace = LLDB()
+    # Attach to and create a process object we can reuse later
+    if self.process is None:
+      tmp_pids = self._getPIDs()
+      if tmp_pids != {}:
+        last_pid = sorted([x for x in tmp_pids.keys()])[-1]
+        self.process = self.stack_trace.getProcess(str(last_pid))
+        return self.stack_trace.getStackTrace(self.process)
+      else:
+        return ''
     else:
-      stack_trace = GDB()
-    tmp_pids = self._getPIDs()
-    if tmp_pids != {}:
-      last_pid = sorted([x for x in tmp_pids.keys()])[-1]
-      return stack_trace.getStackTrace(str(last_pid))
-    else:
-      return ''
+      return self.stack_trace.getStackTrace(self.process)
 
   def _getPIDs(self):
     pid_list = {}
@@ -1003,7 +992,7 @@ def verifyArgs(args):
     else:
       args.outfile = [os.getcwd() + '/' + args.run[0].replace('..', '').replace('/', '').replace(' ', '_') + '.log']
 
-  if args.pstack:
+  if args.pstack and args.read is None and args.plot is None:
     if platform.platform(0, 1).split('-')[:-1][0].find('Darwin') != -1:
       try:
         import lldb
