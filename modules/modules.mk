@@ -23,6 +23,7 @@ ifeq ($(ALL_MODULES),yes)
         SOLID_MECHANICS           := yes
         TENSOR_MECHANICS          := yes
         WATER_STEAM_EOS           := yes
+        XFEM                      := yes
 endif
 
 ifeq ($(PHASE_FIELD),yes)
@@ -33,8 +34,12 @@ ifeq ($(SOLID_MECHANICS),yes)
         TENSOR_MECHANICS          := yes
 endif
 
+ifeq ($(XFEM),yes)
+        SOLID_MECHANICS           := yes
+endif
+
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos"
+MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -121,6 +126,15 @@ endif
 ifeq ($(WATER_STEAM_EOS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/water_steam_eos
   APPLICATION_NAME   := water_steam_eos
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(XFEM),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/xfem
+  APPLICATION_NAME   := xfem
+
+  #Dependency on solid_mechanics
+  DEPEND_MODULES     := solid_mechanics
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

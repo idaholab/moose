@@ -27,6 +27,7 @@
 #include "SolidMechanicsApp.h"
 #include "TensorMechanicsApp.h"
 #include "WaterSteamEOSApp.h"
+#include "XFEMApp.h"
 
 template<>
 InputParameters validParams<ModulesApp>()
@@ -80,6 +81,7 @@ ModulesApp::registerObjects(Factory & factory)
   SolidMechanicsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
   WaterSteamEOSApp::registerObjects(factory);
+  XFEMApp::registerObjects(factory);
 }
 
 // External entry point for dynamic syntax association
@@ -103,4 +105,5 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
+  XFEMApp::associateSyntax(syntax, action_factory);
 }

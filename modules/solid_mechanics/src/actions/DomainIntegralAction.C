@@ -45,6 +45,7 @@ InputParameters validParams<DomainIntegralAction>()
   MooseEnum q_function_type("Geometry Topology","Geometry");
   params.addParam<MooseEnum>("q_function_type",q_function_type,"The method used to define the integration domain. Options are: "+q_function_type.getRawNames());
   params.addParam<bool>("equivalent_k",false,"Calculate an equivalent K from KI, KII and KIII, assuming self-similar crack growth.");
+  //params.addParam<std::string>("xfem_qrule", "volfrac", "XFEM quadrature rule to use");
   return params;
 }
 
