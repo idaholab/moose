@@ -441,7 +441,7 @@ GrainTracker::trackGrains()
       for (unsigned int gr=0; gr < grain_num; ++gr)
       {
         const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
-        center_points[gr] = d.p;
+        center_points[gr] = d._p;
 
         Moose::out << "EBSD Grain " << gr << " " << center_points[gr] << '\n';
       }
