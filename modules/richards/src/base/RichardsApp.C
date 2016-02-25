@@ -77,7 +77,6 @@
 #include "RichardsMass.h"
 #include "RichardsPiecewiseLinearSinkFlux.h"
 #include "RichardsHalfGaussianSinkFlux.h"
-#include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
 #include "RichardsPlotQuantity.h"
 #include "Q2PPiecewiseLinearSinkFlux.h"
@@ -200,7 +199,6 @@ RichardsApp::registerObjects(Factory & factory)
   registerPostprocessor(RichardsMass);
   registerPostprocessor(RichardsPiecewiseLinearSinkFlux);
   registerPostprocessor(RichardsHalfGaussianSinkFlux);
-  registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
   registerPostprocessor(RichardsPlotQuantity);
   registerPostprocessor(Q2PPiecewiseLinearSinkFlux);
