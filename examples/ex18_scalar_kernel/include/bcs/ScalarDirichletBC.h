@@ -42,7 +42,7 @@ protected:
   /**
    * Holds the values of a coupled scalar variable.
    */
-  VariableValue & _scalar_val;
+  const VariableValue & _scalar_val;
 };
 
 #endif // SCALARDIRICHLETBC_H
