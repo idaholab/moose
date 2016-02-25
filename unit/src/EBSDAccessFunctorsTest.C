@@ -24,9 +24,9 @@ EBSDAccessFunctorsTest::setUp()
 {
   // EBSD point data
   _point.phi1 = 1.0;
-  _point.phi = 2.0;
+  _point.Phi = 2.0;
   _point.phi2 = 3.0;
-  _point.symmetry = 4.0; // why real?!
+  _point.symmetry = 4;
   _point.grain = 5;
   _point.phase = 6;
   _point.op = 7;
@@ -71,7 +71,7 @@ EBSDAccessFunctorsTest::test()
     EBSDPointDataPhi1 phi1;
     CPPUNIT_ASSERT( phi1(_point) == _point.phi1 );
     EBSDPointDataPhi phi;
-    CPPUNIT_ASSERT( phi(_point) == _point.phi );
+    CPPUNIT_ASSERT( phi(_point) == _point.Phi );
     EBSDPointDataPhi2 phi2;
     CPPUNIT_ASSERT( phi2(_point) == _point.phi2 );
 

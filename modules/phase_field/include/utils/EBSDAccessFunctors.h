@@ -21,8 +21,8 @@ class EBSDAccessFunctors
 public:
   /// Per element EBSD data point
   struct EBSDPointData {
-    Real phi1, phi, phi2, symmetry;
-    unsigned int grain, phase, op, global;
+    Real phi1, Phi, phi2;
+    unsigned int symmetry, grain, phase, op, global;
     Point p;
     std::vector<Real> custom;
   };
@@ -54,7 +54,7 @@ public:
     virtual Real operator () (const EBSDPointData & d) { return d.phi1; };
   };
   struct EBSDPointDataPhi : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d.phi; };
+    virtual Real operator () (const EBSDPointData & d) { return d.Phi; };
   };
   struct EBSDPointDataPhi2 : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d.phi2; };

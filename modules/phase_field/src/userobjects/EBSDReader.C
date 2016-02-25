@@ -83,12 +83,12 @@ EBSDReader::readFile()
       Real x, y, z;
 
       std::istringstream iss(line);
-      iss >> d.phi1 >> d.phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
+      iss >> d.phi1 >> d.Phi >> d.phi2 >> x >> y >> z >> d.grain >> d.phase >> d.symmetry;
 
       // Transform angles to degrees
-      d.phi1 *= 180.0/libMesh::pi;
-      d.phi *= 180.0/libMesh::pi;
-      d.phi2 *= 180.0/libMesh::pi;
+      d.phi1 *= 180.0 / libMesh::pi;
+      d.Phi *= 180.0 / libMesh::pi;
+      d.phi2 *= 180.0 / libMesh::pi;
 
       // Custom columns
       d.custom.resize(_custom_columns);
@@ -140,7 +140,7 @@ EBSDReader::readFile()
 
     //use Eigen::Quaternion<Real> here?
     b.phi1 += j->phi1;
-    b.Phi  += j->phi;
+    b.Phi  += j->Phi;
     b.phi2 += j->phi2;
 
     if (a.n == 0)
