@@ -19,6 +19,7 @@ InputParameters validParams<GeneralUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<MaterialPropertyInterface>();
+  params += validParams<DependencyResolverInterface>();
   return params;
 }
 
@@ -26,7 +27,7 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters) :
     UserObject(parameters),
     MaterialPropertyInterface(parameters),
     TransientInterface(parameters, "general_user_objects"),
-    DependencyResolverInterface(),
+    DependencyResolverInterface(parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
     VectorPostprocessorInterface(parameters)

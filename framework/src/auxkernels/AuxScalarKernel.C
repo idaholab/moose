@@ -25,6 +25,7 @@ InputParameters validParams<AuxScalarKernel>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
   params += validParams<MeshChangedInterface>();
+  params += validParams<DependencyResolverInterface>();
 
   params.addRequiredParam<AuxVariableName>("variable", "The name of the variable that this kernel operates on");
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
@@ -43,7 +44,7 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters) :
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(parameters),
-    DependencyResolverInterface(),
+    DependencyResolverInterface(parameters),
     TransientInterface(parameters, "scalar_aux_kernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),

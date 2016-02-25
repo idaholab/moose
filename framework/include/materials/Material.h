@@ -53,6 +53,7 @@ struct QpData
 };
 
 
+
 template<>
 InputParameters validParams<Material>();
 
@@ -155,6 +156,16 @@ public:
   const std::set<std::string> &
   getSuppliedItems() { return _supplied_props; }
 
+
+  /**
+   * Return a set of propreties that have been accessed with materialProperty
+   * @return A reference to the properties with calls to materialProperty
+   */
+   //virtual
+   //const std::set<std::string> &
+   //getIterativeItems() { return _iterative_props; }
+
+
   /**
    * Transform a zero prop into a requested prop if a material later supplies it.
    * This ensures proper dependency ordering.
@@ -221,6 +232,9 @@ protected:
 
   /// Set of properties declared
   std::set<std::string> _supplied_props;
+
+  /// Set of properties that are iterative
+  std::set<std::string> _iterative_props;
 
   /// Set of properties returned as zero properties
   std::set<std::string> _zero_props;

@@ -32,11 +32,13 @@
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Material.h"
+#include "DiscreteMaterial.h"
 #include "ConstantIC.h"
 #include "Parser.h"
 #include "ElementH1Error.h"
 #include "Function.h"
 #include "Material.h"
+#include "DiscreteMaterial.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
@@ -1572,6 +1574,34 @@ FEProblem::projectSolution()
   _aux.solution().localize(*_aux.sys().current_local_solution, _aux.dofMap().get_send_list());
 
   Moose::perf_log.pop("projectSolution()", "Utility");
+}
+
+
+MooseSharedPointer<DiscreteMaterial>
+FEProblem::getDiscreteMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid)
+{
+  MooseSharedPointer<Material> output;
+  switch (type)
+  {
+  case Moose::BLOCK_MATERIAL_DATA:
+    output = _materials.getObject(name, tid);
+    break;
+  case Moose::NEIGHBOR_MATERIAL_DATA:
+    name += "_neighbor";
+    output = _neighbor_materials.getObject(name, tid);
+    break;
+  case Moose::BOUNDARY_MATERIAL_DATA:
+  case Moose::FACE_MATERIAL_DATA:
+    name += "_face";
+    output = _face_materials.getObject(name, tid);
+    break;
+  }
+
+  MooseSharedPointer<DiscreteMaterial> discrete = MooseSharedNamespace::dynamic_pointer_cast<DiscreteMaterial>(output);
+  if (!discrete)
+    mooseError("Unable to locate the a DiscreteMaterial with the name " << name);
+
+  return discrete;
 }
 
 
@@ -3917,7 +3947,7 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
       std::ostringstream oss;
       oss << "One or more Material Properties were not supplied on block " << j->first << ":\n";
       for (std::set<std::string>::iterator i = difference.begin(); i != difference.end();  ++i)
-        oss << *i << "\n";
+      oss << *i << "\n";
       mooseError(oss.str());
     }
   }

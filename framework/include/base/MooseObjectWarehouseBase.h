@@ -52,6 +52,8 @@ public:
    * Retrieve complete vector to the all/block/boundary restricted objects for a given thread.
    * @param tid The thread id to retrieve objects from
    */
+
+  MooseSharedPointer<T> getObject(const std::string & name, THREAD_ID tid = 0) const;
   const std::vector<MooseSharedPointer<T> > & getObjects(THREAD_ID tid = 0) const;
   const std::map<SubdomainID, std::vector<MooseSharedPointer<T> > > & getBlockObjects(THREAD_ID tid = 0) const;
   const std::vector<MooseSharedPointer<T> > & getBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
@@ -238,6 +240,25 @@ MooseObjectWarehouseBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID t
         _active_block_objects[tid][*it].push_back(object);
     }
   }
+}
+
+
+template<typename T>
+inline MooseSharedPointer<T>
+MooseObjectWarehouseBase<T>::getObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  MooseSharedPointer<T> output;
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
+  for (it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+  {
+    if ((*it)->name() == name)
+    {
+      output = *it;
+      break;
+    }
+  }
+  return output;
 }
 
 

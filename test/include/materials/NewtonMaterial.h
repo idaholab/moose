@@ -11,41 +11,41 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef NEWTONMATERIAL_H
+#define NEWTONMATERIAL_H
 
-#include "PointerLoadError.h"
+// MOOSE includes
+#include "Material.h"
+
+// Forward declarations
+class NewtonMaterial;
+class DiscreteMaterial;
 
 template<>
-InputParameters validParams<PointerLoadError>()
-{
-  InputParameters params = validParams<GeneralUserObject>();
-  return params;
-}
+InputParameters validParams<NewtonMaterial>();
 
-
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<Stupid *>("pointer_data"))
+/**
+ * A test object that uses DiscreteMaterial to perform a Newton solve of a material property.
+ *
+ * Also, does some error checking.
+ */
+class NewtonMaterial : public Material
 {
-  _pointer_data = new Stupid;
-  _pointer_data->_i = 1;
-}
+public:
+  NewtonMaterial(const InputParameters & parameters);
+  virtual ~NewtonMaterial(){};
 
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
+protected:
+  void computeQpProperties();
 
-void PointerLoadError::initialSetup()
-{
-  _pointer_data->_i = 2;
-}
+private:
+  const Real & _tol;
+  const MaterialProperty<Real> & _f;
+  const MaterialProperty<Real> &_f_prime;
+  MaterialProperty<Real> & _p;
+  std::vector<unsigned int> _prop_ids;
+  unsigned int _max_iterations;
+  DiscreteMaterial & _discrete;
+};
 
-void PointerLoadError::timestepSetup()
-{
-  _pointer_data->_i += 1;
-}
-
-void
-PointerLoadError::execute()
-{
-}
+#endif /* NEWTONMATERIAL_H */

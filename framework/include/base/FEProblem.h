@@ -57,6 +57,7 @@ class Indicator;
 class InternalSideIndicator;
 class Marker;
 class Material;
+class DiscreteMaterial;
 class Transfer;
 class XFEMInterface;
 
@@ -913,10 +914,17 @@ public:
   const MooseObjectWarehouse<Material> & getNeighborMaterialWarehouse() { return _neighbor_materials; }
   ///@}
 
+  /**
+   * Return a pointer to a Material object.
+   *
+   * This will return enabled or disabled objects, the main purpose is for iterative materials.
+   */
+  MooseSharedPointer<DiscreteMaterial> getDiscreteMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid = 0);
+
   /*
    * Return a pointer to the MaterialData
    */
-  MooseSharedPointer<MaterialData> getMaterialData(Moose::MaterialDataType, THREAD_ID tid = 0);
+  MooseSharedPointer<MaterialData> getMaterialData(Moose::MaterialDataType type, THREAD_ID tid = 0);
 
   ///@{
   /**

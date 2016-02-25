@@ -11,41 +11,36 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef RECOMPUTEMATERIAL_H
+#define RECOMPUTEMATERIAL_H
 
-#include "PointerLoadError.h"
+// Moose includes
+#include "DiscreteMaterial.h"
+
+// Forward declarations
+class RecomputeMaterial;
 
 template<>
-InputParameters validParams<PointerLoadError>()
-{
-  InputParameters params = validParams<GeneralUserObject>();
-  return params;
-}
+InputParameters validParams<RecomputeMaterial>();
 
-
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<Stupid *>("pointer_data"))
+/**
+ * A test material for testing the ability for properties to be recomputed
+ *
+ * @see NewtonMaterial
+ */
+class RecomputeMaterial : public DiscreteMaterial
 {
-  _pointer_data = new Stupid;
-  _pointer_data->_i = 1;
-}
+public:
+  RecomputeMaterial(const InputParameters & parameters);
 
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
+protected:
+  void computeQpProperties();
 
-void PointerLoadError::initialSetup()
-{
-  _pointer_data->_i = 2;
-}
+private:
+  const VariableValue & _var;
+  MaterialProperty<Real> & _f;
+  MaterialProperty<Real> &_f_prime;
+  const MaterialProperty<Real> & _p;
+};
 
-void PointerLoadError::timestepSetup()
-{
-  _pointer_data->_i += 1;
-}
-
-void
-PointerLoadError::execute()
-{
-}
+#endif /* RECOMPUTEMATERIAL_H */

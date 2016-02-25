@@ -30,6 +30,7 @@ InputParameters validParams<Material>()
   params += validParams<TransientInterface>();
   params += validParams<RandomInterface>();
   params += validParams<MaterialPropertyInterface>();
+  params += validParams<DependencyResolverInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
 
@@ -61,7 +62,7 @@ Material::Material(const InputParameters & parameters) :
     TransientInterface(parameters, "materials"),
     MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
     PostprocessorInterface(parameters),
-    DependencyResolverInterface(),
+    DependencyResolverInterface(parameters),
     Restartable(parameters, "Materials"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
@@ -122,6 +123,7 @@ void
 Material::computeQpProperties()
 {
 }
+
 
 QpData *
 Material::createData()

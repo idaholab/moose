@@ -12,40 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PointerLoadError.h"
+#ifndef DISCRETEMATERIAL_H
+#define DISCRETEMATERIAL_H
+
+// MOOSE includes
+#include "Material.h"
+
+// Forward declarations
+class DiscreteMaterial;
 
 template<>
-InputParameters validParams<PointerLoadError>()
-{
-  InputParameters params = validParams<GeneralUserObject>();
-  return params;
-}
+InputParameters validParams<DiscreteMaterial>();
 
-
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<Stupid *>("pointer_data"))
+/**
+ * A material that requires explicit calls to computeProperties.
+ *
+ * DiscreteMaterial objects may be retriveved via MaterialPropertyInterface::getDiscreteMaterial.
+ */
+class DiscreteMaterial :
+  public Material
 {
-  _pointer_data = new Stupid;
-  _pointer_data->_i = 1;
-}
+public:
+  DiscreteMaterial(const InputParameters & parameters);
 
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
+  /**
+   * Override the Material::computeProperties so that nothing is computed.
+   */
+  virtual void computeProperties();
 
-void PointerLoadError::initialSetup()
-{
-  _pointer_data->_i = 2;
-}
-
-void PointerLoadError::timestepSetup()
-{
-  _pointer_data->_i += 1;
-}
-
-void
-PointerLoadError::execute()
-{
-}
+  /**
+   * A method for (re)computing the properties of a DiscreteMaterial.
+   */
+  virtual void computeProperties(unsigned int qp);
+};
+#endif // DISCRETEMATERIAL_H

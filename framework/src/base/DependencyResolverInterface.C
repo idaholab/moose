@@ -12,40 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PointerLoadError.h"
+#include "DependencyResolverInterface.h"
 
 template<>
-InputParameters validParams<PointerLoadError>()
+InputParameters validParams<DependencyResolverInterface>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = emptyInputParameters();
+  params.addParam<bool>("allow_cyclic_dependency", false, "Allows for cyclic dependencies to exists for this object (object is also not sorted).");
   return params;
 }
 
 
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<Stupid *>("pointer_data"))
-{
-  _pointer_data = new Stupid;
-  _pointer_data->_i = 1;
-}
-
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
-
-void PointerLoadError::initialSetup()
-{
-  _pointer_data->_i = 2;
-}
-
-void PointerLoadError::timestepSetup()
-{
-  _pointer_data->_i += 1;
-}
-
-void
-PointerLoadError::execute()
+DependencyResolverInterface::DependencyResolverInterface(const InputParameters & parameters) :
+    _allow_cyclic(parameters.get<bool>("allow_cyclic_dependency"))
 {
 }
