@@ -80,6 +80,12 @@
     difference_tol = 1E10
   [../]
 
+  [./jn21]
+    type = 'PetscJacobianTester'
+    input = 'jn21.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
   [./jn22]
     type = 'PetscJacobianTester'
     input = 'jn22.i'
