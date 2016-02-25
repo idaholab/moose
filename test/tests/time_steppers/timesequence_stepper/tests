@@ -25,5 +25,6 @@
     exodiff = 'timesequence_failed_solve.e'
     max_threads = 1
     max_parallel = 1
+    compiler = "GCC CLANG"
   [../]
 []
