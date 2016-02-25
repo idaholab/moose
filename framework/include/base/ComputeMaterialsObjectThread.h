@@ -23,7 +23,6 @@
 // Forward declarations
 class FEProblem;
 class NonlinearSystem;
-class MaterialWarehouse;
 class MaterialPropertyStorage;
 class MaterialData;
 class Assembly;
@@ -60,12 +59,8 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
 
-  ///@{
-  /// References to the various Material object warehouses
-  const MooseObjectWarehouse<Material> & _materials;
-  const MooseObjectWarehouse<Material> & _face_materials;
-  const MooseObjectWarehouse<Material> & _neighbor_materials;
-  ///@}
+  /// Reference to the MaterialBase object warehouses
+  const MaterialWarehouse<MaterialBase> & _materials;
 
   std::vector<Assembly *> & _assembly;
   bool _need_internal_side_material;

@@ -19,7 +19,7 @@
 template<>
 InputParameters validParams<LeastSquaresFit>()
 {
-  InputParameters params = validParams<VectorPostprocessor>();
+  InputParameters params = validParams<GeneralVectorPostprocessor>();
 
   params.addRequiredParam<VectorPostprocessorName>("vectorpostprocessor", "The vectorpostprocessor on whose values we perform a least squares fit");
   params.addRequiredParam<std::string>("x_name", "The name of the independent variable");
@@ -131,4 +131,3 @@ LeastSquaresFit::execute()
   else
     *_coeffs = pf.getCoefficients();
 }
-

@@ -34,8 +34,7 @@ CoupledMaterial2::CoupledMaterial2(const InputParameters & parameters) :
 }
 
 void
-CoupledMaterial2::computeProperties()
+CoupledMaterial2::computeQpProperties()
 {
-  for (_qp = 0; _qp < _q_point.size(); ++_qp)
-    _mat_prop[_qp] = 4.0/_coupled_mat_prop[_qp]/_coupled_mat_prop2[_qp];       // This will produce a NaN if evaluated out of order
+  _mat_prop[_qp] = 4.0/_coupled_mat_prop[_qp]/_coupled_mat_prop2[_qp];       // This will produce a NaN if evaluated out of order
 }

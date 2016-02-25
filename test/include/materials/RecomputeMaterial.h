@@ -11,29 +11,37 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef VECRANGECHECKMATERIAL_H
-#define VECRANGECHECKMATERIAL_H
+#ifndef RECOMPUTEMATERIAL_H
+#define RECOMPUTEMATERIAL_H
 
-#include "Material.h"
-#include "MaterialProperty.h"
+// Moose includes
+#include "DiscreteMaterial.h"
 
-
-//Forward Declarations
-class VecRangeCheckMaterial;
+// Forward declarations
+class RecomputeMaterial;
 
 template<>
-InputParameters validParams<VecRangeCheckMaterial>();
+InputParameters validParams<RecomputeMaterial>();
 
 /**
- * Simple material to test vector parameter range checking.
+ * A test material for testing the ability for properties to be recomputed
+ *
+ * @see NewtonMaterial
  */
-class VecRangeCheckMaterial : public Material
+class RecomputeMaterial : public DiscreteMaterial
 {
 public:
-  VecRangeCheckMaterial(const InputParameters & parameters);
+  RecomputeMaterial(const InputParameters & parameters);
 
 protected:
   void computeQpProperties();
+  void resetQpProperties();
+
+private:
+  const VariableValue & _var;
+  MaterialProperty<Real> & _f;
+  MaterialProperty<Real> & _f_prime;
+  const MaterialProperty<Real> & _p;
 };
 
-#endif //VECRANGECHECKMATERIAL_H
+#endif /* RECOMPUTEMATERIAL_H */

@@ -69,7 +69,7 @@ public:
   const std::vector<MooseSharedPointer<T> > & getActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   const std::map<BoundaryID, std::vector<MooseSharedPointer<T> > > & getActiveBoundaryObjects(THREAD_ID tid = 0) const;
   const std::vector<MooseSharedPointer<T> > & getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
-  ///*}
+  ///@}
 
   ///@{
   /**

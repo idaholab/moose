@@ -46,7 +46,7 @@ protected:
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernel> & _storage;
+  const MooseObjectWarehouse<AuxKernel> & _aux_kernels;
 
   bool _need_materials;
 };

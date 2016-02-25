@@ -77,12 +77,12 @@ CheckOutputAction::checkMaterialOutput()
     return;
 
   // A complete list of all Material objects
-  const std::vector<MooseSharedPointer<Material> > & materials = _problem->getMaterialWarehouse().getActiveObjects();
+  const std::vector<MooseSharedPointer<MaterialBase> > & materials = _problem->getMaterialWarehouse().getActiveObjects();
 
   // TODO include boundary materials
 
   // Loop through each material object
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
+  for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
   {
     // Extract the names of the output objects to which the material properties will be exported
     std::set<OutputName> outputs = (*material_iter)->getOutputs();

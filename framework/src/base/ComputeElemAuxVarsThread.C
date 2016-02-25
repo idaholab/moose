@@ -23,7 +23,7 @@
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
     ThreadedElementLoop<ConstElemRange>(problem, sys),
     _aux_sys(sys),
-    _storage(storage),
+    _aux_kernels(storage),
     _need_materials(need_materials)
 {
 }
@@ -32,7 +32,7 @@ ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, Auxiliar
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
     ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
     _aux_sys(x._aux_sys),
-    _storage(x._storage),
+    _aux_kernels(x._aux_kernels),
     _need_materials(x._need_materials)
 {
 }
@@ -53,9 +53,9 @@ ComputeElemAuxVarsThread::subdomainChanged()
 
   std::set<MooseVariable *> needed_moose_vars;
 
-  if (_storage.hasActiveBlockObjects(_subdomain, _tid))
+  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _storage.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = kernels.begin(); aux_it != kernels.end(); ++aux_it)
     {
       (*aux_it)->subdomainSetup();
@@ -72,9 +72,9 @@ ComputeElemAuxVarsThread::subdomainChanged()
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
-  if (_storage.hasActiveBlockObjects(_subdomain, _tid))
+  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _storage.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 

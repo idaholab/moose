@@ -30,7 +30,7 @@ public:
   CoupledMaterial2(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
   MaterialPropertyName _mat_prop_name;
   MaterialProperty<Real> & _mat_prop;

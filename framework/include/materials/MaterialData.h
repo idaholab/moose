@@ -25,6 +25,7 @@
 #include <vector>
 
 class Material;
+class DiscreteMaterial;
 
 /**
  * Proxy for accessing MaterialPropertyStorage.
@@ -84,6 +85,9 @@ public:
 
   // Reinit material properties for given element (and possible side)
   void reinit(const std::vector<MooseSharedPointer<Material> > & mats);
+
+  /// Calls the reset method of DiscreteMaterials to ensure that they are in a proper state.
+  void reset(const std::vector<MooseSharedPointer<DiscreteMaterial> > & mats);
 
   // material properties for given element (and possible side)
   void swapBack(const Elem & elem, unsigned int side = 0);

@@ -33,3 +33,8 @@ VecRangeCheckMaterial::VecRangeCheckMaterial(const InputParameters & parameters)
     Material(parameters)
 {
 }
+
+void
+VecRangeCheckMaterial::computeQpProperties()
+{
+}

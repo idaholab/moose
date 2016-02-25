@@ -310,4 +310,7 @@ DerivativeStringClass(OutputName);
 /// Used for objects that expect MaterialProperty names
 DerivativeStringClass(MaterialPropertyName);
 
+/// User for accessing DiscreteMaterial objects
+DerivativeStringClass(DiscreteMaterialName);
+
 #endif // MOOSETYPES_H

@@ -13,35 +13,45 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "Material.h"
+#include "DiscreteMaterial.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-
 template<>
-InputParameters validParams<Material>()
+InputParameters validParams<DiscreteMaterial>()
 {
   InputParameters params = validParams<MaterialBase>();
+
+  // It doesn't make sense to restrict DiscreteMaterial objects to a block or boundary since the user is
+  // responsible for the calculation. However, it is not possible to move Block/BoundaryRestrictable
+  // inhertence to Material instead of MaterialBase. This is due to the MaterialPropertyInterface which
+  // requires block/boundary ids be supplied on construction. And, the get/setMaterialProperty methods
+  // in MaterialBase override methods in MaterialPropertyInterface. Rather than re-factor these
+  // interfaces, these parameters are disabled.
+  params.suppressParameter<std::vector<SubdomainName> >("block");
+  params.suppressParameter<std::vector<BoundaryName> >("boundary");
   return params;
 }
 
 
-Material::Material(const InputParameters & parameters) :
+DiscreteMaterial::DiscreteMaterial(const InputParameters & parameters) :
     MaterialBase(parameters)
 {
 }
 
 
 void
-Material::computeProperties()
+DiscreteMaterial::resetProperties()
 {
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    computeQpProperties();
+    resetQpProperties();
 }
 
 
 void
-Material::computeQpProperties()
+DiscreteMaterial::computeProperties(unsigned int qp)
 {
+  _qp = qp;
+  computeQpProperties();
 }
