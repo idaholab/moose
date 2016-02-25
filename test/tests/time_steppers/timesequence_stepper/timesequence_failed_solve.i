@@ -71,7 +71,9 @@
     type = TimeSequenceStepper
     time_sequence  = '0  1000.0 2000.0'
   [../]
-  nl_max_its = 2
+  nl_max_its = 3
+  nl_abs_tol = 1.0e-7
+  nl_rel_tol = 1.0e-50
 []
 
 [Outputs]
