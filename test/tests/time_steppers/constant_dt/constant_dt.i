@@ -1,44 +1,32 @@
 ###########################################################
-# This is test of the Dirac delta function System. The
-# ConstantPointSource object is used to apply a constant
-# Dirac delta contribution at a specified point in the
-# domain.
+# This is a simple test with a time-dependent problem
+# demonstrating the use of the TimeStepper system.
 #
-# @Requirement F3.50
+# @Requirement F1.20
 ###########################################################
 
 
 [Mesh]
   type = GeneratedMesh
-  dim = 1
+  dim = 2
   nx = 10
+  ny = 10
 []
 
 [Variables]
-  active = 'u'
   [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./v]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = CoefDiffusion
     variable = u
+    coef = 0.1
   [../]
-[]
-
-[DiracKernels]
-  [./point_source]
-    type = ConstantPointSource
+  [./time]
+    type = TimeDerivative
     variable = u
-    value = 1.0
-    point = '0.2 0 0'
   [../]
 []
 
@@ -58,11 +46,18 @@
 []
 
 [Executioner]
-  type = Steady
-
   # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+  type = Transient
+  num_steps = 10
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 
+  # Pluggable TimeStepper System
+  [./TimeStepper]
+    type = ConstantDT
+    dt = 0.2
+  [../]
 []
 
 [Outputs]

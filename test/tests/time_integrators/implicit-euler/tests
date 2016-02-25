@@ -1,16 +1,16 @@
 [Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'ie.i'
+    exodiff = 'ie_out.e'
+    group = 'requirements'
+  [../]
+
   [./adapt]
     type = 'Exodiff'
     input = 'ie_adapt.i'
     exodiff = 'ie_adapt_out.e-s005'
     group = 'adaptive'
-  [../]
-
-  [./test]
-    type = 'Exodiff'
-    input = 'ie.i'
-    exodiff = 'ie_out.e'
-    max_parallel = 1
   [../]
 
   [./monomials]

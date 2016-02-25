@@ -12,7 +12,7 @@
     prereq = 'test_1'
   [../]
 
-  
+
   [./test_nodal_var_1]
     type = 'Exodiff'
     input = 'nodal_part1.i'

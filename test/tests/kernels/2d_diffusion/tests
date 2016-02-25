@@ -4,6 +4,7 @@
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
     scale_refine = 5
+    group = 'requirements'
   [../]
 
   [./testneumann]

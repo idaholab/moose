@@ -7,7 +7,7 @@ class RunApp(Tester):
   @staticmethod
   def validParams():
     params = Tester.validParams()
-    params.addParam('input',              "The input file to use for this test.")
+    params.addRequiredParam('input',      "The input file to use for this test.")
     params.addParam('test_name',          "The name of the test - populated automatically")
     params.addParam('skip_test_harness_cli_args', False, "Skip adding global TestHarness CLI Args for this test")
     params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
@@ -48,7 +48,6 @@ class RunApp(Tester):
 
   def getInputFile(self):
     return self.specs['input'].strip()
-
 
   def checkRunnable(self, options):
     if options.enable_recover:
@@ -136,10 +135,6 @@ class RunApp(Tester):
 
     if len(caveats) > 0:
       self.specs['caveats'] = caveats
-
-    if not specs.isValid('input'):
-      specs['input'] = ''
-      specs['input_switch'] = ''
 
     if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
       command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])

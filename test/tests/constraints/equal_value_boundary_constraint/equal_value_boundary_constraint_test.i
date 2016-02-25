@@ -1,3 +1,12 @@
+###########################################################
+# This is a test that demonstrates a user-defined
+# constraint. It forces the value of a boundary to
+# match the value seen at a given node.
+#
+# @Requirement F1.90
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -36,6 +45,7 @@
   [../]
 []
 
+# Constraint System
 [Constraints]
   [./y_top]
     type = EqualValueBoundaryConstraint

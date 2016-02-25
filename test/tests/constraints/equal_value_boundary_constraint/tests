@@ -4,5 +4,6 @@
     input = 'equal_value_boundary_constraint_test.i'
     exodiff = 'out.e'
     abs_zero = 1e-9
+    group = 'requirements'
   [../]
 []

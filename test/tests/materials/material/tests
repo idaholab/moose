@@ -51,7 +51,9 @@
     input = 'material_test.i'
     exodiff = 'out.e'
     scale_refine = 3
+    group = 'requirements'
   [../]
+
   [./check_test]
     type = 'RunException'
     input = 'material_check_test.i'
