@@ -244,6 +244,7 @@
   end_time = 1E6
   dt = 1E6
   dtmin = 1E6
+  line_search = bt
 
   nl_rel_tol = 1.e-6
   nl_max_its = 10
