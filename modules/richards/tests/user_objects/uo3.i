@@ -1,4 +1,5 @@
 # Seff User objects give the correct value
+# Sat User objects give the correct value
 #
 # If you want to add another test for another UserObject
 # then add the UserObject, add a Function defining the expected result,
@@ -119,6 +120,19 @@
     vars = 'shift scale'
     vals = '-2E6 1E6'
   [../]
+
+  [./answer_Sat]
+    type = ParsedFunction
+    value = sres+((1-sumsres)*((1+max((-x)*al,0)^(1/(1-m)))^(-m)))
+    vars = 'al m sres sumsres'
+    vals = '1E-6 0.8 0.054321 0.054321'
+  [../]
+  [./answer_dSat]
+    type = ParsedFunction
+    value = 1-sumsres
+    vars = 'sumsres'
+    vals = '0.054321'
+  [../]
 []
 
 [AuxVariables]
@@ -141,6 +155,11 @@
   [./dSeff1RSC_Aux]
   [../]
   [./d2Seff1RSC_Aux]
+  [../]
+
+  [./Sat_Aux]
+  [../]
+  [./dSat_Aux]
   [../]
 
   [./check_Aux]
@@ -214,10 +233,23 @@
     wrtnum2 = 0
   [../]
 
+  [./Sat_AuxK]
+    type = RichardsSatAux
+    sat_UO = Saturation
+    seff_var = Seff1VG_Aux
+    variable = Sat_Aux
+  [../]
+  [./dSat_AuxK]
+    type = RichardsSatPrimeAux
+    sat_UO = Saturation
+    seff_var = Seff1VG_Aux
+    variable = dSat_Aux
+  [../]
+
   [./check_AuxK]
     type = FunctionAux
     variable = check_Aux
-    function = answer_Seff1RSC
+    function = answer_Seff1VG
   [../]
 []
 
@@ -268,6 +300,17 @@
     type = NodalL2Error
     function = answer_d2Seff1RSC
     variable = d2Seff1RSC_Aux
+  [../]
+
+  [./cf_Sat]
+    type = NodalL2Error
+    function = answer_Sat
+    variable = Sat_Aux
+  [../]
+  [./cf_dSat]
+    type = NodalL2Error
+    function = answer_dSat
+    variable = dSat_Aux
   [../]
 []
 
@@ -352,7 +395,7 @@
   file_base = uo3
   [./csv]
     type = CSV
-    [../]
+  [../]
   [./exodus]
     type = Exodus
     hide = pressure
