@@ -23,30 +23,30 @@ void
 EBSDAccessFunctorsTest::setUp()
 {
   // EBSD point data
-  _point.phi1 = 1.0;
-  _point.Phi = 2.0;
-  _point.phi2 = 3.0;
-  _point.symmetry = 4;
-  _point.grain = 5;
-  _point.phase = 6;
-  _point.op = 7;
-  _point.global = 8;
-  _point.p = Point(9.0, 10.0, 11.0);
-  _point.custom.resize(3);
+  _point._phi1 = 1.0;
+  _point._Phi = 2.0;
+  _point._phi2 = 3.0;
+  _point._symmetry = 4;
+  _point._grain = 5;
+  _point._phase = 6;
+  _point._op = 7;
+  _point._global = 8;
+  _point._p = Point(9.0, 10.0, 11.0);
+  _point._custom.resize(3);
   for (unsigned int i = 0; i < 3; ++i)
-    _point.custom[i] = i + 12.0;
+    _point._custom[i] = i + 12.0;
 
   // Averaged EBSD data
-  _avg.angles = &_angles;
-  _avg.phase = 1;
-  _avg.local = 2;
-  _avg.symmetry = 3;
-  _avg.grain = 4;
-  _avg.n = 5;
-  _avg.p = Point(6.0, 7.0, 8.0);
-  _avg.custom.resize(3);
+  _avg._angles = &_angles;
+  _avg._phase = 1;
+  _avg._local = 2;
+  _avg._symmetry = 3;
+  _avg._grain = 4;
+  _avg._n = 5;
+  _avg._p = Point(6.0, 7.0, 8.0);
+  _avg._custom.resize(3);
   for (unsigned int i = 0; i < 3; ++i)
-    _avg.custom[i] = i + 9.0;
+    _avg._custom[i] = i + 9.0;
 
   // initialize Euler angle object
   _angles.phi1 = 0.1;
@@ -69,31 +69,31 @@ EBSDAccessFunctorsTest::test()
   // Test point data access
   {
     EBSDPointDataPhi1 phi1;
-    CPPUNIT_ASSERT( phi1(_point) == _point.phi1 );
+    CPPUNIT_ASSERT( phi1(_point) == _point._phi1 );
     EBSDPointDataPhi phi;
-    CPPUNIT_ASSERT( phi(_point) == _point.Phi );
+    CPPUNIT_ASSERT( phi(_point) == _point._Phi );
     EBSDPointDataPhi2 phi2;
-    CPPUNIT_ASSERT( phi2(_point) == _point.phi2 );
+    CPPUNIT_ASSERT( phi2(_point) == _point._phi2 );
 
     EBSDPointDataPhase phase;
-    CPPUNIT_ASSERT( phase(_point) == _point.phase );
+    CPPUNIT_ASSERT( phase(_point) == _point._phase );
     EBSDPointDataSymmetry symmetry;
-    CPPUNIT_ASSERT( symmetry(_point) == _point.symmetry );
+    CPPUNIT_ASSERT( symmetry(_point) == _point._symmetry );
     EBSDPointDataGrain grain;
-    CPPUNIT_ASSERT( grain(_point) == _point.grain );
+    CPPUNIT_ASSERT( grain(_point) == _point._grain );
     EBSDPointDataOp op;
-    CPPUNIT_ASSERT( op(_point) == _point.op );
+    CPPUNIT_ASSERT( op(_point) == _point._op );
 
     for (unsigned int i = 0; i < 3; ++i)
     {
       EBSDPointDataCustom custom(i);
-      CPPUNIT_ASSERT( custom(_point) == _point.custom[i] );
+      CPPUNIT_ASSERT( custom(_point) == _point._custom[i] );
     }
   }
 
   // Test average data access
   {
-    RealVectorValue angle = *(_avg.angles);
+    RealVectorValue angle = *(_avg._angles);
     CPPUNIT_ASSERT( (angle - reference_angle).size() == 0 );
 
     EBSDAvgDataPhi1 phi1;
@@ -104,18 +104,18 @@ EBSDAccessFunctorsTest::test()
     CPPUNIT_ASSERT( phi2(_avg) == angle(2) );
 
     EBSDAvgDataPhase phase;
-    CPPUNIT_ASSERT( phase(_avg) == _avg.phase );
+    CPPUNIT_ASSERT( phase(_avg) == _avg._phase );
     EBSDAvgDataSymmetry symmetry;
-    CPPUNIT_ASSERT( symmetry(_avg) == _avg.symmetry );
+    CPPUNIT_ASSERT( symmetry(_avg) == _avg._symmetry );
     EBSDAvgDataGrain grain;
-    CPPUNIT_ASSERT( grain(_avg) == _avg.grain );
+    CPPUNIT_ASSERT( grain(_avg) == _avg._grain );
     EBSDAvgDataLocalID local;
-    CPPUNIT_ASSERT( local(_avg) == _avg.local );
+    CPPUNIT_ASSERT( local(_avg) == _avg._local );
 
     for (unsigned int i = 0; i < 3; ++i)
     {
       EBSDAvgDataCustom custom(i);
-      CPPUNIT_ASSERT( custom(_avg) == _avg.custom[i] );
+      CPPUNIT_ASSERT( custom(_avg) == _avg._custom[i] );
     }
   }
 }
