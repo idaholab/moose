@@ -88,7 +88,7 @@ public:
   /**
    * Return the feature id (global grain number) for a given phase and phase grain number
    */
-  unsigned int getFeatureID(unsigned int phase, unsigned int local_id) const { return _avg_data[_global_id[phase][local_id]].grain; }
+  unsigned int getFeatureID(unsigned int phase, unsigned int local_id) const { return _avg_data[_global_id[phase][local_id]]._grain; }
 
   /**
    * Return the feature id (global grain number) for a given phase and phase grain number

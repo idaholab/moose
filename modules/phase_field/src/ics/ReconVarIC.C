@@ -83,7 +83,7 @@ Point
 ReconVarIC::getCenterPoint(unsigned int index)
 {
   if (_consider_phase)
-    return _ebsd_reader.getAvgData(_phase, index).p;
+    return _ebsd_reader.getAvgData(_phase, index)._p;
   else
-    return _ebsd_reader.getAvgData(index).p;
+    return _ebsd_reader.getAvgData(index)._p;
 }
