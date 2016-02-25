@@ -41,7 +41,7 @@ public:
 
 protected:
   std::vector<unsigned int> _val_number;
-  std::vector<VariableValue *> _value;
+  std::vector<const VariableValue *> _value;
 };
 
 

@@ -83,18 +83,19 @@ protected:
   bool _scale_by_flux_faces;
 
   /// Holds the current solution at the current quadrature point on the face.
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// Holds the current solution gradient at the current quadrature point on the face.
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
 
   /// Normal vectors at the quadrature points
   const MooseArray<Point>& _normals;
 
   /// Holds the current solution at the current quadrature point
-  VariableValue & _u_neighbor;
+  const VariableValue & _u_neighbor;
+
   /// Holds the current solution gradient at the current quadrature point
-  VariableGradient & _grad_u_neighbor;
+  const VariableGradient & _grad_u_neighbor;
 
   /**
    * The virtual function you will want to override to compute error contributions.

@@ -218,7 +218,7 @@ AuxKernel::isNodal()
   return _nodal;
 }
 
-VariableValue &
+const VariableValue &
 AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
@@ -228,7 +228,7 @@ AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
   return Coupleable::coupledDot(var_name, comp);
 }
 
-VariableValue &
+const VariableValue &
 AuxKernel::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);

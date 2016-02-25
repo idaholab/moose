@@ -35,7 +35,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _v;
+  const VariableValue & _v;
 
   /// The id of the coupled variable
   unsigned int _v_num;

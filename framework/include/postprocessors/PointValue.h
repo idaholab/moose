@@ -70,7 +70,7 @@ protected:
   MooseVariable & _var;
 
   /// The value of the desired variable
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// A convenience reference to the libMesh::MeshBase object
   MeshBase & _mesh;

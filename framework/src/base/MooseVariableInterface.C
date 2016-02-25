@@ -46,7 +46,7 @@ MooseVariableInterface::mooseVariable()
   return _variable;
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::value()
 {
   if (_nodal)
@@ -55,7 +55,7 @@ MooseVariableInterface::value()
     return _variable->sln();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::valueOld()
 {
   if (_nodal)
@@ -64,7 +64,7 @@ MooseVariableInterface::valueOld()
     return _variable->slnOld();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::valueOlder()
 {
   if (_nodal)
@@ -73,7 +73,7 @@ MooseVariableInterface::valueOlder()
     return _variable->slnOlder();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::dot()
 {
   if (_nodal)
@@ -82,7 +82,7 @@ MooseVariableInterface::dot()
     return _variable->uDot();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::dotDu()
 {
   if (_nodal)
@@ -92,7 +92,7 @@ MooseVariableInterface::dotDu()
 }
 
 
-VariableGradient &
+const VariableGradient &
 MooseVariableInterface::gradient()
 {
   if (_nodal)
@@ -101,7 +101,7 @@ MooseVariableInterface::gradient()
   return _variable->gradSln();
 }
 
-VariableGradient &
+const VariableGradient &
 MooseVariableInterface::gradientOld()
 {
   if (_nodal)
@@ -110,7 +110,7 @@ MooseVariableInterface::gradientOld()
   return _variable->gradSlnOld();
 }
 
-VariableGradient &
+const VariableGradient &
 MooseVariableInterface::gradientOlder()
 {
   if (_nodal)
@@ -119,7 +119,7 @@ MooseVariableInterface::gradientOlder()
   return _variable->gradSlnOlder();
 }
 
-VariableSecond &
+const VariableSecond &
 MooseVariableInterface::second()
 {
   if (_nodal)
@@ -128,7 +128,7 @@ MooseVariableInterface::second()
   return _variable->secondSln();
 }
 
-VariableSecond &
+const VariableSecond &
 MooseVariableInterface::secondOld()
 {
   if (_nodal)
@@ -137,7 +137,7 @@ MooseVariableInterface::secondOld()
   return _variable->secondSlnOld();
 }
 
-VariableSecond &
+const VariableSecond &
 MooseVariableInterface::secondOlder()
 {
   if (_nodal)
@@ -146,39 +146,39 @@ MooseVariableInterface::secondOlder()
   return _variable->secondSlnOlder();
 }
 
-VariableTestSecond &
+const VariableTestSecond &
 MooseVariableInterface::secondTest()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariableTestSecond &>(_variable->secondPhi());
+  return _variable->secondPhi();
 }
 
-VariableTestSecond &
+const VariableTestSecond &
 MooseVariableInterface::secondTestFace()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariableTestSecond &>(_variable->secondPhiFace());
+  return _variable->secondPhiFace();
 }
 
 
-VariablePhiSecond &
+const VariablePhiSecond &
 MooseVariableInterface::secondPhi()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhi());
+  return _mvi_assembly->secondPhi();
 }
 
-VariablePhiSecond &
+const VariablePhiSecond &
 MooseVariableInterface::secondPhiFace()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhiFace());
+  return _mvi_assembly->secondPhiFace();
 }

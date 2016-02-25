@@ -34,7 +34,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _u_dot_nodal;
+  const VariableValue & _u_dot_nodal;
 };
 
 #endif // MASSLUMPEDTIMEDERIVATIVE_H

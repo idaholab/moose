@@ -155,13 +155,13 @@ protected:
   unsigned int _qp;
 
   /// Value of the unknown variable this is acting on
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// Time derivative of the variable this is acting on
-  VariableValue & _u_dot;
+  const VariableValue & _u_dot;
 
   /// Derivative of u_dot with respect to u
-  VariableValue & _du_dot_du;
+  const VariableValue & _du_dot_du;
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
