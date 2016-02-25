@@ -110,11 +110,7 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters) :
   }
 
   if (isParamValid("intersecting_boundary"))
-  {
     _intersecting_boundary_names = getParam<std::vector<BoundaryName> >("intersecting_boundary");
-    if (_geom_definition_method == CRACK_FRONT_POINTS)
-      mooseError("The use of 'intersecting_boundary' together with 'crack_front_points' is not yet supported");
-  }
 
   MooseEnum end_direction_method_moose_enum = getParam<MooseEnum>("crack_end_direction_method");
   if (end_direction_method_moose_enum.isValid())
@@ -173,6 +169,9 @@ CrackFrontDefinition::initialSetup()
     getCrackFrontNodes(nodes);
     orderCrackFrontNodes(nodes);
   }
+
+  if (_closed_loop && _intersecting_boundary_names.size() > 0)
+    mooseError("Cannot use intersecting_boundary with closed-loop cracks");
 
   updateCrackFrontGeometry();
 
@@ -1183,7 +1182,11 @@ CrackFrontDefinition::isPointWithIndexOnIntersectingBoundary(const unsigned int 
   }
   else
   {
-    //TODO: Implement for CRACK_FRONT_POINTS
+    // If the intersecting boundary option is used with crack front points, the
+    // first and last points are assumed to be on the intersecting boundaries.
+    unsigned int num_crack_front_points = getNumCrackFrontPoints();
+    if (point_index == 0 || point_index == num_crack_front_points - 1)
+      is_on_boundary = true;
   }
   return is_on_boundary;
 }
