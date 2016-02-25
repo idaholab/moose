@@ -111,7 +111,7 @@ protected:
   /**
    * The values of Lagrange multipliers in quadrature points
    */
-  VariableValue & _lambda;
+  const VariableValue & _lambda;
 
   MooseMesh::MortarInterface & _iface;
   PenetrationLocator & _master_penetration_locator;

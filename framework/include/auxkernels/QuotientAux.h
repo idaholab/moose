@@ -39,8 +39,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _numerator;
-  VariableValue & _denominator;
+  const VariableValue & _numerator;
+  const VariableValue & _denominator;
 };
 
 #endif // QUOTIENTAUX_H

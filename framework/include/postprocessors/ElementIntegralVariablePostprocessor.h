@@ -41,11 +41,11 @@ protected:
   virtual Real computeQpIntegral();
 
   /// Holds the solution at current quadrature points
-  VariableValue & _u;
+  const VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
   /// Holds the solution derivative at the current quadrature points
-  VariableValue & _u_dot;
+  const VariableValue & _u_dot;
 };
 
 #endif

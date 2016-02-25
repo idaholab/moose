@@ -44,7 +44,7 @@ protected:
   virtual Real computeQpIntegral();
 
   /// The variable to compare to
-  VariableValue & _other_var;
+  const VariableValue & _other_var;
 };
 
 #endif //ELEMENTL2DIFFERENCE_H

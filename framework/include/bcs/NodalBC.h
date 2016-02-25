@@ -53,7 +53,7 @@ protected:
   /// Quadrature point index
   unsigned int _qp;
   /// Value of the unknown variable this BC is acting on
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;

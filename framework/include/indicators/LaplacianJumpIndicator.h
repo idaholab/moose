@@ -33,8 +33,8 @@ protected:
 
   virtual Real computeQpIntegral();
 
-  VariableSecond & _second_u;
-  VariableSecond & _second_u_neighbor;
+  const VariableSecond & _second_u;
+  const VariableSecond & _second_u_neighbor;
 };
 
 #endif /* LAPLACIANJUMPINDICATOR_H */

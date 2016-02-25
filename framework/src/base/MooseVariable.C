@@ -411,7 +411,7 @@ MooseVariable::secondPhiFaceNeighbor()
   return *_second_phi_face_neighbor;
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValue()
 {
   if (isNodal())
@@ -423,7 +423,7 @@ MooseVariable::nodalValue()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValueOld()
 {
   if (isNodal())
@@ -435,7 +435,7 @@ MooseVariable::nodalValueOld()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValueOlder()
 {
   if (isNodal())
@@ -447,7 +447,7 @@ MooseVariable::nodalValueOlder()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValueDot()
 {
   if (isNodal())
@@ -459,7 +459,7 @@ MooseVariable::nodalValueDot()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValueNeighbor()
 {
   if (isNodal())
@@ -471,7 +471,7 @@ MooseVariable::nodalValueNeighbor()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValueOldNeighbor()
 {
   if (isNodal())
@@ -483,7 +483,7 @@ MooseVariable::nodalValueOldNeighbor()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValueOlderNeighbor()
 {
   if (isNodal())
@@ -495,7 +495,7 @@ MooseVariable::nodalValueOlderNeighbor()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-VariableValue &
+const VariableValue &
 MooseVariable::nodalValueDotNeighbor()
 {
   if (isNodal())

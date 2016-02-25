@@ -92,9 +92,9 @@ protected:
   /// The current Newton increment
   VariableValue & _u_increment;
   /// Holds the current solution at the current quadrature point
-  VariableValue & _u;
+  const VariableValue & _u;
   /// Holds the current solution gradient at the current quadrature point
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
 };
 
 #endif

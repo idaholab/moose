@@ -28,7 +28,7 @@ NeighborMooseVariableInterface::~NeighborMooseVariableInterface()
 }
 
 
-VariableValue &
+const VariableValue &
 NeighborMooseVariableInterface::neighborValue()
 {
   if (_nodal)
@@ -37,7 +37,7 @@ NeighborMooseVariableInterface::neighborValue()
     return _variable->slnNeighbor();
 }
 
-VariableValue &
+const VariableValue &
 NeighborMooseVariableInterface::neighborValueOld()
 {
   if (_nodal)
@@ -46,7 +46,7 @@ NeighborMooseVariableInterface::neighborValueOld()
     return _variable->slnOldNeighbor();
 }
 
-VariableValue &
+const VariableValue &
 NeighborMooseVariableInterface::neighborValueOlder()
 {
   if (_nodal)
@@ -55,7 +55,7 @@ NeighborMooseVariableInterface::neighborValueOlder()
     return _variable->slnOlderNeighbor();
 }
 
-VariableGradient &
+const VariableGradient &
 NeighborMooseVariableInterface::neighborGradient()
 {
   if (_nodal)
@@ -64,7 +64,7 @@ NeighborMooseVariableInterface::neighborGradient()
   return _variable->gradSlnNeighbor();
 }
 
-VariableGradient &
+const VariableGradient &
 NeighborMooseVariableInterface::neighborGradientOld()
 {
   if (_nodal)
@@ -73,7 +73,7 @@ NeighborMooseVariableInterface::neighborGradientOld()
   return _variable->gradSlnOldNeighbor();
 }
 
-VariableGradient &
+const VariableGradient &
 NeighborMooseVariableInterface::neighborGradientOlder()
 {
   if (_nodal)
@@ -82,7 +82,7 @@ NeighborMooseVariableInterface::neighborGradientOlder()
   return _variable->gradSlnOlderNeighbor();
 }
 
-VariableSecond &
+const VariableSecond &
 NeighborMooseVariableInterface::neighborSecond()
 {
   if (_nodal)
@@ -91,7 +91,7 @@ NeighborMooseVariableInterface::neighborSecond()
   return _variable->secondSlnNeighbor();
 }
 
-VariableSecond &
+const VariableSecond &
 NeighborMooseVariableInterface::neighborSecondOld()
 {
   if (_nodal)
@@ -100,7 +100,7 @@ NeighborMooseVariableInterface::neighborSecondOld()
   return _variable->secondSlnOldNeighbor();
 }
 
-VariableSecond &
+const VariableSecond &
 NeighborMooseVariableInterface::neighborSecondOlder()
 {
   if (_nodal)
@@ -109,20 +109,20 @@ NeighborMooseVariableInterface::neighborSecondOlder()
   return _variable->secondSlnOlderNeighbor();
 }
 
-VariableTestSecond &
+const VariableTestSecond &
 NeighborMooseVariableInterface::neighborSecondTest()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariableTestSecond &>(_variable->secondPhiFaceNeighbor());
+  return _variable->secondPhiFaceNeighbor();
 }
 
-VariablePhiSecond &
+const VariablePhiSecond &
 NeighborMooseVariableInterface::neighborSecondPhi()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhiFaceNeighbor());
+  return _mvi_assembly->secondPhiFaceNeighbor();
 }

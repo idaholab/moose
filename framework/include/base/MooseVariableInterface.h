@@ -48,28 +48,28 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableValue & value();
+  virtual const VariableValue & value();
 
   /**
    * The old value of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableValue & valueOld();
+  virtual const VariableValue & valueOld();
 
   /**
    * The older value of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableValue & valueOlder();
+  virtual const VariableValue & valueOlder();
 
   /**
    * The time derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableValue & dot();
+  virtual const VariableValue & dot();
 
   /**
    * The derivative of the time derivative of the variable this object is operating on
@@ -79,7 +79,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableValue & dotDu();
+  virtual const VariableValue & dotDu();
 
   /**
    * The gradient of the variable this object is operating on.
@@ -88,49 +88,49 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableGradient & gradient();
+  virtual const VariableGradient & gradient();
 
   /**
    * The old gradient of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableGradient & gradientOld();
+  virtual const VariableGradient & gradientOld();
 
   /**
    * The older gradient of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableGradient & gradientOlder();
+  virtual const VariableGradient & gradientOlder();
 
   /**
    * The second derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableSecond & second();
+  virtual const VariableSecond & second();
 
   /**
    * The old second derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableSecond & secondOld();
+  virtual const VariableSecond & secondOld();
 
   /**
    * The older second derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableSecond & secondOlder();
+  virtual const VariableSecond & secondOlder();
 
   /**
    * The second derivative of the test function.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableTestSecond & secondTest();
+  virtual const VariableTestSecond & secondTest();
 
   /**
    * The second derivative of the test function on the current face.
@@ -139,14 +139,14 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariableTestSecond & secondTestFace();
+  virtual const VariableTestSecond & secondTestFace();
 
   /**
    * The second derivative of the trial function.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariablePhiSecond & secondPhi();
+  virtual const VariablePhiSecond & secondPhi();
 
   /**
    * The second derivative of the trial function on the current face.
@@ -155,7 +155,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual VariablePhiSecond & secondPhiFace();
+  virtual const VariablePhiSecond & secondPhiFace();
 
   /// Whether or not this object is acting only at nodes
   bool _nodal;
