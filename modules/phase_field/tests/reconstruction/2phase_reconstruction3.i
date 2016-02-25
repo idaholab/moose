@@ -2,7 +2,7 @@
 # In this test , which is set up similarly to 2phase_reconstruction_test2.i
 # we demonstrate that the feature numbers in teh EBSD file can be chosen arbitrarily.
 # There is no need for then to start at a certain index or even to be contiguous!
-# The TestEBSDAux AuxKernel outputs the original feature IDs (grain numbers)
+# The EBSDReaderPointDataAux AuxKernel outputs the original feature IDs (grain numbers)
 #
 
 [Problem]
@@ -45,7 +45,7 @@
 
 [AuxKernels]
   [./grain_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = GRAIN
     ebsd_reader = ebsd
     data_name = 'grain'
