@@ -75,13 +75,28 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
   if (it != _coupled_scalar_vars.end())
     return (i < it->second.size());
   else
+  {
+    // Make sure the user originally requested this value in the InputParameter syntax
+    if (!_coupleable_params.hasCoupledValue(var_name))
+      mooseError("The coupled scalar variable \"" << var_name << "\" was never added to this objects's InputParameters, please double-check your spelling");
+
     return false;
+  }
 }
 
 unsigned int
 ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
 {
   return getScalarVar(var_name, comp)->number();
+}
+
+Order
+ScalarCoupleable::coupledScalarOrder(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupledScalar(var_name, comp))
+    return _sc_fe_problem.getMaxScalarOrder();
+
+  return getScalarVar(var_name, comp)->order();
 }
 
 VariableValue *
