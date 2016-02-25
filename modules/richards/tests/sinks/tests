@@ -56,4 +56,12 @@
     input = 'q2p01.i'
     csvdiff = 'q2p01.csv'
   [../]
+
+  [./except01]
+    type = 'RunException'
+    input = 's_fu_04.i'
+    cli_args = 'BCs/left_flux/area_pp=0'
+    expect_err = 'RichardsPiecewiseLinearSink: flux is nonzero, but area is zero!'
+  [../]
+
 []

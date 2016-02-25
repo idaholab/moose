@@ -115,7 +115,6 @@
     csvdiff = 'gh_bounded_17.csv'
     rel_err = 1e-5
     abs_zero = 1e-4
-    skip = 'not working with PETSc debug'
   [../]
 
   [./gh_fu_01]
