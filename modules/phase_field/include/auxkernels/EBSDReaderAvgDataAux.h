@@ -4,38 +4,36 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef TESTEBSDAUX_H
-#define TESTEBSDAUX_H
+#ifndef EBSDREADERAVGDATAAUX_H
+#define EBSDREADERAVGDATAAUX_H
 
 #include "AuxKernel.h"
 #include "EBSDReader.h"
 
 //Forward Declarations
-class TestEBSDAux;
+class EBSDReaderAvgDataAux;
 
 template<>
-InputParameters validParams<TestEBSDAux>();
+InputParameters validParams<EBSDReaderAvgDataAux>();
 
 /**
- * This kernel tests the EBSDReader GeneralUserObject by using it to
- * set up an Aux variable.
+ * This kernel makes data from the EBSDReader GeneralUserObject available
+ * as AuxVariables.
  */
-class TestEBSDAux : public AuxKernel, EBSDAccessFunctors
+class EBSDReaderAvgDataAux : public AuxKernel, EBSDAccessFunctors
 {
 public:
-  TestEBSDAux(const InputParameters & parameters);
-  ~TestEBSDAux();
+  EBSDReaderAvgDataAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
   const EBSDReader & _ebsd_reader;
 
-  /// String and associated MooseEnum that stores the type of data
-  /// this AuxKernel extracts.
+  /// MooseEnum that stores the type of data this AuxKernel extracts.
   MooseEnum _data_name;
 
   /// Accessor functor to fetch the selected data field form the EBSD data point
-  MooseSharedPointer<EBSDPointDataFunctor> _val;
+  MooseSharedPointer<EBSDAvgDataFunctor> _val;
 };
 
-#endif //TESTEBSDAUX_H
+#endif //EBSDREADERAVGDATAAUX_H
