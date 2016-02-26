@@ -49,7 +49,7 @@
 [MultiApps]
   [./full_solve]
     type = FullSolveMultiApp
-    app_type = MooseTestApp
+# not setting app_type to use the same app type of master, i.e. MooseTestApp
     execute_on = initial
     positions = '0 0 0'
     input_files = sub.i

@@ -55,7 +55,7 @@ InputParameters validParams<MultiApp>()
     app_types_strings << it->first << " ";
   MooseEnum app_types_options(app_types_strings.str(), "", true);
 
-  params.addRequiredParam<MooseEnum>("app_type", app_types_options, "The type of application to build (applications not registered can be loaded with dynamic libraries.");
+  params.addParam<MooseEnum>("app_type", app_types_options, "The type of application to build (applications not registered can be loaded with dynamic libraries. Master application type will be used if not provided.");
   params.addParam<std::string>("library_path", "", "Path to search for dynamic libraries (please avoid committing absolute paths in addition to MOOSE_LIBRARY_PATH)");
   params.addParam<std::vector<Point> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  This and 'positions_file' cannot be both supplied. If this and 'positions_file' are not supplied, a single position (0,0,0) will be used");
   params.addParam<std::vector<FileName> >("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  This and 'positions' cannot be both supplied");
@@ -93,7 +93,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     SetupInterface(parameters),
     Restartable(parameters, "MultiApps"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _app_type(getParam<MooseEnum>("app_type")),
+    _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type")) : _fe_problem.getMooseApp().type()),
     _input_files(getParam<std::vector<FileName> >("input_files")),
     _total_num_apps(0),
     _my_num_apps(0),
