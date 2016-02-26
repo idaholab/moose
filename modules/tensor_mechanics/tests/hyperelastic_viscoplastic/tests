@@ -14,4 +14,9 @@
     input = 'one_elem_base.i'
     exodiff = 'one_elem_base.e'
   [../]
+  [./one_elem_linear_harden]
+    type = 'Exodiff'
+    input = 'one_elem_linear_harden.i'
+    exodiff = 'one_elem_linear_harden.e'
+  [../]
 []
