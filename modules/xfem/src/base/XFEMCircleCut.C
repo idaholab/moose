@@ -27,8 +27,8 @@ XFEMCircleCut::XFEMCircleCut(std::vector<Real> circle_nodes) :
   _normal = ray1.cross(ray2);
   Xfem::normalizePoint(_normal);
 
-  Real R1 = std::sqrt(ray1.size_sq());
-  Real R2 = std::sqrt(ray2.size_sq());
+  Real R1 = std::sqrt(ray1.norm_sq());
+  Real R2 = std::sqrt(ray2.norm_sq());
   if ( std::abs(R1 - R2) > 1e-10 )
     mooseError("XFEMCircleCut only works for a circular cut");
 
@@ -42,7 +42,7 @@ XFEMCircleCut::~XFEMCircleCut()
 
 bool XFEMCircleCut::isInsideCutPlane(Point p){
     Point ray = p - _center;
-    if ( std::abs(ray*_normal)<1e-15 && std::sqrt(ray.size_sq()) < _radius )
+    if ( std::abs(ray*_normal)<1e-15 && std::sqrt(ray.norm_sq()) < _radius )
       return true;
     return false;
 }

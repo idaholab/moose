@@ -55,7 +55,7 @@ TorqueReaction::execute()
   //Sum over T = r x F
   Point force(_react_x[_qp], _react_y[_qp], _react_z[_qp]);
   Point torque = r.cross(force);
-  Real torque_len = torque.size();
+  Real torque_len = torque.norm();
   _sum += torque_len;
 }
 

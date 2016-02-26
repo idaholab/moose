@@ -64,7 +64,7 @@ Real
 NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-  Real V2 = vel.size_sq();
+  Real V2 = vel.norm_sq();
 
   // Derivative wrt density
   if (jvar == _rho_var_number)

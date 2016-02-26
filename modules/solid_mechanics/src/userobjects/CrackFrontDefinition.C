@@ -450,7 +450,7 @@ CrackFrontDefinition::pickLoopCrackEndNodes(std::vector<dof_id_type> &end_nodes,
   for (std::set<dof_id_type>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
   {
     Node & node = _mesh.node(*nit);
-    Real dist = node.size();
+    Real dist = node.norm();
     if (dist > max_dist)
     {
       max_dist = dist;
@@ -630,7 +630,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     if (_closed_loop)
     {
       back_segment = *getCrackFrontPoint(0) - *getCrackFrontPoint(num_crack_front_points-1);
-      back_segment_len = back_segment.size();
+      back_segment_len = back_segment.norm();
     }
 
     for (unsigned int i=0; i<num_crack_front_points; ++i)
@@ -652,12 +652,12 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       else if (_closed_loop && i==num_crack_front_points-1)
       {
         forward_segment = *getCrackFrontPoint(0) - *getCrackFrontPoint(i);
-        forward_segment_len = forward_segment.size();
+        forward_segment_len = forward_segment.norm();
       }
       else
       {
         forward_segment = *getCrackFrontPoint(i+1) - *getCrackFrontPoint(i);
-        forward_segment_len = forward_segment.size();
+        forward_segment_len = forward_segment.norm();
         _overall_length += forward_segment_len;
       }
 
@@ -668,7 +668,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
         _distances_along_front.push_back(back_segment_len + _distances_along_front[i - 1]);
 
       RealVectorValue tangent_direction = back_segment + forward_segment;
-      tangent_direction = tangent_direction / tangent_direction.size();
+      tangent_direction = tangent_direction / tangent_direction.norm();
       _tangent_directions.push_back(tangent_direction);
       _crack_directions.push_back(calculateCrackFrontDirection(*getCrackFrontPoint(i),tangent_direction,ntype));
 
@@ -698,10 +698,10 @@ CrackFrontDefinition::updateCrackFrontGeometry()
     if (hasAngleAlongFront())
     {
       RealVectorValue origin_to_first_node = *getCrackFrontPoint(0) - _crack_mouth_coordinates;
-      Real hyp = origin_to_first_node.size();
+      Real hyp = origin_to_first_node.norm();
       RealVectorValue norm_origin_to_first_node = origin_to_first_node / hyp;
       RealVectorValue tangent_to_first_node = -norm_origin_to_first_node.cross(_crack_plane_normal);
-      tangent_to_first_node /= tangent_to_first_node.size();
+      tangent_to_first_node /= tangent_to_first_node.norm();
 
       for (unsigned int i=0; i<num_crack_front_points; ++i)
       {
@@ -1072,7 +1072,7 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
 
     //Find r, the distance between the qp and the crack front
     RealVectorValue r_vec = p_rot;
-    r = r_vec.size();
+    r = r_vec.norm();
   }
   else
   {
@@ -1082,7 +1082,7 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
     {
       const Point* crack_front_point = getCrackFrontPoint(pit);
       RealVectorValue crack_point_to_current_point = qp - *crack_front_point;
-      Real dist = crack_point_to_current_point.size();
+      Real dist = crack_point_to_current_point.norm();
 
       if (dist < min_dist)
       {
@@ -1096,13 +1096,13 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, const unsigned
     closest_point = closest_point - crack_front_point_rot;
 
     //Find r, the distance between the qp and the crack front
-    Real edge_length_sq = crack_front_edge.size_sq();
+    Real edge_length_sq = crack_front_edge.norm_sq();
     closest_point_to_p = p_rot - closest_point;
     Real perp = crack_front_edge * closest_point_to_p;
     Real dist_along_edge = perp / edge_length_sq;
     RealVectorValue point_on_edge = closest_point + crack_front_edge * dist_along_edge;
     RealVectorValue r_vec = p_rot - point_on_edge;
-    r = r_vec.size();
+    r = r_vec.norm();
   }
 
   //Find theta, the angle between r and the crack front plane
@@ -1231,11 +1231,11 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
 
     forward_segment0 = *next_node - *current_node;
     forward_segment0 = (forward_segment0 * _tangent_directions[0]) * _tangent_directions[0];
-    forward_segment0_len = forward_segment0.size();
+    forward_segment0_len = forward_segment0.norm();
 
     forward_segment1 = (*next_node + disp_next_node) - (*current_node + disp_current_node);
     forward_segment1 = (forward_segment1 * _tangent_directions[0]) * _tangent_directions[0];
-    forward_segment1_len = forward_segment1.size();
+    forward_segment1_len = forward_segment1.norm();
 
     _strain_along_front[0] = (forward_segment1_len - forward_segment0_len) / forward_segment0_len;
   }
@@ -1261,19 +1261,19 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
 
       back_segment0 = *current_node - *previous_node;
       back_segment0 = (back_segment0 * _tangent_directions[i]) * _tangent_directions[i];
-      back_segment0_len = back_segment0.size();
+      back_segment0_len = back_segment0.norm();
 
       back_segment1 = (*current_node + disp_current_node) - (*previous_node + disp_previous_node);
       back_segment1 = (back_segment1 * _tangent_directions[i]) * _tangent_directions[i];
-      back_segment1_len = back_segment1.size();
+      back_segment1_len = back_segment1.norm();
 
       forward_segment0 = *next_node - *current_node;
       forward_segment0 = (forward_segment0 * _tangent_directions[i]) * _tangent_directions[i];
-      forward_segment0_len = forward_segment0.size();
+      forward_segment0_len = forward_segment0.norm();
 
       forward_segment1 = (*next_node + disp_next_node) - (*current_node + disp_current_node);
       forward_segment1 = (forward_segment1 * _tangent_directions[i]) * _tangent_directions[i];
-      forward_segment1_len = forward_segment1.size();
+      forward_segment1_len = forward_segment1.norm();
 
       _strain_along_front[i] = 0.5 * ((back_segment1_len - back_segment0_len) / back_segment0_len
                                       + (forward_segment1_len - forward_segment0_len) / forward_segment0_len);
@@ -1294,11 +1294,11 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
 
     back_segment0 = *current_node - *previous_node;
     back_segment0 = (back_segment0 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
-    back_segment0_len = back_segment0.size();
+    back_segment0_len = back_segment0.norm();
 
     back_segment1 = (*current_node + disp_current_node) - (*previous_node + disp_previous_node);
     back_segment1 = (back_segment1 * _tangent_directions[num_crack_front_nodes-1]) * _tangent_directions[num_crack_front_nodes-1];
-    back_segment1_len = back_segment1.size();
+    back_segment1_len = back_segment1.norm();
 
     _strain_along_front[num_crack_front_nodes-1] = (back_segment1_len - back_segment0_len) / back_segment0_len;
   }

@@ -60,6 +60,6 @@ ElementVectorL2Error::computeQpIntegral()
   func_val(1) = _funcy.value(_t, _q_point[_qp]);
   func_val(2) = _funcz.value(_t, _q_point[_qp]);
 
-  return (sol_val - func_val).size_sq(); // dot product of difference vector
+  return (sol_val - func_val).norm_sq(); // dot product of difference vector
 }
 

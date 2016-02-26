@@ -58,7 +58,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
     for (unsigned int k=0; k<n_neighbor_nodes; k++)
     {
       const Node * cur_node = &_mesh.node(neighbor_nodes[k]);
-      Real distance = ((*cur_node) - node).size();
+      Real distance = ((*cur_node) - node).norm();
 
       if (distance < closest_distance)
       {

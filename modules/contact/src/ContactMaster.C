@@ -256,7 +256,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
     RealVectorValue contact_force_tangential( pinfo->_contact_force - contact_force_normal );
 
     // Tangential magnitude of elastic predictor
-    const Real tan_mag( contact_force_tangential.size() );
+    const Real tan_mag( contact_force_tangential.norm() );
 
     if ( tan_mag > capacity )
     {
@@ -281,7 +281,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
       break;
     case CF_AUGMENTED_LAGRANGE:
       pinfo->_contact_force = pen_force +
-                              pinfo->_lagrange_multiplier*distance_vec/distance_vec.size();
+                              pinfo->_lagrange_multiplier*distance_vec/distance_vec.norm();
       break;
     default:
       mooseError("Invalid contact formulation");

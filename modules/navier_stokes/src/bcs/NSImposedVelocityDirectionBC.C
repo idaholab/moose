@@ -52,7 +52,7 @@ Real NSImposedVelocityDirectionBC::computeQpResidual()
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Specify desired velocity component
-  return _u[_qp] - _rho[_qp] * _desired_unit_velocity_component * vel.size();
+  return _u[_qp] - _rho[_qp] * _desired_unit_velocity_component * vel.norm();
 }
 
 

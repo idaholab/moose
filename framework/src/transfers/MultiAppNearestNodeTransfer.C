@@ -286,7 +286,7 @@ MultiAppNearestNodeTransfer::execute()
 
           for (unsigned int i_node = 0; i_node < local_nodes[i_local_from].size(); i_node++)
           {
-            Real current_distance = (qpt - *(local_nodes[i_local_from][i_node]) - _from_positions[i_local_from]).size();
+            Real current_distance = (qpt - *(local_nodes[i_local_from][i_node]) - _from_positions[i_local_from]).norm();
             if (current_distance < outgoing_evals[2*qp])
             {
               // Assuming LAGRANGE!
@@ -523,7 +523,7 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, Mo
       if (bnode->_bnd_id == src_bnd_id)
       {
         Node * node = bnode->_node;
-        Real current_distance = (p - *node).size();
+        Real current_distance = (p - *node).norm();
 
         if (current_distance < distance)
         {
@@ -540,7 +540,7 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, Mo
 
     for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
     {
-      Real current_distance = (p - *(*node_it)).size();
+      Real current_distance = (p - *(*node_it)).norm();
 
       if (current_distance < distance)
       {
@@ -576,7 +576,7 @@ MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, MeshTools::BoundingBox bbo
 
   for (unsigned int i = 0; i < 8; i++)
   {
-    Real distance = (p - all_points[i]).size();
+    Real distance = (p - all_points[i]).norm();
     if (distance > max_distance)
       max_distance = distance;
   }
@@ -606,7 +606,7 @@ MultiAppNearestNodeTransfer::bboxMinDistance(Point p, MeshTools::BoundingBox bbo
 
   for (unsigned int i = 0; i < 8; i++)
   {
-    Real distance = (p - all_points[i]).size();
+    Real distance = (p - all_points[i]).norm();
     if (distance < min_distance)
       min_distance = distance;
   }

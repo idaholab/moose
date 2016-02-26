@@ -32,7 +32,7 @@ LineSegment::closest_point (const Point & p, bool clamp_to_segment, Point & clos
 {
   Point p0_p  = p - _p0;
   Point p0_p1 = _p1 - _p0;
-  Real p0_p1_2 = p0_p1.size_sq();
+  Real p0_p1_2 = p0_p1.norm_sq();
   Real perp = p0_p(0)*p0_p1(0) + p0_p(1)*p0_p1(1) + p0_p(2)*p0_p1(2);
   Real t = perp / p0_p1_2;
   bool on_segment = true;
@@ -111,7 +111,7 @@ LineSegment::intersect (const Plane & pl, Point & intersect_p) const
   Real d = numerator / denominator;
 
   // Make sure we haven't moved off the line segment!
-  if (d + libMesh::TOLERANCE < 0 || d - libMesh::TOLERANCE > (_p1-_p0).size())
+  if (d + libMesh::TOLERANCE < 0 || d - libMesh::TOLERANCE > (_p1-_p0).norm())
     return false;
 
   intersect_p = d*I + _p0;
@@ -150,7 +150,7 @@ LineSegment::intersect (const LineSegment & l, Point & intersect_p) const
   RealVectorValue v = a.cross(b);
 
   // Check for parallel lines
-  if (std::abs(v.size()) < 1.e-10 && std::abs(c.cross(a).size()) < 1.e-10)
+  if (std::abs(v.norm()) < 1.e-10 && std::abs(c.cross(a).norm()) < 1.e-10)
   {
     // TODO: The lines are co-linear but more work is needed to determine and intersection point
     //       it could be the case that the line segments don't lie on the same line or overlap only

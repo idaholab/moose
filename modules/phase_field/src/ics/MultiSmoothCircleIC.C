@@ -110,14 +110,14 @@ MultiSmoothCircleIC::computeCircleCenters()
 
       for (unsigned int j = 0; j < i; j++)
       {
-        if (j == 0) rr = _range.size();
+        if (j == 0) rr = _range.norm();
 
         Real tmp_rr = _mesh.minPeriodicDistance(_var.number(), _centers[j], newcenter);
 
         if (tmp_rr < rr) rr = tmp_rr;
       }
 
-      if (i == 0) rr = _range.size();
+      if (i == 0) rr = _range.norm();
     }
 
     if (num_tries == _numtries)

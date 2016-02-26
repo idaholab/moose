@@ -62,7 +62,7 @@ StressDivergenceTruss::computeResidual()
   _local_re.zero();
 
   RealGradient orientation( (*_orientation)[0] );
-  orientation /= orientation.size();
+  orientation /= orientation.norm();
   VectorValue<Real> force_local = _axial_stress[0] * _area[0] * orientation;
 
   int sign(-_test[0][0]/std::abs(_test[0][0]));
@@ -83,7 +83,7 @@ void
 StressDivergenceTruss::computeStiffness(ColumnMajorMatrix & stiff_global)
 {
   RealGradient orientation( (*_orientation)[0] );
-  orientation /= orientation.size();
+  orientation /= orientation.norm();
 
   Real k = _E_over_L[0] * _area[0];
   stiff_global(0,0) = orientation(0)*orientation(0)*k;

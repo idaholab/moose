@@ -74,7 +74,7 @@ public:
   /**
    * Length of segment
    */
-  Real length() const { return (_p0 - _p1).size(); }
+  Real length() const { return (_p0 - _p1).norm(); }
 
 private:
   bool closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const;

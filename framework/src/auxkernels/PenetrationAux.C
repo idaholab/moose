@@ -118,7 +118,7 @@ PenetrationAux::computeValue()
       case PA_SIDE:
         retVal = static_cast<Real>(pinfo->_side_num); break;
       case PA_INCREMENTAL_SLIP_MAG:
-        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip.size() : 0; break;
+        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip.norm() : 0; break;
       case PA_INCREMENTAL_SLIP_X:
         retVal = pinfo->isCaptured() ? pinfo->_incremental_slip(0) : 0; break;
       case PA_INCREMENTAL_SLIP_Y:
@@ -145,7 +145,7 @@ PenetrationAux::computeValue()
       {
         RealVectorValue contact_force_normal( (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal );
         RealVectorValue contact_force_tangential( pinfo->_contact_force - contact_force_normal );
-        retVal = contact_force_tangential.size();
+        retVal = contact_force_tangential.norm();
         break;
       }
       case PA_TANGENTIAL_FORCE_X:

@@ -81,7 +81,7 @@ MaterialTensorOnLine::execute()
   {
 
     const Point line_vec(_lp2-_lp1);
-    const Real length(line_vec.size());
+    const Real length(line_vec.norm());
     const Point line_unit_vec(line_vec/length);
 
     for ( qp = 0; qp < _qrule->n_points(); ++qp )
@@ -93,7 +93,7 @@ MaterialTensorOnLine::execute()
       const Point proj_vec(proj*line_unit_vec);
 
       const Point dist_vec(line1_qp_vec-proj_vec);
-      const Real distance(dist_vec.size());
+      const Real distance(dist_vec.norm());
 
       const SymmTensor & tensor( _tensor[qp] );
       RealVectorValue direction;

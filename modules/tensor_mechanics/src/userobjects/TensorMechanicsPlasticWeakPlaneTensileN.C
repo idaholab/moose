@@ -25,10 +25,10 @@ TensorMechanicsPlasticWeakPlaneTensileN::TensorMechanicsPlasticWeakPlaneTensileN
   // cannot check the following for all values of strength, but this is a start
   if (_strength.value(0) < 0)
     mooseError("Weak plane tensile strength must not be negative");
-  if (_input_n.size() == 0)
+  if (_input_n.norm() == 0)
      mooseError("Weak-plane normal vector must not have zero length");
    else
-     _input_n /= _input_n.size();
+     _input_n /= _input_n.norm();
   _rot = RotationMatrix::rotVecToZ(_input_n);
 
   for (unsigned i = 0; i < 3; ++i)

@@ -72,7 +72,7 @@ DiscreteNucleationMap::execute()
       {
         // use a non-periodic or periodic distance
         r = _periodic < 0 ?
-              (_q_point[qp] - _nucleus_list[i].second).size() :
+              (_q_point[qp] - _nucleus_list[i].second).norm() :
               _mesh.minPeriodicDistance(_periodic, _q_point[qp], _nucleus_list[i].second);
         if (r < rmin)
           rmin = r;

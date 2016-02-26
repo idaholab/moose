@@ -47,11 +47,11 @@ LineValueSampler::LineValueSampler(const InputParameters & parameters) :
     Point p = start_point + (i * delta);
 
     _points[i] = p;
-    _ids[i] = (p - start_point).size(); // The ID is the distance along the line
+    _ids[i] = (p - start_point).norm(); // The ID is the distance along the line
   }
 
   // Add the end point explicitly
   _points[num_points-1] = end_point;
-  _ids[num_points-1] = (end_point - start_point).size();
+  _ids[num_points-1] = (end_point - start_point).norm();
 }
 

@@ -56,7 +56,7 @@ MaterialVectorAux::computeValue()
   }
   else if ( _quantity == MVA_LENGTH )
   {
-    value = vector.size();
+    value = vector.norm();
   }
   else
   {
