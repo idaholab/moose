@@ -47,6 +47,7 @@
 #define registerDamper(name)                        registerObject(name)
 #define registerDiracKernel(name)                   registerObject(name)
 #define registerDGKernel(name)                      registerObject(name)
+#define registerInterfaceKernel(name)               registerObject(name)
 #define registerExecutioner(name)                   registerObject(name)
 #define registerFunction(name)                      registerObject(name)
 #define registerMesh(name)                          registerObject(name)
