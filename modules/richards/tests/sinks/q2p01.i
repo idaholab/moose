@@ -171,6 +171,11 @@
   [../]
 []
 
+[AuxVariables]
+  [./one]
+    initial_condition = 1
+  [../]
+[]
 
 [Materials]
   [./rock]

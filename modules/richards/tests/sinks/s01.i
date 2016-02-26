@@ -139,6 +139,12 @@
   [../]
 []
 
+[AuxVariables]
+  [./one]
+    initial_condition = 1
+  [../]
+[]
+
 [Materials]
   [./rock]
     type = RichardsMaterial
@@ -157,20 +163,13 @@
 []
 
 
-[Preconditioning]
-  [./andy]
-    type = SMP
-    full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-12 1E-10 10000'
-  [../]
-[]
-
 [Executioner]
   type = Transient
   solve_type = Newton
   dt = 2E-3
   end_time = 0.2
+  nl_rel_tol = 1E-12
+  nl_abs_tol = 1E-12
 []
 
 [Outputs]

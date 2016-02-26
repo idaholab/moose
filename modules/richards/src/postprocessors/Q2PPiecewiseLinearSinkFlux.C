@@ -51,8 +51,6 @@ Q2PPiecewiseLinearSinkFlux::computeQpIntegral()
 {
   Real flux = _sink_func.sample(_pp[_qp]);
 
-  Moose::out << "pp=" << _pp[_qp] << "\n";
-
   flux *= _m_func.value(_t, _q_point[_qp]);
 
   if (_use_mobility)
