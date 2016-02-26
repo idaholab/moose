@@ -9,6 +9,7 @@
 
 #include "MooseError.h"
 #include "XFEMFuncs.h"
+#include "libmesh/string_to_enum.h"
 
 XFEMGeometricCut3D::XFEMGeometricCut3D(Real t0, Real t1) :
     XFEMGeometricCut(t0,t1),
@@ -38,65 +39,49 @@ XFEMGeometricCut3D::cutElementByGeometry(const Elem* elem,
 {
   bool cut_elem = false;
 
-   const int hex_indices[6][4] = {{0,3,2,1},{0,1,5,4},{1,2,6,5},{2,3,7,6},{3,0,4,7},{4,5,6,7}};
-   const int tet_indices[4][3] = {{0,2,1},{0,1,3},{1,2,3},{2,0,3}};
+  for (unsigned int i = 0; i < elem->n_sides(); ++i)
+  {
+    // This returns the lowest-order type of side.
+    UniquePtr<Elem> curr_side = elem->side(i);
+    if (curr_side->dim() != 2)
+      mooseError("In cutElementByGeometry dimension of side must be 2, but it is " << curr_side->dim());
+    unsigned int n_edges = curr_side->n_sides();
 
-   unsigned int n_face_nodes = 0;
-   if (elem->n_nodes() == 8)
-     n_face_nodes = 4;
-   else if (elem->n_nodes() == 4)
-     n_face_nodes = 3;
-   else
-     mooseError("this method only works for linear hexes and tets");
+    std::vector<unsigned int> cut_edges;
+    std::vector<Real> cut_pos;
 
-    for (unsigned int i = 0; i < elem->n_sides(); ++i)
+    for (unsigned int j = 0; j < n_edges; j++)
     {
-      std::vector<unsigned int> cut_edges;
-      std::vector<Real> cut_pos;
+      // This returns the lowest-order type of side.
+      UniquePtr<Elem> curr_edge = curr_side->side(j);
+      if (curr_edge->type() != EDGE2)
+        mooseError("In cutElementByGeometry face edge must be EDGE2, but type is: " << libMesh::Utility::enum_to_string(curr_edge->type())
+                   << " base element type is: " << libMesh::Utility::enum_to_string(elem->type()));
+      Node * node1 = curr_edge->get_node(0);
+      Node * node2 = curr_edge->get_node(1);
 
-      for (unsigned int j=0; j < n_face_nodes; j++)
+      Point intersection;
+      if (intersectWithEdge(*node1, *node2, intersection))
       {
-        unsigned int jplus1(j < (n_face_nodes-1) ? (j+1) : 0);
-        unsigned int node_id1 = 0;
-        unsigned int node_id2 = 0;
-        if (elem->n_nodes() == 8)  // hex
-        {
-          node_id1 = hex_indices[i][j];
-          node_id2 = hex_indices[i][jplus1];
-        }
-        else if (elem->n_nodes() == 4) // tet
-        {
-          node_id1 = tet_indices[i][j];
-          node_id2 = tet_indices[i][jplus1];
-        }
-        Node *node1 = elem->get_node(node_id1);
-        Node *node2 = elem->get_node(node_id2);
-        Point p1((*node1)(0), (*node1)(1), (*node1)(2));
-        Point p2((*node2)(0), (*node2)(1), (*node2)(2));
-
-        Point pint;
-        if (intersectWithEdge(p1,p2,pint))
-        {
-          cut_edges.push_back(j);
-          cut_pos.push_back(getRelativePosition(p1, p2, pint));
-        }
+        cut_edges.push_back(j);
+        cut_pos.push_back(getRelativePosition(*node1, *node2, intersection));
       }
+    }
 
-      if (cut_edges.size() == 2)
-      {
-       cut_elem = true;
-       CutFace mycut;
-       mycut.face_id = i;
-       mycut.face_edge.push_back(cut_edges[0]);
-       mycut.face_edge.push_back(cut_edges[1]);
-       mycut.position.push_back(cut_pos[0]);
-       mycut.position.push_back(cut_pos[1]);
-       cut_faces.push_back(mycut);
-     }
+    if (cut_edges.size() == 2)
+    {
+      cut_elem = true;
+      CutFace mycut;
+      mycut.face_id = i;
+      mycut.face_edge.push_back(cut_edges[0]);
+      mycut.face_edge.push_back(cut_edges[1]);
+      mycut.position.push_back(cut_pos[0]);
+      mycut.position.push_back(cut_pos[1]);
+      cut_faces.push_back(mycut);
+    }
+  }
 
-   }
-
-   return cut_elem;
+  return cut_elem;
 }
 
 bool
@@ -120,7 +105,7 @@ XFEMGeometricCut3D::cutFragmentByGeometry(std::vector<std::vector<Point> > & /*f
 }
 
 bool
-XFEMGeometricCut3D::intersectWithEdge(Point p1, Point p2, Point &pint)
+XFEMGeometricCut3D::intersectWithEdge(const Point & p1, const Point & p2, Point & pint)
 {
   bool has_intersection = false;
   double plane_point[3] = {_center(0), _center(1), _center(2)};
@@ -141,7 +126,7 @@ XFEMGeometricCut3D::intersectWithEdge(Point p1, Point p2, Point &pint)
 }
 
 bool
-XFEMGeometricCut3D::isInsideEdge(Point p1, Point p2, Point p)
+XFEMGeometricCut3D::isInsideEdge(const Point & p1, const Point & p2, const Point & p)
 {
   Real dotp1 = (p1 - p) * (p2 - p1);
   Real dotp2 = (p2 - p) * (p2 - p1);
@@ -149,7 +134,7 @@ XFEMGeometricCut3D::isInsideEdge(Point p1, Point p2, Point p)
 }
 
 Real
-XFEMGeometricCut3D::getRelativePosition(Point p1, Point p2, Point p)
+XFEMGeometricCut3D::getRelativePosition(const Point & p1, const Point & p2, const Point & p)
 {
   // get the relative position of p from p1
   Real full_len = (p2 - p1).norm();

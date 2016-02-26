@@ -8,6 +8,7 @@
 #include "XFEMGeometricCut2D.h"
 
 #include "MooseError.h"
+#include "libmesh/string_to_enum.h"
 
 XFEMGeometricCut2D::XFEMGeometricCut2D(Real x0, Real y0, Real x1, Real y1, Real t_start, Real t_end) :
     XFEMGeometricCut(t_start, t_end),
@@ -33,12 +34,18 @@ XFEMGeometricCut2D::cutElementByGeometry(const Elem* elem, std::vector<CutEdge> 
 
   Real fraction = cutFraction(time);
 
-  unsigned int nsides = elem->n_nodes();
+  unsigned int n_sides = elem->n_sides();
 
-  for (unsigned int i = 0; i < nsides; ++i)
+  for (unsigned int i = 0; i < n_sides; ++i)
   {
-    const Node *node1 = elem->get_node(i);
-    const Node *node2 = elem->get_node(i<(nsides-1) ? i+1 : 0);
+    // This returns the lowest-order type of side, which should always
+    // be an EDGE2 here because this class is for 2D only.
+    UniquePtr<Elem> curr_side = elem->side(i);
+    if (curr_side->type() != EDGE2)
+      mooseError("In cutElementByGeometry element side must be EDGE2, but type is: " << libMesh::Utility::enum_to_string(curr_side->type())
+                 << " base element type is: " << libMesh::Utility::enum_to_string(elem->type()));
+    const Node *node1 = curr_side->get_node(0);
+    const Node *node2 = curr_side->get_node(1);
 
     Real seg_originx = (*node1)(0);
     Real seg_originy = (*node1)(1);
@@ -93,7 +100,7 @@ XFEMGeometricCut2D::cutElementByGeometry(const Elem* /*elem*/, std::vector<CutFa
 
 bool
 XFEMGeometricCut2D::cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_edges,
-                                            std::vector<CutEdge> & cut_edges, Real time)
+                                          std::vector<CutEdge> & cut_edges, Real time)
 {
   //Use the algorithm described here to determine whether edges are cut by the cut line:
   //http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
@@ -103,9 +110,9 @@ XFEMGeometricCut2D::cutFragmentByGeometry(std::vector<std::vector<Point> > & fra
 
   const Real fraction = cutFraction(time);
 
-  unsigned int nsides = frag_edges.size();
+  unsigned int n_sides = frag_edges.size();
 
-  for (unsigned int i=0; i<nsides; ++i)
+  for (unsigned int i = 0; i < n_sides; ++i)
   {
     Real seg_originx = frag_edges[i][0](0);
     Real seg_originy = frag_edges[i][0](1);
@@ -139,7 +146,7 @@ XFEMGeometricCut2D::cutFragmentByGeometry(std::vector<std::vector<Point> > & fra
           cut_frag = true;
           CutEdge mycut;
           mycut.id1 = i;
-          mycut.id2 = (i<(nsides-1) ? (i+1) : 0);
+          mycut.id2 = (i < (n_sides - 1) ? (i + 1) : 0);
           mycut.distance = seg_int_frac;
           mycut.host_side_id = i;
           cut_edges.push_back(mycut);
