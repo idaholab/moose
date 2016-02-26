@@ -2,91 +2,148 @@
 from tempfile import TemporaryFile, SpooledTemporaryFile
 import os, sys, re, socket, time, pickle, csv, uuid, subprocess, argparse, decimal, select, platform, signal
 
-class LLDB:
+
+class Debugger:
+  """
+The Debugger class is the entry point to our stack tracing capabilities.
+It determins which debugger to inherit based on parsed arguments and
+platform specs.
+  """
+  def __init__(self, arguments):
+    if arguments.debugger[0] == 'lldb':
+      self.debugger = lldbAPI(arguments)
+    else:
+      self.debugger = DebugInterpreter(arguments)
+
   def getProcess(self, pid):
-    debugger = lldb.SBDebugger.Create()
-    debugger.SetAsync(False)
-    target = debugger.CreateTargetWithFileAndArch(None, None)
+    return self.debugger.getProcess(pid)
+
+  def getStackTrace(self, getProcess_tuple):
+    return self.debugger.getStackTrace(getProcess_tuple)
+
+
+class lldbAPI:
+  def __init__(self, arguments):
+    self.debugger = lldb.SBDebugger.Create()
+    self.debugger.SetAsync(True)
+
+  def __del__(self):
+    lldb.SBDebugger.Destroy(self.debugger)
+
+  def getProcess(self, pid):
+    # create and attach to the pid and return our debugger as tuple
+    target = self.debugger.CreateTargetWithFileAndArch(None, None)
     return target, pid
+
   def getStackTrace(self, process_tuple):
     target, pid = process_tuple
     lldb_results = []
+
+    # reuse the process object if available
     if target.process.id is not 0:
       process = target.Attach(lldb.SBAttachInfo(target.process.id), lldb.SBError())
     else:
       process = target.Attach(lldb.SBAttachInfo(int(pid)), lldb.SBError())
-    lldb_results.append(process.GetThreadAtIndex(0).__str__())
-    for i in xrange(process.GetThreadAtIndex(0).GetNumFrames()):
-      lldb_results.append(process.GetThreadAtIndex(0).GetFrameAtIndex(i).__str__())
-    process.Detach()
-    return '\n'.join(lldb_results)
 
-class GDB:
-  def __init__(self):
+    # test if we succeeded at attaching to PID process
+    if process:
+      # grab thread information
+      lldb_results.append(process.GetThreadAtIndex(0).__str__())
+      # iterate through all frames and collect back trace information
+      for i in xrange(process.GetThreadAtIndex(0).GetNumFrames()):
+        lldb_results.append(process.GetThreadAtIndex(0).GetFrameAtIndex(i).__str__())
+      # unfortunately we must detach each time we perform a stack trace
+      # this is a bug in LLDB's Python API.
+      process.Detach()
+      return '\n'.join(lldb_results)
+    else:
+      return ''
+
+class DebugInterpreter:
+  """
+Currently, interfacing with LLDB via subprocess is impossible. This is due to lldb not printing
+to stdout, or stderr when displaying the prompt to the user (informing the user, the debugger
+is ready to receive input). However, this class may someday be able to, which is why
+the self.debugger variable is present.
+  """
+  def __init__(self, arguments):
     self.last_position = 0
-
-  def __detach__(self, process):
-    process, gdb_stdout = process
-    for command in ['quit\n', 'y\n']:
-      if self._waitForResponse(gdb_stdout):
-        try:
-          process.stdin.write(command)
-        except:
-          process.send_signal(signal.SIGKILL)
-          return False
-      else:
-        return True
-
-  def __attach__(self, pid):
-    gdb_stdout = SpooledTemporaryFile()
-    process = subprocess.Popen([which('gdb'), '-nx'], stdin=subprocess.PIPE, stdout=gdb_stdout, stderr=gdb_stdout)
-    for command in [ 'attach ' + pid + '\n', 'set verbose off\n', 'thread\n']:
-      if self._waitForResponse(gdb_stdout):
-        try:
-          process.stdin.write(command)
-        except:
-          return (False, 'GDB quit unexpectedly')
-      else:
-        return (False, 'could not attach to process in allotted time')
-    return (process, gdb_stdout)
+    self.debugger = arguments.debugger[0]
 
   def _parseStackTrace(self, gibberish):
-    not_gibberish = re.findall(r'\(gdb\) (#.*)\(gdb\)', gibberish, re.DOTALL)
+    not_gibberish = re.findall(r'\(' + self.debugger + '\) (#.*)\(' + self.debugger + '\)', gibberish, re.DOTALL)
     if len(not_gibberish) != 0:
       return not_gibberish[0]
     else:
-      return 'Stack Trace failed:', gibberish
+      # return a blank line, as to not polute the log. gibberish here usually indicates a bunch of warnings or information about loading symbols
+      return ''
 
-  def _waitForResponse(self, gdb_stdout, delta=float(5)):
-    end_queue = time.time() + float(delta)
+  def _waitForResponse(self, dbg_stdout):
+    # allow a maximum of 5 seconds to obtain a debugger prompt position. Otherwise we can hang indefinitely
+    end_queue = time.time() + float(10)
     while time.time() < end_queue:
-      gdb_stdout.seek(self.last_position)
-      for line in gdb_stdout:
-        if line == '(gdb) ':
-          self.last_position = gdb_stdout.tell()
+      dbg_stdout.seek(self.last_position)
+      for line in dbg_stdout:
+        if line == '(' + self.debugger + ') ':
+          self.last_position = dbg_stdout.tell()
           return True
       time.sleep(0.01)
+    print 'lost contact with the debugger.\n'
     return False
 
   def getProcess(self, pid):
-    return self.__attach__(pid)
+    # create a temporary file the debugger can write stdout/err to
+    dbg_stdout = SpooledTemporaryFile()
+    # create and attach to running proccess
+    process = subprocess.Popen([which(self.debugger)], stdin=subprocess.PIPE, stdout=dbg_stdout, stderr=dbg_stdout)
+    for command in [ 'attach ' + pid + '\n' ]:
+      if self._waitForResponse(dbg_stdout):
+        try:
+          process.stdin.write(command)
+        except:
+          return (False, self.debugger, 'quit unexpectedly')
+      else:
+        return (False, 'could not attach to process in allotted time')
+    return (process, dbg_stdout)
 
   def getStackTrace(self, process_tuple):
-    process, gdb_stdout = process_tuple
-    batch_position = gdb_stdout.tell()
+    process, dbg_stdout = process_tuple
+    # store our current file position so we can return to it and read the eventual entire stack trace output
+    batch_position = dbg_stdout.tell()
+    # loop through commands necessary to create a back trace
     for command in ['ctrl-c', 'bt\n', 'c\n']:
       if command == 'ctrl-c':
         process.send_signal(signal.SIGINT)
       else:
-        if self._waitForResponse(gdb_stdout):
+        if self._waitForResponse(dbg_stdout):
           process.stdin.write(command)
         else:
-          return self.__detach__(process_tuple)
-    gdb_stdout.seek(batch_position)
-    return self._parseStackTrace(gdb_stdout.read())
+          dbg_stdout.seek(batch_position)
+          return self.detachProcess(process_tuple)
+    # return to previous file position so that we can return the entire stack trace
+    dbg_stdout.seek(batch_position)
+    return self._parseStackTrace(dbg_stdout.read())
 
   def detachProcess(self, process):
-    return self.__detach__(process)
+    process, dbg_stdout = process
+    # The initial ctrl-c does not register a new stdout line, so cheat a little and make it so
+    tmp_position = (dbg_stdout.tell() - 1)
+    for command in ['ctrl-c', 'quit\n', 'y\n']:
+      if command == 'ctrl-c':
+        process.send_signal(signal.SIGINT)
+      else:
+        # when these two variables are not equal, its a safe assumption the debugger is ready to receive input
+        if tmp_position != dbg_stdout.tell():
+          tmp_position = dbg_stdout.tell()
+          try:
+            process.stdin.write(command)
+          except:
+            # because we are trying to detach and quit the debugger anyway, just pass
+            pass
+    dbg_stdout.seek(0)
+    print dbg_stdout.read()
+    sys.exit(1)
+    return True
 
 class Server:
   def __init__(self, arguments):
@@ -391,7 +448,6 @@ based on supplied arguments
     if self.connection == None and self.arguments.call_back_host != None:
       self.CREATED_CONNECTION = True
       self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      self.connection.settimeout(150)
       self.connection.connect((self.arguments.call_back_host[0], int(self.arguments.call_back_host[1])))
 
   # read all data sent by an agent
@@ -541,10 +597,8 @@ machine_id is supplied by the client class. This allows for multiple agents if d
                         }
                       }
 
-    if self._darwin() == True:
-      self.stack_trace = LLDB()
-    else:
-      self.stack_trace = GDB()
+    # Instance our chosen debugger
+    self.stack_trace = Debugger(self.arguments)
 
   # NOTE: This is the only function that should be called in this class
   def takeSample(self):
@@ -577,7 +631,7 @@ machine_id is supplied by the client class. This allows for multiple agents if d
         memory_usage += int(single_pid[1][0])
       if memory_usage == 0:
         # Memory usage hit zero? Then assume the binary being tracked has exited. So lets begin doing the same.
-        self.agent_data[self.my_uuid]['DEBUG_LOG'] = 'I found the total memory usage of all my processes hit 0. Stoping'
+        self.agent_data[self.my_uuid]['DEBUG_LOG'] = 'I found the total memory usage of all my processes hit 0. Stopping'
         self.agent_data[self.my_uuid]['STOP'] = True
         return 0
       return int(memory_usage)
@@ -587,12 +641,14 @@ machine_id is supplied by the client class. This allows for multiple agents if d
     return 0
 
   def _getStack(self):
-    # Attach to and create a process object we can reuse later
+    # Create a process object if none already exists. Reuse the old one if it does.
     if self.process is None:
       tmp_pids = self._getPIDs()
+      # Check if we actually found any running processes
       if tmp_pids != {}:
-        last_pid = sorted([x for x in tmp_pids.keys()])[-1]
-        self.process = self.stack_trace.getProcess(str(last_pid))
+        # Obtain a single process id, any process id will do. This will be the process we attach to and perform stack traces
+        one_pid = tmp_pids.keys()[0]
+        self.process = self.stack_trace.getProcess(str(one_pid))
         return self.stack_trace.getStackTrace(self.process)
       else:
         return ''
@@ -605,9 +661,6 @@ machine_id is supplied by the client class. This allows for multiple agents if d
     # Determin the binary to sample and store it. Doing the findCommand is a little expensive.
     if self.track_process == '':
       self.track_process = self._findCommand(''.join(self.arguments.run))
-
-    # A quick way to safely check for the avilability of needed tools
-    self._verifyCommand(['ps'])
 
     # If we are tracking a binary
     if self.arguments.run:
@@ -624,17 +677,6 @@ machine_id is supplied by the client class. This allows for multiple agents if d
           pid_list[int(single_pid.split()[0])] = []
           pid_list[int(single_pid.split()[0])].extend([single_pid.split()[1], single_pid.split()[3]])
     return pid_list
-
-  def _verifyCommand(self, command_list):
-    for command in command_list:
-      if which(command) == None:
-        print 'Command not found:', command
-        sys.exit(1)
-
-  # determine if we are running on a darwin kernel
-  def _darwin(self):
-   if platform.platform(0, 1).split('-')[:-1][0].find('Darwin') != -1:
-     return True
 
   # Determine the command we are going to track
   # A few things are happening here; first we strip off any MPI commands
@@ -992,15 +1034,22 @@ def verifyArgs(args):
     else:
       args.outfile = [os.getcwd() + '/' + args.run[0].replace('..', '').replace('/', '').replace(' ', '_') + '.log']
 
-  if args.pstack and args.read is None and args.plot is None:
-    if platform.platform(0, 1).split('-')[:-1][0].find('Darwin') != -1:
-      try:
-        import lldb
-      except ImportError:
-        print 'Unable to import lldb. The lldb API is now supplied by \nXcode but not automatically set in your PYTHONPATH. \nPlease search the internet for how to do this if you \nwish to use --pstack on Mac OS X.\n\nNote: If you installed Xcode to the default location of \n/Applications, you should only have to perform the following:\n\n\texport PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python:$PYTHONPATH\n'
-        sys.exit(1)
+  if args.pstack and (args.read is None and args.plot is None):
+    if args.debugger is not None:
+      if args.debugger[0] == 'lldb':
+        if platform.platform(0, 1).split('-')[:-1][0].find('Darwin') != -1:
+          try:
+            import lldb
+          except ImportError:
+            print 'Unable to import lldb.\n\n\tIf using Mac OS X; The Python lldb API is now supplied by \n\tXcode but not automatically set in your PYTHONPATH. \n\tPlease search the internet for how to do this if you \n\twish to use --pstack on Mac OS X.\n\n\tNote: If you installed Xcode to the default location of \n\t/Applications, you should only have to perform the following:\n\n\texport PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python:$PYTHONPATH\n\n\tNote: it may also be necessary to unload the miniconda module.'
+            sys.exit(1)
+        else:
+          results = which('lldb')
+      elif args.debugger[0] == 'gdb':
+        results = which('gdb')
     else:
-      results = which('gdb')
+      print 'Invalid debugger selected. You must choose between gdb and lldb using the --debugger argument'
+      sys.exit(1)
   return args
 
 def parseArguments(args=None):
@@ -1022,6 +1071,7 @@ def parseArguments(args=None):
   commongroup = parser.add_argument_group('Common Options', 'The following options can be used when displaying the results')
   commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Display/Record stack trace information (if available)\n ')
   commongroup.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information\n ')
+  commongroup.add_argument('--debugger', dest='debugger', metavar='gdb | lldb', nargs=1, help='Specify the debugger to use. Possible values: gdb or lldb (default gdb)\n ')
 
   plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
   plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[30], help='Rotate stdout/pstack text by this ammount (default 30)\n ')
