@@ -116,6 +116,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),
     _pars(parameters),
+    _type(getParam<std::string>("_type")),
     _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
     _output_position_set(false),
     _start_time_set(false),
