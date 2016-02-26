@@ -156,7 +156,7 @@ ElementPropertyReadFile::getGrainData(const Elem * elem , unsigned int prop_num)
         //Calculates minimum distance when nothing is specified
         //for rve_type
         Point dist_vec = _center[i] - centroid;
-        dist = dist_vec.size();
+        dist = dist_vec.norm();
     }
 
     if (dist < min_dist)
@@ -174,7 +174,7 @@ Real
 ElementPropertyReadFile::minPeriodicDistance(Point c, Point p) const
 {
   Point dist_vec = c - p;
-  Real min_dist = dist_vec.size();
+  Real min_dist = dist_vec.norm();
 
   Real fac[3] = {-1.0, 0.0, 1.0};
   for ( unsigned int i = 0; i < 3; i++ )
@@ -187,7 +187,7 @@ ElementPropertyReadFile::minPeriodicDistance(Point c, Point p) const
         p1(2) = p(2) + fac[k] * _range(2);
 
         dist_vec = c - p1;
-        Real dist = dist_vec.size();
+        Real dist = dist_vec.norm();
 
         if ( dist < min_dist ) min_dist = dist;
       }

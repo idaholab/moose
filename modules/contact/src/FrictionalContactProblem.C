@@ -573,7 +573,7 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
   ContactState state = STICKING;
 
   RealVectorValue normal_residual = normal * (normal * residual);
-  Real normal_force = normal_residual.size();
+  Real normal_force = normal_residual.norm();
 
 //  _console << "normal=" << info._normal << std::endl;
 //  _console << "normal_force=" << normal_force << std::endl;
@@ -581,13 +581,13 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
 //  _console << "stiffness=" << stiff_vec << std::endl;
 
   RealVectorValue tangential_force = normal_residual - residual ; // swap sign to make the code more manageable
-  Real tangential_force_magnitude = tangential_force.size();
+  Real tangential_force_magnitude = tangential_force.norm();
 
   Real capacity = normal_force * friction_coefficient;
   if (capacity < 0.0)
     capacity = 0.0;
 
-  Real slip_inc = incremental_slip.size();
+  Real slip_inc = incremental_slip.norm();
 
   slip(0)=0.0;
   slip(1)=0.0;
@@ -637,7 +637,7 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
   else if (excess_force > 0)
   {
     state = SLIPPING;
-    Real tangential_force_magnitude = tangential_force.size();
+    Real tangential_force_magnitude = tangential_force.norm();
     slip_residual = excess_force;
 
     RealVectorValue tangential_direction = tangential_force / tangential_force_magnitude;

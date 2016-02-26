@@ -115,5 +115,5 @@ DomainIntegralQFunction::projectToFrontAtPoint(Real & dist_to_front, Real & dist
   dist_along_tangent = crack_node_to_current_node * crack_front_tangent;
   RealVectorValue projection_point = *crack_front_point + dist_along_tangent * crack_front_tangent;
   RealVectorValue axis_to_current_node = p - projection_point;
-  dist_to_front = axis_to_current_node.size();
+  dist_to_front = axis_to_current_node.norm();
 }

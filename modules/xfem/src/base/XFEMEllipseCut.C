@@ -32,8 +32,8 @@ XFEMEllipseCut::XFEMEllipseCut(std::vector<Real> ellipse_nodes) :
   _normal = ray1.cross(ray2);
   Xfem::normalizePoint(_normal);
 
-  Real R1 = std::sqrt(ray1.size_sq());
-  Real R2 = std::sqrt(ray2.size_sq());
+  Real R1 = std::sqrt(ray1.norm_sq());
+  Real R2 = std::sqrt(ray2.norm_sq());
 
   if (R1>R2)
   {

@@ -594,7 +594,7 @@ void i4vec_zero ( int n, int a[] )
 
 void normalizePoint(Point & p)
 {
-  Real len = p.size();
+  Real len = p.norm();
   if (len != 0.0)
     p = (1.0/len)*p;
 }

@@ -1350,7 +1350,7 @@ MooseMesh::minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) c
 Real
 MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const
 {
-  return minPeriodicVector(nonlinear_var_num, p, q).size();
+  return minPeriodicVector(nonlinear_var_num, p, q).norm();
 }
 
 std::pair<BoundaryID, BoundaryID> *
@@ -1546,7 +1546,7 @@ MooseMesh::mapPoints(const std::vector<Point> & from, const std::vector<Point> &
     for (unsigned int j=0; j<n_to; j++)
     {
       const Point & to_point = to[j];
-      Real distance = (from_point - to_point).size();
+      Real distance = (from_point - to_point).norm();
 
       if (distance < current_map._distance)
       {
@@ -2113,7 +2113,7 @@ MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
 
   // Inflate the bbox just a bit to deal with roundoff
   // Adding 1% of the diagonal size in each direction on each end
-  Real inflation_amount = inflation_multiplier * (bbox.max() - bbox.min()).size();
+  Real inflation_amount = inflation_multiplier * (bbox.max() - bbox.min()).norm();
   Point inflation(inflation_amount, inflation_amount, inflation_amount);
 
   bbox.first -= inflation; // min

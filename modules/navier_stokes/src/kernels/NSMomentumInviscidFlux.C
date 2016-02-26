@@ -89,7 +89,7 @@ Real NSMomentumInviscidFlux::compute_jacobian(unsigned m)
   {
   case 0: // density
   {
-    Real V2 = vel.size_sq();
+    Real V2 = vel.norm_sq();
 
     return vel(_component) * (vel*_grad_test[_i][_qp]) - 0.5 * (_gamma-1.) * V2 * _grad_test[_i][_qp](_component);
   }

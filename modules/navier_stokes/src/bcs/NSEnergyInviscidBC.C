@@ -43,12 +43,12 @@ Real NSEnergyInviscidBC::qp_residual(Real pressure, Real un)
 
 Real NSEnergyInviscidBC::qp_residual(Real rho, RealVectorValue u, Real /*pressure*/)
 {
-  // return (rho*(cv*_temperature[_qp] + 0.5*u.size_sq()) + pressure) * (u*_normals[_qp]) * _test[_i][_qp];
+  // return (rho*(cv*_temperature[_qp] + 0.5*u.norm_sq()) + pressure) * (u*_normals[_qp]) * _test[_i][_qp];
 
   // We can also expand pressure in terms of rho... does this make a difference?
   // Then we don't use the input pressure value.
   Real cv = _R / (_gamma-1.);
-  return rho * (_gamma * cv * _temperature[_qp] + 0.5*u.size_sq()) * (u*_normals[_qp]) * _test[_i][_qp];
+  return rho * (_gamma * cv * _temperature[_qp] + 0.5*u.norm_sq()) * (u*_normals[_qp]) * _test[_i][_qp];
 }
 
 

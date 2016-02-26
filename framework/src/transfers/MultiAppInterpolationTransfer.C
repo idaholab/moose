@@ -456,7 +456,7 @@ Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & dis
 
   for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
   {
-    Real current_distance = (p-*(*node_it)).size();
+    Real current_distance = (p-*(*node_it)).norm();
 
     if (current_distance < distance)
     {

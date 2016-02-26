@@ -427,11 +427,11 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
     // axis closest to current_point is found by the following for t:
     const Point p2p1( p2 - p1 );
     const Point p1pc( p1 - current_point );
-    const Real t( -(p1pc*p2p1)/p2p1.size_sq() );
+    const Real t( -(p1pc*p2p1)/p2p1.norm_sq() );
     // The nearest point on the cylindrical axis to current_point is p.
     const Point p( p1 + t * p2p1 );
     Point rad_vec( current_point - p );
-    Real rad = rad_vec.size();
+    Real rad = rad_vec.norm();
     rad_vec /= rad;
     Real rad_dot_norm = rad_vec * current_normal;
 
@@ -455,7 +455,7 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
   {
     const Point origin_to_curr_point( current_point - p1 );
     const Real normal_dot = origin_to_curr_point * current_normal;
-    const Real curr_point_radius = origin_to_curr_point.size();
+    const Real curr_point_radius = origin_to_curr_point.norm();
     if (normal_dot > 0) // on inside surface
     {
       r1 = curr_point_radius;

@@ -273,21 +273,21 @@ PenetrationThread::operator() (const NodeIdRange & range)
                 {
                   ridgeSetDataVec[i]._closest_coor = ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
                   Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
-                  ridgeSetDataVec[i]._distance = contact_point_vec.size();
+                  ridgeSetDataVec[i]._distance = contact_point_vec.norm();
                 }
               }
               else //several ridges join at common node to make peak.  The common node is the contact point
               {
                 ridgeSetDataVec[i]._closest_coor = *ridgeSetDataVec[i]._closest_node;
                 Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
-                ridgeSetDataVec[i]._distance = contact_point_vec.size();
+                ridgeSetDataVec[i]._distance = contact_point_vec.norm();
               }
             }
             else //on a single ridge
             {
               ridgeSetDataVec[i]._closest_coor = ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
               Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
-              ridgeSetDataVec[i]._distance = contact_point_vec.size();
+              ridgeSetDataVec[i]._distance = contact_point_vec.norm();
             }
           }
           //Find the set of ridges closest to us.
@@ -323,7 +323,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
             if (!_do_normal_smoothing)
             {
               Point normal(closest_point - node);
-              const Real len(normal.size());
+              const Real len(normal.norm());
               if (len > 0)
               {
                 normal /= len;
@@ -714,7 +714,7 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
       closest_node = closest_node1;
 
       RealGradient off_face = *closest_node1 - contact_point;
-      tangential_distance = off_face.size();
+      tangential_distance = off_face.norm();
     }
   }
 
@@ -1162,18 +1162,18 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
   {
     return true;
   }
-  normal /= normal.size();
+  normal /= normal.norm();
 
   const Real dot(d * normal);
 
   const RealGradient normcomp = dot*normal;
   const RealGradient tangcomp = d - normcomp;
 
-  const Real tangdist = tangcomp.size();
+  const Real tangdist = tangcomp.norm();
 
   //Increase the size of the zone that we consider if the vector from the face
   //to the node has a larger normal component
-  const Real faceExpansionFactor = 2.0 * (1.0 + normcomp.size()/d.size());
+  const Real faceExpansionFactor = 2.0 * (1.0 + normcomp.norm()/d.norm());
 
   bool isReasonableCandidate = true;
   if (tangdist > faceExpansionFactor*max_face_length)
@@ -1197,7 +1197,7 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
   if (info.isCaptured())
   {
     info._frictional_energy = info._frictional_energy_old + info._contact_force*info._incremental_slip;
-    info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.size();
+    info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.norm();
   }
 }
 
@@ -1236,7 +1236,7 @@ PenetrationThread::smoothNormal(PenetrationInfo* info,
         mooseAssert(this_face_weight >= (0.25-1e-8),"Sum of weights of other faces shouldn't exceed 0.75");
         new_normal += info->_normal * this_face_weight;
 
-        const Real len(new_normal.size());
+        const Real len(new_normal.norm());
         if (len > 0)
         {
           new_normal /= len;
@@ -1252,7 +1252,7 @@ PenetrationThread::smoothNormal(PenetrationInfo* info,
       info->_normal(0) = _nodal_normal_x->getValue(info->_side,info->_side_phi);
       info->_normal(1) = _nodal_normal_y->getValue(info->_side,info->_side_phi);
       info->_normal(2) = _nodal_normal_z->getValue(info->_side,info->_side_phi);
-      const Real len(info->_normal.size());
+      const Real len(info->_normal.norm());
       if (len > 0)
       {
         info->_normal /= len;

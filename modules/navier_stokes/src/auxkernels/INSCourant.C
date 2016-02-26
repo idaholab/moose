@@ -33,7 +33,7 @@ INSCourant::computeValue()
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
-  Real vel_mag = U.size();
+  Real vel_mag = U.norm();
 
   // Don't divide by zero...
   vel_mag = std::max(vel_mag, std::numeric_limits<Real>::epsilon());

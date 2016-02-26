@@ -60,7 +60,7 @@ DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 
   for (; it != end; ++it)
   {
-    Real delta = (*it - p).size_sq();
+    Real delta = (*it - p).norm_sq();
 
     if (delta < TOLERANCE*TOLERANCE)
       return true;

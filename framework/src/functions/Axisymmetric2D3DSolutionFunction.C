@@ -127,7 +127,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     z_dir_2d(1) = 1;
     r_dir_3d = p;
     r_dir_3d(1) = 0;
-    Real r = r_dir_3d.size();
+    Real r = r_dir_3d.norm();
     if (MooseUtils::absoluteFuzzyGreaterThan(r,0.0))
     {
       r_gt_zero = true;
@@ -141,12 +141,12 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
   {
     //Find the r, z coordinates of the point in the 3D model relative to the 3D axis
     z_dir_3d =  _3d_axis_point2 - _3d_axis_point1;
-    z_dir_3d /= z_dir_3d.size();
+    z_dir_3d /= z_dir_3d.norm();
     Point v3dp1p(p - _3d_axis_point1);
     Real z = z_dir_3d * v3dp1p;
     Point axis_proj = _3d_axis_point1 + z*z_dir_3d;  //projection of point onto axis
     Point axis_proj_to_p = p - axis_proj;
-    Real r = axis_proj_to_p.size();
+    Real r = axis_proj_to_p.norm();
     if (MooseUtils::absoluteFuzzyGreaterThan(r,0.0))
     {
       r_gt_zero = true;
@@ -155,10 +155,10 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
 
     //Convert point in r, z coordinates into x, y coordinates
     z_dir_2d = _2d_axis_point2 - _2d_axis_point1;
-    z_dir_2d /= z_dir_2d.size();
+    z_dir_2d /= z_dir_2d.norm();
     Point out_of_plane_vec(0,0,1);
     r_dir_2d = z_dir_2d.cross(out_of_plane_vec);
-    r_dir_2d /= r_dir_2d.size();  //size should be 1, maybe this isn't necessary
+    r_dir_2d /= r_dir_2d.norm();  //size should be 1, maybe this isn't necessary
     xypoint = _2d_axis_point1 + z/_axial_dim_ratio * z_dir_2d + r * r_dir_2d;
   }
 

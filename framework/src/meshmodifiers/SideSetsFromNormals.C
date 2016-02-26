@@ -48,8 +48,8 @@ SideSetsFromNormals::SideSetsFromNormals(const InputParameters & parameters):
   // Make sure that the normals are normalized
   for (std::vector<Point>::iterator normal_it = _normals.begin(); normal_it != _normals.end(); ++normal_it)
   {
-    mooseAssert(normal_it->size() >= 1e-5, "Normal is zero");
-    *normal_it /= normal_it->size();
+    mooseAssert(normal_it->norm() >= 1e-5, "Normal is zero");
+    *normal_it /= normal_it->norm();
   }
 }
 

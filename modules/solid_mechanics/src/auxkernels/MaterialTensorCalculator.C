@@ -28,7 +28,7 @@ MaterialTensorCalculator::MaterialTensorCalculator(const InputParameters & param
   _quantity_moose_enum(parameters.get<MooseEnum>("quantity")),
   _p1(parameters.get<RealVectorValue>("point1")),
   _p2(parameters.get<RealVectorValue>("point2")),
-  _direction(parameters.get<RealVectorValue>("direction")/parameters.get<RealVectorValue>("direction").size())
+  _direction(parameters.get<RealVectorValue>("direction")/parameters.get<RealVectorValue>("direction").norm())
 {
   const std::string & name = parameters.get<std::string>("_object_name");
 
@@ -120,12 +120,12 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
     // axis closest to p0 is found by the following for t:
     const Point p2p1( _p2 - _p1 );
     const Point p1p0( _p1 - p0 );
-    const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
+    const Real t( -(p1p0*p2p1)/p2p1.norm_sq() );
     // The nearest point on the cylindrical axis to p0 is p.
     const Point p( _p1 + t * p2p1 );
     Point xp( p0 - p );
-    xp /= xp.size();
-    Point yp( p2p1/p2p1.size() );
+    xp /= xp.norm();
+    Point yp( p2p1/p2p1.norm() );
     Point zp( xp.cross( yp ));
     //
     // The following works but does more than we need
@@ -168,11 +168,11 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
     // axis closest to p0 is found by the following for t:
     const Point p2p1( _p2 - _p1 );
     const Point p1p0( _p1 - p0 );
-    const Real t( -(p1p0*p2p1)/p2p1.size_sq() );
+    const Real t( -(p1p0*p2p1)/p2p1.norm_sq() );
     // The nearest point on the cylindrical axis to p0 is p.
     const Point p( _p1 + t * p2p1 );
     Point xp( p0 - p );
-    xp /= xp.size();
+    xp /= xp.norm();
     const Real xp0( xp(0) );
     const Real xp1( xp(1) );
     const Real xp2( xp(2) );
@@ -185,7 +185,7 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
   {
     // The vector p2p1=(_p2-_p1) defines the axis, which is the direction in which we want the stress.
     Point p2p1( _p2 - _p1 );
-    p2p1 /= p2p1.size();
+    p2p1 /= p2p1.norm();
 
     const Real axis0( p2p1(0) );
     const Real axis1( p2p1(1) );

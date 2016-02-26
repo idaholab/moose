@@ -45,7 +45,7 @@ Real NSStagnationPressureBC::computeQpResidual()
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Mach number, squared
-  Real M2 = vel.size_sq() / (_gamma * _R * _temperature[_qp]);
+  Real M2 = vel.norm_sq() / (_gamma * _R * _temperature[_qp]);
 
   // p_0 = p*(1 + 0.5*(gam-1)*M^2)^(gam/(gam-1))
   Real computed_stagnation_pressure = _pressure[_qp] * std::pow(1. + 0.5*(_gamma-1.)*M2, _gamma/(_gamma-1.));

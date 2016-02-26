@@ -28,7 +28,7 @@ Real
 SharpInterfaceForcing::computeQpResidual()
 {
   Point current_point = _q_point[_qp];
-  Real distance = (current_point - Point(_x_center.value(_t, _q_point[_qp]), _y_center.value(_t, _q_point[_qp]), 0.0)).size();
+  Real distance = (current_point - Point(_x_center.value(_t, _q_point[_qp]), _y_center.value(_t, _q_point[_qp]), 0.0)).norm();
 
   if (distance <= 0.1)
     return -_amplitude*_test[_i][_qp];
