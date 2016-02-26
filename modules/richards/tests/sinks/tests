@@ -62,6 +62,7 @@
     input = 's_fu_04.i'
     cli_args = 'BCs/left_flux/area_pp=0'
     expect_err = 'RichardsPiecewiseLinearSink: flux is nonzero, but area is zero!'
+    prereq = 's_fu_04'
   [../]
 
 []
