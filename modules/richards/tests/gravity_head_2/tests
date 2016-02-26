@@ -171,4 +171,24 @@
     rel_err = 1e-5
     abs_zero = 1e-4
   [../]
+
+  [./rmp_exception1]
+    type = 'RunException'
+    input = gh_bounded_17.i
+    cli_args = 'Problem/lower_var=dummy_var'
+    expect_err = 'Both the bounded and lower variables must be nodal variables in RichardsMultiphaseProblem'
+  [../]
+  [./rmp_exception2]
+    type = 'RunException'
+    input = gh_bounded_17.i
+    cli_args = 'AuxVariables/dummy_var/family=HIERARCHIC AuxVariables/dummy_var/order=FIRST Problem/lower_var=dummy_var'
+    expect_err = 'Both the bounded and lower variables must belong to the same element family, eg LAGRANGE, in RichardsMultiphaseProblem'
+  [../]
+  [./rmp_exception3]
+    type = 'RunException'
+    input = gh_bounded_17.i
+    cli_args = 'Problem/lower_var=dummy_var Mesh/second_order=true AuxVariables/dummy_var/family=LAGRANGE AuxVariables/dummy_var/order=SECOND'
+    expect_err = 'Both the bounded and lower variables must have the same order, eg FIRST, in RichardsMultiphaseProblem'
+  [../]
+
 []
