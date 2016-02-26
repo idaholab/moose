@@ -140,7 +140,8 @@
 #include "KKSGlobalFreeEnergy.h"
 #include "PFCEnergyDensity.h"
 #include "PFCRFFEnergyDensity.h"
-#include "TestEBSDAux.h"
+#include "EBSDReaderAvgDataAux.h"
+#include "EBSDReaderPointDataAux.h"
 #include "TotalFreeEnergy.h"
 #include "OutputEulerAngles.h"
 
@@ -349,7 +350,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(KKSGlobalFreeEnergy);
   registerAux(PFCEnergyDensity);
   registerAux(PFCRFFEnergyDensity);
-  registerAux(TestEBSDAux);
+  registerAux(EBSDReaderAvgDataAux);
+  registerAux(EBSDReaderPointDataAux);
   registerAux(TotalFreeEnergy);
   registerAux(OutputEulerAngles);
 

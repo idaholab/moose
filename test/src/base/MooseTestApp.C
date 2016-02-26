@@ -352,7 +352,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerDGKernel(DGAdvection);
 
   // Interface kernels
-  registerDGKernel(InterfaceDiffusion);
+  registerInterfaceKernel(InterfaceDiffusion);
 
   // Boundary Conditions
   registerBoundaryCondition(RobinBC);

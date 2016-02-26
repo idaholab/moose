@@ -40,21 +40,21 @@
 
 [AuxKernels]
   [./phi1_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = phi1
     ebsd_reader = ebsd
     data_name = phi1
     execute_on = initial
   [../]
   [./phi_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = phi
     ebsd_reader = ebsd
     data_name = phi
     execute_on = initial
   [../]
   [./phi2_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = phi2
     ebsd_reader = ebsd
     data_name = phi2
@@ -62,14 +62,14 @@
   [../]
 
   [./phase_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = phase
     ebsd_reader = ebsd
     data_name = phase
     execute_on = initial
   [../]
   [./symmetry_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = symmetry
     ebsd_reader = ebsd
     data_name =  symmetry

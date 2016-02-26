@@ -52,6 +52,10 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+  [./APHI2]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
   [./PHI2]
     family = MONOMIAL
     order = CONSTANT
@@ -64,31 +68,38 @@
 
 [AuxKernels]
   [./phi1_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = PHI1
     ebsd_reader = ebsd
     data_name = 'phi1'
     execute_on = 'initial'
   [../]
   [./phi_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = PHI
     ebsd_reader = ebsd
     data_name = 'phi'
     execute_on = 'initial'
   [../]
   [./phi2_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = PHI2
     ebsd_reader = ebsd
     data_name = 'phi2'
     execute_on = 'initial'
   [../]
   [./phase_aux]
-    type = TestEBSDAux
+    type = EBSDReaderPointDataAux
     variable = PHASE
     ebsd_reader = ebsd
     data_name = 'phase'
+    execute_on = 'initial'
+  [../]
+  [./avg_phi_aux]
+    type = EBSDReaderAvgDataAux
+    variable = APHI2
+    ebsd_reader = ebsd
+    data_name = 'phi2'
     execute_on = 'initial'
   [../]
 []
