@@ -893,7 +893,7 @@ XFEM::cutMeshWithEFA()
 
     new_node->set_n_systems(parent_node->n_systems());
     efa_id_to_new_node.insert(std::make_pair(new_node_id,new_node));
-    _console<<"XFEM added new node: "<<new_node->id()+1<<std::endl;
+    _console << "XFEM added new node: " << new_node->id() << "\n";
     mesh_changed = true;
     if (_mesh2)
     {
@@ -984,7 +984,7 @@ XFEM::cutMeshWithEFA()
       _elem_crack_origin_direction_map[libmesh_elem] = crack_data;
     }
 
-    _console<<"XFEM added elem "<<libmesh_elem->id()+1<<std::endl;
+    _console << "XFEM added new element: " << libmesh_elem->id() << "\n";
 
     XFEMCutElem * xfce = NULL;
     if (_mesh->mesh_dimension() == 2)
@@ -1065,8 +1065,9 @@ XFEM::cutMeshWithEFA()
 
     elem_to_delete->nullify_neighbors();
     _mesh->boundary_info->remove(elem_to_delete);
+    unsigned int deleted_elem_id = elem_to_delete->id();
     _mesh->delete_elem(elem_to_delete);
-    _console<<"XFEM deleted elem "<<elem_to_delete->id()+1<<std::endl;
+    _console << "XFEM deleted element: " << deleted_elem_id << "\n";
     mesh_changed = true;
 
     if (_mesh2)
@@ -1096,6 +1097,8 @@ XFEM::cutMeshWithEFA()
       _crack_tip_elems.insert(crack_tip_elem);
    }
   }
+  _console << std::flush;
+
   //store virtual nodes
   //store cut edge info
   return mesh_changed;

@@ -1568,5 +1568,6 @@ Assembly::modifyWeightsDueToXFEM(const Elem *elem)
     {
       _current_JxW[i] = _current_JxW[i] * xfem_weight_multipliers[i];
     }
+    xfem_weight_multipliers.release();
   }
 }
