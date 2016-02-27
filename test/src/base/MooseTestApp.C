@@ -176,6 +176,7 @@
 #include "TestBoundaryRestrictableAssert.h"
 #include "GetMaterialPropertyBoundaryBlockNamesTest.h"
 #include "SetupInterfaceCount.h"
+#include "ReadDoubleIndex.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -465,6 +466,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(SideSetupInterfaceCount);
   registerUserObject(InternalSideSetupInterfaceCount);
   registerUserObject(NodalSetupInterfaceCount);
+  registerUserObject(ReadDoubleIndex);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);

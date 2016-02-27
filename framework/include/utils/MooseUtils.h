@@ -276,6 +276,28 @@ namespace MooseUtils
       pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
     }
   }
+
+  /**
+   *  tokenizeAndConvert splits a string using delimiter and then converts to type T.
+   *  If the conversion fails tokenizeAndConvert returns false, otherwise true.
+   */
+  template <typename T>
+  bool
+  tokenizeAndConvert(const std::string & str, std::vector<T> & tokenized_vector, const std::string & delimiter = " \t\n\v\f\r")
+  {
+    std::vector<std::string> tokens;
+    MooseUtils::tokenize(str, tokens, 1, delimiter);
+    tokenized_vector.resize(tokens.size());
+    for (unsigned int j = 0; j < tokens.size(); ++j)
+    {
+      std::stringstream ss(tokens[j]);
+      // we have to make sure that the conversion succeeded _and_ that the string
+      // was fully read to avoid situations like [conversion to Real] 3.0abc to work
+      if ((ss >> tokenized_vector[j]).fail() || !ss.eof())
+        return false;
+    }
+    return true;
+  }
 }
 
 #endif //MOOSEUTILS_H

@@ -50,5 +50,13 @@ public:
   {
     return parameters().set<std::vector<T> >(name);
   }
+
+  template <typename T>
+  inline
+  std::vector<std::vector<T> > & setDoubleIndexParam(const std::string &name)
+  {
+    return parameters().set<std::vector<std::vector<T> > >(name);
+  }
+
 };
 #endif //GLOBALPARAMSACTION_H
