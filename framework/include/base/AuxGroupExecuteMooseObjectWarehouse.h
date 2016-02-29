@@ -61,18 +61,16 @@ public:
 
 protected:
 
-  /// Storage for the group sorted objects
-  std::map<Moose::AuxGroup, ExecuteMooseObjectWarehouse<T> > _group_objects;
+  /// Storage for the PRE_AUX and POST_AUX group sorted objects (ALL is stored in the base class)
+  std::vector<ExecuteMooseObjectWarehouse<T> > _group_objects;
 };
 
 
 template<typename T>
 AuxGroupExecuteMooseObjectWarehouse<T>::AuxGroupExecuteMooseObjectWarehouse(bool threaded) :
-    ExecuteMooseObjectWarehouse<T>(threaded)
+    ExecuteMooseObjectWarehouse<T>(threaded),
+    _group_objects(2) // initialize Pre/Post aux storage
 {
-  // Initialize Pre/Post aux storage
-  _group_objects.insert(std::pair<Moose::AuxGroup, ExecuteMooseObjectWarehouse<T> >(Moose::PRE_AUX, ExecuteMooseObjectWarehouse<T>(threaded)));
-  _group_objects.insert(std::pair<Moose::AuxGroup, ExecuteMooseObjectWarehouse<T> >(Moose::POST_AUX, ExecuteMooseObjectWarehouse<T>(threaded)));
 }
 
 
@@ -82,11 +80,7 @@ AuxGroupExecuteMooseObjectWarehouse<T>::operator[](Moose::AuxGroup group) const
 {
   if (group == Moose::ALL)
     return *this;
-
-  typename std::map<Moose::AuxGroup, ExecuteMooseObjectWarehouse<T> >::const_iterator iter = _group_objects.find(group);
-  if (iter == _group_objects.end())
-    mooseError("Unable to locate the desired group flag, objects only exists for PRE_AUX and POST_AUX groups.");
-  return iter->second;
+  return _group_objects[group];
 }
 
 

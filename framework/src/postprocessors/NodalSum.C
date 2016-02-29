@@ -20,7 +20,7 @@ template<>
 InputParameters validParams<NodalSum>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
-  params.set<bool>("unique_block_execute") = true;
+  params.set<bool>("unique_node_execute") = true;
   return params;
 }
 

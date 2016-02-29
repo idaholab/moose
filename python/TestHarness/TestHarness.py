@@ -89,6 +89,7 @@ class TestHarness:
       self.checks['dtk'] = set(['ALL'])
       self.checks['unique_ids'] = set(['ALL'])
       self.checks['vtk'] = set(['ALL'])
+      self.checks['tecplot'] = set(['ALL'])
       self.checks['dof_id_bytes'] = set(['ALL'])
       self.checks['petsc_debug'] = set(['ALL'])
       self.checks['curl'] = set(['ALL'])

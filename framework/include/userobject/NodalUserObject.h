@@ -58,7 +58,7 @@ public:
 
   virtual void subdomainSetup() /*final*/;
 
-  bool isUniqueBlockExecute(){ return _unique_block_execute; }
+  bool isUniqueNodeExecute() { return _unique_node_execute; }
 
 protected:
   /// The mesh that is being iterated over
@@ -71,7 +71,7 @@ protected:
   const Node * & _current_node;
 
   // Flag for enable/disabling multiple execute calls on nodes that share block ids
-  const bool & _unique_block_execute;
+  const bool & _unique_node_execute;
 };
 
 #endif

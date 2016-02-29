@@ -22,7 +22,7 @@ template<>
 InputParameters validParams<NodalUserObject>()
 {
   InputParameters params = validParams<UserObject>();
-  params.addParam<bool>("unique_block_execute", false, "When false (default), block restricted objects will have the execute method called multiple times on a single node if the node lies on a interface between two subdomains.");
+  params.addParam<bool>("unique_node_execute", false, "When false (default), block restricted objects will have the execute method called multiple times on a single node if the node lies on a interface between two subdomains.");
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
   params += validParams<RandomInterface>();
@@ -46,7 +46,7 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
     _mesh(_subproblem.mesh()),
     _qp(0),
     _current_node(_assembly.node()),
-    _unique_block_execute(getParam<bool>("unique_block_execute"))
+    _unique_node_execute(getParam<bool>("unique_node_execute"))
 {
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
   for (unsigned int i=0; i<coupled_vars.size(); i++)

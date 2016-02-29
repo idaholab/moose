@@ -47,7 +47,7 @@
     variable = u
     execute_on = 'initial timestep_end'
     block = '0 100'
-    unique_block_execute = false
+    unique_node_execute = false
   [../]
 []
 

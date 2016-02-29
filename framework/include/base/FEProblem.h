@@ -500,7 +500,7 @@ public:
   const T & getUserObject(const std::string & name, unsigned int tid = 0)
   {
     if (_all_user_objects.hasActiveObject(name, tid))
-      return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid))).get();
+      return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid)));
 
 
     mooseError("Unable to find user object with name '" + name + "'");

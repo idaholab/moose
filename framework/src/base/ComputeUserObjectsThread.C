@@ -113,10 +113,9 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
     elem_id = elem->id(),
     neighbor_id = neighbor->id();
 
-  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+  if (_internal_side_user_objects.hasActiveBlockObjects(_subdomain, _tid))
   {
-
-    if (_internal_side_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
       _fe_problem.prepareFace(elem, _tid);
       _fe_problem.reinitNeighbor(elem, side, _tid);
