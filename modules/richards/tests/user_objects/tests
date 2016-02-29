@@ -26,19 +26,19 @@
   [./test_uo_error1]
     type = 'RunException'
     input = uo3.i
-    cli_args = 'AuxKernels/dSeff1VG_AuxK/wrtnum=1'
+    cli_args = 'AuxKernels/dSeff1VG_AuxK/wrtnum=1 Outputs/file_base=except1'
     expect_err = 'Your wrtnum is 1 but it must obey 0 <= wrtnum < 1.'
   [../]
   [./test_uo_error2]
     type = 'RunException'
     input = uo3.i
-    cli_args = 'AuxKernels/d2Seff1VG_AuxK/wrtnum1=1'
+    cli_args = 'AuxKernels/d2Seff1VG_AuxK/wrtnum1=1 Outputs/file_base=except2'
     expect_err = 'Your wrtnum1 is 1 but it must obey 0 <= wrtnum1 < 1.'
   [../]
   [./test_uo_error3]
     type = 'RunException'
     input = uo3.i
-    cli_args = 'AuxKernels/d2Seff1VG_AuxK/wrtnum2=1'
+    cli_args = 'AuxKernels/d2Seff1VG_AuxK/wrtnum2=1 Outputs/file_base=except3'
     expect_err = 'Your wrtnum2 is 1 but it must obey 0 <= wrtnum2 < 1.'
   [../]
 []
