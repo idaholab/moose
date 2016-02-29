@@ -178,15 +178,18 @@
   [./bh_report]
     type = RichardsPlotQuantity
     uo = borehole_total_outflow_mass
+    execute_on = 'initial timestep_end'
   [../]
 
   [./water_mass]
     type = RichardsMass
     variable = pwater
+    execute_on = 'initial timestep_end'
   [../]
   [./gas_mass]
     type = RichardsMass
     variable = pgas
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -233,9 +236,4 @@
   execute_on = 'initial timestep_end final'
   interval = 1000000
   exodus = true
-[]
-
-
-[Problem]
-  use_legacy_uo_initialization = true
 []

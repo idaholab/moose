@@ -5,6 +5,7 @@
     exodiff = 'ex01.e'
     rel_err = 1E-4
     use_old_floor = True
+    exodiff_opts = '-steps last'
   [../]
   [./ex02]
     type = 'Exodiff'
