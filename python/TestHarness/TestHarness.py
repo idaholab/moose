@@ -508,8 +508,8 @@ class TestHarness:
     if 'command not found' in output:
       return ('QSUB NOT FOUND', '')
     else:
-      # Get the PBS Job ID using qstat
-      results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output, re.DOTALL)
+      # Get the Job information from the ClusterLauncher
+      results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output)
       if len(results) != 0:
         file_name = self.options.pbs
         job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
