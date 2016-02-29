@@ -178,11 +178,8 @@
 
 [Outputs]
   file_base = q2p01
+  execute_on = timestep_end
   [./CSV]
     type = CSV
   [../]
-[]
-
-[Problem]
-  use_legacy_uo_initialization = true
 []

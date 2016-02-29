@@ -83,7 +83,7 @@
   [./mass_init]
     type = RichardsMass
     variable = pressure
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_begin'
   [../]
 
 # note this is calculated at end of timestep
@@ -236,8 +236,4 @@
   file_base = ex01
   exodus = true
   csv = true
-[]
-
-[Problem]
-  use_legacy_uo_initialization = true
 []

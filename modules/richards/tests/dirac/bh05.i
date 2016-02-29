@@ -207,8 +207,5 @@
   file_base = bh05
   exodus = false
   csv = true
-[]
-
-[Problem]
-  use_legacy_uo_initialization = true
+  execute_on = timestep_end
 []
