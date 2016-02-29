@@ -99,7 +99,6 @@ the self.debugger variable is present.
           self.last_position = dbg_stdout.tell()
           return True
       time.sleep(0.01)
-    print 'lost contact with the debugger.\n'
     return False
 
   def getProcess(self, pid):
