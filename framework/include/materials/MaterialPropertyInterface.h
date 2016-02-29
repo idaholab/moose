@@ -132,6 +132,15 @@ public:
 
   ///@{
   /**
+   * Return a Material object reference for calling compute directly.
+   */
+  DiscreteMaterial & getDiscreteMaterial(const std::string & name);
+  DiscreteMaterial & getDiscreteMaterialByName(const std::string & name);
+  ///@}
+
+
+  ///@{
+  /**
    * Check if the material property exists
    * @param name the name of the property to query
    * @return true if the property exists, otherwise false
@@ -167,6 +176,9 @@ protected:
 
   /// Reference to the FEProblem class
   FEProblem & _mi_feproblem;
+
+  /// Current threaded it
+  const THREAD_ID _mi_tid;
 
   /**
    * A helper method for checking material properties

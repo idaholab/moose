@@ -21,6 +21,7 @@ template<>
 InputParameters validParams<ScalarInitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<DependencyResolverInterface>();
   params.addParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
 
   params.registerBase("ScalarInitialCondition");
@@ -32,7 +33,7 @@ ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameter
     MooseObject(parameters),
     ScalarCoupleable(parameters),
     FunctionInterface(parameters),
-    DependencyResolverInterface(),
+    DependencyResolverInterface(parameters),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),

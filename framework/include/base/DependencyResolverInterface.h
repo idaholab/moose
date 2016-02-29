@@ -23,6 +23,13 @@
 
 // MOOSE includes
 #include "DependencyResolver.h"
+#include "InputParameters.h"
+
+// Forward Declarations
+class DependencyResolverInterface;
+
+template<>
+InputParameters validParams<DependencyResolverInterface>();
 
 /**
  * Interface for sorting dependent vectors of objects.
@@ -30,10 +37,11 @@
 class DependencyResolverInterface
 {
 public:
+
   /**
    * Constructor.
    */
-  DependencyResolverInterface() {}
+  DependencyResolverInterface(const InputParameters & parameters);
 
   /**
    * Return a set containing the names of items requested by the object.
@@ -44,6 +52,11 @@ public:
    * Return a set containing the names of items owned by the object.
    */
   virtual const std::set<std::string> & getSuppliedItems() = 0;
+
+  /**
+   * Returns true if cyclic dependencies are allowd.
+   */
+  bool allowCyclicDepenedency() { return _allow_cyclic; }
 
   /**
    * Given a vector, sort using the getRequested/SuppliedItems sets.
@@ -58,8 +71,13 @@ public:
   template<typename T>
   static
   void cyclicDependencyError(CyclicDependencyException<T> & e, const std::string & header);
-};
 
+protected:
+
+  /// When true the cyclic sorting and cyclic check are skipped
+  // (This is a ref. on purpose to allow for Controls to manipulate this parameter in the future.)
+  bool _allow_cyclic;
+};
 
 template<typename T>
 void
@@ -72,6 +90,9 @@ DependencyResolverInterface::sort(typename std::vector<T> & vector)
 
   for (typename std::vector<T>::iterator iter = start; iter != end ; ++iter)
   {
+    if ((*iter)->allowCyclicDepenedency())
+      continue;
+
     const std::set<std::string> & requested_items = (*iter)->getRequestedItems();
 
     for (typename std::vector<T>::iterator iter2 = start; iter2 != end; ++iter2)
@@ -91,7 +112,7 @@ DependencyResolverInterface::sort(typename std::vector<T> & vector)
     }
   }
 
-    // Sort based on dependencies
+  // Sort based on dependencies
   std::stable_sort(start, end, resolver);
 }
 

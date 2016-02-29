@@ -12,40 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PointerLoadError.h"
+// MOOSE includes
+#include "DiscreteMaterial.h"
 
 template<>
-InputParameters validParams<PointerLoadError>()
+InputParameters validParams<DiscreteMaterial>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<Material>();
+  params.set<bool>("allow_cyclic_dependency") = true;
   return params;
 }
 
 
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<Stupid *>("pointer_data"))
+DiscreteMaterial::DiscreteMaterial(const InputParameters & parameters) :
+    Material(parameters)
 {
-  _pointer_data = new Stupid;
-  _pointer_data->_i = 1;
 }
 
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
-
-void PointerLoadError::initialSetup()
-{
-  _pointer_data->_i = 2;
-}
-
-void PointerLoadError::timestepSetup()
-{
-  _pointer_data->_i += 1;
-}
 
 void
-PointerLoadError::execute()
+DiscreteMaterial::computeProperties()
 {
+}
+
+
+void
+DiscreteMaterial::computeProperties(unsigned int qp)
+{
+  _qp = qp;
+  computeQpProperties();
 }
