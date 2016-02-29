@@ -53,7 +53,7 @@ GeometricalComponent::displaceMesh()
   RealTensorValue Rx(Rx_x, Rx_y, Rx_z);
 
   // figure out the rotation
-  Real r = _dir.size();
+  Real r = _dir.norm();
   Real theta = acos(_dir(2) / r);
   Real aphi = atan2(_dir(1), _dir(0));
   // rows of transformation matrix
