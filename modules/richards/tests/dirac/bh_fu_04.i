@@ -208,9 +208,6 @@
 [Outputs]
   file_base = bh_fu_04
   exodus = false
+  execute_on = timestep_end
   csv = true
-[]
-
-[Problem]
-  use_legacy_uo_initialization = true
 []
