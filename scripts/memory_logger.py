@@ -31,7 +31,7 @@ class lldbAPI:
     lldb.SBDebugger.Destroy(self.debugger)
 
   def getProcess(self, pid):
-    # create and attach to the pid and return our debugger as tuple
+    # Create and attach to the pid and return our debugger as a tuple
     target = self.debugger.CreateTargetWithFileAndArch(None, None)
     return target, pid
 
@@ -52,8 +52,16 @@ class lldbAPI:
       # iterate through all frames and collect back trace information
       for i in xrange(process.GetThreadAtIndex(0).GetNumFrames()):
         lldb_results.append(process.GetThreadAtIndex(0).GetFrameAtIndex(i).__str__())
-      # unfortunately we must detach each time we perform a stack trace
-      # this is a bug in LLDB's Python API.
+
+      # Unfortunately we must detach each time we perform a stack
+      # trace. This severely limits our sample rate. It _appears_ to
+      # to be a bug in LLDB's Python API. Otherwise we would be able to:
+      #
+      # process.Stop()
+      # ..collect back trace..
+      # process.Continue()
+      #
+      # instead we have to:
       process.Detach()
       return '\n'.join(lldb_results)
     else:
@@ -75,12 +83,15 @@ the self.debugger variable is present.
     if len(not_gibberish) != 0:
       return not_gibberish[0]
     else:
-      # return a blank line, as to not polute the log. gibberish here usually indicates a bunch of warnings or information about loading symbols
+      # Return a blank line, as to not pollute the log. Gibberish here
+      # usually indicates a bunch of warnings or information about
+      # loading symbols
       return ''
 
   def _waitForResponse(self, dbg_stdout):
-    # allow a maximum of 5 seconds to obtain a debugger prompt position. Otherwise we can hang indefinitely
-    end_queue = time.time() + float(10)
+    # Allow a maximum of 5 seconds to obtain a debugger prompt position.
+    # Otherwise we can hang indefinitely
+    end_queue = time.time() + float(5)
     while time.time() < end_queue:
       dbg_stdout.seek(self.last_position)
       for line in dbg_stdout:
@@ -92,9 +103,9 @@ the self.debugger variable is present.
     return False
 
   def getProcess(self, pid):
-    # create a temporary file the debugger can write stdout/err to
+    # Create a temporary file the debugger can write stdout/err to
     dbg_stdout = SpooledTemporaryFile()
-    # create and attach to running proccess
+    # Create and attach to running proccess
     process = subprocess.Popen([which(self.debugger)], stdin=subprocess.PIPE, stdout=dbg_stdout, stderr=dbg_stdout)
     for command in [ 'attach ' + pid + '\n' ]:
       if self._waitForResponse(dbg_stdout):
@@ -108,9 +119,10 @@ the self.debugger variable is present.
 
   def getStackTrace(self, process_tuple):
     process, dbg_stdout = process_tuple
-    # store our current file position so we can return to it and read the eventual entire stack trace output
+    # Store our current file position so we can return to it and read
+    # the eventual entire stack trace output
     batch_position = dbg_stdout.tell()
-    # loop through commands necessary to create a back trace
+    # Loop through commands necessary to create a back trace
     for command in ['ctrl-c', 'bt\n', 'c\n']:
       if command == 'ctrl-c':
         process.send_signal(signal.SIGINT)
@@ -120,29 +132,30 @@ the self.debugger variable is present.
         else:
           dbg_stdout.seek(batch_position)
           return self.detachProcess(process_tuple)
-    # return to previous file position so that we can return the entire stack trace
+    # Return to previous file position so that we can return the entire
+    # stack trace
     dbg_stdout.seek(batch_position)
     return self._parseStackTrace(dbg_stdout.read())
 
   def detachProcess(self, process):
     process, dbg_stdout = process
-    # The initial ctrl-c does not register a new stdout line, so cheat a little and make it so
+    # Offset the position due to ctrl-c not generating a newline event
     tmp_position = (dbg_stdout.tell() - 1)
     for command in ['ctrl-c', 'quit\n', 'y\n']:
       if command == 'ctrl-c':
         process.send_signal(signal.SIGINT)
       else:
-        # when these two variables are not equal, its a safe assumption the debugger is ready to receive input
+        # When these two variables are not equal, its a safe assumption the
+        # debugger is ready to receive input
         if tmp_position != dbg_stdout.tell():
           tmp_position = dbg_stdout.tell()
           try:
             process.stdin.write(command)
           except:
-            # because we are trying to detach and quit the debugger anyway, just pass
+            # Because we are trying to detach and quit the debugger just pass
             pass
-    dbg_stdout.seek(0)
-    print dbg_stdout.read()
-    sys.exit(1)
+    # Always return True for a detach call. What would we do if it failed anyway?
+    # Why am I even leaving a comment about this?
     return True
 
 class Server:
@@ -400,7 +413,7 @@ class Client:
 
       # An agent reported a stop command... so let everyone know where the log was saved, and exit!
       if self.arguments.call_back_host == None:
-        print 'Binary has exited. Wrote log:', self.arguments.outfile[0]
+        print '\n\nBinary has exited and a log file has been written.\nYou can now attempt to view this file by running the\nmemory_logger with either the --plot or --read arguments:\n\n\t', sys.argv[0], '--plot', self.arguments.outfile[0], '\n\nSee --help for additional viewing options.'
 
     # Cancel server operations if ctrl-c was pressed
     except KeyboardInterrupt:
@@ -1037,11 +1050,11 @@ def verifyArgs(args):
   if args.pstack and (args.read is None and args.plot is None):
     if args.debugger is not None:
       if args.debugger[0] == 'lldb':
-        if platform.platform(0, 1).split('-')[:-1][0].find('Darwin') != -1:
+        if platform.platform().find('Darwin') != -1:
           try:
             import lldb
           except ImportError:
-            print 'Unable to import lldb.\n\n\tIf using Mac OS X; The Python lldb API is now supplied by \n\tXcode but not automatically set in your PYTHONPATH. \n\tPlease search the internet for how to do this if you \n\twish to use --pstack on Mac OS X.\n\n\tNote: If you installed Xcode to the default location of \n\t/Applications, you should only have to perform the following:\n\n\texport PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python:$PYTHONPATH\n\n\tNote: it may also be necessary to unload the miniconda module.'
+            print '\nUnable to import lldb\n\n\tIF USING MAC OS X; The Python lldb API is now supplied by \n\tXcode but not automatically set in your PYTHONPATH. \n\tPlease search the internet for how to do this if you \n\twish to use --pstack on Mac OS X.\n\n\tNote: If you installed Xcode to the default location of \n\t/Applications, you should only have to perform the following:\n\n\texport PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python:$PYTHONPATH\n\n\t\t###!! IMPORTANT !!###\n\n\tIt may also be necessary to unload the miniconda module.\n\tIf you receive a Fatal Python error about PyThreadState...\n\ttry using your systems version of Python instead.\n\n'
             sys.exit(1)
         else:
           results = which('lldb')
