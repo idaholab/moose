@@ -1,3 +1,14 @@
+###########################################################
+# This test exercises console Output control. Various
+# controls are implemented using this input file including
+# turning off color, changing Postprocessor output,
+# toggling the performance logging, and verifying
+# simulation information on the console.
+#
+# @Requirement U1.40
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

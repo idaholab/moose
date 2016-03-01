@@ -1,3 +1,15 @@
+###########################################################
+# This is a simple test of the Postprocessor System. This
+# test uses a forcing function and the MMS to verify
+# correctness of the implementation.
+# Grid adaptivity is applied at successively finer grids
+# to verify the correct slope of the measure of error
+# against the analytical solution.
+#
+# @Requirement F6.10
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -25,7 +37,6 @@
 
   [./forcing_func]
     type = ParsedFunction
-    #value = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     vars = 'alpha'
     vals = '4'
@@ -33,7 +44,6 @@
 
   [./u_func]
     type = ParsedFunction
-    #value = sin(alpha*pi*x*y)
     value = sin(alpha*pi*x)
     vars = 'alpha'
     vals = '4'
@@ -84,6 +94,7 @@
   [../]
 []
 
+# Postprocessor System
 [Postprocessors]
   [./integral]
     type = ElementL2Error

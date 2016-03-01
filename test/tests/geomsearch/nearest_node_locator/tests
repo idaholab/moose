@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'nearest_node_locator.i'
     exodiff = 'nearest_node_locator_out.e'
-    group = 'geometric'
+    group = 'requirements geometric'
   [../]
 
   [./adapt]

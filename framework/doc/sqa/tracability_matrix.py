@@ -124,9 +124,8 @@ def extractTestedRequirements(data):
     f.close()
 
     # See if the file maps to a requirement (e.g. @Requirement)
-    m = re.search(r'@Requirement\s+([\w\.]+)', text)
-    if m != None:
-      requirement = m.group(1)
+    for req in re.finditer(r'@Requirement\s+([\w\.]+)', text):
+      requirement = req.group(1)
       if requirement not in data:
         print 'Unable to find referenced requirement "' + requirement + '" in ' + input_path
       else:

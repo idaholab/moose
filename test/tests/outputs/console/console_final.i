@@ -1,3 +1,12 @@
+###########################################################
+# This test exercises console Output control. The console
+# output is only output every third step. Additionally it
+# is forced to be output after the final timestep as well.
+#
+# @Requirement U1.40
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
