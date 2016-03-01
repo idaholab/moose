@@ -23,14 +23,15 @@ public:
   virtual ~HeatSourcePD();
 
 protected:
+
+  MooseVariable * _total_bonds_var;
+
   virtual void computeResidual();
 
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() {return 0;}
  
-  const MaterialProperty<Real> & _bond_volume;
+  const MaterialProperty<Real> & _node_volume;
  
-  const int _pddim;
-  
   Real _power_density;
 
   Function * _power_density_function;

@@ -38,7 +38,7 @@ protected:
 
   MaterialProperty<Real> & _bond_response;
   MaterialProperty<Real> & _bond_response_dif_temp;
-  MaterialProperty<Real> & _bond_volume;
+  MaterialProperty<Real> & _node_volume;
 
 };
 

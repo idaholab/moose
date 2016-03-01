@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "HeatSourcePD.h"
 
+#include "FEProblem.h"
+#include "MooseMesh.h"
 #include "Material.h"
 #include "Function.h"
 #include "Assembly.h"
@@ -16,16 +18,16 @@ InputParameters validParams<HeatSourcePD>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
-  params.addRequiredParam<int>("pddim","Peridynamic dimension is required in Heat Source Block");
   params.addParam<Real>("power_density", 1.0, "power_density");
   params.addParam<FunctionName>("power_density_function", "", "Function describing the volumetric heat source");
+  params.addCoupledVar("total_bonds","Variable to contain total number of bonds connected to node");
   return params;
 }
 
 HeatSourcePD::HeatSourcePD(const InputParameters & parameters)
   :Kernel(parameters),
-   _bond_volume(getMaterialProperty<Real>("bond_volume" + getParam<std::string>("appended_property_name"))),
-   _pddim(isParamValid("pddim") ? getParam<int>("pddim") : 3),
+   _total_bonds_var(getVar("total_bonds",0)),
+   _node_volume(getMaterialProperty<Real>("node_volume" + getParam<std::string>("appended_property_name"))),
    _power_density(isParamValid("power_density") ? getParam<Real>("power_density") : 0),
    _power_density_function(getParam<FunctionName>("power_density_function") != "" ? &getFunction("power_density_function") : NULL)
 {
@@ -38,6 +40,14 @@ HeatSourcePD::~HeatSourcePD()
 void
 HeatSourcePD::computeResidual()
 {
+//get the total_bonds for each node
+  AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
+  const NumericVector<Number> & sln = *aux.currentSolution();
+  const Node* const node0 = _current_elem->get_node(0);
+  const Node* const node1 = _current_elem->get_node(1);
+  long int tb_dof0 = node0->dof_number(aux.number(), _total_bonds_var->number(), 0);
+  long int tb_dof1 = node1->dof_number(aux.number(), _total_bonds_var->number(), 0);
+
   if(_power_density_function)
   {
     Point p;
@@ -48,9 +58,9 @@ HeatSourcePD::computeResidual()
   mooseAssert(re.size() == 2, "Truss elements must have two nodes");
   _local_re.resize(re.size());
   _local_re.zero();
-  
-  _local_re(0) = -_power_density * _bond_volume[0];
-  _local_re(1) = _local_re(0);
+
+  _local_re(0) = -_power_density * _node_volume[0] / sln(tb_dof0);
+  _local_re(1) = -_power_density * _node_volume[0] / sln(tb_dof1);
 
   re += _local_re;
 
@@ -60,10 +70,4 @@ HeatSourcePD::computeResidual()
     for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
-}
-
-Real
-HeatSourcePD::computeQpResidual()
-{
-  return 0;
 }

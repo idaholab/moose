@@ -30,7 +30,7 @@ struct node_structure2D
   struct bond_structure
   {
     int node_index;
-  }bond[28]; // horizon = 3*Meshspacing 
+  }bond[37]; // horizon = 3*Meshspacing, 28 for square shape, 37 for disk shape 
 };
 
 struct node_structure3D
@@ -42,29 +42,8 @@ struct node_structure3D
   struct bond_structure
   {
     int node_index;
-  }bond[122]; // horizon = 3*MeshSpacing
+  }bond[122]; // horizon = 3*MeshSpacing, 122 for cube shape, 118 for cylinder shape
 };
-
-int CountNodeNum(double R,double dx,int nd)
-{
-  int node_num = 0;
-  double X = 0, Y = 0, dis = 0;
-
-  for (int j = 0; j < nd; j++)
-  {
-    for (int i = 0; i < nd; i++)
-    {
-      X = -R  + static_cast<Real>(i)*dx;
-      Y = -R  + static_cast<Real>(j)*dx;
-      dis = std::sqrt(X*X + Y*Y);
-      if (dis <= R + 0.001*dx)
-        {
-          node_num++;
-        }
-    }
-  }
-  return node_num;
-}
 
 void InitializeNode2D(struct node_structure2D *node,int node_num)
 {
@@ -73,7 +52,7 @@ void InitializeNode2D(struct node_structure2D *node,int node_num)
     node[i].X = 0.0;
     node[i].Y = 0.0;
     node[i].bonds_per_node = 0;
-    for(int j = 0; j < 28; j++)
+    for(int j = 0; j < 37; j++)
       {
         node[i].bond[j].node_index = 0;
       }
@@ -107,7 +86,7 @@ void SearchBond2D(struct node_structure2D *node, int node_num, int search_range,
     for(int k = i; k < j; k++)
     {
       dis = std::sqrt(std::pow(node[node_id].X - node[k].X, 2) + std::pow(node[node_id].Y - node[k].Y, 2));
-      if(dis <= 1.001 * horizon && k != node_id)
+      if(dis <= horizon && k != node_id)
       {
         node[node_id].bond[num].node_index = k;
         num++;
@@ -129,7 +108,7 @@ void SearchBond3D(struct node_structure3D *node, int node_num, int search_range,
     for(int k = i; k < j; k++)
     {
       dis = std::sqrt(std::pow(node[node_id].X - node[k].X, 2) + std::pow(node[node_id].Y - node[k].Y, 2) + std::pow(node[node_id].Z - node[k].Z, 2));
-      if(dis <= 1.001 * horizon && k != node_id)
+      if(dis <= horizon && k != node_id)
       {
         node[node_id].bond[num].node_index = k;
         num++;
@@ -195,9 +174,8 @@ PeridynamicsMesh::buildMesh()
   BoundaryInfo& boundary_info = mesh.get_boundary_info();
   
   double dis, X, Y, Z;
-  int i, j, k, node_id;
+  int i, j, k, n, node_id = 0;
   int node_num = 0, bond_num = 0, node_per_layer, search_range;
-  Point mypoint(0.0, 0.0, 0.0);
 
   if (_dim == 2)
   {
@@ -209,18 +187,17 @@ PeridynamicsMesh::buildMesh()
       horizon = mesh_spacing * 3.0; // use a large value for horizon
       // Create and Initialize Node Structure
       node_num = _nx * ny;
-      node = (struct node_structure2D*)malloc(node_num*sizeof(struct node_structure2D));
+      node = (struct node_structure2D*)malloc(node_num * sizeof(struct node_structure2D));
       InitializeNode2D(node, node_num);
       mesh.reserve_nodes(node_num);
       // Define Nodal Coordinates
-      for (j = 0, node_id = 0; j < ny; j++)
+      for (j = 0; j < ny; j++)
       {	
         for (i = 0; i < _nx; i++)
         {
-          X = _xmin + static_cast<Real>(i)*mesh_spacing;
-          Y = _ymin + static_cast<Real>(j)*mesh_spacing;	
-          mypoint = Point(X, Y, 0.0);
-          mesh.add_point (mypoint, node_id);
+          X = _xmin + i * mesh_spacing;
+          Y = _ymin + j * mesh_spacing;	
+          mesh.add_point (Point(X, Y, 0.0), node_id);
           node[node_id].X = X;
           node[node_id].Y = Y;
           node_id++;
@@ -282,33 +259,38 @@ PeridynamicsMesh::buildMesh()
     }
     else if (_shape == 2) //disk-like domain
     {
-      mesh_spacing = 2 * _R / (2 *_nx - 2);
+      mesh_spacing = _R / (_nx - 1);
       horizon = mesh_spacing * 3.0;
       // Create and Initialize Node Structure
-      node_num = CountNodeNum(_R, mesh_spacing, 2 * _nx - 1);
-      node = (struct node_structure2D*)malloc(node_num*sizeof(struct node_structure2D));
+      node_num++;
+      for (i = 1; i < _nx; i++)
+      {
+        j = std::floor(3.14159265359 / std::asin(1.0 / (2.0 * i)) + 0.5);
+        node_num += j;
+      }
+      node = (struct node_structure2D*)malloc(node_num * sizeof(struct node_structure2D));
       InitializeNode2D(node, node_num);
       mesh.reserve_nodes(node_num);
       // Define Nodal Coordinates
-      for (j = 0, node_id = 0; j < 2 * _nx - 1; j++)
+      mesh.add_point (Point(0.0, 0.0, 0.0), node_id);
+      node[node_id].X = 0.0;
+      node[node_id].Y = 0.0;
+      node_id++;
+      for (i = 1; i < _nx; i++)
       {
-        for (i = 0; i < 2 * _nx - 1; i++)
+        k = std::floor(3.14159265359 / std::asin(1.0 / (2.0 * i)) + 0.5);
+        for (j = 0; j < k; j++)
         {
-          X = -_R + static_cast<Real>(i) * mesh_spacing;
-          Y = -_R + static_cast<Real>(j) * mesh_spacing;
-          dis = std::sqrt(X * X + Y * Y);
-          if (dis <= _R + 0.001*mesh_spacing)
-          {
-            mypoint = Point(X, Y, 0.0);
-            mesh.add_point (mypoint, node_id);
-            node[node_id].X = X;
-            node[node_id].Y = Y;
-            node_id++;
-          }
+          X = i * mesh_spacing * std::cos(j * 2.0 * 3.14159265359 / k);
+          Y = i * mesh_spacing * std::sin(j * 2.0 * 3.14159265359 / k);
+          mesh.add_point (Point(X, Y, 0.0), node_id);
+          node[node_id].X = X;
+          node[node_id].Y = Y;
+          node_id++;
         }
       }
       // Search Family Member
-      search_range = 3 * 2 * _nx + 1;
+      search_range = node_num;
       SearchBond2D(node, node_num, search_range, horizon);
       // Generate Mesh
       for(i = 0,j = 0; i < node_num; i++)
@@ -362,7 +344,7 @@ PeridynamicsMesh::buildMesh()
           boundary_info.add_node(mesh.node_ptr(node_id),5);
         }
       }
-      boundary_info.nodeset_name(0) = "PeripheralCurve";
+      boundary_info.nodeset_name(0) = "Periphery";
       boundary_info.nodeset_name(1) = "CenterPoint";
       boundary_info.nodeset_name(2) = "LeftPoint";
       boundary_info.nodeset_name(3) = "RightPoint";
@@ -385,17 +367,16 @@ PeridynamicsMesh::buildMesh()
       InitializeNode3D(node, node_num);
       mesh.reserve_nodes(node_num);
       // Define Nodal Coordinates
-      for(k = 0, node_id = 0; k < nz; k++)
+      for(k = 0; k < nz; k++)
       {
         for (j = 0; j < ny; j++)
         {
           for (i = 0; i < _nx; i++)
           {
-            X = _xmin + static_cast<Real>(i) * mesh_spacing;
-            Y = _ymin + static_cast<Real>(j) * mesh_spacing;
-            Z = _zmin + static_cast<Real>(k) * mesh_spacing;
-            mypoint = Point(X, Y, Z);
-            mesh.add_point (mypoint, node_id);
+            X = _xmin + i * mesh_spacing;
+            Y = _ymin + j * mesh_spacing;
+            Z = _zmin + k * mesh_spacing;
+            mesh.add_point (Point(X, Y, Z), node_id);
             node[node_id].X = X;
             node[node_id].Y = Y;
             node[node_id].Z = Z;
@@ -474,36 +455,43 @@ PeridynamicsMesh::buildMesh()
         nz = static_cast<int>((_zmax - _zmin) / mesh_spacing) + 1;
         horizon = mesh_spacing * 3.0;
         // Create and Initialize Node Structure
-        node_per_layer = CountNodeNum(_R, mesh_spacing, 2 * _nx - 1);
+        node_per_layer = 1;
+        for (i = 1; i < _nx; i++)
+        {
+          j = std::floor(3.14159265359 / std::asin(1.0 / (2.0 * i)) + 0.5);
+          node_per_layer += j;
+        }
         node_num = node_per_layer * nz;
-        node = (struct node_structure3D*)malloc(node_num*sizeof(struct node_structure3D));
+        node = (struct node_structure3D*)malloc(node_num * sizeof(struct node_structure3D));
         InitializeNode3D(node, node_num);
         mesh.reserve_nodes(node_num);
         // Define Nodal Coordinates
-        for (k = 0, node_id = 0; k < nz; k++)
+        for (k = 0; k < nz; k++)
         {
-          for (j = 0; j < 2 * _nx - 1; j++)
+          Z = _zmin + k * mesh_spacing;
+          mesh.add_point (Point(0.0, 0.0, Z), node_id);
+          node[node_id].X = 0;
+          node[node_id].Y = 0;
+          node[node_id].Z = Z;
+          node_id++;
+          for (i = 1; i < _nx; i++)
           {
-            for (i = 0; i < 2 * _nx - 1; i++)
+            n = std::floor(3.14159265359 / std::asin(1.0 / (2.0 * i)) + 0.5);
+            for (j = 0; j < n; j++)
             {
-              X = -_R + static_cast<Real>(i) * mesh_spacing;
-              Y = -_R + static_cast<Real>(j) * mesh_spacing;
-              Z = _zmin + static_cast<Real>(k) * mesh_spacing;
-              dis = std::sqrt(X * X + Y * Y);
-              if (dis <= _R + 0.001 * mesh_spacing)
-              {
-                mypoint = Point(X, Y, Z);
-                mesh.add_point (mypoint, node_id);
-                node[node_id].X = X;
-                node[node_id].Y = Y;
-                node[node_id].Z = Z;
-                node_id++;
-              }
+              X = i * mesh_spacing * std::cos(j * 2.0 * 3.14159265359 / n);
+              Y = i * mesh_spacing * std::sin(j * 2.0 * 3.14159265359 / n);
+              Z = _zmin + k * mesh_spacing;
+              mesh.add_point (Point(X, Y, Z), node_id);
+              node[node_id].X = X;
+              node[node_id].Y = Y;
+              node[node_id].Z = Z;
+              node_id++;
             }
           }
         }
         // Search Family Member
-        search_range = 3 * node_per_layer + _nx;
+        search_range = 4 * node_per_layer;
         SearchBond3D(node, node_num, search_range, horizon);
         // Generate Mesh
         for(i = 0, j = 0; i < node_num; i++)
@@ -570,7 +558,7 @@ PeridynamicsMesh::buildMesh()
             boundary_info.add_node(mesh.node_ptr(node_id),8);
           }
         }
-        boundary_info.nodeset_name(0) = "PeripheralSurface";
+        boundary_info.nodeset_name(0) = "Periphery";
         boundary_info.nodeset_name(1) = "CenterLine";
         boundary_info.nodeset_name(2) = "Center";
         boundary_info.nodeset_name(3) = "LeftLine";

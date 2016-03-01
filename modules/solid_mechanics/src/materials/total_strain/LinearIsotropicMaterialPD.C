@@ -165,7 +165,7 @@ LinearIsotropicMaterialPD::computeProperties()
 
 //obtain the displacements solution
   NonlinearSystem & nonlinear_sys = _fe_problem.getNonlinearSystem();
-  const NumericVector<Number>& ghosted_solution = *nonlinear_sys.currentSolution();
+  const NumericVector<Number> & ghosted_solution = *nonlinear_sys.currentSolution();
   VectorValue<unsigned int> disp_dofs0(node0->dof_number(nonlinear_sys.number(), _disp_x_var->number(), 0),
                            (_disp_y_var ? node0->dof_number(nonlinear_sys.number(), _disp_y_var->number(), 0) : 0),
                            (_disp_z_var ? node0->dof_number(nonlinear_sys.number(), _disp_z_var->number(), 0) : 0));

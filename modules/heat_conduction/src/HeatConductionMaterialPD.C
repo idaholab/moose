@@ -38,7 +38,7 @@ HeatConductionMaterialPD::HeatConductionMaterialPD(const InputParameters & param
     _mesh_spacing(isParamValid("mesh_spacing") ? getParam<Real>("mesh_spacing") : 1.0),
     _bond_response(declareProperty<Real>("bond_response")),
     _bond_response_dif_temp(declareProperty<Real>("bond_response_dif_temp")),
-    _bond_volume(declareProperty<Real>("bond_volume"))
+    _node_volume(declareProperty<Real>("node_volume"))
 {
   NonlinearVariableName temp = parameters.get<NonlinearVariableName>("temp");
   _temp_var = &_fe_problem.getVariable(_tid, temp);
@@ -82,17 +82,15 @@ HeatConductionMaterialPD::computeProperties()
  
     if (_pddim == 2)
     {
-      Real node_volume = std::pow(_mesh_spacing, 2);
-      _bond_volume[_qp] = node_volume / 28;
-      _bond_response[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 3)) * (temp_node1 - temp_node0) / origin_length * node_volume * node_volume;
-      _bond_response_dif_temp[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 3)) / origin_length * node_volume * node_volume;
+      _node_volume[_qp] = std::pow(_mesh_spacing, 2);
+      _bond_response[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 3)) * (temp_node1 - temp_node0) / origin_length * _node_volume[_qp] * _node_volume[_qp];
+      _bond_response_dif_temp[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 3)) / origin_length * _node_volume[_qp] * _node_volume[_qp];
     }
     else if (_pddim == 3)
     {
-      Real node_volume = std::pow(_mesh_spacing, 3);
-      _bond_volume[_qp] = node_volume / 122;
-      _bond_response[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 4)) * (temp_node1 - temp_node0) / origin_length * node_volume * node_volume;
-      _bond_response_dif_temp[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 4)) / origin_length * node_volume * node_volume;
+      _node_volume[_qp] = std::pow(_mesh_spacing, 3);
+      _bond_response[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 4)) * (temp_node1 - temp_node0) / origin_length * _node_volume[_qp] * _node_volume[_qp];
+      _bond_response_dif_temp[_qp] = 6.0 * _thermal_conductivity[_qp] / (3.14159265358 * std::pow(3.0 * _mesh_spacing, 4)) / origin_length * _node_volume[_qp] * _node_volume[_qp];
     }
   }
 }
