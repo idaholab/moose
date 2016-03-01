@@ -41,10 +41,9 @@
 []
 
 [Kernels]
-  [./StressDivergenceRSphericalTensors]
-    type = StressDivergenceRSphericalTensors
-    component = 0
-    variable = disp_r
+  [./StressDivergence1DRSpherical]
+    use_displaced_mesh = true
+    save_in_disp_r = residual_r
   [../]
 []
 
@@ -53,12 +52,19 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./residual_r]
+  [../]
 []
 
 [Postprocessors]
   [./stress_rr]
     type = ElementAverageValue
     variable = stress_rr
+  [../]
+  [./residual_r]
+    type = NodalSum
+    variable = residual_r
+    boundary = right
   [../]
 []
 
