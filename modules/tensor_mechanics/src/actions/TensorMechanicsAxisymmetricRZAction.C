@@ -63,8 +63,8 @@ TensorMechanicsAxisymmetricRZAction::act()
 
   for (unsigned int i = 0; i < dim; ++i)
   {
-    // Create kernal name dependent on the displacement variable
-    std::string kernel_name = "TensorMechanicsAxisymmetricRZ" + _base_name + Moose::stringify(i);
+    // Create kernel name dependent on the displacement variable
+    std::string kernel_name = "TensorMechanicsAxisymmetricRZ_" + Moose::stringify(i);
 
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];

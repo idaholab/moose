@@ -20,10 +20,6 @@ public:
   TensorMechanicsAxisymmetricRZAction(const InputParameters & params);
 
   virtual void act();
-
-private:
-  /// Base name for the kernels + components used in the model
-  std::string _base_name;
 };
 
 #endif //TENSORMECHANICSAXISYMMETRICRZACTION_H
