@@ -45,8 +45,8 @@ GeneralizedPlaneStrainUserObjectOSPD::execute()
   Point coord_j = *_pdmesh.nodePtr(node_j);
 
   // nodal area for node i and j
-  Real nv_i = _pdmesh.getPDNodeVolume(node_i);
-  Real nv_j = _pdmesh.getPDNodeVolume(node_j);
+  Real nv_i = _pdmesh.getNodeVolume(node_i);
+  Real nv_j = _pdmesh.getNodeVolume(node_j);
 
   // number of neighbors for node i and j, used to avoid repeated accounting nodal stress in
   // element-wise loop

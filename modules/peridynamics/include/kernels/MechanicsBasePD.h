@@ -28,7 +28,8 @@ public:
    * Function to compute local contribution to the off-diagonal Jacobian at the current nodes
    * @param coupled_component   The coupled variable number
    */
-  virtual void computeLocalOffDiagJacobian(unsigned int /* coupled_component */){};
+  virtual void computeLocalOffDiagJacobian(unsigned int /* jvar_num */,
+                                           unsigned int /* coupled_component */){};
 
   /**
    * Function to compute nonlocal contribution to the off-diagonal Jacobian at the current nodes

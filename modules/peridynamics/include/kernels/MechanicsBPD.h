@@ -24,7 +24,7 @@ public:
 protected:
   virtual void computeLocalResidual() override;
   virtual void computeLocalJacobian() override;
-  virtual void computeLocalOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeLocalOffDiagJacobian(unsigned int jvar_num, unsigned int jvar) override;
 
   ///@{ Bond based material properties
   const MaterialProperty<Real> & _bond_local_force;

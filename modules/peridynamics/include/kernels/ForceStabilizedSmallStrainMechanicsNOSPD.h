@@ -27,7 +27,7 @@ protected:
   virtual void computeLocalJacobian() override;
   virtual void computeNonlocalJacobian() override;
 
-  void computeLocalOffDiagJacobian(unsigned int coupled_component) override;
+  void computeLocalOffDiagJacobian(unsigned int jvar_num, unsigned int coupled_component) override;
   void computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                                         unsigned int coupled_component) override;
 

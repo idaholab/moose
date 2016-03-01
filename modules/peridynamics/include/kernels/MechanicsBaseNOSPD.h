@@ -23,7 +23,8 @@ public:
 
 protected:
   /**
-   * Function to compute derivative of stress with respect to displacements
+   * Function to compute derivative of stress with respect to displacements for small strain
+   * problems
    * @param component   The index of displacement component
    * @param nd   The local index of element node (either 1 or 2 for Edge2 element)
    * @return The calculated derivative
@@ -41,7 +42,5 @@ protected:
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   const std::vector<MaterialPropertyName> _eigenstrain_names;
   std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
-  ///@}
-
   ///@}
 };

@@ -9,25 +9,25 @@
     design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
-  [./conventional_planestress_HNOSPD]
+  [./conventional_planestress_H1NOSPD]
     type = 'Exodiff'
-    input = 'conventional_planestress_HNOSPD.i'
-    exodiff = 'conventional_planestress_HNOSPD.e'
+    input = 'conventional_planestress_H1NOSPD.i'
+    exodiff = 'conventional_planestress_H1NOSPD.e'
     map = false
     requirement = 'ComputePlaneStressIsotropicElasticityTensor shall provide elasticity
-                   tensor for plane stress model based on non-ordinary state-based peridynamic model.'
+                   tensor for plane stress model based on Form I of the horizon stabilized correspondence model.'
     design = 'modules/peridynamics/ComputePlaneStressIsotropicElasticityTensor.md'
     issues = '#11561'
     allow_test_objects = true
   [../]
-  [./weak_planestress_NOSPD]
+  [./weak_planestress_H1NOSPD]
     type = 'Exodiff'
-    input = 'weak_planestress_HNOSPD.i'
-    exodiff = 'weak_planestress_HNOSPD.e'
+    input = 'weak_planestress_H1NOSPD.i'
+    exodiff = 'weak_planestress_H1NOSPD.e'
     map = false
-    requirement = 'WeakPlaneStressHNOSPD shall model plane stress problem using
-                   non-ordinary state-based weak formulation.'
-    design = 'modules/peridynamics/WeakPlaneStressHNOSPD.md'
+    requirement = 'WeakPlaneStressNOSPD shall model plane stress problem using
+                   weak formulation based on Form I of the horizon stabilized correspondence model.'
+    design = 'modules/peridynamics/WeakPlaneStressNOSPD.md'
     issues = '#11561'
   [../]
 []

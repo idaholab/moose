@@ -1,0 +1,36 @@
+.moose-devel-example .moose-caption,
+.moose-devel-example > div:first-of-type
+{
+    padding:10px;
+}
+
+.moose-devel-example-code pre{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.moose-devel-example-html{
+    padding: 10px;
+}
+
+.moose-devel-example-code,
+.moose-devel-example-html{
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+@media (prefers-color-scheme: light), (prefers-light-interface) {
+.moose-devel-example-code,
+.moose-devel-example-html{
+    border: 4px solid var(--dark-navbar);
+}
+}
+
+@media (prefers-color-scheme: dark), (prefers-dark-interface) {
+.moose-devel-example-code,
+.moose-devel-example-html{
+    border-left: 4px solid var(--dark-navbar);
+    border-right: 4px solid var(--dark-navbar);
+    border-bottom: 4px solid var(--dark-navbar);
+}
+}

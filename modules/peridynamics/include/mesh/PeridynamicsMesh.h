@@ -84,7 +84,8 @@ public:
    * @return The neighbor list for calculation of bond-associated deformation gradient for the
    * neighbor
    */
-  std::vector<dof_id_type> getDefGradNeighbors(dof_id_type node_id, unsigned int neighbor_id);
+  std::vector<dof_id_type> getBondDeformationGradientNeighbors(dof_id_type node_id,
+                                                               dof_id_type neighbor_id);
 
   /**
    * Function to return block ID for node node_id
@@ -104,45 +105,59 @@ public:
    * @param node_id   The querying node index
    * @return The coordinates of a node
    */
-  Point getPDNodeCoord(dof_id_type node_id);
+  Point getNodeCoord(dof_id_type node_id);
 
   /**
    * Function to return the correspondence between PD node IDs and FE element IDs
    * @return The coordinates of a node
    */
-  std::vector<dof_id_type> getPDNodeIDToFiniteElemIDMap();
+  std::vector<dof_id_type> getPDNodeIDToFEElemIDMap();
 
   /**
    * Function to return nodal volume for node node_id
    * @param node_id   The querying node index
    * @return The volume of a node
    */
-  Real getPDNodeVolume(dof_id_type node_id);
+  Real getNodeVolume(dof_id_type node_id);
 
   /**
    * Function to return summation of neighbor nodal volumes for node node_id
    * @param node_id   The querying node index
    * @return The summation of the volume of all the neighbors
    */
-  Real getHorizVolume(dof_id_type node_id);
+  Real getHorizonVolume(dof_id_type node_id);
 
   /**
-   * Function to return summation of volumes of bond-associated neighbors used
-   * in the deformation gradient calculation for bond connecting node node_id
-   * and its neighbor neighbor_id
-   * @param node_id   The ID of the node providing the neighbor's bond-associated volume
+   * Function to return the volume of a horizon subset for bond-associated deformation gradient
+   * calculation for bond connecting node node_id and its neighbor neighbor_id
+   * @param node_id   The ID of the node
    * @param neighbor_id   The ID of the querying neighbor
-   * @return The volume used in the calculation of bond-associated deformation gradeint for the
-   * querying neighbor
+   * @return The horizon subset volume
    */
-  Real getDefGradVolFraction(dof_id_type node_id, dof_id_type neighbor_id);
+  Real getHorizonSubsetVolume(dof_id_type node_id, dof_id_type neighbor_id);
+
+  /**
+   * Function to return the summation of all horizon subset volumes for node node_id
+   * @param node_id   The querying node index
+   * @return The summation of all horizon subset volumes
+   */
+  Real getHorizonSubsetVolumeSum(dof_id_type node_id);
+
+  /**
+   * Function to return the volume fraction of a horizon subset used for bond-associated deformation
+   * gradient calculation for bond connecting node node_id and its neighbor neighbor_id
+   * @param node_id   The ID of the node
+   * @param neighbor_id   The ID of the querying neighbor
+   * @return The horizon subset volume fraction for neighbor neighbor_id of node node_id
+   */
+  Real getHorizonSubsetVolumeFraction(dof_id_type node_id, dof_id_type neighbor_id);
 
   /**
    * Function to return the average spacing between node node_id with its most adjacent neighbors
    * @param node_id   The querying node index
    * @return The node average spacing
    */
-  Real getNodeAvgSpacing(dof_id_type node_id);
+  Real getNodeAverageSpacing(dof_id_type node_id);
 
   /**
    * Function to return horizon size
@@ -160,9 +175,9 @@ public:
 
 protected:
   ///@{ Horizon size control parameters
-  const Real _horiz_rad;
-  const bool _has_horiz_num;
-  const Real _horiz_num;
+  const Real _horizon_radius;
+  const bool _has_horizon_number;
+  const Real _horizon_number;
   const Real _bah_ratio;
   ///@}
 
@@ -184,10 +199,10 @@ protected:
 
   ///@{ Data associated with each peridynamics node
   std::vector<Point> _pdnode_coord;
-  std::vector<Real> & _pdnode_avg_spacing;
-  std::vector<Real> & _pdnode_horiz_rad;
+  std::vector<Real> & _pdnode_average_spacing;
+  std::vector<Real> & _pdnode_horizon_radius;
   std::vector<Real> & _pdnode_vol;
-  std::vector<Real> & _pdnode_horiz_vol;
+  std::vector<Real> & _pdnode_horizon_vol;
   std::vector<SubdomainID> & _pdnode_blockID;
   std::vector<dof_id_type> & _pdnode_elemID;
   ///@}
@@ -201,8 +216,11 @@ protected:
   /// Neighbor lists for deformation gradient calculation using bond-associated horizon
   std::vector<std::vector<std::vector<dof_id_type>>> & _dg_neighbors;
 
-  /// Volume fraction of deformation gradient region to its sum at a node
-  std::vector<std::vector<Real>> & _dg_vol_frac;
+  /// Volume of horizon subsets for bond-associated deformation gradients at a node
+  std::vector<std::vector<Real>> & _pdnode_sub_vol;
+
+  /// Summation of volumes of all horizon subsets at a node
+  std::vector<Real> & _pdnode_sub_vol_sum;
 
   /// Offset of each boundary node to its original FE element boundary edge or face
   std::map<dof_id_type, Real> & _boundary_node_offset;

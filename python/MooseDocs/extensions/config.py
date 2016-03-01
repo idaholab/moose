@@ -36,7 +36,7 @@ class ConfigExtension(command.CommandExtension):
                     if subcommand == 'disable':
                         self.__configPageDisable(page, settings)
                     else:
-                           page['__{}__'.format(subcommand)].update(settings)
+                        page['__{}__'.format(subcommand)].update(settings)
 
     def extend(self, reader, renderer):
         self.requires(command)

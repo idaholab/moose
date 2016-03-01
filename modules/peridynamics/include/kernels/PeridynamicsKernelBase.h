@@ -62,7 +62,8 @@ protected:
   const unsigned int _nnodes;
   std::vector<Real> _node_vol;
   std::vector<Real> _dg_vol_frac;
-  std::vector<Real> _horiz_rad;
+  std::vector<Real> _horizon_radius;
+  std::vector<Real> _horizon_vol;
   ///@}
 
   ///Vector for current bond under undefored configuration

@@ -53,8 +53,8 @@
   [../]
   [./strain]
     type = ComputePlaneSmallStrainNOSPD
-    stabilization = FORCE
     eigenstrain_names = thermal
+    stabilization = FORCE
   [../]
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain

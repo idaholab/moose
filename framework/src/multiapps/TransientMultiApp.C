@@ -208,7 +208,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
       // Maybe this MultiApp was already solved
-      if ((ex->getTime() + app_time_offset + 2e-14 >= target_time) ||
+      if ((ex->getTime() + app_time_offset + ex->timestepTol() >= target_time) ||
           (ex->getTime() >= ex->endTime()))
         continue;
 
@@ -262,7 +262,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         bool local_first = _first;
 
         // Now do all of the solves we need
-        while ((!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time) ||
+        while ((!at_steady && ex->getTime() + app_time_offset + ex->timestepTol() < target_time) ||
                !ex->lastSolveConverged())
         {
           if (local_first != true)

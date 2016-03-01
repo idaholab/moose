@@ -33,7 +33,7 @@ MechanicsActionPD::validParams()
   MooseEnum formulation_option("BOND ORDINARY_STATE NONORDINARY_STATE");
   params.addRequiredParam<MooseEnum>(
       "formulation", formulation_option, "Peridynamic formulation options");
-  MooseEnum stabilization_option("FORCE BOND_HORIZON", "BOND_HORIZON");
+  MooseEnum stabilization_option("FORCE BOND_HORIZON_I BOND_HORIZON_II");
   params.addParam<MooseEnum>("stabilization",
                              stabilization_option,
                              "Stabilization techniques for the peridynamic correspondence model");
@@ -73,6 +73,9 @@ MechanicsActionPD::MechanicsActionPD(const InputParameters & params)
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in"))
 {
   // Consistency check
+  if (_formulation == "NONORDINARY_STATE" && !isParamValid("stabilization"))
+    mooseError("'stabilization' is a required parameter for non-ordinary state-based models only.");
+
   if (_save_in.size() != 0 && _save_in.size() != _ndisp)
     mooseError("Number of save_in variables should equal to the number of displacement variables ",
                _ndisp);
@@ -105,12 +108,12 @@ MechanicsActionPD::act()
 
       if (size_after != size_before + added_size)
         mooseError("The block restrictions in the Peridynamics/Mechanics/Master actions must be "
-                   "non-overlapping.");
+                   "non-overlapping!");
 
       if (added_size == 0 && actions.size() > 1)
         mooseError(
             "No Peridynamics/Mechanics/Master action can be block unrestricted if more than one "
-            "Peridynamics/Mechanics/Master action is specified.");
+            "Peridynamics/Mechanics/Master action is specified!");
     }
   }
   else if (_current_task == "add_aux_variable")
@@ -174,7 +177,7 @@ MechanicsActionPD::act()
     }
   }
   else
-    mooseError("Task error in MechanicsActionPD");
+    mooseError("Task error in MechanicsActionPD!");
 }
 
 std::string
@@ -183,25 +186,38 @@ MechanicsActionPD::getKernelName()
   std::string name;
 
   if (_formulation == "BOND")
+  {
     name = "MechanicsBPD";
+  }
   else if (_formulation == "ORDINARY_STATE")
+  {
     name = "MechanicsOSPD";
+  }
   else if (_formulation == "NONORDINARY_STATE")
   {
     if (_stabilization == "FORCE")
-      name = "ForceStabilizedSmallStrainMechanicsNOSPD";
-    else if (_stabilization == "BOND_HORIZON")
     {
-      if (_strain == "FINITE")
-        name = "HorizonStabilizedFiniteStrainMechanicsNOSPD";
+      name = "ForceStabilizedSmallStrainMechanicsNOSPD";
+    }
+    else if (_stabilization == "BOND_HORIZON_I")
+    {
+      if (_strain == "SMALL")
+        name = "HorizonStabilizedFormISmallStrainMechanicsNOSPD";
       else
-        name = "HorizonStabilizedSmallStrainMechanicsNOSPD";
+        name = "HorizonStabilizedFormIFiniteStrainMechanicsNOSPD";
+    }
+    else if (_stabilization == "BOND_HORIZON_II")
+    {
+      if (_strain == "SMALL")
+        name = "HorizonStabilizedFormIISmallStrainMechanicsNOSPD";
+      else
+        name = "HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD";
     }
     else
-      paramError("stabilization", "Unknown PD stabilization scheme");
+      paramError("stabilization", "Unknown PD stabilization scheme!");
   }
   else
-    paramError("formulation", "Unsupported peridynamic formulation");
+    paramError("formulation", "Unsupported peridynamic formulation!");
 
   return name;
 }

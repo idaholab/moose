@@ -101,6 +101,8 @@ Extensions:
         includes:
             - framework/include
             - test/include
+    MooseDocs.extensions.ifelse:
+        active: True
 
 Translator:
     type: MooseDocs.base.Translator
