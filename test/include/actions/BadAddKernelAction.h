@@ -12,28 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
-#include "AddControlAction.h"
-#include "FEProblem.h"
-#include "Factory.h"
-#include "Control.h"
+#ifndef BADADDKERNELACTION_H
+#define BADADDKERNELACTION_H
+
+#include "MooseObjectAction.h"
+
+class BadAddKernelAction;
 
 template<>
-InputParameters validParams<AddControlAction>()
-{
-  InputParameters params = validParams<MooseObjectAction>();
-  return params;
-}
+InputParameters validParams<BadAddKernelAction>();
 
-AddControlAction::AddControlAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
+/**
+ * This class is for testing an error condition. It is registered
+ * to add kernels but is calling the wrong method on FEProblem
+ * to actually add the object. DO NOT COPY!
+ */
+class BadAddKernelAction : public MooseObjectAction
 {
-}
+public:
+  BadAddKernelAction(InputParameters params);
 
-void
-AddControlAction::act()
-{
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
-  MooseSharedPointer<Control> control = _factory.create<Control>(_type, _name, _moose_object_pars);
-  _problem->getControlWarehouse().addObject(control);
-}
+  virtual void act();
+};
+
+#endif // BADADDKERNELACTION_H

@@ -1491,12 +1491,8 @@ SolidModel::createConstitutiveModel(const std::string & cm_name)
   Factory & factory = _app.getFactory();
   InputParameters params = factory.getValidParams(cm_name);
   params += parameters();
-  MooseSharedPointer<ConstitutiveModel> cm = MooseSharedNamespace::dynamic_pointer_cast<ConstitutiveModel>(factory.create(cm_name, name()+"Model", params, _tid));
+  MooseSharedPointer<ConstitutiveModel> cm = factory.create<ConstitutiveModel>(cm_name, name()+"Model", params, _tid);
 
-  if (!cm.get())
-  {
-    mooseError("\""+name()+"\" is not a ConstitutiveModel");
-  }
   _models_to_free.insert(cm);  // Keep track of the dynamic memory that is created internally to this object
 
   _constitutive_active = true;
