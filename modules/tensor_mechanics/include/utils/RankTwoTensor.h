@@ -184,6 +184,9 @@ public:
   /// returns _vals/a
   RankTwoTensor operator/ (const Real a) const;
 
+  /// Defines multiplication with a vector to get a vector
+  TypeVector<Real> operator* (const TypeVector<Real> & a) const;
+
   /// performs _vals *= a (component by component) and returns the result
   RankTwoTensor & operator*= (const RankTwoTensor & a);
 

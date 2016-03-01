@@ -30,7 +30,10 @@ protected:
   /// Mobility
   const MaterialProperty<Real> & _L;
   const MaterialProperty<Real> & _dLdop;
+
+  /// Interfacial parameter
   const MaterialProperty<Real> & _eps;
+  const MaterialProperty<RealGradient> & _depsdgrad_op;
 
   /// Mobility derivative w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;

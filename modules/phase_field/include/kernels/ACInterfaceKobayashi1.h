@@ -33,6 +33,8 @@ protected:
   const MaterialProperty<Real> & _dLdop;
   const MaterialProperty<Real> & _eps;
   const MaterialProperty<Real> & _deps;
+  const MaterialProperty<RealGradient> & _depsdgrad_op;
+  const MaterialProperty<RealGradient> & _ddepsdgrad_op;
 
   /// Mobility derivative w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;

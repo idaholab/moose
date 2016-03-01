@@ -27,11 +27,18 @@ protected:
   virtual void computeQpProperties();
 
 private:
+  Real _delta;
+  unsigned int _j;
+  Real _theta0;
+  Real _eps_bar;
+
   MaterialProperty<Real> & _eps;
   MaterialProperty<Real> & _deps;
+  MaterialProperty<RealGradient> & _depsdgrad_op;
+  MaterialProperty<RealGradient> & _ddepsdgrad_op;
 
-  const VariableValue & _u;
-  const VariableGradient & _grad_u;
+  const VariableValue & _op;
+  const VariableGradient & _grad_op;
 };
 
 #endif //INTERFACEORIENTATIONMATERIAL_H
