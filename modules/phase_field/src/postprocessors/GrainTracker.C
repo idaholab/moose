@@ -287,7 +287,7 @@ GrainTracker::buildBoundingSpheres()
 //
 //      // The radius is the different between the outer edge of the "bounding box"
 //      // and the center plus the "hull buffer" value
-//      Real radius = (max - center).size() + _hull_buffer;
+//      Real radius = (max - center).norm() + _hull_buffer;
 //
 //      unsigned int some_node_id = *(it1->_ghosted_ids.begin());
 //      _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
@@ -417,7 +417,7 @@ GrainTracker::trackGrains()
 //      for (unsigned int gr=0; gr < grain_num; ++gr)
 //      {
 //        const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
-//        center_points[gr] = d.p;
+//        center_points[gr] = d._p;
 //
 //        Moose::out << "EBSD Grain " << gr << " " << center_points[gr] << '\n';
 //      }
@@ -822,9 +822,9 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
 
     // Swap the values from one variable to the other
     {
-      VariableValue & value = _vars[curr_var_idx]->nodalSln();
-      VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
-      VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
+      const VariableValue & value = _vars[curr_var_idx]->nodalSln();
+      const VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
+      const VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
 
       // Copy Value from intersecting variable to new variable
       dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
@@ -835,9 +835,9 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
       solution_older.set(dof_index, value_older[0]);
     }
     {
-      VariableValue & value = _vars[new_var_idx]->nodalSln();
-      VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
-      VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
+      const VariableValue & value = _vars[new_var_idx]->nodalSln();
+      const VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
+      const VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
 
       // Copy Value from variable to the intersecting variable
       dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
