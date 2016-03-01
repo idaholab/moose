@@ -1,3 +1,13 @@
+###########################################################
+# This test exercises the parallel computation aspect of
+# the framework. Seperate input mesh files are read on
+# different processors and separate output files are
+# produced on different processors.
+#
+# @Requirement P1.10
+###########################################################
+
+
 [Mesh]
   file = cylinder/cylinder.e
   nemesis = true

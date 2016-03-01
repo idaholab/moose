@@ -3,11 +3,13 @@
     type = 'CSVDiff'
     input = 'real_function_control.i'
     csvdiff = 'real_function_control_out.csv'
+    group = 'requirements'
   [../]
 
   [./multiple]
     type = 'CSVDiff'
     input = 'multi_real_function_control.i'
     csvdiff = 'multi_real_function_control_out.csv'
+    group = 'requirements'
   [../]
 []
