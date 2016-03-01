@@ -3,7 +3,7 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR        - Root directory of the MOOSE project 
+# MOOSE_DIR        - Root directory of the MOOSE project
 # HERD_TRUNK_DIR   - Location of the HERD repository
 # FRAMEWORK_DIR    - Location of the MOOSE framework
 #
@@ -25,6 +25,7 @@ include $(MODULE_DIR)/modules.mk
 APPLICATION_DIR    := $(MODULE_DIR)/xfem
 APPLICATION_NAME   := xfem
 BUILD_EXEC         := yes
+DEPEND_MODULES     := solid_mechanics
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include            $(FRAMEWORK_DIR)/app.mk
 
