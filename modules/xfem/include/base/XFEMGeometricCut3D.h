@@ -39,13 +39,13 @@ protected:
   Point _center;
   Point _normal;
 
-  virtual bool intersectWithEdge(Point p1, Point p2, Point &pint);
+  virtual bool intersectWithEdge(const Point & p1, const Point & p2, Point & pint);
 
   virtual bool isInsideCutPlane(Point p) = 0;
 
-  bool isInsideEdge(Point p1, Point p2, Point p);
+  bool isInsideEdge(const Point & p1, const Point & p2, const Point & p);
 
-  Real getRelativePosition(Point p1, Point p2, Point p);
+  Real getRelativePosition(const Point & p1, const Point & p2, const Point & p);
 };
 
 
