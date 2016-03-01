@@ -122,7 +122,7 @@ RichardsMaterial::RichardsMaterial(const InputParameters & parameters) :
   for (unsigned int i = 0; i < LIBMESH_DIM*LIBMESH_DIM; ++i)
     _perm_change[i] = (isCoupled("perm_change")? &coupledValue("perm_change", i) : &_zero); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
 
-  if (!(_material_viscosity.size() == _num_p && getParam<std::vector<UserObjectName> >("relperm_UO").size() && getParam<std::vector<UserObjectName> >("seff_UO").size() && getParam<std::vector<UserObjectName> >("sat_UO").size() && getParam<std::vector<UserObjectName> >("density_UO").size() && getParam<std::vector<UserObjectName> >("SUPG_UO").size()))
+  if (!(_material_viscosity.size() == _num_p && getParam<std::vector<UserObjectName> >("relperm_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("seff_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("sat_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("density_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("SUPG_UO").size() == _num_p))
     mooseError("There are " << _num_p << " Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO");
 
   _d2density.resize(_num_p);
@@ -210,8 +210,9 @@ RichardsMaterial::computePandSeff()
 
       }
     }
-    else
-      mooseError("RichardsMaterial not yet defined for the variable types " << _richards_name_UO.var_types() << " defined in your VarNames UserObject");
+    // the above lines of code are only valid for "pppp"
+    // if you decide to code other RichardsVariables (eg "psss")
+    // you will need to add some lines here
   }
 }
 

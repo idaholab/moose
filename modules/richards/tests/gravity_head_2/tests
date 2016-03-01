@@ -175,20 +175,55 @@
   [./rmp_exception1]
     type = 'RunException'
     input = gh_bounded_17.i
-    cli_args = 'Problem/lower_var=dummy_var'
+    cli_args = 'Problem/lower_var=dummy_var Outputs/file_base=rmp_except1'
     expect_err = 'Both the bounded and lower variables must be nodal variables in RichardsMultiphaseProblem'
   [../]
   [./rmp_exception2]
     type = 'RunException'
     input = gh_bounded_17.i
-    cli_args = 'AuxVariables/dummy_var/family=HIERARCHIC AuxVariables/dummy_var/order=FIRST Problem/lower_var=dummy_var'
+    cli_args = 'AuxVariables/dummy_var/family=HIERARCHIC AuxVariables/dummy_var/order=FIRST Problem/lower_var=dummy_var Outputs/file_base=rmp_except2'
     expect_err = 'Both the bounded and lower variables must belong to the same element family, eg LAGRANGE, in RichardsMultiphaseProblem'
   [../]
   [./rmp_exception3]
     type = 'RunException'
     input = gh_bounded_17.i
-    cli_args = 'Problem/lower_var=dummy_var Mesh/second_order=true AuxVariables/dummy_var/family=LAGRANGE AuxVariables/dummy_var/order=SECOND'
+    cli_args = 'Problem/lower_var=dummy_var Mesh/second_order=true AuxVariables/dummy_var/family=LAGRANGE AuxVariables/dummy_var/order=SECOND Outputs/file_base=rmp_except3'
     expect_err = 'Both the bounded and lower variables must have the same order, eg FIRST, in RichardsMultiphaseProblem'
   [../]
-
+  [./except01]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/viscosity="1" Outputs/file_base=except01'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except02]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/relperm_UO="RelPermWater" Outputs/file_base=except02'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except03]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/seff_UO="SeffWater" Outputs/file_base=except03'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except04]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/sat_UO="SatWater" Outputs/file_base=except04'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except05]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/density_UO="DensityWater" Outputs/file_base=except05'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except06]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/SUPG_UO="SUPGwater" Outputs/file_base=except06'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
 []
