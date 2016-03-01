@@ -532,7 +532,7 @@
 	    \CoverFont{m}{8}{10pt}
 	    \selectfont
 	    Prepared by\\
-	    Idhao National Laboratory\\
+	    Idaho National Laboratory\\
 	    Idaho Falls, Idaho 83415\\
 	    \\
 	    The Idaho National Laboratory is a multiprogram laboratory operated by\\

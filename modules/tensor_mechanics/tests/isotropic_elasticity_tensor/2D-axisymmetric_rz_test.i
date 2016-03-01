@@ -24,7 +24,7 @@
 []
 
 [Kernels]
-  [./AxisymmetricRZ]
+  [./StressDivergence2DAxisymmetricRZ]
     use_displaced_mesh = true
   [../]
 []
