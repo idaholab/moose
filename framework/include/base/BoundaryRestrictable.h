@@ -159,7 +159,7 @@ public:
    * Returns true if this object has been restricted to a boundary
    * @see MooseObject
    */
-  virtual bool boundaryRestricted() { return _boundary_restricted; }
+  virtual bool boundaryRestricted();
 
   /**
    * Returns the set of all boundary ids for the entire mesh
@@ -187,9 +187,6 @@ private:
 
   /// Invalid BoundaryID for case when FEProblem
   const BoundaryID _invalid_boundary_id;
-
-  /// Flag indicating if the class is boundary restricted
-  bool _boundary_restricted;
 
   /// An empty set for referencing when block_ids is not included
   const std::set<SubdomainID> _empty_block_ids;

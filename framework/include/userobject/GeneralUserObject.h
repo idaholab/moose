@@ -45,18 +45,18 @@ class GeneralUserObject :
 public:
   GeneralUserObject(const InputParameters & parameters);
 
-  /**
-   * This function will get called when this user object needs to update its values
-   *
-   * Someone somewhere has to override this.
-   */
-  virtual void execute() = 0;
 
   const std::set<std::string> & getRequestedItems();
 
   const std::set<std::string> & getSuppliedItems();
 
-  virtual ~GeneralUserObject() {}
+  ///@{
+  /**
+   * This method is not used and should not be used in a custom GeneralUserObject.
+   */
+  virtual void threadJoin(const UserObject &) /*final*/;
+  virtual void subdomainSetup() /*final*/;
+  ///@}
 
   ///@{
   /**

@@ -80,4 +80,3 @@ void
 NodalNormalsCorner::threadJoin(const UserObject & /*uo*/)
 {
 }
-
