@@ -415,11 +415,9 @@ class Client:
 
       # An agent reported a stop command... so let everyone know where the log was saved, and exit!
       if self.arguments.call_back_host == None:
-        print '\n\nBinary has exited and a log file has been written.\nYou can now attempt \
-        to view this file by running the\nmemory_logger with either the --plot or --read arguments: \
-        \n\n\t', sys.argv[0], '--plot', self.arguments.outfile[0], '\n\nSee --help for additional \
-        viewing options.'
-
+        print 'Binary has exited and a log file has been written. You can now attempt to view this file by running' \
+          '\nthe memory_logger with either the --plot or --read arguments:\n\n', sys.argv[0], '--plot', self.arguments.outfile[0], \
+          '\n\nSee --help for additional viewing options.'
     # Cancel server operations if ctrl-c was pressed
     except KeyboardInterrupt:
       self.logfile.close()
@@ -1059,15 +1057,7 @@ def verifyArgs(args):
           try:
             import lldb
           except ImportError:
-            print '\nUnable to import lldb\n\n\tIF USING MAC OS X; The Python lldb API is \
-            now supplied by\n\tXcode but not automatically set in your PYTHONPATH. \n\tPlease search the \
-            internet for how to do this if you \n\twish to use --pstack on Mac OS X.\n\n\tNote: If you \
-            installed Xcode to the default location of \n\t/Applications, you should only have to perform \
-            the following:\n\n\texport \
-            PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python:$PYTHONPATH \
-            \n\n\t\t###!! IMPORTANT !!###\n\n\tIt may also be necessary to unload the miniconda module.\n\tIf \
-            you receive a Fatal Python error about PyThreadState...\n\ttry using your systems version of \
-            Python instead.\n\n'
+            lldbImportError()
             sys.exit(1)
         else:
           results = which('lldb')
@@ -1109,6 +1099,26 @@ def parseArguments(args=None):
   internalgroup.add_argument('--call-back-host', nargs=2, help='Server hostname and port that launched memory_logger\n ')
 
   return verifyArgs(parser.parse_args(args))
+
+def lldbImportError():
+  print """
+Unable to import lldb
+
+  The Python lldb API is now supplied by Xcode but not
+  automatically set in your PYTHONPATH. Please search
+  the internet for how to do this if you wish to use
+  --pstack on Mac OS X.
+
+  Note: If you installed Xcode to the default location of
+  /Applications, you should only have to perform the following:
+
+export PYTHONPATH=/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python:$PYTHONPATH
+
+  ###!! IMPORTANT !!###
+  It may also be necessary to unload the miniconda module.
+  If you receive a fatal Python error about PyThreadState
+  try using your system's version of Python instead.
+"""
 
 if __name__ == '__main__':
   args = parseArguments()
