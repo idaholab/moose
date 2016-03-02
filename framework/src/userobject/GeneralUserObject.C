@@ -73,3 +73,15 @@ GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorNa
   _depend_vars.insert(name);
   return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
 }
+
+void
+GeneralUserObject::threadJoin(const UserObject &)
+{
+  mooseError("GeneralUserObjects do not execute using threads, this function does nothing and should not be used.");
+}
+
+void
+GeneralUserObject::subdomainSetup()
+{
+  mooseError("GeneralUserObjects do not execute subdomainSetup method, this function does nothing and should not be used.");
+}
