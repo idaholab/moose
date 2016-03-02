@@ -51,7 +51,8 @@ public:
     id = _ids.front();
     _ids.pop();
 #else
-    mooseError("Threading disabled - Please check your libMesh configuration");
+    // There is no thread model active, so we're always on thread 0.
+    id = 0;
 #endif
   }
 

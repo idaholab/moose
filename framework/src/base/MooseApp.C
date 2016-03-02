@@ -200,6 +200,17 @@ MooseApp::setupOptions()
   Moose::_warnings_are_errors = getParam<bool>("error");
   Moose::_color_console = !getParam<bool>("no_color");
 
+  // If there's no threading model active, but the user asked for
+  // --n-threads > 1 on the command line, throw a mooseError.  This is
+  // intended to prevent situations where the user has potentially
+  // built MOOSE incorrectly (neither TBB nor pthreads found) and is
+  // asking for multiple threads, not knowing that there will never be
+  // any threads launched.
+#if !LIBMESH_USING_THREADS
+  if (libMesh::command_line_value ("--n-threads", 1) > 1)
+    mooseError("You specified --n-threads > 1, but there is no threading model active!");
+#endif
+
   // Build a minimal running application, ignoring the input file.
   if (getParam<bool>("minimal"))
     createMinimalApp();
