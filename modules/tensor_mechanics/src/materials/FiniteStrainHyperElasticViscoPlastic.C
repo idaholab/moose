@@ -39,7 +39,8 @@ FiniteStrainHyperElasticViscoPlastic::FiniteStrainHyperElasticViscoPlastic(const
     _fp_old(declarePropertyOld<RankTwoTensor>(_base_name + "fp")),
     _ce(declareProperty<RankTwoTensor>(_base_name + "ce")),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient"))
+    _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment"))
 {
   initUOVariables();
 
@@ -133,6 +134,7 @@ FiniteStrainHyperElasticViscoPlastic::initJacobianVariables()
 
   _dpk2_dflowrate.resize(_num_flow_rate_uos);
   _dflowrate_dpk2.resize(_num_flow_rate_uos);
+  _dfpinv_dflowrate.resize(_num_flow_rate_uos);
 
   _jac.resize(_num_flow_rate_uos, _num_flow_rate_uos);
 
@@ -196,7 +198,7 @@ FiniteStrainHyperElasticViscoPlastic::computeQpStress()
     }
 
     if (substep_iter > _max_substep_iter)
-      mooseError("Constitutive failure with substepping");
+      mooseError("Constitutive failure with substepping at quadrature point " << _q_point[_qp](0) << " " << _q_point[_qp](1) << " " << _q_point[_qp](2));
   }
   while (!converge);
 
@@ -364,11 +366,10 @@ FiniteStrainHyperElasticViscoPlastic::computeFlowRateJacobian()
 
   computeDpk2Dfpinv();
 
-  RankTwoTensor dfpinv_dflowrate;
   for (unsigned int i = 0; i < _num_flow_rate_uos; ++i)
   {
-    dfpinv_dflowrate = -_fp_tmp_old_inv * _flow_dirn[i] * _dt_substep;
-    _dpk2_dflowrate[i] = _dpk2_dfpinv * dfpinv_dflowrate;
+    _dfpinv_dflowrate[i] = -_fp_tmp_old_inv * _flow_dirn[i] * _dt_substep;
+    _dpk2_dflowrate[i] = _dpk2_dfpinv * _dfpinv_dflowrate[i];
   }
 
   DenseMatrix<Real> dflowrate_dflowrate;
@@ -418,6 +419,17 @@ FiniteStrainHyperElasticViscoPlastic::computePK2StressAndDerivative()
 {
   computeElasticStrain();
   _pk2[_qp] = _elasticity_tensor[_qp] * _ee;
+
+  _dce_dfe.zero();
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+      {
+        _dce_dfe(i, j, k, i) = _dce_dfe(i, j, k, i) + _fe(k, j);
+        _dce_dfe(i, j, k, j) = _dce_dfe(i, j, k, j) + _fe(k, i);
+      }
+
+  _dpk2_dfe = _dpk2_dce * _dce_dfe;
 }
 
 void
@@ -456,29 +468,19 @@ FiniteStrainHyperElasticViscoPlastic::computeElasticPlasticDeformGrad()
     val += _flow_rate(i) * _flow_dirn[i] * _dt_substep;
 
   _fp_tmp_inv = _fp_tmp_old_inv * (iden - val);
-  _fp_tmp_inv = std::pow(_fp_tmp_inv.det(),-1.0/3.0) * _fp_tmp_inv;
+  _fp_tmp_inv = std::pow(_fp_tmp_inv.det(), -1.0/3.0) * _fp_tmp_inv;
   _fe = _dfgrd_tmp * _fp_tmp_inv;
 }
 
 void
 FiniteStrainHyperElasticViscoPlastic::computeDpk2Dfpinv()
 {
-  RankFourTensor dce_dfe;
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-      {
-        dce_dfe(i,j,k,i) = dce_dfe(i,j,k,i) + _fe(k,j);
-        dce_dfe(i,j,k,j) = dce_dfe(i,j,k,j) + _fe(k,i);
-      }
+        _dfe_dfpinv(i, j, k, j) = _dfgrd_tmp(i, k);
 
-  RankFourTensor dfe_dfpinv;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        dfe_dfpinv(i,j,k,j) = _dfgrd_tmp(i,k);
-
-  _dpk2_dfpinv = _dpk2_dce * dce_dfe * dfe_dfpinv;
+  _dpk2_dfpinv = _dpk2_dce * _dce_dfe * _dfe_dfpinv;
 }
 
 Real
@@ -486,8 +488,8 @@ FiniteStrainHyperElasticViscoPlastic::computeNorm(const std::vector<Real> & var)
 {
   Real val = 0.0;
   for (unsigned int i = 0; i < var.size(); ++i)
-    val += std::pow(var[i],2.0);
-  return std::pow(val,0.5);
+    val += std::pow(var[i], 2.0);
+  return std::pow(val, 0.5);
 }
 
 void
@@ -503,35 +505,32 @@ FiniteStrainHyperElasticViscoPlastic::updateFlowRate()
 void
 FiniteStrainHyperElasticViscoPlastic::computeQpJacobian()
 {
-  RankTwoTensor pk2fet, fepk2;
-  RankFourTensor dcedfe, dfedf, tan_mod;
+  _tan_mod = _fe.mixedProductIkJl(_fe) * _dpk2_dfe;
+  _pk2_fet = _pk2[_qp] * _fe.transpose();
+  _fe_pk2 = _fe * _pk2[_qp];
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+      {
+        _tan_mod(i, j, i, l) += _pk2_fet(l, j);
+        _tan_mod(i, j, j, l) += _fe_pk2(i, l);
+      }
+
+  _tan_mod /= _fe.det();
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+        _dfe_df(i, j, i, l) =  _fp_tmp_inv(l, j);
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-      {
-        dcedfe(i,j,k,i) += _fe(k,j);
-        dcedfe(i,j,k,j) += _fe(k,i);
-      }
+        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+          _df_dstretch_inc(i, j, k, l) = _rotation_increment[_qp](i, k) * _deformation_gradient_old[_qp](l, j);
 
-  tan_mod = _fe.mixedProductIkJl(_fe) * _dpk2_dce * dcedfe;
-  pk2fet = _pk2[_qp] * _fe.transpose();
-  fepk2 = _fe * _pk2[_qp];
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-      {
-        tan_mod(i,j,i,l) += pk2fet(l,j);
-        tan_mod(i,j,j,l) += fepk2(i,l);
-      }
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-        dfedf(i,j,i,l) =  _fp_tmp_inv(l,j);
-
-  _Jacobian_mult[_qp] = tan_mod * dfedf;
+  _Jacobian_mult[_qp] = _tan_mod * _dfe_df * _df_dstretch_inc;
 }
 
 bool
@@ -598,7 +597,7 @@ FiniteStrainHyperElasticViscoPlastic::computeIntVarDerivatives()
     for (unsigned int j = 0; j < _num_int_var_rate_uos; ++j)
     {
       _int_var_uo[i]->computeDerivative(_qp, _dt_substep, _int_var_rate_uo_names[j], val);
-      _dintvar_dintvarrate(i ,j) = val;
+      _dintvar_dintvarrate(i, j) = val;
     }
 
   _dintvar_dintvar.zero();
@@ -608,7 +607,7 @@ FiniteStrainHyperElasticViscoPlastic::computeIntVarDerivatives()
     {
       if (i == j) _dintvar_dintvar(i, j) = 1;
       for (unsigned int k = 0; k < _num_int_var_rate_uos; ++k)
-        _dintvar_dintvar(i, j) -= _dintvar_dintvarrate(i ,k) * _dintvarrate_dintvar(k ,j);
+        _dintvar_dintvar(i, j) -= _dintvar_dintvarrate(i, k) * _dintvarrate_dintvar(k, j);
     }
 
   for (unsigned int i = 0; i < _num_flow_rate_uos; ++i)

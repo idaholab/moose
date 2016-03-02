@@ -795,9 +795,6 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
         }
 }
 
-
-
-
 void
 RankFourTensor::fillPrincipalFromInputVector(const std::vector<Real> & input)
 {
@@ -815,4 +812,19 @@ RankFourTensor::fillPrincipalFromInputVector(const std::vector<Real> & input)
   _vals[2][2][0][0] = input[6];
   _vals[2][2][1][1] = input[7];
   _vals[2][2][2][2] = input[8];
+}
+
+RankTwoTensor
+RankFourTensor::innerProductTranspose(const RankTwoTensor & b) const
+{
+  RealTensorValue result;
+  const RankFourTensor & a = *this;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(k,l) += a(i,j,k,l) * b(i,j);
+
+  return result;
 }

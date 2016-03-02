@@ -222,6 +222,9 @@ public:
    */
   int matrixInversion(std::vector<PetscScalar> & A, int n) const;
 
+  /// Inner product of the major transposed tensor with a rank two tensor
+  RankTwoTensor innerProductTranspose(const RankTwoTensor &) const;
+
 protected:
   /// Dimensionality of rank-four tensor
   static const unsigned int N = LIBMESH_DIM;
