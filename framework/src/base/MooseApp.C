@@ -867,7 +867,7 @@ MooseApp::header() const
 void
 MooseApp::addMeshModifier(const std::string & modifier_name, const std::string & name, InputParameters parameters)
 {
-  MooseSharedPointer<MeshModifier> mesh_modifier = MooseSharedNamespace::static_pointer_cast<MeshModifier>(_factory.create(modifier_name, name, parameters));
+  MooseSharedPointer<MeshModifier> mesh_modifier = _factory.create<MeshModifier>(modifier_name, name, parameters);
 
   _mesh_modifiers.insert(std::make_pair(MooseUtils::shortName(name), mesh_modifier));
 }

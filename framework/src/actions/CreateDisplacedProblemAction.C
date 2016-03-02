@@ -50,7 +50,7 @@ CreateDisplacedProblemAction::act()
     object_params.set<FEProblem *>("_fe_problem") = _problem.get();
 
     // Create the object
-    MooseSharedPointer<DisplacedProblem> disp_problem = MooseSharedNamespace::dynamic_pointer_cast<DisplacedProblem>(_factory.create("DisplacedProblem", "DisplacedProblem", object_params));
+    MooseSharedPointer<DisplacedProblem> disp_problem = _factory.create<DisplacedProblem>("DisplacedProblem", "DisplacedProblem", object_params);
 
     // Add the Displaced Problem to FEProblem
     _problem->addDisplacedProblem(disp_problem);

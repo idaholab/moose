@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "Factory.h"
-#include "MooseApp.h"
 #include "InfixIterator.h"
 #include "InputParameterWarehouse.h"
 // Just for testing...
@@ -50,8 +49,11 @@ Factory::getValidParams(const std::string & obj_name)
 }
 
 MooseObjectPtr
-Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
+Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */, bool print_deprecated /* =true */)
 {
+  if (print_deprecated)
+    mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
+
   // Pointer to the object constructor
   std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
 

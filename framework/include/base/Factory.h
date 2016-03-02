@@ -207,13 +207,37 @@ public:
   InputParameters getValidParams(const std::string & name);
 
   /**
+   * Build an object (must be registered) - THIS METHOD IS DEPRECATED (Use create<T>())
+   * @param obj_name Type of the object being constructed
+   * @param name Name for the object
+   * @param parameters Parameters this object should have
+   * @param tid The thread id that this copy will be created for
+   * @param print_deprecated controls the deprecated message
+   * @return The created object
+   */
+  MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters,
+                                         THREAD_ID tid = 0, bool print_deprecated = true);
+
+  /**
    * Build an object (must be registered)
    * @param obj_name Type of the object being constructed
    * @param name Name for the object
    * @param parameters Parameters this object should have
+   * @param tid The thread id that this copy will be created for
    * @return The created object
    */
-  MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
+  template<typename T>
+  MooseSharedPointer<T>
+  create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0)
+  {
+    MooseSharedPointer<T> new_object = MooseSharedNamespace::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
+    if (!new_object)
+      mooseError("We expected to create an object of type '" + demangle(typeid(T).name())
+                 + "'.\nInstead we received a parameters object for type '" + obj_name
+                 + "'.\nDid you call the wrong \"add\" method in your Action?");
+
+    return new_object;
+  }
 
   /**
    * Calling this object with a non-empty vector will cause this factory to ignore registrations from any object

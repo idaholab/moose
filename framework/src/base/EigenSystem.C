@@ -44,7 +44,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
       {
         // EigenKernel
         parameters.set<bool>("implicit") = true;
-        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters, tid));
+        MooseSharedPointer<KernelBase> ekernel = _factory.create<KernelBase>(kernel_name, name, parameters, tid);
         if (parameters.get<bool>("eigen"))
           markEigenVariable(parameters.get<NonlinearVariableName>("variable"));
         _kernels.addObject(ekernel, tid);
@@ -55,7 +55,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
         parameters.set<bool>("implicit") = false;
         std::string old_name(name + "_old");
 
-        MooseSharedPointer<KernelBase> ekernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, old_name, parameters, tid));
+        MooseSharedPointer<KernelBase> ekernel = _factory.create<KernelBase>(kernel_name, old_name, parameters, tid);
         _eigen_var_names.insert(parameters.get<NonlinearVariableName>("variable"));
         _kernels.addObject(ekernel, tid);
         ++_eigen_kernel_counter;
@@ -64,7 +64,7 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
     else // Standard nonlinear system kernel
     {
       // Create the kernel object via the factory
-      MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters, tid));
+      MooseSharedPointer<KernelBase> kernel = _factory.create<KernelBase>(kernel_name, name, parameters, tid);
       _kernels.addObject(kernel, tid);
     }
   }

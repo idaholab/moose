@@ -138,7 +138,7 @@ SetupMeshAction::act()
 {
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
-    _mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "mesh", _moose_object_pars));
+    _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
   else if (_current_task == "init_mesh")
   {
     _mesh->init();
@@ -146,7 +146,7 @@ SetupMeshAction::act()
     if (isParamValid("displacements"))
     {
       // Create the displaced mesh
-      _displaced_mesh = MooseSharedNamespace::static_pointer_cast<MooseMesh>(_factory.create(_type, "displaced_mesh", _moose_object_pars));
+      _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);
       _displaced_mesh->init();
 
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");

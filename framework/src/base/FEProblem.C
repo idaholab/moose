@@ -1173,7 +1173,7 @@ FEProblem::addFunction(std::string type, const std::string & name, InputParamete
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<Function> func = MooseSharedNamespace::static_pointer_cast<Function>(_factory.create(type, name, parameters, tid));
+    MooseSharedPointer<Function> func = _factory.create<Function>(type, name, parameters, tid);
     _functions.addObject(func, tid);
   }
 }
@@ -1496,7 +1496,7 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
     {
       MooseVariable & var = getVariable(tid, var_name);
       parameters.set<SystemBase *>("_sys") = &var.sys();
-      MooseSharedPointer<InitialCondition> ic = MooseSharedNamespace::static_pointer_cast<InitialCondition>(_factory.create(ic_name, name, parameters, tid));
+      MooseSharedPointer<InitialCondition> ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
       _ics.addObject(ic, tid);
     }
   }
@@ -1506,7 +1506,7 @@ FEProblem::addInitialCondition(const std::string & ic_name, const std::string & 
   {
     MooseVariableScalar & var = getScalarVariable(0, var_name);
     parameters.set<SystemBase *>("_sys") = &var.sys();
-    MooseSharedPointer<ScalarInitialCondition> ic = MooseSharedNamespace::static_pointer_cast<ScalarInitialCondition>(_factory.create(ic_name, name, parameters));
+    MooseSharedPointer<ScalarInitialCondition> ic = _factory.create<ScalarInitialCondition>(ic_name, name, parameters);
     _scalar_ics.addObject(ic);
   }
 
@@ -1612,7 +1612,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     // General Block/Boundary Material object
-    MooseSharedPointer<Material> material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, name, parameters, tid));
+    MooseSharedPointer<Material> material = _factory.create<Material>(mat_name, name, parameters, tid);
     _materials.addObject(material, tid);
 
     if (!material->boundaryRestricted())
@@ -1626,14 +1626,14 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       // face material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::FACE_MATERIAL_DATA;
       object_name = name + "_face";
-      MooseSharedPointer<Material> face_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, current_parameters, tid));
+      MooseSharedPointer<Material> face_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
       _face_materials.addObject(face_material, tid);
 
       // neighbor material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::NEIGHBOR_MATERIAL_DATA;
       current_parameters.set<bool>("_neighbor") = true;
       object_name = name + "_neighbor";
-      MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(_factory.create(mat_name, object_name, current_parameters, tid));
+      MooseSharedPointer<Material> neighbor_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
       _neighbor_materials.addObject(neighbor_material, tid);
 
       // link enabled parameter of face and neighbor materials
@@ -1903,7 +1903,7 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    MooseSharedPointer<UserObject> user_object = MooseSharedNamespace::static_pointer_cast<UserObject>(_factory.create(user_object_name, name, parameters, tid));
+    MooseSharedPointer<UserObject> user_object = _factory.create<UserObject>(user_object_name, name, parameters, tid);
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     {
       MooseSharedPointer<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(user_object);
@@ -2533,7 +2533,7 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<Indicator> indicator = MooseSharedNamespace::static_pointer_cast<Indicator>(_factory.create(indicator_name, name, parameters, tid));
+    MooseSharedPointer<Indicator> indicator = _factory.create<Indicator>(indicator_name, name, parameters, tid);
 
     MooseSharedPointer<InternalSideIndicator> isi = MooseSharedNamespace::dynamic_pointer_cast<InternalSideIndicator>(indicator);
     if (isi)
@@ -2562,7 +2562,7 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<Marker> marker = MooseSharedNamespace::static_pointer_cast<Marker>(_factory.create(marker_name, name, parameters, tid));
+    MooseSharedPointer<Marker> marker = _factory.create<Marker>(marker_name, name, parameters, tid);
     _markers.addObject(marker, tid);
   }
 }
@@ -2586,9 +2586,7 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
 
-  MooseSharedPointer<MultiApp> multi_app = MooseSharedNamespace::dynamic_pointer_cast<MultiApp>(_factory.create(multi_app_name, name, parameters));
-  if (!multi_app)
-    mooseError("Unknown MultiApp type: " << multi_app_name);
+  MooseSharedPointer<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
 
   _multi_apps.addObject(multi_app);
 
@@ -2794,9 +2792,7 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
   }
 
   // Create the Transfer objects
-  MooseSharedPointer<Transfer> transfer = MooseSharedNamespace::dynamic_pointer_cast<Transfer>(_factory.create(transfer_name, name, parameters));
-  if (!transfer)
-    mooseError("Unknown Transfer type: " << transfer_name);
+  MooseSharedPointer<Transfer> transfer = _factory.create<Transfer>(transfer_name, name, parameters);
 
   // Add MultiAppTransfer object
   MooseSharedPointer<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
@@ -3250,7 +3246,7 @@ FEProblem::addPredictor(const std::string & type, const std::string & name, Inpu
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
-  MooseSharedPointer<Predictor> predictor = MooseSharedNamespace::static_pointer_cast<Predictor>(_factory.create(type, name, parameters));
+  MooseSharedPointer<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
   _nl.setPredictor(predictor);
 }
 

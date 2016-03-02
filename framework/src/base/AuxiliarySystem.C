@@ -144,7 +144,7 @@ void
 AuxiliarySystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
-  _time_integrator = MooseSharedNamespace::static_pointer_cast<TimeIntegrator>(_factory.create(type, name, parameters));
+  _time_integrator = _factory.create<TimeIntegrator>(type, name, parameters);
 }
 
 void
@@ -154,7 +154,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & 
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<AuxKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxKernel>(_factory.create(kernel_name, name, parameters, tid));
+    MooseSharedPointer<AuxKernel> kernel = _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
     if (kernel->isNodal())
       _nodal_aux_storage.addObject(kernel, tid);
     else
@@ -167,7 +167,7 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::str
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<AuxScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<AuxScalarKernel>(_factory.create(kernel_name, name, parameters, tid));
+    MooseSharedPointer<AuxScalarKernel> kernel = _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);
     _aux_scalar_storage.addObject(kernel, tid);
   }
 }

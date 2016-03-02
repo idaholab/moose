@@ -71,8 +71,7 @@ AStableDirk4::AStableDirk4(const InputParameters & parameters) :
     params.set<FEProblem *>("_fe_problem") = &_fe_problem;
     params.set<SystemBase *>("_sys") = &_sys;
 
-    _bootstrap_method =
-      MooseSharedNamespace::dynamic_pointer_cast<LStableDirk4>(factory.create("LStableDirk4", name() + "_bootstrap", params));
+    _bootstrap_method = factory.create<LStableDirk4>("LStableDirk4", name() + "_bootstrap", params);
   }
 }
 

@@ -12,28 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
-#include "AddControlAction.h"
+#include "BadAddKernelAction.h"
 #include "FEProblem.h"
-#include "Factory.h"
-#include "Control.h"
 
 template<>
-InputParameters validParams<AddControlAction>()
+InputParameters validParams<BadAddKernelAction>()
 {
-  InputParameters params = validParams<MooseObjectAction>();
-  return params;
+  return validParams<MooseObjectAction>();
 }
 
-AddControlAction::AddControlAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
+BadAddKernelAction::BadAddKernelAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
 void
-AddControlAction::act()
+BadAddKernelAction::act()
 {
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
-  MooseSharedPointer<Control> control = _factory.create<Control>(_type, _name, _moose_object_pars);
-  _problem->getControlWarehouse().addObject(control);
+  // Wrong method being called for adding *Kernel* object
+  _problem->addScalarKernel(_type, _name, _moose_object_pars);
 }
