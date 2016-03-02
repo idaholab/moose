@@ -44,9 +44,7 @@ Real
 SideAverageValue::getValue()
 {
   Real integral = SideIntegralVariablePostprocessor::getValue();
-
   gatherSum(_volume);
-
   return integral / _volume;
 }
 
@@ -58,4 +56,3 @@ SideAverageValue::threadJoin(const UserObject & y)
   const SideAverageValue & pps = static_cast<const SideAverageValue &>(y);
   _volume += pps._volume;
 }
-

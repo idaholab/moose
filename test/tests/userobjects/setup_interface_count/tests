@@ -1,0 +1,39 @@
+# The following tests are designed to count how often the setup methods are called (initialSetup, etc.),
+# which requires that the threading be disabeled because the counts can differ.
+#
+# Also, GeneralUserObject must also be restricted for a certain MPI because their methods will be called
+# on each processor, since they are not distributed in any fashion.
+[Tests]
+  [./GeneralUserObject]
+    type = CSVDiff
+    input = general.i
+    csvdiff = general_out.csv
+    max_threads = 1
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+  [./ElementUserObject]
+    type = CSVDiff
+    input = element.i
+    csvdiff = element_out.csv
+    max_threads = 1
+  [../]
+  [./SideUserObject]
+    type = CSVDiff
+    input = side.i
+    csvdiff = side_out.csv
+    max_threads = 1
+  [../]
+  [./InternalSideUserObject]
+    type = CSVDiff
+    input = internal_side.i
+    csvdiff = internal_side_out.csv
+    max_threads = 1
+  [../]
+  [./NodalSideUserObject]
+    type = CSVDiff
+    input = nodal.i
+    csvdiff = nodal_out.csv
+    max_threads = 1
+  [../]
+[]

@@ -19,6 +19,7 @@
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
+#include "UserObject.h"
 
 // libMesh
 #include "libmesh/meshfree_interpolation.h"
