@@ -71,6 +71,13 @@
     prereq = 'Q2P01'
     csvdiff = 'q2p01.csv'
   [../]
+  [./Q2P01_PJFNK]
+    type = 'CSVDiff'
+    input = 'q2p01.i'
+    prereq = 'Q2P01 Q2P01_permchange'
+    cli_args = 'Preconditioning/active="" Executioner/solve_type=PJFNK'
+    csvdiff = 'q2p01.csv'
+  [../]
 
   [./except01]
     type = 'RunException'
