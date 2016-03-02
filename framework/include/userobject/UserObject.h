@@ -50,6 +50,11 @@ public:
   virtual ~UserObject();
 
   /**
+   * Execute method.
+   */
+  virtual void execute() = 0;
+
+  /**
    * Called before execute() is ever called so that data can be cleared.
    */
   virtual void initialize() = 0;
@@ -83,6 +88,13 @@ public:
    * Transfer to transfer information from one domain to another.
    */
   virtual Real spatialValue(const Point & /*p*/) const { mooseError(name() << " does not satisfy the Spatial UserObject interface!"); }
+
+  /**
+   * Must override.
+   *
+   * @param uo The UserObject to be joined into _this_ object.  Take the data from the uo object and "add" it into the data for this object.
+   */
+  virtual void threadJoin(const UserObject & uo) = 0;
 
   /**
    * Gather the parallel sum of the variable passed in. It takes care of values across all threads and CPUs (we DO hybrid parallelism!)

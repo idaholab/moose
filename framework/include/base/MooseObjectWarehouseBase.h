@@ -208,7 +208,8 @@ MooseObjectWarehouseBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID t
   // Boundary Restricted
   if (bnd && bnd->boundaryRestricted())
   {
-    for (std::set<BoundaryID>::const_iterator it = bnd->boundaryIDs().begin(); it != bnd->boundaryIDs().end(); ++it)
+    const std::set<BoundaryID> & ids = bnd->boundaryIDs();
+    for (std::set<BoundaryID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     {
       _all_boundary_objects[tid][*it].push_back(object);
       if (enabled)
@@ -219,18 +220,7 @@ MooseObjectWarehouseBase<T>::addObject(MooseSharedPointer<T> object, THREAD_ID t
   // Block Restricted
   else if (blk)
   {
-    // Get a copy of the Subdomains on which this object is active
-    std::set<SubdomainID> ids = blk->blockIDs();
-
-    // If ANY_BLOCK_ID is in the list, then it is not block restricted, thus the active subdomains is every id from the mesh
-    // (Note: BlockRestrictable::blockRestricted() doesn't work correctly with YAK, just looking for ANY_BLOCK_ID does.)
-    if (ids.find(Moose::ANY_BLOCK_ID) != ids.end() )
-    {
-      ids = blk->meshBlockIDs();
-      ids.insert(Moose::ANY_BLOCK_ID); // insert to allow for hasActiveBlockObjects(ANY_BLOCK_ID) to work correctly
-    }
-
-    // Store the object for each domain on which it is active
+    const std::set<SubdomainID> & ids = blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
     for (std::set<SubdomainID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     {
       _all_block_objects[tid][*it].push_back(object);
@@ -367,9 +357,7 @@ MooseObjectWarehouseBase<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid
 {
   checkThreadID(tid);
   typename std::map<SubdomainID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_block_objects[tid].find(id);
-  if (iter != _active_block_objects[tid].end() && !iter->second.empty())
-    return true;
-  return false;
+  return iter != _active_block_objects[tid].end();
 }
 
 
@@ -392,9 +380,7 @@ MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID t
 {
   checkThreadID(tid);
   typename std::map<BoundaryID, std::vector<MooseSharedPointer<T> > >::const_iterator iter = _active_boundary_objects[tid].find(id);
-  if (iter != _active_boundary_objects[tid].end() && !iter->second.empty())
-    return true;
-  return false;
+  return iter != _active_boundary_objects[tid].end();
 }
 
 
