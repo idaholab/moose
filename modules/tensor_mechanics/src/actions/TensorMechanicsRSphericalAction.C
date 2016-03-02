@@ -25,8 +25,7 @@ InputParameters validParams<TensorMechanicsRSphericalAction>()
 }
 
 TensorMechanicsRSphericalAction::TensorMechanicsRSphericalAction(const InputParameters & params) :
-    Action(params),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
+    Action(params)
 {
 }
 
@@ -57,8 +56,8 @@ TensorMechanicsRSphericalAction::act()
 
   for (unsigned int i = 0; i < dim; ++i)
   {
-    // Create kernal name dependent on the displacement variable
-    std::string kernel_name = "TensorMechanicsRSpherical" + _base_name + Moose::stringify(i);
+    // Create kernel name dependent on the displacement variable
+    std::string kernel_name = "TensorMechanicsRSpherical_" + Moose::stringify(i);
 
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];

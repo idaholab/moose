@@ -20,10 +20,6 @@ public:
   TensorMechanicsRSphericalAction(const InputParameters & params);
 
   virtual void act();
-
-private:
-  /// Base name for the kernels + components used in the model
-  std::string _base_name;
 };
 
 #endif //TENSORMECHANICSRSPHERICALACTION_H

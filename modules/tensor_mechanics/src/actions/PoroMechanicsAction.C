@@ -9,6 +9,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<PoroMechanicsAction>()
@@ -32,7 +33,6 @@ PoroMechanicsAction::act()
   std::vector<NonlinearVariableName> displacements = getParam<std::vector<NonlinearVariableName> >("displacements");
   unsigned int dim = displacements.size();
 
-
   // all the kernels added below have porepressure as a coupled variable
   // add this to the kernel's params
   std::string type("PoroMechanicsCoupling");
@@ -41,19 +41,14 @@ PoroMechanicsAction::act()
   params.addCoupledVar("porepressure", "");
   params.set<std::vector<VariableName> >("porepressure") = std::vector<VariableName>(1, pp_var);
 
-
   // now add the kernels
-  std::string short_name = "PoroMechanics";
   for (unsigned int i = 0; i < dim; ++i)
   {
-    std::stringstream name;
-    name << short_name;
-    name << i;
+    std::string kernel_name = "PoroMechanics" + Moose::stringify(i);
 
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
 
-    _problem->addKernel(type, name.str(), params);
+    _problem->addKernel(type, kernel_name, params);
   }
 }
-

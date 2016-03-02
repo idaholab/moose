@@ -20,9 +20,6 @@ public:
   PoroMechanicsAction(const InputParameters & params);
 
   virtual void act();
-
-private:
-
 };
 
 #endif //POROMECHANICSACTION_H
