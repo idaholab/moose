@@ -140,7 +140,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
     {
       Moose::err << iter_output.str();
     }
-    mooseError("Max sub-newton iteration hit during nonlinear constitutive model solve!");
+    mooseError("Max sub-newton iteration hit during nonlinear constitutive model solve! (" << _name << ")");
   }
 
   // compute inelastic and elastic strain increments (avoid potential divide by zero - how should this be done)?
@@ -163,4 +163,3 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
   computeStressFinalize(qp, inelastic_strain_increment);
 
 }
-

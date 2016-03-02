@@ -9,6 +9,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<PressureAction>()
@@ -73,10 +74,8 @@ PressureAction::act()
   //Create pressure BCs
   for (unsigned int i = 0; i < dim; ++i)
   {
-    std::stringstream name;
-    name << _name;
-    name << "_";
-    name << i;
+    //Create unique kernel name for each of the components
+    std::string unique_kernel_name = _kernel_name + "_" + _name + "_" + Moose::stringify(i);
 
     InputParameters params = _factory.getValidParams(_kernel_name);
 
@@ -94,6 +93,6 @@ PressureAction::act()
     if (_has_save_in_vars[i])
       params.set<std::vector<AuxVariableName> >("save_in") = _save_in_vars[i];
 
-    _problem->addBoundaryCondition(_kernel_name, name.str(), params);
+    _problem->addBoundaryCondition(_kernel_name, unique_kernel_name, params);
   }
 }

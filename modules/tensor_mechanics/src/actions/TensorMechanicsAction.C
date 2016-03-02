@@ -9,6 +9,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<TensorMechanicsAction>()
@@ -67,8 +68,7 @@ TensorMechanicsAction::act()
 
 
   // Retain this code 'as is' because StressDivergenceTensors inherits from Kernel.C
-  std::vector<std::vector<AuxVariableName> > save_in;
-  save_in.resize(dim);
+  std::vector<std::vector<AuxVariableName> > save_in(dim);
 
   if (isParamValid("save_in_disp_x"))
     save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
@@ -91,19 +91,15 @@ TensorMechanicsAction::act()
   if (isParamValid("base_name"))
     params.set<std::string>("base_name") = getParam<std::string>("base_name");
 
-  std::string short_name = "TensorMechanics";
-
   for (unsigned int i = 0; i < dim; ++i)
   {
-    std::stringstream name;
-    name << short_name;
-    name << i;
+    std::string kernel_name = "TensorMechanics_" + Moose::stringify(i);
 
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
     params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];
 
-    addkernel(name.str(), params);
+    addkernel(kernel_name, params);
   }
 }
 
