@@ -189,6 +189,7 @@
 
 
 [Preconditioning]
+  active = 'andy'
   [./andy]
     type = SMP
     full = true
