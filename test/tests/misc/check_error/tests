@@ -530,4 +530,10 @@
     input = time_integrator_error.i
     expect_err = 'You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator.'
   [../]
+
+  [./calling_wrong_feproblem_method]
+    type = 'RunException'
+    input = bad_kernel_action.i
+    expect_err = "We expected to create an object of type '\w+?'\.\nInstead we received a parameters object for type '\w+?'."
+  [../]
 []

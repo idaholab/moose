@@ -47,8 +47,7 @@ SetupPredictorAction::act()
 
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
-    MooseSharedPointer<Predictor> predictor = MooseSharedNamespace::static_pointer_cast<Predictor>(_factory.create(_type, "Predictor", _moose_object_pars));
+    MooseSharedPointer<Predictor> predictor = _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);
     _problem->getNonlinearSystem().setPredictor(predictor);
   }
 }
-

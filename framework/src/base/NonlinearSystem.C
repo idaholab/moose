@@ -524,7 +524,7 @@ NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string &
 {
   parameters.set<SystemBase *>("_sys") = this;
 
-  MooseSharedPointer<TimeIntegrator> ti = MooseSharedNamespace::static_pointer_cast<TimeIntegrator>(_factory.create(type, name, parameters));
+  MooseSharedPointer<TimeIntegrator> ti = _factory.create<TimeIntegrator>(type, name, parameters);
   _time_integrator = ti;
 }
 
@@ -534,7 +534,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     // Create the kernel object via the factory and add to warehouse
-    MooseSharedPointer<KernelBase> kernel = MooseSharedNamespace::static_pointer_cast<KernelBase>(_factory.create(kernel_name, name, parameters, tid));
+    MooseSharedPointer<KernelBase> kernel = _factory.create<KernelBase>(kernel_name, name, parameters, tid);
     _kernels.addObject(kernel, tid);
 
     // Store time/non-time kernels separately
@@ -557,7 +557,7 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     // Create the kernel object via the factory and add to the warehouse
-    MooseSharedPointer<NodalKernel> kernel = MooseSharedNamespace::static_pointer_cast<NodalKernel>(_factory.create(kernel_name, name, parameters, tid));
+    MooseSharedPointer<NodalKernel> kernel = _factory.create<NodalKernel>(kernel_name, name, parameters, tid);
     _nodal_kernels[tid].addNodalKernel(kernel);
   }
 
@@ -570,8 +570,7 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
 void
 NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  MooseSharedPointer<ScalarKernel> kernel = MooseSharedNamespace::static_pointer_cast<ScalarKernel>(_factory.create(kernel_name, name, parameters));
-  mooseAssert(kernel, "Not a ScalarKernel object");
+  MooseSharedPointer<ScalarKernel> kernel = _factory.create<ScalarKernel>(kernel_name, name, parameters);
   _scalar_kernels.addObject(kernel);
 }
 
@@ -582,7 +581,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
   THREAD_ID tid = 0;
 
   // Create the object
-  MooseSharedPointer<BoundaryCondition> bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters, tid));
+  MooseSharedPointer<BoundaryCondition> bc = _factory.create<BoundaryCondition>(bc_name, name, parameters, tid);
 
   // Active BoundaryIDs for the object
   const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
@@ -623,7 +622,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
     for (tid = 1; tid < libMesh::n_threads(); tid++)
     {
       // Create the object
-      bc = MooseSharedNamespace::static_pointer_cast<BoundaryCondition>(_factory.create(bc_name, name, parameters, tid));
+      bc = _factory.create<BoundaryCondition>(bc_name, name, parameters, tid);
 
       // Active BoundaryIDs for the object
       const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
@@ -643,7 +642,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
 void
 NonlinearSystem::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
 {
-  MooseSharedPointer<Constraint> constraint = MooseSharedNamespace::static_pointer_cast<Constraint>(_factory.create(c_name, name, parameters));
+  MooseSharedPointer<Constraint> constraint = _factory.create<Constraint>(c_name, name, parameters);
   _constraints.addObject(constraint);
 
   if (constraint && constraint->addCouplingEntriesToJacobian())
@@ -655,7 +654,7 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<DiracKernel> kernel = MooseSharedNamespace::static_pointer_cast<DiracKernel>(_factory.create(kernel_name, name, parameters, tid));
+    MooseSharedPointer<DiracKernel> kernel = _factory.create<DiracKernel>(kernel_name, name, parameters, tid);
     _dirac_kernels.addObject(kernel, tid);
   }
 }
@@ -665,7 +664,7 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    MooseSharedPointer<DGKernel> dg_kernel = MooseSharedNamespace::static_pointer_cast<DGKernel>(_factory.create(dg_kernel_name, name, parameters, tid));
+    MooseSharedPointer<DGKernel> dg_kernel = _factory.create<DGKernel>(dg_kernel_name, name, parameters, tid);
     _dg_kernels.addObject(dg_kernel, tid);
   }
 
@@ -677,7 +676,7 @@ NonlinearSystem::addInterfaceKernel(std::string interface_kernel_name, const std
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    MooseSharedPointer<InterfaceKernel> interface_kernel = MooseSharedNamespace::static_pointer_cast<InterfaceKernel>(_factory.create(interface_kernel_name, name, parameters, tid));
+    MooseSharedPointer<InterfaceKernel> interface_kernel = _factory.create<InterfaceKernel>(interface_kernel_name, name, parameters, tid);
 
     const std::set<BoundaryID> & boundary_ids = interface_kernel->boundaryIDs();
     _vars[tid].addBoundaryVar(boundary_ids, &interface_kernel->variable());
@@ -694,7 +693,7 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 {
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
-    MooseSharedPointer<Damper> damper = MooseSharedNamespace::static_pointer_cast<Damper>(_factory.create(damper_name, name, parameters, tid));
+    MooseSharedPointer<Damper> damper = _factory.create<Damper>(damper_name, name, parameters, tid);
     _dampers.addObject(damper, tid);
   }
 }
@@ -702,7 +701,7 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 void
 NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
 {
-  MooseSharedPointer<Split> split = MooseSharedNamespace::static_pointer_cast<Split>(_factory.create(split_name, name, parameters));
+  MooseSharedPointer<Split> split = _factory.create<Split>(split_name, name, parameters);
   _splits.addObject(split);
 }
 

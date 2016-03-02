@@ -224,6 +224,7 @@
 #include "ApplyCoupledVariablesTestAction.h"
 #include "AddLotsOfDiffusion.h"
 #include "PrintMaterials.h"
+#include "BadAddKernelAction.h"
 
 // From MOOSE
 #include "AddVariableAction.h"
@@ -491,6 +492,7 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   // and add more
   registerAction(ConvDiffMetaAction, "meta_action");
   registerAction(AddLotsOfAuxVariablesAction, "meta_action");
+  registerAction(BadAddKernelAction, "add_kernel");
 
   registerAction(AddLotsOfDiffusion, "add_variable");
   registerAction(AddLotsOfDiffusion, "add_kernel");
@@ -504,8 +506,7 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(ApplyCoupledVariablesTestAction, "meta_action");
   syntax.registerActionSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
-
   syntax.registerActionSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
-
   syntax.registerActionSyntax("PrintMaterials", "PrintMaterials");
+  syntax.registerActionSyntax("BadAddKernelAction", "BadKernels/*");
 }

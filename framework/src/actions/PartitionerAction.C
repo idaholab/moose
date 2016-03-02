@@ -35,6 +35,6 @@ void
 PartitionerAction::act()
 {
   _mesh->setIsCustomPartitionerRequested(true);
-  MooseSharedPointer<MoosePartitioner> mp = MooseSharedNamespace::static_pointer_cast<MoosePartitioner>(_factory.create(_type, _name, _moose_object_pars));
+  MooseSharedPointer<MoosePartitioner> mp = _factory.create<MoosePartitioner>(_type, _name, _moose_object_pars);
   _mesh->setCustomPartitioner(mp.get());
 }
