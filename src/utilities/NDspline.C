@@ -18,7 +18,9 @@ NDSpline::NDSpline(std::string filename, std::vector<double> alfa, std::vector<d
 }
 
 NDSpline::NDSpline(std::string filename){
- // constructor for scattered data interpolation functions
+     /**
+     * constructor for scattered ND spline interpolation function
+     */
 
  readOrderedNDarray(filename, _dimensions, _discretizations, _values);
 
@@ -34,10 +36,16 @@ NDSpline::NDSpline(std::string filename){
 }
 
 NDSpline::NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta){
+   /**
+    * constructor for scattered ND spline interpolation function
+    */
         NDSpline_init(discretizations, values, alpha, beta);
 }
 
 void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta){
+    /**
+    * main constructor for scattered ND spline interpolation function
+    */
         _discretizations = discretizations;
         _values = values;
         _alpha = alpha;
@@ -55,12 +63,8 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
          for (int nDim=0; nDim<_dimensions; nDim++){
                  int length = _discretizations.at(nDim).size();
              _hj.push_back((_discretizations.at(nDim).at(length-1) - _discretizations.at(nDim).at(0))/(length-1));
-             //std::cerr << "dim " << nDim << ": _hj: " << _hj.at(nDim) << std::endl;
-
              _min_disc.push_back(_discretizations.at(nDim).at(0));
              _max_disc.push_back(_discretizations.at(nDim).at(length-1));
-
-             //std::cout << "nDim: " << nDim << " ; _min_disc.at(nDim).at(0): " <<  _min_disc.at(nDim) << " ; _max_disc.at(nDim): " << _max_disc.at(nDim) << std::endl;
          }
 
          _completed_init = true;
@@ -75,7 +79,11 @@ void NDSpline::NDSpline_init(std::vector< std::vector<double> > & discretization
               _cellDxs.push_back(_discretizations.at(i).at(_discretizations.at(i).size()-1)-_discretizations.at(i).at(0));
             }
 
-         std::cout << "ND spline completed initialization" << std::endl;
+         for (int i=0; i<_dimensions; i++){
+             _lowerBound.push_back(_cellPoint0.at(i));
+             _upperBound.push_back(_cellPoint0.at(i) + _cellDxs.at(i));
+         }
+         std::cout << "ND spline initialization completed " << std::endl;
 }
 
 
@@ -90,6 +98,9 @@ NDSpline::~NDSpline() {
 }
 
 double NDSpline::interpolateAt(std::vector<double> point_coordinate){
+    /**
+    * Method which calculates the interpolated value at coordinate x
+    */
  double interpolated_value;
 
  bool outcome = checkBoundaries(point_coordinate);
@@ -162,9 +173,7 @@ double NDSpline::spline_cartesian_interpolation(std::vector<double> point_coordi
 
   double product=1;
   for (int nDim=0; nDim<_dimensions; nDim++){
-   //u_k(double x, std::vector<double> & discretizations, double k)
    product *= u_k(point_coordinate.at(nDim), _discretizations.at(nDim), coordinates.at(nDim)+1);
-   //product *= u_k(point_coordinate.at(nDim), _discretizations.at(nDim).at(0), _hj.at(nDim), coordinates.at(nDim)+1);       //u_k(double x, double a, double h, double k)
   }
 
   interpolated_value += _spline_coefficients.at(i)*product;
@@ -174,10 +183,7 @@ double NDSpline::spline_cartesian_interpolation(std::vector<double> point_coordi
 
 void NDSpline::calculateCoefficients(){
  std::vector<int> loop_locator (_dimensions);
-
- //std::cerr << "calculateCoefficients" << std::endl;
  std::vector<double> coeff = fillArrayCoefficient(_dimensions, _values, loop_locator);
- //std::cerr << " done calculateCoefficients" << std::endl;
  _spline_coefficients = coeff;
 }
 
@@ -204,14 +210,8 @@ std::vector<double> NDSpline::fillArrayCoefficient(int n_dimensions, std::vector
    y.clear();
   }
  }
-
- // Create tensor-product
- //std::cerr << "Create tensor-product" << std::endl;
-
  std::vector<std::vector<double> > finalCoefficients = tensorProductInterpolation(tempCoefficients, _hj.at(n_dimensions-1), _alpha.at(n_dimensions-1), _beta.at(n_dimensions-1));
 
- // Adjust  Data
- //std::cerr << "Adjust data" << std::endl;
  std::vector<double> coefficients = coefficientRestructuring(finalCoefficients);
 
  tempCoefficients.clear();
@@ -287,31 +287,10 @@ void NDSpline::from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDd
 }
 
 
-void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing){
- // this function restructures a 1D vector into a 2D vector
- // example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
-
- if (oneDdata.size()%spacing == 0)
-  for (unsigned int i=0; i<oneDdata.size()/spacing; i++){
-   for (int j=0; j<spacing; j++)
-     twoDdata.at(i).at(j) = oneDdata.at(spacing*i+j);
-  }
- else
-  throw ("Error in from1Dto2Drestructuring: spacing value not a multiplier for oneDdata");
-}
-
-
-//double NDSpline::u_k(double x, double a, double h, double k){
-// // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
-// return phi((x-a)/h - (k-2));
-//}
-
 
 double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
   // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
-  //double up   = discretizations[0];
 
-  //double down = discretizations[discretizations.size()-1];
   int down=0;
 
   for(unsigned int n=0; n<discretizations.size(); n++){
@@ -335,22 +314,37 @@ double NDSpline::u_k(double x, std::vector<double> & discretizations, double k){
 
   double a = 0.0;
   double h = 1.0;
-  return phi((scaled_x-a)/h - (k-2));
+  return phi((scaled_x-a)/h - (k-2.0));
 
-  //return phi((x-discretizations[0])/(discretizations[1]-discretizations[0]) - (k-2));
+  //return phi((x-discretizations[0])/h - (k-2));
 }
 
 
 
+void NDSpline::from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing){
+    /**
+     * This function restructures a 1D vector into a 2D vector
+     * example: 1D [1,2,3,4,5,6] spacing=2 --> 2D restructuring [[1,2],[3,4],[5,6]]
+     */
+
+ if (oneDdata.size()%spacing == 0)
+  for (unsigned int i=0; i<oneDdata.size()/spacing; i++){
+   for (int j=0; j<spacing; j++)
+    twoDdata[i][j] = oneDdata[spacing*i+j];
+  }
+ else
+  throw ("Error in from1Dto2Drestructuring: spacing value not a multiplier for oneDdata");
+}
+
+
 double NDSpline::phi(double t){
  // defined in Christian Habermann, Fabian Kindermann, "Multidimensional Spline Interpolation: Theory and Applications", Computational Economics, Vol.30-2, pp 153-169 (2007) [http://link.springer.com/article/10.1007%2Fs10614-007-9092-4]
- double phi_value=0;
+ double phi_value=0.0;
 
- if ((std::abs(t)<=2) & (std::abs(t)>=1))
-  phi_value = std::pow(2-std::abs(t),3);
-
- if ((std::abs(t))<1)
-  phi_value = 4 - 6*std::pow(std::abs(t),2) + 3*std::pow(std::abs(t),3);
+ if (((fabs(t)-2.0)<=0.00001) & ((fabs(t)-1.0)>=0.00001))
+  phi_value = std::pow(2.0-fabs(t),3);
+ if ((fabs(t)-1.0)<0.00001)
+  phi_value = 4.0 - 6.0*std::pow(fabs(t),2) + 3.0*std::pow(fabs(t),3);
 
  return phi_value;
 }
@@ -478,36 +472,29 @@ bool NDSpline::checkBoundaries(std::vector<double> point){
    outcome = outcome && false;
  }
 
- //std::cout<<"Outcome Boundaries: " << outcome << std::endl;
-
  return outcome;
 }
 
 double NDSpline::U_K(double x, std::vector<double> & discretizations, double k){
-  //double up   = discretizations[0];
-  //double down = discretizations.at(discretizations.size()-1);
-  int down = 0;
 
-  for(unsigned int n=0; n<discretizations.size(); n++)
-    if (x>discretizations.at(n)) {
-      down = n;
-      break;
-    }
+        int down=0;
 
-  //up is never used
-  //for(int n=discretizations.size(); n<0; n--)
-  //  if (x<discretizations[n])
-  //    up = n;
+        for(unsigned int n=0; n<discretizations.size(); n++)
+                if (x>discretizations.at(n)){
+                        down = n;
+                        break;
+                }
 
-  double scaled_x = down + (x-discretizations.at((int)down))/(discretizations.at((int)down+1)-discretizations.at((int)down));
+        double scaled_x = (double)down + (x-discretizations.at(down))/(discretizations.at(down+1)-discretizations.at(down));
 
-  double a = 0.0;
-  double h = 1.0;
-  //double value = PHI((scaled_x-a)/h - (k-2.0));
+        double a = 0.0;
+        double h = 1.0;
 
-  double value = PHI((scaled_x-a)/h - (k-2.0)) * (discretizations.at(1)-discretizations.at(0));
+        return PHI((scaled_x-a)/h - (k-2.0)) * (discretizations.at(down+1)-discretizations.at(down));
 
-  return value;
+        //return PHI((scaled_x-a)/h - (k-2.0));
+
+        //return PHI((x-discretizations.at(0))/(discretizations.at(down+1)-discretizations.at(down)) - (k-2.0)) * (discretizations.at(down+1)-discretizations.at(down));
 }
 
 
@@ -530,6 +517,7 @@ double NDSpline::spline_cartesian_integration(std::vector<double> point_coordina
             }
             interpolated_value += _spline_coefficients.at(i)*product;
          }
+
          return interpolated_value;
 }
 
@@ -590,8 +578,6 @@ double NDSpline::spline_cartesian_inverse_marginal(double CDF,int marginal_varia
   }while(epsilon>precision);
 
   return x_np1;
-
-  //return 3.0;
 }
 
 double NDSpline::integralSpline(std::vector<double> point_coordinate){
@@ -629,65 +615,20 @@ double NDSpline::val6(double t){
 }
 
 double NDSpline::PHI(double t){
-        double PHI_value=-1;
+        double PHI_value=-1.0;
 
-        if (t<=-2.0)
+        if ((t+2.0)<0.00001)
                 PHI_value = val1(t);
-        else if ((t>-2.0) and (t<=-1.0))
+        else if (((t+2.0)>0.00001) and ((t+1.0)<=0.00001))
                 PHI_value = val2(t) - val2(-2.0);
-        else if ((t>-1.0) and (t<=-0.0))
+        else if (((t+1.0)>0.00001) and (t<=0.0))
                 PHI_value = val2(-1.0) - val2(-2.0) + val3(t) - val3(-1.0);
-        else if ((t>0.0) and (t<=1.0))
-                PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(t)-val4(0.0);
-        else if ((t>1.0) and (t<=2.0))
+        else if ((t>0.0) and ((t-1.0)<=0.00001))
+                PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(t) - val4(0.0);
+        else if (((t-1.0)>0.00001) and ((t-2.0)<=0.00001))
                 PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(1.0) - val4(0.0) + (val5(t)-val5(1.0));
-        else if (t>2.0)
+        else if (((t-2.0)>0.00001))
                 PHI_value = val2(-1.0) - val2(-2.0) + val3(0.0) - val3(-1.0) + val4(1.0) - val4(0.0) + val5(2.0)-val5(1.0) + (val6(t)-val6(2.0));
 
         return PHI_value;
 }
-
-//void NDSpline::iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data){
-// int numberOfCoefficients=1;
-// for (int i=nDim; i<_dimensions; i++)
-//  numberOfCoefficients *= _discretizations[i].size();
-//
-// std::vector<double> tempCoefficients;
-// std::vector<std::vector<double> > twoDcoefficients(numberOfCoefficients, std::vector<double> (_hj[nDim]+3,0));
-// std::vector<std::vector<double> > twoDdata;
-//
-// from1Dto2Drestructuring(twoDdata, _values, _hj[nDim]);
-//
-// for (int i=0; i<numberOfCoefficients; i++){
-//  getCoefficients(tempCoefficients, twoDdata[i], _hj[nDim], _alpha[nDim], _beta[nDim]);
-//  twoDcoefficients[i]=tempCoefficients;
-// }
-//
-// from2Dto1Drestructuring(twoDcoefficients, coefficients);
-//}
-
-
-
-//void NDSpline::initializeCoefficientsVector(){
-// int numberOfCoefficientsToStore = 1;
-//
-// for(int i=0; i<_dimensions; i++)
-//  numberOfCoefficientsToStore *= _discretizations[i].size() + 3;
-//
-// _spline_coefficients = std::vector<double>(numberOfCoefficientsToStore);
-//}
-
-//std::vector<double> NDSpline::NDinverseFunctionGrid(double F, double g){
-// generate RN in [0,1]
-// int seed = time(0);
-// boost::random::mt19937 rng;
-// rng.seed(seed);
-// boost::random::uniform_distribution<> dist(1, numberOfCells);
-//
-// int pickedCell = dist(rng)-1;
-//  std::vector<double> coordinate(_dimensions);
-//  for (int i=0; i<_dimensions; i++){
-//    coordinate.at(i) = spline_cartesian_inverse_marginal(F, i, _tolerance);
-//  }
-//  return coordinate;
-//}
