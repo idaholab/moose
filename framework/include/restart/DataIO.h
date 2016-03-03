@@ -129,8 +129,8 @@ dataStore(std::ostream & stream, T & v, void * /*context*/)
   #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
     static_assert( std::is_polymorphic<T>::value == false,
       "Cannot serialize a class that has virtual members!\nWrite a custom dataStore() template specialization!\n\n");
-    // static_assert( std::is_trivially_copyable<T>::value,
-    //   "Cannot serialize a class that is not trivially copyable!\nWrite a custom dataStore() template specialization!\n\n");
+    static_assert( std::is_trivially_copyable<T>::value || std::is_same<T, Point>::value,
+      "Cannot serialize a class that is not trivially copyable!\nWrite a custom dataStore() template specialization!\n\n");
   #endif
 
   // Moose::out<<"Generic dataStore"<<std::endl;
@@ -142,6 +142,14 @@ inline void
 dataStore(std::ostream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
   mooseError("Cannot store raw pointers as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
+}
+
+template<typename T, typename U>
+inline void
+dataStore(std::ostream & stream, std::pair<T, U> & p, void * context)
+{
+  dataStore(stream, p.first, context);
+  dataStore(stream, p.second, context);
 }
 
 template<typename T>
@@ -283,6 +291,14 @@ template<typename T>
 void dataLoad(std::istream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
   mooseError("Cannot load raw pointers as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
+}
+
+template<typename T, typename U>
+inline void
+dataLoad(std::istream & stream, std::pair<T, U> & p, void * context)
+{
+  dataLoad(stream, p.first, context);
+  dataLoad(stream, p.second, context);
 }
 
 template<typename T>
