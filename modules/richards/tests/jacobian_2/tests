@@ -157,6 +157,13 @@
     difference_tol = 1E10
   [../]
 
+  [./jn40]
+    type = 'PetscJacobianTester'
+    input = 'jn40.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
   [./jnQ2P]
     type = 'PetscJacobianTester'
     input = 'jnQ2P.i'
