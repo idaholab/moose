@@ -32,6 +32,14 @@
     csvdiff = 's_fu_01.csv'
     rel_err = 1.0E-5
   [../]
+  [./s_fu_01_pjfnk]
+    type = 'CSVDiff'
+    input = 's_fu_01.i'
+    csvdiff = 's_fu_01.csv'
+    cli_args = 'Preconditioning/active="" Executioner/solve_type=PJFNK'
+    prereq = s_fu_01
+    rel_err = 1.0E-5
+  [../]
   [./s_fu_03]
     type = 'CSVDiff'
     input = 's_fu_03.i'
@@ -133,5 +141,12 @@
     input = 'q2p01.i'
     cli_args = 'Postprocessors/left_water_out/fluid_relperm=RelPermWater Outputs/file_base=except09'
     expect_err = 'Q2PPiecewiseLinearSink: you must supply both of fluid_relperm and saturation if you wish to multiply by the relative permeaility'
+  [../]
+  [./except10]
+    type = 'RunException'
+    input = 's_fu_04.i'
+    cli_args = 'BCs/left_flux/area_pp=0 BCs/left_flux/pressures="0 2 4" BCs/left_flux/bare_fluxes="-1 0 1" Outputs/file_base=except10'
+    expect_err = 'RichardsPiecewiseLinearSink: deriv is nonzero, but area is zero!'
+    prereq = 's_fu_04'
   [../]
 []
