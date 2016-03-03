@@ -33,11 +33,11 @@ XFEM::XFEM (MooseApp & app) :
 XFEM::~XFEM ()
 {
   for (unsigned int i=0; i<_geometric_cuts.size(); ++i)
-  {
     delete _geometric_cuts[i];
-    _geometric_cuts[i] = NULL;
-  }
-  _geometric_cuts.clear();
+
+  for (std::map<unique_id_type, XFEMCutElem*>::iterator cemit = _cut_elem_map.begin();
+       cemit != _cut_elem_map.end(); ++cemit)
+    delete cemit->second;
 }
 
 void
@@ -53,13 +53,13 @@ XFEM::getCrackTipOrigin(std::map<unsigned int, const Elem* > & elem_id_crack_tip
   crack_front_points.clear();
   crack_front_points.resize(_elem_crack_origin_direction_map.size());
 
-  std::map<const Elem*, std::vector<Point> >::iterator mit1 = _elem_crack_origin_direction_map.begin();
   unsigned int crack_tip_index = 0;
   // This map is used to sort the order in _elem_crack_origin_direction_map such that every process has same order
   std::map<unsigned int, const Elem*> elem_id_map;
 
   int m = -1;
-  for (mit1 = _elem_crack_origin_direction_map.begin(); mit1 != _elem_crack_origin_direction_map.end(); mit1++)
+  for (std::map<const Elem*, std::vector<Point> >::iterator mit1 = _elem_crack_origin_direction_map.begin();
+       mit1 != _elem_crack_origin_direction_map.end(); ++mit1)
   {
     unsigned int elem_id = mit1->first->id();
     if (elem_id > 999999)
@@ -73,16 +73,16 @@ XFEM::getCrackTipOrigin(std::map<unsigned int, const Elem* > & elem_id_crack_tip
     }
   }
 
-  std::map<unsigned int, const Elem*> ::iterator mit2 = elem_id_map.begin();
 
-  for (; mit2 != elem_id_map.end(); mit2++)
+  for (std::map<unsigned int, const Elem*> ::iterator mit1 = elem_id_map.begin();
+       mit1 != elem_id_map.end(); mit1++)
   {
-    const Elem* elem = mit2->second;
-    mit1 = _elem_crack_origin_direction_map.find(elem);
-    if (mit1 != _elem_crack_origin_direction_map.end())
+    const Elem* elem = mit1->second;
+    std::map<const Elem*, std::vector<Point> >::iterator mit2 = _elem_crack_origin_direction_map.find(elem);
+    if (mit2 != _elem_crack_origin_direction_map.end())
     {
-      elem_id_crack_tip[crack_tip_index] = mit1->first;
-      crack_front_points[crack_tip_index] = (mit1->second)[0]; // [0] stores origin coordinates and [1] stores direction
+      elem_id_crack_tip[crack_tip_index] = mit2->first;
+      crack_front_points[crack_tip_index] = (mit2->second)[0]; // [0] stores origin coordinates and [1] stores direction
       crack_tip_index++;
     }
   }
@@ -237,9 +237,9 @@ void XFEM::initSolution(NonlinearSystem & nl, AuxiliarySystem & /*aux*/)
     {
       Node* new_node = getNodeFromUniqueID(nit->first);
       Node* parent_node = getNodeFromUniqueID(nit->second);
-      Point *new_point = new Point(*new_node);
-      Point *parent_point = new Point(*parent_node);
-      if (*new_point != *parent_point)
+      Point new_point(*new_node);
+      Point parent_point(*parent_node);
+      if (new_point != parent_point)
         mooseError("Points don't match");
       unsigned int new_node_dof = new_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
       unsigned int parent_node_dof = parent_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
@@ -525,8 +525,8 @@ bool
 XFEM::markCutEdgesByState(Real time)
 {
   bool marked_edges = false;
-  std::map<const Elem*, RealVectorValue>::iterator pmeit;
-  for (pmeit = _state_marked_elems.begin(); pmeit != _state_marked_elems.end(); ++pmeit)
+  for (std::map<const Elem*, RealVectorValue>::iterator pmeit = _state_marked_elems.begin();
+       pmeit != _state_marked_elems.end(); ++pmeit)
   {
     const Elem *elem = pmeit->first;
     RealVectorValue normal = pmeit->second;
@@ -885,8 +885,7 @@ XFEM::cutMeshWithEFA()
     unsigned int parent_id = NewNodes[i]->parent()->id();
 
     Node *parent_node = _mesh->node_ptr(parent_id);
-    Point *new_point = new Point(*parent_node);
-    Node *new_node = Node::build(*new_point,_mesh->n_nodes()).release();
+    Node *new_node = Node::build(*parent_node,_mesh->n_nodes()).release();
     new_node->processor_id() = parent_node->processor_id();
     _mesh->add_node(new_node);
     _new_node_to_parent_node[new_node->unique_id()] = parent_node->unique_id();
@@ -898,9 +897,7 @@ XFEM::cutMeshWithEFA()
     if (_mesh2)
     {
       const Node *parent_node2 = _mesh2->node_ptr(parent_id);
-
-      Point *new_point2 = new Point(*parent_node2);
-      Node *new_node2 = Node::build(*new_point2,_mesh2->n_nodes()).release();
+      Node *new_node2 = Node::build(*parent_node2,_mesh2->n_nodes()).release();
       new_node2->processor_id() = parent_node2->processor_id();
       _mesh2->add_node(new_node2);
 
