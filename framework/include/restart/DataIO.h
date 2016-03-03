@@ -24,6 +24,9 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/parallel.h"
+#ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
+#  include <type_traits>
+#endif
 
 // C++ includes
 #include <string>
@@ -123,6 +126,13 @@ template<typename T>
 inline void
 dataStore(std::ostream & stream, T & v, void * /*context*/)
 {
+  #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
+    static_assert( std::is_polymorphic<T>::value == false,
+      "Cannot serialize a class that has virtual members!\nWrite a custom dataStore() template specialization!\n\n");
+    // static_assert( std::is_trivially_copyable<T>::value,
+    //   "Cannot serialize a class that is not trivially copyable!\nWrite a custom dataStore() template specialization!\n\n");
+  #endif
+
   // Moose::out<<"Generic dataStore"<<std::endl;
   stream.write((char *) &v, sizeof(v));
 }
