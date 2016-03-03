@@ -1,13 +1,14 @@
 [Mesh]
   file = 3d-non-conf-2nd.e
-[]
 
-[MortarInterfaces]
-  [./middle]
-    master = 100
-    slave = 101
-    subdomain = 1000
+  [./MortarInterfaces]
+    [./middle]
+      master = 100
+      slave = 101
+      subdomain = 1000
+    [../]
   [../]
+
 []
 
 [Functions]
@@ -30,7 +31,7 @@
   [../]
 
   [./lm]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
     block = middle
   [../]

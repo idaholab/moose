@@ -23,7 +23,6 @@
     exodiff = 'non-conforming_out.e'
     max_parallel = 1
     max_threads = 1
-    deleted = true # Diffs 25% of the time in a significant way #1482
   [../]
 
   [./conforming-2nd-order]
@@ -41,6 +40,5 @@
     exodiff = 'non-conforming-2nd-order_out.e'
     max_parallel = 1
     max_threads = 1
-    deleted = true
   [../]
 []

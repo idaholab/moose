@@ -17,6 +17,15 @@
     compiler = 'GCC CLANG'
   [../]
 
+  [./non-conforming-2nd-order]
+    type = 'Exodiff'
+    input = 'non-conforming-2nd-order.i'
+    exodiff = 'non-conforming-2nd-order_out.e'
+    max_parallel = 1
+    max_threads = 1
+    compiler = 'GCC CLANG'
+  [../]
+
   [./non-conforming]
     type = 'Exodiff'
     input = 'non-conforming.i'
