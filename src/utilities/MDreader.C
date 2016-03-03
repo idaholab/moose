@@ -146,9 +146,9 @@ void readMatrix(const std::string filename, unsigned int & rows, unsigned int & 
 
     import_matrix_from_txt_file(filename,v,rows,columns);
 
-    for (int i=0;i<rows;i++){
+    for (unsigned int i=0;i<rows;i++){
      std::vector<double> temp;
-        for (int j=0;j<columns;j++)
+        for (unsigned int j=0;j<columns;j++)
          temp.push_back(v[i*columns+j]);
         matrix.push_back(temp);
     }

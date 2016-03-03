@@ -30,6 +30,12 @@
   requires_swig2 = True
  [../]
 
+ [./test_pca_index]
+  type = 'CrowPython'
+  input = 'test_pca_index.py'
+  requires_swig2 = True
+ [../]
+
  [./test_mvn_pca]
   type = 'CrowPython'
   input = 'test_mvn_pca.py'
@@ -60,4 +66,15 @@
   requires_swig2 = True
  [../]
 
+ [./test_svd_index]
+  type = 'CrowPython'
+  input = 'test_svd_index.py'
+  requires_swig2 = True
+ [../]
+
+ [./test_transformationMatrix_index]
+  type = 'CrowPython'
+  input = 'test_transformationMatrix_index.py'
+  requires_swig2 = True
+ [../]
 []
