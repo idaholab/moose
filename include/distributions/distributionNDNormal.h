@@ -52,16 +52,25 @@ public:
   void show_matrix(double *A, int n);
   // used to obtain the information from the svd decomposition
   std::vector<double> getSingularValues();
+  std::vector<double> getSingularValues(std::vector<int> index);
   std::vector<double> getLeftSingularVectors();
+  std::vector<double> getLeftSingularVectors(std::vector<int> index);
   std::vector<double> getRightSingularVectors();
+  std::vector<double> getRightSingularVectors(std::vector<int> index);
   std::vector<int> getLeftSingularVectorsDimensions();
+  std::vector<int> getLeftSingularVectorsDimensions(std::vector<int> index);
   std::vector<int> getRightSingularVectorsDimensions();
+  std::vector<int> getRightSingularVectorsDimensions(std::vector<int> index);
   std::vector<double> getTransformationMatrix();
+  std::vector<double> getTransformationMatrix(std::vector<int> index);
   std::vector<int> getTransformationMatrixDimensions();
+  std::vector<int> getTransformationMatrixDimensions(std::vector<int> index);
   int  getSingularValuesDimension();
+  int  getSingularValuesDimension(std::vector<int> index);
 
   std::vector<double> coordinateInTransformedSpace(int rank);
   std::vector<double> coordinateInverseTransformed(std::vector<double> &coordinate);
+  std::vector<double> coordinateInverseTransformed(std::vector<double> &coordinate,std::vector<int> index);
 
   double cellProbabilityWeight(std::vector<double> center, std::vector<double> dx);
   double inverseMarginalForPCA(double F);
