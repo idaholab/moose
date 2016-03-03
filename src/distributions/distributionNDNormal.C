@@ -504,7 +504,7 @@ std::vector<double> BasicMultivariateNormal::coordinateInTransformedSpace(int ra
    * function to draw the samples for the uncorrelated variables, and later transform the samples to correlated
    * variables.
    * @ In, rank, int, the effective dimension of the transformed space
-   * @ Out, coordiante, std::vector<double>, the coordinate in the transformed space
+   * @ Out, coordinate, std::vector<double>, the coordinate in the transformed space
    */
   //std::cout << "BasicMultivariateNormal::coordinateInTransformedSpace" << std::endl;
   std::vector<double> coordinate;
