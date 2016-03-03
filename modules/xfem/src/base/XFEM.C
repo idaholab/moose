@@ -711,7 +711,7 @@ XFEM::markCutEdgesByState(Real time)
         Real x1 = x0 + _crack_growth_increment * growth_direction(0);
         Real y1 = y0 + _crack_growth_increment * growth_direction(1);
 
-        XFEMGeometricCut * geometric_cut  = new XFEMGeometricCut2D( x0, y0, x1, y1, time*0.9, time*0.9);
+        XFEMGeometricCut2D geometric_cut(x0, y0, x1, y1, time * 0.9, time * 0.9);
 
         for ( ; elem_it != elem_end; ++elem_it)
         {
@@ -728,7 +728,7 @@ XFEM::markCutEdgesByState(Real time)
             continue;
 
           // mark cut edges for the element and its fragment
-          geometric_cut->cutElementByGeometry(elem, elem_cut_edges, time);
+          geometric_cut.cutElementByGeometry(elem, elem_cut_edges, time);
 
           for (unsigned int i = 0; i < elem_cut_edges.size(); ++i) // mark element edges
           {
