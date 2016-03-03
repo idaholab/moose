@@ -160,6 +160,7 @@
 
 
 [Preconditioning]
+  active = 'andy'
   [./andy]
     type = SMP
     full = true
@@ -173,6 +174,8 @@
   solve_type = Newton
   dt = 2E-3
   end_time = 0.2
+  nl_abs_tol = 1E-12
+  nl_rel_tol = 1E-10
 []
 
 [Outputs]
