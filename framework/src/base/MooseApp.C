@@ -524,15 +524,22 @@ MooseApp::legacyUoInitializationDefault()
 void
 MooseApp::run()
 {
-  Moose::perf_log.push("Full Runtime", "Application");
+  bool running_input_file = (_input_filename != "" || isParamValid("input_file"));
 
-  Moose::perf_log.push("Application Setup", "Setup");
+  if (running_input_file)
+  {
+    Moose::perf_log.push("Full Runtime", "Application");
+
+    Moose::perf_log.push("Application Setup", "Setup");
+  }
   setupOptions();
   runInputFile();
-  Moose::perf_log.pop("Application Setup", "Setup");
+  if (running_input_file)
+    Moose::perf_log.pop("Application Setup", "Setup");
 
   executeExecutioner();
-  Moose::perf_log.pop("Full Runtime", "Application");
+  if (running_input_file)
+    Moose::perf_log.pop("Full Runtime", "Application");
 }
 
 void
