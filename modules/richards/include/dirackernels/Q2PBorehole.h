@@ -10,9 +10,7 @@
 #define Q2PBOREHOLE_H
 
 // Moose Includes
-#include "DiracKernel.h"
-#include "Function.h"
-#include "RichardsSumQuantity.h"
+#include "PeacemanBorehole.h"
 #include "RichardsDensity.h"
 #include "RichardsRelPerm.h"
 
@@ -26,7 +24,7 @@ InputParameters validParams<Q2PBorehole>();
  * Approximates a borehole by a sequence of Dirac Points.
  * This is for use by a Q2P model.
  */
-class Q2PBorehole : public DiracKernel
+class Q2PBorehole : public PeacemanBorehole
 {
 public:
 
@@ -42,11 +40,6 @@ public:
   Q2PBorehole(const InputParameters & parameters);
 
   /**
-   * Add Dirac Points to the borehole
-   */
-  virtual void addPoints();
-
-  /**
    * Computes the residual.  This just
    * calls prepareNodalValues
    * then calls DiracKernel::computeResidual
@@ -57,7 +50,6 @@ public:
    * Computes the Qp residual
    */
   virtual Real computeQpResidual();
-
 
   /**
    * Computes the Jacobian.  This just
@@ -88,43 +80,16 @@ protected:
   const VariableValue & _other_var_nodal;
 
   /// the variable number of the other variable
-  unsigned int _other_var_num;
+  const unsigned int _other_var_num;
 
   /// whether the Variable for this BC is porepressure or not
-  bool _var_is_pp;
+  const bool _var_is_pp;
 
   /// viscosity
-  Real _viscosity;
+  const Real _viscosity;
 
   /// permeability
   const MaterialProperty<RealTensorValue> & _permeability;
-
-
-
-  /**
-   * If positive then the borehole acts as a sink (producion well) for porepressure > borehole pressure, and does nothing otherwise
-   * If negative then the borehole acts as a source (injection well) for porepressure < borehole pressure, and does nothing otherwise
-   * The flow rate to/from the borehole is multiplied by |character|, so usually character = +/- 1
-   */
-  Function & _character;
-
-  /// bottomhole pressure of borehole
-  Real _p_bot;
-
-  /// unit weight of fluid in borehole (for calculating bottomhole pressure at each Dirac Point)
-  RealVectorValue _unit_weight;
-
-  /// borehole constant
-  Real _re_constant;
-
-  /// well constant
-  Real _well_constant;
-
-  /// borehole length.  Note this is only used if there is only one borehole point
-  Real _borehole_length;
-
-  /// borehole direction.  Note this is only used if there is only one borehole point
-  RealVectorValue _borehole_direction;
 
   /// number of nodes in this element.
   unsigned int _num_nodes;
@@ -144,54 +109,8 @@ protected:
   /// nodal d(mobility)/d(saturation)
   std::vector<Real> _dmobility_ds;
 
-  /**
-   * This is used to hold the total fluid flowing into the borehole
-   * Hence, it is positive for production wells where fluid is flowing
-   * from porespace into the borehole and removed from the model
-   */
-  RichardsSumQuantity & _total_outflow_mass;
-
-  /**
-   * File defining the geometry of the borehole.   Each row has format
-   * radius x y z
-   * and the list of such points defines a polyline that is the borehole
-   */
-  std::string _point_file;
-
-  /// radii of the borehole
-  std::vector<Real> _rs;
-
-  /// x points of the borehole
-  std::vector<Real> _xs;
-
-  /// y points of the borehole
-  std::vector<Real> _ys;
-
-  /// z points of borehole
-  std::vector<Real> _zs;
-
-  /// the bottom point of the borehole (where bottom_pressure is defined)
-  Point _bottom_point;
-
-  /// 0.5*(length of polyline segments between points)
-  std::vector<Real> _half_seg_len;
-
-  /// rotation matrix used in well_constant calculation
-  std::vector<RealTensorValue> _rot_matrix;
-
-
-  /// reads a space-separated line of floats from ifs and puts in myvec
-  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
-
-  /**
-   * Calculates Peaceman's form of the borehole well constant
-   * Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388
-   */
-  Real wellConstant(const RealTensorValue & perm, const RealTensorValue & rot, const Real & half_len, const Elem * ele, const Real & rad);
-
   /// calculates the nodal values of pressure, mobility, and derivatives thereof
   void prepareNodalValues();
-
 
   /**
    * Calculates Jacobian
