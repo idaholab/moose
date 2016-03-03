@@ -190,6 +190,18 @@ protected:
                  // 3 in fourth
                  // 2 in fifth
                  // 1 in sixth
+
+  template<class T>
+  friend void dataStore(std::ostream &, T &, void *);
+
+  template<class T>
+  friend void dataLoad(std::istream &, T &, void *);
 };
+
+template<>
+void dataStore(std::ostream &, SymmElasticityTensor &, void *);
+
+template<>
+void dataLoad(std::istream &, SymmElasticityTensor &, void *);
 
 #endif //SYMMELASTICITYTENSOR_H

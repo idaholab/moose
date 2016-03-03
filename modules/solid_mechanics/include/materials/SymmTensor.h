@@ -75,10 +75,6 @@ public:
     }
   }
 
-
-  ~SymmTensor() {}
-
-
   void fillFromInputVector(const std::vector<Real> & input)
   {
     if (input.size() != 6)
