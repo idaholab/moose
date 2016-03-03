@@ -30,7 +30,7 @@
   [../]
 
   [./lm]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
     block = middle
   [../]

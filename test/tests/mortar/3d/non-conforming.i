@@ -30,8 +30,8 @@
   [../]
 
   [./lm]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
     block = middle
   [../]
 []
@@ -63,12 +63,6 @@
     variable = u
     boundary = '1 2 3 4 5 6'
     function = exact_fn
-  [../]
-
-  [./mortar]
-    type = DiffusionFluxBC
-    variable = u
-    boundary = '100 101'
   [../]
 []
 
