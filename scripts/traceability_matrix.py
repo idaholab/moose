@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re, os, sys
+import re, os, sys, argparse
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4, inch, landscape
@@ -8,8 +8,12 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
 
-def buildTable(data):
-  doc = SimpleDocTemplate("MOOSE_requirements_tracability.pdf", pagesize=A4, rightMargin=30,leftMargin=30, topMargin=30,bottomMargin=18)
+def buildTable(args, data):
+  # Change to what ever directory the user was in at
+  # the time they executed this script
+  os.chdir(args.cwd)
+
+  doc = SimpleDocTemplate(args.application_name + "_requirements_traceability.pdf", pagesize=A4, rightMargin=30,leftMargin=30, topMargin=30,bottomMargin=18)
   doc.pagesize = landscape(A4)
   elements = []
 
@@ -47,8 +51,8 @@ def buildTable(data):
 ##########
 # This routine extracts the requirements from the "SoftwareREquirements.tex" document
 ##########
-def extractRequirements(filename):
-  f = open(filename)
+def extractRequirements(args):
+  f = open(os.path.join(args.application_path, 'doc/sqa', args.requirements))
   text = f.read()
   f.close()
 
@@ -77,23 +81,25 @@ def extractRequirements(filename):
   return data
 
 
-def extractTestedRequirements(data):
+def extractTestedRequirements(args, data):
   # Here we will use the TestHarness to find all of the
   # test files where we can look for tested requirements.
   # Assume SQA docs are located in <MOOSE_DIR>/framework/doc/sqa
-  MOOSE_DIR = os.path.abspath(os.path.join('..', '..', '..'))
-  #### See if MOOSE_DIR is already in the environment instead
-  if os.environ.has_key("MOOSE_DIR"):
-    MOOSE_DIR = os.environ['MOOSE_DIR']
+  test_app_name = args.application_name
+  test_app_dir = os.path.join(args.application_path)
 
-  test_app_name = 'moose_test'
-  test_app_dir = os.path.join(MOOSE_DIR, 'test')
+  #### TODO
+  # figure out a cleaner way to set this up
+  # If test_app_name is framework, we need to reword some things
+  if test_app_name == 'framework':
+    test_app_name = 'moose_test'
+    test_app_dir = os.path.join(args.moose_dir, 'test')
 
   # Set the current working directory to test_app_dir
   saved_cwd = os.getcwd()
   os.chdir(test_app_dir)
 
-  sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+  sys.path.append(os.path.join(args.moose_dir, 'python'))
   import path_tool
   path_tool.activate_module('TestHarness')
 
@@ -101,13 +107,13 @@ def extractTestedRequirements(data):
   from Tester import Tester
 
   # Build the TestHarness object here
-  harness = TestHarness(sys.argv, test_app_name, MOOSE_DIR)
+  harness = TestHarness(sys.argv, test_app_name, args.moose_dir)
+
   # Tell it to parse the test files only, not run them
   harness.findAndRunTests(find_only=True)
 
   # Now retrieve all of the accumlated Testers from the TestHarness warehouse
   testers = harness.warehouse.getAllObjects()
-
   for tester in testers:
     print tester.specs['test_name']
     input_filename = tester.getInputFile()
@@ -129,14 +135,53 @@ def extractTestedRequirements(data):
       if requirement not in data:
         print 'Unable to find referenced requirement "' + requirement + '" in ' + input_path
       else:
-        data[requirement][2].add(os.path.relpath(input_path, MOOSE_DIR))
+        data[requirement][2].add(os.path.relpath(input_path, args.moose_dir))
 
   os.chdir(saved_cwd)
 
+def verifyArguments(args):
+  # Verify supplied arguments
+  if args.application is None or os.path.exists(args.application) is False:
+    # Before we error, lets verfiy if current parent directory matches
+    # the application they were supplying:
+    if os.path.basename(os.getcwd()) != args.application:
+      print 'You must specify a path to the application you wish to build an SQA documentation for.'
+      sys.exit(1)
+    else:
+      args.application = os.getcwd()
+  else:
+    if os.path.exists(os.path.join(args.application, 'doc/sqa', args.requirements)) is False:
+      print 'I could not find ', os.path.join(os.path.abspath(args.application), 'doc/sqa', args.requirements), 'file.' \
+        '\nPlease see the directory:', os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), '..', 'framework/doc/sqa'), 'for a working example'
+      sys.exit(1)
+
+  args.application_path = os.path.abspath(args.application)
+  args.application_name = os.path.split(args.application_path)[1]
+
+  # Set the current working directory to this script location
+  # We to do this _after_ discovering application path in case
+  # the user supplied a relative path instead of an absolute
+  # path
+  args.cwd = os.getcwd()
+  os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
+
+  # Set MOOSE_DIR to parent directory (were sitting
+  # in moose/scripts at the moment)
+  args.moose_dir = os.path.abspath('..')
+
+  return args
+
+def parseArguments(args=None):
+  parser = argparse.ArgumentParser(description='Build SQA Documentation')
+  parser.add_argument('--application', metavar='application', help='Path to application you wish to build SQA documentation for')
+  parser.add_argument('--requirements', nargs=1, default='SoftwareRequirements.tex', metavar='requirements.tex', help='Default: %(default)s')
+  return verifyArguments(parser.parse_args(args))
 
 if __name__ == "__main__":
-  data = extractRequirements("SoftwareRequirements.tex")
+  # Parse supplied arguments
+  args = parseArguments()
 
-  extractTestedRequirements(data)
-
-  buildTable(data)
+  # Get requirements from tex file and build SQA
+  data = extractRequirements(args)
+  extractTestedRequirements(args, data)
+  buildTable(args, data)
