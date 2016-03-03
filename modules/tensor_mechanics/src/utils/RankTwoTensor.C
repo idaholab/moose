@@ -369,6 +369,19 @@ RankTwoTensor::operator/(const Real b) const
   return result;
 }
 
+TypeVector<Real>
+RankTwoTensor::operator*(const TypeVector<Real> & b) const
+{
+  RealVectorValue result;
+  const RankTwoTensor &a = *this;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      result(i) += a(i,j) * b(j);
+
+  return result;
+}
+
 RankTwoTensor &
 RankTwoTensor::operator*=(const RankTwoTensor & a)
 {
