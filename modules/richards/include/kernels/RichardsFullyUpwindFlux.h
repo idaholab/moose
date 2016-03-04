@@ -63,17 +63,8 @@ protected:
   /// This simply calls upwind
   virtual void computeResidual();
 
-  /// Not used.  I use computeQpJac instead.
-  virtual Real computeQpJacobian();
-
-  /// Not used.  I use computeQpJac instead.
+  /// this simply calls upwind
   virtual void computeOffDiagJacobian(unsigned int jvar);
-
-  /// this simply calls upwind
-  virtual void computeJacobian();
-
-  /// this simply calls upwind
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// the derivative of the flux without the upstream mobility terms
   Real computeQpJac(unsigned int dvar);

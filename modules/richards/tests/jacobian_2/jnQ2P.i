@@ -66,6 +66,8 @@
       max = 1
     [../]
   [../]
+  [./nonQ2P_var]
+  []
 []
 
 [Q2P]
@@ -80,6 +82,15 @@
   gas_viscosity = 1
   diffusivity = 1E-2
 []
+
+[Kernels]
+  [./nonQ2P_variable_check]
+    type = BodyForce
+    variable = nonQ2P_var
+    function = 0
+  [../]
+[]
+
 
 [Materials]
   [./rock]

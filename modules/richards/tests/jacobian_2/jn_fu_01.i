@@ -102,11 +102,13 @@
       max = 1
     [../]
   [../]
+  [./non_Richards]
+  [../]
 []
 
 
 [Kernels]
-  active = 'richardsfwater richardsfgas'
+  active = 'richardsfwater richardsfgas non_Richards_should_have_0_off_diag'
   [./richardstwater]
     type = RichardsMassChange
     variable = pwater
@@ -122,6 +124,11 @@
   [./richardsfgas]
     type = RichardsFullyUpwindFlux
     variable = pgas
+  [../]
+  [./non_Richards_should_have_0_off_diag]
+    type = BodyForce
+    variable = non_Richards
+    function = 0
   [../]
 []
 
