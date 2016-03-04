@@ -219,6 +219,7 @@
 #include "ElementsAlongLine.h"
 #include "IntersectionPointsAlongLine.h"
 #include "LineMaterialRealSampler.h"
+#include "LineFunctionSampler.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -624,6 +625,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(ElementsAlongLine);
   registerVectorPostprocessor(IntersectionPointsAlongLine);
   registerVectorPostprocessor(LineMaterialRealSampler);
+  registerVectorPostprocessor(LineFunctionSampler);
 
   // user objects
   registerUserObject(LayeredIntegral);

@@ -50,7 +50,7 @@ protected:
    *
    * @param variable_names The names of the variables.  Note: The order of the variables sets the order of the values for addSample()
    */
-  void setupVariables(std::vector<std::string> variable_names);
+  void setupVariables(const std::vector<std::string> & variable_names);
 
   /**
    * Call this with the value of every variable at each point you want to sample at.

@@ -35,23 +35,28 @@ LineValueSampler::LineValueSampler(const InputParameters & parameters) :
 
   unsigned int num_points = getParam<unsigned int>("num_points");
 
+  generatePointsAndIDs(start_point, end_point, num_points, _points, _ids);
+}
+
+void LineValueSampler::generatePointsAndIDs(const Point & start_point, const Point & end_point, unsigned int num_points, std::vector<Point> & points, std::vector<Real> & ids)
+{
+
   Point difference = end_point - start_point;
 
   Point delta = difference / Real(num_points-1);
 
-  _points.resize(num_points);
-  _ids.resize(num_points);
+  points.resize(num_points);
+  ids.resize(num_points);
 
   for (unsigned int i=0; i<num_points-1; i++) // -1 so that we can manually put in the end point to get it perfect
   {
     Point p = start_point + (i * delta);
 
-    _points[i] = p;
-    _ids[i] = (p - start_point).norm(); // The ID is the distance along the line
+    points[i] = p;
+    ids[i] = (p - start_point).norm(); // The ID is the distance along the line
   }
 
   // Add the end point explicitly
-  _points[num_points-1] = end_point;
-  _ids[num_points-1] = (end_point - start_point).norm();
+  points[num_points-1] = end_point;
+  ids[num_points-1] = (end_point - start_point).norm();
 }
-

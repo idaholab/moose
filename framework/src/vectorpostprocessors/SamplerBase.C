@@ -41,7 +41,7 @@ SamplerBase::SamplerBase(const InputParameters & parameters, VectorPostprocessor
 }
 
 void
-SamplerBase::setupVariables(std::vector<std::string> variable_names)
+SamplerBase::setupVariables(const std::vector<std::string> & variable_names)
 {
   _variable_names = variable_names;
 
