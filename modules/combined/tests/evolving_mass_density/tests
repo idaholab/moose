@@ -1,50 +1,126 @@
 [Tests]
-  [./test_rz]
+  [./test_rz_sm]
     type = 'Exodiff'
     input = 'rz.i'
     exodiff = 'rz_out.e'
     max_parallel = 1
   [../]
 
-  [./test_shear_z]
+  [./test_rz_tm]
     type = 'Exodiff'
-    input = 'shear_z_test.i'
+    input = 'rz_tensors.i'
+    exodiff = 'rz_out.e'
+    max_parallel = 1
+    prereq = 'test_rz_sm'
+  [../]
+
+
+  [./test_shear_z_sm]
+    type = 'Exodiff'
+    input = 'shear_test.i'
     exodiff = 'shear_z_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 Outputs/out/file_base=shear_z_test_out BCs/top_z/type=FunctionDirichletBC BCs/top_z/function=rampConstant1 BCs/top_z/boundary=11 BCs/top_y/boundary=11 BCs/top_y/value=0 BCs/top_y/type=DirichletBC BCs/top_x/boundary=11 BCs/top_x/value=0 BCs/top_x/type=DirichletBC'
   [../]
 
-  [./test_shear_y]
+  [./test_shear_y_sm]
     type = 'Exodiff'
-    input = 'shear_y_test.i'
+    input = 'shear_test.i'
     exodiff = 'shear_y_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=10 BCs/bot_y/boundary=10 BCs/bot_z/boundary=10 Outputs/out/file_base=shear_y_test_out BCs/top_y/type=FunctionDirichletBC BCs/top_y/function=rampConstant1 BCs/top_y/boundary=12 BCs/top_z/boundary=12 BCs/top_z/value=0 BCs/top_z/type=DirichletBC BCs/top_x/boundary=12 BCs/top_x/value=0 BCs/top_x/type=DirichletBC'
+    prereq = 'test_shear_z_sm'
   [../]
 
-  [./test_shear_x]
+  [./test_shear_x_sm]
     type = 'Exodiff'
-    input = 'shear_x_test.i'
+    input = 'shear_test.i'
     exodiff = 'shear_x_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 Outputs/out/file_base=shear_x_test_out BCs/top_x/type=FunctionDirichletBC BCs/top_x/function=rampConstant1 BCs/top_x/boundary=11 BCs/top_y/boundary=11 BCs/top_y/value=0 BCs/top_y/type=DirichletBC BCs/top_z/boundary=11 BCs/top_z/value=0 BCs/top_z/type=DirichletBC'
+    prereq = 'test_shear_y_sm'
   [../]
 
-  [./test_uniform]
+  [./test_shear_z_tm]
+    type = 'Exodiff'
+    input = 'shear_test_tensors.i'
+    exodiff = 'shear_z_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 Outputs/out/file_base=shear_z_test_out BCs/top_z/type=FunctionDirichletBC BCs/top_z/function=rampConstant1 BCs/top_z/boundary=11 BCs/top_y/boundary=11 BCs/top_y/value=0 BCs/top_y/type=DirichletBC BCs/top_x/boundary=11 BCs/top_x/value=0 BCs/top_x/type=DirichletBC'
+    prereq = 'test_shear_x_sm'
+  [../]
+
+  [./test_shear_y_tm]
+    type = 'Exodiff'
+    input = 'shear_test_tensors.i'
+    exodiff = 'shear_y_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=10 BCs/bot_y/boundary=10 BCs/bot_z/boundary=10 Outputs/out/file_base=shear_y_test_out BCs/top_y/type=FunctionDirichletBC BCs/top_y/function=rampConstant1 BCs/top_y/boundary=12 BCs/top_z/boundary=12 BCs/top_z/value=0 BCs/top_z/type=DirichletBC BCs/top_x/boundary=12 BCs/top_x/value=0 BCs/top_x/type=DirichletBC'
+    prereq = 'test_shear_z_tm'
+  [../]
+
+  [./test_shear_x_tm]
+    type = 'Exodiff'
+    input = 'shear_test_tensors.i'
+    exodiff = 'shear_x_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 Outputs/out/file_base=shear_x_test_out BCs/top_x/type=FunctionDirichletBC BCs/top_x/function=rampConstant1 BCs/top_x/boundary=11 BCs/top_y/boundary=11 BCs/top_y/value=0 BCs/top_y/type=DirichletBC BCs/top_z/boundary=11 BCs/top_z/value=0 BCs/top_z/type=DirichletBC'
+    prereq = 'test_shear_y_tm'
+  [../]
+
+
+  [./test_uniform_sm]
     type = 'Exodiff'
     input = 'uniform_expand_compress_test.i'
     exodiff = 'uniform_expand_compress_test_out.e'
   [../]
 
-  [./test_z]
+  [./test_uniform_tm]
     type = 'Exodiff'
-    input = 'expand_compress_z_test.i'
+    input = 'uniform_expand_compress_test_tensors.i'
+    exodiff = 'uniform_expand_compress_test_out.e'
+    prereq = 'test_uniform_sm'
+  [../]
+
+
+  [./test_z_sm]
+    type = 'Exodiff'
+    input = 'expand_compress_test.i'
     exodiff = 'expand_compress_z_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=14 BCs/bot_y/boundary=14 BCs/bot_z/boundary=14 BCs/top/variable=disp_z BCs/top/boundary=13 Outputs/out/file_base=expand_compress_z_test_out'
   [../]
 
-  [./test_y]
+  [./test_y_sm]
     type = 'Exodiff'
-    input = 'expand_compress_y_test.i'
+    input = 'expand_compress_test.i'
     exodiff = 'expand_compress_y_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 BCs/top/variable=disp_y BCs/top/boundary=11 Outputs/out/file_base=expand_compress_y_test_out'
+    prereq = 'test_z_sm'
   [../]
 
-  [./test_x]
+  [./test_x_sm]
     type = 'Exodiff'
-    input = 'expand_compress_x_test.i'
+    input = 'expand_compress_test.i'
     exodiff = 'expand_compress_x_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=10 BCs/bot_y/boundary=10 BCs/bot_z/boundary=10 BCs/top/variable=disp_x BCs/top/boundary=12 Outputs/out/file_base=expand_compress_x_test_out'
+    prereq = 'test_y_sm'
+  [../]
+
+  [./test_z_tm]
+    type = 'Exodiff'
+    input = 'expand_compress_test_tensors.i'
+    exodiff = 'expand_compress_z_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=14 BCs/bot_y/boundary=14 BCs/bot_z/boundary=14 BCs/top/variable=disp_z BCs/top/boundary=13 Outputs/out/file_base=expand_compress_z_test_out'
+    prereq = 'test_x_sm'
+  [../]
+
+  [./test_y_tm]
+    type = 'Exodiff'
+    input = 'expand_compress_test_tensors.i'
+    exodiff = 'expand_compress_y_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 BCs/top/variable=disp_y BCs/top/boundary=11 Outputs/out/file_base=expand_compress_y_test_out'
+    prereq = 'test_z_tm'
+  [../]
+
+  [./test_x_tm]
+    type = 'Exodiff'
+    input = 'expand_compress_test_tensors.i'
+    exodiff = 'expand_compress_x_test_out.e'
+    cli_args = 'BCs/bot_x/boundary=10 BCs/bot_y/boundary=10 BCs/bot_z/boundary=10 BCs/top/variable=disp_x BCs/top/boundary=12 Outputs/out/file_base=expand_compress_x_test_out'
+    prereq = 'test_y_tm'
   [../]
 []
