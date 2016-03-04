@@ -46,7 +46,7 @@ AdamsPredictor::~AdamsPredictor()
 }
 
 void
-AdamsPredictor::historyControl()
+AdamsPredictor::timestepSetup()
 {
   // if the time step number hasn't changed then do nothing
   if (_t_step == _t_step_old)
@@ -66,20 +66,23 @@ AdamsPredictor::historyControl()
   _dtstorage = _dt_old;
 }
 
-void
-AdamsPredictor::apply(NumericVector<Number> & sln)
+bool
+AdamsPredictor::shouldApply()
 {
-  // At the moment, I don't believe there is a function in Predictor
-  // that gets called on time step begin.
-  // That means that history control must go here.
-  historyControl();
+  if (!Predictor::shouldApply())
+    return;
+
   // AB2 can only be applied if there are enough old solutions
   // AB1 could potentially be used for the time step prior?
   // It would be possible to do VSVO Adams, Kevin has the info
   // Doing so requires a time stack of some sort....
   if (_dt == 0 || _dt_old == 0 || _dt_older == 0 || _t_step < 2)
     return;
+}
 
+void
+AdamsPredictor::apply(NumericVector<Number> & sln)
+{
   // localize current solution to working vec
   sln.localize(_solution_predictor);
   // NumericVector<Number> & vector1 = _tmp_previous_solution;

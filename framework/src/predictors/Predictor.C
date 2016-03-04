@@ -25,6 +25,7 @@ InputParameters validParams<Predictor>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addRequiredParam<Real>("scale", "The scale factor for the predictor (can range from 0 to 1)");
+  params.addParam<std::vector<Real> >("skip_times", "Time steps for which the predictor should not be applied");
 
   params.registerBase("Predictor");
 
@@ -44,7 +45,8 @@ Predictor::Predictor(const InputParameters & parameters) :
     _solution_old(_nl.solutionOld()),
     _solution_older(_nl.solutionOlder()),
     _solution_predictor(_nl.addVector("predictor", true, GHOSTED)),
-    _scale(getParam<Real>("scale"))
+    _scale(getParam<Real>("scale")),
+    _skip_times(getParam<std::vector<Real> >("skip_times"))
 {
   if (_scale < 0.0 || _scale > 1.0)
     mooseError("Input value for scale = " << _scale << " is outside of permissible range (0 to 1)");
@@ -54,3 +56,24 @@ Predictor::~Predictor()
 {
 }
 
+void
+Predictor::timestepSetup()
+{
+}
+
+bool
+Predictor::shouldApply()
+{
+  bool should_apply = true;
+
+  const Real & current_time =  _fe_problem.time();
+  for (unsigned int i=0; i<_skip_times.size(); ++i)
+  {
+    if (MooseUtils::absoluteFuzzyEqual(current_time, _skip_times[i]))
+    {
+      should_apply = false;
+      break;
+    }
+  }
+  return should_apply;
+}

@@ -19,14 +19,12 @@ template<>
 InputParameters validParams<SimplePredictor>()
 {
   InputParameters params = validParams<Predictor>();
-  params.addRequiredParam<Real>("scale", "The scale factor for the predictor (can range from 0 to 1)");
 
   return params;
 }
 
 SimplePredictor::SimplePredictor(const InputParameters & parameters) :
-    Predictor(parameters),
-    _scale(getParam<Real>("scale"))
+    Predictor(parameters)
 {
 }
 
@@ -34,24 +32,36 @@ SimplePredictor::~SimplePredictor()
 {
 }
 
+bool
+SimplePredictor::shouldApply()
+{
+  bool should_apply = true;
+  should_apply = Predictor::shouldApply();
+
+  if (_t_step < 2 || _dt_old <= 0)
+    should_apply = false;
+
+  if (!should_apply)
+    _console << "  Skipping predictor this step" << std::endl;
+
+  return should_apply;
+}
+
 void
 SimplePredictor::apply(NumericVector<Number> & sln)
 {
-  if (_dt_old > 0)
+  // Save the original stream flags
+  std::ios_base::fmtflags out_flags = Moose::out.flags();
+
+  _console << "  Applying predictor with scale factor = " << std::fixed << std::setprecision(2) << _scale << std::endl;
+
+  // Restore the flags
+  Moose::out.flags(out_flags);
+
+  Real dt_adjusted_scale_factor = _scale * _dt / _dt_old;
+  if (dt_adjusted_scale_factor != 0.0)
   {
-    // Save the original stream flags
-    std::ios_base::fmtflags out_flags = Moose::out.flags();
-
-    _console << "  Applying predictor with scale factor = " << std::fixed << std::setprecision(2) << _scale << std::endl;
-
-    // Restore the flags
-    Moose::out.flags(out_flags);
-
-    Real dt_adjusted_scale_factor = _scale * _dt / _dt_old;
-    if (dt_adjusted_scale_factor != 0.0)
-    {
-      sln *= (1.0 + dt_adjusted_scale_factor);
-      sln.add(-dt_adjusted_scale_factor, _solution_older);
-    }
+    sln *= (1.0 + dt_adjusted_scale_factor);
+    sln.add(-dt_adjusted_scale_factor, _solution_older);
   }
 }
