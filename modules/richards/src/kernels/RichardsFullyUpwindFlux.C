@@ -97,30 +97,6 @@ RichardsFullyUpwindFlux::computeResidual()
 }
 
 
-Real
-RichardsFullyUpwindFlux::computeQpJacobian()
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
-Real
-RichardsFullyUpwindFlux::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
-void
-RichardsFullyUpwindFlux::computeJacobian()
-{
-  upwind(false, true, _var.number());
-  return;
-}
-
-
 void
 RichardsFullyUpwindFlux::computeOffDiagJacobian(unsigned int jvar)
 {
@@ -161,12 +137,10 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
 
-  unsigned int dvar;
+  const unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   if (compute_jac)
   {
-    dvar = _richards_name_UO.richards_var_num(jvar);
-
     _local_ke.resize(ke.m(), ke.n());
     _local_ke.zero();
 
@@ -301,7 +275,7 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
 
     if (_has_diag_save_in && dvar == _pvar)
     {
-      unsigned int rows = ke.m();
+      const unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i,i);

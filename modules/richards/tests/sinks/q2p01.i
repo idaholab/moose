@@ -63,6 +63,10 @@
   gas_viscosity = 0.5
   diffusivity = 0.0
   output_total_masses_to = 'CSV'
+  save_gas_flux_in_Q2PGasFluxResidual = true
+  save_water_flux_in_Q2PWaterFluxResidual = true
+  save_gas_Jacobian_in_Q2PGasJacobian = true
+  save_water_Jacobian_in_Q2PWaterJacobian = true
 []
 
 [Postprocessors]

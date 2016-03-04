@@ -88,23 +88,6 @@ Q2PPorepressureFlux::computeResidual()
   upwind(true, false, 0);
 }
 
-
-Real
-Q2PPorepressureFlux::computeQpJacobian()
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
-Real
-Q2PPorepressureFlux::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
 void
 Q2PPorepressureFlux::computeJacobian()
 {
@@ -292,7 +275,7 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
 
     if (_has_diag_save_in && jvar == _var.number())
     {
-      unsigned int rows = ke.m();
+      const unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i,i);
