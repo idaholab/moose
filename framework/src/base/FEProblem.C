@@ -465,6 +465,13 @@ void FEProblem::initialSetup()
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
     _has_initialized_stateful = true;
 
+  if (!_app.isRecovering())
+  {
+    if (haveXFEM() &&
+        updateMeshXFEM())
+      _console << "XFEM updated mesh on initializaton" << std::endl;
+  }
+
   // Call initialSetup on the nonlinear system
   _nl.initialSetup();
 

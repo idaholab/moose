@@ -40,7 +40,7 @@
   [./square_moment_fitting]
     type = Exodiff
     input = square_moment_fitting.i
-    exodiff = 'square_moment_fitting_out.e square_moment_fitting_out.e-s002'
+    exodiff = 'square_moment_fitting_out.e'
     map = false
   [../]
 []
