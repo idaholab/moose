@@ -95,6 +95,12 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+  [./jn17]
+    type = 'PetscJacobianTester'
+    input = 'jn17.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
 
   [./jn_lumped_16]
     type = 'PetscJacobianTester'

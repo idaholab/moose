@@ -29,6 +29,10 @@ InputParameters validParams<Q2PAction>()
   params.addRequiredParam<Real>("diffusivity", "The diffusivity");
   params.addParam<std::vector<OutputName> >("output_nodal_masses_to", "Output Nodal masses to this Output object.  If you don't want any outputs, don't input anything here");
   params.addParam<std::vector<OutputName> >("output_total_masses_to", "Output total water and gas mass to this Output object.  If you don't want any outputs, don't input anything here");
+  params.addParam<bool>("save_gas_flux_in_Q2PGasFluxResidual", false, "Save the residual for the Q2PPorepressureFlux into the AuxVariable called Q2PGasFluxResidual");
+  params.addParam<bool>("save_water_flux_in_Q2PWaterFluxResidual", false, "Save the residual for the Q2PSaturationFlux into the AuxVariable called Q2PWaterFluxResidual");
+  params.addParam<bool>("save_gas_Jacobian_in_Q2PGasJacobian", false, "Save the diagonal component of the Q2PPorepressureFlux Jacobian into the AuxVariable called Q2PGasJacobian");
+  params.addParam<bool>("save_water_Jacobian_in_Q2PWaterJacobian", false, "Save the diagonal component of the Q2PSaturationFlux Jacobian into the AuxVariable called Q2PWaterJacobian");
   params.addParam<MooseEnum>("ORDER", orders, "The order for the porepressure and saturation: " + orders.getRawNames() + " (only needed if you're calculating masses)");
   return params;
 }
@@ -46,7 +50,11 @@ Q2PAction::Q2PAction(const InputParameters & params) :
     _gas_viscosity(getParam<Real>("gas_viscosity")),
     _diffusivity(getParam<Real>("diffusivity")),
     _output_nodal_masses_to(getParam<std::vector<OutputName> >("output_nodal_masses_to")),
-    _output_total_masses_to(getParam<std::vector<OutputName> >("output_total_masses_to"))
+    _output_total_masses_to(getParam<std::vector<OutputName> >("output_total_masses_to")),
+    _save_gas_flux_in_Q2PGasFluxResidual(getParam<bool>("save_gas_flux_in_Q2PGasFluxResidual")),
+    _save_water_flux_in_Q2PWaterFluxResidual(getParam<bool>("save_water_flux_in_Q2PWaterFluxResidual")),
+    _save_gas_Jacobian_in_Q2PGasJacobian(getParam<bool>("save_gas_Jacobian_in_Q2PGasJacobian")),
+    _save_water_Jacobian_in_Q2PWaterJacobian(getParam<bool>("save_water_Jacobian_in_Q2PWaterJacobian"))
 {
   _nodal_masses_not_outputted = false;
   if (_output_nodal_masses_to.size() == 0)
@@ -127,6 +135,10 @@ Q2PAction::act()
     params.set<UserObjectName>("fluid_density") = _gas_density;
     params.set<UserObjectName>("fluid_relperm") = _gas_relperm;
     params.set<Real>("fluid_viscosity") = _gas_viscosity;
+    if (_save_gas_flux_in_Q2PGasFluxResidual)
+      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PGasFluxResidual");
+    if (_save_gas_Jacobian_in_Q2PGasJacobian)
+      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PGasJacobian");
     _problem->addKernel(kernel_type, kernel_name, params);
 
     kernel_name = "Q2P_liquid_diffusion";
@@ -138,6 +150,10 @@ Q2PAction::act()
     params.set<UserObjectName>("fluid_relperm") = _water_relperm_for_diffusivity;
     params.set<Real>("fluid_viscosity") = _water_viscosity;
     params.set<Real>("diffusivity") = _diffusivity;
+    if (_save_water_flux_in_Q2PWaterFluxResidual)
+      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PWaterFluxResidual");
+    if (_save_water_Jacobian_in_Q2PWaterJacobian)
+      params.set<std::vector<AuxVariableName> >("diag_save_in") = std::vector<AuxVariableName>(1, "Q2PWaterJacobian");
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
@@ -154,6 +170,22 @@ Q2PAction::act()
                                FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
                                       Utility::string_to_enum<FEFamily>("LAGRANGE")));
     }
+    if (_save_gas_flux_in_Q2PGasFluxResidual)
+      _problem->addAuxVariable("Q2PGasFluxResidual",
+                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
+                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+    if (_save_water_flux_in_Q2PWaterFluxResidual)
+      _problem->addAuxVariable("Q2PWaterFluxResidual",
+                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
+                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+    if (_save_gas_Jacobian_in_Q2PGasJacobian)
+      _problem->addAuxVariable("Q2PGasJacobian",
+                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
+                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
+    if (_save_water_Jacobian_in_Q2PWaterJacobian)
+      _problem->addAuxVariable("Q2PWaterJacobian",
+                               FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
+                                      Utility::string_to_enum<FEFamily>("LAGRANGE")));
   }
 
   if (_current_task == "add_function" && _output_total_masses_to.size() > 0)

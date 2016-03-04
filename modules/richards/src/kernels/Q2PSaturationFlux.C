@@ -91,22 +91,6 @@ Q2PSaturationFlux::computeResidual()
 }
 
 
-Real
-Q2PSaturationFlux::computeQpJacobian()
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
-Real
-Q2PSaturationFlux::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
 void
 Q2PSaturationFlux::computeJacobian()
 {
@@ -294,7 +278,7 @@ Q2PSaturationFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
 
     if (_has_diag_save_in && jvar == _var.number())
     {
-      unsigned int rows = ke.m();
+      const unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i,i);
