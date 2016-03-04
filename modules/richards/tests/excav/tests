@@ -16,4 +16,12 @@
     heavy = true
     max_time = 1000
   [../]
+
+  [./except01]
+    type = 'RunException'
+    input = 'ex01.i'
+    cli_args = 'Functions/excav_fcn/end_time=-1 Outputs/file_base=except01'
+    expect_err = 'Start time for excavation set to 0 but this must be less than the end time, which is -1'
+  [../]
+
 []
