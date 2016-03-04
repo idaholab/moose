@@ -16,9 +16,9 @@ template<>
 InputParameters validParams<Mass>();
 
 /**
- * This postprocessor computes the mass by integrating the density over the volume
- *
+ * This postprocessor computes the mass by integrating the density over the volume.
  */
+
 class Mass: public ElementIntegralVariablePostprocessor
 {
 public:
@@ -29,4 +29,4 @@ protected:
   const MaterialProperty<Real> & _density;
 };
 
-#endif
+#endif //MASS_H

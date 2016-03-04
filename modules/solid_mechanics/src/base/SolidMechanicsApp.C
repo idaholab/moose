@@ -30,7 +30,6 @@
 #include "LinearIsotropicMaterial.h"
 #include "LinearStrainHardening.h"
 #include "MacroElastic.h"
-#include "Mass.h"
 #include "JIntegral.h"
 #include "CrackFrontData.h"
 #include "CrackFrontDefinition.h"
@@ -158,7 +157,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
 
   registerPostprocessor(HomogenizedThermalConductivity);
   registerPostprocessor(HomogenizedElasticConstants);
-  registerPostprocessor(Mass);
   registerPostprocessor(JIntegral);
   registerPostprocessor(CrackFrontData);
   registerPostprocessor(InteractionIntegral);
