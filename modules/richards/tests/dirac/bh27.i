@@ -157,7 +157,6 @@
     unit_weight = '0 0 0'
     re_constant = 0.1594
     character = 2 # this is to make the length 1m borehole fill the entire 2m height
-    MyNameIsAndyWilkins = false
   [../]
   [./bh_gas_dummy]
     type = RichardsBorehole
@@ -169,7 +168,6 @@
     unit_weight = '0 0 0'
     re_constant = 0.1594
     character = 2 # this is to make the length 1m borehole fill the entire 2m height
-    MyNameIsAndyWilkins = false
   [../]
 []
 

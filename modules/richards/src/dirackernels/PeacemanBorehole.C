@@ -20,7 +20,6 @@ InputParameters validParams<PeacemanBorehole>()
   params.addRequiredParam<UserObjectName>("SumQuantityUO", "User Object of type=RichardsSumQuantity in which to place the total outflow from the borehole for each time step.");
   params.addParam<Real>("re_constant", 0.28, "The dimensionless constant used in evaluating the borehole effective radius.  This depends on the meshing scheme.  Peacemann finite-difference calculations give 0.28, while for rectangular finite elements the result is closer to 0.1594.  (See  Eqn(4.13) of Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388.)");
   params.addParam<Real>("well_constant", -1.0, "Usually this is calculated internally from the element geometry, the local borehole direction and segment length, and the permeability.  However, if this parameter is given as a positive number then this number is used instead of the internal calculation.  This speeds up computation marginally.  re_constant becomes irrelevant");
-  params.addParam<bool>("MyNameIsAndyWilkins", false, "Used for debugging by Andy");
   params.addRangeCheckedParam<Real>("borehole_length", 0.0, "borehole_length>=0", "Borehole length.  Note this is only used if there is only one point in the point_file.");
   params.addParam<RealVectorValue>("borehole_direction", RealVectorValue(0, 0, 1), "Borehole direction.  Note this is only used if there is only one point in the point_file.");
   params.addClassDescription("Approximates a borehole in the mesh using the Peaceman approach, ie using a number of point sinks with given radii whose positions are read from a file");
@@ -29,7 +28,6 @@ InputParameters validParams<PeacemanBorehole>()
 
 PeacemanBorehole::PeacemanBorehole(const InputParameters & parameters) :
     DiracKernel(parameters),
-    _debug_things(getParam<bool>("MyNameIsAndyWilkins")),
     _re_constant(getParam<Real>("re_constant")),
     _well_constant(getParam<Real>("well_constant")),
     _borehole_length(getParam<Real>("borehole_length")),
@@ -94,47 +92,6 @@ PeacemanBorehole::PeacemanBorehole(const InputParameters & parameters) :
   }
   if (num_pts == 1)
     _rot_matrix[0] = RotationMatrix::rotVecToZ(_borehole_direction);
-
-  // do debugging if AndyWilkins
-  if (_debug_things)
-  {
-    _console << "Checking rotation matrices" << std::endl;
-    RealVectorValue zzz(0,0,1);
-    RealTensorValue iii;
-    iii(0,0) = 1;
-    iii(1,1) = 1;
-    iii(2,2) = 1;
-    RealVectorValue vec0;
-    RealTensorValue ten0;
-    Real the_sum;
-    for (unsigned int i = 0 ; i + 1 < _xs.size(); ++i)
-    {
-      // check rotation matrix does the correct rotation
-      _console << i << std::endl;
-      RealVectorValue v2(_xs[i+1] - _xs[i], _ys[i+1] - _ys[i], _zs[i+1] - _zs[i]);
-      v2 /= std::sqrt(v2*v2);
-      vec0 = _rot_matrix[i]*v2 - zzz;
-      if ((vec0*vec0) > 1E-20)
-        mooseError("Rotation matrix for v2 = " << v2 << " is wrong.  It is " << _rot_matrix[i] << "\n");
-
-      // check rotation matrix is orthogonal
-      ten0 = _rot_matrix[i]*_rot_matrix[i].transpose() - iii;
-      the_sum = 0;
-      for (unsigned int j = 0 ; j < 3; ++j)
-        for (unsigned int k = 0 ; k < 3; ++k)
-          the_sum = ten0(j,k)*ten0(j,k);
-      if (the_sum > 1E-20)
-        mooseError("Rotation matrix for v2 = " << v2 << " does not obey R.R^T=I.  It is " << _rot_matrix[i] << "\n");
-
-      ten0 = _rot_matrix[i].transpose()*_rot_matrix[i] - iii;
-      the_sum = 0;
-      for (unsigned int j = 0 ; j < 3; ++j)
-        for (unsigned int k = 0 ; k < 3; ++k)
-          the_sum = ten0(j,k)*ten0(j,k);
-      if (the_sum > 1E-20)
-        mooseError("Rotation matrix for v2 = " << v2 << " does not obey R^T.R=I.  It is " << _rot_matrix[i] << "\n");
-    }
-  }
 }
 
 bool

@@ -104,7 +104,6 @@
     unit_weight = '0 0 0'
     re_constant = 0.1594
     character = 2
-    MyNameIsAndyWilkins = false
     fully_upwind = true
   [../]
 []
