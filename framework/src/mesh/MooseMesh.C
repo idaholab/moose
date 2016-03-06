@@ -716,6 +716,8 @@ void
 MooseMesh::cacheInfo()
 {
   const MeshBase::element_iterator end = getMesh().elements_end();
+
+  // TODO: Thread this!
   for (MeshBase::element_iterator el = getMesh().elements_begin(); el != end; ++el)
   {
     Elem * elem = *el;
@@ -726,8 +728,10 @@ MooseMesh::cacheInfo()
     {
       std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
 
+      std::set<unsigned int> subdomain_set = _subdomain_boundary_ids[subdomain_id];
+
       for (unsigned int i=0; i<boundaryids.size(); i++)
-        _subdomain_boundary_ids[subdomain_id].insert(boundaryids[i]);
+        subdomain_set.insert(boundaryids[i]);
     }
 
     for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
@@ -738,10 +742,10 @@ MooseMesh::cacheInfo()
   }
 }
 
-std::set<SubdomainID> &
-MooseMesh::getNodeBlockIds(const Node & node)
+const std::set<SubdomainID> &
+MooseMesh::getNodeBlockIds(const Node & node) const
 {
-  return _block_node_list[node.id()];
+  return _block_node_list.at(node.id());
 }
 
 
@@ -2088,7 +2092,7 @@ MooseMesh::setPatchSize(const unsigned int patch_size)
 }
 
 unsigned int
-MooseMesh::getPatchSize()
+MooseMesh::getPatchSize() const
 {
   return _patch_size;
 }
@@ -2100,7 +2104,7 @@ MooseMesh::setPatchUpdateStrategy(MooseEnum patch_update_strategy)
 }
 
 const MooseEnum &
-MooseMesh::getPatchUpdateStrategy()
+MooseMesh::getPatchUpdateStrategy() const
 {
   return _patch_update_strategy;
 }
@@ -2152,21 +2156,21 @@ MooseMesh::exReader() const
   return NULL;
 }
 
-void MooseMesh::printInfo(std::ostream &os)
+void MooseMesh::printInfo(std::ostream &os) const
 {
   getMesh().print_info(os);
 }
 
-std::vector<dof_id_type> &
-MooseMesh::getNodeList(boundary_id_type nodeset_id)
+const std::vector<dof_id_type> &
+MooseMesh::getNodeList(boundary_id_type nodeset_id) const
 {
-  return _node_set_nodes[nodeset_id];
+  return _node_set_nodes.at(nodeset_id);
 }
 
 const std::set<unsigned int> &
-MooseMesh::getSubdomainBoundaryIds(unsigned int subdomain_id)
+MooseMesh::getSubdomainBoundaryIds(unsigned int subdomain_id) const
 {
-  return _subdomain_boundary_ids[subdomain_id];
+  return _subdomain_boundary_ids.at(subdomain_id);
 }
 
 bool
