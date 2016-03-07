@@ -10,9 +10,6 @@
 //
 #include "RichardsSeffVG.h"
 
-RichardsSeffVG::RichardsSeffVG()
-{}
-
 Real
 RichardsSeffVG::seff(Real p, Real al, Real m)
 {
