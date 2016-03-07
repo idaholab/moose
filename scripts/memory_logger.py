@@ -829,16 +829,30 @@ class MemoryPlotter:
       plot_list[-1].set_ylabel(self.memory_label)
       plot_list[-1].set_xlabel('Time in Seconds')
 
+      # Enable dork mode
+      if self.arguments.darkmode:
+        fig.set_facecolor('0.1')
+        plot_list[-1].set_axis_bgcolor('0.1')
+        plot_list[-1].spines['bottom'].set_color('white')
+        plot_list[-1].spines['top'].set_color('white')
+        plot_list[-1].spines['right'].set_color('white')
+        plot_list[-1].spines['left'].set_color('white')
+        plot_list[-1].tick_params(axis='x', colors='white')
+        plot_list[-1].tick_params(axis='y', colors='white')
+        plot_list[-1].xaxis.label.set_color('white')
+        plot_list[-1].yaxis.label.set_color('white')
+        plot_list[-1].grid(color='0.6')
+
       # Plot annotations
       if self.arguments.stdout:
-        stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=f.get_color())
+        stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=f.get_color(), markeredgecolor='0.08', markeredgewidth=0.1)
         next_index = str(len(plot_list))
         stdout_line.set_gid('stdout' + next_index)
         self.stdout_msgs[next_index] = stdout_msg
         self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, stdout_msg, f.get_color())
 
       if self.arguments.pstack:
-        pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=f.get_color())
+        pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=f.get_color(), markeredgecolor='0.08', markeredgewidth=0.1)
         next_index = str(len(plot_list))
         pstack_line.set_gid('pstack' + next_index)
         self.pstack_msgs[next_index] = pstack_msg
@@ -847,7 +861,14 @@ class MemoryPlotter:
     fig.canvas.mpl_connect('pick_event', self)
 
     # Create legend
-    plt.legend(tmp_plot, tmp_legend, loc = 2)
+    legend = plt.legend(tmp_plot, tmp_legend, loc = 2)
+    legend.get_frame().set_alpha(0.7)
+
+    # More dork mode settings
+    if self.arguments.darkmode:
+      legend.get_frame().set_facecolor('0.2')
+      for text in legend.get_texts():
+        text.set_color('0.8')
 
     plt.show()
 
@@ -1094,6 +1115,7 @@ def parseArguments(args=None):
   plotgroup.add_argument('--move-text', nargs=2, metavar='int', default=['0', '0'], help='Move text X and Y by this ammount (default 0 0)\n ')
   plotgroup.add_argument('--trim-text', nargs=1, metavar='int', type=int, default=[15], help='Display this many characters in stdout/pstack (default 15)\n ')
   plotgroup.add_argument('--no-color', dest='no_color', metavar='', action='store_const', const=False, help='When printing output to stdout do not use color codes\n ')
+  plotgroup.add_argument('--darkmode', dest='darkmode', metavar='', action='store_const', const=True, help='When you want to be cool\n ')
 
   internalgroup = parser.add_argument_group('Internal PBS Options', 'The following options are used to control how memory_logger as a tracking agent connects back to the caller. These are set automatically when using PBS and can be ignored.')
   internalgroup.add_argument('--call-back-host', nargs=2, help='Server hostname and port that launched memory_logger\n ')
