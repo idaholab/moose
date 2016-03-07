@@ -218,11 +218,15 @@ MooseApp::setupOptions()
 
   else if (getParam<bool>("help"))
   {
+    Moose::perf_log.disable_logging();
+
     _command_line->printUsage();
     _ready_to_exit = true;
   }
   else if (isParamValid("dump"))
   {
+    Moose::perf_log.disable_logging();
+
     _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
 
     // Get command line argument following --dump on command line
@@ -240,6 +244,8 @@ MooseApp::setupOptions()
   }
   else if (isParamValid("yaml"))
   {
+    Moose::perf_log.disable_logging();
+
     _parser.initSyntaxFormatter(Parser::YAML, true);
 
     // Get command line argument following --yaml on command line
@@ -257,6 +263,8 @@ MooseApp::setupOptions()
   }
   else if (getParam<bool>("syntax"))
   {
+    Moose::perf_log.disable_logging();
+
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
     Moose::out << "**START SYNTAX DATA**\n";
     for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = syntax.begin(); it != syntax.end(); ++it)
@@ -288,6 +296,8 @@ MooseApp::setupOptions()
   }
   else
   {
+    Moose::perf_log.disable_logging();
+
     if (_check_input)
       mooseError("You specified --check-input, but did not provide an input file. Add -i <inputfile> to your command line.");
 
