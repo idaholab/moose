@@ -5,8 +5,7 @@
 # off in general, but that is mitigated by setting this up so that the elements
 # undergo no rotations.
 
-# The main thing to check here is that once the predictor kicks in, there are
-# no iterations required.
+# This test checks to see that the predictor is skipped in the last step.
 
 [Mesh]
   displacements = 'disp_x disp_y disp_z'
@@ -136,6 +135,7 @@
   [./Predictor]
     type = SimplePredictor
     scale = 1.0
+    skip_times = '1.0'
   [../]
 [] # Executioner
 

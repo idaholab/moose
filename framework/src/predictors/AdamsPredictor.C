@@ -70,14 +70,16 @@ bool
 AdamsPredictor::shouldApply()
 {
   if (!Predictor::shouldApply())
-    return;
+    return false;
 
   // AB2 can only be applied if there are enough old solutions
   // AB1 could potentially be used for the time step prior?
   // It would be possible to do VSVO Adams, Kevin has the info
   // Doing so requires a time stack of some sort....
   if (_dt == 0 || _dt_old == 0 || _dt_older == 0 || _t_step < 2)
-    return;
+    return false;
+  else
+    return true;
 }
 
 void
