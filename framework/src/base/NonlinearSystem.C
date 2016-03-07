@@ -2182,6 +2182,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   _interface_kernels.updateActive(tid);
   _dirac_kernels.updateActive(tid);
   _kernels.updateActive(tid);
+  _nodal_kernels.updateActive(tid);
   if (tid == 0)
   {
     _nodal_bcs.updateActive();
