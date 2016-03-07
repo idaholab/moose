@@ -26,6 +26,7 @@ InputParameters validParams<ControlOutput>()
   InputParameters params = validParams<BasicOutput<Output> >();
   params.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
   params.addParam<bool>("clear_after_output", true, "Clear the active control display after each output.");
+  params.addParam<bool>("show_active_objects", true, "List active MooseObjects.");
 
   // Return the InputParameters
   return params;
@@ -34,7 +35,8 @@ InputParameters validParams<ControlOutput>()
 
 ControlOutput::ControlOutput(const InputParameters & parameters) :
     BasicOutput<Output>(parameters),
-    _clear_after_output(getParam<bool>("clear_after_output"))
+    _clear_after_output(getParam<bool>("clear_after_output")),
+    _show_active_objects(getParam<bool>("show_active_objects"))
 {
 }
 
@@ -50,8 +52,47 @@ ControlOutput::output(const ExecFlagType & type)
   default:
     outputChangedControls();
   }
+
+  if (_show_active_objects)
+    outputActiveObjects();
 }
 
+
+void
+ControlOutput::outputActiveObjects()
+{
+  // Extract InputParameter objects from warehouse
+  InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
+  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & params = wh.getInputParameters();
+
+  // Populate a map based on unique InputParameter objects
+  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> > objects;
+  for (std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::const_iterator iter = params.begin(); iter != params.end(); ++iter)
+    objects[iter->second].insert(iter->first);
+
+  // The stream to build
+  std::stringstream oss;
+  oss << std::left;
+
+  // Loop through unique objects
+  oss << "Active Objects:\n" << COLOR_DEFAULT;
+  for (std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> >::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+  {
+    MooseSharedPointer<InputParameters> ptr = iter->first;
+    if (ptr->get<bool>("enable"))
+    {
+      for (std::set<MooseObjectName>::const_iterator it = iter->second.begin(); it != iter->second.end(); ++it)
+      {
+        if (it == iter->second.begin())
+          oss << ConsoleUtils::indent(2) << COLOR_YELLOW << *it << COLOR_DEFAULT << '\n';
+        else
+          oss << ConsoleUtils::indent(4) << *it << '\n';
+      }
+    }
+  }
+
+  _console << oss.str() << std::endl;
+}
 
 void
 ControlOutput::outputControls()
