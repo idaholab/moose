@@ -128,6 +128,14 @@ class PeacockApplication(object):
       type_options['std::vector<OutputName>'] = set(output_names)
       type_options['OutputName'] = set(output_names)
 
+    # DiscreteMaterials
+    discrete_name = tree_widget.getChildNamesOfPath('Materials')
+    if len(output_names):
+      type_options['std::vector<DiscreteMaterialName, std::allocator<DiscreteMaterialName> >'] = set(discrete_name)
+      type_options['std::vector<DiscreteMaterialName>'] = set(discrete_name)
+      type_options['DiscreteMaterialName'] = set(discrete_name)
+
+
     # Mesh stuff
     mesh_data = tree_widget.getMeshItemData()
     if mesh_data:

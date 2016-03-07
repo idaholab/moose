@@ -15,7 +15,6 @@
 #ifndef COMPUTENODALKERNELBCJACOBIANSTHREAD_H
 #define COMPUTENODALKERNELBCJACOBIANSTHREAD_H
 
-#include "NodalKernelWarehouse.h"
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
@@ -24,11 +23,12 @@
 #include "libmesh/numeric_vector.h"
 
 class AuxiliarySystem;
+class NodalKernel;
 
 class ComputeNodalKernelBCJacobiansThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels,  SparseMatrix<Number> & jacobian);
+  ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels,  SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x, Threads::split split);
@@ -42,7 +42,7 @@ public:
 protected:
   AuxiliarySystem & _sys;
 
-  std::vector<NodalKernelWarehouse> & _nodal_kernels;
+  const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 
   SparseMatrix<Number> & _jacobian;
 

@@ -30,6 +30,7 @@
 class DependencyResolverInterface
 {
 public:
+
   /**
    * Constructor.
    */
@@ -59,7 +60,6 @@ public:
   static
   void cyclicDependencyError(CyclicDependencyException<T> & e, const std::string & header);
 };
-
 
 template<typename T>
 void
@@ -91,7 +91,7 @@ DependencyResolverInterface::sort(typename std::vector<T> & vector)
     }
   }
 
-    // Sort based on dependencies
+  // Sort based on dependencies
   std::stable_sort(start, end, resolver);
 }
 

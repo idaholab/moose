@@ -16,14 +16,13 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "NodalKernel.h"
-#include "NodalKernelWarehouse.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem,
                                                                          AuxiliarySystem & sys,
-                                                                         std::vector<NodalKernelWarehouse> & nodal_kernels,
+                                                                         const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                                                          SparseMatrix<Number> & jacobian) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _sys(sys),
@@ -68,14 +67,13 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     // The NodalKernels that are active and are coupled to the jvar in question
     std::vector<MooseSharedPointer<NodalKernel> > active_involved_kernels;
 
-    if (_nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).size() > 0)
+    if (_nodal_kernels.hasActiveBoundaryObjects(boundary_id, _tid))
     {
       // Loop over each NodalKernel to see if it's involved with the jvar
-      for (std::vector<MooseSharedPointer<NodalKernel> >::iterator nodal_kernel_it = _nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).begin();
-          nodal_kernel_it != _nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).end();
-          ++nodal_kernel_it)
+      const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
+      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = objects.begin(); nodal_kernel_it != objects.end(); ++nodal_kernel_it)
       {
-        MooseSharedPointer<NodalKernel> & nodal_kernel = *nodal_kernel_it;
+        const MooseSharedPointer<NodalKernel> & nodal_kernel = *nodal_kernel_it;
 
         // If this NodalKernel isn't operating on this ivar... skip it
         if (nodal_kernel->variable().number() != ivar)
@@ -111,13 +109,12 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         var->prepareAux();
       }
 
-      if (_nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).size() > 0)
+      if (_nodal_kernels.hasActiveBoundaryObjects(boundary_id, _tid))
       {
         Node * node = bnode->_node;
         if (node->processor_id() == _fe_problem.processor_id())
         {
           _fe_problem.reinitNodeFace(node, boundary_id,  _tid);
-
           for (std::vector<MooseSharedPointer<NodalKernel> >::iterator nodal_kernel_it = active_involved_kernels.begin();
                nodal_kernel_it != active_involved_kernels.end();
                ++nodal_kernel_it)

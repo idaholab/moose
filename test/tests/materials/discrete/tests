@@ -1,0 +1,22 @@
+[Tests]
+  [./newton_iteration]
+    # Test the ability to compute material properties in an iterative manner
+    type = 'Exodiff'
+    input = 'recompute.i'
+    exodiff = 'recompute_out.e'
+  [../]
+
+  [./newton_no_calc]
+    # Test that no calculations are performed if computeProperties is not called explicitly on DiscreteMaterial
+    type = 'Exodiff'
+    input = 'recompute_no_calc.i'
+    exodiff = 'recompute_no_calc_out.e'
+  [../]
+
+  [./newton_error]
+    # Test error message when trying to get a non DiscreteMaterial object
+    type = 'RunException'
+    input = 'recompute_error.i'
+    expect_err = 'Unable to locate active object: recompute_props.'
+  [../]
+[]

@@ -30,7 +30,7 @@ class DerivativeMaterialInterfaceTestClient : public DerivativeMaterialInterface
 public:
   DerivativeMaterialInterfaceTestClient(const InputParameters & parameters);
 
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
 protected:
   MaterialPropertyName _prop_name;

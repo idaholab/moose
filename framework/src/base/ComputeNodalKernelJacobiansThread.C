@@ -16,7 +16,6 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "NodalKernel.h"
-#include "NodalKernelWarehouse.h"
 #include "Assembly.h"
 
 // libmesh includes
@@ -24,7 +23,7 @@
 
 ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
                                                                      AuxiliarySystem & sys,
-                                                                     std::vector<NodalKernelWarehouse> & nodal_kernels,
+                                                                     const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                                                      SparseMatrix<Number> & jacobian) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(sys),
@@ -70,32 +69,34 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
     for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
     {
-      // Loop over each NodalKernel to see if it's involved with the jvar
-      for (std::vector<MooseSharedPointer<NodalKernel> >::iterator nodal_kernel_it = _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).begin();
-           nodal_kernel_it != _nodal_kernels[_tid].activeBlockNodalKernels(*block_it).end();
-           ++nodal_kernel_it)
+      if (_nodal_kernels.hasActiveBlockObjects(*block_it, _tid))
       {
-        MooseSharedPointer<NodalKernel> & nodal_kernel = *nodal_kernel_it;
+        // Loop over each NodalKernel to see if it's involved with the jvar
+        const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(*block_it, _tid);
+        for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = objects.begin(); nodal_kernel_it != objects.end(); ++nodal_kernel_it)
+        {
+          const MooseSharedPointer<NodalKernel> & nodal_kernel = *nodal_kernel_it;
 
-        // If this NodalKernel isn't operating on this ivar... skip it
-        if (nodal_kernel->variable().number() != ivar)
+          // If this NodalKernel isn't operating on this ivar... skip it
+          if (nodal_kernel->variable().number() != ivar)
           break;
 
-        // If this NodalKernel is acting on the jvar add it to the list and short-circuit the loop
-        if (nodal_kernel->variable().number() == jvar)
-        {
-          active_involved_kernels.push_back(nodal_kernel);
-          continue;
-        }
-
-        // See if this NodalKernel is coupled to the jvar
-        const std::vector<MooseVariable *> & coupled_vars = (*nodal_kernel_it)->getCoupledMooseVars();
-        for (std::vector<MooseVariable *>::const_iterator var_it = coupled_vars.begin(); var_it != coupled_vars.end(); ++var_it)
-        {
-          if ( (*var_it)->number() == jvar )
+          // If this NodalKernel is acting on the jvar add it to the list and short-circuit the loop
+          if (nodal_kernel->variable().number() == jvar)
           {
             active_involved_kernels.push_back(nodal_kernel);
-            break; // It only takes one
+            continue;
+          }
+
+          // See if this NodalKernel is coupled to the jvar
+          const std::vector<MooseVariable *> & coupled_vars = (*nodal_kernel_it)->getCoupledMooseVars();
+          for (std::vector<MooseVariable *>::const_iterator var_it = coupled_vars.begin(); var_it != coupled_vars.end(); ++var_it)
+          {
+            if ( (*var_it)->number() == jvar )
+            {
+              active_involved_kernels.push_back(nodal_kernel);
+              break; // It only takes one
+            }
           }
         }
       }

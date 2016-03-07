@@ -31,6 +31,9 @@ class VecRangeCheckMaterial : public Material
 {
 public:
   VecRangeCheckMaterial(const InputParameters & parameters);
+
+protected:
+  void computeQpProperties();
 };
 
 #endif //VECRANGECHECKMATERIAL_H

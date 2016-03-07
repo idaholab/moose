@@ -17,14 +17,13 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "NodalKernel.h"
-#include "NodalKernelWarehouse.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(FEProblem & fe_problem,
                                                          AuxiliarySystem & sys,
-                                                         std::vector<NodalKernelWarehouse> & nodal_kernels) :
+                                                         const MooseObjectWarehouse<NodalKernel> & nodal_kernels) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _sys(sys),
     _nodal_kernels(nodal_kernels),
@@ -61,16 +60,14 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
     var->prepareAux();
   }
 
-  if (_nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).size() > 0)
+  if (_nodal_kernels.hasActiveBoundaryObjects(boundary_id, _tid))
   {
     Node * node = bnode->_node;
     if (node->processor_id() == _fe_problem.processor_id())
     {
       _fe_problem.reinitNodeFace(node, boundary_id, _tid);
-
-      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = _nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).begin();
-           nodal_kernel_it != _nodal_kernels[_tid].activeBoundaryNodalKernels(boundary_id).end();
-           ++nodal_kernel_it)
+      const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
+      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = objects.begin(); nodal_kernel_it != objects.end(); ++nodal_kernel_it)
         (*nodal_kernel_it)->computeResidual();
 
       _num_cached++;
