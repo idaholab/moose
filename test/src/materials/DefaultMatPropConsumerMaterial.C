@@ -14,3 +14,8 @@ DefaultMatPropConsumerMaterial::DefaultMatPropConsumerMaterial(const InputParame
     _prop(getDefaultMaterialProperty<Real>(_prop_name))
 {
 }
+
+void
+DefaultMatPropConsumerMaterial::computeQpProperties()
+{
+}

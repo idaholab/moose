@@ -39,21 +39,18 @@ DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(con
 
 
 void
-DerivativeMaterialInterfaceTestClient::computeProperties()
+DerivativeMaterialInterfaceTestClient::computeQpProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  if (_by_name || _prop_name == "prop")
   {
-    if (_by_name || _prop_name == "prop")
-    {
-      if (_prop0[_qp] != 0.0 || _prop1[_qp] != 1.0 || _prop2[_qp] != 2.0 || _prop3[_qp] != 3.0 || _prop4[_qp] != 4.0 || _prop5[_qp] != 5.0)
-        mooseError("Unexpected DerivativeMaterial property value.");
-    }
-    else if (_prop_name == "1.0")
-    {
-      if (_prop0[_qp] != 0.0 || _prop1[_qp] != 0.0 || _prop2[_qp] != 0.0 || _prop3[_qp] != 0.0 || _prop4[_qp] != 0.0 || _prop5[_qp] != 0.0)
-        mooseError("Unexpected DerivativeMaterial property value.");
-    }
-    else
-      mooseError("Unexpected DerivativeMaterial property name.");
+    if (_prop0[_qp] != 0.0 || _prop1[_qp] != 1.0 || _prop2[_qp] != 2.0 || _prop3[_qp] != 3.0 || _prop4[_qp] != 4.0 || _prop5[_qp] != 5.0)
+    mooseError("Unexpected DerivativeMaterial property value.");
   }
+  else if (_prop_name == "1.0")
+  {
+    if (_prop0[_qp] != 0.0 || _prop1[_qp] != 0.0 || _prop2[_qp] != 0.0 || _prop3[_qp] != 0.0 || _prop4[_qp] != 0.0 || _prop5[_qp] != 0.0)
+    mooseError("Unexpected DerivativeMaterial property value.");
+  }
+  else
+  mooseError("Unexpected DerivativeMaterial property name.");
 }

@@ -859,18 +859,18 @@ SolidModel::initialSetup()
   {
 
 //    const std::vector<Material*> * mats_p;
-    std::vector<MooseSharedPointer<Material> > const * mats_p;
+    std::vector<MooseSharedPointer<MaterialBase> > const * mats_p;
     std::string suffix;
     if (_bnd)
     {
-      mats_p = &_fe_problem.getFaceMaterialWarehouse().getActiveBlockObjects(_block_id[i], _tid);
+      mats_p = &_fe_problem.getMaterialWarehouse()[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_block_id[i], _tid);
       suffix = "_face";
     }
     else
       mats_p = &_fe_problem.getMaterialWarehouse().getActiveBlockObjects(_block_id[i], _tid);
 
 
-    const std::vector<MooseSharedPointer<Material> > & mats = *mats_p;
+    const std::vector<MooseSharedPointer<MaterialBase> > & mats = *mats_p;
 
     for (unsigned int j=0; j < mats.size(); ++j)
     {

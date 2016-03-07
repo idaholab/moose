@@ -18,7 +18,7 @@
 template<>
 InputParameters validParams<VectorOfPostprocessors>()
 {
-  InputParameters params = validParams<VectorPostprocessor>();
+  InputParameters params = validParams<GeneralVectorPostprocessor>();
 
   params.addRequiredParam<std::vector<PostprocessorName> >("postprocessors", "The postprocessors whose values are to be reported");
   params.addClassDescription("Outputs the values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user");

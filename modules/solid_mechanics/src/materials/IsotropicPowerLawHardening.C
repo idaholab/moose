@@ -74,4 +74,3 @@ IsotropicPowerLawHardening::computeHardening( unsigned qp, Real scalar )
 
   return slope;
 }
-

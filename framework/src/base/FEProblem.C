@@ -32,11 +32,14 @@
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Material.h"
+#include "DiscreteMaterial.h"
 #include "ConstantIC.h"
 #include "Parser.h"
 #include "ElementH1Error.h"
 #include "Function.h"
+#include "MaterialBase.h"
 #include "Material.h"
+#include "DiscreteMaterial.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
@@ -442,15 +445,13 @@ void FEProblem::initialSetup()
   // Materials
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
+    // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
     _materials.sort(tid);
-    _materials.initialSetup(tid);
 
-    _face_materials.sort(tid);
-    _face_materials.initialSetup(tid);
-
-    _neighbor_materials.sort(tid);
-    _neighbor_materials.initialSetup(tid);
+    // Call initialSetup on both Material and DiscreteMaterial objects
+    _materials_base.initialSetup(tid);
   }
+
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
@@ -617,9 +618,7 @@ void FEProblem::timestepSetup()
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _materials.timestepSetup(tid);
-    _face_materials.timestepSetup(tid);
-    _neighbor_materials.timestepSetup(tid);
+    _materials_base.timestepSetup(tid);
     _functions.timestepSetup(tid);
   }
 
@@ -1159,9 +1158,7 @@ FEProblem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
 
   // Material Warehouses
-  _materials.subdomainSetup(subdomain, tid);
-  _face_materials.subdomainSetup(subdomain, tid);
-  _neighbor_materials.subdomainSetup(subdomain, tid);
+  _materials_base.subdomainSetup(subdomain, tid);
 
   // Call the subdomain methods of the output system, these are not threaded so only call it once
   if (tid == 0)
@@ -1583,6 +1580,26 @@ FEProblem::projectSolution()
 }
 
 
+MooseSharedPointer<DiscreteMaterial>
+FEProblem::getDiscreteMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid)
+{
+  switch (type)
+  {
+  case Moose::NEIGHBOR_MATERIAL_DATA:
+    name += "_neighbor";
+    break;
+  case Moose::BOUNDARY_MATERIAL_DATA:
+  case Moose::FACE_MATERIAL_DATA:
+    name += "_face";
+    break;
+  default:
+    break;
+  }
+
+  return _discrete_materials[type].getActiveObject(name, tid);
+}
+
+
 MooseSharedPointer<MaterialData>
 FEProblem::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 {
@@ -1619,11 +1636,25 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    // General Block/Boundary Material object
-    MooseSharedPointer<Material> material = _factory.create<Material>(mat_name, name, parameters, tid);
-    _materials.addObject(material, tid);
+    // Create the general Block/Boundary MaterialBase object
+    MooseSharedPointer<MaterialBase> material_base = _factory.create<MaterialBase>(mat_name, name, parameters, tid);
 
-    if (!material->boundaryRestricted())
+    // Cast to the two deried class types: Material and DiscreteMaterial
+    MooseSharedPointer<Material> material = MooseSharedNamespace::dynamic_pointer_cast<Material>(material_base);
+    MooseSharedPointer<DiscreteMaterial> discrete = MooseSharedNamespace::dynamic_pointer_cast<DiscreteMaterial>(material_base);
+
+    // If the object is boundary restricted do not create the nieghbor and face objects
+    if (material_base->boundaryRestricted())
+    {
+      _materials_base.addObject(material_base, tid);
+      if (material)
+        _materials.addObject(material, tid);
+      else if (discrete)
+        _discrete_materials.addObject(discrete, tid);
+    }
+
+    // Non-boundary restricted require face and neighbor objects
+    else
     {
       // The name of the object being created, this is changed multiple times as objects are created below
       std::string object_name;
@@ -1634,22 +1665,36 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       // face material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::FACE_MATERIAL_DATA;
       object_name = name + "_face";
-      MooseSharedPointer<Material> face_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
-      _face_materials.addObject(face_material, tid);
+      MooseSharedPointer<MaterialBase> face_material_base = _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
 
       // neighbor material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::NEIGHBOR_MATERIAL_DATA;
       current_parameters.set<bool>("_neighbor") = true;
       object_name = name + "_neighbor";
-      MooseSharedPointer<Material> neighbor_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
-      _neighbor_materials.addObject(neighbor_material, tid);
+      MooseSharedPointer<MaterialBase> neighbor_material_base = _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
+
+      // Store the base materials
+      _materials_base.addObjects(material_base, neighbor_material_base, face_material_base, tid);
 
       // link enabled parameter of face and neighbor materials
-      MooseObjectParameterName name(MooseObjectName("Material", material->name()), "enabled");
-      MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()), "enabled");
-      MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()), "enabled");
+      MooseObjectParameterName name(MooseObjectName("MaterialBase", material_base->name()), "enabled");
+      MooseObjectParameterName face_name(MooseObjectName("MaterialBase", face_material_base->name()), "enabled");
+      MooseObjectParameterName neighbor_name(MooseObjectName("MaterialBase", neighbor_material_base->name()), "enabled");
       _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name);
       _app.getInputParameterWarehouse().addControllableParameterConnection(name, neighbor_name);
+
+      if (material)
+      {
+        MooseSharedPointer<Material> face_material = MooseSharedNamespace::static_pointer_cast<Material>(face_material_base);
+        MooseSharedPointer<Material> neighbor_material = MooseSharedNamespace::static_pointer_cast<Material>(neighbor_material_base);
+        _materials.addObjects(material, neighbor_material, face_material, tid);
+      }
+      else if (discrete)
+      {
+        MooseSharedPointer<DiscreteMaterial> face_material = MooseSharedNamespace::static_pointer_cast<DiscreteMaterial>(face_material_base);
+        MooseSharedPointer<DiscreteMaterial> neighbor_material = MooseSharedNamespace::static_pointer_cast<DiscreteMaterial>(neighbor_material_base);
+        _discrete_materials.addObjects(discrete, neighbor_material, face_material, tid);
+      }
     }
   }
 }
@@ -1660,8 +1705,8 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
   std::set<MooseVariable *> needed_moose_vars;
 
-  if (_materials.hasActiveBlockObjects(blk_id, tid))
-    _materials.updateVariableDependency(needed_moose_vars, tid);
+  if (_materials_base.hasActiveBlockObjects(blk_id, tid))
+    _materials_base.updateVariableDependency(needed_moose_vars, tid);
 
   const std::set<unsigned int> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (std::set<unsigned int>::const_iterator it = ids.begin(); it != ids.end(); ++it)
@@ -1677,7 +1722,7 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 void
 FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_materials.hasActiveBlockObjects(blk_id, tid))
+  if (_materials_base.hasActiveBlockObjects(blk_id, tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
@@ -1688,14 +1733,18 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful
     if (swap_stateful)
       _material_data[tid]->swap(*elem);
 
-    _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
+    if (_discrete_materials.hasActiveBlockObjects(blk_id, tid))
+      _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
+
+    if (_materials.hasActiveBlockObjects(blk_id, tid))
+      _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
   }
 }
 
 void
 FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_face_materials.hasActiveBlockObjects(blk_id, tid))
+  if (_materials_base[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
@@ -1707,14 +1756,18 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
-    _bnd_material_data[tid]->reinit(_face_materials.getActiveBlockObjects(blk_id, tid));
+    if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _bnd_material_data[tid]->reset(_discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _bnd_material_data[tid]->reinit(_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
 void
 FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_neighbor_materials.hasActiveBlockObjects(blk_id, tid))
+  if (_materials_base[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
   {
     // NOTE: this will not work with h-adaptivity
     const Elem * & neighbor = _assembly[tid]->neighbor();
@@ -1727,14 +1780,18 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_
     if (swap_stateful)
       _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
 
-    _neighbor_material_data[tid]->reinit(_neighbor_materials.getActiveBlockObjects(blk_id, tid));
+    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _neighbor_material_data[tid]->reset(_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _neighbor_material_data[tid]->reinit(_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
 void
 FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
+  if (_materials_base.hasActiveBoundaryObjects(boundary_id, tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
@@ -1745,7 +1802,11 @@ FEProblem::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool s
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
-    _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
+    if (_discrete_materials.hasActiveBoundaryObjects(boundary_id, tid))
+      _bnd_material_data[tid]->reset(_discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
+
+    if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
+      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -2202,7 +2263,6 @@ FEProblem::executeControls(const ExecFlagType & exec_type)
 void
 FEProblem::updateActiveObjects()
 {
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     _nl.updateActive(tid);
@@ -2210,9 +2270,9 @@ FEProblem::updateActiveObjects()
     _indicators.updateActive(tid);
     _internal_side_indicators.updateActive(tid);
     _markers.updateActive(tid);
+    _materials_base.updateActive(tid);
     _materials.updateActive(tid);
-    _face_materials.updateActive(tid);
-    _neighbor_materials.updateActive(tid);
+    _discrete_materials.updateActive(tid);
   }
 
   _control_warehouse.updateActive();
@@ -3054,9 +3114,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    _materials.residualSetup(tid);
-    _face_materials.residualSetup(tid);
-    _neighbor_materials.residualSetup(tid);
+    _materials_base.residualSetup(tid);
     _functions.residualSetup(tid);
   }
   _aux.residualSetup();
@@ -3104,9 +3162,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     for (unsigned int tid = 0; tid < n_threads; tid++)
     {
-      _materials.jacobianSetup(tid);
-      _face_materials.jacobianSetup(tid);
-      _neighbor_materials.jacobianSetup(tid);
+      _materials_base.jacobianSetup(tid);
       _functions.jacobianSetup(tid);
     }
 
@@ -3180,7 +3236,7 @@ FEProblem::computeBounds(NonlinearImplicitSystem & /*sys*/, NumericVector<Number
   _lower.swap(lower);
   _upper.swap(upper);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    _materials.residualSetup(tid);
+    _materials_base.residualSetup(tid);
 
   _aux.residualSetup();
   _aux.compute(EXEC_LINEAR);
@@ -3539,7 +3595,7 @@ FEProblem::checkProblemIntegrity()
        * have a material specified.
        */
       bool check_material_coverage = false;
-      std::set<SubdomainID> ids = _materials.getActiveBlocks();
+      std::set<SubdomainID> ids = _materials_base.getActiveBlocks();
       for (std::set<SubdomainID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
       {
         local_mesh_subs.erase(*it);
@@ -3567,11 +3623,11 @@ FEProblem::checkProblemIntegrity()
     //checkBoundaryMatProps();
 
     // Check that material properties exist when requested by other properties on a given block
-    const std::vector<MooseSharedPointer<Material> > & materials = _materials.getActiveObjects();
-    for (std::vector<MooseSharedPointer<Material> >::const_iterator it = materials.begin(); it != materials.end(); ++it)
+    const std::vector<MooseSharedPointer<MaterialBase> > & materials = _materials_base.getActiveObjects();
+    for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator it = materials.begin(); it != materials.end(); ++it)
       (*it)->checkStatefulSanity();
 
-    checkDependMaterialsHelper(_materials.getActiveBlockObjects());
+    checkDependMaterialsHelper(_materials_base.getActiveBlockObjects());
   }
 
   // Check UserObjects and Postprocessors
@@ -3622,25 +3678,25 @@ FEProblem::checkUserObjects()
 
 
 void
-FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & materials_map)
+FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > > & materials_map)
 {
-  for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator j = materials_map.begin(); j != materials_map.end(); ++j)
+  for (std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > >::const_iterator j = materials_map.begin(); j != materials_map.end(); ++j)
   {
     /// These two sets are used to make sure that all dependent props on a block are actually supplied
     std::set<std::string> block_depend_props, block_supplied_props;
 
-    for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
+    for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
     {
       const std::set<std::string> & depend_props = (*mat_iter)->getRequestedItems();
       block_depend_props.insert(depend_props.begin(), depend_props.end());
 
       // See if any of the active materials supply this property
-      for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
+      for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
       {
         // Don't check THIS material for a coupled property
         if (mat_iter == mat_iter2) continue;
 
-        const std::set<std::string> & supplied_props = (*mat_iter2)->getSuppliedItems();
+        const std::set<std::string> & supplied_props = (*mat_iter2)->MaterialBase::getSuppliedItems();
         block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
       }
     }

@@ -17,7 +17,7 @@
 template<>
 InputParameters validParams<RestartableTypes>()
 {
-  InputParameters params = validParams<UserObject>();
+  InputParameters params = validParams<GeneralUserObject>();
   return params;
 }
 

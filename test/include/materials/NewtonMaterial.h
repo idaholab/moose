@@ -11,29 +11,41 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef VECRANGECHECKMATERIAL_H
-#define VECRANGECHECKMATERIAL_H
+#ifndef NEWTONMATERIAL_H
+#define NEWTONMATERIAL_H
 
+// MOOSE includes
 #include "Material.h"
-#include "MaterialProperty.h"
 
-
-//Forward Declarations
-class VecRangeCheckMaterial;
+// Forward declarations
+class NewtonMaterial;
+class DiscreteMaterial;
 
 template<>
-InputParameters validParams<VecRangeCheckMaterial>();
+InputParameters validParams<NewtonMaterial>();
 
 /**
- * Simple material to test vector parameter range checking.
+ * A test object that uses DiscreteMaterial to perform a Newton solve of a material property.
+ *
+ * Also, does some error checking.
  */
-class VecRangeCheckMaterial : public Material
+class NewtonMaterial : public Material
 {
 public:
-  VecRangeCheckMaterial(const InputParameters & parameters);
+  NewtonMaterial(const InputParameters & parameters);
+  virtual ~NewtonMaterial(){};
 
 protected:
   void computeQpProperties();
+
+private:
+  const Real & _tol;
+  const MaterialProperty<Real> & _f;
+  const MaterialProperty<Real> & _f_prime;
+  MaterialProperty<Real> & _p;
+  std::vector<unsigned int> _prop_ids;
+  unsigned int _max_iterations;
+  DiscreteMaterial & _discrete;
 };
 
-#endif //VECRANGECHECKMATERIAL_H
+#endif /* NEWTONMATERIAL_H */

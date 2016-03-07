@@ -138,6 +138,8 @@
 #include "DerivativeMaterialInterfaceTestClient.h"
 #include "DefaultMatPropConsumerMaterial.h"
 #include "RandomMaterial.h"
+#include "RecomputeMaterial.h"
+#include "NewtonMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGAdvection.h"
@@ -408,6 +410,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(DerivativeMaterialInterfaceTestClient);
   registerMaterial(DefaultMatPropConsumerMaterial);
   registerMaterial(RandomMaterial);
+  registerMaterial(RecomputeMaterial);
+  registerMaterial(NewtonMaterial);
 
 
   registerScalarKernel(ExplicitODE);

@@ -17,7 +17,7 @@
 template<>
 InputParameters validParams<PointerStoreError>()
 {
-  InputParameters params = validParams<UserObject>();
+  InputParameters params = validParams<GeneralUserObject>();
   return params;
 }
 
@@ -49,4 +49,3 @@ void
 PointerStoreError::execute()
 {
 }
-

@@ -16,6 +16,7 @@ public:
   DefaultMatPropConsumerMaterial(const InputParameters & parameters);
 
 protected:
+  virtual void computeQpProperties();
   std::string _prop_name;
   const MaterialProperty<Real> & _prop;
 };
