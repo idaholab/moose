@@ -12,9 +12,6 @@
 //
 #include "RichardsSeffRSC.h"
 
-RichardsSeffRSC::RichardsSeffRSC()
-{}
-
 Real
 RichardsSeffRSC::seff(Real pc, Real shift, Real scale)
 {

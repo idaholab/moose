@@ -19,7 +19,6 @@
 class RichardsSeffRSC
 {
 public:
-  RichardsSeffRSC();
 
   /**
    * effective saturation as a function of capillary pressure
