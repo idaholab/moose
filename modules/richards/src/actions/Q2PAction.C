@@ -125,6 +125,10 @@ Q2PAction::act()
     params.set<UserObjectName>("fluid_density") = _water_density;
     params.set<UserObjectName>("fluid_relperm") = _water_relperm;
     params.set<Real>("fluid_viscosity") = _water_viscosity;
+    if (_save_water_flux_in_Q2PWaterFluxResidual)
+      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PWaterFluxResidual");
+    if (_save_water_Jacobian_in_Q2PWaterJacobian)
+      params.set<std::vector<AuxVariableName> >("diag_save_in") = std::vector<AuxVariableName>(1, "Q2PWaterJacobian");
     _problem->addKernel(kernel_type, kernel_name, params);
 
     kernel_name = "Q2P_gas_flux";
@@ -138,7 +142,7 @@ Q2PAction::act()
     if (_save_gas_flux_in_Q2PGasFluxResidual)
       params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PGasFluxResidual");
     if (_save_gas_Jacobian_in_Q2PGasJacobian)
-      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PGasJacobian");
+      params.set<std::vector<AuxVariableName> >("diag_save_in") = std::vector<AuxVariableName>(1, "Q2PGasJacobian");
     _problem->addKernel(kernel_type, kernel_name, params);
 
     kernel_name = "Q2P_liquid_diffusion";
@@ -150,10 +154,6 @@ Q2PAction::act()
     params.set<UserObjectName>("fluid_relperm") = _water_relperm_for_diffusivity;
     params.set<Real>("fluid_viscosity") = _water_viscosity;
     params.set<Real>("diffusivity") = _diffusivity;
-    if (_save_water_flux_in_Q2PWaterFluxResidual)
-      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PWaterFluxResidual");
-    if (_save_water_Jacobian_in_Q2PWaterJacobian)
-      params.set<std::vector<AuxVariableName> >("diag_save_in") = std::vector<AuxVariableName>(1, "Q2PWaterJacobian");
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 

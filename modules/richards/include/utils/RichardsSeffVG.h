@@ -21,7 +21,6 @@
 class RichardsSeffVG
 {
 public:
-  RichardsSeffVG();
 
   /**
    * effective saturation as a fcn of porepressure
