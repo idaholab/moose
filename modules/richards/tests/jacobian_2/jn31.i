@@ -144,7 +144,6 @@
     variable = pwater
     unit_weight = '0 0 0'
     character = -1E12
-    MyNameIsAndyWilkins = false
   [../]
   [./bh_gas]
     type = RichardsBorehole
@@ -154,7 +153,6 @@
     variable = pgas
     unit_weight = '0 0 0'
     character = -1E12
-    MyNameIsAndyWilkins = false
     fully_upwind = true
   [../]
 []

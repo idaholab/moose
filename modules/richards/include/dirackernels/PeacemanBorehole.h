@@ -38,8 +38,6 @@ public:
   PeacemanBorehole(const InputParameters & parameters);
 
  private:
-  /// Checks rotation matrices are correct
-  const bool _debug_things;
 
   /// borehole constant
   const Real _re_constant;

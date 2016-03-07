@@ -84,7 +84,6 @@
     variable = pressure
     unit_weight = '0 0 0'
     character = 1E12
-    MyNameIsAndyWilkins = false
     fully_upwind = true
   [../]
 []
