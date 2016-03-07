@@ -15,16 +15,16 @@
 #ifndef COMPUTENODALKERNELBCSTHREAD_H
 #define COMPUTENODALKERNELBCSTHREAD_H
 
-#include "NodalKernelWarehouse.h"
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
 class AuxiliarySystem;
+class NodalKernel;
 
 class ComputeNodalKernelBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels);
+  ComputeNodalKernelBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
   // Splitting Constructor
   ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split);
 
@@ -37,7 +37,7 @@ public:
 protected:
   AuxiliarySystem & _sys;
 
-  std::vector<NodalKernelWarehouse> & _nodal_kernels;
+  const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 
   //Number of contributions cached up
   unsigned int _num_cached;

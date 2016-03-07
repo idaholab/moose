@@ -18,7 +18,6 @@
 #include "SystemBase.h"
 #include "KernelWarehouse.h"
 #include "ConstraintWarehouse.h"
-#include "NodalKernelWarehouse.h"
 #include "MooseObjectWarehouse.h"
 
 // libMesh includes
@@ -39,6 +38,7 @@ class DGKernel;
 class InterfaceKernel;
 class ScalarKernel;
 class DiracKernel;
+class NodalKernel;
 class Split;
 
 // libMesh forward declarations
@@ -445,7 +445,7 @@ public:
   const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse() { return _interface_kernels; }
   const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
-  const NodalKernelWarehouse & getNodalKernelWarehouse(THREAD_ID tid);
+  const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
   //@}
@@ -545,7 +545,7 @@ protected:
   MooseObjectWarehouse<Damper> _dampers;
 
   /// NodalKernels for each thread
-  std::vector<NodalKernelWarehouse> _nodal_kernels;
+  MooseObjectWarehouse<NodalKernel> _nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods

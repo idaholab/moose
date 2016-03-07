@@ -16,7 +16,6 @@
 #define COMPUTENODALKERNELJACOBIANSTHREAD_H
 
 #include "ThreadedNodeLoop.h"
-#include "NodalKernelWarehouse.h"
 
 // libMesh includes
 #include "libmesh/node_range.h"
@@ -24,6 +23,7 @@
 // Forward declarations
 class FEProblem;
 class AuxiliarySystem;
+class NodalKernel;
 
 // libMesh forward declarations
 namespace libMesh
@@ -37,7 +37,7 @@ class ComputeNodalKernelJacobiansThread : public ThreadedNodeLoop<ConstNodeRange
 public:
   ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
                                     AuxiliarySystem & sys,
-                                    std::vector<NodalKernelWarehouse> & nodal_kernels,
+                                    const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                     SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
@@ -52,7 +52,7 @@ public:
 protected:
   AuxiliarySystem & _aux_sys;
 
-  std::vector<NodalKernelWarehouse> & _nodal_kernels;
+  const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 
   SparseMatrix<Number> & _jacobian;
 

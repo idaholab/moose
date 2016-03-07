@@ -16,7 +16,6 @@
 #define COMPUTENODALKERNELSTHREAD_H
 
 #include "ThreadedNodeLoop.h"
-#include "NodalKernelWarehouse.h"
 
 // libMesh includes
 #include "libmesh/node_range.h"
@@ -24,12 +23,12 @@
 // Forward declarations
 class FEProblem;
 class AuxiliarySystem;
-
+class NodalKernel;
 
 class ComputeNodalKernelsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelsThread(FEProblem & fe_problem, AuxiliarySystem & sys, std::vector<NodalKernelWarehouse> & nodal_kernels);
+  ComputeNodalKernelsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
 
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);
@@ -43,7 +42,7 @@ public:
 protected:
   AuxiliarySystem & _aux_sys;
 
-  std::vector<NodalKernelWarehouse> & _nodal_kernels;
+  const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 
   /// Number of contributions cached up
   unsigned int _num_cached;
