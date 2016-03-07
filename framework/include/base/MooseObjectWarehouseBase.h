@@ -457,18 +457,8 @@ MooseObjectWarehouseBase<T>::updateActiveHelper(std::vector<MooseSharedPointer<T
 
   // Add "enabled" objects to the active list
   for (iter = all.begin(); iter != all.end(); ++iter)
-  {
-    // Cast to TransientInterface to call isActive (deprecated, be sure to remove #include TransientInterface.h when this goes away)
-    MooseSharedPointer<TransientInterface> ti = MooseSharedNamespace::dynamic_pointer_cast<TransientInterface>(*iter);
-    if (ti)
-    {
-      if (ti->isActive() && (*iter)->enabled())
-        active.push_back(*iter);
-    }
-
-    else if ( (*iter)->enabled() )
+    if ( (*iter)->enabled() )
       active.push_back(*iter);
-  }
 }
 
 

@@ -75,7 +75,7 @@ public:
   /**
    * Return the enabled status of the object.
    */
-  bool enabled() { return _enabled; }
+  virtual bool enabled() { return _enabled; }
 
 
 protected:

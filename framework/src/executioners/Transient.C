@@ -17,12 +17,13 @@
 // MOOSE includes
 #include "Factory.h"
 #include "SubProblem.h"
-#include "TimePeriodOld.h"
 #include "TimeStepper.h"
 #include "MooseApp.h"
 #include "Conversion.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "Control.h"
+#include "TimePeriod.h"
 
 // libMesh includes
 #include "libmesh/implicit_system.h"
@@ -684,19 +685,15 @@ void
 Transient::preExecute()
 {
   /*
-  if (_problem.out().useTimeInterval())
+  // Add time period start times to sync times
+  const std::vector<MooseSharedPointer<Control> > & controls = _problem.getControlWarehouse().getActiveObjects();
+  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = controls.begin(); it != controls.end(); ++it)
   {
-    _time_interval = true;
-    _time_interval_output_interval = _problem.out().timeinterval();
-    _next_interval_output_time = _time + _time_interval_output_interval;
+    MooseSharedPointer<TimePeriod> tp = MooseSharedNamespace::dynamic_pointer_cast<TimePeriod>(*it);
+    if (tp)
+      _time_stepper->addSyncTime(tp->getSyncTimes());
   }
   */
-
-  // Add time period start times to sync times
-  const std::vector<TimePeriodOld *> time_periods = _problem.getTimePeriods();
-  for (unsigned int i = 0; i < time_periods.size(); ++i)
-    _time_stepper->addSyncTime(time_periods[i]->start());
-
   _time_stepper->preExecute();
 }
 

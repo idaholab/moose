@@ -98,7 +98,6 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
   syntax.registerActionSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
 
-  syntax.registerActionSyntax("SetupTimePeriodsAction", "Executioner/TimePeriods/*");
   syntax.registerActionSyntax("SetupQuadratureAction", "Executioner/Quadrature");
   syntax.registerActionSyntax("SetupPredictorAction", "Executioner/Predictor");
 #ifdef LIBMESH_ENABLE_AMR
