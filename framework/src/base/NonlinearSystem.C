@@ -55,6 +55,7 @@
 #include "MooseApp.h"
 #include "NodalKernel.h"
 #include "DiracKernel.h"
+#include "NodalKernel.h"
 #include "TimeIntegrator.h"
 #include "Predictor.h"
 #include "Assembly.h"
@@ -196,9 +197,6 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     petsc_solver->use_default_monitor(false);
   }
 #endif
-
-  unsigned int n_threads = libMesh::n_threads();
-  _nodal_kernels.resize(n_threads);
 }
 
 NonlinearSystem::~NonlinearSystem()
@@ -325,6 +323,7 @@ NonlinearSystem::initialSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.initialSetup(tid);
+    _nodal_kernels.initialSetup(tid);
     _dirac_kernels.initialSetup(tid);
     if (_doing_dg)
       _dg_kernels.initialSetup(tid);
@@ -343,6 +342,7 @@ NonlinearSystem::timestepSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.timestepSetup(tid);
+    _nodal_kernels.timestepSetup(tid);
     _dirac_kernels.timestepSetup(tid);
     if (_doing_dg)
       _dg_kernels.timestepSetup(tid);
@@ -558,7 +558,7 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
   {
     // Create the kernel object via the factory and add to the warehouse
     MooseSharedPointer<NodalKernel> kernel = _factory.create<NodalKernel>(kernel_name, name, parameters, tid);
-    _nodal_kernels[tid].addNodalKernel(kernel);
+    _nodal_kernels.addObject(kernel, tid);
   }
 
   if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
@@ -837,6 +837,7 @@ void
 NonlinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
   _kernels.subdomainSetup(subdomain, tid);
+  _nodal_kernels.subdomainSetup(subdomain, tid);
   _dampers.subdomainSetup(subdomain, tid);
 }
 
@@ -1195,7 +1196,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.residualSetup(tid);
-
+    _nodal_kernels.residualSetup(tid);
     _dirac_kernels.residualSetup(tid);
     if (_doing_dg)
       _dg_kernels.residualSetup(tid);
@@ -1243,7 +1244,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   // residual contributions from Block NodalKernels
   PARALLEL_TRY
   {
-    if (!_nodal_kernels[0].allBlockNodalKernels().empty())
+    if (_nodal_kernels.hasActiveBlockObjects())
     {
       ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
 
@@ -1263,7 +1264,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   // residual contributions from boundary NodalKernels
   PARALLEL_TRY
   {
-    if (!_nodal_kernels[0].allBoundaryNodalKernels().empty())
+    if (_nodal_kernels.hasActiveBoundaryObjects())
     {
       ComputeNodalKernelBcsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
 
@@ -1810,7 +1811,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.jacobianSetup(tid);
-
+    _nodal_kernels.jacobianSetup(tid);
     _dirac_kernels.jacobianSetup(tid);
     if (_doing_dg)
       _dg_kernels.jacobianSetup(tid);
@@ -1840,7 +1841,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
           _fe_problem.addCachedJacobian(jacobian, i);
 
         // Block restricted Nodal Kernels
-        if (!_nodal_kernels[0].allBlockNodalKernels().empty())
+        if (_nodal_kernels.hasActiveBlockObjects())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
@@ -1852,7 +1853,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         }
 
         // Boundary restricted Nodal Kernels
-        if (!_nodal_kernels[0].allBoundaryNodalKernels().empty())
+        if (_nodal_kernels.hasActiveBoundaryObjects())
         {
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
@@ -1876,7 +1877,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
           _fe_problem.addCachedJacobian(jacobian, i);
 
         // Block restricted Nodal Kernels
-        if (!_nodal_kernels[0].allBlockNodalKernels().empty())
+        if (_nodal_kernels.hasActiveBlockObjects())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
@@ -1888,7 +1889,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         }
 
         // Boundary restricted Nodal Kernels
-        if (!_nodal_kernels[0].allBoundaryNodalKernels().empty())
+        if (_nodal_kernels.hasActiveBoundaryObjects())
         {
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
@@ -2417,9 +2418,10 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
 
   bool global_kernels_exist = _kernels.hasActiveBlockObjects(Moose::ANY_BLOCK_ID);
   global_kernels_exist |= _scalar_kernels.hasActiveObjects();
-  global_kernels_exist |= _nodal_kernels[0].subdomainsCovered(input_subdomains, kernel_variables);
+  global_kernels_exist |= _nodal_kernels.hasActiveObjects();
 
   _kernels.subdomainsCovered(input_subdomains, kernel_variables);
+  _nodal_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _scalar_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);
 
