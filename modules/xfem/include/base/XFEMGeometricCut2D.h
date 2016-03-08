@@ -17,6 +17,8 @@ public:
   XFEMGeometricCut2D(Real x0, Real y0, Real x1, Real y1, Real t_start, Real t_end);
   ~XFEMGeometricCut2D();
 
+  virtual bool active(Real time);
+
   virtual bool cutElementByGeometry(const Elem* elem, std::vector<CutEdge> & cut_edges, Real time);
   virtual bool cutElementByGeometry(const Elem* elem, std::vector<CutFace> & cut_faces, Real time);
 

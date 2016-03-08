@@ -20,7 +20,7 @@ XFEMGeometricCut::~XFEMGeometricCut()
 Real XFEMGeometricCut::cutFraction(Real time)
 {
   Real fraction = 0.0;
-  if (time > _t_start)
+  if (time >= _t_start)
   {
     if (time >= _t_end)
       fraction = 1.0;

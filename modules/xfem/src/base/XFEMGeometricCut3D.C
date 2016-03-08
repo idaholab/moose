@@ -23,6 +23,12 @@ XFEMGeometricCut3D::~XFEMGeometricCut3D()
 }
 
 bool
+XFEMGeometricCut3D::active(Real /*time*/)
+{
+  return true;
+}
+
+bool
 XFEMGeometricCut3D::cutElementByGeometry(const Elem* /*elem*/,
                                          std::vector<CutEdge> & /*cut_edges*/,
                                          Real /*time*/)
