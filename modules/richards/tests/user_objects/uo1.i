@@ -31,8 +31,8 @@
   [../]
   [./RelPermBW]
     type = RichardsRelPermBW
-    Sn = 0.0
-    Ss = 1.0
+    Sn = 0.05
+    Ss = 0.95
     Kn = 0.0
     Ks = 1.0
     C = 1.5
@@ -46,6 +46,17 @@
     type = RichardsRelPermPowerGas
     simm = 0.0
     n = 5
+  [../]
+  [./Q2PRelPermPowerGas]
+    type = Q2PRelPermPowerGas
+    simm = 0.0
+    n = 5
+  [../]
+  [./RelPermMonomial_zero]
+    type = RichardsRelPermMonomial
+    simm = 0.1
+    n = 0
+    zero_to_the_zero = 0
   [../]
 
   # following are unimportant in this test
@@ -165,23 +176,23 @@
 
   [./answer_RelPermBW]
     type = ParsedFunction
-    value = kn+(x^2)*(c-1)*(ks-kn)/(c-x)
-    vars = 'kn ks c'
-    vals = '0 1 1.5'
+    value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
+    vars = 'kn ks c sn ss'
+    vals = '0 1 1.5 0.05 0.95'
   [../]
   [./answer_dRelPermBW]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = kn+(x^2)*(c-1)*(ks-kn)/(c-x)
-    vars = 'kn ks c'
-    vals = '0 1 1.5'
+    value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
+    vars = 'kn ks c sn ss'
+    vals = '0 1 1.5 0.05 0.95'
   [../]
   [./answer_d2RelPermBW]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
-    value = kn+(x^2)*(c-1)*(ks-kn)/(c-x)
-    vars = 'kn ks c'
-    vals = '0 1 1.5'
+    value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
+    vars = 'kn ks c sn ss'
+    vals = '0 1 1.5 0.05 0.95'
   [../]
 
   [./answer_RelPermMonomial]
@@ -205,6 +216,27 @@
     vals = '3'
   [../]
 
+  [./answer_RelPermMonomial_zero]
+    type = ParsedFunction
+    value = if(x>simm,1,0)
+    vars = 'simm'
+    vals = '0.1'
+  [../]
+  [./answer_dRelPermMonomial_zero]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = if(x>simm,1,0)
+    vars = 'simm'
+    vals = '0.1'
+  [../]
+  [./answer_d2RelPermMonomial_zero]
+    type = Grad2ParsedFunction
+    direction = '1E-3 0 0'
+    value = if(x>simm,1,0)
+    vars = 'simm'
+    vals = '0.1'
+  [../]
+
   [./answer_RelPermPowerGas]
     type = ParsedFunction
     value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
@@ -222,6 +254,27 @@
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
     value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
+    vars = 'n'
+    vals = '5'
+  [../]
+
+  [./answer_Q2PRelPermPowerGas]
+    type = ParsedFunction
+    value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
+    vars = 'n'
+    vals = '5'
+  [../]
+  [./answer_dQ2PRelPermPowerGas]
+    type = GradParsedFunction
+    direction = '1E-4 0 0'
+    value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
+    vars = 'n'
+    vals = '5'
+  [../]
+  [./answer_d2Q2PRelPermPowerGas]
+    type = Grad2ParsedFunction
+    direction = '1E-5 0 0'
+    value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
     vars = 'n'
     vals = '5'
   [../]
@@ -275,6 +328,20 @@
   [./dRelPermPowerGas_Aux]
   [../]
   [./d2RelPermPowerGas_Aux]
+  [../]
+
+  [./Q2PRelPermPowerGas_Aux]
+  [../]
+  [./dQ2PRelPermPowerGas_Aux]
+  [../]
+  [./d2Q2PRelPermPowerGas_Aux]
+  [../]
+
+  [./RelPermMonomial_zero_Aux]
+  [../]
+  [./dRelPermMonomial_zero_Aux]
+  [../]
+  [./d2RelPermMonomial_zero_Aux]
   [../]
 
   [./check_Aux]
@@ -415,10 +482,48 @@
     seff_var = pressure
   [../]
 
+  [./Q2PRelPermPowerGas_AuxK]
+    type = RichardsRelPermAux
+    variable = Q2PRelPermPowerGas_Aux
+    relperm_UO = Q2PRelPermPowerGas
+    seff_var = pressure
+  [../]
+  [./dQ2PRelPermPowerGas_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dQ2PRelPermPowerGas_Aux
+    relperm_UO = Q2PRelPermPowerGas
+    seff_var = pressure
+  [../]
+  [./d2Q2PRelPermPowerGas_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2Q2PRelPermPowerGas_Aux
+    relperm_UO = Q2PRelPermPowerGas
+    seff_var = pressure
+  [../]
+
+  [./RelPermMonomial_zero_AuxK]
+    type = RichardsRelPermAux
+    variable = RelPermMonomial_zero_Aux
+    relperm_UO = RelPermMonomial_zero
+    seff_var = pressure
+  [../]
+  [./dRelPermMonomial_zero_AuxK]
+    type = RichardsRelPermPrimeAux
+    variable = dRelPermMonomial_zero_Aux
+    relperm_UO = RelPermMonomial_zero
+    seff_var = pressure
+  [../]
+  [./d2RelPermMonomial_zero_AuxK]
+    type = RichardsRelPermPrimePrimeAux
+    variable = d2RelPermMonomial_zero_Aux
+    relperm_UO = RelPermMonomial_zero
+    seff_var = pressure
+  [../]
+
   [./check_AuxK]
     type = FunctionAux
     variable = check_Aux
-    function = answer_d2RelPermPowerGas
+    function = answer_RelPermBW
   [../]
 []
 
@@ -533,6 +638,38 @@
     type = NodalL2Error
     function = answer_d2RelPermPowerGas
     variable = d2RelPermPowerGas_Aux
+  [../]
+
+  [./cf_Q2PRelPermPowerGas]
+    type = NodalL2Error
+    function = answer_Q2PRelPermPowerGas
+    variable = Q2PRelPermPowerGas_Aux
+  [../]
+  [./cf_dQ2PRelPermPowerGas]
+    type = NodalL2Error
+    function = answer_dQ2PRelPermPowerGas
+    variable = dQ2PRelPermPowerGas_Aux
+  [../]
+  [./cf_d2Q2PRelPermPowerGas]
+    type = NodalL2Error
+    function = answer_d2Q2PRelPermPowerGas
+    variable = d2Q2PRelPermPowerGas_Aux
+  [../]
+
+  [./cf_RelPermMonomial_zero]
+    type = NodalL2Error
+    function = answer_RelPermMonomial_zero
+    variable = RelPermMonomial_zero_Aux
+  [../]
+  [./cf_dRelPermMonomial_zero]
+    type = NodalL2Error
+    function = answer_dRelPermMonomial_zero
+    variable = dRelPermMonomial_zero_Aux
+  [../]
+  [./cf_d2RelPermMonomial_zero]
+    type = NodalL2Error
+    function = answer_d2RelPermMonomial_zero
+    variable = d2RelPermMonomial_zero_Aux
   [../]
 
 []
