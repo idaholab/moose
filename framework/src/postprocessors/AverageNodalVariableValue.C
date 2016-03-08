@@ -60,4 +60,3 @@ AverageNodalVariableValue::threadJoin(const UserObject & y)
   _avg += pps._avg;
   _n += pps._n;
 }
-

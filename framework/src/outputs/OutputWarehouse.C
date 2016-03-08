@@ -26,7 +26,6 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse(MooseApp & app) :
-    Warehouse<Output>(),
     _app(app),
     _buffer_action_console_outputs(true),
     _output_exec_flag(EXEC_CUSTOM),
