@@ -69,8 +69,8 @@
   [./constraints]
     type = TimePeriod
     disable_objects = 'lower complete'
-    start_time      = '0     1.95'
-    end_time        = '2     4'
-    execute_on = 'initial timestep_end'
+    start_time      = '0.0   2.0'
+    end_time        = '2.0   4.0'
+    execute_on = 'initial timestep_begin'
   [../]
 []
