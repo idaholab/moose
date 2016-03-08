@@ -27,11 +27,17 @@ public:
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_faces,
                             std::vector<CutFace> & cut_faces, Real time);
 
+protected:
+  bool IntersectSegmentWithCutLine(const Point & segment_point1,
+                                   const Point & segment_point2,
+                                   const Point & cutting_line_point1,
+                                   const Point & cutting_line_point2,
+                                   const Real & cutting_line_fraction,
+                                   Real & segment_intersection_fraction);
+
 private:
-  Real _x0;
-  Real _x1;
-  Real _y0;
-  Real _y1;
+  const Point _cut_line_start;
+  const Point _cut_line_end;
 };
 
 #endif
