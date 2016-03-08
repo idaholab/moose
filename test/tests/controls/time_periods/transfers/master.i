@@ -81,7 +81,6 @@
     type = TimePeriod
     enable_objects = pp_transfer
     start_time = 2
-    end_time = 5
     execute_on = 'initial timestep_begin'
   [../]
 []
