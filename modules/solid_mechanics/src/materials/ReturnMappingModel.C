@@ -24,7 +24,7 @@ InputParameters validParams<ReturnMappingModel>()
 }
 
 
-ReturnMappingModel::ReturnMappingModel( const InputParameters & parameters)
+ReturnMappingModel::ReturnMappingModel(const InputParameters & parameters)
   :ConstitutiveModel(parameters),
    _max_its(parameters.get<unsigned int>("max_its")),
    _output_iteration_info(getParam<bool>("output_iteration_info")),
@@ -37,10 +37,10 @@ ReturnMappingModel::ReturnMappingModel( const InputParameters & parameters)
 
 
 void
-ReturnMappingModel::computeStress( const Elem & current_elem,
+ReturnMappingModel::computeStress(const Elem & current_elem,
                                    unsigned qp, const SymmElasticityTensor & elasticityTensor,
                                    const SymmTensor & stress_old, SymmTensor & strain_increment,
-                                   SymmTensor & stress_new )
+                                   SymmTensor & stress_new)
 {
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
@@ -50,23 +50,21 @@ ReturnMappingModel::computeStress( const Elem & current_elem,
   stress_new += stress_old;
 
   SymmTensor inelastic_strain_increment;
-  computeStress( current_elem, qp, elasticityTensor, stress_old,
-                 strain_increment, stress_new, inelastic_strain_increment );
-
+  computeStress(current_elem, qp, elasticityTensor, stress_old,
+                 strain_increment, stress_new, inelastic_strain_increment);
 }
 
 void
-ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
+ReturnMappingModel::computeStress(const Elem & /*current_elem*/, unsigned qp,
                                    const SymmElasticityTensor & elasticityTensor,
                                    const SymmTensor & stress_old,
                                    SymmTensor & strain_increment,
                                    SymmTensor & stress_new,
-                                   SymmTensor & inelastic_strain_increment )
+                                   SymmTensor & inelastic_strain_increment)
 {
-
   // compute deviatoric trial stress
   SymmTensor dev_trial_stress(stress_new);
-  dev_trial_stress.addDiag( -dev_trial_stress.trace()/3.0 );
+  dev_trial_stress.addDiag(-dev_trial_stress.trace()/3.0);
 
   // compute effective trial stress
   Real dts_squared = dev_trial_stress.doubleContraction(dev_trial_stress);
@@ -74,7 +72,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
 
   // compute effective strain increment
   SymmTensor dev_strain_increment(strain_increment);
-  dev_strain_increment.addDiag( -strain_increment.trace()/3.0);
+  dev_strain_increment.addDiag(-strain_increment.trace()/3.0);
   _effective_strain_increment = dev_strain_increment.doubleContraction(dev_strain_increment);
   _effective_strain_increment = std::sqrt(2.0/3.0 * _effective_strain_increment);
 
@@ -94,7 +92,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
         norm_residual > _absolute_tolerance &&
         (norm_residual/first_norm_residual) > _relative_tolerance)
   {
-    iterationInitialize( qp, scalar );
+    iterationInitialize(qp, scalar);
 
     residual = computeResidual(qp, effective_trial_stress, scalar);
     norm_residual = std::abs(residual);
@@ -123,7 +121,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
         << std::endl;
     }
 
-    iterationFinalize( qp, scalar );
+    iterationFinalize(qp, scalar);
 
     ++it;
   }
@@ -140,7 +138,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
     {
       Moose::err << iter_output.str();
     }
-    mooseError("Max sub-newton iteration hit during nonlinear constitutive model solve! (" << _name << ")");
+    mooseError("Exceeded maximum iterations in ReturnMappingModel solve for material: " << _name << ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
   }
 
   // compute inelastic and elastic strain increments (avoid potential divide by zero - how should this be done)?
@@ -161,5 +159,4 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
   stress_new += stress_old;
 
   computeStressFinalize(qp, inelastic_strain_increment);
-
 }
