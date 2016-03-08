@@ -43,6 +43,13 @@ public:
    */
   virtual void execute();
 
+protected:
+
+  /**
+   * If enabled, this injects the start/end times into the TimeStepper sync times.
+   */
+  void initialSetup();
+
 private:
 
   /// List of objects to enable
@@ -56,6 +63,9 @@ private:
 
   /// The time to stop enabling the supplied object tags (defaults to the end of the simulation)
   std::vector<Real> _end_time;
+
+  /// Flag for setting value outside of time range
+  bool _set_outside_of_range;
 };
 
 #endif // TIMEPERIOD_H
