@@ -62,10 +62,13 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
 
    Modified trially by Andy to use MOOSE things
 */
+  mooseAssert(z > 0, "LambertW function in RichardsSeff1BWsmall called with negative argument");
+
   int i;
   const Real eps=4.0e-16, em1=0.3678794411714423215955237701614608;
   Real p,e,t,w;
-  //if (z<-em1 || isinf(z) || isnan(z)) { // Andy read this might not compile on some machines
+
+  /* Uncomment this stuff is you ever need to call with a negative argument
   if (z < -em1)
     mooseError("LambertW: bad argument " << z << "\n");
 
@@ -86,6 +89,7 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
      +5.858023729874774148815053846119*r*q3
       -8.401032217523977370984161688514*q3*q;  // error approx 1e-16
   }
+  */
   /* initial approx for iteration... */
   if (z < 1.0)
   {
