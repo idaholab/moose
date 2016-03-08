@@ -17,4 +17,9 @@
     expect_out = "Controls:.*Active Controls:"
     absent_out = "Controls:.*Active Controls:.*Active Controls:"
   [../]
+  [./active]
+    type = RunApp
+    input = controllable.i
+    expect_out = "Active\sObjects:.*Problem::"
+  [../]
 []

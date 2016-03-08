@@ -20,6 +20,8 @@ public:
 
   virtual ~XFEMGeometricCut3D();
 
+  virtual bool active(Real time);
+
   virtual bool cutElementByGeometry(const Elem* elem,
                                     std::vector<CutEdge> & cut_edges,
                                     Real time);
