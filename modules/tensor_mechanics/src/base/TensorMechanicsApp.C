@@ -62,6 +62,10 @@
 #include "LinearIsoElasticPFDamage.h"
 #include "HyperElasticPhaseFieldIsoDamage.h"
 
+#include "ComputeRadialReturnMappingStress.h"
+#include "DiscreteRadialReturnStressIncrement.h"
+#include "DiscreteRRIsotropicPlasticity.h"
+
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
 #include "TensorMechanicsPlasticTensileMulti.h"
@@ -184,6 +188,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
   registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(HyperElasticPhaseFieldIsoDamage);
+
+  registerMaterial(ComputeRadialReturnMappingStress);
+  registerMaterial(DiscreteRadialReturnStressIncrement);
+  registerMaterial(DiscreteRRIsotropicPlasticity);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
