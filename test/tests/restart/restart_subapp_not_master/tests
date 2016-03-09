@@ -1,0 +1,28 @@
+[Tests]
+  # only master, 0 <= t <= 4
+  [./complete_solve_no_subapp]
+    type = 'Exodiff'
+    input = 'complete_solve_no_subapp.i'
+    exodiff = 'complete_solve_no_subapp.e'
+  [../]
+  # split into sub solve 0 <= t <= 2 && master 2 <= t <= 4
+  # also write cp files for restart case
+  [./two_step_solve_master]
+    type = 'Exodiff'
+    input = 'two_step_solve_master.i'
+    exodiff = 'two_step_solve_master.e'
+    cli_args = 'Outputs/file_base=two_step_solve_master
+                MultiApps/full_solve/input_files=two_step_solve_sub.i'
+  [../]
+  # split into sub solve 0 <= t <= 2 && master 2 <= t <= 4
+  # this time restart the sub but _not_ the master
+  [./two_step_solve_master_restart]
+    type = 'Exodiff'
+    input = 'two_step_solve_master.i'
+    exodiff = 'two_step_solve_master_restart.e'
+    cli_args = 'Outputs/file_base=two_step_solve_master_restart
+                MultiApps/full_solve/input_files=two_step_solve_sub_restart.i'
+    prereq = two_step_solve_master
+    skip = 'Segfault #6297'
+  [../]
+[]
