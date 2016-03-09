@@ -40,22 +40,15 @@
   [./block_1]
     type = OutputTestMaterial
     block = 1
-    output_properties = real_property
+    output_properties = 'real_property'
     outputs = exodus1
     variable = u
   [../]
   [./block_2]
     type = OutputTestMaterial
     block = 2
-    output_properties = vector_property
+    output_properties = 'vector_property'
     outputs = exodus2
-    variable = u
-  [../]
-  [./all]
-    type = OutputTestMaterial
-    block = '1 2'
-    output_properties = tensor_property
-    outputs = exodus
     variable = u
   [../]
 []
@@ -71,7 +64,6 @@
 []
 
 [Outputs]
-  exodus = true
   [./exodus1]
     type = Exodus
     hide = u
