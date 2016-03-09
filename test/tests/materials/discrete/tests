@@ -1,9 +1,18 @@
 [Tests]
   [./newton_iteration]
     # Test the ability to compute material properties in an iterative manner
+    # Solves f(x) = x*x for x: f(x)= 0, so x = 0
     type = 'Exodiff'
     input = 'recompute.i'
     exodiff = 'recompute_out.e'
+  [../]
+
+  [./newton_iteration2]
+    # Test the ability to compute material properties in an iterative manner
+    # Solves f(x) = x*x - 3 for x: f(x)= 0, so x = sqrt(3)
+    type = 'Exodiff'
+    input = 'recompute2.i'
+    exodiff = 'recompute2_out.e'
   [../]
 
   [./newton_no_calc]

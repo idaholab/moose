@@ -22,16 +22,16 @@ InputParameters validParams<RecomputeMaterial>()
   params.addRequiredParam<std::string>("f_name", "The name of the property that holds the value to of the function for which the root is being computed");
   params.addRequiredParam<std::string>("f_prime_name", "The name of the property that holds the value to of the derivative of the function");
   params.addRequiredParam<std::string>("p_name", "The name of the independant variable for the function");
-  params.addRequiredCoupledVar("variable", "The coupled variable to use in the function evaluation.");
+  params.addParam<Real>("constant", 0, "The constant to add to the f equation.");
   return params;
 }
 
 RecomputeMaterial::RecomputeMaterial(const InputParameters & parameters) :
     DiscreteMaterial(parameters),
-    _var(coupledValue("variable")),
     _f(declareProperty<Real>(getParam<std::string>("f_name"))),
     _f_prime(declareProperty<Real>(getParam<std::string>("f_prime_name"))),
-    _p(getMaterialProperty<Real>(getParam<std::string>("p_name")))
+    _p(getMaterialProperty<Real>(getParam<std::string>("p_name"))),
+    _constant(getParam<Real>("constant"))
 {
 }
 
@@ -47,6 +47,6 @@ void
 RecomputeMaterial::computeQpProperties()
 {
   Real x = _p[_qp];
-  _f[_qp] = x * x *_var[_qp];
-  _f_prime[_qp] = 2 * _var[_qp] * x;
+  _f[_qp] = x * x - _constant;
+  _f_prime[_qp] = 2 * x;
 }
