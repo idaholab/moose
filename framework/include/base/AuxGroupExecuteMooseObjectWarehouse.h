@@ -59,11 +59,6 @@ public:
    */
   void sort(THREAD_ID tid = 0);
 
-  /**
-   * Updates the various active lists of objects.
-   */
-  virtual void updateActive(THREAD_ID tid = 0);
-
 protected:
 
   /// Storage for the PRE_AUX and POST_AUX group sorted objects (ALL is stored in the base class)
@@ -112,16 +107,6 @@ AuxGroupExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid/*= 0*/)
   ExecuteMooseObjectWarehouse<T>::sort(tid);
   _group_objects[Moose::PRE_AUX].sort(tid);
   _group_objects[Moose::POST_AUX].sort(tid);
-}
-
-
-template<typename T>
-void
-AuxGroupExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid/*=0*/)
-{
-  ExecuteMooseObjectWarehouse<T>::updateActive(tid);
-  _group_objects[Moose::PRE_AUX].updateActive(tid);
-  _group_objects[Moose::POST_AUX].updateActive(tid);
 }
 
 #endif // AUXGROUPEXECUTEMOOSEOBJECTWAREHOUSEBASE_H

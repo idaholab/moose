@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = CSVDiff
-    input = user_object.i
-    csvdiff = user_object_out.csv
-  [../]
-[]
