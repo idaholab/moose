@@ -15,7 +15,6 @@
 #include "Problem.h"
 #include "Factory.h"
 #include "Function.h"
-#include "TimePeriodOld.h"
 
 template<>
 InputParameters validParams<Problem>()
@@ -36,30 +35,4 @@ Problem::Problem(const InputParameters & parameters) :
 
 Problem::~Problem()
 {
-  for (unsigned int i=0; i<_time_periods.size(); ++i)
-    delete _time_periods[i];
-}
-
-TimePeriodOld &
-Problem::addTimePeriod(const std::string & name, Real start_time)
-{
-  TimePeriodOld * tp = new TimePeriodOld(name, start_time);
-  _time_periods.push_back(tp);
-
-  return *tp;
-}
-
-TimePeriodOld *
-Problem::getTimePeriodByName(const std::string & name)
-{
-  for (unsigned int i=0; i<_time_periods.size(); ++i)
-    if (_time_periods[i]->name() == name)
-      return _time_periods[i];
-  return NULL;
-}
-
-const std::vector<TimePeriodOld *> &
-Problem::getTimePeriods() const
-{
-  return _time_periods;
 }

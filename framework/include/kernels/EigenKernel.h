@@ -40,7 +40,7 @@ public:
   virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
 
   EigenKernel(const InputParameters & parameters);
-  virtual bool isActive();
+  virtual bool enabled();
 
 protected:
   virtual Real computeQpResidual() = 0;

@@ -348,7 +348,6 @@
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
 #include "DetermineSystemType.h"
-#include "SetupTimePeriodsAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
 #include "CopyNodalVarsAction.h"
@@ -886,7 +885,6 @@ addActionTypes(Syntax & syntax)
   /// Additional Actions
   registerTask("no_action", false);  // Used for Empty Action placeholders
   registerTask("set_global_params", false);
-  registerTask("setup_time_periods", true);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
   registerTask("setup_debug", false);
@@ -939,7 +937,6 @@ addActionTypes(Syntax & syntax)
 "(setup_time_stepper)"
 "(setup_predictor)"
 "(setup_postprocessor_data)"
-"(setup_time_periods)"
 "(init_displaced_problem)"
 "(add_aux_variable, add_variable, add_elemental_field_variable)"
 "(setup_variable_complete)"
@@ -1023,7 +1020,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(CreateExecutionerAction, "setup_executioner");
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
-  registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(CreateDisplacedProblemAction, "init_displaced_problem");
   registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");

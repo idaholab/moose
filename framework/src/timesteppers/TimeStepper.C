@@ -231,10 +231,3 @@ TimeStepper::forceTimeStep(Real dt)
 {
   _current_dt = dt;
 }
-
-void
-TimeStepper::addSyncTime(Real sync_time)
-{
-  _sync_times.insert(sync_time);
-}
-

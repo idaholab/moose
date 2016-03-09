@@ -92,11 +92,14 @@ public:
 
   virtual void forceTimeStep(Real dt);
 
+  ///@{
   /**
    * Add a sync time
    * \todo {Remove after old output system is removed; sync time are handled by OutputWarehouse}
    */
   void addSyncTime(Real sync_time);
+  void addSyncTime(const std::set<Real> & times);
+  ///@}
 
 protected:
   /**

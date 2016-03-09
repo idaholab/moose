@@ -78,23 +78,20 @@
 
 [Executioner]
   type = Transient
-
   start_time = 0
   dt = 0.1
   num_steps = 10
+[]
 
-  [./TimePeriods]
-    [./first_period]
-      start = 0.0
-      active_kernels = 'td diff ffn1'
-      active_bcs = 'all1'
-    [../]
-
-    [./second_period]
-      start = 0.45
-      active_kernels = 'td diff ffn2'
-      active_bcs = 'all2'
-    [../]
+[Controls]
+  [./first_period]
+    type = TimePeriod
+    start_time = 0.0
+    end_time = 0.45
+    enable_objects = 'ffn1 all1'
+    disable_objects = 'ffn2 all2'
+    execute_on = 'initial timestep_begin'
+    set_sync_times = true
   [../]
 []
 
