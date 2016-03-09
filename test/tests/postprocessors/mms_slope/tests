@@ -6,5 +6,6 @@
     group = 'adaptive'
     abs_zero = 1e-8
     method = 'OPT OPROF'
+    valgrind = 'HEAVY'
   [../]
 []
