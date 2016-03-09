@@ -2280,13 +2280,8 @@ FEProblem::updateActiveObjects()
     _materials_base.updateActive(tid);
     _materials.updateActive(tid);
     _discrete_materials.updateActive(tid);
-    _nodal_user_objects.updateActive(tid);
-    _elemental_user_objects.updateActive(tid);
-    _side_user_objects.updateActive(tid);
-    _internal_side_user_objects.updateActive(tid);
   }
 
-  _general_user_objects.updateActive();
   _control_warehouse.updateActive();
   _multi_apps.updateActive();
   _transient_multi_apps.updateActive();

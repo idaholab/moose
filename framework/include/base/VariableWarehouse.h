@@ -15,6 +15,7 @@
 #ifndef VARIABLEWAREHOUSE_H
 #define VARIABLEWAREHOUSE_H
 
+#include "Warehouse.h"
 #include "MooseTypes.h"
 
 #include <vector>
@@ -28,7 +29,7 @@ class MooseVariableScalar;
 /**
  * Holds variables and provides some services
  */
-class VariableWarehouse
+class VariableWarehouse : public Warehouse<MooseVariableBase>
 {
 public:
   VariableWarehouse();
@@ -113,9 +114,6 @@ protected:
 
   /// list of all variables
   std::vector<MooseVariableScalar *> _scalar_vars;
-
-  /// All instances of objects (raw pointers)
-  std::vector<MooseVariableBase *> _all_objects;
 };
 
 #endif // VARIABLEWAREHOUSE_H
