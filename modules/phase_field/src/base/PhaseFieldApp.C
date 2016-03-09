@@ -28,6 +28,8 @@
 #include "CHInterfaceAniso.h"
 #include "CHMath.h"
 #include "CHPFCRFF.h"
+#include "CHSplitChemicalPotential.h"
+#include "CHSplitConcentration.h"
 #include "CHSplitVar.h"
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
@@ -252,6 +254,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHInterfaceAniso);
   registerKernel(CHMath);
   registerKernel(CHPFCRFF);
+  registerKernel(CHSplitChemicalPotential);
+  registerKernel(CHSplitConcentration);
   registerKernel(CHSplitVar);
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
