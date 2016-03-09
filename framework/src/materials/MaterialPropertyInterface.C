@@ -15,6 +15,7 @@
 // MOOSE includes
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
+#include "DiscreteMaterial.h"
 
 template<>
 InputParameters validParams<MaterialPropertyInterface>()
@@ -198,5 +199,39 @@ MaterialPropertyInterface::getDiscreteMaterial(const std::string & name)
 DiscreteMaterial &
 MaterialPropertyInterface::getDiscreteMaterialByName(const std::string & name)
 {
-  return *(_mi_feproblem.getDiscreteMaterial(name, _material_data_type, _mi_tid));
+  MooseSharedPointer<DiscreteMaterial> discrete = _mi_feproblem.getDiscreteMaterial(name, _material_data_type, _mi_tid);
+
+  // Check block compatibility
+  if (!discrete->hasBlocks(_mi_block_ids))
+  {
+    std::ostringstream oss;
+    oss << "The DiscreteMaterial object '" << discrete->name() << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name << "':\n";
+    oss << "  " << discrete->name();
+    for (std::set<SubdomainID>::const_iterator it = discrete->blockIDs().begin(); it != discrete->blockIDs().end(); ++it)
+      oss << " " << *it;
+    oss << "\n";
+    oss << "  " << _mi_name;
+    for (std::set<SubdomainID>::const_iterator it = _mi_block_ids.begin(); it != _mi_block_ids.end(); ++it)
+      oss << " " << *it;
+    oss << "\n";
+    mooseError(oss.str());
+  }
+
+  // Check boundary compatibility
+  if (!discrete->hasBoundary(_mi_boundary_ids))
+  {
+    std::ostringstream oss;
+    oss << "The DiscreteMaterial object '" << discrete->name() << "' is defined on boundaries that are incompatible with the retrieving object '" << _mi_name << "':\n";
+    oss << "  " << discrete->name();
+    for (std::set<BoundaryID>::const_iterator it = discrete->boundaryIDs().begin(); it != discrete->boundaryIDs().end(); ++it)
+      oss << " " << *it;
+    oss << "\n";
+    oss << "  " << _mi_name;
+    for (std::set<BoundaryID>::const_iterator it = _mi_boundary_ids.begin(); it != _mi_boundary_ids.end(); ++it)
+      oss << " " << *it;
+    oss << "\n";
+    mooseError(oss.str());
+  }
+
+  return *discrete;
 }

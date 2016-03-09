@@ -1595,7 +1595,6 @@ FEProblem::getDiscreteMaterial(std::string name, Moose::MaterialDataType type, T
   case Moose::NEIGHBOR_MATERIAL_DATA:
     name += "_neighbor";
     break;
-  case Moose::BOUNDARY_MATERIAL_DATA:
   case Moose::FACE_MATERIAL_DATA:
     name += "_face";
     break;
@@ -1646,7 +1645,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     // Create the general Block/Boundary MaterialBase object
     MooseSharedPointer<MaterialBase> material_base = _factory.create<MaterialBase>(mat_name, name, parameters, tid);
 
-    // Cast to the two deried class types: Material and DiscreteMaterial
+    // Cast to the two derived class types: Material and DiscreteMaterial
     MooseSharedPointer<Material> material = MooseSharedNamespace::dynamic_pointer_cast<Material>(material_base);
     MooseSharedPointer<DiscreteMaterial> discrete = MooseSharedNamespace::dynamic_pointer_cast<DiscreteMaterial>(material_base);
 

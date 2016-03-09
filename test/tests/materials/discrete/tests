@@ -28,4 +28,18 @@
     input = 'recompute_error.i'
     expect_err = 'Unable to locate active object: recompute_props.'
   [../]
+
+  [./block_incompatible]
+    # Test error message when blocks are incompatible
+    type = RunException
+    input = recompute_block_error.i
+    expect_err = "The DiscreteMaterial object 'recompute_props' is defined on blocks that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s0\n\s*newton\s0\s10"
+  [../]
+
+  [./boundary_incompatible]
+    # Test error message when boundary are incompatible
+    type = RunException
+    input = recompute_boundary_error.i
+    expect_err = "The DiscreteMaterial object 'recompute_props' is defined on boundaries that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s3\n\s*newton\s1\s3"
+  [../]
 []
