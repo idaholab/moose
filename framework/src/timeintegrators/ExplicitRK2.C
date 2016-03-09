@@ -39,6 +39,15 @@ ExplicitRK2::~ExplicitRK2()
 
 
 void
+ExplicitRK2::preSolve()
+{
+  if (_dt == _dt_old)
+    _fe_problem.setConstJacobian(true);
+  else
+    _fe_problem.setConstJacobian(false);
+}
+
+void
 ExplicitRK2::computeTimeDerivatives()
 {
   // Since advanceState() is called in between stages 2 and 3, this
