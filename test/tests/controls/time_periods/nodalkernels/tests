@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = Exodiff
-    input = nodal.i
-    exodiff = nodal_out.e
-  [../]
-[]

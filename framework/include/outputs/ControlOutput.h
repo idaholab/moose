@@ -47,11 +47,6 @@ protected:
 private:
 
   /**
-   * Output a list of active MooseObjects
-   */
-  void outputActiveObjects();
-
-  /**
    * Output list of controllable parameters
    */
   void outputControls();
@@ -63,9 +58,6 @@ private:
 
   /// Flag for clearing the controlled parameters after they are output
   bool _clear_after_output;
-
-  /// Flag for showing active objects
-  bool _show_active_objects;
 };
 
 #endif /* CONTROLOUTPUT_H */

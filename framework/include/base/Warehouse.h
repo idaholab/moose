@@ -12,52 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "AverageNodalVariableValue.h"
-#include "MooseMesh.h"
-#include "SubProblem.h"
+#ifndef WAREHOUSE_H
+#define WAREHOUSE_H
 
-template<>
-InputParameters validParams<AverageNodalVariableValue>()
+#include <vector>
+
+/**
+ * Base class for all Warehouse containers. The warehouses in MOOSE hold
+ * all of the MooseObjects. Returns various collections of objects when requested
+ * and is responsible for deletion of those objects when the simulation ends.
+ */
+template <typename T>
+class Warehouse
 {
-  InputParameters params = validParams<NodalVariablePostprocessor>();
-  return params;
+public:
+  virtual ~Warehouse() {}
+
+  /**
+   * Get list of all kernels
+   * @return The list of all active kernels
+   */
+  virtual const std::vector<T *> & all() const;
+
+protected:
+  /// All instances of objects (raw pointers)
+  std::vector<T *> _all_objects;
+};
+
+template <typename T>
+const std::vector<T *> &
+Warehouse<T>::all() const
+{
+  return _all_objects;
 }
 
-AverageNodalVariableValue::AverageNodalVariableValue(const InputParameters & parameters) :
-    NodalVariablePostprocessor(parameters),
-    _avg(0),
-    _n(0)
-{
-}
-
-void
-AverageNodalVariableValue::initialize()
-{
-  _avg = 0;
-  _n = 0;
-}
-
-void
-AverageNodalVariableValue::execute()
-{
-  _avg += _u[_qp];
-  _n++;
-}
-
-Real
-AverageNodalVariableValue::getValue()
-{
-  gatherSum(_avg);
-  gatherSum(_n);
-
-  return _avg / _n;
-}
-
-void
-AverageNodalVariableValue::threadJoin(const UserObject & y)
-{
-  const AverageNodalVariableValue & pps = static_cast<const AverageNodalVariableValue &>(y);
-  _avg += pps._avg;
-  _n += pps._n;
-}
-
+#endif // WAREHOUSE_H

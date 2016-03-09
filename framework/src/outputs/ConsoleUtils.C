@@ -240,7 +240,7 @@ outputOutputInformation(MooseApp & app)
   std::stringstream oss;
   oss << std::left;
 
-  const std::vector<Output *> outputs = app.getOutputWarehouse().getOutputs<Output>();
+  const std::vector<Output *> & outputs = app.getOutputWarehouse().all();
   oss << "Outputs:\n";
   for (std::vector<Output *>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
   {
