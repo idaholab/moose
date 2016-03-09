@@ -67,7 +67,7 @@ KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // first get dependence of mobility _L on other variables using parent class
   // member function
-  Real res = ACBulk::computeQpOffDiagJacobian(jvar);
+  Real res = ACBulk<Real>::computeQpOffDiagJacobian(jvar);
   // Then add dependence of KKSACBulkF on other variables
   // Treat ca and cb specially, as they appear in the residual
   if (jvar == _ca_var)

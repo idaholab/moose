@@ -30,7 +30,7 @@ AllenCahn::AllenCahn(const InputParameters & parameters) :
 void
 AllenCahn::initialSetup()
 {
-  ACBulk::initialSetup();
+  ACBulk<Real>::initialSetup();
   validateNonlinearCoupling<Real>("f_name");
 }
 
@@ -57,6 +57,6 @@ AllenCahn::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  return ACBulk::computeQpOffDiagJacobian(jvar) +
+  return ACBulk<Real>::computeQpOffDiagJacobian(jvar) +
          _L[_qp] * (*_d2FdEtadarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }

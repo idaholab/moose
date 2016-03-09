@@ -51,7 +51,7 @@ KKSACBulkBase::KKSACBulkBase(const InputParameters & parameters) :
 void
 KKSACBulkBase::initialSetup()
 {
-  ACBulk::initialSetup();
+  ACBulk<Real>::initialSetup();
   validateNonlinearCoupling<Real>("fa_name");
   validateNonlinearCoupling<Real>("fb_name");
 }
