@@ -138,9 +138,9 @@ EigenKernel::computeQpJacobian()
 }
 
 bool
-EigenKernel::isActive()
+EigenKernel::enabled()
 {
-  bool flag = TransientInterface::isActive();
+  bool flag = MooseObject::enabled();
   if (_eigen)
   {
     if (_is_implicit)

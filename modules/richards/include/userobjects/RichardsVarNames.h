@@ -40,15 +40,6 @@ class RichardsVarNames :
   unsigned int num_v() const;
 
   /**
-   * the MOOSE variable number
-   * @param richards_var_num the richards variable number
-   * eg if richards_vars = 'pwater pgas', and the variables in
-   * the simulation are 'temperature pwater pgas displacement'
-   * then moose_var_num(0) = 1
-   */
-  unsigned int moose_var_num(unsigned int richards_var_num) const;
-
-  /**
    * the richards variable number
    * @param moose_var_num the MOOSE variable number
    * eg if richards_vars = 'pwater pgas', and the variables in
@@ -100,15 +91,6 @@ class RichardsVarNames :
   const VariableGradient * grad_var(unsigned int richards_var_num) const;
 
   /**
-   * The moose variable for the given richards_var_num
-   * This is got using the getVar function.  It allows
-   * direct extraction of nodal variable values
-   * used in mass lumping.
-   * @param richards_var_num the richards variable number
-   */
-  const MooseVariable * raw_var(unsigned int richards_var_num) const;
-
-  /**
    * The nodal variable values for the given richards_var_num
    * To extract a the value of pressure variable "pvar", at
    * node i, use (*RichardsVarNames.nodal_var(pvar))[i]
@@ -130,9 +112,6 @@ class RichardsVarNames :
 
   /// number of richards variables
   unsigned int _num_v;
-
-  /// space-separated string of names of porepressure variables
-  std::string _the_names;
 
   /// physical meaning of the variables.  Eg 'pppp' means 'all variables are pressure variables'
   MooseEnum _var_types;
@@ -157,9 +136,6 @@ class RichardsVarNames :
 
   /// moose_grad_var[i] = gradient values of richards variable i
   std::vector<const VariableGradient *> _moose_grad_var;
-
-  /// _moose_raw_var[i] = getVar of richards variable i
-  std::vector<const MooseVariable *> _moose_raw_var;
 };
 
 #endif // RICHARDSVARNAMES_H

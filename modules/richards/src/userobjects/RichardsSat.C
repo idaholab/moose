@@ -53,10 +53,4 @@ RichardsSat::dsat(Real /*seff*/) const
   return 1.0 - _sum_s_res;
 }
 
-Real
-RichardsSat::d2sat(Real /*seff*/) const
-{
-  return 0.0;
-}
-
 

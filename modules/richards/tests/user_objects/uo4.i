@@ -430,7 +430,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  active = 'csv exodus'
+  active = 'csv'
   file_base = uo4
   [./csv]
     type = CSV

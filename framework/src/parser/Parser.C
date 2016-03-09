@@ -649,6 +649,9 @@ template<>
 void Parser::setVectorParameter<VariableName>(const std::string & full_name, const std::string & short_name,
                                               InputParameters::Parameter<std::vector<VariableName> > * param, bool in_global, GlobalParamsAction * global_block);
 
+template<>
+void Parser::setDoubleIndexParameter<VariableName>(const std::string & full_name, const std::string & short_name,
+                                                   InputParameters::Parameter<std::vector<std::vector<VariableName> > >* param, bool /*in_global*/, GlobalParamsAction * /*global_block*/);
 
 // Macros for parameter extraction
 #define dynamicCastAndExtractScalar(type, param, full_name, short_name, in_global, global_block)                                        \
@@ -673,6 +676,14 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
     InputParameters::Parameter<std::vector<type> > * vector_p = dynamic_cast<InputParameters::Parameter<std::vector<type> >*>(param);   \
     if (vector_p)                                                                                                                       \
       setVectorParameter<type>(full_name, short_name, vector_p, in_global, global_block);                                               \
+  } while (0)
+
+#define dynamicCastAndExtractDoubleIndex(type, param, full_name, short_name, in_global, global_block)                                                                    \
+  do                                                                                                                                                                     \
+  {                                                                                                                                                                      \
+    InputParameters::Parameter<std::vector<std::vector<type> > > * double_index_p = dynamic_cast<InputParameters::Parameter<std::vector<std::vector<type> > > *>(param); \
+    if (double_index_p)                                                                                                                                                  \
+      setDoubleIndexParameter<type>(full_name, short_name, double_index_p, in_global, global_block);                                                                     \
   } while (0)
 
 void
@@ -834,6 +845,41 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(OutputName            , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(MaterialPropertyName  , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(DiscreteMaterialName  , it->second, full_name, it->first, in_global, global_params_block);
+
+      /**
+       * Double indexed types
+       */
+       // built-ins
+       dynamicCastAndExtractDoubleIndex(Real                  , it->second, full_name, it->first, in_global, global_params_block);
+       dynamicCastAndExtractDoubleIndex(int                   , it->second, full_name, it->first, in_global, global_params_block);
+       dynamicCastAndExtractDoubleIndex(long                  , it->second, full_name, it->first, in_global, global_params_block);
+       dynamicCastAndExtractDoubleIndex(unsigned int          , it->second, full_name, it->first, in_global, global_params_block);
+       // See vector type explanation
+ #if LIBMESH_DOF_ID_BYTES == 8
+       dynamicCastAndExtractDoubleIndex(uint64_t              , it->second, full_name, it->first, in_global, global_params_block);
+ #endif
+
+      dynamicCastAndExtractDoubleIndex(SubdomainID           , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(BoundaryID            , it->second, full_name, it->first, in_global, global_params_block);
+
+      // Moose String-derived vectors
+      dynamicCastAndExtractDoubleIndex(/*std::*/string       , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(FileName              , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(FileNameNoExtension   , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(MeshFileName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(SubdomainName         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(BoundaryName          , it->second, full_name, it->first, in_global, global_params_block);
+      // reading double indexed Variable name is problematic because Coupleable assumes they come as vectors
+      // therefore they not included in this list
+      dynamicCastAndExtractDoubleIndex(FunctionName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(UserObjectName        , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(IndicatorName         , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(MarkerName            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(MultiAppName          , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(PostprocessorName     , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(VectorPostprocessorName, it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(OutputName            , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractDoubleIndex(MaterialPropertyName  , it->second, full_name, it->first, in_global, global_params_block);
     }
   }
 
@@ -928,6 +974,45 @@ void Parser::setVectorParameter(const std::string & full_name, const std::string
     global_block->setVectorParam<T>(short_name).resize(vec_size);
     for (int i = 0; i < vec_size; ++i)
       global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
+  }
+}
+
+
+template<typename T>
+void Parser::setDoubleIndexParameter(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<std::vector<T> > >* param, bool in_global, GlobalParamsAction * global_block)
+{
+  GetPot *gp;
+
+  // See if this variable was passed on the command line
+  // if it was then we will retrieve the value from the command line instead of the file
+  if (_app.commandLine() && _app.commandLine()->haveVariable(full_name.c_str()))
+    gp = _app.commandLine()->getPot();
+  else
+    gp = &_getpot_file;
+
+  // Get the full string assigned to the variable full_name
+  std::string buffer = gp->get_value_no_default(full_name, "");
+
+  // split vector at delim ;
+  // NOTE: the substrings are _not_ of type T yet
+  std::vector<std::string> first_tokenized_vector;
+  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, ";");
+  param->set().resize(first_tokenized_vector.size());
+
+  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+    if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
+      mooseError("Reading parameter " << short_name << " failed.");
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setDoubleIndexParam<T>(short_name).resize(first_tokenized_vector.size());
+    for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+    {
+      global_block->setDoubleIndexParam<T>(short_name)[j].resize(param->get()[j].size());
+      for (unsigned int i = 0; i < param->get()[j].size(); ++i)
+        global_block->setDoubleIndexParam<T>(short_name)[j][i] = param->get()[j][i];
+    }
   }
 }
 
@@ -1204,6 +1289,8 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
 
     // If we are able to convert this value into a Real, then set a default coupled value
     if (ss >> real_value && ss.eof())
+      // FIXME: the real_value is assigned to defaultCoupledValue overriding the value assigned before.
+      // Currently there is no functionality to separately assign the correct "real_value[i]" in InputParameters
       _current_params->defaultCoupledValue(short_name, real_value);
     else
     {

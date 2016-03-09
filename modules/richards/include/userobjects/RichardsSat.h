@@ -40,9 +40,6 @@ public:
   /// derivative of saturation wrt effective saturation
   Real dsat(Real /*seff*/) const;
 
-  /// second derivative of saturation wrt effective saturation
-  Real d2sat(Real /*seff*/) const;
-
 protected:
 
   /// residual saturation for this phase

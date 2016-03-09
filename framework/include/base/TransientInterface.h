@@ -19,7 +19,6 @@
 
 
 class FEProblem;
-class TimePeriodOld;
 class TransientInterface;
 
 template<>
@@ -34,12 +33,6 @@ class TransientInterface
 public:
   TransientInterface(const InputParameters & parameters, const std::string & object_type);
   virtual ~TransientInterface();
-
-  /**
-   * Is the object active at the given time?
-   * @return true is it is active, otherwise false
-   */
-  virtual bool isActive();
 
   bool isImplicit() { return _is_implicit; }
 
@@ -63,8 +56,6 @@ protected:
   bool _is_transient;
 
   const std::string _object_type;
-
-  const std::vector<TimePeriodOld *> & _time_periods;
 
 private:
   const std::string _ti_name;
