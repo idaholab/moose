@@ -16,21 +16,41 @@
 
 #include "FEProblem.h"
 #include "SubProblem.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<Residual>()
 {
+  MooseEnum residual_types("FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET", "FINAL");
+
   InputParameters params = validParams<GeneralPostprocessor>();
+  params.addParam<MooseEnum>("residual_type", residual_types, "Type of residual to be reported.  Choices are: "+residual_types.getRawNames());
   return params;
 }
 
 Residual::Residual(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
+    GeneralPostprocessor(parameters),
+    _residual_type(getParam<MooseEnum>("residual_type"))
 {}
 
 Real
 Residual::getValue()
 {
-  return _subproblem.finalNonlinearResidual();
+  Real residual = 0.0;
+  if (_residual_type == "FINAL")
+    residual = _subproblem.finalNonlinearResidual();
+  else
+  {
+    FEProblem * fe_problem = dynamic_cast<FEProblem *> (&_subproblem);
+    if (!fe_problem)
+      mooseError("Dynamic cast to FEProblem failed in Residual Postprocessor");
+    if (_residual_type == "INITIAL_BEFORE_PRESET")
+      residual = fe_problem->getNonlinearSystem()._initial_residual_before_preset_bcs;
+    else if (_residual_type == "INITIAL_AFTER_PRESET")
+      residual = fe_problem->getNonlinearSystem()._initial_residual_after_preset_bcs;
+    else
+      mooseError("Invalid residual_type option in Residual Postprocessor: "<<_residual_type);
+  }
+  return residual;
 }
 

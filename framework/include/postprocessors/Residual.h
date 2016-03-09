@@ -35,6 +35,9 @@ public:
    * This will return the final nonlinear residual.
    */
   virtual Real getValue();
+
+protected:
+  MooseEnum _residual_type;
 };
 
 #endif // RESIDUAL_H
