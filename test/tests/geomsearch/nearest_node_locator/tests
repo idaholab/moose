@@ -11,5 +11,6 @@
     input = 'adapt.i'
     exodiff = 'adapt_out.e-s003'
     group = 'geometric'
+    valgrind = 'HEAVY'
   [../]
 []
