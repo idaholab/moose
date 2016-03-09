@@ -47,10 +47,8 @@ RichardsSUPGstandard::dvelSUPG_dp(RealTensorValue perm, Real density_prime, Real
 Real
 RichardsSUPGstandard::cosh_relation(Real alpha) const
 {
-  if (alpha >= 5.0)
-    return 1 - 1.0/alpha; // prevents overflows
-  else if (alpha <= -5.0)
-    return -1 - 1.0/alpha;
+  if (alpha >= 5.0 || alpha <= -5.0)
+    return ((alpha > 0) ? 1 : -1) - 1.0/alpha; // prevents overflows
   else if (alpha == 0)
     return 0.0;
   return std::cosh(alpha)/std::sinh(alpha) - 1.0/alpha;
@@ -59,10 +57,8 @@ RichardsSUPGstandard::cosh_relation(Real alpha) const
 Real
 RichardsSUPGstandard::cosh_relation_prime(Real alpha) const
 {
-  if (alpha >= 5.0)
-      return 1.0/alpha/alpha;
-  else if (alpha <= -5.0)
-      return 1.0/alpha/alpha;
+  if (alpha >= 5.0 || alpha <= -5.0)
+      return 1.0/alpha/alpha; // prevents overflows
   else if (alpha == 0)
     return 1.0/3.0;
   return 1 - std::pow(std::cosh(alpha)/std::sinh(alpha), 2) + 1.0/alpha/alpha;
