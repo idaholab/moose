@@ -1,9 +1,10 @@
 [Mesh]
-  file = two_step_solve_master_out_full_solve0_cp/0002_mesh.cpr
+  file = two_step_solve_master_cp/0002_mesh.cpr
 []
 
 [Problem]
-  restart_file_base = two_step_solve_master_out_full_solve0_cp/0002
+  restart_file_base = two_step_solve_master_cp/LATEST
+  force_restart = true
 []
 
 [Functions]
@@ -25,13 +26,7 @@
   [../]
 []
 
-[ICs]
-  [./u_var]
-    type = FunctionIC
-    variable = u
-    function = exact_fn
-  [../]
-[]
+# Initial Condition will come from the restart file
 
 [Kernels]
   [./td]
@@ -75,8 +70,5 @@
 []
 
 [Outputs]
-  [./checkpoint]
-    type = Checkpoint
-    num_files = 3
-  [../]
+  exodus = true
 []

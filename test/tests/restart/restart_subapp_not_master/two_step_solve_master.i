@@ -85,7 +85,7 @@
     type = FullSolveMultiApp
     execute_on = initial
     positions = '0 0 0'
-    ##input_files = two_step_solve_sub.i
+    # input file will come from cli-args
   [../]
 []
 
@@ -100,6 +100,6 @@
 []
 
 [Outputs]
-  ##file_base = two_step_solve_master
+  #file_base will come from cli-args
   exodus = true
 []

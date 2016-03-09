@@ -13,6 +13,7 @@
     exodiff = 'two_step_solve_master.e'
     cli_args = 'Outputs/file_base=two_step_solve_master
                 MultiApps/full_solve/input_files=two_step_solve_sub.i'
+    recover = false
   [../]
   # split into sub solve 0 <= t <= 2 && master 2 <= t <= 4
   # this time restart the sub but _not_ the master
@@ -23,6 +24,5 @@
     cli_args = 'Outputs/file_base=two_step_solve_master_restart
                 MultiApps/full_solve/input_files=two_step_solve_sub_restart.i'
     prereq = two_step_solve_master
-    skip = 'Segfault #6297'
   [../]
 []

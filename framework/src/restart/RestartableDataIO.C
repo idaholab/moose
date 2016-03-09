@@ -30,10 +30,6 @@ RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
 
 RestartableDataIO::~RestartableDataIO()
 {
-  unsigned int n_threads = libMesh::n_threads();
-
-  for (unsigned int tid=0; tid<n_threads; tid++)
-    delete _in_file_handles[tid];
 }
 
 void
@@ -236,8 +232,7 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 
     const unsigned int file_version = 2;
 
-    mooseAssert(_in_file_handles[tid] == NULL, "Looks like you might be leaking in RestartableDataIO.C");
-    _in_file_handles[tid] = new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary);
+    _in_file_handles[tid] = MooseSharedPointer<std::ifstream>(new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary));
 
     // header
     char id[2];
@@ -281,7 +276,7 @@ RestartableDataIO::readRestartableData(const RestartableDatas & restartable_data
   {
     const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
-    if (!_in_file_handles[tid]->is_open())
+    if (!_in_file_handles[tid].get() || !_in_file_handles[tid]->is_open())
       mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
 
     deserializeRestartableData(restartable_data, *_in_file_handles[tid], recoverable_data);
