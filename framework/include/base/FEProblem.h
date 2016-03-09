@@ -1209,6 +1209,7 @@ private:
   bool _use_legacy_uo_initialization;
 
   bool _error_on_jacobian_nonzero_reallocation;
+  bool _force_restart;
   bool _fail_next_linear_convergence_check;
 
   /// Whether or not the system is currently computing the Jacobian matrix

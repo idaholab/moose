@@ -94,6 +94,7 @@ InputParameters validParams<FEProblem>()
   params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
   params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
   params.addParam<bool>("error_on_jacobian_nonzero_reallocation", false, "This causes PETSc to error if it had to reallocate memory in the Jacobian matrix due to not having enough nonzeros");
+  params.addParam<bool>("force_restart", false, "EXPERIMENTAL: If true, a sub_app may use a restart file instead of using of using the master backup file");
 
   return params;
 }
@@ -153,6 +154,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
     _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
+    _force_restart(getParam<bool>("force_restart")),
     _fail_next_linear_convergence_check(false),
     _currently_computing_jacobian(false)
 {
@@ -314,10 +316,10 @@ void FEProblem::initialSetup()
   // Flush all output to _console that occur during construction and initialization of objects
   _app.getOutputWarehouse().mooseConsole();
 
-  if (_app.isRecovering() && _app.isUltimateMaster())
+  if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
     _resurrector->setRestartFile(_app.getRecoverFileBase());
 
-  if ((_app.isRestarting() || _app.isRecovering()) && _app.isUltimateMaster())
+  if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
     _resurrector->restartFromFile();
   else
   {
@@ -554,6 +556,9 @@ void FEProblem::initialSetup()
     Moose::perf_log.push("execMultiApps()", "Setup");
     //TODO: we did not check the convergence of the multiapps on initial
     execMultiApps(EXEC_INITIAL);
+
+    // We'll backup the Multiapp here
+    backupMultiApps(EXEC_INITIAL);
     Moose::perf_log.pop("execMultiApps()", "Setup");
   }
 
