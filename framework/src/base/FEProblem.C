@@ -3727,6 +3727,39 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
       mooseError(oss.str());
     }
   }
+
+  // This loop checks that materials are not supplied by multiple MaterialBase objects
+  for (std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > >::const_iterator map_it = materials_map.begin(); map_it != materials_map.end(); ++map_it)
+  {
+    const std::vector<MooseSharedPointer<MaterialBase> > & materials = map_it->second;
+    std::set<std::string> inner_supplied, outer_supplied;
+
+    for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator outer_it = materials.begin(); outer_it != materials.end(); ++outer_it)
+    {
+      outer_supplied = (*outer_it)->getSuppliedItems();
+      inner_supplied.clear();
+
+      for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator inner_it = materials.begin(); inner_it != materials.end(); ++inner_it)
+      {
+        if (outer_it == inner_it)
+          continue;
+        inner_supplied.insert((*inner_it)->getSuppliedItems().begin(), (*inner_it)->getSuppliedItems().end());
+      }
+
+      // Test that a property isn't supplied on multiple blocks
+      std::set<std::string> intersection;
+      std::set_intersection(outer_supplied.begin(), outer_supplied.end(), inner_supplied.begin(), inner_supplied.end(), std::inserter(intersection, intersection.end()));
+
+      if (!intersection.empty())
+      {
+        std::ostringstream oss;
+        oss << "The following material properties are declared on block " << map_it->first << " by multiple materials:\n";
+        for (std::set<std::string>::const_iterator it = intersection.begin(); it != intersection.end(); ++it)
+          oss << *it << "\n";
+        mooseError(oss.str());
+      }
+    }
+  }
 }
 
 

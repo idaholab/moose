@@ -22,15 +22,6 @@ template<>
 InputParameters validParams<DiscreteMaterial>()
 {
   InputParameters params = validParams<MaterialBase>();
-
-  // It doesn't make sense to restrict DiscreteMaterial objects to a block or boundary since the user is
-  // responsible for the calculation. However, it is not possible to move Block/BoundaryRestrictable
-  // inhertence to Material instead of MaterialBase. This is due to the MaterialPropertyInterface which
-  // requires block/boundary ids be supplied on construction. And, the get/setMaterialProperty methods
-  // in MaterialBase override methods in MaterialPropertyInterface. Rather than re-factor these
-  // interfaces, these parameters are disabled.
-  params.suppressParameter<std::vector<SubdomainName> >("block");
-  params.suppressParameter<std::vector<BoundaryName> >("boundary");
   return params;
 }
 

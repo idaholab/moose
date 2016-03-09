@@ -1,0 +1,8 @@
+[Tests]
+  [./error]
+    # Test error when a property is declared on multiple blocks by different matrials.
+    type = RunException
+    input = error.i
+    expect_err = "The following material properties are declared on block 10 by multiple materials:\nf\s*\nf_prime"
+  [../]
+[]
