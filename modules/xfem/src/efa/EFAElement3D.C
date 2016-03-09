@@ -605,7 +605,7 @@ EFAElement3D::isFinalCut() const
     unsigned int num_interior_faces = 0;
     for (unsigned int i = 0; i < _fragments[0]->numFaces(); ++i)
     {
-      if (_fragments[0]->is_face_interior(i))
+      if (_fragments[0]->isFaceInterior(i))
         num_interior_faces += 1;
     }
     if (num_interior_faces == 3)

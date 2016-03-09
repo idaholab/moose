@@ -1145,6 +1145,8 @@ protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
 
+  ElementPairLocator * _element_pair_locator;
+
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;
 

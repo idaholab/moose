@@ -388,3 +388,33 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
   delete[] A;
   delete[] b;
 }
+
+void
+XFEMCutElem2D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase* displaced_mesh) const
+{
+  intersectionPoints.resize(2); // 2D: the intersection line is straight and can be represented by two ending points.(may have issues with double cuts case!)
+
+  std::vector<std::vector<EFANode*> > cut_line_nodes;
+  for (unsigned int i = 0; i < _efa_elem2d.getFragment(0)->numEdges(); ++i)
+  {
+    if (_efa_elem2d.getFragment(0)->isEdgeInterior(i))
+    {
+      std::vector<EFANode*> node_line(2,NULL);
+      node_line[0] = _efa_elem2d.getFragmentEdge(0,i)->getNode(0);
+      node_line[1] = _efa_elem2d.getFragmentEdge(0,i)->getNode(1);
+      cut_line_nodes.push_back(node_line);
+    }
+  }
+  if (cut_line_nodes.size() == 0)
+  {
+    libMesh::err << " ERROR: no cut line found in this element"<<std::endl;
+    exit(1);
+  }
+  if (plane_id < cut_line_nodes.size()) // valid plane_id
+  {
+    intersectionPoints[0]  = getNodeCoordinates(cut_line_nodes[plane_id][0], displaced_mesh);
+    intersectionPoints[1]  = getNodeCoordinates(cut_line_nodes[plane_id][1], displaced_mesh);
+  }
+
+  normal = getCutPlaneNormal(plane_id, displaced_mesh);
+}

@@ -61,5 +61,6 @@ public:
   void getWeightMultipliers(MooseArray<Real> & weights, QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, const MooseArray<Point> & q_points);
   void computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, const MooseArray<Point> & q_points);
   bool isPointPhysical(const Point & p) const;
+  virtual void getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase* displaced_mesh=NULL) const = 0;
 };
 #endif

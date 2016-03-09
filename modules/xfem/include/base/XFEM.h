@@ -140,7 +140,17 @@ public:
   void setXFEMQRule(std::string & xfem_qrule);
   void setCrackGrowthMethod(bool use_crack_growth_increment, Real crack_growth_increment);
   virtual bool getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule, const MooseArray<Point> & q_points);
-
+  virtual void getXFEMCutElemPair(std::vector<std::pair<const Elem*, const Elem*> > & _elem_pair) const {_elem_pair=_sibling_elems;}
+  virtual void getXFEMIntersectionInfo(const Elem* elem, 
+                                       unsigned int plane_id, 
+                                       Point & normal, std::vector<Point> & intersectionPoints, 
+                                       bool displaced_mesh = false) const;
+  virtual void getXFEMqRuleOnLine(std::vector<Point> & intersection_points, 
+                                  std::vector<Point> & quad_pts, 
+                                  std::vector<Real> & quad_wts) const;
+  virtual void getXFEMqRuleOnSurface(std::vector<Point> & intersection_points, 
+                                  std::vector<Point> & quad_pts, 
+                                  std::vector<Real> & quad_wts) const;
 private:
 
   void getFragmentEdges(const Elem* elem,
@@ -167,6 +177,7 @@ private:
 
   std::map<unique_id_type, XFEMCutElem*> _cut_elem_map;
   std::set<const Elem*> _crack_tip_elems;
+  std::vector<std::pair<const Elem*, const Elem*> > _sibling_elems;
 
   std::map<const Elem*, std::vector<Point> > _elem_crack_origin_direction_map;
 

@@ -15,6 +15,7 @@
 #include "Parser.h"
 #include "Factory.h"
 
+#include "XFEMElementPairLocator.h"
 #include "XFEMCircleCut.h"
 #include "XFEMGeometricCut2D.h"
 #include "XFEMSquareCut.h"
@@ -77,6 +78,8 @@ XFEMAction::act()
     xfem->setXFEMQRule(_xfem_qrule);
 
     xfem->setCrackGrowthMethod(_xfem_use_crack_growth_increment, _xfem_crack_growth_increment);
+
+    _problem->geomSearchData().addElementPairLocator(0, new XFEMElementPairLocator(xfem, 0));
 
     if (_xfem_cut_type == "line_segment_2d")
     {

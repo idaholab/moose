@@ -927,6 +927,7 @@ XFEM::cutMeshWithEFA()
   //Add new elements
   const std::vector<EFAElement*> NewElements = _efa_mesh.getChildElements();
 
+  std::map<unsigned int, std::vector<const Elem *> > temporary_parent_children_map;
 
   for (unsigned int i = 0; i < NewElements.size(); ++i)
   {
@@ -935,6 +936,10 @@ XFEM::cutMeshWithEFA()
 
     Elem *parent_elem = _mesh->elem(parent_id);
     Elem *libmesh_elem = Elem::build(parent_elem->type()).release();
+
+    // parent has at least two children
+    if ( NewElements[i]->getParent()->numChildren() > 1)
+      temporary_parent_children_map[parent_id].push_back(libmesh_elem);
 
     Elem *parent_elem2 = NULL;
     Elem *libmesh_elem2 = NULL;
@@ -1093,6 +1098,14 @@ XFEM::cutMeshWithEFA()
       _mesh2->delete_elem(elem_to_delete2);
     }
   }
+
+  for (std::map<unsigned int, std::vector<const Elem *> > :: iterator it = temporary_parent_children_map.begin(); it != temporary_parent_children_map.end(); ++it)
+  {
+      _sibling_elems.push_back(std::make_pair((it->second[0]), (it->second)[1]));
+  }
+  
+  //clear the temporary map
+  temporary_parent_children_map.clear();
 
   //Store information about crack tip elements
   if (mesh_changed)
@@ -1352,4 +1365,86 @@ XFEM::getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule
     have_weights = true;
   }
   return have_weights;
+}
+
+void 
+XFEM::getXFEMIntersectionInfo(const Elem* elem, unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, bool displaced_mesh) const
+{
+  std::map<unique_id_type, XFEMCutElem*>::const_iterator it;
+  it = _cut_elem_map.find(elem->unique_id());
+  if (it != _cut_elem_map.end())
+  {
+    const XFEMCutElem *xfce = it->second;
+    if (displaced_mesh)
+      xfce->getIntersectionInfo(plane_id, normal, intersectionPoints, _mesh2);
+    else
+      xfce->getIntersectionInfo(plane_id, normal, intersectionPoints);
+  }
+}
+
+void
+XFEM::getXFEMqRuleOnLine(std::vector<Point> & intersection_points, std::vector<Point> & quad_pts, std::vector<Real> & quad_wts) const
+{
+  Point p1 = intersection_points[0];
+  Point p2 = intersection_points[1];
+
+  //number of quadrature points
+  unsigned int num_qpoints = 2;
+
+  //quadrature coordinates
+  Real xi0 = -std::sqrt(1.0/3.0);
+  Real xi1 =  std::sqrt(1.0/3.0);
+
+  quad_wts.resize(num_qpoints);
+  quad_pts.resize(num_qpoints);
+
+  Real integ_jacobian =  pow((p1 -  p2).size_sq(), 0.5) * 0.5;
+
+  quad_wts[0] = 1.0 * integ_jacobian;
+  quad_wts[1] = 1.0 * integ_jacobian;
+
+  quad_pts[0] = (1.0 - xi0) / 2.0 * p1 + (1.0 + xi0) / 2.0 * p2;
+  quad_pts[1] = (1.0 - xi1) / 2.0 * p1 + (1.0 + xi1) / 2.0 * p2;
+}
+
+void
+XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points, std::vector<Point> & quad_pts, std::vector<Real> & quad_wts) const
+{
+  unsigned nnd_pe = intersection_points.size();
+  Point xcrd(0.0, 0.0, 0.0);
+  for (unsigned int i = 0; i < intersection_points.size(); ++i)
+    xcrd += intersection_points[i];
+  xcrd *= (1.0/intersection_points.size());
+
+  quad_pts.resize(nnd_pe);
+  quad_wts.resize(nnd_pe);
+
+  Real jac = 0.0;
+
+  for (unsigned int j = 0; j < nnd_pe; ++j) // loop all sub-trigs
+  {
+    std::vector<std::vector<Real> > shape(3, std::vector<Real>(3,0.0));
+    std::vector<Point> subtrig_points(3, Point(0.0,0.0,0.0)); // sub-trig nodal coords
+
+    int jplus1(j < nnd_pe-1 ? j+1 : 0);
+    subtrig_points[0] = xcrd;
+    subtrig_points[1] = intersection_points[j];
+    subtrig_points[2] = intersection_points[jplus1];
+
+    std::vector<std::vector<Real> > sg2;
+    Xfem::stdQuadr2D(3, 1, sg2); // get sg2
+    for (unsigned int l = 0; l < sg2.size(); ++l) // loop all int pts on a sub-trig
+    {
+      Xfem::shapeFunc2D(3, sg2[l], subtrig_points, shape, jac, true); // Get shape
+      std::vector<Real> tsg_line(3,0.0);
+      for (unsigned int k = 0; k < 3; ++k) // loop sub-trig nodes
+      {
+        tsg_line[0] += shape[k][2] * subtrig_points[k](0);
+        tsg_line[1] += shape[k][2] * subtrig_points[k](1);
+        tsg_line[2] += shape[k][2] * subtrig_points[k](2);
+      }
+      quad_pts[j + l] = Point(tsg_line[0], tsg_line[1], tsg_line[2]);
+      quad_wts[j + l] = sg2[l][3] * jac;
+    }
+  }
 }

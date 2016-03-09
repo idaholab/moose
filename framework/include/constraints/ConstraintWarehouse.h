@@ -23,6 +23,7 @@ class Constraint;
 class NodalConstraint;
 class NodeFaceConstraint;
 class FaceFaceConstraint;
+class ElemElemConstraint;
 
 /**
  * Warehouse for storing constraints
@@ -45,6 +46,7 @@ public:
    */
   const std::vector<MooseSharedPointer<NodalConstraint> > & getActiveNodalConstraints() const;
   const std::vector<MooseSharedPointer<FaceFaceConstraint> > & getActiveFaceFaceConstraints(const std::string & interface) const;
+  const std::vector<MooseSharedPointer<ElemElemConstraint> > & getActiveElemElemConstraints(unsigned int interface_id) const;
   const std::vector<MooseSharedPointer<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
   ///@}
 
@@ -54,6 +56,7 @@ public:
    */
   bool hasActiveNodalConstraints() const;
   bool hasActiveFaceFaceConstraints(const std::string & interface) const;
+  bool hasActiveElemElemConstraints(const unsigned int interface_id) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   ///@}
 
@@ -80,6 +83,9 @@ protected:
 
   /// FaceFaceConstraints
   std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> > _face_face_constraints;
+
+  /// ElemElemConstraints
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> > _element_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H
