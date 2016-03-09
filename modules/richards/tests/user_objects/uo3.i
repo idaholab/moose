@@ -27,6 +27,12 @@
     scale_ratio = 1E6
     shift = -2E6
   [../]
+  [./Seff1VGcut]
+    type = RichardsSeff1VGcut
+    m = 0.8
+    al = 1E-6
+    p_cut = -1E6
+  [../]
 
   # following are unimportant in this test
   [./PPNames]
@@ -121,6 +127,27 @@
     vals = '-2E6 1E6'
   [../]
 
+  [./answer_Seff1VGcut]
+    type = ParsedFunction
+    value = if(x<pcut,scut+dscut*(x-pcut),(1+max((-x)*al,0)^(1/(1-m)))^(-m))
+    vars = 'al m pcut scut dscut'
+    vals = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
+  [../]
+  [./answer_dSeff1VGcut]
+    type = GradParsedFunction
+    direction = '1 0 0'
+    value = if(x<pcut,scut+dscut*(x-pcut),(1+max((-x)*al,0)^(1/(1-m)))^(-m))
+    vars = 'al m pcut scut dscut'
+    vals = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
+  [../]
+  [./answer_d2Seff1VGcut]
+    type = Grad2ParsedFunction
+    direction = '1 0 0'
+    value = if(x<pcut,scut+dscut*(x-pcut),(1+max((-x)*al,0)^(1/(1-m)))^(-m))
+    vars = 'al m pcut scut dscut'
+    vals = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
+  [../]
+
   [./answer_Sat]
     type = ParsedFunction
     value = sres+((1-sumsres)*((1+max((-x)*al,0)^(1/(1-m)))^(-m)))
@@ -155,6 +182,13 @@
   [./dSeff1RSC_Aux]
   [../]
   [./d2Seff1RSC_Aux]
+  [../]
+
+  [./Seff1VGcut_Aux]
+  [../]
+  [./dSeff1VGcut_Aux]
+  [../]
+  [./d2Seff1VGcut_Aux]
   [../]
 
   [./Sat_Aux]
@@ -233,6 +267,28 @@
     wrtnum2 = 0
   [../]
 
+  [./Seff1VGcut_AuxK]
+    type = RichardsSeffAux
+    variable = Seff1VGcut_Aux
+    seff_UO = Seff1VGcut
+    pressure_vars = pressure
+  [../]
+  [./dSeff1VGcut_AuxK]
+    type = RichardsSeffPrimeAux
+    variable = dSeff1VGcut_Aux
+    seff_UO = Seff1VGcut
+    pressure_vars = pressure
+    wrtnum = 0
+  [../]
+  [./d2Seff1VGcut_AuxK]
+    type = RichardsSeffPrimePrimeAux
+    variable = d2Seff1VGcut_Aux
+    seff_UO = Seff1VGcut
+    pressure_vars = pressure
+    wrtnum1 = 0
+    wrtnum2 = 0
+  [../]
+
   [./Sat_AuxK]
     type = RichardsSatAux
     sat_UO = Saturation
@@ -249,7 +305,7 @@
   [./check_AuxK]
     type = FunctionAux
     variable = check_Aux
-    function = answer_Seff1VG
+    function = answer_Seff1VGcut
   [../]
 []
 
@@ -300,6 +356,22 @@
     type = NodalL2Error
     function = answer_d2Seff1RSC
     variable = d2Seff1RSC_Aux
+  [../]
+
+  [./cf_Seff1VGcut]
+    type = NodalL2Error
+    function = answer_Seff1VGcut
+    variable = Seff1VGcut_Aux
+  [../]
+  [./cf_dSeff1VGcut]
+    type = NodalL2Error
+    function = answer_dSeff1VGcut
+    variable = dSeff1VGcut_Aux
+  [../]
+  [./cf_d2Seff1VGcut]
+    type = NodalL2Error
+    function = answer_d2Seff1VGcut
+    variable = d2Seff1VGcut_Aux
   [../]
 
   [./cf_Sat]

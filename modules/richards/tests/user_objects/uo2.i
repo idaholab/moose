@@ -31,6 +31,13 @@
     molar_mass = 16.04246E-3
     infinity_ratio = 10
   [../]
+  [./DensityConstBulkCut]
+    type = RichardsDensityConstBulkCut
+    dens0 = 1000
+    bulk_mod = 2E6
+    cut_limit = 1E6
+    zero_point = -1E6
+  [../]
 
   # following are unimportant in this test
   [./SeffVG]
@@ -136,6 +143,27 @@
     vars = 'a b rt molar_mass infinityratio slope0'
     vals = '0.2303 0.000431 2436.1403 0.01604246 10 4.10485e-05'
   [../]
+
+  [./answer_DensityConstBulkCut]
+    type = ParsedFunction
+    value = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
+    vars = 'dens0 bulk_mod zero_pt cut_limit'
+    vals = '1000 2E6 -1E6 1E6'
+  [../]
+  [./answer_dDensityConstBulkCut]
+    type = GradParsedFunction
+    direction = '1 0 0'
+    value = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
+    vars = 'dens0 bulk_mod zero_pt cut_limit'
+    vals = '1000 2E6 -1E6 1E6'
+  [../]
+  [./answer_d2DensityConstBulkCut]
+    type = Grad2ParsedFunction
+    direction = '1 0 0'
+    value = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
+    vars = 'dens0 bulk_mod zero_pt cut_limit'
+    vals = '1000 2E6 -1E6 1E6'
+  [../]
 []
 
 [AuxVariables]
@@ -165,6 +193,13 @@
   [./dDensityVDW_Aux]
   [../]
   [./d2DensityVDW_Aux]
+  [../]
+
+  [./DensityConstBulkCut_Aux]
+  [../]
+  [./dDensityConstBulkCut_Aux]
+  [../]
+  [./d2DensityConstBulkCut_Aux]
   [../]
 
   [./check_Aux]
@@ -248,10 +283,29 @@
     pressure_var = pressure
   [../]
 
+  [./DensityConstBulkCut_AuxK]
+    type = RichardsDensityAux
+    variable = DensityConstBulkCut_Aux
+    density_UO = DensityConstBulkCut
+    pressure_var = pressure
+  [../]
+  [./dDensityConstBulkCut_AuxK]
+    type = RichardsDensityPrimeAux
+    variable = dDensityConstBulkCut_Aux
+    density_UO = DensityConstBulkCut
+    pressure_var = pressure
+  [../]
+  [./d2DensityConstBulkCut_AuxK]
+    type = RichardsDensityPrimePrimeAux
+    variable = d2DensityConstBulkCut_Aux
+    density_UO = DensityConstBulkCut
+    pressure_var = pressure
+  [../]
+
   [./check_AuxK]
     type = FunctionAux
     variable = check_Aux
-    function = answer_dDensityConstBulk
+    function = answer_d2DensityConstBulkCut
   [../]
 []
 
@@ -318,6 +372,22 @@
     type = NodalL2Error
     function = answer_d2DensityVDW
     variable = d2DensityVDW_Aux
+  [../]
+
+  [./cf_DensityConstBulkCut]
+    type = NodalL2Error
+    function = answer_DensityConstBulkCut
+    variable = DensityConstBulkCut_Aux
+  [../]
+  [./cf_dDensityConstBulkCut]
+    type = NodalL2Error
+    function = answer_dDensityConstBulkCut
+    variable = dDensityConstBulkCut_Aux
+  [../]
+  [./cf_d2DensityConstBulkCut]
+    type = NodalL2Error
+    function = answer_d2DensityConstBulkCut
+    variable = d2DensityConstBulkCut_Aux
   [../]
 []
 
@@ -398,7 +468,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  active = 'csv exodus'
+  active = 'csv'
   file_base = uo2
   [./csv]
     type = CSV
