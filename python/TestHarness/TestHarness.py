@@ -765,7 +765,7 @@ class TestHarness:
     if self.code.decode('hex') in argv:
       del argv[argv.index(self.code.decode('hex'))]
       code = False
-    self.options = parser.parse_args(argv)
+    self.options = parser.parse_args()
     self.tests = self.options.test_name
     self.options.code = code
 
