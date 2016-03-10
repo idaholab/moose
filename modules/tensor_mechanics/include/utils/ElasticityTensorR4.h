@@ -32,13 +32,7 @@ void mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v);
 class ElasticityTensorR4 : public RankFourTensor
 {
 public:
-  virtual ~ElasticityTensorR4() {}
-
-  /// Default constructor; fills to zero
-  ElasticityTensorR4();
-
-  /// Copy constructor
-  ElasticityTensorR4(const ElasticityTensorR4 &a);
+  ElasticityTensorR4() : RankFourTensor() {}
 
   /// Copy constructor for RankFourTensor
   ElasticityTensorR4(const RankFourTensor &a);
@@ -50,25 +44,38 @@ public:
    * This is used for the standard kernel stress_ij*d(test)/dx_j, when varied wrt u_k
    * Jacobian entry: d(stress_ij*d(test)/dx_j)/du_k = d(C_ijmn*du_m/dx_n*dtest/dx_j)/du_k
    */
-  virtual Real elasticJacobian( const unsigned int i, const unsigned int k, const RealGradient & grad_test, const RealGradient & grad_phi) const;
+  Real elasticJacobian( const unsigned int i, const unsigned int k, const RealGradient & grad_test, const RealGradient & grad_phi) const;
 
   /**
    * This is used for the standard kernel stress_ij*d(test)/dx_j, when varied wrt w_k (the cosserat rotation)
    * Jacobian entry: d(stress_ij*d(test)/dx_j)/dw_k = d(C_ijmn*eps_mnp*w_p*dtest/dx_j)/dw_k
    */
-  virtual Real elasticJacobianwc(const unsigned int i, const unsigned int k, const RealGradient & grad_test, Real phi) const;
+  Real elasticJacobianwc(const unsigned int i, const unsigned int k, const RealGradient & grad_test, Real phi) const;
 
   /**
    * This is used for the moment-balancing kernel eps_ijk*stress_jk*test, when varied wrt u_k
    * Jacobian entry: d(eps_ijm*stress_jm*test)/du_k = d(eps_ijm*C_jmln*du_l/dx_n*test)/du_k
    */
-  virtual Real momentJacobian(const unsigned int i, const unsigned int k, Real test, const RealGradient & grad_phi) const;
+  Real momentJacobian(const unsigned int i, const unsigned int k, Real test, const RealGradient & grad_phi) const;
 
   /**
    * This is used for the moment-balancing kernel eps_ijk*stress_jk*test, when varied wrt w_k (the cosserat rotation)
    * Jacobian entry: d(eps_ijm*stress_jm*test)/dw_k = d(eps_ijm*C_jmln*eps_lnp*w_p*test)/dw_k
    */
-  virtual Real momentJacobianwc(const unsigned int i, const unsigned int k, Real test, Real phi) const;
+  Real momentJacobianwc(const unsigned int i, const unsigned int k, Real test, Real phi) const;
+  void fillPrincipalFromInputVector(const std::vector<Real> & input);
+
+  template<class T>
+  friend void dataStore(std::ostream &, T &, void *);
+
+  template<class T>
+  friend void dataLoad(std::istream &, T &, void *);
 };
+
+template<>
+void dataStore(std::ostream &, ElasticityTensorR4 &, void *);
+
+template<>
+void dataLoad(std::istream &, ElasticityTensorR4 &, void *);
 
 #endif //ELASTICITYTENSORR4_H

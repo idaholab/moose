@@ -87,9 +87,6 @@ public:
   /// Initialization list replacement constructors, 9 arguments
   RankTwoTensor(Real S11, Real S21, Real S31, Real S12, Real S22, Real S32, Real S13, Real S23, Real S33);
 
-  /// Copy constructor from RankTwoTensor
-  RankTwoTensor(const RankTwoTensor & a);
-
   /// Copy constructor from RealTensorValue
   RankTwoTensor(const TypeTensor<Real> & a);
 
@@ -133,20 +130,20 @@ public:
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a RealTensorValue
    */
-  virtual void rotate(RealTensorValue & R);
+  void rotate(RealTensorValue & R);
 
   /**
    * rotates the tensor data given a rank two tensor rotation tensor
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a RankTwoTensor
    */
-  virtual void rotate(RankTwoTensor & R);
+  void rotate(RankTwoTensor & R);
 
   /**
    * rotates the tensor data anticlockwise around the z-axis
    * @param a angle in radians
    */
-  virtual RankTwoTensor rotateXyPlane(const Real a);
+  RankTwoTensor rotateXyPlane(const Real a);
 
   /**
    * Returns a matrix that is the transpose of the matrix this
@@ -382,14 +379,23 @@ public:
   /// RankTwoTensor from outer product of vectors
   void vectorOuterProduct(const TypeVector<Real> &, const TypeVector<Real> &);
 
-protected:
-
-
 private:
   static const unsigned int N = LIBMESH_DIM;
   Real _vals[N][N];
+
+  template<class T>
+  friend void dataStore(std::ostream &, T &, void *);
+
+  template<class T>
+  friend void dataLoad(std::istream &, T &, void *);
 };
 
 inline RankTwoTensor operator*(Real a, const RankTwoTensor & b) { return b * a; }
+
+template<>
+void dataStore(std::ostream & stream, RankTwoTensor &, void *);
+
+template<>
+void dataLoad(std::istream & stream, RankTwoTensor &, void *);
 
 #endif //RANKTWOTENSOR_H

@@ -57,15 +57,6 @@ public:
         mooseError("please enter a vector with 3 entries.");
     }
 
-  DiagTensor(const DiagTensor &a)
-    {
-      *this = a;
-    }
-
-
-  ~DiagTensor() {}
-
-
   Real rowDot(const unsigned int r,
               const libMesh::TypeVector<Real> & v) const
     {

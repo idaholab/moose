@@ -19,6 +19,20 @@ void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v)
   v.zero();
 }
 
+template<>
+void
+dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
+{
+  dataStore(stream, rtt._vals, context);
+}
+
+template<>
+void
+dataLoad(std::istream & stream, RankTwoTensor & rtt, void * context)
+{
+  dataLoad(stream, rtt._vals, context);
+}
+
 MooseEnum
 RankTwoTensor::fillMethodEnum()
 {
@@ -63,11 +77,6 @@ RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Rea
 
   for (unsigned int i=0; i<N; i++)
     _vals[2][i] = row3(i);
-}
-
-RankTwoTensor::RankTwoTensor(const RankTwoTensor & a)
-{
-  *this = a;
 }
 
 RankTwoTensor::RankTwoTensor(const TypeTensor<Real> & a)

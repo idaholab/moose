@@ -12,14 +12,18 @@ void mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v)
   v.zero();
 }
 
-ElasticityTensorR4::ElasticityTensorR4() :
-    RankFourTensor()
+template<>
+void
+dataStore(std::ostream & stream, ElasticityTensorR4 & et, void * context)
 {
+  dataStore(stream, et._vals, context);
 }
 
-ElasticityTensorR4::ElasticityTensorR4(const ElasticityTensorR4 &a) :
-    RankFourTensor(a)
+template<>
+void
+dataLoad(std::istream & stream, ElasticityTensorR4 & et, void * context)
 {
+  dataLoad(stream, et._vals, context);
 }
 
 ElasticityTensorR4::ElasticityTensorR4(const RankFourTensor &a) :

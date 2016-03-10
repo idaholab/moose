@@ -84,12 +84,6 @@ public:
   /// Fill from vector
   RankFourTensor(const std::vector<Real> &, FillMethod);
 
-  /// Copy constructor
-  RankFourTensor(const RankFourTensor &);
-
-  /// Destructor
-  ~RankFourTensor() {}
-
   // Named constructors
   static RankFourTensor Identity() { return RankFourTensor(initIdentity); }
   static RankFourTensor IdentityFour() { return RankFourTensor(initIdentityFour); };
@@ -168,13 +162,13 @@ public:
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
-  virtual void rotate(RealTensorValue & R);
+  void rotate(RealTensorValue & R);
 
   /**
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
-  virtual void rotate(const RankTwoTensor & R);
+  void rotate(const RankTwoTensor & R);
 
   /**
    * Transpose the tensor by swapping the first pair with the second pair of indices
@@ -192,7 +186,7 @@ public:
    *                       C_2211 = input[7], C_2212 = input[8], C_2222 = input[9]
    *                       and C_ijkl = C_jikl = C_ijlk
    */
-  virtual void surfaceFillFromInputVector(const std::vector<Real> & input);
+  void surfaceFillFromInputVector(const std::vector<Real> & input);
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
@@ -310,8 +304,20 @@ protected:
    * C3333 = input8
    * with all other components being zero
    */
+
   void fillPrincipalFromInputVector(const std::vector<Real> & input);
+  template<class T>
+  friend void dataStore(std::ostream &, T &, void *);
+
+  template<class T>
+  friend void dataLoad(std::istream &, T &, void *);
 };
+
+template<>
+void dataStore(std::ostream &, RankFourTensor &, void *);
+
+template<>
+void dataLoad(std::istream &, RankFourTensor &, void *);
 
 inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
 
