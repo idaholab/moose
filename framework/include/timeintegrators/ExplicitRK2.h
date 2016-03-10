@@ -68,6 +68,7 @@ public:
   ExplicitRK2(const InputParameters & parameters);
   virtual ~ExplicitRK2();
 
+  virtual void preSolve();
   virtual int order() { return 2; }
 
   virtual void computeTimeDerivatives();

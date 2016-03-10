@@ -7,6 +7,24 @@
 #include "SymmElasticityTensor.h"
 #include <vector>
 
+template<>
+void
+dataStore(std::ostream & stream, SymmElasticityTensor & set, void * context)
+{
+  dataStore(stream, set._constant, context);
+  dataStore(stream, set._values_computed, context);
+  dataStore(stream, set._val, context);
+}
+
+template<>
+void
+dataLoad(std::istream & stream, SymmElasticityTensor & set, void * context)
+{
+  dataLoad(stream, set._constant, context);
+  dataLoad(stream, set._values_computed, context);
+  dataLoad(stream, set._val, context);
+}
+
 SymmElasticityTensor::SymmElasticityTensor(const bool constant)
   : _constant(constant),
     _values_computed(false)

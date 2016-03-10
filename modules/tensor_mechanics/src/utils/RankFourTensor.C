@@ -22,6 +22,20 @@ void mooseSetToZero<RankFourTensor>(RankFourTensor & v)
   v.zero();
 }
 
+template<>
+void
+dataStore(std::ostream & stream, RankFourTensor & rft, void * context)
+{
+  dataStore(stream, rft._vals, context);
+}
+
+template<>
+void
+dataLoad(std::istream & stream, RankFourTensor & rft, void * context)
+{
+  dataLoad(stream, rft._vals, context);
+}
+
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {
@@ -37,11 +51,6 @@ RankFourTensor::RankFourTensor()
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
           _vals[i][j][k][l] = 0.0;
-}
-
-RankFourTensor::RankFourTensor(const RankFourTensor & a)
-{
-  *this = a;
 }
 
 RankFourTensor::RankFourTensor(const InitMethod init)
