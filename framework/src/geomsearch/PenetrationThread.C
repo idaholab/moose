@@ -445,7 +445,9 @@ PenetrationThread::switchInfo( PenetrationInfo * & info,
     infoNew->_contact_force_old = info->_contact_force_old;
     infoNew->_lagrange_multiplier = info->_lagrange_multiplier;
     infoNew->_locked_this_step = info->_locked_this_step;
+    infoNew->_stick_locked_this_step = info->_stick_locked_this_step;
     infoNew->_mech_status = info->_mech_status;
+    infoNew->_mech_status_old = info->_mech_status_old;
   }
   else
   {

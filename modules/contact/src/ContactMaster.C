@@ -380,17 +380,13 @@ contactModel(const std::string & the_name)
   std::string name(the_name);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   if ("frictionless" == name)
-  {
     model = CM_FRICTIONLESS;
-  }
   else if ("glued" == name)
-  {
     model = CM_GLUED;
-  }
   else if ("coulomb" == name)
-  {
     model = CM_COULOMB;
-  }
+  else if ("coulomb_mp" == name)
+    model = CM_COULOMB_MP;
   else if ("experimental" == name)
   {
     model = CM_FRICTIONLESS;

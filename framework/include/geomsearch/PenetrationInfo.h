@@ -46,9 +46,10 @@ public:
 
   enum MECH_STATUS_ENUM
   {
-    MS_NO_CONTACT=0,
-    MS_STICKING,
-    MS_SLIPPING,
+    MS_NO_CONTACT=0, // out of contact
+    MS_STICKING, // sticking (glued or frictional)
+    MS_SLIPPING, // slipping with zero frictional resistance
+    MS_SLIPPING_FRICTION, // slipping with nonzero frictional resistance
     MS_CONTACT // In contact, but unknown yet whether slipping or sticking.
   };
 
@@ -83,7 +84,12 @@ public:
   RealVectorValue _contact_force_old;
   Real _lagrange_multiplier;
   unsigned int _locked_this_step;
+  unsigned int _stick_locked_this_step;
   MECH_STATUS_ENUM _mech_status;
+  MECH_STATUS_ENUM _mech_status_old;
+  Point _incremental_slip_prev_iter;
+  bool _slip_reversed;
+  Real _slip_tol;
 };
 
 // Used for Restart

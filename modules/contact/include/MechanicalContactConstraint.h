@@ -89,7 +89,7 @@ protected:
   Real getPenalty(PenetrationInfo & pinfo);
 
   const unsigned int _component;
-  const ContactModel _model;
+  ContactModel _model;
   const ContactFormulation _formulation;
   const bool _normalize_penalty;
 
@@ -97,6 +97,8 @@ protected:
   const Real _friction_coefficient;
   const Real _tension_release;
   const Real _capture_tolerance;
+  const unsigned int _stick_lock_iterations;
+  const Real _stick_unlock_factor;
   bool _update_contact_set;
 
   NumericVector<Number> & _residual_copy;
