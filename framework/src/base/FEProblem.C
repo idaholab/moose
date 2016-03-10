@@ -1285,6 +1285,16 @@ FEProblem::addKernel(const std::string & kernel_name, const std::string & name, 
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Kernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Kernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
@@ -1304,6 +1314,16 @@ FEProblem::addNodalKernel(const std::string & kernel_name, const std::string & n
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow NodalKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this NodalKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
@@ -1321,6 +1341,16 @@ FEProblem::addScalarKernel(const std::string & kernel_name, const std::string & 
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow ScalarKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this ScalarKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
@@ -1339,6 +1369,16 @@ FEProblem::addBoundaryCondition(const std::string & bc_name, const std::string &
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Materials to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Material.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
@@ -1413,6 +1453,16 @@ FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & nam
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow AuxKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this AuxKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
     parameters.set<SystemBase *>("_nl_sys") = &_nl;
@@ -1431,6 +1481,16 @@ FEProblem::addAuxScalarKernel(const std::string & kernel_name, const std::string
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow AuxScalarKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this AuxScalarKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
@@ -1449,6 +1509,16 @@ FEProblem::addDiracKernel(const std::string & kernel_name, const std::string & n
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow DiracKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this DiracKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
@@ -1469,6 +1539,16 @@ FEProblem::addDGKernel(const std::string & dg_kernel_name, const std::string & n
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow DGKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this DGKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
@@ -1489,6 +1569,16 @@ FEProblem::addInterfaceKernel(const std::string & interface_kernel_name, const s
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow InterfaceKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this InterfaceKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_nl;
   }
@@ -1643,7 +1733,19 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     _reinit_displaced_elem = true;
   }
   else
+  {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Materials to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Material.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
+  }
 
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1931,7 +2033,19 @@ FEProblem::addUserObject(std::string user_object_name, const std::string & name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
   else
+  {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow UserObjects to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this UserObject.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
+  }
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -2348,6 +2462,16 @@ FEProblem::addIndicator(std::string indicator_name, const std::string & name, In
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Indicators to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Indicator.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
@@ -2377,6 +2501,16 @@ FEProblem::addMarker(std::string marker_name, const std::string & name, InputPar
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Markers to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Marker.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
@@ -2403,6 +2537,16 @@ FEProblem::addMultiApp(const std::string & multi_app_name, const std::string & n
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow MultiApps to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this MultiApp.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
@@ -2608,6 +2752,16 @@ FEProblem::addTransfer(const std::string & transfer_name, const std::string & na
   }
   else
   {
+    if (_displaced_problem == NULL && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Transfers to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Transfer.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = &_aux;
   }
