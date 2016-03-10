@@ -44,16 +44,23 @@ XDA::XDA(const InputParameters & parameters) :
 void
 XDA::output(const ExecFlagType & /*type*/)
 {
-  if (_binary)
-  {
-    _mesh_ptr->getMesh().write(filename()+"_mesh.xdr");
-    _es_ptr->write (filename()+".xdr", ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
-  }
-  else
-  {
-    _mesh_ptr->getMesh().write(filename()+"_mesh.xda");
-    _es_ptr->write (filename()+".xda", WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
-  }
+  // Strings for the two filenames to be written
+  std::string es_name = filename();
+  std::string mesh_name = es_name;
+
+  // Make sure the filename has an extension
+  if (es_name.size() < 4)
+    mooseError("Unacceptable filename, you must include an extension (.xda or .xdr).");
+
+  // Insert the mesh suffix
+  mesh_name.insert(mesh_name.size()-4, "_mesh");
+
+  // Set the binary flag
+  XdrMODE mode = _binary ? ENCODE : WRITE;
+
+  // Write the files
+  _mesh_ptr->getMesh().write(mesh_name);
+  _es_ptr->write(es_name, mode, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
   _file_num++;
 }
 
@@ -69,5 +76,10 @@ XDA::filename()
          << std::setfill('0')
          << std::right
          << _file_num;
+
+  if (_binary)
+    output << ".xdr";
+  else
+    output << ".xda";
   return output.str();
 }
