@@ -11,13 +11,13 @@
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
 
-//Forward Declarations
 enum ContactModel
 {
   CM_INVALID,
   CM_FRICTIONLESS,
   CM_GLUED,
-  CM_COULOMB
+  CM_COULOMB,
+  CM_COULOMB_MP // Coulomb contact enforced with a "model problem" strategy where slip is computed after the nonlinear solve is converged
 };
 
 enum ContactFormulation

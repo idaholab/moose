@@ -3,6 +3,12 @@
     type = 'Exodiff'
     input = 'sliding_elastic_blocks_2d.i'
     exodiff = 'sliding_elastic_blocks_2d_out.e'
+    superlu = true
+  [../]
+  [./fcp]
+    type = 'Exodiff'
+    input = 'sliding_elastic_blocks_2d_fcp.i'
+    exodiff = 'sliding_elastic_blocks_2d_fcp_out.e'
     custom_cmp = 'sliding_elastic_blocks_2d.cmp'
     max_parallel = 1
   [../]

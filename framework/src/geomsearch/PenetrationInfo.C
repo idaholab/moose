@@ -51,7 +51,11 @@ PenetrationInfo::PenetrationInfo(const Node * node, const Elem * elem, Elem * si
     _contact_force_old(0),
     _lagrange_multiplier(0),
     _locked_this_step(0),
-    _mech_status(MS_NO_CONTACT)
+    _mech_status(MS_NO_CONTACT),
+    _mech_status_old(MS_NO_CONTACT),
+    _incremental_slip_prev_iter(0),
+    _slip_reversed(false),
+    _slip_tol(0)
 {}
 
 PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
@@ -83,7 +87,11 @@ PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
     _contact_force_old(p._contact_force_old),
     _lagrange_multiplier(p._lagrange_multiplier),
     _locked_this_step(p._locked_this_step),
-    _mech_status(p._mech_status)
+    _mech_status(p._mech_status),
+    _mech_status_old(p._mech_status_old),
+    _incremental_slip_prev_iter(p._incremental_slip_prev_iter),
+    _slip_reversed(p._slip_reversed),
+    _slip_tol(p._slip_tol)
 {}
 
 PenetrationInfo::PenetrationInfo()
@@ -114,7 +122,11 @@ PenetrationInfo::PenetrationInfo()
     _contact_force_old(0),
     _lagrange_multiplier(0),
     _locked_this_step(0),
-    _mech_status(MS_NO_CONTACT)
+    _mech_status(MS_NO_CONTACT),
+    _mech_status_old(MS_NO_CONTACT),
+    _incremental_slip_prev_iter(0),
+    _slip_reversed(false),
+    _slip_tol(0)
 {}
 
 PenetrationInfo::~PenetrationInfo()
@@ -159,6 +171,7 @@ dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context)
     storeHelper(stream, pinfo->_contact_force, context);
     storeHelper(stream, pinfo->_lagrange_multiplier, context);
     storeHelper(stream, pinfo->_mech_status, context);
+    storeHelper(stream, pinfo->_mech_status_old, context);
 
     // Don't need frictional_energy_old, accumulated_slip_old, contact_force_old, or locked_this_step
     // because they are always set by the constraints at the beginning of a new time step.
@@ -211,6 +224,7 @@ dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context)
     loadHelper(stream, pinfo->_contact_force, context);
     loadHelper(stream, pinfo->_lagrange_multiplier, context);
     loadHelper(stream, pinfo->_mech_status, context);
+    loadHelper(stream, pinfo->_mech_status_old, context);
 
     // Don't need frictional_energy_old, accumulated_slip_old, contact_force_old, or locked_this_step
     // because they are always set by the constraints at the beginning of a new time step.
