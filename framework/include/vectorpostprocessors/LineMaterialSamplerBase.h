@@ -80,13 +80,6 @@ public:
   virtual void finalize();
 
   /**
-   * Thread Join
-   * Calls through to base class's threadJoin()
-   * @param sb SamplerBase object to be joint into this object
-   */
-  virtual void threadJoin(const SamplerBase & sb);
-
-  /**
    * Reduce the material property to a scalar for output
    * @param property The material property
    * @param curr_point The point corresponding to this material property
@@ -197,13 +190,6 @@ void
 LineMaterialSamplerBase<T>::finalize()
 {
   SamplerBase::finalize();
-}
-
-template <typename T>
-void
-LineMaterialSamplerBase<T>::threadJoin(const SamplerBase & sb)
-{
-  SamplerBase::threadJoin(sb);
 }
 
 #endif

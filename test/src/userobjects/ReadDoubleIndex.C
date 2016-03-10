@@ -101,14 +101,14 @@ ReadDoubleIndex::ReadDoubleIndex(const InputParameters & params) :
   // check int
   if (_int_di.size() != 3)
     mooseError("Error reading int_di.");
-  for (int j = 0; j < 3; ++j)
+  for (unsigned int j = 0; j < 3; ++j)
   {
     if (_int_di[j].size() != array_length[j])
       mooseError("Error reading int_di.");
-    for (int i = 0; i < _int_di[j].size(); ++i)
+    for (unsigned int i = 0; i < _int_di[j].size(); ++i)
     {
       int mult = ((j == 1) ? -1 : 1);
-      if (_int_di[j][i] != mult * ((j + 1) * 10 + i + 1))
+      if (_int_di[j][i] != mult * static_cast<int>(((j + 1) * 10 + i + 1)))
         mooseError("Error reading int_di.");
     }
   }
@@ -116,11 +116,11 @@ ReadDoubleIndex::ReadDoubleIndex(const InputParameters & params) :
   // check long
   if (_long_di.size() != 3)
     mooseError("Error reading long_di.");
-  for (long j = 0; j < 3; ++j)
+  for (unsigned int j = 0; j < 3; ++j)
   {
     if (_long_di[j].size() != array_length[j])
       mooseError("Error reading long_di.");
-    for (long i = 0; i < _long_di[j].size(); ++i)
+    for (unsigned int i = 0; i < _long_di[j].size(); ++i)
     {
       long mult = ((j != 1) ? -1 : 1);
       if (_long_di[j][i] != mult * ((j + 1) * 10 + i + 1))
@@ -148,7 +148,7 @@ ReadDoubleIndex::ReadDoubleIndex(const InputParameters & params) :
     if (_bid_di[j].size() != array_length[j])
       mooseError("Error reading bid_di.");
     for (unsigned int i = 0; i < _bid_di[j].size(); ++i)
-      if (_bid_di[j][i] != (j + 2) * 10 + i + 1)
+      if (_bid_di[j][i] != static_cast<short>((j + 2) * 10 + i + 1))
         mooseError("Error reading bid_di.");
   }
 

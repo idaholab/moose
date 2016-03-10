@@ -38,8 +38,6 @@ public:
    * @param comm The communicator of the child
    */
   SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm);
-  SamplerBase(const std::string & /*name*/, InputParameters parameters, VectorPostprocessor * vpp,
-              const libMesh::Parallel::Communicator & comm); // DEPRECATED CONSTRUCTOR
   virtual ~SamplerBase() {}
 
 protected:
