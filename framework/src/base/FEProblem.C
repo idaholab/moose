@@ -77,6 +77,7 @@
 #include "ScalarInitialCondition.h"
 #include "InternalSideIndicator.h"
 #include "XFEMInterface.h"
+#include "ConsoleUtils.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -3735,14 +3736,23 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
 
     for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator outer_it = materials.begin(); outer_it != materials.end(); ++outer_it)
     {
+      // Storage for properties for this material (outer) and all other materials (inner)
       outer_supplied = (*outer_it)->getSuppliedItems();
       inner_supplied.clear();
+
+      // Property to material map for error reporting
+      std::map<std::string, std::set<std::string> > prop_to_mat;
+      for (std::set<std::string>::const_iterator it = outer_supplied.begin(); it != outer_supplied.end(); ++it)
+        prop_to_mat[*it].insert((*outer_it)->name());
 
       for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator inner_it = materials.begin(); inner_it != materials.end(); ++inner_it)
       {
         if (outer_it == inner_it)
           continue;
         inner_supplied.insert((*inner_it)->getSuppliedItems().begin(), (*inner_it)->getSuppliedItems().end());
+
+        for (std::set<std::string>::const_iterator it = inner_supplied.begin(); it != inner_supplied.end(); ++it)
+          prop_to_mat[*it].insert((*inner_it)->name());
       }
 
       // Test that a property isn't supplied on multiple blocks
@@ -3753,9 +3763,18 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
       {
         std::ostringstream oss;
         oss << "The following material properties are declared on block " << map_it->first << " by multiple materials:\n";
+        oss << ConsoleUtils::indent(2) << std::setw(30) << std::left << "Material Property" << "Material Objects\n";
         for (std::set<std::string>::const_iterator it = intersection.begin(); it != intersection.end(); ++it)
-          oss << *it << "\n";
-        mooseError(oss.str());
+        {
+          oss << ConsoleUtils::indent(2) << std::setw(30) << std::left << *it;
+          for (std::set<std::string>::const_iterator jt = prop_to_mat[*it].begin(); jt != prop_to_mat[*it].end(); ++jt)
+            oss << *jt << " ";
+          oss << '\n';
+        }
+
+        oss << "\nThis will result in ambiguous material property calculations and lead to incorrect results.\n";
+        mooseWarning(oss.str());
+        break;
       }
     }
   }

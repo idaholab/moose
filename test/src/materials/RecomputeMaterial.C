@@ -49,4 +49,5 @@ RecomputeMaterial::computeQpProperties()
   Real x = _p[_qp];
   _f[_qp] = x * x - _constant;
   _f_prime[_qp] = 2 * x;
+
 }
