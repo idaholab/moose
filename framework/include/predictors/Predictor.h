@@ -44,6 +44,8 @@ public:
   virtual ~Predictor();
 
   virtual int order() { return 0; }
+  virtual void timestepSetup();
+  virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln) = 0;
 
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
@@ -62,6 +64,9 @@ protected:
 
   /// Amount by which to scale the predicted value.  Must be in [0,1].
   Real _scale;
+
+  /// Times for which the predictor should not be applied
+  std::vector<Real> _skip_times;
 };
 
 #endif /* PREDICTOR_H */

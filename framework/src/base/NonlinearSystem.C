@@ -784,13 +784,15 @@ void
 NonlinearSystem::onTimestepBegin()
 {
   _time_integrator->preSolve();
+  if (_predictor.get())
+    _predictor->timestepSetup();
 }
 
 void
 NonlinearSystem::setInitialSolution()
 {
   NumericVector<Number> & initial_solution(solution());
-  if (_predictor.get())
+  if (_predictor.get() && _predictor->shouldApply())
   {
     _predictor->apply(initial_solution);
     _fe_problem.predictorCleanup(initial_solution);

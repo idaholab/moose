@@ -40,9 +40,10 @@ public:
   virtual ~AdamsPredictor();
 
   virtual int order() { return _order; }
+  virtual void timestepSetup();
+  virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln);
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
-  virtual void historyControl();
 
 protected:
   int _order;

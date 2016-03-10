@@ -3,12 +3,10 @@
     type = 'CSVDiff'
     input = 'predictor_test.i'
     csvdiff = 'predictor_test_out.csv'
-    abs_zero = 1e-8
   [../]
   [./test_skip]
     type = 'CSVDiff'
     input = 'predictor_skip_test.i'
     csvdiff = 'predictor_skip_test_out.csv'
-    abs_zero = 1e-8
   [../]
 []

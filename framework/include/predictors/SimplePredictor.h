@@ -50,10 +50,8 @@ public:
   SimplePredictor(const InputParameters & parameters);
   virtual ~SimplePredictor();
 
+  virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln);
-
-protected:
-  Real _scale;
 };
 
 #endif /* SIMPLEPREDICTOR_H */
