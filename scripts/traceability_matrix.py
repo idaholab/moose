@@ -52,7 +52,7 @@ def buildTable(args, data):
 # This routine extracts the requirements from the "SoftwareREquirements.tex" document
 ##########
 def extractRequirements(args):
-  f = open(os.path.join(args.application_path, 'doc/sqa', args.requirements))
+  f = open(args.requirements_path)
   text = f.read()
   f.close()
 
@@ -107,7 +107,7 @@ def extractTestedRequirements(args, data):
   from Tester import Tester
 
   # Build the TestHarness object here
-  harness = TestHarness(sys.argv, test_app_name, args.moose_dir)
+  harness = TestHarness('', test_app_name, args.moose_dir)
 
   # Tell it to parse the test files only, not run them
   harness.findAndRunTests(find_only=True)
@@ -156,6 +156,7 @@ def verifyArguments(args):
       sys.exit(1)
 
   args.application_path = os.path.abspath(args.application)
+  args.requirements_path = os.path.join(args.application_path, 'doc/sqa', args.requirements)
   args.application_name = os.path.split(args.application_path)[1]
 
   # Set the current working directory to this script location
@@ -174,7 +175,7 @@ def verifyArguments(args):
 def parseArguments(args=None):
   parser = argparse.ArgumentParser(description='Build SQA Documentation')
   parser.add_argument('--application', metavar='application', help='Path to application you wish to build SQA documentation for')
-  parser.add_argument('--requirements', nargs=1, default='SoftwareRequirements.tex', metavar='requirements.tex', help='Default: %(default)s')
+  parser.add_argument('--requirements', nargs=1, default='SoftwareRequirements.tex', metavar='requirements.tex', help='Default: application_path/doc/sqa/%(default)s')
   return verifyArguments(parser.parse_args(args))
 
 if __name__ == "__main__":

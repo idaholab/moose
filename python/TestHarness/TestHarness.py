@@ -761,17 +761,11 @@ class TestHarness:
     outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
     outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
 
-    # Options that are not needed by the TestHarness but need to be allowed, due to the way we handle argparse.REMAINDER arguments
-    # We realize there is a feature to ignore unknown parsed arguments, but that does not work with remainder arguments
-    thirdparty= parser.add_argument_group('3rd Party options', 'Options listed here are not used by the TestHarness.')
-    thirdparty.add_argument("--application", help="SQA Generator script uses this option to identify which application it is generating documents for")
-    thirdparty.add_argument("--requirements", help="SQA Generator script latex template file")
-
     code = True
     if self.code.decode('hex') in argv:
       del argv[argv.index(self.code.decode('hex'))]
       code = False
-    self.options = parser.parse_args()
+    self.options = parser.parse_args(argv)
     self.tests = self.options.test_name
     self.options.code = code
 
