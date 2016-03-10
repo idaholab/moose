@@ -62,7 +62,7 @@ class Tester(MooseObject):
     if mode == 'NORMAL':
       self.specs['max_time'] = self.specs['max_time'] * 2
     elif mode == 'HEAVY':
-      self.specs['max_time'] = self.specs['max_time'] * 4
+      self.specs['max_time'] = self.specs['max_time'] * 6
 
 
   # Override this method to tell the harness whether or not this test should run.
