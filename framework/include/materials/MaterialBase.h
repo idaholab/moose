@@ -142,12 +142,6 @@ public:
   const std::set<std::string> &
   getSuppliedItems() { return _supplied_props; }
 
-  /**
-   * Transform a zero prop into a requested prop if a material later supplies it.
-   * This ensures proper dependency ordering.
-   */
-  void setZeroPropAsRequested(const std::string & prop_name);
-
   void checkStatefulSanity() const;
 
   /**
@@ -208,9 +202,6 @@ protected:
 
   /// Set of properties declared
   std::set<std::string> _supplied_props;
-
-  /// Set of properties returned as zero properties
-  std::set<std::string> _zero_props;
 
   enum QP_Data_Type {
     CURR,
@@ -353,9 +344,11 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
 {
-  // declare this material property and insert in _zero_props...
-  _zero_props.insert(prop_name);
   MaterialProperty<T> & preload_with_zero = _material_data->getProperty<T>(prop_name);
+
+  // Register this material on these blocks as a zero property with relaxed consistency checking
+  for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
+    _fe_problem.storeZeroMatProp(*it, prop_name);
 
   // set values for all qpoints to zero
   unsigned int nqp = _mi_feproblem.getMaxQps();
