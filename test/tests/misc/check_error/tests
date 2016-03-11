@@ -536,4 +536,10 @@
     input = bad_kernel_action.i
     expect_err = "We expected to create an object of type '\w+?'\.\nInstead we received a parameters object for type '\w+?'."
   [../]
+
+  [./wrong_displacement_order]
+    type = 'RunException'
+    input = wrong_displacement_order.i
+    expect_err = "Error: mesh has SECOND order elements, so all displacement variables must be SECOND order."
+  [../]
 []

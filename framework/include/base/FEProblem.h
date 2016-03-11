@@ -1114,6 +1114,9 @@ protected:
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
+  /// Verify that SECOND order mesh uses SECOND order displacements.
+  void checkDisplacementOrders();
+
   void checkUserObjects();
 
   /**
