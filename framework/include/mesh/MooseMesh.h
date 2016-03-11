@@ -629,31 +629,31 @@ public:
    * @param subdomain_id The subdomain ID you want to get the boundary ids for.
    * @return All boundary IDs connected to elements in the give
    */
-  const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id) const;
+  const std::set<BoundaryID> & getSubdomainBoundaryIds(SubdomainID subdomain_id) const;
 
   /**
    * Returns true if the requested node is in the list of boundary
    * nodes, false otherwise.
    */
-  bool isBoundaryNode(dof_id_type node_id);
+  bool isBoundaryNode(dof_id_type node_id) const;
 
   /**
    * Returns true if the requested node is in the list of boundary
    * nodes for the specified boundary, false otherwise.
    */
-  bool isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id);
+  bool isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const;
 
   /**
    * Returns true if the requested element is in the list of boundary
    * elements, false otherwise.
    */
-  bool isBoundaryElem(dof_id_type elem_id);
+  bool isBoundaryElem(dof_id_type elem_id) const;
 
   /**
    * Returns true if the requested element is in the list of boundary
    * elements for the specified boundary, false otherwise.
    */
-  bool isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id);
+  bool isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id) const;
 
   /**
    * Generate a unified error message if the underlying libMesh mesh
@@ -973,7 +973,7 @@ private:
   std::map<std::pair<int, ElemType>, std::vector<std::pair<unsigned int, QpMap> > > _elem_type_to_coarsening_map;
 
   /// Holds a map from subomdain ids to the boundary ids that are attached to it
-  std::map<unsigned int, std::set<unsigned int> > _subdomain_boundary_ids;
+  std::map<SubdomainID, std::set<BoundaryID> > _subdomain_boundary_ids;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;

@@ -722,16 +722,15 @@ MooseMesh::cacheInfo()
   {
     Elem * elem = *el;
 
-    unsigned int subdomain_id = elem->subdomain_id();
+    SubdomainID subdomain_id = elem->subdomain_id();
 
-    for (unsigned int side=0; side<elem->n_sides(); side++)
+    for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
       std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
 
-      std::set<unsigned int> subdomain_set = _subdomain_boundary_ids[subdomain_id];
+      std::set<BoundaryID> subdomain_set = _subdomain_boundary_ids[subdomain_id];
 
-      for (unsigned int i=0; i<boundaryids.size(); i++)
-        subdomain_set.insert(boundaryids[i]);
+      subdomain_set.insert(boundaryids.begin(), boundaryids.end());
     }
 
     for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
@@ -745,9 +744,13 @@ MooseMesh::cacheInfo()
 const std::set<SubdomainID> &
 MooseMesh::getNodeBlockIds(const Node & node) const
 {
-  return _block_node_list.at(node.id());
-}
+  std::map<dof_id_type, std::set<SubdomainID> >::const_iterator it = _block_node_list.find(node.id());
 
+  if (it == _block_node_list.end())
+    mooseError("Unable to find node: " << node.id() << " in any block list.");
+
+  return it->second;
+}
 
 // default begin() accessor
 MooseMesh::bnd_node_iterator
@@ -2164,20 +2167,30 @@ void MooseMesh::printInfo(std::ostream &os) const
 const std::vector<dof_id_type> &
 MooseMesh::getNodeList(boundary_id_type nodeset_id) const
 {
-  return _node_set_nodes.at(nodeset_id);
+  std::map<boundary_id_type, std::vector<dof_id_type> >::const_iterator it = _node_set_nodes.find(nodeset_id);
+
+  if (it == _node_set_nodes.end())
+    mooseError("Unable to nodeset ID: " << nodeset_id << '.');
+
+  return it->second;
 }
 
-const std::set<unsigned int> &
-MooseMesh::getSubdomainBoundaryIds(unsigned int subdomain_id) const
+const std::set<BoundaryID> &
+MooseMesh::getSubdomainBoundaryIds(SubdomainID subdomain_id) const
 {
-  return _subdomain_boundary_ids.at(subdomain_id);
+  std::map<SubdomainID, std::set<BoundaryID> >::const_iterator it = _subdomain_boundary_ids.find(subdomain_id);
+
+  if (it == _subdomain_boundary_ids.end())
+    mooseError("Unable to find subdomain ID: " << subdomain_id << '.');
+
+  return it->second;
 }
 
 bool
-MooseMesh::isBoundaryNode(dof_id_type node_id)
+MooseMesh::isBoundaryNode(dof_id_type node_id) const
 {
   bool found_node = false;
-  for (std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
+  for (std::map<boundary_id_type, std::set<dof_id_type> >::const_iterator it = _bnd_node_ids.begin(); it != _bnd_node_ids.end(); ++it)
   {
     if (it->second.find(node_id) != it->second.end())
     {
@@ -2189,10 +2202,10 @@ MooseMesh::isBoundaryNode(dof_id_type node_id)
 }
 
 bool
-MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id)
+MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const
 {
   bool found_node = false;
-  std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_node_ids.find(bnd_id);
+  std::map<boundary_id_type, std::set<dof_id_type> >::const_iterator it = _bnd_node_ids.find(bnd_id);
   if (it != _bnd_node_ids.end())
     if (it->second.find(node_id) != it->second.end())
       found_node = true;
@@ -2200,10 +2213,10 @@ MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id)
 }
 
 bool
-MooseMesh::isBoundaryElem(dof_id_type elem_id)
+MooseMesh::isBoundaryElem(dof_id_type elem_id) const
 {
   bool found_elem = false;
-  for (std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
+  for (std::map<boundary_id_type, std::set<dof_id_type> >::const_iterator it = _bnd_elem_ids.begin(); it != _bnd_elem_ids.end(); ++it)
   {
     if (it->second.find(elem_id) != it->second.end())
     {
@@ -2215,10 +2228,10 @@ MooseMesh::isBoundaryElem(dof_id_type elem_id)
 }
 
 bool
-MooseMesh::isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id)
+MooseMesh::isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id) const
 {
   bool found_elem = false;
-  std::map<boundary_id_type, std::set<dof_id_type> >::iterator it = _bnd_elem_ids.find(bnd_id);
+  std::map<boundary_id_type, std::set<dof_id_type> >::const_iterator it = _bnd_elem_ids.find(bnd_id);
   if (it != _bnd_elem_ids.end())
     if (it->second.find(elem_id) != it->second.end())
       found_elem = true;
