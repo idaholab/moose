@@ -1720,8 +1720,8 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   if (_materials_base.hasActiveBlockObjects(blk_id, tid))
     _materials_base.updateVariableDependency(needed_moose_vars, tid);
 
-  const std::set<unsigned int> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
-  for (std::set<unsigned int>::const_iterator it = ids.begin(); it != ids.end(); ++it)
+  const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
+  for (std::set<BoundaryID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     _materials.updateBoundaryVariableDependency(*it, needed_moose_vars, tid);
 
   const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
