@@ -355,15 +355,11 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
 {
   // declare this material property and insert in _zero_props...
   _zero_props.insert(prop_name);
-  // ...but NOT in _supplied_props (hence the is_get = true)
-  registerPropName(prop_name, true, MaterialBase::CURRENT);
-  MaterialProperty<T> & preload_with_zero = _material_data->declareProperty<T>(prop_name);
-
-  // resize to accomodate maximum number of qpoints
-  unsigned int nqp = _mi_feproblem.getMaxQps();
-  preload_with_zero.resize(nqp);
+  MaterialProperty<T> & preload_with_zero = _material_data->getProperty<T>(prop_name);
 
   // set values for all qpoints to zero
+  unsigned int nqp = _mi_feproblem.getMaxQps();
+  preload_with_zero.resize(nqp);
   for (unsigned int qp = 0; qp < nqp; ++qp)
     mooseSetToZero<T>(preload_with_zero[qp]);
 
