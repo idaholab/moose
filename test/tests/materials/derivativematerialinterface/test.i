@@ -25,6 +25,10 @@
   solve = false
 []
 
+[Debug]
+  show_material_props = true
+[]
+
 [Outputs]
   exodus = true
 []

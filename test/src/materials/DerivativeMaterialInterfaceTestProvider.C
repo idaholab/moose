@@ -25,11 +25,11 @@ InputParameters validParams<DerivativeMaterialInterfaceTestProvider>()
 
 DerivativeMaterialInterfaceTestProvider::DerivativeMaterialInterfaceTestProvider(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
-    _prop1(declarePropertyDerivative<Real>("prop","a")),
-    _prop2(declarePropertyDerivative<Real>("prop","b")),
-    _prop3(declarePropertyDerivative<Real>("prop","b", "a")),
-    _prop4(declarePropertyDerivative<Real>("prop","a", "c")),
-    _prop5(declarePropertyDerivative<Real>("prop","b", "c", "a"))
+    _prop1(declarePropertyDerivative<Real>("prop", "a")),
+    _prop2(declarePropertyDerivative<Real>("prop", "b")),
+    _prop3(declarePropertyDerivative<Real>("prop", "b", "a")),
+    _prop4(declarePropertyDerivative<Real>("prop", "a", "c")),
+    _prop5(declarePropertyDerivative<Real>("prop", "b", "c", "a"))
 {
 }
 
