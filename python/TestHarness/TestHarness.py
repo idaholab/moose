@@ -701,7 +701,7 @@ class TestHarness:
       self.options.quiet = True
 
   ## Parse command line options and assign them to self.options
-  def parseCLArgs(self, argv=sys.argv[1:]):
+  def parseCLArgs(self, argv):
     parser = argparse.ArgumentParser(description='A tool used to test MOOSE based applications')
     parser.add_argument('test_name', nargs=argparse.REMAINDER)
     parser.add_argument('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
@@ -765,7 +765,7 @@ class TestHarness:
     if self.code.decode('hex') in argv:
       del argv[argv.index(self.code.decode('hex'))]
       code = False
-    self.options = parser.parse_args()
+    self.options = parser.parse_args(argv[1:])
     self.tests = self.options.test_name
     self.options.code = code
 
