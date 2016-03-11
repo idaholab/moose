@@ -55,7 +55,7 @@ AutoPositionsMultiApp::fillPositions()
     BoundaryID boundary_id = *bid_it;
 
     // Grab the nodes on the boundary ID and add a Sub-App at each one.
-    std::vector<dof_id_type> & boundary_node_ids = master_mesh.getNodeList(boundary_id);
+    const std::vector<dof_id_type> & boundary_node_ids = master_mesh.getNodeList(boundary_id);
 
     for (unsigned int i=0; i<boundary_node_ids.size(); i++)
     {
