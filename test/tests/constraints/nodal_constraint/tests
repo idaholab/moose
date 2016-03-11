@@ -4,5 +4,6 @@
     input = 'nodal_constraint_test.i'
     exodiff = 'nodal_constraint_test_out.e'
     max_parallel = 1
+    max_threads = 1 #6511
   [../]
 []

@@ -125,15 +125,6 @@ PointSamplerBase::finalize()
   SamplerBase::finalize();
 }
 
-void
-PointSamplerBase::threadJoin(const SamplerBase & y)
-{
-  const PointSamplerBase & vpp = static_cast<const PointSamplerBase &>(y);
-
-  SamplerBase::threadJoin(vpp);
-}
-
-
 const Elem *
 PointSamplerBase::getLocalElemContainingPoint(const Point & p, unsigned int /*id*/)
 {

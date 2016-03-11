@@ -145,17 +145,3 @@ SamplerBase::threadJoin(const SamplerBase & y)
   for (unsigned int i=0; i<_variable_names.size(); i++)
     _values_tmp[i].insert(_values_tmp[i].end(), y._values_tmp[i].begin(), y._values_tmp[i].end());
 }
-
-// DEPRECATED CONSTRUCTOR
-SamplerBase::SamplerBase(const std::string & /*name*/, InputParameters parameters, VectorPostprocessor * vpp,
-                         const libMesh::Parallel::Communicator & comm) :
-    _sampler_params(parameters),
-    _vpp(vpp),
-    _comm(comm),
-    _sort_by(parameters.get<MooseEnum>("sort_by")),
-    _x(vpp->declareVector("x")),
-    _y(vpp->declareVector("y")),
-    _z(vpp->declareVector("z")),
-    _id(vpp->declareVector("id"))
-{
-}

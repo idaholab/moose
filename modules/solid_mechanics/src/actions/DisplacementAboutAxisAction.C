@@ -90,13 +90,10 @@ DisplacementAboutAxisAction::act()
   vars.push_back(_disp_x);
   vars.push_back(_disp_y);
   vars.push_back(_disp_z);
-  std::string short_name(_name);
-  // Chop off "BCs/DisplacementAboutAxis/"
-  short_name.erase(0, 5+_kernel_name.size());
   for (std::vector<unsigned int>::iterator it = dim_vec.begin(); it != dim_vec.end(); ++it)
   {
     std::stringstream name;
-    name << short_name;
+    name << _name;
     name << "_";
     name << *it;
 
