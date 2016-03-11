@@ -53,7 +53,7 @@ InputParameters validParams<Output>()
   params.addParam<MultiMooseEnum>("additional_execute_on", Output::getExecuteOptions(), "This list of output flags is added to the existing flags (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to execute only at that moment");
 
   // 'Timing' group
-  params.addParamNamesToGroup("time_tolerance interval output_initial output_final sync_times sync_only start_time end_time ", "Timing");
+  params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time ", "Timing");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
