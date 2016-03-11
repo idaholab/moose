@@ -429,7 +429,7 @@ public:
    * The constructors all throw errors.
    */
   Updater() { mooseError("Updater requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
-  Updater(std::istream &stream) { mooseError("Updater requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
+  Updater(std::istream &) { mooseError("Updater requires --enable-cxx11 parameter to update_and_build_libmesh.sh."); }
 
   /**
    * The following functions do nothing, and will never be called.
