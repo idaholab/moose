@@ -36,6 +36,7 @@ protected:
   MaterialPropertyName _prop_name;
   bool _by_name;
   const MaterialProperty<Real> & _prop0, & _prop1, & _prop2, & _prop3, & _prop4, & _prop5;
+  const MaterialProperty<dof_id_type> & _prop6;
 };
 
 #endif //DERIVATIVEMATERIALINTERFACETESTCLIENT_H

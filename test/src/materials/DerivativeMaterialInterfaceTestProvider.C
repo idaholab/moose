@@ -29,7 +29,8 @@ DerivativeMaterialInterfaceTestProvider::DerivativeMaterialInterfaceTestProvider
     _prop2(declarePropertyDerivative<Real>("prop", "b")),
     _prop3(declarePropertyDerivative<Real>("prop", "b", "a")),
     _prop4(declarePropertyDerivative<Real>("prop", "a", "c")),
-    _prop5(declarePropertyDerivative<Real>("prop", "b", "c", "a"))
+    _prop5(declarePropertyDerivative<Real>("prop", "b", "c", "a")),
+    _prop6(declareProperty<dof_id_type>("elementid"))
 {
 }
 
@@ -41,4 +42,6 @@ DerivativeMaterialInterfaceTestProvider::computeQpProperties()
   _prop3[_qp] = 3.0;
   _prop4[_qp] = 4.0;
   _prop5[_qp] = 5.0;
+
+  _prop6[_qp] = _current_elem->id();
 }
