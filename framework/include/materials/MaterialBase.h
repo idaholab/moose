@@ -346,6 +346,10 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
 {
   MaterialProperty<T> & preload_with_zero = _material_data->getProperty<T>(prop_name);
 
+  _requested_props.insert(prop_name);
+  registerPropName(prop_name, true, MaterialBase::CURRENT);
+  _fe_problem.markMatPropRequested(prop_name);
+
   // Register this material on these blocks as a zero property with relaxed consistency checking
   for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
     _fe_problem.storeZeroMatProp(*it, prop_name);
