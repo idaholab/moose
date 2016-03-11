@@ -107,7 +107,7 @@ def extractTestedRequirements(args, data):
   from Tester import Tester
 
   # Build the TestHarness object here
-  harness = TestHarness('', test_app_name, args.moose_dir)
+  harness = TestHarness([], test_app_name, args.moose_dir)
 
   # Tell it to parse the test files only, not run them
   harness.findAndRunTests(find_only=True)
@@ -172,11 +172,11 @@ def verifyArguments(args):
 
   return args
 
-def parseArguments(args=None):
+def parseArguments():
   parser = argparse.ArgumentParser(description='Build SQA Documentation')
-  parser.add_argument('--application', metavar='application', help='Path to application you wish to build SQA documentation for')
-  parser.add_argument('--requirements', nargs=1, default='SoftwareRequirements.tex', metavar='requirements.tex', help='Default: application_path/doc/sqa/%(default)s')
-  return verifyArguments(parser.parse_args(args))
+  parser.add_argument('--application', '-a', metavar='application', help='Path to application you wish to build SQA documentation for')
+  parser.add_argument('--requirements', '-r', nargs=1, default='SoftwareRequirements.tex', metavar='requirements.tex', help='Default: application_path/doc/sqa/%(default)s')
+  return verifyArguments(parser.parse_args())
 
 if __name__ == "__main__":
   # Parse supplied arguments
