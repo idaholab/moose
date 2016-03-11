@@ -384,7 +384,7 @@ public:
    * Getter/setter for the patch_size parameter.
    */
   void setPatchSize(const unsigned int patch_size);
-  unsigned int getPatchSize();
+  unsigned int getPatchSize() const;
 
   /**
    * Set the patch size update strategy
@@ -394,7 +394,7 @@ public:
   /**
    * Get the current patch update strategy.
    */
-  const MooseEnum & getPatchUpdateStrategy();
+  const MooseEnum & getPatchUpdateStrategy() const;
 
   /**
    * Get a (slightly inflated) processor bounding box.
@@ -423,18 +423,18 @@ public:
   /**
    * Calls print_info() on the underlying Mesh.
    */
-  void printInfo(std::ostream &os=libMesh::out);
+  void printInfo(std::ostream &os=libMesh::out) const;
 
   /**
    * Return list of blocks to which the given node belongs.
    */
-  std::set<SubdomainID> & getNodeBlockIds(const Node & node);
+  const std::set<SubdomainID> & getNodeBlockIds(const Node & node) const;
 
   /**
    * Return a writable reference to a vector of node IDs that belong
    * to nodeset_id.
    */
-  std::vector<dof_id_type> & getNodeList(boundary_id_type nodeset_id);
+  const std::vector<dof_id_type> & getNodeList(boundary_id_type nodeset_id) const;
 
   /**
    * Add a new node to the mesh.  If there is already a node located at the point passed
@@ -629,7 +629,7 @@ public:
    * @param subdomain_id The subdomain ID you want to get the boundary ids for.
    * @return All boundary IDs connected to elements in the give
    */
-  const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id);
+  const std::set<unsigned int> & getSubdomainBoundaryIds(unsigned int subdomain_id) const;
 
   /**
    * Returns true if the requested node is in the list of boundary
