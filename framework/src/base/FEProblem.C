@@ -3652,6 +3652,50 @@ FEProblem::checkProblemIntegrity()
 
   // Verify that we don't have any Element type/Coordinate Type conflicts
   checkCoordinateSystems();
+
+  // If using displacements, verify that the order of the displacement
+  // variables matches the order of the elements in the displaced
+  // mesh.
+  checkDisplacementOrders();
+}
+
+void
+FEProblem::checkDisplacementOrders()
+{
+  if (_displaced_problem)
+  {
+    MeshBase::const_element_iterator
+      it = _displaced_mesh->activeLocalElementsBegin(),
+      end = _displaced_mesh->activeLocalElementsEnd();
+
+    bool mesh_has_second_order_elements = false;
+    for (; it != end; ++it)
+    {
+      if ((*it)->default_order() == SECOND)
+      {
+        mesh_has_second_order_elements = true;
+        break;
+      }
+    }
+
+    // We checked our local elements, so take the max over all processors.
+    _displaced_mesh->comm().max(mesh_has_second_order_elements);
+
+    // If the Mesh has second order elements, make sure the
+    // displacement variables are second-order.
+    if (mesh_has_second_order_elements)
+    {
+      const std::vector<std::string> & displacement_variables =
+        _displaced_problem->getDisplacementVarNames();
+
+      for (unsigned int var = 0; var<displacement_variables.size(); ++var)
+      {
+        MooseVariable & mv = _displaced_problem->getVariable(/*tid=*/0, displacement_variables[var]);
+        if (mv.order() != SECOND)
+          mooseError("Error: mesh has SECOND order elements, so all displacement variables must be SECOND order.");
+      }
+    }
+  }
 }
 
 void

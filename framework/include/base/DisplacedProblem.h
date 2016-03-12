@@ -55,6 +55,9 @@ public:
   DisplacedSystem & nlSys() { return _displaced_nl; }
   DisplacedSystem & auxSys() { return _displaced_aux; }
 
+  // Return a constant reference to the vector of variable names.
+  const std::vector<std::string> & getDisplacementVarNames() const { return _displacements; }
+
   virtual void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
 
   /**
