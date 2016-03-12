@@ -42,6 +42,11 @@ DerivativeParsedMaterialHelper::functionsPostParse()
 
   // generate derivatives
   assembleDerivatives();
+
+  // force a value update to get the property at least once and register it for the dependencies
+  unsigned int nmat_props = _mat_prop_descriptors.size();
+  for (unsigned int i = 0; i < nmat_props; ++i)
+    _mat_prop_descriptors[i].value();
 }
 
 ParsedMaterialHelper::MatPropDescriptorList::iterator
