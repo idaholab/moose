@@ -350,8 +350,10 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
   registerPropName(prop_name, true, MaterialBase::CURRENT);
   _fe_problem.markMatPropRequested(prop_name);
 
-  // Register this material on these blocks as a zero property with relaxed consistency checking
+  // Register this material on these blocks and boundaries as a zero property with relaxed consistency checking
   for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
+    _fe_problem.storeZeroMatProp(*it, prop_name);
+  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
     _fe_problem.storeZeroMatProp(*it, prop_name);
 
   // set values for all qpoints to zero

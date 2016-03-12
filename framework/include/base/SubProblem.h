@@ -182,7 +182,7 @@ public:
    * Adds the given material property to a storage map based on block ids
    *
    * This is method is called from within the Material class when the property
-   * is begin registered.
+   * is first registered.
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
    */
@@ -192,7 +192,7 @@ public:
    * Adds the given material property to a storage map based on boundary ids
    *
    * This is method is called from within the Material class when the property
-   * is begin registered.
+   * is first registered.
    * @param boundary_id The block id for the MaterialProperty
    * @param name The name of the property
    */
@@ -205,9 +205,18 @@ public:
    *
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
-   *
    */
   virtual void storeZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name);
+
+  /**
+   * Adds to a map based on boundary ids of material properties for which a zero
+   * value can be returned. Thes properties are optional and will not trigger a
+   * missing material property error.
+   *
+   * @param boundary_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  virtual void storeZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name);
 
   /**
    * Adds to a map based on block ids of material properties to validate

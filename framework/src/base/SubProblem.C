@@ -181,6 +181,12 @@ SubProblem::storeZeroMatProp(SubdomainID block_id, const MaterialPropertyName & 
 }
 
 void
+SubProblem::storeZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name)
+{
+  _zero_boundary_material_props[boundary_id].insert(name);
+}
+
+void
 SubProblem::storeDelayedCheckMatProp(const std::string & requestor, SubdomainID block_id, const std::string & name)
 {
   _map_block_material_props_check[block_id].insert(std::make_pair(requestor, name));
