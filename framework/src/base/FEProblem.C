@@ -3762,8 +3762,9 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
       }
     }
 
-    // Add zero material propertied for this block
+    // Add zero material properties specific to this block and unrestricted
     block_supplied_props.insert(_zero_block_material_props[j->first].begin(), _zero_block_material_props[j->first].end());
+    block_supplied_props.insert(_zero_block_material_props[Moose::ANY_BLOCK_ID].begin(), _zero_block_material_props[Moose::ANY_BLOCK_ID].end());
 
     // Error check to make sure all properties consumed by materials are supplied on this block
     std::set<std::string> difference;
