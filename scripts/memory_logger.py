@@ -614,7 +614,8 @@ machine_id is supplied by the client class. This allows for multiple agents if d
                       }
 
     # Instance our chosen debugger
-    self.stack_trace = Debugger(self.arguments)
+    if self.arguments.debugger:
+      self.stack_trace = Debugger(self.arguments)
 
   # NOTE: This is the only function that should be called in this class
   def takeSample(self):
