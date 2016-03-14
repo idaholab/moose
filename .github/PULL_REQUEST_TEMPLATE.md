@@ -1,4 +1,4 @@
-### Completed each of the following items before creating a PR
+### Complete each of the following items before creating a PR
 
 - Include any relevant design information for your change
 - Follow [Coding Standards](http://mooseframework.org/wiki/CodeStandards/)
