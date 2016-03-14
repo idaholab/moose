@@ -95,6 +95,7 @@ class TestHarness:
       self.checks['curl'] = set(['ALL'])
       self.checks['tbb'] = set(['ALL'])
       self.checks['superlu'] = set(['ALL'])
+      self.checks['unique_id'] = set(['ALL'])
       self.checks['cxx11'] = set(['ALL'])
       self.checks['asio'] =  set(['ALL'])
     else:
@@ -111,6 +112,7 @@ class TestHarness:
       self.checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
       self.checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
       self.checks['superlu'] =  getLibMeshConfigOption(self.libmesh_dir, 'superlu')
+      self.checks['unique_id'] =  getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
       self.checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
       self.checks['asio'] =  getIfAsioExists(self.moose_dir)
 
