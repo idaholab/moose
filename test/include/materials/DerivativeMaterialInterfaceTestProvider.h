@@ -34,6 +34,7 @@ public:
 
 protected:
   MaterialProperty<Real> & _prop1, & _prop2, & _prop3, & _prop4, & _prop5;
+  MaterialProperty<dof_id_type> & _prop6;
 };
 
 #endif //DERIVATIVEMATERIALINTERFACETESTPROVIDER_H

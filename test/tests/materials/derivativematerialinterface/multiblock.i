@@ -76,6 +76,10 @@
   type = Steady
 []
 
+[Debug]
+  show_material_props = true
+[]
+
 [Problem]
   solve = false
 []

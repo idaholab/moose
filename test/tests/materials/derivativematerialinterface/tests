@@ -1,8 +1,13 @@
 [Tests]
   [./property_names]
-    type = 'Exodiff'
+    type = 'RunApp'
     input = 'test.i'
-    exodiff = 'test_out.e'
+    recover = false
+  [../]
+
+  [./execution_order]
+    type = 'RunApp'
+    input = 'execution_order.i'
     recover = false
   [../]
 
