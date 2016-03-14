@@ -80,7 +80,7 @@ InputParameters validParams<Console>()
   params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
 
   // Advanced group
-  params.addParamNamesToGroup("max_rows fit_node verbose show_multiapp_name system_info", "Advanced");
+  params.addParamNamesToGroup("max_rows verbose show_multiapp_name system_info", "Advanced");
 
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Perf Log");

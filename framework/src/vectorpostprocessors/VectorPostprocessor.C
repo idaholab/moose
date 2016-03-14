@@ -25,8 +25,9 @@ InputParameters validParams<VectorPostprocessor>()
 {
   InputParameters params = validParams<UserObject>();
 
-  params.addParamNamesToGroup("outputs", "Advanced");
   params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of this VectorPostprocessor (empty outputs to all)");
+
+  params.addParamNamesToGroup("outputs", "Advanced");
 
   params.registerBase("VectorPostprocessor");
   return params;
