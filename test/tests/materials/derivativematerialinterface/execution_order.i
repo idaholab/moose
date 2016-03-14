@@ -1,19 +1,22 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 1
-  ny = 1
+  nx = 2
+  ny = 2
 []
 
 [Materials]
+  # fetch the properties first...
+  [./client]
+    type = DerivativeMaterialInterfaceTestClient
+    block = 0
+  [../]
+
+  # ...then declare them!
   [./provider]
     type = DerivativeMaterialInterfaceTestProvider
     block = 0
     outputs = exodus
-  [../]
-  [./client]
-    type = DerivativeMaterialInterfaceTestClient
-    block = 0
   [../]
 []
 

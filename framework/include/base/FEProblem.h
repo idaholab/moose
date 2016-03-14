@@ -1124,7 +1124,7 @@ protected:
    *
    * @see checkProblemIntegrity
    */
-  static void checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > > & materials_map);
+  void checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > > & materials_map);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();

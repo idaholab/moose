@@ -110,21 +110,6 @@ MaterialBase::initQpStatefulProperties()
   mooseDoOnce(mooseWarning(std::string("Material \"") + name() + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
 }
 
-
-void
-MaterialBase::setZeroPropAsRequested(const std::string & prop_name)
-{
-  // look if property name is in _zero_props
-  std::set<std::string>::iterator it = _zero_props.find(prop_name);
-  if (it != _zero_props.end())
-  {
-    // move the property from _zero_props to _requested_props
-    _requested_props.insert(*it);
-    _zero_props.erase(it);
-  }
-}
-
-
 void
 MaterialBase::checkStatefulSanity() const
 {

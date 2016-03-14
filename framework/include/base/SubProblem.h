@@ -182,7 +182,7 @@ public:
    * Adds the given material property to a storage map based on block ids
    *
    * This is method is called from within the Material class when the property
-   * is begin registered.
+   * is first registered.
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
    */
@@ -192,11 +192,31 @@ public:
    * Adds the given material property to a storage map based on boundary ids
    *
    * This is method is called from within the Material class when the property
-   * is begin registered.
+   * is first registered.
    * @param boundary_id The block id for the MaterialProperty
    * @param name The name of the property
    */
   virtual void storeMatPropName(BoundaryID boundary_id, const std::string & name);
+
+  /**
+   * Adds to a map based on block ids of material properties for which a zero
+   * value can be returned. Thes properties are optional and will not trigger a
+   * missing material property error.
+   *
+   * @param block_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  virtual void storeZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name);
+
+  /**
+   * Adds to a map based on boundary ids of material properties for which a zero
+   * value can be returned. Thes properties are optional and will not trigger a
+   * missing material property error.
+   *
+   * @param boundary_id The block id for the MaterialProperty
+   * @param name The name of the property
+   */
+  virtual void storeZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name);
 
   /**
    * Adds to a map based on block ids of material properties to validate
@@ -209,6 +229,7 @@ public:
   /**
    * Adds to a map based on boundary ids of material properties to validate
    *
+   * @param requestor The MOOSE object name requesting the material property
    * @param boundary_id The block id for the MaterialProperty
    * @param name The name of the property
    */
@@ -310,6 +331,10 @@ protected:
   /// Map for boundary material properties (boundary_id -> list of properties)
   std::map<unsigned int, std::set<std::string> > _map_boundary_material_props;
 
+  /// Set of properties returned as zero properties
+  std::map<unsigned int, std::set<MaterialPropertyName> > _zero_block_material_props;
+  std::map<unsigned int, std::set<MaterialPropertyName> > _zero_boundary_material_props;
+
   /// set containing all material property names that have been requested by getMaterialProperty*
   std::set<std::string> _material_property_requested;
 
@@ -348,6 +373,7 @@ private:
    */
   void checkMatProps(std::map<unsigned int, std::set<std::string> > & props,
                      std::map<unsigned int, std::multimap<std::string, std::string> > & check_props,
+                     std::map<unsigned int, std::set<MaterialPropertyName> > & zero_props,
                      const std::string & type);
 
   /**
