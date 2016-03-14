@@ -5,7 +5,7 @@
     exodiff = 'crack2d_out.e'
     abs_zero = 1e-09
     use_old_floor = True
-    valgrind = heavy
+    valgrind = 'HEAVY'
     max_time = 500
   [../]
 [../]
