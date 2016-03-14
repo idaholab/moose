@@ -497,7 +497,7 @@ public:
     return (_sys.variable(var_num).type().family == SCALAR);
   }
 
-  virtual unsigned int nVariables() { return _vars[0].all().size(); }
+  virtual unsigned int nVariables() { return _vars[0].names().size(); }
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
