@@ -524,9 +524,17 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names, con
   std::vector<std::string> elements;
   MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r");  // tokenize on whitespace
 
-  for (std::vector<std::string>::const_iterator it = elements.begin(); it != elements.end(); ++it)
-    _group[*it] = group_name;
+  // Since we don't require types (templates) for this method, we need
+  // to get a raw list of parameter names to compare against.
+  std::set<std::string> param_names;
+  for (InputParameters::iterator it = begin(); it != end(); ++it)
+    param_names.insert(it->first);
 
+  for (std::vector<std::string>::const_iterator it = elements.begin(); it != elements.end(); ++it)
+    if (param_names.find(*it) != param_names.end())
+      _group[*it] = group_name;
+    else
+      mooseError("Unable to find a parameter with name: " << *it << " when adding to group " << group_name << '.');
 }
 
 std::vector<std::string>

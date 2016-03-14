@@ -614,52 +614,74 @@ template<class T>
 void
 AdvancedOutput<T>::addValidParams(InputParameters & params, const MultiMooseEnum & types)
 {
-
   // Nodal output
   if (types.contains("nodal"))
+  {
     params.addParam<MultiMooseEnum>("execute_nodal_on", T::getExecuteOptions(), "Control the output of nodal variables");
+    params.addParamNamesToGroup("execute_nodal_on", "Variables");
+  }
 
   // Elemental output
   if (types.contains("elemental"))
   {
     params.addParam<MultiMooseEnum>("execute_elemental_on", T::getExecuteOptions(), "Control the output of elemental variables");
+    params.addParamNamesToGroup("execute_elemental_on", "Variables");
 
     // Add material output control, which are output via elemental variables
     params.addParam<bool>("output_material_properties", false, "Flag indicating if material properties should be output");
     params.addParam<std::vector<std::string> >("show_material_properties", "List of materialproperties that should be written to the output");
     params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
-    params.addParamNamesToGroup("show_material_properties", "Materials");
   }
 
   // Scalar variable output
   if (types.contains("scalar"))
+  {
     params.addParam<MultiMooseEnum>("execute_scalars_on", T::getExecuteOptions(), "Control the output of scalar variables");
+    params.addParamNamesToGroup("execute_scalars_on", "Variables");
+  }
 
   // Nodal and scalar output
   if (types.contains("nodal") && types.contains("scalar"))
+  {
     params.addParam<bool>("scalar_as_nodal", false, "Output scalar variables as nodal");
+    params.addParamNamesToGroup("scalar_as_nodal", "Variables");
+  }
 
   // Elemental and nodal
   if (types.contains("elemental") && types.contains("nodal"))
+  {
     params.addParam<bool>("elemental_as_nodal", false, "Output elemental nonlinear variables as nodal");
+    params.addParamNamesToGroup("elemental_as_nodal", "Variables");
+  }
 
   // Postprocessors
   if (types.contains("postprocessor"))
+  {
     params.addParam<MultiMooseEnum>("execute_postprocessors_on", T::getExecuteOptions(), "Control of when postprocessors are output");
+    params.addParamNamesToGroup("execute_postprocessors_on", "Variables");
+  }
+
   // Vector Postprocessors
   if (types.contains("vector_postprocessor"))
+  {
     params.addParam<MultiMooseEnum>("execute_vector_postprocessors_on", T::getExecuteOptions(), "Enable/disable the output of VectorPostprocessors");
+    params.addParamNamesToGroup("execute_vector_postprocessors_on", "Variables");
+  }
 
   // Input file
   if (types.contains("input"))
+  {
     params.addParam<MultiMooseEnum>("execute_input_on", T::getExecuteOptions(), "Enable/disable the output of the input file");
+    params.addParamNamesToGroup("execute_input_on", "Variables");
+  }
 
   // System Information
   if (types.contains("system_information"))
+  {
     params.addParam<MultiMooseEnum>("execute_system_information_on", T::getExecuteOptions(), "Control when the output of the simulation information occurs");
+    params.addParamNamesToGroup("execute_system_information_on", "Variables");
 
-  // Store everything in the 'Variables' group
-  params.addParamNamesToGroup("scalar_as_nodal elemental_as_nodal execute_scalars_on execute_nodal_on execute_elemental_on execute_postprocessors_on execute_vector_postprocessors_on execute_system_information_on execute_input_on", "Variables");
+  }
 }
 
 template<class T>
