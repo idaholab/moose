@@ -5,6 +5,8 @@
     exodiff = 'crack_propagation_2d_out.e crack_propagation_2d_out.e-s002'
     abs_zero = 1e-8
     map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
   [../]
   [./edge_crack_3d]
     type = Exodiff
@@ -12,35 +14,47 @@
     exodiff = 'edge_crack_3d_out.e'
     abs_zero = 1e-8
     map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
   [../]
   [./elliptical_crack]
     type = Exodiff
     input = elliptical_crack.i
     exodiff = 'elliptical_crack_out.e'
     map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
   [../]
   [./penny_crack]
     type = Exodiff
     input = penny_crack.i
     exodiff = 'penny_crack_out.e'
     map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
   [../]
   [./square_branch_quad_2d]
     type = Exodiff
     input = square_branch_quad_2d.i
     exodiff = 'square_branch_quad_2d_out.e square_branch_quad_2d_out.e-s002 square_branch_quad_2d_out.e-s003'
     map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
   [../]
   [./square_branch_tri_2d]
     type = Exodiff
     input = square_branch_tri_2d.i
     exodiff = 'square_branch_tri_2d_out.e square_branch_tri_2d_out.e-s002 square_branch_tri_2d_out.e-s003'
     map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
   [../]
   [./square_moment_fitting]
     type = Exodiff
     input = square_moment_fitting.i
     exodiff = 'square_moment_fitting_out.e'
     map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
   [../]
 []
