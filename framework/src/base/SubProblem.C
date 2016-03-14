@@ -75,7 +75,7 @@ SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
 {
   std::set<SubdomainID> blocks;
 
-  for (std::map<unsigned int, std::set<std::string> >::iterator it = _map_block_material_props.begin();
+  for (std::map<SubdomainID, std::set<std::string> >::iterator it = _map_block_material_props.begin();
       it != _map_block_material_props.end();
       ++it)
   {
@@ -115,12 +115,13 @@ SubProblem::getMaterialPropertyBlockNames(const std::string & prop_name)
   return block_names;
 }
 
+// TODO: remove code duplication by templating
 std::set<BoundaryID>
 SubProblem::getMaterialPropertyBoundaryIDs(const std::string & prop_name)
 {
   std::set<BoundaryID> boundaries;
 
-  for (std::map<unsigned int, std::set<std::string> >::iterator it = _map_boundary_material_props.begin();
+  for (std::map<BoundaryID, std::set<std::string> >::iterator it = _map_boundary_material_props.begin();
       it != _map_boundary_material_props.end();
       ++it)
   {
@@ -201,13 +202,13 @@ SubProblem::storeDelayedCheckMatProp(const std::string & requestor, BoundaryID b
 void
 SubProblem::checkBlockMatProps()
 {
-  checkMatProps(_map_block_material_props, _map_block_material_props_check, _zero_block_material_props, "block");
+  checkMatProps(_map_block_material_props, _map_block_material_props_check, _zero_block_material_props);
 }
 
 void
 SubProblem::checkBoundaryMatProps()
 {
-  checkMatProps(_map_boundary_material_props, _map_boundary_material_props_check, _zero_boundary_material_props , "boundary");
+  checkMatProps(_map_boundary_material_props, _map_boundary_material_props_check, _zero_boundary_material_props);
 }
 
 void
@@ -252,59 +253,61 @@ SubProblem::meshChanged()
   mooseError("This system does not support changing the mesh");
 }
 
-void
-SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props,
-                          std::map<unsigned int, std::multimap<std::string, std::string> > & check_props,
-                          std::map<unsigned int, std::set<MaterialPropertyName> > & zero_props,
-                          const std::string & type)
+template <>
+std::string
+SubProblem::restrictionTypeName<SubdomainID>()
 {
+  return "block";
+}
 
+template <>
+std::string
+SubProblem::restrictionTypeName<BoundaryID>()
+{
+  return "boundary";
+}
+
+std::string
+SubProblem::restrictionCheckName(SubdomainID check_id)
+{
+  // TODO: Put a better a interface in MOOSE
+  std::map<subdomain_id_type, std::string> & name_map = mesh().getMesh().set_subdomain_name_map();
+  std::map<subdomain_id_type, std::string>::const_iterator pos = name_map.find(check_id);
+  if (pos != name_map.end())
+    return pos->second;
+  return "";
+}
+
+std::string
+SubProblem::restrictionCheckName(BoundaryID check_id)
+{
+  return mesh().getMesh().get_boundary_info().sideset_name(check_id);
+}
+
+template <typename T>
+void
+SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
+                          std::map<T, std::multimap<std::string, std::string> > & check_props,
+                          std::map<T, std::set<MaterialPropertyName> > & zero_props)
+{
   // Set flag for type: block/boundary
   bool block_type;
-  if (type == "block")
-    block_type = true;
-  else if (type == "boundary")
-    block_type = false;
-  else
-    mooseError("Unknown type argument, it must be 'block' or 'boundary'");
 
   // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
-  int any_id;
+  T any_id = mesh().getAnyID<T>();
 
   // Variable for storing all available blocks/boundaries from the mesh
-  std::set<int> all_ids;
-
-  // Define the id variables based on the type of material checking
-  if (block_type)
-  {
-    any_id = Moose::ANY_BLOCK_ID;
-    all_ids.insert(mesh().meshSubdomains().begin(), mesh().meshSubdomains().end());
-  }
-  else
-  {
-    any_id = Moose::ANY_BOUNDARY_ID;
-    all_ids.insert(mesh().getBoundaryIDs().begin(), mesh().getBoundaryIDs().end());
-  }
+  std::set<T> all_ids(mesh().getBlockOrBoundaryIDs<T>());
 
   // Loop through the properties to check
-  for (std::map<unsigned int, std::multimap<std::string, std::string> >::const_iterator check_it = check_props.begin();
+  for (typename std::map<T, std::multimap<std::string, std::string> >::const_iterator check_it = check_props.begin();
        check_it != check_props.end(); ++check_it)
   {
     // The current id for the property being checked (BoundaryID || BlockID)
-    int check_id = check_it->first;
+    T check_id = check_it->first;
 
     // Get the name of the block/boundary (for error reporting)
-    std::string check_name;
-    if (block_type)
-    {
-      // TODO: Put a better a interface in MOOSE
-      std::map<subdomain_id_type, std::string> & name_map = mesh().getMesh().set_subdomain_name_map();
-      std::map<subdomain_id_type, std::string>::const_iterator pos = name_map.find(check_id);
-      if (pos != name_map.end())
-        check_name = pos->second;
-    }
-    else
-      check_name = mesh().getMesh().get_boundary_info().sideset_name(check_id);
+    std::string check_name = restrictionCheckName(check_id);
 
     // Create a name if it doesn't exist
     if (check_name.empty())
@@ -319,7 +322,7 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
     if (check_id == any_id)
     {
       // Loop through all the block/boundary ids
-      for (std::set<int>::const_iterator all_it = all_ids.begin(); all_it != all_ids.end(); ++all_it)
+      for (typename std::set<T>::const_iterator all_it = all_ids.begin(); all_it != all_ids.end(); ++all_it)
       {
         // Loop through all the stored properties
         for (std::multimap<std::string, std::string>::const_iterator prop_it = check_it->second.begin(); prop_it != check_it->second.end(); ++prop_it)
@@ -328,7 +331,7 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
           // and not is not a zero material property.
           if (props[*all_it].find(prop_it->second) == props[*all_it].end() && props[any_id].find(prop_it->second) == props[any_id].end() &&
               zero_props[*all_it].find(prop_it->second) == zero_props[*all_it].end() && zero_props[any_id].find(prop_it->second) == zero_props[any_id].end())
-            mooseError("Material property '" << prop_it->second << "', requested by '" << prop_it->first << "' is not defined on " << type << " " << *all_it);
+            mooseError("Material property '" << prop_it->second << "', requested by '" << prop_it->first << "' is not defined on " << restrictionTypeName<T>() << " " << *all_it);
         }
       }
     }
@@ -341,10 +344,10 @@ SubProblem::checkMatProps(std::map<unsigned int, std::set<std::string> > & props
         // Check if the name is contained in the map and skip over the id if it is Moose::ANY_BLOCK_ID/ANY_BOUNDARY_ID
         if (props[check_id].find(prop_it->second) == props[check_id].end() &&
             zero_props[check_id].find(prop_it->second) == zero_props[check_id].end() && check_id != any_id)
-          mooseError("Material property '" + prop_it->second + "', requested by '" + prop_it->first + "' is not defined on " + type + " " + check_name);
+          mooseError("Material property '" + prop_it->second + "', requested by '" + prop_it->first + "' is not defined on " + restrictionTypeName<T>() + " " + check_name);
       }
     else
-      mooseError("No material defined on " + type + " " + check_name);
+      mooseError("No material defined on " + restrictionTypeName<T>() + " " + check_name);
   }
 }
 

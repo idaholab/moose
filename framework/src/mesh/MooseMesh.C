@@ -1841,6 +1841,34 @@ MooseMesh::getBoundaryIDs() const
   return getMesh().get_boundary_info().get_boundary_ids();
 }
 
+template <>
+const std::set<SubdomainID> &
+MooseMesh::getBlockOrBoundaryIDs() const
+{
+  return meshSubdomains();
+}
+
+template <>
+const std::set<BoundaryID> &
+MooseMesh::getBlockOrBoundaryIDs() const
+{
+  return getBoundaryIDs();
+}
+
+template <>
+SubdomainID
+MooseMesh::getAnyID() const
+{
+  return Moose::ANY_BLOCK_ID;
+}
+
+template <>
+BoundaryID
+MooseMesh::getAnyID() const
+{
+  return Moose::ANY_BOUNDARY_ID;
+}
+
 void
 MooseMesh::buildNodeListFromSideList()
 {

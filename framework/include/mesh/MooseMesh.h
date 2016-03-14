@@ -125,6 +125,20 @@ public:
   const std::set<BoundaryID> & getBoundaryIDs() const;
 
   /**
+   * Templated helper that returns either block or boundary IDs depending on
+   * the template argument
+   */
+  template <typename T>
+  const std::set<T> & getBlockOrBoundaryIDs() const;
+
+  /**
+   * Templated helper that returns either the ang block or any boundary ID
+   * depending on the template argument
+   */
+  template <typename T>
+  T getAnyID() const;
+
+  /**
    * Calls BoundaryInfo::build_node_list()/build_side_list() and *makes separate copies* of
    * Nodes/Elems in those lists.
    *
