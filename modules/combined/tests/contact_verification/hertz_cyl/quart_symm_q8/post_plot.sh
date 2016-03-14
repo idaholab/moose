@@ -78,9 +78,9 @@ do
     title[3]="Contact Pressure Plot (Time = 1.0, P = $press)"
 
 # Generate interface pressure data using BLOT
-    blot --device met --input blot_splot_q8.inp ${base}.e > ${logfile} 2>&1
+    blot --device cps --input blot_splot_q8.inp ${base}.e > ${logfile} 2>&1
     cd gold
-    blot --device met --input ../blot_splot_q8.inp ${base}.e >> ../${logfile} 2>&1
+    blot --device cps --input ../blot_splot_q8.inp ${base}.e >> ../${logfile} 2>&1
     perl -i -ple 's/^@/#@/g' ${datfile2}
     perl -i -ple 's/^&/#&/g' ${datfile2}
     cd ..

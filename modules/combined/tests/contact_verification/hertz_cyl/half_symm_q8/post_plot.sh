@@ -88,14 +88,14 @@ do
 
 # Generate interface pressure data using BLOT
     algebra ${base}.e ${base}2.e < algebra.inp > ${logfile} 2>&1
-    blot --device met --input blot_splot.inp --basename ${base}2_splot ${base}2.e >> ${logfile} 2>&1
-    blot --device met --input blot_xyplot.inp --basename ${base}2_xyplot ${base}2.e >> ${logfile} 2>&1
-    blot --device met --input blot_tang_tract.inp --basename ${base}2_tang ${base}2.e >> ${logfile} 2>&1
+    blot --device cps --input blot_splot.inp --basename ${base}2_splot ${base}2.e >> ${logfile} 2>&1
+    blot --device cps --input blot_xyplot.inp --basename ${base}2_xyplot ${base}2.e >> ${logfile} 2>&1
+    blot --device cps --input blot_tang_tract.inp --basename ${base}2_tang ${base}2.e >> ${logfile} 2>&1
     cd gold
     algebra ${base}.e ${base}2.e < ../algebra.inp >> ../${logfile} 2>&1
-    blot --device met --input ../blot_splot.inp --basename ${base}2_splot ${base}2.e >> ../${logfile} 2>&1
-    blot --device met --input ../blot_xyplot.inp --basename ${base}2_xyplot ${base}2.e >> ../${logfile} 2>&1
-    blot --device met --input ../blot_tang_tract.inp --basename ${base}2_tang ${base}2.e >> ../${logfile} 2>&1
+    blot --device cps --input ../blot_splot.inp --basename ${base}2_splot ${base}2.e >> ../${logfile} 2>&1
+    blot --device cps --input ../blot_xyplot.inp --basename ${base}2_xyplot ${base}2.e >> ../${logfile} 2>&1
+    blot --device cps --input ../blot_tang_tract.inp --basename ${base}2_tang ${base}2.e >> ../${logfile} 2>&1
     perl -i -ple 's/^@/#@/g' ${datfile2}
     perl -i -ple 's/^&/#&/g' ${datfile2}
     perl -0777 -i -pe 's/ (0\.00)/#$1/' ${datfile2}
