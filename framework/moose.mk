@@ -126,7 +126,7 @@ exodiff: app_INCLUDES := $(exodiff_includes)
 exodiff: $(exodiff_APP)
 
 $(exodiff_APP): $(exodiff_objects)
-	@echo "Linking "$@"..."
+	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objects) -o $@ $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS)
 

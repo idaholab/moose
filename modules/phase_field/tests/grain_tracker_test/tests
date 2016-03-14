@@ -6,7 +6,7 @@
 
     # integer based maps can shift slightly in parallel
     max_parallel = 1
-    valgrind = heavy
+    valgrind = 'HEAVY'
     max_time = 500
   [../]
 
@@ -15,7 +15,7 @@
     input = 'grain_tracker_test_elemental.i'
     exodiff = 'grain_tracker_test_elemental_out.e-s002'
     method = 'OPT OPROF' # slow test
-    valgrind = heavy
+    valgrind = 'HEAVY'
     max_time = 500
   [../]
 
@@ -26,7 +26,7 @@
     method = 'OPT OPROF' # slow test
     cli_args = 'Outputs/exodus=false'
     recover = false  # grain tracker CSV output isn't designed to work with recover
-    valgrind = heavy
+    valgrind = 'HEAVY'
     max_time = 500
   [../]
 
@@ -59,7 +59,7 @@
     cli_args = 'Outputs/file_base=gt_faux_nodal_out Postprocessors/grain_tracker/type=FauxGrainTracker'
 
     exodiff = 'gt_faux_nodal_out.e'
-    valgrind = heavy
+    valgrind = 'HEAVY'
     max_time = 500
   [../]
 
@@ -70,7 +70,7 @@
 
     exodiff = 'gt_faux_elemental_out.e-s002'
     method = 'OPT OPROF' # slow test
-    valgrind = heavy
+    valgrind = 'HEAVY'
     max_time = 500
   [../]
 []
