@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "Output.h"
-#include "Warehouse.h"
 
 // Forward declarations
 class FEProblem;
@@ -26,7 +25,7 @@ class InputParameters;
 /**
  * Class for storing and utilizing output objects
  */
-class OutputWarehouse : public Warehouse<Output>
+class OutputWarehouse
 {
 public:
 
@@ -294,6 +293,9 @@ private:
 
   /// MooseApp
   MooseApp & _app;
+
+  /// All instances of objects (raw pointers)
+  std::vector<Output *> _all_objects;
 
   /// True to buffer console outputs in actions
   bool _buffer_action_console_outputs;
