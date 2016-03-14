@@ -28,6 +28,9 @@ XFEM::XFEM (MooseApp & app) :
     XFEMInterface(app),
     _efa_mesh(Moose::out)
 {
+#ifndef LIBMESH_ENABLE_UNIQUE_ID
+  mooseError("MOOSE requires unique ids to be enabled in libmesh (configure with --enable-unique-id) to use XFEM!");
+#endif
 }
 
 XFEM::~XFEM ()
