@@ -552,7 +552,7 @@ GrainTracker::trackGrains()
   for (std::map<std::pair<unsigned int, unsigned int>, std::vector<unsigned int> >::iterator it = new_grain_idx_to_existing_grain_idx.begin();
        it != new_grain_idx_to_existing_grain_idx.end(); ++it)
   {
-    std::cout << '(' << it->first.first << ',' << it->first.second << ") -> " << it->second.size() << '\n';
+//    std::cout << '(' << it->first.first << ',' << it->first.second << ") -> " << it->second.size() << '\n';
 
 
                                                                 // map index     feature index
@@ -676,8 +676,12 @@ GrainTracker::remapGrains()
         if (grain_it1 == grain_it2 || grain_it2->second->_status == INACTIVE)
           continue;
 
-        if (grain_it1->second->_var_idx == grain_it2->second->_var_idx &&         // Are the grains represented by the same variable?
-            grain_it1->second->isStichable(*grain_it2->second))                   // If so, do their bboxes intersect?
+        if (grain_it1->second->_var_idx == grain_it2->second->_var_idx &&   // Are the grains represented by the same variable?
+            grain_it1->second->isStichable(*grain_it2->second) &&           // If so, do their bboxes intersect (coarse level check)?
+            setsIntersect(grain_it1->second->_halo_ids.begin(),             // If so, do they actually overlap (tight "hull" check)?
+                          grain_it1->second->_halo_ids.end(),
+                          grain_it2->second->_halo_ids.begin(),
+                          grain_it2->second->_halo_ids.end()))
         {
           // If so, remap one of them
           swapSolutionValues(grain_it1, grain_it2, times_through_loop);

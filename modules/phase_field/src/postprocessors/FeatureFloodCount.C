@@ -67,6 +67,7 @@ private:
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
   storeHelper(stream, feature._ghosted_ids, context);
+  storeHelper(stream, feature._halo_ids, context);
   storeHelper(stream, feature._periodic_nodes, context);
   storeHelper(stream, feature._var_idx, context);
   storeHelper(stream, feature._bboxes, context);
@@ -84,6 +85,7 @@ template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, 
 template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
   loadHelper(stream, feature._ghosted_ids, context);
+  loadHelper(stream, feature._halo_ids, context);
   loadHelper(stream, feature._periodic_nodes, context);
   loadHelper(stream, feature._var_idx, context);
   loadHelper(stream, feature._bboxes, context);
@@ -441,8 +443,8 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
       // Local variables for clarity
       dof_id_type entity_id = entity_it->first;
 
-      // Is this an odd number?
-      bool isHaloMarking = entity_it->second % 2 == 1;
+      // Is this an odd number (ones bit set)?
+      bool isHaloMarking = (entity_it->second & 1) == 1;
 
       // Divide by two to obtain the feature number
       int feature_num = entity_it->second >> 1;
@@ -1414,6 +1416,10 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 
     out << "\nLocal Entities: ";
     for (std::set<dof_id_type>::const_iterator it = feature._local_ids.begin();  it != feature._local_ids.end(); ++it)
+      out << *it << " ";
+
+    out << "\nHalo Entities: ";
+    for (std::set<dof_id_type>::const_iterator it = feature._halo_ids.begin();  it != feature._halo_ids.end(); ++it)
       out << *it << " ";
 
     out << "\nPeriodic Node IDs: ";
