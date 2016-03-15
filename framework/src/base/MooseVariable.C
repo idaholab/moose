@@ -74,6 +74,9 @@ MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, Syste
     _phi_face(_assembly.fePhiFace(_fe_type)),
     _grad_phi_face(_assembly.feGradPhiFace(_fe_type)),
 
+    _phi_neighbor(_assembly.fePhiNeighbor(_fe_type)),
+    _grad_phi_neighbor(_assembly.feGradPhiNeighbor(_fe_type)),
+
     _phi_face_neighbor(_assembly.fePhiFaceNeighbor(_fe_type)),
     _grad_phi_face_neighbor(_assembly.feGradPhiFaceNeighbor(_fe_type)),
 
@@ -388,6 +391,25 @@ MooseVariable::secondPhiFace()
 {
   _second_phi_face = &_assembly.feSecondPhiFace(_fe_type);
   return *_second_phi_face;
+}
+
+const VariablePhiValue &
+MooseVariable::phiNeighbor()
+{
+  return _phi_neighbor;
+}
+
+const VariablePhiGradient &
+MooseVariable::gradPhiNeighbor()
+{
+  return _grad_phi_neighbor;
+}
+
+const VariablePhiSecond &
+MooseVariable::secondPhiNeighbor()
+{
+  _second_phi_neighbor = &_assembly.feSecondPhiNeighbor(_fe_type);
+  return *_second_phi_neighbor;
 }
 
 const VariablePhiValue &
@@ -1392,11 +1414,11 @@ MooseVariable::computeNeighborValues()
 
     for (unsigned int qp=0; qp < nqp; ++qp)
     {
-      phi_local = _phi_face_neighbor[i][qp];
-      dphi_local = _grad_phi_face_neighbor[i][qp];
+      phi_local = _phi_neighbor[i][qp];
+      dphi_local = _grad_phi_neighbor[i][qp];
 
       if (_need_second_neighbor || _need_second_old_neighbor || _need_second_older_neighbor)
-        d2phi_local = (*_second_phi_face_neighbor)[i][qp];
+        d2phi_local = (*_second_phi_neighbor)[i][qp];
 
       _u_neighbor[qp]      += phi_local * soln_local;
       _grad_u_neighbor[qp] += dphi_local * soln_local;

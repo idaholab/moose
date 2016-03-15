@@ -69,6 +69,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
   // Build fe's for the helpers
   buildFE(FEType(FIRST, LAGRANGE));
   buildFaceFE(FEType(FIRST, LAGRANGE));
+  buildNeighborFE(FEType(FIRST,LAGRANGE));
   buildFaceNeighborFE(FEType(FIRST, LAGRANGE));
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current mesh
@@ -87,10 +88,10 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     (*_holder_fe_face_helper[dim])->get_JxW();
     (*_holder_fe_face_helper[dim])->get_normals();
 
-    _holder_fe_neighbor_helper[dim] = &_fe_neighbor[dim][FEType(FIRST, LAGRANGE)];
-    (*_holder_fe_neighbor_helper[dim])->get_xyz();
-    (*_holder_fe_neighbor_helper[dim])->get_JxW();
-    (*_holder_fe_neighbor_helper[dim])->get_normals();
+    _holder_fe_face_neighbor_helper[dim] = &_fe_face_neighbor[dim][FEType(FIRST, LAGRANGE)];
+    (*_holder_fe_face_neighbor_helper[dim])->get_xyz();
+    (*_holder_fe_face_neighbor_helper[dim])->get_JxW();
+    (*_holder_fe_face_neighbor_helper[dim])->get_normals();
   }
 }
 
@@ -104,6 +105,9 @@ Assembly::~Assembly()
       delete it->second;
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[dim].begin(); it != _fe_neighbor[dim].end(); ++it)
+      delete it->second;
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+    for (std::map<FEType, FEBase *>::iterator it = _fe_face_neighbor[dim].begin(); it != _fe_face_neighbor[dim].end(); ++it)
       delete it->second;
 
   for (std::map<unsigned int, QBase *>::iterator it = _holder_qrule_volume.begin(); it != _holder_qrule_volume.end(); ++it)
@@ -174,10 +178,10 @@ Assembly::buildFaceFE(FEType type)
 }
 
 void
-Assembly::buildFaceNeighborFE(FEType type)
+Assembly::buildNeighborFE(FEType type)
 {
-  if (!_fe_shape_data_face_neighbor[type])
-    _fe_shape_data_face_neighbor[type] = new FEShapeData;
+  if (!_fe_shape_data_neighbor[type])
+    _fe_shape_data_neighbor[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
   for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
@@ -188,6 +192,24 @@ Assembly::buildFaceNeighborFE(FEType type)
     _fe_neighbor[dim][type]->get_dphi();
     if (_need_second_derivative.find(type) != _need_second_derivative.end())
       _fe_neighbor[dim][type]->get_d2phi();
+  }
+}
+
+void
+Assembly::buildFaceNeighborFE(FEType type)
+{
+  if (!_fe_shape_data_face_neighbor[type])
+    _fe_shape_data_face_neighbor[type] = new FEShapeData;
+
+  // Build an FE object for this type for each dimension up to the dimension of the current mesh
+  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  {
+    if (!_fe_face_neighbor[dim][type])
+      _fe_face_neighbor[dim][type] = FEBase::build(dim, type).release();
+    _fe_face_neighbor[dim][type]->get_phi();
+    _fe_face_neighbor[dim][type]->get_dphi();
+    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+      _fe_face_neighbor[dim][type]->get_d2phi();
   }
 }
 
@@ -254,6 +276,28 @@ Assembly::feSecondPhiFace(FEType type)
   _need_second_derivative[type] = true;
   buildFaceFE(type);
   return _fe_shape_data_face[type]->_second_phi;
+}
+
+const VariablePhiValue &
+Assembly::fePhiNeighbor(FEType type)
+{
+  buildNeighborFE(type);
+  return _fe_shape_data_neighbor[type]->_phi;
+}
+
+const VariablePhiGradient &
+Assembly::feGradPhiNeighbor(FEType type)
+{
+  buildNeighborFE(type);
+  return _fe_shape_data_neighbor[type]->_grad_phi;
+}
+
+const VariablePhiSecond &
+Assembly::feSecondPhiNeighbor(FEType type)
+{
+  _need_second_derivative[type] = true;
+  buildNeighborFE(type);
+  return _fe_shape_data_neighbor[type]->_second_phi;
 }
 
 const VariablePhiValue &
@@ -324,7 +368,7 @@ Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
 {
   _current_qrule_neighbor = qrule;
 
-  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[dim].begin(); it != _fe_neighbor[dim].end(); ++it)
+  for (std::map<FEType, FEBase *>::iterator it = _fe_face_neighbor[dim].begin(); it != _fe_face_neighbor[dim].end(); ++it)
     it->second->attach_quadrature_rule(_current_qrule_neighbor);
 }
 
@@ -455,6 +499,111 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
   _current_q_points_face.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_xyz()));
   _current_JxW_face.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_JxW()));
   _current_normals.shallowCopy(const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_normals()));
+}
+
+void
+Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points)
+{
+  unsigned int neighbor_dim = neighbor->dim();
+
+  // reinit neighbor face
+  for (std::map<FEType, FEBase *>::iterator it = _fe_face_neighbor[neighbor_dim].begin(); it != _fe_face_neighbor[neighbor_dim].end(); ++it)
+  {
+    FEBase * fe_face_neighbor = it->second;
+    FEType fe_type = it->first;
+    FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
+
+    it->second->reinit(neighbor, &reference_points);
+
+    _current_fe_face_neighbor[it->first] = it->second;
+
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_face_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_face_neighbor->get_dphi()));
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_face_neighbor->get_d2phi()));
+  }
+}
+
+void
+Assembly::reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & reference_points)
+{
+  unsigned int neighbor_dim = neighbor->dim();
+
+  // reinit neighbor face
+  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[neighbor_dim].begin(); it != _fe_neighbor[neighbor_dim].end(); ++it)
+  {
+    FEBase * fe_neighbor = it->second;
+    FEType fe_type = it->first;
+    FEShapeData * fesd = _fe_shape_data_neighbor[fe_type];
+
+    it->second->reinit(neighbor, &reference_points);
+
+    _current_fe_neighbor[it->first] = it->second;
+
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
+    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
+  }
+}
+
+void
+Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points)
+{
+  unsigned int neighbor_dim = neighbor->dim();
+
+  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  neighbor_rule->setPoints(reference_points);
+  setNeighborQRule(neighbor_rule, neighbor_dim);
+
+  _current_neighbor_elem = neighbor;
+
+  // Calculate the volume of the neighbor
+
+  FEType fe_type (neighbor->default_order() , LAGRANGE);
+  UniquePtr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
+
+  const std::vector<Real> & JxW = fe->get_JxW();
+  const std::vector<Point> & q_points = fe->get_xyz();
+
+  // The default quadrature rule should integrate the mass matrix,
+  // thus it should be plenty to compute the area
+  QGauss qrule (neighbor->dim(), fe_type.default_quadrature_order());
+  fe->attach_quadrature_rule(&qrule);
+  fe->reinit(neighbor);
+
+  // set the coord transformation
+  MooseArray<Real> coord;
+  coord.resize(qrule.n_points());
+  Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(neighbor->subdomain_id());
+  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
+  switch (coord_type) // coord type should be the same for the neighbor
+  {
+    case Moose::COORD_XYZ:
+      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+        coord[qp] = 1.;
+      break;
+
+    case Moose::COORD_RZ:
+      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+        coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
+      break;
+
+    case Moose::COORD_RSPHERICAL:
+      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+        coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
+      break;
+
+    default:
+      mooseError("Unknown coordinate system");
+      break;
+  }
+
+  _current_neighbor_volume = 0.;
+  for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+    _current_neighbor_volume += JxW[qp] * coord[qp];
+
+  coord.release();
 }
 
 void
@@ -624,83 +773,8 @@ Assembly::reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem
   std::vector<Point> reference_points;
   FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
 
-  reinitNeighborAtReference(neighbor, reference_points);
-}
-
-void
-Assembly::reinitNeighborAtReference(const Elem * neighbor, const std::vector<Point> & reference_points)
-{
-  unsigned int neighbor_dim = neighbor->dim();
-
-  // reinit neighbor element
-  for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[neighbor_dim].begin(); it != _fe_neighbor[neighbor_dim].end(); ++it)
-  {
-    FEBase * fe_neighbor = it->second;
-    FEType fe_type = it->first;
-    FEShapeData * fesd = _fe_shape_data_face_neighbor[fe_type];
-
-    it->second->reinit(neighbor, &reference_points);
-
-    _current_fe_neighbor[it->first] = it->second;
-
-    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
-    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
-    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
-      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
-  }
-
-  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
-  neighbor_rule->setPoints(reference_points);
-  setNeighborQRule(neighbor_rule, neighbor_dim);
-
-  _current_neighbor_elem = neighbor;
-
-  // Calculate the volume of the neighbor
-
-  FEType fe_type (neighbor->default_order() , LAGRANGE);
-  UniquePtr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
-
-  const std::vector<Real> & JxW = fe->get_JxW();
-  const std::vector<Point> & q_points = fe->get_xyz();
-
-  // The default quadrature rule should integrate the mass matrix,
-  // thus it should be plenty to compute the area
-  QGauss qrule (neighbor->dim(), fe_type.default_quadrature_order());
-  fe->attach_quadrature_rule(&qrule);
-  fe->reinit(neighbor);
-
-  // set the coord transformation
-  MooseArray<Real> coord;
-  coord.resize(qrule.n_points());
-  Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(neighbor->subdomain_id());
-  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
-  switch (coord_type) // coord type should be the same for the neighbor
-  {
-  case Moose::COORD_XYZ:
-    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-      coord[qp] = 1.;
-    break;
-
-  case Moose::COORD_RZ:
-    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-      coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-    break;
-
-  case Moose::COORD_RSPHERICAL:
-    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-      coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-    break;
-
-  default:
-    mooseError("Unknown coordinate system");
-    break;
-  }
-
-  _current_neighbor_volume = 0.;
-  for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-    _current_neighbor_volume += JxW[qp] * coord[qp];
-
-  coord.release();
+  reinitFEFaceNeighbor(neighbor, reference_points);
+  reinitNeighbor(neighbor, reference_points);
 }
 
 void
@@ -715,16 +789,33 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_
   FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
 
   // first do the side element
-  reinitNeighborAtReference(_current_neighbor_side_elem, reference_points);
+  reinitFEFaceNeighbor(_current_neighbor_side_elem, reference_points);
+  reinitNeighbor(_current_neighbor_side_elem, reference_points);
   // compute JxW on the neighbor's face
   unsigned int neighbor_side_dim = _current_neighbor_side_elem->dim();
-  _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_neighbor_helper[neighbor_side_dim])->get_JxW()));
+  _current_JxW_neighbor.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_face_neighbor_helper[neighbor_side_dim])->get_JxW()));
 
-  reinitNeighborAtReference(neighbor, reference_points);
+  reinitFEFaceNeighbor(neighbor, reference_points);
+  reinitNeighbor(neighbor, reference_points);
 
   // Save off the physical points
   _current_physical_points = physical_points;
 }
+
+void
+Assembly::reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Point> & physical_points)
+{
+  std::vector<Point> reference_points;
+
+  unsigned int neighbor_dim = neighbor->dim();
+  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, physical_points, reference_points);
+
+  reinitFENeighbor(neighbor, reference_points);
+  reinitNeighbor(neighbor, reference_points);
+  // Save off the physical points
+  _current_physical_points = physical_points;
+}
+
 
 DenseMatrix<Number> &
 Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
@@ -1023,6 +1114,13 @@ Assembly::copyNeighborShapes(unsigned int var)
     _grad_phi_face_neighbor.shallowCopy(v.gradPhiFaceNeighbor());
   if (v.usesSecondPhi())
     _second_phi_face_neighbor.shallowCopy(v.secondPhiFaceNeighbor());
+
+  if (v.usesPhi())
+    _phi_neighbor.shallowCopy(v.phiNeighbor());
+  if (v.usesGradPhi())
+    _grad_phi_neighbor.shallowCopy(v.gradPhiNeighbor());
+  if (v.usesSecondPhi())
+    _second_phi_neighbor.shallowCopy(v.secondPhiNeighbor());
 }
 
 void

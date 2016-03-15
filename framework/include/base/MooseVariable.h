@@ -106,6 +106,10 @@ public:
   const VariablePhiGradient & gradPhiFace();
   const VariablePhiSecond & secondPhiFace();
 
+  const VariablePhiValue & phiNeighbor();
+  const VariablePhiGradient & gradPhiNeighbor();
+  const VariablePhiSecond & secondPhiNeighbor();
+
   const VariablePhiValue & phiFaceNeighbor();
   const VariablePhiGradient & gradPhiFaceNeighbor();
   const VariablePhiSecond & secondPhiFaceNeighbor();
@@ -360,6 +364,11 @@ protected:
   const VariablePhiValue & _phi_face;
   const VariablePhiGradient & _grad_phi_face;
   const VariablePhiSecond * _second_phi_face;
+
+ // Values, gradients and second derivatives of shape function
+  const VariablePhiValue & _phi_neighbor;
+  const VariablePhiGradient & _grad_phi_neighbor;
+  const VariablePhiSecond * _second_phi_neighbor;
 
   // Values, gradients and second derivatives of shape function on faces
   const VariablePhiValue & _phi_face_neighbor;
