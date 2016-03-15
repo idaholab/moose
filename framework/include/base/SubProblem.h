@@ -326,14 +326,14 @@ protected:
   DiracKernelInfo _dirac_kernel_info;
 
   /// Map of material properties (block_id -> list of properties)
-  std::map<unsigned int, std::set<std::string> > _map_block_material_props;
+  std::map<SubdomainID, std::set<std::string> > _map_block_material_props;
 
   /// Map for boundary material properties (boundary_id -> list of properties)
-  std::map<unsigned int, std::set<std::string> > _map_boundary_material_props;
+  std::map<BoundaryID, std::set<std::string> > _map_boundary_material_props;
 
   /// Set of properties returned as zero properties
-  std::map<unsigned int, std::set<MaterialPropertyName> > _zero_block_material_props;
-  std::map<unsigned int, std::set<MaterialPropertyName> > _zero_boundary_material_props;
+  std::map<SubdomainID, std::set<MaterialPropertyName> > _zero_block_material_props;
+  std::map<BoundaryID, std::set<MaterialPropertyName> > _zero_boundary_material_props;
 
   /// set containing all material property names that have been requested by getMaterialProperty*
   std::set<std::string> _material_property_requested;
@@ -344,8 +344,8 @@ protected:
    * from boudnary/block id to multimap.  Each of the multimaps is a list of
    * requestor object names to material property names.
    */
-  std::map<unsigned int, std::multimap<std::string, std::string> > _map_block_material_props_check;
-  std::map<unsigned int, std::multimap<std::string, std::string> > _map_boundary_material_props_check;
+  std::map<SubdomainID, std::multimap<std::string, std::string> > _map_block_material_props_check;
+  std::map<BoundaryID, std::multimap<std::string, std::string> > _map_boundary_material_props_check;
   ///@}
 
   /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
@@ -371,10 +371,10 @@ private:
    * \see checkBlockMatProps
    * \see checkBoundaryMatProps
    */
-  void checkMatProps(std::map<unsigned int, std::set<std::string> > & props,
-                     std::map<unsigned int, std::multimap<std::string, std::string> > & check_props,
-                     std::map<unsigned int, std::set<MaterialPropertyName> > & zero_props,
-                     const std::string & type);
+  template <typename T>
+  void checkMatProps(std::map<T, std::set<std::string> > & props,
+                     std::map<T, std::multimap<std::string, std::string> > & check_props,
+                     std::map<T, std::set<MaterialPropertyName> > & zero_props);
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
@@ -387,6 +387,13 @@ private:
    * @param name The full (unique) name.
    */
   virtual void registerRecoverableData(std::string name);
+
+  ///@{ Helper functions for checkMatProps
+  template <typename T>
+  std::string restrictionTypeName();
+  std::string restrictionCheckName(SubdomainID check_id);
+  std::string restrictionCheckName(BoundaryID check_id);
+  ///@}
 
   friend class Restartable;
 };
