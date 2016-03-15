@@ -52,6 +52,9 @@ public:
 private:
   void updateGenerators();
 
+  template<typename T>
+  void updateGeneratorHelper(T it, T end_it);
+
   FEProblem & _rd_problem;
   MooseMesh & _rd_mesh;
 
