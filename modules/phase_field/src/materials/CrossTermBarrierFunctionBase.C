@@ -1,0 +1,69 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#include "CrossTermBarrierFunctionBase.h"
+
+template<>
+InputParameters validParams<CrossTermBarrierFunctionBase>()
+{
+  InputParameters params = validParams<Material>();
+  params.addParam<std::string>("function_name", "g", "actual name for g(eta_i)");
+  params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
+  params.addRequiredParam<std::vector<Real> >("W_ij", "Terms controlling barrier height set W=1 in DerivativeMultiPhaseMaterial for these to apply");
+  return params;
+}
+
+CrossTermBarrierFunctionBase::CrossTermBarrierFunctionBase(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
+    _function_name(getParam<std::string>("function_name")),
+    _W_ij(getParam<std::vector<Real> >("W_ij")),
+    _num_eta(coupledComponents("etas")),
+    _eta_names(_num_eta),
+    _eta(_num_eta),
+    _prop_g(declareProperty<Real>(_function_name)),
+    _prop_dg(_num_eta),
+    _prop_d2g(_num_eta)
+{
+  // if Vector W_ij is not the correct size to fill the matrix give error
+  if (_num_eta * _num_eta != _W_ij.size())
+    mooseError("Supply the number of etas squared for W_ij.");
+
+  // erroro out if the W_ij diagonal values are not zero
+  for (unsigned int i = 0; i < _num_eta; ++i)
+    if (_W_ij[_num_eta * i + i] != 0)
+      mooseError("Set on-diagonal values of W_ij to zero");
+
+  // declare g derivative properties, fetch eta values
+  for (unsigned int i = 0; i < _num_eta; ++i)
+  {
+    _prop_d2g[i].resize(_num_eta);
+    _eta_names[i] = getVar("etas", i)->name();
+  }
+
+  for (unsigned int i = 0; i < _num_eta; ++i)
+  {
+    _prop_dg[i]  = &declarePropertyDerivative<Real>(_function_name, _eta_names[i]);
+    _eta[i] = &coupledValue("etas", i);
+    for (unsigned int j = i; j < _num_eta; ++j)
+    {
+      _prop_d2g[i][j] =
+      _prop_d2g[j][i] = &declarePropertyDerivative<Real>(_function_name, _eta_names[i], _eta_names[j]);
+    }
+  }
+}
+
+void
+CrossTermBarrierFunctionBase::computeQpProperties()
+{
+  // Initialize properties to zero before accumulating
+  _prop_g[_qp] = 0.0;
+  for (unsigned int i = 0; i < _num_eta; ++i)
+  {
+    (*_prop_dg[i])[_qp] = 0.0;
+    for (unsigned int j = i; j < _num_eta; ++j)
+      (*_prop_d2g[i][j])[_qp] = 0.0;
+  }
+}

@@ -30,7 +30,7 @@ protected:
   virtual void computeQpProperties();
 
   /// switching function name list
-  std::vector<std::string> _h_list;
+  std::vector<MaterialPropertyName> _h_list;
 
   /// number of phases handled by this material
   unsigned int _n_phase;

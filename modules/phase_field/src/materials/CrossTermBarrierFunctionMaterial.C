@@ -9,93 +9,42 @@
 template<>
 InputParameters validParams<CrossTermBarrierFunctionMaterial>()
 {
-  InputParameters params = validParams<Material>();
-  params.addParam<std::string>("function_name", "g", "actual name for g(eta_i)");
-  MooseEnum h_order("SIMPLE=0", "SIMPLE");
-  params.addParam<MooseEnum>("g_order", h_order, "Polynomial order of the switching function h(eta)");
-  params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
-  params.addRequiredParam<std::vector<Real> >("W_ij", "Terms controlling barrier height set W=1 in DerivativeMultiPhaseMaterial for these to apply");
+  InputParameters params = validParams<CrossTermBarrierFunctionBase>();
+  params.addClassDescription("");
   return params;
 }
 
 CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-    _function_name(getParam<std::string>("function_name")),
-    _g_order(getParam<MooseEnum>("g_order")),
-    _W_ij(getParam<std::vector<Real> >("W_ij")),
-    _num_eta(coupledComponents("etas")),
-    _eta(_num_eta),
-    _prop_g(declareProperty<Real>(_function_name)),
-    _prop_dg(_num_eta),
-    _prop_d2g(_num_eta)
-
+    CrossTermBarrierFunctionBase(parameters)
 {
-
-  // if Vector W_ij is not the correct size to fill the matrix give error
-  if (_num_eta * _num_eta != _W_ij.size())
-    mooseError("Supply the number of etas squared for W_ij.");
-
-  // if W_ij is not symmetric or if diagonal values are not zero, return error
+  // error out if W_ij is not symmetric
   for (unsigned int i = 0; i < _num_eta; ++i)
-  {
-    if (_W_ij[_num_eta * i + i] != 0)
-      mooseError("Set on-diagonal values of W_ij to zero");
-
-    for (unsigned int j = i; j < _num_eta; ++j)
-    {
+    for (unsigned int j = 0; j < i; ++j)
       if (_W_ij[_num_eta * i + j] != _W_ij[_num_eta * j + i])
-        mooseError("Supply symmetric values for W_ij");
-    }
-  }
-
-  for (unsigned int i = 0; i < _num_eta; ++i)
-    _prop_d2g[i].resize(_num_eta);
-
-  // declare derivative properties, fetch eta values
-  std::vector<std::string> eta_name(_num_eta);
-  for (unsigned int i = 0; i < _num_eta; ++i)
-    eta_name[i] = getVar("etas", i)->name();
-
-  for (unsigned int i = 0; i < _num_eta; ++i)
-  {
-    _prop_dg[i]  = &declarePropertyDerivative<Real>(_function_name, eta_name[i]);
-    _eta[i] = &coupledValue("etas", i);
-    for (unsigned int j = i; j < _num_eta; ++j)
-    {
-      _prop_d2g[i][j] =
-      _prop_d2g[j][i] = &declarePropertyDerivative<Real>(_function_name, eta_name[i], eta_name[j]);
-    }
-  }
+        mooseError("Please supply a symmetric W_ij matrix for ");
 }
 
 void
 CrossTermBarrierFunctionMaterial::computeQpProperties()
 {
   // Initialize properties to zero before accumulating
-  _prop_g[_qp] = 0.0;
-  for (unsigned int i = 0; i < _num_eta; ++i)
-  {
-    (*_prop_dg[i])[_qp] = 0.0;
-    for (unsigned int j = i; j < _num_eta; ++j)
-      (*_prop_d2g[i][j])[_qp] = 0.0;
-  }
+  CrossTermBarrierFunctionBase::computeQpProperties();
 
   // Sum the components of our W_ij matrix to get constant used in our g function
   for (unsigned int i = 0; i < _num_eta; ++i)
-    for (unsigned int j = i; j < _num_eta; ++j)
-
+    for (unsigned int j = i + 1; j < _num_eta; ++j)
     {
-      switch (_g_order)
-      {
-        case 0: // SIMPLE
-          _prop_g[_qp]         +=  _W_ij[_num_eta * i + j] * ((*_eta[i])[_qp] * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp] + ((*_eta[i])[_qp]-1) * ((*_eta[i])[_qp]-1) * ((*_eta[j])[_qp]-1) * ((*_eta[j])[_qp]-1));
-          (*_prop_dg[i])[_qp]  +=  _W_ij[_num_eta * i + j] * (2 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp] + 2 * ((*_eta[i])[_qp]-1) * ((*_eta[j])[_qp]-1) * ((*_eta[j])[_qp]-1));
-          if (i == j)
-            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * (2 * (*_eta[j])[_qp] * (*_eta[j])[_qp] + 2 * ((*_eta[j])[_qp]-1) * ((*_eta[j])[_qp]-1));
-          else
-            (*_prop_d2g[i][j])[_qp] +=  _W_ij[_num_eta * i + j] * (4 * (*_eta[i])[_qp] * (*_eta[j])[_qp] + 4 * ((*_eta[i])[_qp]-1) * ((*_eta[j])[_qp]-1));
-          break;
+      const Real ni = (*_eta[i])[_qp];
+      const Real nj = (*_eta[j])[_qp];
+      const Real Wij = _W_ij[_num_eta * i + j];
 
-      }
+      // barrier function value
+      _prop_g[_qp] += Wij * (ni * ni * nj * nj + (ni - 1) * (ni - 1) * (nj - 1) * (nj - 1));
+
+      // first derivative
+      (*_prop_dg[i])[_qp] += Wij * (2 * ni * nj * nj + 2 * (ni - 1) * (nj - 1) * (nj - 1));
+
+      // second derivative
+      (*_prop_d2g[i][j])[_qp] +=  Wij * (4 * ni * nj + 4 * (ni - 1) * (nj - 1));
     }
 }
