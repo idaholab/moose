@@ -62,12 +62,12 @@
 
   start_time = 0.0
   dt = 0.5
-  end_time = 1.0
+  end_time = 1.5
 
   [./Predictor]
     type = SimplePredictor
     scale = 1.0
-    skip_times = '1.0'
+    skip_times_old = '1.0'
   [../]
 []
 

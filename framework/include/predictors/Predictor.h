@@ -67,6 +67,9 @@ protected:
 
   /// Times for which the predictor should not be applied
   std::vector<Real> _skip_times;
+
+  /// Old times for which the predictor should not be applied
+  std::vector<Real> _skip_times_old;
 };
 
 #endif /* PREDICTOR_H */
