@@ -35,7 +35,7 @@
   [./multiple_files]
     type = Exodiff
     input = output_multiple_files.i
-    exodiff = 'output_multiple_files_out.e output_multiple_files_exodus1.e output_multiple_files_exodus2.e'
+    exodiff = 'output_multiple_files_exodus1.e output_multiple_files_exodus2.e'
   [../]
   [./invalid_outputs]
     type = RunException
