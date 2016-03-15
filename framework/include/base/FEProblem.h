@@ -929,7 +929,6 @@ public:
    */
   MooseSharedPointer<MaterialData> getMaterialData(Moose::MaterialDataType type, THREAD_ID tid = 0);
 
-  ///@{
   /**
    * Will return True if the user wants to get an error when
    * a nonzero is reallocated in the Jacobian by PETSc

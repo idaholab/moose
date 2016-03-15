@@ -79,7 +79,6 @@ MaterialWarehouse<T>::operator[](Moose::MaterialDataType data_type) const
   case Moose::NEIGHBOR_MATERIAL_DATA:
     return _neighbor_materials;
     break;
-  case Moose::BOUNDARY_MATERIAL_DATA:
   case Moose::FACE_MATERIAL_DATA:
     return _face_materials;
     break;

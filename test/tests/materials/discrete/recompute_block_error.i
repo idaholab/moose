@@ -48,7 +48,7 @@
 
   [./recompute_props]
     type = RecomputeMaterial
-    block = '0'
+    block = 0
     f_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
@@ -58,19 +58,18 @@
 
   [./newton]
     type = NewtonMaterial
-    block = 0
+    block = '0 10'
     outputs = all
     f_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
-    material = recompute_props
-    max_iterations = 0
+    material = 'recompute_props'
   [../]
 
   [./left]
     type = GenericConstantMaterial
-    prop_names =  'f f_prime p'
-    prop_values = '1 0.5     1.2345'
+    prop_names =  'f f_prime'
+    prop_values = '1 0.5    '
     block = 10
     outputs = all
   [../]

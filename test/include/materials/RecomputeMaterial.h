@@ -38,10 +38,10 @@ protected:
   void resetQpProperties();
 
 private:
-  const VariableValue & _var;
   MaterialProperty<Real> & _f;
   MaterialProperty<Real> & _f_prime;
   const MaterialProperty<Real> & _p;
+  const Real & _constant;
 };
 
 #endif /* RECOMPUTEMATERIAL_H */

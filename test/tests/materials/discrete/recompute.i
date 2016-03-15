@@ -52,7 +52,6 @@
     f_name = 'f'
     f_prime_name = 'f_prime'
     p_name = 'p'
-    variable = u
     outputs = all
     output_properties = 'f f_prime p'
   [../]

@@ -77,6 +77,7 @@
 #include "ScalarInitialCondition.h"
 #include "InternalSideIndicator.h"
 #include "XFEMInterface.h"
+#include "ConsoleUtils.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -1690,7 +1691,6 @@ FEProblem::getDiscreteMaterial(std::string name, Moose::MaterialDataType type, T
   case Moose::NEIGHBOR_MATERIAL_DATA:
     name += "_neighbor";
     break;
-  case Moose::BOUNDARY_MATERIAL_DATA:
   case Moose::FACE_MATERIAL_DATA:
     name += "_face";
     break;
@@ -1753,7 +1753,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
     // Create the general Block/Boundary MaterialBase object
     MooseSharedPointer<MaterialBase> material_base = _factory.create<MaterialBase>(mat_name, name, parameters, tid);
 
-    // Cast to the two deried class types: Material and DiscreteMaterial
+    // Cast to the two derived class types: Material and DiscreteMaterial
     MooseSharedPointer<Material> material = MooseSharedNamespace::dynamic_pointer_cast<Material>(material_base);
     MooseSharedPointer<DiscreteMaterial> discrete = MooseSharedNamespace::dynamic_pointer_cast<DiscreteMaterial>(material_base);
 
@@ -3932,6 +3932,57 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
       for (std::set<std::string>::iterator i = difference.begin(); i != difference.end();  ++i)
         oss << *i << "\n";
       mooseError(oss.str());
+    }
+  }
+
+  // This loop checks that materials are not supplied by multiple MaterialBase objects
+  for (std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > >::const_iterator map_it = materials_map.begin(); map_it != materials_map.end(); ++map_it)
+  {
+    const std::vector<MooseSharedPointer<MaterialBase> > & materials = map_it->second;
+    std::set<std::string> inner_supplied, outer_supplied;
+
+    for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator outer_it = materials.begin(); outer_it != materials.end(); ++outer_it)
+    {
+      // Storage for properties for this material (outer) and all other materials (inner)
+      outer_supplied = (*outer_it)->getSuppliedItems();
+      inner_supplied.clear();
+
+      // Property to material map for error reporting
+      std::map<std::string, std::set<std::string> > prop_to_mat;
+      for (std::set<std::string>::const_iterator it = outer_supplied.begin(); it != outer_supplied.end(); ++it)
+        prop_to_mat[*it].insert((*outer_it)->name());
+
+      for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator inner_it = materials.begin(); inner_it != materials.end(); ++inner_it)
+      {
+        if (outer_it == inner_it)
+          continue;
+        inner_supplied.insert((*inner_it)->getSuppliedItems().begin(), (*inner_it)->getSuppliedItems().end());
+
+        for (std::set<std::string>::const_iterator it = inner_supplied.begin(); it != inner_supplied.end(); ++it)
+          prop_to_mat[*it].insert((*inner_it)->name());
+      }
+
+      // Test that a property isn't supplied on multiple blocks
+      std::set<std::string> intersection;
+      std::set_intersection(outer_supplied.begin(), outer_supplied.end(), inner_supplied.begin(), inner_supplied.end(), std::inserter(intersection, intersection.end()));
+
+      if (!intersection.empty())
+      {
+        std::ostringstream oss;
+        oss << "The following material properties are declared on block " << map_it->first << " by multiple materials:\n";
+        oss << ConsoleUtils::indent(2) << std::setw(30) << std::left << "Material Property" << "Material Objects\n";
+        for (std::set<std::string>::const_iterator it = intersection.begin(); it != intersection.end(); ++it)
+        {
+          oss << ConsoleUtils::indent(2) << std::setw(30) << std::left << *it;
+          for (std::set<std::string>::const_iterator jt = prop_to_mat[*it].begin(); jt != prop_to_mat[*it].end(); ++jt)
+            oss << *jt << " ";
+          oss << '\n';
+        }
+
+        oss << "\nThis will result in ambiguous material property calculations and lead to incorrect results.\n";
+        mooseWarning(oss.str());
+        break;
+      }
     }
   }
 }

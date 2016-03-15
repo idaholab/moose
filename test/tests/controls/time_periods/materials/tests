@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = Exodiff
-    input = 'material.i'
-    exodiff = 'material_out.e'
-  [../]
-[]
