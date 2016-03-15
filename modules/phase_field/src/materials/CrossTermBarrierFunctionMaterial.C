@@ -38,13 +38,32 @@ CrossTermBarrierFunctionMaterial::computeQpProperties()
       const Real nj = (*_eta[j])[_qp];
       const Real Wij = _W_ij[_num_eta * i + j];
 
-      // barrier function value
-      _prop_g[_qp] += Wij * (ni * ni * nj * nj + (ni - 1) * (ni - 1) * (nj - 1) * (nj - 1));
+      switch (_g_order)
+      {
+        case 0: // SIMPLE
+          _prop_g[_qp] += 16.0 * Wij * (ni * ni * nj * nj);
+          // first derivatives
+          (*_prop_dg[i])[_qp] += 16.0 * Wij * (2 * ni * nj * nj);
+          (*_prop_dg[j])[_qp] += 16.0 * Wij * (2 * ni * ni * nj);
+          // second derivatives (diagonal)
+          (*_prop_d2g[i][i])[_qp] += 16.0 * Wij * (2 * nj * nj);
+          (*_prop_d2g[j][j])[_qp] += 16.0 * Wij * (2 * ni * ni);
+          // second derivatives (off-diagonal)
+          (*_prop_d2g[i][j])[_qp] = 16.0 * Wij * (4 * ni * nj);
+          break;
 
-      // first derivative
-      (*_prop_dg[i])[_qp] += Wij * (2 * ni * nj * nj + 2 * (ni - 1) * (nj - 1) * (nj - 1));
+        case 1: // LOW
+          _prop_g[_qp] += 4.0 * Wij * (ni * nj);
+          // first derivatives
+          (*_prop_dg[i])[_qp] += 4.0 * Wij * nj;
+          (*_prop_dg[j])[_qp] += 4.0 * Wij * ni;
+          // second derivatives (diagonal) vanish
+          // second derivatives (off-diagonal)
+          (*_prop_d2g[i][j])[_qp] =  4.0 * Wij;
+          break;
 
-      // second derivative
-      (*_prop_d2g[i][j])[_qp] +=  Wij * (4 * ni * nj + 4 * (ni - 1) * (nj - 1));
+        default:
+          mooseError("Internal error");
+      }
     }
 }
