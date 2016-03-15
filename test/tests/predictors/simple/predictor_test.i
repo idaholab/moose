@@ -19,9 +19,8 @@
 
 [Functions]
   [./ramp1]
-    type = PiecewiseLinear
-    x = '0. 1.'
-    y = '0. 1.'
+    type = ParsedFunction
+    value = 't'
   [../]
 []
 
@@ -64,7 +63,6 @@
 
   start_time = 0.0
   dt = 0.5
-  num_steps = 2
   end_time = 1.0
 
   [./Predictor]
