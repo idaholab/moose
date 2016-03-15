@@ -12,37 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTDAMPER_H
-#define CONSTANTDAMPER_H
+#ifndef COMPUTEELEMDAMPINGTHREAD_H
+#define COMPUTEELEMDAMPINGTHREAD_H
 
-// Moose Includes
-#include "GeneralDamper.h"
+// MOOSE includes
+#include "ThreadedElementLoop.h"
+#include "MooseObjectWarehouse.h"
 
-//Forward Declarations
-class ConstantDamper;
+// libMesh includes
+#include "libmesh/elem_range.h"
 
-template<>
-InputParameters validParams<ConstantDamper>();
+// Forward declarations
+class NonlinearSystem;
+class ElementDamper;
 
-/**
- * Simple constant damper.
- *
- * Modifies the non-linear step by applying a constant damping factor
- */
-class ConstantDamper : public GeneralDamper
+class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ConstantDamper(const InputParameters & parameters);
+  ComputeElemDampingThread(FEProblem & feproblem, NonlinearSystem & sys);
+
+  // Splitting Constructor
+  ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split);
+
+  virtual ~ComputeElemDampingThread();
+
+  virtual void onElement(const Elem *elem);
+
+  void join(const ComputeElemDampingThread & /*y*/);
+
+  Real damping();
 
 protected:
-
-  /**
-   * Return the constant damping value.
-   */
-  virtual Real computeDamping(const NumericVector<Number> & update);
-
-  /// The constant amount of the Newton update to take.
   Real _damping;
+  NonlinearSystem & _nl;
+  const MooseObjectWarehouse<ElementDamper> & _element_dampers;
 };
 
-#endif //CONSTANTDAMPER_H
+#endif //COMPUTEELEMDAMPINGTHREAD_H

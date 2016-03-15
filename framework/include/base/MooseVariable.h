@@ -227,9 +227,9 @@ public:
   void setNodalValueNeighbor(const DenseVector<Number> & value);
 
   /**
-   * Compute damping for this variable based on increment_vec
+   * Compute and store incremental change based on increment_vec
    */
-  void computeDamping(const NumericVector<Number> & increment_vec);
+  void computeIncrement(const NumericVector<Number> & increment_vec);
 
   /**
    * Get DOF indices for currently selected element

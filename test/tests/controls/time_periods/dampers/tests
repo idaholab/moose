@@ -4,14 +4,14 @@
     type = RunApp
     input = 'enable_disable.i'
     absent_out = '6\s*Nonlinear'
-    cli_args = "Dampers/u_damp/enable=false"
+    cli_args = "Dampers/const_damp/enable=false"
   [../]
   [./enable_true]
     # Tests that MooseObject parameter operates correctly when set to 'true'
     type = RunApp
     input = 'enable_disable.i'
     expect_out = '6\s*Nonlinear'
-    cli_args = "Dampers/u_damp/enable=true"
+    cli_args = "Dampers/const_damp/enable=true"
   [../]
   [./control]
     # Test that a damper may be disabled during simulation

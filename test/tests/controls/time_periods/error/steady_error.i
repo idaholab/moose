@@ -45,9 +45,8 @@
 []
 
 [Dampers]
-  [./u_damp]
+  [./const_damp]
     type = ConstantDamper
-    variable = u
     damping = 0.9
   [../]
 []
@@ -59,7 +58,7 @@
 [Controls]
   [./damping_control]
     type = TimePeriod
-    disable_objects = 'u_damp'
+    disable_objects = 'const_damp'
     start_time = 0.25
     execute_on = 'initial timestep_begin'
   [../]
