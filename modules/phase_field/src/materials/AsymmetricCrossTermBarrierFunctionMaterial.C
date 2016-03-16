@@ -44,54 +44,54 @@ AsymmetricCrossTermBarrierFunctionMaterial::computeQpProperties()
   for (unsigned int i = 0; i < _num_eta; ++i)
     for (unsigned int j = i + 1; j < _num_eta; ++j)
     {
+      // readable aliases
       const Real ni = (*_eta[i])[_qp];
       const Real nj = (*_eta[j])[_qp];
 
       const Real Wij = _W_ij[_num_eta * i + j];
       const Real Wji = _W_ij[_num_eta * j + i];
 
+      const Real hi = (*_h[i])[_qp];
+      const Real hj = (*_h[j])[_qp];
+      const Real dhi = (*_dh[i])[_qp];
+      const Real dhj = (*_dh[j])[_qp];
+      const Real d2hi = (*_d2h[i])[_qp];
+      const Real d2hj = (*_d2h[j])[_qp];
+
+      // raw barrier term and derivatives
+      Real B, dBi, dBj, d2Bii, d2Bjj, d2Bij;
       switch (_g_order)
       {
         case 0: // SIMPLE
-          _prop_g[_qp] += 16.0 * (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * (ni * ni * nj * nj);
-          // first derivatives
-          (*_prop_dg[i])[_qp] += 16.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * (2 * ni * nj * nj)
-                                         + (Wij * (*_dh[i])[_qp]) * (ni * ni * nj * nj));
-          (*_prop_dg[j])[_qp] += 16.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * (2 * ni * ni * nj)
-                                         + (Wji * (*_dh[j])[_qp]) * (ni * ni * nj * nj));
-          // second derivatives (diagonal)
-          (*_prop_d2g[i][i])[_qp] += 16.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * (2 * nj * nj)
-                                             + 2 * (Wij * (*_dh[i])[_qp]) * (2 * ni * nj * nj)
-                                             + (Wij * (*_d2h[i])[_qp]) * (ni * ni * nj * nj));
-          (*_prop_d2g[j][j])[_qp] += 16.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * (2 * ni * ni)
-                                             + 2 * (Wji * (*_dh[j])[_qp]) * (2 * ni * ni * nj)
-                                             + (Wji * (*_d2h[j])[_qp]) * (ni * ni * nj * nj));
-          // second derivatives (off-diagonal)
-          (*_prop_d2g[i][j])[_qp] = 16.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * (4 * ni * nj)
-                                             + (Wji * (*_dh[j])[_qp]) * (2 * ni * nj * nj)
-                                             + (Wij * (*_dh[i])[_qp]) * (2 * ni * ni * nj));
+          B = 16.0 * ni * ni * nj * nj;
+          dBi = 16.0 * 2.0 * ni * nj * nj;
+          dBj = 16.0 * 2.0 * ni * ni * nj;
+          d2Bii = 16.0 * 2.0 * nj * nj;
+          d2Bjj = 16.0 * 2.0 * ni * ni;
+          d2Bij = 16.0 * 4.0 * ni * nj;
           break;
 
         case 1: // LOW
-          _prop_g[_qp] += 4.0 * (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * (ni * nj);
-          // first derivatives
-          (*_prop_dg[i])[_qp] += 4.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * nj
-                                         + (Wij * (*_dh[i])[_qp]) * (ni * nj));
-          (*_prop_dg[j])[_qp] += 4.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp]) * ni
-                                         + (Wji * (*_dh[j])[_qp]) * (ni * nj));
-          // second derivatives (diagonal)
-          (*_prop_d2g[i][i])[_qp] += 4.0 * (  2 * (Wij * (*_dh[i])[_qp]) * nj
-                                            + (Wij * (*_d2h[i])[_qp]) * ni * nj);
-          (*_prop_d2g[j][j])[_qp] += 4.0 * (  2 * (Wji * (*_dh[j])[_qp]) * ni
-                                            + (Wji * (*_d2h[j])[_qp]) * ni * nj);
-          // second derivatives (off-diagonal)
-          (*_prop_d2g[i][j])[_qp] = 4.0 * (  (Wij * (*_h[i])[_qp] + Wji * (*_h[j])[_qp])
-                                            + (Wji * (*_dh[j])[_qp]) * nj
-                                            + (Wij * (*_dh[i])[_qp]) * ni);
+          B = 4.0 * ni * nj;
+          dBi = 4.0 * nj;
+          dBj = 4.0 * ni;
+          d2Bii = 0.0;
+          d2Bjj = 0.0;
+          d2Bij = 4.0;
           break;
 
         default:
           mooseError("Internal error");
       }
+
+      _prop_g[_qp] += (Wij * hi + Wji * hj) * B;
+      // first derivatives
+      (*_prop_dg[i])[_qp] += (Wij * hi + Wji * hj) * dBi + (Wij * dhi) * B;
+      (*_prop_dg[j])[_qp] += (Wij * hi + Wji * hj) * dBj + (Wji * dhj) * B;
+      // second derivatives (diagonal)
+      (*_prop_d2g[i][i])[_qp] += (Wij * hi + Wji * hj) * d2Bii + 2 * (Wij * dhi) * dBi + (Wij * d2hi) * B;
+      (*_prop_d2g[j][j])[_qp] += (Wij * hi + Wji * hj) * d2Bjj + 2 * (Wji * dhj) * dBj + (Wji * d2hj) * B;
+      // second derivatives (off-diagonal)
+      (*_prop_d2g[i][j])[_qp] = (Wij * hi + Wji * hj) * (d2Bij) + (Wji * dhj) * dBi + (Wij * dhi) * dBj;
     }
 }
