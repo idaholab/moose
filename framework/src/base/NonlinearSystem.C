@@ -27,7 +27,7 @@
 #include "ComputeFullJacobianThread.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ComputeDiracThread.h"
-#include "ComputeDampingThread.h"
+#include "ComputeElemDampingThread.h"
 #include "ComputeNodalKernelsThread.h"
 #include "ComputeNodalKernelBcsThread.h"
 #include "ComputeNodalKernelJacobiansThread.h"
@@ -39,7 +39,8 @@
 #include "IntegratedBC.h"
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
-#include "Damper.h"
+#include "ElementDamper.h"
+#include "GeneralDamper.h"
 #include "DisplacedProblem.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
@@ -328,11 +329,12 @@ NonlinearSystem::initialSetup()
     if (_doing_dg)
       _dg_kernels.initialSetup(tid);
     _interface_kernels.initialSetup(tid);
-    _dampers.initialSetup(tid);
+    _element_dampers.initialSetup(tid);
     _integrated_bcs.initialSetup(tid);
   }
   _scalar_kernels.initialSetup();
   _constraints.initialSetup();
+  _general_dampers.initialSetup();
   _nodal_bcs.initialSetup();
 }
 
@@ -347,11 +349,12 @@ NonlinearSystem::timestepSetup()
     if (_doing_dg)
       _dg_kernels.timestepSetup(tid);
     _interface_kernels.timestepSetup(tid);
-    _dampers.timestepSetup(tid);
+    _element_dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
   }
   _scalar_kernels.initialSetup();
   _constraints.timestepSetup();
+  _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
 }
 
@@ -694,7 +697,20 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
     MooseSharedPointer<Damper> damper = _factory.create<Damper>(damper_name, name, parameters, tid);
-    _dampers.addObject(damper, tid);
+
+    // Attempt to cast to the damper types
+    MooseSharedPointer<ElementDamper> ed = MooseSharedNamespace::dynamic_pointer_cast<ElementDamper>(damper);
+    MooseSharedPointer<GeneralDamper> gd = MooseSharedNamespace::dynamic_pointer_cast<GeneralDamper>(damper);
+
+    if (gd)
+    {
+      _general_dampers.addObject(gd);
+      break; // not threaded
+    }
+    else if (ed)
+      _element_dampers.addObject(ed,tid);
+    else
+      mooseError("Invalid damper type");
   }
 }
 
@@ -840,7 +856,7 @@ NonlinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
   _kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
-  _dampers.subdomainSetup(subdomain, tid);
+  _element_dampers.subdomainSetup(subdomain, tid);
 }
 
 NumericVector<Number> &
@@ -1203,11 +1219,12 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     if (_doing_dg)
       _dg_kernels.residualSetup(tid);
     _interface_kernels.residualSetup(tid);
-    _dampers.residualSetup(tid);
+    _element_dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
   }
   _scalar_kernels.residualSetup();
   _constraints.residualSetup();
+  _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
 
   // reinit scalar variables
@@ -1818,11 +1835,12 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     if (_doing_dg)
       _dg_kernels.jacobianSetup(tid);
     _interface_kernels.jacobianSetup(tid);
-    _dampers.jacobianSetup(tid);
+    _element_dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
   }
   _scalar_kernels.jacobianSetup();
   _constraints.jacobianSetup();
+  _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
 
   // reinit scalar variables
@@ -2176,7 +2194,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 void
 NonlinearSystem::updateActive(THREAD_ID tid)
 {
-  _dampers.updateActive(tid);
+  _element_dampers.updateActive(tid);
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
   _interface_kernels.updateActive(tid);
@@ -2185,6 +2203,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
   _nodal_kernels.updateActive(tid);
   if (tid == 0)
   {
+    _general_dampers.updateActive();
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
     _constraints.updateActive();
@@ -2193,19 +2212,30 @@ NonlinearSystem::updateActive(THREAD_ID tid)
 }
 
 Real
-NonlinearSystem::computeDamping(const NumericVector<Number>& update)
+NonlinearSystem::computeDamping(const NumericVector<Number> & update)
 {
   Moose::perf_log.push("compute_dampers()", "Execution");
 
   // Default to no damping
   Real damping = 1.0;
 
-  if (_dampers.hasActiveObjects())
+  if (_element_dampers.hasActiveObjects())
   {
     *_increment_vec = update;
-    ComputeDampingThread cid(_fe_problem, *this);
+    ComputeElemDampingThread cid(_fe_problem, *this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
     damping = cid.damping();
+  }
+
+  if (_general_dampers.hasActiveObjects())
+  {
+    const std::vector<MooseSharedPointer<GeneralDamper> > & gdampers = _general_dampers.getActiveObjects();
+    for (std::vector<MooseSharedPointer<GeneralDamper> >::const_iterator it = gdampers.begin(); it != gdampers.end(); ++it)
+    {
+      Real gd_damping = (*it)->computeDamping(update);
+      if (gd_damping < damping)
+        damping = gd_damping;
+    }
   }
 
   _communicator.min(damping);
@@ -2401,14 +2431,20 @@ NonlinearSystem::setupDampers()
 }
 
 void
-NonlinearSystem::reinitDampers(THREAD_ID tid)
+NonlinearSystem::reinitIncrementForDampers(THREAD_ID tid)
 {
-  // FIXME: be smart here and compute only variables with dampers (need to add some book keeping)
-  const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  // Find the variables that are being operated on by active element dampers
+  std::set<MooseVariable *> damped_vars;
+
+  const std::vector<MooseSharedPointer<ElementDamper> > & edampers = _element_dampers.getActiveObjects();
+  for (std::vector<MooseSharedPointer<ElementDamper> >::const_iterator it = edampers.begin(); it != edampers.end(); ++it)
+    damped_vars.insert( (*it)->getVariable() );
+
+  for (std::set<MooseVariable *>::const_iterator it = damped_vars.begin();
+       it != damped_vars.end(); ++it)
   {
-    MooseVariable *var = *it;
-    var->computeDamping(*_increment_vec);
+    MooseVariable * var = *it;
+    var->computeIncrement(*_increment_vec);
   }
 }
 

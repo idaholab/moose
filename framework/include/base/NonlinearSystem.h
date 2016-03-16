@@ -30,7 +30,8 @@ class MoosePreconditioner;
 class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
-class Damper;
+class ElementDamper;
+class GeneralDamper;
 class IntegratedBC;
 class NodalBC;
 class PresetNodalBC;
@@ -356,10 +357,10 @@ public:
    */
   void setupDampers();
   /**
-   * Reinit dampers. Called before we use damping
+   * Compute the incremental change in variables for dampers. Called before we use damping
    * @param tid Thread ID
    */
-  void reinitDampers(THREAD_ID tid);
+  void reinitIncrementForDampers(THREAD_ID tid);
 
   ///@{
   /// System Integrity Checks
@@ -447,7 +448,7 @@ public:
   const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
   const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
-  const MooseObjectWarehouse<Damper> & getDamperWarehouse() { return _dampers; }
+  const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() { return _element_dampers; }
   //@}
 
   /**
@@ -541,8 +542,11 @@ protected:
   /// Dirac Kernel storage for each thread
   MooseObjectWarehouse<DiracKernel> _dirac_kernels;
 
-  /// Dampers for each thread
-  MooseObjectWarehouse<Damper> _dampers;
+  /// Element Dampers for each thread
+  MooseObjectWarehouse<ElementDamper> _element_dampers;
+
+  /// General Dampers
+  MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
   /// NodalKernels for each thread
   MooseObjectWarehouse<NodalKernel> _nodal_kernels;

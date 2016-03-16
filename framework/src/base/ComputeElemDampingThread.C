@@ -13,45 +13,45 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "ComputeDampingThread.h"
+#include "ComputeElemDampingThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
-#include "Damper.h"
+#include "ElementDamper.h"
 
 // libMesh includes
 #include "libmesh/threads.h"
 
-ComputeDampingThread::ComputeDampingThread(FEProblem & feproblem,
-                                           NonlinearSystem & sys) :
+ComputeElemDampingThread::ComputeElemDampingThread(FEProblem & feproblem,
+                                                   NonlinearSystem & sys) :
     ThreadedElementLoop<ConstElemRange>(feproblem, sys),
     _damping(1.0),
     _nl(sys),
-    _dampers(sys.getDamperWarehouse())
+    _element_dampers(sys.getElementDamperWarehouse())
 {
 }
 
 // Splitting Constructor
-ComputeDampingThread::ComputeDampingThread(ComputeDampingThread & x, Threads::split split) :
+ComputeElemDampingThread::ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _damping(1.0),
     _nl(x._nl),
-    _dampers(x._dampers)
+    _element_dampers(x._element_dampers)
 {
 }
 
-ComputeDampingThread::~ComputeDampingThread()
+ComputeElemDampingThread::~ComputeElemDampingThread()
 {
 }
 
 void
-ComputeDampingThread::onElement(const Elem *elem)
+ComputeElemDampingThread::onElement(const Elem *elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
-  _nl.reinitDampers(_tid);
+  _nl.reinitIncrementForDampers(_tid);
 
-  const std::vector<MooseSharedPointer<Damper> > & objects = _dampers.getActiveObjects(_tid);
-  for (std::vector<MooseSharedPointer<Damper> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+  const std::vector<MooseSharedPointer<ElementDamper> > & objects = _element_dampers.getActiveObjects(_tid);
+  for (std::vector<MooseSharedPointer<ElementDamper> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
   {
     Real cur_damping = (*it)->computeDamping();
     if (cur_damping < _damping)
@@ -60,13 +60,13 @@ ComputeDampingThread::onElement(const Elem *elem)
 }
 
 Real
-ComputeDampingThread::damping()
+ComputeElemDampingThread::damping()
 {
   return _damping;
 }
 
 void
-ComputeDampingThread::join(const ComputeDampingThread & y)
+ComputeElemDampingThread::join(const ComputeElemDampingThread & y)
 {
   if (y._damping < _damping)
     _damping = y._damping;

@@ -12,40 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTEDAMPINGTHREAD_H
-#define COMPUTEDAMPINGTHREAD_H
+#ifndef GENERALDAMPER_H
+#define GENERALDAMPER_H
 
-// MOOSE includes
-#include "ThreadedElementLoop.h"
-#include "MooseObjectWarehouse.h"
+// Moose Includes
+#include "Damper.h"
 
-// libMesh includes
-#include "libmesh/elem_range.h"
+//Forward Declarations
+class GeneralDamper;
+class SubProblem;
+class SystemBase;
+class MooseVariable;
+class Assembly;
 
-// Forward declarations
-class NonlinearSystem;
-class Damper;
+template<>
+InputParameters validParams<GeneralDamper>();
 
-class ComputeDampingThread : public ThreadedElementLoop<ConstElemRange>
+/**
+ * Base class for deriving general dampers
+ */
+class GeneralDamper :
+  public Damper
 {
 public:
-  ComputeDampingThread(FEProblem & feproblem, NonlinearSystem & sys);
+  GeneralDamper(const InputParameters & parameters);
 
-  // Splitting Constructor
-  ComputeDampingThread(ComputeDampingThread & x, Threads::split split);
-
-  virtual ~ComputeDampingThread();
-
-  virtual void onElement(const Elem *elem);
-
-  void join(const ComputeDampingThread & /*y*/);
-
-  Real damping();
-
-protected:
-  Real _damping;
-  NonlinearSystem & _nl;
-  const MooseObjectWarehouse<Damper> & _dampers;
+  /**
+   * Computes this Damper's damping
+   */
+  virtual Real computeDamping(const NumericVector<Number> & update) = 0;
 };
 
-#endif //COMPUTEDAMPINGTHREAD_H
+#endif //GENERALDAMPER_H
