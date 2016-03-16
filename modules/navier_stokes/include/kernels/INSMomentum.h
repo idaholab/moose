@@ -42,6 +42,7 @@ protected:
   const VariableGradient & _grad_u_vel;
   const VariableGradient & _grad_v_vel;
   const VariableGradient & _grad_w_vel;
+  const VariableGradient & _grad_p;
 
   // Variable numberings
   unsigned _u_vel_var_number;
@@ -57,6 +58,7 @@ protected:
 
   // Parameters
   unsigned _component;
+  bool _integrate_p_by_parts;
 };
 
 
