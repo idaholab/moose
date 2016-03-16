@@ -12,37 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CONSTANTDAMPER_H
-#define CONSTANTDAMPER_H
-
-// Moose Includes
 #include "GeneralDamper.h"
 
-//Forward Declarations
-class ConstantDamper;
-
 template<>
-InputParameters validParams<ConstantDamper>();
-
-/**
- * Simple constant damper.
- *
- * Modifies the non-linear step by applying a constant damping factor
- */
-class ConstantDamper : public GeneralDamper
+InputParameters validParams<GeneralDamper>()
 {
-public:
-  ConstantDamper(const InputParameters & parameters);
+  InputParameters params = validParams<Damper>();
+  return params;
+}
 
-protected:
-
-  /**
-   * Return the constant damping value.
-   */
-  virtual Real computeDamping(const NumericVector<Number> & update);
-
-  /// The constant amount of the Newton update to take.
-  Real _damping;
-};
-
-#endif //CONSTANTDAMPER_H
+GeneralDamper::GeneralDamper(const InputParameters & parameters) :
+    Damper(parameters)
+{
+}

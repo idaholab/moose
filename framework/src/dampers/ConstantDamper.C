@@ -17,19 +17,19 @@
 template<>
 InputParameters validParams<ConstantDamper>()
 {
-  InputParameters params = validParams<Damper>();
+  InputParameters params = validParams<GeneralDamper>();
   params.addRequiredParam<Real>("damping", "The percentage (between 0 and 1) of the newton update to take.");
   return params;
 }
 
 ConstantDamper::ConstantDamper(const InputParameters & parameters) :
-    Damper(parameters),
+    GeneralDamper(parameters),
     _damping(getParam<Real>("damping"))
 {
 }
 
 Real
-ConstantDamper::computeQpDamping()
+ConstantDamper::computeDamping(const NumericVector<Number> & /*update*/)
 {
   return _damping;
 }
