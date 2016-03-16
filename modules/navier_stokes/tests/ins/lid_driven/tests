@@ -5,14 +5,14 @@
     exodiff = 'lid_driven_out.e'
     # skip = 'under development'
   [../]
-  [./open_bc_pressure_bc]
+  [./open_bc_pressure_BC]
     type = 'Exodiff'
-    input = 'open_bc_pressure_bc.i'
-    exodiff = 'open_bc_out_pressure_bc.e'
+    input = 'open_bc_pressure_BC.i’
+    exodiff = 'open_bc_out_pressure_BC.e’
   [../]
-  [./open_bc_pressure_bc_failed]
+  [./open_bc_pressure_BC_failed]
     type = 'Exodiff'
-    input = 'open_bc_pressure_bc_failed.i'
-    exodiff = 'open_bc_out_pressure_bc_failed.e'
+    input = 'open_bc_pressure_BC_failed.i'
+    exodiff = 'open_bc_out_pressure_BC_failed.e'
   [../]
 []
