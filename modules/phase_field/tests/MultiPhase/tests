@@ -9,6 +9,7 @@
     input = 'orderparameterfunctionmaterial.i'
     exodiff = 'orderparameterfunctionmaterial_out.e'
   [../]
+
   [./multibarrierfunction]
     type = 'Exodiff'
     input = 'multibarrierfunction.i'
@@ -19,6 +20,12 @@
     input = 'crosstermbarrierfunction.i'
     exodiff = 'crosstermbarrierfunction_out.e'
   [../]
+  [./asymmetriccrosstermbarrierfunction]
+    type = 'Exodiff'
+    input = 'asymmetriccrosstermbarrierfunction.i'
+    exodiff = 'asymmetriccrosstermbarrierfunction_out.e'
+  [../]
+
   [./lagrangemult]
     type = 'Exodiff'
     input = 'lagrangemult.i'
