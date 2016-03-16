@@ -32,12 +32,12 @@ CrossTermBarrierFunctionBase::CrossTermBarrierFunctionBase(const InputParameters
 {
   // if Vector W_ij is not the correct size to fill the matrix give error
   if (_num_eta * _num_eta != _W_ij.size())
-    mooseError("Supply the number of etas squared for W_ij.");
+    mooseError("Size of W_ij does not match (number of etas)^2. Supply W_ij of correct size.");
 
-  // erroro out if the W_ij diagonal values are not zero
+  // error out if the W_ij diagonal values are not zero
   for (unsigned int i = 0; i < _num_eta; ++i)
     if (_W_ij[_num_eta * i + i] != 0)
-      mooseError("Set on-diagonal values of W_ij to zero");
+      mooseError("Set on-diagonal values of W_ij to zero.");
 
   // declare g derivative properties, fetch eta values
   for (unsigned int i = 0; i < _num_eta; ++i)

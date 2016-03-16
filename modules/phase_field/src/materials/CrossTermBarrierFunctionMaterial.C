@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<CrossTermBarrierFunctionMaterial>()
 {
   InputParameters params = validParams<CrossTermBarrierFunctionBase>();
-  params.addClassDescription("");
+  params.addClassDescription("Free energy contribution symmetric across interfaces between arbitrary pairs of phases.");
   return params;
 }
 
@@ -21,7 +21,7 @@ CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputPa
   for (unsigned int i = 0; i < _num_eta; ++i)
     for (unsigned int j = 0; j < i; ++j)
       if (_W_ij[_num_eta * i + j] != _W_ij[_num_eta * j + i])
-        mooseError("Please supply a symmetric W_ij matrix for ");
+        mooseError("Please supply a symmetric W_ij matrix for CrossTermBarrierFunctionMaterial " << name());
 }
 
 void

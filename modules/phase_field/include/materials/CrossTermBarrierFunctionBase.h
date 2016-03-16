@@ -31,10 +31,10 @@ protected:
   /// name of the function of eta (used to generate the material property names)
   std::string _function_name;
 
-  /// Polynomial order of the switching function \f$ g(\eta) \f$
+  /// polynomial order of the switching function \f$ g(\eta) \f$
   unsigned int _g_order;
 
-  ///barrier function height vector
+  /// barrier function height matrix
   std::vector<Real> _W_ij;
 
   /// order parameters
@@ -42,13 +42,13 @@ protected:
   std::vector<VariableName> _eta_names;
   std::vector<const VariableValue *> _eta;
 
-  ///@{ Barrier function and its drivatives
+  ///@{ Barrier function and its derivatives
   MaterialProperty<Real> & _prop_g;
   std::vector<MaterialProperty<Real> *> _prop_dg;
   std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2g;
   ///@}
 
-  ///@{ Switching functions and their drivatives
+  ///@{ Switching functions and their derivatives
   std::vector<const MaterialProperty<Real> *> _h;
   std::vector<std::vector<const MaterialProperty<Real> *> > _dh;
   ///@}
