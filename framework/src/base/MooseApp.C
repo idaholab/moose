@@ -45,6 +45,7 @@
 
 // System include for dynamic library methods
 #include <dlfcn.h>
+#include <sys/utsname.h> // utsname
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -178,9 +179,36 @@ MooseApp::~MooseApp()
 
   if (check_cxx11)
   {
+    // Get system information
+    struct utsname sys_info;
+    uname(&sys_info);
+
+    // Get compiler name and version
+#ifdef __clang__
+    std::string
+      compiler_name = "Clang",
+      compiler_version = QUOTE(__clang_major__) "." QUOTE(__clang_minor__) "." QUOTE(__clang_patchlevel__);
+#elif __INTEL_COMPILER
+    std::string
+      compiler_name = "Intel",
+      compiler_version = QUOTE(__INTEL_COMPILER_BUILD_DATE);
+#elif __GNUG__
+    std::string
+      compiler_name = "GCC",
+      compiler_version = QUOTE(__GNUC__) "." QUOTE(__GNUC_MINOR__) "." QUOTE(__GNUC_PATCHLEVEL__);
+#else
+    std::string
+      compiler_name = "Unknown compiler",
+      compiler_version = "Unknown version";
+#endif
+
     std::stringstream oss;
 
-    oss << std::left << "Compiler C++11 compatibility report: " << '\n';
+    oss << "----------------------------------------" << '\n';
+    oss << std::left << "C++11 compiler compatibility report: " << '\n';
+    oss << "OS: " << sys_info.version << '\n';
+    oss << "Compiler: " << compiler_name << ' ' << compiler_version << '\n';
+    oss << "----------------------------------------" << '\n';
     print_yes_no(oss, "Basic functionality", QUOTE(LIBMESH_HAVE_CXX11));
 #ifdef LIBMESH_HAVE_CXX11
     print_yes_no(oss, "Alias declarations", QUOTE(LIBMESH_HAVE_CXX11_ALIAS_DECLARATIONS));
