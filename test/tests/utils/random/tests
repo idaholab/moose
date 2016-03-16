@@ -60,9 +60,6 @@
     exodiff = 'random_uo_out.e'
     prereq = 'parallel_verification_uo'
     min_threads = 2
-    # This test fails, well, randomly, and needs to be fixed before it
-    # can be trusted as a reliable regression test.
-    deleted = '#2088'
   [../]
 
   # User Object Tests
