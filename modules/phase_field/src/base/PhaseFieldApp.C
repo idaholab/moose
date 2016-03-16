@@ -91,10 +91,12 @@
 /*
  * Materials
  */
+#include "AsymmetricCrossTermBarrierFunctionMaterial.h"
 #include "BarrierFunctionMaterial.h"
 #include "CompositeMobilityTensor.h"
 #include "ComputePolycrystalElasticityTensor.h"
 #include "ConstantAnisotropicMobility.h"
+#include "CrossTermBarrierFunctionMaterial.h"
 #include "DerivativeMultiPhaseMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
@@ -121,7 +123,6 @@
 #include "RegularSolutionFreeEnergy.h"
 #include "StrainGradDispDerivatives.h"
 #include "SwitchingFunctionMaterial.h"
-#include "CrossTermBarrierFunctionMaterial.h"
 
 /*
  * Postprocessors
@@ -310,10 +311,12 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);
 
+  registerMaterial(AsymmetricCrossTermBarrierFunctionMaterial);
   registerMaterial(BarrierFunctionMaterial);
   registerMaterial(CompositeMobilityTensor);
   registerMaterial(ComputePolycrystalElasticityTensor);
   registerMaterial(ConstantAnisotropicMobility);
+  registerMaterial(CrossTermBarrierFunctionMaterial);
   registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
@@ -339,7 +342,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(RegularSolutionFreeEnergy);
   registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunctionMaterial);
-  registerMaterial(CrossTermBarrierFunctionMaterial);
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
