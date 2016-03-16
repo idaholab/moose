@@ -22,7 +22,6 @@ InputParameters validParams<INSMomentum>()
   params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addRequiredParam<unsigned>("component", "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
-
   params.addParam<bool>("integrate_p_by_parts", true, "Allows simulations to be run with pressure BC if set to false");
 
   return params;
@@ -56,7 +55,6 @@ INSMomentum::INSMomentum(const InputParameters & parameters) :
   _rho(getParam<Real>("rho")),
   _gravity(getParam<RealVectorValue>("gravity")),
   _component(getParam<unsigned>("component")),
-
   _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts"))
 
   // Material properties
@@ -75,10 +73,12 @@ Real INSMomentum::computeQpResidual()
      _v_vel[_qp]*_grad_u[_qp](1) +
      _w_vel[_qp]*_grad_u[_qp](2)) * _test[_i][_qp];
 
-  // The pressure part, -p (div v)
-  Real pressure_part;
-  if (_integrate_p_by_parts)  pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
-  else  pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
+  // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
+  Real pressure_part = 0.;
+  if (_integrate_p_by_parts)
+    pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
+  else
+    pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
 
 
   // The component'th row (or col, it's symmetric) of the viscous stress tensor
