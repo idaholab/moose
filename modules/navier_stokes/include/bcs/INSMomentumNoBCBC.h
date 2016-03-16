@@ -53,6 +53,7 @@ protected:
   RealVectorValue _gravity;
 
   unsigned _component;
+  bool _integrate_p_by_parts;
 };
 
 
