@@ -174,7 +174,12 @@ Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
   }
 
   else if (jvar == _p_var_number)
-    return -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
+  {
+    if (_integrate_p_by_parts)
+      return -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
+    else
+      return _grad_phi[_j][_qp](_component) * _test[_i][_qp];
+  }
 
   else
     return 0;
