@@ -77,7 +77,7 @@ Real INSMomentum::computeQpResidual()
 
   // The pressure part, -p (div v)
   Real pressure_part;
-  if(_integrate_p_by_parts)  pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
+  if (_integrate_p_by_parts)  pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
   else  pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
 
 
