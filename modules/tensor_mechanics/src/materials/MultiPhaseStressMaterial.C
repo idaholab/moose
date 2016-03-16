@@ -13,7 +13,7 @@ InputParameters validParams<MultiPhaseStressMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Compute a global stress form multiple phase stresses");
-  params.addParam<std::vector<std::string> >("h", "Switching Function Materials that provide h(eta_i)");
+  params.addParam<std::vector<MaterialPropertyName> >("h", "Switching Function Materials that provide h(eta_i)");
   params.addRequiredParam<std::vector<std::string> >("phase_base", "Base names for the Phase strains");
   params.addParam<std::string>("base_name", "Base name for the computed global stress (optional)");
   return params;
@@ -21,7 +21,7 @@ InputParameters validParams<MultiPhaseStressMaterial>()
 
 MultiPhaseStressMaterial::MultiPhaseStressMaterial(const InputParameters & parameters) :
     Material(parameters),
-    _h_list(getParam<std::vector<std::string> >("h")),
+    _h_list(getParam<std::vector<MaterialPropertyName> >("h")),
     _n_phase(_h_list.size()),
     _h_eta(_n_phase),
     _phase_base(getParam<std::vector<std::string> >("phase_base")),
