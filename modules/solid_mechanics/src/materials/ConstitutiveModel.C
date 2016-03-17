@@ -147,4 +147,3 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
   bool modified = true;
   return modified;
 }
-

@@ -52,7 +52,6 @@ ReturnMappingModel::computeStress( const Elem & current_elem,
   SymmTensor inelastic_strain_increment;
   computeStress( current_elem, qp, elasticityTensor, stress_old,
                  strain_increment, stress_new, inelastic_strain_increment );
-
 }
 
 void
@@ -63,7 +62,6 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
                                    SymmTensor & stress_new,
                                    SymmTensor & inelastic_strain_increment )
 {
-
   // compute deviatoric trial stress
   SymmTensor dev_trial_stress(stress_new);
   dev_trial_stress.addDiag( -dev_trial_stress.trace()/3.0 );
@@ -140,7 +138,7 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
     {
       Moose::err << iter_output.str();
     }
-    mooseError("Max sub-newton iteration hit during nonlinear constitutive model solve! (" << _name << ")");
+    mooseError("During the material iteration in the DiscreteRadialReturn material, the max number of iterations was hit during nonlinear constitutive model solve on (" << _name << ").  Try running this problem with the option 'output_iteration_info_on_error' set to true in the input file to output more information.");
   }
 
   // compute inelastic and elastic strain increments (avoid potential divide by zero - how should this be done)?
@@ -161,5 +159,4 @@ ReturnMappingModel::computeStress( const Elem & /*current_elem*/, unsigned qp,
   stress_new += stress_old;
 
   computeStressFinalize(qp, inelastic_strain_increment);
-
 }
