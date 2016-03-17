@@ -49,7 +49,7 @@ InputParameters validParams<Transient>()
    * For backwards compatibility we'll allow users to set the TimeIntegration scheme inside of the executioner block
    * as long as the TimeIntegrator does not have any additional parameters.
    */
-  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk");
+  MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk explicit-tvd-rk-2");
 
   params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
   params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
@@ -737,6 +737,7 @@ Transient::setupTimeIntegrator()
     case 3: ti_str = "BDF2"; break;
     case 4: ti_str = "ExplicitMidpoint"; break;
     case 5: ti_str = "LStableDirk2"; break;
+    case 6: ti_str = "ExplicitTVDRK2"; break;
     default: mooseError("Unknown scheme"); break;
     }
 

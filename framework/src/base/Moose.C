@@ -298,6 +298,7 @@
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
 #include "ExplicitMidpoint.h"
+#include "ExplicitTVDRK2.h"
 #include "LStableDirk2.h"
 #include "LStableDirk3.h"
 #include "AStableDirk4.h"
@@ -709,6 +710,7 @@ registerObjects(Factory & factory)
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
   registerTimeIntegrator(ExplicitMidpoint);
+  registerTimeIntegrator(ExplicitTVDRK2);
   registerTimeIntegrator(LStableDirk2);
   registerTimeIntegrator(LStableDirk3);
   registerTimeIntegrator(AStableDirk4);
