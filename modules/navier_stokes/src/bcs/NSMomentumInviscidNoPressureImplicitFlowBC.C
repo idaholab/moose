@@ -54,6 +54,6 @@ Real NSMomentumInviscidNoPressureImplicitFlowBC::computeQpJacobian()
 
 Real NSMomentumInviscidNoPressureImplicitFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return this->convective_qp_jacobian( this->map_var_number(jvar) );
+  return this->convective_qp_jacobian( mapVarNumber(jvar) );
 }
 

@@ -33,7 +33,7 @@ NSMassSpecifiedNormalFlowBC::NSMassSpecifiedNormalFlowBC(const InputParameters &
 
 Real NSMassSpecifiedNormalFlowBC::computeQpResidual()
 {
-  return this->qp_residual(_rhoun);
+  return qpResidualHelper(_rhoun);
 }
 
 

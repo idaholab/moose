@@ -64,7 +64,7 @@ Real NSSUPGMass::computeQpOffDiagJacobian(unsigned int jvar)
 Real NSSUPGMass::compute_jacobian(unsigned var)
 {
   // Convert the Moose numbering to canonical NS variable numbering.
-  unsigned m = this->map_var_number(var);
+  unsigned m = mapVarNumber(var);
 
   // Time derivative contributions only for momentum
   Real time_part = 0.;

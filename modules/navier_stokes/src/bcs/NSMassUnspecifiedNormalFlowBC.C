@@ -29,7 +29,7 @@ Real NSMassUnspecifiedNormalFlowBC::computeQpResidual()
 {
   RealVectorValue mom(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
 
-  return this->qp_residual( mom * _normals[_qp] );
+  return qpResidualHelper( mom * _normals[_qp] );
 }
 
 
@@ -45,6 +45,6 @@ Real NSMassUnspecifiedNormalFlowBC::computeQpJacobian()
 
 Real NSMassUnspecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return this->qp_jacobian( this->map_var_number(jvar) );
+  return this->qp_jacobian( mapVarNumber(jvar) );
 }
 

@@ -16,7 +16,6 @@ class NSEnergyInviscidBC;
 template<>
 InputParameters validParams<NSEnergyInviscidBC>();
 
-
 /**
  * This class corresponds to the inviscid part of the "natural"
  * boundary condition for the energy equation, i.e.
@@ -34,21 +33,10 @@ InputParameters validParams<NSEnergyInviscidBC>();
  */
 class NSEnergyInviscidBC : public NSIntegratedBC
 {
-
 public:
   NSEnergyInviscidBC(const InputParameters & parameters);
 
-  virtual ~NSEnergyInviscidBC(){}
-
 protected:
-
-  /**
-   * Must be implemented in derived classes.
-   */
-//  virtual Real computeQpResidual();
-//  virtual Real computeQpJacobian();
-//  virtual Real computeQpOffDiagJacobian(unsigned jvar);
-
   // Aux vars
   const VariableValue & _temperature;
 
@@ -64,7 +52,7 @@ protected:
   // at this quadrature point.  Note that the derived classes are
   // responsible for determining whether the inputs are specified
   // values or come from the current solution.
-  Real qp_residual(Real pressure, Real un);
+  Real qpResidualHelper(Real pressure, Real un);
 
   // This was experimental code and did not really work out, do not use!
   // New version, allows input of three variables to provide both:
@@ -73,7 +61,7 @@ protected:
   //
   // The actual term implemented here is:
   // rho*H*(u.n) = (rho*E + p)(u.n) = (rho*(cv*T + 0.5*|u|^2) + p)(u.n)
-  Real qp_residual(Real rho, RealVectorValue u, Real pressure);
+  Real qpResidualHelper(Real rho, RealVectorValue u, Real pressure);
 
   // The Jacobian of this term is given by the product rule, i.e.
   //
@@ -91,13 +79,13 @@ protected:
   // passed in.
 
   // (U4+p) * d(u.n)/dX
-  Real qp_jacobian_termA(unsigned var_number, Real pressure);
+  Real qpJacobianTermA(unsigned var_number, Real pressure);
 
   // d(U4)/dX * (u.n)
-  Real qp_jacobian_termB(unsigned var_number, Real un);
+  Real qpJacobianTermB(unsigned var_number, Real un);
 
   // d(p)/dX * (u.n)
-  Real qp_jacobian_termC(unsigned var_number, Real un);
+  Real qpJacobianTermC(unsigned var_number, Real un);
 
   // The residual term with rho*E expanded has 3 parts:
   // rho*cv*T*(u.n) + rho*0.5*|u|^2*(u.n) + p*(u.n)
@@ -107,6 +95,5 @@ protected:
   // (2) d/dX (rho*0.5*|u|^2*(u.n)) = 0.5 * (d(rho)/dX*|u|^2*(u.n) + rho*d(|u|^2)/dX*(u.n) + rho*|u|^2*d(u.n)/dX)
   // (3) d/dX (p*(u.n)) = d(p)/dx*(u.n) + p*d(u.n)/dX
 };
-
 
 #endif // NSENERGYINVISCIDBC_H

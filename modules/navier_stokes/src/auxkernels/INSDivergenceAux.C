@@ -21,12 +21,13 @@ InputParameters validParams<INSDivergenceAux>()
   return params;
 }
 
-INSDivergenceAux::INSDivergenceAux(const InputParameters & parameters)
-  :AuxKernel(parameters),
-  _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
-  _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero)
-{}
+INSDivergenceAux::INSDivergenceAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
+    _grad_u_vel(coupledGradient("u")),
+    _grad_v_vel(_mesh.dimension() >= 2 ? coupledGradient("v") : _grad_zero),
+    _grad_w_vel(_mesh.dimension() == 3 ? coupledGradient("w") : _grad_zero)
+{
+}
 
 Real
 INSDivergenceAux::computeValue()
@@ -34,4 +35,3 @@ INSDivergenceAux::computeValue()
   // div U = du/dx + dv/dy + dw/dz
   return _grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2);
 }
-

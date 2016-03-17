@@ -91,7 +91,7 @@ Real NSSUPGEnergy::computeQpOffDiagJacobian(unsigned int jvar)
 Real NSSUPGEnergy::compute_jacobian(unsigned var)
 {
   // Convert the Moose numbering to canonical NS variable numbering.
-  unsigned  mapped_var_number = this->map_var_number(var);
+  unsigned  mapped_var_number = mapVarNumber(var);
 
   // Convenience vars
 

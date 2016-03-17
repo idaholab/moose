@@ -71,7 +71,7 @@ Real
 NSEnergyThermalFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Map jvar into the numbering expected by this->compute_jacobain_value()
-  unsigned var_number = this->map_var_number(jvar);
+  unsigned var_number = mapVarNumber(jvar);
 
   return this->compute_jacobian_value(var_number);
 }

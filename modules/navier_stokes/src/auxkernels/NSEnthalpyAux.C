@@ -22,13 +22,14 @@ InputParameters validParams<NSEnthalpyAux>()
   return params;
 }
 
-NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters)
-  :AuxKernel(parameters),
-   _rho(coupledValue("rho")),
-   _rhoe(coupledValue("rhoe")),
-   _pressure(coupledValue("pressure")),
-   _gamma(getParam<Real>("gamma"))
-{}
+NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
+    _rho(coupledValue("rho")),
+    _rhoe(coupledValue("rhoe")),
+    _pressure(coupledValue("pressure")),
+    _gamma(getParam<Real>("gamma"))
+{
+}
 
 Real
 NSEnthalpyAux::computeValue()
@@ -36,4 +37,3 @@ NSEnthalpyAux::computeValue()
   // H = (rho*E + P) / rho
   return (_rhoe[_qp] + _pressure[_qp]) / _rho[_qp];
 }
-

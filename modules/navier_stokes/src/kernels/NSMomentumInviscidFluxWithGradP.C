@@ -99,7 +99,7 @@ Real
 NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Map jvar into the numbering expected by this->compute_pressure_jacobain_value()
-  unsigned var_number = this->map_var_number(jvar);
+  unsigned var_number = mapVarNumber(jvar);
 
   // The Jacobian contribution due to differentiating the grad(p)
   // term wrt variable var_number.

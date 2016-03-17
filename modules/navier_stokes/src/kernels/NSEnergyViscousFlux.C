@@ -61,7 +61,7 @@ Real NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
   // Map jvar into the variable m for our problem, regardless of
   // how Moose has numbered things.
-  unsigned m = this->map_var_number(jvar);
+  unsigned m = mapVarNumber(jvar);
 
   // Compute Jacobian terms based on the value of m
   switch (m)

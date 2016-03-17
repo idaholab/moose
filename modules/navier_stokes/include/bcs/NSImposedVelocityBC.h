@@ -21,15 +21,11 @@ InputParameters validParams<NSImposedVelocityBC>();
 class NSImposedVelocityBC : public NodalBC
 {
 public:
-  // Constructor
   NSImposedVelocityBC(const InputParameters & parameters);
-
-  // Destructor, better be virtual
-  virtual ~NSImposedVelocityBC(){}
 
 protected:
 
-  // NodalBC's can (currently) only specialize the computeQpResidual function,
+  // NodalBC's can (currently) only override the computeQpResidual function,
   // the computeQpJacobian() function automatically assembles a "1" onto the main
   // diagonal for this DoF.
   virtual Real computeQpResidual();
@@ -41,6 +37,5 @@ protected:
   // The desired value for the velocity component
   Real _desired_velocity;
 };
-
 
 #endif // NSIMPOSEDVELOCITYBC_H

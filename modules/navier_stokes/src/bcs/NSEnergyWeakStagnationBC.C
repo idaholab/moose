@@ -10,32 +10,26 @@ template<>
 InputParameters validParams<NSEnergyWeakStagnationBC>()
 {
   InputParameters params = validParams<NSWeakStagnationBC>();
-
   return params;
 }
 
-
-
-NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters)
-    : NSWeakStagnationBC(parameters)
+NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters) :
+    NSWeakStagnationBC(parameters)
 {
 }
-
-
-
 
 Real NSEnergyWeakStagnationBC::computeQpResidual()
 {
   // Compute stagnation values
-  Real T_s = 0., p_s = 0., rho_s = 0.;
+  Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
   this->static_values(T_s, p_s, rho_s);
 
   // And get velocity magnitude, squared
   Real velmag2 = this->velmag2();
 
   // Compute static total energy, E_s
-  Real cv = _R / (_gamma-1.);
-  Real E_s = cv*T_s + 0.5*velmag2;
+  Real cv = _R / (_gamma - 1.0);
+  Real E_s = cv*T_s + 0.5 * velmag2;
 
   // Compute the product rho_s * H_s (H_s = static enthalpy)
   Real rhoH_s = rho_s * E_s + p_s;
@@ -44,25 +38,14 @@ Real NSEnergyWeakStagnationBC::computeQpResidual()
   return rhoH_s * std::sqrt(velmag2) * this->sdotn() * _test[_i][_qp];
 }
 
-
-
-
 Real NSEnergyWeakStagnationBC::computeQpJacobian()
 {
   // TODO
-  return 0.;
+  return 0.0;
 }
-
-
-
 
 Real NSEnergyWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
-  return 0.;
+  return 0.0;
 }
-
-
-
-
-

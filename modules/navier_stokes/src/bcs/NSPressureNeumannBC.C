@@ -60,7 +60,7 @@
 //
 // Real NSPressureNeumannBC::computeQpOffDiagJacobian(unsigned jvar)
 // {
-//   unsigned m = this->map_var_number(jvar);
+//   unsigned m = mapVarNumber(jvar);
 //
 //   return this->compute_jacobian(m);
 // }

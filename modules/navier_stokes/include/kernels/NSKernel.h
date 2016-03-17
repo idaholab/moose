@@ -73,7 +73,7 @@ protected:
 
   // Helper function for mapping Moose variable numberings into
   // the "canonical" numbering for the compressible NS equations.
-  unsigned map_var_number(unsigned var);
+  unsigned mapVarNumber(unsigned var);
 };
 
 

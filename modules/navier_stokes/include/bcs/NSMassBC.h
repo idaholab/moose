@@ -51,7 +51,7 @@ protected:
    * rho*(u.n).  This value may come from the current nonlinear
    * solution or be specified, depending on the derived class.
    */
-  Real qp_residual(Real rhoun);
+  Real qpResidualHelper(Real rhoun);
 
   /**
    * Compute the Jacobian contribution due to variable

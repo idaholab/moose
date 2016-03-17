@@ -73,7 +73,7 @@ NSKernel::NSKernel(const InputParameters & parameters)
 
 
 
-unsigned NSKernel::map_var_number(unsigned var)
+unsigned NSKernel::mapVarNumber(unsigned var)
 {
   // Convert the Moose numbering to:
   // 0 for rho

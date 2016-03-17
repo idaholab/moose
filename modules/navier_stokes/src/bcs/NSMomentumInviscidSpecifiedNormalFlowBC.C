@@ -58,6 +58,6 @@ Real NSMomentumInviscidSpecifiedNormalFlowBC::computeQpJacobian()
 
 Real NSMomentumInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return this->pressure_qp_jacobian( this->map_var_number(jvar) );
+  return this->pressure_qp_jacobian( mapVarNumber(jvar) );
 }
 

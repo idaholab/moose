@@ -4,7 +4,6 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #include "NSImposedVelocityDirectionBC.h"
 #include "MooseMesh.h"
 
@@ -27,25 +26,16 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
   return params;
 }
 
+NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters & parameters) :
+    NodalBC(parameters),
+    _rho(coupledValue("rho")),
+    _u_vel(coupledValue("u")),
+    _v_vel(coupledValue("v")),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+    _desired_unit_velocity_component(getParam<Real>("desired_unit_velocity_component"))
+{
+}
 
-
-
-// Constructor, be sure to call the base class constructor first!
-NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters & parameters)
-    : NodalBC(parameters),
-
-      // Coupled variables
-      _rho(coupledValue("rho")),
-      _u_vel(coupledValue("u")),
-      _v_vel(coupledValue("v")),
-      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-
-      _desired_unit_velocity_component(getParam<Real>("desired_unit_velocity_component"))
-{}
-
-
-
-// Specialization of the computeQpResidual function for this class
 Real NSImposedVelocityDirectionBC::computeQpResidual()
 {
   // The velocity vector
@@ -54,5 +44,3 @@ Real NSImposedVelocityDirectionBC::computeQpResidual()
   // Specify desired velocity component
   return _u[_qp] - _rho[_qp] * _desired_unit_velocity_component * vel.norm();
 }
-
-

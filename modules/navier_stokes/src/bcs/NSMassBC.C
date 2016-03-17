@@ -25,7 +25,7 @@ NSMassBC::NSMassBC(const InputParameters & parameters)
 
 
 
-Real NSMassBC::qp_residual(Real rhoun)
+Real NSMassBC::qpResidualHelper(Real rhoun)
 {
   return rhoun * _test[_i][_qp];
 }
@@ -83,7 +83,7 @@ Real NSMassBC::qp_jacobian(unsigned var_number)
 // {
 //   // Map jvar into the variable m for our problem, regardless of
 //   // how Moose has numbered things.
-//   unsigned m = this->map_var_number(jvar);
+//   unsigned m = mapVarNumber(jvar);
 //
 //   switch ( m )
 //   {
