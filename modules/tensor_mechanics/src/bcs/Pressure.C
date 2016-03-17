@@ -22,13 +22,13 @@ InputParameters validParams<Pressure>()
   return params;
 }
 
-Pressure::Pressure(const InputParameters & parameters)
-  :IntegratedBC(parameters),
-   _component(getParam<unsigned int>("component")),
-   _factor(getParam<Real>("factor")),
-   _function( isParamValid("function") ? &getFunction("function") : NULL ),
-   _postprocessor( isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : NULL ),
-   _alpha(getParam<Real>("alpha"))
+Pressure::Pressure(const InputParameters & parameters) :
+    IntegratedBC(parameters),
+    _component(getParam<unsigned int>("component")),
+    _factor(getParam<Real>("factor")),
+    _function( isParamValid("function") ? &getFunction("function") : NULL ),
+    _postprocessor( isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : NULL ),
+    _alpha(getParam<Real>("alpha"))
 {
   if (_component > 2)
     mooseError( "Invalid component given for " << name() << ": " << _component << "." << std::endl );
@@ -47,4 +47,3 @@ Pressure::computeQpResidual()
 
   return factor * (_normals[_qp](_component) * _test[_i][_qp]);
 }
-

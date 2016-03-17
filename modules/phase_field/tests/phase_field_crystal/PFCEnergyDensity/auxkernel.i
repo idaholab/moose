@@ -128,7 +128,7 @@
   [./PFCTrad]
     type = PFCTradMaterial
     block = 0
-    order = 4
+    order = FOURTH
   [../]
 []
 

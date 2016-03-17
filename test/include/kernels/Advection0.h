@@ -11,6 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef ADVECTION0_H
+#define ADVECTION0_H
+
 #include "Kernel.h"
 #include "Material.h"
 
@@ -23,20 +26,15 @@ InputParameters validParams<Advection0>();
 class Advection0 : public Kernel
 {
 public:
-
   Advection0(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
 
 private:
-
- /**
-  *   Parameters for spatially linearly varying velocity.
-  */
-  Real _Au,_Bu,_Cu,_Av,_Bv,_Cv;
-
+  /// Parameters for spatially linearly varying velocity.
+  Real _Au, _Bu, _Cu, _Av, _Bv, _Cv;
 };
+
+#endif //ADVECTION0_H

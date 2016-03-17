@@ -20,21 +20,22 @@ InputParameters validParams<ComputingInitialTest>()
   return params;
 }
 
-ComputingInitialTest::ComputingInitialTest(const InputParameters & parameters)
-  :Material(parameters),
-   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-   _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity"))
-{}
+ComputingInitialTest::ComputingInitialTest(const InputParameters & parameters) :
+    Material(parameters),
+    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+    _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity"))
+{
+}
 
 void
 ComputingInitialTest::initQpStatefulProperties()
 {
-  _thermal_conductivity[_qp] = 0.;
+  _thermal_conductivity[_qp] = 0.0;
 }
 
 void
 ComputingInitialTest::computeQpProperties()
 {
   if (_subproblem.computingInitialResidual())
-    _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + 1;
+    _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + 1.0;
 }

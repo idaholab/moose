@@ -21,32 +21,25 @@ InputParameters validParams<DiffTensorKernel>()
   return params;
 }
 
-
-DiffTensorKernel::DiffTensorKernel(const InputParameters & parameters)
-    : Kernel(parameters),
+DiffTensorKernel::DiffTensorKernel(const InputParameters & parameters) :
+    Kernel(parameters),
     _k_comp(getFunction("conductivity"))
 {
 }
 
-DiffTensorKernel::~DiffTensorKernel()
-{
-}
-
-
 Real
 DiffTensorKernel::computeQpResidual()
 {
-  RealTensorValue k = computeConductivity(_t,_qp);
+  RealTensorValue k = computeConductivity(_t, _qp);
   return k * _grad_test[_i][_qp] * _grad_u[_qp] - 4.0;
 }
 
 Real
 DiffTensorKernel::computeQpJacobian()
 {
-  RealTensorValue k = computeConductivity(_t,_qp);
+  RealTensorValue k = computeConductivity(_t, _qp);
   return k * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }
-
 
 RealTensorValue
 DiffTensorKernel::computeConductivity(Real /*t*/, const Point & /*pt*/)

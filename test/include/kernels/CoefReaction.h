@@ -11,9 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#ifndef CoefReaction_H
-#define CoefReaction_H
+#ifndef COEFREACTION_H
+#define COEFREACTION_H
 
 #include "Reaction.h"
 
@@ -26,7 +25,6 @@ InputParameters validParams<CoefReaction>();
 class CoefReaction : public Reaction
 {
 public:
-
   CoefReaction(const InputParameters & parameters);
 
 protected:
@@ -35,4 +33,5 @@ protected:
 
   Real _coef;
 };
-#endif //CoefReaction_H
+
+#endif //COEFREACTION_H
