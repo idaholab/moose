@@ -53,6 +53,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    skip = 'Issue 6528'
   [../]
   [./mu_1_0_kin]
     type = 'CSVDiff'
