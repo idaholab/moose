@@ -20,12 +20,13 @@ InputParameters validParams<StatefulTest>()
   return params;
 }
 
-StatefulTest::StatefulTest(const InputParameters & parameters)
-  :Material(parameters),
-   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-   _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity")),
-   _thermal_conductivity_older(declarePropertyOlder<Real>("thermal_conductivity"))
-{}
+StatefulTest::StatefulTest(const InputParameters & parameters) :
+    Material(parameters),
+    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+    _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity")),
+    _thermal_conductivity_older(declarePropertyOlder<Real>("thermal_conductivity"))
+{
+}
 
 void
 StatefulTest::initQpStatefulProperties()

@@ -15,7 +15,6 @@ class NSMomentumPressureWeakStagnationBC;
 template<>
 InputParameters validParams<NSMomentumPressureWeakStagnationBC>();
 
-
 /**
  * This class implements the pressure term of the momentum
  * equation boundary integral for use in weak stagnation
@@ -23,11 +22,8 @@ InputParameters validParams<NSMomentumPressureWeakStagnationBC>();
  */
 class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBC
 {
-
 public:
   NSMomentumPressureWeakStagnationBC(const InputParameters & parameters);
-
-  virtual ~NSMomentumPressureWeakStagnationBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -35,7 +31,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Required parameters
-  unsigned _component;
+  const unsigned int _component;
 };
 
 #endif // NSMOMENTUMPRESSUREWEAKSTAGNATIONBC_H

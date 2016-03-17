@@ -15,7 +15,6 @@ class NSSUPGBase;
 template<>
 InputParameters validParams<NSSUPGBase>();
 
-
 /**
  * This class acts as a base class for stabilization kernels.
  * This is useful because the stabilization kernels for different
@@ -24,18 +23,9 @@ InputParameters validParams<NSSUPGBase>();
 class NSSUPGBase : public NSKernel
 {
 public:
-
   NSSUPGBase(const InputParameters & parameters);
 
 protected:
-  /**
-   * This kernel is not actually called at quadrature points:
-   * derived classes must implement these functions
-   */
-  //virtual Real computeQpResidual();
-  //virtual Real computeQpJacobian();
-  //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
   // Material properties
   const MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   const MaterialProperty<Real> & _dynamic_viscosity;
@@ -79,4 +69,4 @@ protected:
   const VariableValue & _enthalpy;
 };
 
-#endif //  NSSUPGBASE_H
+#endif //NSSUPGBASE_H

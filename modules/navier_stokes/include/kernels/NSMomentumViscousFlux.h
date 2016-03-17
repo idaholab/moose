@@ -10,13 +10,11 @@
 #include "NSKernel.h"
 #include "NSViscStressTensorDerivs.h"
 
-
 // ForwardDeclarations
 class NSMomentumViscousFlux;
 
 template<>
 InputParameters validParams<NSMomentumViscousFlux>();
-
 
 /**
  * Derived instance of the NSViscousFluxBase class
@@ -25,7 +23,6 @@ InputParameters validParams<NSMomentumViscousFlux>();
 class NSMomentumViscousFlux : public NSKernel
 {
 public:
-
   NSMomentumViscousFlux(const InputParameters & parameters);
 
 protected:
@@ -34,7 +31,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Required parameter
-  unsigned _component;
+  const unsigned int _component;
 
   // An object for computing viscous stress tensor derivatives.
   // Constructed via a reference to ourself
@@ -45,4 +42,4 @@ protected:
   friend class NSViscStressTensorDerivs;
 };
 
-#endif //  NSMOMENTUMVISCOUSFLUX_H
+#endif //NSMOMENTUMVISCOUSFLUX_H

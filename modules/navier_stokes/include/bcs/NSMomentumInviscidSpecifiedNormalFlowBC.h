@@ -9,7 +9,6 @@
 
 #include "NSMomentumInviscidBC.h"
 
-
 // Forward Declarations
 class NSMomentumInviscidSpecifiedNormalFlowBC;
 
@@ -25,19 +24,13 @@ class NSMomentumInviscidSpecifiedNormalFlowBC : public NSMomentumInviscidBC
 public:
   NSMomentumInviscidSpecifiedNormalFlowBC(const InputParameters & parameters);
 
-  virtual ~NSMomentumInviscidSpecifiedNormalFlowBC(){}
-
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
-  // Aux Variables
   const VariableValue & _pressure;
-
-  // Required parameters
-  Real _rhou_udotn;
+  const Real _rhou_udotn;
 };
 
 #endif // NSMOMENTUMINVISCIDSPECIFIEDPRESSUREBC_H

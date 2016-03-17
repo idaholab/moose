@@ -23,20 +23,15 @@ InputParameters validParams<NSInflowThermalBC>()
   return params;
 }
 
-
-
-
-NSInflowThermalBC::NSInflowThermalBC(const InputParameters & parameters)
-  :NodalBC(parameters),
-   _R(getParam<Real>("R")),
-   _gamma(getParam<Real>("gamma")),
-   _specified_rho(getParam<Real>("specified_rho")),
-   _specified_temperature(getParam<Real>("specified_temperature")),
-   _specified_velocity_magnitude(getParam<Real>("specified_velocity_magnitude"))
-  {}
-
-
-
+NSInflowThermalBC::NSInflowThermalBC(const InputParameters & parameters) :
+    NodalBC(parameters),
+    _R(getParam<Real>("R")),
+    _gamma(getParam<Real>("gamma")),
+    _specified_rho(getParam<Real>("specified_rho")),
+    _specified_temperature(getParam<Real>("specified_temperature")),
+    _specified_velocity_magnitude(getParam<Real>("specified_velocity_magnitude"))
+{
+}
 
 Real
 NSInflowThermalBC::computeQpResidual()
@@ -53,4 +48,3 @@ NSInflowThermalBC::computeQpResidual()
   Real cv = _R / (_gamma-1.);
   return _u[_qp] - _specified_rho * (cv * _specified_temperature + 0.5*_specified_velocity_magnitude*_specified_velocity_magnitude);
 }
-

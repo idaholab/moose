@@ -59,11 +59,11 @@ protected:
   // Given |u|, p_0, and T_0, compute static quantities.  Each
   // on depends on the previous, so it makes sense to compute them
   // all even if you don't need them all...
-  void static_values(Real& T_s, Real& p_s, Real& rho_s);
+  void staticValues(Real & T_s, Real & p_s, Real & rho_s);
 
   // Nicer interface if you actually only want one of the static values.
   // Note that they will all still be computed!
-  Real rho_static();
+  Real rhoStatic();
 
   // The velocity magnitude, squared
   Real velmag2();

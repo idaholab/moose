@@ -19,17 +19,15 @@ InputParameters validParams<CoefDiffusion>();
 class CoefDiffusion : public Kernel
 {
 public:
-
   CoefDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
 
 private:
-  Real _coef;
+  const Real _coef;
   Function * const _func;
-
 };
+
 #endif //COEFDIFFUSION_H

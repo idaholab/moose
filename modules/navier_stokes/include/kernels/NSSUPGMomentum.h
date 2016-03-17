@@ -32,13 +32,13 @@ protected:
   // This kernel is to be used for the x, y, and z momentum equations.
   // The _component parameter tells you which equation you are currently
   // solving.
-  unsigned _component;
+  unsigned int _component;
 
 private:
   // Single function for computing on and off-diagonal Jacobian
   // entries in a single function.  The input index is in Moose
   // variable numbering.
-  Real compute_jacobian(unsigned var);
+  Real computeJacobianHelper(unsigned int var);
 };
 
-#endif // NSSUPGMOMENTUM_H
+#endif //NSSUPGMOMENTUM_H

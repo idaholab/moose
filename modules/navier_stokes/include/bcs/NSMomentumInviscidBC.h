@@ -58,23 +58,12 @@ InputParameters validParams<NSMomentumInviscidBC>();
 class NSMomentumInviscidBC : public NSIntegratedBC
 {
 public:
-
   NSMomentumInviscidBC(const InputParameters & parameters);
 
-  virtual ~NSMomentumInviscidBC(){}
-
 protected:
-
-  /**
-   * Must be implemented in derived classes.
-   */
-//  virtual Real computeQpResidual();
-//  virtual Real computeQpJacobian();
-//  virtual Real computeQpOffDiagJacobian(unsigned jvar);
-
   // Which spatial component of the momentum equations (0,1, or 2) is this
   // kernel applied in?
-  unsigned _component;
+  const unsigned _component;
 
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself
@@ -93,21 +82,21 @@ protected:
 
   // Depending on the passed-in value, will compute the residual for either a specified
   // pressure value or the residual at the current value of the pressure.
-  Real pressure_qp_residual(Real pressure);
+  Real pressureQpResidualHelper(Real pressure);
 
   // If the pressure is fixed, the Jacobian of the pressure term is zero, otherwise
   // we return the Jacobian value for the passed-in variable number.
-  Real pressure_qp_jacobian(unsigned var_number);
+  Real pressureQpJacobianHelper(unsigned var_number);
 
   // Depending on the passed-in vector, will compute the residual for either a specified
   // value of (rho*u)(u.n) or the residual at the current value of (rho*u)(u.n).
   // The passed-in value is the _component'th entry of the (rho*u)(u.n) vector.
-  Real convective_qp_residual(Real rhou_udotn);
+  Real convectiveQpResidualHelper(Real rhou_udotn);
 
   // If the value of (rho*u)(u.n) is fixed, the Jacobian of the
   // convective term is zero, otherwise we return the correct value
   // based on the passed-in variable number.
-  Real convective_qp_jacobian(unsigned var_number);
+  Real convectiveQpJacobianHelper(unsigned var_number);
 };
 
 #endif // NSMOMENTUMINVISCIDBC_H

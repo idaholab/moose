@@ -11,11 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#include "Material.h"
-
 #ifndef SPATIALSTATEFULMATERIAL_H
 #define SPATIALSTATEFULMATERIAL_H
+
+#include "Material.h"
 
 //Forward Declarations
 class SpatialStatefulMaterial;

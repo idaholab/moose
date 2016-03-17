@@ -9,7 +9,6 @@
 
 #include "NodalBC.h"
 
-
 // Forward Declarations
 class NSThermalBC;
 
@@ -19,10 +18,7 @@ InputParameters validParams<NSThermalBC>();
 class NSThermalBC : public NodalBC
 {
 public:
-
   NSThermalBC(const InputParameters & parameters);
-
-  virtual ~NSThermalBC(){}
 
 protected:
   // Computes the temperature based on ideal gas equation of state,
@@ -38,8 +34,8 @@ protected:
 
   // Specific heat at constant volume, treated as a single
   // constant value.
-  Real _R;
-  Real _gamma;
+  const Real _R;
+  const Real _gamma;
 };
 
-#endif //THERMALBC_H
+#endif //NSTHERMALBC_H

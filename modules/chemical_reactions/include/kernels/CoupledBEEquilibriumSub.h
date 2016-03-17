@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "Kernel.h"
-
 #ifndef COUPLEDBEEQUILIBRIUMSUB_H
 #define COUPLEDBEEQUILIBRIUMSUB_H
+
+#include "Kernel.h"
 
 /**
  * The forward declaration is so that we can declare the validParams function
@@ -33,12 +33,6 @@ InputParameters validParams<CoupledBEEquilibriumSub>();
 class CoupledBEEquilibriumSub : public Kernel
 {
 public:
-
-  /**
-   * This is the Constructor declaration AND definition.
-   * It is ok to have the definition in the .h if the function body
-   * is really small.  Otherwise it should be in the .C
-   */
   CoupledBEEquilibriumSub(const InputParameters & parameters);
 
 protected:
@@ -66,10 +60,13 @@ protected:
 private:
   /// Weight of the equilibrium species concentration in the total primary species concentration.
   Real _weight;
+
   /// Equilibrium constant for the equilibrium species in association form.
   Real _log_k;
+
   /// Stochiometric coefficient of the primary species.
   Real _sto_u;
+
   /// Stochiometric coefficiets of the coupled primary species.
   std::vector<Real> _sto_v;
 
@@ -77,11 +74,15 @@ private:
   const MaterialProperty<Real> & _porosity;
 
   std::vector<unsigned int> _vars;
+
   /// Coupled primary species concentrations.
   std::vector<const VariableValue *> _v_vals;
+
   /// Coupled old values of primary species concentrations.
   std::vector<const VariableValue *> _v_vals_old;
+
   /// The old values of the primary species concentration.
   const VariableValue & _u_old;
 };
+
 #endif //COUPLEDBEEQUILIBRIUMSUB_H

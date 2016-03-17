@@ -28,14 +28,7 @@ InputParameters validParams<NSEnthalpyAux>();
 class NSEnthalpyAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   NSEnthalpyAux(const InputParameters & parameters);
-
-  virtual ~NSEnthalpyAux() {}
 
 protected:
   virtual Real computeValue();
@@ -44,7 +37,7 @@ protected:
   const VariableValue & _rhoe;
   const VariableValue & _pressure;
 
-  Real _gamma;
+  const Real _gamma;
 };
 
 #endif // NSENTHALPYAUX_H

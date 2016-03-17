@@ -15,9 +15,9 @@ InputParameters validParams<NSTemperatureAux>()
 
   // Mark variables as required
   params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", ""); // Only required in 3D...
+  params.addRequiredCoupledVar("u", "x-velocity");
+  params.addRequiredCoupledVar("v", "y-velocity");
+  params.addCoupledVar("w", "z-velocity"); // Only required in 3D...
   params.addRequiredCoupledVar("rhoe", "");
 
   // Parameters with default values
@@ -27,19 +27,17 @@ InputParameters validParams<NSTemperatureAux>()
   return params;
 }
 
-
-
-NSTemperatureAux::NSTemperatureAux(const InputParameters & parameters)
-    : AuxKernel(parameters),
-      _rho(coupledValue("rho")),
-      _u_vel(coupledValue("u")),
-      _v_vel(coupledValue("v")),
-      _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-      _rhoe(coupledValue("rhoe")),
-      _R(getParam<Real>("R")),
-      _gamma(getParam<Real>("gamma"))
-{}
-
+NSTemperatureAux::NSTemperatureAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
+    _rho(coupledValue("rho")),
+    _u_vel(coupledValue("u")),
+    _v_vel(coupledValue("v")),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+    _rhoe(coupledValue("rhoe")),
+    _R(getParam<Real>("R")),
+    _gamma(getParam<Real>("gamma"))
+{
+}
 
 Real
 NSTemperatureAux::computeValue()
@@ -50,10 +48,9 @@ NSTemperatureAux::computeValue()
     _w_vel[_qp]*_w_vel[_qp];
 
   // Internal Energy = Total Energy - Kinetic
-  Real e_i = (_rhoe[_qp] / _rho[_qp]) - 0.5*V2;
+  Real e_i = (_rhoe[_qp] / _rho[_qp]) - 0.5 * V2;
 
   // T = e_i / cv
   Real cv = _R / (_gamma-1.);
   return e_i / cv;
 }
-

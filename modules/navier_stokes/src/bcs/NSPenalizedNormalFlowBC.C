@@ -10,55 +10,33 @@ template<>
 InputParameters validParams<NSPenalizedNormalFlowBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-
-  // Required parameters
   params.addRequiredParam<Real>("penalty", "The penalty parameter, some (large) value.");
-
-  // Parameters with default values
   params.addParam<Real>("specified_udotn", 0., "The desired value of u.n.");
-
   return params;
 }
 
-
-
-NSPenalizedNormalFlowBC::NSPenalizedNormalFlowBC(const InputParameters & parameters)
-    : NSIntegratedBC(parameters),
-
-      // Required parameters
-      _penalty(getParam<Real>("penalty")),
-      _specified_udotn(getParam<Real>("specified_udotn"))
+NSPenalizedNormalFlowBC::NSPenalizedNormalFlowBC(const InputParameters & parameters) :
+    NSIntegratedBC(parameters),
+    _penalty(getParam<Real>("penalty")),
+    _specified_udotn(getParam<Real>("specified_udotn"))
 {
 }
 
-
-
-
-Real NSPenalizedNormalFlowBC::computeQpResidual()
+Real
+NSPenalizedNormalFlowBC::computeQpResidual()
 {
-  RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-  Real residual = _penalty * ((vel*_normals[_qp]) - _specified_udotn) * _test[_i][_qp];
-  // Moose::out << "residual[" << _qp << "]=" << residual << std::endl;
-
-  return residual;
+  const RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  return _penalty * ((vel*_normals[_qp]) - _specified_udotn) * _test[_i][_qp];
 }
-
-
-
 
 Real NSPenalizedNormalFlowBC::computeQpJacobian()
 {
   // TODO
-  return 0.;
+  return 0.0;
 }
-
-
-
 
 Real NSPenalizedNormalFlowBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
-  return 0.;
+  return 0.0;
 }
-

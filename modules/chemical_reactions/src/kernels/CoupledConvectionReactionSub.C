@@ -23,189 +23,130 @@ InputParameters validParams<CoupledConvectionReactionSub>()
   return params;
 }
 
-CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters)
-
-    // You must call the constructor of the base class first
-  :Kernel(parameters),
-
-    // coupledGradient will give us a reference to the gradient of another
-    // variable in the computation.  We are going to use the gradient of p
-    // to calculate our velocity vector.
-   _weight(getParam<Real>("weight")),
-   _log_k (getParam<Real>("log_k")),
-   _sto_u(getParam<Real>("sto_u")),
-   _sto_v(getParam<std::vector<Real> >("sto_v")),
-   _cond(getMaterialProperty<Real>("conductivity")),
-   _grad_p(coupledGradient("p"))
+CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters) :
+    Kernel(parameters),
+    _weight(getParam<Real>("weight")),
+    _log_k (getParam<Real>("log_k")),
+    _sto_u(getParam<Real>("sto_u")),
+    _sto_v(getParam<std::vector<Real> >("sto_v")),
+    _cond(getMaterialProperty<Real>("conductivity")),
+    _grad_p(coupledGradient("p"))
 {
-  int n = coupledComponents("v");
+  const unsigned int n = coupledComponents("v");
   _vars.resize(n);
   _vals.resize(n);
   _grad_vals.resize(n);
 
-  for (unsigned int i=0; i<_vals.size(); ++i)
+  for (unsigned int i = 0; i < n; ++i)
   {
     _vars[i] = coupled("v", i);
     _vals[i] = &coupledValue("v", i);
     _grad_vals[i] = &coupledGradient("v", i);
   }
-
 }
 
 Real CoupledConvectionReactionSub::computeQpResidual()
 {
-  RealGradient darcy_vel=-_grad_p[_qp]*_cond[_qp];
+  RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
+  RealGradient d_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
+  RealGradient d_var_sum;
+  const Real d_v_u = std::pow(_u[_qp],_sto_u);
 
-  RealGradient d_u = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_u[_qp];
-
-  RealGradient d_var_sum(0.0,0.0,0.0);
-
-  Real d_v_u = std::pow(_u[_qp],_sto_u);
-
-  if (_vals.size())
+  for (unsigned int i = 0; i < _vals.size(); ++i)
   {
-    for (unsigned int i=0; i<_vals.size(); ++i)
-    {
-      d_u *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+    d_u *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
-      RealGradient d_var = d_v_u * _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
+    RealGradient d_var = d_v_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+    for (unsigned int j = 0; j < _vals.size(); ++j)
+      if (j != i)
+        d_var *= std::pow((*_vals[j])[_qp], _sto_v[j]);
 
-      for (unsigned int j=0; j<_vals.size(); ++j)
-      {
-        if (j != i)
-          d_var *= std::pow((*_vals[j])[_qp],_sto_v[j]);
-      }
-
-      d_var_sum += d_var;
-
-    }
-
+    d_var_sum += d_var;
   }
 
-  return _weight*std::pow(10.0,_log_k)*_test[_i][_qp]*darcy_vel*(d_u + d_var_sum);
+  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum);
 }
 
 Real CoupledConvectionReactionSub::computeQpJacobian()
 {
-// the partial derivative of _grad_u is just _dphi[_j]
-
-  RealGradient darcy_vel=-_grad_p[_qp]*_cond[_qp];
-
-  RealGradient d_u_1=_sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_phi[_j][_qp];
-
-  RealGradient d_u_2=_phi[_j][_qp]*_sto_u*(_sto_u-1.0)*std::pow(_u[_qp],_sto_u-2.0)*_grad_u[_qp];
-
+  RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
+  RealGradient d_u_1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_phi[_j][_qp];
+  RealGradient d_u_2 = _phi[_j][_qp] * _sto_u * (_sto_u - 1.0) * std::pow(_u[_qp], _sto_u - 2.0) * _grad_u[_qp];
   RealGradient d_u;
+  RealGradient d_var_sum;
+  const Real d_v_u = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _phi[_j][_qp];
 
-  RealGradient d_var_sum(0.0,0.0,0.0);
-
-  Real d_v_u = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_phi[_j][_qp];
-
-  if (_vals.size())
+  for (unsigned int i = 0; i < _vals.size(); ++i)
   {
-    for (unsigned int i=0; i<_vals.size(); ++i)
-    {
-      d_u_1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
-      d_u_2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
+    d_u_1 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
+    d_u_2 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
-      RealGradient d_var = d_v_u * _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
+    RealGradient d_var = d_v_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+    for (unsigned int j = 0; j < _vals.size(); ++j)
+      if (j != i)
+        d_var *= std::pow((*_vals[j])[_qp], _sto_v[j]);
 
-      for (unsigned int j=0; j<_vals.size(); ++j)
-      {
-        if (j != i)
-          d_var *= std::pow((*_vals[j])[_qp],_sto_v[j]);
-      }
-
-      d_var_sum += d_var;
-
-    }
+    d_var_sum += d_var;
   }
 
   d_u = d_u_1 + d_u_2;
-
-  return  _weight*std::pow(10.0,_log_k)*_test[_i][_qp]*darcy_vel*(d_u + d_var_sum);
+  return  _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum);
 }
 
 Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_vals.size())
-  {
-    RealGradient darcy_vel=-_grad_p[_qp]*_cond[_qp];
-
-    RealGradient diff1 = _sto_u*std::pow(_u[_qp],_sto_u-1.0)*_grad_u[_qp];
-
-    for (unsigned int i=0; i<_vals.size(); ++i)
-    {
-      if (jvar == _vars[i])
-      {
-        diff1 *= _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
-      }
-      else
-      {
-        diff1 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
-      }
-    }
-
-    Real val_u = std::pow(_u[_qp],_sto_u);
-
-
-    RealGradient diff2_1(1.0, 1.0, 1.0);
-    RealGradient diff2_2(1.0, 1.0, 1.0);
-
-    for (unsigned int i=0; i<_vals.size(); ++i)
-    {
-      if (jvar == _vars[i])
-      {
-        diff2_1 = _sto_v[i]*(_sto_v[i]-1.0)*std::pow((*_vals[i])[_qp],_sto_v[i]-2.0)*_phi[_j][_qp]*(*_grad_vals[i])[_qp];
-        diff2_2 = _sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_grad_phi[_j][_qp];
-      }
-    }
-
-    RealGradient diff2 = val_u * (diff2_1 + diff2_2);
-
-    for (unsigned int i=0; i<_vals.size(); ++i)
-    {
-      if (jvar != _vars[i])
-      {
-        diff2 *= std::pow((*_vals[i])[_qp],_sto_v[i]);
-      }
-    }
-
-    RealGradient diff3;
-
-    RealGradient diff3_sum(0.0,0.0,0.0);
-
-    Real val_jvar;
-
-    unsigned int var;
-
-    for (unsigned int i=0; i<_vals.size(); ++i)
-    {
-      if (jvar == _vars[i])
-      {
-        var = i;
-        val_jvar = val_u*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
-      }
-    }
-
-    for (unsigned int i=0; i<_vals.size(); ++i)
-    {
-      if (i != var)
-      {
-        diff3 = val_jvar*_sto_v[i]*std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*(*_grad_vals[i])[_qp];
-
-        for (unsigned int j=0; j<_vals.size(); ++j)
-        {
-          if (j != var && j != i)
-            diff3 *= std::pow((*_vals[j])[_qp],_sto_v[j]);
-        }
-        diff3_sum += diff3;
-      }
-    }
-
-    return  _weight*std::pow(10.0,_log_k)*_test[_i][_qp]*darcy_vel*(diff1 + diff2 + diff3_sum);
-  }
-  else
+  if (_vals.size() == 0)
     return 0.0;
-}
 
+  RealGradient darcy_vel = -_grad_p[_qp] * _cond[_qp];
+  RealGradient diff1 = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _grad_u[_qp];
+  for (unsigned int i = 0; i < _vals.size(); ++i)
+  {
+    if (jvar == _vars[i])
+      diff1 *= _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i]-1.0) * _phi[_j][_qp];
+    else
+      diff1 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
+  }
+
+  Real val_u = std::pow(_u[_qp], _sto_u);
+  RealGradient diff2_1(1.0, 1.0, 1.0);
+  RealGradient diff2_2(1.0, 1.0, 1.0);
+  for (unsigned int i = 0; i < _vals.size(); ++i)
+    if (jvar == _vars[i])
+    {
+      diff2_1 = _sto_v[i] * (_sto_v[i] - 1.0) * std::pow((*_vals[i])[_qp], _sto_v[i] - 2.0) * _phi[_j][_qp] * (*_grad_vals[i])[_qp];
+      diff2_2 = _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * _grad_phi[_j][_qp];
+    }
+
+  RealGradient diff2 = val_u * (diff2_1 + diff2_2);
+  for (unsigned int i = 0; i < _vals.size(); ++i)
+    if (jvar != _vars[i])
+    {
+      diff2 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
+    }
+
+  RealGradient diff3;
+  RealGradient diff3_sum(0.0,0.0,0.0);
+  Real val_jvar;
+  unsigned int var;
+  for (unsigned int i = 0; i < _vals.size(); ++i)
+    if (jvar == _vars[i])
+    {
+      var = i;
+      val_jvar = val_u * _sto_v[i] * std::pow((*_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
+    }
+
+  for (unsigned int i = 0; i < _vals.size(); ++i)
+    if (i != var)
+    {
+      diff3 = val_jvar * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+
+      for (unsigned int j = 0; j < _vals.size(); ++j)
+        if (j != var && j != i)
+          diff3 *= std::pow((*_vals[j])[_qp], _sto_v[j]);
+
+      diff3_sum += diff3;
+    }
+
+  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (diff1 + diff2 + diff3_sum);
+}

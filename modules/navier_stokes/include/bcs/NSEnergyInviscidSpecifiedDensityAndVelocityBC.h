@@ -22,7 +22,6 @@ InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>();
  */
 class NSEnergyInviscidSpecifiedDensityAndVelocityBC : public NSEnergyInviscidBC
 {
-
 public:
   NSEnergyInviscidSpecifiedDensityAndVelocityBC(const InputParameters & parameters);
 
@@ -42,10 +41,6 @@ protected:
   Real _specified_u; // FIXME: Read these as a single RealVectorValue
   Real _specified_v; // FIXME: Read these as a single RealVectorValue
   Real _specified_w; // FIXME: Read these as a single RealVectorValue
-
-private:
-  // Helper Jacobian function
-  // Real compute_jacobian(unsigned var_number);
 };
 
 #endif // NSENERGYINVISCIDSPECIFIEDDENSITYANDVELOCITYBC_H

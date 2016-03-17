@@ -10,61 +10,37 @@ template<>
 InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSEnergyInviscidBC>();
-
-  // Coupled variables
   params.addRequiredCoupledVar("pressure", "");
-
-  // Required parameters
   params.addRequiredParam<Real>("un", "The specified value of u.n for this boundary");
-
   return params;
 }
 
-
-
-NSEnergyInviscidSpecifiedNormalFlowBC::NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters)
-    : NSEnergyInviscidBC(parameters),
-
-      // Aux Variables
-      _pressure(coupledValue("pressure")),
-
-      // Required parameters
-      _un(getParam<Real>("un"))
+NSEnergyInviscidSpecifiedNormalFlowBC::NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters) :
+    NSEnergyInviscidBC(parameters),
+    _pressure(coupledValue("pressure")),
+    _un(getParam<Real>("un"))
 {
 }
-
-
-
 
 Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpResidual()
 {
-  return this->qp_residual(_pressure[_qp], _un);
+  return qpResidualHelper(_pressure[_qp], _un);
 }
-
-
-
 
 Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpJacobian()
 {
-  return this->compute_jacobian(/*on-diagonal variable is energy=*/4);
+  return computeJacobianHelper(/*on-diagonal variable is energy=*/4);
 }
-
-
-
 
 Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return this->compute_jacobian( this->map_var_number(jvar) );
+  return computeJacobianHelper(mapVarNumber(jvar));
 }
 
-
-
-
-Real NSEnergyInviscidSpecifiedNormalFlowBC::compute_jacobian(unsigned var_number)
+Real NSEnergyInviscidSpecifiedNormalFlowBC::computeJacobianHelper(unsigned var_number)
 {
   // For specified u.n, term "A" is zero, see base class for details.
   return
-    this->qp_jacobian_termB(var_number, _un) +
-    this->qp_jacobian_termC(var_number, _un);
+    qpJacobianTermB(var_number, _un) +
+    qpJacobianTermC(var_number, _un);
 }
-

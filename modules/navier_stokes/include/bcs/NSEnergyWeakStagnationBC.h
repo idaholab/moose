@@ -21,11 +21,8 @@ InputParameters validParams<NSEnergyWeakStagnationBC>();
  */
 class NSEnergyWeakStagnationBC : public NSWeakStagnationBC
 {
-
 public:
   NSEnergyWeakStagnationBC(const InputParameters & parameters);
-
-  virtual ~NSEnergyWeakStagnationBC(){}
 
 protected:
   virtual Real computeQpResidual();

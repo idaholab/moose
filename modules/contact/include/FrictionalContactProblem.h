@@ -4,8 +4,6 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-
 #ifndef FRICTIONALCONTACTPROBLEM_H
 #define FRICTIONALCONTACTPROBLEM_H
 
@@ -13,19 +11,6 @@
 
 class FrictionalContactProblem;
 
-struct InteractionParams
-{
-  Real _friction_coefficient;
-  Real _slip_factor;
-  Real _slip_too_far_factor;
-};
-
-enum ContactState
-{
-  STICKING,
-  SLIPPING,
-  SLIPPED_TOO_FAR
-};
 
 template<>
 InputParameters validParams<FrictionalContactProblem>();
@@ -37,44 +22,50 @@ class FrictionalContactProblem : public ReferenceResidualProblem
 {
 public:
   FrictionalContactProblem(const InputParameters & params);
-  virtual ~FrictionalContactProblem();
+  virtual ~FrictionalContactProblem() {}
 
-  class SlipData
+  struct InteractionParams;
+  struct SlipData;
+  enum ContactState
   {
-    public:
-      SlipData(const Node* node, unsigned int dof, Real slip);
-      SlipData(const SlipData & sd);
-      ~SlipData();
-
-      const Node* _node;
-      unsigned int _dof;
-      Real _slip;
+    STICKING,
+    SLIPPING,
+    SLIPPED_TOO_FAR
   };
 
   virtual void initialSetup();
   virtual void timestepSetup();
+
   virtual bool shouldUpdateSolution();
-  virtual bool updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution);
-  virtual void predictorCleanup(NumericVector<Number>& ghosted_solution);
-  bool enforceRateConstraint(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution);
-  bool calculateSlip(const NumericVector<Number>& ghosted_solution,
+  virtual bool updateSolution(NumericVector<Number> & vec_solution, NumericVector<Number>& ghosted_solution);
+
+  virtual void predictorCleanup(NumericVector<Number> & ghosted_solution);
+
+  bool enforceRateConstraint(NumericVector<Number> & vec_solution, NumericVector<Number> & ghosted_solution);
+
+  bool calculateSlip(const NumericVector<Number> & ghosted_solution,
                      std::vector<SlipData> * iterative_slip);
-  static ContactState calculateInteractionSlip(RealVectorValue &slip,
-                                    Real &slip_residual,
-                                    const RealVectorValue &normal,
-                                    const RealVectorValue &residual,
-                                    const RealVectorValue &incremental_slip,
-                                    const RealVectorValue &stiffness,
-                                    const Real friction_coefficient,
-                                    const Real slip_factor,
-                                    const Real slip_too_far_factor,
-                                    const int dim);
-  void applySlip(NumericVector<Number>& vec_solution,
-                 NumericVector<Number>& ghosted_solution,
+
+  static ContactState calculateInteractionSlip(RealVectorValue & slip,
+                                               Real & slip_residual,
+                                               const RealVectorValue & normal,
+                                               const RealVectorValue & residual,
+                                               const RealVectorValue & incremental_slip,
+                                               const RealVectorValue & stiffness,
+                                               const Real friction_coefficient,
+                                               const Real slip_factor,
+                                               const Real slip_too_far_factor,
+                                               const int dim);
+
+  void applySlip(NumericVector<Number> & vec_solution,
+                 NumericVector<Number> & ghosted_solution,
                  std::vector<SlipData> & iterative_slip);
+
   unsigned int numLocalFrictionalConstraints();
+
   void updateContactReferenceResidual();
-  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
+
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string & msg,
                                                                     const PetscInt it,
                                                                     const Real xnorm,
                                                                     const Real snorm,
@@ -86,12 +77,14 @@ public:
                                                                     const PetscInt max_funcs,
                                                                     const Real ref_resid,
                                                                     const Real div_threshold);
-  void updateContactPoints(NumericVector<Number>& ghosted_solution,
+
+  void updateContactPoints(NumericVector<Number> & ghosted_solution,
                            bool update_incremental_slip);
+
   void updateIncrementalSlip();
 
 protected:
-  std::map<std::pair<int,int>,InteractionParams> _interaction_params;
+  std::map<std::pair<int, int>, InteractionParams> _interaction_params;
   NonlinearVariableName _disp_x;
   NonlinearVariableName _disp_y;
   NonlinearVariableName _disp_z;
@@ -126,7 +119,25 @@ protected:
   Real _it_slip_norm;
 
   /// Convenient typedef for frequently used iterator
-  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_iterator;
+  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator PLIterator;
+};
+
+struct FrictionalContactProblem::InteractionParams
+{
+  Real _friction_coefficient;
+  Real _slip_factor;
+  Real _slip_too_far_factor;
+};
+
+struct FrictionalContactProblem::SlipData
+{
+  SlipData(const Node* node, unsigned int dof, Real slip);
+  SlipData(const SlipData & sd);
+  ~SlipData();
+
+  const Node * _node;
+  unsigned int _dof;
+  Real _slip;
 };
 
 #endif /* FRICTIONALCONTACTPROBLEM_H */
