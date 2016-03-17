@@ -21,7 +21,7 @@
 
 // Forward declerations
 class MaterialPropertyDebugOutput;
-class MaterialBase;
+class Material;
 
 template<>
 InputParameters validParams<MaterialPropertyDebugOutput>();
@@ -59,7 +59,7 @@ protected:
    * @param output The output stream to populate
    * @param materials Vector of pointers to the Material objects of interest
    */
-  void printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<MaterialBase> > & materials) const;
+  void printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<Material> > & materials) const;
 
 };
 

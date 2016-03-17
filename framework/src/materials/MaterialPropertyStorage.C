@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "MaterialPropertyStorage.h"
-#include "MaterialBase.h"
+#include "Material.h"
 #include "MaterialData.h"
 #include "MooseMesh.h"
 
@@ -239,7 +239,7 @@ MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsig
 
 
 void
-MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const std::vector<MooseSharedPointer<MaterialBase> > & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
+MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const std::vector<MooseSharedPointer<Material> > & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
 {
   // NOTE: since materials are storing their computed properties in MaterialData class, we need to
   // juggle the memory between MaterialData and MaterialProperyStorage classes
@@ -263,7 +263,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const s
   // copy from storage to material data
   swap(material_data, elem, side);
   // run custom init on properties
-  for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
+  for (std::vector<MooseSharedPointer<Material> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
     (*it)->initStatefulProperties(n_qpoints);
   swapBack(material_data, elem, side);
 

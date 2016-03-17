@@ -795,7 +795,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractScalar(MultiAppName          , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(OutputName            , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractScalar(MaterialPropertyName  , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractScalar(DiscreteMaterialName  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(MaterialName          , it->second, full_name, it->first, in_global, global_params_block);
 
 
       /**
@@ -844,7 +844,7 @@ Parser::extractParams(const std::string & prefix, InputParameters &p)
       dynamicCastAndExtractVector(VectorPostprocessorName, it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(OutputName            , it->second, full_name, it->first, in_global, global_params_block);
       dynamicCastAndExtractVector(MaterialPropertyName  , it->second, full_name, it->first, in_global, global_params_block);
-      dynamicCastAndExtractVector(DiscreteMaterialName  , it->second, full_name, it->first, in_global, global_params_block);
+      dynamicCastAndExtractVector(MaterialName          , it->second, full_name, it->first, in_global, global_params_block);
 
       /**
        * Double indexed types

@@ -19,13 +19,13 @@
 
 // Forward declarations
 class NewtonMaterial;
-class DiscreteMaterial;
+class Material;
 
 template<>
 InputParameters validParams<NewtonMaterial>();
 
 /**
- * A test object that uses DiscreteMaterial to perform a Newton solve of a material property.
+ * A test object that uses Material to perform a Newton solve of a material property.
  *
  * Also, does some error checking.
  */
@@ -45,7 +45,7 @@ private:
   MaterialProperty<Real> & _p;
   std::vector<unsigned int> _prop_ids;
   unsigned int _max_iterations;
-  DiscreteMaterial & _discrete;
+  Material & _discrete;
 };
 
 #endif /* NEWTONMATERIAL_H */
