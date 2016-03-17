@@ -43,4 +43,10 @@
     exodiff = 'adapt_tstep_shrink_init_dt_restart_out.e'
     prereq = 'test_shrink_init_dt'
   [../]
+
+  [./test_postproc_dt]
+    type = 'Exodiff'
+    input = 'adapt_and_postproc_dt.i'
+    exodiff = 'adapt_and_postproc_dt_out.e'
+  [../]
 []
