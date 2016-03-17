@@ -53,7 +53,7 @@
 //
 // Real NSPressureNeumannBC::computeQpJacobian()
 // {
-//   return this->compute_jacobian(_component+1);  // <-- the on-diagonal variable number is _component+1
+//   return computeJacobianHelper(_component+1);  // <-- the on-diagonal variable number is _component+1
 // }
 //
 //
@@ -62,12 +62,12 @@
 // {
 //   unsigned m = mapVarNumber(jvar);
 //
-//   return this->compute_jacobian(m);
+//   return computeJacobianHelper(m);
 // }
 //
 //
 //
-// Real NSPressureNeumannBC::compute_jacobian(unsigned m)
+// Real NSPressureNeumannBC::computeJacobianHelper(unsigned m)
 // {
 //   return _normals[_qp](_component) * _pressure_derivs.get_grad(m) * _phi[_j][_qp] * _test[_i][_qp];
 // }

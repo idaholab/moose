@@ -9,7 +9,6 @@
 
 #include "Material.h"
 
-
 //Forward Declarations
 class NavierStokesMaterial;
 
@@ -37,7 +36,6 @@ public:
   NavierStokesMaterial(const InputParameters & parameters);
 
 protected:
-
   /**
    * Must be called _after_ the child class computes dynamic_viscocity.
    */
@@ -49,24 +47,24 @@ protected:
   const VariableGradient & _grad_v;
   const VariableGradient & _grad_w;
 
-  MaterialProperty<RealTensorValue>& _viscous_stress_tensor;
-  MaterialProperty<Real>&            _thermal_conductivity;
-  MaterialProperty<Real>&            _dynamic_viscosity;
+  MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
+  MaterialProperty<Real> &            _thermal_conductivity;
+  MaterialProperty<Real> &            _dynamic_viscosity;
 
   // Also store the "cal A" matrices at each quadrature point as material
   // poperties.  These are defined in the compns notes and are needed for
   // computing strong and weak residual values and Jacobian entries, so it's
   // good if we reuse them...
-  MaterialProperty<std::vector<RealTensorValue> >& _calA;
+  MaterialProperty<std::vector<RealTensorValue> > & _calA;
 
   // The "velocity column" matrices.  _calC[_qp][k] is a tensor with the
   // velocity vector in the k'th column.  See notes for additional details.
-  MaterialProperty<std::vector<RealTensorValue> >& _calC;
+  MaterialProperty<std::vector<RealTensorValue> > & _calC;
 
   // The energy equation inviscid flux matrix components.  There are n_vars of
   // these for each dimension, so in 3D, 3*5=15 different matrices.
   // See notes for additional details.
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > >& _calE;
+  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _calE;
 
   // Convenient storage for all of the velocity gradient components so
   // we can refer to them in a loop.
@@ -113,10 +111,10 @@ protected:
 
   // The real-valued material properties representing the element stabilization
   // parameters for each of the equations.
-  MaterialProperty<Real>& _hsupg;
-  MaterialProperty<Real>& _tauc;
-  MaterialProperty<Real>& _taum;
-  MaterialProperty<Real>& _taue;
+  MaterialProperty<Real> & _hsupg;
+  MaterialProperty<Real> & _tauc;
+  MaterialProperty<Real> & _taum;
+  MaterialProperty<Real> & _taue;
 
   // The (vector-valued) material property which is the strong-form
   // residual at each quadrature point.
@@ -124,13 +122,13 @@ protected:
 
 private:
   // To be called from computeProperties() function to compute _hsupg
-  void compute_h_supg(unsigned qp);
+  void computeHSUPG(unsigned int qp);
 
   // To be called from computeProperties() function to compute _tauc, _taum, _taue
-  void compute_tau(unsigned qp);
+  void computeTau(unsigned int qp);
 
   // To be called from computeProperties() function to compute the strong residual of each equation.
-  void compute_strong_residuals(unsigned qp);
+  void computeStrongResiduals(unsigned int qp);
 };
 
 #endif //NAVIERSTOKESMATERIAL_H

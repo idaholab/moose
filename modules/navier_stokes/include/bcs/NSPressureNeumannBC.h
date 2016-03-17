@@ -62,7 +62,7 @@
 // private:
 //   // Computes the Jacobian value for this term for variable 'm'
 //   // in the canonical ordering.
-//   Real compute_jacobian(unsigned m);
+//   Real computeJacobianHelper(unsigned m);
 // };
 //
 // #endif //PRESSURENEUMANNBC_H

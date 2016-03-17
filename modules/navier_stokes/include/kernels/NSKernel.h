@@ -28,16 +28,7 @@ class NSKernel : public Kernel
 public:
   NSKernel(const InputParameters & parameters);
 
-  virtual ~NSKernel(){}
-
 protected:
-  /**
-   * Not defined here, need to be defined in derived classes.
-   */
-  // virtual Real computeQpResidual();
-  // virtual Real computeQpJacobian();
-  // virtual Real computeQpOffDiagJacobian(unsigned jvar);
-
   // Coupled variables
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
@@ -71,10 +62,11 @@ protected:
   const MaterialProperty<Real> & _dynamic_viscosity;
   const MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
 
-  // Helper function for mapping Moose variable numberings into
-  // the "canonical" numbering for the compressible NS equations.
+  /**
+   * Helper function for mapping Moose variable numberings into
+   * the "canonical" numbering for the compressible NS equations.
+   */
   unsigned mapVarNumber(unsigned var);
 };
 
-
-#endif // NSKERNEL_H
+#endif //NSKERNEL_H

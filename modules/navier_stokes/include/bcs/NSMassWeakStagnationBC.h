@@ -15,17 +15,13 @@ class NSMassWeakStagnationBC;
 template<>
 InputParameters validParams<NSMassWeakStagnationBC>();
 
-
 /**
  * The inviscid energy BC term with specified normal flow.
  */
 class NSMassWeakStagnationBC : public NSWeakStagnationBC
 {
-
 public:
   NSMassWeakStagnationBC(const InputParameters & parameters);
-
-  virtual ~NSMassWeakStagnationBC(){}
 
 protected:
   virtual Real computeQpResidual();

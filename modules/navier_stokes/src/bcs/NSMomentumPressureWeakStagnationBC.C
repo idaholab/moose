@@ -10,55 +10,34 @@ template<>
 InputParameters validParams<NSMomentumPressureWeakStagnationBC>()
 {
   InputParameters params = validParams<NSWeakStagnationBC>();
-
-  // Required parameters
-  params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
-
+  params.addRequiredParam<unsigned int>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }
 
-
-
-NSMomentumPressureWeakStagnationBC::NSMomentumPressureWeakStagnationBC(const InputParameters & parameters)
-    : NSWeakStagnationBC(parameters),
-
-      // Required parameters
-      _component(getParam<unsigned>("component"))
+NSMomentumPressureWeakStagnationBC::NSMomentumPressureWeakStagnationBC(const InputParameters & parameters) :
+    NSWeakStagnationBC(parameters),
+    _component(getParam<unsigned int>("component"))
 {
 }
-
-
-
 
 Real NSMomentumPressureWeakStagnationBC::computeQpResidual()
 {
   // Compute stagnation values
-  Real T_s = 0., p_s = 0., rho_s = 0.;
-  this->static_values(T_s, p_s, rho_s);
+  Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
+  staticValues(T_s, p_s, rho_s);
 
   // (p_s * n_k) * phi_i
   return (p_s * _normals[_qp](_component)) * _test[_i][_qp];
 }
 
-
-
-
 Real NSMomentumPressureWeakStagnationBC::computeQpJacobian()
 {
   // TODO
-  return 0.;
+  return 0.0;
 }
-
-
-
 
 Real NSMomentumPressureWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
-  return 0.;
+  return 0.0;
 }
-
-
-
-
-

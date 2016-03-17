@@ -44,13 +44,13 @@ Real NSEnergyInviscidSpecifiedDensityAndVelocityBC::computeQpResidual()
 Real NSEnergyInviscidSpecifiedDensityAndVelocityBC::computeQpJacobian()
 {
   // TODO
-  // return this->compute_jacobian(/*on-diagonal variable is energy=*/4);
+  // return computeJacobianHelper(/*on-diagonal variable is energy=*/4);
   return 0.;
 }
 
 Real NSEnergyInviscidSpecifiedDensityAndVelocityBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
-  // return this->compute_jacobian( mapVarNumber(jvar) );
+  // return computeJacobianHelper(mapVarNumber(jvar));
   return 0.;
 }

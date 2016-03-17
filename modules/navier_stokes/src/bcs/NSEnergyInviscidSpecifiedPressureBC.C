@@ -38,7 +38,7 @@ Real NSEnergyInviscidSpecifiedPressureBC::computeQpJacobian()
 
 Real NSEnergyInviscidSpecifiedPressureBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return computeJacobianHelper( mapVarNumber(jvar) );
+  return computeJacobianHelper(mapVarNumber(jvar));
 }
 
 Real NSEnergyInviscidSpecifiedPressureBC::computeJacobianHelper(unsigned var_number)

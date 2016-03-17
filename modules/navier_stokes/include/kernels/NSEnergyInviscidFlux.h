@@ -18,7 +18,6 @@ InputParameters validParams<NSEnergyInviscidFlux>();
 class NSEnergyInviscidFlux : public NSKernel
 {
 public:
-
   NSEnergyInviscidFlux(const InputParameters & parameters);
 
 protected:

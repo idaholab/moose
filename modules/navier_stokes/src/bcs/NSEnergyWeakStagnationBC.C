@@ -22,7 +22,7 @@ Real NSEnergyWeakStagnationBC::computeQpResidual()
 {
   // Compute stagnation values
   Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
-  this->static_values(T_s, p_s, rho_s);
+  staticValues(T_s, p_s, rho_s);
 
   // And get velocity magnitude, squared
   Real velmag2 = this->velmag2();

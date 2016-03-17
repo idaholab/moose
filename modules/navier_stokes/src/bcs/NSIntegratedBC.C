@@ -62,7 +62,8 @@ NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters) :
 {
 }
 
-unsigned NSIntegratedBC::mapVarNumber(unsigned var)
+unsigned
+NSIntegratedBC::mapVarNumber(unsigned var)
 {
   // Convert the Moose numbering to:
   // 0 for rho

@@ -6,34 +6,22 @@
 /****************************************************************/
 #include "NSStagnationTemperatureBC.h"
 
-// Full specialization of the validParams function for this object
 template<>
 InputParameters validParams<NSStagnationTemperatureBC>()
 {
-  // Initialize the params object from the base class
   InputParameters params = validParams<NSStagnationBC>();
-
-  // Required parameters
   params.addRequiredParam<Real>("desired_stagnation_temperature", "");
-
   return params;
 }
 
+NSStagnationTemperatureBC::NSStagnationTemperatureBC(const InputParameters & parameters) :
+    NSStagnationBC(parameters),
+    _desired_stagnation_temperature(getParam<Real>("desired_stagnation_temperature"))
+{
+}
 
-
-
-// Constructor, be sure to call the base class constructor first!
-NSStagnationTemperatureBC::NSStagnationTemperatureBC(const InputParameters & parameters)
-    : NSStagnationBC(parameters),
-
-      // Required parameters
-      _desired_stagnation_temperature(getParam<Real>("desired_stagnation_temperature"))
-{}
-
-
-
-// Specialization of the computeQpResidual() function for this class.
-Real NSStagnationTemperatureBC::computeQpResidual()
+Real
+NSStagnationTemperatureBC::computeQpResidual()
 {
   // The velocity vector
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -48,5 +36,3 @@ Real NSStagnationTemperatureBC::computeQpResidual()
   // and the desired.  The Dirichlet condition asserts that these should be equal.
   return computed_stagnation_temperature - _desired_stagnation_temperature;
 }
-
-

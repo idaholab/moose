@@ -10,39 +10,27 @@
 template<>
 InputParameters validParams<NSWeakStagnationBC>()
 {
-  // Initialize the params object from the base class
   InputParameters params = validParams<NSIntegratedBC>();
-
-  // Required parameters
   params.addRequiredParam<Real>("stagnation_pressure", "The specifed stagnation pressure");
   params.addRequiredParam<Real>("stagnation_temperature", "The specifed stagnation temperature");
-
   params.addRequiredParam<Real>("sx", "x-component of specifed flow direction");
   params.addRequiredParam<Real>("sy", "y-component of specifed flow direction");
-  params.addParam<Real>("sz", 0., "z-component of specifed flow direction"); // only required in 3D
-
+  params.addParam<Real>("sz", 0.0, "z-component of specifed flow direction"); // only required in 3D
   return params;
 }
 
+NSWeakStagnationBC::NSWeakStagnationBC(const InputParameters & parameters) :
+    NSIntegratedBC(parameters),
+    _stagnation_pressure(getParam<Real>("stagnation_pressure")),
+    _stagnation_temperature(getParam<Real>("stagnation_temperature")),
+    _sx(getParam<Real>("sx")),
+    _sy(getParam<Real>("sy")),
+    _sz(getParam<Real>("sz"))
+{
+}
 
-
-
-// Constructor, be sure to call the base class constructor first!
-NSWeakStagnationBC::NSWeakStagnationBC(const InputParameters & parameters)
-    : NSIntegratedBC(parameters),
-
-      // Required parameters
-      _stagnation_pressure(getParam<Real>("stagnation_pressure")),
-      _stagnation_temperature(getParam<Real>("stagnation_temperature")),
-      _sx(getParam<Real>("sx")),
-      _sy(getParam<Real>("sy")),
-      _sz(getParam<Real>("sz"))
-{}
-
-
-
-
-void NSWeakStagnationBC::static_values(Real& T_s, Real& p_s, Real& rho_s)
+void
+NSWeakStagnationBC::staticValues(Real & T_s, Real & p_s, Real & rho_s)
 {
   // T_s = T_0 - |u|^2/2/cp
   Real cv = _R / (_gamma-1.);
@@ -58,34 +46,28 @@ void NSWeakStagnationBC::static_values(Real& T_s, Real& p_s, Real& rho_s)
   rho_s = p_s / _R / T_s;
 }
 
-
-
-
-Real NSWeakStagnationBC::rho_static()
+Real
+NSWeakStagnationBC::rhoStatic()
 {
   Real T_s = 0., p_s = 0., rho_s = 0.;
-  this->static_values(T_s, p_s, rho_s);
+  staticValues(T_s, p_s, rho_s);
   return rho_s;
 }
 
-
-
-Real NSWeakStagnationBC::velmag2()
+Real
+NSWeakStagnationBC::velmag2()
 {
   return
-    _u_vel[_qp]*_u_vel[_qp] +
-    _v_vel[_qp]*_v_vel[_qp] +
-    _w_vel[_qp]*_w_vel[_qp];
+    _u_vel[_qp] * _u_vel[_qp] +
+    _v_vel[_qp] * _v_vel[_qp] +
+    _w_vel[_qp] * _w_vel[_qp];
 }
 
-
-
-
-Real NSWeakStagnationBC::sdotn()
+Real
+NSWeakStagnationBC::sdotn()
 {
   return
-    _sx*_normals[_qp](0) +
-    _sy*_normals[_qp](1) +
-    _sz*_normals[_qp](2);
+    _sx * _normals[_qp](0) +
+    _sy * _normals[_qp](1) +
+    _sz * _normals[_qp](2);
 }
-
