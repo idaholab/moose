@@ -24,35 +24,30 @@ InputParameters validParams<GapHeatPointSourceMaster>()
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
+  params.addParam<std::string>("normal_smoothing_method", "Method to use to smooth normals (edge_based|nodal_normal_based)");
 
   return params;
 }
 
-GapHeatPointSourceMaster::GapHeatPointSourceMaster(const InputParameters & parameters)
-  :DiracKernel(parameters),
-   _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
-   _slave_flux(_sys.getVector("slave_flux"))
+GapHeatPointSourceMaster::GapHeatPointSourceMaster(const InputParameters & parameters) :
+    DiracKernel(parameters),
+    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
+    _slave_flux(_sys.getVector("slave_flux"))
 {
   if (parameters.isParamValid("tangential_tolerance"))
-  {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_distance"))
-  {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_method"))
-  {
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
-  }
 }
 
 void
 GapHeatPointSourceMaster::addPoints()
 {
   point_to_info.clear();
-
   _slave_flux.close();
 
   std::map<dof_id_type, PenetrationInfo *>::iterator
@@ -64,7 +59,7 @@ GapHeatPointSourceMaster::addPoints()
     PenetrationInfo * pinfo = it->second;
 
     // Skip this pinfo if there are no DOFs on this node.
-    if ( ! pinfo || pinfo->_node->n_comp(_sys.number(), _var.number()) < 1 )
+    if (! pinfo || pinfo->_node->n_comp(_sys.number(), _var.number()) < 1)
       continue;
 
     addPoint(pinfo->_elem, pinfo->_closest_point);
@@ -85,6 +80,5 @@ GapHeatPointSourceMaster::computeQpResidual()
 Real
 GapHeatPointSourceMaster::computeQpJacobian()
 {
-  return 0;
+  return 0.0;
 }
-

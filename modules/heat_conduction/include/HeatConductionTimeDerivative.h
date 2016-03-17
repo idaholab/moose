@@ -33,12 +33,10 @@ InputParameters validParams<HeatConductionTimeDerivative>();
 class HeatConductionTimeDerivative : public TimeDerivative
 {
 public:
-
   /// Contructor for Heat Equation time derivative term.
   HeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:
-
   /// Compute the residual of the Heat Equation time derivative.
   virtual Real computeQpResidual();
 
@@ -51,7 +49,6 @@ protected:
   virtual void initialSetup();
 
 private:
-
   /// Flag that indicates the type of formulation to utilize
   bool _use_heat_capacity;
 
@@ -72,4 +69,5 @@ private:
   const MaterialProperty<Real> * _density;
   ///@}
 };
+
 #endif //HEATCONDUCTIONTIMEDERIVATIVE_H

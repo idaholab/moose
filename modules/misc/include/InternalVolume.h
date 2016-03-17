@@ -28,20 +28,15 @@ InputParameters validParams<InternalVolume>();
 class InternalVolume : public SideIntegralPostprocessor
 {
 public:
-
   InternalVolume( const InputParameters & parameters);
 
-  virtual ~InternalVolume() {}
-
 protected:
-
   virtual Real computeQpIntegral();
   virtual Real getValue();
 
   const unsigned int _component;
   const Real _scale;
   const Real _addition;
-
 };
 
-#endif
+#endif //INTERNALVOLUME_H

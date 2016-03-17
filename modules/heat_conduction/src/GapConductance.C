@@ -63,36 +63,36 @@ InputParameters validParams<GapConductance>()
   return params;
 }
 
-GapConductance::GapConductance(const InputParameters & parameters)
-  :Material(parameters),
-   _appended_property_name( getParam<std::string>("appended_property_name") ),
-   _temp(coupledValue("variable")),
-   _gap_geometry_params_set(false),
-   _gap_geometry_type(GapConductance::PLATE),
-   _quadrature(getParam<bool>("quadrature")),
-   _gap_temp(0),
-   _gap_distance(88888),
-   _radius(0),
-   _r1(0),
-   _r2(0),
-   _has_info(false),
-   _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
-   _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
-   _gap_conductance(declareProperty<Real>("gap_conductance"+_appended_property_name)),
-   _gap_conductance_dT(declareProperty<Real>("gap_conductance"+_appended_property_name+"_dT")),
-   _gap_conductivity(getParam<Real>("gap_conductivity")),
-   _gap_conductivity_function(isParamValid("gap_conductivity_function") ? &getFunction("gap_conductivity_function") : NULL),
-   _gap_conductivity_function_variable(isCoupled("gap_conductivity_function_variable") ? &coupledValue("gap_conductivity_function_variable") : NULL),
-   _stefan_boltzmann(getParam<Real>("stefan_boltzmann")),
-   _emissivity( getParam<Real>("emissivity_1") != 0 && getParam<Real>("emissivity_2") != 0 ?
-                1/getParam<Real>("emissivity_1") + 1/getParam<Real>("emissivity_2") - 1 : 0 ),
-   _min_gap(getParam<Real>("min_gap")),
-   _max_gap(getParam<Real>("max_gap")),
-   _temp_var(_quadrature ? getVar("variable",0) : NULL),
-   _penetration_locator(NULL),
-   _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
-   _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),
-   _warnings(getParam<bool>("warnings"))
+GapConductance::GapConductance(const InputParameters & parameters) :
+    Material(parameters),
+    _appended_property_name(getParam<std::string>("appended_property_name")),
+    _temp(coupledValue("variable")),
+    _gap_geometry_params_set(false),
+    _gap_geometry_type(GapConductance::PLATE),
+    _quadrature(getParam<bool>("quadrature")),
+    _gap_temp(0),
+    _gap_distance(88888),
+    _radius(0),
+    _r1(0),
+    _r2(0),
+    _has_info(false),
+    _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
+    _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
+    _gap_conductance(declareProperty<Real>("gap_conductance"+_appended_property_name)),
+    _gap_conductance_dT(declareProperty<Real>("gap_conductance"+_appended_property_name + "_dT")),
+    _gap_conductivity(getParam<Real>("gap_conductivity")),
+    _gap_conductivity_function(isParamValid("gap_conductivity_function") ? &getFunction("gap_conductivity_function") : NULL),
+    _gap_conductivity_function_variable(isCoupled("gap_conductivity_function_variable") ? &coupledValue("gap_conductivity_function_variable") : NULL),
+    _stefan_boltzmann(getParam<Real>("stefan_boltzmann")),
+    _emissivity(getParam<Real>("emissivity_1") != 0.0 && getParam<Real>("emissivity_2") != 0.0 ?
+                 1.0 / getParam<Real>("emissivity_1") + 1.0 / getParam<Real>("emissivity_2") - 1 : 0.0),
+    _min_gap(getParam<Real>("min_gap")),
+    _max_gap(getParam<Real>("max_gap")),
+    _temp_var(_quadrature ? getVar("variable",0) : NULL),
+    _penetration_locator(NULL),
+    _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
+    _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),
+    _warnings(getParam<bool>("warnings"))
 {
   if (_quadrature)
   {
@@ -108,21 +108,18 @@ GapConductance::GapConductance(const InputParameters & parameters)
       mooseError(std::string("No 'gap_temp' provided for ") + _name);
   }
 
-
   if (_quadrature)
   {
     _penetration_locator = &_subproblem.geomSearchData().getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
                                                                                          getParam<std::vector<BoundaryName> >("boundary")[0],
                                                                                          Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   }
-
 }
 
 void GapConductance::setGapGeometryParameters(const InputParameters & params,
                                               const Moose::CoordinateSystemType coord_sys,
                                               GAP_GEOMETRY & gap_geometry_type,
-                                              Point & p1,
-                                              Point & p2)
+                                              Point & p1, Point & p2)
 {
   if (params.isParamSetByUser("gap_geometry_type"))
   {
@@ -239,7 +236,7 @@ GapConductance::h_conduction()
 Real
 GapConductance::dh_conduction()
 {
-  return 0;
+  return 0.0;
 }
 
 
@@ -264,23 +261,20 @@ GapConductance::h_radiation()
       Fe = 1 / (1/ef + 1/ec - 1)
   */
 
-  if (_emissivity == 0)
-  {
+  if (_emissivity == 0.0)
     return 0.0;
-  }
 
-  const Real temp_func = (_temp[_qp]*_temp[_qp] + _gap_temp*_gap_temp) * (_temp[_qp] + _gap_temp);
+  const Real temp_func = (_temp[_qp] * _temp[_qp] + _gap_temp * _gap_temp) * (_temp[_qp] + _gap_temp);
   return _stefan_boltzmann*temp_func/_emissivity;
 }
 
 Real
 GapConductance::dh_radiation()
 {
-  if (_emissivity == 0)
-  {
+  if (_emissivity == 0.0)
     return 0.0;
-  }
-  const Real temp_func = 3*_temp[_qp]*_temp[_qp] + _gap_temp * ( 2*_temp[_qp] + _gap_temp );
+
+  const Real temp_func = 3*_temp[_qp]*_temp[_qp] + _gap_temp * (2*_temp[_qp] + _gap_temp);
   return _stefan_boltzmann*temp_func/_emissivity;
 }
 
@@ -299,66 +293,34 @@ GapConductance::gapLength(const GapConductance::GAP_GEOMETRY & gap_geom,
 Real
 GapConductance::gapRect(Real distance, Real min_gap, Real max_gap)
 {
-  Real gap_L = distance;
-
-  if (gap_L > max_gap)
-  {
-    gap_L = max_gap;
-  }
-
-  gap_L = std::max(min_gap, gap_L);
-
-  return gap_L;
+  return std::max(min_gap, std::min(distance, max_gap));
 }
 
 Real
 GapConductance::gapCyl(Real radius, Real r1, Real r2, Real min_denom, Real max_denom)
 {
-  Real denominator = radius*std::log(r2/r1);
-
-  if (denominator > max_denom)
-  {
-    denominator = max_denom;
-  }
-  else if (denominator < min_denom)
-  {
-    denominator =  min_denom;
-  }
-
-  return denominator;
+  Real denominator = radius * std::log(r2 / r1);
+  return std::max(min_denom, std::min(denominator, max_denom));
 }
 
 Real
 GapConductance::gapSphere(Real radius, Real r1, Real r2, Real min_denom, Real max_denom)
 {
-  Real denominator = std::pow(radius,2)*((1/r1)-(1/r2));
-
-  if (denominator > max_denom)
-  {
-    denominator = max_denom;
-  }
-  else if (denominator < min_denom)
-  {
-    denominator =  min_denom;
-  }
-
-  return denominator;
+  Real denominator = std::pow(radius, 2.0) * ((1.0 / r1) - (1.0 / r2));
+  return std::max(min_denom, std::min(denominator, max_denom));
 }
 
 Real
 GapConductance::gapK()
 {
   Real gap_conductivity = _gap_conductivity;
+
   if (_gap_conductivity_function)
   {
     if (_gap_conductivity_function_variable)
-    {
-      gap_conductivity *= _gap_conductivity_function->value( (*_gap_conductivity_function_variable)[_qp], _q_point[_qp] );
-    }
+      gap_conductivity *= _gap_conductivity_function->value((*_gap_conductivity_function_variable)[_qp], _q_point[_qp]);
     else
-    {
-      gap_conductivity *= _gap_conductivity_function->value( _t, _q_point[_qp] );
-    }
+      gap_conductivity *= _gap_conductivity_function->value(_t, _q_point[_qp]);
   }
 
   return gap_conductivity;
@@ -393,7 +355,7 @@ GapConductance::computeGapValues()
 
       _dof_map->dof_indices(slave_side, slave_side_dof_indices, _temp_var->number());
 
-      for (unsigned int i=0; i<slave_side_dof_indices.size(); ++i)
+      for (unsigned int i = 0; i < slave_side_dof_indices.size(); ++i)
       {
         //The zero index is because we only have one point that the phis are evaluated at
         _gap_temp += slave_side_phi[i][0] * (*(*_serialized_solution))(slave_side_dof_indices[i]);
@@ -425,12 +387,13 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
   {
     // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
     // axis closest to current_point is found by the following for t:
-    const Point p2p1( p2 - p1 );
-    const Point p1pc( p1 - current_point );
-    const Real t( -(p1pc*p2p1)/p2p1.norm_sq() );
+    const Point p2p1(p2 - p1);
+    const Point p1pc(p1 - current_point);
+    const Real t = -(p1pc * p2p1) / p2p1.norm_sq();
+
     // The nearest point on the cylindrical axis to current_point is p.
-    const Point p( p1 + t * p2p1 );
-    Point rad_vec( current_point - p );
+    const Point p(p1 + t * p2p1);
+    Point rad_vec(current_point - p);
     Real rad = rad_vec.norm();
     rad_vec /= rad;
     Real rad_dot_norm = rad_vec * current_normal;
@@ -448,12 +411,12 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
       radius = r2;
     }
     else
-      mooseError( "Issue with cylindrical flux calc. normals.\n");
+      mooseError("Issue with cylindrical flux calc. normals.\n");
 
   }
   else if (gap_geometry_type == GapConductance::SPHERE)
   {
-    const Point origin_to_curr_point( current_point - p1 );
+    const Point origin_to_curr_point(current_point - p1);
     const Real normal_dot = origin_to_curr_point * current_normal;
     const Real curr_point_radius = origin_to_curr_point.norm();
     if (normal_dot > 0) // on inside surface
@@ -469,7 +432,7 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
       radius = r2;
     }
     else
-      mooseError( "Issue with spherical flux calc. normals. \n");
+      mooseError("Issue with spherical flux calc. normals. \n");
   }
   else
   {
