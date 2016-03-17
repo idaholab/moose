@@ -61,6 +61,9 @@
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 #include "LinearIsoElasticPFDamage.h"
 #include "HyperElasticPhaseFieldIsoDamage.h"
+#include "ComputeVolumetricDeformGrad.h"
+#include "ComputeDeformGradBasedStress.h"
+#include "VolumeDeformGradCorrectedStress.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -184,6 +187,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
   registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(HyperElasticPhaseFieldIsoDamage);
+  registerMaterial(ComputeVolumetricDeformGrad);
+  registerMaterial(ComputeDeformGradBasedStress);
+  registerMaterial(VolumeDeformGradCorrectedStress);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
