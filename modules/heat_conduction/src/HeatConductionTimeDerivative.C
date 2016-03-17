@@ -34,11 +34,11 @@ InputParameters validParams<HeatConductionTimeDerivative>()
 }
 
 
-HeatConductionTimeDerivative::HeatConductionTimeDerivative(const InputParameters & parameters)
-  : TimeDerivative(parameters),
-   _use_heat_capacity(getParam<bool>("use_heat_capacity")),
-   _specific_heat(NULL),
-   _density(NULL)
+HeatConductionTimeDerivative::HeatConductionTimeDerivative(const InputParameters & parameters) :
+    TimeDerivative(parameters),
+    _use_heat_capacity(getParam<bool>("use_heat_capacity")),
+    _specific_heat(NULL),
+    _density(NULL)
 {
   // Use the Heat Capacity based formulation
   if (_use_heat_capacity)

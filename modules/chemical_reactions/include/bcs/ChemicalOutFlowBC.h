@@ -9,10 +9,6 @@
 
 #include "IntegratedBC.h"
 
-//libMesh includes
-//#include "vector_value.h"
-
-
 //Forward Declarations
 class ChemicalOutFlowBC;
 
@@ -26,14 +22,7 @@ InputParameters validParams<ChemicalOutFlowBC>();
 class ChemicalOutFlowBC : public IntegratedBC
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   ChemicalOutFlowBC(const InputParameters & parameters);
-
- virtual ~ChemicalOutFlowBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -45,9 +34,6 @@ private:
    */
   const MaterialProperty<Real> & _diff;
   const MaterialProperty<Real> & _porosity;
-
-//  std::vector<RealGradient> & _grad_p;
-
 };
 
-#endif //NEUMANNBC_H
+#endif //CHEMICALOUTFLOWBC_H

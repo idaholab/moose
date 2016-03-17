@@ -24,7 +24,8 @@ InputParameters validParams<Convection>()
 Convection::Convection(const InputParameters & parameters) :
     Kernel(parameters),
     _velocity(getParam<RealVectorValue>("velocity"))
-{}
+{
+}
 
 Real
 Convection::computeQpResidual()

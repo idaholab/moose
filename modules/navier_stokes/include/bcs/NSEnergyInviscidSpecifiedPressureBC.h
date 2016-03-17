@@ -21,11 +21,8 @@ InputParameters validParams<NSEnergyInviscidSpecifiedPressureBC>();
  */
 class NSEnergyInviscidSpecifiedPressureBC : public NSEnergyInviscidBC
 {
-
 public:
   NSEnergyInviscidSpecifiedPressureBC(const InputParameters & parameters);
-
-  virtual ~NSEnergyInviscidSpecifiedPressureBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -37,7 +34,7 @@ protected:
 
 private:
   // Helper Jacobian function
-  Real compute_jacobian(unsigned var_number);
+  Real computeJacobianHelper(unsigned var_number);
 };
 
 #endif // NSENERGYINVISCIDSPECIFIEDPRESSUREBC_H

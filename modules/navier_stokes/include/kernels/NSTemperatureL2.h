@@ -24,7 +24,6 @@ InputParameters validParams<NSTemperatureL2>();
 class NSTemperatureL2 : public Kernel
 {
 public:
-
   NSTemperatureL2(const InputParameters & parameters);
 
 protected:
@@ -50,4 +49,4 @@ protected:
   const MaterialProperty<Real> & _c_v;
 };
 
-#endif
+#endif //NSTEMPERATUREL2_H

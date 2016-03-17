@@ -21,11 +21,8 @@ InputParameters validParams<NSEnergyInviscidUnspecifiedBC>();
  */
 class NSEnergyInviscidUnspecifiedBC : public NSEnergyInviscidBC
 {
-
 public:
   NSEnergyInviscidUnspecifiedBC(const InputParameters & parameters);
-
-  virtual ~NSEnergyInviscidUnspecifiedBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -37,7 +34,7 @@ protected:
 
 private:
   // Helper Jacobian function
-  Real compute_jacobian(unsigned var_number);
+  Real computeJacobianHelper(unsigned var_number);
 };
 
 #endif // NSENERGYINVISCIDUNSPECIFIEDBC_H

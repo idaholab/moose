@@ -29,7 +29,6 @@ InputParameters validParams<PrimaryDiffusion>();
 class PrimaryDiffusion : public Diffusion
 {
 public:
-
   PrimaryDiffusion(const InputParameters & parameters);
 
 protected:
@@ -57,4 +56,5 @@ protected:
   /// Material property of dispersion-diffusion coefficient.
   const MaterialProperty<Real> & _diffusivity;
 };
+
 #endif //PRIMARYDIFFUSION_H

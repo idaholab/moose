@@ -6,50 +6,31 @@
 /****************************************************************/
 #include "NSMomentumInviscidFluxWithGradP.h"
 
-
 template<>
 InputParameters validParams<NSMomentumInviscidFluxWithGradP>()
 {
   InputParameters params = validParams<NSKernel>();
-
-  // Coupled variables
   params.addRequiredCoupledVar("pressure", "");
-
-  // Required parameters
-  params.addRequiredParam<Real>("component", "");
-
+  params.addRequiredParam<unsigned int>("component", "");
   return params;
 }
 
-
-
-
-
-NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputParameters & parameters)
-    : NSKernel(parameters),
-
-      // Coupled gradients
-      _grad_p(coupledGradient("pressure")),
-
-      // Parameters
-      _component(getParam<Real>("component")),
-
-      // Derivative calculation helper object
-      _pressure_derivs(*this)
+NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputParameters & parameters) :
+    NSKernel(parameters),
+    _grad_p(coupledGradient("pressure")),
+    _component(getParam<unsigned int>("component")),
+    _pressure_derivs(*this)
 {
   // Store pointers to all variable gradients in a single vector.
   // This is needed for computing pressure Hessian values with a small
   // amount of code.
   _gradU.resize(5);
-  _gradU[0] = &_grad_rho  ;
+  _gradU[0] = &_grad_rho;
   _gradU[1] = &_grad_rho_u;
   _gradU[2] = &_grad_rho_v;
   _gradU[3] = &_grad_rho_w;
   _gradU[4] = &_grad_rho_e;
 }
-
-
-
 
 Real
 NSMomentumInviscidFluxWithGradP::computeQpResidual()
@@ -65,9 +46,6 @@ NSMomentumInviscidFluxWithGradP::computeQpResidual()
   return -(vec*_grad_test[_i][_qp]) + _grad_p[_qp](_component)*_test[_i][_qp];
 }
 
-
-
-
 Real
 NSMomentumInviscidFluxWithGradP::computeQpJacobian()
 {
@@ -79,32 +57,24 @@ NSMomentumInviscidFluxWithGradP::computeQpJacobian()
 
   // The Jacobian contribution due to grad(p) for the on-diagonal
   // variable, which is equal to _component+1.
-  Real dFdp = compute_pressure_jacobian_value(_component+1);
+  Real dFdp = pressureQpJacobianHelper(_component + 1);
 
   return
     // Convective terms Jacobian
     -(vec * _grad_test[_i][_qp]) * _phi[_j][_qp]
-
-    +
-
     // Pressure term Jacobian
-    dFdp*_test[_i][_qp];
+    + dFdp*_test[_i][_qp];
 }
-
-
-
-
 
 Real
 NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Map jvar into the numbering expected by this->compute_pressure_jacobain_value()
-  unsigned var_number = this->map_var_number(jvar);
+  unsigned int var_number = mapVarNumber(jvar);
 
   // The Jacobian contribution due to differentiating the grad(p)
   // term wrt variable var_number.
-  Real dFdp = compute_pressure_jacobian_value(var_number);
-
+  Real dFdp = pressureQpJacobianHelper(var_number);
 
   if (jvar == _rho_var_number)
   {
@@ -122,23 +92,19 @@ NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
     return
       // Convective terms Jacobian
       -(vec * _grad_test[_i][_qp]) * _phi[_j][_qp]
-
-      +
-
       // Pressure term Jacobian
-      dFdp*_test[_i][_qp];
+      +  dFdp*_test[_i][_qp];
   }
 
-
   // Handle off-diagonal derivatives wrt momentums
-  else if ((jvar == _rhou_var_number) || (jvar == _rhov_var_number) || (jvar == _rhow_var_number))
+  else if (jvar == _rhou_var_number || jvar == _rhov_var_number || jvar == _rhow_var_number)
   {
     // Start with the velocity vector
     RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
     // Map jvar into jlocal = {0,1,2}, regardless of how Moose has numbered things.
     // Can't do a case statement here since _rhou_var_number, etc. are not constants...
-    unsigned jlocal = 0;
+    unsigned int jlocal = 0;
 
     if (jvar == _rhov_var_number)
       jlocal = 1;
@@ -148,45 +114,31 @@ NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
     return
       // Convective terms Jacobian
       -vel(_component) * _grad_test[_i][_qp](jlocal) * _phi[_j][_qp]
-
-      +
-
       // Pressure term Jacobian
-      dFdp*_test[_i][_qp];
+      + dFdp*_test[_i][_qp];
   }
 
   else if (jvar == _rhoe_var_number)
   {
-    return
-      // Pressure term Jacobian
-      dFdp*_test[_i][_qp];
+    // Pressure term Jacobian
+    return dFdp * _test[_i][_qp];
   }
 
   // We shouldn't get here... jvar should have matched one of the if statements above!
   mooseError("computeQpOffDiagJacobian called with invalid jvar.");
-
-  return 0;
 }
 
-
-
-
-
-Real NSMomentumInviscidFluxWithGradP::compute_pressure_jacobian_value(unsigned var_number)
+Real
+NSMomentumInviscidFluxWithGradP::pressureQpJacobianHelper(unsigned var_number)
 {
   // Make sure our local gradient and Hessian data
   // structures are up-to-date for this quadrature point
   //  this->recalculate_gradient_and_hessian();
 
-  Real hessian_sum = 0.;
-  for (unsigned n=0; n<5; ++n)
+  Real hessian_sum = 0.0;
+  for (unsigned int n = 0; n < 5; ++n)
     hessian_sum += _pressure_derivs.get_hess(var_number,n) * (*_gradU[n])[_qp](_component);
 
   // Hit hessian_sum with phij, then add to dp/dU_m * dphij/dx_k, finally return the result
-  return _pressure_derivs.get_grad(var_number) * _grad_phi[_j][_qp](_component) + hessian_sum*_phi[_j][_qp];
+  return _pressure_derivs.get_grad(var_number) * _grad_phi[_j][_qp](_component) + hessian_sum * _phi[_j][_qp];
 }
-
-
-
-
-

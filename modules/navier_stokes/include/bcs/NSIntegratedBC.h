@@ -28,17 +28,7 @@ class NSIntegratedBC : public IntegratedBC
 public:
   NSIntegratedBC(const InputParameters & parameters);
 
-  virtual ~NSIntegratedBC(){}
-
 protected:
-  /**
-   * Not defined here, need to be defined in derived classes.
-   */
-  // virtual Real computeQpResidual();
-  // virtual Real computeQpJacobian();
-  // virtual Real computeQpOffDiagJacobian(unsigned jvar);
-
-  // Coupled variables
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
@@ -49,14 +39,12 @@ protected:
   const VariableValue & _rho_w;
   const VariableValue & _rho_e;
 
-  // Gradients
   const VariableGradient & _grad_rho;
   const VariableGradient & _grad_rho_u;
   const VariableGradient & _grad_rho_v;
   const VariableGradient & _grad_rho_w;
   const VariableGradient & _grad_rho_e;
 
-  // Variable numberings
   unsigned _rho_var_number;
   unsigned _rhou_var_number;
   unsigned _rhov_var_number;
@@ -73,7 +61,7 @@ protected:
 
   // Helper function for mapping Moose variable numberings into
   // the "canonical" numbering for the compressible NS equations.
-  unsigned map_var_number(unsigned var);
+  unsigned mapVarNumber(unsigned var);
 };
 
 

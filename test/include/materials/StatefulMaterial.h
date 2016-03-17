@@ -11,11 +11,10 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#include "Material.h"
-
 #ifndef STATEFULMATERIAL_H
 #define STATEFULMATERIAL_H
+
+#include "Material.h"
 
 //Forward Declarations
 class StatefulMaterial;

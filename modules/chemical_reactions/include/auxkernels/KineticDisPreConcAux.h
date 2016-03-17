@@ -45,18 +45,25 @@ protected:
 
   /// Equilibrium constant at reference temperature
   Real _log_k;
+
   /// Specific reactive surface area, m^2/L solution
   Real _r_area;
+
   /// Reference kinetic rate constant
-  Real _ref_kconst;
+  const Real _ref_kconst;
+
   /// Activation energy
   Real _e_act;
+
   /// Gas constant, 8.314 J/mol/K
-  Real _gas_const;
+  const Real _gas_const;
+
   /// Reference temperature
   Real _ref_temp;
+
   /// Actual system temperature
   Real _sys_temp;
+
   /// Stochiometric coefficients for involved primary species
   std::vector<Real> _sto_v;
 

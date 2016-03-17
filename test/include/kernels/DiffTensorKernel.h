@@ -34,7 +34,7 @@ public:
   DiffTensorKernel(const InputParameters & parameters);
 
   /** Class destructor */
-  virtual ~DiffTensorKernel();
+  virtual ~DiffTensorKernel() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -45,9 +45,8 @@ protected:
   Function & _k_comp;
 
 private:
-
   /** Compute the k Tensor from the vector function input */
   RealTensorValue computeConductivity(Real t, const Point & pt);
-
 };
+
 #endif //DIFFTENSORKERNEL_H

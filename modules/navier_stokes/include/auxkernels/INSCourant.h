@@ -23,8 +23,6 @@ class INSCourant : public AuxKernel
 public:
   INSCourant(const InputParameters & parameters);
 
-  virtual ~INSCourant() {}
-
 protected:
   virtual Real computeValue();
 
@@ -34,4 +32,4 @@ protected:
   const VariableValue & _w_vel;
 };
 
-#endif //VELOCITYAUX_H
+#endif //INSCOURANT_H

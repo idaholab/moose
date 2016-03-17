@@ -21,47 +21,50 @@ template<>
 InputParameters validParams<FrictionalContactProblem>()
 {
   InputParameters params = validParams<ReferenceResidualProblem>();
-  params.addRequiredParam<std::vector<int> >("master","IDs of the master surfaces for which the slip should be calculated");
-  params.addRequiredParam<std::vector<int> >("slave","IDs of the slave surfaces for which the slip should be calculated");
-  params.addRequiredParam<std::vector<Real> >("friction_coefficient","Coefficient of friction for sliding contact for each interaction");
-  params.addRequiredParam<std::vector<Real> >("slip_factor","Fraction of calculated slip to be applied for each interaction");
-  params.addRequiredParam<std::vector<Real> >("slip_too_far_factor","Fraction of calculated slip to be applied for each interaction in the slipped-too-far state");
-  params.addRequiredParam<NonlinearVariableName>("disp_x","Variable containing the x displacement");
-  params.addRequiredParam<NonlinearVariableName>("disp_y","Variable containing the y displacement");
-  params.addParam<NonlinearVariableName>        ("disp_z","Variable containing the z displacement");
-  params.addRequiredParam<AuxVariableName>("residual_x","Auxiliary variable containing the saved x residual");
-  params.addRequiredParam<AuxVariableName>("residual_y","Auxiliary variable containing the saved y residual");
-  params.addParam<AuxVariableName>        ("residual_z","Auxiliary variable containing the saved z residual");
-  params.addRequiredParam<AuxVariableName>("diag_stiff_x","Auxiliary variable containing the saved x diagonal stiffness");
-  params.addRequiredParam<AuxVariableName>("diag_stiff_y","Auxiliary variable containing the saved y diagonal stiffness");
-  params.addParam<AuxVariableName>        ("diag_stiff_z","Auxiliary variable containing the saved z diagonal stiffness");
-  params.addRequiredParam<AuxVariableName>("inc_slip_x","Auxiliary variable to store the x incremental slip");
-  params.addRequiredParam<AuxVariableName>("inc_slip_y","Auxiliary variable to store the y incremental slip");
-  params.addParam<AuxVariableName>        ("inc_slip_z","Auxiliary variable to store the z incremental slip");
-  params.addParam<int>         ("minimum_slip_iterations",1,"Minimum number of slip iterations per step");
-  params.addParam<int>         ("maximum_slip_iterations",100,"Maximum number of slip iterations per step");
-  params.addParam<int>         ("slip_updates_per_iteration",1,"Number of slip updates per contact iteration");
-  params.addParam<Real>        ("target_contact_residual","Frictional contact residual convergence criterion");
-  params.addParam<Real>        ("target_relative_contact_residual","Frictional contact relative residual convergence criterion");
-  params.addParam<Real>        ("contact_slip_tolerance_factor",10.0,"Multiplier on convergence criteria to determine when to start slipping");
-  params.addParam<std::vector<std::string> >("contact_reference_residual_variables","Set of variables that provide reference residuals for relative contact convergence check");
+  params.addRequiredParam<std::vector<int> >("master", "IDs of the master surfaces for which the slip should be calculated");
+  params.addRequiredParam<std::vector<int> >("slave", "IDs of the slave surfaces for which the slip should be calculated");
+  params.addRequiredParam<std::vector<Real> >("friction_coefficient", "Coefficient of friction for sliding contact for each interaction");
+  params.addRequiredParam<std::vector<Real> >("slip_factor", "Fraction of calculated slip to be applied for each interaction");
+  params.addRequiredParam<std::vector<Real> >("slip_too_far_factor", "Fraction of calculated slip to be applied for each interaction in the slipped-too-far state");
+  params.addRequiredParam<NonlinearVariableName>("disp_x", "Variable containing the x displacement");
+  params.addRequiredParam<NonlinearVariableName>("disp_y", "Variable containing the y displacement");
+  params.addParam<NonlinearVariableName>        ("disp_z", "Variable containing the z displacement");
+  params.addRequiredParam<AuxVariableName>("residual_x", "Auxiliary variable containing the saved x residual");
+  params.addRequiredParam<AuxVariableName>("residual_y", "Auxiliary variable containing the saved y residual");
+  params.addParam<AuxVariableName>        ("residual_z", "Auxiliary variable containing the saved z residual");
+  params.addRequiredParam<AuxVariableName>("diag_stiff_x", "Auxiliary variable containing the saved x diagonal stiffness");
+  params.addRequiredParam<AuxVariableName>("diag_stiff_y", "Auxiliary variable containing the saved y diagonal stiffness");
+  params.addParam<AuxVariableName>        ("diag_stiff_z", "Auxiliary variable containing the saved z diagonal stiffness");
+  params.addRequiredParam<AuxVariableName>("inc_slip_x", "Auxiliary variable to store the x incremental slip");
+  params.addRequiredParam<AuxVariableName>("inc_slip_y", "Auxiliary variable to store the y incremental slip");
+  params.addParam<AuxVariableName>        ("inc_slip_z", "Auxiliary variable to store the z incremental slip");
+  params.addParam<int> ("minimum_slip_iterations", 1, "Minimum number of slip iterations per step");
+  params.addParam<int> ("maximum_slip_iterations", 100, "Maximum number of slip iterations per step");
+  params.addParam<int> ("slip_updates_per_iteration", 1, "Number of slip updates per contact iteration");
+  params.addParam<Real>("target_contact_residual", "Frictional contact residual convergence criterion");
+  params.addParam<Real>("target_relative_contact_residual", "Frictional contact relative residual convergence criterion");
+  params.addParam<Real>("contact_slip_tolerance_factor", 10.0, "Multiplier on convergence criteria to determine when to start slipping");
+  params.addParam<std::vector<std::string> >("contact_reference_residual_variables", "Set of variables that provide reference residuals for relative contact convergence check");
   return params;
 }
 
-FrictionalContactProblem::SlipData::SlipData(const Node* node, unsigned int dof, Real slip)
-  : _node(node),
+FrictionalContactProblem::SlipData::SlipData(const Node* node, unsigned int dof, Real slip) :
+    _node(node),
     _dof(dof),
     _slip(slip)
-{}
+{
+}
 
-FrictionalContactProblem::SlipData::SlipData(const SlipData &sd)
-  : _node(sd._node),
+FrictionalContactProblem::SlipData::SlipData(const SlipData & sd) :
+    _node(sd._node),
     _dof(sd._dof),
     _slip(sd._slip)
-{}
+{
+}
 
 FrictionalContactProblem::SlipData::~SlipData()
-{}
+{
+}
 
 FrictionalContactProblem::FrictionalContactProblem(const InputParameters & params) :
     ReferenceResidualProblem(params),
@@ -158,9 +161,6 @@ FrictionalContactProblem::FrictionalContactProblem(const InputParameters & param
     _contactRefResidVarNames = params.get<std::vector<std::string> >("contact_reference_residual_variables");
 }
 
-FrictionalContactProblem::~FrictionalContactProblem()
-{}
-
 void
 FrictionalContactProblem::initialSetup()
 {
@@ -232,7 +232,7 @@ FrictionalContactProblem::shouldUpdateSolution()
 }
 
 bool
-FrictionalContactProblem::updateSolution(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution)
+FrictionalContactProblem::updateSolution(NumericVector<Number> & vec_solution, NumericVector<Number> & ghosted_solution)
 {
   bool solution_modified = false;
 
@@ -321,7 +321,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
     GeometricSearchData & displaced_geom_search_data = getDisplacedProblem()->geomSearchData();
     std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = &displaced_geom_search_data._penetration_locators;
 
-    for (pl_iterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
+    for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
 
@@ -348,7 +348,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 
             if (info.isCaptured())
             {
-//              _console << "Slave node: " << slave_node_num << std::endl;
+              // _console << "Slave node: " << slave_node_num << std::endl;
               const Node * node = info._node;
 
               VectorValue<dof_id_type> solution_dofs(node->dof_number(nonlinear_sys.number(), disp_x_var->number(), 0),
@@ -361,15 +361,15 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
               //find xyz coords of current point from original coords and displacement vector
               //calculate difference between those two point coordinates to get correction
 
-//              std::vector<Point>points(1);
-//              points[0] = info._starting_closest_point_ref;
-//              Elem *side = (info._starting_elem->build_side(info._starting_side_num,false)).release();
-//              FEBase &fe = *(pen_loc._fe[0]);
-//              fe.reinit(side, &points);
-//              RealVectorValue correction = starting_point[0] - current_coords;
-
-//              RealVectorValue current_coords = *node;
-//              RealVectorValue correction = info._closest_point - current_coords;
+              // std::vector<Point>points(1);
+              // points[0] = info._starting_closest_point_ref;
+              // Elem *side = (info._starting_elem->build_side(info._starting_side_num,false)).release();
+              // FEBase &fe = *(pen_loc._fe[0]);
+              // fe.reinit(side, &points);
+              // RealVectorValue correction = starting_point[0] - current_coords;
+              //
+              // RealVectorValue current_coords = *node;
+              // RealVectorValue correction = info._closest_point - current_coords;
 
               const Node & undisp_node = _mesh.node(node->id());
               RealVectorValue solution = info._closest_point - undisp_node;
@@ -449,7 +449,7 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
     AuxiliarySystem & aux_sys = getAuxiliarySystem();
     const NumericVector<Number> & aux_solution = *aux_sys.currentSolution();
 
-    for (pl_iterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
+    for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
     {
       PenetrationLocator & pen_loc = *plit->second;
 
@@ -513,11 +513,11 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
 
                 RealVectorValue slip_iterative(0.0,0.0,0.0);
                 Real interaction_slip_residual = 0.0;
-//                _console << "inc  slip: " << slip_inc_vec << std::endl;
-//                _console << "info slip: " << info._incremental_slip << std::endl;
-//                ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, info._incremental_slip, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
+                //  _console << "inc  slip: " << slip_inc_vec << std::endl;
+                //  _console << "info slip: " << info._incremental_slip << std::endl;
+                //  ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, info._incremental_slip, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
                 ContactState state = calculateInteractionSlip(slip_iterative, interaction_slip_residual, info._normal, res_vec, slip_inc_vec, stiff_vec, friction_coefficient, slip_factor, slip_too_far_factor, dim);
-//                _console << "iter slip: " << slip_iterative << std::endl;
+                // _console << "iter slip: " << slip_iterative << std::endl;
                 _slip_residual += interaction_slip_residual*interaction_slip_residual;
 
                 if (state == SLIPPING || state == SLIPPED_TOO_FAR)
@@ -557,13 +557,13 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
   return updatedSolution;
 }
 
-ContactState
-FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
-                                                   Real &slip_residual,
-                                                   const RealVectorValue &normal,
-                                                   const RealVectorValue &residual,
-                                                   const RealVectorValue &incremental_slip,
-                                                   const RealVectorValue &stiffness,
+FrictionalContactProblem::ContactState
+FrictionalContactProblem::calculateInteractionSlip(RealVectorValue & slip,
+                                                   Real & slip_residual,
+                                                   const RealVectorValue & normal,
+                                                   const RealVectorValue & residual,
+                                                   const RealVectorValue & incremental_slip,
+                                                   const RealVectorValue & stiffness,
                                                    const Real friction_coefficient,
                                                    const Real slip_factor,
                                                    const Real slip_too_far_factor,
@@ -575,10 +575,10 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
   RealVectorValue normal_residual = normal * (normal * residual);
   Real normal_force = normal_residual.norm();
 
-//  _console << "normal=" << info._normal << std::endl;
-//  _console << "normal_force=" << normal_force << std::endl;
-//  _console << "residual=" << residual << std::endl;
-//  _console << "stiffness=" << stiff_vec << std::endl;
+  // _console << "normal=" << info._normal << std::endl;
+  // _console << "normal_force=" << normal_force << std::endl;
+  // _console << "residual=" << residual << std::endl;
+  // _console << "stiffness=" << stiff_vec << std::endl;
 
   RealVectorValue tangential_force = normal_residual - residual ; // swap sign to make the code more manageable
   Real tangential_force_magnitude = tangential_force.norm();
@@ -600,7 +600,7 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
     if (slip_dot_tang_force < capacity)
     {
       state = SLIPPED_TOO_FAR;
-//      _console << "STF slip_dot_force: " << slip_dot_tang_force << " capacity: " << capacity << std::endl;
+      // _console << "STF slip_dot_force: " << slip_dot_tang_force << " capacity: " << capacity << std::endl;
     }
   }
 
@@ -655,8 +655,8 @@ FrictionalContactProblem::calculateInteractionSlip(RealVectorValue &slip,
 }
 
 void
-FrictionalContactProblem::applySlip(NumericVector<Number>& vec_solution,
-                                    NumericVector<Number>& ghosted_solution,
+FrictionalContactProblem::applySlip(NumericVector<Number> & vec_solution,
+                                    NumericVector<Number> & ghosted_solution,
                                     std::vector<SlipData> & iterative_slip)
 {
   NonlinearSystem & nonlinear_sys = getNonlinearSystem();
@@ -732,7 +732,7 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 
   unsigned int num_constraints(0);
 
-  for (pl_iterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
+  for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
   {
     PenetrationLocator & pen_loc = *plit->second;
 
@@ -763,7 +763,7 @@ FrictionalContactProblem::numLocalFrictionalConstraints()
 }
 
 MooseNonlinearConvergenceReason
-FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
+FrictionalContactProblem::checkNonlinearConvergence(std::string & msg,
                                                     const PetscInt it,
                                                     const Real xnorm,
                                                     const Real snorm,
@@ -855,13 +855,13 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string &msg,
 }
 
 void
-FrictionalContactProblem::updateContactPoints(NumericVector<Number>& ghosted_solution,
+FrictionalContactProblem::updateContactPoints(NumericVector<Number> & ghosted_solution,
                                               bool update_incremental_slip)
 {
   GeometricSearchData & displaced_geom_search_data = getDisplacedProblem()->geomSearchData();
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = &displaced_geom_search_data._penetration_locators;
 
-  for (pl_iterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
+  for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
   {
     PenetrationLocator & pen_loc = *plit->second;
     pen_loc.setUpdate(true);
@@ -870,7 +870,7 @@ FrictionalContactProblem::updateContactPoints(NumericVector<Number>& ghosted_sol
   //Do new contact search to update positions of slipped nodes
   _displaced_problem->updateMesh(ghosted_solution, *_aux.currentSolution());
 
-  for (pl_iterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
+  for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
   {
     PenetrationLocator & pen_loc = *plit->second;
     pen_loc.setUpdate(false);
@@ -896,7 +896,7 @@ FrictionalContactProblem::updateIncrementalSlip()
   GeometricSearchData & displaced_geom_search_data = getDisplacedProblem()->geomSearchData();
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = &displaced_geom_search_data._penetration_locators;
 
-  for (pl_iterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
+  for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
   {
     PenetrationLocator & pen_loc = *plit->second;
 

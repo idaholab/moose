@@ -16,7 +16,6 @@
 
 #include "Material.h"
 
-
 //Forward Declarations
 class ComputingInitialTest;
 

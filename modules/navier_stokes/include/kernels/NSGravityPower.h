@@ -18,7 +18,6 @@ InputParameters validParams<NSGravityPower>();
 class NSGravityPower : public Kernel
 {
 public:
-
   NSGravityPower(const InputParameters & parameters);
 
 protected:
@@ -29,7 +28,7 @@ protected:
   unsigned int _momentum_var;
   const VariableValue & _momentum;
 
-  Real _acceleration;
+  const Real _acceleration;
 };
 
-#endif
+#endif //NSGRAVITYPOWER_H

@@ -59,8 +59,10 @@ protected:
   Real _r1;
   Real _r2;
 
-  //This is a factor that is used to gradually taper down the conductance if the
-  //contact point is off the face and tangential_tolerance is nonzero.
+  /**
+   * This is a factor that is used to gradually taper down the conductance if the
+   * contact point is off the face and tangential_tolerance is nonzero.
+   */
   Real _edge_multiplier;
 
   bool _has_info;

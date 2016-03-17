@@ -24,14 +24,7 @@ InputParameters validParams<NSTemperatureAux>();
 class NSTemperatureAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   NSTemperatureAux(const InputParameters & parameters);
-
-  virtual ~NSTemperatureAux() {}
 
 protected:
   virtual Real computeValue();
@@ -45,8 +38,8 @@ protected:
 
   // Specific heat at constant volume, treated as a single
   // constant value.
-  Real _R;
-  Real _gamma;
+  const Real _R;
+  const Real _gamma;
 };
 
 #endif // NSTEMPERATUREAUX_H

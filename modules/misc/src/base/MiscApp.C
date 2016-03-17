@@ -11,7 +11,6 @@
 
 #include "BodyForceVoid.h"
 #include "CoefDiffusion.h"
-#include "Convection.h"
 #include "Density.h"
 #include "InternalVolume.h"
 #include "RobinBC.h"
@@ -67,7 +66,6 @@ MiscApp::registerObjects(Factory & factory)
 
   registerKernel(BodyForceVoid);
   registerKernel(CoefDiffusion);
-  registerKernel(Convection);
   registerKernel(JouleHeating);
   registerKernel(CoefTimeDerivative);
   registerKernel(GaussContForcing);

@@ -4,8 +4,6 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-// MOOSE includes
 #include "GapHeatTransfer.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
@@ -53,32 +51,32 @@ InputParameters validParams<GapHeatTransfer>()
   return params;
 }
 
-GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
-  :IntegratedBC(parameters),
-   _gap_geometry_params_set(false),
-   _gap_geometry_type(GapConductance::PLATE),
-   _quadrature(getParam<bool>("quadrature")),
-   _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
-   _gap_conductance(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name"))),
-   _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance"+getParam<std::string>("appended_property_name")+"_dT")),
-   _min_gap(getParam<Real>("min_gap")),
-   _max_gap(getParam<Real>("max_gap")),
-   _gap_temp(0),
-   _gap_distance(88888),
-   _edge_multiplier(1.0),
-   _has_info(false),
-   _xdisp_coupled(isCoupled("disp_x")),
-   _ydisp_coupled(isCoupled("disp_y")),
-   _zdisp_coupled(isCoupled("disp_z")),
-   _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
-   _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
-   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
-   _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
-   _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
-   _penetration_locator(!_quadrature ? NULL : &getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
-                                                                               getParam<std::vector<BoundaryName> >("boundary")[0],
-                                                                               Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
-   _warnings(getParam<bool>("warnings"))
+GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters) :
+    IntegratedBC(parameters),
+    _gap_geometry_params_set(false),
+    _gap_geometry_type(GapConductance::PLATE),
+    _quadrature(getParam<bool>("quadrature")),
+    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
+    _gap_conductance(getMaterialProperty<Real>("gap_conductance" + getParam<std::string>("appended_property_name"))),
+    _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance" + getParam<std::string>("appended_property_name") + "_dT")),
+    _min_gap(getParam<Real>("min_gap")),
+    _max_gap(getParam<Real>("max_gap")),
+    _gap_temp(0),
+    _gap_distance(std::numeric_limits<Real>::max()),
+    _edge_multiplier(1.0),
+    _has_info(false),
+    _xdisp_coupled(isCoupled("disp_x")),
+    _ydisp_coupled(isCoupled("disp_y")),
+    _zdisp_coupled(isCoupled("disp_z")),
+    _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
+    _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
+    _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+    _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
+    _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
+    _penetration_locator(!_quadrature ? NULL : &getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
+                                                                                getParam<std::vector<BoundaryName> >("boundary")[0],
+                                                                                Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
+    _warnings(getParam<bool>("warnings"))
 {
   if (_quadrature)
   {
@@ -125,11 +123,11 @@ GapHeatTransfer::computeQpResidual()
     _slave_flux->add(_var.dofIndices()[_i], slave_flux);
   }
 
-  return _test[_i][_qp]*grad_t;
+  return _test[_i][_qp] * grad_t;
 }
 
 Real
-GapHeatTransfer::computeSlaveFluxContribution( Real grad_t )
+GapHeatTransfer::computeSlaveFluxContribution(Real grad_t)
 {
   return _coord[_qp] * _JxW[_qp] * _test[_i][_qp] * grad_t;
 }
@@ -146,7 +144,7 @@ GapHeatTransfer::computeQpJacobian()
 }
 
 Real
-GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
+GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
 {
   computeGapValues();
 
@@ -155,24 +153,24 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
 
   unsigned coupled_component(0);
   bool active(false);
-  if ( _xdisp_coupled && jvar == _xdisp_var )
+  if (_xdisp_coupled && jvar == _xdisp_var)
   {
     coupled_component = 0;
     active = true;
   }
-  else if ( _ydisp_coupled && jvar == _ydisp_var )
+  else if (_ydisp_coupled && jvar == _ydisp_var)
   {
     coupled_component = 1;
     active = true;
   }
-  else if ( _zdisp_coupled && jvar == _zdisp_var )
+  else if (_zdisp_coupled && jvar == _zdisp_var)
   {
     coupled_component = 2;
     active = true;
   }
 
   Real dRdx(0);
-  if ( active )
+  if (active)
   {
     // Compute dR/du_[xyz]
     // Residual is based on
@@ -204,35 +202,31 @@ GapHeatTransfer::computeQpOffDiagJacobian( unsigned jvar )
     //
     // Until we have the normal we need,
     //   we'll hope that the one we have is close to the negative of the one we need.
-    const Point & normal( _normals[_qp] );
+    const Point & normal(_normals[_qp]);
 
-    const Real dgap = dgapLength( -normal(coupled_component) );
+    const Real dgap = dgapLength(-normal(coupled_component));
     dRdx = -(_u[_qp]-_gap_temp)*_edge_multiplier*_gap_conductance[_qp]/gapL * dgap;
   }
   return _test[_i][_qp] * dRdx * _phi[_j][_qp];
 }
 
-
 Real
 GapHeatTransfer::gapLength() const
 {
   if (_has_info)
-    return GapConductance::gapLength( _gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap );
+    return GapConductance::gapLength(_gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap);
 
   return 1;
 }
 
 Real
-GapHeatTransfer::dgapLength( Real normalComponent ) const
+GapHeatTransfer::dgapLength(Real normalComponent) const
 {
   const Real gap_L = gapLength();
+  Real dgap = 0.0;
 
-  Real dgap(0);
-
-  if ( _min_gap <= gap_L && gap_L <= _max_gap)
-  {
+  if (_min_gap <= gap_L && gap_L <= _max_gap)
     dgap = normalComponent;
-  }
 
   return dgap;
 }
@@ -252,7 +246,7 @@ GapHeatTransfer::computeGapValues()
     PenetrationInfo * pinfo = _penetration_locator->_penetration_info[qnode->id()];
 
     _gap_temp = 0.0;
-    _gap_distance = 88888;
+    _gap_distance = std::numeric_limits<Real>::max();
     _has_info = false;
     _edge_multiplier = 1.0;
 
@@ -270,26 +264,16 @@ GapHeatTransfer::computeGapValues()
       {
         _edge_multiplier = 1.0 - pinfo->_tangential_distance / tangential_tolerance;
         if (_edge_multiplier < 0.0)
-        {
           _edge_multiplier = 0.0;
-        }
       }
     }
     else
     {
       if (_warnings)
-      {
-        std::stringstream msg;
-        msg << "No gap value information found for node ";
-        msg << qnode->id();
-        msg << " on processor ";
-        msg << processor_id();
-        mooseWarning( msg.str() );
-      }
+        mooseWarning("No gap value information found for node " << qnode->id() << " on processor " << processor_id());
     }
   }
 
   Point current_point(_q_point[_qp]);
   GapConductance::computeGapRadii(_gap_geometry_type, current_point, _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
 }
-

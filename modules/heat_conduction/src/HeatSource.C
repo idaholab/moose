@@ -17,8 +17,7 @@ InputParameters validParams<HeatSource>()
   return params;
 }
 
-HeatSource::HeatSource(const InputParameters & parameters)
-  :BodyForce(parameters)
+HeatSource::HeatSource(const InputParameters & parameters) :
+    BodyForce(parameters)
 {
 }
-

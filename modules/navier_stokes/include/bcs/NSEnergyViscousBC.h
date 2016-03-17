@@ -31,14 +31,10 @@ InputParameters validParams<NSEnergyViscousBC>();
  */
 class NSEnergyViscousBC : public NSIntegratedBC
 {
-
 public:
   NSEnergyViscousBC(const InputParameters & parameters);
 
-  virtual ~NSEnergyViscousBC(){}
-
 protected:
-
   /**
    * Just like other kernels, we must overload the Residual and Jacobian contributions...
    */
@@ -72,6 +68,5 @@ protected:
   // the ctor.
   std::vector<const VariableGradient *> _gradU;
 };
-
 
 #endif // NSENERGYVISCOUSBC_H

@@ -17,8 +17,6 @@ class NSImposedVelocityDirectionBC;
 template<>
 InputParameters validParams<NSImposedVelocityDirectionBC>();
 
-
-
 /**
  * This class imposes a velocity direction component as a
  * Dirichlet condition on the appropriate momentum equation.
@@ -42,14 +40,9 @@ InputParameters validParams<NSImposedVelocityDirectionBC>();
 class NSImposedVelocityDirectionBC : public NodalBC
 {
 public:
-  // Constructor
   NSImposedVelocityDirectionBC(const InputParameters & parameters);
 
-  // Destructor, better be virtual
-  virtual ~NSImposedVelocityDirectionBC(){}
-
 protected:
-
   // NodalBC's can (currently) only specialize the computeQpResidual function,
   // the computeQpJacobian() function automatically assembles a "1" onto the main
   // diagonal for this DoF.
@@ -64,6 +57,5 @@ protected:
   // The desired value for the unit velocity component
   Real _desired_unit_velocity_component;
 };
-
 
 #endif // NSIMPOSEDVELOCITYDIRECTIONBC_H
