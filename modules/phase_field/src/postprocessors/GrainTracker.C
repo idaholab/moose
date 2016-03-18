@@ -19,6 +19,20 @@
 #include <limits>
 #include <algorithm>
 
+
+/**
+ * special std::pair sort functor
+ */
+template<typename T1, typename T2>
+class pair_sorter_first {
+public:
+    bool operator()(const std::pair<T1, T2> & lhs, const std::pair<T1, T2> & rhs) const
+    {
+      return lhs.first < rhs.first;
+    }
+};
+
+
 template<>
 InputParameters validParams<GrainTracker>()
 {
@@ -696,8 +710,8 @@ GrainTracker::remapGrains()
       }
     }
 
-    if (++times_through_loop >= 5 && processor_id() == 0)
-      mooseError(COLOR_RED << "Five passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?" << COLOR_DEFAULT);
+    if (++times_through_loop >= (_vars.size() - 2) && processor_id() == 0)
+      mooseError(COLOR_RED << times_through_loop << " passes through the remapping loop and grains are still being remapped, perhaps you need more op variables?" << COLOR_DEFAULT);
 
   } while (variables_remapped);
   _console << "Done Remapping" << std::endl;
@@ -717,10 +731,12 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, MooseSharedPointer<Featu
    * We have two grains that are getting close represented by the same order parameter.
    * We need to map to the variable whose closest grain to this one is furthest away by sphere to sphere distance.
    */
-  std::vector<Real> min_distances(_vars.size(), std::numeric_limits<Real>::max());
+  std::vector<std::pair<Real, unsigned int> > min_distances(_vars.size(),
+                                                            std::pair<Real, unsigned int>(std::numeric_limits<Real>::max(),
+                                                                                          std::numeric_limits<unsigned int>::max()));
 
   // Make sure that we don't attempt to remap to the same variable
-  min_distances[curr_var_idx] = -std::numeric_limits<Real>::max();
+//  min_distances[curr_var_idx] = -std::numeric_limits<Real>::max();
 
   for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it3 = _unique_grains.begin();
        grain_it3 != _unique_grains.end(); ++grain_it3)
@@ -729,10 +745,11 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, MooseSharedPointer<Featu
       continue;
 
     unsigned int potential_var_idx = grain_it3->second->_var_idx;
+    unsigned int grain_id = grain_it3->first;
 
-    Real curr_bounding_sphere_diff = boundingRegionDistance(grain_it1->second->_bboxes, grain_it3->second->_bboxes, false);
-    if (curr_bounding_sphere_diff < min_distances[potential_var_idx])
-      min_distances[potential_var_idx] = curr_bounding_sphere_diff;
+    Real curr_centroid_diff = boundingRegionDistance(grain_it1->second->_bboxes, grain_it3->second->_bboxes, true);
+    if (curr_centroid_diff < min_distances[potential_var_idx].first)
+      min_distances[potential_var_idx] = std::pair<Real, unsigned int>(curr_centroid_diff, grain_id);
   }
 
   /**
@@ -740,14 +757,17 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, MooseSharedPointer<Featu
    * a suitable grain to replace with.  We will start with the maximum of this this list: (max of the mins), but will settle
    * for next to largest and so forth as we make more attempts at remapping grains.  This is a graph coloring problem so
    * more work will be required to optimize this process.
+   *
    * Note: We don't have an explicit check here to avoid remapping a  variable to itself.  This is unecessary since the
    * min_distance of a variable is explicitly set up above.
    */
-  unsigned int nth_largest_idx = min_distances.size() - attempt_number - 1;
+  mooseAssert(min_distances.size() >= attempt_number - 2, "Too many attempts to remap, are running with at least two variables?");
+  unsigned int nth_largest_idx = min_distances.size() - attempt_number - 2; /* +1 to account for zero based index, +1 to skip "this variable" */
 
   // nth element destroys the original array so we need to copy it first
-  std::vector<Real> min_distances_copy(min_distances);
-  std::nth_element(min_distances_copy.begin(), min_distances_copy.end()+nth_largest_idx, min_distances_copy.end());
+  std::vector<std::pair<Real, unsigned int> > min_distances_copy(min_distances);
+  std::nth_element(min_distances_copy.begin(), min_distances_copy.end()+nth_largest_idx, min_distances_copy.end(),
+                   pair_sorter_first<Real, unsigned int>());
 
   // Now find the location of the nth element in the original vector
   unsigned int new_variable_idx = std::distance(min_distances.begin(),
@@ -761,20 +781,30 @@ GrainTracker::swapSolutionValues(std::map<unsigned int, MooseSharedPointer<Featu
     << " (variable index: " << grain_it1->second->_var_idx << ")\n"
     << COLOR_DEFAULT;
 
-  if (min_distances[new_variable_idx] < 0)
+  /**
+   * So far we've only looked at centroid distances. This is pretty good when there isn't a lot of pressure and the grains
+   * are regularly shaped. We have to make sure that these grains really aren't touching though before we proceed to remapping.
+   */
+  unsigned int target_idx = min_distances[new_variable_idx].second;
+  mooseAssert(target_idx != std::numeric_limits<unsigned int>::max(), "Error in finding target grain index in remapping");
+
+  mooseAssert(_unique_grains.find(target_idx) != _unique_grains.end(), "Error in indexing target grain in remapping");
+  MooseSharedPointer<FeatureData> target_grain = _unique_grains[target_idx];
+
+  if (setsIntersect(grain_it1->second->_halo_ids.begin(), grain_it1->second->_halo_ids.end(),
+                    target_grain->_halo_ids.begin(), target_grain->_halo_ids.end()))
   {
     Moose::out
       << COLOR_YELLOW
-      << "*****************************************************************************************************\n"
       << "Warning: No suitable variable found for remapping. Will attempt to remap in next loop if necessary...\n"
-      << "*****************************************************************************************************\n"
+      << "*****************************************************************************************************\n\n"
       << COLOR_DEFAULT;
     return;
   }
 
   Moose::out
     << COLOR_GREEN
-    << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx] << "\n"
+    << "Remapping to: " << new_variable_idx << " whose closest grain is at a distance of " << min_distances[new_variable_idx].first << "\n"
     << COLOR_DEFAULT;
 
   MeshBase & mesh = _mesh.getMesh();
