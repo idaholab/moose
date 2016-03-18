@@ -906,6 +906,10 @@ GrainTracker::updateFieldInfo()
     for (std::set<dof_id_type>::const_iterator entity_it = grain_it->second->_halo_ids.begin();
          entity_it != grain_it->second->_halo_ids.end(); ++entity_it)
       _halo_ids[*entity_it] = grain_it->second->_var_idx;
+
+    for (std::set<dof_id_type>::const_iterator entity_it = grain_it->second->_ghosted_ids.begin();
+         entity_it != grain_it->second->_ghosted_ids.end(); ++entity_it)
+      _ghosted_entity_ids[*entity_it] = grain_it->second->_var_idx;
   }
 }
 

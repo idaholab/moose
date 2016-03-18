@@ -84,8 +84,8 @@ public:
 
   struct FeatureData
   {
-    FeatureData() :
-        _var_idx(std::numeric_limits<unsigned int>::max()),
+    FeatureData(unsigned int var_idx = std::numeric_limits<unsigned int>::max()) :
+        _var_idx(var_idx),
         _min_entity_id(DofObject::invalid_id),
         _status(NOT_MARKED),
         _merged(false),
@@ -164,10 +164,11 @@ protected:
 
   /**
    * This method will "mark" all entities on neighboring elements that
-   * are above the supplied threshold. If live_region == -1, that means the
-   * region is inactive (unmarked areas)
+   * are above the supplied threshold. If feature is NULL, we are exploring
+   * for a new region to mark, otherwise we are in the recursive calls
+   * currently marking a region.
    */
-  void flood(const DofObject *dof_object, int current_idx, int live_region);
+  void flood(const DofObject * dof_object, int current_idx, FeatureData * feature);
 
   /**
    * This routine uses the local flooded data to build up the local feature data structures (_feature_sets).
@@ -326,7 +327,7 @@ protected:
 
   /// This data structure is used to keep track of which bubbles are owned by which variables.
   /// It is used single_map_mode only
-  std::vector<unsigned int> _region_to_var_idx;
+//  std::vector<unsigned int> _region_to_var_idx;
 
 //  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)
 //  std::vector<unsigned int> _region_offsets;
@@ -348,7 +349,7 @@ protected:
   std::vector<std::vector<std::vector<FeatureData> > > _partial_feature_sets;
 
   /// The scalar counters used during the marking stage of the flood algorithm. Up to one per variable
-  std::vector<unsigned int> _region_counts;
+//  std::vector<unsigned int> _region_counts;
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
@@ -356,8 +357,8 @@ protected:
   /// Average value of the domain which can optionally be used to find bubbles in a field
   const PostprocessorValue & _element_average_value;
 
-  std::set<dof_id_type> _ghosted_entity_ids;
-
+  // TODO: Doco
+  std::map<dof_id_type, int> _ghosted_entity_ids;
   std::map<dof_id_type, int> _halo_ids;
 
   /**
