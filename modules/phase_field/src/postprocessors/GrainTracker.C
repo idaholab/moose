@@ -548,7 +548,7 @@ GrainTracker::trackGrains()
    * new_grain_idx_to_existing_grain_idx data structure).  This will happen any time a grain disappears during
    * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
    */
-  std::cout << "Mapping time:\n";
+//  std::cout << "Mapping time:\n";
   for (std::map<std::pair<unsigned int, unsigned int>, std::vector<unsigned int> >::iterator it = new_grain_idx_to_existing_grain_idx.begin();
        it != new_grain_idx_to_existing_grain_idx.end(); ++it)
   {
@@ -569,17 +569,17 @@ GrainTracker::trackGrains()
     // More than one existing grain is mapping to a new one (i.e. multiple values exist for a single key)
     else
     {
-      std::cout << "New Grain:\n" << *feature_ptr;
+//      std::cout << "New Grain:\n" << *feature_ptr;
 
       Real min_centroid_diff = std::numeric_limits<Real>::max();
       unsigned int min_idx = 0;
 
-      std::cout << "Existing Competing Grains:\n";
+//      std::cout << "Existing Competing Grains:\n";
       for (unsigned int i = 0; i < it->second.size(); ++i)
       {
         unsigned int curr_idx = (it->second)[i];
 
-        std::cout << *_unique_grains[curr_idx];
+//        std::cout << *_unique_grains[curr_idx];
 
         Real curr_centroid_diff = boundingRegionDistance(feature_ptr->_bboxes, _unique_grains[curr_idx]->_bboxes, true);
         if (curr_centroid_diff <= min_centroid_diff)
@@ -909,7 +909,7 @@ GrainTracker::updateFieldInfo()
 
     for (std::set<dof_id_type>::const_iterator entity_it = grain_it->second->_ghosted_ids.begin();
          entity_it != grain_it->second->_ghosted_ids.end(); ++entity_it)
-      _ghosted_entity_ids[*entity_it] = grain_it->second->_var_idx;
+      _ghosted_entity_ids[*entity_it] = grain_it->first;
   }
 }
 

@@ -22,7 +22,7 @@
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 15 # Number of grains
+  op_num = 8 # Number of grains
   var_name_base = gr # Base name of grains
 []
 
@@ -38,7 +38,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 15
+      grain_num = 100
     [../]
   [../]
 []
@@ -60,6 +60,10 @@
     family = MONOMIAL
   [../]
   [./halos]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./var_indices]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -91,13 +95,20 @@
     type = FeatureFloodCountAux
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
     bubble_object = ngrains
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
+    execute_on = 'initial timestep_end'
+    bubble_object = ngrains
+  [../]
+  [./var_indices]
+    type = FeatureFloodCountAux
+    variable = var_indices
+    field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
     bubble_object = ngrains
   [../]
@@ -129,8 +140,8 @@
   # Scalar postprocessors
   [./ngrains]
     # Counts the number of grains in the polycrystal
-#    type = FeatureFloodCount
-#    variable = bnds
+    # type = FeatureFloodCount
+    # variable = bnds
     type = GrainTracker
     threshold = 0.1
     convex_hull_buffer = 0.0
@@ -186,3 +197,4 @@
     max_rows = 20
   [../]
 []
+
