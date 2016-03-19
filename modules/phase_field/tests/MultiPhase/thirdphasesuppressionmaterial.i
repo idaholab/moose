@@ -62,8 +62,8 @@
 []
 
 [Materials]
-  [./crosstermbarrier]
-    type = OPInterfaceBarrierMaterial
+  [./suppressionbarrier]
+    type = ThirdPhaseSuppressionMaterial
     block = 0
     etas = 'eta1 eta2 eta3'
     function_name = g

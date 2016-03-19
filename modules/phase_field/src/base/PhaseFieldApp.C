@@ -115,7 +115,6 @@
 #include "MathEBFreeEnergy.h"
 #include "MathFreeEnergy.h"
 #include "MultiBarrierFunctionMaterial.h"
-#include "OPInterfaceBarrierMaterial.h"
 #include "ParsedMaterial.h"
 #include "PFCRFFMaterial.h"
 #include "PFCTradMaterial.h"
@@ -126,6 +125,7 @@
 #include "RegularSolutionFreeEnergy.h"
 #include "StrainGradDispDerivatives.h"
 #include "SwitchingFunctionMaterial.h"
+#include "ThirdPhaseSuppressionMaterial.h"
 
 /*
  * Postprocessors
@@ -338,7 +338,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(MathEBFreeEnergy);
   registerMaterial(MathFreeEnergy);
   registerMaterial(MultiBarrierFunctionMaterial);
-  registerMaterial(OPInterfaceBarrierMaterial);
   registerMaterial(ParsedMaterial);
   registerMaterial(PFCRFFMaterial);
   registerMaterial(PFCTradMaterial);
@@ -348,6 +347,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(RegularSolutionFreeEnergy);
   registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunctionMaterial);
+  registerMaterial(ThirdPhaseSuppressionMaterial);
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);

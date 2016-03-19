@@ -9,10 +9,10 @@
     input = 'orderparameterfunctionmaterial.i'
     exodiff = 'orderparameterfunctionmaterial_out.e'
   [../]
-  [./opinterfacebarriermaterial]
+  [./thirdphasesuppressionmaterial]
     type = 'Exodiff'
-    input = 'opinterfacebarriermaterial.i'
-    exodiff = 'opinterfacebarriermaterial_out.e'
+    input = 'thirdphasesuppressionmaterial.i'
+    exodiff = 'thirdphasesuppressionmaterial_out.e'
   [../]
   [./multibarrierfunction]
     type = 'Exodiff'

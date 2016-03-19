@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "OPInterfaceBarrierMaterial.h"
+#include "ThirdPhaseSuppressionMaterial.h"
 
 template<>
-InputParameters validParams<OPInterfaceBarrierMaterial>()
+InputParameters validParams<ThirdPhaseSuppressionMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("function_name", "g", "actual name for g(eta_i)");
@@ -16,7 +16,7 @@ InputParameters validParams<OPInterfaceBarrierMaterial>()
   return params;
 }
 
-OPInterfaceBarrierMaterial::OPInterfaceBarrierMaterial(const InputParameters & parameters) :
+ThirdPhaseSuppressionMaterial::ThirdPhaseSuppressionMaterial(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
     _function_name(getParam<std::string>("function_name")),
     _num_eta(coupledComponents("etas")),
@@ -45,7 +45,7 @@ OPInterfaceBarrierMaterial::OPInterfaceBarrierMaterial(const InputParameters & p
 }
 
 void
-OPInterfaceBarrierMaterial::computeQpProperties()
+ThirdPhaseSuppressionMaterial::computeQpProperties()
 {
   // Initialize properties to zero before accumulating
   _prop_g[_qp] = 0.0;
@@ -61,8 +61,19 @@ OPInterfaceBarrierMaterial::computeQpProperties()
     for (unsigned int j = 0; j < i; ++j)
       for (unsigned int k = 0; k < j; ++k)
       {
-            _prop_g[_qp]         +=  (*_eta[i])[_qp] * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp] * (*_eta[k])[_qp] * (*_eta[k])[_qp];
-            (*_prop_dg[i])[_qp]  +=  2 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[j])[_qp] * (*_eta[k])[_qp] * (*_eta[k])[_qp];
-            (*_prop_d2g[i][j])[_qp] +=  4 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * (*_eta[k])[_qp] * (*_eta[k])[_qp];
+        const Real ni = (*_eta[i])[_qp];
+        const Real nj = (*_eta[j])[_qp];
+        const Real nk = (*_eta[k])[_qp];
+
+            _prop_g[_qp]         +=  ni * ni * nj * nj * nk * nk;
+            (*_prop_dg[i])[_qp]  +=  2 * ni * nj * nj * nk * nk;
+            (*_prop_dg[j])[_qp]  +=  2 * ni * ni * nj * nk * nk;
+            (*_prop_dg[k])[_qp]  +=  2 * ni * ni * nj * nj * nk;
+            (*_prop_d2g[i][i])[_qp] +=  2 * nj * nj * nk * nk;
+            (*_prop_d2g[j][j])[_qp] +=  2 * ni * ni * nk * nk;
+            (*_prop_d2g[k][k])[_qp] +=  2 * ni * ni * nj * nj;
+            (*_prop_d2g[i][j])[_qp] +=  4 * ni * nj * nk * nk;
+            (*_prop_d2g[i][k])[_qp] +=  4 * ni * nj * nj * nk;
+            (*_prop_d2g[k][j])[_qp] +=  4 * ni * ni * nj * nk;
       }
 }

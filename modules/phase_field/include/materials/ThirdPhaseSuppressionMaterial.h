@@ -4,27 +4,27 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef OPINTERFACEBARRIERMATERIAL_H
-#define OPINTERFACEBARRIERMATERIAL_H
+#ifndef THIRDPHASESUPPRESSIONMATERIAL_H
+#define THIRDPHASESUPPRESSIONMATERIAL_H
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class OPInterfaceBarrierMaterial;
+class ThirdPhaseSuppressionMaterial;
 
 template<>
-InputParameters validParams<OPInterfaceBarrierMaterial>();
+InputParameters validParams<ThirdPhaseSuppressionMaterial>();
 
 /**
  * OPInterfaceBarrierMaterial is a Free Energy Penalty contribution
  * material that acts on all of the eta_i variables to
  * prevent more than two eta variables going above 0 on an interface.
  */
-class OPInterfaceBarrierMaterial : public DerivativeMaterialInterface<Material>
+class ThirdPhaseSuppressionMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
-  OPInterfaceBarrierMaterial(const InputParameters & parameters);
+  ThirdPhaseSuppressionMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
@@ -44,4 +44,4 @@ protected:
   std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2g;
 };
 
-#endif //OPINTERFACEBARRIER_H
+#endif //THIRDPHASESUPPRESSIONMATERIAL_H
