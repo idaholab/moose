@@ -38,19 +38,19 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./ghost_elements]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halos]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./var_indices]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./centroids]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./proc_id]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./ghosts]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -72,33 +72,32 @@
     variable = unique_grains
     execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
-    field_display = UNIQUE_REGION
+  [../]
+  [./ghost_elements]
+    type = FeatureFloodCountAux
+    variable = ghost_elements
+    field_display = GHOSTED_ENTITIES
+    execute_on = 'initial timestep_end'
+    bubble_object = grain_tracker
+  [../]
+  [./halos]
+    type = FeatureFloodCountAux
+    variable = halos
+    field_display = HALOS
+    execute_on = 'initial timestep_end'
+    bubble_object = grain_tracker
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
-  [./centroids]
-    type = FeatureFloodCountAux
-    variable = centroids
     execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
-    field_display = CENTROID
   [../]
   [./proc_id]
     type = ProcessorIDAux
     variable = proc_id
     execute_on = 'initial timestep_end'
-  [../]
-  [./ghosts]
-    type = FeatureFloodCountAux
-    variable = ghosts
-    field_display = GHOSTED_ELEMS
-    execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
   [../]
 []
 

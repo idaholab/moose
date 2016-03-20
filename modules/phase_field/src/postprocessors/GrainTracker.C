@@ -49,6 +49,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
     _hull_buffer(getParam<Real>("convex_hull_buffer")),
+    _halo_level(getParam<unsigned int>("halo_level")),
     _remap(getParam<bool>("remap_grains")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, MooseSharedPointer<FeatureData> > >("unique_grains")),
@@ -127,6 +128,8 @@ GrainTracker::finalize()
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
+
+  expandHalos();
 
   FeatureFloodCount::communicateAndMerge();
 
@@ -331,6 +334,38 @@ GrainTracker::centerOfMass(UniqueGrain & grain) const
 //  center_of_mass /= static_cast<Real>(grain.entities_ptr->size());
 //
   return center_of_mass;
+}
+
+void
+GrainTracker::expandHalos()
+{
+  processor_id_type n_procs = _app.n_processors();
+
+  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    for (processor_id_type rank = 0; rank < n_procs; ++rank)
+      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
+           it != _partial_feature_sets[rank][map_num].end(); ++it)
+      {
+        FeatureData & feature = *it;
+
+        for (unsigned int halo_level = 1; halo_level < _halo_level; ++halo_level)
+        {
+          /**
+           * Create a copy of the halo set so that as we insert new ids into the
+           * set we don't continue to iterate on those new ids.
+           */
+          std::set<dof_id_type> orig_halo_ids(feature._halo_ids);
+
+          for (std::set<dof_id_type>::iterator entity_it = orig_halo_ids.begin();
+               entity_it != orig_halo_ids.end(); ++entity_it)
+          {
+            if (_is_elemental)
+              visitElementalNeighbors(_mesh.elem(*entity_it), feature._var_idx, &feature, /*recurse =*/false);
+            else
+              visitNodalNeighbors(_mesh.nodePtr(*entity_it), feature._var_idx, &feature, /*recurse =*/false);
+          }
+        }
+      }
 }
 
 void

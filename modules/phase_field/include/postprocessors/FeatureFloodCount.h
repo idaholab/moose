@@ -170,6 +170,10 @@ protected:
    */
   void flood(const DofObject * dof_object, int current_idx, FeatureData * feature);
 
+  // TODO: doco
+  void visitElementalNeighbors(const Elem * elem, int current_idx, FeatureData * feature, bool recurse);
+  void visitNodalNeighbors(const Node * elem, int current_idx, FeatureData * feature, bool recurse);
+
   /**
    * This routine uses the local flooded data to build up the local feature data structures (_feature_sets).
    * This routine does not perform any communication so the _feature_sets data structure will only contain

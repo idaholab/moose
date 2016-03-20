@@ -150,8 +150,8 @@
     condense_map_info = true
     connecting_threshold = 0.05
     execute_on = 'initial timestep_end'
-    tracking_step = 0
     flood_entity_type = ELEMENTAL
+    halo_level = 2
   [../]
   [./dt]
     # Outputs the current time step

@@ -103,6 +103,8 @@ protected:
 
   Point centerOfMass(UniqueGrain & grain) const;
 
+  void expandHalos();
+
   /**
    * Calculate the volume of each grain maintaining proper order and dumping results to CSV
    */
@@ -117,6 +119,9 @@ protected:
 
   /// The value added to each bounding sphere radius to detect earlier intersection
   const Real _hull_buffer;
+
+  /// The thickness of the halo surrounding each grain
+  const unsigned int _halo_level;
 
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;

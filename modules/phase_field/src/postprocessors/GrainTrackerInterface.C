@@ -15,6 +15,8 @@ InputParameters validParams<GrainTrackerInterface>()
   params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
   params.addParam<Real>("convex_hull_buffer", 1.0, "The buffer around the convex hull used to determine"
                                                    "when features intersect");
+  params.addParam<unsigned int>("halo_level", 1, "The thickness of the halo surrounding each feature.");
+
   params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
   params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
                                                   "hold the active order parameter information"

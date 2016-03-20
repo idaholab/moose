@@ -1132,76 +1132,80 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureD
   // Insert the current entity into the local ids map
   feature->_local_ids.insert(entity_id);
 
-  /**
-   * Now it's time to start looking around to see what neighbors might
-   * also be part of this feature.
-   */
   if (_is_elemental)
+    visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*recurse =*/true);
+  else
+    visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*recurse =*/true);
+}
+
+void
+FeatureFloodCount::visitElementalNeighbors(const Elem * elem, int current_idx, FeatureData * feature, bool recurse)
+{
+  mooseAssert(elem, "Elem is NULL");
+
+  std::vector<const Elem *> all_active_neighbors;
+
+  // Loop over all neighbors (at the the same level as the current element)
+  for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
   {
-    const Elem * elem = static_cast<const Elem *>(dof_object);
-    std::vector<const Elem *> all_active_neighbors;
+    const Elem * neighbor_ancestor = elem->neighbor(i);
+    if (neighbor_ancestor)
+      // Retrieve only the active neighbors for each side of this element, append them to the list of active neighbors
+      neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+  }
 
-    // Loop over all neighbors (at the the same level as the current element)
-    for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
+  // Loop over all active element neighbors
+  for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin();
+       neighbor_it != all_active_neighbors.end(); ++neighbor_it)
+  {
+    const Elem * neighbor = *neighbor_it;
+    processor_id_type my_proc_id = processor_id();
+
+    // Only recurse on elems this processor can see
+    if (neighbor && neighbor->is_semilocal(my_proc_id))
     {
-      const Elem * neighbor_ancestor = elem->neighbor(i);
-      if (neighbor_ancestor)
-        // Retrieve only the active neighbors for each side of this element, append them to the list of active neighbors
-        neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
-    }
+      if (neighbor->processor_id() != my_proc_id)
+        feature->_ghosted_ids.insert(elem->id());
 
-    // Loop over all active element neighbors
-    for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin(); neighbor_it != all_active_neighbors.end(); ++neighbor_it)
-    {
-      const Elem * neighbor = *neighbor_it;
-      processor_id_type my_proc_id = processor_id();
+      /**
+       * Premark neighboring entities with a halo mark. These
+       * entities may or may not end up being part of the feature.
+       * We will not update the _entities_visited data structure
+       * here.
+       */
+      feature->_halo_ids.insert(neighbor->id());
 
-      // Only recurse on elems this processor can see
-      if (neighbor && neighbor->is_semilocal(my_proc_id))
-      {
-        if (neighbor->processor_id() != my_proc_id)
-          feature->_ghosted_ids.insert(elem->id());
-
-        /**
-         * Premark neighboring entities with a halo mark. These
-         * entities may or may not end up being part of the feature.
-         * We will not update the _entities_visited data structure
-         * here.
-         *
-         * TODO: We may need to mark point neighbors here. It's possible that by
-         * only looking at edge neighbors we could be creating an un-handled
-         * corner case (literally) for intersection in the grain tracker.
-         */
-        feature->_halo_ids.insert(neighbor->id());
-
-        // recurse
+      if (recurse)
         flood(neighbor, current_idx, feature);
-      }
     }
   }
-  else
+}
+
+void
+FeatureFloodCount::visitNodalNeighbors(const Node * node, int current_idx, FeatureData * feature, bool recurse)
+{
+  mooseAssert(node, "Node is NULL");
+
+  std::vector<const Node *> neighbors;
+  MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, neighbors);
+
+  // Loop over all nodal neighbors
+  for (unsigned int i = 0; i < neighbors.size(); ++i)
   {
-    std::vector<const Node *> neighbors;
-    MeshTools::find_nodal_neighbors(_mesh.getMesh(), *static_cast<const Node *>(dof_object), _nodes_to_elem_map, neighbors);
+    const Node * neighbor_node = neighbors[i];
+    processor_id_type my_proc_id = processor_id();
 
-    // Loop over all nodal neighbors
-    for (unsigned int i = 0; i < neighbors.size(); ++i)
+    // Only recurse on nodes this processor can see
+    if (_mesh.isSemiLocal(const_cast<Node *>(neighbor_node)))
     {
-      const Node * neighbor_node = neighbors[i];
-      processor_id_type my_proc_id = processor_id();
+      if (neighbor_node->processor_id() != my_proc_id)
+        feature->_ghosted_ids.insert(neighbor_node->id());
 
-      // Only recurse on nodes this processor can see
-      if (_mesh.isSemiLocal(const_cast<Node *>(neighbor_node)))
-      {
-        if (neighbor_node->processor_id() != my_proc_id)
-          feature->_ghosted_ids.insert(neighbor_node->id());
+      // Premark Halo values
+      feature->_halo_ids.insert(neighbor_node->id());
 
-        // Premark Halo values (See description above)
-        feature->_halo_ids.insert(neighbor_node->id());
-
-        // recurse
+      if (recurse)
         flood(neighbors[i], current_idx, feature);
-      }
     }
   }
 }
