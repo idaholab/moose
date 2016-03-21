@@ -379,6 +379,15 @@ public:
   /// RankTwoTensor from outer product of vectors
   void vectorOuterProduct(const TypeVector<Real> &, const TypeVector<Real> &);
 
+  /// Return real tensor of a rank two tensor
+  void fillRealTensor(RealTensorValue &);
+
+  ///Assigns value to the columns of a specified row
+  void fillRow(unsigned int, const TypeVector<Real> &);
+
+  ///Assigns value to the rows of a specified column
+  void fillColumn(unsigned int, const TypeVector<Real> &);
+
 private:
   static const unsigned int N = LIBMESH_DIM;
   Real _vals[N][N];

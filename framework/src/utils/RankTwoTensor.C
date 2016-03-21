@@ -1019,3 +1019,25 @@ RankTwoTensor::vectorOuterProduct(const TypeVector<Real> & v1, const TypeVector<
     for (unsigned int j = 0; j < N; ++j)
       _vals[i][j] = v1(i) * v2(j);
 }
+
+void
+RankTwoTensor::fillRealTensor(RealTensorValue & tensor)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      tensor(i, j) = _vals[i][j];
+}
+
+void
+RankTwoTensor::fillRow(unsigned int r, const TypeVector<Real> & v)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    _vals[r][i] = v(i);
+}
+
+void
+RankTwoTensor::fillColumn(unsigned int c, const TypeVector<Real> & v)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    _vals[i][c] = v(i);
+}
