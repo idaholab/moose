@@ -134,8 +134,8 @@ public:
   /**
    * Return a Material object reference for calling compute directly.
    */
-  DiscreteMaterial & getDiscreteMaterial(const std::string & name);
-  DiscreteMaterial & getDiscreteMaterialByName(const std::string & name);
+  Material & getMaterial(const std::string & name);
+  Material & getMaterialByName(const std::string & name);
   ///@}
 
 

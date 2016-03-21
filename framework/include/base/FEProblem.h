@@ -57,9 +57,7 @@ class ScalarInitialCondition;
 class Indicator;
 class InternalSideIndicator;
 class Marker;
-class MaterialBase;
 class Material;
-class DiscreteMaterial;
 class Transfer;
 class XFEMInterface;
 class SideUserObject;
@@ -913,16 +911,16 @@ public:
   unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
   /*
-   * Return a reference to the material warehouse of MaterialBase objects.
+   * Return a reference to the material warehouse of Material objects.
    */
-  const MaterialWarehouse<MaterialBase> & getMaterialWarehouse() { return _materials_base; }
+  const MaterialWarehouse<Material> & getMaterialWarehouse() { return _all_materials; }
 
   /**
    * Return a pointer to a Material object.
    *
    * This will return enabled or disabled objects, the main purpose is for iterative materials.
    */
-  MooseSharedPointer<DiscreteMaterial> getDiscreteMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid = 0);
+  MooseSharedPointer<Material> getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid = 0);
 
   /*
    * Return a pointer to the MaterialData
@@ -1057,8 +1055,8 @@ protected:
   ///@{
   // Material Warehouses
   MaterialWarehouse<Material> _materials; // Traditional materials that MOOSE computes
-  MaterialWarehouse<DiscreteMaterial> _discrete_materials; // Materials that the user must compute
-  MaterialWarehouse<MaterialBase> _materials_base; // All materials for error checking and MaterialData storage
+  MaterialWarehouse<Material> _discrete_materials; // Materials that the user must compute
+  MaterialWarehouse<Material> _all_materials; // All materials for error checking and MaterialData storage
   ///@}
 
   ///@{
@@ -1123,7 +1121,7 @@ protected:
    *
    * @see checkProblemIntegrity
    */
-  void checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > > & materials_map);
+  void checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & materials_map);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();

@@ -55,6 +55,7 @@
     outputs = all
     output_properties = 'f f_prime p'
     constant = 3
+    compute = false # make this material "discrete"
   [../]
 
   [./newton]

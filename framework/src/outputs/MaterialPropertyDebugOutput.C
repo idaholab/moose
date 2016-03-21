@@ -16,7 +16,7 @@
 #include "MaterialPropertyDebugOutput.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
-#include "MaterialBase.h"
+#include "Material.h"
 #include "ConsoleUtils.h"
 
 // libMesh includes
@@ -50,14 +50,14 @@ MaterialPropertyDebugOutput::printMaterialMap() const
   // Build output streams for block materials and block face materials
   std::stringstream active_block, active_face, active_neighbor, active_boundary;
 
-  // Reference to the MaterialBase warehouse
-  const MaterialWarehouse<MaterialBase> & warehouse = _problem_ptr->getMaterialWarehouse();
+  // Reference to the Material warehouse
+  const MaterialWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse();
 
 
   // Active materials on block
   {
-    const std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > > & objects = warehouse.getBlockObjects();
-    for (std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBlockObjects();
+    for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
       active_block << "    Block ID " << it->first << ":\n";
       printMaterialProperties(active_block, it->second);
@@ -66,8 +66,8 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
   // Active face materials on blocks
   {
-    const std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > > & objects = warehouse[Moose::FACE_MATERIAL_DATA].getBlockObjects();
-    for (std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse[Moose::FACE_MATERIAL_DATA].getBlockObjects();
+    for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
       active_face << "    Block ID " << it->first << ":\n";
       printMaterialProperties(active_face, it->second);
@@ -76,8 +76,8 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
   // Active neighbor materials on blocks
   {
-    const std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > > & objects = warehouse[Moose::NEIGHBOR_MATERIAL_DATA].getBlockObjects();
-    for (std::map<SubdomainID, std::vector<MooseSharedPointer<MaterialBase> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse[Moose::NEIGHBOR_MATERIAL_DATA].getBlockObjects();
+    for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
       active_neighbor << "    Block ID " << it->first << ":\n";
       printMaterialProperties(active_neighbor, it->second);
@@ -86,8 +86,8 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
   // Active boundary materials
   {
-    const std::map<BoundaryID, std::vector<MooseSharedPointer<MaterialBase> > > & objects = warehouse.getBoundaryObjects();
-    for (std::map<BoundaryID, std::vector<MooseSharedPointer<MaterialBase> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    const std::map<BoundaryID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBoundaryObjects();
+    for (std::map<BoundaryID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
     {
       active_boundary << "    Boundary ID " << it->first << ":\n";
       printMaterialProperties(active_boundary, it->second);
@@ -110,10 +110,10 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 }
 
 void
-MaterialPropertyDebugOutput::printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<MaterialBase> > & materials) const
+MaterialPropertyDebugOutput::printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<Material> > & materials) const
 {
   // Loop through all material objects
-  for (std::vector<MooseSharedPointer<MaterialBase> >::const_iterator jt = materials.begin(); jt != materials.end(); ++jt)
+  for (std::vector<MooseSharedPointer<Material> >::const_iterator jt = materials.begin(); jt != materials.end(); ++jt)
   {
     // Get a list of properties for the current material
     const std::set<std::string> & props = (*jt)->getSuppliedItems();
