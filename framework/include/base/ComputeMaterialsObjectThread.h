@@ -59,8 +59,8 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
 
-  /// Reference to the MaterialBase object warehouses
-  const MaterialWarehouse<MaterialBase> & _materials;
+  /// Reference to the Material object warehouses
+  const MaterialWarehouse<Material> & _materials;
 
   std::vector<Assembly *> & _assembly;
   bool _need_internal_side_material;

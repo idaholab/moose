@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
-#include "DiscreteMaterial.h"
+#include "Material.h"
 
 template<>
 InputParameters validParams<MaterialPropertyInterface>()
@@ -189,23 +189,23 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
 }
 
 
-DiscreteMaterial &
-MaterialPropertyInterface::getDiscreteMaterial(const std::string & name)
+Material &
+MaterialPropertyInterface::getMaterial(const std::string & name)
 {
-  return getDiscreteMaterialByName(_mi_params.get<DiscreteMaterialName>(name));
+  return getMaterialByName(_mi_params.get<MaterialName>(name));
 }
 
 
-DiscreteMaterial &
-MaterialPropertyInterface::getDiscreteMaterialByName(const std::string & name)
+Material &
+MaterialPropertyInterface::getMaterialByName(const std::string & name)
 {
-  MooseSharedPointer<DiscreteMaterial> discrete = _mi_feproblem.getDiscreteMaterial(name, _material_data_type, _mi_tid);
+  MooseSharedPointer<Material> discrete = _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid);
 
   // Check block compatibility
   if (!discrete->hasBlocks(_mi_block_ids))
   {
     std::ostringstream oss;
-    oss << "The DiscreteMaterial object '" << discrete->name() << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name << "':\n";
+    oss << "The Material object '" << discrete->name() << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name << "':\n";
     oss << "  " << discrete->name();
     for (std::set<SubdomainID>::const_iterator it = discrete->blockIDs().begin(); it != discrete->blockIDs().end(); ++it)
       oss << " " << *it;
@@ -221,7 +221,7 @@ MaterialPropertyInterface::getDiscreteMaterialByName(const std::string & name)
   if (!discrete->hasBoundary(_mi_boundary_ids))
   {
     std::ostringstream oss;
-    oss << "The DiscreteMaterial object '" << discrete->name() << "' is defined on boundaries that are incompatible with the retrieving object '" << _mi_name << "':\n";
+    oss << "The Material object '" << discrete->name() << "' is defined on boundaries that are incompatible with the retrieving object '" << _mi_name << "':\n";
     oss << "  " << discrete->name();
     for (std::set<BoundaryID>::const_iterator it = discrete->boundaryIDs().begin(); it != discrete->boundaryIDs().end(); ++it)
       oss << " " << *it;

@@ -48,6 +48,10 @@
 
   [./recompute_props]
     type = GenericConstantMaterial
+    prop_names =  'f  f_prime'
+    prop_values = '22 24'
+    block = 0
+    compute = true # the default, but should trigger a warning because newton is calling getMaterial on this
   [../]
 
   [./newton]

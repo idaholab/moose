@@ -14,7 +14,6 @@
 
 #include "MaterialData.h"
 #include "Material.h"
-#include "DiscreteMaterial.h"
 
 MaterialData::MaterialData(MaterialPropertyStorage & storage) :
     _storage(storage),
@@ -82,9 +81,9 @@ MaterialData::reinit(const std::vector<MooseSharedPointer<Material> > & mats)
 }
 
 void
-MaterialData::reset(const std::vector<MooseSharedPointer<DiscreteMaterial> > & mats)
+MaterialData::reset(const std::vector<MooseSharedPointer<Material> > & mats)
 {
-  for (std::vector<MooseSharedPointer<DiscreteMaterial> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
+  for (std::vector<MooseSharedPointer<Material> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
     (*it)->resetProperties();
 }
 

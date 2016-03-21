@@ -16,30 +16,39 @@
   [../]
 
   [./newton_no_calc]
-    # Test that no calculations are performed if computeProperties is not called explicitly on DiscreteMaterial
+    # Test that no calculations are performed if computeProperties is not called explicitly on Material
     type = 'Exodiff'
     input = 'recompute_no_calc.i'
     exodiff = 'recompute_no_calc_out.e'
   [../]
 
-  [./newton_error]
-    # Test error message when trying to get a non DiscreteMaterial object
+  [./newton_warning]
+    # Test warning message when trying getting a Material object that has 'compute = true'
     type = 'RunException'
-    input = 'recompute_error.i'
-    expect_err = 'Unable to locate active object: recompute_props.'
+    input = 'recompute_warning.i'
+    expect_err = "You are retrieving a Material object \(recompute_props\), but its compute flag is not set to true"
+    cli_args = '--error'
   [../]
 
   [./block_incompatible]
     # Test error message when blocks are incompatible
     type = RunException
     input = recompute_block_error.i
-    expect_err = "The DiscreteMaterial object 'recompute_props' is defined on blocks that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s0\n\s*newton\s0\s10"
+    expect_err = "The Material object 'recompute_props' is defined on blocks that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s0\n\s*newton\s0\s10"
   [../]
 
   [./boundary_incompatible]
     # Test error message when boundary are incompatible
     type = RunException
     input = recompute_boundary_error.i
-    expect_err = "The DiscreteMaterial object 'recompute_props' is defined on boundaries that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s3\n\s*newton\s1\s3"
+    expect_err = "The Material object 'recompute_props' is defined on boundaries that are incompatible with the retrieving object 'newton':\n\s*recompute_props\s3\n\s*newton\s1\s3"
+  [../]
+
+  [./reset_warning]
+    # Test that the resetQpProperties warning is produced with setting "compute = false" w/o defining this method
+    type = RunException
+    input = reset_warning.i
+    expect_err = "You disabled the computation of this \(mat\) material by MOOSE, but have not overridden the 'resetQpProperties' method"
+    cli_args = '--error'
   [../]
 []

@@ -15,7 +15,7 @@
 #define RECOMPUTEMATERIAL_H
 
 // Moose includes
-#include "DiscreteMaterial.h"
+#include "Material.h"
 
 // Forward declarations
 class RecomputeMaterial;
@@ -28,7 +28,7 @@ InputParameters validParams<RecomputeMaterial>();
  *
  * @see NewtonMaterial
  */
-class RecomputeMaterial : public DiscreteMaterial
+class RecomputeMaterial : public Material
 {
 public:
   RecomputeMaterial(const InputParameters & parameters);

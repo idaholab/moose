@@ -18,7 +18,7 @@
 template<>
 InputParameters validParams<RecomputeMaterial>()
 {
-  InputParameters params = validParams<DiscreteMaterial>();
+  InputParameters params = validParams<Material>();
   params.addRequiredParam<std::string>("f_name", "The name of the property that holds the value to of the function for which the root is being computed");
   params.addRequiredParam<std::string>("f_prime_name", "The name of the property that holds the value to of the derivative of the function");
   params.addRequiredParam<std::string>("p_name", "The name of the independant variable for the function");
@@ -27,7 +27,7 @@ InputParameters validParams<RecomputeMaterial>()
 }
 
 RecomputeMaterial::RecomputeMaterial(const InputParameters & parameters) :
-    DiscreteMaterial(parameters),
+    Material(parameters),
     _f(declareProperty<Real>(getParam<std::string>("f_name"))),
     _f_prime(declareProperty<Real>(getParam<std::string>("f_prime_name"))),
     _p(getMaterialProperty<Real>(getParam<std::string>("p_name"))),
