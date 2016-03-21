@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = CSVDiff
+    input = time_data.i
+    csvdiff = 'time_data_out_line_sample_time.csv'
+  [../]
+[]
