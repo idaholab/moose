@@ -57,7 +57,10 @@ void
 FlagElementsThread::onElement(const Elem *elem)
 {
   dof_id_type dof_number = elem->dof_number(_system_number, _field_var_number, 0);
-  Marker::MarkerValue marker_value = (Marker::MarkerValue)_serialized_solution[dof_number];
+
+  // This is basically lround() but doesn't require C99 or C++11
+  Marker::MarkerValue marker_value =
+    (Marker::MarkerValue)(std::ceil(_serialized_solution[dof_number]-0.5));
 
   // If no Markers cared about what happened to this element let's just leave it alone
   if (marker_value == Marker::DONT_MARK)
