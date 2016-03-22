@@ -41,3 +41,9 @@ WrongJacobianDiffusion::computeQpJacobian()
 {
   return _jfactor * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }
+
+Real
+WrongJacobianDiffusion::computeQpOffDiagJacobian(unsigned int)
+{
+  return 1.0;
+}

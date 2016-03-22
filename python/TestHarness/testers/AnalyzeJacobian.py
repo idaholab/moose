@@ -11,6 +11,7 @@ class AnalyzeJacobian(Tester):
     params.addParam('test_name',      "The name of the test - populated automatically")
     params.addParam('expect_out',     "A regular expression that must occur in the input in order for the test to be considered passing.")
     params.addParam('resize_mesh', False, "Resize the input mesh")
+    params.addParam('off_diagonal', True, "Also test the off-diagonal Jacobian entries")
     params.addParam('mesh_size',   1, "Resize the input mesh")
 
     return params
@@ -32,6 +33,9 @@ class AnalyzeJacobian(Tester):
     mesh_options = ' -m %s' % options.method
     if specs['resize_mesh'] :
       mesh_options += ' -r -s %d' % specs['mesh_size']
+
+    if not specs['off_diagonal'] :
+      mesh_options += ' -D'
 
     command += mesh_options + ' ' + specs['input'] + ' -e ' + specs['executable'] + ' ' + ' '.join(specs['cli_args'])
 
