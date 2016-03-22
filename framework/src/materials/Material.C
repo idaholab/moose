@@ -85,6 +85,7 @@ Material::Material(const InputParameters & parameters) :
     _current_side(_neighbor ? _assembly.neighborSide() : _assembly.side()),
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
+    _compute(getParam<bool>("compute")),
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies
