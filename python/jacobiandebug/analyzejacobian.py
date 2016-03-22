@@ -93,6 +93,9 @@ def findExecutable(executable_option, method_option):
 #   sd1  kern3
 
 def analyze(dofdata, Mfd, Mhc, Mdiff) :
+  global options
+
+  diagonal_only = options.diagonal_only
   dofs = dofdata['ndof']
   nlvars = [var['name'] for var in dofdata['vars']]
   numvars = len(nlvars)
@@ -140,6 +143,9 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
 
     for j in range(nblocks) :
 
+      if i != j and diagonal_only :
+        continue
+
       if norm[i][j] > e*fd[i][j] :
         if not printed :
           print "\nKernel for variable '%s':" % nlvars[i]
@@ -182,7 +188,10 @@ def saveMatrixToFile(M, dofs, filename) :
 #
 # Simple state machine parser for the MOOSE output
 #
-def parseOutput(output, dofdata, write_matrices) :
+def parseOutput(output, dofdata) :
+  global options
+
+  write_matrices = options.write_matrices
   dofs = dofdata['ndof']
 
   state = 0
@@ -263,6 +272,8 @@ if __name__ == '__main__':
 
   parser.add_option("-r", "--resize-mesh", dest="resize_mesh", action="store_true", help="Perform resizing of generated meshs (to speed up the testing).")
   parser.add_option("-s", "--mesh-size", dest="mesh_size", default=1, type="int", help="Set the mesh dimensions to this number of elements along each dimension (defaults to 1, requires -r option).")
+
+  parser.add_option("-D", "--on-diagonal-only", dest="diagonal_only", action="store_true", help="Test on-diagonal Jacobians only.")
 
   parser.add_option("-d", "--debug", dest="debug", action="store_true", help="Output the command line used to run the application.")
   parser.add_option("-w", "--write-matrices", dest="write_matrices", action="store_true", help="Output the Jacobian matrices in gnuplot format.")
@@ -374,4 +385,4 @@ if __name__ == '__main__':
     sys.exit(1)
 
   # parse the raw output, which contains the PETSc debug information
-  parseOutput(data, dofdata, options.write_matrices)
+  parseOutput(data, dofdata)
