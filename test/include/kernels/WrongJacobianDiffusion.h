@@ -43,6 +43,11 @@ protected:
    */
   virtual Real computeQpJacobian();
 
+  /**
+   * Set a constant off-diagonal Jacobian
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int);
+
 private:
   /// prefactor of the Residual
   Real _rfactor;
