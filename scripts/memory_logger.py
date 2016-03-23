@@ -10,7 +10,7 @@ It determins which debugger to inherit based on parsed arguments and
 platform specs.
   """
   def __init__(self, arguments):
-    if arguments.debugger[0] == 'lldb':
+    if arguments.debugger == 'lldb':
       self.debugger = lldbAPI(arguments)
     else:
       self.debugger = DebugInterpreter(arguments)
@@ -76,7 +76,7 @@ class DebugInterpreter:
   """
   def __init__(self, arguments):
     self.last_position = 0
-    self.debugger = arguments.debugger[0]
+    self.debugger = arguments.debugger
 
   def _parseStackTrace(self, gibberish):
     not_gibberish = re.findall(r'\(' + self.debugger + '\) (#.*)\(' + self.debugger + '\)', gibberish, re.DOTALL)
@@ -606,20 +606,24 @@ machine_id is supplied by the client class. This allows for multiple agents if d
                           'REQUEST'   : { 'run'          : '',
                                           'pstack'       : '',
                                           'repeat_rate'  : '',
-                                          'cwd'          : ''},
+                                          'cwd'          : '',
+                                          'debugger'     : ''},
                           'STOP'      : False,
                           'TOTAL'     : 0,
                           'DEBUG_LOG' : ''
                         }
                       }
 
-    # Instance our chosen debugger
-    if self.arguments.debugger:
-      self.stack_trace = Debugger(self.arguments)
+    # we need to create a place holder for our debugger because when
+    # memory_logger is run via --pbs, this Agent will not know what
+    # kind of debugger to use until it has made contact with the server
+    self.stack_trace = None
 
   # NOTE: This is the only function that should be called in this class
   def takeSample(self):
     if self.arguments.pstack:
+      if self.stack_trace is None:
+        self.stack_trace = Debugger(self.arguments)
       self.agent_data[self.my_uuid]['STACK'] = self._getStack()
 
     # Always do the following
@@ -1074,7 +1078,7 @@ def verifyArgs(args):
 
   if args.pstack and (args.read is None and args.plot is None):
     if args.debugger is not None:
-      if args.debugger[0] == 'lldb':
+      if args.debugger == 'lldb':
         if platform.platform().find('Darwin') != -1:
           try:
             import lldb
@@ -1083,7 +1087,7 @@ def verifyArgs(args):
             sys.exit(1)
         else:
           results = which('lldb')
-      elif args.debugger[0] == 'gdb':
+      elif args.debugger == 'gdb':
         results = which('gdb')
     else:
       print 'Invalid debugger selected. You must choose between gdb and lldb using the --debugger argument'
@@ -1109,7 +1113,7 @@ def parseArguments(args=None):
   commongroup = parser.add_argument_group('Common Options', 'The following options can be used when displaying the results')
   commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Display/Record stack trace information (if available)\n ')
   commongroup.add_argument('--stdout', dest='stdout', action='store_const', const=True, default=False, help='Display stdout information\n ')
-  commongroup.add_argument('--debugger', dest='debugger', metavar='gdb | lldb', nargs=1, help='Specify the debugger to use. Possible values: gdb or lldb (default gdb)\n ')
+  commongroup.add_argument('--debugger', dest='debugger', metavar='gdb | lldb', nargs='?', help='Specify the debugger to use. Possible values: gdb or lldb\n ')
 
   plotgroup = parser.add_argument_group('Plot Options', 'Additional options when using --plot')
   plotgroup.add_argument('--rotate-text', nargs=1, metavar='int', type=int, default=[30], help='Rotate stdout/pstack text by this ammount (default 30)\n ')
