@@ -12,4 +12,17 @@
     exodiff = coord_type_rz_x_rotation.e
     cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_x_rotation'
   [../]
+  [./rz-integrated-y-rotation]
+    # DGDiffusion with multiple integrated BCs; rotation around y-axis
+    type = Exodiff
+    input = coord_type_rz_integrated.i
+    exodiff = coord_type_rz_integrated_out.e
+  [../]
+  [./rz-integrated-x-rotation]
+    # DGDiffusion with multiple integrated BCs; rotation around x-axis
+    type = Exodiff
+    input = coord_type_rz_integrated.i
+    exodiff = coord_type_rz_integrated_x_rotation_out.e
+    cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_integrated_x_rotation_out'
+  [../]
 []
