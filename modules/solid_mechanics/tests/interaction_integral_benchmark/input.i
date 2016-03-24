@@ -32,6 +32,14 @@
   [../]
 []
 
+[Functions]
+  [./kifunc]
+    type = PiecewiseLinear
+    x = '0.0 1.0 2.0'
+    y = '0.0 1.0 2.0'
+  [../]
+[]
+
 [DomainIntegral]
   integrals = 'JIntegral InteractionIntegralKI InteractionIntegralKII InteractionIntegralKIII'
   boundary = 1001
@@ -121,6 +129,9 @@
     variable = disp_x
     component = x
     boundary = 1
+    KI_function = kifunc
+    KII_function = 1.0
+    KIII_function = 1.0
     youngs_modulus = 30000
     poissons_ratio = 0.3
     crack_front_definition = crackFrontDefinition
@@ -132,6 +143,9 @@
     variable = disp_y
     component = y
     boundary = 1
+    KI_function = kifunc
+    KII_function = 1.0
+    KIII_function = 1.0
     youngs_modulus = 30000
     poissons_ratio = 0.3
     crack_front_definition = crackFrontDefinition
@@ -143,6 +157,9 @@
     variable = disp_z
     component = z
     boundary = 1
+    KI_function = kifunc
+    KII_function = 1.0
+    KIII_function = 1.0
     youngs_modulus = 30000
     poissons_ratio = 0.3
     crack_front_definition = crackFrontDefinition
@@ -189,8 +206,8 @@
   start_time = 0.0
   dt = 1
 
-  end_time = 1
-  num_steps = 1
+  end_time = 2
+  num_steps = 2
 
 []
 
