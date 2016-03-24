@@ -276,7 +276,7 @@ class TensorMechanicsPlasticTensileMulti : public TensorMechanicsPlasticModel
    * @param returned_diagonal_stress The eigenvalues (sorted in ascending order as is standard in this Class) are stored in the diagonal components
    * @param dpm The three plastic multipliers
    * @param str The yield strength
-   * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is classified as "non-negative" in the Kuhn-Tucker conditions).
+   * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is grouped as "non-negative" in the Kuhn-Tucker conditions).
    */
   bool KuhnTuckerOK(const RankTwoTensor & returned_diagonal_stress, const std::vector<Real> & dpm, Real str, Real ep_plastic_tolerance) const;
 
