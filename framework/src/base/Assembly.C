@@ -566,6 +566,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   // set the coord transformation
   _coord.resize(_current_qrule_face->n_points());
   _coord_type = _sys.subproblem().getCoordSystem(elem->subdomain_id());
+  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
   switch (_coord_type)
   {
   case Moose::COORD_XYZ:
@@ -575,7 +576,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   case Moose::COORD_RZ:
     for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
-      _coord[qp] = 2 * M_PI * _current_q_points_face[qp](0);
+      _coord[qp] = 2 * M_PI * _current_q_points_face[qp](rz_radial_coord);
     break;
 
   case Moose::COORD_RSPHERICAL:
