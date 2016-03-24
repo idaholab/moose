@@ -70,7 +70,8 @@ class Parser:
                 params[key] = False
               else:
                 print "Unrecognized (key,value) pair: (", key, ',', value, ")"
-                return 0x02
+                params['error_code'] = 0x02
+                error_code = error_code | params['error_code']
 
               # Otherwise, just do normal assignment
             else:
@@ -83,7 +84,8 @@ class Parser:
     if len(required_params_missing):
       print 'Error detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
       print '       Required Missing Parameter(s): ', required_params_missing
-      error_code = 0x04 # Missing required params
+      params['error_code'] = 0x04 # Missing required params
+      error_code = params['error_code']
 
     return error_code
 

@@ -214,6 +214,8 @@ class TestHarness:
                       (should_run, reason) = (False, 'Max Fails Exceeded')
                     elif self.num_failed > self.options.max_fails:
                       (should_run, reason) = (False, 'Max Fails Exceeded')
+                    elif tester.parameters().isValid('error_code'):
+                      (should_run, reason) = (False, 'skipped (Parser Error)')
                     else:
                       (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
 
