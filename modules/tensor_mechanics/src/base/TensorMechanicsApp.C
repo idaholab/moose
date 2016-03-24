@@ -64,6 +64,10 @@
 #include "ComputeVolumetricDeformGrad.h"
 #include "ComputeDeformGradBasedStress.h"
 #include "VolumeDeformGradCorrectedStress.h"
+#include "ComputeReturnMappingStress.h"
+#include "RecomputeGeneralReturnStressIncrement.h"
+#include "RecomputeRadialReturnStressIncrement.h"
+#include "RecomputeRadialReturnIsotropicPlasticity.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -190,6 +194,10 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeVolumetricDeformGrad);
   registerMaterial(ComputeDeformGradBasedStress);
   registerMaterial(VolumeDeformGradCorrectedStress);
+  registerMaterial(ComputeReturnMappingStress);
+  registerMaterial(RecomputeGeneralReturnStressIncrement);
+  registerMaterial(RecomputeRadialReturnStressIncrement);
+  registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

@@ -640,7 +640,6 @@ SolidModel::computeProperties()
 
   for ( _qp = 0; _qp < _qrule->n_points(); ++_qp )
   {
-
     _element->computeStrain( _qp,
                              _total_strain_old[_qp],
                              _total_strain[_qp],
