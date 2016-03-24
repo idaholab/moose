@@ -62,17 +62,17 @@ BoundingBoxNodeSet::modify()
     // Loop over the elements and assign node set id to nodes within the bounding box
     for (MeshBase::element_iterator el = mesh.active_elements_begin(); el != mesh.active_elements_end(); ++el)
     {
-      const Elem* elem = *el;
+      const Elem * elem = *el;
 
       bool contains = _bounding_box.contains_point((*el)->centroid());
       if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
       {
-        for (unsigned int j=0; j<elem->n_nodes(); j++)
+        for (unsigned int j = 0; j < elem->n_nodes(); ++j)
         {
-          const Node* node = elem->get_node(j);
+          const Node * node = elem->get_node(j);
 
-          for (unsigned int j=0; j<boundary_ids.size(); ++j)
-              boundary_info.add_node(node, boundary_ids[j]);
+          for (unsigned int j = 0; j < boundary_ids.size(); ++j)
+            boundary_info.add_node(node, boundary_ids[j]);
 
           found_node = true;
         }
@@ -84,7 +84,6 @@ BoundingBoxNodeSet::modify()
   else
     mooseError("Node set can not be empty!");
 
-  for (unsigned int i=0; i<boundary_ids.size(); ++i)
+  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.nodeset_name(boundary_ids[i]) = boundary_names[i];
 }
-

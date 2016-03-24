@@ -31,7 +31,7 @@ InputParameters validParams<AddAllSideSetsByNormals>()
   return params;
 }
 
-AddAllSideSetsByNormals::AddAllSideSetsByNormals(const InputParameters & parameters):
+AddAllSideSetsByNormals::AddAllSideSetsByNormals(const InputParameters & parameters) :
     AddSideSetsBase(parameters)
 {
 }
@@ -63,11 +63,11 @@ AddAllSideSetsByNormals::modify()
   // We can't rely on flood catching them all here...
   MeshBase::const_element_iterator       el     = _mesh_ptr->getMesh().elements_begin();
   const MeshBase::const_element_iterator end_el = _mesh_ptr->getMesh().elements_end();
-  for ( ; el != end_el ; ++el)
+  for (; el != end_el ; ++el)
   {
-    const Elem *elem = *el;
+    const Elem * elem = *el;
 
-    for (unsigned int side=0; side < elem->n_sides(); ++side)
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       if (elem->neighbor(side))
         continue;
@@ -117,4 +117,3 @@ AddAllSideSetsByNormals::getNextBoundaryID()
 
   return next_id;
 }
-
