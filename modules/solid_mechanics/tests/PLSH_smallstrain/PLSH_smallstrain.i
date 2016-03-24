@@ -3,7 +3,6 @@
 
 [Mesh]
   file = 1x1x1cube.e
-
 #  displacements = 'disp_x disp_y disp_z'
 []
 
@@ -138,10 +137,10 @@
 [Materials]
   [./vermont]
     type = SolidModel
-    formulation = lINeaR
+    formulation = Linear
     block = 1
     youngs_modulus = 2.1e5
-    poissons_ratio = .3
+    poissons_ratio = 0.3
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -154,6 +153,7 @@
     hardening_function = hf
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
+#    output_iteration_info = true
   [../]
 
 []
@@ -177,7 +177,7 @@
   nl_max_its = 100
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-10
-  l_tol = 1e-9
+  l_tol = 1e-19
 
   start_time = 0.0
   end_time = 0.075

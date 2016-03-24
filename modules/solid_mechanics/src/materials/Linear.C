@@ -66,6 +66,4 @@ Linear::computeStrain( const unsigned qp,
 
   strain_increment -= total_strain_old;
 }
-
-
 }
