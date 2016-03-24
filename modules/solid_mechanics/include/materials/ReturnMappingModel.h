@@ -16,19 +16,19 @@
 class ReturnMappingModel : public ConstitutiveModel
 {
 public:
-  ReturnMappingModel( const InputParameters & parameters);
+  ReturnMappingModel(const InputParameters & parameters);
   virtual ~ReturnMappingModel() {}
 
 
   /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress( const Elem & current_elem,
+  virtual void computeStress(const Elem & current_elem,
                               unsigned qp,
                               const SymmElasticityTensor & elasticityTensor,
                               const SymmTensor & stress_old,
                               SymmTensor & strain_increment,
                               SymmTensor & stress_new );
 
-  void computeStress( const Elem & /*current_elem*/,
+  void computeStress(const Elem & /*current_elem*/,
                       unsigned qp,
                       const SymmElasticityTensor & elasticityTensor,
                       const SymmTensor & stress_old,
@@ -57,7 +57,6 @@ protected:
   Real _effective_strain_increment;
 
 private:
-
 };
 
 template<>

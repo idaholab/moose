@@ -138,6 +138,7 @@ IsotropicPlasticity::computeHardening( unsigned qp, Real /*scalar*/ )
   {
     const Real strain_old = (*_scalar_plastic_strain_old)[qp];
     Point p;
+
     slope = _hardening_function->timeDerivative( strain_old, p );
   }
   return slope;
