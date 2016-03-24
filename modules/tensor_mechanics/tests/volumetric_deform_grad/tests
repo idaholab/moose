@@ -1,0 +1,12 @@
+[Tests]
+  [./elastic]
+    type = 'CSVDiff'
+    input = 'elastic_stress.i'
+    csvdiff = 'elastic_stress_out.csv'
+  [../]
+  [./interface]
+    type = 'CSVDiff'
+    input = 'volumetric_strain_interface.i'
+    csvdiff = 'volumetric_strain_interface_out.csv'
+  [../]
+[]
