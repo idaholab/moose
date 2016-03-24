@@ -42,13 +42,13 @@ protected:
 
   Real _r;
   Real _theta;
-  Real _poissons_ratio;
-  Real _youngs_modulus;
+  const Real _poissons_ratio;
+  const Real _youngs_modulus;
   Real _kappa;
   Real _mu;
-  Real _ki;
-  Real _kii;
-  Real _kiii;
+  Function & _ki_function;
+  Function & _kii_function;
+  Function & _kiii_function;
 };
 
 #endif //INTERACTIONINTEGRALBENCHMARKBC_H
