@@ -243,7 +243,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
    * Returns true if the Kuhn-Tucker conditions are satisfied
    * @param yf The six yield function values
    * @param dpm The six plastic multipliers
-   * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is classified as "non-negative" in the Kuhn-Tucker conditions).
+   * @param ep_plastic_tolerance The tolerance on the plastic strain (if dpm>-ep_plastic_tolerance then it is grouped as "non-negative" in the Kuhn-Tucker conditions).
    */
   bool KuhnTuckerOK(const std::vector<Real> & yf, const std::vector<Real> & dpm, Real ep_plastic_tolerance) const;
 
