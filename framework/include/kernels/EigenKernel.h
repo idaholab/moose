@@ -24,7 +24,7 @@ class EigenSystem;
 template<>
 InputParameters validParams<EigenKernel>();
 
-/*
+/**
  * The behavior of this kernel is controlled by one problem-wise global parameter
  *    eigen_on_current - bool, to indicate if this kernel is operating on the current solution or old solution
  * This kernel also obtain the postprocessor for eigenvalue by one problem-wise global parameter
@@ -58,8 +58,10 @@ protected:
   /// EigenKernel always lives in EigenSystem
   EigenSystem * _eigen_sys;
 
-  /// A pointer to the eigenvalue that is stored in a postprocessor
-  // This is a pointer so that the method for retrieval (old vs current) may be changed
+  /**
+   * A pointer to the eigenvalue that is stored in a postprocessor
+   * This is a pointer so that the method for retrieval (old vs current) may be changed.
+   */
   const Real * _eigenvalue;
 };
 
