@@ -28,7 +28,7 @@ ThirdPhaseSuppressionMaterial::ThirdPhaseSuppressionMaterial(const InputParamete
   std::vector<std::string> eta_name(_num_eta);
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
-      _prop_d2g[i].resize(_num_eta);
+    _prop_d2g[i].resize(_num_eta);
   // declare derivative properties, fetch eta values
     eta_name[i] = getVar("etas", i)->name();
   }
@@ -65,15 +65,15 @@ ThirdPhaseSuppressionMaterial::computeQpProperties()
         const Real nj = (*_eta[j])[_qp];
         const Real nk = (*_eta[k])[_qp];
 
-            _prop_g[_qp]         +=  ni * ni * nj * nj * nk * nk;
-            (*_prop_dg[i])[_qp]  +=  2 * ni * nj * nj * nk * nk;
-            (*_prop_dg[j])[_qp]  +=  2 * ni * ni * nj * nk * nk;
-            (*_prop_dg[k])[_qp]  +=  2 * ni * ni * nj * nj * nk;
-            (*_prop_d2g[i][i])[_qp] +=  2 * nj * nj * nk * nk;
-            (*_prop_d2g[j][j])[_qp] +=  2 * ni * ni * nk * nk;
-            (*_prop_d2g[k][k])[_qp] +=  2 * ni * ni * nj * nj;
-            (*_prop_d2g[i][j])[_qp] +=  4 * ni * nj * nk * nk;
-            (*_prop_d2g[i][k])[_qp] +=  4 * ni * nj * nj * nk;
-            (*_prop_d2g[k][j])[_qp] +=  4 * ni * ni * nj * nk;
+        _prop_g[_qp]         +=  ni * ni * nj * nj * nk * nk;
+        (*_prop_dg[i])[_qp]  +=  2 * ni * nj * nj * nk * nk;
+        (*_prop_dg[j])[_qp]  +=  2 * ni * ni * nj * nk * nk;
+        (*_prop_dg[k])[_qp]  +=  2 * ni * ni * nj * nj * nk;
+        (*_prop_d2g[i][i])[_qp] +=  2 * nj * nj * nk * nk;
+        (*_prop_d2g[j][j])[_qp] +=  2 * ni * ni * nk * nk;
+        (*_prop_d2g[k][k])[_qp] +=  2 * ni * ni * nj * nj;
+        (*_prop_d2g[i][j])[_qp] +=  4 * ni * nj * nk * nk;
+        (*_prop_d2g[i][k])[_qp] +=  4 * ni * nj * nj * nk;
+        (*_prop_d2g[k][j])[_qp] +=  4 * ni * ni * nj * nk;
       }
 }
