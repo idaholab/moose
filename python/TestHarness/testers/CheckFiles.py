@@ -19,10 +19,12 @@ class CheckFiles(RunApp):
   def prepare(self):
     if self.specs['delete_output_before_running'] == True:
       for file in self.specs['check_files'] + self.specs['check_not_exists']:
-        try:
-          os.remove(os.path.join(self.specs['test_dir'], file))
-        except:
-          pass
+        full_path = os.path.join(self.specs['test_dir'], file)
+        if os.path.exists(full_path):
+          try:
+            os.remove(full_path)
+          except:
+            print "Unable to remove file: " + full_path
 
   def processResults(self, moose_dir, retcode, options, output):
     (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
