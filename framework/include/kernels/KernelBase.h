@@ -39,6 +39,10 @@ class MooseVariable;
 template<>
 InputParameters validParams<KernelBase>();
 
+/**
+ * This is the common base class for the two main
+ * kernel types implemented in MOOSE, EigenKernel and Kernel.
+ */
 class KernelBase :
   public MooseObject,
   public BlockRestrictable,

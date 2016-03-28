@@ -21,7 +21,7 @@ template<>
 InputParameters validParams<BodyForce>()
 {
   InputParameters params = validParams<Kernel>();
-  params.set<Real>("value")=0.0;
+  params.addParam<Real>("value", 1.0, "Coefficent to multiply by the body force term");
   // A ConstantFunction of "1" is supplied as the default
   params.addParam<FunctionName>("function", "1", "A function that describes the body force");
   return params;
@@ -40,4 +40,3 @@ BodyForce::computeQpResidual()
   Real factor = _value * _function.value(_t, _q_point[_qp]);
   return _test[_i][_qp] * -factor;
 }
-
