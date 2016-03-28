@@ -167,8 +167,8 @@ GeneratedMesh::buildMesh()
 
     // We will need the biases raised to integer powers in each
     // direction, so let's pre-compute those...
-    std::vector<std::vector<Real> > pows(3);
-    for (unsigned int dir=0; dir<3; ++dir)
+    std::vector<std::vector<Real> > pows(LIBMESH_DIM);
+    for (unsigned int dir = 0; dir < LIBMESH_DIM; ++dir)
     {
       pows[dir].resize(nelem[dir] + 1);
       for (unsigned int i=0; i<pows[dir].size(); ++i)
@@ -179,11 +179,11 @@ GeneratedMesh::buildMesh()
     MeshBase::node_iterator       node_it  = mesh.nodes_begin();
     const MeshBase::node_iterator node_end = mesh.nodes_end();
 
-    for ( ; node_it != node_end; ++node_it)
+    for (; node_it != node_end; ++node_it)
     {
       Node & node = **node_it;
 
-      for (unsigned int dir=0; dir<3; ++dir)
+      for (unsigned int dir = 0; dir < LIBMESH_DIM; ++dir)
       {
         if (width[dir] != 0. && bias[dir] != 1.)
         {

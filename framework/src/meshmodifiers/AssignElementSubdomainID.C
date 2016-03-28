@@ -50,7 +50,7 @@ AssignElementSubdomainID::modify()
   if (isParamValid("element_ids"))
   {
     std::vector<dof_id_type> elemids = getParam<std::vector<dof_id_type> >("element_ids");
-    for (dof_id_type i=0; i<elemids.size(); ++i)
+    for (dof_id_type i = 0; i < elemids.size(); ++i)
     {
       Elem * elem = mesh.query_elem(elemids[i]);
       if (!elem)
@@ -64,9 +64,9 @@ AssignElementSubdomainID::modify()
     bool has_warned_remapping = false;
     MeshBase::const_element_iterator       el     = mesh.elements_begin();
     const MeshBase::const_element_iterator end_el = mesh.elements_end();
-    for (dof_id_type e=0; el != end_el; ++el, ++e)
+    for (dof_id_type e = 0; el != end_el; ++el, ++e)
     {
-      Elem* elem = *el;
+      Elem * elem = *el;
       if (elem->id() != e && (!has_warned_remapping))
       {
         mooseWarning("AssignElementSubdomainID will ignore the element remapping");
@@ -81,7 +81,7 @@ AssignElementSubdomainID::modify()
 
   // Assign new subdomain IDs and make sure elements in different types are not assigned with the same subdomain ID
   std::map<ElemType, std::set<SubdomainID> > type2blocks;
-  for (dof_id_type e=0; e<elements.size(); ++e)
+  for (dof_id_type e = 0; e<elements.size(); ++e)
   {
     Elem* elem = elements[e];
     ElemType type = elem->type();
@@ -109,4 +109,3 @@ AssignElementSubdomainID::modify()
     elem->subdomain_id() = newid;
   }
 }
-

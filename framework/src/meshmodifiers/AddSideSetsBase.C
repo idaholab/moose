@@ -34,7 +34,7 @@ InputParameters validParams<AddSideSetsBase>()
   return params;
 }
 
-AddSideSetsBase::AddSideSetsBase(const InputParameters & parameters):
+AddSideSetsBase::AddSideSetsBase(const InputParameters & parameters) :
     MeshModifier(parameters),
     _variance(getParam<Real>("variance")),
     _fixed_normal(getParam<bool>("fixed_normal")),
@@ -84,7 +84,7 @@ AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
     return;
 
   _visited[side_id].insert(elem);
-  for (unsigned int side=0; side < elem->n_sides(); ++side)
+  for (unsigned int side = 0; side < elem->n_sides(); ++side)
   {
     if (elem->neighbor(side))
       continue;
@@ -93,10 +93,10 @@ AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
     const std::vector<Point> normals = _fe_face->get_normals();
 
     // We'll just use the normal of the first qp
-    if (std::abs(1.0 - normal*normals[0]) <= _variance)
+    if (std::abs(1.0 - normal * normals[0]) <= _variance)
     {
       _mesh_ptr->getMesh().get_boundary_info().add_side(elem, side, side_id);
-      for (unsigned int neighbor=0; neighbor < elem->n_sides(); ++neighbor)
+      for (unsigned int neighbor = 0; neighbor < elem->n_sides(); ++neighbor)
       {
         // Flood to the neighboring elements using the current matching side normal from this element.
         // This will allow us to tolerate small changes in the normals so we can "paint" around a curve.
@@ -105,4 +105,3 @@ AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
     }
   }
 }
-

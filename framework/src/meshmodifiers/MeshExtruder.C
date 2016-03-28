@@ -37,7 +37,7 @@ InputParameters validParams<MeshExtruder>()
   return params;
 }
 
-MeshExtruder::MeshExtruder(const InputParameters & parameters):
+MeshExtruder::MeshExtruder(const InputParameters & parameters) :
     MeshModifier(parameters),
     _num_layers(getParam<unsigned int>("num_layers")),
     _extrusion_vector(getParam<RealVectorValue>("extrusion_vector")),
@@ -82,7 +82,7 @@ MeshExtruder::modify()
                                          _map_custom_ids ? &elem_subdomain_id : NULL);
 
   // See if the user has requested specific sides for the top and bottom
-  const std::set<boundary_id_type> &side_ids = _mesh_ptr->getMesh().get_boundary_info().get_side_boundary_ids();
+  const std::set<boundary_id_type> & side_ids = _mesh_ptr->getMesh().get_boundary_info().get_side_boundary_ids();
   std::set<boundary_id_type>::reverse_iterator last_side_it = side_ids.rbegin();
 
   const boundary_id_type old_top = *last_side_it;
@@ -111,7 +111,7 @@ MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_i
   if (std::find(boundary_ids.begin(), boundary_ids.end(), old_id) == boundary_ids.end())
     _mesh_ptr->changeBoundaryId(old_id, boundary_ids[0], true);
 
-  for (unsigned int i=0; i<boundary_ids.size(); ++i)
+  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     _mesh_ptr->getMesh().get_boundary_info().sideset_name(boundary_ids[i]) = names[i];
 }
 
@@ -128,13 +128,12 @@ MeshExtruder::QueryElemSubdomainID::QueryElemSubdomainID(std::vector<SubdomainID
 
   // Setup our stride depending on whether the user passed unique sets in new ids or just a single set of new ids
   const unsigned int zero = 0;
-  unsigned int i = 0;
   const unsigned int stride = existing_subdomains.size() == new_ids.size() ? zero : existing_subdomains.size();
 
   // Populate the data structure
-  for (i = 0; i < layers.size(); ++i)
+  for (unsigned int i = 0; i < layers.size(); ++i)
     for (unsigned int j = 0; j < existing_subdomains.size(); ++j)
-      _layer_data[layers[i]][existing_subdomains[j]] = new_ids[i*stride + j];
+      _layer_data[layers[i]][existing_subdomains[j]] = new_ids[i * stride + j];
 }
 
 subdomain_id_type

@@ -27,7 +27,7 @@ InputParameters validParams<SideSetsBetweenSubdomains>()
   return params;
 }
 
-SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const InputParameters & parameters):
+SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const InputParameters & parameters) :
     MeshModifier(parameters)
 {
 }
@@ -61,7 +61,7 @@ SideSetsBetweenSubdomains::modify()
     if (curr_subdomain != master_id)
       continue;
 
-    for (unsigned int side=0; side<elem->n_sides(); side++)
+    for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
       const Elem * neighbor = elem->neighbor(side);
       if (neighbor != NULL && neighbor->subdomain_id() == paired_id)  // is this side between the two blocks?
@@ -72,7 +72,6 @@ SideSetsBetweenSubdomains::modify()
     }
   }
 
-  for (unsigned int i=0; i<boundary_ids.size(); ++i)
+  for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = boundary_names[i];
 }
-
