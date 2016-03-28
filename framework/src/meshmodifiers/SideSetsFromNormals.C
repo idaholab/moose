@@ -33,7 +33,7 @@ InputParameters validParams<SideSetsFromNormals>()
   return params;
 }
 
-SideSetsFromNormals::SideSetsFromNormals(const InputParameters & parameters):
+SideSetsFromNormals::SideSetsFromNormals(const InputParameters & parameters) :
     AddSideSetsBase(parameters),
     _normals(getParam<std::vector<Point> >("normals"))
 {
@@ -76,11 +76,11 @@ SideSetsFromNormals::modify()
   // We can't rely on flood catching them all here...
   MeshBase::const_element_iterator       el     = _mesh_ptr->getMesh().elements_begin();
   const MeshBase::const_element_iterator end_el = _mesh_ptr->getMesh().elements_end();
-  for ( ; el != end_el ; ++el)
+  for (; el != end_el ; ++el)
   {
     const Elem *elem = *el;
 
-    for (unsigned int side=0; side < elem->n_sides(); ++side)
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       if (elem->neighbor(side))
         continue;
@@ -88,7 +88,7 @@ SideSetsFromNormals::modify()
       _fe_face->reinit(elem, side);
       const std::vector<Point> & normals = _fe_face->get_normals();
 
-      for (unsigned int i=0; i<boundary_ids.size(); ++i)
+      for (unsigned int i = 0; i < boundary_ids.size(); ++i)
       {
         if (std::abs(1.0 - _normals[i]*normals[0]) < 1e-5)
           flood(*el, _normals[i], boundary_ids[i]);
@@ -102,4 +102,3 @@ SideSetsFromNormals::modify()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 }
-

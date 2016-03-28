@@ -53,7 +53,7 @@ InputParameters validParams<TiledMesh>()
   return params;
 }
 
-TiledMesh::TiledMesh(const InputParameters & parameters):
+TiledMesh::TiledMesh(const InputParameters & parameters) :
     MooseMesh(parameters),
     _x_width(getParam<Real>("x_width")),
     _y_width(getParam<Real>("y_width")),
@@ -111,7 +111,7 @@ TiledMesh::buildMesh()
       UniquePtr<MeshBase> clone = serial_mesh->clone();
 
       // Build X Tiles
-      for (unsigned int i=1; i<getParam<unsigned int>("x_tiles"); ++i)
+      for (unsigned int i = 1; i < getParam<unsigned int>("x_tiles"); ++i)
       {
         MeshTools::Modification::translate(*clone, _x_width, 0, 0);
         serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
@@ -121,7 +121,7 @@ TiledMesh::buildMesh()
       UniquePtr<MeshBase> clone = serial_mesh->clone();
 
       // Build Y Tiles
-      for (unsigned int i=1; i<getParam<unsigned int>("y_tiles"); ++i)
+      for (unsigned int i = 1; i < getParam<unsigned int>("y_tiles"); ++i)
       {
         MeshTools::Modification::translate(*clone, 0, _y_width, 0);
         serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
@@ -131,7 +131,7 @@ TiledMesh::buildMesh()
       UniquePtr<MeshBase> clone = serial_mesh->clone();
 
       // Build Z Tiles
-      for (unsigned int i=1; i<getParam<unsigned int>("z_tiles"); ++i)
+      for (unsigned int i = 1; i < getParam<unsigned int>("z_tiles"); ++i)
       {
         MeshTools::Modification::translate(*clone, 0, 0, _z_width);
         serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);

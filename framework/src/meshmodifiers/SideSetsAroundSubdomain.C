@@ -32,7 +32,7 @@ InputParameters validParams<SideSetsAroundSubdomain>()
   return params;
 }
 
-SideSetsAroundSubdomain::SideSetsAroundSubdomain(const InputParameters & parameters):
+SideSetsAroundSubdomain::SideSetsAroundSubdomain(const InputParameters & parameters) :
     AddSideSetsBase(parameters),
     BlockRestrictable(parameters),
     _boundary_names(getParam<std::vector<BoundaryName> >("new_boundary")),
@@ -40,7 +40,6 @@ SideSetsAroundSubdomain::SideSetsAroundSubdomain(const InputParameters & paramet
     _normal_tol(getParam<Real>("normal_tol")),
     _normal(_using_normal ? getParam<Point>("normal") : Point())
 {
-
   if (_using_normal)
   {
     // normalize
@@ -92,7 +91,7 @@ SideSetsAroundSubdomain::modify()
     if (curr_subdomain != block_id)
       continue;
 
-    for (unsigned int side = 0; side < elem->n_sides(); side++)
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       const Elem * neighbor = elem->neighbor(side);
       if (neighbor == NULL ||                   // element on boundary OR
@@ -120,4 +119,3 @@ SideSetsAroundSubdomain::modify()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 }
-

@@ -477,7 +477,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
       ++it)
   {
     const Elem * elem = *it;
-    for (unsigned int n=0; n<elem->n_nodes(); n++)
+    for (unsigned int n = 0; n < elem->n_nodes(); ++n)
     {
       Node * node = elem->get_node(n);
 
@@ -491,7 +491,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
       ++it)
   {
     Elem * elem = getMesh().elem(*it);
-    for (unsigned int n=0; n<elem->n_nodes(); n++)
+    for (unsigned int n = 0; n < elem->n_nodes(); n++)
     {
       Node * node = elem->get_node(n);
 
@@ -558,7 +558,7 @@ MooseMesh::buildNodeList()
   }
 
   _bnd_nodes.reserve(_bnd_nodes.size() + _extra_bnd_nodes.size());
-  for (unsigned int i=0; i<_extra_bnd_nodes.size(); i++)
+  for (unsigned int i = 0; i < _extra_bnd_nodes.size(); i++)
   {
     BndNode * bnode = new BndNode(_extra_bnd_nodes[i]._node, _extra_bnd_nodes[i]._bnd_id);
     _bnd_nodes.push_back(bnode);
@@ -603,7 +603,7 @@ MooseMesh::nodeToElemMap()
       const MeshBase::const_element_iterator end = getMesh().elements_end();
 
       for (; el != end; ++el)
-        for (unsigned int n=0; n<(*el)->n_nodes(); n++)
+        for (unsigned int n = 0; n < (*el)->n_nodes(); n++)
           _node_to_elem_map[(*el)->node(n)].push_back((*el)->id());
 
       _node_to_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
@@ -626,7 +626,7 @@ MooseMesh::nodeToActiveSemilocalElemMap()
 
       for (; el != end; ++el)
         if ((*el)->active())
-          for (unsigned int n=0; n<(*el)->n_nodes(); n++)
+          for (unsigned int n = 0; n < (*el)->n_nodes(); n++)
             _node_to_active_semilocal_elem_map[(*el)->node(n)].push_back((*el)->id());
 
       _node_to_active_semilocal_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
@@ -796,14 +796,14 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
     _node_map.clear();
     _node_map.reserve(getMesh().n_nodes());
     const libMesh::MeshBase::node_iterator end = getMesh().nodes_end();
-    for (libMesh::MeshBase::node_iterator i=getMesh().nodes_begin(); i != end; ++i)
+    for (libMesh::MeshBase::node_iterator i = getMesh().nodes_begin(); i != end; ++i)
     {
       _node_map.push_back(*i);
     }
   }
 
   Node *node = NULL;
-  for (unsigned int i=0; i<_node_map.size(); ++i)
+  for (unsigned int i = 0; i < _node_map.size(); ++i)
   {
     if (p.relative_fuzzy_equals(*_node_map[i], tol))
     {
@@ -816,22 +816,6 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
     node = getMesh().add_node(new Node(p));
     _node_map.push_back(node);
   }
-
-/*  Alternative method
-  libMesh::MeshBase::node_iterator i = getMesh().nodes_begin();
-  libMesh::MeshBase::node_iterator i_end = getMesh().nodes_end();
-  Node *node = NULL;
-  for (; i != i_end; ++i)
-  {
-    if (p.relative_fuzzy_equals(**i, tol))
-    {
-      node = *i;
-      break;
-    }
-  }
-  if (node == NULL)
-    node = getMesh().add_node(new Node(p));
-*/
 
   mooseAssert(node != NULL, "Node is NULL");
   return node;
@@ -936,7 +920,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool 
   BoundaryID max_boundary_id = boundary_ids.empty() ? 0 : *(boundary_ids.rbegin());
 
   std::vector<BoundaryID> ids(boundary_name.size());
-  for (unsigned int i=0; i<boundary_name.size(); i++)
+  for (unsigned int i = 0; i < boundary_name.size(); i++)
   {
     if (boundary_name[i] == "ANY_BOUNDARY_ID")
     {
@@ -952,7 +936,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool 
     if (!(ss >> id))
     {
       /**
-       * If the converstion from a name to a number fails, that means that this must be a named
+       * If the conversion from a name to a number fails, that means that this must be a named
        * boundary.  We will look in the complete map for this sideset and create a new name/ID pair
        * if requested.
        */
@@ -990,7 +974,7 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
 {
   std::vector<SubdomainID> ids(subdomain_name.size());
 
-  for (unsigned int i=0; i<subdomain_name.size(); i++)
+  for (unsigned int i = 0; i < subdomain_name.size(); i++)
   {
     if (subdomain_name[i] == "ANY_BLOCK_ID")
     {
@@ -1056,30 +1040,30 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
   for (; it != it_end; ++it)
   {
     const Elem *elem = *it;
-    for (unsigned int s=0; s<elem->n_sides(); ++s)
+    for (unsigned int s = 0; s < elem->n_sides(); ++s)
     {
       if (elem->neighbor(s))
         continue;
 
       boundary_info.boundary_ids (elem, s, bc_ids);
-      for (std::vector<boundary_id_type>::const_iterator id_it = bc_ids.begin(); id_it!=bc_ids.end(); ++id_it)
+      for (std::vector<boundary_id_type>::const_iterator id_it = bc_ids.begin(); id_it != bc_ids.end(); ++id_it)
       {
         const boundary_id_type boundary_id = *id_it;
         const PeriodicBoundaryBase *periodic = pbs->boundary(boundary_id);
         if (periodic && periodic->is_my_variable(var_number))
         {
-          const Elem* neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
+          const Elem * neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
           unsigned int s_neigh = boundary_info.side_with_boundary_id (neigh, periodic->pairedboundary);
 
           UniquePtr<Elem> elem_side = elem->build_side(s);
           UniquePtr<Elem> neigh_side = neigh->build_side(s_neigh);
 
           // At this point we have matching sides - lets find matching nodes
-          for (unsigned int i=0; i<elem_side->n_nodes(); ++i)
+          for (unsigned int i = 0; i < elem_side->n_nodes(); ++i)
           {
-            Node *master_node = elem->get_node(i);
+            Node * master_node = elem->get_node(i);
             Point master_point = periodic->get_corresponding_pos(*master_node);
-            for (unsigned int j=0; j<neigh_side->n_nodes(); ++j)
+            for (unsigned int j = 0; j < neigh_side->n_nodes(); ++j)
             {
               Node *slave_node = neigh_side->get_node(j);
               if (master_point.absolute_fuzzy_equals(*slave_node))
@@ -1118,7 +1102,7 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type> > & 
   getMesh().get_boundary_info().build_node_list(nl, il);
 
   // Loop over all the boundary nodes adding the periodic nodes to the appropriate set
-  for (unsigned int i=0; i<nl.size(); ++i)
+  for (unsigned int i = 0; i < nl.size(); ++i)
   {
     // Is this current node on a known periodic boundary?
     if (periodic_node_sets.find(il[i]) != periodic_node_sets.end())
@@ -1143,8 +1127,8 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   const MeshBase::node_iterator nd_end = getMesh().nodes_end();
   for (MeshBase::node_iterator nd = getMesh().nodes_begin(); nd != nd_end; ++nd)
   {
-    Node &node = **nd;
-    for (unsigned int i=0; i<dim; ++i)
+    Node & node = **nd;
+    for (unsigned int i = 0; i < dim; ++i)
     {
       if (node(i) < min[i])
         min[i] = node(i);
@@ -1160,17 +1144,17 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   for (MeshBase::node_iterator nd = getMesh().nodes_begin(); nd != nd_end; ++nd)
   {
     // See if the current node is located at one of the extremes
-    Node &node = **nd;
+    Node & node = **nd;
     unsigned int coord_match = 0;
 
-    for (unsigned int i=0; i<dim; ++i)
+    for (unsigned int i = 0; i < dim; ++i)
     {
       if (std::abs(node(i) - min[i]) < tol)
       {
         comp_map[i] = MIN;
         ++coord_match;
       }
-      else if (std::abs(node(i) - max[i]) <tol)
+      else if (std::abs(node(i) - max[i]) < tol)
       {
         comp_map[i] = MAX;
         ++coord_match;
@@ -1179,7 +1163,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
     if (coord_match == dim)  // Found a coordinate at one of the extremes
     {
-      _extreme_nodes[comp_map[X]*4 + comp_map[Y]*2 + comp_map[Z]] = &node;
+      _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = &node;
       ++extreme_matches;
     }
   }
@@ -1191,13 +1175,13 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   // This is a regular orthogonal mesh, so set the bounds
   _regular_orthogonal_mesh = true;
   _bounds.resize(LIBMESH_DIM);
-  for (unsigned int i=0; i<dim; ++i)
+  for (unsigned int i = 0; i < dim; ++i)
   {
     _bounds[i].resize(2);
     _bounds[i][MIN] = min[i];
     _bounds[i][MAX] = max[i];
   }
-  for (unsigned int i=dim; i<LIBMESH_DIM; ++i)
+  for (unsigned int i = dim; i < LIBMESH_DIM; ++i)
   {
     _bounds[i].resize(2);
     _bounds[i][MIN] = 0;
@@ -1228,24 +1212,24 @@ MooseMesh::detectPairedSidesets()
   // Container to catch IDs passed back from the BoundaryInfo object
   std::vector<BoundaryID> bounds_ids;
 
-  for (unsigned int curr_dim=0; curr_dim < dim; ++curr_dim)
+  for (unsigned int curr_dim = 0; curr_dim < dim; ++curr_dim)
   {
     std::pair<BoundaryID, BoundaryID> paired_boundary;
-    for (unsigned int i=0; i<2; ++i)
+    for (unsigned int i = 0; i < 2; ++i)
     {
       std::map<BoundaryID, unsigned int> boundary_counts;
-      for (unsigned int j=0; j<2; ++j)
-        for (unsigned int k=0; k<z_dim; ++k)
+      for (unsigned int j = 0; j < 2; ++j)
+        for (unsigned int k = 0; k < z_dim; ++k)
         {
           boundary_info.boundary_ids(_extreme_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]], bounds_ids);
 
-          for (unsigned int l=0; l<bounds_ids.size(); ++l)
+          for (unsigned int l = 0; l<bounds_ids.size(); ++l)
             ++boundary_counts[bounds_ids[l]];
         }
 
       BoundaryID common_boundary = std::numeric_limits<BoundaryID>::max();
       unsigned int max_count = 0;
-      for (std::map<BoundaryID, unsigned int>::const_iterator it=boundary_counts.begin(); it != boundary_counts.end(); ++it)
+      for (std::map<BoundaryID, unsigned int>::const_iterator it = boundary_counts.begin(); it != boundary_counts.end(); ++it)
       {
         if (it->second > max_count)
         {
@@ -1256,7 +1240,7 @@ MooseMesh::detectPairedSidesets()
 
       // If this test fails, it means that the autodetection failed.  We'll just exit gracefully from this routine.
       // Note, this means that the _paired_boundary datastructure will not be populated
-      if (max_count < std::pow(2.0, (int)dim - 1))
+      if (max_count < std::pow(2.0, static_cast<int>(dim) - 1))
         return;
 
       if (i==0)
@@ -1303,11 +1287,11 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
 
   _periodic_dim[var_num].resize(dimension());
 
-  _half_range = Point(dimensionWidth(0)/2.0, dimensionWidth(1)/2.0, dimensionWidth(2)/2.0);
+  _half_range = Point(dimensionWidth(0) / 2.0, dimensionWidth(1) / 2.0, dimensionWidth(2) / 2.0);
 
-  for (unsigned int component=0; component<dimension(); ++component)
+  for (unsigned int component = 0; component < dimension(); ++component)
   {
-    std::pair<BoundaryID, BoundaryID> *boundary_ids = getPairedBoundaryMapping(component);
+    std::pair<BoundaryID, BoundaryID> * boundary_ids = getPairedBoundaryMapping(component);
 
     if (boundary_ids != NULL &&
         ((boundary_ids->first == primary && boundary_ids->second == secondary) ||
@@ -1332,7 +1316,7 @@ MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int com
 RealVectorValue
 MooseMesh::minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) const
 {
-  for (unsigned int i=0; i<dimension(); ++i)
+  for (unsigned int i = 0; i < dimension(); ++i)
   {
     // check to see if we're closer in real or periodic space in x, y, and z
     if (isTranslatedPeriodic(nonlinear_var_num, i))
@@ -1390,7 +1374,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
 
   // First, loop over all elements and find a canonical element for each type
   // Doing it this way guarantees that this is going to work in parallel
-  for ( ; el != end_el ; ++el) // TODO: Thread this
+  for (; el != end_el ; ++el) // TODO: Thread this
   {
     Elem * elem = *el;
     ElemType type = elem->type();
@@ -1425,7 +1409,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     buildCoarseningMap(*elem, *qrule, *qrule_face, -1);
 
     // Map the sides of children
-    for (unsigned int side=0; side<elem->n_sides(); side++)
+    for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
       // Side to side for sides that match parent's sides
       buildRefinementMap(*elem, *qrule, *qrule_face, side, -1, side);
@@ -1433,8 +1417,8 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     }
 
     // Child side to parent volume mapping for "internal" child sides
-    for (unsigned int child=0; child<elem->n_children(); child++)
-      for (unsigned int side=0; side<elem->n_sides(); side++) // Assume children have the same number of sides!
+    for (unsigned int child = 0; child < elem->n_children(); ++child)
+      for (unsigned int side = 0; side < elem->n_sides(); ++side) // Assume children have the same number of sides!
         if (!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
           buildRefinementMap(*elem, *qrule, *qrule_face, -1, child, side);
   }
@@ -1544,13 +1528,13 @@ MooseMesh::mapPoints(const std::vector<Point> & from, const std::vector<Point> &
 
   qp_map.resize(n_from);
 
-  for (unsigned int i=0; i<n_from; i++)
+  for (unsigned int i = 0; i < n_from; ++i)
   {
     const Point & from_point = from[i];
 
     QpMap & current_map = qp_map[i];
 
-    for (unsigned int j=0; j<n_to; j++)
+    for (unsigned int j = 0; j < n_to; ++j)
     {
       const Point & to_point = to[j];
       Real distance = (from_point - to_point).norm();
@@ -1581,21 +1565,21 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   unsigned int dim = template_elem->dim();
   mesh.set_mesh_dimension(dim);
 
-  for (unsigned int i=0; i<template_elem->n_nodes(); i++)
+  for (unsigned int i = 0; i < template_elem->n_nodes(); ++i)
     mesh.add_point(template_elem->point(i));
 
   Elem * elem = mesh.add_elem(Elem::build(template_elem->type()).release());
 
-  for (unsigned int i=0; i<template_elem->n_nodes(); i++)
+  for (unsigned int i = 0; i < template_elem->n_nodes(); ++i)
     elem->set_node(i) = mesh.node_ptr(i);
 
   UniquePtr<FEBase> fe (FEBase::build(dim, FEType()));
   fe->get_phi();
-  const std::vector<Point>& q_points_volume = fe->get_xyz();
+  const std::vector<Point> & q_points_volume = fe->get_xyz();
 
   UniquePtr<FEBase> fe_face (FEBase::build(dim, FEType()));
   fe_face->get_phi();
-  const std::vector<Point>& q_points_face = fe_face->get_xyz();
+  const std::vector<Point> & q_points_face = fe_face->get_xyz();
 
   fe->attach_quadrature_rule (&qrule);
   fe_face->attach_quadrature_rule (&qrule_face);
@@ -1633,11 +1617,11 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   else
   {
     children.resize(n_children);
-    for (unsigned int child=0; child < n_children; child++)
+    for (unsigned int child = 0; child < n_children; ++child)
       children[child] = child;
   }
 
-  for (unsigned int i=0; i < children.size(); i++)
+  for (unsigned int i = 0; i < children.size(); ++i)
   {
     unsigned int child = children[i];
 
@@ -1671,7 +1655,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   coarsen_map.resize(parent_ref_points.size());
 
   // For each parent qp find the closest child qp
-  for (unsigned int child=0; child < n_children; child++)
+  for (unsigned int child = 0; child < n_children; child++)
   {
     if (parent_side != -1 && !elem->is_child_on_side(child, child_side))
       continue;
@@ -1684,7 +1668,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
     mapPoints(parent_ref_points, child_ref_points, qp_map);
 
     // Check those to see if they are closer than what we currently have for each point
-    for (unsigned int parent_qp=0; parent_qp < parent_ref_points.size(); parent_qp++)
+    for (unsigned int parent_qp = 0; parent_qp < parent_ref_points.size(); ++parent_qp)
     {
       std::pair<unsigned int, QpMap> & child_and_map = coarsen_map[parent_qp];
       unsigned int & closest_child = child_and_map.first;
@@ -1715,9 +1699,9 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
   const MeshBase::element_iterator end_el = getMesh().level_elements_end(0);
   for (; el != end_el; ++el)
   {
-    Elem *elem = *el;
+    Elem * elem = *el;
     unsigned int n_sides = elem->n_sides();
-    for (unsigned int s=0; s != n_sides; ++s)
+    for (unsigned int s = 0; s != n_sides; ++s)
     {
       boundary_info.boundary_ids(elem, s, old_ids);
       if (std::find(old_ids.begin(), old_ids.end(), old_id) != old_ids.end())
@@ -2088,12 +2072,11 @@ MooseMesh::ghostGhostedBoundaries()
 
   std::vector<const Elem*> family_tree;
 
-  for (unsigned int i=0; i<elems.size(); i++)
+  for (unsigned int i = 0; i < elems.size(); ++i)
   {
     if (_ghosted_boundaries.find(ids[i]) != _ghosted_boundaries.end())
     {
       Elem * elem = mesh.elem(elems[i]);
-
 
 #ifdef LIBMESH_ENABLE_AMR
       elem->family_tree(family_tree);
@@ -2101,12 +2084,12 @@ MooseMesh::ghostGhostedBoundaries()
       family_tree.clear();
       family_tree.push_back(elem);
 #endif
-      for (unsigned int leaf=0; leaf<family_tree.size(); leaf++)
+      for (unsigned int leaf = 0; leaf < family_tree.size(); ++leaf)
       {
         const Elem * felem = family_tree[leaf];
         boundary_elems_to_ghost.insert(felem);
 
-        for (unsigned int n=0; n<felem->n_nodes(); n++)
+        for (unsigned int n = 0; n < felem->n_nodes(); ++n)
           connected_nodes_to_ghost.insert (felem->get_node(n));
       }
     }
@@ -2184,6 +2167,7 @@ MooseMesh::getMesh() const
 ExodusII_IO *
 MooseMesh::exReader() const
 {
+  //TODO: Implement or remove
   return NULL;
 }
 

@@ -95,7 +95,7 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   // TODO: Check that all images are the same aspect ratio and have
   // the same number of pixels?  ImageFunction does not currently do
   // this...
-  // for (unsigned i=0; i<filenames.size(); ++i)
+  // for (unsigned i = 0; i < filenames.size(); ++i)
   // {
   //   // Extract the number of pixels from the image using the file command
   //   GetPixelInfo(filenames[i], xpixels, ypixels);
