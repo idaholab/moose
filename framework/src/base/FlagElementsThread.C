@@ -22,6 +22,9 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
+// C++ includes
+#include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
+
 FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
                                        std::vector<Number> & serialized_solution,
                                        unsigned int max_h_level) :
@@ -57,7 +60,14 @@ void
 FlagElementsThread::onElement(const Elem *elem)
 {
   dof_id_type dof_number = elem->dof_number(_system_number, _field_var_number, 0);
-  Marker::MarkerValue marker_value = (Marker::MarkerValue)_serialized_solution[dof_number];
+
+  // round() is a C99 function, it is not located in the std:: namespace.
+  Marker::MarkerValue marker_value =
+    static_cast<Marker::MarkerValue>(round(_serialized_solution[dof_number]));
+
+  // Make sure we aren't masking an issue in the Marker system by rounding its values.
+  if (std::abs(marker_value - _serialized_solution[dof_number]) > TOLERANCE*TOLERANCE)
+    mooseError("Invalid Marker value detected: " << _serialized_solution[dof_number]);
 
   // If no Markers cared about what happened to this element let's just leave it alone
   if (marker_value == Marker::DONT_MARK)
