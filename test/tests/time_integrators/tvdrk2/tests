@@ -1,0 +1,29 @@
+[Tests]
+  [./1d-linear]
+    type = 'Exodiff'
+    input = '1d-linear.i'
+    exodiff = '1d-linear_out.e'
+  [../]
+
+  [./1d-linear_num-of-jacobian-calls]
+    # Test how many times compute_jacobian() has been called
+    type = RunApp
+    input = '1d-linear.i'
+    expect_out = 'compute_jacobian\(\)\s*1'
+    cli_args = 'Outputs/exodus=false'
+  [../]
+
+  [./2d-quadratic]
+    type = 'Exodiff'
+    input = '2d-quadratic.i'
+    exodiff = '2d-quadratic_out.e'
+  [../]
+
+  [./2d-quadratic_num-of-jacobian-calls]
+    # Test how many times compute_jacobian() has been called
+    type = RunApp
+    input = '2d-quadratic.i'
+    expect_out = 'compute_jacobian\(\)\s*1'
+    cli_args = 'Outputs/exodus=false'
+  [../]
+[]
