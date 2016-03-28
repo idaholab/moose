@@ -34,6 +34,9 @@ InputParameters validParams<TableOutput>()
   InputParameters params = validParams<AdvancedOutput<FileOutput> >();
   params += AdvancedOutput<FileOutput>::enableOutputTypes("postprocessor scalar vector_postprocessor");
 
+  // Option for writing vector_postprocessor time file
+  params.addParam<bool>("time_data", false, "When true and VecptorPostprocessor data exists, write a csv file containing the timestep and time information.");
+
   // Add option for appending file on restart
   params.addParam<bool>("append_restart", false, "Append existing file on restart");
 
@@ -44,8 +47,10 @@ TableOutput::TableOutput(const InputParameters & parameters) :
     AdvancedOutput<FileOutput>(parameters),
     _tables_restartable(getParam<bool>("append_restart")),
     _postprocessor_table(_tables_restartable ? declareRestartableData<FormattedTable>("postprocessor_table") : declareRecoverableData<FormattedTable>("postprocessor_table")),
+    _vector_postprocessor_time_tables(_tables_restartable ? declareRestartableData<std::map<std::string, FormattedTable> >("vector_postprocessor_time_table") : declareRecoverableData<std::map<std::string, FormattedTable> >("vector_postprocessor_time_table")),
     _scalar_table(_tables_restartable ? declareRestartableData<FormattedTable>("scalar_table") : declareRecoverableData<FormattedTable>("scalar_table")),
-    _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table") : declareRecoverableData<FormattedTable>("all_data_table"))
+    _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table") : declareRecoverableData<FormattedTable>("all_data_table")),
+    _time_data(getParam<bool>("time_data"))
 {
 }
 
@@ -88,6 +93,12 @@ TableOutput::outputVectorPostprocessors()
 
       for (unsigned int i=0; i<vector.size(); i++)
         table.addData(vec_it->first, vector[i], i);
+    }
+
+    if (_time_data)
+    {
+      FormattedTable & t_table = _vector_postprocessor_time_tables[vpp_name];
+      t_table.addData("timestep", _t_step, _time);
     }
   }
 }

@@ -112,6 +112,13 @@ CSV::output(const ExecFlagType & type)
         it->second.setDelimiter(_delimiter);
       it->second.setPrecision(_precision);
       it->second.printCSV(output.str(), 1, _align);
+
+      if (_time_data)
+      {
+        std::ostringstream filename;
+        filename << _file_base << "_" << MooseUtils::shortName(it->first) << "_time.csv";
+        _vector_postprocessor_time_tables[it->first].printCSV(filename.str());
+      }
     }
 
   // Re-set write flags

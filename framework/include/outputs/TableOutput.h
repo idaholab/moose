@@ -74,11 +74,17 @@ protected:
   /// Formatted tables for outputting vector postprocessor data.  One per VectorPostprocessor
   std::map<std::string, FormattedTable> _vector_postprocessor_tables;
 
+  /// Table for vector postprocessor time data
+  std::map<std::string, FormattedTable> & _vector_postprocessor_time_tables;
+
   /// Table containing scalar aux variables
   FormattedTable & _scalar_table;
 
   /// Table containing postprocessor values and scalar aux variables
   FormattedTable & _all_data_table;
+
+  /// Enable/disable VecptorPostprocessor time data file.
+  bool _time_data;
 
 };
 
