@@ -90,7 +90,7 @@ InputParameters validParams<MultiApp>()
 
 MultiApp::MultiApp(const InputParameters & parameters):
     MooseObject(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     Restartable(parameters, "MultiApps"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type")) : _fe_problem.getMooseApp().type()),

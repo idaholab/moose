@@ -42,7 +42,7 @@ InputParameters validParams<Indicator>()
 Indicator::Indicator(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     Restartable(parameters, "Indicators"),

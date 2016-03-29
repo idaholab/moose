@@ -38,7 +38,7 @@ InputParameters validParams<BoundaryCondition>()
 BoundaryCondition::BoundaryCondition(const InputParameters & parameters) :
     MooseObject(parameters),
     BoundaryRestrictableRequired(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, "bcs"),

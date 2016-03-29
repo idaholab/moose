@@ -49,7 +49,7 @@ InputParameters validParams<KernelBase>()
 KernelBase::KernelBase(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),

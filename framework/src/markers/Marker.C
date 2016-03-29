@@ -37,7 +37,7 @@ InputParameters validParams<Marker>()
 Marker::Marker(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     DependencyResolverInterface(),
     UserObjectInterface(parameters),
     Restartable(parameters, "Markers"),

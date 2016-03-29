@@ -51,7 +51,7 @@ DGKernel::DGKernel(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     TransientInterface(parameters, "dgkernels"),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),

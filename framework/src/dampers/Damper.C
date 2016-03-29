@@ -27,7 +27,7 @@ InputParameters validParams<Damper>()
 
 Damper::Damper(const InputParameters & parameters) :
     MooseObject(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     Restartable(parameters, "Dampers"),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

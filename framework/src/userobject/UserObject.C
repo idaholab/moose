@@ -40,7 +40,7 @@ InputParameters validParams<UserObject>()
 
 UserObject::UserObject(const InputParameters & parameters) :
     MooseObject(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     FunctionInterface(parameters),
     Restartable(parameters, "UserObjects"),
     MeshChangedInterface(parameters),

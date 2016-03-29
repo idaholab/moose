@@ -46,7 +46,7 @@ InputParameters validParams<DiracKernel>()
 
 DiracKernel::DiracKernel(const InputParameters & parameters) :
     MooseObject(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),

@@ -49,7 +49,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     TransientInterface(parameters, "bcs"),

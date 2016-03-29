@@ -34,7 +34,7 @@ InputParameters validParams<Constraint>()
 
 Constraint::Constraint(const InputParameters & parameters) :
   MooseObject(parameters),
-  SetupInterface(parameters),
+  SetupInterface(this),
   FunctionInterface(parameters),
   UserObjectInterface(parameters),
   TransientInterface(parameters, "constraint"),

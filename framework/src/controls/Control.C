@@ -32,7 +32,7 @@ InputParameters validParams<Control>()
 Control::Control(const InputParameters & parameters) :
     MooseObject(parameters),
     TransientInterface(parameters, "control"),
-    SetupInterface(parameters),
+    SetupInterface(this),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
     PostprocessorInterface(this),

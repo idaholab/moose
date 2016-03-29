@@ -51,7 +51,7 @@ Material::Material(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters, blockIDs()),
-    SetupInterface(parameters),
+    SetupInterface(this),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
     ScalarCoupleable(parameters),
