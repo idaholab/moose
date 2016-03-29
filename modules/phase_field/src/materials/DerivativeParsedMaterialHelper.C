@@ -129,7 +129,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       // generate material property argument vector
       std::vector<VariableName> darg_names(0);
       for (unsigned int j = 0; j < newitem._dargs.size(); ++j)
-        darg_names.push_back(_variable_names[newitem._dargs[j]]);
+        darg_names.push_back(_arg_names[newitem._dargs[j]]);
 
       // append to list of derivatives if the derivative is non-vanishing
       if (!newitem._F->isZero())
