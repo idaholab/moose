@@ -25,7 +25,7 @@ InputParameters validParams<GeneralUserObject>()
 GeneralUserObject::GeneralUserObject(const InputParameters & parameters) :
     UserObject(parameters),
     MaterialPropertyInterface(parameters),
-    TransientInterface(parameters, "general_user_objects"),
+    TransientInterface(this),
     DependencyResolverInterface(),
     UserObjectInterface(this),
     PostprocessorInterface(this),

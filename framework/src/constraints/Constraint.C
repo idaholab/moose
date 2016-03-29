@@ -37,7 +37,7 @@ Constraint::Constraint(const InputParameters & parameters) :
   SetupInterface(this),
   FunctionInterface(this),
   UserObjectInterface(this),
-  TransientInterface(parameters, "constraint"),
+  TransientInterface(this),
   GeometricSearchInterface(parameters),
   Restartable(parameters, "Constraints"),
   ZeroInterface(parameters),

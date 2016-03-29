@@ -26,16 +26,16 @@ InputParameters validParams<TransientInterface>()
 }
 
 
-TransientInterface::TransientInterface(const InputParameters & parameters, const std::string & object_type) :
-    _ti_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
+TransientInterface::TransientInterface(const MooseObject * moose_object) :
+    _ti_params(moose_object->parameters()),
+    _ti_feproblem(*_ti_params.get<FEProblem *>("_fe_problem")),
+    _is_implicit(_ti_params.have_parameter<bool>("implicit") ? _ti_params.get<bool>("implicit") : true),
     _t(_is_implicit ? _ti_feproblem.time() : _ti_feproblem.timeOld()),
     _t_step(_ti_feproblem.timeStep()),
     _dt(_ti_feproblem.dt()),
     _dt_old(_ti_feproblem.dtOld()),
     _is_transient(_ti_feproblem.isTransient()),
-    _object_type(object_type),
-    _ti_name(MooseUtils::shortName(parameters.get<std::string>("_object_name")))
+    _ti_name(MooseUtils::shortName(_ti_params.get<std::string>("_object_name")))
 {
 }
 

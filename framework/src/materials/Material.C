@@ -57,7 +57,7 @@ Material::Material(const InputParameters & parameters) :
     ScalarCoupleable(parameters),
     FunctionInterface(this),
     UserObjectInterface(this),
-    TransientInterface(parameters, "materials"),
+    TransientInterface(this),
     MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
     PostprocessorInterface(this),
     DependencyResolverInterface(),

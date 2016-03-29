@@ -53,7 +53,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(this),
     UserObjectInterface(this),
-    TransientInterface(parameters, "kernels"),
+    TransientInterface(this),
     PostprocessorInterface(this),
     MaterialPropertyInterface(parameters, blockIDs()),
     RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),

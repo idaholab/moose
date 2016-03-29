@@ -31,7 +31,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     NeighborCoupleable(parameters, false, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(this),
-    TransientInterface(parameters, "internal_side_user_object"),
+    TransientInterface(this),
     PostprocessorInterface(this),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),

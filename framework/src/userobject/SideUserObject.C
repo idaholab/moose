@@ -33,7 +33,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters) :
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
     UserObjectInterface(this),
-    TransientInterface(parameters, "side_user_objects"),
+    TransientInterface(this),
     PostprocessorInterface(this),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),

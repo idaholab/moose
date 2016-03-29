@@ -44,7 +44,7 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters) :
     UserObjectInterface(this),
     PostprocessorInterface(this),
     DependencyResolverInterface(),
-    TransientInterface(parameters, "scalar_aux_kernels"),
+    TransientInterface(this),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

@@ -61,7 +61,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
-    TransientInterface(parameters, "aux_kernels"),
+    TransientInterface(this),
     MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
     PostprocessorInterface(this),
     DependencyResolverInterface(),
