@@ -63,7 +63,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
     UserObjectInterface(parameters),
     TransientInterface(parameters, "aux_kernels"),
     MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     DependencyResolverInterface(),
     RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     GeometricSearchInterface(parameters),

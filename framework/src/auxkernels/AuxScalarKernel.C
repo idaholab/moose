@@ -42,7 +42,7 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters) :
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     DependencyResolverInterface(),
     TransientInterface(parameters, "scalar_aux_kernels"),
     ZeroInterface(parameters),

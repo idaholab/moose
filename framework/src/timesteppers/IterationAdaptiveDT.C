@@ -41,7 +41,7 @@ InputParameters validParams<IterationAdaptiveDT>()
 
 IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
     TimeStepper(parameters),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     _dt_old(declareRestartableData<Real>("dt_old", 0.0)),
     _input_dt(getParam<Real>("dt")),
     _tfunc_last_step(declareRestartableData<bool>("tfunc_last_step", false)),

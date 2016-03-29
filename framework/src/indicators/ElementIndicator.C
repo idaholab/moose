@@ -37,7 +37,7 @@ InputParameters validParams<ElementIndicator>()
 ElementIndicator::ElementIndicator(const InputParameters & parameters) :
     Indicator(parameters),
     TransientInterface(parameters, "indicators"),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
     MooseVariableInterface(parameters, false),

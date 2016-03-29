@@ -39,7 +39,7 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
     ScalarCoupleable(parameters),
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, "element_user_objects"),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),

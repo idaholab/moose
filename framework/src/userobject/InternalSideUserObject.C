@@ -32,7 +32,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     MooseVariableDependencyInterface(),
     UserObjectInterface(parameters),
     TransientInterface(parameters, "internal_side_user_object"),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),

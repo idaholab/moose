@@ -16,10 +16,12 @@
 #include "FEProblem.h"
 #include "Postprocessor.h"
 #include "MooseTypes.h"
+#include "MooseObject.h"
 
-PostprocessorInterface::PostprocessorInterface(const InputParameters & params) :
-    _pi_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _ppi_params(params)
+PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object) :
+    _ppi_params(moose_object->parameters()),
+    // TODO: Retrieve using checked pointer method
+    _pi_feproblem(*_ppi_params.get<FEProblem *>("_fe_problem"))
 {
 }
 

@@ -40,7 +40,7 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
     ScalarCoupleable(parameters),
     MooseVariableDependencyInterface(),
     TransientInterface(parameters, "nodal_user_objects"),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, true),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),

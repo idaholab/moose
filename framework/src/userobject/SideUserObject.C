@@ -34,7 +34,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters) :
     MooseVariableDependencyInterface(),
     UserObjectInterface(parameters),
     TransientInterface(parameters, "side_user_objects"),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),

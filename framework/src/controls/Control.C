@@ -35,7 +35,7 @@ Control::Control(const InputParameters & parameters) :
     SetupInterface(parameters),
     FunctionInterface(parameters),
     UserObjectInterface(parameters),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     VectorPostprocessorInterface(parameters),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _input_parameter_warehouse(_app.getInputParameterWarehouse())

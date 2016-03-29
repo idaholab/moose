@@ -52,7 +52,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters) :
     UserObjectInterface(parameters),
     TransientInterface(parameters, "dirac_kernels"),
     MaterialPropertyInterface(parameters),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     GeometricSearchInterface(parameters),
     Restartable(parameters, "DiracKernels"),
     ZeroInterface(parameters),

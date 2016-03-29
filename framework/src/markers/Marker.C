@@ -41,7 +41,7 @@ Marker::Marker(const InputParameters & parameters) :
     DependencyResolverInterface(),
     UserObjectInterface(parameters),
     Restartable(parameters, "Markers"),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     MeshChangedInterface(parameters),
     OutputInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

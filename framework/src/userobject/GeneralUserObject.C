@@ -28,7 +28,7 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters) :
     TransientInterface(parameters, "general_user_objects"),
     DependencyResolverInterface(),
     UserObjectInterface(parameters),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     VectorPostprocessorInterface(parameters)
 {
   _supplied_vars.insert(name());

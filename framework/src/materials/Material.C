@@ -59,7 +59,7 @@ Material::Material(const InputParameters & parameters) :
     UserObjectInterface(parameters),
     TransientInterface(parameters, "materials"),
     MaterialPropertyInterface(parameters, blockIDs(), boundaryIDs()),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     DependencyResolverInterface(),
     Restartable(parameters, "Materials"),
     ZeroInterface(parameters),
