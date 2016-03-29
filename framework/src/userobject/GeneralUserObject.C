@@ -29,7 +29,7 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters) :
     DependencyResolverInterface(),
     UserObjectInterface(parameters),
     PostprocessorInterface(this),
-    VectorPostprocessorInterface(parameters)
+    VectorPostprocessorInterface(this)
 {
   _supplied_vars.insert(name());
 }
