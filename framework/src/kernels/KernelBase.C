@@ -52,7 +52,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     TransientInterface(parameters, "kernels"),
     PostprocessorInterface(this),
     MaterialPropertyInterface(parameters, blockIDs()),

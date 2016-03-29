@@ -34,7 +34,7 @@ Control::Control(const InputParameters & parameters) :
     TransientInterface(parameters, "control"),
     SetupInterface(this),
     FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),

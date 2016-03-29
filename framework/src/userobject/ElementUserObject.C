@@ -34,7 +34,7 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
     UserObject(parameters),
     BlockRestrictable(parameters),
     MaterialPropertyInterface(parameters, blockIDs()),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
     MooseVariableDependencyInterface(),

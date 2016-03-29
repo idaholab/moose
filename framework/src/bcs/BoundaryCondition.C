@@ -40,7 +40,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters) :
     BoundaryRestrictableRequired(parameters),
     SetupInterface(this),
     FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     TransientInterface(parameters, "bcs"),
     PostprocessorInterface(this),
     GeometricSearchInterface(parameters),

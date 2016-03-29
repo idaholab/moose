@@ -27,7 +27,7 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters) :
     MaterialPropertyInterface(parameters),
     TransientInterface(parameters, "general_user_objects"),
     DependencyResolverInterface(),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this)
 {

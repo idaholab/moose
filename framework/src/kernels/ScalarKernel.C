@@ -40,7 +40,7 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters) :
     ScalarCoupleable(parameters),
     SetupInterface(this),
     FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     PostprocessorInterface(this),
     TransientInterface(parameters, "scalar_kernel"),
     ZeroInterface(parameters),

@@ -44,7 +44,7 @@ Indicator::Indicator(const InputParameters & parameters) :
     BlockRestrictable(parameters),
     SetupInterface(this),
     FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     Restartable(parameters, "Indicators"),
     OutputInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

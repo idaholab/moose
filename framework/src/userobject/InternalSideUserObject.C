@@ -30,7 +30,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     TwoMaterialPropertyInterface(parameters, blockIDs()),
     NeighborCoupleable(parameters, false, false),
     MooseVariableDependencyInterface(),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     TransientInterface(parameters, "internal_side_user_object"),
     PostprocessorInterface(this),
     ZeroInterface(parameters),

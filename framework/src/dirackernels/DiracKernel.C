@@ -49,7 +49,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters) :
     SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
     FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     TransientInterface(parameters, "dirac_kernels"),
     MaterialPropertyInterface(parameters),
     PostprocessorInterface(this),

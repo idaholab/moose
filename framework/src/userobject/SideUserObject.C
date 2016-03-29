@@ -32,7 +32,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters) :
     MaterialPropertyInterface(parameters, boundaryIDs()),
     Coupleable(parameters, false),
     MooseVariableDependencyInterface(),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     TransientInterface(parameters, "side_user_objects"),
     PostprocessorInterface(this),
     ZeroInterface(parameters),

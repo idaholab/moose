@@ -61,7 +61,7 @@ InputParameters validParams<Executioner>()
 
 Executioner::Executioner(const InputParameters & parameters) :
     MooseObject(parameters),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     PostprocessorInterface(this),
     Restartable(parameters, "Executioners"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),

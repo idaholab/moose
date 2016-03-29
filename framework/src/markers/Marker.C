@@ -39,7 +39,7 @@ Marker::Marker(const InputParameters & parameters) :
     BlockRestrictable(parameters),
     SetupInterface(this),
     DependencyResolverInterface(),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     Restartable(parameters, "Markers"),
     PostprocessorInterface(this),
     MeshChangedInterface(parameters),

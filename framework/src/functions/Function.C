@@ -29,7 +29,7 @@ Function::Function(const InputParameters & parameters) :
     SetupInterface(this),
     TransientInterface(parameters, "functions"),
     PostprocessorInterface(this),
-    UserObjectInterface(parameters),
+    UserObjectInterface(this),
     Restartable(parameters, "Functions"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(parameters)
