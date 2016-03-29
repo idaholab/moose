@@ -33,7 +33,7 @@ InputParameters validParams<ElementUserObject>()
 ElementUserObject::ElementUserObject(const InputParameters & parameters) :
     UserObject(parameters),
     BlockRestrictable(parameters),
-    MaterialPropertyInterface(parameters, blockIDs()),
+    MaterialPropertyInterface(this, blockIDs()),
     UserObjectInterface(this),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),

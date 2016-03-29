@@ -17,9 +17,10 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "SystemBase.h"
+#include "MooseObject.h"
 
-GeometricSearchInterface::GeometricSearchInterface(const InputParameters & parameters) :
-    _geometric_search_data(parameters.get<SubProblem *>("_subproblem")->geomSearchData())
+GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object) :
+    _geometric_search_data(moose_object->parameters().get<SubProblem *>("_subproblem")->geomSearchData())
 {
 }
 

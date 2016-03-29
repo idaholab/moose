@@ -27,61 +27,61 @@ InputParameters validParams<MaterialPropertyInterface>()
 
 
 // Standard construction
-MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters):
-    _mi_name(parameters.get<std::string>("_object_name")),
-    _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _mi_tid(parameters.get<THREAD_ID>("_tid")),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object) :
+    _mi_params(moose_object->parameters()),
+    _mi_name(_mi_params.get<std::string>("_object_name")),
+    _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
+    _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(_empty_block_ids),
-    _mi_boundary_ids(_empty_boundary_ids),
-    _mi_params(parameters)
+    _mi_boundary_ids(_empty_boundary_ids)
 {
-  initializeMaterialPropertyInterface(parameters);
+  initializeMaterialPropertyInterface(_mi_params);
 }
 
 // Block restricted
-MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids):
-    _mi_name(parameters.get<std::string>("_object_name")),
-    _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _mi_tid(parameters.get<THREAD_ID>("_tid")),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids) :
+    _mi_params(moose_object->parameters()),
+    _mi_name(_mi_params.get<std::string>("_object_name")),
+    _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
+    _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(block_ids),
-    _mi_boundary_ids(_empty_boundary_ids),
-    _mi_params(parameters)
+    _mi_boundary_ids(_empty_boundary_ids)
 {
-  initializeMaterialPropertyInterface(parameters);
+  initializeMaterialPropertyInterface(_mi_params);
 }
 
 // Boundary restricted
-MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids):
-    _mi_name(parameters.get<std::string>("_object_name")),
-    _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _mi_tid(parameters.get<THREAD_ID>("_tid")),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids) :
+    _mi_params(moose_object->parameters()),
+    _mi_name(_mi_params.get<std::string>("_object_name")),
+    _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
+    _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(_empty_block_ids),
-    _mi_boundary_ids(boundary_ids),
-    _mi_params(parameters)
+    _mi_boundary_ids(boundary_ids)
 {
-  initializeMaterialPropertyInterface(parameters);
+  initializeMaterialPropertyInterface(_mi_params);
 }
 
 // Dual restricted
-MaterialPropertyInterface::MaterialPropertyInterface(const InputParameters & parameters,
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
-                                                     const std::set<BoundaryID> & boundary_ids):
-    _mi_name(parameters.get<std::string>("_object_name")),
-    _mi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _mi_tid(parameters.get<THREAD_ID>("_tid")),
+                                                     const std::set<BoundaryID> & boundary_ids) :
+    _mi_params(moose_object->parameters()),
+    _mi_name(_mi_params.get<std::string>("_object_name")),
+    _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
+    _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _mi_block_ids(block_ids),
-    _mi_boundary_ids(boundary_ids),
-    _mi_params(parameters)
+    _mi_boundary_ids(boundary_ids)
 {
-  initializeMaterialPropertyInterface(parameters);
+  initializeMaterialPropertyInterface(_mi_params);
 }
 
 void

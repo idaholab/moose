@@ -38,7 +38,7 @@ Constraint::Constraint(const InputParameters & parameters) :
   FunctionInterface(this),
   UserObjectInterface(this),
   TransientInterface(this),
-  GeometricSearchInterface(parameters),
+  GeometricSearchInterface(this),
   Restartable(parameters, "Constraints"),
   ZeroInterface(parameters),
   MeshChangedInterface(parameters),
