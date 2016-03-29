@@ -43,7 +43,7 @@ Indicator::Indicator(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     UserObjectInterface(this),
     Restartable(parameters, "Indicators"),
     OutputInterface(parameters),

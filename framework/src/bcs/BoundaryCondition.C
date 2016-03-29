@@ -39,7 +39,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters) :
     MooseObject(parameters),
     BoundaryRestrictableRequired(parameters),
     SetupInterface(this),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(parameters, "bcs"),
     PostprocessorInterface(this),

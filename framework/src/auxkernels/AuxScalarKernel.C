@@ -40,7 +40,7 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters) :
     MooseObject(parameters),
     ScalarCoupleable(parameters),
     SetupInterface(this),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),
     DependencyResolverInterface(),

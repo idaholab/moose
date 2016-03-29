@@ -53,7 +53,7 @@ DGKernel::DGKernel(const InputParameters & parameters) :
     BoundaryRestrictable(parameters),
     SetupInterface(this),
     TransientInterface(parameters, "dgkernels"),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     UserObjectInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false, false),
     TwoMaterialPropertyInterface(parameters),

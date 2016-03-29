@@ -23,10 +23,10 @@ InputParameters validParams<FunctionInterface>()
   return emptyInputParameters();
 }
 
-FunctionInterface::FunctionInterface(const InputParameters & params) :
-    _fni_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _fni_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
-    _fni_params(params)
+FunctionInterface::FunctionInterface(const MooseObject * moose_object) :
+    _fni_params(moose_object->parameters()),
+    _fni_feproblem(*_fni_params.get<FEProblem *>("_fe_problem")),
+    _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
 {
 }
 

@@ -33,7 +33,7 @@ Control::Control(const InputParameters & parameters) :
     MooseObject(parameters),
     TransientInterface(parameters, "control"),
     SetupInterface(this),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),

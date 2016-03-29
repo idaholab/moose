@@ -39,7 +39,7 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters) :
     MooseObject(parameters),
     ScalarCoupleable(parameters),
     SetupInterface(this),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),
     TransientInterface(parameters, "scalar_kernel"),

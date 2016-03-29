@@ -50,7 +50,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters) :
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
     SetupInterface(this),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(parameters, "bcs"),
     PostprocessorInterface(this),
