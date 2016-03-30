@@ -60,7 +60,6 @@ protected:
 private:
   using Material::computeProperties;
   using Material::_qp;
-
 };
 
 template<>
