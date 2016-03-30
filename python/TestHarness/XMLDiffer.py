@@ -34,6 +34,7 @@ class XMLDiffer(object):
     # Extract the optional arguments
     self._abs_zero = float(kwargs.pop('abs_zero', 1e-11))
     self._rtol = float(kwargs.pop('rel_tol', 5.5e-6))
+    self._ignored_attributes = kwargs.pop('ignored_attributes', [])
 
     # Storage for XMLError objects
     self._errors = []
@@ -185,8 +186,10 @@ class XMLDiffer(object):
   #         the XMLError object.
   def _compareBlock(self, elem0, elem1):
 
-    # Perform attribute comparision
-    test_attrib = self._compareAttributes(elem0, elem1)
+    # Perform attribute comparision in both directions: ensure that
+    # every attribute in the gold file is in the output file, and
+    # vice-versa.
+    test_attrib = self._compareAttributes(elem0, elem1) and self._compareAttributes(elem1, elem0)
 
     # If the attributes match, compare the text and return those results
     if test_attrib:
@@ -208,6 +211,10 @@ class XMLDiffer(object):
 
     # Loop through each attribute of the master object
     for key0, value0 in elem0.attrib.iteritems():
+
+      # If this key is one of the attributes we're ignoring, then ignore it!
+      if key0 in self._ignored_attributes:
+        continue
 
       # Attribute is missing from the slave object, match fails
       if not elem1.attrib.has_key(key0):
@@ -319,81 +326,15 @@ class XMLDiffer(object):
 
 
 if __name__ == '__main__':
+  # You can run XMLDiffer.py as a stand-alone by putting two XML files
+  # in the variable names file1 and file2 below, and then running:
+  #
+  # python $MOOSE_DIR/python/TestHarness/XMLDiffer.py
+  file1 = os.path.join(os.getenv('MOOSE_DIR'), 'test', 'tests', 'outputs', 'vtk', 'vtk_diff_serial_mesh_parallel_out_005.pvtu')
+  file2 = os.path.join(os.getenv('MOOSE_DIR'), 'test', 'tests', 'outputs', 'vtk', 'gold', 'vtk_diff_serial_mesh_parallel_out_005.pvtu')
 
-  # 'gold' file
-  file0 = os.path.join(os.getenv('MOOSE_DIR'), 'framework', 'scripts', 'TestHarness', 'test_files', 'xml_differ_test0.vtu')
-
-  # Has invalid tags
-  file1 = os.path.join(os.getenv('MOOSE_DIR'), 'framework', 'scripts', 'TestHarness', 'test_files', 'xml_differ_test1.vtu')
-
-  # Has blocks with different attributes and values (text)
-  file2 = os.path.join(os.getenv('MOOSE_DIR'), 'framework', 'scripts', 'TestHarness', 'test_files', 'xml_differ_test2.vtu')
-
-  # Has blocks with tolerance differences
-  file3 = os.path.join(os.getenv('MOOSE_DIR'), 'framework', 'scripts', 'TestHarness', 'test_files', 'xml_differ_test3.vtu')
-
-  # Lines for making things look pretty
-  lines = '-'*129
-
-  # Test invalid filenames (1 error)
-  print lines
-  print 'Test 1: Invalid filename (1 error)'
-  print lines
-  d = XMLDiffer(file0, 'adfadfas.vtk')
-  if d.fail():
-    d.message(output=True)
-
-  # Parser error (i.e., opening/closing tags do not match)
-  print '\n' + lines
-  print 'Test 2: Parser Error (1 error)'
-  print lines
-  d = XMLDiffer(file0, file2)
-  if d.fail():
-    d.message(output=True)
-
-  # Test missing block and different attribute
-  #  (1) Unable locate block (Piece as different attributes in 2)
-  #  (2) Differing values in Points/DataArray
-  #  (3) No CellData block in 2
-  #  (4) Different no. of values in Cells/DataArray (Name = types)
-  print '\n' + lines
-  print 'Test 3: Block Errors (4 errors)'
-  print lines
-  d = XMLDiffer(file0, file1)
-  if d.fail():
-    d.message(output=True)
-
-  # Test abs_zero
-  # The first call should not error, the second should diff
-  print '\n' + lines
-  print 'Test 4: Absolute zero (1 error)'
-  print lines
-  # This should not error
-  d = XMLDiffer(file0, file3, abs_zero=1e-10)
+  d = XMLDiffer(file1, file2, ignored_attributes=['header_type'])
   if not d.fail():
-    print 'Successfully set value with lower abs_zero flag\n'
-
-  d = XMLDiffer(file0, file3, abs_zero=1e-12)
-  if d.fail():
-    d.message(output=True)
-
-  # Test rel_tol
-  # The first call should not error, the second should diff
-  print '\n' + lines
-  print 'Test 5: Relative Tolerance (1 error)'
-  print lines
-  d = XMLDiffer(file0, file3)
-  if not d.fail():
-    print 'Successfully checked value within default tolerance\n'
-
-  d = XMLDiffer(file0, file3, rel_tol=1e-10)
-  if d.fail():
-    d.message(output=True)
-
-  # Test no-error
-  print '\n' + lines
-  print 'Test 6: Same File (0 error)'
-  print lines
-  d = XMLDiffer(file0, file0)
-  if not d.fail():
-    print 'Successfully checked the same file\n'
+    print 'Files are the same\n'
+  else:
+    print d.message()
