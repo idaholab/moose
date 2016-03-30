@@ -23,7 +23,7 @@ class XMLDiffer(object):
   # @param file2 The file to compare to the master file
   #
   # Optional Arguments:
-  #   abz_zero Any value less than this is assumed zero (default: 1e-11)
+  #   abs_zero Any value less than this is assumed zero (default: 1e-11)
   #   rel_tol Relative tolerance to check numeric values against (default: 5.5e-6)
   #   max_values The maximum number of values to test
   def __init__(self, file1, file2, **kwargs):
@@ -62,7 +62,7 @@ class XMLDiffer(object):
     output.append( '         File 1: ' + self._file[0])
     output.append( '         File 2: ' + self._file[1])
     output.append( '        rel_tol: ' + str(self._rtol))
-    output.append( '       abz_zero: ' + str(self._abs_zero))
+    output.append( '       abs_zero: ' + str(self._abs_zero))
     output.append( '  No. of errors: ' + str(len(self._errors)))
 
     # Errors
