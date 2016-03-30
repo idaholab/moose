@@ -150,11 +150,14 @@ CommandLine::printUsage() const
   std::string command((*_get_pot)[0]);
   command.substr(command.find_last_of("/\\")+1);
 
-  Moose::out << "\nUsage: " << command << " [<options>]\n\n"
+  Moose::out << "Usage: " << command << " [<options>]\n\n"
              << "Options:\n" << std::left;
 
   for (std::map<std::string, Option>::const_iterator i = _cli_options.begin(); i != _cli_options.end(); ++i)
   {
+    if (i->second.cli_syntax.empty())
+      continue;
+
     std::stringstream oss;
     for (unsigned int j = 0; j < i->second.cli_syntax.size(); ++j)
     {
