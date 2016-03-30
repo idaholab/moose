@@ -21,15 +21,15 @@ InputParameters validParams<MultiPlasticityDebugger>()
   return params;
 }
 
-MultiPlasticityDebugger::MultiPlasticityDebugger(const InputParameters & parameters):
-    MultiPlasticityLinearSystem(parameters),
-    _fspb_debug(parameters.get<MooseEnum>("debug_fspb")),
-    _fspb_debug_stress(parameters.get<RealTensorValue>("debug_jac_at_stress")),
-    _fspb_debug_pm(parameters.get<std::vector<Real> >("debug_jac_at_pm")),
-    _fspb_debug_intnl(parameters.get<std::vector<Real> >("debug_jac_at_intnl")),
-    _fspb_debug_stress_change(parameters.get<Real>("debug_stress_change")),
-    _fspb_debug_pm_change(parameters.get<std::vector<Real> >("debug_pm_change")),
-    _fspb_debug_intnl_change(parameters.get<std::vector<Real> >("debug_intnl_change"))
+MultiPlasticityDebugger::MultiPlasticityDebugger(const MooseObject * moose_object) :
+    MultiPlasticityLinearSystem(moose_object),
+    _fspb_debug(_params.get<MooseEnum>("debug_fspb")),
+    _fspb_debug_stress(_params.get<RealTensorValue>("debug_jac_at_stress")),
+    _fspb_debug_pm(_params.get<std::vector<Real> >("debug_jac_at_pm")),
+    _fspb_debug_intnl(_params.get<std::vector<Real> >("debug_jac_at_intnl")),
+    _fspb_debug_stress_change(_params.get<Real>("debug_stress_change")),
+    _fspb_debug_pm_change(_params.get<std::vector<Real> >("debug_pm_change")),
+    _fspb_debug_intnl_change(_params.get<std::vector<Real> >("debug_intnl_change"))
 {
 }
 
