@@ -16,7 +16,7 @@ InputParameters validParams<MultiSmoothCircleIC>()
   params.addRequiredParam<unsigned int>("numbub", "The number of bubbles to place");
   params.addRequiredParam<Real>("bubspac", "minimum spacing of bubbles, measured from center to center");
   params.addParam<unsigned int>("numtries", 1000, "The number of tries");
-  params.addRequiredParam<Real>("radius", "Mean radius value for the circels");
+  params.addRequiredParam<Real>("radius", "Mean radius value for the circles");
   params.addParam<Real>("radius_variation", 0.0, "Plus or minus fraction of random variation in the bubble radius for uniform, standard deviation for normal");
   MooseEnum rand_options("uniform normal none","none");
   params.addParam<MooseEnum>("radius_variation_type", rand_options, "Type of distribution that random circle radii will follow");
