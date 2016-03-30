@@ -27,6 +27,7 @@ InputParameters validParams<IterationAdaptiveDT>()
   params.addParam<int>("optimal_iterations", "The target number of nonlinear iterations for adaptive timestepping");
   params.addParam<int>("iteration_window", "Attempt to grow/shrink timestep if the iteration count is below/above 'optimal_iterations plus/minus iteration_window' (default = optimal_iterations/5).");
   params.addParam<unsigned>("linear_iteration_ratio", "The ratio of linear to nonlinear iterations to determine target linear iterations and window for adaptive timestepping (default = 25)");
+  params.addParam<PostprocessorName>("postprocessor_dtlim", "If specified, the postprocessor value is used as an upper limit for the current time step length");
   params.addParam<FunctionName>("timestep_limiting_function", "A 'Piecewise' type function used to control the timestep by limiting the change in the function over a timestep");
   params.addParam<Real>("max_function_change", "The absolute value of the maximum change in timestep_limiting_function over a timestep");
   params.addParam<bool>("force_step_every_function_point", false, "Forces the timestepper to take a step that is consistent with points defined in the function");
@@ -40,12 +41,14 @@ InputParameters validParams<IterationAdaptiveDT>()
 
 IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
     TimeStepper(parameters),
+    PostprocessorInterface(parameters),
     _dt_old(declareRestartableData<Real>("dt_old", 0.0)),
     _input_dt(getParam<Real>("dt")),
     _tfunc_last_step(declareRestartableData<bool>("tfunc_last_step", false)),
     _sync_last_step(declareRestartableData<bool>("sync_last_step", false)),
     _linear_iteration_ratio(isParamValid("linear_iteration_ratio") ? getParam<unsigned>("linear_iteration_ratio") : 25),  // Default to 25
     _adaptive_timestepping(false),
+    _pps_value(isParamValid("postprocessor_dtlim") ? &getPostprocessorValue("postprocessor_dtlim") : NULL),
     _timestep_limiting_function(NULL),
     _piecewise_timestep_limiting_function(NULL),
     _times(0),
@@ -187,6 +190,10 @@ IterationAdaptiveDT::constrainStep(Real & dt)
 {
   bool at_sync_point = TimeStepper::constrainStep(dt);
 
+  // Limit the timestep to postprocessor value
+
+  limitDTToPostprocessorValue(dt);
+
   // Limit the timestep to limit change in the function
   limitDTByFunction(dt);
 
@@ -229,6 +236,21 @@ IterationAdaptiveDT::computeFailedDT()
     _console << "\nSolve failed, cutting timestep.\n";
 
   return _dt * _cutback_factor;
+}
+
+void
+IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT)
+{
+  if (_pps_value)
+  {
+    if (*_pps_value > _dt_min && limitedDT > *_pps_value)
+    {
+      limitedDT = *_pps_value;
+
+      if (_verbose)
+        _console << "Limiting dt to postprocessor value. dt = " << limitedDT << '\n';
+    }
+  }
 }
 
 void

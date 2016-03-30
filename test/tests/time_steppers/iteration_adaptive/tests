@@ -43,4 +43,10 @@
     exodiff = 'adapt_tstep_shrink_init_dt_restart_out.e'
     prereq = 'test_shrink_init_dt'
   [../]
+
+  [./test_pps_lim]
+    type = 'Exodiff'
+    input = 'adapt_tstep_pps_lim.i'
+    exodiff = 'adapt_tstep_pps_lim_out.e'
+  [../]
 []
