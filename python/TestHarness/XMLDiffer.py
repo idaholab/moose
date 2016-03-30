@@ -23,9 +23,9 @@ class XMLDiffer(object):
   # @param file2 The file to compare to the master file
   #
   # Optional Arguments:
-  #   abs_zero Any value less than this is assumed zero (default: 1e-11)
-  #   rel_tol Relative tolerance to check numeric values against (default: 5.5e-6)
-  #   max_values The maximum number of values to test
+  #   abs_zero: Any value less than this is assumed zero (default: 1e-11)
+  #   rel_tol: Relative tolerance to check numeric values against (default: 5.5e-6)
+  #   max_values: The maximum number of values to test
   def __init__(self, file1, file2, **kwargs):
 
     # Store the file names
@@ -43,12 +43,12 @@ class XMLDiffer(object):
     self._root1 = self._extractXML(file1)
     self._root2 = self._extractXML(file2)
 
-    # Perform the comparision
+    # Perform the comparison
     self._compare()
 
   ##
-  # Check the comparision status (public)
-  # Returns True if the comparision fails
+  # Check the comparison status (public)
+  # Returns True if the comparison fails
   def fail(self):
     return len(self._errors) > 0
 
@@ -115,7 +115,7 @@ class XMLDiffer(object):
 
     # Catch parser errors
     except xml.ParseError:
-      err = 'An XML parser error occured attemptting to read XML tree from ' + filename + '.'
+      err = 'An XML parser error occurred attempting to read XML tree from ' + filename + '.'
       msg = traceback.format_exc().splitlines()
       self._addError(err, msg)
       root = None
@@ -124,7 +124,7 @@ class XMLDiffer(object):
     return root
 
   ##
-  # Perform the block by block comparision (private)
+  # Perform the block by block comparison (private)
   def _compare(self):
 
     # Define local variables
@@ -138,14 +138,14 @@ class XMLDiffer(object):
     # Loop through each tree object in the master file
     for elem0 in root[0].getiterator():
 
-      # Intialize the result and error storage
+      # Initialize the result and error storage
       results = []
       errors  = []
 
       # Loop through all blocks in the second file with the current tag
       for elem1 in root[1].getiterator(elem0.tag):
 
-        # Perform the comparision
+        # Perform the comparison
         r, e = self._compareBlock(elem0, elem1)
 
         # Append the test results
@@ -155,10 +155,10 @@ class XMLDiffer(object):
       # If all results are False, there was no match
       if not any(results):
 
-        # Fiter out errors (elem.text failure)
+        # Filter out errors (elem.text failure)
         errors = filter(None, errors)
 
-        # If no erros exist there was no block or block with identical attributes located
+        # If no errors exist there was no block or block with identical attributes located
         if len(errors) == 0:
           msg = self._getAttrib(elem0)
           if len(msg) == 0:
@@ -180,13 +180,13 @@ class XMLDiffer(object):
   # then the XML text is also compared.
   # @param elem0 The master XML element object
   # @param elem1 The XML element object to compare the master against
-  # @return A pair containg the test result (True or False) and an error indicator,
+  # @return A pair containing the test result (True or False) and an error indicator,
   #         this 'indicator' is None if the result of the match is True or if the
   #         attributes fail to match. When the text fails to match then it contains
   #         the XMLError object.
   def _compareBlock(self, elem0, elem1):
 
-    # Perform attribute comparision in both directions: ensure that
+    # Perform attribute comparison in both directions: ensure that
     # every attribute in the gold file is in the output file, and
     # vice-versa.
     test_attrib = self._compareAttributes(elem0, elem1) and self._compareAttributes(elem1, elem0)
@@ -262,7 +262,7 @@ class XMLDiffer(object):
     # Check that the lengths are the same
     if len(text0) != len(text1):
       result = False
-      err = 'An XML block with the tag "' + elem0.tag + '" and the following attributes exists in both files, but the blocks have a diffenent number of values.'
+      err = 'An XML block with the tag "' + elem0.tag + '" and the following attributes exists in both files, but the blocks have a different number of values.'
       msg = self._getAttrib(elem0)
       msg.append('No. items file 1: ' + '%d' % len(text0))
       msg.append('No. items file 2: ' + '%d' % len(text1))
@@ -311,7 +311,7 @@ class XMLDiffer(object):
       if rel_diff > self._rtol:
         result = False
 
-    # Return the comparision
+    # Return the comparison
     return result, rel_diff
 
 
