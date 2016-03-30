@@ -16,6 +16,7 @@
 
 #include "TimeStepper.h"
 #include "LinearInterpolation.h"
+#include "PostprocessorInterface.h"
 
 class Function;
 class Piecewise;
@@ -29,8 +30,11 @@ class Piecewise;
  * of linear iterations with the multiplier linear_iteration_ratio applied to optimal_iterations and
  * iteration_window.
  * This time stepper allows the user to specify a function that limits the maximal time step change.
+ * This time stepper allows the user to specify a limiting time step length through a postprocessor.
  */
-class IterationAdaptiveDT : public TimeStepper
+class IterationAdaptiveDT :
+  public TimeStepper,
+  public PostprocessorInterface
 {
 public:
   IterationAdaptiveDT(const InputParameters & parameters);
@@ -50,6 +54,7 @@ protected:
   void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
   Real computeInterpolationDT();
   void limitDTByFunction(Real & limitedDT);
+  void limitDTToPostprocessorValue(Real & limitedDT);
 
   Real & _dt_old;
 
@@ -67,6 +72,9 @@ protected:
   const int _linear_iteration_ratio;
   /// adaptive timestepping is active if the optimal_iterations input parameter is specified
   bool _adaptive_timestepping;
+
+  /// if specified, the postprocessor value is an upper limit for the time step length
+  const PostprocessorValue * _pps_value;
 
   Function * _timestep_limiting_function;
   Piecewise * _piecewise_timestep_limiting_function;
