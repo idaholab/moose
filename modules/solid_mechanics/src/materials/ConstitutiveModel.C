@@ -31,13 +31,13 @@ InputParameters validParams<ConstitutiveModel>()
 }
 
 
-ConstitutiveModel::ConstitutiveModel( const InputParameters & parameters)
+ConstitutiveModel::ConstitutiveModel(const InputParameters & parameters)
   :Material(parameters),
    _has_temp(isCoupled("temp")),
    _temperature(_has_temp ? coupledValue("temp") : _zero),
    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
    _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
-   _alpha_function( parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
+   _alpha_function(parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
    _has_stress_free_temp(isParamValid("stress_free_temperature")),
    _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0),
    _ref_temp(0.0)
@@ -72,19 +72,19 @@ ConstitutiveModel::ConstitutiveModel( const InputParameters & parameters)
 }
 
 void
-ConstitutiveModel::computeStress( const Elem & /*current_elem*/,
-                                  unsigned /*qp*/,
-                                  const SymmElasticityTensor & elasticityTensor,
-                                  const SymmTensor & stress_old,
-                                  SymmTensor & strain_increment,
-                                  SymmTensor & stress_new )
+ConstitutiveModel::computeStress(const Elem & /*current_elem*/,
+                                 unsigned /*qp*/,
+                                 const SymmElasticityTensor & elasticityTensor,
+                                 const SymmTensor & stress_old,
+                                 SymmTensor & strain_increment,
+                                 SymmTensor & stress_new)
 {
   stress_new = elasticityTensor * strain_increment;
   stress_new += stress_old;
 }
 
 void
-ConstitutiveModel::initStatefulProperties( unsigned int /*n_points*/ )
+ConstitutiveModel::initStatefulProperties(unsigned int /*n_points*/)
 {
 }
 
@@ -93,7 +93,7 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
                                       SymmTensor & strain_increment,
                                       SymmTensor & d_strain_dT)
 {
-  if ( _has_temp && _t_step != 0 )
+  if (_has_temp && _t_step != 0)
   {
     Real inc_thermal_strain;
     Real d_thermal_strain_d_temp;
@@ -139,12 +139,11 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
       d_thermal_strain_d_temp = alpha;
     }
 
-    strain_increment.addDiag( -inc_thermal_strain );
-    d_strain_dT.addDiag( -d_thermal_strain_d_temp );
+    strain_increment.addDiag(-inc_thermal_strain);
+    d_strain_dT.addDiag(-d_thermal_strain_d_temp);
 
   }
 
   bool modified = true;
   return modified;
 }
-
