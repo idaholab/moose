@@ -36,12 +36,12 @@ InputParameters validParams<ElementIndicator>()
 
 ElementIndicator::ElementIndicator(const InputParameters & parameters) :
     Indicator(parameters),
-    TransientInterface(parameters, "indicators"),
-    PostprocessorInterface(parameters),
+    TransientInterface(this),
+    PostprocessorInterface(this),
     Coupleable(parameters, false),
     ScalarCoupleable(parameters),
     MooseVariableInterface(parameters, false),
-    MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(this),
     ZeroInterface(parameters),
 
     _field_var(_sys.getVariable(_tid, name())),

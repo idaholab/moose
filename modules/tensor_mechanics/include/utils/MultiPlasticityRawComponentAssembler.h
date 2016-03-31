@@ -7,6 +7,7 @@
 #define MULTIPLASTICITYRAWCOMPONENTASSEMBLER_H
 
 #include "TensorMechanicsPlasticModel.h"
+#include "UserObjectInterface.h"
 
 class MultiPlasticityRawComponentAssembler;
 
@@ -32,14 +33,16 @@ InputParameters validParams<MultiPlasticityRawComponentAssembler>();
  * The std::vectors _model_given_surface, _model_surface_given_surface
  * and _surfaces_given_model allow translation between these
  */
-class MultiPlasticityRawComponentAssembler
+class MultiPlasticityRawComponentAssembler : public UserObjectInterface
 {
 public:
-  MultiPlasticityRawComponentAssembler(const InputParameters & parameters);
+  MultiPlasticityRawComponentAssembler(const MooseObject * moose_object);
 
   virtual ~MultiPlasticityRawComponentAssembler() {}
 
 protected:
+  const InputParameters & _params;
+
   /// Number of plastic models for this material
   unsigned int _num_models;
 

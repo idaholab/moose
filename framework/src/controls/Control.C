@@ -31,12 +31,12 @@ InputParameters validParams<Control>()
 
 Control::Control(const InputParameters & parameters) :
     MooseObject(parameters),
-    TransientInterface(parameters, "control"),
-    SetupInterface(parameters),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
-    PostprocessorInterface(parameters),
-    VectorPostprocessorInterface(parameters),
+    TransientInterface(this),
+    SetupInterface(this),
+    FunctionInterface(this),
+    UserObjectInterface(this),
+    PostprocessorInterface(this),
+    VectorPostprocessorInterface(this),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _input_parameter_warehouse(_app.getInputParameterWarehouse())
 {

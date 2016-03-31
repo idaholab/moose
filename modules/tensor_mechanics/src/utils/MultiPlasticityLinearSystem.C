@@ -20,9 +20,9 @@ InputParameters validParams<MultiPlasticityLinearSystem>()
   return params;
 }
 
-MultiPlasticityLinearSystem::MultiPlasticityLinearSystem(const InputParameters & parameters):
-    MultiPlasticityRawComponentAssembler(parameters),
-    _svd_tol(parameters.get<Real>("linear_dependent")),
+MultiPlasticityLinearSystem::MultiPlasticityLinearSystem(const MooseObject * moose_object):
+    MultiPlasticityRawComponentAssembler(moose_object),
+    _svd_tol(_params.get<Real>("linear_dependent")),
     _min_f_tol(-1.0)
 {
   for (unsigned model = 0; model < _num_models; ++model)

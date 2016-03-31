@@ -25,6 +25,7 @@
 class FEProblem;
 class InputParameters;
 class PostprocessorName;
+class MooseObject;
 
 /**
  * Interface class for classes which interact with Postprocessors.
@@ -33,7 +34,7 @@ class PostprocessorName;
 class PostprocessorInterface
 {
 public:
-  PostprocessorInterface(const InputParameters & params);
+  PostprocessorInterface(const MooseObject * moose_object);
 
   ///@{
   /**
@@ -99,12 +100,11 @@ public:
   bool hasPostprocessorByName(const PostprocessorName & name);
 
 private:
+  /// PostprocessorInterface Parameters
+  const InputParameters & _ppi_params;
 
   /// Reference the the FEProblem class
   FEProblem & _pi_feproblem;
-
-  /// PostprocessorInterface Parameters
-  const InputParameters & _ppi_params;
 };
 
 #endif //POSTPROCESSORINTERFACE_H

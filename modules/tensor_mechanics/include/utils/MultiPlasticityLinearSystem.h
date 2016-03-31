@@ -117,7 +117,7 @@ class MultiPlasticityLinearSystem:
   public MultiPlasticityRawComponentAssembler
 {
 public:
-  MultiPlasticityLinearSystem(const InputParameters & parameters);
+  MultiPlasticityLinearSystem(const MooseObject * moose_object);
 
 protected:
 

@@ -26,7 +26,7 @@ InputParameters validParams<LinearCombinationFunction>()
 
 LinearCombinationFunction::LinearCombinationFunction(const InputParameters & parameters) :
     Function(parameters),
-    FunctionInterface(parameters),
+    FunctionInterface(this),
     _w(getParam<std::vector<Real> >("w"))
 {
 
@@ -59,4 +59,3 @@ LinearCombinationFunction::value(Real t, const Point & p)
     val += _w[i]*_f[i]->value(t, p);
   return val;
 }
-

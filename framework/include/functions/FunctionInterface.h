@@ -15,9 +15,10 @@
 #ifndef FUNCTIONINTERFACE_H
 #define FUNCTIONINTERFACE_H
 
-#include "InputParameters.h"
 #include "ParallelUniqueId.h"
+#include "InputParameters.h"
 
+// Forward declarations
 class Function;
 class FEProblem;
 class FunctionInterface;
@@ -40,7 +41,7 @@ public:
    *        but the object calling getFunction only needs to use the name on the
    *        left hand side of the statement "function = func_name"
    */
-  FunctionInterface(const InputParameters & params);
+  FunctionInterface(const MooseObject * moose_object);
 
   /**
    * Get a function with a given name
@@ -57,15 +58,14 @@ public:
   Function & getFunctionByName(const FunctionName & name);
 
 private:
+  /// Parameters of the object with this interface
+  const InputParameters &_fni_params;
 
   /// Reference to FEProblem instance
   FEProblem & _fni_feproblem;
 
   /// Thread ID
   THREAD_ID _fni_tid;
-
-  /// Parameters of the object with this interface
-  const InputParameters &_fni_params;
 };
 
 #endif //FUNCTIONINTERFACE_H

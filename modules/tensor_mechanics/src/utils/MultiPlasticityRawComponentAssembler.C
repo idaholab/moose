@@ -17,15 +17,16 @@ InputParameters validParams<MultiPlasticityRawComponentAssembler>()
   return params;
 }
 
-MultiPlasticityRawComponentAssembler::MultiPlasticityRawComponentAssembler(const InputParameters & parameters):
-  _num_models(parameters.get<std::vector<UserObjectName> >("plastic_models").size()),
-  _num_surfaces(0),
-  _specialIC(parameters.get<MooseEnum>("specialIC"))
+MultiPlasticityRawComponentAssembler::MultiPlasticityRawComponentAssembler(const MooseObject * moose_object) :
+    UserObjectInterface(moose_object),
+    _params(moose_object->parameters()),
+    _num_models(_params.get<std::vector<UserObjectName> >("plastic_models").size()),
+    _num_surfaces(0),
+    _specialIC(_params.get<MooseEnum>("specialIC"))
 {
   _f.resize(_num_models);
-  UserObjectInterface uoi(parameters); // this comes via TensorMechanicsPlasticModel.  i haven't derived this class from UserObjectInterface because i'm worried about diamond inheritance when using this in FiniteStrainMultiPlasticity
   for (unsigned model = 0; model < _num_models; ++model)
-    _f[model] = &uoi.getUserObjectByName<TensorMechanicsPlasticModel>(parameters.get<std::vector<UserObjectName> >("plastic_models")[model]);
+    _f[model] = &getUserObjectByName<TensorMechanicsPlasticModel>(_params.get<std::vector<UserObjectName> >("plastic_models")[model]);
 
   for (unsigned model = 0; model < _num_models; ++model)
     _num_surfaces += _f[model]->numberSurfaces();

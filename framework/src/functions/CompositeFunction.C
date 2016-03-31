@@ -25,7 +25,7 @@ InputParameters validParams<CompositeFunction>()
 
 CompositeFunction::CompositeFunction(const InputParameters & parameters) :
   Function(parameters),
-  FunctionInterface( parameters ),
+  FunctionInterface(this),
   _scale_factor( getParam<Real>("scale_factor") )
 {
 
@@ -70,4 +70,3 @@ CompositeFunction::value(Real t, const Point & p)
   }
   return val;
 }
-

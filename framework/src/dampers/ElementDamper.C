@@ -16,6 +16,7 @@
 #include "SystemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
+#include "FEProblem.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
@@ -31,7 +32,7 @@ InputParameters validParams<ElementDamper>()
 
 ElementDamper::ElementDamper(const InputParameters & parameters) :
     Damper(parameters),
-    MaterialPropertyInterface(parameters),
+    MaterialPropertyInterface(this),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _coord_sys(_assembly.coordSystem()),
