@@ -48,7 +48,8 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _stop_time(std::numeric_limits<Real>::max()),
     _cycles_per_step(1),
     _use_new_system(false),
-    _max_h_level(0)
+    _max_h_level(0),
+    _use_refined_mesh(false)
 {
 }
 
