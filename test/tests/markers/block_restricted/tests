@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = marker_block.i
+    exodiff = marker_block_out.e
+  [../]
+[]
