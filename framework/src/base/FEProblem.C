@@ -2453,7 +2453,7 @@ FEProblem::updateActiveObjects()
 void
 FEProblem::reportMooseObjectDependency(MooseObject * a, MooseObject * b)
 {
-  std::cout << "Object " << a->name() << " -> " << b->name() << std::endl;
+  //<< "Object " << a->name() << " -> " << b->name() << std::endl;
 }
 
 void
