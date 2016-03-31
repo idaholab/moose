@@ -327,6 +327,9 @@ MooseApp::setupOptions()
     createMinimalApp();
 
   else if (getParam<bool>("check_cxx11"))
+  {
+    Moose::perf_log.disable_logging();
+
     /**
      * Do nothing here but we don't want to fall into the catch-all
      * at the bottom of this if/else cascade which prints the Usage
@@ -334,6 +337,7 @@ MooseApp::setupOptions()
      * destruction and will print information out there.
      */
     _ready_to_exit = true;
+  }
   else if (getParam<bool>("help"))
   {
     Moose::perf_log.disable_logging();
