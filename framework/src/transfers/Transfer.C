@@ -45,7 +45,7 @@ InputParameters validParams<Transfer>()
 
 Transfer::Transfer(const InputParameters & parameters) :
     MooseObject(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     Restartable(parameters, "Transfers"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),

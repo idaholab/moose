@@ -25,14 +25,14 @@ InputParameters validParams<TwoMaterialPropertyInterface>()
   return params;
 }
 
-TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters) :
-    MaterialPropertyInterface(parameters),
-    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
+TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const MooseObject * moose_object) :
+    MaterialPropertyInterface(moose_object),
+    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, _mi_params.get<THREAD_ID>("_tid")))
 {
 }
 
-TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids) :
-    MaterialPropertyInterface(parameters, block_ids),
-    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, parameters.get<THREAD_ID>("_tid")))
+TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids) :
+    MaterialPropertyInterface(moose_object, block_ids),
+    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, _mi_params.get<THREAD_ID>("_tid")))
 {
 }

@@ -78,7 +78,7 @@ Output::Output(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "Output"),
     MeshChangedInterface(parameters),
-    SetupInterface(parameters),
+    SetupInterface(this),
     _problem_ptr(getParam<FEProblem *>("_fe_problem")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),

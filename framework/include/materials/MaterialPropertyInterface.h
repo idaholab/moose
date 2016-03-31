@@ -20,10 +20,11 @@
 #include "MaterialProperty.h"
 #include "MaterialData.h"
 #include "FEProblem.h"
+#include "InputParameters.h"
 
 // Forward declarations
 class MaterialPropertyInterface;
-class InputParameters;
+class MooseObject;
 
 template<>
 InputParameters validParams<MaterialPropertyInterface>();
@@ -57,10 +58,10 @@ public:
    *   (3) restricted to only boundaries
    *   (4) restricted to both blocks and boundaries
    */
-  MaterialPropertyInterface(const InputParameters & parameters);
-  MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids);
-  MaterialPropertyInterface(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
-  MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids, const std::set<BoundaryID> & boundary_ids);
+  MaterialPropertyInterface(const MooseObject * moose_object);
+  MaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids);
+  MaterialPropertyInterface(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids);
+  MaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids, const std::set<BoundaryID> & boundary_ids);
   ///@}
 
   ///@{
@@ -164,6 +165,8 @@ public:
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
 protected:
+  /// Parameters of the object with this interface
+  const InputParameters & _mi_params;
 
   /// The name of the object that this interface belongs to
   const std::string _mi_name;
@@ -237,9 +240,6 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> _mi_boundary_ids;
-
-  /// Parameters of the object with this interface
-  const InputParameters & _mi_params;
 };
 
 /**

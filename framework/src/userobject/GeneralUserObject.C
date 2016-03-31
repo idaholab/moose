@@ -24,12 +24,12 @@ InputParameters validParams<GeneralUserObject>()
 
 GeneralUserObject::GeneralUserObject(const InputParameters & parameters) :
     UserObject(parameters),
-    MaterialPropertyInterface(parameters),
-    TransientInterface(parameters, "general_user_objects"),
+    MaterialPropertyInterface(this),
+    TransientInterface(this),
     DependencyResolverInterface(),
-    UserObjectInterface(parameters),
-    PostprocessorInterface(parameters),
-    VectorPostprocessorInterface(parameters)
+    UserObjectInterface(this),
+    PostprocessorInterface(this),
+    VectorPostprocessorInterface(this)
 {
   _supplied_vars.insert(name());
 }

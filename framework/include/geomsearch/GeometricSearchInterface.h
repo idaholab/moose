@@ -15,7 +15,7 @@
 #ifndef GEOMETRICSEARCHINTERFACE_H
 #define GEOMETRICSEARCHINTERFACE_H
 
-#include "InputParameters.h"
+#include "MooseTypes.h"
 
 #include "libmesh/enum_order.h"
 
@@ -23,12 +23,13 @@
 class GeometricSearchData;
 class PenetrationLocator;
 class NearestNodeLocator;
-
+class MooseObject;
+class BoundaryName;
 
 class GeometricSearchInterface
 {
 public:
-  GeometricSearchInterface(const InputParameters & parameters);
+  GeometricSearchInterface(const MooseObject * moose_object);
 
   /**
    * Retrieve the PentrationLocator associated with the two sides.

@@ -33,7 +33,7 @@ InputParameters validParams<ComputeMultiPlasticityStress>()
 
 ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters & parameters) :
     ComputeStressBase(parameters),
-    MultiPlasticityDebugger(parameters),
+    MultiPlasticityDebugger(this),
     _max_iter(getParam<unsigned int>("max_NR_iterations")),
     _min_stepsize(getParam<Real>("min_stepsize")),
     _max_stepsize_for_dumb(getParam<Real>("max_stepsize_for_dumb")),

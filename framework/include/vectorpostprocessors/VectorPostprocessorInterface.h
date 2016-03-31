@@ -21,11 +21,12 @@
 
 // Forward Declarations
 class FEProblem;
+class MooseObject;
 
 class VectorPostprocessorInterface
 {
 public:
-  VectorPostprocessorInterface(const InputParameters & parameters);
+  VectorPostprocessorInterface(const MooseObject * moose_object);
 
   /**
    * This class has virtual methods, so it needs a virtual dtor.
@@ -106,15 +107,14 @@ public:
 
 
 private:
+  /// VectorPostprocessorInterface Parameters
+  const InputParameters & _vpi_params;
 
   /// Reference the the FEProblem class
   FEProblem & _vpi_feproblem;
 
   /// Thread ID
   THREAD_ID _vpi_tid;
-
-  /// VectorPostprocessorInterface Parameters
-  const InputParameters & _vpi_params;
 };
 
 #endif //VECTORPOSTPROCESSORINTERFACE_H

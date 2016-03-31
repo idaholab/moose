@@ -26,10 +26,10 @@ InputParameters validParams<Function>()
 
 Function::Function(const InputParameters & parameters) :
     MooseObject(parameters),
-    SetupInterface(parameters),
-    TransientInterface(parameters, "functions"),
-    PostprocessorInterface(parameters),
-    UserObjectInterface(parameters),
+    SetupInterface(this),
+    TransientInterface(this),
+    PostprocessorInterface(this),
+    UserObjectInterface(this),
     Restartable(parameters, "Functions"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(parameters)
@@ -78,4 +78,3 @@ Function::average()
   mooseError("Average method not defined for function " << name());
   return 0;
 }
-

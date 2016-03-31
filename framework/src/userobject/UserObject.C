@@ -40,8 +40,8 @@ InputParameters validParams<UserObject>()
 
 UserObject::UserObject(const InputParameters & parameters) :
     MooseObject(parameters),
-    SetupInterface(parameters),
-    FunctionInterface(parameters),
+    SetupInterface(this),
+    FunctionInterface(this),
     Restartable(parameters, "UserObjects"),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

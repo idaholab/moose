@@ -42,9 +42,9 @@ InputParameters validParams<Indicator>()
 Indicator::Indicator(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
-    SetupInterface(parameters),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+    SetupInterface(this),
+    FunctionInterface(this),
+    UserObjectInterface(this),
     Restartable(parameters, "Indicators"),
     OutputInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),

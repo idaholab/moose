@@ -23,7 +23,7 @@ class MultiPlasticityDebugger:
   public MultiPlasticityLinearSystem
 {
 public:
-  MultiPlasticityDebugger(const InputParameters & parameters);
+  MultiPlasticityDebugger(const MooseObject * moose_object);
 
   /**
    * Outputs the debug parameters: _fspb_debug_stress, _fspd_debug_pm, etc

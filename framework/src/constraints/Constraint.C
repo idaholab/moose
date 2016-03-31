@@ -34,11 +34,11 @@ InputParameters validParams<Constraint>()
 
 Constraint::Constraint(const InputParameters & parameters) :
   MooseObject(parameters),
-  SetupInterface(parameters),
-  FunctionInterface(parameters),
-  UserObjectInterface(parameters),
-  TransientInterface(parameters, "constraint"),
-  GeometricSearchInterface(parameters),
+  SetupInterface(this),
+  FunctionInterface(this),
+  UserObjectInterface(this),
+  TransientInterface(this),
+  GeometricSearchInterface(this),
   Restartable(parameters, "Constraints"),
   ZeroInterface(parameters),
   MeshChangedInterface(parameters),

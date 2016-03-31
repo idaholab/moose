@@ -39,8 +39,8 @@ public:
    *   (1) not restricted to boundaries or blocks
    *   (2) restricted to only blocks
    */
-  TwoMaterialPropertyInterface(const InputParameters & parameters);
-  TwoMaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids);
+  TwoMaterialPropertyInterface(const MooseObject * moose_object);
+  TwoMaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids);
   ///@}
 
   /**

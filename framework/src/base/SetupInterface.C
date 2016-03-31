@@ -34,10 +34,12 @@ InputParameters validParams<SetupInterface>()
   return params;
 }
 
-SetupInterface::SetupInterface(const InputParameters & params) :
-    _current_execute_flag((params.getCheckedPointerParam<FEProblem *>("_fe_problem"))->getCurrentExecuteOnFlag())
+SetupInterface::SetupInterface(const MooseObject * moose_object) :
+    _current_execute_flag((moose_object->parameters().getCheckedPointerParam<FEProblem *>("_fe_problem"))->getCurrentExecuteOnFlag())
 {
-  /*
+  const InputParameters & params = moose_object->parameters();
+
+  /**
    * While many of the MOOSE systems inherit from this interface, it doesn't make sense for them all to adjust their execution flags.
    * Our way of dealing with this is by not having those particular classes add the this classes valid params to their own.  In
    * those cases it won't exist so we just set it to a default and ignore it.
