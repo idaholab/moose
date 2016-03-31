@@ -326,6 +326,14 @@ MooseApp::setupOptions()
   if (getParam<bool>("minimal"))
     createMinimalApp();
 
+  else if (getParam<bool>("check_cxx11"))
+    /**
+     * Do nothing here but we don't want to fall into the catch-all
+     * at the bottom of this if/else cascade which prints the Usage
+     * among other things. This CLI option will be checked during
+     * destruction and will print information out there.
+     */
+    _ready_to_exit = true;
   else if (getParam<bool>("help"))
   {
     Moose::perf_log.disable_logging();
