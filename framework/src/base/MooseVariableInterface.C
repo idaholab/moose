@@ -17,10 +17,33 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
+#include "MooseError.h" // mooseDeprecated
+
+MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object, bool nodal, std::string var_param_name) :
+    _nodal(nodal)
+{
+  const InputParameters & parameters = moose_object->parameters();
+
+  SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
+
+  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
+
+  // Try the scalar version first
+  std::string variable_name = parameters.getMooseType(var_param_name);
+  if (variable_name == "")
+    // When using vector variables, we are only going to use the first one in the list at the interface level...
+    variable_name = parameters.getVecMooseType(var_param_name)[0];
+
+  _variable = &problem.getVariable(tid, variable_name);
+
+  _mvi_assembly = &problem.assembly(tid);
+}
 
 MooseVariableInterface::MooseVariableInterface(const InputParameters & parameters, bool nodal, std::string var_param_name) :
     _nodal(nodal)
 {
+  mooseDeprecated("Deprecated constructor: Please contact the MOOSE team for assistance in removing this warning");
+
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");

@@ -25,7 +25,7 @@ InputParameters validParams<AuxNodalScalarKernel>()
 
 AuxNodalScalarKernel::AuxNodalScalarKernel(const InputParameters & parameters) :
     AuxScalarKernel(parameters),
-    Coupleable(parameters, true),
+    Coupleable(this, true),
     MooseVariableDependencyInterface(),
     _node_ids(getParam<std::vector<dof_id_type> >("nodes"))
 {
@@ -45,4 +45,3 @@ AuxNodalScalarKernel::compute()
   _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
   AuxScalarKernel::compute();
 }
-

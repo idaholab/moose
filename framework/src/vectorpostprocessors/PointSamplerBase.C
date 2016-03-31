@@ -33,7 +33,7 @@ InputParameters validParams<PointSamplerBase>()
 
 PointSamplerBase::PointSamplerBase(const InputParameters & parameters) :
     GeneralVectorPostprocessor(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     SamplerBase(parameters, this, _communicator),
     _mesh(_subproblem.mesh()),
     _point_vec(1) // Only going to evaluate one point at a time for now

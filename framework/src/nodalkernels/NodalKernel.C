@@ -59,7 +59,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters) :
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), true),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),

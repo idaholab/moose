@@ -43,9 +43,9 @@ InputParameters validParams<InternalSideIndicator>()
 
 InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters) :
     Indicator(parameters),
-    NeighborCoupleable(parameters, false, false),
-    ScalarCoupleable(parameters),
-    NeighborMooseVariableInterface(parameters, false),
+    NeighborCoupleable(this, false, false),
+    ScalarCoupleable(this),
+    NeighborMooseVariableInterface(this, false),
     _field_var(_sys.getVariable(_tid, name())),
 
     _current_elem(_assembly.elem()),
@@ -124,4 +124,3 @@ InternalSideIndicator::finalize()
     _solution.set(_field_var.nodalDofIndex(), std::sqrt(value)/static_cast<Real>(n_flux_faces));
   }
 }
-

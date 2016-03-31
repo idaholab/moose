@@ -33,7 +33,7 @@ InputParameters validParams<FaceFaceConstraint>()
 
 FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
     Constraint(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _dim(_mesh.dimension()),
 
@@ -226,4 +226,3 @@ FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_t
 {
   return 0.;
 }
-

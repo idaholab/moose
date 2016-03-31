@@ -30,7 +30,7 @@ InputParameters validParams<NodalConstraint>()
 
 NodalConstraint::NodalConstraint(const InputParameters & parameters) :
     Constraint(parameters),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, true, true),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, true),
     _u_slave(_var.nodalSlnNeighbor()),
     _u_master(_var.nodalSln())
 {
