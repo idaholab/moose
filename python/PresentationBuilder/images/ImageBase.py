@@ -76,7 +76,7 @@ class ImageBase(MooseObject):
     # Create the html <img> block
     img = '\n\n'
     if div:
-      img += '<div style="text-align:center;>\n'
+      img += '<div style="text-align:center;">\n'
     img += '<figure style="float:left">\n'
     img += '  <a href="' + url + '">\n'
     img += '    <img src="' + img_name + '"'
