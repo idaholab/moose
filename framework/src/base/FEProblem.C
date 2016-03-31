@@ -3615,6 +3615,8 @@ FEProblem::adaptMesh()
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
     _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << '\n';
+    if (_adaptivity.getUseRefineMesh())
+      computeIndicatorsAndMarkers();
     if (_adaptivity.adaptMesh())
       meshChanged();
   }

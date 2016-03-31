@@ -113,6 +113,19 @@ public:
   void setCyclesPerStep(const unsigned int & num){ _cycles_per_step = num; }
 
   /**
+   * Pull out the parameter for use_refined_mesh previously set through the AdaptivityAction
+   *
+   * @return the use_refined_mesh parameter
+   */
+  bool getUseRefinedMesh() const { return _use_refined_mesh; }
+
+  /**
+   * Set the flag for of use_refined_mesh
+   * @param flag The bool for using a refined mesh to recalculate indicators and markers
+   */
+  void setUseRefinedMesh(bool flag) { _use_refined_mesh = flag; }
+
+  /**
    * Adapts the mesh based on the error estimator used
    *
    * @return a boolean that indicates whether the mesh was changed
@@ -250,6 +263,9 @@ protected:
   /// The maximum number of refinement levels
   unsigned int _max_h_level;
 
+  /// Flag to recompute indicators and markers on refined mesh
+  bool _use_refined_mesh;
+
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, ErrorVector *> _indicator_field_to_error_vector;
 };
@@ -278,6 +294,8 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
   }
   else if (param_name == "cycles_per_step")
     _cycles_per_step = param_value;
+  else if (param_name == "use_refined_mesh")
+    _use_refined_mesh = param_value;
   else
     mooseError("Invalid Param in adaptivity object");
 }
