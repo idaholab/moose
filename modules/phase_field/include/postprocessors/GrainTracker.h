@@ -87,13 +87,13 @@ protected:
    */
   void remapGrains();
 
-  /**
-   * This method swaps the values at all the nodes in grain_it1, with the values in grain_it2.
-   */
-  void swapSolutionValues(std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator & grain_it1,
-                          std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator & grain_it2, unsigned int attempt_number);
+  void computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain, std::vector<std::pair<Real, unsigned int> > & min_distances);
 
-  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, NumericVector<Real> & solution, NumericVector<Real> & solution_old, NumericVector<Real> & solution_older);
+  bool attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
+
+  void swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, unsigned int depth);
+
+  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx);
 
   /**
    * This method returns the periodic distance between two bounding boxes.  If use_centroids_only is true, then the distance will be between the two
@@ -122,6 +122,9 @@ protected:
 
   /// The thickness of the halo surrounding each grain
   const unsigned int _halo_level;
+
+  /// Depth of renumbing recursion (a depth of zero means no recursion)
+  const unsigned int _max_renumbering_recursion = 2;
 
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
