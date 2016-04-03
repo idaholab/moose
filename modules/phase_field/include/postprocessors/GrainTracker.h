@@ -32,6 +32,33 @@ public:
 
   virtual void finalize();
 
+  struct GrainDistance
+  {
+    GrainDistance() :
+        _distance(std::numeric_limits<Real>::max()),
+        _grain_id(std::numeric_limits<unsigned int>::max()),
+        _var_index(std::numeric_limits<unsigned int>::max())
+    {
+    }
+
+    GrainDistance(Real distance, unsigned int grain_id, unsigned int var_index) :
+        _distance(distance),
+        _grain_id(grain_id),
+        _var_index(var_index)
+    {
+    }
+
+    // TODO: Document this!
+    bool operator<(const GrainDistance & rhs) const
+    {
+      return _distance < rhs._distance;
+    }
+
+    Real _distance;
+    unsigned int _grain_id;
+    unsigned int _var_index;
+  };
+
   /**
    * Accessor for retrieving nodal field information (unique grains or variable indicies)
    * @param node_id the node identifier for which to retrieve field data
@@ -87,7 +114,7 @@ protected:
    */
   void remapGrains();
 
-  void computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain, std::vector<std::pair<Real, unsigned int> > & min_distances);
+  void computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain, std::vector<std::list<GrainDistance> > & min_distances);
 
   bool attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
 
