@@ -704,42 +704,51 @@ GrainTracker::remapGrains()
   /**
    * Loop over each grain and see if any grains represented by the same variable are "touching"
    */
-  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it1 = _unique_grains.begin();
-       grain_it1 != _unique_grains.end(); ++grain_it1)
+  bool grains_remapped;
+  do
   {
-    if (grain_it1->second->_status == INACTIVE)
-      continue;
-
-    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it2 = _unique_grains.begin() /*grain_it1*/;
-         grain_it2 != _unique_grains.end(); ++grain_it2)
+    grains_remapped = false;
+    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it1 = _unique_grains.begin();
+         grain_it1 != _unique_grains.end(); ++grain_it1)
     {
-      // Don't compare a grain with itself and don't try to remap inactive grains
-      if (grain_it1 == grain_it2 || grain_it2->second->_status == INACTIVE)
+      if (grain_it1->second->_status == INACTIVE)
         continue;
 
-      if (grain_it1->second->_var_idx == grain_it2->second->_var_idx &&   // Are the grains represented by the same variable?
-          grain_it1->second->isStichable(*grain_it2->second) &&           // If so, do their bboxes intersect (coarse level check)?
-          setsIntersect(grain_it1->second->_halo_ids.begin(),             // If so, do they actually overlap (tight "hull" check)?
-                        grain_it1->second->_halo_ids.end(),
-                        grain_it2->second->_halo_ids.begin(),
-                        grain_it2->second->_halo_ids.end()))
+      for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it2 = _unique_grains.begin();
+           grain_it2 != _unique_grains.end(); ++grain_it2)
       {
-        Moose::out
-          << COLOR_YELLOW
-          << "Grain #" << grain_it1->first << " intersects Grain #" << grain_it2->first
-          << " (variable index: " << grain_it1->second->_var_idx << ")\n"
-          << COLOR_DEFAULT;
+        // Don't compare a grain with itself and don't try to remap inactive grains
+        if (grain_it1 == grain_it2 || grain_it2->second->_status == INACTIVE)
+          continue;
 
-        for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
+        if (grain_it1->second->_var_idx == grain_it2->second->_var_idx &&   // Are the grains represented by the same variable?
+            grain_it1->second->isStichable(*grain_it2->second) &&           // If so, do their bboxes intersect (coarse level check)?
+            setsIntersect(grain_it1->second->_halo_ids.begin(),             // If so, do they actually overlap (tight "hull" check)?
+                          grain_it1->second->_halo_ids.end(),
+                          grain_it2->second->_halo_ids.begin(),
+                          grain_it2->second->_halo_ids.end()))
+        {
+          Moose::out
+            << COLOR_YELLOW
+            << "Grain #" << grain_it1->first << " intersects Grain #" << grain_it2->first
+            << " (variable index: " << grain_it1->second->_var_idx << ")\n"
+            << COLOR_DEFAULT;
 
-          if (max < _max_renumbering_recursion &&
-              (attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) || attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max)))
-            break;
-          else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) && !attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
-            mooseError(COLOR_RED << "Unable to find any suitable grains for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+          for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
+            if (max < _max_renumbering_recursion)
+            {
+              if (attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) || attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
+                break;
+            }
+            else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) && !attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
+              mooseError(COLOR_RED << "Unable to find any suitable grains for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+
+          grains_remapped = true;
+        }
       }
     }
   }
+  while (grains_remapped);
 }
 
 void
@@ -784,7 +793,14 @@ GrainTracker::computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain
     unsigned int grain_id = grain_it->first;
 
     Real curr_sphere_diff = boundingRegionDistance(grain->_bboxes, grain_it->second->_bboxes, false);
-    if (curr_sphere_diff < min_distances[potential_var_idx].first)
+    if (curr_sphere_diff == -1.0)
+    {
+      if (min_distances[potential_var_idx].first >= 0.0)
+        min_distances[potential_var_idx] = std::pair<Real, unsigned int>(curr_sphere_diff, grain_id);
+      else
+        min_distances[potential_var_idx] = std::pair<Real, unsigned int>(min_distances[potential_var_idx].first + curr_sphere_diff, grain_id);
+    }
+    else if (curr_sphere_diff < min_distances[potential_var_idx].first)
       min_distances[potential_var_idx] = std::pair<Real, unsigned int>(curr_sphere_diff, grain_id);
   }
 
@@ -820,11 +836,12 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
 
   std::sort(min_distances.begin(), min_distances.end(), pair_sorter_first<Real, unsigned int>());
 
+  for (std::vector<std::pair<Real, unsigned int> >::reverse_iterator min_it = min_distances.rbegin(); min_it != min_distances.rend(); ++min_it)
+    std::cout << min_it->first << ": " << min_it->second << '\n';
+
   // iterator over this vector backwards (biggest distance first)
   for (std::vector<std::pair<Real, unsigned int> >::reverse_iterator min_it = min_distances.rbegin(); min_it != min_distances.rend(); ++min_it)
   {
-//    std::cout << min_it->first << ": " << min_it->second << std::endl;
-
     // If we are at the numeric limit, this must be our variable, just skip it!
     if (min_it->first == -std::numeric_limits<Real>::max())
       continue;
@@ -845,6 +862,8 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
     if (curr_var_idx == target_var_idx)
       mooseError("Error3");
 
+    std::cout << "Depth " << depth << " Var idx: " << target_var_idx << '\n';
+
     Real distance = min_it->first;
 
     // If the distance is positive we can just remap and be done
@@ -852,8 +871,8 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
     {
       Moose::out
         << COLOR_GREEN
-        << "- Depth " << depth << ": Remapping grain #" << grain_idx << " to variable index " << target_var_idx
-        << " whose closest grain is at a distance of " << distance << "\n"
+        << "- Depth " << depth << ": Remapping grain #" << grain_idx << " from variable index " << curr_var_idx
+        << " to " << target_var_idx << " whose closest grain (#" << target_grain_idx << ") is at a distance of " << distance << "\n"
         << COLOR_DEFAULT;
 
       swapSolutionValues(grain, target_var_idx, depth);
@@ -866,8 +885,8 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
     {
       Moose::out
         << COLOR_GREEN
-        << "- Depth " << depth << ": Remapping grain #" << grain_idx << " to variable index " << target_var_idx
-        << " whose closest grain is inside our bounding sphere but whose halo is not touching\n"
+        << "- Depth " << depth << ": Remapping grain #" << grain_idx << " from variable index " << curr_var_idx
+        << " to " << target_var_idx << " whose closest grain (#" << target_grain_idx << ") is inside our bounding sphere but whose halo is not touching\n"
         << COLOR_DEFAULT;
 
       swapSolutionValues(grain, target_var_idx, depth);
@@ -877,11 +896,7 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
     // If we reach this part of the loop, there is no simple renumbering that can be done.
     // Propose a new variable index for the current grain and recurse
     grain->_var_idx = target_var_idx;
-    bool remap_successful = attemptGrainRenumber(target_grain, target_grain_idx, depth+1, max);
-    // Need to set our var index back after the recursion
-    grain->_var_idx = curr_var_idx;
-
-    if (remap_successful)
+    if (attemptGrainRenumber(target_grain, target_grain_idx, depth+1, max))
     {
       // Recompute distances (we can destroy this vector now because we are returning)
       min_distances.assign(_vars.size(), std::pair<Real, unsigned int>(std::numeric_limits<Real>::max(),
@@ -890,17 +905,20 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
       // Update the distance after the remapping
       distance = min_distances[target_var_idx].first;
 
+      std::cout << "Target Var: " << target_var_idx << " Other: " << curr_var_idx << '\n';
+
       if (distance > 0)
         Moose::out
           << COLOR_GREEN
-          << "- Depth " << depth << ": Remapping grain #" << grain_idx << " to variable index " << target_var_idx << " whose closest grain is at a distance of " << distance << "\n"
+          << "- Depth " << depth << ": Remapping grain #" << grain_idx << " from variable index " << curr_var_idx
+          << " to " << target_var_idx << " whose closest grain (#" << target_grain_idx << ") is at a distance of " << distance << "\n"
           << COLOR_DEFAULT;
       else if (!setsIntersect(grain->_halo_ids.begin(), grain->_halo_ids.end(),
                               target_grain->_halo_ids.begin(), target_grain->_halo_ids.end()))
         Moose::out
           << COLOR_GREEN
-          << "- Depth " << depth << ": Remapping grain #" << grain_idx << " to variable index " << target_var_idx
-          << " whose closest grain is inside our bounding sphere but whose halo is not touching\n"
+          << "- Depth " << depth << ": Remapping grain #" << grain_idx << " from variable index " << curr_var_idx
+          << " to " << target_var_idx << " whose closest grain (#" << target_grain_idx << ") is inside our bounding sphere but whose halo is not touching\n"
           << COLOR_DEFAULT;
       else
         mooseError("Catastrophic failure in the recursive remapping routine!");
@@ -908,6 +926,9 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
       swapSolutionValues(grain, target_var_idx, depth);
       return true;
     }
+    else
+      // Need to set our var index back after failed recursive step
+      grain->_var_idx = curr_var_idx;
   }
 
   // No luck so far, if we at a depth greater than zero there's still hope.
@@ -1084,9 +1105,13 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
         // Here we'll calculate a distance between the centroids
         curr_distance = _mesh.minPeriodicDistance(_var_number, centroid1, centroid2);
       else
+      {
         // We need to compute the distance between the boxes...
         // That's pretty hard so let's do it between spheres instead.
         curr_distance = sphere1.distance(sphere2);
+        if (curr_distance < 0.0)
+          curr_distance = -1.0; // All overlaps are treated the same
+      }
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;

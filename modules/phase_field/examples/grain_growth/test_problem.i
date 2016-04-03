@@ -148,7 +148,7 @@
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
-    connecting_threshold = 0.09
+    connecting_threshold = 0.05
     execute_on = 'initial timestep_end'
     flood_entity_type = ELEMENTAL
     halo_level = 2
