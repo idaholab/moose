@@ -426,7 +426,8 @@ void FEProblem::initialSetup()
     for (unsigned int i = 0; i < n; i++)
     {
       _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
-      computeIndicatorsAndMarkers();
+      computeIndicators();
+      computeMarkers();
 
       _adaptivity.initialAdaptMesh();
       meshChanged();
@@ -2167,10 +2168,10 @@ FEProblem::parentOutputPositionChanged()
 }
 
 void
-FEProblem::computeIndicatorsAndMarkers()
+FEProblem::computeIndicators()
 {
-  // Initialize marker and indicator aux variable fields
-  if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects() || _markers.hasActiveObjects())
+  // Initialize indicator aux variable fields
+  if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
     std::vector<std::string> fields;
 
@@ -2182,11 +2183,6 @@ FEProblem::computeIndicatorsAndMarkers()
     // InternalSideIndicator Fields
     const std::vector<MooseSharedPointer<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveObjects();
     for (std::vector<MooseSharedPointer<InternalSideIndicator> >::const_iterator it = internal_indicators.begin(); it != internal_indicators.end(); ++it)
-      fields.push_back((*it)->name());
-
-    // Marker Fields
-    const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects();
-    for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = markers.begin(); it != markers.end(); ++it)
       fields.push_back((*it)->name());
 
     _aux.zeroVariables(fields);
@@ -2204,6 +2200,23 @@ FEProblem::computeIndicatorsAndMarkers()
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
     _aux.solution().close();
     _aux.update();
+  }
+}
+
+void
+FEProblem::computeMarkers()
+{
+  // Initialize marker aux variable fields
+  if (_markers.hasActiveObjects())
+  {
+    std::vector<std::string> fields;
+
+    // Marker Fields
+    const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects();
+    for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = markers.begin(); it != markers.end(); ++it)
+      fields.push_back((*it)->name());
+
+    _aux.zeroVariables(fields);
   }
 
   // compute Markers
