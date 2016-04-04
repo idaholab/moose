@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "DataIO.h"
+#include "Backup.h"
 
 // C++ includes
 #include <sstream>
@@ -27,56 +28,6 @@
 class RestartableDatas;
 class RestartableDataValue;
 class FEProblem;
-
-/**
- * Helper class to hold streams for Backup and Restore operations.
- */
-class Backup
-{
-public:
-  Backup()
-  {
-    unsigned int n_threads = libMesh::n_threads();
-
-    _restartable_data.resize(n_threads);
-
-    for (unsigned int i=0; i < n_threads; i++)
-      _restartable_data[i] = new std::stringstream;
-  }
-
-  ~Backup()
-  {
-    unsigned int n_threads = libMesh::n_threads();
-
-    for (unsigned int i=0; i < n_threads; i++)
-      delete _restartable_data[i];
-  }
-
-  std::stringstream _system_data;
-
-  std::vector<std::stringstream*> _restartable_data;
-};
-
-template<>
-inline void
-dataStore(std::ostream & stream, Backup * & backup, void * context)
-{
-  dataStore(stream, backup->_system_data, context);
-
-  for (unsigned int i=0; i<backup->_restartable_data.size(); i++)
-    dataStore(stream, backup->_restartable_data[i], context);
-}
-
-template<>
-inline void
-dataLoad(std::istream & stream, Backup * & backup, void * context)
-{
-  dataLoad(stream, backup->_system_data, context);
-
-  for (unsigned int i=0; i<backup->_restartable_data.size(); i++)
-    dataLoad(stream, backup->_restartable_data[i], context);
-}
-
 
 /**
  * Class for doing restart.
