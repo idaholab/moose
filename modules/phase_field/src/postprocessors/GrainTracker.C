@@ -714,6 +714,15 @@ GrainTracker::remapGrains()
   std::cout << "Running remap Grains" << std::endl;
 
   /**
+   * The remapping algorithm is recursive. We will reuse the "merged" flag in the FeatureData
+   * to track which grains are currently being remapped so we don't have runaway recursion.
+   * TODO: Possibly rename this variable?
+   */
+  for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it = _unique_grains.begin();
+       grain_it != _unique_grains.end(); ++grain_it)
+    grain_it->second->_merged = false;
+
+  /**
    * Loop over each grain and see if any grains represented by the same variable are "touching"
    */
   bool grains_remapped;
@@ -831,6 +840,8 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
 
   unsigned int curr_var_idx = grain->_var_idx;
 
+  std::map<Node *, CacheValues> cache;
+
   std::vector<std::list<GrainDistance> > min_distances(_vars.size());
 
   /**
@@ -868,24 +879,6 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
     if (target_it == min_distances[i].end())
       continue;
 
-      //     unsigned int target_grain_idx = min_it->second;
-
-//    if (target_grain_idx == std::numeric_limits<unsigned int>::max())
-//      mooseError("Error1");
-//    if (_unique_grains.find(target_grain_idx) == _unique_grains.end())
-//      mooseError("Error2");
-
-//    mooseAssert(target_grain_idx != std::numeric_limits<unsigned int>::max(), "Error in finding target grain index in attemptGrainRenumber");
-//    unsigned int target_var_idx = target_grain->_var_idx;
-//    mooseAssert(curr_var_idx != target_var_idx, "Error in variable index in attemptGrainRenumber");
-
-//    if (curr_var_idx == target_var_idx)
-//      mooseError("Error3");
-
-//      std::cout << "Depth " << depth << " Var idx: " << target_var_idx << '\n';
-
-//    Real distance = min_it->first;
-
     // If the distance is positive we can just remap and be done
     if (target_it->_distance > 0)
     {
@@ -896,7 +889,7 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
         << ") is at a distance of " << target_it->_distance << "\n"
         << COLOR_DEFAULT;
 
-      swapSolutionValues(grain, target_it->_var_index, depth);
+      swapSolutionValues(grain, target_it->_var_index, cache, BYPASS, depth);
       return true;
     }
 
@@ -932,93 +925,64 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
         << " are inside our bounding sphere but whose halo(s) are not touching.\n"
         << COLOR_DEFAULT;
 
-      swapSolutionValues(grain, target_it->_var_index, depth);
+      swapSolutionValues(grain, target_it->_var_index, cache, BYPASS, depth);
       return true;
     }
 
     // If we reach this part of the loop, there is no simple renumbering that can be done.
+    mooseAssert(_unique_grains.find(target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
+    MooseSharedPointer<FeatureData> target_grain = _unique_grains[target_it->_grain_id];
+
+    // Make sure this grain isn't marked. If it is, we can't recurse here
+    // TODO: Don't error, we can recover
+    if (target_grain->_merged)
+      mooseError("Unfinished algorithm");
+
+    // Save the solution values in case we overright them during recursion
+    swapSolutionValues(grain, target_it->_var_index, cache, FILL, depth);
+
+    // TODO: Make sure this distance is -1 or higher or fine intersections only exist for a single variable
     // Propose a new variable index for the current grain and recurse
 
-    mooseAssert(_unique_grains.find(target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
-
+//    std::cout << "Proposing remap of grain #" << grain_id << " from variable index " << curr_var_idx
+//              << " to " << target_it->_var_index << " - ";
     grain->_var_idx = target_it->_var_index;
-    if (attemptGrainRenumber(_unique_grains[target_it->_grain_id], target_it->_grain_id, depth+1, max))
+    grain->_merged = true;
+    if (attemptGrainRenumber(target_grain, target_it->_grain_id, depth+1, max))
     {
-      // Recompute distances (we can destroy this vector now because we are returning)
-      for (unsigned int j = 0; j < min_distances.size(); ++j)
-        min_distances[j].clear();
+//      std::cout << "SUCCESS!\n";
+      // SUCCESS!
+      Moose::out
+        << COLOR_GREEN
+        << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index " << curr_var_idx
+        << " to " << target_it->_var_index << '\n'
+        << COLOR_DEFAULT;
 
-      computeMinDistancesFromGrain(grain, min_distances);
+      // NOTE: swapSolutionValues currently reads the current variable index off the grain. We need to set
+      //       back here before calling this method.
+      grain->_var_idx = curr_var_idx;
+      swapSolutionValues(grain, target_it->_var_index, cache, USE, depth);
 
-      // DO NOT SORT
-
-      // Update the distance after the remapping
-      Real distance = min_distances[grain->_var_idx].empty() ? std::numeric_limits<Real>::max() : min_distances[grain->_var_idx].begin()->_distance;
-
-//      std::cout << "Target Var: " << target_it->_var_index << " Other: " << curr_var_idx << '\n';
-
-      // TODO: This is mostly duplicated code. I can be removed with a more clever version of this algorithm
-      if (distance > 0)
-      {
-        Moose::out
-          << COLOR_GREEN
-          << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index " << curr_var_idx
-          << " to " << grain->_var_idx << " whose closest grain (#" << min_distances[grain->_var_idx].begin()->_grain_id
-          << ") is at a distance of " << distance << "\n"
-          << COLOR_DEFAULT;
-
-        swapSolutionValues(grain, grain->_var_idx, depth);
-        return true;
-      }
-
-      // If the distance isn't positive we just need to make sure that none of the grains represented by the
-      // target variable index would intersect this one if we were to remap
-      std::list<GrainDistance>::const_iterator next_target_it = min_distances[grain->_var_idx].begin();
-      bool intersection_hit = false;
-      std::ostringstream oss;
-      while (!intersection_hit && next_target_it != min_distances[grain->_var_idx].end())
-      {
-        if (next_target_it->_distance > 0)
-          break;
-
-        mooseAssert(_unique_grains.find(next_target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
-        MooseSharedPointer<FeatureData> next_target_grain = _unique_grains[next_target_it->_grain_id];
-
-        // If any grains touch we're done here
-        if (setsIntersect(grain->_halo_ids.begin(), grain->_halo_ids.end(),
-                          next_target_grain->_halo_ids.begin(), next_target_grain->_halo_ids.end()))
-          intersection_hit = true;
-        else
-          oss << " #" << next_target_it->_grain_id;
-
-        ++next_target_it;
-      }
-
-      if (!intersection_hit)
-      {
-        Moose::out
-          << COLOR_GREEN
-          << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index " << curr_var_idx
-          << " to " << grain->_var_idx << " whose closest grain(s):" << oss.str()
-          << " are inside our bounding sphere but whose halo(s) are not touching.\n"
-          << COLOR_DEFAULT;
-
-        swapSolutionValues(grain, grain->_var_idx, depth);
-        return true;
-      }
-
-      mooseError("Not finished implementing");
+      return true;
     }
-    // Need to set our var index back after failed recursive step
-    grain->_var_idx = curr_var_idx;
+    else
+    {
+//      std::cout << "FAIL\n";
+
+      // Need to set our var index back after failed recursive step
+      grain->_var_idx = curr_var_idx;
+    }
+
+    // Always "unmark" the grain after the recursion so it can be used by other remap operations
+    grain->_merged = false;
   }
 
-  // No luck so far, if we at a depth greater than zero there's still hope.
   return false;
 }
 
 void
-GrainTracker::swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, unsigned int depth)
+GrainTracker::swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+                                 REMAP_CACHE_MODE cache_mode, unsigned int depth)
 {
   MeshBase & mesh = _mesh.getMesh();
 
@@ -1039,12 +1003,12 @@ GrainTracker::swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned
         if (updated_nodes_tmp.find(curr_node) == updated_nodes_tmp.end())
         {
           updated_nodes_tmp.insert(curr_node);         // cache this node so we don't attempt to remap it again within this loop
-          swapSolutionValuesHelper(curr_node, grain->_var_idx, var_idx);
+          swapSolutionValuesHelper(curr_node, grain->_var_idx, var_idx, cache, cache_mode);
         }
       }
     }
     else
-      swapSolutionValuesHelper(mesh.query_node_ptr(*entity_it), grain->_var_idx, var_idx);
+      swapSolutionValuesHelper(mesh.query_node_ptr(*entity_it), grain->_var_idx, var_idx, cache, cache_mode);
   }
 
   // Update the variable index in the unique grain datastructure
@@ -1054,49 +1018,95 @@ GrainTracker::swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned
   if (depth == 0)
   {
     _nl.solution().close();
-    _nl.solutionOld().close();
-    _nl.solutionOlder().close();
+//    _nl.solutionOld().close();
+//    _nl.solutionOlder().close();
 
     _fe_problem.getNonlinearSystem().sys().update();
   }
 }
 
 void
-GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx)
+GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
+                                       REMAP_CACHE_MODE cache_mode)
 {
   if (curr_node && curr_node->processor_id() == processor_id())
   {
     // Reinit the node so we can get and set values of the solution here
     _subproblem.reinitNode(curr_node, 0);
 
-    // Swap the values from one variable to the other
+    // Get the value out of the solution vector or the cache
+    Real current, old, older;
+
+    if (cache_mode == FILL || cache_mode == BYPASS)
     {
-      const VariableValue & value = _vars[curr_var_idx]->nodalSln();
-      const VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
-      const VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
-
-      // Copy Value from intersecting variable to new variable
-      dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
-
-      // Set the only DOF for this variable on this node
-      _nl.solution().set(dof_index, value[0]);
-      _nl.solutionOld().set(dof_index, value_old[0]);
-      _nl.solutionOlder().set(dof_index, value_older[0]);
+      current = _vars[curr_var_idx]->nodalSln()[0];
+      old = _vars[curr_var_idx]->nodalSlnOld()[0];
+      older = _vars[curr_var_idx]->nodalSlnOlder()[0];
     }
+    else // USE
     {
-      const VariableValue & value = _vars[new_var_idx]->nodalSln();
-      const VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
-      const VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
+      std::map<Node *, CacheValues>::const_iterator it = cache.find(curr_node);
+      mooseAssert(it != cache.end(), "Error in cache");
+      current = it->second.current;
+      old = it->second.old;
+      older = it->second.older;
+    }
 
-      // Copy Value from variable to the intersecting variable
-      dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+    // Cache the value or use it!
+    if (cache_mode == FILL)
+    {
+      cache[curr_node].current = current;
+      cache[curr_node].old = old;
+      cache[curr_node].older = older;
+    }
+    else // USE or BYPASS
+    {
+      {
+        dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
 
-      // Set the only DOF for this variable on this node
-      _nl.solution().set(dof_index, value[0]);
-      _nl.solutionOld().set(dof_index, value_old[0]);
-      _nl.solutionOlder().set(dof_index, value_older[0]);
+        // Transfer this solution from the current to the new
+        _nl.solution().set(dof_index, current);
+        _nl.solutionOld().set(dof_index, old);
+        _nl.solutionOlder().set(dof_index, older);
+      }
+      {
+        dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+
+        // Set the DOF for the current variable to zero
+        _nl.solution().set(dof_index, 0.0);
+        _nl.solutionOld().set(dof_index, 0.0);
+        _nl.solutionOlder().set(dof_index, 0.0);
+      }
     }
   }
+
+//    // Swap the values from one variable to the other
+//    {
+//      const VariableValue & value = _vars[curr_var_idx]->nodalSln();
+//      const VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
+//      const VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
+//
+//      // Copy Value from intersecting variable to new variable
+//      dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
+//
+//      // Set the only DOF for this variable on this node
+//      _nl.solution().set(dof_index, value[0]);
+//      _nl.solutionOld().set(dof_index, value_old[0]);
+//      _nl.solutionOlder().set(dof_index, value_older[0]);
+//    }
+//    {
+//      const VariableValue & value = _vars[new_var_idx]->nodalSln();
+//      const VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
+//      const VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
+//
+//      // Copy Value from variable to the intersecting variable
+//      dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+//
+//      // Set the only DOF for this variable on this node
+//      _nl.solution().set(dof_index, value[0]);
+//      _nl.solutionOld().set(dof_index, value_old[0]);
+//      _nl.solutionOlder().set(dof_index, value_older[0]);
+//    }
 }
 
 void

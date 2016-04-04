@@ -195,5 +195,7 @@
   [./console]
     type = Console
     max_rows = 20
+    perf_log = true
+    perf_log_interval = 10
   [../]
 []

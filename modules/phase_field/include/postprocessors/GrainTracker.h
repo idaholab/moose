@@ -59,6 +59,20 @@ public:
     unsigned int _var_index;
   };
 
+  struct CacheValues
+  {
+    Real current;
+    Real old;
+    Real older;
+  };
+
+  enum REMAP_CACHE_MODE
+  {
+    FILL,
+    USE,
+    BYPASS
+  };
+
   /**
    * Accessor for retrieving nodal field information (unique grains or variable indicies)
    * @param node_id the node identifier for which to retrieve field data
@@ -118,9 +132,11 @@ protected:
 
   bool attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
 
-  void swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, unsigned int depth);
+  void swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+                          REMAP_CACHE_MODE cache_mode, unsigned int depth);
 
-  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx);
+  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
+                                REMAP_CACHE_MODE cache_mode);
 
   /**
    * This method returns the periodic distance between two bounding boxes.  If use_centroids_only is true, then the distance will be between the two
