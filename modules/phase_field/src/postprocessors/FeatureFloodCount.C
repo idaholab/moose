@@ -72,8 +72,14 @@ template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData 
   storeHelper(stream, feature._var_idx, context);
   storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._min_entity_id, context);
+  storeHelper(stream, feature._status, context);
   storeHelper(stream, feature._merged, context);
   storeHelper(stream, feature._intersects_boundary, context);
+}
+
+template<> void dataStore(std::ostream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
+{
+  dataStore(stream, *feature, context);
 }
 
 template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
@@ -90,8 +96,16 @@ template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData &
   loadHelper(stream, feature._var_idx, context);
   loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._min_entity_id, context);
+  loadHelper(stream, feature._status, context);
   loadHelper(stream, feature._merged, context);
   loadHelper(stream, feature._intersects_boundary, context);
+}
+
+template<> void dataLoad(std::istream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
+{
+  feature = MooseSharedPointer<FeatureFloodCount::FeatureData>(new FeatureFloodCount::FeatureData());
+
+  dataLoad(stream, *feature, context);
 }
 
 template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)

@@ -448,5 +448,13 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
   }
 }
 
+template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+template<> void dataStore(std::ostream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context);
+template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);
+
+template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+template<> void dataLoad(std::istream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context);
+template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
+
 
 #endif //FEATUREFLOODCOUNT_H

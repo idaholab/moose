@@ -231,12 +231,4 @@ public:
   std::ofstream _outfile;
 };
 
-
-template<> void dataStore(std::ostream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context);
-template<> void dataLoad(std::istream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context);
-
-template<> void dataStore(std::ostream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context);
-template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context);
-
-
 #endif
