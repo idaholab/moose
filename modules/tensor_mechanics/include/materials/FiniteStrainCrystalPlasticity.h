@@ -9,6 +9,7 @@
 
 #include "FiniteStrainMaterial.h"
 #include "ElementPropertyReadFile.h"
+#include "Function.h"
 
 /**
  * FiniteStrainCrystalPlasticity uses the multiplicative decomposition of deformation gradient
@@ -361,6 +362,9 @@ protected:
   bool _read_from_slip_sys_file;
 
   bool _err_tol;///Flag to check whether convergence is achieved
+
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
 
   ///Used for substepping; Uniformly divides the increment in deformation gradient
   RankTwoTensor _delta_dfgrd, _dfgrd_tmp_old;

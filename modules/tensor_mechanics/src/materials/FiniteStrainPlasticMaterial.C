@@ -10,13 +10,13 @@ template<>
 InputParameters validParams<FiniteStrainPlasticMaterial>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
-
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addRequiredParam< std::vector<Real> >("yield_stress", "Input data as pairs of equivalent plastic strain and yield stress: Should start with equivalent plastic strain 0");
   params.addParam<Real>("rtol",1e-8,"Plastic strain NR tolerance");
   params.addParam<Real>("ftol",1e-4,"Consistency condition NR tolerance");
   params.addParam<Real>("eptol",1e-7,"Equivalent plastic strain NR tolerance");
   params.addClassDescription("Associative J2 plasticity with isotropic hardening.");
-
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on the elasticity tensor.");
   return params;
 }
 
@@ -31,7 +31,9 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters &
     _ftol(getParam<Real>("ftol")),
     _eptol(getParam<Real>("eptol")),
     _deltaOuter(RankTwoTensor::Identity().outerProduct(RankTwoTensor::Identity())),
-    _deltaMixed(RankTwoTensor::Identity().mixedProductIkJl(RankTwoTensor::Identity()))
+    _deltaMixed(RankTwoTensor::Identity().mixedProductIkJl(RankTwoTensor::Identity())),
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
 }
 
@@ -73,6 +75,21 @@ void FiniteStrainPlasticMaterial::computeQpStress()
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
 
 }
+
+void
+FiniteStrainPlasticMaterial::computeQpElasticityTensor()
+{
+  // Fill in the matrix stiffness material property
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
+  _elasticity_tensor[_qp] = _Cijkl;
+
+  if (_prefactor_function)
+    _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+
+  _elasticity_tensor[_qp].rotate(R);
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+}
+
 
 /**
  * Implements the return-map algorithm via a Newton-Raphson process.

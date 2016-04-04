@@ -10,6 +10,7 @@
 #define LINEARELASTICMATERIAL_H
 
 #include "TensorMechanicsMaterial.h"
+#include "Function.h"
 
 /**
  * LinearElasticMaterial handles a fully anisotropic, single-crystal material's elastic
@@ -25,6 +26,7 @@ public:
 protected:
   virtual void computeQpStrain();
   virtual void computeQpStress();
+  virtual void computeQpElasticityTensor();
   virtual RankTwoTensor computeStressFreeStrain();
 
 private:
@@ -35,6 +37,11 @@ private:
 
   std::vector<Real> _applied_strain_vector;
   RankTwoTensor _applied_strain_tensor;
+
+protected:
+  
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
 };
 
 #endif //LINEARELASTICMATERIAL_H

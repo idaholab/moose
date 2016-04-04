@@ -14,6 +14,7 @@ InputParameters validParams<FiniteStrainPlasticBase>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
 
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addRangeCheckedParam<unsigned int>("max_NR_iterations", 20, "max_NR_iterations>0", "Maximum number of Newton-Raphson iterations allowed");
   params.addRequiredParam<std::vector<Real> >("yield_function_tolerance", "If the yield function is less than this amount, the (stress, internal parameters) are deemed admissible.  A vector of tolerances must be entered for the multi-surface case");
   params.addParam<std::vector<Real> >("internal_constraint_tolerance", "The Newton-Raphson process is only deemed converged if the internal constraint is less than this.  A vector of tolerances must be entered for the case with more than one internal parameter");
@@ -27,6 +28,7 @@ InputParameters validParams<FiniteStrainPlasticBase>()
   params.addParam<std::vector<Real> >("debug_pm_change", "Debug finite differencing parameters for the plastic multipliers");
   params.addParam<std::vector<Real> >("debug_intnl_change", "Debug finite differencing parameters for the internal parameters");
   params.addClassDescription("Base class for non-associative finite-strain plasticity");
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on the elasticity tensor.");
 
   return params;
 }
@@ -52,7 +54,9 @@ FiniteStrainPlasticBase::FiniteStrainPlasticBase(const InputParameters & paramet
     _intnl(declareProperty<std::vector<Real> >("plastic_internal_parameter")),
     _intnl_old(declarePropertyOld<std::vector<Real> >("plastic_internal_parameter")),
     _f(declareProperty<std::vector<Real> >("plastic_yield_function")),
-    _iter(declareProperty<unsigned int>("plastic_NR_iterations"))
+    _iter(declareProperty<unsigned int>("plastic_NR_iterations")),
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
 }
 
@@ -178,6 +182,20 @@ FiniteStrainPlasticBase::computeQpStress()
   _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
   _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
+}
+
+void
+FiniteStrainPlasticBase::computeQpElasticityTensor()
+{
+  // Fill in the matrix stiffness material property
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
+  _elasticity_tensor[_qp] = _Cijkl;
+
+  if (_prefactor_function)
+    _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+
+  _elasticity_tensor[_qp].rotate(R);
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }
 
 void

@@ -8,6 +8,7 @@
 #define FINITESTRAINPLASTICBASE
 
 #include "FiniteStrainMaterial.h"
+#include "Function.h"
 
 class FiniteStrainPlasticBase;
 
@@ -26,6 +27,7 @@ public:
 
 protected:
   virtual void computeQpStress();
+  virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
 
   /// Maximum number of Newton-Raphson iterations allowed
@@ -344,6 +346,11 @@ protected:
    * and checks that they are sized correctly
    */
   void outputAndCheckDebugParameters();
+
+protected:
+
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
 
 };
 
