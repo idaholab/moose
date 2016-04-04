@@ -2,7 +2,7 @@
   [./pointer_store_error]
     type = 'RunException'
     input = 'pointer_store_error.i'
-    expect_err = 'Cannot store raw pointers'
+    expect_err = 'Attempting to store a raw pointer type:'
   [../]
 
   [./pointer_load_error]
@@ -14,7 +14,7 @@
   [./pointer_load_error2]
     type = 'RunException'
     input = 'pointer_load_error2.i'
-    expect_err = 'Cannot load raw pointers'
+    expect_err = 'Attempting to load a raw pointer type:'
     prereq = pointer_load_error
     max_parallel = 16
   [../]

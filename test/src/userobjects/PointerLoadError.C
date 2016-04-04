@@ -24,9 +24,9 @@ InputParameters validParams<PointerLoadError>()
 
 PointerLoadError::PointerLoadError(const InputParameters & params) :
     GeneralUserObject(params),
-    _pointer_data(declareRestartableData<Stupid *>("pointer_data"))
+    _pointer_data(declareRestartableData<TypeWithNoLoad *>("pointer_data"))
 {
-  _pointer_data = new Stupid;
+  _pointer_data = new TypeWithNoLoad;
   _pointer_data->_i = 1;
 }
 
