@@ -10,6 +10,7 @@
 #define FINITESTRAINELASTICMATERIAL_H
 
 #include "FiniteStrainMaterial.h"
+#include "Function.h"
 
 /**
  * FiniteStrainElasticMaterial handles a fully anisotropic, single-crystal material's elastic
@@ -24,6 +25,9 @@ public:
 
 protected:
   virtual void computeQpStress();
+  virtual void computeQpElasticityTensor();
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
 };
 
 #endif //FINITESTRAINELASTICMATERIAL_H

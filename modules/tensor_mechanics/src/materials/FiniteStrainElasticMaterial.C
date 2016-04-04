@@ -18,11 +18,15 @@ template<>
 InputParameters validParams<FiniteStrainElasticMaterial>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on the elasticity tensor.");
   return params;
 }
 
 FiniteStrainElasticMaterial::FiniteStrainElasticMaterial(const InputParameters & parameters) :
-    FiniteStrainMaterial(parameters)
+  FiniteStrainMaterial(parameters),
+  _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+  _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
 }
 
@@ -45,3 +49,15 @@ void FiniteStrainElasticMaterial::computeQpStress()
 
 }
 
+void FiniteStrainElasticMaterial::computeQpElasticityTensor()
+{
+  // Fill in the matrix stiffness material property
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
+  _elasticity_tensor[_qp] = _Cijkl;
+
+  if (_prefactor_function)
+    _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+
+  _elasticity_tensor[_qp].rotate(R);
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+}

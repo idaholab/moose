@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<CosseratLinearElasticMaterial>()
 {
   InputParameters params = validParams<TensorMechanicsMaterial>();
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
   params.addParam<Real>("T0", 300, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("T", 300, "Temperature in Kelvin");
@@ -29,6 +30,7 @@ InputParameters validParams<CosseratLinearElasticMaterial>()
 
   MooseEnum fm = RankFourTensor::fillMethodEnum();
   fm = "antisymmetric_isotropic";
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on the elasticity tensor.");
   params.addParam<MooseEnum>("fill_method_bending", fm, "The fill method for the 'bending' tensor.");
 
   return params;
@@ -57,7 +59,9 @@ CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const InputParamete
     _grad_wc_x(coupledGradient("wc_x")),
     _grad_wc_y(coupledGradient("wc_y")),
     _grad_wc_z(coupledGradient("wc_z")),
-    _fill_method_bending(getParam<MooseEnum>("fill_method_bending"))
+    _fill_method_bending(getParam<MooseEnum>("fill_method_bending")),
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
   //Initialize applied strain tensor from input vector
   if (_applied_strain_vector.size() == 6)
@@ -121,7 +125,16 @@ CosseratLinearElasticMaterial::computeStressFreeStrain()
 
 void CosseratLinearElasticMaterial::computeQpElasticityTensor()
 {
-  TensorMechanicsMaterial::computeQpElasticityTensor();
+  // Fill in the matrix stiffness material property
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
+  _elasticity_tensor[_qp] = _Cijkl;
+
+  if (_prefactor_function)
+    _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+
+  _elasticity_tensor[_qp].rotate(R);
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+
 
   _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
   _Jacobian_mult_couple[_qp] = _Bijkl;

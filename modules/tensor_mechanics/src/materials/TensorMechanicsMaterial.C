@@ -17,7 +17,6 @@ template<>
 InputParameters validParams<TensorMechanicsMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addParam<MooseEnum>("fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
@@ -53,10 +52,7 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const InputParameters & paramet
 
     _Euler_angles(getParam<Real>("euler_angle_1"),
                   getParam<Real>("euler_angle_2"),
-                  getParam<Real>("euler_angle_3")),
-
-    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
-    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
+                  getParam<Real>("euler_angle_3"))
 {
   const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
   const unsigned num = fcn_names.size();
@@ -92,19 +88,6 @@ TensorMechanicsMaterial::computeProperties()
     computeQpElasticityTensor();
     computeQpStress();
   }
-}
-
-void TensorMechanicsMaterial::computeQpElasticityTensor()
-{
-  // Fill in the matrix stiffness material property
-  RotationTensor R(_Euler_angles); // R type: RealTensorValue
-  _elasticity_tensor[_qp] = _Cijkl;
-
-  if (_prefactor_function)
-    _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
-
-  _elasticity_tensor[_qp].rotate(R);
-  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }
 
 void TensorMechanicsMaterial::computeStrain()

@@ -12,6 +12,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
 {
   InputParameters params = validParams<FiniteStrainMaterial>();
   params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addRequiredParam<int >("nss", "Number of slip systems");
   params.addParam<std::vector<Real> >("gprops", "Initial values of slip system resistances");
   params.addParam<std::vector<Real> >("hprops", "Hardening properties");
@@ -45,6 +46,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   params.addParam<unsigned int>("line_search_maxiter",20,"Line search bisection method maximum number of iteration");
   MooseEnum line_search_method("CUT_HALF BISECTION","CUT_HALF");
   params.addParam<MooseEnum>("line_search_method",line_search_method,"The method used in line search");
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on the elasticity tensor.");
 
   return params;
 }
@@ -102,7 +104,9 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _s0(_nss),
     _gss_tmp(_nss),
     _gss_tmp_old(_nss),
-    _dgss_dsliprate(_nss,_nss)
+    _dgss_dsliprate(_nss,_nss),
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
   if (_save_euler_angle)
   {

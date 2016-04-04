@@ -34,7 +34,7 @@ public:
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeProperties();
-  virtual void computeQpElasticityTensor();
+  virtual void computeQpElasticityTensor() = 0;
   virtual void computeStrain();
 
   virtual void computeQpStrain() = 0;
@@ -62,13 +62,6 @@ protected:
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
 
   RealVectorValue _Euler_angles;
-
-  /// Individual material information
-  ElasticityTensorR4 _Cijkl;
-
-  /// prefactor function to multiply the elasticity tensor with
-  Function * const _prefactor_function;
-
   RankTwoTensor _strain_increment;
 
   /// initial stress components
