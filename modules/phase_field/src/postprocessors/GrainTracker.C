@@ -934,9 +934,8 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
     MooseSharedPointer<FeatureData> target_grain = _unique_grains[target_it->_grain_id];
 
     // Make sure this grain isn't marked. If it is, we can't recurse here
-    // TODO: Don't error, we can recover
     if (target_grain->_merged)
-      mooseError("Unfinished algorithm");
+      return false;
 
     // Save the solution values in case we overright them during recursion
     swapSolutionValues(grain, target_it->_var_index, cache, FILL, depth);
