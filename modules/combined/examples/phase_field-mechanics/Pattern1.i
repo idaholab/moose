@@ -228,7 +228,6 @@
   # declare a few constants, such as mobilities (L,M) and interface gradient prefactors (kappa*)
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'M   kappa_c  L1 L2 L3  kappa11 kappa12 kappa13 kappa21 kappa22 kappa23 kappa31 kappa32 kappa33'
     prop_values = '0.2 0        1  1  1   2.00    2.00    2.00    2.00    2.00    2.00    2.00    2.00    2.00   '
   [../]
@@ -237,7 +236,6 @@
   # ideally it should be 0 everywhere, if the constraint is fully enforced
   [./etasummat]
     type = ParsedMaterial
-    block = 0
     f_name = etasum
     args = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
@@ -249,7 +247,6 @@
   # It will be 0 for phase 1, -1 for phase 2, and 1 for phase 3
   [./phasemap]
     type = ParsedMaterial
-    block = 0
     f_name = phase
     args = 'eta2 eta3'
     function = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
@@ -320,21 +317,18 @@
   # switching functions
   [./switching1]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h1
     eta = eta1
     h_order = SIMPLE
   [../]
   [./switching2]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h2
     eta = eta2
     h_order = SIMPLE
   [../]
   [./switching3]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h3
     eta = eta3
     h_order = SIMPLE
@@ -342,14 +336,12 @@
 
   [./barrier]
     type = MultiBarrierFunctionMaterial
-    block = 0
     etas = 'eta1 eta2 eta3'
   [../]
 
   # chemical free energies
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fc1
     function = '4*c^2'
     args = 'c'
@@ -357,7 +349,6 @@
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fc2
     function = '(c-0.9)^2-0.4'
     args = 'c'
@@ -365,7 +356,6 @@
   [../]
   [./chemical_free_energy_3]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fc3
     function = '(c-0.9)^2-0.5'
     args = 'c'
@@ -377,7 +367,6 @@
     type = ElasticEnergyMaterial
     base_name = phase1
     f_name = Fe1
-    block = 0
     derivative_order = 2
     args = 'c' # should be empty
   [../]
@@ -385,7 +374,6 @@
     type = ElasticEnergyMaterial
     base_name = phase2
     f_name = Fe2
-    block = 0
     derivative_order = 2
     args = 'c' # should be empty
   [../]
@@ -393,7 +381,6 @@
     type = ElasticEnergyMaterial
     base_name = phase3
     f_name = Fe3
-    block = 0
     derivative_order = 2
     args = 'c' # should be empty
   [../]
@@ -401,7 +388,6 @@
   # phase free energies (chemical + elastic)
   [./phase_free_energy_1]
     type = DerivativeSumMaterial
-    block = 0
     f_name = F1
     sum_materials = 'Fc1 Fe1'
     args = 'c'
@@ -409,7 +395,6 @@
   [../]
   [./phase_free_energy_2]
     type = DerivativeSumMaterial
-    block = 0
     f_name = F2
     sum_materials = 'Fc2 Fe2'
     args = 'c'
@@ -417,7 +402,6 @@
   [../]
   [./phase_free_energy_3]
     type = DerivativeSumMaterial
-    block = 0
     f_name = F3
     sum_materials = 'Fc3 Fe3'
     args = 'c'
@@ -427,7 +411,6 @@
   # global free energy
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    block = 0
     f_name = F
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'
@@ -439,7 +422,6 @@
   # Generate the global stress from the phase stresses
   [./global_stress]
     type = MultiPhaseStressMaterial
-    block = 0
     phase_base = 'phase1 phase2 phase3'
     h          = 'h1     h2     h3'
   [../]

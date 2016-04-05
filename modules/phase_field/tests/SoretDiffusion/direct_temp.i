@@ -84,7 +84,6 @@
 [Materials]
   [./Copper]
     type = PFParamsPolyFreeEnergy
-    block = 0
     c = c
     T = T # K
     int_width = 60.0
@@ -97,7 +96,6 @@
   [../]
   [./thcond]
     type = ParsedMaterial
-    block = 0
     args = 'c'
     function = 'if(c>0.7,1e-8,4e-8)'
     f_name = thermal_conductivity
@@ -105,7 +103,6 @@
   [../]
   [./free_energy]
     type = PolynomialFreeEnergy
-    block = 0
     c = c
     derivative_order = 3
   [../]

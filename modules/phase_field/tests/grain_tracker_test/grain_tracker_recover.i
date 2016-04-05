@@ -92,7 +92,6 @@
 [Materials]
   [./CuGrGr]
     type = CuGrGr
-    block = 0
     T = 500 # K
     wGB = 75 # nm
   [../]

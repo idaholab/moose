@@ -72,13 +72,11 @@
 [Materials]
   [./kappa]
     type = GenericConstantMaterial
-    block = 0
     prop_names = kappa_c
     prop_values = 2.0
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = M
     args = 'c d'
     function = if(d>0.001,d,0.001)*if(c<0,0.5,if(c>1,0.5,1-0.5*c^2))
@@ -86,7 +84,6 @@
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    block = 0
     f_name = F
     c = c
   [../]
@@ -94,7 +91,6 @@
     type = GenericConstantMaterial
     prop_names = diffusivity
     prop_values = 1.0
-    block = 0
   [../]
 []
 

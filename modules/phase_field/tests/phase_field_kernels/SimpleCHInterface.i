@@ -57,11 +57,9 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 0.1'
-    block = 0
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = 'cv'
     function = '(1-cv)^2 * (1+cv)^2'

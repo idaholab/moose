@@ -81,14 +81,12 @@
   # simple toy free energy
   [./fa]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fa
     args = 'ca'
     function = 'ca^2'
   [../]
   [./fb]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fb
     args = 'cb'
     function = '(1-cb)^2'
@@ -97,7 +95,6 @@
   # h(eta)
   [./h_eta]
     type = SwitchingFunctionMaterial
-    block = 0
     h_order = HIGH
     eta = eta
     outputs = exodus

@@ -21,10 +21,6 @@
   uniform_refine = 2
 []
 
-[GlobalParams]
-  block = 0           # The generated mesh is used for all materials and kernels
-[]
-
 [Variables]
   [./c]   # Mole fraction of Cr (unitless)
     order = FIRST

@@ -52,7 +52,6 @@
   # derivatives used both before and after being declared
   [./sum_a_1]
     type = DerivativeSumMaterial
-    block = 0
     f_name = Fa1
     sum_materials = 'Fa'
     args = 'c'
@@ -60,14 +59,12 @@
   [../]
   [./free_energy_a]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fa
     args = 'c'
     function = 'c^4'
   [../]
   [./sum_a_2]
     type = DerivativeSumMaterial
-    block = 0
     f_name = Fa2
     sum_materials = 'Fa'
     args = 'c'
@@ -77,7 +74,6 @@
   # derivatives declared after being used
   [./sum_b_1]
     type = DerivativeSumMaterial
-    block = 0
     f_name = Fb1
     sum_materials = 'Fb'
     args = 'c'
@@ -85,7 +81,6 @@
   [../]
   [./free_energy_b]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fb
     args = 'c'
     function = 'c^4'
@@ -94,14 +89,12 @@
   # derivatives declared before being used
   [./free_energy_c]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fc
     args = 'c'
     function = 'c^4'
   [../]
   [./sum_c_2]
     type = DerivativeSumMaterial
-    block = 0
     f_name = Fc2
     sum_materials = 'Fc'
     args = 'c'
@@ -111,14 +104,12 @@
   # non-existing derivatives
   [./free_energy_d]
     type = ParsedMaterial
-    block = 0
     f_name = Fd
     args = 'c'
     function = 'c^4'
   [../]
   [./sum_d_1]
     type = DerivativeSumMaterial
-    block = 0
     f_name = Fd1
     sum_materials = 'Fd'
     args = 'c'

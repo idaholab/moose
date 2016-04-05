@@ -79,7 +79,6 @@
 [Materials]
   [./CuGrGr]
     type = GBEvolution
-    block = 0
     T = 500 # K
     wGB = 100 # nm
     GBmob0 = 2.5e-6

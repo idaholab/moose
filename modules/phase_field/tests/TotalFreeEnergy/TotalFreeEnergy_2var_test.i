@@ -103,7 +103,6 @@
 [Materials]
   [./Copper]
     type = GBEvolution
-    block = 0
     T = 500 # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
@@ -112,7 +111,6 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     args = 'gr0 gr1'
     material_property_names = 'mu gamma_asymm'
     function = 'mu*( gr0^4/4.0 - gr0^2/2.0 + gr1^4/4.0 - gr1^2/2.0 + gamma_asymm*gr0^2*gr1^2) + 1.0/4.0'

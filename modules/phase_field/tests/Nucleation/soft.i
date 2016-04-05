@@ -34,7 +34,6 @@
     type = DiscreteNucleation
     op_names  = c
     op_values = 1
-    block = 0
     penalty = 10
     map = map
     outputs = exodus

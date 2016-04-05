@@ -27,7 +27,6 @@
       radii = '14.0 14.0'
       3D_spheres = false
       variable = c
-      block = 0
     [../]
   [../]
   [./w]
@@ -72,13 +71,11 @@
 [Materials]
   [./pfmobility]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '5.0  2.0      0.1'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = c
     constant_names = 'barr_height  cv_eq'
@@ -88,7 +85,6 @@
   [../]
   [./force_density]
     type = ExternalForceDensityMaterial
-    block = 0
     c = c
     etas = 'eta0 eta1'
     k = 1.0
@@ -96,7 +92,6 @@
   [../]
   [./advection_vel]
     type = GrainAdvectionVelocity
-    block = 0
     grain_force = grain_force
     etas = 'eta0 eta1'
     c = c
@@ -160,7 +155,6 @@
     var_name_base = eta
     op_num = 2.0
     v = 'eta0 eta1'
-    block = 0
   [../]
   [./df01]
     type = MaterialStdVectorRealGradientAux

@@ -52,7 +52,6 @@
 [Materials]
   [./Diffusivity]
     type = GenericConstantMaterial
-    block = 0
     prop_names = D
     prop_values = 1.0
   [../]
