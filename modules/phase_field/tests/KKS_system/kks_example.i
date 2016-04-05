@@ -170,6 +170,7 @@
     variable = eta
     fa_name  = fm
     fb_name  = fd
+    args     = 'cm cd'
     w        = 0.4
   [../]
   [./ACBulkC]

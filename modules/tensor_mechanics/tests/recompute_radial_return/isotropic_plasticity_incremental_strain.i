@@ -171,14 +171,13 @@
     relative_tolerance = 1e-10
     absolute_tolerance = 1e-12
     max_iterations = 50
-#    output_iteration_info_on_error = true
+    # output_iteration_info_on_error = true
     compute = false # make this material "discrete"
   [../]
 
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 0
-    outputs = all
     return_mapping_stress_model = 'isotropic_plasticity_recompute'
   [../]
 []
