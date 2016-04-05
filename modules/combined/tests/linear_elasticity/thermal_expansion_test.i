@@ -79,15 +79,29 @@
 []
 
 [Materials]
-  [./Anisotropic]
-    type = LinearElasticMaterial
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
     fill_method = symmetric9
     C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
-    thermal_expansion_coeff = 1.0e-6
-    T = 400
+  [../]
+  [./strain]
+    type = ComputeSmallStrain
+    block = 0
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
+    block = 0
+  [../]
+  [./eigenstrain]
+    type = ComputeEigenstrain
+    # this models the
+    #   thermal_expansion_coeff = 1.0e-6
+    #   T = 400
+    #   T0 = 300
+    # options of LinearElasticMaterial (T-T0)*1e-6 = 1e-4
+    eigen_base = '1e-4'
   [../]
 []
 

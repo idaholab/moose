@@ -76,14 +76,26 @@
 []
 
 [Materials]
-  [./Anisotropic]
-    type = LinearElasticMaterial
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
     fill_method = symmetric9
     C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
-    applied_strain_vector = '0.1 0.05 0 0 0 0.01'
+  [../]
+  [./strain]
+    type = ComputeSmallStrain
+    block = 0
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
+    block = 0
+  [../]
+  [./eigenstrain]
+    type = ComputeEigenstrain
+    block = 0
+    eigen_base = '0.1 0.05 0 0 0 0.01'
+    prefactor = -1
   [../]
 []
 
