@@ -23,8 +23,8 @@ InputParameters validParams<CircleMarker>()
 
   MooseEnum marker_states = Marker::markerStates();
 
-  params.addRequiredParam<MooseEnum>("inside", marker_states, "How to mark elements inside the box.");
-  params.addRequiredParam<MooseEnum>("outside", marker_states, "How to mark elements outside the box.");
+  params.addRequiredParam<MooseEnum>("inside", marker_states, "How to mark elements inside the circle.");
+  params.addRequiredParam<MooseEnum>("outside", marker_states, "How to mark elements outside the circle.");
 
   return params;
 }
