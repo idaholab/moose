@@ -66,6 +66,7 @@
     block = 0
     h_order = SIMPLE
     eta = eta1
+    function_name = h1
     outputs = exodus
   [../]
 
@@ -74,6 +75,7 @@
     block = 0
     h_order = HIGH
     eta = eta2
+    function_name = h2
     outputs = exodus
   [../]
 
@@ -82,6 +84,7 @@
     block = 0
     g_order = SIMPLE
     eta = eta1
+    function_name = g1
     outputs = exodus
   [../]
 
@@ -90,6 +93,7 @@
     block = 0
     g_order = LOW
     eta = eta2
+    function_name = g2
     outputs = exodus
   [../]
 []
