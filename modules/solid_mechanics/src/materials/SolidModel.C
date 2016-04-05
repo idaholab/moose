@@ -1409,9 +1409,7 @@ SolidModel::createElement()
   {
     if ( !isCoupled("disp_x") ||
          !isCoupled("disp_y") )
-    {
-      mooseError("NonlinearPlaneStrain must define disp_r and disp_z");
-    }
+      mooseError("NonlinearPlaneStrain must define disp_x and disp_y");
     element = new SolidMechanics::NonlinearPlaneStrain(*this, mat_name, parameters);
   }
   else if ( formulation == "linear" )
