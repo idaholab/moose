@@ -172,7 +172,7 @@
   nl_abs_tol = 1e-11 # Relative tolerance for nonlienar solves
   nl_rel_tol = 1e-8 # Absolute tolerance for nonlienar solves
   start_time = 0.0
-  end_time = 50000
+  end_time = 75000
   num_steps = 2500
   dt = 25
   [./TimeStepper]

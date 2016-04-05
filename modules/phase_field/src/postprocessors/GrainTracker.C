@@ -1173,8 +1173,8 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
 {
   /**
    * The region that each grain covers is represented by a bounding box large enough to encompassing all the points
-   * within that grain.  When using periodic boundaries, we may have several discrete "pieces" of a grain each represented
-   * by a bounding sphere.  The distance between any two grains is defined as the minimum distance between any pair of spheres,
+   * within that grain. When using periodic boundaries, we may have several discrete "pieces" of a grain each represented
+   * by a bounding box. The distance between any two grains is defined as the minimum distance between any pair of boxes,
    * one selected from each grain.
    */
   Real min_distance = std::numeric_limits<Real>::max();
@@ -1182,14 +1182,14 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
   {
     const MeshTools::BoundingBox & bbox1 = *bbox_it1;
     const Point centroid1 = (bbox1.max() + bbox1.min()) / 2.0;
-    Sphere sphere1(centroid1, (bbox1.max() - centroid1).norm());
+//    Sphere sphere1(centroid1, (bbox1.max() - centroid1).norm());
 
 
     for (std::vector<MeshTools::BoundingBox>::const_iterator bbox_it2 = bboxes2.begin(); bbox_it2 != bboxes2.end(); ++bbox_it2)
     {
       const MeshTools::BoundingBox & bbox2 = *bbox_it2;
       const Point centroid2 = (bbox2.max() + bbox2.min()) / 2.0;
-      Sphere sphere2(centroid2, (bbox2.max() - centroid2).norm());
+//      Sphere sphere2(centroid2, (bbox2.max() - centroid2).norm());
 
       Real curr_distance = std::numeric_limits<Real>::max();
 
@@ -1198,11 +1198,37 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
         curr_distance = _mesh.minPeriodicDistance(_var_number, centroid1, centroid2);
       else
       {
-        // We need to compute the distance between the boxes...
-        // That's pretty hard so let's do it between spheres instead.
-        curr_distance = sphere1.distance(sphere2);
-        if (curr_distance < 0.0)
-          curr_distance = -1.0; // All overlaps are treated the same
+        // AABB squared distance
+        Real result = 0.0;
+        bool boxes_overlap = true;
+        for (unsigned int dim = 0; dim < LIBMESH_DIM; ++dim)
+        {
+          const Real & min1 = bbox1.min()(dim);
+          const Real & max1 = bbox1.max()(dim);
+          const Real & min2 = bbox2.min()(dim);
+          const Real & max2 = bbox2.max()(dim);
+
+          if (min1 > max2)
+          {
+            const Real delta = max2 - min1;
+            result += delta * delta;
+            boxes_overlap = false;
+          }
+          else if (min2 > max1)
+          {
+            const Real delta = max1 - min2;
+            result += delta * delta;
+            boxes_overlap = false;
+          }
+        }
+
+        curr_distance = boxes_overlap ? -1 /* all overlaps are treated the same */ : result;
+
+//        // We need to compute the distance between the boxes...
+//        // That's pretty hard so let's do it between spheres instead.
+//        curr_distance = sphere1.distance(sphere2);
+//        if (curr_distance < 0.0)
+//          curr_distance = -1.0; // All overlaps are treated the same
       }
 
       if (curr_distance < min_distance)
