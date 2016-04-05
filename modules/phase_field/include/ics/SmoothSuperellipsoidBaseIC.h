@@ -23,7 +23,7 @@ InputParameters validParams<SmoothSuperellipsoidBaseIC>();
 /**
  * SmoothSuperellipsoidBaseIC is the base class for all initial conditions that create superellipsoids.
  * A superellipsoid is described by \f$ \left|\frac{x}{a}\right|^n + \left|\frac{y}{b}\right|^n + \left|\frac{z}{c}\right|^n = 1\f$.
- * Note that all children must resize _a, _b, _c, _n, and _centers.
+ * Note that all children must resize _as, _bs, _cs, _ns, and _centers.
  */
 class SmoothSuperellipsoidBaseIC : public InitialCondition
 {
@@ -37,10 +37,11 @@ public:
 
 protected:
   virtual Real computeSuperellipsoidValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
-  virtual RealGradient computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
+  RealGradient computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
 
-  virtual void computeSuperellipsoidRadii() = 0;
   virtual void computeSuperellipsoidCenters() = 0;
+  virtual void computeSuperellipsoidSemiaxes() = 0;
+  virtual void computeSuperellipsoidExponents() = 0;
 
   MooseMesh & _mesh;
 
@@ -52,10 +53,10 @@ protected:
   unsigned int _num_dim;
 
   std::vector<Point> _centers;
-  std::vector<Real> _a;
-  std::vector<Real> _b;
-  std::vector<Real> _c;
-  std::vector<Real> _n;
+  std::vector<Real> _as;
+  std::vector<Real> _bs;
+  std::vector<Real> _cs;
+  std::vector<Real> _ns;
 
   MooseRandom _random;
 };

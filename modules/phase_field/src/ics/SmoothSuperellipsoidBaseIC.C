@@ -15,7 +15,7 @@ InputParameters validParams<SmoothSuperellipsoidBaseIC>()
   params.addRequiredParam<Real>("invalue", "The variable value inside the superellipsoid");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the superellipsoid");
   params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
-  params.addParam<bool>("zero_gradient", false, "Set the gradient DOFs to zero. This can avoid numerical problems with higher order shape functions and overlapping superellipsoids.");
+  params.addParam<bool>("zero_gradient", false, "Set the gradient DOFs to zero. This can avoid numerical problems with higher order shape functions.");
   params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
   return params;
 }
@@ -26,7 +26,7 @@ SmoothSuperellipsoidBaseIC::SmoothSuperellipsoidBaseIC(const InputParameters & p
     _invalue(parameters.get<Real>("invalue")),
     _outvalue(parameters.get<Real>("outvalue")),
     _int_width(parameters.get<Real>("int_width")),
-    _zero_gradient(parameters.get<bool>("zero_gradient")),
+    _zero_gradient(parameters.get<bool>("zero_gradient"))
 {
   _random.seed(_tid, getParam<unsigned int>("rand_seed"));
 }
@@ -34,15 +34,22 @@ SmoothSuperellipsoidBaseIC::SmoothSuperellipsoidBaseIC(const InputParameters & p
 void
 SmoothSuperellipsoidBaseIC::initialSetup()
 {
-  //Compute radii and centers and initialize vector sizes
-  computeCircleRadii();
-  computeCircleCenters();
+  //Compute centers, semiaxes, exponents, and initialize vector sizes
+  computeSuperellipsoidCenters();
+  computeSuperellipsoidSemiaxes();
+  computeSuperellipsoidExponents();
 
-  if (_centers.size() != _radii.size())
-    mooseError("_center and _radii vectors are not the same size in the Circle IC");
+  if (_centers.size() != _as.size())
+    mooseError("_center and semiaxis _as vectors are not the same size in the Superellipsoid IC");
+  if (_centers.size() != _bs.size())
+    mooseError("_center and semiaxis _bs vectors are not the same size in the Superellipsoid IC");
+  if (_centers.size() != _cs.size())
+    mooseError("_center and semiaxis _cs vectors are not the same size in the Superellipsoid IC");
+  if (_centers.size() != _ns.size())
+    mooseError("_center and exponent _ns vectors are not the same size in the Superellipsoid IC");
 
   if (_centers.size() < 1)
-    mooseError("_center and _radii were not initialized in the Circle IC");
+    mooseError("_centers, _as, _bs, _cs, and _ns were not initialized in the Superellipsoid IC");
 }
 
 Real
@@ -51,9 +58,9 @@ SmoothSuperellipsoidBaseIC::value(const Point & p)
   Real value = _outvalue;
   Real val2 = 0.0;
 
-  for (unsigned int circ = 0; circ < _centers.size() && value != _invalue; ++circ)
+  for (unsigned int ellip = 0; ellip < _centers.size() && value != _invalue; ++ellip)
   {
-    val2 = computeSuperellipsoidValue(p, _centers[circ], _radii[circ]);
+    val2 = computeSuperellipsoidValue(p, _centers[ellip], _as[ellip], _bs[ellip], _cs[ellip], _ns[ellip]);
     if ( (val2 > value && _invalue > _outvalue) || (val2 < value && _outvalue > _invalue) )
       value = val2;
   }
@@ -71,13 +78,13 @@ SmoothSuperellipsoidBaseIC::gradient(const Point & p)
   Real value = _outvalue;
   Real val2 = 0.0;
 
-  for (unsigned int circ = 0; circ < _centers.size(); ++circ)
+  for (unsigned int ellip = 0; ellip < _centers.size(); ++ellip)
   {
-    val2 = computeSuperellipsoidValue(p, _centers[circ], _radii[circ]);
+    val2 = computeSuperellipsoidValue(p, _centers[ellip], _as[ellip], _bs[ellip], _cs[ellip], _ns[ellip]);
     if ( (val2 > value && _invalue > _outvalue) || (val2 < value && _outvalue > _invalue) )
     {
       value = val2;
-      gradient = computeSuperellipsoidGradient(p, _centers[circ], _radii[circ]);
+      gradient = computeSuperellipsoidGradient(p, _centers[ellip], _as[ellip], _bs[ellip], _cs[ellip], _ns[ellip]);
     }
   }
 
@@ -85,57 +92,73 @@ SmoothSuperellipsoidBaseIC::gradient(const Point & p)
 }
 
 Real
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Point & center, const Real & radius)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
 {
   Point l_center = center;
   Point l_p = p;
-  if (!_3D_spheres) //Create 3D cylinders instead of spheres
-  {
-    l_p(2) = 0.0;
-    l_center(2) = 0.0;
-  }
   //Compute the distance between the current point and the center
   Real dist = _mesh.minPeriodicDistance(_var.number(), l_p, l_center);
 
-  //Return value
-  Real value = _outvalue;//Outside circle
+  //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
+  //Handle this case independently because we cannot calculate polar angles at this point
+  if (dist == 0.0) return _invalue;
 
-    if (dist <= radius - _int_width/2.0) //Inside circle
-      value = _invalue;
-    else if (dist < radius + _int_width/2.0) //Smooth interface
-    {
-      Real int_pos = (dist - radius + _int_width/2.0)/_int_width;
-      value = _outvalue + (_invalue - _outvalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
-    }
+  //Compute the distance r from the center of the superellipsoid to its outside edge
+  //along the vector from the center to the current point
+  //This uses the equation for a superellipse in polar coordinates and substitutes
+  //distances for sin, cos functions
+  Point dist_vec = _mesh.minPeriodicVector(_var.number(), center, p);
 
-    return value;
+  //First calculate rmn = r^(-n), replacing sin, cos functions with distances
+  Real rmn = (std::pow(std::abs(dist_vec(0) / dist / a), n)
+            + std::pow(std::abs(dist_vec(1) / dist / b), n)
+            + std::pow(std::abs(dist_vec(2) / dist / c), n) );
+  //Then calculate r from rmn
+  Real r = std::pow(rmn, (-1.0/n));
+
+  Real value = _outvalue; //Outside superellipsoid
+
+  if (dist <= r - _int_width/2.0) //Inside superellipsoid
+    value = _invalue;
+  else if (dist < r + _int_width/2.0) //Smooth interface
+  {
+    Real int_pos = (dist - r + _int_width/2.0)/_int_width;
+    value = _outvalue + (_invalue - _outvalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+  }
+
+  return value;
 }
 
 RealGradient
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & radius)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
 {
   Point l_center = center;
   Point l_p = p;
-  if (!_3D_spheres) //Create 3D cylinders instead of spheres
-  {
-    l_p(2) = 0.0;
-    l_center(2) = 0.0;
-  }
   //Compute the distance between the current point and the center
   Real dist = _mesh.minPeriodicDistance(_var.number(), l_p, l_center);
 
+  //Compute the distance r from the center of the superellipsoid to its outside edge
+  //along the vector from the center to the current point
+  //This uses the equation for a superellipse in polar coordinates and substitutes
+  //distances for sin, cos functions
+  Point dist_vec = _mesh.minPeriodicVector(_var.number(), center, p);
+  //First calculate rmn = r^(-n)
+  Real rmn = (std::pow(std::abs(dist_vec(0)/dist/a), n) +  std::pow(std::abs(dist_vec(1)/dist/b), n));
+  //Then calculate r
+  Real r = std::pow(rmn, (-1.0/n));
+
   Real DvalueDr = 0.0;
 
-  if (dist < radius + _int_width/2.0 && dist > radius - _int_width/2.0)
+  if (dist < r + _int_width/2.0 && dist > r - _int_width/2.0)
   {
-    Real int_pos = (dist - radius + _int_width / 2.0) / _int_width;
+    Real int_pos = (dist - r + _int_width / 2.0) / _int_width;
     Real Dint_posDr = 1.0 / _int_width;
     DvalueDr = Dint_posDr * (_invalue - _outvalue) * (-std::sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
   }
 
   //Set gradient over the smooth interface
   if (dist != 0.0)
-    return _mesh.minPeriodicVector(_var.number(), center, p) * (DvalueDr / dist);
+    return dist_vec * (DvalueDr / dist);
   else
     return 0.0;
 }
