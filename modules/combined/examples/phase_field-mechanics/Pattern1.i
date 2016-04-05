@@ -259,45 +259,38 @@
   # matrix phase
   [./elasticity_tensor_1]
     type = ComputeElasticityTensor
-    block = 0
     base_name = phase1
     C_ijkl = '3 3'
     fill_method = symmetric_isotropic
   [../]
   [./strain_1]
     type = ComputeSmallStrain
-    block = 0
     base_name = phase1
     displacements = 'disp_x disp_y'
   [../]
   [./stress_1]
     type = ComputeLinearElasticStress
-    block = 0
     base_name = phase1
   [../]
 
   # oversized phase
   [./elasticity_tensor_2]
     type = ComputeElasticityTensor
-    block = 0
     base_name = phase2
     C_ijkl = '7 7'
     fill_method = symmetric_isotropic
   [../]
   [./strain_2]
     type = ComputeSmallStrain
-    block = 0
     base_name = phase2
     displacements = 'disp_x disp_y'
   [../]
   [./stress_2]
     type = ComputeLinearElasticStress
-    block = 0
     base_name = phase2
   [../]
   [./eigenstrain_2]
     type = ComputeEigenstrain
-    block = 0
     base_name = phase2
     eigen_base = '0.02'
   [../]
@@ -305,25 +298,21 @@
   # undersized phase
   [./elasticity_tensor_3]
     type = ComputeElasticityTensor
-    block = 0
     base_name = phase3
     C_ijkl = '7 7'
     fill_method = symmetric_isotropic
   [../]
   [./strain_3]
     type = ComputeSmallStrain
-    block = 0
     base_name = phase3
     displacements = 'disp_x disp_y'
   [../]
   [./stress_3]
     type = ComputeLinearElasticStress
-    block = 0
     base_name = phase3
   [../]
   [./eigenstrain_3]
     type = ComputeEigenstrain
-    block = 0
     base_name = phase3
     eigen_base = '-0.05'
   [../]
