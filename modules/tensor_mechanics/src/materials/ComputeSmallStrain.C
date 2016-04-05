@@ -25,24 +25,18 @@ ComputeSmallStrain::ComputeSmallStrain(const InputParameters & parameters) :
 }
 
 void
-ComputeSmallStrain::computeProperties()
+ComputeSmallStrain::computeQpProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-//    if (_ndisplacements < 3)
-//      (*_grad_displacements[2])[_qp] = _zero;
+  //strain = (grad_disp + grad_disp^T)/2
+  RankTwoTensor grad_tensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
-    //strain = (grad_disp + grad_disp^T)/2
-    RankTwoTensor grad_tensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+  _total_strain[_qp] = ( grad_tensor + grad_tensor.transpose() )/2.0;
 
-    _total_strain[_qp] = ( grad_tensor + grad_tensor.transpose() )/2.0;
+  _mechanical_strain[_qp] = _total_strain[_qp];
 
-    _mechanical_strain[_qp] = _total_strain[_qp];
+  //Remove thermal expansion
+  _mechanical_strain[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T0 ));
 
-    //Remove thermal expansion
-    _mechanical_strain[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T0 ));
-
-    //Remove the Eigen strain
-    _mechanical_strain[_qp] -= _stress_free_strain[_qp];
-  }
+  //Remove the Eigen strain
+  _mechanical_strain[_qp] -= _stress_free_strain[_qp];
 }

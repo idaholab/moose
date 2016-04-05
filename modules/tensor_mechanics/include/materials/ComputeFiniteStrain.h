@@ -17,10 +17,11 @@ class ComputeFiniteStrain : public ComputeStrainBase
 public:
   ComputeFiniteStrain(const InputParameters & parameters);
 
+  virtual void computeProperties();
+
 protected:
   virtual void initQpStatefulProperties();
-  virtual void computeProperties();
-  virtual void computeQpStrain(const RankTwoTensor & Fhat);
+  virtual void computeQpStrain();
 
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
@@ -33,6 +34,9 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _stress_free_strain_increment;
   const VariableValue & _T_old;
+
+  const Real & _current_elem_volume;
+  std::vector<RankTwoTensor> _Fhat;
 };
 
 #endif //COMPUTEFINITESTRAIN_H
