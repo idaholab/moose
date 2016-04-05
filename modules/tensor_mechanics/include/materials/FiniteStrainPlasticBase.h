@@ -8,6 +8,7 @@
 #define FINITESTRAINPLASTICBASE
 
 #include "FiniteStrainMaterial.h"
+#include "Function.h"
 
 class FiniteStrainPlasticBase;
 
@@ -26,6 +27,7 @@ public:
 
 protected:
   virtual void computeQpStress();
+  virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
 
   /// Maximum number of Newton-Raphson iterations allowed
@@ -283,6 +285,8 @@ protected:
    */
   virtual bool lineSearch(Real & nr_res2, RankTwoTensor & stress, const std::vector<Real> & intnl_old, std::vector<Real> & intnl, std::vector<Real> & pm, const RankFourTensor & E_inv, RankTwoTensor & delta_dp, const RankTwoTensor & dstress, const std::vector<Real> & dpm, const std::vector<Real> & dintnl, std::vector<Real> & f, RankTwoTensor & epp, std::vector<Real> & ic);
 
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
 
  private:
 

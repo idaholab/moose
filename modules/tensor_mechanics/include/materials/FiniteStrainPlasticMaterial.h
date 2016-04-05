@@ -10,6 +10,7 @@
 #define FINITESTRAINPLASTICMATERIAL_H
 
 #include "FiniteStrainMaterial.h"
+#include "Function.h"
 
 class FiniteStrainPlasticMaterial;
 
@@ -31,6 +32,7 @@ public:
 
 protected:
   virtual void computeQpStress();
+  virtual void computeQpElasticityTensor();
   virtual void initQpStatefulProperties();
 
   std::vector<Real> _yield_stress_vector;
@@ -118,6 +120,9 @@ protected:
    * d(yieldstress)/d(equivalent plastic strain)
    */
   Real getdYieldStressdPlasticStrain(const Real equivalent_plastic_strain);
+
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
 };
 
 #endif //FINITESTRAINPLASTICMATERIAL_H

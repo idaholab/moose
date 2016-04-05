@@ -9,6 +9,7 @@
 
 #include "FiniteStrainMaterial.h"
 #include "ElementPropertyReadFile.h"
+#include "Function.h"
 
 /**
  * FiniteStrainCrystalPlasticity uses the multiplicative decomposition of deformation gradient
@@ -368,6 +369,10 @@ protected:
   Real _dfgrd_scale_factor;
   ///Flags to reset variables and reinitialize variables
   bool _first_step_iter, _last_step_iter, _first_substep;
+
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
+
 };
 
 #endif //FINITESTRAINCRYSTALPLASTICITY_H
