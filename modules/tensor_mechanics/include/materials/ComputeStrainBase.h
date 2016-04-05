@@ -24,7 +24,6 @@ public:
 
 protected:
   virtual void initQpStatefulProperties();
-  virtual void computeProperties() = 0;
 
   /// Coupled displacement variables
   unsigned int _ndisp;

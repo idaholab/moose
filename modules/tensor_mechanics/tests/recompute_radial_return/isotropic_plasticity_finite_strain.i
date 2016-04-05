@@ -18,11 +18,13 @@
   file = 1x1x1cube.e
 []
 
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   order = FIRST
   family = LAGRANGE
 []
+
 
 [Variables]
   [./disp_x]
@@ -111,7 +113,7 @@
     index_i = 2
     index_j = 2
   [../]
- []
+[]
 
 
 [BCs]
@@ -144,6 +146,7 @@
   [../]
 []
 
+
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
@@ -156,7 +159,6 @@
     block = 1
   [../]
 
-
   [./isotropic_plasticity_recompute]
     type = RecomputeRadialReturnIsotropicPlasticity
     block = 1
@@ -165,17 +167,17 @@
     relative_tolerance = 1e-10
     absolute_tolerance = 1e-12
     max_iterations = 50
-#    output_iteration_info_on_error = true
+    # output_iteration_info_on_error = true
     compute = false # make this material "discrete"
   [../]
 
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 1
-    outputs = all
     return_mapping_stress_model = 'isotropic_plasticity_recompute'
   [../]
 []
+
 
 [Executioner]
   type = Transient
@@ -200,7 +202,6 @@
   dt = 0.00125
   dtmin = 0.0001
 []
-
 
 
 [Outputs]

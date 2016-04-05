@@ -1,10 +1,4 @@
 [Tests]
-  [./tween]
-    type = 'Exodiff'
-    input = 'tween.i'
-    exodiff = 'tween_out.e'
-    abs_zero = 1e-13
-  [../]
   [./tween_new]
     type = 'Exodiff'
     input = 'tween_new.i'
