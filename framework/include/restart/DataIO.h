@@ -19,6 +19,7 @@
 #include "MooseTypes.h"
 #include "HashMap.h"
 #include "MooseError.h"
+#include "Backup.h"
 
 // libMesh includes
 #include "libmesh/vector_value.h"
@@ -141,7 +142,7 @@ template<typename T>
 inline void
 dataStore(std::ostream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
-  mooseError("Cannot store raw pointers as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
+  mooseError("Attempting to store a raw pointer type: \"" << demangle(typeid(T).name()) << " *\" as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
 }
 
 template<typename T, typename U>
@@ -290,7 +291,7 @@ dataLoad(std::istream & stream, T & v, void * /*context*/)
 template<typename T>
 void dataLoad(std::istream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
-  mooseError("Cannot load raw pointers as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
+  mooseError("Attempting to load a raw pointer type: \"" << demangle(typeid(T).name()) << " *\" as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
 }
 
 template<typename T, typename U>
@@ -522,6 +523,26 @@ loadHelper(std::istream & stream, HashMap<P,Q> & data, void * context)
   dataLoad(stream, data, context);
 }
 
+// Specializations for Backup type
+template<>
+inline void
+dataStore(std::ostream & stream, Backup * & backup, void * context)
+{
+  dataStore(stream, backup->_system_data, context);
+
+  for (unsigned int i=0; i<backup->_restartable_data.size(); i++)
+    dataStore(stream, backup->_restartable_data[i], context);
+}
+
+template<>
+inline void
+dataLoad(std::istream & stream, Backup * & backup, void * context)
+{
+  dataLoad(stream, backup->_system_data, context);
+
+  for (unsigned int i=0; i<backup->_restartable_data.size(); i++)
+    dataLoad(stream, backup->_restartable_data[i], context);
+}
 
 /**
  * The following methods are specializations for using the libMesh::Parallel::packed_range_* routines
