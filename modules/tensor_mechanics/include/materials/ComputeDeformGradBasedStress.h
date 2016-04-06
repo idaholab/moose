@@ -9,7 +9,7 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "RotationTensor.h"
 #include "DerivativeMaterialInterface.h"
 
@@ -27,10 +27,10 @@ protected:
   virtual void computeQpStress();
 
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;
-  const MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
   MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  MaterialProperty<RankFourTensor> & _Jacobian_mult;
 };
 
 #endif

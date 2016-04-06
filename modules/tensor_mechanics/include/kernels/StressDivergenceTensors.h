@@ -8,12 +8,12 @@
 #define STRESSDIVERGENCETENSORS_H
 
 #include "Kernel.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 //Forward Declarations
 class StressDivergenceTensors;
-class ElasticityTensorR4;
+class RankFourTensor;
 class RankTwoTensor;
 
 template<>
@@ -37,7 +37,7 @@ protected:
   std::string _base_name;
 
   const MaterialProperty<RankTwoTensor> & _stress;
-  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
   const unsigned int _component;

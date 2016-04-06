@@ -27,8 +27,8 @@ EigenStrainBaseMaterial::EigenStrainBaseMaterial(const InputParameters & paramet
     _delastic_strain_dc(declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _c_name)),
     _d2elastic_strain_dc2(declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", _c_name, _c_name)),
 
-    _delasticity_tensor_dc(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name)),
-    _d2elasticity_tensor_dc2(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name, _c_name))
+    _delasticity_tensor_dc(declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, _c_name)),
+    _d2elasticity_tensor_dc2(declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, _c_name, _c_name))
 {
 }
 

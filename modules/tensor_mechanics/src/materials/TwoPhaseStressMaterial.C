@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "TwoPhaseStressMaterial.h"
 #include "RankTwoTensor.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 
 template<>
 InputParameters validParams<TwoPhaseStressMaterial>()
@@ -26,15 +26,15 @@ TwoPhaseStressMaterial::TwoPhaseStressMaterial(const InputParameters & parameter
 
     _base_A(getParam<std::string>("base_A") + "_"),
     _stress_A(getMaterialPropertyByName<RankTwoTensor>(_base_A + "stress")),
-    _dstress_dstrain_A(getMaterialPropertyByName<ElasticityTensorR4>(_base_A + "Jacobian_mult")),
+    _dstress_dstrain_A(getMaterialPropertyByName<RankFourTensor>(_base_A + "Jacobian_mult")),
 
     _base_B(getParam<std::string>("base_B") + "_"),
     _stress_B(getMaterialPropertyByName<RankTwoTensor>(_base_B + "stress")),
-    _dstress_dstrain_B(getMaterialPropertyByName<ElasticityTensorR4>(_base_B + "Jacobian_mult")),
+    _dstress_dstrain_B(getMaterialPropertyByName<RankFourTensor>(_base_B + "Jacobian_mult")),
 
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
-    _dstress_dstrain(declareProperty<ElasticityTensorR4>(_base_name + "Jacobian_mult"))
+    _dstress_dstrain(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult"))
 {
 }
 

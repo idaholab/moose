@@ -43,8 +43,8 @@ CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const InputParamete
     _symmetric_stress(declareProperty<RankTwoTensor>("symmetric_stress")),
     _antisymmetric_stress(declareProperty<RankTwoTensor>("antisymmetric_stress")),
     _stress_couple(declareProperty<RankTwoTensor>("coupled_stress")),
-    _elastic_flexural_rigidity_tensor(declareProperty<ElasticityTensorR4>("elastic_flexural_rigidity_tensor")),
-    _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("coupled_Jacobian_mult")),
+    _elastic_flexural_rigidity_tensor(declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
+    _Jacobian_mult_couple(declareProperty<RankFourTensor>("coupled_Jacobian_mult")),
     _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
     _Bijkl(),
     _T(coupledValue("T")),
@@ -126,4 +126,3 @@ void CosseratLinearElasticMaterial::computeQpElasticityTensor()
   _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
   _Jacobian_mult_couple[_qp] = _Bijkl;
 }
-

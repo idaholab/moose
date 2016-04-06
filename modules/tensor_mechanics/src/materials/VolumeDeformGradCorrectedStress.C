@@ -26,10 +26,10 @@ VolumeDeformGradCorrectedStress::VolumeDeformGradCorrectedStress(const InputPara
     _stress(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("stress_name")))
 {
   if (isParamValid("pre_jacobian_name"))
-    _pre_Jacobian_mult = &getMaterialProperty<ElasticityTensorR4>("pre_jacobian_name");
+    _pre_Jacobian_mult = &getMaterialProperty<RankFourTensor>("pre_jacobian_name");
 
   if (isParamValid("jacobian_name"))
-    _Jacobian_mult = &declareProperty<ElasticityTensorR4>(getParam<MaterialPropertyName>("jacobian_name"));
+    _Jacobian_mult = &declareProperty<RankFourTensor>(getParam<MaterialPropertyName>("jacobian_name"));
 }
 
 void

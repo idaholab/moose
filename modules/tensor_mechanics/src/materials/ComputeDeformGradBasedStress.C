@@ -21,9 +21,9 @@ InputParameters validParams<ComputeDeformGradBasedStress>()
 ComputeDeformGradBasedStress::ComputeDeformGradBasedStress(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>("deform_grad_name")),
-    _elasticity_tensor(getMaterialProperty<ElasticityTensorR4>("elasticity_tensor_name")),
+    _elasticity_tensor(getMaterialProperty<RankFourTensor>("elasticity_tensor_name")),
     _stress(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("stress_name"))),
-    _Jacobian_mult(declareProperty<ElasticityTensorR4>(getParam<MaterialPropertyName>("jacobian_name")))
+    _Jacobian_mult(declareProperty<RankFourTensor>(getParam<MaterialPropertyName>("jacobian_name")))
 {
 }
 

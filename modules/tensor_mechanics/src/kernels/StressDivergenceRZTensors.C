@@ -7,6 +7,7 @@
 
 #include "StressDivergenceRZTensors.h"
 #include "Assembly.h"
+#include "ElasticityTensorTools.h"
 
 template<>
 InputParameters validParams<StressDivergenceRZTensors>()
@@ -100,31 +101,30 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
 
   if (ivar == 0 && jvar == 0)  // Case when both phi and test are functions of x and z; requires four terms
   {
-    const Real first_sum = _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_x and phi_x
-    const Real second_sum = _Jacobian_mult[_qp].elasticJacobian(2, 2, test_z, phi_z); //test_z and phi_z
-    const Real mixed_sum1 = _Jacobian_mult[_qp].elasticJacobian(ivar, 2, test, phi_z); //test_x and phi_z
-    const Real mixed_sum2 = _Jacobian_mult[_qp].elasticJacobian(2, jvar, test_z, phi); //test_z and phi_x
+    const Real first_sum = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test, phi); //test_x and phi_x
+    const Real second_sum = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], 2, 2, test_z, phi_z); //test_z and phi_z
+    const Real mixed_sum1 = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, 2, test, phi_z); //test_x and phi_z
+    const Real mixed_sum2 = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], 2, jvar, test_z, phi); //test_z and phi_x
 
     return first_sum + second_sum + mixed_sum1 + mixed_sum2;
   }
   else if (ivar == 0 && jvar == 1)
   {
-    const Real first_sum = _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_x and phi_y
-    const Real mixed_sum2 = _Jacobian_mult[_qp].elasticJacobian(2, jvar, test_z, phi); //test_z and phi_y
+    const Real first_sum = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test, phi); //test_x and phi_y
+    const Real mixed_sum2 = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], 2, jvar, test_z, phi); //test_z and phi_y
 
     return first_sum + mixed_sum2;
   }
   else if (ivar == 1 && jvar == 0)
   {
-    const Real second_sum = _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_y and phi_x
-    const Real mixed_sum1 = _Jacobian_mult[_qp].elasticJacobian(ivar, 2, test, phi_z); //test_y and phi_z
+    const Real second_sum = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test, phi); //test_y and phi_x
+    const Real mixed_sum1 = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, 2, test, phi_z); //test_y and phi_z
 
     return second_sum + mixed_sum1;
   }
   else if (ivar == 1 && jvar == 1)
-    return _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test, phi); //test_y and phi_y
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test, phi); //test_y and phi_y
 
   else
     mooseError("Invalid component in Jacobian Calculation");
 }
-

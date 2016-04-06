@@ -7,6 +7,7 @@
 
 #include "StressDivergenceRSphericalTensors.h"
 #include "Assembly.h"
+#include "ElasticityTensorTools.h"
 
 template<>
 InputParameters validParams<StressDivergenceRSphericalTensors>()
@@ -85,7 +86,7 @@ StressDivergenceRSphericalTensors::calculateJacobian(unsigned int ivar, unsigned
 
   if (ivar == 0 && jvar == 0)  // Only nonzero case for a 1D simulation
   {
-    return _Jacobian_mult[_qp].elasticJacobian(ivar, jvar, test_r, phi_r);
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test_r, phi_r);
   }
   else
     mooseError("Invalid component in Jacobian Calculation");

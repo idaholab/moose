@@ -1007,10 +1007,10 @@ FiniteStrainCrystalPlasticity::computeQpElasticityTensor()
 
 }
 
-ElasticityTensorR4
+RankFourTensor
 FiniteStrainCrystalPlasticity::calcTangentModuli()
 {
-  ElasticityTensorR4 tan_mod;
+  RankFourTensor tan_mod;
 
   switch ( _tan_mod_type )
   {
@@ -1055,10 +1055,10 @@ FiniteStrainCrystalPlasticity::calc_schmid_tensor()
 }
 
 
-ElasticityTensorR4
+RankFourTensor
 FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
 {
-  ElasticityTensorR4 tan_mod;
+  RankFourTensor tan_mod;
   RankTwoTensor pk2fet, fepk2;
   RankFourTensor deedfe, dsigdpk2dfe;
 
@@ -1095,7 +1095,7 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
 }
 
 
-ElasticityTensorR4
+RankFourTensor
 FiniteStrainCrystalPlasticity::elasticTangentModuli()
 {
   return _elasticity_tensor[_qp];//update jacobian_mult

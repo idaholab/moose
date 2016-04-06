@@ -23,7 +23,7 @@ RecomputeGeneralReturnStressIncrement::RecomputeGeneralReturnStressIncrement(con
     _return_stress_increment(declareProperty<RankTwoTensor>("return_stress_increment")),
     _inelastic_strain_increment(declareProperty<RankTwoTensor>("inelastic_strain_increment")),
     _max_its(parameters.get<unsigned int>("max_iterations")),
-    _elasticity_tensor(getMaterialPropertyByName<ElasticityTensorR4>(_base_name + "elasticity_tensor")),
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress"))
