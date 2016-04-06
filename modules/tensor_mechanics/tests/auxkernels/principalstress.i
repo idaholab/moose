@@ -186,7 +186,6 @@
 
 
 [Outputs]
-  file_base = principal_aux
   exodus = true
   csv = true
 []

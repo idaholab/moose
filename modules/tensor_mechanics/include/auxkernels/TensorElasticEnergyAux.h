@@ -26,7 +26,8 @@ public:
 protected:
   virtual Real computeValue();
 
-private:
+  std::string _base_name;
+
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };

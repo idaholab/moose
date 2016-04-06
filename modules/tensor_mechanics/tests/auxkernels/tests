@@ -1,0 +1,17 @@
+[Tests]
+  [./ranktwoscalaraux]
+    type = 'Exodiff'
+    input = 'ranktwoscalaraux.i'
+    exodiff = 'ranktwoscalaraux_out.e'
+  [../]
+  [./principalstress]
+    type = 'Exodiff'
+    input = 'principalstress.i'
+    exodiff = 'principalstress_out.e'
+  [../]
+  [./tensorelasticenergyaux]
+    type = 'Exodiff'
+    input = 'tensorelasticenergyaux.i'
+    exodiff = 'tensorelasticenergyaux_out.e'
+  [../]
+[]
