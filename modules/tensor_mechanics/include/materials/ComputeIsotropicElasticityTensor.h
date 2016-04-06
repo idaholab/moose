@@ -34,7 +34,7 @@ protected:
   Real _youngs_modulus;
 
   /// Individual elasticity tensor
-  ElasticityTensorR4 _Cijkl;
+  RankFourTensor _Cijkl;
 };
 
 #endif //COMPUTEISOTROPICELASTICITYTENSOR_H

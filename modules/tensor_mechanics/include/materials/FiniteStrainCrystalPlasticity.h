@@ -191,17 +191,17 @@ protected:
    * Exact jacobian is currently implemented.
    * tan_mod_type can be modified to exact in .i file to turn it on.
    */
-  virtual ElasticityTensorR4 calcTangentModuli();
+  virtual RankFourTensor calcTangentModuli();
 
   /**
    * This function calculate the elastic tangent moduli for preconditioner.
    */
-  virtual ElasticityTensorR4 elasticTangentModuli();
+  virtual RankFourTensor elasticTangentModuli();
 
   /**
    * This function calculate the exact tangent moduli for preconditioner.
    */
-  virtual ElasticityTensorR4 elastoPlasticTangentModuli();
+  virtual RankFourTensor elastoPlasticTangentModuli();
 
   /**
    * This function perform RU decomposition to obtain the rotation tensor.

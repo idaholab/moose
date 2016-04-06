@@ -11,7 +11,7 @@
 
 //Forward Declarations
 class MomentBalancing;
-class ElasticityTensorR4;
+class RankFourTensor;
 class RankTwoTensor;
 
 template<>
@@ -28,7 +28,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const MaterialProperty<RankTwoTensor> & _stress;
-  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
 private:
   const unsigned int _component;

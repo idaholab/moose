@@ -74,7 +74,7 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const Inp
     std::string material_name = propertyNameFirst(_elasticity_tensor_name, var_name);
 
     // declare elasticity tensor derivative properties
-    _D_elastic_tensor[op] = &declareProperty<ElasticityTensorR4>(material_name);
+    _D_elastic_tensor[op] = &declareProperty<RankFourTensor>(material_name);
   }
 }
 
@@ -82,7 +82,7 @@ void
 ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
 {
   // Initialize local elasticity tnesor and sum of h
-  ElasticityTensorR4 local_elasticity_tensor;
+  RankFourTensor local_elasticity_tensor;
 
   Real sum_h = 0.0;
 
@@ -129,7 +129,7 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
     unsigned int grn_index = active_ops[op].first;
     unsigned int op_index = active_ops[op].second;
     Real dhdopi = libMesh::pi * std::cos(libMesh::pi * ((*_vals[op_index])[_qp] - 0.5))/2.0;
-    ElasticityTensorR4 C_deriv(_C_rotated[grn_index]);
+    RankFourTensor C_deriv(_C_rotated[grn_index]);
     C_deriv -= local_elasticity_tensor;
     C_deriv *= dhdopi/sum_h;
 

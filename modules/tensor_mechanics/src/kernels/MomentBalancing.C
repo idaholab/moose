@@ -7,7 +7,7 @@
 #include "MomentBalancing.h"
 
 #include "Material.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 template<>
@@ -30,7 +30,7 @@ InputParameters validParams<MomentBalancing>()
 MomentBalancing::MomentBalancing(const InputParameters & parameters) :
     Kernel(parameters),
     _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
-    _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
+    _Jacobian_mult(getMaterialProperty<RankFourTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
     _wc_x_var(coupled("wc_x")),
     _wc_y_var(coupled("wc_y")),
@@ -86,4 +86,3 @@ MomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0;
 }
-

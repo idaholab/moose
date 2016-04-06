@@ -31,7 +31,7 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     Kernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
-    _Jacobian_mult(getMaterialPropertyByName<ElasticityTensorR4>(_base_name + "Jacobian_mult")),
+    _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp(3),

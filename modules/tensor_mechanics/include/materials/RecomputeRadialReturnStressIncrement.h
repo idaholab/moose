@@ -9,7 +9,7 @@
 
 #include "RecomputeGeneralReturnStressIncrement.h"
 #include "RankTwoTensor.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "Conversion.h"
 
 //Forward declaration

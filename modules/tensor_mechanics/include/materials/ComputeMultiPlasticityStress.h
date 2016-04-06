@@ -140,7 +140,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
   /// Elasticity tensor that can be rotated by this class (ie, its not const)
-  ElasticityTensorR4 _my_elasticity_tensor;
+  RankFourTensor _my_elasticity_tensor;
 
   /// Strain increment that can be rotated by this class, and split into multiple increments (ie, its not const)
   RankTwoTensor _my_strain_increment;

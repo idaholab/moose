@@ -1,7 +1,7 @@
 #include "ACGrGrElasticDrivingForce.h"
 
 #include "Material.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 template<>
@@ -15,7 +15,7 @@ InputParameters validParams<ACGrGrElasticDrivingForce>()
 
 ACGrGrElasticDrivingForce::ACGrGrElasticDrivingForce(const InputParameters & parameters) :
     ACBulk<Real>(parameters),
-    _D_elastic_tensor(getMaterialProperty<ElasticityTensorR4>("D_tensor_name")),
+    _D_elastic_tensor(getMaterialProperty<RankFourTensor>("D_tensor_name")),
     _elastic_strain(getMaterialPropertyByName<RankTwoTensor>("elastic_strain"))
 {
 }

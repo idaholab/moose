@@ -35,8 +35,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _delastic_strain_dc;
   MaterialProperty<RankTwoTensor> & _d2elastic_strain_dc2;
 
-  MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
-  MaterialProperty<ElasticityTensorR4> & _d2elasticity_tensor_dc2;
+  MaterialProperty<RankFourTensor> & _delasticity_tensor_dc;
+  MaterialProperty<RankFourTensor> & _d2elasticity_tensor_dc2;
 };
 
 #endif //EIGENSTRAINBASEMATERIAL_H

@@ -47,9 +47,9 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const InputParameters & paramet
     _elastic_strain(declareProperty<RankTwoTensor>(_base_name + "elastic_strain")),
 
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(declareProperty<ElasticityTensorR4>(_elasticity_tensor_name)),
+    _elasticity_tensor(declareProperty<RankFourTensor>(_elasticity_tensor_name)),
 
-    _Jacobian_mult(declareProperty<ElasticityTensorR4>(_base_name + "Jacobian_mult")),
+    _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
 
     _Euler_angles(getParam<Real>("euler_angle_1"),
                   getParam<Real>("euler_angle_2"),

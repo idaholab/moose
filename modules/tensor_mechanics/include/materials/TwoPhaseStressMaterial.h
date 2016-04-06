@@ -12,7 +12,7 @@
 // Forward Declarations
 class TwoPhaseStressMaterial;
 class RankTwoTensor;
-class ElasticityTensorR4;
+class RankFourTensor;
 
 template<>
 InputParameters validParams<TwoPhaseStressMaterial>();
@@ -35,17 +35,17 @@ protected:
   // phase A material properties
   std::string _base_A;
   const MaterialProperty<RankTwoTensor> & _stress_A;
-  const MaterialProperty<ElasticityTensorR4> & _dstress_dstrain_A;
+  const MaterialProperty<RankFourTensor> & _dstress_dstrain_A;
 
   // phase B material properties
   std::string _base_B;
   const MaterialProperty<RankTwoTensor> & _stress_B;
-  const MaterialProperty<ElasticityTensorR4> & _dstress_dstrain_B;
+  const MaterialProperty<RankFourTensor> & _dstress_dstrain_B;
 
   // global material properties
   std::string _base_name;
   MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<ElasticityTensorR4> & _dstress_dstrain;
+  MaterialProperty<RankFourTensor> & _dstress_dstrain;
 };
 
 #endif //TWOPHASESTRESSMATERIAL_H
