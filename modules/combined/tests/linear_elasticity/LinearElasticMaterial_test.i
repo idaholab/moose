@@ -1,5 +1,3 @@
-# This input file is designed to test the LinearElasticMaterial class.
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -133,16 +131,22 @@
 []
 
 [Materials]
-  [./Anisotropic]
-    type = LinearElasticMaterial
+  # these materials replace the deprecated LinearElasticMaterial
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-
-    #set from elk/tests/anisotropic_path/anisotropic_patch_test.i
     fill_method = symmetric9
     #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
     C_ijkl ='1.0e6  0.0   0.0 1.0e6  0.0  1.0e6 0.5e6 0.5e6 0.5e6'
+  [../]
+  [./strain]
+    type = ComputeSmallStrain
+    block = 0
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
+    block = 0
   [../]
 []
 

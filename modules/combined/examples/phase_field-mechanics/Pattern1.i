@@ -37,6 +37,7 @@
   # CahnHilliard needs the third derivatives
   derivative_order = 3
   enable_jit = true
+  displacements = 'disp_x disp_y'
 []
 
 # AuxVars to compute the free energy density for outputting
@@ -121,8 +122,6 @@
 [Kernels]
   # Set up stress divergence kernels
   [./TensorMechanics]
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
 
   # Cahn-Hilliard kernels
@@ -258,43 +257,75 @@
   [../]
 
   # matrix phase
-  [./eigenstrain_1]
-    type = LinearElasticMaterial
-    base_name = phase1
+  [./elasticity_tensor_1]
+    type = ComputeElasticityTensor
     block = 0
-    disp_y = disp_y
-    disp_x = disp_x
-    # Stiffness tensor lambda, mu values
+    base_name = phase1
     C_ijkl = '3 3'
     fill_method = symmetric_isotropic
   [../]
-
-  # oversized phase (simulated using thermal expansion)
-  [./eigenstrain_2]
-    type = LinearElasticMaterial
-    base_name = phase2
+  [./strain_1]
+    type = ComputeSmallStrain
     block = 0
-    thermal_expansion_coeff = 0.02
-    T0 = 0
-    T = 1
-    disp_y = disp_y
-    disp_x = disp_x
+    base_name = phase1
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress_1]
+    type = ComputeLinearElasticStress
+    block = 0
+    base_name = phase1
+  [../]
+
+  # oversized phase
+  [./elasticity_tensor_2]
+    type = ComputeElasticityTensor
+    block = 0
+    base_name = phase2
     C_ijkl = '7 7'
     fill_method = symmetric_isotropic
   [../]
-
-  # undersized phase (simulated using thermal expansion)
-  [./eigenstrain_3]
-    type = LinearElasticMaterial
-    base_name = phase3
+  [./strain_2]
+    type = ComputeSmallStrain
     block = 0
-    thermal_expansion_coeff = -0.05
-    T0 = 0
-    T = 1
-    disp_y = disp_y
-    disp_x = disp_x
+    base_name = phase2
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress_2]
+    type = ComputeLinearElasticStress
+    block = 0
+    base_name = phase2
+  [../]
+  [./eigenstrain_2]
+    type = ComputeEigenstrain
+    block = 0
+    base_name = phase2
+    eigen_base = '0.02'
+  [../]
+
+  # undersized phase
+  [./elasticity_tensor_3]
+    type = ComputeElasticityTensor
+    block = 0
+    base_name = phase3
     C_ijkl = '7 7'
     fill_method = symmetric_isotropic
+  [../]
+  [./strain_3]
+    type = ComputeSmallStrain
+    block = 0
+    base_name = phase3
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress_3]
+    type = ComputeLinearElasticStress
+    block = 0
+    base_name = phase3
+  [../]
+  [./eigenstrain_3]
+    type = ComputeEigenstrain
+    block = 0
+    base_name = phase3
+    eigen_base = '-0.05'
   [../]
 
   # switching functions
