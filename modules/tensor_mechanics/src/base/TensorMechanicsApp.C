@@ -105,7 +105,7 @@
 
 #include "CrystalPlasticitySlipRateGSS.h"
 #include "CrystalPlasticitySlipResistanceGSS.h"
-#include "CrystalPlasticityStateVariableGSS.h"
+#include "CrystalPlasticityStateVariable.h"
 #include "CrystalPlasticityStateVarRateComponentGSS.h"
 
 #include "Mass.h"
@@ -224,7 +224,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(HEVPFlowRatePowerLawJ2);
   registerUserObject(CrystalPlasticitySlipRateGSS);
   registerUserObject(CrystalPlasticitySlipResistanceGSS);
-  registerUserObject(CrystalPlasticityStateVariableGSS);
+  registerUserObject(CrystalPlasticityStateVariable);
   registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
 
   registerAux(CylindricalRankTwoAux);
