@@ -29,6 +29,22 @@
     valgrind = 'HEAVY'
   [../]
 
+  [./SmoothSuperellipsoidIC]
+    type = Exodiff
+    input = 'SmoothSuperellipsoidIC.i'
+    exodiff = 'SmoothSuperellipsoidIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./SpecifiedSmoothSuperellipsoidIC]
+    type = Exodiff
+    input = 'SpecifiedSmoothSuperellipsoidIC.i'
+    exodiff = 'SpecifiedSmoothSuperellipsoidIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
   [./RndBoundingBoxIC]
     type = Exodiff
     input = 'RndBoundingBoxIC.i'
@@ -44,6 +60,14 @@
     type = Exodiff
     input = 'SmoothCircleIC_3D.i'
     exodiff = 'SmoothCircleIC_3D_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./SmoothSuperellipsoidIC_3D]
+    type = Exodiff
+    input = 'SmoothSuperellipsoidIC_3D.i'
+    exodiff = 'SmoothSuperellipsoidIC_3D_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
   [../]

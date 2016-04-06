@@ -4,26 +4,26 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef SPECIFIEDSMOOTHCIRCLEIC_H
-#define SPECIFIEDSMOOTHCIRCLEIC_H
+#ifndef SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H
+#define SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H
 
 #include "Kernel.h"
-#include "SmoothCircleBaseIC.h"
+#include "SmoothSuperellipsoidBaseIC.h"
 
 // System includes
 #include <string>
 
 // Forward Declarations
-class SpecifiedSmoothCircleIC;
+class SpecifiedSmoothSuperellipsoidIC;
 
 template<>
-InputParameters validParams<SpecifiedSmoothCircleIC>();
+InputParameters validParams<SpecifiedSmoothSuperellipsoidIC>();
 
 /**
- * SpecifiedsmoothCircleIC creates multiple SmoothCircles (number = size of x_positions) that are positioned in the
- * set locations with the set radii.  This is adapted from PolySpecifiedSmoothCircleIC from HYRAX by A.M. Jokisaari
+ * SpecifiedSmoothSuperellipsoidIC creates multiple SmoothSuperellipsoids (number = size of x_positions) that are positioned in the
+ * set locations with the set semiaxes a, b, c and exponents n
  **/
-class SpecifiedSmoothCircleIC : public SmoothCircleBaseIC
+class SpecifiedSmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
 {
 public:
   /**
@@ -31,17 +31,20 @@ public:
    *
    * @param parameters The parameters object holding data for the class to use.
    */
-  SpecifiedSmoothCircleIC(const InputParameters & parameters);
+  SpecifiedSmoothSuperellipsoidIC(const InputParameters & parameters);
 
-  virtual void computeCircleRadii();
-
-  virtual void computeCircleCenters();
+  virtual void computeSuperellipsoidCenters();
+  virtual void computeSuperellipsoidSemiaxes();
+  virtual void computeSuperellipsoidExponents();
 
 protected:
   std::vector<Real> _x_positions;
   std::vector<Real> _y_positions;
   std::vector<Real> _z_positions;
-  std::vector<Real> _input_radii;
+  std::vector<Real> _input_as;
+  std::vector<Real> _input_bs;
+  std::vector<Real> _input_cs;
+  std::vector<Real> _input_ns;
 };
 
-#endif //SPECIFIEDSMOOTHCIRCLEIC_H
+#endif //SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H

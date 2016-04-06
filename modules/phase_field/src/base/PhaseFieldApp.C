@@ -80,6 +80,7 @@
 #include "SmoothCircleIC.h"
 #include "SmoothSuperellipsoidIC.h"
 #include "SpecifiedSmoothCircleIC.h"
+#include "SpecifiedSmoothSuperellipsoidIC.h"
 #include "ThumbIC.h"
 #include "Tricrystal2CircleGrainsIC.h"
 
@@ -307,6 +308,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(SmoothCircleIC);
   registerInitialCondition(SmoothSuperellipsoidIC);
   registerInitialCondition(SpecifiedSmoothCircleIC);
+  registerInitialCondition(SpecifiedSmoothSuperellipsoidIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
 
