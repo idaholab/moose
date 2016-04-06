@@ -37,11 +37,11 @@ protected:
   MaterialProperty<RankTwoTensor> & _antisymmetric_stress;
   MaterialProperty<RankTwoTensor> & _stress_couple;
 
-  MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult_couple;
+  MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
+  MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
 
   std::vector<Real> _Bijkl_vector;
-  ElasticityTensorR4 _Bijkl;
+  RankFourTensor _Bijkl;
 
 private:
   const VariableValue & _T;

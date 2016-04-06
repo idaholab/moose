@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "ElasticEnergyMaterial.h"
 #include "RankTwoTensor.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 
 template<>
 InputParameters validParams<ElasticEnergyMaterial>()
@@ -23,7 +23,7 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const InputParameters & parameters)
     DerivativeFunctionMaterialBase(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
-    _elasticity_tensor(getMaterialPropertyByName<ElasticityTensorR4>(_base_name + "elasticity_tensor")),
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
     _strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "elastic_strain"))
 {
   _dstrain.resize(_nargs);
@@ -35,7 +35,7 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const InputParameters & parameters)
   for (unsigned int i = 0; i < _nargs; ++i)
   {
     _dstrain[i]            = &getMaterialPropertyDerivativeByName<RankTwoTensor>(_base_name + "elastic_strain", _arg_names[i]);
-    _delasticity_tensor[i] = &getMaterialPropertyDerivativeByName<ElasticityTensorR4>(_base_name + "elasticity_tensor", _arg_names[i]);
+    _delasticity_tensor[i] = &getMaterialPropertyDerivativeByName<RankFourTensor>(_base_name + "elasticity_tensor", _arg_names[i]);
 
     _d2strain[i].resize(_nargs);
     _d2elasticity_tensor[i].resize(_nargs);
@@ -43,7 +43,7 @@ ElasticEnergyMaterial::ElasticEnergyMaterial(const InputParameters & parameters)
     for (unsigned int j = 0; j < _nargs; ++j)
     {
       _d2strain[i][j]            = &getMaterialPropertyDerivativeByName<RankTwoTensor>(_base_name + "elastic_strain", _arg_names[i], _arg_names[j]);
-      _d2elasticity_tensor[i][j] = &getMaterialPropertyDerivativeByName<ElasticityTensorR4>(_base_name + "elasticity_tensor", _arg_names[i], _arg_names[j]);
+      _d2elasticity_tensor[i][j] = &getMaterialPropertyDerivativeByName<RankFourTensor>(_base_name + "elasticity_tensor", _arg_names[i], _arg_names[j]);
     }
   }
 }

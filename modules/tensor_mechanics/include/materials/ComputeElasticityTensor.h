@@ -21,7 +21,7 @@ protected:
   virtual void computeQpElasticityTensor();
 
   /// Individual material information
-  ElasticityTensorR4 _Cijkl;
+  RankFourTensor _Cijkl;
 };
 
 #endif //COMPUTEELASTICITYTENSOR_H

@@ -6,7 +6,7 @@
 //Forward Declarations
 class ACGrGrElasticDrivingForce;
 class RankTwoTensor;
-class ElasticityTensorR4;
+class RankFourTensor;
 
 template<>
 InputParameters validParams<ACGrGrElasticDrivingForce>();
@@ -24,7 +24,7 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
 
 private:
-  const MaterialProperty<ElasticityTensorR4> & _D_elastic_tensor;
+  const MaterialProperty<RankFourTensor> & _D_elastic_tensor;
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 

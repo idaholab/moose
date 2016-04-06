@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "DynamicStressDivergenceTensors.h"
+#include "ElasticityTensorTools.h"
 
 template<>
 InputParameters validParams<DynamicStressDivergenceTensors>()
@@ -51,7 +52,7 @@ Real
 DynamicStressDivergenceTensors::computeQpJacobian()
 {
   if (_dt > 0)
-    return _Jacobian_mult[_qp].elasticJacobian(_component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
   else
     return 0;
 }
@@ -72,7 +73,7 @@ DynamicStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
   if (active)
   {
     if (_dt > 0)
-      return _Jacobian_mult[_qp].elasticJacobian(_component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
+      return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
     else
       return 0;
    }

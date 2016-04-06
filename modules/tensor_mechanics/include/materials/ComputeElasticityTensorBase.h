@@ -8,7 +8,7 @@
 #define COMPUTEELASTICITYTENSORBASE_H
 
 #include "Material.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 
 /**
  * ComputeElasticityTensorBase the base class for computing elasticity tensors
@@ -25,7 +25,7 @@ protected:
   std::string _base_name;
   std::string _elasticity_tensor_name;
 
-  MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
+  MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
   /// prefactor function to multiply the elasticity tensor with
   Function * const _prefactor_function;

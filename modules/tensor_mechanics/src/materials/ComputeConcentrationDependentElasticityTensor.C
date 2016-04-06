@@ -26,7 +26,7 @@ ComputeConcentrationDependentElasticityTensor::ComputeConcentrationDependentElas
     _Cijkl1(getParam<std::vector<Real> >("C1_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method1")),
     _c(coupledValue("c")),
     _c_name(getVar("c", 0)->name()),
-    _delasticity_tensor_dc(declarePropertyDerivative<ElasticityTensorR4>(_elasticity_tensor_name, _c_name))
+    _delasticity_tensor_dc(declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, _c_name))
 {
   // Define a rotation according to Euler angle parameters
   RotationTensor R(_Euler_angles); // R type: RealTensorValue

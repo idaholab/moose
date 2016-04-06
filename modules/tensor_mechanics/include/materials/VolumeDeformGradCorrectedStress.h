@@ -9,7 +9,7 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "RotationTensor.h"
 #include "DerivativeMaterialInterface.h"
 
@@ -28,10 +28,10 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _pre_stress;
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;
-  const MaterialProperty<ElasticityTensorR4> * _pre_Jacobian_mult;
+  const MaterialProperty<RankFourTensor> * _pre_Jacobian_mult;
 
   MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<ElasticityTensorR4> * _Jacobian_mult;
+  MaterialProperty<RankFourTensor> * _Jacobian_mult;
 };
 
 #endif

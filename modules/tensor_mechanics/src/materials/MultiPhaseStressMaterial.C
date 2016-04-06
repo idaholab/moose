@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "MultiPhaseStressMaterial.h"
 #include "RankTwoTensor.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 
 template<>
 InputParameters validParams<MultiPhaseStressMaterial>()
@@ -29,7 +29,7 @@ MultiPhaseStressMaterial::MultiPhaseStressMaterial(const InputParameters & param
     _dphase_stress_dstrain(_n_phase),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
-    _dstress_dstrain(declareProperty<ElasticityTensorR4>(_base_name + "Jacobian_mult"))
+    _dstress_dstrain(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult"))
 {
   // verify parameter length
   if (_n_phase != _phase_base.size())
@@ -39,7 +39,7 @@ MultiPhaseStressMaterial::MultiPhaseStressMaterial(const InputParameters & param
   {
     _h_eta[i] = &getMaterialProperty<Real>(_h_list[i]);
     _phase_stress[i] = &getMaterialProperty<RankTwoTensor>(_phase_base[i] + "_stress");
-    _dphase_stress_dstrain[i] = &getMaterialProperty<ElasticityTensorR4>(_phase_base[i] + "_Jacobian_mult");
+    _dphase_stress_dstrain[i] = &getMaterialProperty<RankFourTensor>(_phase_base[i] + "_Jacobian_mult");
   }
 }
 

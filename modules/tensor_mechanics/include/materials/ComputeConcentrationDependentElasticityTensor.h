@@ -21,15 +21,15 @@ protected:
   virtual void computeQpElasticityTensor();
 
   /// Elasticity tensor for phase with zero concentration.
-  ElasticityTensorR4 _Cijkl0;
+  RankFourTensor _Cijkl0;
   /// Elasticity tensor for phase with concentration 1.
-  ElasticityTensorR4 _Cijkl1;
+  RankFourTensor _Cijkl1;
   /// Concentration variable.
   const VariableValue & _c;
   VariableName _c_name;
 
   /// Derivative of elasticity tensor with respect to concentration.
-  MaterialProperty<ElasticityTensorR4> & _delasticity_tensor_dc;
+  MaterialProperty<RankFourTensor> & _delasticity_tensor_dc;
 };
 
 #endif //COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H

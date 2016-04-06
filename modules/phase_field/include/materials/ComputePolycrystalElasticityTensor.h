@@ -26,7 +26,7 @@ protected:
   virtual void computeQpElasticityTensor();
 
   /// Unrotated elasticity tensor
-  ElasticityTensorR4 _C_unrotated;
+  RankFourTensor _C_unrotated;
 
   Real _length_scale;
   Real _pressure_scale;
@@ -50,10 +50,10 @@ protected:
   std::vector<const VariableValue *> _vals;
 
   /// vector of elasticity tensor material properties
-  std::vector< MaterialProperty<ElasticityTensorR4> *> _D_elastic_tensor;
+  std::vector< MaterialProperty<RankFourTensor> *> _D_elastic_tensor;
 
   /// vector of elasticity tensors for storing rotated elasticity tensors for each grain
-  std::vector<ElasticityTensorR4> _C_rotated;
+  std::vector<RankFourTensor> _C_rotated;
 
   /// Conversion factor from J to eV
   const Real _JtoeV;

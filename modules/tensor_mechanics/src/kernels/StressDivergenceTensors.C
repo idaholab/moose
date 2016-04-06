@@ -8,6 +8,7 @@
 #include "StressDivergenceTensors.h"
 #include "Material.h"
 #include "MooseMesh.h"
+#include "ElasticityTensorTools.h"
 
 template<>
 InputParameters validParams<StressDivergenceTensors>()
@@ -31,7 +32,7 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     Kernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
-    _Jacobian_mult(getMaterialPropertyByName<ElasticityTensorR4>(_base_name + "Jacobian_mult")),
+    _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
@@ -86,7 +87,7 @@ StressDivergenceTensors::computeQpResidual()
 Real
 StressDivergenceTensors::computeQpJacobian()
 {
-  return _Jacobian_mult[_qp].elasticJacobian(_component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+  return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
 }
 
 Real
@@ -103,7 +104,7 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
     }
 
   if (active)
-    return _Jacobian_mult[_qp].elasticJacobian(_component, coupled_component,
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component,
                                           _grad_test[_i][_qp], _grad_phi[_j][_qp]);
 
   if (_temp_coupled && jvar == _temp_var)
@@ -114,4 +115,3 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0;
 }
-

@@ -545,7 +545,7 @@ FiniteStrainUObasedCP::calcTangentModuli()
 void
 FiniteStrainUObasedCP::elastoPlasticTangentModuli()
 {
-  ElasticityTensorR4 tan_mod;
+  RankFourTensor tan_mod;
   RankTwoTensor pk2fet, fepk2;
   RankFourTensor deedfe, dsigdpk2dfe, dfedf;
 

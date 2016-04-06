@@ -11,7 +11,7 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "RotationTensor.h"
 
 //Forward declaration
@@ -56,15 +56,15 @@ protected:
   MaterialProperty<RankTwoTensor> & _elastic_strain;
 
   std::string _elasticity_tensor_name;
-  MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
+  MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
   /// derivative of stress w.r.t. strain (_dstress_dstrain)
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
   RealVectorValue _Euler_angles;
 
   /// Individual material information
-  ElasticityTensorR4 _Cijkl;
+  RankFourTensor _Cijkl;
 
   /// prefactor function to multiply the elasticity tensor with
   Function * const _prefactor_function;
