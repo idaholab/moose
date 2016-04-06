@@ -10,6 +10,7 @@
 #define COSSERATLINEARELASTICMATERIAL_H
 
 #include "TensorMechanicsMaterial.h"
+#include "Function.h"
 
 /**
  * CosseratLinearElasticMaterial handles a fully anisotropic, single-crystal material's elastic
@@ -61,6 +62,10 @@ private:
 
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;
+
+protected:
+  ElasticityTensorR4 _Cijkl;
+  Function * const _prefactor_function;
 };
 
 #endif //COSSERATLINEARELASTICMATERIAL_H

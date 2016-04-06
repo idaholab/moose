@@ -18,10 +18,12 @@ template<>
 InputParameters validParams<LinearElasticMaterial>()
 {
   InputParameters params = validParams<TensorMechanicsMaterial>();
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
   params.addParam<Real>("T0", 300, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("T", 300, "Temperature in Kelvin");
   params.addParam<std::vector<Real> >("applied_strain_vector", "Applied strain: e11, e22, e33, e23, e13, e12");
+  params.addParam<FunctionName>("elasticity_tensor_prefactor", "Optional function to use as a scalar prefactor on the elasticity tensor.");
   return params;
 }
 
@@ -30,7 +32,9 @@ LinearElasticMaterial::LinearElasticMaterial(const InputParameters & parameters)
     _T(coupledValue("T")),
     _T0(getParam<Real>("T0")),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
+    _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector")),
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
   //Initialize applied strain tensor from input vector
   if (_applied_strain_vector.size() == 6)
@@ -63,6 +67,20 @@ LinearElasticMaterial::computeQpStress()
 
   // stress = C * e
   _stress[_qp] = _elasticity_tensor[_qp] * _elastic_strain[_qp];
+}
+
+void
+LinearElasticMaterial::computeQpElasticityTensor()
+{
+  // Fill in the matrix stiffness material property
+  RotationTensor R(_Euler_angles); // R type: RealTensorValue
+  _elasticity_tensor[_qp] = _Cijkl;
+
+  if (_prefactor_function)
+    _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
+
+  _elasticity_tensor[_qp].rotate(R);
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }
 
 RankTwoTensor
