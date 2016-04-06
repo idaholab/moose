@@ -464,93 +464,106 @@ GrainTracker::trackGrains()
    * If it's the first time through this routine for the simulation, we will generate the unique grain
    * numbers using a simple counter.  These will be the unique grain numbers that we must track for
    * the remainder of the simulation.
+   *
+   * If we are linked to the EBSD Reader, we'll get the numbering information from its data
+   * rather than generating our own.
    */
   if (_t_step == _tracking_step)   // Start tracking when the time_step == the tracking_step
   {
     if (_ebsd_reader)
     {
-//      Real grain_num = _ebsd_reader->getGrainNum();
-//
-//      std::vector<Point> center_points(grain_num);
-//
-//      for (unsigned int gr=0; gr < grain_num; ++gr)
-//      {
-//        const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
-//        center_points[gr] = d._p;
-//
-//        Moose::out << "EBSD Grain " << gr << " " << center_points[gr] << '\n';
-//      }
-//
-//      // To find the minimum distance we will use the boundingRegionDistance routine.
-//      // To do that, we need to build BoundingSphereObjects with a few dummy values, radius and node_id will be ignored
-//      BoundingSphereInfo ebsd_sphere(0, Point(0, 0, 0), 1);
-//      std::vector<BoundingSphereInfo *> ebsd_vector(1);
-//      ebsd_vector[0] = &ebsd_sphere;
-//
-//      std::set<unsigned int> used_indices;
-//      std::map<unsigned int, unsigned int> error_indices;
-//
-//      if (grain_num != new_grains.size() && processor_id() == 0)
-//        mooseWarning("Mismatch:\nEBSD centers: " << grain_num << " Grain Tracker Centers: " << new_grains.size());
-//
-//      unsigned int next_index = grain_num;
+      Real grain_num = _ebsd_reader->getGrainNum();
+
+      std::vector<Point> center_points(grain_num);
+
+      for (unsigned int gr = 0; gr < grain_num; ++gr)
+      {
+        const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
+        center_points[gr] = d._p;
+
+        Moose::out << "EBSD Grain " << gr << " " << center_points[gr] << '\n';
+      }
+
+      // To find the minimum distance we will use the boundingRegionDistance routine.
+      std::vector<MeshTools::BoundingBox> ebsd_vector(1);
+
+      std::set<unsigned int> used_indices;
+      std::map<unsigned int, unsigned int> error_indices;
+
+      unsigned int total_grains = 0;
+      for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+        total_grains += _feature_sets[map_num].size();
+
+      if (grain_num != total_grains && processor_id() == 0)
+        mooseWarning("Mismatch:\nEBSD centers: " << grain_num << " Grain Tracker Centers: " << total_grains);
+
+      unsigned int next_index = grain_num;
+
+      // Loop over all of the features (grains)
+      for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+        for (unsigned int feature_num = 0; feature_num < _feature_sets[map_num].size(); ++feature_num)
+        {
+
 //      for (unsigned int i = 0; i < new_grains.size(); ++i)
 //      {
-//        Real min_centroid_diff = std::numeric_limits<Real>::max();
-//        unsigned int closest_match_idx = 0;
-//
-//        //Point center_of_mass = centerOfMass(*new_grains[i]);
-//
-//        for (unsigned int j = 0; j<center_points.size(); ++j)
-//        {
-//          // Update the ebsd sphere to be used in the boundingRegionDistance calculation
-//          ebsd_sphere.b_sphere.center() = center_points[j];
-//
-//          Real curr_centroid_diff = boundingRegionDistance(ebsd_vector, new_grains[i]->sphere_ptrs, true);
-//          //Real curr_centroid_diff = (center_points[j] - center_of_mass).size();
-//          if (curr_centroid_diff <= min_centroid_diff)
-//          {
-//            closest_match_idx = j;
-//            min_centroid_diff = curr_centroid_diff;
-//          }
-//        }
-//
-//        if (used_indices.find(closest_match_idx) != used_indices.end())
-//        {
-//          Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
-//                     << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-//          _unique_grains[next_index] = new_grains[i];
-//
-//          _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
-//
-//          ++next_index;
-//        }
-//        else
-//        {
-//          Moose::out << "Assigning center " << closest_match_idx << " "
-//                     << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-//          _unique_grains[closest_match_idx] = new_grains[i];
-//
-//          _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
-//
-//          used_indices.insert(closest_match_idx);
-//        }
-//      }
-//      if (!error_indices.empty())
-//      {
-//        for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
-//          Moose::out << "Grain " << grain_it->first << ": " << center_points[grain_it->first] << '\n';
-//
-//        Moose::out << "Error Indices:\n";
-//        for (std::map<unsigned int, unsigned int>::const_iterator it = error_indices.begin(); it != error_indices.end(); ++it)
-//          Moose::out << "Grain " << it->first << '(' << it->second << ')' << ": " << center_points[it->second] << '\n';
-//
-//        mooseError("Error with ESBD Mapping (see above unused indices)");
-//      }
-//
-//      print();
+          Real min_centroid_diff = std::numeric_limits<Real>::max();
+          unsigned int closest_match_idx = 0;
+
+        //Point center_of_mass = centerOfMass(*new_grains[i]);
+
+          for (unsigned int j = 0; j < center_points.size(); ++j)
+          {
+            // Update the ebsd bbox data to be used in the boundingRegionDistance calculation
+            // Since we are using centroid matching we'll just make it easy and set both the min/max of the box to the same
+            // value (i.e. a zero sized box).
+            ebsd_vector[0].min() = ebsd_vector[0].max() = center_points[j];
+
+            Real curr_centroid_diff = boundingRegionDistance(ebsd_vector, _feature_sets[map_num][feature_num]->_bboxes, true);
+            //Real curr_centroid_diff = (center_points[j] - center_of_mass).size();
+            if (curr_centroid_diff <= min_centroid_diff)
+            {
+              closest_match_idx = j;
+              min_centroid_diff = curr_centroid_diff;
+            }
+          }
+
+          if (used_indices.find(closest_match_idx) != used_indices.end())
+          {
+            Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
+                       << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+            _unique_grains[next_index] = _feature_sets[map_num][feature_num];
+
+            _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
+
+            ++next_index;
+          }
+          else
+          {
+            Moose::out << "Assigning center " << closest_match_idx << " "
+                       << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+            _unique_grains[closest_match_idx] = _feature_sets[map_num][feature_num];
+
+            _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
+
+            used_indices.insert(closest_match_idx);
+          }
+        }
+
+      if (!error_indices.empty())
+      {
+        for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::const_iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
+          Moose::out << "Grain " << grain_it->first << ": " << center_points[grain_it->first] << '\n';
+
+        Moose::out << "Error Indices:\n";
+        for (std::map<unsigned int, unsigned int>::const_iterator it = error_indices.begin(); it != error_indices.end(); ++it)
+          Moose::out << "Grain " << it->first << '(' << it->second << ')' << ": " << center_points[it->second] << '\n';
+
+        mooseError("Error with ESBD Mapping (see above unused indices)");
+      }
+
+      print();
     }
-    else
+    else // Just assign IDs in order
     {
       unsigned int counter = 0;
       for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)

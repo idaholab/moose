@@ -83,7 +83,7 @@
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
