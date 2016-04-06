@@ -645,6 +645,8 @@ SolutionUserObject::evalMeshFunction(const Point & p, std::string var_name, unsi
 
   // Extract the variable index for the MeshFunction(s), must use iterator b/c of const
   std::map<std::string, unsigned int>::const_iterator it = _local_variable_index.find(var_name);
+  if (it == _local_variable_index.end())
+    mooseError("Value requested for nonexistant variable '" << var_name << "' in the '" << name() << "' SolutionUserObject");
 
   // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
   if (output.size() == 0)
