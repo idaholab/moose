@@ -54,13 +54,29 @@ public:
   virtual void timestepSetup();
 
   /**
+   * Returns the local index for a given variable name
+   * @param var_name The name of the variable for which the index is located
+   * @return The local index of the variable
+   */
+  unsigned int getLocalVarIndex(const std::string & var_name) const;
+
+  /**
    * Returns a value at a specific location and variable (see SolutionFunction)
    * @param t The time at which to extract (not used, it is handled automatically when reading the data)
    * @param p The location at which to return a value
-   * @param var_name The variable that is desired
+   * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
   virtual Real pointValue(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns a value at a specific location and variable (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param local_var_index The local index of the variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  virtual Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
 
   /**
    * Return a value directly from a Node
@@ -140,10 +156,10 @@ protected:
   /**
    * A wrapper method for calling the various MeshFunctions used for reading the data
    * @param p The location at which data is desired
-   * @param var_name The variable name to extract data from
+   * @param local_var_index The local index of the variable to extract data from
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
-  Real evalMeshFunction(const Point & p, std::string var_name, unsigned int func_num) const;
+  Real evalMeshFunction(const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
 
   /// File type to read (0 = xda; 1 = ExodusII)
   MooseEnum _file_type;

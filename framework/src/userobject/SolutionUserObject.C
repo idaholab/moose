@@ -575,9 +575,25 @@ SolutionUserObject::updateExodusBracketingTimeIndices(Real time)
   return indices_modified;
 }
 
+unsigned int
+SolutionUserObject::getLocalVarIndex(const std::string & var_name) const
+{
+  // Extract the variable index for the MeshFunction(s)
+  std::map<std::string, unsigned int>::const_iterator it = _local_variable_index.find(var_name);
+  if (it == _local_variable_index.end())
+    mooseError("Value requested for nonexistent variable '" << var_name << "' in the '" << name() << "' SolutionUserObject");
+  return it->second;
+}
 
 Real
 SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_name) const
+{
+  const unsigned int local_var_index = getLocalVarIndex(var_name);
+  return pointValue(t, p, local_var_index);
+}
+
+Real
+SolutionUserObject::pointValue(Real t, const Point & p, const unsigned int local_var_index) const
 {
   // Create copy of point
   Point pt(p);
@@ -601,13 +617,13 @@ SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_
   }
 
   // Extract the value at the current point
-  Real val = evalMeshFunction(pt, var_name, 1);
+  Real val = evalMeshFunction(pt, local_var_index, 1);
 
   // Interpolate
   if (_file_type == 1 && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
-    Real val2 = evalMeshFunction(pt, var_name, 2);
+    Real val2 = evalMeshFunction(pt, local_var_index, 2);
     val = val + (val2 - val)*_interpolation_factor;
   }
 
@@ -627,7 +643,7 @@ SolutionUserObject::directValue(dof_id_type dof_index) const
 }
 
 Real
-SolutionUserObject::evalMeshFunction(const Point & p, std::string var_name, unsigned int func_num) const
+SolutionUserObject::evalMeshFunction(const Point & p, const unsigned int local_var_index, unsigned int func_num) const
 {
   // Storage for mesh function output
   DenseVector<Number> output;
@@ -643,19 +659,14 @@ SolutionUserObject::evalMeshFunction(const Point & p, std::string var_name, unsi
   else
     mooseError("The func_num must be 1 or 2");
 
-  // Extract the variable index for the MeshFunction(s), must use iterator b/c of const
-  std::map<std::string, unsigned int>::const_iterator it = _local_variable_index.find(var_name);
-  if (it == _local_variable_index.end())
-    mooseError("Value requested for nonexistant variable '" << var_name << "' in the '" << name() << "' SolutionUserObject");
-
   // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
   if (output.size() == 0)
   {
     std::ostringstream oss;
     p.print(oss);
-    mooseError("Failed to access the data for variable '"<< var_name << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
   }
-  return output(it->second);
+  return output(local_var_index);
 }
 
 const std::vector<std::string> &
