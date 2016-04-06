@@ -74,9 +74,9 @@ do
     fi
 
 # Generate interface pressure data using BLOT
-    blot --device met --input blot_splot.inp ${base}.e > ${logfile} 2>&1
+    blot --device cps --input blot_splot.inp ${base}.e > ${logfile} 2>&1
     cd gold
-    blot --device met --input ../blot_splot.inp ${base}.e >> ../${logfile} 2>&1
+    blot --device cps --input ../blot_splot.inp ${base}.e >> ../${logfile} 2>&1
     perl -i -ple 's/^@/#@/g' ${datfile2}
     perl -i -ple 's/^&/#&/g' ${datfile2}
     cd ..
