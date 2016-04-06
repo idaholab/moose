@@ -26,10 +26,6 @@ ifeq ($(ALL_MODULES),yes)
         XFEM                      := yes
 endif
 
-ifeq ($(PHASE_FIELD),yes)
-        TENSOR_MECHANICS          := yes
-endif
-
 ifeq ($(SOLID_MECHANICS),yes)
         TENSOR_MECHANICS          := yes
 endif
@@ -117,7 +113,7 @@ endif
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
-  
+
   #Dependency on tensor mechanics
   DEPEND_MODULES     := tensor_mechanics
   include $(FRAMEWORK_DIR)/app.mk
