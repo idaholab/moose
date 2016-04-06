@@ -41,6 +41,8 @@
 #include "KKSACBulkC.h"
 #include "KKSACBulkF.h"
 #include "KKSCHBulk.h"
+#include "KKSMultiACBulkC.h"
+#include "KKSMultiACBulkF.h"
 #include "KKSMultiPhaseConcentration.h"
 #include "KKSPhaseChemicalPotential.h"
 #include "KKSPhaseConcentration.h"
@@ -292,6 +294,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(KKSACBulkC);
   registerKernel(KKSACBulkF);
   registerKernel(KKSCHBulk);
+  registerKernel(KKSMultiACBulkC);
+  registerKernel(KKSMultiACBulkF);
   registerKernel(KKSMultiPhaseConcentration);
   registerKernel(KKSPhaseChemicalPotential);
   registerKernel(KKSPhaseConcentration);
