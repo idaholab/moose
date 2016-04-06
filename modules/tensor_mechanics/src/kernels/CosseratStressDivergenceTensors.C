@@ -8,6 +8,7 @@
 #include "CosseratStressDivergenceTensors.h"
 #include "Material.h"
 #include "RankFourTensor.h"
+#include "ElasticityTensorTools.h"
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
@@ -43,8 +44,7 @@ CosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
+    return ElasticityTensorTools::elasticJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
 
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
 }
-

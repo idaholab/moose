@@ -8,6 +8,7 @@
 
 #include "Material.h"
 #include "RankFourTensor.h"
+#include "ElasticityTensorTools.h"
 #include "RankTwoTensor.h"
 
 template<>
@@ -54,7 +55,7 @@ MomentBalancing::computeQpResidual()
 Real
 MomentBalancing::computeQpJacobian()
 {
-  return _Jacobian_mult[_qp].momentJacobianwc(_component, _component, _test[_i][_qp], _phi[_j][_qp]);
+  return ElasticityTensorTools::momentJacobianWC(_Jacobian_mult[_qp], _component, _component, _test[_i][_qp], _phi[_j][_qp]);
 }
 
 Real
@@ -71,7 +72,7 @@ MomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].momentJacobian(_component, coupled_component, _test[_i][_qp], _grad_phi[_j][_qp]);
+    return ElasticityTensorTools::momentJacobian(_Jacobian_mult[_qp], _component, coupled_component, _test[_i][_qp], _grad_phi[_j][_qp]);
 
   // What does 2D look like here?
   if (jvar == _wc_x_var)
@@ -82,7 +83,7 @@ MomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].momentJacobianwc(_component, coupled_component, _test[_i][_qp], _phi[_j][_qp]);
+    return ElasticityTensorTools::momentJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _test[_i][_qp], _phi[_j][_qp]);
 
   return 0;
 }
