@@ -53,7 +53,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
-    skip = 'Issue 6528'
+    skip = 'Waiting for damper changes.'
   [../]
   [./mu_1_0_kin]
     type = 'CSVDiff'
@@ -63,6 +63,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
+    max_time = 1000
     superlu = true
   [../]
 []
