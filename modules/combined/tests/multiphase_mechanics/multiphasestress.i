@@ -66,39 +66,81 @@
 []
 
 [Materials]
-  [./Anisotropic_A]
-    # this material is deprecated
-    type = LinearElasticMaterial
-    base_name = A
+  [./elasticity_tensor_A]
+    type = ComputeElasticityTensor
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
+    base_name = A
     fill_method = symmetric9
     C_ijkl = '1e6 1e5 1e5 1e6 0 1e6 .4e6 .2e6 .5e6'
-    applied_strain_vector = '0.1 0.05 0 0 0 0.01'
   [../]
-  [./Anisotropic_B]
-    # this material is deprecated
-    type = LinearElasticMaterial
+  [./strain_A]
+    type = ComputeSmallStrain
+    block = 0
+    base_name = A
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress_A]
+    type = ComputeLinearElasticStress
+    base_name = A
+  [../]
+  [./eigenstrain_A]
+    type = ComputeEigenstrain
+    block = 0
+    base_name = A
+    eigen_base = '0.1 0.05 0 0 0 0.01'
+    prefactor = -1
+  [../]
+
+  [./elasticity_tensor_B]
+    type = ComputeElasticityTensor
+    block = 0
     base_name = B
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
     fill_method = symmetric9
-    C_ijkl = '1e6 0 0 1e6 0 1.1e6 .5e6 .5e6 .5e6'
-    applied_strain_vector = '0.1 0.05 0 0 0 0.01'
+    C_ijkl = '1e6 0 0 1e6 0 1e6 .5e6 .5e6 .5e6'
   [../]
-  [./Anisotropic_C]
-    # this material is deprecated
-    type = LinearElasticMaterial
-    base_name = C
+  [./strain_B]
+    type = ComputeSmallStrain
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
+    base_name = B
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress_B]
+    type = ComputeLinearElasticStress
+    base_name = B
+  [../]
+  [./eigenstrain_B]
+    type = ComputeEigenstrain
+    block = 0
+    base_name = B
+    eigen_base = '0.1 0.05 0 0 0 0.01'
+    prefactor = -1
+  [../]
+
+  [./elasticity_tensor_C]
+    type = ComputeElasticityTensor
+    block = 0
+    base_name = C
     fill_method = symmetric9
     C_ijkl = '1.1e6 1e5 0 1e6 0 1e6 .5e6 .2e6 .5e6'
-    applied_strain_vector = '0.1 0.05 0 0 0 0.01'
   [../]
+  [./strain_C]
+    type = ComputeSmallStrain
+    block = 0
+    base_name = C
+    displacements = 'disp_x disp_y'
+  [../]
+  [./stress_C]
+    type = ComputeLinearElasticStress
+    base_name = C
+  [../]
+  [./eigenstrain_C]
+    type = ComputeEigenstrain
+    block = 0
+    base_name = C
+    eigen_base = '0.1 0.05 0 0 0 0.01'
+    prefactor = -1
+  [../]
+
 
   [./switching_A]
     type = SwitchingFunctionMaterial
@@ -124,7 +166,6 @@
     block = 0
     phase_base = 'A  B  C'
     h          = 'h1 h2 h3'
-    #outputs = exodus
   [../]
 []
 
