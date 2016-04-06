@@ -12,40 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PointerLoadError.h"
+#ifndef BACKUP_H
+#define BACKUP_H
 
-template<>
-InputParameters validParams<PointerLoadError>()
+// C++ includes
+#include <sstream>
+#include <list>
+#include <vector>
+
+/**
+ * Helper class to hold streams for Backup and Restore operations.
+ */
+class Backup
 {
-  InputParameters params = validParams<GeneralUserObject>();
-  return params;
-}
+public:
+  Backup();
 
+  ~Backup();
 
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<TypeWithNoLoad *>("pointer_data"))
-{
-  _pointer_data = new TypeWithNoLoad;
-  _pointer_data->_i = 1;
-}
+  std::stringstream _system_data;
 
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
+  std::vector<std::stringstream*> _restartable_data;
+};
 
-void PointerLoadError::initialSetup()
-{
-  _pointer_data->_i = 2;
-}
+// Specializations for dataLoad and dataStore appear in DataIO.C
 
-void PointerLoadError::timestepSetup()
-{
-  _pointer_data->_i += 1;
-}
-
-void
-PointerLoadError::execute()
-{
-}
+#endif /* BACKUP_H */

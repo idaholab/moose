@@ -12,40 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PointerLoadError.h"
+// MOOSE includes
+#include "Backup.h"
+#include "RestartableData.h"
 
-template<>
-InputParameters validParams<PointerLoadError>()
+#include "libmesh/parallel.h"
+
+
+// Backup Definitions
+Backup::Backup()
 {
-  InputParameters params = validParams<GeneralUserObject>();
-  return params;
+  unsigned int n_threads = libMesh::n_threads();
+
+  _restartable_data.resize(n_threads);
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _restartable_data[i] = new std::stringstream;
 }
 
-
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<TypeWithNoLoad *>("pointer_data"))
+Backup::~Backup()
 {
-  _pointer_data = new TypeWithNoLoad;
-  _pointer_data->_i = 1;
-}
+  unsigned int n_threads = libMesh::n_threads();
 
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
-
-void PointerLoadError::initialSetup()
-{
-  _pointer_data->_i = 2;
-}
-
-void PointerLoadError::timestepSetup()
-{
-  _pointer_data->_i += 1;
-}
-
-void
-PointerLoadError::execute()
-{
+  for (unsigned int i = 0; i < n_threads; ++i)
+    delete _restartable_data[i];
 }
