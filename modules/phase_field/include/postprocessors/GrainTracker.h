@@ -83,13 +83,6 @@ public:
   virtual Real getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
 
   /**
-   * Accessor for retrieving elemental field data (grain centroids).
-   * @param element_id the element identifier for which to retrieve field data
-   * @return the elemental value
-   */
-  virtual Real getElementalValue(dof_id_type element_id) const;
-
-  /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
    * holds the ith node with the inner vector holds the list of active unique grains.
    * (unique_grain_id, variable_idx)
@@ -135,8 +128,6 @@ protected:
    */
   Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2, bool use_centroids_only) const;
 
-  Point centerOfMass(UniqueGrain & grain) const;
-
   void expandHalos();
 
   /**
@@ -150,9 +141,6 @@ protected:
 
   /// The timestep to begin tracking grains
   const int _tracking_step;
-
-  /// The value added to each bounding sphere radius to detect earlier intersection
-  const Real _hull_buffer;
 
   /// The thickness of the halo surrounding each grain
   const unsigned int _halo_level;
@@ -193,8 +181,6 @@ public:
   };
 
   bool _compute_op_maps;
-
-  bool _center_mass_tracking;
 
   /**
    * Data structure for active order parameter information on elements:

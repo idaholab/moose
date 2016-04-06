@@ -58,14 +58,12 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     FeatureFloodCount(parameters),
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
-    _hull_buffer(getParam<Real>("convex_hull_buffer")),
     _halo_level(getParam<unsigned int>("halo_level")),
     _remap(getParam<bool>("remap_grains")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, MooseSharedPointer<FeatureData> > >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : NULL),
-    _compute_op_maps(getParam<bool>("compute_op_maps")),
-    _center_mass_tracking(getParam<bool>("center_of_mass_tracking"))
+    _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
   // Size the data structures to hold the correct number of maps
   _bounding_spheres.resize(_maps_size);
@@ -88,14 +86,6 @@ GrainTracker::getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigne
     return 0;
 
   return FeatureFloodCount::getEntityValue(node_id, field_type, var_idx);
-}
-
-Real
-GrainTracker::getElementalValue(dof_id_type element_id) const
-{
-  mooseDoOnce(mooseWarning("Method not implemented"));
-
-  return 0;
 }
 
 void

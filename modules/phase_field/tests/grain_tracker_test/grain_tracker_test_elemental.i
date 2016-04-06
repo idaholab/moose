@@ -42,10 +42,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./centroids]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Kernels]
@@ -61,23 +57,14 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
-  [./centroids]
-    type = FeatureFloodCountAux
-    variable = centroids
-    execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
-    field_display = CENTROID
   [../]
 []
 
@@ -105,11 +92,6 @@
 [Postprocessors]
   [./grain_tracker]
     type = GrainTracker
-    convex_hull_buffer = 5.0
-    execute_on = 'initial timestep_end'
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
     flood_entity_type = ELEMENTAL
     bubble_volume_file = grain_volumes.csv
   [../]

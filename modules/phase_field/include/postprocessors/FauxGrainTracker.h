@@ -38,15 +38,6 @@ public:
   virtual void execute();
 
   /**
-   * Accessor for retrieving nodal field information (unique grains or variable indices)
-   * @param node_id the node identifier for which to retrieve field data
-   * @param var_idx when using multi-map mode, the map number from which to retrieve data.
-   * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
-   * @return the nodal value
-   */
-//  virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
-
-  /**
    * Accessor for retrieving either nodal or elemental information (unique grains or variable indicies)
    * @param entity_id the node identifier for which to retrieve field data
    * @param var_idx when using multi-map mode, the map number from which to retrieve data.
@@ -54,13 +45,6 @@ public:
    * @return the entity value
    */
   virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE field_type, unsigned int var_idx) const;
-
-  /**
-   * Accessor for retrieving elemental field data (grain centroids).
-   * @param element_id the element identifier for which to retrieve field data
-   * @return the elemental value
-   */
-  virtual Real getElementalValue(dof_id_type /*element_id*/) const;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector

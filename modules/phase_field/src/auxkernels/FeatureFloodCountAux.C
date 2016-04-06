@@ -15,8 +15,13 @@ InputParameters validParams<FeatureFloodCountAux>()
   params.addClassDescription("Feature detection by connectivity analysis");
   params.addRequiredParam<UserObjectName>("bubble_object", "The FeatureFloodCount UserObject to get values from.");
   params.addParam<unsigned int>("map_index", 0, "The index of which map to retrieve values from when using FeatureFloodCount with multiple maps.");
-  MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING GHOSTED_ENTITIES HALOS ACTIVE_BOUNDS CENTROID", "UNIQUE_REGION");
+  MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING GHOSTED_ENTITIES HALOS ACTIVE_BOUNDS", "UNIQUE_REGION");
   params.addParam<MooseEnum>("field_display", field_display, "Determines how the auxilary field should be colored. (UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is elemental, default: UNIQUE_REGION)");
+
+  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
+  execute_options = "initial timestep_end";
+  params.set<MultiMooseEnum>("execute_on") = execute_options;
+
   return params;
 }
 
@@ -30,9 +35,6 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
 {
   if (isNodal())
   {
-    if (_field_display == "CENTROID")
-      mooseError("CENTROID coloring is only available for elemental aux variables");
-
     if (_field_display == "ACTIVE_BOUNDS")
       mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
 
@@ -56,12 +58,10 @@ FeatureFloodCountAux::computeValue()
   case 0:  // UNIQUE_REGION
   case 1:  // VARIABLE_COLORING
   case 2:  // GHOSTED_ENTITIES
-  case 3:
+  case 3:  // HALOS
     return _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _field_type, _var_idx);
   case 4:  // ACTIVE_BOUNDS
     return _flood_counter.getElementalValues(_current_elem->id()).size();
-  case 5:  // CENTROID
-    return _flood_counter.getElementalValue(_current_elem->id());
   }
 
   return 0;

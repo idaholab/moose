@@ -118,14 +118,12 @@ InputParameters validParams<FeatureFloodCount>()
   params.addRequiredCoupledVar("variable", "The variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
   params.addParam<Real>("threshold", 0.5, "The threshold value for which a new bubble may be started");
   params.addParam<Real>("connecting_threshold", "The threshold for which an existing bubble may be extended (defaults to \"threshold\")");
-  params.addParam<PostprocessorName>("elem_avg_value", "If supplied, will be used to find the scaled threshold of the bubble edges");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
-  params.addParam<bool>("use_global_numbering", false, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: false)");
+  params.addParam<bool>("use_global_numbering", true, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: true)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
   params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether bubbles are defined to be less than or greater than the threshold value.");
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
-  params.addDeprecatedParam<bool>("track_memory_usage", false, "Track memory usage", "This parameter is no longer valid, please remove.");
   params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
 
   MooseEnum flood_type("NODAL ELEMENTAL", "NODAL");
@@ -340,22 +338,6 @@ Real
 FeatureFloodCount::getValue()
 {
   return _feature_count;
-}
-
-Real
-FeatureFloodCount::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
-{
-  mooseDoOnce(mooseWarning("Please call getEntityValue instead"));
-
-  return 0;
-}
-
-Real
-FeatureFloodCount::getElementalValue(dof_id_type /*element_id*/) const
-{
-  mooseDoOnce(mooseWarning("Method not implemented"));
-
-  return 0;
 }
 
 Real
@@ -742,6 +724,10 @@ FeatureFloodCount::updateFieldInfo()
 
       ++feature_number;
     }
+
+    // If the user doesn't want a global numbering, we'll reset the feature_number for each map
+    if (!_global_numbering)
+      feature_number = 0;
   }
 
   mooseAssert(_feature_count == feature_number, "feature_number does not agree with previously calculated _feature_count");

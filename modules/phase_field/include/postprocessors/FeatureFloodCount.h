@@ -49,7 +49,6 @@ public:
 
   virtual void initialize();
   virtual void execute();
-//  virtual void threadJoin(const UserObject & y);
   virtual void finalize();
   virtual Real getValue();
 
@@ -64,9 +63,6 @@ public:
   };
 
   // Retrieve field information
-  virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
-  virtual Real getElementalValue(dof_id_type element_id) const;
-
   virtual Real getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
 
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
