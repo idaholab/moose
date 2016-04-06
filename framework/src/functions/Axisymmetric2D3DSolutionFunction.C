@@ -109,6 +109,10 @@ Axisymmetric2D3DSolutionFunction::initialSetup()
     mooseError("3rd component of 2d_axis_point1 must be zero");
   if (_2d_axis_point2(2) != 0)
     mooseError("3rd component of 2d_axis_point2 must be zero");
+
+  _solution_object_var_indices.resize(_var_names.size());
+  for (unsigned int i = 0; i < _var_names.size(); ++i)
+    _solution_object_var_indices[i] = _solution_object_ptr->getLocalVarIndex(_var_names[i]);
 }
 
 Real
@@ -165,8 +169,8 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
   Real val;
   if (_has_component)
   {
-    Real val_x = _solution_object_ptr->pointValue(t, xypoint, _var_names[0]);
-    Real val_y = _solution_object_ptr->pointValue(t, xypoint, _var_names[1]);
+    Real val_x = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[0]);
+    Real val_y = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[1]);
 
     // val_vec_rz contains the value vector converted from x,y to r,z coordinates
     Point val_vec_rz;
@@ -179,7 +183,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     val = val_vec_3d(_component);
   }
   else
-    val = _solution_object_ptr->pointValue(t, xypoint, _var_names[0]);
+    val = _solution_object_ptr->pointValue(t, xypoint, _solution_object_var_indices[0]);
 
   return _scale_factor * val + _add_factor;
 }

@@ -63,8 +63,8 @@ protected:
   /// Pointer to SolutionUserObject containing the solution of interest
   const SolutionUserObject * _solution_object_ptr;
 
-  /// The variable name to extract from the file
-  std::string _var_name;
+  /// The local SolutionUserObject index for the variable extracted from the file
+  unsigned int _solution_object_var_index;
 
   /// Factor to scale the solution by (default = 1)
   const Real _scale_factor;

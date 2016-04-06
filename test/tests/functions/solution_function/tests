@@ -54,11 +54,11 @@
     exodiff = 'solution_function_scale_mult.e'
     mesh_mode = SERIAL
   [../]
-  [./nonexistant_var_err]
+  [./nonexistent_var_err]
     type = 'RunException'
     input = 'solution_function_rot1.i'
-    cli_args = 'Functions/solution_fcn/from_variable=nonexistant_var'
-    expect_err = "Value requested for nonexistant variable 'nonexistant_var' in the 'solution_uo' SolutionUserObject"
+    cli_args = 'Functions/solution_fcn/from_variable=nonexistent_var'
+    expect_err = "Value requested for nonexistent variable 'nonexistent_var' in the 'solution_uo' SolutionUserObject"
     mesh_mode = SERIAL
   [../]
 []

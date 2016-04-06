@@ -100,6 +100,9 @@ protected:
 
   /// The variable names to extract from the file
   std::vector<std::string> _var_names;
+
+  /// The local SolutionUserObject indices for the variables extracted from the file
+  std::vector<unsigned int> _solution_object_var_indices;
 };
 
 #endif //AXISYMMETRIC2D3DSOLUTIONFUNCTION_H
