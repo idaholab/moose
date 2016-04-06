@@ -96,9 +96,6 @@ public:
    */
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
-  // Debugging routine used for printing grain data structure information
-  void print();
-
   /// This struct holds the nodesets and bounding spheres for each flooded region.
   struct BoundingSphereInfo;
 
@@ -108,12 +105,6 @@ public:
 protected:
   /// This routine is called at the of finalize to update the field data
   virtual void updateFieldInfo();
-
-  /**
-   * This method uses the bubble sets to build bounding spheres around each cluster of nodes.  In this class it will be called before periodic
-   * information has been added so that each bubble piece will have a unique sphere.  It populates the _bounding_spheres vector.
-   */
-  void buildBoundingSpheres();
 
   /**
    * This method first finds all of the bounding spheres from the _bounding_spheres vector that belong to the same bubble by using the
@@ -200,23 +191,6 @@ public:
     unsigned int member_node_id;
     libMesh::Sphere b_sphere;
   };
-
-  /// This struct hold the information necessary to identify and track a unique grain;
-//  struct UniqueGrain : public FeatureData
-//  {
-//    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<dof_id_type> *nodes_pt, STATUS status);
-//    ~UniqueGrain();
-//
-//    unsigned int variable_idx;
-//    std::vector<BoundingSphereInfo *> sphere_ptrs;
-//    STATUS status;
-//    /**
-//     * Pointer to the actual nodes ids.  Note: This pointer is not always valid.  It is invalid
-//     * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
-//     * avoid making unnecessary copies of the set when we don't need it.
-//     */
-//    const std::set<dof_id_type> *entities_ptr;
-//  };
 
   bool _compute_op_maps;
 

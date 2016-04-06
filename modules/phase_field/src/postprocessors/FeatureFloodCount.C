@@ -22,9 +22,6 @@
 #include <algorithm>
 #include <limits>
 
-#include <unistd.h> // sleep
-
-
 /**
  * index sort functor
  */
@@ -192,7 +189,6 @@ FeatureFloodCount::initialize()
   {
     _feature_maps[map_num].clear();
     _feature_sets[map_num].clear();
-//    _region_counts[map_num] = 0;
 
     if (_var_index_mode)
       _var_index_maps[map_num].clear();
@@ -201,9 +197,6 @@ FeatureFloodCount::initialize()
   // TODO: use iterator
   for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
     _entities_visited[var_num].clear();
-
-  // Reset the ownership structure
-//  _region_to_var_idx.clear();
 
   // Build a new node to element map
   _nodes_to_elem_map.clear();
@@ -254,10 +247,6 @@ FeatureFloodCount::execute()
 
 void FeatureFloodCount::communicateAndMerge()
 {
-  // First we need to finalize our ghosted elems data structure
-  // TODO: We don't really need to do this, we can do better...
-//  _communicator.set_union(_ghosted_entity_ids);
-
   // First we need to transform the raw data into a usable data structure
   populateDataStructuresFromFloodData();
 
@@ -266,9 +255,6 @@ void FeatureFloodCount::communicateAndMerge()
    * Begin Parallel Communication Section
    *********************************************************************************
    *********************************************************************************/
-
-  // The processor local byte buffer
-//  std::string serialized_buffer;
 
   /**
    * The libMesh packed range routines handle the communication of the individual
@@ -325,9 +311,6 @@ FeatureFloodCount::finalize()
   // Populate _feature_maps and _var_index_maps
   updateFieldInfo();
 
-//  // Update the region offsets so we can get unique bubble numbers in multimap mode
-//  updateRegionOffsets();
-
   // Calculate and out output bubble volume data
   if (_pars.isParamValid("bubble_volume_file"))
   {
@@ -379,7 +362,6 @@ Real
 FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx) const
 {
   mooseAssert(var_idx < _maps_size, "Index out of range");
-//  mooseAssert(!show_var_coloring || _var_index_mode, "Cannot use \"show_var_coloring\" without \"enable_var_coloring\"");
 
   switch (field_type)
   {
@@ -480,96 +462,15 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
         appendPeriodicNeighborNodes(feature);
       }
 
-
-//  _partial_feature_sets[rank].clear();
-//  _partial_feature_sets[rank].resize(_maps_size);
-//
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//  {
-//    // Destroy any existing data
-//    _partial_feature_sets[rank][map_num].clear();
-//
-//    // Resize the inner vector for the number of local flooded regions
-//    _partial_feature_sets[rank][map_num].resize(_region_counts[map_num]);
-//
-//    /**
-//     * Transform the flooded regions into feature sets
-//     *
-//     * map of entity_id to feature_num  -->  map_num [ feature_num [ set of entity_ids ] ]
-//     */
-//    std::map<dof_id_type, int>::const_iterator entity_end = _feature_maps[map_num].end();
-//    for (std::map<dof_id_type, int>::const_iterator entity_it = _feature_maps[map_num].begin(); entity_it != entity_end; ++entity_it)
-//    {
-//      // Local variables for clarity
-//      dof_id_type entity_id = entity_it->first;
-//
-//      // Is this an odd number (ones bit set)?
-//      bool isHaloMarking = (entity_it->second & 1) == 1;
-//
-//      // Divide by two to obtain the feature number
-//      int feature_num = entity_it->second >> 1;
-//
-//      FeatureData & feature = _partial_feature_sets[rank][map_num][feature_num];
-//
-//      if (isHaloMarking)
-//        feature._halo_ids.insert(entity_id);
-//      else
-//      {
-//        /**
-//         * Processors only need enough information to stitch together the regions.
-//         * We'll keep ids on ghosted regions (overlap areas) separate from the
-//         * local ids.
-//         *
-//         * Note: The local ids also include the processor's ghosted nodes. This
-//         * allows us to ignore the ghosted entities when rebuilding the processor's local
-//         * field data as well when determining the set of periodic nodes relevant to
-//         * each processor.
-//         */
-//        if (_ghosted_entity_ids.find(entity_id) != _ghosted_entity_ids.end())
-//          feature._ghosted_ids.insert(entity_id);
-//
-//        // Save all local nodes to the inter
-//        feature._local_ids.insert(entity_id);
-//
-//        // Now retrieve the location of this entity for determining the bounding box region
-//        const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
-//
-//        /**
-//         * Update the bounding box.
-//         *
-//         * Note: There will always be one and only one bbox while we are building up our
-//         * data structures because we haven't started to stitch together any regions yet.
-//         */
-//        feature.updateBBoxMin(feature._bboxes[0], entity_point);
-//        feature.updateBBoxMax(feature._bboxes[0], entity_point);
-//
-//        // Finally save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
-//        feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
-//      }
-//    }
-//
-//    // Populate the remaining feature data structure members.
-//    for (unsigned int feature_num = 0; feature_num < _region_counts[map_num]; ++feature_num)
-//    {
-//      FeatureData & feature = _partial_feature_sets[rank][map_num][feature_num];
-//
-//      // The coupled variable index
-//      feature._var_idx = _single_map_mode ? _region_to_var_idx[feature_num] : map_num;
-//
-//      // Periodic node ids
-//      appendPeriodicNeighborNodes(feature);
-//    }
-//  }
-
 //  // DEBUGGING
-//  std::cout << "*********************************************************************************************\n"
+//  _console  << "*********************************************************************************************\n"
 //            << "BEGIN POPULATE DATA STRUCTURES\n"
 //            << "*********************************************************************************************\n";
 //  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
 //    for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
 //         it != _partial_feature_sets[rank][map_num].end(); ++it)
-//      std::cout << *it;
-//  std::cout << "*********************************************************************************************\n"
+//      _console << *it;
+//  _console  << "*********************************************************************************************\n"
 //            << "END POPULATE DATA STRUCTURES\n"
 //            << "*********************************************************************************************\n";
 //  // DEBUGGING
@@ -621,129 +522,6 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
     // Load the communicated data into all of the other processors' slots
     dataLoad(iss, _partial_feature_sets[rank], this);
   }
-
-//  bool start_next_set = true;
-//  bool has_data_to_save = false;
-//
-//  unsigned int curr_set_length = 0;
-//  std::set<dof_id_type> curr_set;
-//  unsigned int curr_var_idx = std::numeric_limits<unsigned int>::max();
-//
-//  _region_to_var_idx.clear();
-//  for (unsigned int i = 0; i < packed_data.size(); ++i)
-//  {
-//    if (start_next_set)
-//    {
-//      if (has_data_to_save)
-//      {
-//        // See Note at the bottom of this routine
-//        _feature_sets[_single_map_mode ? 0 : curr_var_idx].push_back(FeatureData(curr_set, curr_var_idx));
-//        _region_to_var_idx.push_back(curr_var_idx);
-//        curr_set.clear();
-//      }
-//
-//      // Get the length of the next set
-//      curr_set_length = packed_data[i];
-//      // Also get the owning variable idx.
-//      // Note: We are intentionally advancing "i" here too!
-//      curr_var_idx = packed_data[++i];
-//    }
-//    else
-//    {
-//      // unpack each bubble
-//      curr_set.insert(packed_data[i]);
-//      --curr_set_length;
-//    }
-//
-//    start_next_set = !(curr_set_length);
-//    has_data_to_save = true;
-//  }
-//
-//  /**
-//   * Note: In multi-map mode the var_idx information stored inside of FeatureData is redundant with
-//   * the outer index of the _feature_sets data-structure.  We need this information for single-map
-//   * mode when we have multiple variables coupled in.
-//   */
-//  if (has_data_to_save)
-//  {
-//    _feature_sets[_single_map_mode ? 0 : curr_var_idx].push_back(FeatureData(curr_set, curr_var_idx));
-//    _region_to_var_idx.push_back(curr_var_idx);
-//  }
-//
-//  mooseAssert(curr_set_length == 0, "Error in unpacking data");
-}
-
-void
-FeatureFloodCount::communicateOneList(std::list<FeatureData> & list, unsigned int owner_id, unsigned int map_num)
-{
-//  Moose::perf_log.push("communicateOneList()", "FeatureFloodCount");
-//
-//  mooseAssert(!_single_map_mode, "This routine only works in single map mode");
-//  std::vector<dof_id_type> packed_data;
-//  unsigned int total_size = 0;
-//
-//  if (owner_id == processor_id())
-//  {
-//    // First resize our vector to hold our packed data
-//    for (std::list<FeatureData>::iterator list_it = list.begin(); list_it != list.end(); ++list_it)
-//      total_size += list_it->_ghosted_ids.size() + 1; // The +1 is for the markers between individual sets
-//    packed_data.resize(total_size);
-//
-//    // Now fill in the packed_data data structure
-//    unsigned int counter = 0;
-//    for (std::list<FeatureData>::iterator list_it = list.begin(); list_it != list.end(); ++list_it)
-//    {
-//      packed_data[counter++] = list_it->_ghosted_ids.size();
-//      for (std::set<dof_id_type>::iterator set_it = list_it->_ghosted_ids.begin(); set_it != list_it->_ghosted_ids.end(); ++set_it)
-//        packed_data[counter++] = *set_it;
-//    }
-//  }
-//
-//  _communicator.broadcast(total_size, owner_id);
-//  packed_data.resize(total_size);
-//  _communicator.broadcast(packed_data, owner_id);
-//
-//  // Unpack
-//  if (owner_id != processor_id())
-//  {
-//    list.clear();
-//
-//    bool start_next_set = true;
-//    bool has_data_to_save = false;
-//
-//    unsigned int curr_set_length = 0;
-//    std::set<dof_id_type> curr_set;
-//
-//    for (unsigned int i = 0; i < packed_data.size(); ++i)
-//    {
-//      if (start_next_set)
-//      {
-//        if (has_data_to_save)
-//        {
-//          list.push_back(FeatureData(curr_set, map_num)); // map_num == var_idx in multi_map mode
-//          curr_set.clear();
-//        }
-//
-//        // Get the length of the next set
-//        curr_set_length = packed_data[i];
-//      }
-//      else
-//      {
-//        // unpack each bubble
-//        curr_set.insert(packed_data[i]);
-//        --curr_set_length;
-//      }
-//
-//      start_next_set = !(curr_set_length);
-//      has_data_to_save = true;
-//    }
-//
-//    if (has_data_to_save)
-//      list.push_back(FeatureData(curr_set, map_num)); // map_num == var_idx in multi_map mode
-//
-//    mooseAssert(curr_set_length == 0, "Error in unpacking data");
-//  }
-//  Moose::perf_log.pop("communicateOneList()", "FeatureFloodCount");
 }
 
 void
@@ -756,15 +534,15 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   processor_id_type n_procs = _app.n_processors();
 
 //  // DEBUGGING
-//  std::cout << "*********************************************************************************************\n"
+//  _console << "*********************************************************************************************\n"
 //            << "BEGIN BEFORE MERGE\n"
 //            << "*********************************************************************************************\n";
 //  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
 //    for (processor_id_type rank = 0; rank < n_procs; ++rank)
 //      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
 //           it != _partial_feature_sets[rank][map_num].end(); ++it)
-//        std::cout << *it;
-//  std::cout << "*********************************************************************************************\n"
+//        _console << *it;
+//  _console << "*********************************************************************************************\n"
 //            << "END BEFORE MERGE\n"
 //            << "*********************************************************************************************\n";
 //  // DEBUGGING
@@ -777,8 +555,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
       for (processor_id_type rank2 = 0; rank2 < n_procs; ++rank2)
       {
-//        if (rank1 == rank2 && n_procs > 1)
-//          continue;
         for (std::vector<FeatureData>::iterator it1 = _partial_feature_sets[rank1][map_num].begin();
              it1 != _partial_feature_sets[rank1][map_num].end(); /* no increment ++it1 */)
         {
@@ -791,11 +567,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
           bool region_merged = false;
           for (std::vector<FeatureData>::iterator it2 = _partial_feature_sets[rank2][map_num].begin(); it2 != _partial_feature_sets[rank2][map_num].end(); ++it2)
           {
-//            if (map_num == 5)
-//            {
-//              std::cout << "Trying to merge:\n" << *it1 << " AND\n" << *it2;
-//            }
-
             bool pb_intersect = false;
             if (it1 != it2 &&                                                                // Make sure that these iterators aren't pointing at the same set
                 !it2->_merged &&                                                             // and that it2 is not merged (it1 was already checked)
@@ -828,9 +599,9 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
               bool physical_intersection = (it1->_ghosted_ids.size() + it2->_ghosted_ids.size() > set_union.size());
 
 //              // DEBUGGING
-//              std::cout << "Var idx: " << it1->_var_idx << ": merging " << it1->_min_entity_id << " and " << it2->_min_entity_id << " due to "
+//              _console << "Var idx: " << it1->_var_idx << ": merging " << it1->_min_entity_id << " and " << it2->_min_entity_id << " due to "
 //                        << (physical_intersection ? " physical intersection.\n" : " virtual intersection.\n");
-//              std::cout << *it1 << *it2;
+//              _console << *it1 << *it2;
 //              // DEBUGGING
 
               it1->_ghosted_ids.swap(set_union);
@@ -866,10 +637,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
               // Set the flag on the merged set so we don't revisit it again
               it2->_merged = true;
 
-//              // DEBUGGING
-//              std::cout << "MERGED ENTITY:\n" << *it2;
-//              // DEBUGGING
-
               // Something was merged so we'll need to repeat this loop
               region_merged = true;
             }
@@ -896,12 +663,9 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   {
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     {
-//      std::cout << "Consolidating\n";
       for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
            it != _partial_feature_sets[rank][map_num].end(); ++it)
       {
-//        std::cout << *it;
-
         if (!it->_merged)
         {
           _feature_sets[map_num].push_back(MooseSharedPointer<FeatureData>(new FeatureData(*it)));
@@ -910,93 +674,22 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       }
 
       _partial_feature_sets[rank][map_num].clear();
-
     }
   }
 
 //  // DEBUGGING
-//  std::cout << "*********************************************************************************************\n"
+//  _console << "*********************************************************************************************\n"
 //            << "BEGIN AFTER MERGE\n"
 //            << "*********************************************************************************************\n";
 //  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
 //    for (std::vector<MooseSharedPointer<FeatureData> >::iterator it = _feature_sets[map_num].begin();
 //         it != _feature_sets[map_num].end(); ++it)
-//      std::cout << **it;
-//  std::cout << "*********************************************************************************************\n"
+//      _console << **it;
+//  _console << "*********************************************************************************************\n"
 //            << "END AFTER MERGE\n"
 //            << "*********************************************************************************************\n";
 //  // DEBUGGING
 
-
-   /**
-    * If map_num <= n_processors (normal case), each processor up to map_num will handle one list
-    * of nodes and receive the merged nodes from other processors for all other lists.
-    */
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//  {
-//    unsigned int owner_id = map_num % _app.n_processors();
-//    if (_single_map_mode || owner_id == processor_id())
-//    {
-//      // Get an iterator pointing to the end of the list, we'll reuse it several times in the merge algorithm below
-//      std::list<FeatureData>::iterator end = _feature_sets[map_num].end();
-//
-//      // Next add periodic neighbor information if requested to the FeatureData objects
-//      if (use_periodic_boundary_info)
-//        for (std::list<FeatureData>::iterator it = _feature_sets[map_num].begin(); it != end; ++it)
-//          appendPeriodicNeighborNodes(*it);
-//
-//      // Finally start our merge loops
-//      for (std::list<FeatureData>::iterator it1 = _feature_sets[map_num].begin(); it1 != end; /* No increment */)
-//      {
-//        bool need_it1_increment = true;
-//
-//        for (std::list<FeatureData>::iterator it2 = it1; it2 != end; ++it2)
-//        {
-//          if (it1 != it2 &&                                                               // Make sure that these iterators aren't pointing at the same set
-//              it1->_var_idx == it2->_var_idx &&                                           // and that the sets have matching variable indices...
-//              (setsIntersect(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(),            // Do they overlap on the current entity type? OR..
-//                             it2->_ghosted_ids.begin(), it2->_ghosted_ids.end()) ||
-//                 (use_periodic_boundary_info &&                                           // Are we merging across periodic boundaries? AND
-//                 setsIntersect(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(),  // Do they overlap on periodic nodes?
-//                               it2->_periodic_nodes.begin(), it2->_periodic_nodes.end())
-//                 )
-//              )
-//            )
-//          {
-//            // Merge these two entity sets
-//            set_union.clear();
-//            std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(), set_union_inserter);
-//            // Put the merged set in the latter iterator so that we'll compare earlier sets to it again
-//            it2->_ghosted_ids = set_union;
-//
-//            // If we are merging periodic boundaries we'll need to merge those nodes too
-//            if (use_periodic_boundary_info)
-//            {
-//              set_union.clear();
-//              std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
-//              it2->_periodic_nodes = set_union;
-//            }
-//
-//            // Now remove the merged set, the one we didn't update (it1)
-//            _feature_sets[map_num].erase(it1++);
-//            // don't increment the outer loop since we just deleted it incremented
-//            need_it1_increment = false;
-//            // break out of the inner loop and move on
-//            break;
-//          }
-//        }
-//
-//        if (need_it1_increment)
-//          ++it1;
-//      }
-//    }
-//  }
-//
-//  if (!_single_map_mode)
-//    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//      // Now communicate this list with all the other processors
-//      communicateOneList(_feature_sets[map_num], map_num % _app.n_processors(), map_num);
-//
   Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
 
@@ -1021,22 +714,14 @@ FeatureFloodCount::updateFieldInfo()
     std::generate(index_vector.begin(), index_vector.end(), idx_gen<unsigned int>(0));
     std::sort(index_vector.begin(), index_vector.end(), index_sorter<std::vector<MooseSharedPointer<FeatureData> > >(_feature_sets[map_num]));
 
-//    sleep(processor_id());
-
     // Clear out the original markings since they aren't unique globally
     _feature_maps[map_num].clear();
-
-
-//    std::cout << "vector: " << index_vector.size() << '\n' << _feature_sets[map_num].size() << '\n';
-
 
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : map_num;
     for (std::vector<size_t>::const_iterator idx_it = index_vector.begin(); idx_it != index_vector.end(); ++idx_it)
     {
       const FeatureData & feature = *_feature_sets[map_num][*idx_it];
-
-//      std::cout << "Proc " << processor_id() << "\nmap num: " << map_num << '\n' << feature;
 
       // Loop over the entitiy ids of this feature and update our local map
       for (std::set<dof_id_type>::const_iterator entity_it = feature._local_ids.begin(); entity_it != feature._local_ids.end(); ++entity_it)
@@ -1060,34 +745,6 @@ FeatureFloodCount::updateFieldInfo()
   }
 
   mooseAssert(_feature_count == feature_number, "feature_number does not agree with previously calculated _feature_count");
-
-
-//  std::cerr << "Proc " << processor_id() << ": " << _feature_count << std::endl;
-
-
-//        std::cout << _feature_sets[map_num][*l_it];
-    // Debugging
-
-
-
-//    for (std::list<FeatureData>::iterator it1 = _feature_sets[map_num].begin(); it1 != _feature_sets[map_num].end(); ++it1)
-//    {
-//      std::cout << "Size: " << it1->_ghosted_ids.size() << std::endl;
-//      for (std::set<dof_id_type>::iterator it2 = it1->_ghosted_ids.begin(); it2 != it1->_ghosted_ids.end(); ++it2)
-//      {
-//        // Color the bubble map with a unique region
-//        _feature_maps[map_num][*it2] = counter;
-////        if (_var_index_mode)
-////          _var_index_maps[map_num][*it2] = it1->_var_idx;
-//      }
-////
-////      if (_single_map_mode)
-////        _region_to_var_idx[counter] = it1->_var_idx;
-//      ++counter;
-//    }
-//
-////    std::cerr << "Proc: " << processor_id() << " map_num: " << map_num << " : " << counter << '\n';
-
 }
 
 void
@@ -1262,15 +919,6 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
   }
 }
 
-//void
-//FeatureFloodCount::updateRegionOffsets()
-//{
-//  if (_global_numbering)
-//    // Note: We never need to touch offset zero - it should *always* be zero
-//    for (unsigned int map_num = 1; map_num < _maps_size; ++map_num)
-//      _region_offsets[map_num] = _region_offsets[map_num -1] + _region_counts[map_num - 1];
-//}
-
 void
 FeatureFloodCount::inflateBoundingBoxes(RealVectorValue inflation_amount)
 {
@@ -1387,7 +1035,7 @@ FeatureFloodCount::calculateBubbleVolumes()
     _communicator.sum(_total_volume_intersecting_boundary);
 
     // Scale the boundary intersecting grain volumes by the total domain volume
-    for (unsigned int i = 0; i<_total_volume_intersecting_boundary.size(); ++i)
+    for (unsigned int i = 0; i < _total_volume_intersecting_boundary.size(); ++i)
       _total_volume_intersecting_boundary[i] /= total_volume;
   }
 

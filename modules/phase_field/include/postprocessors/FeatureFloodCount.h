@@ -69,7 +69,6 @@ public:
 
   virtual Real getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
 
-//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
@@ -93,16 +92,6 @@ public:
     {
       _bboxes.resize(1);
     }
-
-//    FeatureData(std::set<dof_id_type> & ghosted_ids, unsigned int var_idx) :
-//        _ghosted_ids(ghosted_ids),
-//        _var_idx(var_idx),
-//        _intersects_boundary(false),
-//        _min_entity_id(DofObject::invalid_id),
-//        _merged(false)
-//    {
-//      _bboxes.resize(1);
-//    }
 
     FeatureData(const FeatureData & f) :
         _ghosted_ids(f._ghosted_ids),
@@ -203,15 +192,6 @@ protected:
   void mergeSets(bool use_periodic_boundary_info);
 
   void communicateAndMerge();
-
-  /**
-   * This routine broadcasts a std::list<FeatureData> to other ranks. It includes both the
-   * serialization and de-serialization routines.
-   * @param list the list to broadcast
-   * @param owner_id the rank initiating the broadcast
-   * @param map_num the number in the _feature_sets datastructure that will be replaced by the results of the broadcast
-   */
-  void communicateOneList(std::list<FeatureData> & list, unsigned int owner_id, unsigned int map_num);
 
   /**
    * This routine adds the periodic node information to our data structure prior to packing the data
@@ -323,18 +303,8 @@ protected:
    */
   std::vector<std::map<dof_id_type, int> > _var_index_maps;
 
-//  /// The data structure used to marshall the data between processes and/or threads
-//  std::vector<unsigned int> _packed_data;
-
   /// The data structure used to find neighboring elements give a node ID
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
-
-  /// This data structure is used to keep track of which bubbles are owned by which variables.
-  /// It is used single_map_mode only
-//  std::vector<unsigned int> _region_to_var_idx;
-
-//  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)
-//  std::vector<unsigned int> _region_offsets;
 
   // The number of features seen by this object
   unsigned int _feature_count;
@@ -351,9 +321,6 @@ protected:
    * one additional vector indexed by processor id
    */
   std::vector<std::vector<std::vector<FeatureData> > > _partial_feature_sets;
-
-  /// The scalar counters used during the marking stage of the flood algorithm. Up to one per variable
-//  std::vector<unsigned int> _region_counts;
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;

@@ -79,8 +79,6 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
 GrainTracker::~GrainTracker()
 {
   _outfile.close();
-//  for (std::map<unsigned int, UniqueGrain *>::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
-//    delete it->second;
 }
 
 Real
@@ -95,28 +93,7 @@ GrainTracker::getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigne
 Real
 GrainTracker::getElementalValue(dof_id_type element_id) const
 {
-//  // If this element contains the centroid of on of the grains, return the unique index
-//  const Elem * curr_elem = _mesh.elem(element_id);
-//
-//  for (std::map<unsigned int, UniqueGrain *>::const_iterator grain_it = _unique_grains.begin();
-//       grain_it != _unique_grains.end(); ++grain_it)
-//  {
-//    if (grain_it->second->status == INACTIVE)
-//      continue;
-//
-//    for (std::vector<BoundingSphereInfo *>::const_iterator it = grain_it->second->sphere_ptrs.begin();
-//         it != grain_it->second->sphere_ptrs.end(); ++it)
-//      if (curr_elem->contains_point((*it)->b_sphere.center()))
-//      {
-//        if (!_ebsd_reader)
-//          return grain_it->first;
-//
-//        std::map<unsigned int, unsigned int>::const_iterator ebsd_it = _unique_grain_to_ebsd_num.find(grain_it->first);
-//
-//        mooseAssert(ebsd_it != _unique_grain_to_ebsd_num.end(), "Bad mapping in unique_grain_to_ebsd_num");
-//        return ebsd_it->second;
-//      }
-//  }
+  mooseDoOnce(mooseWarning("Method not implemented"));
 
   return 0;
 }
@@ -143,13 +120,13 @@ GrainTracker::finalize()
 
   FeatureFloodCount::communicateAndMerge();
 
-  std::cout << "Finished inside of FeatureFloodCount" << std::endl;
+  _console << "Finished inside of FeatureFloodCount" << std::endl;
 
   Moose::perf_log.push("trackGrains()","GrainTracker");
   trackGrains();
   Moose::perf_log.pop("trackGrains()","GrainTracker");
 
-  std::cout << "Finished inside of trackGrains" << std::endl;
+  _console << "Finished inside of trackGrains" << std::endl;
 
   // DEBUGGING
   if (processor_id() == 0)
@@ -181,7 +158,7 @@ GrainTracker::finalize()
 
   updateFieldInfo();
 
-  std::cout << "Finished inside of updateFieldInfo" << std::endl;
+  _console << "Finished inside of updateFieldInfo" << std::endl;
 
 
   Moose::perf_log.pop("finalize()","GrainTracker");
@@ -229,121 +206,6 @@ GrainTracker::getElementalValues(dof_id_type elem_id) const
 #endif
     return _empty;
   }
-}
-
-void
-GrainTracker::print()
-{
-//  for (std::map<unsigned int, UniqueGrain *>::iterator grain_it = _unique_grains.begin();
-//       grain_it != _unique_grains.end(); ++grain_it)
-//  {
-//    Moose::out << "Grain " << grain_it->first << ":\n";
-//
-//    for (std::vector<BoundingSphereInfo *>::iterator it2 = grain_it->second->sphere_ptrs.begin(); it2 != grain_it->second->sphere_ptrs.end(); ++it2)
-//      Moose::out << "Centroid: " << (*it2)->b_sphere.center() << " radius: " << (*it2)->b_sphere.radius() << '\n';
-//  }
-}
-
-
-void
-GrainTracker::buildBoundingSpheres()
-{
-//  // Don't track grains if the current simulation step is before the specified tracking step
-//  if (_t_step < _tracking_step)
-//    return;
-//
-//  MeshBase & mesh = _mesh.getMesh();
-//
-//  unsigned long total_node_count = 0;
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//  {
-//    /**
-//     * Create a pair of vectors of real values that is 3 (for the x,y,z components) times
-//     * the length of the current _feature_sets length. Each processor will update the
-//     * vector for the nodes that it owns (parallel_mesh case).  Then a parallel exchange
-//     * will all for the global min/maxs of each bubble.
-//     */
-//    std::vector<Real> min_points(_feature_sets[map_num].size()*3,  std::numeric_limits<Real>::max());
-//    std::vector<Real> max_points(_feature_sets[map_num].size()*3, -std::numeric_limits<Real>::max());
-//
-//    unsigned int set_counter = 0;
-//    for (std::list<FeatureData>::const_iterator it1 = _feature_sets[map_num].begin();
-//         it1 != _feature_sets[map_num].end(); ++it1)
-//    {
-//      total_node_count += it1->_ghosted_ids.size();
-//
-//      // Find the min/max of our bounding box to calculate our bounding sphere
-//      for (std::set<dof_id_type>::iterator it2 = it1->_ghosted_ids.begin(); it2 != it1->_ghosted_ids.end(); ++it2)
-//      {
-//        Point point;
-//        Point * p_ptr = NULL;
-//        if (_is_elemental)
-//        {
-//          Elem *elem = mesh.query_elem(*it2);
-//          if (elem)
-//          {
-//            point = elem->centroid();
-//            p_ptr = &point;
-//          }
-//        }
-//        else
-//          p_ptr = mesh.query_node_ptr(*it2);
-//        if (p_ptr)
-//          for (unsigned int i = 0; i < mesh.spatial_dimension(); ++i)
-//          {
-//            min_points[set_counter*3+i] = std::min(min_points[set_counter*3+i], (*p_ptr)(i));
-//            max_points[set_counter*3+i] = std::max(max_points[set_counter*3+i], (*p_ptr)(i));
-//          }
-//      }
-//
-//      ++set_counter;
-//    }
-//
-//    _communicator.min(min_points);
-//    _communicator.max(max_points);
-//
-//    set_counter = 0;
-//    for (std::list<FeatureData>::const_iterator it1 = _feature_sets[map_num].begin();
-//         it1 != _feature_sets[map_num].end(); ++it1)
-//    {
-//      Point min(min_points[set_counter*3], min_points[set_counter*3+1], min_points[set_counter*3+2]);
-//      Point max(max_points[set_counter*3], max_points[set_counter*3+1], max_points[set_counter*3+2]);
-//
-//      // Calulate our bounding sphere
-//      Point center(min + ((max - min) / 2.0));
-//
-//      // The radius is the different between the outer edge of the "bounding box"
-//      // and the center plus the "hull buffer" value
-//      Real radius = (max - center).norm() + _hull_buffer;
-//
-//      unsigned int some_node_id = *(it1->_ghosted_ids.begin());
-//      _bounding_spheres[map_num].push_back(new BoundingSphereInfo(some_node_id, center, radius));
-//
-//      ++set_counter;
-//    }
-//  }
-}
-
-Point
-GrainTracker::centerOfMass(UniqueGrain & grain) const
-{
-//  // NOTE: Does not work with Parallel Mesh yet
-//
-//  if (!_is_elemental)
-//    mooseError("Not intended to work with Nodal Floods");
-//
-  Point center_of_mass;
-//  for (std::set<dof_id_type>::const_iterator entity_it = grain.entities_ptr->begin(); entity_it != grain.entities_ptr->end(); ++entity_it)
-//  {
-//    Elem *elem = _mesh.elem(*entity_it);
-//    if (!elem)
-//      mooseError("Couldn't find element " << *entity_it << " in centerOfMass calculation.");
-//
-//    center_of_mass += elem->centroid();
-//  }
-//  center_of_mass /= static_cast<Real>(grain.entities_ptr->size());
-//
-  return center_of_mass;
 }
 
 void
@@ -416,49 +278,7 @@ GrainTracker::trackGrains()
       }
     }
     _console << std::endl;
-
-//    if (display_them)
-//    {
-//      for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//        for (unsigned int i = 0; i < _feature_sets[map_num].size(); ++i)
-//          std::cout << *_feature_sets[map_num][i] << '\n';
-//    }
   }
-
-//  std::vector<UniqueGrain *> new_grains; new_grains.reserve(_unique_grains.size());
-//
-//  // Loop over all the current regions and build our unique grain structures
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//  {
-//    for (std::list<FeatureData>::const_iterator it1 = _feature_sets[map_num].begin();
-//         it1 != _feature_sets[map_num].end(); ++it1)
-//    {
-//      std::vector<BoundingSphereInfo *> sphere_ptrs;
-//      unsigned int curr_var = it1->_var_idx;
-//
-//      for (std::list<BoundingSphereInfo *>::iterator it2 = _bounding_spheres[map_num].begin();
-//           it2 != _bounding_spheres[map_num].end(); /* No increment here! */)
-//      {
-//        /**
-//         * See which of the bounding spheres belong to the current region (bubble set) by looking at a
-//         * member node id.  A single region may have multiple bounding spheres as members if it spans
-//         * periodic boundaries
-//         */
-//        if (it1->_ghosted_ids.find((*it2)->member_node_id) != it1->_ghosted_ids.end())
-//        {
-//          // Transfer ownership of the bounding sphere info to "sphere_ptrs" which will be stored in the unique grain
-//          sphere_ptrs.push_back(*it2);
-//          // Now delete the current BoundingSpherestructure so that it won't be inspected or reused
-//          _bounding_spheres[map_num].erase(it2++);
-//        }
-//        else
-//          ++it2;
-//      }
-//
-//      // Create our new grains from this timestep that we will use to match up against the existing grains
-//      new_grains.push_back(new UniqueGrain(curr_var, sphere_ptrs, &it1->_ghosted_ids, NOT_MARKED));
-//    }
-//  }
 
   /**
    * If it's the first time through this routine for the simulation, we will generate the unique grain
@@ -503,13 +323,8 @@ GrainTracker::trackGrains()
       for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
         for (unsigned int feature_num = 0; feature_num < _feature_sets[map_num].size(); ++feature_num)
         {
-
-//      for (unsigned int i = 0; i < new_grains.size(); ++i)
-//      {
           Real min_centroid_diff = std::numeric_limits<Real>::max();
           unsigned int closest_match_idx = 0;
-
-        //Point center_of_mass = centerOfMass(*new_grains[i]);
 
           for (unsigned int j = 0; j < center_points.size(); ++j)
           {
@@ -519,7 +334,6 @@ GrainTracker::trackGrains()
             ebsd_vector[0].min() = ebsd_vector[0].max() = center_points[j];
 
             Real curr_centroid_diff = boundingRegionDistance(ebsd_vector, _feature_sets[map_num][feature_num]->_bboxes, true);
-            //Real curr_centroid_diff = (center_points[j] - center_of_mass).size();
             if (curr_centroid_diff <= min_centroid_diff)
             {
               closest_match_idx = j;
@@ -560,8 +374,6 @@ GrainTracker::trackGrains()
 
         mooseError("Error with ESBD Mapping (see above unused indices)");
       }
-
-      print();
     }
     else // Just assign IDs in order
     {
@@ -620,13 +432,9 @@ GrainTracker::trackGrains()
    * new_grain_idx_to_existing_grain_idx data structure).  This will happen any time a grain disappears during
    * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
    */
-//  std::cout << "Mapping time:\n";
   for (std::map<std::pair<unsigned int, unsigned int>, std::vector<unsigned int> >::iterator it = new_grain_idx_to_existing_grain_idx.begin();
        it != new_grain_idx_to_existing_grain_idx.end(); ++it)
   {
-//    std::cout << '(' << it->first.first << ',' << it->first.second << ") -> " << it->second.size() << '\n';
-
-
                                                                 // map index     feature index
     MooseSharedPointer<FeatureData> feature_ptr = _feature_sets[it->first.first][it->first.second];
 
@@ -641,17 +449,12 @@ GrainTracker::trackGrains()
     // More than one existing grain is mapping to a new one (i.e. multiple values exist for a single key)
     else
     {
-//      std::cout << "New Grain:\n" << *feature_ptr;
-
       Real min_centroid_diff = std::numeric_limits<Real>::max();
       unsigned int min_idx = 0;
 
-//      std::cout << "Existing Competing Grains:\n";
       for (unsigned int i = 0; i < it->second.size(); ++i)
       {
         unsigned int curr_idx = (it->second)[i];
-
-//        std::cout << *_unique_grains[curr_idx];
 
         Real curr_centroid_diff = boundingRegionDistance(feature_ptr->_bboxes, _unique_grains[curr_idx]->_bboxes, true);
         if (curr_centroid_diff <= min_centroid_diff)
@@ -710,11 +513,6 @@ GrainTracker::trackGrains()
                << *it->second;
       it->second->_status = INACTIVE;
     }
-
-////  // Sanity check to make sure that we consumed all of the bounding sphere datastructures
-////  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-////    if (!_bounding_spheres[map_num].empty())
-////      mooseError("BoundingSpheres where not completely used by the GrainTracker");
 }
 
 void
@@ -724,7 +522,7 @@ GrainTracker::remapGrains()
   if (_t_step < _tracking_step)
     return;
 
-  std::cout << "Running remap Grains" << std::endl;
+  _console << "Running remap Grains" << std::endl;
 
   /**
    * The remapping algorithm is recursive. We will reuse the "merged" flag in the FeatureData
@@ -861,9 +659,6 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
    * We have two grains that are getting close represented by the same order parameter.
    * We need to map to the variable whose closest grain to this one is furthest away by sphere to sphere distance.
    */
-//  std::vector<std::pair<Real, unsigned int> > min_distances(_vars.size(),
-//                                                            std::pair<Real, unsigned int>(std::numeric_limits<Real>::max(),
-//                                                                                          std::numeric_limits<unsigned int>::max()));
   computeMinDistancesFromGrain(grain, min_distances);
 
   /**
@@ -876,14 +671,14 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
    * min_distance of a variable is explicitly set up above.
    */
 
-  std::sort(min_distances.begin(), min_distances.end(), GrainDistanceSorter()/*, pair_sorter_first<Real, unsigned int>()*/);
+  std::sort(min_distances.begin(), min_distances.end(), GrainDistanceSorter());
 
-  std::cout << "\n********************************************\nDistances list for grain " << grain_id << '\n';
+  _console << "\n********************************************\nDistances list for grain " << grain_id << '\n';
   for (unsigned int i = 0; i < min_distances.size(); ++i)
   {
     for (std::list<GrainDistance>::iterator min_it = min_distances[i].begin(); min_it != min_distances[i].end(); ++min_it)
-      std::cout << min_it->_distance << ": " << min_it->_grain_id << ": " <<  min_it->_var_index << '\n';
-    std::cout << '\n';
+      _console << min_it->_distance << ": " << min_it->_grain_id << ": " <<  min_it->_var_index << '\n';
+    _console << '\n';
   }
 
   for (unsigned int i = 0; i < min_distances.size(); ++i)
@@ -955,14 +750,10 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
 
     // TODO: Make sure this distance is -1 or higher or fine intersections only exist for a single variable
     // Propose a new variable index for the current grain and recurse
-
-//    std::cout << "Proposing remap of grain #" << grain_id << " from variable index " << curr_var_idx
-//              << " to " << target_it->_var_index << " - ";
     grain->_var_idx = target_it->_var_index;
     grain->_merged = true;
     if (attemptGrainRenumber(target_grain, target_it->_grain_id, depth+1, max))
     {
-//      std::cout << "SUCCESS!\n";
       // SUCCESS!
       Moose::out
         << COLOR_GREEN
@@ -978,12 +769,8 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
       return true;
     }
     else
-    {
-//      std::cout << "FAIL\n";
-
       // Need to set our var index back after failed recursive step
       grain->_var_idx = curr_var_idx;
-    }
 
     // Always "unmark" the grain after the recursion so it can be used by other remap operations
     grain->_merged = false;
@@ -1030,8 +817,8 @@ GrainTracker::swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned
   if (depth == 0)
   {
     _nl.solution().close();
-//    _nl.solutionOld().close();
-//    _nl.solutionOlder().close();
+    _nl.solutionOld().close();
+    _nl.solutionOlder().close();
 
     _fe_problem.getNonlinearSystem().sys().update();
   }
@@ -1091,34 +878,6 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
       }
     }
   }
-
-//    // Swap the values from one variable to the other
-//    {
-//      const VariableValue & value = _vars[curr_var_idx]->nodalSln();
-//      const VariableValue & value_old = _vars[curr_var_idx]->nodalSlnOld();
-//      const VariableValue & value_older = _vars[curr_var_idx]->nodalSlnOlder();
-//
-//      // Copy Value from intersecting variable to new variable
-//      dof_id_type & dof_index = _vars[new_var_idx]->nodalDofIndex();
-//
-//      // Set the only DOF for this variable on this node
-//      _nl.solution().set(dof_index, value[0]);
-//      _nl.solutionOld().set(dof_index, value_old[0]);
-//      _nl.solutionOlder().set(dof_index, value_older[0]);
-//    }
-//    {
-//      const VariableValue & value = _vars[new_var_idx]->nodalSln();
-//      const VariableValue & value_old = _vars[new_var_idx]->nodalSlnOld();
-//      const VariableValue & value_older = _vars[new_var_idx]->nodalSlnOlder();
-//
-//      // Copy Value from variable to the intersecting variable
-//      dof_id_type & dof_index = _vars[curr_var_idx]->nodalDofIndex();
-//
-//      // Set the only DOF for this variable on this node
-//      _nl.solution().set(dof_index, value[0]);
-//      _nl.solutionOld().set(dof_index, value_old[0]);
-//      _nl.solutionOlder().set(dof_index, value_older[0]);
-//    }
 }
 
 void
@@ -1134,8 +893,6 @@ GrainTracker::updateFieldInfo()
 
   for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it = _unique_grains.begin(); grain_it != _unique_grains.end(); ++grain_it)
   {
-//    std::cout << *grain_it->second;
-
     unsigned int curr_var = grain_it->second->_var_idx;
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
 
@@ -1194,14 +951,11 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
   {
     const MeshTools::BoundingBox & bbox1 = *bbox_it1;
     const Point centroid1 = (bbox1.max() + bbox1.min()) / 2.0;
-//    Sphere sphere1(centroid1, (bbox1.max() - centroid1).norm());
-
 
     for (std::vector<MeshTools::BoundingBox>::const_iterator bbox_it2 = bboxes2.begin(); bbox_it2 != bboxes2.end(); ++bbox_it2)
     {
       const MeshTools::BoundingBox & bbox2 = *bbox_it2;
       const Point centroid2 = (bbox2.max() + bbox2.min()) / 2.0;
-//      Sphere sphere2(centroid2, (bbox2.max() - centroid2).norm());
 
       Real curr_distance = std::numeric_limits<Real>::max();
 
@@ -1235,12 +989,6 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
         }
 
         curr_distance = boxes_overlap ? -1 /* all overlaps are treated the same */ : result;
-
-//        // We need to compute the distance between the boxes...
-//        // That's pretty hard so let's do it between spheres instead.
-//        curr_distance = sphere1.distance(sphere2);
-//        if (curr_distance < 0.0)
-//          curr_distance = -1.0; // All overlaps are treated the same
       }
 
       if (curr_distance < min_distance)
@@ -1306,26 +1054,3 @@ GrainTracker::calculateBubbleVolumes()
 
   Moose::perf_log.pop("calculateBubbleVolumes()", "GrainTracker");
 }
-
-// BoundingSphereInfo
-//GrainTracker::BoundingSphereInfo::BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius) :
-//    member_node_id(node_id),
-//    b_sphere(center, radius)
-//{}
-
-// Unique Grain
-//GrainTracker::UniqueGrain::UniqueGrain(unsigned int var_idx,
-//                                       const std::vector<BoundingSphereInfo *> & b_sphere_ptrs,
-//                                       const std::set<dof_id_type> *entities_pt,
-//                                       STATUS status) :
-//    variable_idx(var_idx),
-//    sphere_ptrs(b_sphere_ptrs),
-//    status(status),
-//    entities_ptr(entities_pt)
-//{}
-
-//GrainTracker::UniqueGrain::~UniqueGrain()
-//{
-//  for (unsigned int i=0; i<sphere_ptrs.size(); ++i)
-//    delete sphere_ptrs[i];
-//}
