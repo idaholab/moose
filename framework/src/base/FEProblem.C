@@ -3544,7 +3544,7 @@ FEProblem::computeDamping(const NumericVector<Number>& soln, const NumericVector
     //   values.  Once more complete dependency checking is in place, auxiliary variables (and
     //   material properties) will be computed as needed by dampers.
 //    _aux.compute();
-    damping = _nl.computeDamping(update);
+    damping = _nl.computeDamping(soln, update);
 
     // restore saved solution
     _nl.setSolution(*_saved_current_solution);

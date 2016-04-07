@@ -39,7 +39,8 @@ protected:
   /**
    * Return the constant damping value.
    */
-  virtual Real computeDamping(const NumericVector<Number> & update);
+  virtual Real computeDamping(const NumericVector<Number> & solution,
+                              const NumericVector<Number> & update);
 
   /// The constant amount of the Newton update to take.
   Real _damping;
