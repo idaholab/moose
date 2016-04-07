@@ -7,17 +7,47 @@
 #include "RotationTensor.h"
 #include "libmesh/libmesh.h"
 
-RotationTensor::RotationTensor(const RealVectorValue & Euler_angles)
+RotationTensor::RotationTensor(Axis axis, Real angle)
 {
-  update(Euler_angles);
+  update(axis, angle);
+}
+
+RotationTensor::RotationTensor(const RealVectorValue & euler_angles)
+{
+  update(euler_angles);
 }
 
 void
-RotationTensor::update(const RealVectorValue & Euler_angles)
+RotationTensor::update(Axis axis, Real angle)
 {
-  const Real phi_1 = Euler_angles(0) * (libMesh::pi / 180.0);
-  const Real Phi = Euler_angles(1) * (libMesh::pi / 180.0);
-  const Real phi_2 = Euler_angles(2) * (libMesh::pi / 180.0);
+  zero();
+
+  RealVectorValue a;
+  a(axis) = 1.0;
+
+  const Real s = std::sin(angle * libMesh::pi / 180.0);
+  const Real c = std::cos(angle * libMesh::pi / 180.0);
+
+  //assemble row wise
+  _coords[0] = a * RealVectorValue(1.0, -c, -c);
+  _coords[1] = a * RealVectorValue(0.0, 0.0, s);
+  _coords[2] = a * RealVectorValue(0.0, -s, 0.0);
+
+  _coords[3] = a * RealVectorValue(0.0, 0.0, -s);
+  _coords[4] = a * RealVectorValue(-c, 1.0, -c);
+  _coords[5] = a * RealVectorValue(s, 0.0, 0.0);
+
+  _coords[6] = a * RealVectorValue(0.0, s, 0.0);
+  _coords[7] = a * RealVectorValue(-s, 0.0, 0.0);
+  _coords[8] = a * RealVectorValue(-c, -c, 1.0);
+}
+
+void
+RotationTensor::update(const RealVectorValue & euler_angles)
+{
+  const Real phi_1 = euler_angles(0) * (libMesh::pi / 180.0);
+  const Real Phi = euler_angles(1) * (libMesh::pi / 180.0);
+  const Real phi_2 = euler_angles(2) * (libMesh::pi / 180.0);
 
   const Real c1 = std::cos(phi_1);
   const Real c2 = std::cos(Phi);
