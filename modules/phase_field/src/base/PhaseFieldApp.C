@@ -78,7 +78,9 @@
 #include "RndBoundingBoxIC.h"
 #include "RndSmoothCircleIC.h"
 #include "SmoothCircleIC.h"
+#include "SmoothSuperellipsoidIC.h"
 #include "SpecifiedSmoothCircleIC.h"
+#include "SpecifiedSmoothSuperellipsoidIC.h"
 #include "ThumbIC.h"
 #include "Tricrystal2CircleGrainsIC.h"
 
@@ -304,7 +306,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(RndBoundingBoxIC);
   registerInitialCondition(RndSmoothCircleIC);
   registerInitialCondition(SmoothCircleIC);
+  registerInitialCondition(SmoothSuperellipsoidIC);
   registerInitialCondition(SpecifiedSmoothCircleIC);
+  registerInitialCondition(SpecifiedSmoothSuperellipsoidIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
 
