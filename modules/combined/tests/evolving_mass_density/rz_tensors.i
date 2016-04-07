@@ -1,13 +1,20 @@
-#  Constant mass in RZ
-
+#  Constant mass in RZ using Tensor Mechanics
+#
 # This test forces an RZ mesh to move through a series of displacements
 #   in order to test whether the mass is constant.  The density is chosen
 #   such that the mass is 2.5.
+# This test is a duplicate of the rz.i test for solid mechanics, and the
+#   output of this tensor mechanics test is compared to the original
+#   solid mechanics output.  The duplication is necessary to test the
+#   migrated tensor mechanics version while maintaining tests for solid mechanics.
 
-[Mesh]#Comment
+[Mesh]
   file = elastic_patch_rz.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y'
-[] # Mesh
+[]
 
 [Problem]
   coord_type = RZ
@@ -54,10 +61,9 @@
     x = '0 2 3    4'
     y = '0 0 0.12 0'
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -67,18 +73,13 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
-[] # Variables
-
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
-  [../]
 []
 
-
+[Kernels]
+  [./StressDivergence2DAxisymmetricRZ]
+    use_displaced_mesh = true
+  [../]
+[]
 
 [BCs]
 
@@ -133,19 +134,24 @@
     boundary = 104
     function = y104
   [../]
-[] # BCs
+[]
 
 [Materials]
-
-  [./stiffStuff1]
-    type = Elastic
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     block = PATCH
-
-    disp_r = disp_x
-    disp_z = disp_y
-
     youngs_modulus = 1e6
     poissons_ratio = 0.0
+  [../]
+
+  [./small_strain_rz]
+    type = ComputeAxisymmetricRZSmallStrain
+    block = PATCH
+  [../]
+
+  [./elastic_stress]
+    type = ComputeLinearElasticStress
+    block = PATCH
   [../]
 
   [./density]
@@ -155,42 +161,35 @@
     disp_r = disp_x
     disp_z = disp_y
   [../]
-[] # Materials
+[]
 
 [Executioner]
-
   type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-
   # Two sets of linesearch options are for petsc 3.1 and 3.3 respectively
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
 
-
   line_search = 'none'
-
-
   nl_abs_tol = 1e-10
-
   l_max_its = 20
 
   start_time = 0.0
   dt = 1
   num_steps = 6
   end_time = 6.0
-[] # Executioner
+[]
 
 [Outputs]
   [./out]
     type = Exodus
     elemental_as_nodal = true
+    file_base = rz_out
   [../]
-[] # Outputs
+[]
 
 [Postprocessors]
   [./mass]

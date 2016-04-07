@@ -11,24 +11,34 @@
 #  The tests/file names are as follows:
 
 #  Expansion and compression along a single axis
-#  expand_compress_x_test.i
-#  expand_compress_y_test.i
-#  expand_compress_z_test.i
+#  expand_compress_x_test_out.e
+#  expand_compress_y_test_out.e
+#  expand_compress_z_test_out.e
 
 #  Volumetric expansion and compression
 #  uniform_expand_compress_test.i
 
 #  Zero volume change shear along each axis
-#  shear_x_test.i
-#  shear_y_test.i
-#  shear_z_test.i
+#  shear_x_test_out.e
+#  shear_y_test_out.e
+#  shear_z_test_out.e
 
 #  The resulting mass calculation for these tests should always be = 1.
 
-[Mesh]#Comment
+# This test is a duplicate of the uniform_expand_compress_test.i test for solid mechanics, and the
+#   output of this tensor mechanics test is compared to the original
+#   solid mechanics output.  The duplication is necessary to test the
+#   migrated tensor mechanics version while maintaining tests for solid mechanics.
+
+[Mesh]
   file = elastic_patch.e
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-[] # Mesh
+  order = FIRST
+  family = LAGRANGE
+[]
 
 [Functions]
   [./rampConstant1]
@@ -40,157 +50,57 @@
 [] # Functions
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-[] # Variables
-
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
-
+[Kernels]
+  [./TensorMechanics]
+  [../]
+[]
 
 [BCs]
-
   [./bot_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 9
     value = 0.0
   [../]
   [./bot_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 9
     value = 0
   [../]
   [./bot_z]
     type = DirichletBC
     variable = disp_z
-    boundary = 9
     value = 0
   [../]
-
-
-  [./top_x]
+  [./top]
     type = FunctionDirichletBC
-    variable = disp_x
-    boundary = 11
     function = rampConstant1
   [../]
-  [./top_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 11
-    value = 0
-  [../]
-  [./top_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = 11
-    value = 0
-  [../]
-
-
-[] # BCs
+[]
 
 [Materials]
-
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    block = '1 2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
   [../]
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
 
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
+  [./small_strain]
+    type = ComputeSmallStrain
+    block = ' 1 2 3 4 5 6 7'
   [../]
-  [./stiffStuff3]
-    type = Elastic
-    block = 3
 
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-  [./stiffStuff4]
-    type = Elastic
-    block = 4
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-  [./stiffStuff5]
-    type = Elastic
-    block = 5
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-  [./stiffStuff6]
-    type = Elastic
-    block = 6
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-  [./stiffStuff7]
-    type = Elastic
-    block = 7
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
+  [./elastic_stress]
+    type = ComputeLinearElasticStress
+    block = '1 2 3 4 5 6 7'
   [../]
 
   [./density]
@@ -201,8 +111,7 @@
     disp_y = disp_y
     disp_z = disp_z
   [../]
-
-[] # Materials
+[]
 
 [Executioner]
 
@@ -211,25 +120,20 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-
   nl_abs_tol = 1e-10
-
   l_max_its = 20
-
   start_time = 0.0
   dt = 1.0
   num_steps = 3
   end_time = 3.0
-[] # Executioner
+[]
 
 [Outputs]
   [./out]
     type = Exodus
     elemental_as_nodal = true
   [../]
-[] # Outputs
+[]
 
 [Postprocessors]
   [./Mass]
