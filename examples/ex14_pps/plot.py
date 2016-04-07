@@ -19,7 +19,7 @@ def isInt(string):
 # 4,12961,0.022979021365857,
 # 5,51521,0.0057978748995635,
 # 6,205441,0.0014528130907967,
-reader = csv.reader(file('out.csv'))
+reader = csv.reader(file('ex14_out.csv'))
 
 dofs = []
 errs = []
