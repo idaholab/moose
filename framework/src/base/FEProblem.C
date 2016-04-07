@@ -2168,6 +2168,13 @@ FEProblem::parentOutputPositionChanged()
 }
 
 void
+FEProblem::computeIndicatorsAndMarkers()
+{
+  computeIndicators();
+  computeMarkers();
+}
+
+void
 FEProblem::computeIndicators()
 {
   // Initialize indicator aux variable fields

@@ -727,6 +727,7 @@ public:
                                 bool & changed_search_direction,
                                 bool & changed_new_soln);
 
+  virtual void computeIndicatorsAndMarkers();
   virtual void computeIndicators();
   virtual void computeMarkers();
 
