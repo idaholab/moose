@@ -26,7 +26,9 @@ public:
   virtual void initSlipSysProps(std::vector<Real> & val) const;
 
 protected:
-  virtual void readFileInitSlipSysRes(std::vector<Real> & val) const;
+  virtual void readInitialValueFromFile(std::vector<Real> & val) const;
+
+  virtual void readInitialValueFromInline(std::vector<Real> & val) const;
 
   unsigned int _num_mat_state_var_evol_rate_comps;
 
@@ -35,11 +37,23 @@ protected:
   const MaterialProperty<std::vector<Real> > &  _mat_prop_state_var;
   const MaterialProperty<std::vector<Real> > &  _mat_prop_state_var_old;
 
-  /// File should contain initial values of the slip system resistances.
-  std::string _slip_sys_res_prop_file_name;
+  /// File should contain initial values of the state variable.
+  FileName _state_variable_file_name;
 
   /// Read from options for initial values of internal variables
   MooseEnum _intvar_read_type;
+
+  /** The _groups variable is used to group slip systems and assign the initial values to each group.
+   *  The format is taken as [start end)
+   *  i.e. _groups = '0 4 8 11', it means three groups 0-3, 4-7 and 8-11
+   */
+  std::vector<unsigned int> _groups;
+
+  /** The _group_values are the initial values corresponding to each group.
+   *  i.e. _groups = '0 4 8 11', and _group_values = '1.0 2.0 3.0'
+   *  it means that initial values of slip system 0-3 is 1.0 , 4-7 is 2.0 and 8-11 is 3.0
+   */
+  std::vector<Real> _group_values;
 
   /// Numerical zero for internal variable
   Real _zero;

@@ -34,12 +34,11 @@ CrystalPlasticityStateVarRateComponentGSS::calcStateVariableEvolutionRateCompone
 
   Real r = _hprops[0];
   Real h0 = _hprops[1];
-  Real tau_init = _hprops[2];
-  Real tau_sat = _hprops[3];
+  Real tau_sat = _hprops[2];
 
   DenseVector<Real> hb(_variable_size);
   Real qab;
-  Real a = _hprops[4]; // Kalidindi
+  Real a = _hprops[3]; // Kalidindi
 
   for (unsigned int i = 0; i < _variable_size; ++i)
     hb(i) = h0 * std::pow(std::abs(1.0 - _mat_prop_state_var[qp][i] / tau_sat), a) * copysign(1.0,1.0 - _mat_prop_state_var[qp][i] / tau_sat);
