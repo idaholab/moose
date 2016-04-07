@@ -158,43 +158,6 @@ Material::getOutputs()
   return std::set<OutputName>(out.begin(), out.end());
 }
 
-
-bool
-Material::hasBlockMaterialPropertyHelper(const std::string & name)
-{
-  // Reference to the warehouse
-  const MaterialWarehouse<Material> & warehouse = _fe_problem.getMaterialWarehouse();
-
-  // Complete set of ids that this object is active
-  const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
-
-  // Loop over each id for this object
-  for (std::set<SubdomainID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
-  {
-    // Storage of material properties that have been DECLARED on this id
-    std::set<std::string> declared_props;
-
-    // If block materials exist, populated the set of properties that were declared
-    if (warehouse[_material_data_type].hasActiveBlockObjects(*id_it))
-    {
-      const std::vector<MooseSharedPointer<Material> > & mats = warehouse[_material_data_type].getActiveBlockObjects(*id_it);
-      for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
-      {
-        const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
-        declared_props.insert(mat_props.begin(), mat_props.end());
-      }
-    }
-
-    // If the supplied property is not in the list of properties on the current id, return false
-    if (declared_props.find(name) == declared_props.end())
-      return false;
-  }
-
-  // If you get here the supplied property is defined on all blocks
-  return true;
-}
-
-
 void
 Material::computeProperties()
 {
