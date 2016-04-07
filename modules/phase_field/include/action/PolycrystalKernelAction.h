@@ -9,6 +9,10 @@
 
 #include "Action.h"
 
+/**
+ * Action that sets up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly
+ * kernels.
+ */
 class PolycrystalKernelAction: public Action
 {
 public:
@@ -16,9 +20,14 @@ public:
 
   virtual void act();
 
-private:
+protected:
+  /// number of grains to create
   unsigned int _op_num;
+
+  /// base name for the order parameter variables
   std::string _var_name_base;
+
+  /// kernels are implicit?
   bool _implicit;
 };
 
