@@ -18,7 +18,6 @@ InputParameters validParams<GBEvolutionBase>()
   params.addParam<Real>("GBMobility", -1, "GB mobility input in m^4/(J*s), that overrides the temperature dependent calculation");
   params.addParam<Real>("GBmob0", 0, "Grain boundary mobility prefactor in m^4/(J*s)");
   params.addParam<Real>("Q", 0, "Grain boundary migration activation energy in eV");
-  params.addRequiredParam<Real>("GBenergy", "Grain boundary energy in J/m^2");
   params.addParam<Real>("molar_volume", 24.62e-6, "Molar volume in m^3/mol, needed for temperature gradient driving force");
   return params;
 }
