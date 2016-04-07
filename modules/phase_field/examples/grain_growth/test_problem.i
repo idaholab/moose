@@ -77,39 +77,31 @@
 []
 
 [AuxKernels]
-  # active = ''
-  # AuxKernel block, defining the equations used to calculate the auxvars
   [./bnds_aux]
-    # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
-    execute_on = 'initial timestep_end'
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    execute_on = 'initial timestep_end'
     bubble_object = ngrains
   [../]
   [./ghost_elements]
     type = FeatureFloodCountAux
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
-    execute_on = 'initial timestep_end'
     bubble_object = ngrains
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
-    execute_on = 'initial timestep_end'
     bubble_object = ngrains
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     field_display = VARIABLE_COLORING
-    execute_on = 'initial timestep_end'
     bubble_object = ngrains
   [../]
 []
@@ -139,19 +131,11 @@
 [Postprocessors]
   # Scalar postprocessors
   [./ngrains]
-    # Counts the number of grains in the polycrystal
-    # type = FeatureFloodCount
-    # variable = bnds
     type = GrainTracker
     threshold = 0.1
-    convex_hull_buffer = 0.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
     connecting_threshold = 0.05
     execute_on = 'initial timestep_end'
     flood_entity_type = ELEMENTAL
-    halo_level = 2
   [../]
   [./dt]
     # Outputs the current time step

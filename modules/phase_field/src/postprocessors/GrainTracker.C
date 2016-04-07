@@ -20,28 +20,8 @@
 #include <limits>
 #include <algorithm>
 
-/**
- * GrainDistance sort functor
- */
-class GrainDistanceSorter
-{
-public:
-  // Max of the mins
-  bool operator()(const std::list<GrainTracker::GrainDistance> & lhs, const std::list<GrainTracker::GrainDistance> & rhs) const
-    {
-      if (lhs.empty())
-      {
-        if (rhs.empty())
-          return true;
-        else
-          return false;
-      }
-      else if (rhs.empty())
-        return true;
-      else
-        return lhs.begin()->_distance > rhs.begin()->_distance;
-    }
-};
+// Forward Declaration (Helper Functor)
+class GrainDistanceSorter;
 
 template<>
 InputParameters validParams<GrainTracker>()
@@ -52,7 +32,6 @@ InputParameters validParams<GrainTracker>()
 
   return params;
 }
-
 
 GrainTracker::GrainTracker(const InputParameters & parameters) :
     FeatureFloodCount(parameters),
@@ -65,18 +44,12 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : NULL),
     _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
-  // Size the data structures to hold the correct number of maps
-  _bounding_spheres.resize(_maps_size);
-
   if (!_is_elemental && _compute_op_maps)
     mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
-
-  _outfile.open("bboxes.txt");
 }
 
 GrainTracker::~GrainTracker()
 {
-  _outfile.close();
 }
 
 Real
@@ -118,26 +91,26 @@ GrainTracker::finalize()
 
   _console << "Finished inside of trackGrains" << std::endl;
 
-  // DEBUGGING
-  if (processor_id() == 0)
-  {
-    _outfile << "Time: " << _t << '\n';
-    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
-    {
-      if (it->second->_status == MARKED)
-      {
-        MooseSharedPointer<FeatureData> feature = it->second;
-        for (unsigned int i = 0; i < feature->_bboxes.size(); ++i)
-          _outfile << it->first << ","
-                   << feature->_bboxes[i].min()(0) << "," << feature->_bboxes[i].max()(0) << ","
-                   << feature->_bboxes[i].min()(1) << "," << feature->_bboxes[i].max()(1) << ","
-                   << feature->_bboxes[i].min()(2) << "," << feature->_bboxes[i].max()(2) <<'\n';
-      }
-    }
-    _outfile << '\n';
-    _outfile.flush();
-  }
-  // DEBUGGING
+//  // DEBUGGING
+//  if (processor_id() == 0)
+//  {
+//    _outfile << "Time: " << _t << '\n';
+//    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
+//    {
+//      if (it->second->_status == MARKED)
+//      {
+//        MooseSharedPointer<FeatureData> feature = it->second;
+//        for (unsigned int i = 0; i < feature->_bboxes.size(); ++i)
+//          _outfile << it->first << ","
+//                   << feature->_bboxes[i].min()(0) << "," << feature->_bboxes[i].max()(0) << ","
+//                   << feature->_bboxes[i].min()(1) << "," << feature->_bboxes[i].max()(1) << ","
+//                   << feature->_bboxes[i].min()(2) << "," << feature->_bboxes[i].max()(2) <<'\n';
+//      }
+//    }
+//    _outfile << '\n';
+//    _outfile.flush();
+//  }
+//  // DEBUGGING
 
 
 
@@ -1043,4 +1016,45 @@ GrainTracker::calculateBubbleVolumes()
   _communicator.sum(_all_feature_volumes);
 
   Moose::perf_log.pop("calculateBubbleVolumes()", "GrainTracker");
+}
+
+
+
+/*************************************************
+ ************** Helper Structures ****************
+ ************************************************/
+GrainDistance::GrainDistance() :
+    _distance(std::numeric_limits<Real>::max()),
+    _grain_id(std::numeric_limits<unsigned int>::max()),
+    _var_index(std::numeric_limits<unsigned int>::max())
+{
+}
+
+GrainDistance::GrainDistance(Real distance, unsigned int grain_id, unsigned int var_index) :
+    _distance(distance),
+    _grain_id(grain_id),
+    _var_index(var_index)
+{
+}
+
+bool
+GrainDistance::operator<(const GrainDistance & rhs) const
+{
+  return _distance < rhs._distance;
+}
+
+
+/**
+ * GrainDistance sort functor (sorts in reverse order!)
+ */
+bool
+GrainDistanceSorter::operator()(const std::list<GrainDistance> & lhs, const std::list<GrainDistance> & rhs) const
+{
+  // These empty cases are here to make this comparison stable
+  if (lhs.empty())
+    return rhs.empty();
+  else if (rhs.empty())
+    return true;
+  else
+    return lhs.begin()->_distance > rhs.begin()->_distance;
 }

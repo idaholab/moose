@@ -33,21 +33,12 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
     _var_coloring(_field_display == "VARIABLE_COLORING"),
     _field_type(static_cast<FeatureFloodCount::FIELD_TYPE>(static_cast<int>(_field_display)))
 {
-  if (isNodal())
-  {
-    if (_field_display == "ACTIVE_BOUNDS")
-      mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
+  if (_flood_counter.isElemental() == isNodal() &&
+      (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING" || _field_display == "GHOSTED_ENTITIES" || _field_display == "HALOS"))
+    mooseError("UNIQUE_REGION, VARIABLE_COLORING, GHOSTED_ENTITITES and HALOS must be on variable types that match the entity mode of the FeatureFloodCounter");
 
-    if (_flood_counter.isElemental() &&
-        (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING" || _field_display == "GHOSTED_ENTITIES" || _field_display == "HALOS"))
-      mooseError("UNIQUE_REGION, VARIABLE_COLORING, and GHOSTED_ENTITITES must be on variable types that match the entity mode of the FeatureFloodCounter");
-  }
-  else
-  {
-    if (! _flood_counter.isElemental() &&
-        (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING" || _field_display == "GHOSTED_ENTITIES" || _field_display == "HALOS"))
-      mooseError("UNIQUE_REGION, VARIABLE_COLORING, and GHOSTED_ENTITITES must be on variable types that match the entity mode of the FeatureFloodCounter");
-  }
+  if (isNodal() && _field_display == "ACTIVE_BOUNDS")
+    mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
 }
 
 Real
@@ -62,6 +53,9 @@ FeatureFloodCountAux::computeValue()
     return _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _field_type, _var_idx);
   case 4:  // ACTIVE_BOUNDS
     return _flood_counter.getElementalValues(_current_elem->id()).size();
+
+  default:
+    mooseError("Unimplemented \"field_display\" type");
   }
 
   return 0;

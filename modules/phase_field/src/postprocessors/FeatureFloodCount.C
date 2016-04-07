@@ -9,6 +9,7 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "MooseUtils.h"
+#include "IndirectSort.h"
 
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
@@ -22,44 +23,15 @@
 #include <algorithm>
 #include <limits>
 
-/**
- * index sort functor
- */
+// TODO: Replace this with something better that can handle MooseSharedPointer<T>
 template<typename T>
-class index_sorter {
-public:
-    index_sorter(T const & c) :
-        c(c)
-    {}
-
-    bool operator()(std::size_t const & lhs, std::size_t const & rhs) const
-    {
-      return *c[lhs] < *c[rhs];
-    }
-
-  private:
-    T const & c;
+struct DereferenceSorter
+{
+  bool operator()(const T & lhs, const T & rhs) const
+  {
+    return *lhs < *rhs;
+  }
 };
-
-/**
- * generator for populating index vector
- */
-template <typename T>
-class idx_gen {
-public:
-    idx_gen(T seed) :
-        i(seed)
-    {}
-
-    T operator()()
-    {
-      return i++;
-    }
-
-private:
-  T i;
-};
-
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
@@ -147,28 +119,22 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
+    _entities_visited(_vars.size()), // This map is always sized to the number of variables
     _feature_count(0),
+    _partial_feature_sets(_app.n_processors()),
+    _feature_sets(_maps_size),
+    _feature_maps(_maps_size),
     _pbs(NULL),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
 {
-  _partial_feature_sets.resize(_app.n_processors());
-
   // Size the data structures to hold the correct number of maps
   for (unsigned int rank = 0; rank < _app.n_processors(); ++rank)
     _partial_feature_sets[rank].resize(_maps_size);
 
-  _feature_sets.resize(_maps_size);
-  _feature_maps.resize(_maps_size);
-//  _region_counts.resize(_maps_size);
-//  _region_offsets.resize(_maps_size);
-
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
-
-  // This map is always size to the number of variables
-  _entities_visited.resize(_vars.size());
 }
 
 FeatureFloodCount::~FeatureFloodCount()
@@ -347,49 +313,49 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
 
   switch (field_type)
   {
-  case UNIQUE_REGION:
-  {
-    std::map<dof_id_type, int>::const_iterator entity_it = _feature_maps[var_idx].find(entity_id);
+    case UNIQUE_REGION:
+    {
+      std::map<dof_id_type, int>::const_iterator entity_it = _feature_maps[var_idx].find(entity_id);
 
-    if (entity_it != _feature_maps[var_idx].end())
-      return entity_it->second; // + _region_offsets[var_idx];
-    else
-      return -1;
+      if (entity_it != _feature_maps[var_idx].end())
+        return entity_it->second; // + _region_offsets[var_idx];
+      else
+        return -1;
+    }
+
+    case VARIABLE_COLORING:
+    {
+      std::map<dof_id_type, int>::const_iterator entity_it = _var_index_maps[var_idx].find(entity_id);
+
+      if (entity_it != _var_index_maps[var_idx].end())
+        return entity_it->second;
+      else
+        return -1;
+    }
+
+    case GHOSTED_ENTITIES:
+    {
+      std::map<dof_id_type, int>::const_iterator entity_it = _ghosted_entity_ids.find(entity_id);
+
+      if (entity_it != _ghosted_entity_ids.end())
+        return entity_it->second;
+      else
+        return -1;
+    }
+
+    case HALOS:
+    {
+      std::map<dof_id_type, int>::const_iterator entity_it = _halo_ids.find(entity_id);
+
+      if (entity_it != _halo_ids.end())
+        return entity_it->second;
+      else
+        return -1;
+    }
+
+    default:
+      return 0;
   }
-
-  case VARIABLE_COLORING:
-  {
-    std::map<dof_id_type, int>::const_iterator entity_it = _var_index_maps[var_idx].find(entity_id);
-
-    if (entity_it != _var_index_maps[var_idx].end())
-      return entity_it->second;
-    else
-      return -1;
-  }
-
-  case GHOSTED_ENTITIES:
-  {
-    std::map<dof_id_type, int>::const_iterator entity_it = _ghosted_entity_ids.find(entity_id);
-
-    if (entity_it != _ghosted_entity_ids.end())
-      return entity_it->second;
-    else
-      return -1;
-  }
-
-  case HALOS:
-  {
-    std::map<dof_id_type, int>::const_iterator entity_it = _halo_ids.find(entity_id);
-
-    if (entity_it != _halo_ids.end())
-      return entity_it->second;
-    else
-      return -1;
-  }
-
-  default:
-    return 0;
-  };
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
@@ -642,7 +608,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   // Now consolidate the data structure
   _feature_count = 0;
   for (processor_id_type rank = 0; rank < n_procs; ++rank)
-  {
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     {
       for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
@@ -657,7 +622,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
       _partial_feature_sets[rank][map_num].clear();
     }
-  }
+
 
 //  // DEBUGGING
 //  _console << "*********************************************************************************************\n"
@@ -688,13 +653,11 @@ FeatureFloodCount::updateFieldInfo()
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     /**
-     * Perform an indexed sort to give a parallel unique sorting to the identified features.
+     * Perform an indirect sort to give a parallel unique sorting to the identified features.
      * We use the "min_entity_id" inside each feature to assign it's position in the
      * sorted indices vector.
      */
-    index_vector.resize(_feature_sets[map_num].size());
-    std::generate(index_vector.begin(), index_vector.end(), idx_gen<unsigned int>(0));
-    std::sort(index_vector.begin(), index_vector.end(), index_sorter<std::vector<MooseSharedPointer<FeatureData> > >(_feature_sets[map_num]));
+    Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector, DereferenceSorter<MooseSharedPointer<FeatureData> >());
 
     // Clear out the original markings since they aren't unique globally
     _feature_maps[map_num].clear();
@@ -753,7 +716,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureD
   Real threshold = feature ? _step_connecting_threshold : _step_threshold;
 
   // Get the value of the current variable for the current entity
-  Number entity_value;
+  Real entity_value;
   if (_is_elemental)
   {
     const Elem * elem = static_cast<const Elem *>(dof_object);

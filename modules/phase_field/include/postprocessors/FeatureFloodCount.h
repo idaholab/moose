@@ -54,12 +54,12 @@ public:
 
   enum FIELD_TYPE
   {
-  UNIQUE_REGION,
-  VARIABLE_COLORING,
-  GHOSTED_ENTITIES,
-  HALOS,
-  ACTIVE_BOUNDS,
-  CENTROID,
+    UNIQUE_REGION,
+    VARIABLE_COLORING,
+    GHOSTED_ENTITIES,
+    HALOS,
+    ACTIVE_BOUNDS,
+    CENTROID,
   };
 
   // Retrieve field information
@@ -81,12 +81,12 @@ public:
   {
     FeatureData(unsigned int var_idx = std::numeric_limits<unsigned int>::max()) :
         _var_idx(var_idx),
+        _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _status(NOT_MARKED),
         _merged(false),
         _intersects_boundary(false)
     {
-      _bboxes.resize(1);
     }
 
     FeatureData(const FeatureData & f) :
@@ -287,12 +287,6 @@ protected:
   std::vector<std::map<dof_id_type, bool> > _entities_visited;
 
   /**
-   * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
-   * of them so we can create one per variable if that level of detail is desired.
-   */
-  std::vector<std::map<dof_id_type, int> > _feature_maps;
-
-  /**
    * This map keeps track of which variables own which nodes.  We need a vector of them for multimap mode where
    * multiple variables can own a single mode.  Note: This map is only populated when "show_var_coloring" is set
    * to true.
@@ -306,17 +300,24 @@ protected:
   unsigned int _feature_count;
 
   /**
+   * The data structure used to hold partial and communicated feature data.
+   * The data structure mirrors that found in _feature_sets, but contains
+   * one additional vector indexed by processor id
+   */
+  std::vector<std::vector<std::vector<FeatureData> > > _partial_feature_sets;
+
+  /**
    * The data structure used to hold the globally unique features. The outer vector
    * is indexed by variable number, the inner vector is indexed by feature number
    */
   std::vector<std::vector<MooseSharedPointer<FeatureData> > > _feature_sets;
 
   /**
-   * The data structure used to hold partial and communicated feature data.
-   * The data structure mirrors that found in _feature_sets, but contains
-   * one additional vector indexed by processor id
+   * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
+   * of them so we can create one per variable if that level of detail is desired.
    */
-  std::vector<std::vector<std::vector<FeatureData> > > _partial_feature_sets;
+  std::vector<std::map<dof_id_type, int> > _feature_maps;
+
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;

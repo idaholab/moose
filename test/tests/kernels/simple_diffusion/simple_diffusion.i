@@ -44,8 +44,5 @@
 []
 
 [Outputs]
-  [./exodus]
-    type = Exodus
-    file_base = foo_${=floor ${+ ${/ ${=time} 31556926} 1970} }
-  [../]
+  exodus = true
 []
