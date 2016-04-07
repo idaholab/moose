@@ -64,7 +64,8 @@ AdaptAndModify::endStep(Real input_time)
     for (unsigned int i=0; i<_adapt_cycles; i++)
     {
       // Compute the Error Indicators and Markers
-      _problem.computeIndicatorsAndMarkers();
+      _problem.computeIndicators();
+      _problem.computeMarkers();
 
 #ifdef LIBMESH_ENABLE_AMR
       if (_problem.adaptivity().isOn())

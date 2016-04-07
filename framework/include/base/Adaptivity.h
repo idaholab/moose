@@ -113,6 +113,19 @@ public:
   void setCyclesPerStep(const unsigned int & num){ _cycles_per_step = num; }
 
   /**
+   * Pull out the _recompute_markers_during_cycles flag previously set through the AdaptivityAction
+   *
+   * @return the flag to recompute markers during adaptivity cycles
+   */
+  bool getRecomputeMarkersFlag() const { return _recompute_markers_during_cycles; }
+
+  /**
+   * Set the flag to recompute markers during adaptivity cycles
+   * @param flag The flag to recompute markers
+   */
+  void setRecomputeMarkersFlag(const bool flag){ _recompute_markers_during_cycles = flag; }
+
+  /**
    * Adapts the mesh based on the error estimator used
    *
    * @return a boolean that indicates whether the mesh was changed
@@ -250,6 +263,9 @@ protected:
   /// The maximum number of refinement levels
   unsigned int _max_h_level;
 
+  /// Whether or not to recompute markers during adaptivity cycles
+  bool _recompute_markers_during_cycles;
+
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, ErrorVector *> _indicator_field_to_error_vector;
 };
@@ -278,6 +294,8 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
   }
   else if (param_name == "cycles_per_step")
     _cycles_per_step = param_value;
+  else if (param_name == "recompute_markers_during_cycles")
+    _recompute_markers_during_cycles = param_value;
   else
     mooseError("Invalid Param in adaptivity object");
 }
