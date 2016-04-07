@@ -56,6 +56,20 @@ endif
 
 endif
 
+ifeq ($(coverage),true)
+        COVERAGE_COMPILE_EXTRA = -fprofile-arcs -ftest-coverage
+	ifeq (,$(findstring clang++,$(cxx_compiler)))
+		COVERAGE_LINK_EXTRA = -lgcov
+	else
+                COVERAGE_LINK_EXTRA =
+	endif
+else
+        COVERAGE_COMPILE_EXTRA =
+        COVERAGE_LINK_EXTRA =
+endif
+PYTHON_INCLUDE += $(COVERAGE_COMPILE_EXTRA)
+PYTHON_LIB += $(COVERAGE_LINK_EXTRA)
+
 CROW_LIB_INCLUDE_DIR := $(CROW_DIR)/contrib/include
 
 python_crow_modules :: $(PYTHON_MODULES)

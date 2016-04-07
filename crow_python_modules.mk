@@ -28,12 +28,12 @@ $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix): $(CROW_DIR)/
 
 $(CROW_DIR)/src/distributions/randomClass.$(obj-suffix): $(CROW_DIR)/src/distributions/randomClass.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
-	
+
 $(CROW_DIR)/src/distributions/distributionNDCartesianSpline.$(obj-suffix): $(CROW_DIR)/src/distributions/distributionNDCartesianSpline.C
 	$(DISTRIBUTION_COMPILE_COMMAND)
 
 $(CROW_DIR)/install/crow_modules/_distribution1Dpy2.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy2.so : $(CROW_DIR)/crow_modules/distribution1Dpy2.i $(CROW_DIR)/crow_modules/interpolationNDpy2.i $(DISTRIBUTION_SOURCE) $(INTERPOLATION_SOURCE)
-	(cd $(CROW_DIR) && if test `uname` != "Darwin"; then unset CXX; fi && python $(CROW_DIR)/setup.py build_ext build install --install-platlib=$(CROW_DIR)/install)
+	(cd $(CROW_DIR) && if test `uname` != "Darwin"; then unset CXX; fi && CFLAGS="$$CFLAGS $(COVERAGE_COMPILE_EXTRA)" && LDFLAGS="$$LDFLAGS $(COVERAGE_LINK_EXTRA)" && export CFLAGS LDFLAGS && python $(CROW_DIR)/setup.py build_ext build install --install-platlib=$(CROW_DIR)/install)
 
 $(CROW_DIR)/install/crow_modules/_distribution1Dpy3.so $(CROW_DIR)/install/crow_modules/_interpolationNDpy3.so : $(CROW_DIR)/crow_modules/distribution1Dpy3.i $(CROW_DIR)/crow_modules/interpolationNDpy3.i $(DISTRIBUTION_SOURCE) $(INTERPOLATION_SOURCE)
 	(cd $(CROW_DIR) && if test `uname` != "Darwin"; then unset CXX; fi && python3 $(CROW_DIR)/setup3.py build_ext build install --install-platlib=$(CROW_DIR)/install)
