@@ -108,6 +108,9 @@
 #include "CrystalPlasticityStateVariableGSS.h"
 #include "CrystalPlasticityStateVarRateComponentGSS.h"
 
+#include "Mass.h"
+#include "TorqueReactionScalar.h"
+
 template<>
 InputParameters validParams<TensorMechanicsApp>()
 {
@@ -234,6 +237,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(NewmarkVelAux);
 
   registerBoundaryCondition(Pressure);
+
+  registerPostprocessor(Mass);
+  registerPostprocessor(TorqueReactionScalar);
 }
 
 // External entry point for dynamic syntax association
