@@ -30,11 +30,11 @@ public:
   virtual void initialSetup();
 
 protected:
-  // /// Number of coupled variables
-  // unsigned int _nvar;
-  //
-  // /// name of the order parameter (needed to retrieve the derivative material properties)
-  // VariableName _eta_name;
+  /// Number of coupled variables
+  unsigned int _nvar;
+
+  /// name of the order parameter (needed to retrieve the derivative material properties)
+  VariableName _etai_name;
   //
   // /// Derivatives of \f$ F_a \f$ with respect to all coupled variables
   // std::vector<const MaterialProperty<Real> *> _derivatives_Fa;
@@ -44,8 +44,8 @@ protected:
   //
 
   /// Names of free energy functions for each phase \f$ F_j \f$
-  std::vector<MaterialPropertyName> _fj_names;
-  unsigned int _num_fj;
+  std::vector<MaterialPropertyName> _Fj_names;
+  unsigned int _num_Fj;
 
   /// Values of the free energy functions for each phase \f$ F_j \f$
   std::vector<const MaterialProperty<Real> *> _prop_Fj;
@@ -66,8 +66,11 @@ protected:
   /// Derivatives of the switching functions wrt the order parameter for this kernel
   std::vector<const MaterialProperty<Real> *> _prop_dhjdetai;
 
-  /// Second derivatives of the switching functions (needed for Jacobians)
-  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_d2hjdetaidetaj;
+  /// Second derivatives of the switching functions wrt the order parameter for this kernel
+  std::vector<const MaterialProperty<Real> *> _prop_d2hjdetai2;
+
+  /// Second derivatives of the switching functions (needed for off-diagonal Jacobians)
+  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_d2hjdetaidarg;
 
   // /// Gradients for all coupled variables
   // std::vector<const VariableGradient *> _grad_args;

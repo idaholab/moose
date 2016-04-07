@@ -4,16 +4,16 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef KKSACBULK_H
-#define KKSACBULK_H
+#ifndef KKSMULTIACBULKC_H
+#define KKSMULTIACBULKC_H
 
 #include "KKSACBulkBase.h"
 
 //Forward Declarations
-class KKSACBulkC;
+class KKSMultiACBulkC;
 
 template<>
-InputParameters validParams<KKSACBulkC>();
+InputParameters validParams<KKSMultiACBulkC>();
 
 /**
  * KKSACBulkBase child class for the phase concentration difference term
@@ -22,10 +22,10 @@ InputParameters validParams<KKSACBulkC>();
  *
  * The non-linear variable for this Kernel is the order parameter 'eta'.
  */
-class KKSACBulkC : public KKSACBulkBase
+class KKSMultiACBulkC : public KKSACBulkBase
 {
 public:
-  KKSACBulkC(const InputParameters & parameters);
+  KKSMultiACBulkC(const InputParameters & parameters);
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);
@@ -58,4 +58,4 @@ protected:
   std::vector<const MaterialProperty<Real>* > _prop_d2Fadcadarg;
 };
 
-#endif //KKSACBULKC_H
+#endif //KKSMULTIACBULKC_H

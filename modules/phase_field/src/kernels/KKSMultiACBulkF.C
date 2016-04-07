@@ -4,43 +4,45 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "KKSACBulkF.h"
+#include "KKSMultiACBulkF.h"
 
 template<>
-InputParameters validParams<KKSACBulkF>()
+InputParameters validParams<KKSMultiACBulkF>()
 {
-  InputParameters params = validParams<KKSACBulkBase>();
+  InputParameters params = validParams<KKSMultiACBulkBase>();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This includes all terms NOT dependent on chemical potential.");
-  params.addRequiredParam<Real>("w", "Double well height parameter");
-  params.addParam<MaterialPropertyName>("g_name", "g", "Base name for the double well function g(eta)");
+  params.addRequiredParam<Real>("wi", "Double well height parameter");
+  params.addRequiredParam<MaterialPropertyName>("gi_name", "Base name for the double well function g_i(eta)");
   return params;
 }
 
-KKSACBulkF::KKSACBulkF(const InputParameters & parameters) :
-    KKSACBulkBase(parameters),
-    _w(getParam<Real>("w")),
-    _prop_dg(getMaterialPropertyDerivative<Real>("g_name", _eta_name)),
-    _prop_d2g(getMaterialPropertyDerivative<Real>("g_name", _eta_name, _eta_name))
+KKSMultiACBulkF::KKSMultiACBulkF(const InputParameters & parameters) :
+    KKSMultiACBulkBase(parameters),
+    _wi(getParam<Real>("wi")),
+    _prop_dgi(getMaterialPropertyDerivative<Real>("gi_name", _etai_name)),
+    _prop_d2gi(getMaterialPropertyDerivative<Real>("gi_name", _etai_name, _etai_name))
 {
 }
 
 Real
-KKSACBulkF::computeDFDOP(PFFunctionType type)
+KKSMultiACBulkF::computeDFDOP(PFFunctionType type)
 {
   Real res = 0.0;
-  Real A1 = _prop_Fa[_qp] - _prop_Fb[_qp];
 
   switch (type)
   {
     case Residual:
-      return -_prop_dh[_qp] * A1 + _w * _prop_dg[_qp];
+      for (unsigned int n = 0; n < _num_Fj; ++n)
+        res += (*_prop_dhjdetai[n])[_qp] * (*_prop_Fj[n])[_qp];
+
+      return res + _wi * _prop_dgi[_qp];
 
     case Jacobian:
     {
-      res =  -_prop_d2h[_qp] * A1
-            + _w * _prop_d2g[_qp];
+      for (unsigned int n = 0; n < _num_Fj; ++n)
+        res += (*_prop_d2hjdetai2[n])[_qp] * (*_prop_Fj[n])[_qp];
 
-      return _phi[_j][_qp] * res;
+      return _phi[_j][_qp] * res + _wi * _prop_d2gi[_qp];
     }
   }
 
@@ -48,7 +50,7 @@ KKSACBulkF::computeDFDOP(PFFunctionType type)
 }
 
 Real
-KKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
+KKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
   unsigned int cvar;
@@ -59,10 +61,13 @@ KKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   // member function
   Real res = ACBulk<Real>::computeQpOffDiagJacobian(jvar);
 
-  // Then add dependence of KKSACBulkF on other variables
-  res -= _L[_qp] * _prop_dh[_qp] * (
-           (*_derivatives_Fa[cvar])[_qp] - (*_derivatives_Fb[cvar])[_qp]
-         ) * _phi[_j][_qp] * _test[_i][_qp];
+  // Then add dependence of KKSMultiACBulkF on other variables
+  // TODO: Add dF/darg to sum below
+  Real sum = 0.0;
+  for (unsigned int n = 0; n < _num_Fj; ++n)
+    sum += (*_prop_d2hjdetaidarg[n][cvar])[_qp] * (*_prop_Fj[n])[_qp];
+
+  res += _L[_qp] * sum * _phi[_j][_qp] * _test[_i][_qp];
 
   return res;
 }

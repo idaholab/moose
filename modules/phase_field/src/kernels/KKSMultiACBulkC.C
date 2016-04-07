@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "KKSACBulkC.h"
+#include "KKSMultiACBulkC.h"
 
 template<>
-InputParameters validParams<KKSACBulkC>()
+InputParameters validParams<KKSMultiACBulkC>()
 {
   InputParameters params = validParams<KKSACBulkBase>();
   params.addClassDescription("KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. This includes all terms dependent on chemical potential.");
@@ -16,7 +16,7 @@ InputParameters validParams<KKSACBulkC>()
   return params;
 }
 
-KKSACBulkC::KKSACBulkC(const InputParameters & parameters) :
+KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters) :
     KKSACBulkBase(parameters),
     _ca_name(getVar("ca", 0)->name()),
     _ca_var(coupled("ca")),
@@ -43,7 +43,7 @@ KKSACBulkC::KKSACBulkC(const InputParameters & parameters) :
 }
 
 Real
-KKSACBulkC::computeDFDOP(PFFunctionType type)
+KKSMultiACBulkC::computeDFDOP(PFFunctionType type)
 {
   Real res = 0.0;
   Real A1 = _prop_dFadca[_qp] * (_ca[_qp] - _cb[_qp]);
@@ -63,7 +63,7 @@ KKSACBulkC::computeDFDOP(PFFunctionType type)
 }
 
 Real
-KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
+KKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // first get dependence of mobility _L on other variables using parent class
   // member function
