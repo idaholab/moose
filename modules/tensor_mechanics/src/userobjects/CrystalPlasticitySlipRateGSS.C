@@ -155,7 +155,7 @@ CrystalPlasticitySlipRateGSS::calcSlipRate(unsigned int qp, Real dt, std::vector
 }
 
 bool
-CrystalPlasticitySlipRateGSS::calcSlipRateDerivative(unsigned int qp, Real dt, std::vector<Real> & val) const
+CrystalPlasticitySlipRateGSS::calcSlipRateDerivative(unsigned int qp, Real /*dt*/, std::vector<Real> & val) const
 {
   DenseVector<Real> tau(_variable_size);
 

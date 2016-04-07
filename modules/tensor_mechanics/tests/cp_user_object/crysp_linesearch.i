@@ -134,16 +134,17 @@
     uo_state_var_name = state_var_gss
   [../]
   [./state_var_gss]
-    type = CrystalPlasticityStateVariableGSS
+    type = CrystalPlasticityStateVariable
     variable_size = 12
-    gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
+    groups = '0 4 8 12'
+    group_values = '60.8 60.8 60.8'
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
   [../]
   [./state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
-    hprops = '1.0 541.5 60.8 109.8 2.5'
+    hprops = '1.0 541.5 109.8 2.5'
     uo_slip_rate_name = slip_rate_gss
     uo_state_var_name = state_var_gss
   [../]

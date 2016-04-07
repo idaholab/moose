@@ -19,7 +19,7 @@ InputParameters validParams<FiniteStrainUObasedCP>()
   params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
   params.addParam<Real>("rtol", 1e-6, "Constitutive stress residue relative tolerance");
   params.addParam<Real>("abs_tol", 1e-6, "Constitutive stress residue absolute tolerance");
-  params.addParam<Real>("stol", 1e2, "Constitutive slip system resistance residual tolerance");
+  params.addParam<Real>("stol", 1e-2, "Constitutive slip system resistance relative residual tolerance");
   params.addParam<Real>("zero_tol", 1e-12, "Tolerance for residual check when variable value is zero");
   params.addParam<unsigned int>("maxiter", 100 , "Maximum number of iterations for stress update");
   params.addParam<unsigned int>("maxiter_state_variable", 100 , "Maximum number of iterations for state variable update");
@@ -149,7 +149,6 @@ void FiniteStrainUObasedCP::initQpStatefulProperties()
   _fp[_qp].addIa(1.0);
 
   _pk2[_qp].zero();
-  _pk2_tmp_old.zero();
 
   _lag_e[_qp].zero();
 
@@ -170,6 +169,9 @@ void FiniteStrainUObasedCP::initQpStatefulProperties()
  */
 void FiniteStrainUObasedCP::computeQpStress()
 {
+  // Userobject based crystal plasticity does not support face/boundary material property calculation.
+  if (isBoundaryMaterial())
+    return;
   // Depth of substepping; Limited to maximum substep iteration
   unsigned int substep_iter = 1;
   // Calculated from substep_iter as 2^substep_iter
@@ -211,8 +213,8 @@ void FiniteStrainUObasedCP::computeQpStress()
         break;
       }
     }
-    if (substep_iter > _max_substep_iter)
-      mooseWarning("FiniteStrainUObasedCP: Failure with substepping");
+    if (substep_iter > _max_substep_iter && _err_tol)
+      mooseError("FiniteStrainUObasedCP: Constitutive failure");
   }
   while (_err_tol);
 
@@ -227,7 +229,7 @@ FiniteStrainUObasedCP::preSolveQp()
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
     (*_mat_prop_state_vars[i])[_qp] = (*_mat_prop_state_vars_old[i])[_qp] = _state_vars_old[i];
 
-  _pk2[_qp] = _pk2_tmp_old = _pk2_old[_qp];
+  _pk2[_qp] = _pk2_old[_qp];
   _fp_old_inv = _fp_old[_qp].inverse();
 }
 
@@ -271,8 +273,10 @@ FiniteStrainUObasedCP::preSolveStatevar()
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
     (*_mat_prop_state_vars[i])[_qp] = (*_mat_prop_state_vars_old[i])[_qp];
 
-  for (unsigned int i = 0; i < _num_uo_slip_rates; ++i)
+  for (unsigned int i = 0; i < _num_uo_slip_resistances; ++i)
     _uo_slip_resistances[i]->calcSlipResistance(_qp, (*_mat_prop_slip_resistances[i])[_qp]);
+
+  _fp_inv = _fp_old_inv;
 }
 
 void
@@ -291,8 +295,8 @@ FiniteStrainUObasedCP::solveStatevar()
       return;
     postSolveStress();
 
-    // Update slip system resistance
-    updateSlipSystemResistance();
+    // Update slip system resistance and state variable
+    updateSlipSystemResistanceAndStateVariable();
 
     if (_err_tol)
       return;
@@ -337,15 +341,11 @@ FiniteStrainUObasedCP::postSolveStatevar()
     (*_mat_prop_state_vars_old[i])[_qp] = (*_mat_prop_state_vars[i])[_qp];
 
   _fp_old_inv = _fp_inv;
-  _pk2_tmp_old = _pk2[_qp];
-
 }
 
 void
 FiniteStrainUObasedCP::preSolveStress()
 {
-  _pk2[_qp] = _pk2_tmp_old;
-  _fp_inv = _fp_old_inv;
 }
 
 void
@@ -417,9 +417,8 @@ FiniteStrainUObasedCP::postSolveStress()
   _fp[_qp] = _fp_inv.inverse();
 }
 
-// Update slip system resistance. Overide to incorporate new slip system resistance laws
 void
-FiniteStrainUObasedCP::updateSlipSystemResistance()
+FiniteStrainUObasedCP::updateSlipSystemResistanceAndStateVariable()
 {
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
     _state_vars_prev[i] = (*_mat_prop_state_vars[i])[_qp];
@@ -433,7 +432,7 @@ FiniteStrainUObasedCP::updateSlipSystemResistance()
       _err_tol = true;
   }
 
-  for (unsigned int i = 0; i < _num_uo_slip_rates; ++i)
+  for (unsigned int i = 0; i < _num_uo_slip_resistances; ++i)
     _uo_slip_resistances[i]->calcSlipResistance(_qp, (*_mat_prop_slip_resistances[i])[_qp]);
 }
 

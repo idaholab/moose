@@ -55,10 +55,10 @@ protected:
   virtual void calcResidJacob();
 
   /**
-   * updates the slip system resistances.
-   * Override to modify slip system resistance evolution
+   * updates the slip system resistances and state variables.
+   * override to modify slip system resistance and state variable evolution.
    */
-  virtual void updateSlipSystemResistance();
+  virtual void updateSlipSystemResistanceAndStateVariable();
 
   /**
    * set variables for stress and internal variable solve.
@@ -248,7 +248,6 @@ protected:
   /// Crystal rotation
   const MaterialProperty<RankTwoTensor> & _crysrot;
 
-  RankTwoTensor _pk2_tmp_old;
   RankTwoTensor _dfgrd_tmp;
   RankTwoTensor _fe, _fp_old_inv, _fp_inv;
   DenseVector<Real> _tau;

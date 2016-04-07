@@ -28,7 +28,7 @@ class CrystalPlasticityStateVarRateComponentGSS : public CrystalPlasticityStateV
   const MaterialProperty<std::vector<Real> > & _mat_prop_state_var;
 
   /// The hardening parameters in this class are read from .i file. The user can override to read from file.
-  std::string _slip_sys_hard_prop_file_name;
+  FileName _slip_sys_hard_prop_file_name;
 
   std::vector<Real> _hprops;
 };
