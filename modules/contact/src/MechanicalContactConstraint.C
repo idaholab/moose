@@ -277,7 +277,6 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
           RealVectorValue contact_force_normal( (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal );
           RealVectorValue contact_force_tangential( pinfo->_contact_force - contact_force_normal );
 
-          RealVectorValue tangential_inc_slip_prev_iter = pinfo->_incremental_slip_prev_iter - (pinfo->_incremental_slip_prev_iter * pinfo->_normal) * pinfo->_normal;
           RealVectorValue tangential_inc_slip = pinfo->_incremental_slip - (pinfo->_incremental_slip * pinfo->_normal) * pinfo->_normal;
 
           // Magnitude of tangential predictor force
