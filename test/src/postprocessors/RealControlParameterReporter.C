@@ -35,7 +35,7 @@ void
 RealControlParameterReporter::initialSetup()
 {
   MooseObjectParameterName name(getParam<std::string>("parameter"));
-  const InputParameters & params = getMooseApp().getInputParameterWarehouse().getInputParametersObject(name.tag(), name.name(), _tid);
+  const InputParameters & params = getMooseApp().getInputParameterWarehouse().getInputParametersObject(name.tag(), name.name(), 0);
   _parameter = &params.get<Real>(name.parameter());
 }
 

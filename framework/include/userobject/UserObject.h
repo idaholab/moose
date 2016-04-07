@@ -30,7 +30,7 @@
 class UserObject;
 class FEProblem;
 class SubProblem;
-class Assembly;
+class MooseMesh;
 
 template<>
 InputParameters validParams<UserObject>();
@@ -134,12 +134,8 @@ protected:
   /// Reference to the FEProblem for this user object
   FEProblem & _fe_problem;
 
-  /// Thread ID of this postprocessor
-  THREAD_ID _tid;
-  Assembly & _assembly;
-
-  /// Coordinate system
-  const Moose::CoordinateSystemType & _coord_sys;
+  /// The mesh of the FEProblem
+  MooseMesh & _mesh;
 };
 
 

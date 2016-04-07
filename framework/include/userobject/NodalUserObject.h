@@ -61,8 +61,14 @@ public:
   bool isUniqueNodeExecute() { return _unique_node_execute; }
 
 protected:
-  /// The mesh that is being iterated over
-  MooseMesh & _mesh;
+  /// Thread ID of this postprocessor
+  THREAD_ID _tid;
+
+  /// Assembly of this thread of this postprocessor
+  Assembly & _assembly;
+
+  /// Coordinate system
+  const Moose::CoordinateSystemType & _coord_sys;
 
   /// Quadrature point index
   const unsigned int _qp;

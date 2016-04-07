@@ -31,7 +31,6 @@ InputParameters validParams<NodalVariableValue>()
 
 NodalVariableValue::NodalVariableValue(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _node_ptr(_mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid"))),
     _scale_factor(getParam<Real>("scale_factor"))
@@ -50,7 +49,7 @@ NodalVariableValue::getValue()
   Real value = 0;
 
   if (_node_ptr->processor_id() == processor_id())
-    value = _subproblem.getVariable(_tid, _var_name).getNodalValue(*_node_ptr);
+    value = _subproblem.getVariable(0, _var_name).getNodalValue(*_node_ptr);
 
   gatherSum(value);
 

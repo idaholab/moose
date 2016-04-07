@@ -115,8 +115,8 @@ LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & para
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _mesh(_subproblem.mesh()),
-    _qrule(_subproblem.assembly(_tid).qRule()),
-    _q_point(_subproblem.assembly(_tid).qPoints())
+    _qrule(_subproblem.assembly(0).qRule()),
+    _q_point(_subproblem.assembly(0).qPoints())
 {
   std::vector<std::string> material_property_names = getParam<std::vector<std::string> >("property");
   for (unsigned int i=0; i<material_property_names.size(); ++i)
@@ -162,9 +162,9 @@ LineMaterialSamplerBase<T>::execute()
     if (!hasBlocks(elem->subdomain_id()))
       continue;
 
-    _subproblem.prepare(elem, _tid);
-    _subproblem.reinitElem(elem, _tid);
-    _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
+    _subproblem.prepare(elem, 0);
+    _subproblem.reinitElem(elem, 0);
+    _fe_problem.reinitMaterials(elem->subdomain_id(), 0);
 
     for (unsigned int qp=0; qp<_qrule->n_points(); ++qp)
     {
@@ -181,7 +181,7 @@ LineMaterialSamplerBase<T>::execute()
 
       addSample(_q_point[qp], qp_proj_dist_along_line, values);
     }
-    _fe_problem.swapBackMaterials(_tid);
+    _fe_problem.swapBackMaterials(0);
   }
 }
 

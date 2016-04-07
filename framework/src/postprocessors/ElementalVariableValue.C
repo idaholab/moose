@@ -27,7 +27,6 @@ InputParameters validParams<ElementalVariableValue>()
 
 ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem(parameters.get<unsigned int>("elementid")))
 {
@@ -43,10 +42,10 @@ ElementalVariableValue::getValue()
 
   if (_element && (_element->processor_id() == processor_id()))
   {
-    _subproblem.prepare(_element, _tid);
-    _subproblem.reinitElem(_element, _tid);
+    _subproblem.prepare(_element, 0);
+    _subproblem.reinitElem(_element, 0);
 
-    MooseVariable & var = _subproblem.getVariable(_tid, _var_name);
+    MooseVariable & var = _subproblem.getVariable(0, _var_name);
     const VariableValue & u = var.sln();
     unsigned int n = u.size();
     for (unsigned int i = 0; i < n; i++)

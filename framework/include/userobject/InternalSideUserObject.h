@@ -49,7 +49,14 @@ public:
   virtual ~InternalSideUserObject();
 
 protected:
-  MooseMesh & _mesh;
+  /// Thread ID of this postprocessor
+  THREAD_ID _tid;
+
+  /// Assembly of this thread of this postprocessor
+  Assembly & _assembly;
+
+  /// Coordinate system
+  const Moose::CoordinateSystemType & _coord_sys;
 
   const MooseArray<Point> & _q_point;
   QBase * & _qrule;

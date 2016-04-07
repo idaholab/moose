@@ -57,7 +57,14 @@ public:
   ElementUserObject(const InputParameters & parameters);
 
 protected:
-  MooseMesh & _mesh;
+  /// Thread ID of this postprocessor
+  THREAD_ID _tid;
+
+  /// Assembly of this thread of this postprocessor
+  Assembly & _assembly;
+
+  /// Coordinate system
+  const Moose::CoordinateSystemType & _coord_sys;
 
   /// The current element pointer (available during execute())
   const Elem * & _current_elem;

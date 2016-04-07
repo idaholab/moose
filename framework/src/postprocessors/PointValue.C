@@ -29,7 +29,7 @@ InputParameters validParams<PointValue>()
 
 PointValue::PointValue(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _var(_subproblem.getVariable(0, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
     _mesh(_subproblem.mesh().getMesh()),
     _point_vec(1, getParam<Point>("point")),
@@ -69,7 +69,7 @@ PointValue::finalize()
     std::set<MooseVariable *> var_list;
     var_list.insert(&_var);
 
-    _fe_problem.setActiveElementalMooseVariables(var_list, _tid);
+    _fe_problem.setActiveElementalMooseVariables(var_list, 0);
     _subproblem.reinitElemPhys(elem, _point_vec, 0);
     mooseAssert(_u.size() == 1, "No values in u!");
     _value = _u[0];
