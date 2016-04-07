@@ -26,11 +26,6 @@ InputParameters validParams<SpecifiedSmoothSuperellipsoidIC>();
 class SpecifiedSmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   SpecifiedSmoothSuperellipsoidIC(const InputParameters & parameters);
 
   virtual void computeSuperellipsoidCenters();
