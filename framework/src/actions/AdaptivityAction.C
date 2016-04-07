@@ -48,6 +48,7 @@ InputParameters validParams<AdaptivityAction>()
   params.addParam<unsigned int>("cycles_per_step", 1, "The number of adaptivity cycles per step");
 
   params.addParam<bool>("show_initial_progress", true, "Show the progress of the initial adaptivity");
+  params.addParam<bool>("recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
   return params;
 }
 
@@ -71,6 +72,7 @@ AdaptivityAction::act()
   adapt.setParam("refine fraction", getParam<Real>("refine_fraction"));
   adapt.setParam("coarsen fraction", getParam<Real>("coarsen_fraction"));
   adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
+  adapt.setParam("recompute_markers_during_cycles", getParam<bool>("recompute_markers_during_cycles"));
 
   adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 

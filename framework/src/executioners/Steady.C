@@ -107,7 +107,8 @@ Steady::execute()
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
-    _problem.computeIndicatorsAndMarkers();
+    _problem.computeIndicators();
+    _problem.computeMarkers();
 
     _problem.outputStep(EXEC_TIMESTEP_END);
 

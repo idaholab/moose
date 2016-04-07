@@ -14,7 +14,6 @@ template<>
 InputParameters validParams<PolycrystalKernelAction>()
 {
   InputParameters params = validParams<Action>();
-
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
@@ -22,7 +21,6 @@ InputParameters validParams<PolycrystalKernelAction>()
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<VariableName>("T", "Name of temperature variable");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-
   return params;
 }
 

@@ -728,6 +728,8 @@ public:
                                 bool & changed_new_soln);
 
   virtual void computeIndicatorsAndMarkers();
+  virtual void computeIndicators();
+  virtual void computeMarkers();
 
   virtual NumericVector<Number> & residualVector(Moose::KernelType type);
 

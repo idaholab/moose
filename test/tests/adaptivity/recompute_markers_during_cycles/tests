@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'recompute_markers_during_cycles.i'
+    exodiff = 'recompute_markers_during_cycles_out.e-s002'
+  [../]
+[]
