@@ -52,19 +52,19 @@
 []
 
 [AuxKernels]
-  [./zeroslip_x]
-    type = ConstantAux
+  [./incslip_x]
+    type = PenetrationAux
     variable = inc_slip_x
+    quantity = incremental_slip_x
     boundary = 3
-    execute_on = timestep_begin
-    value = 0.0
+    paired_boundary = 2
   [../]
-  [./zeroslip_y]
-    type = ConstantAux
+  [./incslip_y]
+    type = PenetrationAux
     variable = inc_slip_y
+    quantity = incremental_slip_y
     boundary = 3
-    execute_on = timestep_begin
-    value = 0.0
+    paired_boundary = 2
   [../]
   [./accum_slip_x]
     type = AccumulateAux
@@ -185,8 +185,8 @@
 
 
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre    boomeramg      101'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu    superlu_dist'
 
 
   line_search = 'none'
@@ -205,6 +205,8 @@
 [Outputs]
   file_base = single_point_2d_out
   exodus = true
+  print_linear_residuals = true
+  print_perf_log = true
   [./console]
     type = Console
     max_rows = 5
@@ -217,30 +219,16 @@
     slave = 3
     disp_y = disp_y
     disp_x = disp_x
-    model = glued
+    model = coulomb
+    system = constraint
+    friction_coefficient = '0.25'
   [../]
 []
 
-[Problem]
-  type = FrictionalContactProblem
-  master = '2'
-  slave = '3'
-  friction_coefficient = '0.25'
-  slip_factor = '1.0'
-  slip_too_far_factor = '1.0'
-  disp_x = disp_x
-  disp_y = disp_y
-  residual_x = saved_x
-  residual_y = saved_y
-  diag_stiff_x = diag_saved_x
-  diag_stiff_y = diag_saved_y
-  inc_slip_x = inc_slip_x
-  inc_slip_y = inc_slip_y
-  contact_slip_tolerance_factor = 100.
-  target_relative_contact_residual = 1.e-8
-  maximum_slip_iterations = 50
-  minimum_slip_iterations = 1
-  slip_updates_per_iteration = 5
-  solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
+[Dampers]
+  [./contact_slip]
+    type = ContactSlipDamper
+    master = '2'
+    slave = '3'
+  [../]
 []

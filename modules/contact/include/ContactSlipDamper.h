@@ -48,7 +48,7 @@ protected:
    */
   bool operateOnThisInteraction(const PenetrationLocator & pen_loc);
 
-  std::set<std::pair<int,int> > _interactions;
+  std::set<std::pair<int, int> > _interactions;
 
   int _num_contact_nodes;
   int _num_sticking;
@@ -56,8 +56,6 @@ protected:
   int _num_slipping_friction;
   int _num_stick_locked;
   int _num_slip_reversed;
-  Real _inc_slip_norm;
-  Real _it_slip_norm;
   Real _max_iterative_slip;
   Real _min_damping_factor;
   Real _damping_threshold_factor;
