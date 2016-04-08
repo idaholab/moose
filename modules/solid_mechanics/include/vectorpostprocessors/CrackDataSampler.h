@@ -51,7 +51,6 @@ public:
   virtual void execute();
 
   virtual void finalize();
-  virtual void threadJoin(const SamplerBase &);
 
 protected:
   const CrackFrontDefinition * const _crack_front_definition;

@@ -82,10 +82,3 @@ CrackDataSampler::finalize()
 {
   SamplerBase::finalize();
 }
-
-void
-CrackDataSampler::threadJoin(const SamplerBase & y)
-{
-  const CrackDataSampler & vpp = static_cast<const CrackDataSampler &>(y);
-  SamplerBase::threadJoin(vpp);
-}

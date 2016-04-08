@@ -290,9 +290,6 @@ SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
                           std::map<T, std::multimap<std::string, std::string> > & check_props,
                           std::map<T, std::set<MaterialPropertyName> > & zero_props)
 {
-  // Set flag for type: block/boundary
-  bool block_type;
-
   // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
   T any_id = mesh().getAnyID<T>();
 

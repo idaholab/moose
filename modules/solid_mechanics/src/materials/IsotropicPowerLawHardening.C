@@ -42,7 +42,7 @@ IsotropicPowerLawHardening::IsotropicPowerLawHardening( const InputParameters & 
 }
 
 void
-IsotropicPowerLawHardening::computeYieldStress(unsigned qp)
+IsotropicPowerLawHardening::computeYieldStress(unsigned /*qp*/)
 {
   _yield_stress = std::pow(_K/pow(_youngs_modulus, _n), 1.0/(1.0-_n));
 }
@@ -65,7 +65,7 @@ IsotropicPowerLawHardening::computeStressInitialize(unsigned qp, Real effectiveT
 }
 
 Real
-IsotropicPowerLawHardening::computeHardening( unsigned qp, Real scalar )
+IsotropicPowerLawHardening::computeHardening( unsigned /*qp*/, Real scalar )
 {
   Real stress = _effectiveTrialStress - 3.0 * _shear_modulus * scalar;
   Real slope = std::pow(stress, 1.0/_n -1.0)/ _n/ std::pow(_K, 1.0/_n) - 1.0/_youngs_modulus;

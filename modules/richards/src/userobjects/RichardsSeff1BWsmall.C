@@ -65,7 +65,7 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   mooseAssert(z > 0, "LambertW function in RichardsSeff1BWsmall called with negative argument");
 
   int i;
-  const Real eps=4.0e-16, em1=0.3678794411714423215955237701614608;
+  const Real eps=4.0e-16; //, em1=0.3678794411714423215955237701614608;
   Real p,e,t,w;
 
   /* Uncomment this stuff is you ever need to call with a negative argument
@@ -155,4 +155,3 @@ RichardsSeff1BWsmall::d2seff(std::vector<const VariableValue *> p, unsigned int 
   Real lamw = LambertW(x);
   result[0][0] = -std::pow(_c, 3)/std::pow(_las, 2)*lamw*(1 - 2*lamw)/std::pow(1 + lamw, 5);
 }
-
