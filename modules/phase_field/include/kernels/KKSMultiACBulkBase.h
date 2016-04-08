@@ -35,13 +35,6 @@ protected:
 
   /// name of the order parameter (needed to retrieve the derivative material properties)
   VariableName _etai_name;
-  //
-  // /// Derivatives of \f$ F_a \f$ with respect to all coupled variables
-  // std::vector<const MaterialProperty<Real> *> _derivatives_Fa;
-  //
-  // /// Derivatives of \f$ F_b \f$ with respect to all coupled variables
-  // std::vector<const MaterialProperty<Real> *> _derivatives_Fb;
-  //
 
   /// Names of free energy functions for each phase \f$ F_j \f$
   std::vector<MaterialPropertyName> _Fj_names;
@@ -49,13 +42,10 @@ protected:
 
   /// Values of the free energy functions for each phase \f$ F_j \f$
   std::vector<const MaterialProperty<Real> *> _prop_Fj;
-  //  //
-  // /// Derivative of the free energy function \f$ \frac d{d\eta} F_a \f$
-  // const MaterialProperty<Real> & _prop_dFa;
-  //
-  // /// Derivative of the free energy function \f$ \frac d{d\eta} F_b \f$
-  // const MaterialProperty<Real> & _prop_dFb;
-  //
+
+  /// Derivatives of the free energy functions (needed for off-diagonal Jacobians)
+  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_dFjdarg;
+
   /// switching function names
   std::vector<MaterialPropertyName> _hj_names;
   unsigned int _num_hj;
@@ -71,9 +61,6 @@ protected:
 
   /// Second derivatives of the switching functions (needed for off-diagonal Jacobians)
   std::vector<std::vector<const MaterialProperty<Real> *> > _prop_d2hjdetaidarg;
-
-  // /// Gradients for all coupled variables
-  // std::vector<const VariableGradient *> _grad_args;
 };
 
 #endif //KKSMULTIACBULKBASE_H

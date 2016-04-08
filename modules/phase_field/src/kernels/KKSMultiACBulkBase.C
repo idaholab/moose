@@ -39,10 +39,7 @@ KKSMultiACBulkBase::KKSMultiACBulkBase(const InputParameters & parameters) :
   {
     // get phase free energy
     _prop_Fj[n] = &getMaterialPropertyByName<Real>(_Fj_names[n]);
-    // _prop_dFi[n].resize(_nargs);
-    // _prop_d2Fi[n].resize(_nargs);
-    // _prop_d3Fi[n].resize(_nargs);
-    //
+    _prop_dFjdarg[n].resize(_nvar);
 
     // get switching function and derivatives wrt eta_i, the nonlinear variable
     _prop_hj[n] = &getMaterialPropertyByName<Real>(_hj_names[n]);
@@ -50,57 +47,23 @@ KKSMultiACBulkBase::KKSMultiACBulkBase(const InputParameters & parameters) :
     _prop_d2hjdetai2[n] = &getMaterialPropertyDerivative<Real>(_hj_names[n], _etai_name, _etai_name);
     _prop_d2hjdetaidarg[n].resize(_nvar);
 
-    // Get second derivatives wrt eta_i and all coupled variables
     for (unsigned int i = 0; i < _nvar; ++i)
     {
       MooseVariable *cvar = _coupled_moose_vars[i];
+      // Get derivatives of all Fj wrt all coupled variables
+      _prop_dFjdarg[n][i] = &getMaterialPropertyDerivative<Real>(_Fj_names[n], cvar->name());
 
+      // Get second derivatives of all hj wrt eta_i and all coupled variables
       _prop_d2hjdetaidarg[n][i] = &getMaterialPropertyDerivative<Real>(_hj_names[n], _etai_name, cvar->name());
-
-    //   _prop_dFi[n][i] = &getMaterialPropertyDerivative<Real>(_fi_names[n], _arg_names[i]);
-    //   _prop_d2Fi[n][i].resize(_nargs);
-    //
-    //   if (_third_derivatives)
-    //     _prop_d3Fi[n][i].resize(_nargs);
-    //
-    //   for (unsigned int j = 0; j < _nargs; ++j)
-    //   {
-    //     _prop_d2Fi[n][i][j] = &getMaterialPropertyDerivative<Real>(_fi_names[n], _arg_names[i], _arg_names[j]);
-    //
-    //     if (_third_derivatives) {
-    //       _prop_d3Fi[n][i][j].resize(_nargs);
-    //
-    //       for (unsigned int k = 0; k < _nargs; ++k)
-    //         _prop_d3Fi[n][i][j][k] = &getMaterialPropertyDerivative<Real>(_fi_names[n], _arg_names[i], _arg_names[j], _arg_names[k]);
-    //     }
-    //   }
     }
   }
-
-
-  // reserve space for derivatives
-  // _derivatives_Fa.resize(_nvar);
-  // _derivatives_Fb.resize(_nvar);
-  // _grad_args.resize(_nvar);
-
-  // Iterate over all coupled variables
-  // for (unsigned int i = 0; i < _nvar; ++i)
-  // {
-  //   MooseVariable *cvar = _coupled_moose_vars[i];
-  //
-  //   // get the first derivatives of Fa and Fb material property
-  //   _derivatives_Fa[i] = &getMaterialPropertyDerivative<Real>("fa_name", cvar->name());
-  //   _derivatives_Fb[i] = &getMaterialPropertyDerivative<Real>("fb_name", cvar->name());
-  //
-  //   // get the gradient
-  //   _grad_args[i] = &(cvar->gradSln());
-  // }
 }
 
 void
 KKSMultiACBulkBase::initialSetup()
 {
   ACBulk<Real>::initialSetup();
+  //TODO: validate couplings for Fj and hj
   // validateNonlinearCoupling<Real>("fa_name");
   // validateNonlinearCoupling<Real>("fb_name");
 }

@@ -62,10 +62,10 @@ KKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
   Real res = ACBulk<Real>::computeQpOffDiagJacobian(jvar);
 
   // Then add dependence of KKSMultiACBulkF on other variables
-  // TODO: Add dF/darg to sum below
   Real sum = 0.0;
   for (unsigned int n = 0; n < _num_Fj; ++n)
-    sum += (*_prop_d2hjdetaidarg[n][cvar])[_qp] * (*_prop_Fj[n])[_qp];
+    sum += (*_prop_d2hjdetaidarg[n][cvar])[_qp] * (*_prop_Fj[n])[_qp]
+            + (*_prop_dhjdetai[n])[_qp] * (*_prop_dFjdarg[n][cvar])[_qp];
 
   res += _L[_qp] * sum * _phi[_j][_qp] * _test[_i][_qp];
 
