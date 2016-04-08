@@ -208,11 +208,10 @@ libmesh_CXXFLAGS += -DMETHOD=$(METHOD)
 ifneq (,$(findstring g++,$(cxx_compiler)))
   libmesh_CXXFLAGS += -Werror=return-type -Werror=reorder
 
+	# Disable the long string warning from GCC
+	# warning: string length ‘524’ is greater than the length ‘509’ ISO C90 compilers are required to support [-Woverlength-strings]
+	libmesh_CXXFLAGS += -Woverlength-strings
 endif
-
-# Disable the long string warning from GCC
-# warning: string length ‘524’ is greater than the length ‘509’ ISO C90 compilers are required to support [-Woverlength-strings]
-libmesh_CXXFLAGS += -Woverlength-strings
 
 #
 # Fortran baggage

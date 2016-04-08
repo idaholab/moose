@@ -187,9 +187,8 @@ Material::resetQpProperties()
     mooseDoOnce(mooseWarning("You disabled the computation of this (" << name() << ") material by MOOSE, but have not overridden the 'resetQpProperties' method, this can lead to unintended values being set for material property values."));
 }
 
-
 void
-Material::computeProperties(unsigned int qp)
+Material::computePropertiesAtQp(unsigned int qp)
 {
   _qp = qp;
   computeQpProperties();

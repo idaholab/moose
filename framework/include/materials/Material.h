@@ -98,7 +98,7 @@ public:
    * This is intended to be called from other objects, by first calling
    * MaterialPropertyInterface::getMaterial and then calling this method on the Material object returned.
    */
-  virtual void computeProperties(unsigned int qp);
+  virtual void computePropertiesAtQp(unsigned int qp);
 
   ///@{
   /**

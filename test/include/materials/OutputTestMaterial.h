@@ -37,6 +37,9 @@ public:
    */
   OutputTestMaterial(const InputParameters & parameters);
 
+  // Used for testing if hidden compiler warning shows up
+  virtual void computeProperties(){ Material::computeProperties(); }
+
   /**
    * Class destructor
    */

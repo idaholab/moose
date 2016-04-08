@@ -1088,4 +1088,3 @@ MechanicalContactConstraint::getCoupledVarComponent(unsigned int var_num,
   }
   return coupled_var_is_disp_var;
 }
-
