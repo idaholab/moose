@@ -477,7 +477,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 {
   Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
   std::set<dof_id_type> set_union;
-  std::insert_iterator<std::set<dof_id_type> > set_union_inserter(set_union, set_union.begin());
 
   processor_id_type n_procs = _app.n_processors();
 
@@ -541,7 +540,8 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
                * bounding box(s) need to be expanded.
                */
               set_union.clear();
-              std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(), set_union_inserter);
+              std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(),
+                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
 
               // Was there overlap in the physical region?
               bool physical_intersection = (it1->_ghosted_ids.size() + it2->_ghosted_ids.size() > set_union.size());
@@ -556,17 +556,20 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
               it2->_ghosted_ids.clear();
 
               set_union.clear();
-              std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(), set_union_inserter);
+              std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(),
+                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
               it1->_periodic_nodes.swap(set_union);
               it2->_periodic_nodes.clear();
 
               set_union.clear();
-              std::set_union(it1->_local_ids.begin(), it1->_local_ids.end(), it2->_local_ids.begin(), it2->_local_ids.end(), set_union_inserter);
+              std::set_union(it1->_local_ids.begin(), it1->_local_ids.end(), it2->_local_ids.begin(), it2->_local_ids.end(),
+                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
               it1->_local_ids.swap(set_union);
               it2->_local_ids.clear();
 
               set_union.clear();
-              std::set_union(it1->_halo_ids.begin(), it1->_halo_ids.end(), it2->_halo_ids.begin(), it2->_halo_ids.end(), set_union_inserter);
+              std::set_union(it1->_halo_ids.begin(), it1->_halo_ids.end(), it2->_halo_ids.begin(), it2->_halo_ids.end(),
+                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
               it1->_halo_ids.swap(set_union);
               it2->_halo_ids.clear();
 
