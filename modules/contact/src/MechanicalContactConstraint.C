@@ -282,7 +282,6 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
 
           // Magnitude of tangential predictor force
           const Real tan_mag( contact_force_tangential.size() );
-          const Real inc_slip_mag = pinfo->_incremental_slip.size();
           const Real tangential_inc_slip_mag = tangential_inc_slip.size();
           const Real slip_tol = capacity/penalty;
           pinfo->_slip_tol = slip_tol;

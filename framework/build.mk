@@ -202,12 +202,17 @@ endif
 	  $(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
 # Add method to list of defines passed to the compiler
-libmesh_CXXFLAGS       += -DMETHOD=$(METHOD)
+libmesh_CXXFLAGS += -DMETHOD=$(METHOD)
 
 # treat these warnings as errors (This doesn't seem to be necessary for Intel)
 ifneq (,$(findstring g++,$(cxx_compiler)))
-  libmesh_CXXFLAGS     += -Werror=return-type -Werror=reorder
+  libmesh_CXXFLAGS += -Werror=return-type -Werror=reorder
+
 endif
+
+# Disable the long string warning from GCC
+# warning: string length ‘524’ is greater than the length ‘509’ ISO C90 compilers are required to support [-Woverlength-strings]
+libmesh_CXXFLAGS += -Woverlength-strings
 
 #
 # Fortran baggage
