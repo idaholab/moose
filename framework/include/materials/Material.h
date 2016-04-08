@@ -163,19 +163,6 @@ public:
   void checkStatefulSanity() const;
 
   /**
-   * Check if a material property is valid for all blocks of this Material
-   *
-   * This method returns true if the supplied property name has been declared
-   * in a Material object on the block ids for this object.
-   *
-   * @param prop_name the name of the property to query
-   * @return true if the property exists for all block ids of the object, otherwise false
-   *
-   * @see BlockRestrictable::hasBlockMaterialPropertyHelper
-   */
-  virtual bool hasBlockMaterialPropertyHelper(const std::string & prop_name);
-
-  /**
    * Get the list of output objects that this class is restricted
    * @return A vector of OutputNames
    */
