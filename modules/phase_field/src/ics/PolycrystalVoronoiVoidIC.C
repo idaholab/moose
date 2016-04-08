@@ -10,7 +10,7 @@ InputParameters validParams<PolycrystalVoronoiVoidIC>()
   params.addRequiredParam<MooseEnum>("structure_type", structure_options, "Which structure type is being initialized, grains or voids");
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>("grain_num", "Number of grains being represented by the order parameters");
-  params.addParam<unsigned int>("op_index",0,"The index for the current order parameter, not needed if sructure_type = voids");
+  params.addParam<unsigned int>("op_index", 0, "The index for the current order parameter, not needed if sructure_type = voids");
 
   params.addParam<unsigned int>("rand_seed", 12444, "The random seed");
 
@@ -254,6 +254,3 @@ PolycrystalVoronoiVoidIC::gradient(const Point & p)
 
   return gradient;
 }
-
-
-
