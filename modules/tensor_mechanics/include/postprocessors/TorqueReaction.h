@@ -5,37 +5,37 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef TORQUEREACTIONSCALAR_H
-#define TORQUEREACTIONSCALAR_H
+#ifndef TORQUEREACTION_H
+#define TORQUEREACTION_H
 
 #include "NodalPostprocessor.h"
 
 //Forward Declarations
-class TorqueReactionScalar;
+class TorqueReaction;
 class AuxiliarySystem;
 
 template<>
-InputParameters validParams<TorqueReactionScalar>();
+InputParameters validParams<TorqueReaction>();
 
 /*
- * TorqueReactionScalarScalar calculates the torque in 2D and 3D about a user-specified
+ * TorqueReaction calculates the torque in 2D and 3D about a user-specified
  * axis of rotation centered at a user-specied origin. The default origin is the
  * global coordinate system origin: (0.0,0.0,0.0).
  *
- * TorqueReactionScalarScalar takes a scalar approach to calculating the sum of the
+ * TorqueReaction takes a scalar approach to calculating the sum of the
  * acting torques by projecting both the reaction force and the position vector
  * (the coordinates of the node upon which the force is applied) onto the axis of
  * rotation and applying the Pythagorean theorem, as in a statics course.  This
  * scalar approach allows the postprocessor to accept any axis of rotation direction.
  *
- * TorqueReactionScalarScalar is similar to TorqueReactionScalar in SolidMechanics but does
- * not replace the TorqueReactionScalar postprocessor; different assumptions were used
- * to derive the SolidMechanics TorqueReactionScalar postprocessor.
+ * TorqueReaction is similar to TorqueReaction in SolidMechanics but does
+ * not replace the TorqueReaction postprocessor; different assumptions were used
+ * to derive the SolidMechanics TorqueReaction postprocessor.
  */
-class TorqueReactionScalar : public NodalPostprocessor
+class TorqueReaction : public NodalPostprocessor
 {
 public:
-  TorqueReactionScalar(const InputParameters & parameters);
+  TorqueReaction(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();
@@ -46,7 +46,8 @@ protected:
   AuxiliarySystem & _aux;
   MooseVariable & _react_x_var;
   MooseVariable & _react_y_var;
-  MooseVariable & _react_z_var;
+  /// Use a pointer for the z-case to allow 2D problems
+  MooseVariable * const _react_z_var;
 
   const VariableValue & _react_x;
   const VariableValue & _react_y;
@@ -58,4 +59,4 @@ protected:
   Real _sum;
 };
 
-#endif //TORQUEREACTIONSCALAR_H
+#endif //TORQUEREACTION_H
