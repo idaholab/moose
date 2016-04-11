@@ -1,0 +1,8 @@
+[Tests]
+  [./testverifydamping]
+    type = 'RunApp'
+    input = 'max_increment_damper_test.i'
+    expect_out = '8\s*Nonlinear'
+    absent_out = '11\s*Nonlinear'
+  [../]
+[]
