@@ -28,8 +28,8 @@ DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & p
     _probability(getMaterialProperty<Real>("probability")),
     _hold_time(getParam<Real>("hold_time")),
     _changes_made(0),
-    _global_nucleus_list(0),
-    _local_nucleus_list(0)
+    _global_nucleus_list(declareRestartableData("global_nucleus_list", NucleusList(0))),
+    _local_nucleus_list(declareRestartableData("local_nucleus_list", NucleusList(0)))
 {
   setRandomResetFrequency(EXEC_TIMESTEP_END);
 
@@ -39,6 +39,9 @@ DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & p
     _insert_test = true;
   else
     _insert_test = false;
+
+  // force a map rebuild after restart or recover
+  _changes_made = _app.isRecovering() || _app.isRestarting();
 }
 
 void
