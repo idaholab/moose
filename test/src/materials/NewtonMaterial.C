@@ -49,7 +49,7 @@ NewtonMaterial::computeQpProperties()
   // Newton iteration for find p
   for (unsigned int i = 0; i < _max_iterations; ++i)
   {
-    _discrete.computeProperties(_qp);
+    _discrete.computePropertiesAtQp(_qp);
     _p[_qp] -= _f[_qp] / _f_prime[_qp];
     if (std::abs(_f[_qp]) < _tol)
       break;

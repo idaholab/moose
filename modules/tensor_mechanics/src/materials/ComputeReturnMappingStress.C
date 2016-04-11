@@ -36,7 +36,7 @@ void
 ComputeReturnMappingStress::computeQpStress()
 {
   // compute the stress increment (as a tensor) and the inelastic strain increment (tensor) required to return to the yield surface
-  _recompute_return_material.computeProperties(_qp);
+  _recompute_return_material.computePropertiesAtQp(_qp);
 
   //Rotate the stress to the current configuration after updating to include the radial return value
   _stress[_qp] = _rotation_increment[_qp] * (_return_stress_increment[_qp] + _stress_old[_qp]) * _rotation_increment[_qp].transpose();

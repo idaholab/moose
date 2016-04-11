@@ -130,7 +130,7 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Po
 }
 
 RealGradient
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & /*c*/, const Real & n)
 {
   Point l_center = center;
   Point l_p = p;
