@@ -2436,7 +2436,7 @@ NonlinearSystem::reinitIncrementForDampers(THREAD_ID tid)
   // Find the variables that are being operated on by active element dampers
   std::set<MooseVariable *> damped_vars;
 
-  const std::vector<MooseSharedPointer<ElementDamper> > & edampers = _element_dampers.getActiveObjects();
+  const std::vector<MooseSharedPointer<ElementDamper> > & edampers = _element_dampers.getActiveObjects(tid);
   for (std::vector<MooseSharedPointer<ElementDamper> >::const_iterator it = edampers.begin(); it != edampers.end(); ++it)
     damped_vars.insert( (*it)->getVariable() );
 

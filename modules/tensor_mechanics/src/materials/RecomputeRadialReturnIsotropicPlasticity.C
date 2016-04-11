@@ -105,7 +105,7 @@ RecomputeRadialReturnIsotropicPlasticity::computeResidual(Real effectiveTrialStr
 }
 
 Real
-RecomputeRadialReturnIsotropicPlasticity::computeDerivative(Real effectiveTrialStress, Real /*scalar*/)
+RecomputeRadialReturnIsotropicPlasticity::computeDerivative(Real /*effectiveTrialStress*/, Real /*scalar*/)
 {
   Real derivative = 1.0;
   if (_yield_condition > 0.0)
@@ -130,7 +130,7 @@ RecomputeRadialReturnIsotropicPlasticity::computeStressFinalize(const RankTwoTen
 }
 
 Real
-RecomputeRadialReturnIsotropicPlasticity::computeHardening(Real scalar)
+RecomputeRadialReturnIsotropicPlasticity::computeHardening(Real /*scalar*/)
 {
   Real slope = _hardening_constant;
   if (_hardening_function)
