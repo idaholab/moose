@@ -209,8 +209,8 @@ MooseApp::~MooseApp()
     oss << "OS: " << sys_info.version << '\n';
     oss << "Compiler: " << compiler_name << ' ' << compiler_version << '\n';
     oss << "----------------------------------------" << '\n';
-    print_yes_no(oss, "Basic functionality", QUOTE(LIBMESH_HAVE_CXX11));
 #ifdef LIBMESH_HAVE_CXX11
+    print_yes_no(oss, "Basic functionality", QUOTE(LIBMESH_HAVE_CXX11));
     print_yes_no(oss, "Alias declarations", QUOTE(LIBMESH_HAVE_CXX11_ALIAS_DECLARATIONS));
     print_yes_no(oss, "auto keyword", QUOTE(LIBMESH_HAVE_CXX11_AUTO));
     print_yes_no(oss, "constexpr keyword", QUOTE(LIBMESH_HAVE_CXX11_CONSTEXPR));
