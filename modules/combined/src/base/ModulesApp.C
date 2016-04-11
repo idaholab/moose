@@ -11,11 +11,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-/************************************************************
- * New Module Step 1.                                       *
- *         Add include for new modules here                 *
- * #include "ModuleNameApp.h"                               *
- ***********************************************************/
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
 #include "HeatConductionApp.h"
@@ -28,6 +23,7 @@
 #include "TensorMechanicsApp.h"
 #include "WaterSteamEOSApp.h"
 #include "XFEMApp.h"
+#include "PorousFlowApp.h"
 
 template<>
 InputParameters validParams<ModulesApp>()
@@ -65,11 +61,6 @@ extern "C" void ModulesApp__registerObjects(Factory & factory) { ModulesApp::reg
 void
 ModulesApp::registerObjects(Factory & factory)
 {
-  /************************************************************
-   * New Module Step 2.                                       *
-   *                Register module objects here              *
-   * ModuleNameApp::registerObjects(factory);                 *
-   ***********************************************************/
   ChemicalReactionsApp::registerObjects(factory);
   ContactApp::registerObjects(factory);
   HeatConductionApp::registerObjects(factory);
@@ -82,6 +73,7 @@ ModulesApp::registerObjects(Factory & factory)
   TensorMechanicsApp::registerObjects(factory);
   WaterSteamEOSApp::registerObjects(factory);
   XFEMApp::registerObjects(factory);
+  PorousFlowApp::registerObjects(factory);
 }
 
 // External entry point for dynamic syntax association
@@ -89,11 +81,6 @@ extern "C" void ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & act
 void
 ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  /************************************************************
-   * New Module Step 3.                                       *
-   *                Associate syntax here                     *
-   * ModuleNameApp::associateSyntax(syntax, action_factory);  *
-   ***********************************************************/
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);
   HeatConductionApp::associateSyntax(syntax, action_factory);
@@ -106,4 +93,5 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
   XFEMApp::associateSyntax(syntax, action_factory);
+  PorousFlowApp::associateSyntax(syntax, action_factory);
 }

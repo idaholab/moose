@@ -2,15 +2,6 @@
 ############################ COMMON MODULES ###################################
 ###############################################################################
 
-
-###############################################################################
-#
-# New Module Step 5.
-#       MODULENAME                := yes
-#
-# Add to list
-# MODULE_LIST := ... MODULENAME
-###############################################################################
 ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS        := yes
         CONTACT                   := yes
@@ -24,6 +15,7 @@ ifeq ($(ALL_MODULES),yes)
         TENSOR_MECHANICS          := yes
         WATER_STEAM_EOS           := yes
         XFEM                      := yes
+        POROUS_FLOW               := yes
 endif
 
 ifeq ($(SOLID_MECHANICS),yes)
@@ -34,22 +26,15 @@ ifeq ($(XFEM),yes)
         SOLID_MECHANICS           := yes
 endif
 
+ifeq ($(POROUS_FLOW),yes)
+        TENSOR_MECHANICS           := yes
+endif
+
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem"
+MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
-###############################################################################
-#
-# New Module Step 6.
-#
-# ifeq ($(MODULENAME),yes)
-# APPLICATION_DIR    := $(MOOSE_DIR)/modules/modulename
-# APPLICATION_NAME   := modulename
-# include $(FRAMEWORK_DIR)/app.mk
-# libmesh_CXXFLAGS   += -DMODULENAME
-# endif
-#
 ###############################################################################
 
 ifeq ($(CHEMICAL_REACTIONS),yes)
@@ -131,6 +116,15 @@ ifeq ($(XFEM),yes)
 
   #Dependency on solid_mechanics
   DEPEND_MODULES     := solid_mechanics
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(POROUS_FLOW),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/porous_flow
+  APPLICATION_NAME   := porous_flow
+
+  #Dependency on tensor_mechanics
+  DEPEND_MODULES     := tensor_mechanics
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
