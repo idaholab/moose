@@ -259,7 +259,7 @@ public:
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
    */
-  std::vector<VariableName> getVariableNames();
+  virtual std::vector<VariableName> getVariableNames();
 
 
   virtual void initialSetup();
