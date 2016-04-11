@@ -47,8 +47,14 @@ public:
   SideUserObject(const InputParameters & parameters);
 
 protected:
+  /// Thread ID of this postprocessor
+  THREAD_ID _tid;
 
-  MooseMesh & _mesh;
+  /// Assembly of this thread of this postprocessor
+  Assembly & _assembly;
+
+  /// Coordinate system
+  const Moose::CoordinateSystemType & _coord_sys;
 
   const MooseArray< Point > & _q_point;
   QBase * & _qrule;

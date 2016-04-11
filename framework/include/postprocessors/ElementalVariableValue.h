@@ -44,7 +44,6 @@ public:
   virtual Real getValue();
 
 protected:
-  MooseMesh & _mesh;
   std::string _var_name;
   Elem * _element;
 };

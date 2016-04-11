@@ -47,7 +47,6 @@ public:
   virtual Real getValue();
 
 protected:
-  MooseMesh & _mesh;
   std::string _var_name;
   Node * _node_ptr;
   const Real _scale_factor;

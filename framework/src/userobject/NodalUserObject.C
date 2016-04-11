@@ -41,9 +41,11 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
     MooseVariableDependencyInterface(),
     TransientInterface(this),
     PostprocessorInterface(this),
-    RandomInterface(parameters, _fe_problem, _tid, true),
+    RandomInterface(parameters, _fe_problem, parameters.get<THREAD_ID>("_tid"), true),
     ZeroInterface(parameters),
-    _mesh(_subproblem.mesh()),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _coord_sys(_assembly.coordSystem()),
     _qp(0),
     _current_node(_assembly.node()),
     _unique_node_execute(getParam<bool>("unique_node_execute"))
