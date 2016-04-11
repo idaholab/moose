@@ -21,9 +21,16 @@ InputParameters validParams<FunctionParserUtils>()
 
 #ifdef LIBMESH_HAVE_FPARSER_JIT
   params.addParam<bool>("enable_jit", true, "enable just-in-time compilation of function expressions for faster evaluation");
+  params.addParamNamesToGroup("enable_jit", "Advanced");
 #endif
-  params.addParam<bool>( "disable_fpoptimizer", false, "Disable the function parser algebraic optimizer");
-  params.addParam<bool>( "fail_on_evalerror", false, "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)");
+  params.addParam<bool>("enable_ad_cache", true, "enable cacheing of function derivatives for faster startup time");
+  params.addParam<bool>("enable_auto_optimize", false, "enable automatic optimization of derivatives");
+  params.addParam<bool>("disable_fpoptimizer", false, "Disable the function parser algebraic optimizer");
+  params.addParam<bool>("fail_on_evalerror", false, "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)");
+  params.addParamNamesToGroup("enable_ad_cache", "Advanced");
+  params.addParamNamesToGroup("enable_auto_optimize", "Advanced");
+  params.addParamNamesToGroup("disable_fpoptimizer", "Advanced");
+  params.addParamNamesToGroup("fail_on_evalerror", "Advanced");
 
   return params;
 }
@@ -40,10 +47,19 @@ const char * FunctionParserUtils::_eval_error_msg[] = {
 FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters) :
     _enable_jit(parameters.isParamValid("enable_jit") &&
                 parameters.get<bool>("enable_jit")),
-    _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
+    _enable_ad_cache(parameters.get<bool>("enable_ad_cache")),
+    _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize")),
+    _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer") || _enable_auto_optimize),
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {
+}
+
+void
+FunctionParserUtils::setParserFeatureFlags(ADFunctionPtr & parser)
+{
+  parser->SetADFlags(ADFunction::ADCacheDerivatives, _enable_ad_cache);
+  parser->SetADFlags(ADFunction::ADAutoOptimize, _enable_auto_optimize);
 }
 
 Real
@@ -87,6 +103,9 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
   {
     ADFunctionPtr expression = ADFunctionPtr(new ADFunction());
 
+    // set FParser internal feature flags
+    setParserFeatureFlags(expression);
+
     // add previously evaluated constants
     for (unsigned int j = 0; j < i; ++j)
       if (!expression->AddConstant(constant_names[j], constant_values[j]))
@@ -101,14 +120,4 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
     if (!parser->AddConstant(constant_names[i], constant_values[i]))
       mooseError("Invalid constant name in parsed function object");
   }
-}
-
-// DEPRECATED CONSTRUCTOR
-FunctionParserUtils::FunctionParserUtils(const std::string & /*name*/, InputParameters parameters) :
-    _enable_jit(parameters.isParamValid("enable_jit") &&
-                parameters.get<bool>("enable_jit")),
-    _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
-    _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
-    _nan(std::numeric_limits<Real>::quiet_NaN())
-{
 }

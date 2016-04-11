@@ -60,6 +60,9 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   // build base function object
   _func_F = ADFunctionPtr(new ADFunction());
 
+  // set FParser internal feature flags
+  setParserFeatureFlags(_func_F);
+
   // initialize constants
   addFParserConstants(_func_F, constant_names, constant_expressions);
 
