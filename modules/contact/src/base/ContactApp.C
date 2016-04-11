@@ -28,6 +28,7 @@
 #include "NodalArea.h"
 #include "NodalAreaAction.h"
 #include "NodalAreaVarAction.h"
+#include "ContactSlipDamper.h"
 
 template<>
 InputParameters validParams<ContactApp>()
@@ -76,6 +77,7 @@ ContactApp::registerObjects(Factory & factory)
   registerProblem(ReferenceResidualProblem);
   registerUserObject(NodalArea);
   registerAux(ContactPressureAux);
+  registerDamper(ContactSlipDamper);
 }
 
 // External entry point for dynamic syntax association

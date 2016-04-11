@@ -2212,7 +2212,8 @@ NonlinearSystem::updateActive(THREAD_ID tid)
 }
 
 Real
-NonlinearSystem::computeDamping(const NumericVector<Number> & update)
+NonlinearSystem::computeDamping(const NumericVector<Number> & solution,
+                                const NumericVector<Number> & update)
 {
   Moose::perf_log.push("compute_dampers()", "Execution");
 
@@ -2232,7 +2233,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number> & update)
     const std::vector<MooseSharedPointer<GeneralDamper> > & gdampers = _general_dampers.getActiveObjects();
     for (std::vector<MooseSharedPointer<GeneralDamper> >::const_iterator it = gdampers.begin(); it != gdampers.end(); ++it)
     {
-      Real gd_damping = (*it)->computeDamping(update);
+      Real gd_damping = (*it)->computeDamping(solution, update);
       if (gd_damping < damping)
         damping = gd_damping;
     }

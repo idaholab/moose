@@ -29,7 +29,8 @@ ConstantDamper::ConstantDamper(const InputParameters & parameters) :
 }
 
 Real
-ConstantDamper::computeDamping(const NumericVector<Number> & /*update*/)
+ConstantDamper::computeDamping(const NumericVector<Number> & /*solution*/,
+                               const NumericVector<Number> & /*update*/)
 {
   return _damping;
 }

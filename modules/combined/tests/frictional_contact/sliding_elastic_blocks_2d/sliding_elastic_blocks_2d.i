@@ -259,3 +259,11 @@
     penalty = 1e6
   [../]
 []
+
+[Dampers]
+  [./contact_slip]
+    type = ContactSlipDamper
+    master = '2'
+    slave = '3'
+  [../]
+[]
