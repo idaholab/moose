@@ -40,7 +40,8 @@ public:
   /**
    * Computes this Damper's damping
    */
-  virtual Real computeDamping(const NumericVector<Number> & update) = 0;
+  virtual Real computeDamping(const NumericVector<Number> & solution,
+                              const NumericVector<Number> & update) = 0;
 };
 
 #endif //GENERALDAMPER_H

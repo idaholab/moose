@@ -262,10 +262,12 @@ public:
 
   /**
    * Compute damping
-   * @param update
+   * @param solution The trail solution vector
+   * @param update The incremental update to the solution vector
    * @return returns The damping factor
    */
-  Real computeDamping(const NumericVector<Number>& update);
+  Real computeDamping(const NumericVector<Number> & solution,
+                      const NumericVector<Number> & update);
 
   /**
    * Computes the time derivative vector

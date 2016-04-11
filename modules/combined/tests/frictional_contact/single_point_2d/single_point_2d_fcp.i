@@ -52,19 +52,19 @@
 []
 
 [AuxKernels]
-  [./incslip_x]
-    type = PenetrationAux
+  [./zeroslip_x]
+    type = ConstantAux
     variable = inc_slip_x
-    quantity = incremental_slip_x
     boundary = 3
-    paired_boundary = 2
+    execute_on = timestep_begin
+    value = 0.0
   [../]
-  [./incslip_y]
-    type = PenetrationAux
+  [./zeroslip_y]
+    type = ConstantAux
     variable = inc_slip_y
-    quantity = incremental_slip_y
     boundary = 3
-    paired_boundary = 2
+    execute_on = timestep_begin
+    value = 0.0
   [../]
   [./accum_slip_x]
     type = AccumulateAux
@@ -200,15 +200,10 @@
   nl_abs_tol = 1e-8
   dtmin = 0.001
   l_tol = 1e-3
-
-  [./Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  [../]
 []
 
 [Outputs]
-  file_base = single_point_2d_predictor_out
+  file_base = single_point_2d_fcp_out
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
@@ -226,14 +221,29 @@
     disp_x = disp_x
     model = coulomb
     system = constraint
-    friction_coefficient = '0.25'
   [../]
 []
 
-[Dampers]
-  [./contact_slip]
-    type = ContactSlipDamper
-    master = '2'
-    slave = '3'
-  [../]
+[Problem]
+  type = FrictionalContactProblem
+  master = '2'
+  slave = '3'
+  friction_coefficient = '0.25'
+  slip_factor = '1.0'
+  slip_too_far_factor = '1.0'
+  disp_x = disp_x
+  disp_y = disp_y
+  residual_x = saved_x
+  residual_y = saved_y
+  diag_stiff_x = diag_saved_x
+  diag_stiff_y = diag_saved_y
+  inc_slip_x = inc_slip_x
+  inc_slip_y = inc_slip_y
+  contact_slip_tolerance_factor = 100.
+  target_relative_contact_residual = 1.e-8
+  maximum_slip_iterations = 50
+  minimum_slip_iterations = 1
+  slip_updates_per_iteration = 5
+  solution_variables = 'disp_x disp_y'
+  reference_residual_variables = 'saved_x saved_y'
 []
