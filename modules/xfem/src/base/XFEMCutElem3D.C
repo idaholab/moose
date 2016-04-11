@@ -227,7 +227,7 @@ XFEMCutElem3D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::v
         node_line.push_back(face->getNode(j));
       cut_plane_nodes.push_back(node_line);
     }
-  } // i
+  }
   if (cut_plane_nodes.size() == 0)
   {
     libMesh::err << " ERROR: no cut plane found in this element"<<std::endl;

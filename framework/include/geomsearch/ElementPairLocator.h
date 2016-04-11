@@ -15,6 +15,8 @@
 #ifndef ELEMENTPAIRLOCATOR_H
 #define ELEMENTPAIRLOCATOR_H
 
+#include <list>
+
 // MOOSE includes
 #include "Moose.h"
 #include "DataIO.h"
@@ -31,8 +33,6 @@ namespace libMesh
   class Elem;
 }
 
-class ElementPairInfo;
-
 /**
  * This is the ElementPairLocator class.  This is a base class that
  * finds the element pairs for ElementElementConstraint
@@ -42,30 +42,41 @@ class ElementPairLocator
 {
 public:
 
-  ElementPairLocator(unsigned int interface_id)
+  ElementPairLocator(unsigned int interface_id):
+    _elem_pairs(NULL)
   {
     _interface_id = interface_id;
   }
 
   virtual ~ElementPairLocator()
   {
-    _elem_pairs.clear();
-
-    for (std::map<const Elem *, ElementPairInfo *>::iterator it = _element_pair_info.begin(); it != _element_pair_info.end(); ++it)
-      delete it->second;
   }
- 
+
   virtual void reinit(){};
 
-public:
+  const std::list<std::pair<const Elem*, const Elem*> > & getElemPairs() const
+  {
+    if (_elem_pairs == NULL)
+      mooseError("_elem_pairs has not yet been initialized");
+    return *_elem_pairs;
+  }
 
-  std::vector<std::pair<const Elem*, const Elem*> > _elem_pairs;
+  const ElementPairInfo & getElemPairInfo(const Elem* elem) const
+  {
+    std::map<const Elem*, ElementPairInfo>::const_iterator it = _element_pair_info.find(elem);
+    if (it == _element_pair_info.end())
+      mooseError("Could not find ElemenPairInfo for specified element");
+    return it->second;
+  }
 
-  std::map<const Elem*, ElementPairInfo *> _element_pair_info;
+protected:
+
+  const std::list<std::pair<const Elem*, const Elem*> > * _elem_pairs;
+
+  std::map<const Elem*, ElementPairInfo> _element_pair_info;
 
 private:
   unsigned int _interface_id;
-
 };
 
 #endif // ELEMENTPAIRLOCATOR_H

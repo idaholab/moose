@@ -39,12 +39,12 @@ public:
   /**
    * reinit element-element constraint
    */
-  virtual void reinit(ElementPairInfo & element_pair_info);
+  virtual void reinit(const ElementPairInfo & element_pair_info);
 
   /**
-   * Set the quadrature points and normal direction
+   * Set information needed for constraint integration
    */
-  virtual void setqRuleNormal(ElementPairInfo & element_pair_info);
+  virtual void reinitConstraintQuadrature(const ElementPairInfo & element_pair_info);
 
   /**
    * Computes the residual for this element or the neighbor
@@ -61,9 +61,9 @@ public:
    */
   virtual void computeElemNeighJacobian(Moose::DGJacobianType type);
 
-  /**                                  
+  /**
    * Computes the jacobian for the current side.
-   */                         
+   */
   virtual void computeJacobian();
 
 protected:
@@ -72,77 +72,54 @@ protected:
 
   const Elem * & _current_elem;
 
-  /// The volume (or length) of the current element
-  const Real & _current_elem_volume;
-
   /// The neighboring element
   const Elem * & _neighbor_elem;
 
-  /// The volume (or length) of the current neighbor
-  const Real & _neighbor_elem_volume;  
+  /// Quadrature points used in integration of constraint
+  std::vector<Point> _constraint_q_point;
+  /// Weights of quadrature points used in integration of constraint
+  std::vector<Real> _constraint_weight;
 
-  /// Current side            
-  unsigned int & _current_side;
-  /// Current side element    
-  const Elem * & _current_side_elem;
-
-  /// The volume (or length) of the current side
-  const Real & _current_side_volume;
-
-  /// Coordinate system
-  const Moose::CoordinateSystemType & _coord_sys;
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
-  const MooseArray<Real> & _JxW;
-  const MooseArray<Real> & _coord;
-
-  Point _interface_normal;
-  std::vector<Point> _interface_q_point;
-  std::vector<Real> _interface_JxW;
-
+  /// Indices for looping over DOFs
   unsigned int _i, _j;
 
-  BoundaryID _boundary_id;
-
-  /// Holds the current solution at the current quadrature point on the face.
+  /// Holds the current solution at the current quadrature point
   const VariableValue & _u;
 
-  /// Holds the current solution gradient at the current quadrature point on the face.
+  /// Holds the current solution gradient at the current quadrature point
   const VariableGradient & _grad_u;
-  // shape functions
+  /// Shape function
   const VariablePhiValue & _phi;
+  /// Shape function gradient
   const VariablePhiGradient & _grad_phi;
-  // test functions
 
-  /// Side shape function.
+  /// Test function.
   const VariableTestValue & _test;
-  /// Gradient of side shape function
+  /// Gradient of test function
   const VariableTestGradient & _grad_test;
-  /// Normal vectors at the quadrature points
-  const MooseArray<Point>& _normals;
 
-  /// Side shape function.
+  /// Neighbor shape function.
   const VariablePhiValue & _phi_neighbor;
-  /// Gradient of side shape function
+  /// Gradient of neighbor shape function
   const VariablePhiGradient & _grad_phi_neighbor;
 
-  /// Side test function
+  /// Neighbor test function
   const VariableTestValue & _test_neighbor;
-  /// Gradient of side shape function
+  /// Gradient of neighbor shape function
   const VariableTestGradient & _grad_test_neighbor;
 
-  /// Holds the current solution at the current quadrature point
+  /// Holds the current solution at the current quadrature point on the neighbor element
   const VariableValue & _u_neighbor;
-  /// Holds the current solution gradient at the current quadrature point
+  /// Holds the current solution gradient at the current quadrature point on the neighbor element
   const VariableGradient & _grad_u_neighbor;
 
-  /** 
-   * This is the virtual that derived classes should override for computing the residual on neighboring element. 
-   */ 
+  /**
+   *  Compute the residual for one of the constraint quadrature points.  Must be overwritten by derived class.
+   */
   virtual Real computeQpResidual(Moose::DGResidualType type) = 0;
 
   /**
-   * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
+   *  Compute the Jacobian for one of the constraint quadrature points.  Must be overwritten by derived class.
    */
   virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;
 };

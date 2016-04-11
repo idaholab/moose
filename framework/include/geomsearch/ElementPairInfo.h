@@ -32,22 +32,24 @@ namespace libMesh
 
 /**
  * This is the ElementPairInfo class.  This is a base class that
- * stores integraion info.
+ * stores information used for integration in element to element constraints.
  */
 
 class ElementPairInfo
 {
 public:
 
-  ElementPairInfo(const Elem * elem, const std::vector<Point> & q_point, const std::vector<Real> & JxW, const Point & normal);
+  ElementPairInfo(const Elem * elem,
+                  const std::vector<Point> & constraint_q_point,
+                  const std::vector<Real> & constraint_JxW,
+                  const Point & normal);
 
   virtual ~ElementPairInfo();
 
-
 public:
-  const Elem * _elem; 
-  std::vector<Point> _q_point;
-  std::vector<Real> _JxW;
+  const Elem * _elem;
+  std::vector<Point> _constraint_q_point;
+  std::vector<Real> _constraint_JxW;
   Point _normal;
 };
 

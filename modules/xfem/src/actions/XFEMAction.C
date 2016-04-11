@@ -79,7 +79,8 @@ XFEMAction::act()
 
     xfem->setCrackGrowthMethod(_xfem_use_crack_growth_increment, _xfem_crack_growth_increment);
 
-    _problem->geomSearchData().addElementPairLocator(0, new XFEMElementPairLocator(xfem, 0));
+    MooseSharedPointer<XFEMElementPairLocator> new_xfem_epl (new XFEMElementPairLocator(xfem, 0));
+    _problem->geomSearchData().addElementPairLocator(0, new_xfem_epl);
 
     if (_xfem_cut_type == "line_segment_2d")
     {

@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<ElemElemConstraint>()
 {
   InputParameters params = validParams<Constraint>();
-  params.addRequiredParam<unsigned int>("interface_id", "The id of the interface.");
+  params.addParam<unsigned int>("interface_id", 0, "The id of the interface.");
   return params;
 }
 
@@ -33,40 +33,26 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters) :
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _dim(_mesh.dimension()),
 
-    _current_elem(_assembly.elem()), 
-    _current_elem_volume(_assembly.elemVolume()), 
+    _current_elem(_assembly.elem()),
 
-    _neighbor_elem(_assembly.neighbor()), 
-    _neighbor_elem_volume(_assembly.neighborVolume()), 
+    _neighbor_elem(_assembly.neighbor()),
 
-    _current_side(_assembly.side()), 
-    _current_side_elem(_assembly.sideElem()), 
-    _current_side_volume(_assembly.sideElemVolume()), 
+    _u(_var.sln()),
+    _grad_u(_var.gradSln()),
 
-    _coord_sys(_assembly.coordSystem()), 
-    _q_point(_assembly.qPointsFace()), 
-    _qrule(_assembly.qRuleFace()), 
-    _JxW(_assembly.JxWFace()), 
-    _coord(_assembly.coordTransformation()), 
+    _phi(_assembly.phi()),
+    _grad_phi(_assembly.gradPhi()),
 
-    _u(_var.sln()), 
-    _grad_u(_var.gradSln()), 
+    _test(_var.phi()),
+    _grad_test(_var.gradPhi()),
 
-    _phi(_assembly.phi()), 
-    _grad_phi(_assembly.gradPhi()), 
+    _phi_neighbor(_assembly.phiFaceNeighbor()),
+    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
 
-    _test(_var.phi()), 
-    _grad_test(_var.gradPhi()), 
+    _test_neighbor(_var.phiFaceNeighbor()),
+    _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
 
-    _normals(_var.normals()), 
-
-    _phi_neighbor(_assembly.phiFaceNeighbor()), 
-    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()), 
-
-    _test_neighbor(_var.phiFaceNeighbor()), 
-    _grad_test_neighbor(_var.gradPhiFaceNeighbor()), 
-
-    _u_neighbor(_var.slnNeighbor()), 
+    _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())
 {
 }
@@ -76,18 +62,22 @@ ElemElemConstraint::~ElemElemConstraint()
 }
 
 void
-ElemElemConstraint::reinit(ElementPairInfo & element_pair_info)
+ElemElemConstraint::reinit(const ElementPairInfo & element_pair_info)
 {
-  setqRuleNormal(element_pair_info);
+  reinitConstraintQuadrature(element_pair_info);
 }
 
-void 
-ElemElemConstraint::setqRuleNormal(ElementPairInfo & element_pair_info)
+void
+ElemElemConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
 {
-  _interface_q_point.resize(element_pair_info._q_point.size());
-  _interface_JxW.resize(element_pair_info._JxW.size());
-  std::copy(element_pair_info._q_point.begin(), element_pair_info._q_point.end(), _interface_q_point.begin());
-  std::copy(element_pair_info._JxW.begin(), element_pair_info._JxW.end(), _interface_JxW.begin());
+  _constraint_q_point.resize(element_pair_info._constraint_q_point.size());
+  _constraint_weight.resize(element_pair_info._constraint_JxW.size());
+  std::copy(element_pair_info._constraint_q_point.begin(),
+            element_pair_info._constraint_q_point.end(),
+            _constraint_q_point.begin());
+  std::copy(element_pair_info._constraint_JxW.begin(),
+            element_pair_info._constraint_JxW.end(),
+            _constraint_weight.begin());
 }
 
 void
@@ -102,9 +92,9 @@ ElemElemConstraint::computeElemNeighResidual(Moose::DGResidualType type)
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
   DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number()) :
                                        _assembly.residualBlockNeighbor(_var.number());
-  for (_qp=0; _qp < _interface_q_point.size(); _qp++)
+  for (_qp=0; _qp < _constraint_q_point.size(); _qp++)
       for (_i=0; _i< test_space.size(); _i++)
-        re(_i) += _interface_JxW[_qp] * computeQpResidual(type);
+        re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
 }
 
 void
@@ -129,10 +119,10 @@ ElemElemConstraint::computeElemNeighJacobian(Moose::DGJacobianType type)
                               type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number()) :
                               _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
-  for (_qp=0; _qp< _interface_q_point.size(); _qp++)
+  for (_qp=0; _qp< _constraint_q_point.size(); _qp++)
     for (_i=0; _i<test_space.size(); _i++)
       for (_j=0; _j<loc_phi.size(); _j++)
-        Kxx(_i,_j) += _interface_JxW[_qp]*computeQpJacobian(type);
+        Kxx(_i,_j) += _constraint_weight[_qp]*computeQpJacobian(type);
 }
 
 void

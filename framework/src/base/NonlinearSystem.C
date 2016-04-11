@@ -1209,7 +1209,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
   }
 
   // go over element-element constraint interface
-  std::map<unsigned int, ElementPairLocator *> * element_pair_locators = NULL;
+  std::map<unsigned int, MooseSharedPointer<ElementPairLocator> > * element_pair_locators = NULL;
 
   if (!displaced)
   {
@@ -1222,7 +1222,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
     element_pair_locators = &displaced_geom_search_data._element_pair_locators;
   }
 
-  for (std::map<unsigned int, ElementPairLocator *>::iterator it = element_pair_locators->begin();
+  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator it = element_pair_locators->begin();
        it != element_pair_locators->end();
        ++it)
   {
@@ -1234,23 +1234,25 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       const std::vector<MooseSharedPointer<ElemElemConstraint> > & _element_constraints = _constraints.getActiveElemElemConstraints(it->first);
 
       // go over pair elements
-      for (unsigned int ie = 0; ie < elem_pair_loc._elem_pairs.size(); ++ie)
+      const std::list<std::pair<const Elem*, const Elem*> > & elem_pairs = elem_pair_loc.getElemPairs();
+      for (std::list<std::pair<const Elem *, const Elem*> >::const_iterator it = elem_pairs.begin();
+           it != elem_pairs.end(); ++it)
       {
-        const Elem * elem = elem_pair_loc._elem_pairs[ie].first;
-        const Elem * pair_elem = elem_pair_loc._elem_pairs[ie].second;
+        const Elem * elem = it->first;
+        const Elem * pair_elem = it->second;
 
         if (elem->processor_id() != processor_id())
           continue;
 
-        ElementPairInfo & info = *elem_pair_loc._element_pair_info[elem];
-        
+        const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem);
+
         // for each element process constraints on the
         for (std::vector<MooseSharedPointer<ElemElemConstraint> >::const_iterator ec_it = _element_constraints.begin(); ec_it != _element_constraints.end(); ++ec_it)
         {
           MooseSharedPointer<ElemElemConstraint> ec = *ec_it;
 
-          _fe_problem.reinitElemPhys(elem, info._q_point, tid);
-          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._q_point, tid);
+          _fe_problem.reinitElemPhys(elem, info._constraint_q_point, tid);
+          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._constraint_q_point, tid);
 
           ec->subProblem().prepareShapes(ec->variable().number(), tid);
           ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
@@ -1837,7 +1839,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
   }
 
   // go over element-element constraint interface
-  std::map<unsigned int, ElementPairLocator *> * element_pair_locators = NULL;
+  std::map<unsigned int, MooseSharedPointer<ElementPairLocator> > * element_pair_locators = NULL;
 
   if (!displaced)
   {
@@ -1850,7 +1852,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
     element_pair_locators = &displaced_geom_search_data._element_pair_locators;
   }
 
-  for (std::map<unsigned int, ElementPairLocator *>::iterator it = element_pair_locators->begin();
+  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator it = element_pair_locators->begin();
        it != element_pair_locators->end();
        ++it)
   {
@@ -1862,23 +1864,25 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       const std::vector<MooseSharedPointer<ElemElemConstraint> > & _element_constraints = _constraints.getActiveElemElemConstraints(it->first);
 
       // go over pair elements
-      for (unsigned int ie = 0; ie < elem_pair_loc._elem_pairs.size(); ++ie)
+      const std::list<std::pair<const Elem*, const Elem*> > & elem_pairs = elem_pair_loc.getElemPairs();
+      for (std::list<std::pair<const Elem *, const Elem*> >::const_iterator it = elem_pairs.begin();
+           it != elem_pairs.end(); ++it)
       {
-        const Elem * elem = elem_pair_loc._elem_pairs[ie].first;
-        const Elem * pair_elem = elem_pair_loc._elem_pairs[ie].second;
+        const Elem * elem = it->first;
+        const Elem * pair_elem = it->second;
 
         if (elem->processor_id() != processor_id())
           continue;
 
-        ElementPairInfo & info = *elem_pair_loc._element_pair_info[elem];
-        
+        const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem);
+
         // for each element process constraints on the
         for (std::vector<MooseSharedPointer<ElemElemConstraint> >::const_iterator ec_it = _element_constraints.begin(); ec_it != _element_constraints.end(); ++ec_it)
         {
           MooseSharedPointer<ElemElemConstraint> ec = *ec_it;
 
-          _fe_problem.reinitElemPhys(elem, info._q_point, tid);
-          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._q_point, tid);
+          _fe_problem.reinitElemPhys(elem, info._constraint_q_point, tid);
+          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._constraint_q_point, tid);
 
           ec->subProblem().prepareShapes(ec->variable().number(), tid);
           ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);

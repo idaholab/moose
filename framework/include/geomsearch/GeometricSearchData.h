@@ -58,7 +58,7 @@ public:
   NearestNodeLocator & getMortarNearestNodeLocator(const BoundaryName & domain, const BoundaryName & slave, Moose::ConstraintType side_type);
   NearestNodeLocator & getMortarNearestNodeLocator(const unsigned int master_id, const unsigned int slave_id, Moose::ConstraintType side_type);
 
-  void addElementPairLocator(const unsigned int & interface_id, ElementPairLocator * epl);
+  void addElementPairLocator(const unsigned int & interface_id, MooseSharedPointer<ElementPairLocator> epl);
 
   /**
    * Update all of the search objects.
@@ -87,7 +87,7 @@ public:
   MooseMesh & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;
-  std::map<unsigned int, ElementPairLocator *> _element_pair_locators;
+  std::map<unsigned int, MooseSharedPointer<ElementPairLocator> > _element_pair_locators;
 
 protected:
 

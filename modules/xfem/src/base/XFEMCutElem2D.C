@@ -32,7 +32,8 @@ XFEMCutElem2D::~XFEMCutElem2D()
 
 Point
 XFEMCutElem2D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) const
-{ Point node_coor(0.0,0.0,0.0);
+{
+  Point node_coor(0.0,0.0,0.0);
   std::vector<EFANode*> master_nodes;
   std::vector<Point> master_points;
   std::vector<double> master_weights;

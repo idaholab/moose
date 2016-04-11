@@ -1,18 +1,11 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "XFEMEqualValueConstraint.h"
+#include "XFEMSingleVariableConstraint.h"
 #include "FEProblem.h"
 #include "Assembly.h"
 
@@ -20,7 +13,7 @@
 #include "libmesh/quadrature.h"
 
 template<>
-InputParameters validParams<XFEMEqualValueConstraint>()
+InputParameters validParams<XFEMSingleVariableConstraint>()
 {
   InputParameters params = validParams<ElemElemConstraint>();
   params.addParam<Real>("alpha", 100, "Stablization parameter in Nitsche's formulation.");
@@ -29,7 +22,7 @@ InputParameters validParams<XFEMEqualValueConstraint>()
   return params;
 }
 
-XFEMEqualValueConstraint::XFEMEqualValueConstraint(const InputParameters & parameters) :
+XFEMSingleVariableConstraint::XFEMSingleVariableConstraint(const InputParameters & parameters) :
     ElemElemConstraint(parameters),
     _alpha(getParam<Real>("alpha")),
     _jump(getParam<Real>("jump")),
@@ -37,25 +30,22 @@ XFEMEqualValueConstraint::XFEMEqualValueConstraint(const InputParameters & param
 {
 }
 
-XFEMEqualValueConstraint::~XFEMEqualValueConstraint()
+XFEMSingleVariableConstraint::~XFEMSingleVariableConstraint()
 {
 }
 
 void
-XFEMEqualValueConstraint::setqRuleNormal(ElementPairInfo & element_pair_info)
-{ 
-  _interface_q_point.resize(element_pair_info._q_point.size());
-  _interface_JxW.resize(element_pair_info._JxW.size());
-  std::copy(element_pair_info._q_point.begin(), element_pair_info._q_point.end(), _interface_q_point.begin());
-  std::copy(element_pair_info._JxW.begin(), element_pair_info._JxW.end(), _interface_JxW.begin());
+XFEMSingleVariableConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
+{
   _interface_normal = element_pair_info._normal;
-} 
+  ElemElemConstraint::reinitConstraintQuadrature(element_pair_info);
+}
 
-Real 
-XFEMEqualValueConstraint::computeQpResidual(Moose::DGResidualType type)
+Real
+XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
 {
   Real r = 0;
-  
+
   switch (type)
   {
     case Moose::Element:
@@ -75,8 +65,8 @@ XFEMEqualValueConstraint::computeQpResidual(Moose::DGResidualType type)
   return r;
 }
 
-Real 
-XFEMEqualValueConstraint::computeQpJacobian(Moose::DGJacobianType type)
+Real
+XFEMSingleVariableConstraint::computeQpJacobian(Moose::DGJacobianType type)
 {
   Real r = 0;
 

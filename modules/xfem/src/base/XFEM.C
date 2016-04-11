@@ -1083,6 +1083,18 @@ XFEM::cutMeshWithEFA()
       _cut_elem_map.erase(cemit);
     }
 
+    //Delete any entries in _sibling_elems for this element.
+    for (std::list<std::pair<const Elem *, const Elem*> >::iterator it = _sibling_elems.begin();
+       it != _sibling_elems.end(); ++it)
+    {
+      if (elem_to_delete == it->first ||
+          elem_to_delete == it->second)
+      {
+        _sibling_elems.erase(it);
+        break;
+      }
+    }
+
     elem_to_delete->nullify_neighbors();
     _mesh->boundary_info->remove(elem_to_delete);
     unsigned int deleted_elem_id = elem_to_delete->id();
@@ -1099,11 +1111,15 @@ XFEM::cutMeshWithEFA()
     }
   }
 
-  for (std::map<unsigned int, std::vector<const Elem *> > :: iterator it = temporary_parent_children_map.begin(); it != temporary_parent_children_map.end(); ++it)
+  for (std::map<unsigned int, std::vector<const Elem *> >::iterator it = temporary_parent_children_map.begin();
+       it != temporary_parent_children_map.end(); ++it)
   {
-      _sibling_elems.push_back(std::make_pair((it->second[0]), (it->second)[1]));
+    std::vector<const Elem *> & sibling_elem_vec = it->second;
+    if (sibling_elem_vec.size() != 2)
+      mooseError("Must have exactly 2 sibling elements");
+    _sibling_elems.push_back(std::make_pair(sibling_elem_vec[0], sibling_elem_vec[1]));
   }
-  
+
   //clear the temporary map
   temporary_parent_children_map.clear();
 
@@ -1367,7 +1383,7 @@ XFEM::getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule
   return have_weights;
 }
 
-void 
+void
 XFEM::getXFEMIntersectionInfo(const Elem* elem, unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, bool displaced_mesh) const
 {
   std::map<unique_id_type, XFEMCutElem*>::const_iterator it;

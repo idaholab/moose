@@ -131,16 +131,12 @@ GeometricSearchData::reinit()
     pl->reinit();
   }
 
-  std::map<unsigned int, ElementPairLocator *>::iterator epl_it = _element_pair_locators.begin();
-  std::map<unsigned int, ElementPairLocator *>::iterator epl_end = _element_pair_locators.end();
-
-  for (; epl_it != epl_end; ++epl_it)
+  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
+       epl_it != _element_pair_locators.end(); ++epl_it)
   {
-    ElementPairLocator * epl = epl_it->second;
-
-    epl->reinit();
+    ElementPairLocator & epl = *epl_it->second;
+    epl.reinit();
   }
-
 }
 
 void
@@ -380,8 +376,9 @@ GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id, c
   return getNearestNodeLocator(boundary, 1001);
 }
 
-void 
-GeometricSearchData::addElementPairLocator(const unsigned int & interface_id, ElementPairLocator * epl)
+void
+GeometricSearchData::addElementPairLocator(const unsigned int & interface_id,
+                                           MooseSharedPointer<ElementPairLocator> epl)
 {
   _element_pair_locators[interface_id] = epl;
 }
