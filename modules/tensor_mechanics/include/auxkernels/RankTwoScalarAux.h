@@ -29,12 +29,31 @@ public:
 
 protected:
   virtual Real computeValue();
-  Real calcEigenValues();
 
   const MaterialProperty<RankTwoTensor> & _tensor;
+
+  /**
+   * Determines the information to be extracted from
+   * the tensor.  Eg, vonMisesStress, EquivalentPlasticStrain,
+   * L2norm, MaxPrincipal eigenvalue, etc.
+   */
   MooseEnum _scalar_type;
 
-private:
+  /// whether or not selected_qp has been set
+  const bool _has_selected_qp;
+
+  /// The std::vector will be evaluated at this quadpoint only
+  const unsigned int _selected_qp;
+
+  /**
+   * Calculates the eigenvalues of the tensor
+   * at the given quadpoint, and returns the
+   * one of interest, depending on _scalar_type
+   *
+   * @param qp the quadpoint
+   * @return the eigenvalue of interest
+   */
+  virtual Real calcEigenValues(unsigned int qp);
 };
 
 #endif //RANKTWOSCALARAUX_H

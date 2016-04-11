@@ -51,4 +51,17 @@
     exodiff = borehole_highres.e
     heavy = true
   [../]
+
+  [./selected_qp]
+    type = CSVDiff
+    input = selected_qp.i
+    csvdiff = selected_qp.csv
+  [../]
+  [./except1]
+    type = 'RunException'
+    input = selected_qp.i
+    prereq = 'selected_qp'
+    cli_args = 'Outputs/file_base=except1 AuxKernels/mean_stress0/selected_qp=10'
+    expect_err = 'RankTwoScalarAux.  selected_qp specified as 10 but there are only 8 quadpoints in the element'
+  [../]
 []
