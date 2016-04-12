@@ -19,6 +19,7 @@
 #include "NavierStokesApp.h"
 #include "PhaseFieldApp.h"
 #include "RichardsApp.h"
+#include "StructuralMechanicsApp.h"
 #include "SolidMechanicsApp.h"
 #include "TensorMechanicsApp.h"
 #include "WaterSteamEOSApp.h"
@@ -69,6 +70,7 @@ ModulesApp::registerObjects(Factory & factory)
   NavierStokesApp::registerObjects(factory);
   PhaseFieldApp::registerObjects(factory);
   RichardsApp::registerObjects(factory);
+  StructuralMechanicsApp::registerObjects(factory);
   SolidMechanicsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
   WaterSteamEOSApp::registerObjects(factory);
@@ -89,6 +91,7 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   NavierStokesApp::associateSyntax(syntax, action_factory);
   PhaseFieldApp::associateSyntax(syntax, action_factory);
   RichardsApp::associateSyntax(syntax, action_factory);
+  StructuralMechanicsApp::associateSyntax(syntax, action_factory);
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);

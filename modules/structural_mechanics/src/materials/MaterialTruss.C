@@ -5,18 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "TrussMaterial.h"
+#include "MaterialTruss.h"
 #include "Material.h"
-#include "ColumnMajorMatrix.h"
-#include "SymmIsotropicElasticityTensor.h"
-#include "VolumetricModel.h"
 #include "NonlinearSystem.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
 
 template<>
-InputParameters validParams<TrussMaterial>()
+InputParameters validParams<MaterialTruss>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<NonlinearVariableName>("disp_x","Variable containing the x displacement");
@@ -30,7 +27,7 @@ InputParameters validParams<TrussMaterial>()
   return params;
 }
 
-TrussMaterial::TrussMaterial(const InputParameters & parameters)
+MaterialTruss::MaterialTruss(const InputParameters & parameters)
   :Material(parameters),
    _axial_stress(declareProperty<Real>("axial_stress")),
    _e_over_l(declareProperty<Real>("e_over_l")),
@@ -85,12 +82,12 @@ TrussMaterial::TrussMaterial(const InputParameters & parameters)
   }
 }
 
-TrussMaterial::~TrussMaterial()
+MaterialTruss::~MaterialTruss()
 {
 }
 
 void
-TrussMaterial::computeProperties()
+MaterialTruss::computeProperties()
 {
   const Node* const node0=_current_elem->get_node(0);
   const Node* const node1=_current_elem->get_node(1);
