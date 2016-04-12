@@ -12,6 +12,7 @@ ifeq ($(ALL_MODULES),yes)
         PHASE_FIELD               := yes
         RICHARDS                  := yes
         SOLID_MECHANICS           := yes
+        STRUCTURAL_MECHANICS      := yes
         TENSOR_MECHANICS          := yes
         WATER_STEAM_EOS           := yes
         XFEM                      := yes
@@ -31,7 +32,7 @@ ifeq ($(POROUS_FLOW),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow"
+MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards structural_mechanics solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -92,6 +93,12 @@ endif
 ifeq ($(RICHARDS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/richards
   APPLICATION_NAME   := richards
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(STRUCTURAL_MECHANICS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/structural_mechanics
+  APPLICATION_NAME   := structural_mechanics
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

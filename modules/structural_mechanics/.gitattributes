@@ -1,0 +1,19 @@
+# Linguist overrides
+
+# These paths do not work properly with linguist yet, but they should (2/27/2015)
+doc/* linguist-vendored
+tests/* linguist-vendored
+contrib/* linguist-vendored
+
+# Skipping explicit file types
+*.eps linguist-vendored
+*.m linguist-vendored
+*.tex linguist-vendored
+*.e linguist-vendored
+*.js linguist-vendored
+*.nb linguist-vendored
+*.css linguist-vendored
+*.html linguist-vendored
+*.xml linguist-vendored
+
+*.C linguist-language=C++

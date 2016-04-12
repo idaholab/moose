@@ -4,26 +4,26 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef TRUSSMATERIAL_H
-#define TRUSSMATERIAL_H
+#ifndef MATERIALTRUSS_H
+#define MATERIALTRUSS_H
 
 #include "Material.h"
 
 //Forward Declarations
-class TrussMaterial;
+class MaterialTruss;
 
 template<>
-InputParameters validParams<TrussMaterial>();
+InputParameters validParams<MaterialTruss>();
 
 /**
  * LinearIsotropic material for use in simple applications that don't need material properties.
  */
-class TrussMaterial : public Material
+class MaterialTruss : public Material
 {
 public:
-  TrussMaterial(const InputParameters & parameters);
+  MaterialTruss(const InputParameters & parameters);
 
-  virtual ~TrussMaterial();
+  virtual ~MaterialTruss();
 
 protected:
 
@@ -48,4 +48,4 @@ protected:
   unsigned int _dim;
 };
 
-#endif //TRUSSMATERIAL_H
+#endif //MATERIALTRUSS_H

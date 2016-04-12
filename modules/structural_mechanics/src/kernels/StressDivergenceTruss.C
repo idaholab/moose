@@ -7,7 +7,6 @@
 
 #include "StressDivergenceTruss.h"
 #include "Material.h"
-#include "SymmElasticityTensor.h"
 #include "Assembly.h"
 
 template<>

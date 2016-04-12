@@ -1,23 +1,7 @@
-#
-# Truss
-#
-# The truss is made of five equilateral triangles supported at each end.
-# The truss starts at (0,0).  At (1,0), there is a point load of 25.
-# The reactions are therefore
-#  Ryleft  = 2/3 * 25 = 16.7
-#  Ryright = 1/3 * 25 = 8.33
-# The area of each member is 0.8.
-# Statics gives the stress in each member.  For example, for element 6 (from
-#   (0,0) to (1/2,sqrt(3)/2)), the force is
-#   f = 2/3 * 25 * 2/sqrt(3) = 100/3/sqrt(3) (compressive)
-#   and the stress is
-#   s = -100/3/sqrt(3)/0.8 = -24.06
-#
-
 [Mesh]
   type = FileMesh
-  file = truss.e
-  displacements = 'disp_x disp_y'
+  file = truss_3d.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -26,6 +10,10 @@
     family = LAGRANGE
   [../]
   [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -79,57 +67,75 @@
     boundary = 1
     value = 0.0
   [../]
+  [./fixx2]
+    type = FunctionDirichletBC
+    variable = disp_x
+    boundary = 2
+    function = x2
+  [../]
+  [./fixx3]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 3
+    value = 0.0
+  [../]
   [./fixy1]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0
   [../]
-
-
-  [./fixy4]
+  [./fixy2]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = 2
+    function = y2
+  [../]
+  [./fixy3]
     type = DirichletBC
     variable = disp_y
-    boundary = 4
+    boundary = 3
     value = 0
   [../]
-[]
-
-[DiracKernels]
-  [./pull]
-    type = ConstantPointSource
-    value = -25
-    point = '1 0 0'
-    variable = disp_y
+  [./fixz1]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 1
+    value = 0
+  [../]
+  [./fixz2]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 2
+    value = 0
+  [../]
+  [./fixz3]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 3
+    value = 0
   [../]
 []
 
 [AuxKernels]
   [./axial_stress]
     type = MaterialRealAux
-    block = 1
+    block = '1 2'
     property = axial_stress
     variable = axial_stress
   [../]
   [./e_over_l]
     type = MaterialRealAux
-    block = 1
+    block = '1 2'
     property = e_over_l
     variable = e_over_l
   [../]
   [./area]
     type = ConstantAux
-    block = 1
+    block = '1 2'
     variable = area
-    value = 0.8
+    value = 1.0
     execute_on = 'initial timestep_begin'
-  [../]
-[]
-
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
   [../]
 []
 
@@ -137,52 +143,70 @@
   type = Transient
 
   solve_type = PJFNK
-
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'jacobi   101'
+  line_search = 'none'
 
   nl_max_its = 15
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-6
   nl_abs_tol = 1e-10
 
   dt = 1
-  num_steps = 1
-  end_time = 1
+  num_steps = 3
+  end_time = 3
 []
 
 [Kernels]
   [./solid_x]
     type = StressDivergenceTruss
-    block = 1
+    block = '1 2'
     variable = disp_x
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
     component = 0
     area = area
     save_in = react_x
   [../]
   [./solid_y]
     type = StressDivergenceTruss
-    block = 1
+    block = '1 2'
     variable = disp_y
     component = 1
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
     area = area
     save_in = react_y
+  [../]
+  [./solid_z]
+    type = StressDivergenceTruss
+    block = '1 2'
+    variable = disp_z
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    component = 2
+    area = area
+    save_in = react_z
   [../]
 []
 
 [Materials]
   [./linelast]
-    type = TrussMaterial
-    block = 1
+    type = MaterialTruss
+    block = '1 2'
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
     youngs_modulus = 1e6
+#    thermal_expansion = 0.1
+#    t_ref = 0.5
+#    temp = temp
   [../]
 []
 
 [Outputs]
+  file_base = truss_3d_out
   exodus = true
 []

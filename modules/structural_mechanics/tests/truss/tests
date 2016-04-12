@@ -1,0 +1,15 @@
+[Tests]
+  [./truss_3d]
+    type = 'Exodiff'
+    input = 'truss_3d.i'
+    exodiff = 'truss_3d_out.e'
+    abs_zero = 1e-7
+  [../]
+  [./truss_2d]
+    type = 'Exodiff'
+    input = 'truss_2d.i'
+    exodiff = 'truss_2d_out.e'
+    abs_zero = 1e-7
+    max_parallel = 1
+  [../]
+[]
