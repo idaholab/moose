@@ -5,12 +5,6 @@
     exodiff = 'material_out.e'
   [../]
 
-  [./soft]
-    type = 'Exodiff'
-    input = 'soft.i'
-    exodiff = 'soft_out.e'
-  [../]
-
   [./parallel]
     type = 'CSVDiff'
     input = 'parallel.i'
@@ -18,5 +12,57 @@
     min_parallel = 4
     max_parallel = 4
     rel_err = 1e-3
+  [../]
+
+  #
+  # manual recover test for [./material]
+  #
+  [./material_recover1]
+    type = 'CheckFiles'
+    input = 'material.i'
+    check_files = 'material_recover_cp/0005.xdr'
+    cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=material_recover'
+    prereq = 'material'
+    recover = false
+  [../]
+  [./material_recover2]
+    # Recover the solve from part1 with a specified file
+    type = 'Exodiff'
+    input = 'material.i'
+    exodiff = 'material_out.e'
+    cli_args = '--recover material_recover_cp/0005'
+    prereq = 'material_recover1'
+    delete_output_before_running = false
+    recover = false
+  [../]
+
+  #
+  # manual recover test for [./parallel]
+  #
+  [./parallel_recover1]
+    type = 'CheckFiles'
+    input = 'parallel.i'
+    check_files = 'parallel_recover_cp/0005.xdr'
+    cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=parallel_recover'
+    prereq = 'parallel'
+    recover = false
+  [../]
+  [./parallel_recover2]
+    # Recover the solve from part1 with a specified file
+    type = 'CSVDiff'
+    input = 'parallel.i'
+    csvdiff = 'parallel_out.csv'
+    rel_err = 1e-3
+    cli_args = '--recover parallel_recover_cp/0005'
+    prereq = 'parallel_recover1'
+    delete_output_before_running = false
+    recover = false
+  [../]
+
+  [./soft]
+    type = 'Exodiff'
+    input = 'soft.i'
+    exodiff = 'soft_out.e'
+    recover = false
   [../]
 []
