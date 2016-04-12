@@ -130,12 +130,16 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Po
 }
 
 RealGradient
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & /*c*/, const Real & n)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
 {
   Point l_center = center;
   Point l_p = p;
   //Compute the distance between the current point and the center
   Real dist = _mesh.minPeriodicDistance(_var.number(), l_p, l_center);
+
+  //When dist is 0 we are exactly at the center of the superellipsoid so return 0
+  //Handle this case independently because we cannot calculate polar angles at this point
+  if (dist == 0.0) return 0.0;
 
   //Compute the distance r from the center of the superellipsoid to its outside edge
   //along the vector from the center to the current point
@@ -143,22 +147,20 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const
   //distances for sin, cos functions
   Point dist_vec = _mesh.minPeriodicVector(_var.number(), center, p);
   //First calculate rmn = r^(-n)
-  Real rmn = (std::pow(std::abs(dist_vec(0)/dist/a), n) +  std::pow(std::abs(dist_vec(1)/dist/b), n));
-  //Then calculate r
+  Real rmn = (std::pow(std::abs(dist_vec(0) / dist / a), n)
+            + std::pow(std::abs(dist_vec(1) / dist / b), n)
+            + std::pow(std::abs(dist_vec(2) / dist / c), n) );
+  //Then calculate r from rmn
   Real r = std::pow(rmn, (-1.0/n));
 
   Real DvalueDr = 0.0;
 
-  if (dist < r + _int_width/2.0 && dist > r - _int_width/2.0)
+  if (dist < r + _int_width/2.0 && dist > r - _int_width/2.0) //in interfacial region
   {
     Real int_pos = (dist - r + _int_width / 2.0) / _int_width;
     Real Dint_posDr = 1.0 / _int_width;
     DvalueDr = Dint_posDr * (_invalue - _outvalue) * (-std::sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
   }
 
-  //Set gradient over the smooth interface
-  if (dist != 0.0)
-    return dist_vec * (DvalueDr / dist);
-  else
-    return 0.0;
+  return dist_vec * (DvalueDr / dist);
 }
