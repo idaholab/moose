@@ -1,0 +1,45 @@
+[Tests]
+  [./grav01a]
+    type = 'CSVDiff'
+    input = 'grav01a.i'
+    csvdiff = 'grav01a.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav01b]
+    type = 'CSVDiff'
+    input = 'grav01b.i'
+    csvdiff = 'grav01b.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav01c]
+    type = 'CSVDiff'
+    input = 'grav01c.i'
+    csvdiff = 'grav01c.csv'
+    rel_err = 1.0E-5
+  [../]
+
+  [./grav02a]
+    type = 'CSVDiff'
+    input = 'grav02a.i'
+    csvdiff = 'grav02a.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav02b]
+    type = 'CSVDiff'
+    input = 'grav02b.i'
+    csvdiff = 'grav02b.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav02c]
+    type = 'CSVDiff'
+    input = 'grav02c.i'
+    csvdiff = 'grav02c.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav02d]
+    type = 'CSVDiff'
+    input = 'grav02d.i'
+    csvdiff = 'grav02d.csv'
+    rel_err = 1.0E-5
+  [../]
+[]
