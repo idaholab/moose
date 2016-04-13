@@ -29,7 +29,7 @@
 #include "ThermalContactDiracKernelsAction.h"
 #include "ThermalContactMaterialsAction.h"
 #include "HeatSource.h"
-#include "ThermalCond.h"
+#include "ThermalConductivity.h"
 #include "CoupledConvectiveFlux.h"
 
 template<>
@@ -82,8 +82,11 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerMaterial(AnisoHeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
   registerPostprocessor(HomogenizedThermalConductivity);
-  registerPostprocessor(ThermalCond);
+  registerPostprocessor(ThermalConductivity);
   registerConstraint(GapConductanceConstraint);
+
+  registerDeprecatedObjectName(ThermalConductivity, "ThermalCond", "15/09/2016 00:00");
+  registerDeprecatedObjectName(HomogenizedHeatConduction, "HomogenizationHeatConduction", "15/09/2016 00:00");
 }
 
 // External entry point for dynamic syntax association
