@@ -1,0 +1,17 @@
+[Tests]
+  [./vol_expansion]
+    type = Exodiff
+    input = vol_expansion.i
+    exodiff = vol_expansion.e
+  [../]
+  [./undrained_oedometer]
+    type = CSVDiff
+    input = undrained_oedometer.i
+    csvdiff = undrained_oedometer.csv
+  [../]
+  #[./mandel]
+  #  type = CSVDiff
+  #  input = mandel.i
+  #  csvdiff = mandel.csv
+  #[../]
+[]

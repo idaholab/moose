@@ -1,0 +1,56 @@
+[Tests]
+  [./h2o1]
+    type = 'CSVDiff'
+    input = 'h2o1.i'
+    csvdiff = 'h2o1.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./h2o2]
+    type = 'CSVDiff'
+    input = 'h2o2.i'
+    csvdiff = 'h2o2.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./methane1]
+    type = 'CSVDiff'
+    input = 'methane1.i'
+    csvdiff = 'methane1.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./methane2]
+    type = 'CSVDiff'
+    input = 'methane2.i'
+    csvdiff = 'methane2.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./constantbulk]
+    type = 'CSVDiff'
+    input = 'constant_bulk.i'
+    csvdiff = 'constant_bulk.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./ideal_gas]
+    type = 'CSVDiff'
+    input = 'ideal_gas.i'
+    csvdiff = 'ideal_gas.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./brine1]
+    type = 'CSVDiff'
+    input = 'brine1.i'
+    csvdiff = 'brine1.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./simpleco21]
+    type = 'CSVDiff'
+    input = 'simpleco21.i'
+    csvdiff = 'simpleco21.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./simpleco22]
+    type = 'CSVDiff'
+    input = 'simpleco22.i'
+    csvdiff = 'simpleco22.csv'
+    rel_err = 1.0E-5
+  [../]
+[]
