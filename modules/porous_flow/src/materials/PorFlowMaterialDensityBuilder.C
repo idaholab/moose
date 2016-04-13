@@ -1,0 +1,79 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+
+#include "PorFlowMaterialDensityBuilder.h"
+
+#include "Conversion.h"
+
+template<>
+InputParameters validParams<PorFlowMaterialDensityBuilder>()
+{
+  InputParameters params = validParams<Material>();
+
+  params.addRequiredParam<unsigned int>("num_phases", "The number of fluid phases in the simulation");
+  params.addRequiredParam<UserObjectName>("PorFlowVarNames_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addClassDescription("This Material forms a std::vector of density out of the individual phase densities");
+  return params;
+}
+
+PorFlowMaterialDensityBuilder::PorFlowMaterialDensityBuilder(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
+
+    _num_phases(getParam<unsigned int>("num_phases")),
+    _porflow_name_UO(getUserObject<PorFlowVarNames>("PorFlowVarNames_UO")),
+
+    _density(declareProperty<std::vector<Real> >("PorFlow_fluid_phase_density")),
+    _density_old(declarePropertyOld<std::vector<Real> >("PorFlow_fluid_phase_density")),
+    _ddensity_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_fluid_phase_density_dvar"))
+{
+  _phase_density.resize(_num_phases);
+  _dphase_density_dvar.resize(_num_phases);
+  for (unsigned int ph = 0; ph < _num_phases; ++ph)
+  {
+    _phase_density[ph] = &getMaterialProperty<Real>("PorFlow_fluid_phase_density" + Moose::stringify(ph));
+    _dphase_density_dvar[ph] = &getMaterialProperty<std::vector<Real> >("dPorFlow_fluid_phase_density" + Moose::stringify(ph) + "_dvar");
+  }
+}
+
+void
+PorFlowMaterialDensityBuilder::initQpStatefulProperties()
+{
+  _density_old[_qp].resize(_num_phases);
+  _density[_qp].resize(_num_phases);
+  _ddensity_dvar[_qp].resize(_num_phases);
+  const unsigned int num_var = _porflow_name_UO.num_v();
+  for (unsigned int ph = 0; ph < _num_phases; ++ph)
+    _ddensity_dvar[_qp][ph].resize(num_var);
+}
+
+void
+PorFlowMaterialDensityBuilder::computeQpProperties()
+{
+  const unsigned int num_var = _porflow_name_UO.num_v();
+
+  for (unsigned int ph = 0; ph < _num_phases; ++ph)
+  {
+    _density[_qp][ph] = (*_phase_density[ph])[_qp];
+    for (unsigned v = 0; v < num_var; ++v)
+      _ddensity_dvar[_qp][ph][v] = (*_dphase_density_dvar[ph])[_qp][v];
+  }
+
+
+  /*
+   *  YAQI HACK !!
+   *
+   * I really just want to simply set
+   * _density[_qp][ph] = (*_phase_density[ph])[_qp];
+   * in initQpStatefulProperties, but the Variables
+   * aren't initialised at that point so moose crashes
+   */
+  if (_t_step == 1)
+    for (unsigned int ph = 0; ph < _num_phases; ++ph)
+      _density_old[_qp][ph] = _density[_qp][ph];
+}
+

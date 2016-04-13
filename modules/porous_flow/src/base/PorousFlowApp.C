@@ -3,6 +3,19 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// Kernels
+#include "PorFlowComponentMassTimeDerivative.h"
+
+// UserObjects
+#include "PorFlowVarNames.h"
+
+// Materials
+#include "PorFlowMaterial2PhasePS.h"
+#include "PorFlowMaterialDensityConstBulk.h"
+#include "PorFlowMaterialDensityBuilder.h"
+#include "PorFlowMaterialPorosityConst.h"
+#include "PorFlowMaterialMassFractionBuilder.h"
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -42,6 +55,18 @@ extern "C" void PorousFlowApp__registerObjects(Factory & factory) { PorousFlowAp
 void
 PorousFlowApp::registerObjects(Factory & factory)
 {
+  // Kernels
+  registerKernel(PorFlowComponentMassTimeDerivative);
+
+  // UserObjects
+  registerUserObject(PorFlowVarNames);
+
+  // Materials
+  registerMaterial(PorFlowMaterial2PhasePS);
+  registerMaterial(PorFlowMaterialDensityConstBulk);
+  registerMaterial(PorFlowMaterialDensityBuilder);
+  registerMaterial(PorFlowMaterialPorosityConst);
+  registerMaterial(PorFlowMaterialMassFractionBuilder);
 }
 
 // External entry point for dynamic syntax association
