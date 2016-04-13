@@ -62,7 +62,7 @@
     variable = Tx_AEH
   [../]
   [./heat_rhs_x]
-    type = HomogenizationHeatConduction
+    type = HomogenizedHeatConduction
     variable = Tx_AEH
     component = 0
   [../]
@@ -71,7 +71,7 @@
     variable = Ty_AEH
   [../]
   [./heat_rhs_y]
-    type = HomogenizationHeatConduction
+    type = HomogenizedHeatConduction
     variable = Ty_AEH
     component = 1
   [../]

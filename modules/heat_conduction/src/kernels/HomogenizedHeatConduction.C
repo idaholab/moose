@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "HomogenizationHeatConduction.h"
+#include "HomogenizedHeatConduction.h"
 
 template<>
-InputParameters validParams<HomogenizationHeatConduction>()
+InputParameters validParams<HomogenizedHeatConduction>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<MaterialPropertyName>("diffusion_coefficient_name", "thermal_conductivity", "The diffusion coefficient for the temperature gradient (Default: thermal_conductivity)");
@@ -16,7 +16,7 @@ InputParameters validParams<HomogenizationHeatConduction>()
 }
 
 
-HomogenizationHeatConduction::HomogenizationHeatConduction(const InputParameters & parameters) :
+HomogenizedHeatConduction::HomogenizedHeatConduction(const InputParameters & parameters) :
     Kernel(parameters),
     _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
     _component(getParam<unsigned int>("component"))
@@ -24,7 +24,7 @@ HomogenizationHeatConduction::HomogenizationHeatConduction(const InputParameters
 }
 
 Real
-HomogenizationHeatConduction::computeQpResidual()
+HomogenizedHeatConduction::computeQpResidual()
 {
   // Compute positive value since we are computing a residual not a rhs
   return _diffusion_coefficient[_qp] * _grad_test[_i][_qp](_component);
