@@ -67,11 +67,17 @@ namespace Moose
     return os.str();
   }
 
-  /**
-   * Convert solve type into human readable string
-   */
+  /// Convert solve type into human readable string
   template<>
   std::string stringify(const SolveType & t);
+
+  /// Convert execute flags type into human readable string
+  template<>
+  std::string stringify(const ExecFlagType & t);
+
+   /// Stringify Reals with high precision
+  template<>
+  std::string stringify(const Real & t);
 }
 
 /**
