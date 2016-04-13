@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef HOMOGENIZATIONHEATCONDUCTION_H
-#define HOMOGENIZATIONHEATCONDUCTION_H
+#ifndef HOMOGENIZEDHEATCONDUCTION_H
+#define HOMOGENIZEDHEATCONDUCTION_H
 
 #include "Kernel.h"
 
@@ -14,10 +14,10 @@
  * Materials, Journal of Thermophysics and Heat Transfer, Vol. 15, No. 1,
  * January-March 2001.
  */
-class HomogenizationHeatConduction : public Kernel
+class HomogenizedHeatConduction : public Kernel
 {
 public:
-  HomogenizationHeatConduction(const InputParameters & parameters);
+  HomogenizedHeatConduction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -27,6 +27,6 @@ protected:
 };
 
 template<>
-InputParameters validParams<HomogenizationHeatConduction>();
+InputParameters validParams<HomogenizedHeatConduction>();
 
-#endif //HOMOGENIZATIONHEATCONDUCTION_H
+#endif //HOMOGENIZEDHEATCONDUCTION_H

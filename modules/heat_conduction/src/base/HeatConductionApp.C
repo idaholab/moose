@@ -21,7 +21,7 @@
 #include "HeatConductionMaterial.h"
 #include "AnisoHeatConductionMaterial.h"
 #include "HeatConductionBC.h"
-#include "HomogenizationHeatConduction.h"
+#include "HomogenizedHeatConduction.h"
 #include "HomogenizedThermalConductivity.h"
 #include "ThermalContactAuxBCsAction.h"
 #include "ThermalContactAuxVarsAction.h"
@@ -72,7 +72,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerKernel(AnisoHeatConduction);
   registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
-  registerKernel(HomogenizationHeatConduction);
+  registerKernel(HomogenizedHeatConduction);
   registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
