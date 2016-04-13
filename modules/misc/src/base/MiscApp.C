@@ -24,6 +24,10 @@
 #include "CInterfacePosition.h"
 #include "ThermoDiffusion.h"
 
+// Initialize static member variables
+bool MiscApp::_registered_objects = false;
+bool MiscApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<MiscApp>()
 {
@@ -60,6 +64,10 @@ extern "C" void MiscApp__registerObjects(Factory & factory) { MiscApp::registerO
 void
 MiscApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerAux(CoupledDirectionalMeshHeightInterpolation);
 
   registerBoundaryCondition(RobinBC);
@@ -87,4 +95,8 @@ extern "C" void MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action
 void
 MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
 }

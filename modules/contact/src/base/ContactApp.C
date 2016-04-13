@@ -30,6 +30,10 @@
 #include "NodalAreaVarAction.h"
 #include "ContactSlipDamper.h"
 
+// Initialize static member variables
+bool ContactApp::_registered_objects = false;
+bool ContactApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<ContactApp>()
 {
@@ -66,6 +70,10 @@ extern "C" void ContactApp__registerObjects(Factory & factory) { ContactApp::reg
 void
 ContactApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerDiracKernel(ContactMaster);
   registerDiracKernel(SlaveConstraint);
   registerConstraint(OneDContactConstraint);
@@ -85,6 +93,10 @@ extern "C" void ContactApp__associateSyntax(Syntax & syntax, ActionFactory & act
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   syntax.registerActionSyntax("ContactAction", "Contact/*");
 
   syntax.registerActionSyntax("ContactPenetrationAuxAction", "Contact/*");

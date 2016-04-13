@@ -104,6 +104,10 @@
 // Problems
 #include "RichardsMultiphaseProblem.h"
 
+// Initialize static member variables
+bool RichardsApp::_registered_objects = false;
+bool RichardsApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<RichardsApp>()
 {
@@ -136,6 +140,10 @@ RichardsApp::registerApps()
 void
 RichardsApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   // UserObjects
   registerUserObject(RichardsVarNames);
   registerUserObject(RichardsDensityConstBulk);
@@ -230,6 +238,10 @@ RichardsApp::registerObjects(Factory & factory)
 void
 RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   syntax.registerActionSyntax("Q2PAction", "Q2P", "add_kernel");
   syntax.registerActionSyntax("Q2PAction", "Q2P", "add_aux_variable");
   syntax.registerActionSyntax("Q2PAction", "Q2P", "add_function");

@@ -23,6 +23,12 @@ public:
   static void registerApps();
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
+
+private:
+  /// Used to prevent re-registration of objects
+  static bool _registered_objects;
+  /// Used to prevent re-association of syntax
+  static bool _associated_syntax;
 };
 
 #endif /* TENSOR_MECHANICSAPP_H */

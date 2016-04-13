@@ -10,6 +10,10 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// Initialize static member variables
+bool WaterSteamEOSApp::_registered_objects = false;
+bool WaterSteamEOSApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<WaterSteamEOSApp>()
 {
@@ -46,6 +50,10 @@ extern "C" void WaterSteamEOSApp__registerObjects(Factory & factory) { WaterStea
 void
 WaterSteamEOSApp::registerObjects(Factory & /*factory*/)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
 }
 
 // External entry point for dynamic syntax association
@@ -53,4 +61,8 @@ extern "C" void WaterSteamEOSApp__associateSyntax(Syntax & syntax, ActionFactory
 void
 WaterSteamEOSApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
 }

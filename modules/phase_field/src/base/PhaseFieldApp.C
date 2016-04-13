@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "PhaseFieldApp.h"
+#include "TensorMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -204,6 +205,9 @@
  #include "GrainCentersPostprocessor.h"
  #include "GrainForcesPostprocessor.h"
 
+// Initialize static member variables
+bool PhaseFieldApp::_registered_objects = false;
+bool PhaseFieldApp::_associated_syntax = false;
 
 template<>
 InputParameters validParams<PhaseFieldApp>()
@@ -241,6 +245,12 @@ extern "C" void PhaseFieldApp__registerObjects(Factory & factory) { PhaseFieldAp
 void
 PhaseFieldApp::registerObjects(Factory & factory)
 {
+  TensorMechanicsApp::registerObjects(factory);
+
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerKernel(ACGBPoly);
   registerKernel(ACGrGrElasticDrivingForce);
   registerKernel(ACGrGrPoly);
@@ -391,6 +401,12 @@ extern "C" void PhaseFieldApp__associateSyntax(Syntax & syntax, ActionFactory & 
 void
 PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  TensorMechanicsApp::associateSyntax(syntax, action_factory);
+
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   syntax.registerActionSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
   syntax.registerActionSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
   syntax.registerActionSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");

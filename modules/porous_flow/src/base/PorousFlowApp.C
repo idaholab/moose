@@ -3,6 +3,10 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// Initialize static member variables
+bool PorousFlowApp::_registered_objects = false;
+bool PorousFlowApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -42,6 +46,10 @@ extern "C" void PorousFlowApp__registerObjects(Factory & factory) { PorousFlowAp
 void
 PorousFlowApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
 }
 
 // External entry point for dynamic syntax association
@@ -49,4 +57,8 @@ extern "C" void PorousFlowApp__associateSyntax(Syntax & syntax, ActionFactory & 
 void
 PorousFlowApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
 }

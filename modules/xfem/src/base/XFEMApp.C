@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "XFEMApp.h"
+#include "SolidMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -16,6 +17,10 @@
 #include "XFEMMarkerUserObject.h"
 #include "XFEMMaterialTensorMarkerUserObject.h"
 #include "XFEMAction.h"
+
+// Initialize static member variables
+bool XFEMApp::_registered_objects = false;
+bool XFEMApp::_associated_syntax = false;
 
 template<>
 InputParameters validParams<XFEMApp>()
@@ -55,6 +60,12 @@ extern "C" void XFEMApp__registerObjects(Factory & factory) { XFEMApp::registerO
 void
 XFEMApp::registerObjects(Factory & factory)
 {
+  SolidMechanicsApp::registerObjects(factory);
+
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   //AuxKernels
   registerAux(XFEMVolFracAux);
   registerAux(XFEMCutPlaneAux);
@@ -63,6 +74,8 @@ XFEMApp::registerObjects(Factory & factory)
   //UserObjects
   registerUserObject(XFEMMarkerUserObject);
   registerUserObject(XFEMMaterialTensorMarkerUserObject);
+
+  _registered_objects = true;
 }
 
 // External entry point for dynamic syntax association
@@ -70,6 +83,12 @@ extern "C" void XFEMApp__associateSyntax(Syntax & syntax, ActionFactory & action
 void
 XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  SolidMechanicsApp::associateSyntax(syntax, action_factory);
+
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   registerTask("setup_xfem", false);
   registerAction(XFEMAction, "setup_xfem");
   syntax.addDependency("setup_xfem","setup_adaptivity");
@@ -78,5 +97,4 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("XFEMAction", "XFEM");
   syntax.registerActionSyntax("AddUserObjectAction", "XFEM/*");
-
 }

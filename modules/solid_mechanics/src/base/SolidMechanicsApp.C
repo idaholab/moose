@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "SolidMechanicsApp.h"
+#include "TensorMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -72,6 +73,9 @@
 #include "RateDepSmearCrackModel.h"
 #include "RateDepSmearIsoCrackModel.h"
 
+// Initialize static member variables
+bool SolidMechanicsApp::_registered_objects = false;
+bool SolidMechanicsApp::_associated_syntax = false;
 
 template<>
 InputParameters validParams<SolidMechanicsApp>()
@@ -109,6 +113,12 @@ extern "C" void SolidMechanicsApp__registerObjects(Factory & factory) { SolidMec
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
 {
+  TensorMechanicsApp::registerObjects(factory);
+
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
@@ -178,6 +188,12 @@ extern "C" void SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactor
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  TensorMechanicsApp::associateSyntax(syntax, action_factory);
+
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   syntax.registerActionSyntax("EmptyAction", "BCs/CavityPressure");
   syntax.registerActionSyntax("CavityPressureAction", "BCs/CavityPressure/*");
   syntax.registerActionSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
