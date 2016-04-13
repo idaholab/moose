@@ -1,0 +1,58 @@
+[Tests]
+  [./propagating_1field]
+    type = Exodiff
+    input = propagating_1field.i
+    exodiff = 'propagating_1field_out.e propagating_1field_out.e-s002'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./propagating_2field_1constraint]
+    type = Exodiff
+    input = propagating_2field_1constraint.i
+    exodiff = 'propagating_2field_1constraint_out.e propagating_2field_1constraint_out.e-s002'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./propagating_2field_2constraint]
+    type = Exodiff
+    input = propagating_2field_2constraint.i
+    exodiff = 'propagating_2field_2constraint_out.e propagating_2field_2constraint_out.e-s002'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./stationary_equal]
+    type = Exodiff
+    input = stationary_equal.i
+    exodiff = 'stationary_equal_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./stationary_fluxjump]
+    type = Exodiff
+    input = stationary_fluxjump.i
+    exodiff = 'stationary_fluxjump_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./stationary_jump]
+    type = Exodiff
+    input = stationary_jump.i
+    exodiff = 'stationary_jump_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./stationary_jump_fluxjump]
+    type = Exodiff
+    input = stationary_jump_fluxjump.i
+    exodiff = 'stationary_jump_fluxjump_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+[]
