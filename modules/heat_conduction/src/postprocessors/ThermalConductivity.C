@@ -4,13 +4,13 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ThermalCond.h"
+#include "ThermalConductivity.h"
 
 template<>
-InputParameters validParams<ThermalCond>()
+InputParameters validParams<ThermalConductivity>()
 {
   InputParameters params = validParams<SideAverageValue>();
-  params.addRequiredParam<Real>("dx","Length between sides of sample in length_scale");
+  params.addRequiredParam<Real>("dx", "Length between sides of sample in length_scale");
   params.addRequiredParam<PostprocessorName>("flux", "Heat flux out of 'cold' boundary in solution units, should always be positive");
   params.addRequiredParam<PostprocessorName>("T_hot", "Temperature on 'hot' boundary in K");
   params.addParam<Real>("length_scale", 1e-8, "lengthscale of the solution, default is 1e-8");
@@ -18,7 +18,7 @@ InputParameters validParams<ThermalCond>()
   return params;
 }
 
-ThermalCond::ThermalCond(const InputParameters & parameters) :
+ThermalConductivity::ThermalConductivity(const InputParameters & parameters) :
     SideAverageValue(parameters),
     _dx(getParam<Real>("dx")),
     _flux(getPostprocessorValue("flux")),
@@ -29,7 +29,7 @@ ThermalCond::ThermalCond(const InputParameters & parameters) :
 }
 
 Real
-ThermalCond::getValue()
+ThermalConductivity::getValue()
 {
   const Real T_cold = SideAverageValue::getValue();
   Real Th_cond = 0.0;

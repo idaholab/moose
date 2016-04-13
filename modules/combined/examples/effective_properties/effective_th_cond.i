@@ -133,7 +133,7 @@
   [./k_x_direct] #Effective thermal conductivity from direct method
     # This value is lower than the AEH value because it is impacted by second phase
     # on the right boundary
-    type = ThermalCond
+    type = ThermalConductivity
     variable = T
     flux = 5e-6
     length_scale = 1e-06

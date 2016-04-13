@@ -90,7 +90,7 @@
 
 [Postprocessors]
   [./k_eff]
-    type = ThermalCond
+    type = ThermalConductivity
     variable = temp
     T_hot = 301
     flux = 100
