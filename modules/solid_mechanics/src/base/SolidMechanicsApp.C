@@ -21,8 +21,6 @@
 #include "ElementsOnLineAux.h"
 #include "HomogenizationKernel.h"
 #include "HomogenizedElasticConstants.h"
-#include "HomogenizationHeatConduction.h"
-#include "HomogenizedThermalConductivity.h"
 #include "IsotropicPlasticity.h"
 #include "IsotropicPowerLawHardening.h"
 #include "LinearAnisotropicMaterial.h"
@@ -153,9 +151,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceRZ);
   registerKernel(StressDivergenceRSpherical);
   registerKernel(StressDivergenceTruss);
-  registerKernel(HomogenizationHeatConduction);
 
-  registerPostprocessor(HomogenizedThermalConductivity);
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(JIntegral);
   registerPostprocessor(CrackFrontData);
