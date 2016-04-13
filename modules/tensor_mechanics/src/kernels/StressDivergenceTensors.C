@@ -16,10 +16,7 @@ InputParameters validParams<StressDivergenceTensors>()
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Stress divergence kernel (used by the TensorMechanics action)");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
-  params.addCoupledVar("displacements", "The string of displacements suitable for the problem statement");
-  params.addCoupledVar("disp_x", "Depricated: the x displacement");
-  params.addCoupledVar("disp_y", "Depricated: the y displacement");
-  params.addCoupledVar("disp_z", "Depricated: the z displacement");
+  params.addRequiredCoupledVar("displacements", "The string of displacements suitable for the problem statement");
   params.addCoupledVar("temp", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
@@ -35,43 +32,12 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
-    _disp(3),
     _disp_var(3),
     _temp_coupled(isCoupled("temp")),
     _temp_var(_temp_coupled ? coupled("temp") : 0)
 {
-  if (_ndisp)
-  {
-    for (unsigned int i = 0; i < _ndisp; ++i)
-    {
-      _disp[i] = &coupledValue("displacements", i);
-      _disp_var[i] = coupled("displacements", i);
-    }
-  }
-
-  //This code is for the depricated version that allows three unique displacement variables
-  else if ((_ndisp == 0) && isParamValid("disp_x"))
-  {
-    mooseDeprecated("StressDivergenceTensors has been updated to accept a string of displacement variable names, e.g. displacements = 'disp_x disp_y' in the input file.");
-    _disp[0] = &coupledValue("disp_x");
-    _disp_var[0] = coupled("disp_x");
-    ++_ndisp;
-    if (isParamValid("disp_y"))
-    {
-      _disp[1] = &coupledValue("disp_y");
-      _disp_var[1] = coupled("disp_y");
-      ++_ndisp;
-      if (isParamValid("disp_z"))
-      {
-        _disp[2] = &coupledValue("disp_z");
-        _disp_var[2] = coupled("disp_z");
-        ++_ndisp;
-      }
-    }
-  }
-
-  else
-    mooseError("The input file should specify a string of displacement names; these names should match the Variable block names.");
+  for (unsigned int i = 0; i < _ndisp; ++i)
+    _disp_var[i] = coupled("displacements", i);
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
