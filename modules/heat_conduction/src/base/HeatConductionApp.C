@@ -21,13 +21,15 @@
 #include "HeatConductionMaterial.h"
 #include "AnisoHeatConductionMaterial.h"
 #include "HeatConductionBC.h"
+#include "HomogenizedHeatConduction.h"
+#include "HomogenizedThermalConductivity.h"
 #include "ThermalContactAuxBCsAction.h"
 #include "ThermalContactAuxVarsAction.h"
 #include "ThermalContactBCsAction.h"
 #include "ThermalContactDiracKernelsAction.h"
 #include "ThermalContactMaterialsAction.h"
 #include "HeatSource.h"
-#include "ThermalCond.h"
+#include "ThermalConductivity.h"
 #include "CoupledConvectiveFlux.h"
 
 template<>
@@ -70,6 +72,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerKernel(AnisoHeatConduction);
   registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
+  registerKernel(HomogenizedHeatConduction);
   registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
@@ -78,8 +81,12 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerMaterial(HeatConductionMaterial);
   registerMaterial(AnisoHeatConductionMaterial);
   registerDiracKernel(GapHeatPointSourceMaster);
-  registerPostprocessor(ThermalCond);
+  registerPostprocessor(HomogenizedThermalConductivity);
+  registerPostprocessor(ThermalConductivity);
   registerConstraint(GapConductanceConstraint);
+
+  registerDeprecatedObjectName(ThermalConductivity, "ThermalCond", "15/09/2016 00:00");
+  registerDeprecatedObjectName(HomogenizedHeatConduction, "HomogenizationHeatConduction", "15/09/2016 00:00");
 }
 
 // External entry point for dynamic syntax association

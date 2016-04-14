@@ -92,7 +92,7 @@
     default = 301
   [../]
   [./k_eff]
-    type = ThermalCond
+    type = ThermalConductivity
     variable = temp
     T_hot = temp_in
     flux = 100

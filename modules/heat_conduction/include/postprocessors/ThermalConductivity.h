@@ -4,34 +4,33 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef THERMALCOND_H
-#define THERMALCOND_H
+#ifndef THERMALCONDUCTIVITY_H
+#define THERMALCONDUCTIVITY_H
 
 #include "SideAverageValue.h"
 
 //Forward Declarations
-class ThermalCond;
+class ThermalConductivity;
 
 template<>
-InputParameters validParams<ThermalCond>();
+InputParameters validParams<ThermalConductivity>();
 
 /**
  * This postprocessor computes the thermal conductivity of the bulk.
  */
-class ThermalCond : public SideAverageValue
+class ThermalConductivity : public SideAverageValue
 {
 public:
-  ThermalCond(const InputParameters & parameters);
+  ThermalConductivity(const InputParameters & parameters);
 
   virtual Real getValue();
 
-  Real _dx;
+protected:
+  const Real _dx;
   const PostprocessorValue & _flux;
   const PostprocessorValue & _T_hot;
-  Real _length_scale;
-  Real _k0;
-
-private:
+  const Real _length_scale;
+  const Real _k0;
 };
 
-#endif
+#endif //THERMALCONDUCTIVITY_H

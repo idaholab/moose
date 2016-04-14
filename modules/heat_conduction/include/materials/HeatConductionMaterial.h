@@ -9,7 +9,6 @@
 
 #include "Material.h"
 
-
 //Forward Declarations
 class HeatConductionMaterial;
 class Function;
