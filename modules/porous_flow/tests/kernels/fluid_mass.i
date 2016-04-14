@@ -5,6 +5,10 @@
   ny = 1
 []
 
+[GlobalParams]
+  PorousFlowDictator_UO = porflow_vars
+[]
+
 [Variables]
   [./pp]
   [../]
@@ -26,63 +30,55 @@
 
 [Kernels]
   [./mass0]
-    type = PorFlowComponentMassTimeDerivative
+    type = PorousFlowComponentMassTimeDerivative
     component_index = 0
-    PorFlowVarNames_UO = porflow_vars
     variable = pp
   [../]
   [./mass1]
-    type = PorFlowComponentMassTimeDerivative
+    type = PorousFlowComponentMassTimeDerivative
     component_index = 1
-    PorFlowVarNames_UO = porflow_vars
     variable = sat
   [../]
 []
 
 [UserObjects]
   [./porflow_vars]
-    type = PorFlowVarNames
+    type = PorousFlowDictator
     porflow_vars = 'pp sat'
   [../]
 []
 
 [Materials]
   [./ppss]
-    type = PorFlowMaterial2PhasePS
+    type = PorousFlowMaterial2PhasePS
     phase0_porepressure = pp
     phase1_saturation = sat
-    PorFlowVarNames_UO = porflow_vars
   [../]
   [./massfrac]
-    type = PorFlowMaterialMassFractionBuilder
+    type = PorousFlowMaterialMassFractionBuilder
     num_phases = 2
     num_components = 2
     mass_fraction_vars = 'gasph_gascomp waterph_gascomp'
-    PorFlowVarNames_UO = porflow_vars
   [../]
   [./dens0]
-    type = PorFlowMaterialDensityConstBulk
+    type = PorousFlowMaterialDensityConstBulk
     density0 = 1
     bulk_modulus = 1.5
     phase = 0
-    PorFlowVarNames_UO = porflow_vars
   [../]
   [./dens1]
-    type = PorFlowMaterialDensityConstBulk
+    type = PorousFlowMaterialDensityConstBulk
     density0 = 0.5
     bulk_modulus = 0.5
     phase = 1
-    PorFlowVarNames_UO = porflow_vars
   [../]
   [./dens_all]
-    type = PorFlowMaterialDensityBuilder
+    type = PorousFlowMaterialDensityBuilder
     num_phases = 2
-    PorFlowVarNames_UO = porflow_vars
   [../]
   [./porosity]
-    type = PorFlowMaterialPorosityConst
+    type = PorousFlowMaterialPorosityConst
     porosity = 0.1
-    PorFlowVarNames_UO = porflow_vars
   [../]
 []
 

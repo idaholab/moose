@@ -6,18 +6,18 @@
 /****************************************************************/
 
 
-#ifndef PORFLOWVARNAMES_H
-#define PORFLOWVARNAMES_H
+#ifndef PORFLOWDICTATOR_H
+#define PORFLOWDICTATOR_H
 
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
 #include "ZeroInterface.h"
 
-class PorFlowVarNames;
+class PorousFlowDictator;
 
 
 template<>
-InputParameters validParams<PorFlowVarNames>();
+InputParameters validParams<PorousFlowDictator>();
 
 /**
  * This holds maps between the nonlinear variables
@@ -30,13 +30,13 @@ InputParameters validParams<PorFlowVarNames>();
  * (in practice they may be lazy and not compute
  * the derivatives).
  */
-class PorFlowVarNames :
+class PorousFlowDictator :
   public GeneralUserObject,
   public Coupleable,
   public ZeroInterface
 {
  public:
-  PorFlowVarNames(const InputParameters & parameters);
+  PorousFlowDictator(const InputParameters & parameters);
 
   void initialize();
   void execute();
@@ -46,7 +46,7 @@ class PorFlowVarNames :
   unsigned int num_v() const;
 
   /**
-   * the PorFlow variable number
+   * the PorousFlow variable number
    * @param moose_var_num the MOOSE variable number
    * eg if porflow_vars = 'pwater pgas', and the variables in
    * the simulation are 'energy pwater pgas shape'
@@ -99,7 +99,7 @@ class PorFlowVarNames :
   /**
    * The nodal variable values for the given porflow_var_num
    * To extract the value of porflow variable "pvar", at
-   * node i, use (*PorFlowVarNames.nodal_var(pvar))[i]
+   * node i, use (*PorousFlowDictator.nodal_var(pvar))[i]
    * @param porflow_var_num the porflow variable number
    */
   const VariableValue * nodal_var(unsigned int porflow_var_num) const;
@@ -137,4 +137,4 @@ class PorFlowVarNames :
   std::vector<const VariableGradient *> _moose_grad_var;
 };
 
-#endif // PORFLOWVARNAMES_H
+#endif // PORFLOWDICTATOR_H

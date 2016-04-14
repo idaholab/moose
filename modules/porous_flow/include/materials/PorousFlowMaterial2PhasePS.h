@@ -12,21 +12,21 @@
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorFlowMaterial2PhasePS;
+class PorousFlowMaterial2PhasePS;
 
 template<>
-InputParameters validParams<PorFlowMaterial2PhasePS>();
+InputParameters validParams<PorousFlowMaterial2PhasePS>();
 
 /**
  * Material designed to calculate fluid-phase porepressures at nodes
  */
-class PorFlowMaterial2PhasePS : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterial2PhasePS : public DerivativeMaterialInterface<Material>
 {
 public:
-  PorFlowMaterial2PhasePS(const InputParameters & parameters);
+  PorousFlowMaterial2PhasePS(const InputParameters & parameters);
 
 protected:
 
@@ -55,7 +55,7 @@ protected:
   const unsigned int _phase1_saturation_varnum;
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorFlowVarNames & _porflow_name_UO;
+  const PorousFlowDictator & _porflow_name_UO;
 
   /// nodal porepressure of the phases
   MaterialProperty<std::vector<Real> > & _porepressure;

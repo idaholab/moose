@@ -6,12 +6,12 @@
 /****************************************************************/
 
 
-//  Holds maps between PorFlow variables (porepressure, saturations) and the variable number used by MOOSE.
+//  Holds maps between PorousFlow variables (porepressure, saturations) and the variable number used by MOOSE.
 //
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 template<>
-InputParameters validParams<PorFlowVarNames>()
+InputParameters validParams<PorousFlowDictator>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("Holds information on the PorousFlow variable names");
@@ -19,7 +19,7 @@ InputParameters validParams<PorFlowVarNames>()
   return params;
 }
 
-PorFlowVarNames::PorFlowVarNames(const InputParameters & parameters) :
+PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
     GeneralUserObject(parameters),
     Coupleable(parameters, false),
     ZeroInterface(parameters),
@@ -52,34 +52,34 @@ PorFlowVarNames::PorFlowVarNames(const InputParameters & parameters) :
 }
 
 void
-PorFlowVarNames::initialize()
+PorousFlowDictator::initialize()
 {}
 
 void
-PorFlowVarNames::execute()
+PorousFlowDictator::execute()
 {}
 
-void PorFlowVarNames::finalize()
+void PorousFlowDictator::finalize()
 {}
 
 
 
 unsigned int
-PorFlowVarNames::num_v() const
+PorousFlowDictator::num_v() const
 {
   return _num_v;
 }
 
 unsigned int
-PorFlowVarNames::porflow_var_num(unsigned int moose_var_num) const
+PorousFlowDictator::porflow_var_num(unsigned int moose_var_num) const
 {
   if (moose_var_num >= _pf_var_num.size() || _pf_var_num[moose_var_num] == _num_v)
-    mooseError("The moose variable with number " << moose_var_num << " is not a PorousFlow variable according to the PorFlowVarNames UserObject");
+    mooseError("The moose variable with number " << moose_var_num << " is not a PorousFlow variable according to the PorousFlowDictator UserObject");
   return _pf_var_num[moose_var_num];
 }
 
 bool
-PorFlowVarNames::not_porflow_var(unsigned int moose_var_num) const
+PorousFlowDictator::not_porflow_var(unsigned int moose_var_num) const
 {
   if (moose_var_num >= _pf_var_num.size() || _pf_var_num[moose_var_num] == _num_v)
     return true;
@@ -87,31 +87,31 @@ PorFlowVarNames::not_porflow_var(unsigned int moose_var_num) const
 }
 
 const VariableValue *
-PorFlowVarNames::porflow_vals(unsigned int porflow_var_num) const
+PorousFlowDictator::porflow_vals(unsigned int porflow_var_num) const
 {
   return _moose_var_value[porflow_var_num]; // moose_var_value is a vector of pointers to VariableValuees
 }
 
 const VariableValue *
-PorFlowVarNames::porflow_vals_old(unsigned int porflow_var_num) const
+PorousFlowDictator::porflow_vals_old(unsigned int porflow_var_num) const
 {
   return _moose_var_value_old[porflow_var_num];
 }
 
 const VariableGradient *
-PorFlowVarNames::grad_var(unsigned int porflow_var_num) const
+PorousFlowDictator::grad_var(unsigned int porflow_var_num) const
 {
   return _moose_grad_var[porflow_var_num];
 }
 
 const VariableValue *
-PorFlowVarNames::nodal_var(unsigned int porflow_var_num) const
+PorousFlowDictator::nodal_var(unsigned int porflow_var_num) const
 {
   return _moose_nodal_var_value[porflow_var_num];
 }
 
 const VariableValue *
-PorFlowVarNames::nodal_var_old(unsigned int porflow_var_num) const
+PorousFlowDictator::nodal_var_old(unsigned int porflow_var_num) const
 {
   return _moose_nodal_var_value_old[porflow_var_num];
 }

@@ -4,17 +4,17 @@
 #include "MooseSyntax.h"
 
 // Kernels
-#include "PorFlowComponentMassTimeDerivative.h"
+#include "PorousFlowComponentMassTimeDerivative.h"
 
 // UserObjects
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 // Materials
-#include "PorFlowMaterial2PhasePS.h"
-#include "PorFlowMaterialDensityConstBulk.h"
-#include "PorFlowMaterialDensityBuilder.h"
-#include "PorFlowMaterialPorosityConst.h"
-#include "PorFlowMaterialMassFractionBuilder.h"
+#include "PorousFlowMaterial2PhasePS.h"
+#include "PorousFlowMaterialDensityConstBulk.h"
+#include "PorousFlowMaterialDensityBuilder.h"
+#include "PorousFlowMaterialPorosityConst.h"
+#include "PorousFlowMaterialMassFractionBuilder.h"
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -56,17 +56,17 @@ void
 PorousFlowApp::registerObjects(Factory & factory)
 {
   // Kernels
-  registerKernel(PorFlowComponentMassTimeDerivative);
+  registerKernel(PorousFlowComponentMassTimeDerivative);
 
   // UserObjects
-  registerUserObject(PorFlowVarNames);
+  registerUserObject(PorousFlowDictator);
 
   // Materials
-  registerMaterial(PorFlowMaterial2PhasePS);
-  registerMaterial(PorFlowMaterialDensityConstBulk);
-  registerMaterial(PorFlowMaterialDensityBuilder);
-  registerMaterial(PorFlowMaterialPorosityConst);
-  registerMaterial(PorFlowMaterialMassFractionBuilder);
+  registerMaterial(PorousFlowMaterial2PhasePS);
+  registerMaterial(PorousFlowMaterialDensityConstBulk);
+  registerMaterial(PorousFlowMaterialDensityBuilder);
+  registerMaterial(PorousFlowMaterialPorosityConst);
+  registerMaterial(PorousFlowMaterialMassFractionBuilder);
 }
 
 // External entry point for dynamic syntax association

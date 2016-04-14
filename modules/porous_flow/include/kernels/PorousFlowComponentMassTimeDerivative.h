@@ -10,24 +10,24 @@
 #define PORFLOWCOMPONENTMASSTIMEDERIVATIVE_H
 
 #include "TimeDerivative.h"
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 // Forward Declarations
-class PorFlowComponentMassTimeDerivative;
+class PorousFlowComponentMassTimeDerivative;
 
 template<>
-InputParameters validParams<PorFlowComponentMassTimeDerivative>();
+InputParameters validParams<PorousFlowComponentMassTimeDerivative>();
 
 /**
  * Kernel = (mass_component - mass_component_old)/dt
  * where mass_component = porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
  * It is lumped to the nodes
  */
-class PorFlowComponentMassTimeDerivative : public TimeKernel
+class PorousFlowComponentMassTimeDerivative : public TimeKernel
 {
 public:
 
-  PorFlowComponentMassTimeDerivative(const InputParameters & parameters);
+  PorousFlowComponentMassTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -39,7 +39,7 @@ protected:
   unsigned int _component_index;
 
   /// holds info on the Richards variables
-  const PorFlowVarNames & _porflow_name_UO;
+  const PorousFlowDictator & _porflow_name_UO;
 
   bool _var_is_porflow_var;
 
@@ -68,9 +68,9 @@ protected:
   const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_frac_dvar;
 
   /**
-   * Derivative of residual with respect to PorFlow variable number pvar
+   * Derivative of residual with respect to PorousFlow variable number pvar
    * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param wrt_num take the derivative of the residual wrt this PorFlow variable
+   * @param wrt_num take the derivative of the residual wrt this PorousFlow variable
    */
   Real computeQpJac(unsigned int pvar);
 

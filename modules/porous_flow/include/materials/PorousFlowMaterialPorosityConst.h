@@ -12,22 +12,22 @@
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorFlowMaterialPorosityConst;
+class PorousFlowMaterialPorosityConst;
 
 template<>
-InputParameters validParams<PorFlowMaterialPorosityConst>();
+InputParameters validParams<PorousFlowMaterialPorosityConst>();
 
 /**
  * Material designed to provide the porosity
  * which is assumed constant
  */
-class PorFlowMaterialPorosityConst : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterialPorosityConst : public DerivativeMaterialInterface<Material>
 {
 public:
-  PorFlowMaterialPorosityConst(const InputParameters & parameters);
+  PorousFlowMaterialPorosityConst(const InputParameters & parameters);
 
 protected:
 
@@ -35,7 +35,7 @@ protected:
   const Real _input_porosity;
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorFlowVarNames & _porflow_name_UO;
+  const PorousFlowDictator & _porflow_name_UO;
 
   /// porosity
   MaterialProperty<Real> & _porosity;
@@ -43,7 +43,7 @@ protected:
   /// old value of porosity (which is, of course = _porosity in this case)
   MaterialProperty<Real> & _porosity_old;
 
-  /// d(porosity)/d(PorFlow variable)
+  /// d(porosity)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real> > & _dporosity_dvar;
 
   virtual void initQpStatefulProperties();

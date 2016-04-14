@@ -6,41 +6,41 @@
 /****************************************************************/
 
 
-#include "PorFlowMaterialPorosityConst.h"
+#include "PorousFlowMaterialPorosityConst.h"
 
 #include "Conversion.h"
 
 template<>
-InputParameters validParams<PorFlowMaterialPorosityConst>()
+InputParameters validParams<PorousFlowMaterialPorosityConst>()
 {
   InputParameters params = validParams<Material>();
 
   params.addRequiredParam<Real>("porosity", "The porosity, which is assumed constant for this material");
-  params.addRequiredParam<UserObjectName>("PorFlowVarNames_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material calculates the porosity assuming it is constant");
   return params;
 }
 
-PorFlowMaterialPorosityConst::PorFlowMaterialPorosityConst(const InputParameters & parameters) :
+PorousFlowMaterialPorosityConst::PorousFlowMaterialPorosityConst(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
     _input_porosity(getParam<Real>("porosity")),
-    _porflow_name_UO(getUserObject<PorFlowVarNames>("PorFlowVarNames_UO")),
+    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-    _porosity(declareProperty<Real>("PorFlow_porosity")),
-    _porosity_old(declarePropertyOld<Real>("PorFlow_porosity")),
-    _dporosity_dvar(declareProperty<std::vector<Real> >("dPorFlow_porosity_dvar"))
+    _porosity(declareProperty<Real>("PorousFlow_porosity")),
+    _porosity_old(declarePropertyOld<Real>("PorousFlow_porosity")),
+    _dporosity_dvar(declareProperty<std::vector<Real> >("dPorousFlow_porosity_dvar"))
 {
 }
 
 void
-PorFlowMaterialPorosityConst::initQpStatefulProperties()
+PorousFlowMaterialPorosityConst::initQpStatefulProperties()
 {
   _porosity[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
 }
 
 void
-PorFlowMaterialPorosityConst::computeQpProperties()
+PorousFlowMaterialPorosityConst::computeQpProperties()
 {
   _porosity[_qp] = _input_porosity;
 

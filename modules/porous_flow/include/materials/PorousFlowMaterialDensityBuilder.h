@@ -12,29 +12,29 @@
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorFlowMaterialDensityBuilder;
+class PorousFlowMaterialDensityBuilder;
 
 template<>
-InputParameters validParams<PorFlowMaterialDensityBuilder>();
+InputParameters validParams<PorousFlowMaterialDensityBuilder>();
 
 /**
  * Material designed to form a std::vector of density
  * from the individual phase densities
  */
-class PorFlowMaterialDensityBuilder : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterialDensityBuilder : public DerivativeMaterialInterface<Material>
 {
 public:
-  PorFlowMaterialDensityBuilder(const InputParameters & parameters);
+  PorousFlowMaterialDensityBuilder(const InputParameters & parameters);
 
 protected:
 
   unsigned int _num_phases;
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorFlowVarNames & _porflow_name_UO;
+  const PorousFlowDictator & _porflow_name_UO;
 
   /// computed density of the phase
   MaterialProperty<std::vector<Real> > & _density;
@@ -42,7 +42,7 @@ protected:
   /// old value of density of the phase
   MaterialProperty<std::vector<Real> > & _density_old;
 
-  /// d(density)/d(PorFlow variable)
+  /// d(density)/d(PorousFlow variable)
   MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dvar;
 
   /// density of each phase

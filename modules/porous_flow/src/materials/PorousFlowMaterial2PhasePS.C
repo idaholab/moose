@@ -6,23 +6,23 @@
 /****************************************************************/
 
 
-#include "PorFlowMaterial2PhasePS.h"
+#include "PorousFlowMaterial2PhasePS.h"
 
 
 
 template<>
-InputParameters validParams<PorFlowMaterial2PhasePS>()
+InputParameters validParams<PorousFlowMaterial2PhasePS>()
 {
   InputParameters params = validParams<Material>();
 
   params.addRequiredCoupledVar("phase0_porepressure", "Variable that is the porepressure of phase 0 (eg, the gas phase)");
   params.addRequiredCoupledVar("phase1_saturation", "Variable that is the saturation of phase 1 (eg, the water phase)");
-  params.addRequiredParam<UserObjectName>("PorFlowVarNames_UO", "The UserObject that holds the list of Porous-Flow variable names.");
-  params.addClassDescription("This Material calculates the 2 porepressures and the 2 saturations in a 2-phase isothermal situation, and derivatives of these with respect to the PorFlowVariables.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addClassDescription("This Material calculates the 2 porepressures and the 2 saturations in a 2-phase isothermal situation, and derivatives of these with respect to the PorousFlowVariables.");
   return params;
 }
 
-PorFlowMaterial2PhasePS::PorFlowMaterial2PhasePS(const InputParameters & parameters) :
+PorousFlowMaterial2PhasePS::PorousFlowMaterial2PhasePS(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
     _phase0_porepressure(coupledNodalValue("phase0_porepressure")),
@@ -35,28 +35,28 @@ PorFlowMaterial2PhasePS::PorFlowMaterial2PhasePS(const InputParameters & paramet
     _phase1_grads(coupledGradient("phase1_saturation")),
     _phase1_saturation_varnum(coupled("phase1_saturation")),
 
-    _porflow_name_UO(getUserObject<PorFlowVarNames>("PorFlowVarNames_UO")),
+    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-    _porepressure(declareProperty<std::vector<Real> >("PorFlow_porepressure")),
-    _porepressure_old(declarePropertyOld<std::vector<Real> >("PorFlow_porepressure")),
-    _porepressure_qp(declareProperty<std::vector<Real> >("PorFlow_porepressure_qp")),
-    _gradp(declareProperty<std::vector<RealGradient> >("PorFlow_grad_porepressure")),
-    _dporepressure_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_dvar")),
-    _dporepressure_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_qp_dvar")),
-    _dgradp_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_grad_porepressure_dgradvar")),
+    _porepressure(declareProperty<std::vector<Real> >("PorousFlow_porepressure")),
+    _porepressure_old(declarePropertyOld<std::vector<Real> >("PorousFlow_porepressure")),
+    _porepressure_qp(declareProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
+    _gradp(declareProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure")),
+    _dporepressure_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_dvar")),
+    _dporepressure_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),
+    _dgradp_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_dgradvar")),
 
-    _saturation(declareProperty<std::vector<Real> >("PorFlow_saturation")),
-    _saturation_old(declarePropertyOld<std::vector<Real> >("PorFlow_saturation")),
-    _saturation_qp(declareProperty<std::vector<Real> >("PorFlow_saturation_qp")),
-    _grads(declareProperty<std::vector<RealGradient> >("PorFlow_grad_saturation")),
-    _dsaturation_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_saturation_dvar")),
-    _dsaturation_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_saturation_qp_dvar")),
-    _dgrads_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_grad_saturation_dgradvar"))
+    _saturation(declareProperty<std::vector<Real> >("PorousFlow_saturation")),
+    _saturation_old(declarePropertyOld<std::vector<Real> >("PorousFlow_saturation")),
+    _saturation_qp(declareProperty<std::vector<Real> >("PorousFlow_saturation_qp")),
+    _grads(declareProperty<std::vector<RealGradient> >("PorousFlow_grad_saturation")),
+    _dsaturation_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
+    _dsaturation_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar")),
+    _dgrads_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_saturation_dgradvar"))
 {
 }
 
 void
-PorFlowMaterial2PhasePS::initQpStatefulProperties()
+PorousFlowMaterial2PhasePS::initQpStatefulProperties()
 {
   _porepressure[_qp].resize(2);
   _porepressure_qp[_qp].resize(2);
@@ -84,7 +84,7 @@ PorFlowMaterial2PhasePS::initQpStatefulProperties()
 }
 
 void
-PorFlowMaterial2PhasePS::computeQpProperties()
+PorousFlowMaterial2PhasePS::computeQpProperties()
 {
   buildQpPPSS();
 
@@ -152,7 +152,7 @@ PorFlowMaterial2PhasePS::computeQpProperties()
 }
 
 void
-PorFlowMaterial2PhasePS::buildQpPPSS()
+PorousFlowMaterial2PhasePS::buildQpPPSS()
 {
   const Real pc = 1.0;  // capillary suction function
   const Real pc_qp = 1.0;

@@ -6,42 +6,42 @@
 /****************************************************************/
 
 
-#include "PorFlowMaterialDensityBuilder.h"
+#include "PorousFlowMaterialDensityBuilder.h"
 
 #include "Conversion.h"
 
 template<>
-InputParameters validParams<PorFlowMaterialDensityBuilder>()
+InputParameters validParams<PorousFlowMaterialDensityBuilder>()
 {
   InputParameters params = validParams<Material>();
 
   params.addRequiredParam<unsigned int>("num_phases", "The number of fluid phases in the simulation");
-  params.addRequiredParam<UserObjectName>("PorFlowVarNames_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material forms a std::vector of density out of the individual phase densities");
   return params;
 }
 
-PorFlowMaterialDensityBuilder::PorFlowMaterialDensityBuilder(const InputParameters & parameters) :
+PorousFlowMaterialDensityBuilder::PorousFlowMaterialDensityBuilder(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
     _num_phases(getParam<unsigned int>("num_phases")),
-    _porflow_name_UO(getUserObject<PorFlowVarNames>("PorFlowVarNames_UO")),
+    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-    _density(declareProperty<std::vector<Real> >("PorFlow_fluid_phase_density")),
-    _density_old(declarePropertyOld<std::vector<Real> >("PorFlow_fluid_phase_density")),
-    _ddensity_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_fluid_phase_density_dvar"))
+    _density(declareProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
+    _density_old(declarePropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density")),
+    _ddensity_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar"))
 {
   _phase_density.resize(_num_phases);
   _dphase_density_dvar.resize(_num_phases);
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _phase_density[ph] = &getMaterialProperty<Real>("PorFlow_fluid_phase_density" + Moose::stringify(ph));
-    _dphase_density_dvar[ph] = &getMaterialProperty<std::vector<Real> >("dPorFlow_fluid_phase_density" + Moose::stringify(ph) + "_dvar");
+    _phase_density[ph] = &getMaterialProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(ph));
+    _dphase_density_dvar[ph] = &getMaterialProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density" + Moose::stringify(ph) + "_dvar");
   }
 }
 
 void
-PorFlowMaterialDensityBuilder::initQpStatefulProperties()
+PorousFlowMaterialDensityBuilder::initQpStatefulProperties()
 {
   _density_old[_qp].resize(_num_phases);
   _density[_qp].resize(_num_phases);
@@ -52,7 +52,7 @@ PorFlowMaterialDensityBuilder::initQpStatefulProperties()
 }
 
 void
-PorFlowMaterialDensityBuilder::computeQpProperties()
+PorousFlowMaterialDensityBuilder::computeQpProperties()
 {
   const unsigned int num_var = _porflow_name_UO.num_v();
 

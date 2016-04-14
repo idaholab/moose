@@ -12,22 +12,22 @@
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorFlowMaterialMassFractionBuilder;
+class PorousFlowMaterialMassFractionBuilder;
 
 template<>
-InputParameters validParams<PorFlowMaterialMassFractionBuilder>();
+InputParameters validParams<PorousFlowMaterialMassFractionBuilder>();
 
 /**
  * Material designed to form a std::vector<std::vector>
  * of mass fractions from the individual mass fraction variables
  */
-class PorFlowMaterialMassFractionBuilder : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterialMassFractionBuilder : public DerivativeMaterialInterface<Material>
 {
 public:
-  PorFlowMaterialMassFractionBuilder(const InputParameters & parameters);
+  PorousFlowMaterialMassFractionBuilder(const InputParameters & parameters);
 
 protected:
 
@@ -36,7 +36,7 @@ protected:
   unsigned int _num_components;
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorFlowVarNames & _porflow_name_UO;
+  const PorousFlowDictator & _porflow_name_UO;
 
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac_old;

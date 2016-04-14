@@ -6,55 +6,55 @@
 /****************************************************************/
 
 
-#include "PorFlowMaterialDensityConstBulk.h"
+#include "PorousFlowMaterialDensityConstBulk.h"
 
 #include "Conversion.h"
 
 template<>
-InputParameters validParams<PorFlowMaterialDensityConstBulk>()
+InputParameters validParams<PorousFlowMaterialDensityConstBulk>()
 {
   InputParameters params = validParams<Material>();
 
   params.addRequiredParam<Real>("density0", "The density of each phase at zero porepressure");
   params.addRequiredParam<Real>("bulk_modulus", "The constant bulk modulus of each phase");
   params.addRequiredParam<unsigned int>("phase", "The phase number");
-  params.addRequiredParam<UserObjectName>("PorFlowVarNames_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material calculates a fluid density from its porepressure, assuming constant bulk modulus for the fluid");
   return params;
 }
 
-PorFlowMaterialDensityConstBulk::PorFlowMaterialDensityConstBulk(const InputParameters & parameters) :
+PorousFlowMaterialDensityConstBulk::PorousFlowMaterialDensityConstBulk(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
     _dens0(getParam<Real>("density0")),
     _bulk(getParam<Real>("bulk_modulus")),
     _phase_num(getParam<unsigned int>("phase")),
-    _porflow_name_UO(getUserObject<PorFlowVarNames>("PorFlowVarNames_UO")),
+    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-    _porepressure(getMaterialProperty<std::vector<Real> >("PorFlow_porepressure")),
-    _dporepressure_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_dvar")),
-    _density(declareProperty<Real>("PorFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _density_old(declarePropertyOld<Real>("PorFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _ddensity_dvar(declareProperty<std::vector<Real> >("dPorFlow_fluid_phase_density" + Moose::stringify(_phase_num) + "_dvar")),
+    _porepressure(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure")),
+    _dporepressure_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_dvar")),
+    _density(declareProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
+    _density_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
+    _ddensity_dvar(declareProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density" + Moose::stringify(_phase_num) + "_dvar")),
 
-    _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorFlow_porepressure_qp")),
-    _dporepressure_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_qp_dvar")),
-    _density_qp(declareProperty<Real>("PorFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num))),
-    _ddensity_qp_dvar(declareProperty<std::vector<Real> >("dPorFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num) + "_dvar"))
+    _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
+    _dporepressure_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),
+    _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num))),
+    _ddensity_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num) + "_dvar"))
 {
 }
 
 void
-PorFlowMaterialDensityConstBulk::initQpStatefulProperties()
+PorousFlowMaterialDensityConstBulk::initQpStatefulProperties()
 {
   _ddensity_dvar[_qp].resize(_porflow_name_UO.num_v());
   _ddensity_qp_dvar[_qp].resize(_porflow_name_UO.num_v());
 }
 
 void
-PorFlowMaterialDensityConstBulk::computeQpProperties()
+PorousFlowMaterialDensityConstBulk::computeQpProperties()
 {
-  mooseAssert(_phase_num < _porepressure[_qp].size(), "PorFlowMaterialDensityConstBulk: phase number is " << _phase_num << " but size of porepressure is " << _porepressure[_qp].size() << ".  These must be equal");
+  mooseAssert(_phase_num < _porepressure[_qp].size(), "PorousFlowMaterialDensityConstBulk: phase number is " << _phase_num << " but size of porepressure is " << _porepressure[_qp].size() << ".  These must be equal");
 
   _density[_qp] = _dens0*std::exp(_porepressure[_qp][_phase_num]/_bulk);
   _density_qp[_qp] = _dens0*std::exp(_porepressure_qp[_qp][_phase_num]/_bulk);
