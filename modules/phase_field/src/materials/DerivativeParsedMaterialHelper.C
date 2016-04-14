@@ -73,7 +73,9 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   if (_tid > 0)
   {
     // get the master object from thread 0
-    const MaterialWarehouse<Material> & warehouse = _fe_problem.getMaterialWarehouse();
+    const MaterialWarehouse<Material> & material_warehouse = _fe_problem.getMaterialWarehouse();
+    const ExecuteMooseObjectWarehouse<Material> & warehouse = material_warehouse[_material_data_type];
+
     MooseSharedPointer<DerivativeParsedMaterialHelper> master =
       MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelper>(warehouse.getActiveObject(name()));
 
@@ -85,6 +87,16 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       newderivative.second = ADFunctionPtr(new ADFunction(*master->_derivatives[i].second));
       _derivatives.push_back(newderivative);
     }
+
+    // copy coupled material properties
+    for (unsigned int i = 0; i < master->_mat_prop_descriptors.size(); ++i)
+    {
+      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i]);
+      _mat_prop_descriptors.push_back(newdescriptor);
+    }
+
+    // size parameter buffer
+    _func_params.resize(master->_func_params.size());
   }
 
   // set up job queue. We need a deque here to be able to iterate over the currently queued items.

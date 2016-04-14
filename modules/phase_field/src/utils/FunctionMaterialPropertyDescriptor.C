@@ -41,7 +41,7 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const Fun
     _base_name(rhs._base_name),
     _dependent_vars(rhs._dependent_vars),
     _derivative_vars(rhs._derivative_vars),
-    _value(rhs._value),
+    _value(NULL),
     _parent(rhs._parent)
 {
 }
