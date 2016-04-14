@@ -83,7 +83,8 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
 {
   if (_materials.hasActiveBlockObjects(_subdomain, _tid))
   {
-    _assembly[_tid]->reinit(elem);
+    _fe_problem.prepare(elem, _tid);
+    _fe_problem.reinitElem(elem, _tid);
 
     unsigned int n_points = _assembly[_tid]->qRule()->n_points();
     if (_material_data[_tid]->nQPoints() != n_points)

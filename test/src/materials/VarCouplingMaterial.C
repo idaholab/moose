@@ -20,6 +20,7 @@ InputParameters validParams<VarCouplingMaterial>()
   params.addRequiredCoupledVar("var", "The variable to be coupled in");
   params.addParam<Real>("base", 0.0, "The baseline of the property");
   params.addParam<Real>("coef", 1.0, "The linear coefficient of the coupled var");
+  params.addParam<bool>("declare_old", false, "When True the old value for the material property is declared.");
   return params;
 }
 
@@ -29,12 +30,24 @@ VarCouplingMaterial::VarCouplingMaterial(const InputParameters & parameters) :
     _var(coupledValue("var")),
     _base(getParam<Real>("base")),
     _coef(getParam<Real>("coef")),
-    _diffusion(declareProperty<Real>("diffusion"))
+    _diffusion(declareProperty<Real>("diffusion")),
+    _diffusion_old(getParam<bool>("declare_old") ? &declarePropertyOld<Real>("diffusion") : NULL)
 {
+}
+
+void
+VarCouplingMaterial::initQpStatefulProperties()
+{
+  if (_diffusion_old)
+    _diffusion[_qp] = _var[_qp];
 }
 
 void
 VarCouplingMaterial::computeQpProperties()
 {
-  _diffusion[_qp] = _base + _coef * _var[_qp];
+  // If "declare_old" is set, then just use it. The test associated is checking that initQpStatefulProperties can use a coupledValue
+  if (_diffusion_old)
+    _diffusion[_qp] = (*_diffusion_old)[_qp];
+  else
+    _diffusion[_qp] = _base + _coef * _var[_qp];
 }
