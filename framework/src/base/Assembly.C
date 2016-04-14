@@ -146,6 +146,10 @@ Assembly::buildFE(FEType type)
       _fe[dim][type] = FEBase::build(dim, type).release();
     _fe[dim][type]->get_phi();
     _fe[dim][type]->get_dphi();
+    // Pre-request xyz.  We have always computed xyz, but due to
+    // recent optimizations in libmesh, we now need to explicity
+    // request it, since apps (Yak) may rely on it being computed.
+    _fe[dim][type]->get_xyz();
     if (_need_second_derivative.find(type) != _need_second_derivative.end())
       _fe[dim][type]->get_d2phi();
   }
