@@ -5,6 +5,7 @@
 
 // Kernels
 #include "PorousFlowComponentMassTimeDerivative.h"
+#include "PorousFlowAdvectiveFlux.h"
 
 // UserObjects
 #include "PorousFlowDictator.h"
@@ -60,6 +61,7 @@ PorousFlowApp::registerObjects(Factory & factory)
 {
   // Kernels
   registerKernel(PorousFlowComponentMassTimeDerivative);
+  registerKernel(PorousFlowAdvectiveFlux);
 
   // UserObjects
   registerUserObject(PorousFlowDictator);
