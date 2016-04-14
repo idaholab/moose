@@ -4,17 +4,16 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-// See
-// Homogenization of Temperature-Dependent Thermal Conductivity in Composite
-// Materials, Journal of Thermophysics and Heat Transfer, Vol. 15, No. 1,
-// January-March 2001.
-
-
 #ifndef HOMOGENIZEDTHERMALCONDUCTIVITY_H
 #define HOMOGENIZEDTHERMALCONDUCTIVITY_H
 
 #include "ElementAverageValue.h"
 
+/**
+ * Homogenization of Temperature-Dependent Thermal Conductivity in Composite
+ * Materials, Journal of Thermophysics and Heat Transfer, Vol. 15, No. 1,
+ * January-March 2001.
+ */
 class HomogenizedThermalConductivity : public ElementAverageValue
 {
 public:
