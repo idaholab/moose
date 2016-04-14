@@ -261,6 +261,7 @@ MultiMooseEnum::clear()
 unsigned int
 MultiMooseEnum::size() const
 {
+  mooseAssert(_current_ids.size() == _current_names_preserved.size(), "Internal inconsistency between id and name vectors in MultiMooseEnum");
   return _current_ids.size();
 }
 
