@@ -47,4 +47,3 @@ PorousFlowMaterialViscosityConst::computeQpProperties()
   const unsigned int num_var = _porflow_name_UO.num_v();
   _dviscosity_dvar[_qp].resize(num_var, 0.0);
 }
-
