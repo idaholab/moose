@@ -17,6 +17,10 @@
 #include "SolidMechTempCoupleY.h"
 #include "SolidMechTempCoupleZ.h"
 
+// Initialize static member variables
+bool LinearElasticityApp::_registered_objects = false;
+bool LinearElasticityApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<LinearElasticityApp>()
 {
@@ -53,6 +57,10 @@ extern "C" void LinearElasticityApp__registerObjects(Factory & factory) { Linear
 void
 LinearElasticityApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerMaterial(LinearElasticityMaterial);
   registerKernel(SolidMechX);
   registerKernel(SolidMechY);
@@ -67,4 +75,8 @@ extern "C" void LinearElasticityApp__associateSyntax(Syntax & syntax, ActionFact
 void
 LinearElasticityApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
 }

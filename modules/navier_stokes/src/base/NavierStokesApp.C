@@ -79,6 +79,10 @@
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
 
+// Initialize static member variables
+bool NavierStokesApp::_registered_objects = false;
+bool NavierStokesApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<NavierStokesApp>()
 {
@@ -115,6 +119,10 @@ extern "C" void NavierStokesApp__registerObjects(Factory & factory) { NavierStok
 void
 NavierStokesApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerKernel(NSMassInviscidFlux);
   registerKernel(NSMomentumInviscidFlux);
   registerKernel(NSEnergyInviscidFlux);
@@ -191,4 +199,8 @@ extern "C" void NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory 
 void
 NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
 }

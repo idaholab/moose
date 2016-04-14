@@ -111,6 +111,10 @@
 #include "Mass.h"
 #include "TorqueReactionScalar.h"
 
+// Initialize static member variables
+bool TensorMechanicsApp::_registered_objects = false;
+bool TensorMechanicsApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<TensorMechanicsApp>()
 {
@@ -147,6 +151,10 @@ extern "C" void TensorMechanicsApp__registerObjects(Factory & factory) { TensorM
 void
 TensorMechanicsApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerKernel(StressDivergenceTensors);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(StressDivergenceRZTensors);
@@ -247,6 +255,10 @@ extern "C" void TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFacto
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
   syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");

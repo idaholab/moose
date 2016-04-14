@@ -30,6 +30,10 @@
 #include "ThermalCond.h"
 #include "CoupledConvectiveFlux.h"
 
+// Initialize static member variables
+bool HeatConductionApp::_registered_objects = false;
+bool HeatConductionApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<HeatConductionApp>()
 {
@@ -66,6 +70,10 @@ extern "C" void HeatConductionApp__registerObjects(Factory & factory) { HeatCond
 void
 HeatConductionApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
   registerKernel(AnisoHeatConduction);
   registerKernel(HeatConductionTimeDerivative);
@@ -87,6 +95,10 @@ extern "C" void HeatConductionApp__associateSyntax(Syntax & syntax, ActionFactor
 void
 HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   // This registers an action to add the "slave_flux" vector to the system at the right time
   registerTask("add_slave_flux_vector", false);
   addTaskDependency("add_slave_flux_vector", "ready_to_init");

@@ -36,6 +36,10 @@
 #include "LangmuirMaterial.h"
 #include "MollifiedLangmuirMaterial.h"
 
+// Initialize static member variables
+bool ChemicalReactionsApp::_registered_objects = false;
+bool ChemicalReactionsApp::_associated_syntax = false;
+
 template<>
 InputParameters validParams<ChemicalReactionsApp>()
 {
@@ -72,6 +76,10 @@ extern "C" void ChemicalReactionsApp__registerObjects(Factory & factory) { Chemi
 void
 ChemicalReactionsApp::registerObjects(Factory & factory)
 {
+  if (_registered_objects)
+    return;
+  _registered_objects = true;
+
   registerKernel(PrimaryTimeDerivative);
   registerKernel(PrimaryConvection);
   registerKernel(PrimaryDiffusion);
@@ -97,6 +105,10 @@ extern "C" void ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFac
 void
 ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  if (_associated_syntax)
+    return;
+  _associated_syntax = true;
+
   syntax.registerActionSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
   syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   syntax.registerActionSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
