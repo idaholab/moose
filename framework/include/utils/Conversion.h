@@ -57,7 +57,7 @@ namespace Moose
   template<>
   std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const MultiMooseEnum & v);
 
-  // conversion to string
+  /// conversion to string
   template<typename T>
   std::string
   stringify(const T & t)
