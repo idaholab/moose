@@ -50,6 +50,10 @@ PorousFlowMaterialJoinerOld::initQpStatefulProperties()
   const unsigned int num_var = _porflow_name_UO.num_v();
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
     _dproperty_dvar[_qp][ph].resize(num_var);
+
+  //
+  for (unsigned int ph = 0; ph < _num_phases; ++ph)
+    _property[_qp][ph] = (*_phase_property[ph])[_qp];
 }
 
 void
@@ -72,8 +76,9 @@ PorousFlowMaterialJoinerOld::computeQpProperties()
    * in initQpStatefulProperties, but the Variables
    * aren't initialised at that point so moose crashes
    */
-  if (_t_step == 1)
+  /*if (_t_step == 1)
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
       _property_old[_qp][ph] = _property[_qp][ph];
+  */
 }
 

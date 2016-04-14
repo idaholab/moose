@@ -11,6 +11,7 @@
 #include "PorousFlowDictator.h"
 
 // Materials
+#include "PorousFlowMaterial1PhaseP_VG.h"
 #include "PorousFlowMaterial2PhasePS.h"
 #include "PorousFlowMaterialDensityConstBulk.h"
 #include "PorousFlowMaterialPorosityConst.h"
@@ -68,6 +69,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerUserObject(PorousFlowDictator);
 
   // Materials
+  registerMaterial(PorousFlowMaterial1PhaseP_VG);
   registerMaterial(PorousFlowMaterial2PhasePS);
   registerMaterial(PorousFlowMaterialDensityConstBulk);
   registerMaterial(PorousFlowMaterialPorosityConst);

@@ -83,6 +83,7 @@ PorousFlowMaterial2PhasePS::initQpStatefulProperties()
    * buildQpPPSS();
    * but i do it below in computeQpProperties
    */
+   buildQpPPSS();
 }
 
 void
@@ -98,12 +99,13 @@ PorousFlowMaterial2PhasePS::computeQpProperties()
    * from initQpStatefulProperties, but the Variables
    * aren't initialised at that point so moose crashes
    */
-  if (_t_step == 1)
+  /*  if (_t_step == 1)
     for (unsigned ph = 0; ph < 2; ++ph)
     {
       _porepressure_old[_qp][ph] = _porepressure[_qp][ph];
       _saturation_old[_qp][ph] = _saturation[_qp][ph];
     }
+  */
 
   /*
    * TODO: these derivatives could be put into the initQpStatefulProperties

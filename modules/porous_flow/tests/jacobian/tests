@@ -1,0 +1,15 @@
+[Tests]
+  [./mass01]
+    type = 'PetscJacobianTester'
+    input = 'mass01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass02]
+    type = 'PetscJacobianTester'
+    input = 'mass02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+[]

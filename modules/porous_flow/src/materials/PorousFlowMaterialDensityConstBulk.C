@@ -51,6 +51,8 @@ PorousFlowMaterialDensityConstBulk::initQpStatefulProperties()
 {
   _ddensity_dvar[_qp].resize(_porflow_name_UO.num_v());
   _ddensity_qp_dvar[_qp].resize(_porflow_name_UO.num_v());
+  //
+  _density[_qp] = _dens0*std::exp(_porepressure[_qp][_phase_num]/_bulk);
 }
 
 void
@@ -75,7 +77,8 @@ PorousFlowMaterialDensityConstBulk::computeQpProperties()
    * in initQpStatefulProperties, but the Variables
    * aren't initialised at that point so moose crashes
    */
-  if (_t_step == 1)
+  /*if (_t_step == 1)
     _density_old[_qp] = _density[_qp];
+  */
 }
 

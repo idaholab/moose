@@ -86,6 +86,8 @@ PorousFlowMaterialMassFractionBuilder::initQpStatefulProperties()
       i++;
     }
   }
+  //
+  build_mass_frac(_qp);
 }
 
 void
@@ -101,10 +103,12 @@ PorousFlowMaterialMassFractionBuilder::computeQpProperties()
    * from initQpStatefulProperties, but the Variables
    * aren't initialised at that point so moose crashes
    */
+  /*
   if (_t_step == 1)
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
       for (unsigned int comp = 0; comp < _num_components; ++comp)
         _mass_frac_old[_qp][ph][comp] = _mass_frac[_qp][ph][comp];
+  */
 }
 
 void
