@@ -25,7 +25,7 @@ PorousFlowMaterialViscosityConst::PorousFlowMaterialViscosityConst(const InputPa
     DerivativeMaterialInterface<Material>(parameters),
 
     _input_viscosity(getParam<Real>("viscosity")),
-    _porflow_name_UO(getUserObject<PorFlowVarNames>("PorousFlowVarNames_UO")),
+    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowVarNames_UO")),
 
     _viscosity(declareProperty<Real>("PorousFlow_viscosity")),
     _viscosity_old(declarePropertyOld<Real>("PorousFlow_viscosity")),

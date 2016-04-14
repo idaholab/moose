@@ -12,7 +12,7 @@
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 //Forward Declarations
 class PorousFlowMaterialViscosityConst;
@@ -35,7 +35,7 @@ protected:
   const Real _input_viscosity;
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorFlowVarNames & _porflow_name_UO;
+  const PorousFlowDictator & _porflow_name_UO;
 
   /// viscosity
   MaterialProperty<Real> & _viscosity;
