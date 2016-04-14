@@ -15,6 +15,9 @@
 #include "PorousFlowMaterialDensityBuilder.h"
 #include "PorousFlowMaterialPorosityConst.h"
 #include "PorousFlowMaterialMassFractionBuilder.h"
+#include "PorousFlowMaterialPermeabilityConst.h"
+#include "PorousFlowMaterialRelativePermeabilityConst.h"
+#include "PorousFlowMaterialViscosityConst.h"
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -67,6 +70,9 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterialDensityBuilder);
   registerMaterial(PorousFlowMaterialPorosityConst);
   registerMaterial(PorousFlowMaterialMassFractionBuilder);
+  registerMaterial(PorousFlowMaterialPermeabilityConst);
+  registerMaterial(PorousFlowMaterialRelativePermeabilityConst);
+  registerMaterial(PorousFlowMaterialViscosityConst);
 }
 
 // External entry point for dynamic syntax association

@@ -6,35 +6,34 @@
 /****************************************************************/
 
 
-#include "PorFlowMaterialRelativePermeabilityConst.h"
+#include "PorousFlowMaterialRelativePermeabilityConst.h"
 
 
 template<>
-InputParameters validParams<PorFlowMaterialRelativePermeabilityConst>()
+InputParameters validParams<PorousFlowMaterialRelativePermeabilityConst>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredParam<UserObjectName>("PorFlowVarNames_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material calculates the relative permeability assuming it is constant");
   return params;
 }
 
-PorFlowMaterialRelativePermeabilityConst::PorFlowMaterialRelativePermeabilityConst(const InputParameters & parameters) :
+PorousFlowMaterialRelativePermeabilityConst::PorousFlowMaterialRelativePermeabilityConst(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _porflow_name_UO(getUserObject<PorFlowVarNames>("PorFlowVarNames_UO")),
+    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-  _relative_permeability(declareProperty<std::vector<Real> > ("PorFlow_relative_permeability")),
-  _drelative_permeability_dvar(declareProperty<std::vector<std::vector<Real> > > ("dPorFlow_relative_permeability_dvar"))
+  _relative_permeability(declareProperty<std::vector<Real> > ("PorousFlow_relative_permeability")),
+  _drelative_permeability_dvar(declareProperty<std::vector<std::vector<Real> > > ("dPorousFlow_relative_permeability_dvar"))
 {
 }
 
 
 void
-PorFlowMaterialRelativePermeabilityConst::computeQpProperties()
+PorousFlowMaterialRelativePermeabilityConst::computeQpProperties()
 {
   unsigned int number_phases=2;
-  int i;
   
   // FIX THIS: need to get number of phases.
   _relative_permeability[_qp].resize(number_phases,1.0);

@@ -6,43 +6,43 @@
 /****************************************************************/
 
 
-#ifndef PORFLOWMATERIALRELATIVEPERMEABILITYCONST_H
-#define PORFLOWMATERIALRELATIVEPERMEABILITYCONST_H
+#ifndef POROUSFLOWMATERIALRELATIVEPERMEABILITYCONST_H
+#define POROUSFLOWMATERIALRELATIVEPERMEABILITYCONST_H
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
 
-#include "PorFlowVarNames.h"
+#include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorFlowMaterialRelativePermeabilityConst;
+class PorousFlowMaterialRelativePermeabilityConst;
 
 template<>
-InputParameters validParams<PorFlowMaterialRelativePermeabilityConst>();
+InputParameters validParams<PorousFlowMaterialRelativePermeabilityConst>();
 
 /**
  * Material designed to provide the porosity
  * which is assumed constant
  */
-class PorFlowMaterialRelativePermeabilityConst : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterialRelativePermeabilityConst : public DerivativeMaterialInterface<Material>
 {
 public:
-  PorFlowMaterialRelativePermeabilityConst(const InputParameters & parameters);
+  PorousFlowMaterialRelativePermeabilityConst(const InputParameters & parameters);
 
 protected:
 
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorFlowVarNames & _porflow_name_UO;
+  const PorousFlowDictator & _porflow_name_UO;
 
   /// relative permeability
   MaterialProperty<std::vector<Real> > & _relative_permeability;
 
 
-  /// d(relperm)/d(PorFlow variable)
+  /// d(relperm)/d(PorousFlow variable)
   MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
 
   virtual void computeQpProperties();
 };
 
-#endif //PORFLOWMATERIALRELATIVEPERMEABILITYCONST_H
+#endif //POROUSFLOWMATERIALRELATIVEPERMEABILITYCONST_H
