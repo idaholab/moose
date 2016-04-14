@@ -44,7 +44,6 @@ protected:
 
   /// Coupled displacement variables
   unsigned int _ndisp;
-  std::vector<const VariableValue *> _disp;
   std::vector<unsigned int> _disp_var;
 
   const bool _temp_coupled;
