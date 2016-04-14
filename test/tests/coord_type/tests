@@ -5,7 +5,7 @@
     input = coord_type_rz.i
     exodiff = coord_type_rz_out.e
   [../]
-  [/rz-x-rotation]
+  [./rz-x-rotation]
     # Simple diffusion with rotation around the x-axis
     type = Exodiff
     input = coord_type_rz.i
