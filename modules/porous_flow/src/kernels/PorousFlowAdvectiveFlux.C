@@ -16,40 +16,39 @@ InputParameters validParams<PorousFlowAdvectiveFlux>()
   InputParameters params = validParams<Kernel>();
   params.addParam<unsigned int>("component_index", 0, "The index corresponding to the component for this kernel");
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector downwards (m/s^2)");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictatorUO", "The UserObject that holds the list of PorousFlow variable names");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("Fully-upwinded advective flux of the component given by component_index");
   return params;
 }
 
 PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & parameters) :
   Kernel(parameters),
-  _permeability(getMaterialProperty<RealTensorValue>("permeability")),
+  _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability")),
   _fluid_density_node(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
   _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
   _fluid_density_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
   _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_qp_dvar")),
-  _fluid_viscosity(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_viscosity")),
+  _fluid_viscosity(getMaterialProperty<std::vector<Real> >("PorousFlow_viscosity")),
   _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_viscosity_dvar")),
   _mass_fractions(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
   _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
   _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure")),
   _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_dgradvar")),
-  _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeabilty")),
+  _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability")),
   _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_dvar")),
-  _porousflow_dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictatorUO")),
+  _porousflow_dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
   _component_index(getParam<unsigned int>("component_index")),
   _gravity(getParam<RealVectorValue>("gravity"))
 {
-  /// Make sure that this kernels variable is a valid PorousFlow variable
+  // Make sure that this kernels variable is a valid PorousFlow variable
   if (_porousflow_dictator_UO.not_porflow_var(_var.number()))
-    mooseError("Variable " << _var.name() << " in the " << _name << " kernel is not a valid PorousFlow variable");
+    mooseError(" Variable " << _var.name() << " in the " << _name << " kernel is not a valid PorousFlow variable");
 
   _num_phases = _porousflow_dictator_UO.num_phases();
 }
 
 Real PorousFlowAdvectiveFlux::computeQpResidual()
 {
-  // TODO: check that these grad_p's at the qp?
   RealVectorValue qpresidual = 0.0;
 
   for (unsigned ph = 0; ph < _num_phases; ++ph)

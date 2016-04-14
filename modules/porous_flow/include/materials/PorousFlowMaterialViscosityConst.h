@@ -34,19 +34,18 @@ protected:
   /// constant value of viscosity
   const Real _input_viscosity;
 
+  /// the phase number
+  unsigned int _phase_num;
+
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _porflow_name_UO;
 
   /// viscosity
   MaterialProperty<Real> & _viscosity;
 
-  /// old value of viscosity (which is, of course = _viscosity in this case)
-  MaterialProperty<Real> & _viscosity_old;
-
   /// d(viscosity)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real> > & _dviscosity_dvar;
 
-  virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 };
 

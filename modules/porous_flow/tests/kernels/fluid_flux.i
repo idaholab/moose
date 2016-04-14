@@ -29,15 +29,17 @@
 []
 
 [Kernels]
-  [./mass0]
-    type = PorousFlowMassTimeDerivative
+  [./flux0]
+    type = PorousFlowAdvectiveFlux
     component_index = 0
     variable = pp
+    gravity = '0 0 -1'
   [../]
-  [./mass1]
-    type = PorousFlowMassTimeDerivative
+  [./flux1]
+    type = PorousFlowAdvectiveFlux
     component_index = 1
     variable = sat
+    gravity = '0 0 -1'
   [../]
 []
 
@@ -72,13 +74,38 @@
     bulk_modulus = 0.5
     phase = 1
   [../]
+  [./visc0]
+    type = PorousFlowMaterialViscosityConst
+    viscosity = 1
+    phase = 0
+  [../]
+  [./visc1]
+    type = PorousFlowMaterialViscosityConst
+    viscosity = 0.5
+    phase = 1
+  [../]
   [./dens_all]
     type = PorousFlowMaterialJoinerOld
     material_property = PorousFlow_fluid_phase_density
   [../]
+  [./dens_qp_all]
+    type = PorousFlowMaterialJoiner
+    material_property = PorousFlow_fluid_phase_density_qp
+  [../]
+  [./visc_all]
+    type = PorousFlowMaterialJoiner
+    material_property = PorousFlow_viscosity
+  [../]
   [./porosity]
     type = PorousFlowMaterialPorosityConst
     porosity = 0.1
+  [../]
+  [./permeability]
+    type = PorousFlowMaterialPermeabilityConst
+    permeability = '1 0 0 0 2 0 0 0 3'
+  [../]
+  [./relperm]
+    type = PorousFlowMaterialRelativePermeabilityConst
   [../]
 []
 

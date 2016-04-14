@@ -36,20 +36,32 @@ protected:
 
   unsigned int _num_phases;
 
-  /// computed density of the phase
+  /// computed nodal density of the phase
   MaterialProperty<std::vector<Real> > & _density;
+
+  /// computed quadpoint density of the phase
+  MaterialProperty<std::vector<Real> > & _density_qp;
 
   /// old value of density of the phase
   MaterialProperty<std::vector<Real> > & _density_old;
 
-  /// d(density)/d(PorousFlow variable)
+  /// d(nodal density)/d(PorousFlow variable)
   MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dvar;
 
-  /// density of each phase
+  /// d(quadpoint density)/d(PorousFlow variable)
+  MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_qp_dvar;
+
+  /// nodal density of each phase
   std::vector<const MaterialProperty<Real> *> _phase_density;
 
-  /// d(density of each phase)/d(var)
+  /// quadpoint density of each phase
+  std::vector<const MaterialProperty<Real> *> _phase_density_qp;
+
+  /// d(nodal density of each phase)/d(var)
   std::vector<const MaterialProperty<std::vector<Real> > *> _dphase_density_dvar;
+
+  /// d(quadpoint density of each phase)/d(var)
+  std::vector<const MaterialProperty<std::vector<Real> > *> _dphase_density_qp_dvar;
 
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();

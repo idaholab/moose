@@ -27,27 +27,38 @@ PorousFlowMaterialDensityBuilder::PorousFlowMaterialDensityBuilder(const InputPa
     _num_phases(_porflow_name_UO.num_phases()),
 
     _density(declareProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
+    _density_qp(declareProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
     _density_old(declarePropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density")),
-    _ddensity_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar"))
+    _ddensity_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
+    _ddensity_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_qp_dvar"))
 {
   _phase_density.resize(_num_phases);
+  _phase_density_qp.resize(_num_phases);
   _dphase_density_dvar.resize(_num_phases);
+  _dphase_density_qp_dvar.resize(_num_phases);
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _phase_density[ph] = &getMaterialProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(ph));
+    _phase_density_qp[ph] = &getMaterialProperty<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(ph));
     _dphase_density_dvar[ph] = &getMaterialProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density" + Moose::stringify(ph) + "_dvar");
+    _dphase_density_qp_dvar[ph] = &getMaterialProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density_qp" + Moose::stringify(ph) + "_dvar");
   }
 }
 
 void
 PorousFlowMaterialDensityBuilder::initQpStatefulProperties()
 {
-  _density_old[_qp].resize(_num_phases);
   _density[_qp].resize(_num_phases);
+  _density_qp[_qp].resize(_num_phases);
+  _density_old[_qp].resize(_num_phases);
   _ddensity_dvar[_qp].resize(_num_phases);
+  _ddensity_qp_dvar[_qp].resize(_num_phases);
   const unsigned int num_var = _porflow_name_UO.num_v();
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
+  {
     _ddensity_dvar[_qp][ph].resize(num_var);
+    _ddensity_qp_dvar[_qp][ph].resize(num_var);
+  }
 }
 
 void
@@ -58,8 +69,12 @@ PorousFlowMaterialDensityBuilder::computeQpProperties()
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _density[_qp][ph] = (*_phase_density[ph])[_qp];
+    _density_qp[_qp][ph] = (*_phase_density_qp[ph])[_qp];
     for (unsigned v = 0; v < num_var; ++v)
+    {
       _ddensity_dvar[_qp][ph][v] = (*_dphase_density_dvar[ph])[_qp][v];
+      _ddensity_qp_dvar[_qp][ph][v] = (*_dphase_density_qp_dvar[ph])[_qp][v];
+    }
   }
 
 

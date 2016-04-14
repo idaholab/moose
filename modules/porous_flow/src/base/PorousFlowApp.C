@@ -13,12 +13,13 @@
 // Materials
 #include "PorousFlowMaterial2PhasePS.h"
 #include "PorousFlowMaterialDensityConstBulk.h"
-#include "PorousFlowMaterialDensityBuilder.h"
 #include "PorousFlowMaterialPorosityConst.h"
 #include "PorousFlowMaterialMassFractionBuilder.h"
 #include "PorousFlowMaterialPermeabilityConst.h"
 #include "PorousFlowMaterialRelativePermeabilityConst.h"
 #include "PorousFlowMaterialViscosityConst.h"
+#include "PorousFlowMaterialJoiner.h"
+#include "PorousFlowMaterialJoinerOld.h"
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -69,12 +70,13 @@ PorousFlowApp::registerObjects(Factory & factory)
   // Materials
   registerMaterial(PorousFlowMaterial2PhasePS);
   registerMaterial(PorousFlowMaterialDensityConstBulk);
-  registerMaterial(PorousFlowMaterialDensityBuilder);
   registerMaterial(PorousFlowMaterialPorosityConst);
   registerMaterial(PorousFlowMaterialMassFractionBuilder);
   registerMaterial(PorousFlowMaterialPermeabilityConst);
   registerMaterial(PorousFlowMaterialRelativePermeabilityConst);
   registerMaterial(PorousFlowMaterialViscosityConst);
+  registerMaterial(PorousFlowMaterialJoiner);
+  registerMaterial(PorousFlowMaterialJoinerOld);
 }
 
 // External entry point for dynamic syntax association

@@ -24,7 +24,7 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
     GeneralUserObject(parameters),
     Coupleable(parameters, false),
     ZeroInterface(parameters),
-    _num_v(coupledComponents("porflow_vars")),
+    _num_v(coupledComponents("porous_flow_vars")),
     _num_phases(getParam<unsigned int>("number_fluid_phases")),
     _num_components(getParam<unsigned int>("number_fluid_components"))
 {
@@ -38,13 +38,13 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
   _moose_grad_var.resize(_num_v);
   for (unsigned int i = 0; i < _num_v; ++i)
   {
-    _moose_var_num[i] = coupled("porflow_vars", i);
+    _moose_var_num[i] = coupled("porous_flow_vars", i);
     max_moose_var_num_seen = (max_moose_var_num_seen > _moose_var_num[i] ? max_moose_var_num_seen : _moose_var_num[i]);
-    _moose_var_value[i] = &coupledValue("porflow_vars", i); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
-    _moose_var_value_old[i] = (_is_transient ? &coupledValueOld("porflow_vars", i) : &_zero);
-    _moose_nodal_var_value[i] = &coupledNodalValue("porflow_vars", i); // coupledNodalValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
-    _moose_nodal_var_value_old[i] = (_is_transient ? &coupledNodalValueOld("porflow_vars", i) : &_zero);
-    _moose_grad_var[i] = &coupledGradient("porflow_vars", i);
+    _moose_var_value[i] = &coupledValue("porous_flow_vars", i); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
+    _moose_var_value_old[i] = (_is_transient ? &coupledValueOld("porous_flow_vars", i) : &_zero);
+    _moose_nodal_var_value[i] = &coupledNodalValue("porous_flow_vars", i); // coupledNodalValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
+    _moose_nodal_var_value_old[i] = (_is_transient ? &coupledNodalValueOld("porous_flow_vars", i) : &_zero);
+    _moose_grad_var[i] = &coupledGradient("porous_flow_vars", i);
   }
 
   _pf_var_num.resize(max_moose_var_num_seen + 1);
