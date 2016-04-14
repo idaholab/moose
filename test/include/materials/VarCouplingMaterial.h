@@ -31,11 +31,14 @@ public:
 
 protected:
   virtual void computeQpProperties();
+  virtual void initQpStatefulProperties();
 
   const VariableValue & _var;
   Real _base;
   Real _coef;
   MaterialProperty<Real> & _diffusion;
+  MaterialProperty<Real> * const _diffusion_old;
+
 };
 
 #endif //VARCOUPLINGMATERIAL_H
