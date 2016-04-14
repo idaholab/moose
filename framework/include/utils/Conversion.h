@@ -75,9 +75,11 @@ namespace Moose
   template<>
   std::string stringify(const ExecFlagType & t);
 
-   /// Stringify Reals with high precision
-  template<>
-  std::string stringify(const Real & t);
+  /**
+   * Stringify Reals with enough precision to gurantee lossless
+   * Real -> string -> Real roundtrips.
+   */
+  std::string stringifyExact(Real);
 }
 
 /**

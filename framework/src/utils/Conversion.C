@@ -230,15 +230,13 @@ namespace Moose
     return "";
   }
 
-  template<>
-  std::string stringify(const Real & t)
+  std::string stringifyExact(Real t)
   {
     // this or std::numeric_limits<T>::max_digits10
     const unsigned int max_digits10 = std::floor(std::numeric_limits<Real>::digits * std::log10(2) + 2);
 
     std::ostringstream os;
-    os << std::scientific
-       << std::setprecision(max_digits10)
+    os << std::setprecision(max_digits10)
        << t;
     return os.str();
   }
