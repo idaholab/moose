@@ -53,6 +53,8 @@ PorousFlowMaterial2PhasePS::PorousFlowMaterial2PhasePS(const InputParameters & p
     _dsaturation_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar")),
     _dgrads_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_saturation_dgradvar"))
 {
+  if (_porflow_name_UO.num_phases() != 2)
+    mooseError("The Dictator proclaims that the number of phases is " << _porflow_name_UO.num_phases() << " whereas PorousFlowMaterial2PhasePS can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
 }
 
 void

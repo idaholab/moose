@@ -31,10 +31,10 @@ public:
 
 protected:
 
-  unsigned int _num_phases;
-
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _porflow_name_UO;
+
+  unsigned int _num_phases;
 
   /// computed density of the phase
   MaterialProperty<std::vector<Real> > & _density;

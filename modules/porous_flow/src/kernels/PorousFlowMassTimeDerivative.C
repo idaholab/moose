@@ -35,15 +35,17 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
   _mass_frac_old(getMaterialPropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
   _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar"))
 {
+  if (_component_index >= _porflow_name_UO.num_components())
+    mooseError("The Dictator proclaims that the number of components in this simulation is " << _porflow_name_UO.num_components() << " whereas you have used the Kernel PorousFlowComponetMassTimeDeriative with component = " << _component_index << ".  The Dictator does not take such mistakes lightly");
 }
 
 /// Note that this kernel lumps the mass terms to the nodes, so that there is no mass at the qp's.
 Real
 PorousFlowMassTimeDerivative::computeQpResidual()
 {
-  mooseAssert(_component_index < _mass_frac[_i][0].size(), "PorousFlowComponentMassTimeDerivative: component_index is given as " << _component_index << " which must be less than the number of fluid components described by the mass-fraction matrix, which is " << _mass_frac[_i][0].size());
+  mooseAssert(_component_index < _mass_frac[_i][0].size(), "PorousFlowMassTimeDerivative: component_index is given as " << _component_index << " which must be less than the number of fluid components described by the mass-fraction matrix, which is " << _mass_frac[_i][0].size());
   unsigned int num_phases = _fluid_density[_i].size();
-  mooseAssert(num_phases == _fluid_saturation[_i].size(), "PorousFlowComponentMassTimeDerivative: Size of fluid density = " << num_phases << " size of fluid saturation = " << _fluid_saturation[_i].size() << " but both these must be equal to the number of phases in the system");
+  mooseAssert(num_phases == _fluid_saturation[_i].size(), "PorousFlowMassTimeDerivative: Size of fluid density = " << num_phases << " size of fluid saturation = " << _fluid_saturation[_i].size() << " but both these must be equal to the number of phases in the system");
 
   Real mass = 0.;
   Real mass_old = 0.;

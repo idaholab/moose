@@ -45,6 +45,12 @@ class PorousFlowDictator :
   /// the number of variables
   unsigned int num_v() const;
 
+  /// the number of phases
+  unsigned int num_phases() const;
+
+  /// the number of components
+  unsigned int num_components() const;
+
   /**
    * the PorousFlow variable number
    * @param moose_var_num the MOOSE variable number
@@ -114,6 +120,12 @@ class PorousFlowDictator :
 
   /// number of porflow variables
   unsigned int _num_v;
+
+  /// number of fluid phases
+  unsigned int _num_phases;
+
+  /// number of fluid components
+  unsigned int _num_components;
 
   /// _moose_var_num[i] = the moose variable number corresponding to porflow variable i
   std::vector<unsigned int> _moose_var_num;

@@ -42,6 +42,8 @@ PorousFlowMaterialDensityConstBulk::PorousFlowMaterialDensityConstBulk(const Inp
     _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num))),
     _ddensity_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num) + "_dvar"))
 {
+  if (_phase_num >= _porflow_name_UO.num_phases())
+    mooseError("PorousFlowMaterialDensityConstBulk: The Dictator proclaims that the number of fluid phases is " << _porflow_name_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
 }
 
 void

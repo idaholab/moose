@@ -14,7 +14,9 @@ InputParameters validParams<PorousFlowDictator>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("Holds information on the PorousFlow variable names");
-  params.addRequiredCoupledVar("porflow_vars", "List of primary variables that are used in the PorousFlow simulation.  Jacobian entries involving derivatives wrt these variables will be computed.  In single-phase models you will just have one (eg \'pressure\'), in two-phase models you will have two (eg \'p_water p_gas\', or \'p_water s_water\'), etc.  These names must also be used in your kernels and materials.");
+  params.addRequiredCoupledVar("porous_flow_vars", "List of primary variables that are used in the PorousFlow simulation.  Jacobian entries involving derivatives wrt these variables will be computed.  In single-phase models you will just have one (eg \'pressure\'), in two-phase models you will have two (eg \'p_water p_gas\', or \'p_water s_water\'), etc.  These names must also be used in your kernels and materials.");
+  params.addRequiredParam<unsigned int>("number_fluid_phases", "The number of fluid phases in the simulation");
+  params.addRequiredParam<unsigned int>("number_fluid_components", "The number of fluid components in the simulation");
   return params;
 }
 
@@ -22,7 +24,9 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
     GeneralUserObject(parameters),
     Coupleable(parameters, false),
     ZeroInterface(parameters),
-    _num_v(coupledComponents("porflow_vars"))
+    _num_v(coupledComponents("porflow_vars")),
+    _num_phases(getParam<unsigned int>("number_fluid_phases")),
+    _num_components(getParam<unsigned int>("number_fluid_components"))
 {
   unsigned int max_moose_var_num_seen = 0;
 
@@ -67,6 +71,18 @@ unsigned int
 PorousFlowDictator::num_v() const
 {
   return _num_v;
+}
+
+unsigned int
+PorousFlowDictator::num_phases() const
+{
+  return _num_phases;
+}
+
+unsigned int
+PorousFlowDictator::num_components() const
+{
+  return _num_components;
 }
 
 unsigned int

@@ -6,7 +6,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = porflow_vars
+  PorousFlowDictator_UO = dictator
 []
 
 [Variables]
@@ -30,21 +30,23 @@
 
 [Kernels]
   [./mass0]
-    type = PorousFlowComponentMassTimeDerivative
+    type = PorousFlowMassTimeDerivative
     component_index = 0
     variable = pp
   [../]
   [./mass1]
-    type = PorousFlowComponentMassTimeDerivative
+    type = PorousFlowMassTimeDerivative
     component_index = 1
     variable = sat
   [../]
 []
 
 [UserObjects]
-  [./porflow_vars]
+  [./dictator]
     type = PorousFlowDictator
-    porflow_vars = 'pp sat'
+    porous_flow_vars = 'pp sat'
+    number_fluid_phases = 2
+    number_fluid_components = 2
   [../]
 []
 
@@ -56,8 +58,6 @@
   [../]
   [./massfrac]
     type = PorousFlowMaterialMassFractionBuilder
-    num_phases = 2
-    num_components = 2
     mass_fraction_vars = 'gasph_gascomp waterph_gascomp'
   [../]
   [./dens0]
@@ -74,7 +74,6 @@
   [../]
   [./dens_all]
     type = PorousFlowMaterialDensityBuilder
-    num_phases = 2
   [../]
   [./porosity]
     type = PorousFlowMaterialPorosityConst

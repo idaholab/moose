@@ -33,7 +33,7 @@ protected:
 
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _porflow_name_UO;
+  const PorousFlowDictator & _dictator_UO;
 
   /// relative permeability
   MaterialProperty<std::vector<Real> > & _relative_permeability;

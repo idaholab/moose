@@ -31,12 +31,13 @@ public:
 
 protected:
 
+  /// The variable names UserObject for the Porous-Flow variables
+  const PorousFlowDictator & _porflow_name_UO;
+
   unsigned int _num_phases;
 
   unsigned int _num_components;
 
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _porflow_name_UO;
 
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac_old;

@@ -22,7 +22,7 @@ InputParameters validParams<PorousFlowMaterialRelativePermeabilityConst>()
 PorousFlowMaterialRelativePermeabilityConst::PorousFlowMaterialRelativePermeabilityConst(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
   _relative_permeability(declareProperty<std::vector<Real> > ("PorousFlow_relative_permeability")),
   _drelative_permeability_dvar(declareProperty<std::vector<std::vector<Real> > > ("dPorousFlow_relative_permeability_dvar"))
@@ -33,15 +33,14 @@ PorousFlowMaterialRelativePermeabilityConst::PorousFlowMaterialRelativePermeabil
 void
 PorousFlowMaterialRelativePermeabilityConst::computeQpProperties()
 {
-  unsigned int number_phases=2;
+  const unsigned int number_phases = _dictator_UO.num_phases();
   
-  // FIX THIS: need to get number of phases.
-  _relative_permeability[_qp].resize(number_phases,1.0);
+  _relative_permeability[_qp].resize(number_phases, 1.0);
 
-  const unsigned int num_var = _porflow_name_UO.num_v();
+  const unsigned int num_var = _dictator_UO.num_v();
   _drelative_permeability_dvar[_qp].resize(number_phases);
-  for (unsigned int i = 0 ; i < number_phases; i++)
-    _drelative_permeability_dvar[_qp][i].resize(num_var,0.0);
+  for (unsigned int i = 0; i < number_phases; i++)
+    _drelative_permeability_dvar[_qp][i].resize(num_var, 0.0);
 
 }
 

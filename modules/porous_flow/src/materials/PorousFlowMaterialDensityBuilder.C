@@ -15,7 +15,6 @@ InputParameters validParams<PorousFlowMaterialDensityBuilder>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredParam<unsigned int>("num_phases", "The number of fluid phases in the simulation");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material forms a std::vector of density out of the individual phase densities");
   return params;
@@ -24,8 +23,8 @@ InputParameters validParams<PorousFlowMaterialDensityBuilder>()
 PorousFlowMaterialDensityBuilder::PorousFlowMaterialDensityBuilder(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _num_phases(getParam<unsigned int>("num_phases")),
     _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _num_phases(_porflow_name_UO.num_phases()),
 
     _density(declareProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
     _density_old(declarePropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density")),
