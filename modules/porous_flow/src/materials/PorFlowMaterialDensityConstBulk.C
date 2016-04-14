@@ -35,7 +35,12 @@ PorFlowMaterialDensityConstBulk::PorFlowMaterialDensityConstBulk(const InputPara
     _dporepressure_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_dvar")),
     _density(declareProperty<Real>("PorFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
     _density_old(declarePropertyOld<Real>("PorFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _ddensity_dvar(declareProperty<std::vector<Real> >("dPorFlow_fluid_phase_density" + Moose::stringify(_phase_num) + "_dvar"))
+    _ddensity_dvar(declareProperty<std::vector<Real> >("dPorFlow_fluid_phase_density" + Moose::stringify(_phase_num) + "_dvar")),
+
+    _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorFlow_porepressure_qp")),
+    _dporepressure_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_qp_dvar")),
+    _density_qp(declareProperty<Real>("PorFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num))),
+    _ddensity_qp_dvar(declareProperty<std::vector<Real> >("dPorFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num) + "_dvar"))
 {
 }
 
@@ -43,6 +48,7 @@ void
 PorFlowMaterialDensityConstBulk::initQpStatefulProperties()
 {
   _ddensity_dvar[_qp].resize(_porflow_name_UO.num_v());
+  _ddensity_qp_dvar[_qp].resize(_porflow_name_UO.num_v());
 }
 
 void
@@ -51,9 +57,13 @@ PorFlowMaterialDensityConstBulk::computeQpProperties()
   mooseAssert(_phase_num < _porepressure[_qp].size(), "PorFlowMaterialDensityConstBulk: phase number is " << _phase_num << " but size of porepressure is " << _porepressure[_qp].size() << ".  These must be equal");
 
   _density[_qp] = _dens0*std::exp(_porepressure[_qp][_phase_num]/_bulk);
+  _density_qp[_qp] = _dens0*std::exp(_porepressure_qp[_qp][_phase_num]/_bulk);
 
   for (unsigned v = 0; v < _porflow_name_UO.num_v() ; ++v)
+  {
     _ddensity_dvar[_qp][v] = (1.0/_bulk)*_density[_qp]*_dporepressure_dvar[_qp][_phase_num][v];
+    _ddensity_qp_dvar[_qp][v] = (1.0/_bulk)*_density_qp[_qp]*_dporepressure_qp_dvar[_qp][_phase_num][v];
+  }
 
   /*
    *  YAQI HACK !!

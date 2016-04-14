@@ -26,17 +26,32 @@ PorFlowMaterial2PhasePS::PorFlowMaterial2PhasePS(const InputParameters & paramet
     DerivativeMaterialInterface<Material>(parameters),
 
     _phase0_porepressure(coupledNodalValue("phase0_porepressure")),
+    _phase0_qp_porepressure(coupledValue("phase0_porepressure")),
+    _phase0_gradp(coupledGradient("phase0_porepressure")),
     _phase0_porepressure_varnum(coupled("phase0_porepressure")),
+
     _phase1_saturation(coupledNodalValue("phase1_saturation")),
+    _phase1_qp_saturation(coupledValue("phase1_saturation")),
+    _phase1_grads(coupledGradient("phase1_saturation")),
     _phase1_saturation_varnum(coupled("phase1_saturation")),
+
     _porflow_name_UO(getUserObject<PorFlowVarNames>("PorFlowVarNames_UO")),
 
     _porepressure(declareProperty<std::vector<Real> >("PorFlow_porepressure")),
     _porepressure_old(declarePropertyOld<std::vector<Real> >("PorFlow_porepressure")),
+    _porepressure_qp(declareProperty<std::vector<Real> >("PorFlow_porepressure_qp")),
+    _gradp(declareProperty<std::vector<RealGradient> >("PorFlow_grad_porepressure")),
     _dporepressure_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_dvar")),
+    _dporepressure_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_porepressure_qp_dvar")),
+    _dgradp_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_grad_porepressure_dgradvar")),
+
     _saturation(declareProperty<std::vector<Real> >("PorFlow_saturation")),
     _saturation_old(declarePropertyOld<std::vector<Real> >("PorFlow_saturation")),
-    _dsaturation_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_saturation_dvar"))
+    _saturation_qp(declareProperty<std::vector<Real> >("PorFlow_saturation_qp")),
+    _grads(declareProperty<std::vector<RealGradient> >("PorFlow_grad_saturation")),
+    _dsaturation_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_saturation_dvar")),
+    _dsaturation_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_saturation_qp_dvar")),
+    _dgrads_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorFlow_grad_saturation_dgradvar"))
 {
 }
 
@@ -44,12 +59,20 @@ void
 PorFlowMaterial2PhasePS::initQpStatefulProperties()
 {
   _porepressure[_qp].resize(2);
-  _dporepressure_dvar[_qp].resize(2);
+  _porepressure_qp[_qp].resize(2);
   _porepressure_old[_qp].resize(2);
+  _gradp[_qp].resize(2);
+  _dporepressure_dvar[_qp].resize(2);
+  _dporepressure_qp_dvar[_qp].resize(2);
+  _dgradp_dgradv[_qp].resize(2);
 
   _saturation[_qp].resize(2);
-  _dsaturation_dvar[_qp].resize(2);
+  _saturation_qp[_qp].resize(2);
   _saturation_old[_qp].resize(2);
+  _grads[_qp].resize(2);
+  _dsaturation_dvar[_qp].resize(2);
+  _dsaturation_qp_dvar[_qp].resize(2);
+  _dgrads_dgradv[_qp].resize(2);
 
   /*
    *  YAQI HACK !!
@@ -88,20 +111,32 @@ PorFlowMaterial2PhasePS::computeQpProperties()
    */
   // prepare the derivative matrix with zeroes
   for (unsigned phase = 0; phase < 2; ++phase)
+  {
     _dporepressure_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+    _dporepressure_qp_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+    _dgradp_dgradv[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+  }
 
   // _porepressure is only dependent on _phase0_porepressure, and its derivative is 1
   if (!(_porflow_name_UO.not_porflow_var(_phase0_porepressure_varnum)))
   {
     // _phase0_porepressure is a porflow variable
     for (unsigned phase = 0; phase < 2; ++phase)
+    {
       _dporepressure_dvar[_qp][phase][_porflow_name_UO.porflow_var_num(_phase0_porepressure_varnum)] = 1;
+      _dporepressure_qp_dvar[_qp][phase][_porflow_name_UO.porflow_var_num(_phase0_porepressure_varnum)] = 1;
+      _dgradp_dgradv[_qp][phase][_porflow_name_UO.porflow_var_num(_phase0_porepressure_varnum)] = 1;
+    }
   }
 
 
   // prepare the derivative matrix with zeroes
   for (unsigned phase = 0; phase < 2; ++phase)
+  {
     _dsaturation_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+    _dsaturation_qp_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+    _dgrads_dgradv[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+  }
 
   // _saturation is only dependent on _phase1_saturation, and its derivative is +/- 1
   if (!(_porflow_name_UO.not_porflow_var(_phase1_saturation_varnum)))
@@ -109,6 +144,10 @@ PorFlowMaterial2PhasePS::computeQpProperties()
     // _phase1_saturation is a porflow variable
     _dsaturation_dvar[_qp][0][_porflow_name_UO.porflow_var_num(_phase1_saturation_varnum)] = -1;
     _dsaturation_dvar[_qp][1][_porflow_name_UO.porflow_var_num(_phase1_saturation_varnum)] = 1;
+    _dsaturation_qp_dvar[_qp][0][_porflow_name_UO.porflow_var_num(_phase1_saturation_varnum)] = -1;
+    _dsaturation_qp_dvar[_qp][1][_porflow_name_UO.porflow_var_num(_phase1_saturation_varnum)] = 1;
+    _dgrads_dgradv[_qp][0][_porflow_name_UO.porflow_var_num(_phase1_saturation_varnum)] = -1;
+    _dgrads_dgradv[_qp][1][_porflow_name_UO.porflow_var_num(_phase1_saturation_varnum)] = 1;
   }
 }
 
@@ -116,8 +155,18 @@ void
 PorFlowMaterial2PhasePS::buildQpPPSS()
 {
   const Real pc = 1.0;  // capillary suction function
+  const Real pc_qp = 1.0;
   _porepressure[_qp][0] = _phase0_porepressure[_qp];
   _porepressure[_qp][1] = _phase0_porepressure[_qp] - pc;
+  _porepressure_qp[_qp][0] = _phase0_qp_porepressure[_qp];
+  _porepressure_qp[_qp][1] = _phase0_qp_porepressure[_qp] - pc_qp;
+  _gradp[_qp][0] = _phase0_gradp[_qp];
+  _gradp[_qp][1] = _phase0_gradp[_qp];
+
   _saturation[_qp][0] = 1.0 - _phase1_saturation[_qp];
   _saturation[_qp][1] = _phase1_saturation[_qp];
+  _saturation_qp[_qp][0] = 1.0 - _phase1_qp_saturation[_qp];
+  _saturation_qp[_qp][1] = _phase1_qp_saturation[_qp];
+  _grads[_qp][0] = -_phase1_grads[_qp];
+  _grads[_qp][1] = _phase1_grads[_qp];
 }

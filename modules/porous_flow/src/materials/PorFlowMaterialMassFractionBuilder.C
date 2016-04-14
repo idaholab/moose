@@ -32,6 +32,7 @@ PorFlowMaterialMassFractionBuilder::PorFlowMaterialMassFractionBuilder(const Inp
 
     _mass_frac(declareProperty<std::vector<std::vector<Real> > >("PorFlow_mass_frac")),
     _mass_frac_old(declarePropertyOld<std::vector<std::vector<Real> > >("PorFlow_mass_frac")),
+    _grad_mass_frac(declareProperty<std::vector<std::vector<RealGradient> > >("PorFlow_grad_mass_frac")),
     _dmass_frac_dvar(declareProperty<std::vector<std::vector<std::vector<Real> > > >("dPorFlow_mass_frac_dvar")),
 
     _num_passed_mf_vars(coupledComponents("mass_fraction_vars"))
@@ -39,12 +40,14 @@ PorFlowMaterialMassFractionBuilder::PorFlowMaterialMassFractionBuilder(const Inp
   if (_num_passed_mf_vars != _num_phases*(_num_components - 1))
     mooseError("PorFlowMaterialMassFractionBuilder: The number of mass_fraction_vars is " << _num_passed_mf_vars << " which must be equal to num_phases (" << _num_phases << ") multiplied by num_components-1 (" << _num_components - 1 << ")");
 
-  _mf_vars.resize(_num_passed_mf_vars);
   _mf_vars_num.resize(_num_passed_mf_vars);
+  _mf_vars.resize(_num_passed_mf_vars);
+  _grad_mf_vars.resize(_num_passed_mf_vars);
   for (unsigned i = 0; i < _num_passed_mf_vars; ++i)
   {
     _mf_vars_num[i] = coupled("mass_fraction_vars", i);
     _mf_vars[i] = &coupledNodalValue("mass_fraction_vars", i);
+    _grad_mf_vars[i] = &coupledGradient("mass_fraction_vars", i);
   }
 }
 
@@ -54,11 +57,13 @@ PorFlowMaterialMassFractionBuilder::initQpStatefulProperties()
   const unsigned int num_var = _porflow_name_UO.num_v();
   _mass_frac[_qp].resize(_num_phases);
   _mass_frac_old[_qp].resize(_num_phases);
+  _grad_mass_frac[_qp].resize(_num_phases);
   _dmass_frac_dvar[_qp].resize(_num_phases);
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _mass_frac[_qp][ph].resize(_num_components);
     _mass_frac_old[_qp][ph].resize(_num_components);
+    _grad_mass_frac[_qp][ph].resize(_num_components);
     _dmass_frac_dvar[_qp][ph].resize(_num_components);
     for (unsigned int comp = 0; comp < _num_components; ++comp)
       _dmass_frac_dvar[_qp][ph][comp].assign(num_var, 0.0);
@@ -109,10 +114,13 @@ PorFlowMaterialMassFractionBuilder::build_mass_frac(unsigned int qp)
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     Real total_mass_frac = 0;
+    _grad_mass_frac[_qp][ph][_num_components - 1] = 0.0;
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
       _mass_frac[qp][ph][comp] = (*_mf_vars[i])[qp];
       total_mass_frac += (*_mf_vars[i])[qp];
+      _grad_mass_frac[qp][ph][comp] = (*_grad_mf_vars[i])[qp];
+      _grad_mass_frac[_qp][ph][_num_components - 1] -= (*_grad_mf_vars[i])[qp];
       i++;
     }
     _mass_frac[qp][ph][_num_components - 1] = 1 - total_mass_frac;

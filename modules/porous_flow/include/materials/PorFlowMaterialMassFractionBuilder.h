@@ -40,12 +40,14 @@ protected:
 
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac_old;
+  MaterialProperty<std::vector<std::vector<RealGradient> > > & _grad_mass_frac;
   MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_frac_dvar;
 
   unsigned int _num_passed_mf_vars;
 
   std::vector<unsigned int> _mf_vars_num;
   std::vector<const VariableValue *> _mf_vars;
+  std::vector<const VariableGradient *> _grad_mf_vars;
 
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();

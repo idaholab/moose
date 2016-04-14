@@ -44,20 +44,32 @@ protected:
   /// The variable names UserObject for the Porous-Flow variables
   const PorFlowVarNames & _porflow_name_UO;
 
-  /// porepressure of each phase
+  /// nodal porepressure of each phase
   const MaterialProperty<std::vector<Real> > & _porepressure;
 
-  /// d(porepressure)/d(PorFlow variable)
+  /// d(nodal porepressure)/d(PorFlow variable)
   const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_dvar;
 
-  /// computed density of the phase
+  /// computed nodal density of the phase
   MaterialProperty<Real> & _density;
 
-  /// old value of density of the phase
+  /// old value of nodal density of the phase
   MaterialProperty<Real> & _density_old;
 
-  /// d(density)/d(PorFlow variable)
+  /// d(nodal density)/d(PorFlow variable)
   MaterialProperty<std::vector<Real> > & _ddensity_dvar;
+
+  /// quadpoint porepressure of each phase
+  const MaterialProperty<std::vector<Real> > & _porepressure_qp;
+
+  /// d(quadpoint porepressure)/d(PorFlow variable)
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_qp_dvar;
+
+  /// computed quadpoint density of the phase
+  MaterialProperty<Real> & _density_qp;
+
+  /// d(quadpoint density)/d(PorFlow variable)
+  MaterialProperty<std::vector<Real> > & _ddensity_qp_dvar;
 
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
