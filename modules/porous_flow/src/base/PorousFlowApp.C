@@ -4,7 +4,7 @@
 #include "MooseSyntax.h"
 
 // Kernels
-#include "PorousFlowComponentMassTimeDerivative.h"
+#include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowAdvectiveFlux.h"
 
 // UserObjects
@@ -60,7 +60,7 @@ void
 PorousFlowApp::registerObjects(Factory & factory)
 {
   // Kernels
-  registerKernel(PorousFlowComponentMassTimeDerivative);
+  registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowAdvectiveFlux);
 
   // UserObjects

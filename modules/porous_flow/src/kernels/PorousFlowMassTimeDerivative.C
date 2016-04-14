@@ -5,10 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "PorousFlowComponentMassTimeDerivative.h"
+#include "PorousFlowMassTimeDerivative.h"
 
 template<>
-InputParameters validParams<PorousFlowComponentMassTimeDerivative>()
+InputParameters validParams<PorousFlowMassTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
   params.addParam<unsigned int>("component_index", 0, "The index corresponding to the component for this kernel");
@@ -17,7 +17,7 @@ InputParameters validParams<PorousFlowComponentMassTimeDerivative>()
   return params;
 }
 
-PorousFlowComponentMassTimeDerivative::PorousFlowComponentMassTimeDerivative(const InputParameters & parameters) :
+PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters & parameters) :
   TimeKernel(parameters),
   _component_index(getParam<unsigned int>("component_index")),
   _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
@@ -39,7 +39,7 @@ PorousFlowComponentMassTimeDerivative::PorousFlowComponentMassTimeDerivative(con
 
 /// Note that this kernel lumps the mass terms to the nodes, so that there is no mass at the qp's.
 Real
-PorousFlowComponentMassTimeDerivative::computeQpResidual()
+PorousFlowMassTimeDerivative::computeQpResidual()
 {
   mooseAssert(_component_index < _mass_frac[_i][0].size(), "PorousFlowComponentMassTimeDerivative: component_index is given as " << _component_index << " which must be less than the number of fluid components described by the mass-fraction matrix, which is " << _mass_frac[_i][0].size());
   unsigned int num_phases = _fluid_density[_i].size();
@@ -57,7 +57,7 @@ PorousFlowComponentMassTimeDerivative::computeQpResidual()
 }
 
 Real
-PorousFlowComponentMassTimeDerivative::computeQpJacobian()
+PorousFlowMassTimeDerivative::computeQpJacobian()
 {
   /// If the variable is not a PorousFlow variable (very unusual), the diag Jacobian terms are 0
   if (!(_var_is_porflow_var))
@@ -66,7 +66,7 @@ PorousFlowComponentMassTimeDerivative::computeQpJacobian()
 }
 
 Real
-PorousFlowComponentMassTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
+PorousFlowMassTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
   /// If the variable is not a PorousFlow variable, the OffDiag Jacobian terms are 0
   if (_porflow_name_UO.not_porflow_var(jvar))
@@ -75,7 +75,7 @@ PorousFlowComponentMassTimeDerivative::computeQpOffDiagJacobian(unsigned int jva
 }
 
 Real
-PorousFlowComponentMassTimeDerivative::computeQpJac(unsigned int pvar)
+PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
 {
   /// As mass is lumped to the nodes, only non-zero terms are for _i==_j
   if (_i != _j)

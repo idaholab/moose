@@ -7,6 +7,8 @@
 
 #include "PorousFlowAdvectiveFlux.h"
 #include "Assembly.h"
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
 InputParameters validParams<PorousFlowAdvectiveFlux>()
@@ -73,7 +75,7 @@ Real PorousFlowAdvectiveFlux::computeQpJac(unsigned int pvar)
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     qpjacobian += _phi[_j][_qp] * _dmass_fractions_dvar[_qp][ph][_component_index][pvar] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-    qpjacobian += _mass_fractions[_qp][ph][_component_index] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
+    qpjacobian += _mass_fractions[_qp][ph][_component_index] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
   }
 
   return _grad_test[_i][_qp] * (_permeability[_qp] * qpjacobian);

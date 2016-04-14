@@ -6,28 +6,28 @@
 /****************************************************************/
 
 
-#ifndef PORFLOWCOMPONENTMASSTIMEDERIVATIVE_H
-#define PORFLOWCOMPONENTMASSTIMEDERIVATIVE_H
+#ifndef PORFLOWMASSTIMEDERIVATIVE_H
+#define PORFLOWMASSTIMEDERIVATIVE_H
 
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
 // Forward Declarations
-class PorousFlowComponentMassTimeDerivative;
+class PorousFlowMassTimeDerivative;
 
 template<>
-InputParameters validParams<PorousFlowComponentMassTimeDerivative>();
+InputParameters validParams<PorousFlowMassTimeDerivative>();
 
 /**
  * Kernel = (mass_component - mass_component_old)/dt
  * where mass_component = porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
  * It is lumped to the nodes
  */
-class PorousFlowComponentMassTimeDerivative : public TimeKernel
+class PorousFlowMassTimeDerivative : public TimeKernel
 {
 public:
 
-  PorousFlowComponentMassTimeDerivative(const InputParameters & parameters);
+  PorousFlowMassTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -76,4 +76,4 @@ protected:
 
 };
 
-#endif //PORFLOWCOMPONENTMASSTIMEDERIVATIVE_H
+#endif //PORFLOWMASSTIMEDERIVATIVE_H
