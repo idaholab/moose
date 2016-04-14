@@ -178,7 +178,7 @@ MultiMooseEnum::push_back(const std::set<std::string> & names)
 const std::string &
 MultiMooseEnum::operator[](unsigned int i) const
 {
-  mooseAssert(i < _current_names.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names.size() << ")");
+  mooseAssert(i < _current_names_preserved.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names_preserved.size() << ")");
 
   return _current_names_preserved[i];
 }
@@ -186,7 +186,7 @@ MultiMooseEnum::operator[](unsigned int i) const
 unsigned int
 MultiMooseEnum::get(unsigned int i) const
 {
-  mooseAssert( i < _current_ids.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_ids.size() << ")");
+  mooseAssert(i < _current_ids.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_ids.size() << ")");
 
   return _current_ids[i];
 }
@@ -211,7 +211,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
     {
       if (_out_of_range_index == 0)     // Are out of range values allowed?
-        mooseError(std::string("Invalid option \"") + upper + "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
+        mooseError("Invalid option \"" << upper << "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"" << _raw_names << "\".");
       else
       {
         // Allow values assigned outside of the enumeration range
