@@ -20,11 +20,11 @@ InputParameters validParams<FunctionParserUtils>()
   InputParameters params = emptyInputParameters();
 
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-  params.addParam<bool>("enable_jit", true, "enable just-in-time compilation of function expressions for faster evaluation");
+  params.addParam<bool>("enable_jit", true, "Enable just-in-time compilation of function expressions for faster evaluation");
   params.addParamNamesToGroup("enable_jit", "Advanced");
 #endif
-  params.addParam<bool>("enable_ad_cache", true, "enable cacheing of function derivatives for faster startup time");
-  params.addParam<bool>("enable_auto_optimize", false, "enable automatic optimization of derivatives");
+  params.addParam<bool>("enable_ad_cache", true, "Enable cacheing of function derivatives for faster startup time");
+  params.addParam<bool>("enable_auto_optimize", true, "Enable automatic immediate optimization of derivatives");
   params.addParam<bool>("disable_fpoptimizer", false, "Disable the function parser algebraic optimizer");
   params.addParam<bool>("fail_on_evalerror", false, "Fail fatally if a function evaluation returns an error code (otherwise just pass on NaN)");
   params.addParamNamesToGroup("enable_ad_cache", "Advanced");
@@ -48,8 +48,8 @@ FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters) :
     _enable_jit(parameters.isParamValid("enable_jit") &&
                 parameters.get<bool>("enable_jit")),
     _enable_ad_cache(parameters.get<bool>("enable_ad_cache")),
-    _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize")),
-    _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer") || _enable_auto_optimize),
+    _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
+    _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize") && !_disable_fpoptimizer),
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {

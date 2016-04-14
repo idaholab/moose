@@ -50,8 +50,8 @@ protected:
   //@{ feature flags
   bool _enable_jit;
   bool _enable_ad_cache;
-  bool _enable_auto_optimize;
   bool _disable_fpoptimizer;
+  bool _enable_auto_optimize;
   bool _fail_on_evalerror;
   //@}
 
