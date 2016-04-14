@@ -9,7 +9,7 @@
 #define POROUSFLOWADVECTIVEFLUX_H
 
 #include "Kernel.h"
-#include "FluidState.h"
+#include "PorousFlowDictator.h"
 
 class PorousFlowAdvectiveFlux;
 
@@ -57,13 +57,15 @@ protected:
   /// Fluid density for each phase (at the node)
   const MaterialProperty<std::vector<Real> > & _fluid_density_node;
   /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the node)
-  const MaterialProperty<std::vector<std::vector<Real> > & _dfluid_density_node_dvar;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_density_node_dvar;
   /// Fluid density for each phase (at the qp)
   const MaterialProperty<std::vector<Real> > & _fluid_density_qp;
   /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the qp)
-  const MaterialProperty<std::vector<std::vector<Real> > & _dfluid_density_qp_dvar;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_density_qp_dvar;
   /// Viscosity of each component in each phase
   const MaterialProperty<std::vector<Real> > & _fluid_viscosity;
+  /// Derivative of the fluid viscosity for each phase wrt PorousFlow variables
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_viscosity_dvar;
   /// Mass fraction of each component in each phase
   const MaterialProperty<std::vector<std::vector<Real> > > & _mass_fractions;
   /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
@@ -74,9 +76,11 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real> > > & _dgrad_p_dgrad_var;
   /// Relative permeability of each phase
   const MaterialProperty<std::vector<Real> > & _relative_permeability;
+  /// Derivative of relative permeability of each phase wrt PorousFlow variables
+  const MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
 
   /// PorousFlow UserObject
-  const PorousFlowVarNames & _porousflow_varname_UO;
+  const PorousFlowDictator & _porousflow_dictator_UO;
 
   /// Index of the component that this kernel acts on
   unsigned int _component_index;

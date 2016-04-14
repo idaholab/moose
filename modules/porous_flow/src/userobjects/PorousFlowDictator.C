@@ -7,7 +7,6 @@
 
 
 //  Holds maps between PorousFlow variables (porepressure, saturations) and the variable number used by MOOSE.
-//
 #include "PorousFlowDictator.h"
 
 template<>
@@ -115,5 +114,3 @@ PorousFlowDictator::nodal_var_old(unsigned int porflow_var_num) const
 {
   return _moose_nodal_var_value_old[porflow_var_num];
 }
-
-

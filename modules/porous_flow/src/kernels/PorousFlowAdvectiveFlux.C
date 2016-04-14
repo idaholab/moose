@@ -7,8 +7,6 @@
 
 #include "PorousFlowAdvectiveFlux.h"
 #include "Assembly.h"
-#include "libmesh/quadrature.h"
-
 
 template<>
 InputParameters validParams<PorousFlowAdvectiveFlux>()
@@ -16,7 +14,7 @@ InputParameters validParams<PorousFlowAdvectiveFlux>()
   InputParameters params = validParams<Kernel>();
   params.addParam<unsigned int>("component_index", 0, "The index corresponding to the component for this kernel");
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector downwards (m/s^2)");
-  params.addRequiredParam<UserObjectName>("PorousFlowVarNamesUO", "The UserObject that holds the list of PorousFlow variable names");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictatorUO", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("Fully-upwinded advective flux of the component given by component_index");
   return params;
 }
@@ -24,31 +22,31 @@ InputParameters validParams<PorousFlowAdvectiveFlux>()
 PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & parameters) :
   Kernel(parameters),
   _permeability(getMaterialProperty<RealTensorValue>("permeability")),
-  _gravity(getParam<RealVectorValue>("gravity")),
   _fluid_density_node(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
-  _dfluid_density_node_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density_dvar")),
+  _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
   _fluid_density_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
-  _dfluid_density_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_fluid_phase_density_qp_dvar")),
+  _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_qp_dvar")),
   _fluid_viscosity(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_viscosity")),
+  _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_viscosity_dvar")),
   _mass_fractions(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
   _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
   _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure")),
-  _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> >("dPorousFlow_grad_porepressure_dgradvar")),
+  _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_dgradvar")),
   _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeabilty")),
-  _porousflow_varname_UO(getUserObject<PorousFlowVarNames>("PorousFlowVarNamesUO")),
-  _component_index(getParam<unsigned int>("component_index"))
-
+  _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_dvar")),
+  _porousflow_dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictatorUO")),
+  _component_index(getParam<unsigned int>("component_index")),
+  _gravity(getParam<RealVectorValue>("gravity"))
 {
   /// Make sure that this kernels variable is a valid PorousFlow variable
-  if (_porousflow_varname_UO.not_porousflow_var(_var.number()))
+  if (_porousflow_dictator_UO.not_porflow_var(_var.number()))
     mooseError("Variable " << _var.name() << " in the " << _name << " kernel is not a valid PorousFlow variable");
 
-  _num_phases = _porousflow_varname_UO.numberPhases();
+  _num_phases = _porousflow_dictator_UO.num_phases();
 }
 
 Real PorousFlowAdvectiveFlux::computeQpResidual()
 {
-  // TODO: want these densities to be the qp densities
   // TODO: check that these grad_p's at the qp?
   RealVectorValue qpresidual = 0.0;
 
@@ -64,10 +62,10 @@ void PorousFlowAdvectiveFlux::computeResidual()
 }
 
 
-Real PorousFlow::computeQpJac(unsigned int pvar)
+Real PorousFlowAdvectiveFlux::computeQpJac(unsigned int pvar)
 {
   /// If the variable is not a valid PorousFlow variable, return 0
-  if (_porousflow_varname_UO.not_porousflow_var(pvar))
+  if (_porousflow_dictator_UO.not_porflow_var(pvar))
     return 0.0;
 
   RealVectorValue qpjacobian = 0.0;
@@ -83,7 +81,7 @@ Real PorousFlow::computeQpJac(unsigned int pvar)
 
 Real PorousFlowAdvectiveFlux::computeQpJacobian()
 {
-  return computeQpJac(_porousflow_varname_UO.porflow_var_num(_var.number()));;
+  return computeQpJac(_porousflow_dictator_UO.porflow_var_num(_var.number()));;
 }
 
 void PorousFlowAdvectiveFlux::computeJacobian()
@@ -93,7 +91,7 @@ void PorousFlowAdvectiveFlux::computeJacobian()
 
 Real PorousFlowAdvectiveFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return computeQpJac(_porousflow_varname_UO.porflow_var_num(jvar));;
+  return computeQpJac(_porousflow_dictator_UO.porflow_var_num(jvar));;
 }
 
 void PorousFlowAdvectiveFlux::computeOffDiagJacobian(unsigned int jvar)
@@ -104,27 +102,15 @@ void PorousFlowAdvectiveFlux::computeOffDiagJacobian(unsigned int jvar)
 
 void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
 {
-  if (compute_jac && _porousflow_varname_UO.not_porousflow_var(jvar))
+  if (compute_jac && _porousflow_dictator_UO.not_porflow_var(jvar))
     return;
+  /// The PorousFlow variable index corresponding to the variable number jvar
+  unsigned int pvar = _porousflow_dictator_UO.porflow_var_num(jvar);
 
-  /// We require the mobility calculated at the nodes of the element. Additionally,
-  /// in order to call the derivatives for the Jacobian from the FluidState UserObject,
-  /// determine the node id's of the nodes in this element
-
+  /// The number of nodes in the element
   unsigned int num_nodes = _test.size();
-  std::vector<Real> mobility;
-  mobility.resize(num_nodes);
 
-  std::vector<unsigned int> elem_node_ids;
-  elem_node_ids.resize(num_nodes);
-
-  for (unsigned int n = 0; n < num_nodes; ++n)
-  {
-    elem_node_ids[n] = _current_elem->get_node(n)->id();
-    mobility[n] = _fluid_state.getNodalProperty("mobility", elem_node_ids[n], _phase_index);
-  }
-
-  /// Compute the residual and jacobian without the mobility terms. Even if we are computing the jacobian
+  /// Compute the residual and jacobian without the mobility terms. Even if we are computing the Jacobian
   /// we still need this in order to see which nodes are upwind and which are downwind.
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   _local_re.resize(re.size());
@@ -158,28 +144,24 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
     }
   }
 
-  // Now perform the upwinding by multiplying the residuals at the
-  // upstream nodes by their mobilities
-  //
-  // The residual for the kernel is the darcy flux.
-  // This is
-  // R_i = int{mobility*flux_no_mob} = int{mobility*grad(pot)*permeability*grad(test_i)}
-  // for node i.  where int is the integral over the element.
-  // However, in fully-upwind, the first step is to take the mobility outside the
-  // integral, which was done in the _local_re calculation above.
-  //
-  // NOTE: Physically _local_re(_i) is a measure of fluid flowing out of node i
-  // If we had left in mobility, it would be exactly the mass flux flowing out of node i.
-  //
-  // This leads to the definition of upwinding:
-  // ***
-  // If _local_re(i) is positive then we use mobility_i.  That is
-  // we use the upwind value of mobility.
-  // ***
-  //
-  // The final subtle thing is we must also conserve fluid mass: the total mass
-  // flowing out of node i must be the sum of the masses flowing
-  // into the other nodes.
+  /**
+   * Now perform the upwinding by multiplying the residuals at the upstream nodes by their mobilities
+   * The residual for the kernel is the Darcy flux. This is
+   * R_i = int{mobility*flux_no_mob} = int{mobility*grad(pot)*permeability*grad(test_i)}
+   * for node i.  where int is the integral over the element.
+   * However, in fully-upwind, the first step is to take the mobility outside the integral,
+   * which was done in the _local_re calculation above.
+   *
+   * NOTE: Physically _local_re(_i) is a measure of fluid flowing out of node i.
+   * If we had left in mobility, it would be exactly the mass flux flowing out of node i.
+   *
+   * This leads to the definition of upwinding:
+   *
+   * If _local_re(i) is positive then we use mobility_i.  That is we use the upwind value of mobility.
+   *
+   * The final subtle thing is we must also conserve fluid mass: the total mass flowing out of node i
+   * must be the sum of the masses flowing into the other nodes.
+  **/
 
   // FIRST:
   // this is a dirty way of getting around precision loss problems
@@ -195,77 +177,81 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
     }
   }
 
-  /// Define variables used to ensure mass conservation
-  Real total_mass_out = 0;
-  Real total_in = 0;
-
-  /// The following holds derivatives of these
-  std::vector<Real> dtotal_mass_out;
-  std::vector<Real> dtotal_in;
-  if (compute_jac)
+  /// Loop over all the phases
+  for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    dtotal_mass_out.resize(num_nodes);
-    dtotal_in.resize(num_nodes);
+    Real mobility;
+    Real dmobility;
+    /// Define variables used to ensure mass conservation
+    Real total_mass_out = 0;
+    Real total_in = 0;
 
-    for (unsigned int n = 0; n < num_nodes ; ++n)
+    /// The following holds derivatives of these
+    std::vector<Real> dtotal_mass_out;
+    std::vector<Real> dtotal_in;
+    if (compute_jac)
     {
-      dtotal_mass_out[n] = 0;
-      dtotal_in[n] = 0;
-    }
-  }
+      dtotal_mass_out.resize(num_nodes);
+      dtotal_in.resize(num_nodes);
 
-  /// Perform the upwinding
-    for (unsigned int n = 0; n < num_nodes ; ++n)
-    {
-      if (_local_re(n) >= 0 || reached_steady) // upstream node
+      for (unsigned int n = 0; n < num_nodes ; ++n)
       {
-        if (compute_jac)
+        dtotal_mass_out[n] = 0;
+        dtotal_in[n] = 0;
+      }
+    }
+
+    /// Perform the upwinding using the mobility (relative permeability * fluid density / fluid viscosity)
+      for (unsigned int n = 0; n < num_nodes ; ++n)
+      {
+        if (_local_re(n) >= 0 || reached_steady) // upstream node
         {
-          Real dmobility = 0.;
+          /// The mobility at the upstream node
+          // TODO: somewhere make sure that viscosity mustn't be zero - maybe in the viscosity material?
+          mobility = _relative_permeability[n][ph] * _fluid_density_node[n][ph] / _fluid_viscosity[n][ph];
 
-          if (jvar_type == "pressure")
-            dmobility = _fluid_state.getNodalProperty("dmobility_dp", elem_node_ids[n], _phase_index);
-
-          else if (jvar_type == "saturation")
-            dmobility = _fluid_state.getNodalProperty("dmobility_ds", elem_node_ids[n], _phase_index);
-
-          else if (jvar_type == "mass_fraction")
-            dmobility = _fluid_state.getNodalProperty("dmobility_dx", elem_node_ids[n], _phase_index, _component_index);
-
-          for (_j = 0; _j < _phi.size(); _j++)
-            _local_ke(n, _j) *= mobility[n];
-
-          _local_ke(n, n) += dmobility * _local_re(n);
-
-          for (_j = 0; _j < _phi.size(); _j++)
-            dtotal_mass_out[_j] += _local_ke(n, _j);
-        }
-        _local_re(n) *= mobility[n];
-        total_mass_out += _local_re(n);
-      }
-      else
-      {
-        total_in -= _local_re(n); /// note the -= means the result is positive
-        if (compute_jac)
-          for (_j = 0; _j < _phi.size(); _j++)
-            dtotal_in[_j] -= _local_ke(n, _j);
-      }
-    }
-
-  /// Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes, weighted by their _local_re values
-  if (!reached_steady)
-  {
-    for (unsigned int n = 0; n < num_nodes; ++n)
-    {
-      if (_local_re(n) < 0)
-      {
-        if (compute_jac)
-          for (_j = 0; _j < _phi.size(); _j++)
+          if (compute_jac)
           {
-            _local_ke(n, _j) *= total_mass_out / total_in;
-            _local_ke(n, _j) += _local_re(n) * (dtotal_mass_out[_j] / total_in - dtotal_in[_j] * total_mass_out / total_in / total_in);
+            /// The derivative of the mobility wrt the PorousFlow variable
+            dmobility = _fluid_density_node[n][ph] * _drelative_permeability_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
+            dmobility += _relative_permeability[n][ph] * _dfluid_density_node_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
+            dmobility -= mobility * _dfluid_viscosity_dvar[n][ph][pvar];
+
+            for (_j = 0; _j < _phi.size(); _j++)
+              _local_ke(n, _j) *= mobility;
+
+            _local_ke(n, n) += dmobility * _local_re(n);
+
+            for (_j = 0; _j < _phi.size(); _j++)
+              dtotal_mass_out[_j] += _local_ke(n, _j);
           }
-        _local_re(n) *= total_mass_out / total_in;
+          _local_re(n) *= mobility;
+          total_mass_out += _local_re(n);
+        }
+        else
+        {
+          total_in -= _local_re(n); /// note the -= means the result is positive
+          if (compute_jac)
+            for (_j = 0; _j < _phi.size(); _j++)
+              dtotal_in[_j] -= _local_ke(n, _j);
+        }
+      }
+
+    /// Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes, weighted by their _local_re values
+    if (!reached_steady)
+    {
+      for (unsigned int n = 0; n < num_nodes; ++n)
+      {
+        if (_local_re(n) < 0)
+        {
+          if (compute_jac)
+            for (_j = 0; _j < _phi.size(); _j++)
+            {
+              _local_ke(n, _j) *= total_mass_out / total_in;
+              _local_ke(n, _j) += _local_re(n) * (dtotal_mass_out[_j] / total_in - dtotal_in[_j] * total_mass_out / total_in / total_in);
+            }
+          _local_re(n) *= total_mass_out / total_in;
+        }
       }
     }
   }
