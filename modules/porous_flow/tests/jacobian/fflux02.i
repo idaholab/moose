@@ -1,4 +1,4 @@
-# 1phase, 1component, constant viscosity, constant insitu permeability
+# 1phase, 2components, constant viscosity, constant insitu permeability
 # density with constant bulk, Corey relative perm, nonzero gravity, unsaturated with vanGenuchten
 [Mesh]
   type = GeneratedMesh
@@ -18,6 +18,8 @@
 [Variables]
   [./pp]
   [../]
+  [./massfrac0]
+  [../]
 []
 
 [ICs]
@@ -25,6 +27,11 @@
     type = FunctionIC
     variable = pp
     function = -0.7+x+y
+  [../]
+  [./massfrac0]
+    type = FunctionIC
+    variable = massfrac0
+    function = 0.1+(x-0.4)*(x-0.4)+0.1*y
   [../]
 []
 
@@ -36,14 +43,20 @@
     variable = pp
     gravity = '-1 -0.1 0'
   [../]
+  [./flux1]
+    type = PorousFlowAdvectiveFlux
+    component_index = 1
+    variable = massfrac0
+    gravity = '-1 -0.1 0'
+  [../]
 []
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pp'
+    porous_flow_vars = 'pp massfrac0'
     number_fluid_phases = 1
-    number_fluid_components = 1
+    number_fluid_components = 2
   [../]
 []
 
@@ -56,6 +69,7 @@
   [../]
   [./massfrac]
     type = PorousFlowMaterialMassFractionBuilder
+    mass_fraction_vars = 'massfrac0'
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
@@ -84,6 +98,9 @@
     type = PorousFlowMaterialPermeabilityConst
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
+  #[./relperm]
+  #  type = PorousFlowMaterialRelativePermeabilityConst
+  #[../]
   [./relperm]
     type = PorousFlowMaterialRelativePermeabilityCorey
     n_j = 2

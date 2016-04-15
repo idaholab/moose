@@ -10,6 +10,8 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
+#include "MooseMesh.h"
+
 template<>
 InputParameters validParams<PorousFlowAdvectiveFlux>()
 {
@@ -33,6 +35,7 @@ PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & paramet
   _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_viscosity_dvar")),
   _mass_fractions(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
   _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
+  _pp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure")),
   _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure")),
   _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_dgradvar")),
   _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability")),
@@ -146,6 +149,11 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
    * must be the sum of the masses flowing into the other nodes.
   **/
 
+  Real knorm = 0;
+  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+    knorm += _permeability[qp].tr();
+
+
   /// Loop over all the phases
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
@@ -154,13 +162,24 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
     // this is a dirty way of getting around precision loss problems
     // and problems at steadystate where upwinding oscillates from
     // node-to-node causing nonconvergence.
-    // I'm not sure if i actually need to do this in moose.  Certainly
-    // in cosflow it is necessary.
-    // I will code a better algorithm if necessary
+    // The residual = int_{ele}*grad_test*k*(gradP - rho*g) = L^(d-1)*k*(gradP - rho*g), where d is dimension
+    // I assume that if one nodal P changes by P*1E-8 then this is
+    // a "negligible" change.  The residual will change by L^(d-2)*k*P*1E-8
+    // Similarly if rho*g changes by rho*g*1E-8 then this is a "negligible change"
+    // Hence the formulae below, with grad_test = 1/L
+    Real pnorm = 0.0;
+    Real gravnorm = 0.0;
+    for (unsigned int n = 0; n < num_nodes; ++n)
+    {
+      pnorm += _pp[n][ph]*_pp[n][ph];
+      gravnorm += _fluid_density_node[n][ph]*_fluid_density_node[n][ph];
+    }
+    gravnorm *= _gravity*_gravity;
+    const Real cutoff = 1E-8*knorm*(std::sqrt(pnorm)*std::pow(_grad_test[0][0]*_grad_test[0][0], 0.5*(2 - _mesh.dimension())) + std::sqrt(gravnorm)*std::pow(_grad_test[0][0]*_grad_test[0][0], 0.5*(1 - _mesh.dimension())));
     bool reached_steady = true;
     for (unsigned int nodenum = 0; nodenum < num_nodes ; ++nodenum)
     {
-      if (component_re[nodenum][ph] >= 1E-20)
+      if (component_re[nodenum][ph] >= cutoff)
       {
 	reached_steady = false;
 	break;
@@ -189,10 +208,12 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
     }
 
     /// Perform the upwinding using the mass_frac*mobility (massfrac * relative permeability * fluid density / fluid viscosity)
+    std::vector<bool> upwind_node(num_nodes);
     for (unsigned int n = 0; n < num_nodes ; ++n)
       {
-        if (component_re[n][ph] >= 0) // upstream node
+        if (component_re[n][ph] >= cutoff || reached_steady) // upstream node
         {
+	  upwind_node[n] = true;
           /// The massfrac*mobility at the upstream node
           mobility = _mass_fractions[n][ph][_component_index] * _fluid_density_node[n][ph] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
 
@@ -217,6 +238,7 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
         }
         else
         {
+	  upwind_node[n] = false;
           total_in -= component_re[n][ph]; /// note the -= means the result is positive
           if (compute_jac)
             for (_j = 0; _j < _phi.size(); _j++)
@@ -229,7 +251,7 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
     {
       for (unsigned int n = 0; n < num_nodes; ++n)
       {
-        if (component_re[n][ph] < 0)
+        if (!upwind_node[n]) // downstream node
         {
           if (compute_jac)
             for (_j = 0; _j < _phi.size(); _j++)

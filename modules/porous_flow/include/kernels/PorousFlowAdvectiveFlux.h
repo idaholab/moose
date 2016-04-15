@@ -63,6 +63,8 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real> > > & _mass_fractions;
   /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_fractions_dvar;
+  /// Nodal pore pressure in each phase
+  const MaterialProperty<std::vector<Real> > & _pp;
   /// Gradient of the pore pressure in each phase
   const MaterialProperty<std::vector<RealGradient> > & _grad_p;
   /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
