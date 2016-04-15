@@ -17,6 +17,10 @@ FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
+# dependency on tensor_mechanics
+TENSOR_MECHANICS := yes
+include $(MODULE_DIR)/modules.mk
+
 # dep apps
 APPLICATION_DIR    := $(MODULE_DIR)/phase_field
 APPLICATION_NAME   := phase_field
