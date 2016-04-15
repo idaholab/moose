@@ -27,6 +27,9 @@ public:
   PorousFlowAdvectiveFlux(const InputParameters & parameters);
 
 protected:
+  virtual Real darcyQp(unsigned int ph);
+  virtual Real darcyQpJacobian(unsigned int jvar, unsigned int ph);
+
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
@@ -54,6 +57,7 @@ protected:
 
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> & _permeability;
+  const MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_dvar;
   /// Fluid density for each phase (at the node)
   const MaterialProperty<std::vector<Real> > & _fluid_density_node;
   /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the node)
