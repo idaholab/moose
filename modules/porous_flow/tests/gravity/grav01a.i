@@ -1,6 +1,10 @@
 # Checking that gravity head is established
 # 1phase, vanGenuchten, constant fluid-bulk, constant viscosity, constant permeability, constant relative perm
 # fully saturated
+
+# Bulk = 2
+# nz = 1
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
