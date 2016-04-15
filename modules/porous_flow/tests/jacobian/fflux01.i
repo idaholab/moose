@@ -2,7 +2,7 @@
 # fully saturated
 [Mesh]
   type = GeneratedMesh
-  dim = 3
+  dim = 1
   nx = 1
   ny = 1
   nz = 1
@@ -14,7 +14,14 @@
 
 [Variables]
   [./pp]
-    initial_condition = 1
+  [../]
+[]
+
+[ICs]
+  [./pp]
+    type = FunctionIC
+    variable = pp
+    function = 1+x
   [../]
 []
 
@@ -90,7 +97,7 @@
   [./check]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
+    petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
   [../]

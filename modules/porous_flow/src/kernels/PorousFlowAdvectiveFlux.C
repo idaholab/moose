@@ -65,10 +65,6 @@ void PorousFlowAdvectiveFlux::computeResidual()
 
 Real PorousFlowAdvectiveFlux::computeQpJac(unsigned int pvar)
 {
-  /// If the variable is not a valid PorousFlow variable, return 0
-  if (_porousflow_dictator_UO.not_porflow_var(pvar))
-    return 0.0;
-
   RealVectorValue qpjacobian = 0.0;
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
@@ -82,6 +78,8 @@ Real PorousFlowAdvectiveFlux::computeQpJac(unsigned int pvar)
 
 Real PorousFlowAdvectiveFlux::computeQpJacobian()
 {
+  if (_porousflow_dictator_UO.not_porflow_var(_var.number()))
+    return 0.0
   return computeQpJac(_porousflow_dictator_UO.porflow_var_num(_var.number()));;
 }
 
@@ -92,6 +90,8 @@ void PorousFlowAdvectiveFlux::computeJacobian()
 
 Real PorousFlowAdvectiveFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  if (_porousflow_dictator_UO.not_porflow_var(jvar))
+    return 0.0
   return computeQpJac(_porousflow_dictator_UO.porflow_var_num(jvar));;
 }
 
