@@ -22,6 +22,9 @@
 #include "PorousFlowMaterialJoiner.h"
 #include "PorousFlowMaterialJoinerOld.h"
 
+// Postprocessors
+#include "PorousFlowFluidMass.h"
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -79,6 +82,9 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterialViscosityConst);
   registerMaterial(PorousFlowMaterialJoiner);
   registerMaterial(PorousFlowMaterialJoinerOld);
+
+  // Postprocessors
+  registerPostprocessor(PorousFlowFluidMass);
 }
 
 // External entry point for dynamic syntax association

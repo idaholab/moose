@@ -36,7 +36,7 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
   _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar"))
 {
   if (_component_index >= _porflow_name_UO.num_components())
-    mooseError("The Dictator proclaims that the number of components in this simulation is " << _porflow_name_UO.num_components() << " whereas you have used the Kernel PorousFlowComponetMassTimeDeriative with component = " << _component_index << ".  The Dictator does not take such mistakes lightly");
+    mooseError("The Dictator proclaims that the number of components in this simulation is " << _porflow_name_UO.num_components() << " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = " << _component_index << ".  The Dictator does not take such mistakes lightly");
 }
 
 /// Note that this kernel lumps the mass terms to the nodes, so that there is no mass at the qp's.
