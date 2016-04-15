@@ -29,13 +29,21 @@
   [../]
 []
 
-
 [Kernels]
   [./flux0]
     type = PorousFlowAdvectiveFlux
     component_index = 0
     variable = pp
     gravity = '0 0 -1'
+  [../]
+[]
+
+[Functions]
+  [./ana_pp]
+    type = ParsedFunction
+    vars = 'g B p0 rho0'
+    vals = '1 2 0 1'
+    value = '-B*log(exp(-p0/B)+g*rho0*z/B)' # expected pp at base
   [../]
 []
 
@@ -99,6 +107,25 @@
   [../]
 []
 
+[Postprocessors]
+  [./pp_base]
+    type = PointValue
+    variable = pp
+    point = '0 0 -1'
+  [../]
+  [./pp_analytical]
+    type = FunctionValuePostprocessor
+    function = ana_pp
+    point = '0 0 -1'
+  [../]
+  [./pp_diff]
+    type = DifferencePostprocessor
+    value2 = pp_analytical
+    value1 = pp_base
+    point = '0 0 -1'
+  [../]
+[]
+
 [Preconditioning]
   active = andy
   [./andy]
@@ -122,5 +149,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
+  file_base = grav01
   exodus = true
 []
