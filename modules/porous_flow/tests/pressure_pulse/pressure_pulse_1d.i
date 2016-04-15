@@ -1,7 +1,4 @@
-# Test of new module with single phase.
-# investigating pressure pulse in 1D with 1 phase
-
-
+# Pressure pulse in 1D with 1 phase
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -20,7 +17,6 @@
   [../]
 []
 
-
 [Kernels]
   [./mass0]
     type = PorousFlowMassTimeDerivative
@@ -35,7 +31,6 @@
   [../]
 []
   
-  
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
@@ -44,7 +39,6 @@
     number_fluid_components = 1
   [../]
 []
-
 
 [Materials]
   [./ppss]
@@ -58,8 +52,8 @@
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
-    density0 = 1
-    bulk_modulus = 1E7
+    density0 = 1000
+    bulk_modulus = 2E9
     phase = 0
   [../]
   [./dens_all]
@@ -76,14 +70,20 @@
   [../]
   [./permeability]
     type = PorousFlowMaterialPermeabilityConst
-    permeability = '1 0 0 0 2 0 0 0 3'
+    permeability = '1E-15 0 0 0 1E-15 0 0 0 1E-15'
   [../]
   [./relperm]
-    type = PorousFlowMaterialRelativePermeabilityConst
+    type = PorousFlowMaterialRelativePermeabilityCorey
+    n_j = 0
+    phase = 0
   [../]
-    [./visc0]
+  [./relperm_all]
+    type = PorousFlowMaterialJoiner
+    material_property = PorousFlow_relative_permeability
+  [../]
+  [./visc0]
     type = PorousFlowMaterialViscosityConst
-    viscosity = 1
+    viscosity = 1E-3
     phase = 0
   [../]
   [./visc_all]
@@ -101,27 +101,24 @@
   [../]
 []
 
-[AuxVariables]
-
-[]
-
-
-
-
-
 [Preconditioning]
-
+  [./andy]
+    type = SMP
+    full = true
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
+    petsc_options_value = 'bcgs bjacobi 1E-15 1E-20 10000'
+  [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
-    dt = 0.1
-  end_time = 1
+  dt = 1E3
+  end_time = 1E4
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
+  execute_on = 'initial timestep_end final'
   file_base = pressure_pulse_1d
   exodus = true
 []
