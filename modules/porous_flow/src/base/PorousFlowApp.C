@@ -6,6 +6,7 @@
 // Kernels
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowAdvectiveFlux.h"
+#include "PorousFlowTestKernel.h"
 
 // UserObjects
 #include "PorousFlowDictator.h"
@@ -18,6 +19,7 @@
 #include "PorousFlowMaterialMassFractionBuilder.h"
 #include "PorousFlowMaterialPermeabilityConst.h"
 #include "PorousFlowMaterialRelativePermeabilityConst.h"
+#include "PorousFlowMaterialRelativePermeabilityLinear.h"
 #include "PorousFlowMaterialViscosityConst.h"
 #include "PorousFlowMaterialJoiner.h"
 #include "PorousFlowMaterialJoinerOld.h"
@@ -67,6 +69,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   // Kernels
   registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowAdvectiveFlux);
+  registerKernel(PorousFlowTestKernel);
 
   // UserObjects
   registerUserObject(PorousFlowDictator);
@@ -79,6 +82,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterialMassFractionBuilder);
   registerMaterial(PorousFlowMaterialPermeabilityConst);
   registerMaterial(PorousFlowMaterialRelativePermeabilityConst);
+  registerMaterial(PorousFlowMaterialRelativePermeabilityLinear);
   registerMaterial(PorousFlowMaterialViscosityConst);
   registerMaterial(PorousFlowMaterialJoiner);
   registerMaterial(PorousFlowMaterialJoinerOld);
