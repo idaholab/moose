@@ -1,4 +1,4 @@
-# Pressure pulse in 1D with 1 phase
+# Pressure pulse in 1D with 1 phase - transient
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -117,8 +117,79 @@
   end_time = 1E4
 []
 
+[Postprocessors]
+  [./p000]
+    type = PointValue
+    variable = pp
+    point = '0 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p010]
+    type = PointValue
+    variable = pp
+    point = '10 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p020]
+    type = PointValue
+    variable = pp
+    point = '20 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p030]
+    type = PointValue
+    variable = pp
+    point = '30 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p040]
+    type = PointValue
+    variable = pp
+    point = '40 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p050]
+    type = PointValue
+    variable = pp
+    point = '50 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p060]
+    type = PointValue
+    variable = pp
+    point = '60 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p070]
+    type = PointValue
+    variable = pp
+    point = '70 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p080]
+    type = PointValue
+    variable = pp
+    point = '80 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p090]
+    type = PointValue
+    variable = pp
+    point = '90 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p100]
+    type = PointValue
+    variable = pp
+    point = '100 0 0'
+    execute_on = 'initial timestep_end'
+  [../]
+[]
+
 [Outputs]
-  execute_on = 'initial timestep_end final'
   file_base = pressure_pulse_1d
-  exodus = true
+  print_linear_residuals = false
+  [./csv]
+    type = CSV
+  [../]
 []

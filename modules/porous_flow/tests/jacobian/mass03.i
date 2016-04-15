@@ -1,5 +1,5 @@
 # 1phase
-# vanGenuchten, constant-bulk density, constant porosity, 2components
+# vanGenuchten, constant-bulk density, constant porosity, 3components
 # unsaturated
 [Mesh]
   type = GeneratedMesh
@@ -14,10 +14,31 @@
 
 [Variables]
   [./pp]
-    initial_condition = -1
   [../]
   [./mass_frac_comp0]
-    initial_condition = 0.3
+  [../]
+  [./mass_frac_comp1]
+  [../]
+[]
+
+[ICs]
+  [./pp]
+    type = RandomIC
+    variable = pp
+    min = -1
+    max = 0
+  [../]
+  [./mass_frac_comp0]
+    type = RandomIC
+    variable = mass_frac_comp0
+    min = 0
+    max = 0.3
+  [../]
+  [./mass_frac_comp1]
+    type = RandomIC
+    variable = mass_frac_comp1
+    min = 0
+    max = 0.3
   [../]
 []
 
@@ -33,15 +54,20 @@
     component_index = 1
     variable = mass_frac_comp0
   [../]
+  [./masscomp2]
+    type = PorousFlowMassTimeDerivative
+    component_index = 2
+    variable = mass_frac_comp1
+  [../]
 []
 
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pp mass_frac_comp0'
+    porous_flow_vars = 'pp mass_frac_comp0 mass_frac_comp1'
     number_fluid_phases = 1
-    number_fluid_components = 2
+    number_fluid_components = 3
   [../]
 []
 
@@ -54,7 +80,7 @@
   [../]
   [./massfrac]
     type = PorousFlowMaterialMassFractionBuilder
-    mass_fraction_vars = 'mass_frac_comp0'
+    mass_fraction_vars = 'mass_frac_comp0 mass_frac_comp1'
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
