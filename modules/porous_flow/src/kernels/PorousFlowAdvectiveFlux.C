@@ -133,7 +133,7 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
   /// Compute the residual and jacobian without the mobility terms. Even if we are computing the Jacobian
   /// we still need this in order to see which nodes are upwind and which are downwind.
 
-  std::vector<std::vector<Real> > component_re(num_nodes, _num_phases);
+  std::vector<std::vector<Real> > component_re; // TODO:(num_nodes, _num_phases);
   for (unsigned i = 0; i < num_nodes; ++i)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (unsigned ph = 0; ph < _num_phases; ++ph)
@@ -141,7 +141,7 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
   
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-  std::vector<std::vector<std::vector<Real> > > component_ke(ke.m(), ke.n(), _num_phases);
+  std::vector<std::vector<std::vector<Real> > > component_ke; // TODO:(ke.m(), ke.n(), _num_phases);
   if (compute_jac)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
@@ -223,9 +223,9 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
           {
             /// The derivative of the massfrac*mobility wrt the PorousFlow variable
             dmobility = _dmass_fractions_dvar[n][ph][_component_index][pvar] * _fluid_density_node[n][ph] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
-            dmobility += mass_fractions[n][ph][_component_index] * _dfluid_density_node[n][ph][pvar] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
-            dmobility += mass_fractions[n][ph][_component_index] * _fluid_density_node[n][ph] * _drelative_permeability_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
-            dmobility -= mobility / _fluid_visocity[n][ph] * _dfluid_viscosity_dvar[n][ph][pvar];
+            dmobility += _mass_fractions[n][ph][_component_index] * _dfluid_density_node_dvar[n][ph][pvar] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
+            dmobility += _mass_fractions[n][ph][_component_index] * _fluid_density_node[n][ph] * _drelative_permeability_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
+            dmobility -= mobility / _fluid_viscosity[n][ph] * _dfluid_viscosity_dvar[n][ph][pvar];
 
             for (_j = 0; _j < _phi.size(); _j++)
               component_ke[n][_j][ph] *= mobility;

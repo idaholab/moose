@@ -52,7 +52,6 @@ protected:
   /// d(nodal relative permeability)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real> > & _drelative_permeability_dvar;
 
-  virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 };
 
