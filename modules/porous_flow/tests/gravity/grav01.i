@@ -7,6 +7,12 @@
   nx = 1
   ny = 1
   nz = 1
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  zmin = -1
+  zmax = 0
 []
 
 [GlobalParams]
@@ -15,7 +21,11 @@
 
 [Variables]
   [./pp]
-    initial_condition = 0.1
+    [./InitialCondition]
+      type = RandomIC
+      min = 0
+      max = 1
+    [../]
   [../]
 []
 
@@ -60,7 +70,7 @@
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
     density0 = 1
-    bulk_modulus = 1000
+    bulk_modulus = 2
     phase = 0
   [../]
   [./dens_all]
