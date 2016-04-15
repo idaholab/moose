@@ -1,3 +1,6 @@
+# 1phase
+# vanGenuchten, constant-bulk density, constant porosity, 1component
+# fully saturated
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -84,5 +87,5 @@
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
 []

@@ -1,5 +1,5 @@
 # 1phase
-# vanGenuchten, constant-bulk density, constant porosity, 1component
+# vanGenuchten, constant-bulk density, constant porosity, 2components
 # unsaturated
 [Mesh]
   type = GeneratedMesh
@@ -16,23 +16,32 @@
   [./pp]
     initial_condition = -1
   [../]
+  [./mass_frac_comp0]
+    initial_condition = 0.3
+  [../]
 []
 
 
 [Kernels]
-  [./mass0]
+  [./mass_comp0]
     type = PorousFlowMassTimeDerivative
     component_index = 0
     variable = pp
   [../]
+  [./masscomp1]
+    type = PorousFlowMassTimeDerivative
+    component_index = 1
+    variable = mass_frac_comp0
+  [../]
 []
+
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pp'
+    porous_flow_vars = 'pp mass_frac_comp0'
     number_fluid_phases = 1
-    number_fluid_components = 1
+    number_fluid_components = 2
   [../]
 []
 
@@ -45,6 +54,7 @@
   [../]
   [./massfrac]
     type = PorousFlowMaterialMassFractionBuilder
+    mass_fraction_vars = 'mass_frac_comp0'
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
