@@ -6,8 +6,8 @@
 /****************************************************************/
 
 
-#ifndef POROUSFLOWMATERIALRELATIVEPERMEABILITYCONST_H
-#define POROUSFLOWMATERIALRELATIVEPERMEABILITYCONST_H
+#ifndef POROUSFLOWMATERIALRELATIVEPERMEABILITYLINEAR_H
+#define POROUSFLOWMATERIALRELATIVEPERMEABILITYLINEAR_H
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
@@ -15,18 +15,18 @@
 #include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorousFlowMaterialRelativePermeabilityConst;
+class PorousFlowMaterialRelativePermeabilityLinear;
 
 template<>
-InputParameters validParams<PorousFlowMaterialRelativePermeabilityConst>();
+InputParameters validParams<PorousFlowMaterialRelativePermeabilityLinear>();
 
 /**
- * Returns a constant relative permeability (1.0)
+ * Linear relative permeability (equal to the phase saturation)
  */
-class PorousFlowMaterialRelativePermeabilityConst : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterialRelativePermeabilityLinear : public DerivativeMaterialInterface<Material>
 {
 public:
-  PorousFlowMaterialRelativePermeabilityConst(const InputParameters & parameters);
+  PorousFlowMaterialRelativePermeabilityLinear(const InputParameters & parameters);
 
 protected:
 
@@ -42,6 +42,8 @@ protected:
   MaterialProperty<Real> & _relative_permeability;
   /// Derivative of relative permeability wrt phase saturation
   MaterialProperty<Real> & _drelative_permeability_ds;
+  /// Saturation material property
+  const MaterialProperty<std::vector<Real> > & _saturation;
 };
 
-#endif //POROUSFLOWMATERIALRELATIVEPERMEABILITYCONST_H
+#endif //POROUSFLOWMATERIALRELATIVEPERMEABILITYLINEAR_H
