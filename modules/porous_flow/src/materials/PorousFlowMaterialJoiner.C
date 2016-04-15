@@ -58,7 +58,7 @@ PorousFlowMaterialJoiner::computeQpProperties()
   {
     _property[_qp][ph] = (*_phase_property[ph])[_qp];
     for (unsigned v = 0; v < num_var; ++v)
-      _dproperty_dvar[_qp][ph][v] = 1; //(*_dphase_property_dvar[ph])[_qp][v];
+      _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dvar[ph])[_qp][v];
   }
 }
 

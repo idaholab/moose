@@ -31,20 +31,9 @@ protected:
   virtual Real darcyQpJacobian(unsigned int jvar, unsigned int ph);
 
   virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
   virtual void computeResidual();
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int jvar);
-
-  /**
-   * Derivative of residual wrt PorousFlow variable number pvar.
-   * Used by both computeQpJacobian and computeQpOffDiagJacobian.
-   *
-   * @param pvar PorousFlow variable to take derivatives wrt to
-   * @return derivative of the residual wrt PorousFlow variable pvar
-   */
-  Real computeQpJac(unsigned int pvar);
 
   /**
    * Full upwinding of both the residual and Jacobians.

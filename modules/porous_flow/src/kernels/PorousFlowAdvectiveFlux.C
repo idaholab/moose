@@ -64,53 +64,21 @@ Real PorousFlowAdvectiveFlux::darcyQpJacobian(unsigned int jvar, unsigned int ph
 }
 
 
-
 Real PorousFlowAdvectiveFlux::computeQpResidual()
 {
-  RealVectorValue qpresidual = 0.0;
-
-  for (unsigned ph = 0; ph < _num_phases; ++ph)
-    qpresidual += _mass_fractions[_qp][ph][_component_index] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-
-  return _grad_test[_i][_qp] * (_permeability[_qp] * qpresidual);
+  mooseError("PorousFlowAdvectiveFlux: computeQpResidual called");
+  return 0.0;
 }
+
 
 void PorousFlowAdvectiveFlux::computeResidual()
 {
   upwind(true, false, 0.);
 }
 
-
-Real PorousFlowAdvectiveFlux::computeQpJac(unsigned int pvar)
-{
-  RealVectorValue qpjacobian = 0.0;
-
-  for (unsigned int ph = 0; ph < _num_phases; ++ph)
-  {
-    qpjacobian += _phi[_j][_qp] * _dmass_fractions_dvar[_qp][ph][_component_index][pvar] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-    qpjacobian += _mass_fractions[_qp][ph][_component_index] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
-  }
-
-  return _grad_test[_i][_qp] * (_permeability[_qp] * qpjacobian);
-}
-
-Real PorousFlowAdvectiveFlux::computeQpJacobian()
-{
-  if (_porousflow_dictator_UO.not_porflow_var(_var.number()))
-    return 0.0;
-  return computeQpJac(_porousflow_dictator_UO.porflow_var_num(_var.number()));;
-}
-
 void PorousFlowAdvectiveFlux::computeJacobian()
 {
    upwind(false, true, _var.number());
-}
-
-Real PorousFlowAdvectiveFlux::computeQpOffDiagJacobian(unsigned int jvar)
-{
-  if (_porousflow_dictator_UO.not_porflow_var(jvar))
-    return 0.0;
-  return computeQpJac(_porousflow_dictator_UO.porflow_var_num(jvar));;
 }
 
 void PorousFlowAdvectiveFlux::computeOffDiagJacobian(unsigned int jvar)
@@ -133,21 +101,30 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
   /// Compute the residual and jacobian without the mobility terms. Even if we are computing the Jacobian
   /// we still need this in order to see which nodes are upwind and which are downwind.
 
-  std::vector<std::vector<Real> > component_re; // TODO:(num_nodes, _num_phases);
-  for (unsigned i = 0; i < num_nodes; ++i)
+  std::vector<std::vector<Real> > component_re(num_nodes, _num_phases);
+  for (_i = 0; _i < num_nodes; ++_i)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (unsigned ph = 0; ph < _num_phases; ++ph)
-	component_re[i][ph] += _JxW[_qp] * _coord[_qp] * darcyQp(ph);
+	component_re[_i][ph] += _JxW[_qp] * _coord[_qp] * darcyQp(ph);
   
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-  std::vector<std::vector<std::vector<Real> > > component_ke; // TODO:(ke.m(), ke.n(), _num_phases);
+  std::vector<std::vector<std::vector<Real> > > component_ke;
   if (compute_jac)
+  {
+    component_ke.resize(ke.m());
     for (_i = 0; _i < _test.size(); _i++)
+    {
+      component_ke[_i].resize(ke.n());
       for (_j = 0; _j < _phi.size(); _j++)
+      {
+	component_ke[_i][_j].resize(_num_phases);
 	for (_qp = 0; _qp < _qrule->n_points(); _qp++)
 	  for (unsigned ph = 0; ph < _num_phases; ++ph)
 	    component_ke[_i][_j][ph] += _JxW[_qp] * _coord[_qp] * darcyQpJacobian(jvar, ph);
+      }
+    }
+  }
 
   /**
    * Now perform the upwinding by multiplying the residuals at the upstream nodes by their mobilities
@@ -265,22 +242,19 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
       }
     }
   }
-  // to here
 
-  /// Compute the residual and jacobian without the mobility terms. Even if we are computing the Jacobian
-  /// we still need this in order to see which nodes are upwind and which are downwind.
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
-
-  /// Form the _local_re contribution to the residual without the mobility term
- for (_i = 0; _i < _test.size(); _i++)
-   for (unsigned int ph = 0; ph < _num_phases; ++ph)
-     _local_re(_i) += component_re[_i][ph];
 
   /// Add results to the Residual or Jacobian
   if (compute_res)
   {
+    DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+
+    _local_re.resize(re.size());
+    _local_re.zero();
+    for (_i = 0; _i < _test.size(); _i++)
+      for (unsigned int ph = 0; ph < _num_phases; ++ph)
+	_local_re(_i) += component_re[_i][ph];
+
     re += _local_re;
 
     if (_has_save_in)
@@ -293,6 +267,14 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
 
   if (compute_jac)
   {
+    _local_ke.resize(ke.m(), ke.n());
+    _local_ke.zero();
+
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
+	for (unsigned int ph = 0; ph < _num_phases; ++ph)
+	  _local_ke(_i, _j) += component_ke[_i][_j][ph];
+    
     ke += _local_ke;
 
     if (_has_diag_save_in && jvar == _var.number())
@@ -307,115 +289,4 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
         _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }
   }
-
-  /*
-  /// Loop over all the phases
-  for (unsigned int ph = 0; ph < _num_phases; ++ph)
-  {
-    Real mobility;
-    Real dmobility;
-    /// Define variables used to ensure mass conservation
-    Real total_mass_out = 0;
-    Real total_in = 0;
-
-    /// The following holds derivatives of these
-    std::vector<Real> dtotal_mass_out;
-    std::vector<Real> dtotal_in;
-    if (compute_jac)
-    {
-      dtotal_mass_out.resize(num_nodes);
-      dtotal_in.resize(num_nodes);
-
-      for (unsigned int n = 0; n < num_nodes ; ++n)
-      {
-        dtotal_mass_out[n] = 0;
-        dtotal_in[n] = 0;
-      }
-    }
-
-    /// Perform the upwinding using the mobility (relative permeability * fluid density / fluid viscosity)
-    for (unsigned int n = 0; n < num_nodes ; ++n)
-      {
-        if (_local_re(n) >= 0 || reached_steady) // upstream node
-        {
-          /// The mobility at the upstream node
-          // TODO: somewhere make sure that viscosity mustn't be zero - maybe in the viscosity material?
-          mobility = _relative_permeability[n][ph] * _fluid_density_node[n][ph] / _fluid_viscosity[n][ph];
-
-          if (compute_jac)
-          {
-            /// The derivative of the mobility wrt the PorousFlow variable
-            dmobility = _fluid_density_node[n][ph] * _drelative_permeability_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
-            dmobility += _relative_permeability[n][ph] * _dfluid_density_node_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
-            dmobility -= mobility * _dfluid_viscosity_dvar[n][ph][pvar];
-
-            for (_j = 0; _j < _phi.size(); _j++)
-              _local_ke(n, _j) *= mobility;
-
-            _local_ke(n, n) += dmobility * _local_re(n);
-
-            for (_j = 0; _j < _phi.size(); _j++)
-              dtotal_mass_out[_j] += _local_ke(n, _j);
-          }
-          _local_re(n) *= mobility;
-          total_mass_out += _local_re(n);
-        }
-        else
-        {
-          total_in -= _local_re(n); /// note the -= means the result is positive
-          if (compute_jac)
-            for (_j = 0; _j < _phi.size(); _j++)
-              dtotal_in[_j] -= _local_ke(n, _j);
-        }
-      }
-
-    /// Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes, weighted by their _local_re values
-    if (!reached_steady)
-    {
-      for (unsigned int n = 0; n < num_nodes; ++n)
-      {
-        if (_local_re(n) < 0)
-        {
-          if (compute_jac)
-            for (_j = 0; _j < _phi.size(); _j++)
-            {
-              _local_ke(n, _j) *= total_mass_out / total_in;
-              _local_ke(n, _j) += _local_re(n) * (dtotal_mass_out[_j] / total_in - dtotal_in[_j] * total_mass_out / total_in / total_in);
-            }
-          _local_re(n) *= total_mass_out / total_in;
-        }
-      }
-    }
-  }
-
-  /// Add results to the Residual or Jacobian
-  if (compute_res)
-  {
-    re += _local_re;
-
-    if (_has_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i = 0; i < _save_in.size(); i++)
-        _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
-    }
-  }
-
-  if (compute_jac)
-  {
-    ke += _local_ke;
-
-    if (_has_diag_save_in && jvar == _var.number())
-    {
-      unsigned int rows = ke.m();
-      DenseVector<Number> diag(rows);
-      for (unsigned int i = 0; i < rows; i++)
-        diag(i) = _local_ke(i,i);
-
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-        _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
-    }
-  }
-  */
 }

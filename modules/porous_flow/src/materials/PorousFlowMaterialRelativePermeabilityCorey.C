@@ -31,8 +31,8 @@ PorousFlowMaterialRelativePermeabilityCorey::PorousFlowMaterialRelativePermeabil
 
     _saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation")),
     _dsaturation_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
-    _relative_permeability(declareProperty<Real>("PorousFlow_fluid_relative_permeability" + Moose::stringify(_phase_num))),
-    _drelative_permeability_dvar(declareProperty<std::vector<Real> >("dPorousFlow_fluid_relative_permeability" + Moose::stringify(_phase_num) + "_dvar"))
+    _relative_permeability(declareProperty<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num))),
+    _drelative_permeability_dvar(declareProperty<std::vector<Real> >("dPorousFlow_relative_permeability" + Moose::stringify(_phase_num) + "_dvar"))
 {
 }
 

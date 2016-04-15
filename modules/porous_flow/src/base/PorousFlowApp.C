@@ -18,6 +18,7 @@
 #include "PorousFlowMaterialMassFractionBuilder.h"
 #include "PorousFlowMaterialPermeabilityConst.h"
 #include "PorousFlowMaterialRelativePermeabilityConst.h"
+#include "PorousFlowMaterialRelativePermeabilityCorey.h"
 #include "PorousFlowMaterialViscosityConst.h"
 #include "PorousFlowMaterialJoiner.h"
 #include "PorousFlowMaterialJoinerOld.h"
@@ -79,6 +80,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterialMassFractionBuilder);
   registerMaterial(PorousFlowMaterialPermeabilityConst);
   registerMaterial(PorousFlowMaterialRelativePermeabilityConst);
+  registerMaterial(PorousFlowMaterialRelativePermeabilityCorey);
   registerMaterial(PorousFlowMaterialViscosityConst);
   registerMaterial(PorousFlowMaterialJoiner);
   registerMaterial(PorousFlowMaterialJoinerOld);
