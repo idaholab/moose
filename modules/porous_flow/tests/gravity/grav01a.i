@@ -1,22 +1,14 @@
 # Checking that gravity head is established
-# 1phase, vanGenuchten, constant fluid-bulk, constant viscosity, constant permeability, constant relative perm
+# 1phase, vanGenuchten, constant fluid-bulk, constant viscosity, constant permeability, Corey relative perm
 # fully saturated
-
-# Bulk = 2
-# nz = 1
+# For better agreement with the analytical solution (ana_pp), just increase nx
 
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
-  xmin = 0
-  xmax = 1
-  ymin = 0
-  ymax = 1
-  zmin = -1
-  zmax = 0
+  dim = 1
+  nx = 100
+  xmin = -1
+  xmax = 0
 []
 
 [GlobalParams]
@@ -38,7 +30,7 @@
     type = PorousFlowAdvectiveFlux
     component_index = 0
     variable = pp
-    gravity = '0 0 -1'
+    gravity = '-1 0 0'
   [../]
 []
 
@@ -46,8 +38,8 @@
   [./ana_pp]
     type = ParsedFunction
     vars = 'g B p0 rho0'
-    vals = '1 2 0 1'
-    value = '-B*log(exp(-p0/B)+g*rho0*z/B)' # expected pp at base
+    vals = '1 1.2 0 1'
+    value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
   [../]
 []
 
@@ -55,7 +47,7 @@
   [./z]
     type = PresetBC
     variable = pp
-    boundary = front
+    boundary = right
     value = 0
   [../]
 []
@@ -82,7 +74,7 @@
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
     density0 = 1
-    bulk_modulus = 2
+    bulk_modulus = 1.2
     phase = 0
   [../]
   [./dens_all]
@@ -107,7 +99,13 @@
     permeability = '1 0 0  0 2 0  0 0 3'
   [../]
   [./relperm]
-    type = PorousFlowMaterialRelativePermeabilityConst
+    type = PorousFlowMaterialRelativePermeabilityCorey
+    n_j = 1
+    phase = 0
+  [../]
+  [./relperm_all]
+    type = PorousFlowMaterialJoiner
+    material_property = PorousFlow_relative_permeability
   [../]
 []
 
@@ -115,18 +113,12 @@
   [./pp_base]
     type = PointValue
     variable = pp
-    point = '0 0 -1'
+    point = '-1 0 0'
   [../]
   [./pp_analytical]
     type = FunctionValuePostprocessor
     function = ana_pp
-    point = '0 0 -1'
-  [../]
-  [./pp_diff]
-    type = DifferencePostprocessor
-    value2 = pp_analytical
-    value1 = pp_base
-    point = '0 0 -1'
+    point = '-1 0 0'
   [../]
 []
 
@@ -154,6 +146,8 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = grav01
-  exodus = true
+  file_base = grav01a
+  [./csv]
+    type = CSV
+  [../]
 []
