@@ -14,6 +14,7 @@
 // Materials
 #include "PorousFlowMaterial1PhaseP_VG.h"
 #include "PorousFlowMaterial2PhasePS.h"
+#include "PorousFlowMaterial2PhasePP_VG.h"
 #include "PorousFlowMaterialDensityConstBulk.h"
 #include "PorousFlowMaterialPorosityConst.h"
 #include "PorousFlowMaterialMassFractionBuilder.h"
@@ -78,6 +79,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   // Materials
   registerMaterial(PorousFlowMaterial1PhaseP_VG);
   registerMaterial(PorousFlowMaterial2PhasePS);
+  registerMaterial(PorousFlowMaterial2PhasePP_VG);
   registerMaterial(PorousFlowMaterialDensityConstBulk);
   registerMaterial(PorousFlowMaterialPorosityConst);
   registerMaterial(PorousFlowMaterialMassFractionBuilder);

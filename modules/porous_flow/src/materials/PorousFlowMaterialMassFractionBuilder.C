@@ -101,10 +101,16 @@ PorousFlowMaterialMassFractionBuilder::computeQpProperties()
    * I really just want to simply call
    * build_mass_frac(_qp)
    * from initQpStatefulProperties, but the Variables
-   * aren't initialised at that point so moose crashes
+   * aren't initialised at that point so moose crashes.
+   *
+   * Since PR#6763 i can often build_mass_frac(_qp) in
+   * initQpStatefulProperties, but sometimes it causes
+   * MOOSE to crash (see, eg, tests/pressure_pulse/pressure_pulse_1d_2phase)
+   * and i need the YaqiHack below to get the simulation
+   * to work.  But then other simulations fail, because
+   * the hack below doesn't work, boohoo.
    */
-  /*
-  if (_t_step == 1)
+  /*if (_t_step == 1)
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
       for (unsigned int comp = 0; comp < _num_components; ++comp)
         _mass_frac_old[_qp][ph][comp] = _mass_frac[_qp][ph][comp];
