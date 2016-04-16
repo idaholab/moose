@@ -532,6 +532,12 @@ void FEProblem::initialSetup()
   updateGeomSearch(); // Call all of the rest of the geometric searches
   Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
+  // Global manager setup
+  for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+       it != _global_managers.end();
+       ++it)
+    it->second->initialSetup();
+
   // Random interface objects
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
        it != _random_data_objects.end();
@@ -661,6 +667,12 @@ void FEProblem::timestepSetup()
 
   _aux.timestepSetup();
   _nl.timestepSetup();
+
+  // Global manager setup
+  for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+       it != _global_managers.end();
+       ++it)
+    it->second->timestepSetup();
 
   // Random interface objects
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
@@ -3302,6 +3314,12 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   unsigned int n_threads = libMesh::n_threads();
 
+  // Global manager setup
+  for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+       it != _global_managers.end();
+       ++it)
+    it->second->residualSetup();
+
   // Random interface objects
   for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
        it != _random_data_objects.end();
@@ -3350,6 +3368,12 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _aux.zeroVariablesForJacobian();
 
     unsigned int n_threads = libMesh::n_threads();
+
+    // Global manager setup
+    for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+         it != _global_managers.end();
+         ++it)
+      it->second->jacobianSetup();
 
     // Random interface objects
     for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();

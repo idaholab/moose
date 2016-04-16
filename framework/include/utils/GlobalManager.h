@@ -26,7 +26,15 @@ public:
   GlobalManager(FEProblem & fe_problem) : _fe_problem(fe_problem) {}
 
 protected:
+  ///@{ Setup methods called by FEProblem
+  virtual void initialSetup() {}
+  virtual void timestepSetup() {}
+  virtual void jacobianSetup() {}
+  virtual void residualSetup() {}
+  ///@}
+
   FEProblem & _fe_problem;
+  friend class FEProblem;
 };
 
 #endif //GLOBALMANAGER_H
