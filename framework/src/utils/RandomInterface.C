@@ -14,6 +14,7 @@
 
 #include "Moose.h"
 #include "RandomInterface.h"
+#include "RandomInterfaceManager.h"
 #include "Assembly.h"
 #include "RandomData.h"
 #include "MooseRandom.h"
@@ -29,9 +30,9 @@ InputParameters validParams<RandomInterface>()
 }
 
 RandomInterface::RandomInterface(const InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal) :
-    _random_data(NULL),
+    _random_data(),
     _generator(NULL),
-    _ri_problem(problem),
+    _ri_manager(problem.getGlobal<RandomInterfaceManager>()),
     _ri_name(parameters.get<std::string>("_object_name")),
     _master_seed(parameters.get<unsigned int>("seed")),
     _is_nodal(is_nodal),
@@ -49,11 +50,11 @@ void
 RandomInterface::setRandomResetFrequency(ExecFlagType exec_flag)
 {
   _reset_on = exec_flag;
-  _ri_problem.registerRandomInterface(*this, _ri_name);
+  _ri_manager.registerRandomInterface(*this, _ri_name);
 }
 
 void
-RandomInterface::setRandomDataPointer(RandomData *random_data)
+RandomInterface::setRandomDataPointer(const MooseSharedPointer<RandomData> & random_data)
 {
   _random_data = random_data;
   _generator = &_random_data->getGenerator();

@@ -41,8 +41,6 @@
 #include "Material.h"
 #include "Material.h"
 #include "PetscSupport.h"
-#include "RandomInterface.h"
-#include "RandomData.h"
 #include "EigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
@@ -240,11 +238,6 @@ FEProblem::~FEProblem()
   delete &_nl;
 
   delete _resurrector;
-
-  // Random data objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end(); ++it)
-    delete it->second;
 }
 
 Moose::CoordinateSystemType
@@ -538,12 +531,6 @@ void FEProblem::initialSetup()
        ++it)
     it->second->initialSetup();
 
-  // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
-       ++it)
-    it->second->updateSeeds(EXEC_INITIAL);
-
   if (_app.isRestarting() || _app.isRecovering())
   {
     if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a Backup
@@ -673,12 +660,6 @@ void FEProblem::timestepSetup()
        it != _global_managers.end();
        ++it)
     it->second->timestepSetup();
-
-  // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
-       ++it)
-    it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
@@ -3320,12 +3301,6 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
        ++it)
     it->second->residualSetup();
 
-  // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
-       ++it)
-    it->second->updateSeeds(EXEC_LINEAR);
-
   execTransfers(EXEC_LINEAR);
 
   execMultiApps(EXEC_LINEAR);
@@ -3374,12 +3349,6 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
          it != _global_managers.end();
          ++it)
       it->second->jacobianSetup();
-
-    // Random interface objects
-    for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-         it != _random_data_objects.end();
-         ++it)
-      it->second->updateSeeds(EXEC_NONLINEAR);
 
     _currently_computing_jacobian = true;
 
@@ -4225,21 +4194,6 @@ SolverParams &
 FEProblem::solverParams()
 {
   return _solver_params;
-}
-
-void
-FEProblem::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
-{
-  RandomData *random_data;
-  if (_random_data_objects.find(name) == _random_data_objects.end())
-  {
-    random_data = new RandomData(*this, random_interface);
-    random_interface.setRandomDataPointer(random_data);
-
-    _random_data_objects[name] = random_data;
-  }
-  else
-    random_interface.setRandomDataPointer(_random_data_objects[name]);
 }
 
 bool
