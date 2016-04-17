@@ -1,14 +1,7 @@
 # Buckley-Leverett 1-phase with the MD formulation
 # (where the primary variable is log(mass-density)
 # The front starts at (around) x=5, and at t=50 it should
-# have moved to x=9.6.  The version below has a nonzero
-# suction function, and at t=50, the front sits between
-# (about) x=9.7 and x=10.4.  Changing the van-Genuchten
-# al parameter to 1E-3 sharpens the front so it sits between
-# x=9.6 and x=9.9, but of course the simulation takes longer
-# with al=1E-2 and nx=600, the front sits between x=9.6 and x=9.8,
-# but takes about 100 times longer to run.
-
+# have moved to x=9.6.
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -29,6 +22,9 @@
       # In the saturated zone
       # md = log(density0) + porepressure/bulk
       function = '6.907755278982137+max((1000000-x/5*1000000)-20000,-20000)/2E6-if(max((1000000-x/5*1000000)-20000,-20000)>0,0,max((1000000-x/5*1000000)-20000,-20000)*max((1000000-x/5*1000000)-20000,-20000)*1E-4*1E-4)'
+      # following is sharp in md
+      #function = 'if(x<5,6.907755278982137+(1000000-20000)/2E6,-0.1)'
+      # following is fully saturated
       #function = '6.907755278982137+max((1000000-x/5*1000000)-0,-0)/2E6-if(max((1000000-x/5*1000000)-0,-0)>0,0,max((1000000-x/5*1000000)-0,-0)*max((1000000-x/5*1000000)-0,-0)*1E-4*1E-4)'
     [../]
   [../]
@@ -63,11 +59,11 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./pp_saturated]
-  [../]
   [./pp_material]
     family = MONOMIAL
     order = CONSTANT
+  [../]
+  [./bounds_dummy]
   [../]
 []
 
@@ -79,12 +75,6 @@
     index = 0
     property = PorousFlow_saturation_qp
   [../]
-  [./pp]
-    type = ParsedAux
-    function = '(md-6.907755278982137)*2.0E6'
-    args = 'md'
-    variable = pp_saturated
-  [../]
   [./pp_material]
     type = MaterialStdVectorAux
     variable = pp_material
@@ -93,6 +83,15 @@
     property = PorousFlow_porepressure_qp
   [../]
 []
+
+[Bounds]
+  [./pwater_bounds]
+    type = BoundsAux
+    variable = bounds_dummy
+    bounded_variable = md
+    upper = 7.0 #7.6
+    lower = 2.5
+  [../]
     
 
 [UserObjects]
@@ -118,7 +117,7 @@
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
     density0 = 1000
-    bulk_modulus = 2.0E6
+    bulk_modulus = 2E6
     phase = 0
   [../]
   [./dens_all]
@@ -144,7 +143,7 @@
   [../]
   [./relperm]
     type = PorousFlowMaterialRelativePermeabilityCorey
-    n_j = 2
+    n_j = 0
     phase = 0
   [../]
   [./relperm_all]
@@ -159,39 +158,35 @@
 
 
 [Preconditioning]
-  active = experiment
+  active = bounded
   [./andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     petsc_options_value = 'gmres bjacobi 1E-10 1E-10 20'
   [../]
-  [./check]
+  [./bounded]
+  # must use --use-petsc-dm command line argument
     type = SMP
     full = true
-    petsc_options = '-snes_test_display'
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
-    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
+    petsc_options = '-snes_converged_reason'
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type -ksp_rtol -ksp_atol'
+    petsc_options_value = 'bcgs bjacobi 1E-7 1E-10 50 vinewtonssls 1E-5 1E-20'
   [../]
   [./experiment]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E-10 1E-10 20'
-  [../]
-  [./experiment_direct]
-    type = SMP
-    full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_gmres_restart -ksp_max_it'
-    petsc_options_value = 'gmres     lu       1E-10 1E-10 20                      100 100'
+    petsc_options_value = 'gmres      asm      lu           NONZERO                   2               1E-10 1E-10 200'
   [../]
 []
 
 [Executioner]
   solve_type = NEWTON
   type = Transient
+  line_search = bt
   end_time = 50
-  dt = 0.1
+  dt = 1
 []
 
 [Outputs]

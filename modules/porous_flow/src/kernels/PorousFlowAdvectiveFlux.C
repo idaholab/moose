@@ -105,11 +105,14 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
   /// Compute the residual and jacobian without the mobility terms. Even if we are computing the Jacobian
   /// we still need this in order to see which nodes are upwind and which are downwind.
 
-  std::vector<std::vector<Real> > component_re(num_nodes, _num_phases);
+  std::vector<std::vector<Real> > component_re(num_nodes);
   for (_i = 0; _i < num_nodes; ++_i)
+  {
+    component_re[_i].assign(_num_phases, 0.0);
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (unsigned ph = 0; ph < _num_phases; ++ph)
 	component_re[_i][ph] += _JxW[_qp] * _coord[_qp] * darcyQp(ph);
+  }
   
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
