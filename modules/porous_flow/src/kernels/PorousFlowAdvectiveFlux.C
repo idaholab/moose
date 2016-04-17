@@ -38,6 +38,7 @@ PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & paramet
   _pp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure")),
   _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure")),
   _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_dgradvar")),
+  _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_porepressure_dvar")),
   _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability")),
   _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_dvar")),
   _porousflow_dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
@@ -63,7 +64,7 @@ Real PorousFlowAdvectiveFlux::darcyQpJacobian(unsigned int jvar, unsigned int ph
     return 0.0;
 
   const unsigned int pvar = _porousflow_dictator_UO.porflow_var_num(jvar);
-  return _grad_test[_i][_qp] * (_dpermeability_dvar[_qp][pvar] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph]*_gravity) + _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity) );
+  return _grad_test[_i][_qp] * (_dpermeability_dvar[_qp][pvar] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph]*_gravity) + _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity) + _permeability[_qp]*(_dgrad_p_dvar[_qp][ph][pvar]*_phi[_j][_qp]) );
 }
 
 

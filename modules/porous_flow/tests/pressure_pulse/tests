@@ -24,4 +24,10 @@
     skip = 'Must skip until YaqiHack (Issue #6774)'
     rel_err = 1.0E-5
   [../]
+  [./pressure_pulse_1d_MD]
+    type = 'CSVDiff'
+    input = 'pressure_pulse_1d_MD.i'
+    csvdiff = 'pressure_pulse_1d_MD.csv'
+    rel_err = 1.0E-5
+  [../]
 []

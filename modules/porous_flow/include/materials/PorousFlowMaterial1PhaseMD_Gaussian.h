@@ -6,8 +6,8 @@
 /****************************************************************/
 
 
-#ifndef PORFLOWMATERIAL2PHASEPS_H
-#define PORFLOWMATERIAL2PHASEPS_H
+#ifndef POROUSFLOWMATERIAL1PAHSEMD_GAUSSIAN_H
+#define POROUSFLOWMATERIAL1PAHSEMD_GAUSSIAN_H
 
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
@@ -15,47 +15,59 @@
 #include "PorousFlowDictator.h"
 
 //Forward Declarations
-class PorousFlowMaterial2PhasePS;
+class PorousFlowMaterial1PhaseMD_Gaussian;
 
 template<>
-InputParameters validParams<PorousFlowMaterial2PhasePS>();
+InputParameters validParams<PorousFlowMaterial1PhaseMD_Gaussian>();
 
 /**
- * Material designed to calculate fluid-phase porepressures at nodes
+ * Material designed to calculate fluid-phase porepressure and saturation
+ * for the single-phase situation, assuming a Gaussian capillary suction
+ * function and assuming the independent variable is log(mass density) and
+ * assuming the fluid has a constant bulk modulus
  */
-class PorousFlowMaterial2PhasePS : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterial1PhaseMD_Gaussian : public DerivativeMaterialInterface<Material>
 {
 public:
-  PorousFlowMaterial2PhasePS(const InputParameters & parameters);
+  PorousFlowMaterial1PhaseMD_Gaussian(const InputParameters & parameters);
 
 protected:
 
-  /// Nodal value of porepressure of the zero phase (eg, the gas phase)
-  const VariableValue & _phase0_porepressure;
+  /// number of phases (=1 for this class)
+  const unsigned int _num_ph;
 
-  /// Quadpoint value of porepressure of the zero phase (eg, the gas phase)
-  const VariableValue & _phase0_qp_porepressure;
+  /// Gaussian parameter: saturation = exp(-(al*p)^2)
+  const Real _al;
 
-  /// Gradient(phase0_porepressure)
-  const VariableGradient & _phase0_gradp;
+  /// _al2 = al*al
+  const Real _al2;
 
-  /// Moose variable number of the phase0 porepressure
-  const unsigned int _phase0_porepressure_varnum;
+  /// fluid density = _dens0*exp(P/_bulk)
+  const Real _logdens0;
 
-  /// Nodal value of saturation of the one phase (eg, the water phase)
-  const VariableValue & _phase1_saturation;
+  /// fluid density = _dens0*exp(P/_bulk)
+  const Real _bulk;
 
-  /// Quadpoint value of saturation of the one phase (eg, the water phase)
-  const VariableValue & _phase1_qp_saturation;
+  /// 1/_bulk
+  const Real _recip_bulk;
 
-  /// Gradient(phase1_saturation)
-  const VariableGradient & _phase1_grads;
+  /// (1/_bulk)^2
+  const Real _recip_bulk2;
 
-  /// Moose variable number of the phase1 saturation
-  const unsigned int _phase1_saturation_varnum;
+  /// Nodal value of mass-density of the fluid phase
+  const VariableValue & _md_var;
+
+  /// Quadpoint value of mass-density of the fluid phase
+  const VariableValue & _qp_md_var;
+
+  /// Gradient(_mass-density at quadpoints)
+  const VariableGradient & _gradmd_var;
+
+  /// Moose variable number of the mass-density
+  const unsigned int _md_varnum;
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _porflow_name_UO;
+  const PorousFlowDictator & _dictator_UO;
 
   /// nodal porepressure of the phases
   MaterialProperty<std::vector<Real> > & _porepressure;
@@ -66,7 +78,7 @@ protected:
   /// quadpoint porepressure of the phases
   MaterialProperty<std::vector<Real> > & _porepressure_qp;
 
-  /// grad(p)
+  /// grad(p) at the quadpoints
   MaterialProperty<std::vector<RealGradient> > & _gradp;
 
   /// d(nodal porepressure)/d(nodal porflow variable)
@@ -90,7 +102,7 @@ protected:
   /// quadpoint saturation of the phases
   MaterialProperty<std::vector<Real> > & _saturation_qp;
 
-  /// grad(s)
+  /// grad(s) at the quadpoints
   MaterialProperty<std::vector<RealGradient> > & _grads;
 
   /// d(nodal saturation)/d(nodal porflow variable)
@@ -102,11 +114,15 @@ protected:
   /// d(grad saturation)/d(grad porflow variable)
   MaterialProperty<std::vector<std::vector<Real> > > & _dgrads_dgradv;
 
+  /// d(grad saturation)/d(porflow variable)
+  MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgrads_dv;
+
+
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
  private:
-  void buildQpPPSS();
+  void buildPS();
 };
 
-#endif //PORFLOWMATERIAL2PHASEPS_H
+#endif //POROUSFLOWMATERIAL1PAHSEMD_GAUSSIAN_H
