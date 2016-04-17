@@ -32,7 +32,7 @@ PorousFlowMaterial1PhaseMD_Gaussian::PorousFlowMaterial1PhaseMD_Gaussian(const I
     _al2(std::pow(_al, 2)),
     _logdens0(std::log(getParam<Real>("density0"))),
     _bulk(getParam<Real>("bulk_modulus")),
-    _recip_bulk(1.0/_bulk),
+    _recip_bulk(1.0/_al/_bulk),
     _recip_bulk2(std::pow(_recip_bulk, 2)),
 
 
@@ -145,7 +145,7 @@ PorousFlowMaterial1PhaseMD_Gaussian::computeQpProperties()
   else
   {
     const Real pp = _porepressure[_qp][0];
-    _dporepressure_dvar[_qp][0][pvar] = 1.0/(_recip_bulk - 2*_al*pp);
+    _dporepressure_dvar[_qp][0][pvar] = 1.0/(_recip_bulk - 2*_al*pp)/_al; //yes
     const Real sat = _saturation[_qp][0];
     _dsaturation_dvar[_qp][0][pvar] = -2*_al2*pp*sat*_dporepressure_dvar[_qp][0][pvar];
   }
@@ -163,9 +163,9 @@ PorousFlowMaterial1PhaseMD_Gaussian::computeQpProperties()
   else
   {
     const Real pp = _porepressure_qp[_qp][0];
-    _dporepressure_qp_dvar[_qp][0][pvar] = 1.0/(_recip_bulk - 2*_al*pp);
-    _dgradp_dgradv[_qp][0][pvar] = 1.0/(_recip_bulk - 2*_al*pp);
-    _dgradp_dv[_qp][0][pvar] = _gradmd_var[_qp]*2*_al*_dporepressure_qp_dvar[_qp][0][pvar]/std::pow(_recip_bulk - 2*_al*_porepressure_qp[_qp][0], 2);
+    _dporepressure_qp_dvar[_qp][0][pvar] = 1.0/(_recip_bulk - 2*_al*pp)/_al; //yes
+    _dgradp_dgradv[_qp][0][pvar] = 1.0/(_recip_bulk - 2*_al*pp)/_al; //yes
+    _dgradp_dv[_qp][0][pvar] = _gradmd_var[_qp]*2*_al*_dporepressure_qp_dvar[_qp][0][pvar]/std::pow(_recip_bulk - 2*_al*_porepressure_qp[_qp][0], 2)/_al; //yes
     const Real sat = _saturation_qp[_qp][0];
     _dsaturation_qp_dvar[_qp][0][pvar] = -2*_al2*pp*sat*_dporepressure_qp_dvar[_qp][0][pvar];
     _dgrads_dgradv[_qp][0][pvar] = -2*_al2*_porepressure_qp[_qp][0]*_saturation_qp[_qp][0]*_dgradp_dgradv[_qp][0][pvar];
@@ -189,10 +189,10 @@ PorousFlowMaterial1PhaseMD_Gaussian::buildPS()
   {
     // v = logdens0 + p/bulk - (al p)^2
     // 0 = (v-logdens0) - p/bulk + (al p)^2
-    // 2 al p = (1/bulk) +/- sqrt((1/bulk)^2 - 4(v-logdens0))  (the "minus" sign is chosen)
+    // 2 al p = (1/al/bulk) +/- sqrt((1/al/bulk)^2 - 4(v-logdens0))  (the "minus" sign is chosen)
     // s = exp(-(al*p)^2)
-    _porepressure[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4*(_logdens0 - _md_var[_qp])))/(2*_al);
-    _saturation[_qp][0] = std::exp(-std::pow(_al*_porepressure[_qp][0], 2));
+    _porepressure[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4*(_logdens0 - _md_var[_qp])))/(2*_al); //yes
+    _saturation[_qp][0] = std::exp(-std::pow(_al*_porepressure[_qp][0], 2)); 
 }
 
   if (_qp_md_var[_qp] >= _logdens0)
@@ -204,8 +204,8 @@ PorousFlowMaterial1PhaseMD_Gaussian::buildPS()
   }
   else
   {
-    _porepressure_qp[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4*(_logdens0 - _qp_md_var[_qp])))/(2*_al);
-    _gradp[_qp][0] = _gradmd_var[_qp]/(_recip_bulk - 2*_al*_porepressure_qp[_qp][0]);
+    _porepressure_qp[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4*(_logdens0 - _qp_md_var[_qp])))/(2*_al); //yes
+    _gradp[_qp][0] = _gradmd_var[_qp]/(_recip_bulk - 2*_al*_porepressure_qp[_qp][0])/_al; //yes
     _saturation_qp[_qp][0] = std::exp(-std::pow(_al*_porepressure_qp[_qp][0], 2));
     _grads[_qp][0] = -2*_al2*_porepressure_qp[_qp][0]*_saturation_qp[_qp][0]*_gradp[_qp][0];
   }  

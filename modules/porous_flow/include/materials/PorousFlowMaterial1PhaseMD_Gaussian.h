@@ -48,7 +48,7 @@ protected:
   /// fluid density = _dens0*exp(P/_bulk)
   const Real _bulk;
 
-  /// 1/_bulk
+  /// 1/_bulk/_al
   const Real _recip_bulk;
 
   /// (1/_bulk)^2

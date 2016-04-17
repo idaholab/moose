@@ -55,7 +55,7 @@
   [./ppss]
     type = PorousFlowMaterial1PhaseMD_Gaussian
     mass_density = md
-    al = 1
+    al = 1.1
     density0 = 0.8
     bulk_modulus = 1.5
   [../]
