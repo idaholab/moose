@@ -49,6 +49,7 @@ PorousFlowMaterial2PhasePP_VG::PorousFlowMaterial2PhasePP_VG(const InputParamete
     _dporepressure_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_dvar")),
     _dporepressure_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),
     _dgradp_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_dgradvar")),
+    _dgradp_dv(declareProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_porepressure_dvar")),
 
     _saturation(declareProperty<std::vector<Real> >("PorousFlow_saturation")),
     _saturation_old(declarePropertyOld<std::vector<Real> >("PorousFlow_saturation")),
@@ -73,6 +74,7 @@ PorousFlowMaterial2PhasePP_VG::initQpStatefulProperties()
   _dporepressure_dvar[_qp].resize(2);
   _dporepressure_qp_dvar[_qp].resize(2);
   _dgradp_dgradv[_qp].resize(2);
+  _dgradp_dv[_qp].resize(2);
 
   _saturation[_qp].resize(2);
   _saturation_qp[_qp].resize(2);
@@ -95,6 +97,7 @@ PorousFlowMaterial2PhasePP_VG::initQpStatefulProperties()
     _dporepressure_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
     _dporepressure_qp_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
     _dgradp_dgradv[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+    _dgradp_dv[_qp][phase].assign(_porflow_name_UO.num_v(), RealGradient());
   }
 
   if (!(_porflow_name_UO.not_porflow_var(_phase0_porepressure_varnum)))

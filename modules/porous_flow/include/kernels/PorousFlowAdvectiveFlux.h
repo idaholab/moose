@@ -67,8 +67,10 @@ protected:
   const MaterialProperty<std::vector<Real> > & _pp;
   /// Gradient of the pore pressure in each phase
   const MaterialProperty<std::vector<RealGradient> > & _grad_p;
-  /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
+  /// Derivative of Grad porepressure in each phase wrt grad(PorousFlow variables)
   const MaterialProperty<std::vector<std::vector<Real> > > & _dgrad_p_dgrad_var;
+  /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
+  const MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgrad_p_dvar;
   /// Relative permeability of each phase
   const MaterialProperty<std::vector<Real> > & _relative_permeability;
   /// Derivative of relative permeability of each phase wrt PorousFlow variables

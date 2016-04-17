@@ -85,6 +85,9 @@ protected:
   /// d(grad porepressure)/d(grad porflow variable)
   MaterialProperty<std::vector<std::vector<Real> > > & _dgradp_dgradv;
 
+  /// d(grad porepressure)/d(porflow variable)
+  MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgradp_dv;
+
   /// nodal saturation of the phases
   MaterialProperty<std::vector<Real> > & _saturation;
 
