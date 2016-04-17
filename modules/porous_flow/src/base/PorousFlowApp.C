@@ -22,13 +22,20 @@
 #include "PorousFlowMaterialPorosityConst.h"
 #include "PorousFlowMaterialMassFractionBuilder.h"
 #include "PorousFlowMaterialPermeabilityConst.h"
-#include "PorousFlowMaterialRelativePermeabilityConst.h"
-#include "PorousFlowMaterialRelativePermeabilityCorey.h"
+#include "PorousFlowMaterialRelativePermeabilityBase.h"
+#include "PorousFlowMaterialRelativePermeabilityConstant.h"
 #include "PorousFlowMaterialRelativePermeabilityLinear.h"
+#include "PorousFlowMaterialRelativePermeabilityCorey.h"
+#include "PorousFlowMaterialCapillaryPressureBase.h"
+#include "PorousFlowMaterialCapillaryPressureConstant.h"
+#include "PorousFlowMaterialCapillaryPressureLinear.h"
 #include "PorousFlowMaterialViscosityConst.h"
 #include "PorousFlowMaterialJoiner.h"
 #include "PorousFlowMaterialJoinerOld.h"
 #include "PorousFlowMaterialEffectiveFluidPressure.h"
+#include "PorousFlowMaterialFluidPropertiesBase.h"
+#include "PorousFlowMaterialIdealGas.h"
+#include "PorousFlowMaterialMethane.h"
 
 // Postprocessors
 #include "PorousFlowFluidMass.h"
@@ -91,13 +98,20 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterialPorosityConst);
   registerMaterial(PorousFlowMaterialMassFractionBuilder);
   registerMaterial(PorousFlowMaterialPermeabilityConst);
-  registerMaterial(PorousFlowMaterialRelativePermeabilityConst);
-  registerMaterial(PorousFlowMaterialRelativePermeabilityCorey);
+  registerMaterial(PorousFlowMaterialCapillaryPressureBase);
+  registerMaterial(PorousFlowMaterialCapillaryPressureConstant);
+  registerMaterial(PorousFlowMaterialCapillaryPressureLinear);
+  registerMaterial(PorousFlowMaterialRelativePermeabilityBase);
+  registerMaterial(PorousFlowMaterialRelativePermeabilityConstant);
   registerMaterial(PorousFlowMaterialRelativePermeabilityLinear);
+  registerMaterial(PorousFlowMaterialRelativePermeabilityCorey);
   registerMaterial(PorousFlowMaterialViscosityConst);
   registerMaterial(PorousFlowMaterialJoiner);
   registerMaterial(PorousFlowMaterialJoinerOld);
   registerMaterial(PorousFlowMaterialEffectiveFluidPressure);
+  registerMaterial(PorousFlowMaterialFluidPropertiesBase);
+  registerMaterial(PorousFlowMaterialIdealGas);
+  registerMaterial(PorousFlowMaterialMethane);
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
