@@ -33,7 +33,7 @@ PorousFlowMassVolumetricExpansion::PorousFlowMassVolumetricExpansion(const Input
   _dfluid_saturation_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
   _mass_frac(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
   _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
-  _strain_increment(getMaterialProperty<RankTwoTensor>("strain_increment"))
+  _strain_rate(getMaterialProperty<RankTwoTensor>("strain_rate"))
 {
   if (_component_index >= _dictator_UO.num_components())
     mooseError("The Dictator proclaims that the number of components in this simulation is " << _dictator_UO.num_components() << " whereas you have used the Kernel PorousFlowComponetMassVolumetricExpansion with component = " << _component_index << ".  The Dictator is watching you");
@@ -53,8 +53,7 @@ PorousFlowMassVolumetricExpansion::computeQpResidual()
   for (unsigned ph = 0; ph < num_phases; ++ph)
     mass += _fluid_density[_i][ph]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index];
 
-  Real vol_strain = _strain_increment[_qp].trace();
-  return _test[_i][_qp] * mass * _porosity[_qp] * vol_strain;
+  return _test[_i][_qp] * mass * _porosity[_qp] * _strain_rate[_qp].trace();
 }
 
 Real
@@ -110,5 +109,5 @@ PorousFlowMassVolumetricExpansion::computedMassQpJac(unsigned int jvar)
   }
 
     
-  return _test[_i][_qp] * (dmass*_strain_increment[_qp].trace());
+  return _test[_i][_qp] * dmass * _strain_rate[_qp].trace();
 }

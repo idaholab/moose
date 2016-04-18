@@ -179,7 +179,8 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
       gravnorm += _fluid_density_node[n][ph]*_fluid_density_node[n][ph];
     }
     gravnorm *= _gravity*_gravity;
-    const Real cutoff = 1E-8*knorm*(std::sqrt(pnorm)*std::pow(_grad_test[0][0]*_grad_test[0][0], 0.5*(2 - _mesh.dimension())) + std::sqrt(gravnorm)*std::pow(_grad_test[0][0]*_grad_test[0][0], 0.5*(1 - _mesh.dimension())));
+    const unsigned int dim = _mesh.dimension();
+    const Real cutoff = 1E-8*knorm*(std::sqrt(pnorm)*std::pow(_grad_test[0][0]*_grad_test[0][0], 0.5*(2.0 - dim)) + std::sqrt(gravnorm)*std::pow(_grad_test[0][0]*_grad_test[0][0], 0.5*(1.0 - dim)));
     bool reached_steady = true;
     for (unsigned int nodenum = 0; nodenum < num_nodes ; ++nodenum)
     {
