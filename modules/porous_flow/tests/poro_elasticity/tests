@@ -1,0 +1,7 @@
+[Tests]
+  [./vol_expansion]
+    type = Exodiff
+    input = vol_expansion.i
+    exodiff = vol_expansion.e
+  [../]
+[]

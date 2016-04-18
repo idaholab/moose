@@ -1,5 +1,6 @@
 #include "PorousFlowApp.h"
 #include "Moose.h"
+#include "TensorMechanicsApp.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
@@ -57,9 +58,11 @@ PorousFlowApp::PorousFlowApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
+  TensorMechanicsApp::registerObjects(_factory);
   PorousFlowApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
 }
 
