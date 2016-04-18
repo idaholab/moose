@@ -91,6 +91,7 @@ PorousFlowMaterial2PhasePS::initQpStatefulProperties()
   _dgrads_dgradv[_qp].resize(_num_ph);
 
   _temperature[_qp].resize(_num_ph);
+  _temperature_qp[_qp].resize(_num_ph);
   _dtemperature_dvar[_qp].resize(_num_ph);
   _dtemperature_qp_dvar[_qp].resize(_num_ph);
 
