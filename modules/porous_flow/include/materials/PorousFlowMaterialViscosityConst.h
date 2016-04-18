@@ -27,19 +27,16 @@ public:
 
 protected:
 
+  virtual void computeQpProperties();
+
   /// constant value of viscosity
   const Real _input_viscosity;
-
   /// the phase number
   unsigned int _phase_num;
-
   /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _porflow_name_UO;
-
+  const PorousFlowDictator & _dictator_UO;
   /// viscosity
   MaterialProperty<Real> & _viscosity;
-
-  virtual void computeQpProperties();
 };
 
 #endif //POROUSFLOWMATERIALVISCOSITYCONST_H

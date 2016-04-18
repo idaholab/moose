@@ -32,16 +32,16 @@ protected:
 
   /// Phase number of fluid that this relative permeability relates to
   const unsigned int _phase_num;
-  /// Saturation material property
-  const MaterialProperty<std::vector<Real> > & _saturation;
+  /// The PorousFlowDictator UserObject
+  const PorousFlowDictator & _dictator_UO;
   /// Name of (dummy) saturation primary variable
   VariableName _saturation_variable_name;
+  /// Saturation material property
+  const MaterialProperty<std::vector<Real> > & _saturation;
   /// Relative permeability material property
   MaterialProperty<Real> & _relative_permeability;
   /// Derivative of relative permeability wrt phase saturation
   MaterialProperty<Real> & _drelative_permeability_ds;
-  /// The PorousFlowDictator UserObject
-  const PorousFlowDictator & _dictator_UO;
 };
 
 #endif //POROUSFLOWMATERIALRELATIVEPERMEABILITYBASE_H

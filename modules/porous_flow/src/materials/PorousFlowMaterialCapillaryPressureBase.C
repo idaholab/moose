@@ -23,11 +23,11 @@ PorousFlowMaterialCapillaryPressureBase::PorousFlowMaterialCapillaryPressureBase
     DerivativeMaterialInterface<Material>(parameters),
 
   _phase_num(getParam<unsigned int>("phase")),
+  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+  _saturation_variable_name(_dictator_UO.saturationVariableNameDummy()),
   _saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation")),
-  _saturation_variable_name("saturation_variable"),
   _capillary_pressure(declareProperty<Real>("PorousFlow_capillary_pressure" + Moose::stringify(_phase_num))),
-  _dcapillary_pressure_ds(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure" + Moose::stringify(_phase_num), _saturation_variable_name)),
-  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO"))
+  _dcapillary_pressure_ds(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure" + Moose::stringify(_phase_num), _saturation_variable_name))
 {
   if (_phase_num >= _dictator_UO.num_phases())
     mooseError("PorousFlowMaterialCapillaryPressure: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");

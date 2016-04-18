@@ -27,9 +27,9 @@ PorousFlowMaterialFluidPropertiesBase::PorousFlowMaterialFluidPropertiesBase(con
   _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
   _temperature(getMaterialProperty<std::vector<Real> >("PorousFlow_temperature")),
   _temperature_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_temperature_qp")),
-  _pressure_variable_name("pressure_variable"),
-  _temperature_variable_name("temperature_variable"),
-  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO"))
+  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+  _pressure_variable_name(_dictator_UO.pressureVariableNameDummy()),
+  _temperature_variable_name(_dictator_UO.temperatureVariableNameDummy())
 {
   _t_c2k = 273.15;
   _R = 8.3144621;
