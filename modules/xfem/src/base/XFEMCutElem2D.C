@@ -33,7 +33,7 @@ XFEMCutElem2D::~XFEMCutElem2D()
 Point
 XFEMCutElem2D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) const
 {
-  Point node_coor(0.0,0.0,0.0);
+  Point node_coor(0.0, 0.0, 0.0);
   std::vector<EFANode*> master_nodes;
   std::vector<Point> master_points;
   std::vector<double> master_weights;
@@ -78,7 +78,7 @@ void
 XFEMCutElem2D::computeMomentFittingWeights()
 {
   // Purpose: calculate new weights via moment-fitting method
-  std::vector<Point> elem_nodes(_n_nodes, Point(0.0,0.0,0.0));
+  std::vector<Point> elem_nodes(_n_nodes, Point(0.0, 0.0, 0.0));
   std::vector<std::vector<Real> > wsg;
 
   for (unsigned int i = 0; i < _n_nodes; ++i)
@@ -100,7 +100,7 @@ XFEMCutElem2D::computeMomentFittingWeights()
 Point
 XFEMCutElem2D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
-  Point orig(0.0,0.0,0.0);
+  Point orig(0.0, 0.0, 0.0);
   std::vector<std::vector<EFANode*> > cut_line_nodes;
   for (unsigned int i = 0; i < _efa_elem2d.getFragment(0)->numEdges(); ++i)
   {
@@ -142,7 +142,7 @@ XFEMCutElem2D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh
     Point cut_line_p2 = getNodeCoordinates(cut_line_nodes[plane_id][1], displaced_mesh);
     Point cut_line = cut_line_p2 - cut_line_p1;
     Real len = std::sqrt(cut_line.norm_sq());
-    cut_line *= (1.0/len);
+    cut_line /= len;
     normal = Point(cut_line(1), -cut_line(0), 0.0);
   }
   return normal;
@@ -157,7 +157,7 @@ XFEMCutElem2D::getCrackTipOriginAndDirection(unsigned tip_id, Point & origin, Po
   {
     if (_efa_elem2d.getFragment(0)->isEdgeInterior(i))
     {
-      std::vector<EFANode*> node_line(2,NULL);
+      std::vector<EFANode*> node_line(2, NULL);
       node_line[0] = _efa_elem2d.getFragmentEdge(0,i)->getNode(0);
       node_line[1] = _efa_elem2d.getFragmentEdge(0,i)->getNode(1);
       if (node_line[1]->id() == tip_id)
@@ -181,7 +181,7 @@ XFEMCutElem2D::getCrackTipOriginAndDirection(unsigned tip_id, Point & origin, Po
   Point cut_line_p2 = getNodeCoordinates(cut_line_nodes[1]);
   Point cut_line = cut_line_p2 - cut_line_p1;
   Real len = std::sqrt(cut_line.norm_sq());
-  cut_line *= (1.0/len);
+  cut_line /= len;
   origin = cut_line_p2;
   direction = Point(cut_line(0), cut_line(1), 0.0);
 }
@@ -193,7 +193,7 @@ XFEMCutElem2D::getFragmentFaces(std::vector<std::vector<Point> > &frag_faces, Me
   frag_faces.clear();
   for (unsigned int i = 0; i < _efa_elem2d.getFragment(0)->numEdges(); ++i)
   {
-    std::vector<Point> edge_points(2, Point(0.0,0.0,0.0));
+    std::vector<Point> edge_points(2, Point(0.0, 0.0, 0.0));
     edge_points[0] = getNodeCoordinates(_efa_elem2d.getFragmentEdge(0,i)->getNode(0), displaced_mesh);
     edge_points[1] = getNodeCoordinates(_efa_elem2d.getFragmentEdge(0,i)->getNode(1), displaced_mesh);
     frag_faces.push_back(edge_points);
@@ -222,14 +222,14 @@ XFEMCutElem2D::getPhysicalQuadraturePoints(std::vector<std::vector<Real> > &tsg)
   // Get the coords for parial element nodes
   EFAFragment2D* frag = _efa_elem2d.getFragment(0);
   unsigned int nnd_pe = frag->numEdges();
-  std::vector<Point> frag_points(nnd_pe, Point(0.0,0.0,0.0));// nodal coord of partial elem
+  std::vector<Point> frag_points(nnd_pe, Point(0.0, 0.0, 0.0));// nodal coord of partial elem
   Real jac = 0.0;
 
   for (unsigned int j = 0; j < nnd_pe; ++j)
     frag_points[j] = getNodeCoordinates(frag->getEdge(j)->getNode(0));
 
   // Get centroid coords for partial elements
-  Point xcrd(0.0,0.0,0.0);
+  Point xcrd(0.0, 0.0, 0.0);
   for (unsigned int j = 0; j < nnd_pe; ++j)
     xcrd += frag_points[j];
   xcrd *= (1.0/nnd_pe);
@@ -261,9 +261,9 @@ XFEMCutElem2D::getPhysicalQuadraturePoints(std::vector<std::vector<Real> > &tsg)
     for (unsigned int j = 0; j < nnd_pe; ++j) // loop all sub-tris
     {
       std::vector<std::vector<Real> > shape(3, std::vector<Real>(3,0.0));
-      std::vector<Point> subtri_points(3, Point(0.0,0.0,0.0)); // sub-tri nodal coords
+      std::vector<Point> subtri_points(3, Point(0.0, 0.0, 0.0)); // sub-tri nodal coords
 
-      int jplus1(j < nnd_pe-1 ? j+1 : 0);
+      int jplus1 = j < nnd_pe - 1 ? j + 1 : 0;
       subtri_points[0] = xcrd;
       subtri_points[1] = frag_points[j];
       subtri_points[2] = frag_points[jplus1];
@@ -296,7 +296,7 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
                                   std::vector<std::vector<Real> > &wsg)
 {
   // Get physical coords for the new six-point rule
-  std::vector<std::vector<Real> > shape(nen,std::vector<Real>(3,0.0));
+  std::vector<std::vector<Real> > shape(nen,std::vector<Real>(3, 0.0));
   std::vector<std::vector<Real> > wss;
 
   if (nen == 4)
@@ -391,7 +391,7 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
 }
 
 void
-XFEMCutElem2D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase* displaced_mesh) const
+XFEMCutElem2D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase * displaced_mesh) const
 {
   intersectionPoints.resize(2); // 2D: the intersection line is straight and can be represented by two ending points.(may have issues with double cuts case!)
 
@@ -407,10 +407,8 @@ XFEMCutElem2D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::v
     }
   }
   if (cut_line_nodes.size() == 0)
-  {
-    libMesh::err << " ERROR: no cut line found in this element"<<std::endl;
-    exit(1);
-  }
+    mooseError("No cut line found in this element");
+
   if (plane_id < cut_line_nodes.size()) // valid plane_id
   {
     intersectionPoints[0]  = getNodeCoordinates(cut_line_nodes[plane_id][0], displaced_mesh);

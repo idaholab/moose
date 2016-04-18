@@ -14,17 +14,11 @@
 class XFEMElementPairLocator : public ElementPairLocator
 {
 public:
-
   XFEMElementPairLocator(MooseSharedPointer<XFEM> xfem, unsigned int interface_id);
-
-  virtual ~XFEMElementPairLocator();
-
   virtual void reinit();
 
 protected:
-
   MooseSharedPointer<XFEM> _xfem;
-
 };
 
 #endif // XFEMELEMENTPAIRLOCATOR_H

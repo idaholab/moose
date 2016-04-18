@@ -938,7 +938,7 @@ XFEM::cutMeshWithEFA()
     Elem *libmesh_elem = Elem::build(parent_elem->type()).release();
 
     // parent has at least two children
-    if ( NewElements[i]->getParent()->numChildren() > 1)
+    if (NewElements[i]->getParent()->numChildren() > 1)
       temporary_parent_children_map[parent_id].push_back(libmesh_elem);
 
     Elem *parent_elem2 = NULL;
@@ -1084,7 +1084,7 @@ XFEM::cutMeshWithEFA()
     }
 
     //Delete any entries in _sibling_elems for this element.
-    for (std::list<std::pair<const Elem *, const Elem*> >::iterator it = _sibling_elems.begin();
+    for (ElementPairLocator::ElementPairList::iterator it = _sibling_elems.begin();
        it != _sibling_elems.end(); ++it)
     {
       if (elem_to_delete == it->first ||
@@ -1428,9 +1428,9 @@ XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points, std::vecto
 {
   unsigned nnd_pe = intersection_points.size();
   Point xcrd(0.0, 0.0, 0.0);
-  for (unsigned int i = 0; i < intersection_points.size(); ++i)
+  for (unsigned int i = 0; i < nnd_pe; ++i)
     xcrd += intersection_points[i];
-  xcrd *= (1.0/intersection_points.size());
+  xcrd /= nnd_pe;
 
   quad_pts.resize(nnd_pe);
   quad_wts.resize(nnd_pe);
@@ -1440,9 +1440,9 @@ XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points, std::vecto
   for (unsigned int j = 0; j < nnd_pe; ++j) // loop all sub-trigs
   {
     std::vector<std::vector<Real> > shape(3, std::vector<Real>(3,0.0));
-    std::vector<Point> subtrig_points(3, Point(0.0,0.0,0.0)); // sub-trig nodal coords
+    std::vector<Point> subtrig_points(3, Point(0.0, 0.0, 0.0)); // sub-trig nodal coords
 
-    int jplus1(j < nnd_pe-1 ? j+1 : 0);
+    int jplus1 = j < nnd_pe - 1 ? j + 1 : 0;
     subtrig_points[0] = xcrd;
     subtrig_points[1] = intersection_points[j];
     subtrig_points[2] = intersection_points[jplus1];

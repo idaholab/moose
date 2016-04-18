@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "Moose.h"
-#include "DataIO.h"
 
 // libmesh includes
 #include "libmesh/vector_value.h"
@@ -46,7 +45,6 @@ public:
 
   virtual ~ElementPairInfo();
 
-public:
   const Elem * _elem;
   std::vector<Point> _constraint_q_point;
   std::vector<Real> _constraint_JxW;

@@ -14,10 +14,6 @@ XFEMElementPairLocator::XFEMElementPairLocator(MooseSharedPointer<XFEM> xfem, un
   _elem_pairs = _xfem->getXFEMCutElemPairs();
 }
 
-XFEMElementPairLocator::~XFEMElementPairLocator()
-{
-}
-
 void
 XFEMElementPairLocator::reinit()
 {

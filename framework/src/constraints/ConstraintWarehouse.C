@@ -60,7 +60,7 @@ ConstraintWarehouse::addObject(MooseSharedPointer<Constraint> object, THREAD_ID 
   // ElemElemConstraint
   else if (ec)
   {
-    const unsigned int interface_id = ec->getParam<unsigned int>("interface_id");
+    const InterfaceID interface_id = ec->getParam<InterfaceID>("interface_id");
     _element_constraints[interface_id].addObject(ec);
   }
 
@@ -111,7 +111,7 @@ ConstraintWarehouse::getActiveFaceFaceConstraints(const std::string & interface)
 }
 
 const std::vector<MooseSharedPointer<ElemElemConstraint> > &
-ConstraintWarehouse::getActiveElemElemConstraints(const unsigned int interface_id) const
+ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id) const
 {
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> >::const_iterator it = _element_constraints.find(interface_id);
   mooseAssert(it != _element_constraints.end(), "Unable to locate storage for ElemElemConstraint objects for the given interface id: " << interface_id);
@@ -133,7 +133,7 @@ ConstraintWarehouse::hasActiveFaceFaceConstraints(const std::string & interface)
 }
 
 bool
-ConstraintWarehouse::hasActiveElemElemConstraints(const unsigned int interface_id) const
+ConstraintWarehouse::hasActiveElemElemConstraints(const InterfaceID interface_id) const
 {
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> >::const_iterator it = _element_constraints.find(interface_id);
   return (it != _element_constraints.end() && it->second.hasActiveObjects());

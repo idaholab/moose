@@ -8,7 +8,7 @@
 #ifndef XFEM_H
 #define XFEM_H
 
-#include <list>
+#include "ElementPairLocator.h"
 #include "ElementFragmentAlgorithm.h"
 #include "XFEMInterface.h"
 
@@ -141,8 +141,8 @@ public:
   void setXFEMQRule(std::string & xfem_qrule);
   void setCrackGrowthMethod(bool use_crack_growth_increment, Real crack_growth_increment);
   virtual bool getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule, const MooseArray<Point> & q_points);
-  virtual const std::list<std::pair<const Elem*, const Elem*> > * getXFEMCutElemPairs() const {return & _sibling_elems;}
-  virtual void getXFEMIntersectionInfo(const Elem* elem,
+  virtual const ElementPairLocator::ElementPairList * getXFEMCutElemPairs() const {return & _sibling_elems;}
+  virtual void getXFEMIntersectionInfo(const Elem * elem,
                                        unsigned int plane_id,
                                        Point & normal, std::vector<Point> & intersectionPoints,
                                        bool displaced_mesh = false) const;
@@ -178,7 +178,7 @@ private:
 
   std::map<unique_id_type, XFEMCutElem*> _cut_elem_map;
   std::set<const Elem*> _crack_tip_elems;
-  std::list<std::pair<const Elem*, const Elem*> > _sibling_elems;
+  ElementPairLocator::ElementPairList _sibling_elems;
 
   std::map<const Elem*, std::vector<Point> > _elem_crack_origin_direction_map;
 

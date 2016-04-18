@@ -44,6 +44,7 @@
 typedef Real                     PostprocessorValue;
 typedef std::vector<Real>        VectorPostprocessorValue;
 typedef boundary_id_type         BoundaryID;
+typedef unsigned int             InterfaceID;
 typedef subdomain_id_type        SubdomainID;
 typedef unsigned int             MooseObjectID;
 typedef unsigned int             THREAD_ID;

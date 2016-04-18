@@ -46,7 +46,7 @@ public:
    */
   const std::vector<MooseSharedPointer<NodalConstraint> > & getActiveNodalConstraints() const;
   const std::vector<MooseSharedPointer<FaceFaceConstraint> > & getActiveFaceFaceConstraints(const std::string & interface) const;
-  const std::vector<MooseSharedPointer<ElemElemConstraint> > & getActiveElemElemConstraints(unsigned int interface_id) const;
+  const std::vector<MooseSharedPointer<ElemElemConstraint> > & getActiveElemElemConstraints(InterfaceID interface_id) const;
   const std::vector<MooseSharedPointer<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
   ///@}
 
@@ -56,7 +56,7 @@ public:
    */
   bool hasActiveNodalConstraints() const;
   bool hasActiveFaceFaceConstraints(const std::string & interface) const;
-  bool hasActiveElemElemConstraints(const unsigned int interface_id) const;
+  bool hasActiveElemElemConstraints(const InterfaceID interface_id) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   ///@}
 

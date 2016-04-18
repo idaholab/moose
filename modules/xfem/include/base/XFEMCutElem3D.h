@@ -40,7 +40,7 @@ public:
   virtual void getFragmentFaces(std::vector<std::vector<Point> > &frag_faces, MeshBase* displaced_mesh=NULL) const;
   virtual const EFAElement * getEFAElement() const;
   virtual unsigned int numCutPlanes() const;
-  virtual void getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase* displaced_mesh=NULL) const;
+  virtual void getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase * displaced_mesh=NULL) const;
 };
 
 #endif

@@ -92,15 +92,15 @@ ElemElemConstraint::computeElemNeighResidual(Moose::DGResidualType type)
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
   DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number()) :
                                        _assembly.residualBlockNeighbor(_var.number());
-  for (_qp=0; _qp < _constraint_q_point.size(); _qp++)
-      for (_i=0; _i< test_space.size(); _i++)
+  for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
+      for (_i = 0; _i< test_space.size(); _i++)
         re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
 }
 
 void
 ElemElemConstraint::computeResidual()
 {
- // Compute the residual for this element
+  // Compute the residual for this element
   computeElemNeighResidual(Moose::Element);
 
   // Compute the residual for the neighbor
@@ -119,10 +119,10 @@ ElemElemConstraint::computeElemNeighJacobian(Moose::DGJacobianType type)
                               type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number()) :
                               _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
-  for (_qp=0; _qp< _constraint_q_point.size(); _qp++)
-    for (_i=0; _i<test_space.size(); _i++)
-      for (_j=0; _j<loc_phi.size(); _j++)
-        Kxx(_i,_j) += _constraint_weight[_qp]*computeQpJacobian(type);
+  for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+      for (_j = 0; _j < loc_phi.size(); _j++)
+        Kxx(_i, _j) += _constraint_weight[_qp] * computeQpJacobian(type);
 }
 
 void
