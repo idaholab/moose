@@ -7,6 +7,7 @@
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowAdvectiveFlux.h"
 #include "PorousFlowTestKernel.h"
+#include "PorousFlowEffectiveStressCoupling.h"
 
 // UserObjects
 #include "PorousFlowDictator.h"
@@ -26,6 +27,7 @@
 #include "PorousFlowMaterialViscosityConst.h"
 #include "PorousFlowMaterialJoiner.h"
 #include "PorousFlowMaterialJoinerOld.h"
+#include "PorousFlowMaterialEffectiveFluidPressure.h"
 
 // Postprocessors
 #include "PorousFlowFluidMass.h"
@@ -73,6 +75,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowAdvectiveFlux);
   registerKernel(PorousFlowTestKernel);
+  registerKernel(PorousFlowEffectiveStressCoupling);
 
   // UserObjects
   registerUserObject(PorousFlowDictator);
@@ -92,6 +95,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterialViscosityConst);
   registerMaterial(PorousFlowMaterialJoiner);
   registerMaterial(PorousFlowMaterialJoinerOld);
+  registerMaterial(PorousFlowMaterialEffectiveFluidPressure);
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
