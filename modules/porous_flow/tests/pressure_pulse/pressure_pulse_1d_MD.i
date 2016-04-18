@@ -11,11 +11,11 @@
 [GlobalParams]
   PorousFlowDictator_UO = dictator
 []
-  
+
 [Variables]
   [./md]
     # initial porepressure = 2E6
-    # so initial md = log(density0) + porepressure/bulk_modulus = 
+    # so initial md = log(density0) + porepressure/bulk_modulus =
     initial_condition = 6.90875527898214
   [../]
 []
@@ -33,7 +33,7 @@
     component_index = 0
   [../]
 []
-  
+
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
@@ -67,6 +67,7 @@
   [./dens_all_at_quadpoints]
     type = PorousFlowMaterialJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+    use_qps = true
   [../]
   [./porosity]
     type = PorousFlowMaterialPorosityConst
@@ -95,13 +96,13 @@
     material_property = PorousFlow_viscosity
   [../]
 []
-  
+
 [BCs]
   [./left]
     type = DirichletBC
     boundary = left
     # BC porepressure = 3E6
-    # so boundary md = log(density0) + porepressure/bulk_modulus = 
+    # so boundary md = log(density0) + porepressure/bulk_modulus =
     value = 6.90925527898214
     variable = md
   [../]
@@ -136,8 +137,8 @@
     variable = pp
   [../]
 []
-    
-    
+
+
 [Postprocessors]
   [./p000]
     type = PointValue

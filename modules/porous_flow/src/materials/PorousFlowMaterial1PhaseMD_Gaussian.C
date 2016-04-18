@@ -16,6 +16,7 @@ InputParameters validParams<PorousFlowMaterial1PhaseMD_Gaussian>()
   InputParameters params = validParams<Material>();
 
   params.addRequiredCoupledVar("mass_density", "Variable that represents log(mass-density) of the single phase");
+  params.addCoupledVar("temperature", 20.0, "Fluid temperature");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addRequiredRangeCheckedParam<Real>("al", "al>0", "For this class, the capillary function is assumed to be saturation = exp(-(al*porepressure)^2) for porepressure<0.");
   params.addRequiredRangeCheckedParam<Real>("density0", "density0>0", "The density of the fluid phase");
@@ -41,6 +42,10 @@ PorousFlowMaterial1PhaseMD_Gaussian::PorousFlowMaterial1PhaseMD_Gaussian(const I
     _gradmd_var(coupledGradient("mass_density")),
     _md_varnum(coupled("mass_density")),
 
+    _temperature_var(coupledNodalValue("temperature")),
+    _temperature_qp_var(coupledValue("temperature")),
+    _temperature_varnum(coupled("temperature")),
+
     _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
     _porepressure(declareProperty<std::vector<Real> >("PorousFlow_porepressure")),
@@ -59,9 +64,14 @@ PorousFlowMaterial1PhaseMD_Gaussian::PorousFlowMaterial1PhaseMD_Gaussian(const I
     _dsaturation_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
     _dsaturation_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar")),
     _dgrads_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_saturation_dgradvar")),
-    _dgrads_dv(declareProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_saturation_dv"))
+    _dgrads_dv(declareProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_saturation_dv")),
+
+    _temperature(declareProperty<std::vector<Real> >("PorousFlow_temperature")),
+    _temperature_qp(declareProperty<std::vector<Real> >("PorousFlow_temperature_qp")),
+    _dtemperature_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_dvar")),
+    _dtemperature_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_qp_dvar"))
 {
-  if (_dictator_UO.num_phases() != 1)
+  if (_dictator_UO.num_phases() != _num_ph)
     mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.num_phases() << " whereas PorousFlowMaterial1PhaseMD_Gaussian can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
@@ -85,6 +95,11 @@ PorousFlowMaterial1PhaseMD_Gaussian::initQpStatefulProperties()
   _dsaturation_qp_dvar[_qp].resize(_num_ph);
   _dgrads_dgradv[_qp].resize(_num_ph);
   _dgrads_dv[_qp].resize(_num_ph);
+
+  _temperature[_qp].resize(_num_ph);
+  _temperature_qp[_qp].resize(_num_ph);
+  _dtemperature_dvar[_qp].resize(_num_ph);
+  _dtemperature_qp_dvar[_qp].resize(_num_ph);
 
   /*
    *  YAQI HACK !!
@@ -172,8 +187,23 @@ PorousFlowMaterial1PhaseMD_Gaussian::computeQpProperties()
     _dgrads_dv[_qp][0][pvar] = -2*_al2*_dporepressure_qp_dvar[_qp][0][pvar]*_saturation_qp[_qp][0]*_gradp[_qp][0];
     _dgrads_dv[_qp][0][pvar] += -2*_al2*_porepressure_qp[_qp][0]*_dsaturation_qp_dvar[_qp][0][pvar]*_gradp[_qp][0];
     _dgrads_dv[_qp][0][pvar] += -2*_al2*_porepressure_qp[_qp][0]*_saturation_qp[_qp][0]*_dgradp_dv[_qp][0][pvar];
-  }    
-    
+  }
+
+  // prepare the derivative matrix with zeroes
+  for (unsigned phase = 0; phase < _num_ph; ++phase)
+  {
+    _dtemperature_dvar[_qp][phase].assign(_dictator_UO.num_v(), 0.0);
+    _dtemperature_qp_dvar[_qp][phase].assign(_dictator_UO.num_v(), 0.0);
+  }
+
+  // _temperature is only dependent on _temperature, and its derivative is = 1
+  if (!(_dictator_UO.not_porflow_var(_temperature_varnum)))
+  {
+    // _temperature is a porflow variable
+    _dtemperature_dvar[_qp][0][_dictator_UO.porflow_var_num(_temperature_varnum)] = 1.0;
+    _dtemperature_qp_dvar[_qp][0][_dictator_UO.porflow_var_num(_temperature_varnum)] = 1.0;
+  }
+
 }
 
 void
@@ -192,7 +222,7 @@ PorousFlowMaterial1PhaseMD_Gaussian::buildPS()
     // 2 al p = (1/al/bulk) +/- sqrt((1/al/bulk)^2 - 4(v-logdens0))  (the "minus" sign is chosen)
     // s = exp(-(al*p)^2)
     _porepressure[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4*(_logdens0 - _md_var[_qp])))/(2*_al); //yes
-    _saturation[_qp][0] = std::exp(-std::pow(_al*_porepressure[_qp][0], 2)); 
+    _saturation[_qp][0] = std::exp(-std::pow(_al*_porepressure[_qp][0], 2));
 }
 
   if (_qp_md_var[_qp] >= _logdens0)
@@ -208,5 +238,9 @@ PorousFlowMaterial1PhaseMD_Gaussian::buildPS()
     _gradp[_qp][0] = _gradmd_var[_qp]/(_recip_bulk - 2*_al*_porepressure_qp[_qp][0])/_al; //yes
     _saturation_qp[_qp][0] = std::exp(-std::pow(_al*_porepressure_qp[_qp][0], 2));
     _grads[_qp][0] = -2*_al2*_porepressure_qp[_qp][0]*_saturation_qp[_qp][0]*_gradp[_qp][0];
-  }  
+  }
+
+  /// Temperature is the same in each phase presently
+  _temperature[_qp][0] = _temperature_var[_qp];
+  _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
 }

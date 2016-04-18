@@ -13,7 +13,7 @@
 template<>
 InputParameters validParams<PorousFlowMaterialViscosityConst>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<PorousFlowMaterialFluidPropertiesBase>();
 
   params.addRequiredParam<Real>("viscosity", "The viscosity, which is assumed constant for this material");
   params.addRequiredParam<unsigned int>("phase", "The phase number");
@@ -23,14 +23,13 @@ InputParameters validParams<PorousFlowMaterialViscosityConst>()
 }
 
 PorousFlowMaterialViscosityConst::PorousFlowMaterialViscosityConst(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+    PorousFlowMaterialFluidPropertiesBase(parameters),
 
     _input_viscosity(getParam<Real>("viscosity")),
     _phase_num(getParam<unsigned int>("phase")),
     _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-    _viscosity(declareProperty<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num))),
-    _dviscosity_dvar(declareProperty<std::vector<Real> >("dPorousFlow_viscosity" + Moose::stringify(_phase_num) + "_dvar"))
+    _viscosity(declareProperty<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num)))
 {
   if (_phase_num >= _porflow_name_UO.num_phases())
     mooseError("PorousFlowMaterialViscosityConst: The Dictator proclaims that the number of fluid phases is " << _porflow_name_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
@@ -40,5 +39,4 @@ void
 PorousFlowMaterialViscosityConst::computeQpProperties()
 {
   _viscosity[_qp] = _input_viscosity;
-  _dviscosity_dvar[_qp].assign(_porflow_name_UO.num_v(), 0.0);
 }

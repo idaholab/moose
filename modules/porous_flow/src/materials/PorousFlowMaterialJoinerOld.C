@@ -28,6 +28,10 @@ PorousFlowMaterialJoinerOld::PorousFlowMaterialJoinerOld(const InputParameters &
     _num_phases(_porflow_name_UO.num_phases()),
     _pf_prop(getParam<std::string>("material_property")),
 
+    _dporepressure_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_dvar")),
+    _dsaturation_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
+    _dtemperature_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_dvar")),
+
     _property(declareProperty<std::vector<Real> >(_pf_prop)),
     _property_old(declarePropertyOld<std::vector<Real> >(_pf_prop)),
     _dproperty_dvar(declareProperty<std::vector<std::vector<Real> > >("d" + _pf_prop + "_dvar"))
@@ -36,9 +40,16 @@ PorousFlowMaterialJoinerOld::PorousFlowMaterialJoinerOld(const InputParameters &
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
     _phase_property[ph] = &getMaterialProperty<Real>(_pf_prop + Moose::stringify(ph));
 
-  _dphase_property_dvar.resize(_num_phases);
+    _dphase_property_dp.resize(_num_phases);
+    _dphase_property_ds.resize(_num_phases);
+    _dphase_property_dt.resize(_num_phases);
+
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
-    _dphase_property_dvar[ph] = &getMaterialProperty<std::vector<Real> >("d" + _pf_prop + Moose::stringify(ph) + "_dvar");
+  {
+    _dphase_property_dp[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), "pressure_variable");
+    _dphase_property_ds[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), "saturation_variable");
+    _dphase_property_dt[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), "temperature_variable");
+  }
 }
 
 void
@@ -66,8 +77,11 @@ PorousFlowMaterialJoinerOld::computeQpProperties()
   const unsigned int num_var = _porflow_name_UO.num_v();
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
     for (unsigned v = 0; v < num_var; ++v)
-      _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dvar[ph])[_qp][v];
-
+    {
+      _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dp[ph])[_qp] * _dporepressure_dvar[_qp][ph][v];
+      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_ds[ph])[_qp] * _dsaturation_dvar[_qp][ph][v];
+      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][ph][v];
+    }
   /*
    *  YAQI HACK !!
    *
@@ -81,4 +95,3 @@ PorousFlowMaterialJoinerOld::computeQpProperties()
       _property_old[_qp][ph] = _property[_qp][ph];
   */
 }
-

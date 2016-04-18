@@ -31,6 +31,11 @@ public:
 
 protected:
 
+  virtual void initQpStatefulProperties();
+  virtual void computeQpProperties();
+
+  /// number of phases (=2 for this class)
+  const unsigned int _num_ph;
   /// vanGenuchten alpha
   const Real _al;
 
@@ -61,6 +66,12 @@ protected:
   /// Moose variable number of the phase1 porepressure
   const unsigned int _phase1_porepressure_varnum;
 
+  /// Nodal value of temperature
+  const VariableValue & _phase0_temperature;
+  /// Quadpoint value of temperature
+  const VariableValue & _phase0_temperature_qp;
+  /// Moose variable number of the phase0 temperature
+  const unsigned int _phase0_temperature_varnum;
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _porflow_name_UO;
 
@@ -111,9 +122,16 @@ protected:
 
   /// d(grad saturation)/d(porflow variable)
   MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgrads_dv;
+  /// Nodal values of the temperature of the phases
+  MaterialProperty<std::vector<Real> > & _temperature;
+  /// quadpoint values of the temperature of the phases
+  MaterialProperty<std::vector<Real> > & _temperature_qp;
+  /// d(nodal temperature)/d(nodal porflow variable)
+  MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_dvar;
+  /// d(quadpoint temperature)/d(quadpoint porflow variable)
+  MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_qp_dvar;
 
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+
 
  private:
   void buildQpPPSS();

@@ -92,7 +92,7 @@
     upper = 7.0 #7.6
     lower = 2.5
   [../]
-    
+
 
 [UserObjects]
   [./dictator]
@@ -127,6 +127,7 @@
   [./dens_qp_all]
     type = PorousFlowMaterialJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+    use_qps = true
   [../]
   [./visc0]
     type = PorousFlowMaterialViscosityConst

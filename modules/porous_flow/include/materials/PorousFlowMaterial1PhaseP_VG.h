@@ -52,6 +52,12 @@ protected:
 
   /// Moose variable number of the porepressure
   const unsigned int _porepressure_varnum;
+  /// Nodal value of temperature
+  const VariableValue & _temperature_var;
+  /// Quadpoint value of temperature
+  const VariableValue & _temperature_qp_var;
+  /// Moose variable number of the phase0 temperature
+  const unsigned int _temperature_varnum;
 
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _porflow_name_UO;
@@ -103,6 +109,14 @@ protected:
 
   /// d(grad saturation)/d(porflow variable)
   MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgrads_dv;
+  /// Nodal values of the temperature of the phases
+  MaterialProperty<std::vector<Real> > & _temperature;
+  /// quadpoint values of the temperature of the phases
+  MaterialProperty<std::vector<Real> > & _temperature_qp;
+  /// d(nodal temperature)/d(nodal porflow variable)
+  MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_dvar;
+  /// d(quadpoint temperature)/d(quadpoint porflow variable)
+  MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_qp_dvar;
 
 
   virtual void initQpStatefulProperties();
