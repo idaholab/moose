@@ -41,8 +41,6 @@
 #include "Material.h"
 #include "Material.h"
 #include "PetscSupport.h"
-#include "RandomInterface.h"
-#include "RandomData.h"
 #include "EigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
@@ -240,11 +238,6 @@ FEProblem::~FEProblem()
   delete &_nl;
 
   delete _resurrector;
-
-  // Random data objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end(); ++it)
-    delete it->second;
 }
 
 Moose::CoordinateSystemType
@@ -532,11 +525,11 @@ void FEProblem::initialSetup()
   updateGeomSearch(); // Call all of the rest of the geometric searches
   Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
-  // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
+  // Global manager setup
+  for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+       it != _global_managers.end();
        ++it)
-    it->second->updateSeeds(EXEC_INITIAL);
+    it->second->initialSetup();
 
   if (_app.isRestarting() || _app.isRecovering())
   {
@@ -662,11 +655,11 @@ void FEProblem::timestepSetup()
   _aux.timestepSetup();
   _nl.timestepSetup();
 
-  // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
+  // Global manager setup
+  for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+       it != _global_managers.end();
        ++it)
-    it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
+    it->second->timestepSetup();
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
@@ -3302,11 +3295,11 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   unsigned int n_threads = libMesh::n_threads();
 
-  // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
+  // Global manager setup
+  for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+       it != _global_managers.end();
        ++it)
-    it->second->updateSeeds(EXEC_LINEAR);
+    it->second->residualSetup();
 
   execTransfers(EXEC_LINEAR);
 
@@ -3351,11 +3344,11 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     unsigned int n_threads = libMesh::n_threads();
 
-    // Random interface objects
-    for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-         it != _random_data_objects.end();
+    // Global manager setup
+    for (std::map<std::string, MooseSharedPointer<GlobalManager> >::iterator it = _global_managers.begin();
+         it != _global_managers.end();
          ++it)
-      it->second->updateSeeds(EXEC_NONLINEAR);
+      it->second->jacobianSetup();
 
     _currently_computing_jacobian = true;
 
@@ -4201,21 +4194,6 @@ SolverParams &
 FEProblem::solverParams()
 {
   return _solver_params;
-}
-
-void
-FEProblem::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
-{
-  RandomData *random_data;
-  if (_random_data_objects.find(name) == _random_data_objects.end())
-  {
-    random_data = new RandomData(*this, random_interface);
-    random_interface.setRandomDataPointer(random_data);
-
-    _random_data_objects[name] = random_data;
-  }
-  else
-    random_interface.setRandomDataPointer(_random_data_objects[name]);
 }
 
 bool

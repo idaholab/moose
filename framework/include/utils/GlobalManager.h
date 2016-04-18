@@ -1,0 +1,40 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#ifndef GLOBALMANAGER_H
+#define GLOBALMANAGER_H
+
+class FEProblem;
+
+/**
+ * Base class for globally registered manager classes in FEProblem
+ */
+class GlobalManager
+{
+public:
+  GlobalManager(FEProblem & fe_problem) : _fe_problem(fe_problem) {}
+
+protected:
+  ///@{ Setup methods called by FEProblem
+  virtual void initialSetup() {}
+  virtual void timestepSetup() {}
+  virtual void jacobianSetup() {}
+  virtual void residualSetup() {}
+  ///@}
+
+  FEProblem & _fe_problem;
+  friend class FEProblem;
+};
+
+#endif //GLOBALMANAGER_H

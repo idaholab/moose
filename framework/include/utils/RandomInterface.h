@@ -23,6 +23,7 @@ class RandomInterface;
 class Assembly;
 class RandomData;
 class MooseRandom;
+class RandomInterfaceManager;
 
 template<>
 InputParameters validParams<RandomInterface>();
@@ -68,13 +69,13 @@ public:
   bool isNodal() const { return _is_nodal; }
   ExecFlagType getResetOnTime() const { return _reset_on; }
 
-  void setRandomDataPointer(RandomData *random_data);
+  void setRandomDataPointer(const MooseSharedPointer<RandomData> & random_data);
 
 private:
-  RandomData *_random_data;
-  mutable MooseRandom *_generator;
+  MooseSharedPointer<RandomData> _random_data;
+  mutable MooseRandom * _generator;
 
-  FEProblem & _ri_problem;
+  RandomInterfaceManager & _ri_manager;
   const std::string _ri_name;
 
   unsigned int _master_seed;
