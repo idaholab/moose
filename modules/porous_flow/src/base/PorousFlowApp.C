@@ -8,6 +8,7 @@
 #include "PorousFlowAdvectiveFlux.h"
 #include "PorousFlowTestKernel.h"
 #include "PorousFlowEffectiveStressCoupling.h"
+#include "PorousFlowMassVolumetricExpansion.h"
 
 // UserObjects
 #include "PorousFlowDictator.h"
@@ -76,6 +77,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowAdvectiveFlux);
   registerKernel(PorousFlowTestKernel);
   registerKernel(PorousFlowEffectiveStressCoupling);
+  registerKernel(PorousFlowMassVolumetricExpansion);
 
   // UserObjects
   registerUserObject(PorousFlowDictator);
