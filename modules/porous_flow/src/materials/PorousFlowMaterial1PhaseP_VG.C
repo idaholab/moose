@@ -16,6 +16,7 @@ InputParameters validParams<PorousFlowMaterial1PhaseP_VG>()
   InputParameters params = validParams<Material>();
 
   params.addRequiredCoupledVar("porepressure", "Variable that represents the porepressure of the single phase");
+  params.addCoupledVar("temperature", 20.0, "Fluid temperature");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addRequiredRangeCheckedParam<Real>("al", "al > 0", "van-Genuchten alpha parameter.  Must be positive.  effectiveSaturation = (1 + (-al*c)^(1/(1-m)))^(-m)");
   params.addRequiredRangeCheckedParam<Real>("m", "m > 0 & m < 1", "van-Genuchten m parameter.  Must be between 0 and 1, and optimally should be set to >0.5   EffectiveSaturation = (1 + (-al*p)^(1/(1-m)))^(-m)");
@@ -36,6 +37,10 @@ PorousFlowMaterial1PhaseP_VG::PorousFlowMaterial1PhaseP_VG(const InputParameters
     _gradp_var(coupledGradient("porepressure")),
     _porepressure_varnum(coupled("porepressure")),
 
+    _temperature_var(coupledNodalValue("temperature")),
+    _temperature_qp_var(coupledValue("temperature")),
+    _temperature_varnum(coupled("temperature")),
+
     _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
     _porepressure(declareProperty<std::vector<Real> >("PorousFlow_porepressure")),
@@ -54,7 +59,12 @@ PorousFlowMaterial1PhaseP_VG::PorousFlowMaterial1PhaseP_VG(const InputParameters
     _dsaturation_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
     _dsaturation_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar")),
     _dgrads_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_saturation_dgradvar")),
-    _dgrads_dv(declareProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_saturation_dv"))
+    _dgrads_dv(declareProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_saturation_dv")),
+
+    _temperature(declareProperty<std::vector<Real> >("PorousFlow_temperature")),
+    _temperature_qp(declareProperty<std::vector<Real> >("PorousFlow_temperature_qp")),
+    _dtemperature_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_dvar")),
+    _dtemperature_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_qp_dvar"))
 {
   if (_porflow_name_UO.num_phases() != 1)
     mooseError("The Dictator proclaims that the number of phases is " << _porflow_name_UO.num_phases() << " whereas PorousFlowMaterial1PhaseP_VG can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
@@ -80,6 +90,10 @@ PorousFlowMaterial1PhaseP_VG::initQpStatefulProperties()
   _dsaturation_qp_dvar[_qp].resize(_num_ph);
   _dgrads_dgradv[_qp].resize(_num_ph);
   _dgrads_dv[_qp].resize(_num_ph);
+
+  _temperature[_qp].resize(_num_ph);
+  _dtemperature_dvar[_qp].resize(_num_ph);
+  _dtemperature_qp_dvar[_qp].resize(_num_ph);
 
   /*
    *  YAQI HACK !!
@@ -148,6 +162,21 @@ PorousFlowMaterial1PhaseP_VG::computeQpProperties()
     _dgrads_dgradv[_qp][0][_porflow_name_UO.porflow_var_num(_porepressure_varnum)] = PorousFlowCapillaryVG::dseff(_qp_porepressure_var[_qp], _al, _m);
     _dgrads_dv[_qp][0][_porflow_name_UO.porflow_var_num(_porepressure_varnum)] = PorousFlowCapillaryVG::d2seff(_qp_porepressure_var[_qp], _al, _m)*_gradp_var[_qp];
   }
+
+  // prepare the derivative matrix with zeroes
+  for (unsigned phase = 0; phase < _num_ph; ++phase)
+  {
+    _dtemperature_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+    _dtemperature_qp_dvar[_qp][phase].assign(_porflow_name_UO.num_v(), 0.0);
+  }
+
+  // _temperature is only dependent on _temperature, and its derivative is = 1
+  if (!(_porflow_name_UO.not_porflow_var(_temperature_varnum)))
+  {
+    // _temperature is a porflow variable
+    _dtemperature_dvar[_qp][0][_porflow_name_UO.porflow_var_num(_temperature_varnum)] = 1.0;
+    _dtemperature_qp_dvar[_qp][0][_porflow_name_UO.porflow_var_num(_temperature_varnum)] = 1.0;
+  }
 }
 
 void
@@ -160,4 +189,8 @@ PorousFlowMaterial1PhaseP_VG::buildQpPPSS()
   _saturation[_qp][0] = PorousFlowCapillaryVG::seff(_porepressure_var[_qp], _al, _m);
   _saturation_qp[_qp][0] = PorousFlowCapillaryVG::seff(_qp_porepressure_var[_qp], _al, _m);
   _grads[_qp][0] = PorousFlowCapillaryVG::dseff(_qp_porepressure_var[_qp], _al, _m)*_gradp_var[_qp];
+
+  /// Temperature is the same in each phase presently
+  _temperature[_qp][0] = _temperature_var[_qp];
+  _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
 }
