@@ -38,11 +38,15 @@ DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
 {
   if (_component < 0 || _component > 2)
     mooseError("Invalid component given for " << name() << ": " << _component << "."  );
+
+  if (_axis_direction.norm() == 0.)
+    mooseError("Please specify a non-zero direction vector for the axis_direction in " << name());
 }
 
 void
 DisplacementAboutAxis::initialSetup()
 {
+  calculateUnitDirectionVector();
   calculateTransformationMatrices();
 }
 
@@ -69,39 +73,42 @@ DisplacementAboutAxis::computeQpValue()
 ColumnMajorMatrix
 DisplacementAboutAxis::rotateAroundAxis(const ColumnMajorMatrix & p0, const Real angle)
 {
-  ColumnMajorMatrix rotz(4,4);
-  rotz(0,0) = cos(angle);
-  rotz(0,1) = -sin(angle);
-  rotz(0,2) = 0;
-  rotz(0,3) = 0;
-  rotz(1,0) = sin(angle);
-  rotz(1,1) = cos(angle);
-  rotz(1,2) = 0;
-  rotz(1,3) = 0;
-  rotz(2,0) = 0;
-  rotz(2,1) = 0;
-  rotz(2,2) = 1;
-  rotz(2,3) = 0;
-  rotz(3,0) = 0;
-  rotz(3,1) = 0;
-  rotz(3,2) = 0;
-  rotz(3,3) = 1;
+  ColumnMajorMatrix rotate_about_z(4,4);
+  rotate_about_z(0,0) = cos(angle);
+  rotate_about_z(0,1) = -sin(angle);
+  rotate_about_z(0,2) = 0;
+  rotate_about_z(0,3) = 0;
+  rotate_about_z(1,0) = sin(angle);
+  rotate_about_z(1,1) = cos(angle);
+  rotate_about_z(1,2) = 0;
+  rotate_about_z(1,3) = 0;
+  rotate_about_z(2,0) = 0;
+  rotate_about_z(2,1) = 0;
+  rotate_about_z(2,2) = 1;
+  rotate_about_z(2,3) = 0;
+  rotate_about_z(3,0) = 0;
+  rotate_about_z(3,1) = 0;
+  rotate_about_z(3,2) = 0;
+  rotate_about_z(3,3) = 1;
 
-  ColumnMajorMatrix transform = _transformation_matrix_inv * rotz * _transformation_matrix;
+  ColumnMajorMatrix transform = _transformation_matrix_inv * rotate_about_z * _transformation_matrix;
   return transform * p0;
+}
+
+void
+DisplacementAboutAxis::calculateUnitDirectionVector()
+{
+  Real magnitude = _axis_direction.norm();
+  _axis_direction /= magnitude;
 }
 
 void
 DisplacementAboutAxis::calculateTransformationMatrices()
 {
   //These parts of the transformation matrix only depend on the axis of rotation:
-  //calculate only once, at initialization
 
-  Real a(_axis_direction(0));
-  Real b(_axis_direction(1));
-  Real c(_axis_direction(2));
-  Real l(a*a+b*b+c*c);
-  Real v(b*b+c*c);
+  Real length = _axis_direction.norm_sq();
+  Real v = _axis_direction(1) * _axis_direction(1) + _axis_direction(2) * _axis_direction(2);
 
   ColumnMajorMatrix transl(4,4);
   transl(0,0) = 1;
@@ -120,49 +127,50 @@ DisplacementAboutAxis::calculateTransformationMatrices()
   transl(3,1) = 0;
   transl(3,2) = 0;
   transl(3,3) = 1;
-ColumnMajorMatrix rotx(4,4);
-  rotx(0,0) = 1;
-  rotx(0,1) = 0;
-  rotx(0,2) = 0;
-  rotx(0,3) = 0;
-  rotx(1,0) = 0;
-  rotx(1,1) = c/v;
-  rotx(1,2) = -b/v;
-  rotx(1,3) = 0;
-  rotx(2,0) = 0;
-  rotx(2,1) = b/v;
-  rotx(2,2) = c/v;
-  rotx(2,3) = 0;
-  rotx(3,0) = 0;
-  rotx(3,1) = 0;
-  rotx(3,2) = 0;
-  rotx(3,3) = 1;
-  ColumnMajorMatrix roty(4,4);
-  roty(0,0) = v/l;
-  roty(0,1) = 0;
-  roty(0,2) = -a/l;
-  roty(0,3) = 0;
-  roty(1,0) = 0;
-  roty(1,1) = 1;
-  roty(1,2) = 0;
-  roty(1,3) = 0;
-  roty(2,0) = a/l;
-  roty(2,1) = 0;
-  roty(2,2) = v/l;
-  roty(2,3) = 0;
-  roty(3,0) = 0;
-  roty(3,1) = 0;
-  roty(3,2) = 0;
-  roty(3,3) = 1;
+
+ColumnMajorMatrix rotate_about_x(4,4);
+  rotate_about_x(0,0) = 1;
+  rotate_about_x(0,1) = 0;
+  rotate_about_x(0,2) = 0;
+  rotate_about_x(0,3) = 0;
+  rotate_about_x(1,0) = 0;
+  rotate_about_x(1,1) = _axis_direction(2) / v;
+  rotate_about_x(1,2) = -_axis_direction(1) / v;
+  rotate_about_x(1,3) = 0;
+  rotate_about_x(2,0) = 0;
+  rotate_about_x(2,1) = _axis_direction(1) / v;
+  rotate_about_x(2,2) = _axis_direction(2) / v;
+  rotate_about_x(2,3) = 0;
+  rotate_about_x(3,0) = 0;
+  rotate_about_x(3,1) = 0;
+  rotate_about_x(3,2) = 0;
+  rotate_about_x(3,3) = 1;
+
+  ColumnMajorMatrix rotate_about_y(4,4);
+  rotate_about_y(0,0) = v / length;
+  rotate_about_y(0,1) = 0;
+  rotate_about_y(0,2) = -_axis_direction(0) / length;
+  rotate_about_y(0,3) = 0;
+  rotate_about_y(1,0) = 0;
+  rotate_about_y(1,1) = 1;
+  rotate_about_y(1,2) = 0;
+  rotate_about_y(1,3) = 0;
+  rotate_about_y(2,0) = _axis_direction(0) / length;
+  rotate_about_y(2,1) = 0;
+  rotate_about_y(2,2) = v / length;
+  rotate_about_y(2,3) = 0;
+  rotate_about_y(3,0) = 0;
+  rotate_about_y(3,1) = 0;
+  rotate_about_y(3,2) = 0;
+  rotate_about_y(3,3) = 1;
 
   ColumnMajorMatrix transl_inv(4,4);
   transl.inverse(transl_inv);
   ColumnMajorMatrix rotx_inv(4,4);
-  rotx.inverse(rotx_inv);
+  rotate_about_x.inverse(rotx_inv);
   ColumnMajorMatrix roty_inv(4,4);
-  roty.inverse(roty_inv);
+  rotate_about_y.inverse(roty_inv);
 
-  _transformation_matrix = roty * rotx * transl;
+  _transformation_matrix = rotate_about_y * rotate_about_x * transl;
   _transformation_matrix_inv = transl_inv * rotx_inv * roty_inv;
-
 }

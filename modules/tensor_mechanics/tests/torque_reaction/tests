@@ -1,7 +1,35 @@
 [Tests]
-  [./torque_reaction_tm]
+  [./torque_reaction_2D]
     type = 'Exodiff'
     input = 'torque_reaction_tm.i'
     exodiff = 'torque_reaction_tm_out.e'
+  [../]
+  [./torque_reaction_3D]
+    type = 'Exodiff'
+    input = 'torque_reaction_3D_tm.i'
+    exodiff = 'torque_reaction_3D_tm_out.e'
+  [../]
+  [./torque_reaction_cylinder]
+    type = 'Exodiff'
+    input = 'torque_reaction_cylinder.i'
+    exodiff = 'torque_reaction_cylinder_out.e'
+    abs_zero = 5e-7
+  [../]
+  [./disp_about_axis_motion]
+    type = 'Exodiff'
+    input = 'disp_about_axis_axial_motion.i'
+    exodiff = 'disp_about_axis_axial_motion_out.e'
+  [../]
+  [./disp_about_axis_error1]
+    type = 'RunException'
+    input = 'disp_about_axis_errors.i'
+    cli_args = 'BCs/top_y/component=3 BCs/top_y/axis_direction="0. 0. 1."'
+    expect_err = 'Invalid component given for top_y: 3.'
+  [../]
+  [./disp_about_axis_error2]
+    type = 'RunException'
+    input = 'disp_about_axis_errors.i'
+    cli_args = 'BCs/top_y/component=1 BCs/top_y/axis_direction="0. 0. 0."'
+    expect_err = 'Please specify a non-zero direction vector for the axis_direction in top_y'
   [../]
 []
