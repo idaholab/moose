@@ -20,6 +20,9 @@
 // libMesh includes
 #include "libmesh/string_to_enum.h"
 
+// system includes
+#include <iomanip>
+
 namespace Moose
 {
   std::map<std::string, ExecFlagType> execstore_type_to_enum;
@@ -198,11 +201,11 @@ namespace Moose
   {
     switch (t)
     {
-    case ST_NEWTON: return "NEWTON";
-    case ST_JFNK:   return "JFNK";
-    case ST_PJFNK:  return "Preconditioned JFNK";
-    case ST_FD:     return "FD";
-    case ST_LINEAR: return "Linear";
+      case ST_NEWTON: return "NEWTON";
+      case ST_JFNK:   return "JFNK";
+      case ST_PJFNK:  return "Preconditioned JFNK";
+      case ST_FD:     return "FD";
+      case ST_LINEAR: return "Linear";
     }
     return "";
   }
@@ -212,19 +215,30 @@ namespace Moose
   {
     switch (t)
     {
-    case EXEC_INITIAL:        return "INITIAL";
-    case EXEC_LINEAR:         return "LINEAR";
-    case EXEC_NONLINEAR:      return "NONLINEAR";
-    case EXEC_TIMESTEP_END:   return "TIMESTEP_END";
-    case EXEC_TIMESTEP_BEGIN: return "TIMESTEP_BEGIN";
-    case EXEC_CUSTOM:         return "CUSTOM";
-    case EXEC_FINAL:          return "FINAL";
-    case EXEC_FORCED:         return "FORCED";
-    case EXEC_FAILED:         return "FAILED";
-    case EXEC_SUBDOMAIN:      return "SUBDOMAIN";
-    case EXEC_NONE:           return "NONE";
+      case EXEC_INITIAL:        return "INITIAL";
+      case EXEC_LINEAR:         return "LINEAR";
+      case EXEC_NONLINEAR:      return "NONLINEAR";
+      case EXEC_TIMESTEP_END:   return "TIMESTEP_END";
+      case EXEC_TIMESTEP_BEGIN: return "TIMESTEP_BEGIN";
+      case EXEC_CUSTOM:         return "CUSTOM";
+      case EXEC_FINAL:          return "FINAL";
+      case EXEC_FORCED:         return "FORCED";
+      case EXEC_FAILED:         return "FAILED";
+      case EXEC_SUBDOMAIN:      return "SUBDOMAIN";
+      case EXEC_NONE:           return "NONE";
     }
     return "";
+  }
+
+  std::string stringifyExact(Real t)
+  {
+    // this or std::numeric_limits<T>::max_digits10
+    const unsigned int max_digits10 = std::floor(std::numeric_limits<Real>::digits * std::log10(2) + 2);
+
+    std::ostringstream os;
+    os << std::setprecision(max_digits10)
+       << t;
+    return os.str();
   }
 }
 
