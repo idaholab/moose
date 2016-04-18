@@ -32,16 +32,16 @@ protected:
 
   /// Phase number of fluid that this relative permeability relates to
   const unsigned int _phase_num;
-  /// Saturation material property
-  const MaterialProperty<std::vector<Real> > & _saturation;
+  /// The PorousFlowDictator UserObject
+  const PorousFlowDictator & _dictator_UO;
   /// Name of (dummy) saturation primary variable
   VariableName _saturation_variable_name;
+  /// Saturation material property
+  const MaterialProperty<std::vector<Real> > & _saturation;
   /// Capillary pressure material property
   MaterialProperty<Real> & _capillary_pressure;
   /// Derivative of capillary pressure wrt phase saturation
   MaterialProperty<Real> & _dcapillary_pressure_ds;
-  /// The PorousFlowDictator UserObject
-  const PorousFlowDictator & _dictator_UO;
 };
 
 #endif //POROUSFLOWMATERIALCAPILLARYPRESSUREBASE_H

@@ -23,11 +23,11 @@ PorousFlowMaterialRelativePermeabilityBase::PorousFlowMaterialRelativePermeabili
     DerivativeMaterialInterface<Material>(parameters),
 
   _phase_num(getParam<unsigned int>("phase")),
+  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+  _saturation_variable_name(_dictator_UO.saturationVariableNameDummy()),
   _saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation")),
-  _saturation_variable_name("saturation_variable"),
   _relative_permeability(declareProperty<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num))),
-  _drelative_permeability_ds(declarePropertyDerivative<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num), _saturation_variable_name)),
-  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO"))
+  _drelative_permeability_ds(declarePropertyDerivative<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num), _saturation_variable_name))
 {
   if (_phase_num >= _dictator_UO.num_phases())
     mooseError("PorousFlowMaterialRelativePermeability: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");

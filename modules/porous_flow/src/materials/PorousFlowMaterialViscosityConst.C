@@ -27,12 +27,12 @@ PorousFlowMaterialViscosityConst::PorousFlowMaterialViscosityConst(const InputPa
 
     _input_viscosity(getParam<Real>("viscosity")),
     _phase_num(getParam<unsigned int>("phase")),
-    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
     _viscosity(declareProperty<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num)))
 {
-  if (_phase_num >= _porflow_name_UO.num_phases())
-    mooseError("PorousFlowMaterialViscosityConst: The Dictator proclaims that the number of fluid phases is " << _porflow_name_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
+  if (_phase_num >= _dictator_UO.num_phases())
+    mooseError("PorousFlowMaterialViscosityConst: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
 }
 
 void

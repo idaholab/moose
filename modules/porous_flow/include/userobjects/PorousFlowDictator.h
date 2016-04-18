@@ -15,7 +15,6 @@
 
 class PorousFlowDictator;
 
-
 template<>
 InputParameters validParams<PorousFlowDictator>();
 
@@ -115,6 +114,30 @@ class PorousFlowDictator :
    * @param porflow_var_num the porflow variable number
    */
   const VariableValue * nodal_var_old(unsigned int porflow_var_num) const;
+
+  /**
+   * Dummy pressure variable name for use in derivatives using the
+   * DerivativeMaterialInterface
+   */
+  VariableName pressureVariableNameDummy() const;
+
+  /**
+   * Dummy saturation variable name for use in derivatives using the
+   * DerivativeMaterialInterface
+   */
+  VariableName saturationVariableNameDummy() const;
+
+  /**
+   * Dummy temperature variable name for use in derivatives using the
+   * DerivativeMaterialInterface
+   */
+  VariableName temperatureVariableNameDummy() const;
+
+  /**
+   * Dummy mass fraction variable name for use in derivatives using the
+   * DerivativeMaterialInterface
+   */
+  VariableName massFractionVariableNameDummy() const;
 
  protected:
 

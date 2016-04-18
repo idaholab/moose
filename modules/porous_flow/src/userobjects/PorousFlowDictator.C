@@ -65,8 +65,6 @@ PorousFlowDictator::execute()
 void PorousFlowDictator::finalize()
 {}
 
-
-
 unsigned int
 PorousFlowDictator::num_v() const
 {
@@ -129,4 +127,28 @@ const VariableValue *
 PorousFlowDictator::nodal_var_old(unsigned int porflow_var_num) const
 {
   return _moose_nodal_var_value_old[porflow_var_num];
+}
+
+VariableName
+PorousFlowDictator::pressureVariableNameDummy() const
+{
+  return "pressure_variable_dummy";
+}
+
+VariableName
+PorousFlowDictator::saturationVariableNameDummy() const
+{
+  return "saturation_variable_dummy";
+}
+
+VariableName
+PorousFlowDictator::temperatureVariableNameDummy() const
+{
+  return "temperature_variable_dummy";
+}
+
+VariableName
+PorousFlowDictator::massFractionVariableNameDummy() const
+{
+  return "mass_fraction_variable_dummy";
 }

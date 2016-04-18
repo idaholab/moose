@@ -40,12 +40,13 @@ protected:
   const MaterialProperty<std::vector<Real> > & _temperature;
   /// Fluid temperature at the qps
   const MaterialProperty<std::vector<Real> > & _temperature_qp;
+  /// The PorousFlowDictator UserObject
+  const PorousFlowDictator & _dictator_UO;
   /// Name of (dummy) pressure primary variable
   VariableName _pressure_variable_name;
   /// Name of (dummy) temperature primary variable
   VariableName _temperature_variable_name;
-  /// The PorousFlowDictator UserObject
-  const PorousFlowDictator & _dictator_UO;
+
   /// Conversion from degrees Celsius to degrees Kelvin
   Real _t_c2k;
   /// Universal gas constant

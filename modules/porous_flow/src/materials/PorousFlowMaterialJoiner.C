@@ -24,9 +24,13 @@ InputParameters validParams<PorousFlowMaterialJoiner>()
 PorousFlowMaterialJoiner::PorousFlowMaterialJoiner(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _pressure_variable_name(_dictator_UO.pressureVariableNameDummy()),
+    _saturation_variable_name(_dictator_UO.saturationVariableNameDummy()),
+    _temperature_variable_name(_dictator_UO.temperatureVariableNameDummy()),
+    _mass_fraction_variable_name(_dictator_UO.massFractionVariableNameDummy()),
     _use_qps(getParam<bool>("use_qps")),
-    _num_phases(_porflow_name_UO.num_phases()),
+    _num_phases(_dictator_UO.num_phases()),
     _pf_prop(getParam<std::string>("material_property")),
 
     _dporepressure_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_dvar")),
@@ -47,11 +51,6 @@ PorousFlowMaterialJoiner::PorousFlowMaterialJoiner(const InputParameters & param
   _dphase_property_ds.resize(_num_phases);
   _dphase_property_dt.resize(_num_phases);
 
-  VariableName _pressure_variable_name = "pressure_variable";
-  VariableName _saturation_variable_name = "saturation_variable";
-  VariableName _temperature_variable_name = "temperature_variable";
-
-
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _dphase_property_dp[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), _pressure_variable_name);
@@ -61,16 +60,11 @@ PorousFlowMaterialJoiner::PorousFlowMaterialJoiner(const InputParameters & param
 }
 
 void
-PorousFlowMaterialJoiner::initQpStatefulProperties()
-{
-}
-
-void
 PorousFlowMaterialJoiner::computeQpProperties()
 {
   _property[_qp].resize(_num_phases);
   _dproperty_dvar[_qp].resize(_num_phases);
-  const unsigned int num_var = _porflow_name_UO.num_v();
+  const unsigned int num_var = _dictator_UO.num_v();
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
     _dproperty_dvar[_qp][ph].resize(num_var);
