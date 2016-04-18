@@ -76,7 +76,7 @@ namespace Moose
   std::string stringify(const ExecFlagType & t);
 
   /**
-   * Stringify Reals with enough precision to gurantee lossless
+   * Stringify Reals with enough precision to guarantee lossless
    * Real -> string -> Real roundtrips.
    */
   std::string stringifyExact(Real);
