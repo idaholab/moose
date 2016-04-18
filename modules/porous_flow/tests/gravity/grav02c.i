@@ -108,6 +108,7 @@
   [./dens_qp_all]
     type = PorousFlowMaterialJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+    use_qps = true
   [../]
   [./porosity]
     type = PorousFlowMaterialPorosityConst
@@ -175,7 +176,7 @@
     variable = ppgas
     execute_on = 'initial timestep_end'
   [../]
-    
+
 []
 
 [Preconditioning]

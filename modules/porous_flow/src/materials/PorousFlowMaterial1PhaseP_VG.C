@@ -31,7 +31,6 @@ PorousFlowMaterial1PhaseP_VG::PorousFlowMaterial1PhaseP_VG(const InputParameters
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m")),
 
-
     _porepressure_var(coupledNodalValue("porepressure")),
     _qp_porepressure_var(coupledValue("porepressure")),
     _gradp_var(coupledGradient("porepressure")),

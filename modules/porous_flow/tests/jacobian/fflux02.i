@@ -99,6 +99,7 @@
   [./dens_qp_all]
     type = PorousFlowMaterialJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+    use_qps = true
   [../]
   [./visc0]
     type = PorousFlowMaterialViscosityConst

@@ -10,10 +10,10 @@
 [GlobalParams]
   PorousFlowDictator_UO = dictator
 []
-  
+
 [Variables]
   [./pp]
-    initial_condition = 2E6  
+    initial_condition = 2E6
   [../]
 []
 
@@ -30,7 +30,7 @@
     component_index = 0
   [../]
 []
-  
+
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
@@ -63,6 +63,7 @@
   [./dens_all_at_quadpoints]
     type = PorousFlowMaterialJoiner
     material_property = PorousFlow_fluid_phase_density_qp
+    use_qps = true
   [../]
   [./porosity]
     type = PorousFlowMaterialPorosityConst
@@ -91,7 +92,7 @@
     material_property = PorousFlow_viscosity
   [../]
 []
-  
+
 [BCs]
   [./left]
     type = DirichletBC
