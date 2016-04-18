@@ -24,7 +24,7 @@ void
 ComputeLinearElasticStress::initialSetup()
 {
   if (hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
-    mooseError("This linear elastic stress calculation only works for small strains");
+    mooseWarning("This linear elastic stress calculation only works for small strains");
 }
 
 void
