@@ -43,7 +43,7 @@
   [./area]
     order = CONSTANT
     family = MONOMIAL
-#    initial_condition = 1.0 
+#    initial_condition = 1.0
   [../]
   [./react_x]
     order = FIRST
