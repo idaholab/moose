@@ -30,8 +30,8 @@ PorousFlowMassVolumetricExpansion::PorousFlowMassVolumetricExpansion(const Input
   _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar")),
   _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
   _dfluid_density_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
-  _fluid_saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation")),
-  _dfluid_saturation_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
+  _fluid_saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
+  _dfluid_saturation_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
   _mass_frac(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
   _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
   _strain_rate(getMaterialProperty<RankTwoTensor>("strain_rate"))
@@ -109,6 +109,6 @@ PorousFlowMassVolumetricExpansion::computedMassQpJac(unsigned int jvar)
     dmass += _fluid_density[_i][ph]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index]*_dporosity_dvar[_i][pvar];
   }
 
-    
+
   return _test[_i][_qp] * dmass * _strain_rate[_qp].trace();
 }

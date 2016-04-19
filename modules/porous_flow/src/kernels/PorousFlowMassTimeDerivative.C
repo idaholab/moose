@@ -47,8 +47,8 @@ PorousFlowMassTimeDerivative::computeQpResidual()
   unsigned int num_phases = _fluid_density[_i].size();
   mooseAssert(num_phases == _fluid_saturation_nodal[_i].size(), "PorousFlowMassTimeDerivative: Size of fluid density = " << num_phases << " size of fluid saturation = " << _fluid_saturation_nodal[_i].size() << " but both these must be equal to the number of phases in the system");
 
-  Real mass = 0.;
-  Real mass_old = 0.;
+  Real mass = 0.0;
+  Real mass_old = 0.0;
   for (unsigned ph = 0; ph < num_phases; ++ph)
   {
     mass += _fluid_density[_i][ph] * _fluid_saturation_nodal[_i][ph] * _mass_frac[_i][ph][_component_index];
@@ -86,7 +86,7 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
   // of variables, which are NOT lumped to the nodes, hence:
   Real dmass = 0.0;
   for (unsigned ph = 0; ph < num_phases; ++ph)
-    dmass += _fluid_density[_i][ph]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index]*_dporosity_dgradvar[_i][pvar]*_grad_phi[_j][_i];
+    dmass += _fluid_density[_i][ph] * _fluid_saturation_nodal[_i][ph] * _mass_frac[_i][ph][_component_index] * _dporosity_dgradvar[_i][pvar] * _grad_phi[_j][_i];
 
   if (_i != _j)
     return _test[_i][_qp]*dmass/_dt;
