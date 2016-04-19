@@ -7,7 +7,7 @@
 #ifndef KKSMULTIACBULKC_H
 #define KKSMULTIACBULKC_H
 
-#include "KKSACBulkBase.h"
+#include "KKSMultiACBulkBase.h"
 
 //Forward Declarations
 class KKSMultiACBulkC;
@@ -22,7 +22,7 @@ InputParameters validParams<KKSMultiACBulkC>();
  *
  * The non-linear variable for this Kernel is the order parameter 'eta_i'.
  */
-class KKSMultiACBulkC : public KKSACBulkBase
+class KKSMultiACBulkC : public KKSMultiACBulkBase
 {
 public:
   KKSMultiACBulkC(const InputParameters & parameters);
@@ -32,12 +32,11 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const unsigned int _ncj;
-
-  /// phase a concentration
-  // std::string _ca_name;
-  // unsigned int _ca_var;
-  std::vector<const VariableValue *> _vals;
-  std::vector<unsigned int> _vals_var;
+  /// Names of phase concentration variables
+  //std::vector<MaterialPropertyName> _cj_names;
+  MaterialPropertyName _c1_name;
+  std::vector<const VariableValue *> _cjs;
+  std::vector<unsigned int> _cjs_var;
 
   // /// phase b concentration
   // std::string _cb_name;
@@ -47,8 +46,8 @@ protected:
   // /// Value of the switching function \f$ h(\eta) \f$
   // const MaterialProperty<Real> & _prop_h;
   //
-  // /// Derivative of the free energy function \f$ \frac d{dc_a} F_a \f$
-  // const MaterialProperty<Real> & _prop_dFadca;
+  /// Derivative of the free energy function \f$ \frac d{dc_1} F_1 \f$
+  const MaterialProperty<Real> & _prop_dF1dc1;
   //
   // /// Second derivative of the free energy function \f$ \frac {d^2}{dc_a^2} F_a \f$
   // const MaterialProperty<Real> & _prop_d2Fadca2;

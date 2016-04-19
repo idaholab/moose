@@ -32,10 +32,12 @@ KKSMultiACBulkF::computeDFDOP(PFFunctionType type)
   switch (type)
   {
     case Residual:
+    {
       for (unsigned int n = 0; n < _num_Fj; ++n)
         res += (*_prop_dhjdetai[n])[_qp] * (*_prop_Fj[n])[_qp];
 
       return res + _wi * _prop_dgi[_qp];
+    }
 
     case Jacobian:
     {

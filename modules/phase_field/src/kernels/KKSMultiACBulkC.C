@@ -9,17 +9,19 @@
 template<>
 InputParameters validParams<KKSMultiACBulkC>()
 {
-  InputParameters params = validParams<KKSACBulkBase>();
+  InputParameters params = validParams<KKSMultiACBulkBase>();
   params.addClassDescription("Multi-phase KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. This includes all terms dependent on chemical potential.");
   params.addRequiredCoupledVar("cj", "Array of phase concentrations cj. Place in same order as Fj_names!");
   return params;
 }
 
 KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters) :
-    KKSACBulkBase(parameters),
+    KKSMultiACBulkBase(parameters),
     _ncj(coupledComponents("cj")),
-    _vals(_ncj),
-    _vals_var(_ncj)
+    //_cj_names(_ncj),
+    _c1_name(getVar("cj", 0)->name()),
+    _cjs(_ncj),
+    _cjs_var(_ncj),
     // _ca_name(getVar("ca", 0)->name()),
     // _ca_var(coupled("ca")),
     // _ca(coupledValue("ca")),
@@ -27,10 +29,19 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters) :
     // _cb_var(coupled("cb")),
     // _cb(coupledValue("cb")),
     // _prop_h(getMaterialProperty<Real>("h")),
-    // _prop_dFadca(getMaterialPropertyDerivative<Real>("fa_name", _ca_name)),
+    _prop_dF1dc1(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name))
     // _prop_d2Fadca2(getMaterialPropertyDerivative<Real>("fa_name", _ca_name, _ca_name)),
     // _prop_d2Fbdcb2(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _cb_name))
 {
+  // Load concentration variables into the arrays
+  for (unsigned int i = 0; i < _ncj; ++i)
+  {
+    //_cj_names[i] = getVar("cj", i)->name();
+    _cjs[i] = &coupledValue("cj", i);
+    _cjs_var[i] = coupled("cj", i);
+  }
+
+  //_prop_dF1dc1 = getMaterialPropertyDerivative<Real>(_Fj_names[0], _cj_names[0]);
   // //Resize to number of coupled variables (_nvar from KKSACBulkBase constructor)
   // _prop_d2Fadcadarg.resize(_nvar);
   //
@@ -53,12 +64,20 @@ KKSMultiACBulkC::computeDFDOP(PFFunctionType type)
   switch (type)
   {
     case Residual:
-      return res;
+    {
+      for (unsigned int n = 0; n < _ncj; ++n)
+        res += (*_prop_dhjdetai[n])[_qp] * (*_cjs[n])[_qp];
+
+      return - _prop_dF1dc1[_qp] * res;
+    }
 
     case Jacobian:
+    {
       // res =   _prop_d2h[_qp] * A1;
       //
       return res;
+
+    }
   }
 
   mooseError("Invalid type passed in");
