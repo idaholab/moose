@@ -14,7 +14,7 @@ InputParameters validParams<PorousFlowMaterialIdealGas>()
 {
   InputParameters params = validParams<PorousFlowMaterialFluidPropertiesBase>();
   params.addRequiredParam<Real>("molar_mass", "The molar mass of the Ideal gas (kg/mol)");
-  params.addClassDescription("This Material calculates fluid properties for an ideal gas");
+  params.addClassDescription("This Material calculates fluid density for an ideal gas");
   return params;
 }
 
@@ -55,7 +55,7 @@ PorousFlowMaterialIdealGas::computeQpProperties()
 Real
 PorousFlowMaterialIdealGas::density(Real pressure, Real temperature, Real molar_mass) const
 {
-  return pressure * _molar_mass / (_R * (temperature + _t_c2k));
+  return pressure * molar_mass / (_R * (temperature + _t_c2k));
 }
 
 Real

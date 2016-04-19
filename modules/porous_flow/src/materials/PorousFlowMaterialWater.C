@@ -130,9 +130,9 @@ PorousFlowMaterialWater::dDensity_dP(Real pressure, Real temperature) const
 }
 
 Real
-PorousFlowMaterialWater::dDensity_dT(Real pressure, Real temperature) const
+PorousFlowMaterialWater::dDensity_dT(Real /*pressure*/, Real /*temperature*/) const
 {
-  return 0.; // FIXME: not implemented yet
+  return 0.; // TODO: not implemented yet
 }
 
 Real
@@ -193,9 +193,9 @@ PorousFlowMaterialWater::viscosity(Real temperature, Real density) const
 }
 
 Real
-PorousFlowMaterialWater::dViscosity_dT(Real temperature, Real density) const
+PorousFlowMaterialWater::dViscosity_dT(Real /*temperature*/, Real /*density*/) const
 {
-  return 0.; // FIXME: not implemented yet
+  return 0.; // TODO: not implemented yet
 }
 
 Real
@@ -321,10 +321,6 @@ PorousFlowMaterialWater::densityRegion2(Real pressure, Real temperature) const
   Real tk = temperature + _t_c2k;
 
   /// Constants for region 2.
-  Real n02[9] = {-0.96927686500217e1,  0.10086655968018e2, -0.56087911283020e-2, 0.71452738081455e-1,
-                -0.40710498223928e0, 0.14240819171444e1, -0.43839511319450e1,  -0.28408632460772e0,
-                 0.21268463753307e-1};
-
   Real n2[43] = {-0.17731742473213e-2, -0.17834862292358e-1, -0.45996013696365e-1, -0.57581259083432e-1,
                  -0.50325278727930e-1, -0.33032641670203e-4, -0.18948987516315e-3, -0.39392777243355e-2,
                  -0.43797295650573e-1, -0.26674547914087e-4, 0.20481737692309e-7, 0.43870667284435e-6,
@@ -336,8 +332,6 @@ PorousFlowMaterialWater::densityRegion2(Real pressure, Real temperature) const
                   0.10693031879409e0, -0.33662250574171e0, 0.89185845355421e-24, 0.30629316876232e-12,
                  -0.42002467698208e-5, -0.59056029685639e-25, 0.37826947613457e-5, -0.12768608934681e-14,
                   0.73087610595061e-28, 0.55414715350778e-16, -0.94369707241210e-6};
-
-  int J02[9] = {0, 1, -5, -4, -3, -2, -1, 2, 3};
 
   int I2[43] = {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9, 10, 10,
                 10, 16, 16, 18, 20, 20, 20, 21, 22, 23, 24, 24, 24};
@@ -420,10 +414,6 @@ PorousFlowMaterialWater::dDensityRegion2_dP(Real pressure, Real temperature) con
   Real tk = temperature + _t_c2k;
 
   /// Constants for region 2.
-  Real n02[9] = {-0.96927686500217e1,  0.10086655968018e2, -0.56087911283020e-2, 0.71452738081455e-1,
-                -0.40710498223928e0, 0.14240819171444e1, -0.43839511319450e1,  -0.28408632460772e0,
-                 0.21268463753307e-1};
-
   Real n2[43] = {-0.17731742473213e-2, -0.17834862292358e-1, -0.45996013696365e-1, -0.57581259083432e-1,
                  -0.50325278727930e-1, -0.33032641670203e-4, -0.18948987516315e-3, -0.39392777243355e-2,
                  -0.43797295650573e-1, -0.26674547914087e-4, 0.20481737692309e-7, 0.43870667284435e-6,
@@ -435,8 +425,6 @@ PorousFlowMaterialWater::dDensityRegion2_dP(Real pressure, Real temperature) con
                   0.10693031879409e0, -0.33662250574171e0, 0.89185845355421e-24, 0.30629316876232e-12,
                  -0.42002467698208e-5, -0.59056029685639e-25, 0.37826947613457e-5, -0.12768608934681e-14,
                   0.73087610595061e-28, 0.55414715350778e-16, -0.94369707241210e-6};
-
-  int J02[9] = {0, 1, -5, -4, -3, -2, -1, 2, 3};
 
   int I2[43] = {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9, 10, 10,
                 10, 16, 16, 18, 20, 20, 20, 21, 22, 23, 24, 24, 24};
