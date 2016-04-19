@@ -35,15 +35,15 @@ PorousFlowMaterialDensityConstBulk::PorousFlowMaterialDensityConstBulk(const Inp
 void
 PorousFlowMaterialDensityConstBulk::initQpStatefulProperties()
 {
-  _density[_qp] = _dens0 * std::exp(_porepressure[_qp][_phase_num]/_bulk);
+  _density[_qp] = _dens0 * std::exp(_porepressure_nodal[_qp][_phase_num] / _bulk);
 }
 
 void
 PorousFlowMaterialDensityConstBulk::computeQpProperties()
 {
   /// Density and derivatives wrt pressure at the nodes
-  _density[_qp] = density(_porepressure[_qp][_phase_num]);
-  _ddensity_dp[_qp] = dDensity_dP(_porepressure[_qp][_phase_num]);
+  _density[_qp] = density(_porepressure_nodal[_qp][_phase_num]);
+  _ddensity_dp[_qp] = dDensity_dP(_porepressure_nodal[_qp][_phase_num]);
 
   /// Density and derivatives wrt pressure at the qps
   _density_qp[_qp] = density(_porepressure_qp[_qp][_phase_num]);

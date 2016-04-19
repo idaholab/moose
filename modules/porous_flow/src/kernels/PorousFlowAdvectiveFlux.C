@@ -35,10 +35,10 @@ PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & paramet
   _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_viscosity_dvar")),
   _mass_fractions(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
   _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
-  _pp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure")),
-  _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure")),
-  _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_dgradvar")),
-  _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_porepressure_dvar")),
+  _pp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal")),
+  _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure_qp")),
+  _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_qp_dgradvar")),
+  _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_porepressure_qp_dvar")),
   _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability")),
   _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_dvar")),
   _porousflow_dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
@@ -113,7 +113,7 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
       for (unsigned ph = 0; ph < _num_phases; ++ph)
 	component_re[_i][ph] += _JxW[_qp] * _coord[_qp] * darcyQp(ph);
   }
-  
+
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   std::vector<std::vector<std::vector<Real> > > component_ke;
@@ -301,7 +301,7 @@ void PorousFlowAdvectiveFlux::upwind(bool compute_res, bool compute_jac, unsigne
       for (_j = 0; _j < _phi.size(); _j++)
 	for (unsigned int ph = 0; ph < _num_phases; ++ph)
 	  _local_ke(_i, _j) += component_ke[_i][_j][ph];
-    
+
     ke += _local_ke;
 
     if (_has_diag_save_in && jvar == _var.number())

@@ -48,12 +48,12 @@ protected:
   const unsigned int _num_phases;
   /// Name of material property to be joined
   const std::string _pf_prop;
-  /// Derivatives of porepressure variable wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_dvar;
-  /// Derivatives of saturation variable wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_dvar;
-  /// Derivatives of temperature variable wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_dvar;
+  /// Derivatives of porepressure variable wrt PorousFlow variables at the nodes
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_nodal_dvar;
+  /// Derivatives of saturation variable wrt PorousFlow variables at the nodes
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_nodal_dvar;
+  /// Derivatives of temperature variable wrt PorousFlow variables at the nodes
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_nodal_dvar;
   /// computed property of the phase
   MaterialProperty<std::vector<Real> > & _property;
   /// old value of property of the phase

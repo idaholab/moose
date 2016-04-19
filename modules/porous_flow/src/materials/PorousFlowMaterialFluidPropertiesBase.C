@@ -23,9 +23,9 @@ PorousFlowMaterialFluidPropertiesBase::PorousFlowMaterialFluidPropertiesBase(con
     DerivativeMaterialInterface<Material>(parameters),
 
   _phase_num(getParam<unsigned int>("phase")),
-  _porepressure(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure")),
+  _porepressure_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal")),
   _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
-  _temperature(getMaterialProperty<std::vector<Real> >("PorousFlow_temperature")),
+  _temperature_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_temperature_nodal")),
   _temperature_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_temperature_qp")),
   _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
   _pressure_variable_name(_dictator_UO.pressureVariableNameDummy()),
