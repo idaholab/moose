@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<LinearElasticTruss>()
 {
   InputParameters params = validParams<TrussMaterial>();
-  params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
+  params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient in 1/K");
   params.addParam<Real>("temperature_ref", 273, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("temperature", 273, "Temperature in Kelvin");
   return params;
@@ -35,6 +35,5 @@ LinearElasticTruss::computeQpStrain()
 void
 LinearElasticTruss::computeQpStress()
 {
-  // axial stress = E * elastic_stretch
-  _axial_stress[_qp] = _youngs_modulus * _elastic_stretch[_qp];
+  _axial_stress[_qp] = _youngs_modulus[_qp] * _elastic_stretch[_qp];
 }

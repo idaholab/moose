@@ -19,12 +19,11 @@ class StressDivergenceTensorsTruss : public Kernel
 {
 public:
   StressDivergenceTensorsTruss(const InputParameters & parameters);
-  virtual ~StressDivergenceTensorsTruss() {}
 
 protected:
   virtual void initialSetup();
   virtual void computeResidual();
-  virtual Real computeQpResidual() {return 0;}
+  virtual Real computeQpResidual() { return 0.0; }
   virtual Real computeStiffness(unsigned int i, unsigned int j);
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int jvar);

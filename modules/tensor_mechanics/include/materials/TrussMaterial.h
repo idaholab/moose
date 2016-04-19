@@ -29,12 +29,10 @@ protected:
 
   std::vector<MooseVariable *> _disp_var;
 
-  std::string _base_name;
+  const std::string _base_name;
 
   unsigned int _ndisp;
-  const Real _my_youngs_modulus;
-  bool _youngs_modulus_coupled;
-  const VariableValue & _youngs_modulus_var;
+  const VariableValue & _youngs_modulus;
 
   MaterialProperty<Real> & _total_stretch;
   MaterialProperty<Real> & _elastic_stretch;
@@ -43,7 +41,6 @@ protected:
 
   Real _origin_length;
   Real _current_length;
-  Real _youngs_modulus;
 };
 
 #endif //TRUSSMATERIAL_H

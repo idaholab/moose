@@ -20,7 +20,6 @@ InputParameters validParams<StressDivergenceTensorsTruss>()
   params.addCoupledVar("area", "Cross-sectional area of truss element");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = true;
-
   return params;
 }
 
@@ -51,7 +50,7 @@ StressDivergenceTensorsTruss::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   mooseAssert(re.size() == 2, "Truss element has and only has two nodes.");
-  _local_re.resize(re.size()); 
+  _local_re.resize(re.size());
   _local_re.zero();
 
   RealGradient orientation((*_orientation)[0]);
@@ -67,7 +66,7 @@ StressDivergenceTensorsTruss::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i<_save_in.size(); i++)
+    for (unsigned int i = 0; i < _save_in.size(); ++i)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
@@ -75,7 +74,7 @@ StressDivergenceTensorsTruss::computeResidual()
 Real
 StressDivergenceTensorsTruss::computeStiffness(unsigned int i, unsigned int j)
 {
-  RealGradient orientation( (*_orientation)[0] );
+  RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
 
   return orientation(i) * orientation(j) * _e_over_l[0] * _area[0];
@@ -88,8 +87,8 @@ StressDivergenceTensorsTruss::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  for (unsigned int i = 0; i < _test.size(); i++)
-    for (unsigned int j = 0; j < _phi.size(); j++)
+  for (unsigned int i = 0; i < _test.size(); ++i)
+    for (unsigned int j = 0; j < _phi.size(); ++j)
       _local_ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, _component);
 
   ke += _local_ke;
@@ -98,11 +97,11 @@ StressDivergenceTensorsTruss::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
+    for (unsigned int i = 0; i < rows; ++i)
       diag(i) = _local_ke(i,i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
+    for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
@@ -115,11 +114,11 @@ StressDivergenceTensorsTruss::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     unsigned int coupled_component = 0;
-    bool active(false);
+    bool active = false;
 
     for (unsigned int i = 0; i < _ndisp; ++i)
       if (jvar == _disp_var[i])
-      {   
+      {
         coupled_component = i;
         active = true;
       }
@@ -127,8 +126,8 @@ StressDivergenceTensorsTruss::computeOffDiagJacobian(unsigned int jvar)
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
     if (active)
-      for (unsigned int i = 0; i < _test.size(); i++)
-        for (unsigned int j = 0; j < _phi.size(); j++)
+      for (unsigned int i = 0; i < _test.size(); ++i)
+        for (unsigned int j = 0; j < _phi.size(); ++j)
           ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, coupled_component);
     else if ( false ) // Need some code here for coupling with temperature
     {
