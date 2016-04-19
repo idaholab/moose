@@ -49,6 +49,8 @@ protected:
 
   const MaterialProperty<std::vector<Real> > & _dporosity_dvar;
 
+  const MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+
   const MaterialProperty<std::vector<Real> > & _fluid_density;
 
   const MaterialProperty<std::vector<Real> > & _fluid_density_old;

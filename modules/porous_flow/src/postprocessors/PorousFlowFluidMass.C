@@ -25,7 +25,7 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
   _component_index(getParam<unsigned int>("component_index")),
   _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-  _porosity(getMaterialProperty<Real>("PorousFlow_porosity")),
+  _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
   _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
   _fluid_saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation")),
   _mass_frac(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac"))

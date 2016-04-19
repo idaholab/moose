@@ -37,14 +37,29 @@ protected:
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _porflow_name_UO;
 
-  /// porosity
-  MaterialProperty<Real> & _porosity;
+  /// nodal porosity
+  MaterialProperty<Real> & _porosity_nodal;
 
-  /// old value of porosity (which is, of course = _porosity in this case)
-  MaterialProperty<Real> & _porosity_old;
+  /// old value of nodal porosity (which is, of course = _porosity in this case)
+  MaterialProperty<Real> & _porosity_nodal_old;
 
-  /// d(porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dporosity_dvar;
+  /// d(nodal porosity)/d(PorousFlow variable)
+  MaterialProperty<std::vector<Real> > & _dporosity_nodal_dvar;
+
+  /// d(nodal porosity)/d(PorousFlow variable)
+  MaterialProperty<std::vector<RealGradient> > & _dporosity_nodal_dgradvar;
+
+  /// qp porosity
+  MaterialProperty<Real> & _porosity_qp;
+
+  /// old value of qp porosity (which is, of course = _porosity in this case)
+  MaterialProperty<Real> & _porosity_qp_old;
+
+  /// d(qp porosity)/d(PorousFlow variable)
+  MaterialProperty<std::vector<Real> > & _dporosity_qp_dvar;
+
+  /// d(qp porosity)/d(PorousFlow variable)
+  MaterialProperty<std::vector<RealGradient> > & _dporosity_qp_dgradvar;
 
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();

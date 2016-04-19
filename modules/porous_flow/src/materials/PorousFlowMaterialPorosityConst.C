@@ -27,24 +27,34 @@ PorousFlowMaterialPorosityConst::PorousFlowMaterialPorosityConst(const InputPara
     _input_porosity(getParam<Real>("porosity")),
     _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
 
-    _porosity(declareProperty<Real>("PorousFlow_porosity")),
-    _porosity_old(declarePropertyOld<Real>("PorousFlow_porosity")),
-    _dporosity_dvar(declareProperty<std::vector<Real> >("dPorousFlow_porosity_dvar"))
+    _porosity_nodal(declareProperty<Real>("PorousFlow_porosity_nodal")),
+    _porosity_nodal_old(declarePropertyOld<Real>("PorousFlow_porosity_nodal")),
+    _dporosity_nodal_dvar(declareProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar")),
+    _dporosity_nodal_dgradvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar")),
+    _porosity_qp(declareProperty<Real>("PorousFlow_porosity_qp")),
+    _porosity_qp_old(declarePropertyOld<Real>("PorousFlow_porosity_qp")),
+    _dporosity_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
+    _dporosity_qp_dgradvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_porosity_qp_dgradvar"))
 {
 }
 
 void
 PorousFlowMaterialPorosityConst::initQpStatefulProperties()
 {
-  _porosity[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
+  _porosity_nodal[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
+  _porosity_qp[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
+
+  const unsigned int num_var = _porflow_name_UO.num_v();
+  _dporosity_nodal_dvar[_qp].resize(num_var, 0.0);
+  _dporosity_qp_dvar[_qp].resize(num_var, 0.0);
+  _dporosity_nodal_dgradvar[_qp].resize(num_var, RealGradient());
+  _dporosity_qp_dgradvar[_qp].resize(num_var, RealGradient());
 }
 
 void
 PorousFlowMaterialPorosityConst::computeQpProperties()
 {
-  _porosity[_qp] = _input_porosity;
-
-  const unsigned int num_var = _porflow_name_UO.num_v();
-  _dporosity_dvar[_qp].resize(num_var, 0.0);
+  _porosity_nodal[_qp] = _input_porosity;
+  _porosity_qp[_qp] = _input_porosity;
 }
 

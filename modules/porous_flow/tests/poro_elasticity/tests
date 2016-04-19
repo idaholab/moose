@@ -4,4 +4,9 @@
     input = vol_expansion.i
     exodiff = vol_expansion.e
   [../]
+  #[./mandel]
+  #  type = CSVDiff
+  #  input = mandel.i
+  #  csvdiff = mandel.csv
+  #[../]
 []
