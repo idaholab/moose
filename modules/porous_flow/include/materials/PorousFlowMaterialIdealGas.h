@@ -63,13 +63,13 @@ protected:
   /// Molar mass (kg/mol)
   Real _molar_mass;
   /// Fluid phase density at the nodes
-  MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _density_nodal;
   /// Old fluid phase density at the nodes
-  MaterialProperty<Real> & _density_old;
+  MaterialProperty<Real> & _density_nodal_old;
   /// Derivative of fluid density wrt phase pore pressure at the nodes
-  MaterialProperty<Real> & _ddensity_dp;
+  MaterialProperty<Real> & _ddensity_nodal_dp;
   /// Derivative of fluid density wrt temperature at the nodes
-  MaterialProperty<Real> & _ddensity_dt;
+  MaterialProperty<Real> & _ddensity_nodal_dt;
   /// Fluid phase density at the qps
   MaterialProperty<Real> & _density_qp;
   /// Derivative of fluid density wrt phase pore pressure at the qps
