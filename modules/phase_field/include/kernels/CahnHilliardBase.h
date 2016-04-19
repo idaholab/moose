@@ -77,7 +77,10 @@ CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters) :
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    VariableName iname = _coupled_moose_vars[i]->name();
+    const VariableName iname = _coupled_moose_vars[i]->name();
+    if (iname == _var.name())
+      mooseError("The kernel variable should not be specified in the coupled `args` parameter.");
+
     _second_derivatives[i+1] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname);
     _third_derivatives[i+1]  = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), iname);
 
