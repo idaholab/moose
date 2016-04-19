@@ -18,8 +18,7 @@ InputParameters validParams<PorousFlowMaterialWater>();
 
 /**
  * Fluid properties of Water (H20).
- * Provides density, viscosity, derivatives wrt pressure and temperature,
- * and Henry Law constants.
+ * Provides density, viscosity, derivatives wrt pressure and temperature.
  */
 class PorousFlowMaterialWater : public PorousFlowMaterialFluidPropertiesBase
 {
@@ -62,7 +61,7 @@ protected:
   Real dDensity_dP(Real pressure, Real temperature) const;
 
   /**
-   * Derivative of the density of water with respect to pressure.
+   * Derivative of the density of water with respect to temperature.
    * From IAPWS IF97 Revised Release on the IAPWS Industrial
    * Formulation 1997 for the Thermodynamic Properties of Water
    * and Steam.
@@ -72,7 +71,7 @@ protected:
    *
    * @param pressure water pressure (Pa)
    * @param temperature water temperature (C)
-   * @return derivative of water density (kg/m^3) with respect to pressure
+   * @return derivative of water density (kg/m^3) with respect to temperature
    */
   Real dDensity_dT(Real pressure, Real temperature) const;
 
@@ -221,13 +220,13 @@ protected:
   Real dViscosity_dDensity(Real temperature, Real density) const;
 
   /// Fluid phase density at the nodes
-  MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _density_nodal;
   /// Old fluid phase density at the nodes
-  MaterialProperty<Real> & _density_old;
+  MaterialProperty<Real> & _density_nodal_old;
   /// Derivative of fluid density wrt phase pore pressure at the nodes
-  MaterialProperty<Real> & _ddensity_dp;
+  MaterialProperty<Real> & _ddensity_nodal_dp;
   /// Derivative of fluid density wrt temperature at the nodes
-  MaterialProperty<Real> & _ddensity_dt;
+  MaterialProperty<Real> & _ddensity_nodal_dt;
   /// Fluid phase density at the qps
   MaterialProperty<Real> & _density_qp;
   /// Derivative of fluid density wrt phase pore pressure at the qps
@@ -235,9 +234,9 @@ protected:
   /// Derivative of fluid density wrt temperature at the qps
   MaterialProperty<Real> & _ddensity_qp_dt;
   /// Fluid phase viscosity at the nodes
-  MaterialProperty<Real> & _viscosity;
+  MaterialProperty<Real> & _viscosity_nodal;
   /// Derivative of fluid phase viscosity wrt temperature at the nodes
-  MaterialProperty<Real> & _dviscosity_dt;
+  MaterialProperty<Real> & _dviscosity_nodal_dt;
 
   /// Molar mass of water (kg/mol)
   Real _Mh2o;
