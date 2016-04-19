@@ -24,9 +24,9 @@ PorousFlowMaterialDensityConstBulk::PorousFlowMaterialDensityConstBulk(const Inp
 
     _dens0(getParam<Real>("density0")),
     _bulk(getParam<Real>("bulk_modulus")),
-    _density(declareProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _density_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _ddensity_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num), _pressure_variable_name)),
+    _density_nodal(declareProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
+    _density_nodal_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
+    _ddensity_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num), _pressure_variable_name)),
     _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num))),
     _ddensity_qp_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num), _pressure_variable_name))
 {
@@ -35,15 +35,15 @@ PorousFlowMaterialDensityConstBulk::PorousFlowMaterialDensityConstBulk(const Inp
 void
 PorousFlowMaterialDensityConstBulk::initQpStatefulProperties()
 {
-  _density[_qp] = _dens0 * std::exp(_porepressure_nodal[_qp][_phase_num] / _bulk);
+  _density_nodal[_qp] = _dens0 * std::exp(_porepressure_nodal[_qp][_phase_num] / _bulk);
 }
 
 void
 PorousFlowMaterialDensityConstBulk::computeQpProperties()
 {
   /// Density and derivatives wrt pressure at the nodes
-  _density[_qp] = density(_porepressure_nodal[_qp][_phase_num]);
-  _ddensity_dp[_qp] = dDensity_dP(_porepressure_nodal[_qp][_phase_num]);
+  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num]);
+  _ddensity_nodal_dp[_qp] = dDensity_dP(_porepressure_nodal[_qp][_phase_num]);
 
   /// Density and derivatives wrt pressure at the qps
   _density_qp[_qp] = density(_porepressure_qp[_qp][_phase_num]);

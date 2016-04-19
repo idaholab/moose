@@ -53,11 +53,11 @@ protected:
   /// constant bulk modulus
   const Real _bulk;
   /// Fluid phase density at the nodes
-  MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _density_nodal;
   /// Old fluid phase density at the nodes
-  MaterialProperty<Real> & _density_old;
+  MaterialProperty<Real> & _density_nodal_old;
   /// Derivative of fluid density wrt phase pore pressure at the nodes
-  MaterialProperty<Real> & _ddensity_dp;
+  MaterialProperty<Real> & _ddensity_nodal_dp;
   /// Fluid phase density at the qps
   MaterialProperty<Real> & _density_qp;
   /// Derivative of fluid density wrt phase pore pressure at the qps

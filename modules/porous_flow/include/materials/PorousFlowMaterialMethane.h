@@ -89,13 +89,13 @@ protected:
   std::vector<Real> henryConstants() const;
 
   /// Fluid phase density at the nodes
-  MaterialProperty<Real> & _density;
+  MaterialProperty<Real> & _density_nodal;
   /// Old fluid phase density at the nodes
-  MaterialProperty<Real> & _density_old;
+  MaterialProperty<Real> & _density_nodal_old;
   /// Derivative of fluid density wrt phase pore pressure at the nodes
-  MaterialProperty<Real> & _ddensity_dp;
+  MaterialProperty<Real> & _ddensity_nodal_dp;
   /// Derivative of fluid density wrt temperature at the nodes
-  MaterialProperty<Real> & _ddensity_dt;
+  MaterialProperty<Real> & _ddensity_nodal_dt;
   /// Fluid phase density at the qps
   MaterialProperty<Real> & _density_qp;
   /// Derivative of fluid density wrt phase pore pressure at the qps
@@ -103,9 +103,9 @@ protected:
   /// Derivative of fluid density wrt temperature at the qps
   MaterialProperty<Real> & _ddensity_qp_dt;
   /// Fluid phase viscosity at the nodes
-  MaterialProperty<Real> & _viscosity;
+  MaterialProperty<Real> & _viscosity_nodal;
   /// Derivative of fluid phase viscosity wrt temperature at the nodes
-  MaterialProperty<Real> & _dviscosity_dt;
+  MaterialProperty<Real> & _dviscosity_nodal_dt;
   /// Methane molar mass (kg/mol)
   Real _Mch4;
 };
