@@ -32,8 +32,8 @@ protected:
 
   unsigned int _component_index;
 
-  /// holds info on the Richards variables
-  const PorousFlowDictator & _porflow_name_UO;
+  /// holds info on the PorousFlow variables
+  const PorousFlowDictator & _dictator_UO;
 
   const MaterialProperty<Real> & _porosity;
 
