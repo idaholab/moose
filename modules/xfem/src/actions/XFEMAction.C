@@ -61,7 +61,7 @@ XFEMAction::act()
   MooseSharedPointer<XFEMInterface> xfem_interface = _problem->getXFEM();
   if (xfem_interface == NULL)
   {
-    MooseSharedPointer<XFEM> new_xfem (new XFEM(_problem->getMooseApp()));
+    MooseSharedPointer<XFEM> new_xfem (new XFEM(_problem->getMooseApp(), _problem));
     _problem->initXFEM(new_xfem);
     xfem_interface = _problem->getXFEM();
   }
