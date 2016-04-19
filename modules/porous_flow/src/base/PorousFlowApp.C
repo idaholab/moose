@@ -21,6 +21,7 @@
 #include "PorousFlowMaterial2PhasePP_VG.h"
 #include "PorousFlowMaterialDensityConstBulk.h"
 #include "PorousFlowMaterialPorosityConst.h"
+#include "PorousFlowPorosityHM.h"
 #include "PorousFlowMaterialMassFractionBuilder.h"
 #include "PorousFlowMaterialPermeabilityConst.h"
 #include "PorousFlowMaterialRelativePermeabilityBase.h"
@@ -100,6 +101,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterial2PhasePP_VG);
   registerMaterial(PorousFlowMaterialDensityConstBulk);
   registerMaterial(PorousFlowMaterialPorosityConst);
+  registerMaterial(PorousFlowPorosityHM);
   registerMaterial(PorousFlowMaterialMassFractionBuilder);
   registerMaterial(PorousFlowMaterialPermeabilityConst);
   registerMaterial(PorousFlowMaterialCapillaryPressureBase);

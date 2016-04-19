@@ -27,6 +27,7 @@ PorousFlowMassVolumetricExpansion::PorousFlowMassVolumetricExpansion(const Input
   _disp_var_num(_ndisp),
   _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
   _dporosity_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar")),
+  _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar")),
   _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
   _dfluid_density_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
   _fluid_saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation")),
@@ -41,7 +42,6 @@ PorousFlowMassVolumetricExpansion::PorousFlowMassVolumetricExpansion(const Input
     _disp_var_num[i] = coupled("displacements", i);
 }
 
-/// Note that this kernel lumps the mass terms to the nodes, so that there is no mass at the qp's.
 Real
 PorousFlowMassVolumetricExpansion::computeQpResidual()
 {
@@ -53,7 +53,7 @@ PorousFlowMassVolumetricExpansion::computeQpResidual()
   for (unsigned ph = 0; ph < num_phases; ++ph)
     mass += _fluid_density[_i][ph]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index];
 
-  return _test[_i][_qp] * mass * _porosity[_qp] * _strain_rate[_qp].trace();
+  return _test[_i][_qp] * mass * _porosity[_i] * _strain_rate[_qp].trace();
 }
 
 Real
@@ -82,24 +82,25 @@ PorousFlowMassVolumetricExpansion::computedVolQpJac(unsigned int jvar)
     if (jvar == _disp_var_num[i])
       dvol = _grad_phi[_j][_qp](i);
 
-  return _test[_i][_qp] * mass * _porosity[_qp] * dvol/_dt;
+  return _test[_i][_qp] * mass * _porosity[_i] * dvol/_dt;
 }
 Real
 PorousFlowMassVolumetricExpansion::computedMassQpJac(unsigned int jvar)
 {
-  /// If the variable is not a PorousFlow variable, the OffDiag Jacobian terms are 0
   if (_dictator_UO.not_porflow_var(jvar))
     return 0.0;
 
-  unsigned int pvar = _dictator_UO.porflow_var_num(jvar);
+  const unsigned int pvar = _dictator_UO.porflow_var_num(jvar);
 
-  /// As mass is lumped to the nodes, only non-zero terms are for _i==_j
-  if (_i != _j)
-    return 0.0;
-
-  unsigned int num_phases = _fluid_density[_i].size();
-
+  const unsigned int num_phases = _fluid_density[_i].size();
   Real dmass = 0.0;
+  for (unsigned ph = 0; ph < num_phases; ++ph)
+    dmass += _fluid_density[_i][ph]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index]*_dporosity_dgradvar[_i][pvar]*_grad_phi[_j][_i];
+
+  if (_i != _j)
+    return _test[_i][_qp]*dmass*_strain_rate[_qp].trace();
+
+
   for (unsigned ph = 0; ph < num_phases; ++ph)
   {
     dmass += _dfluid_density_dvar[_i][ph][pvar]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index]*_porosity[_i];

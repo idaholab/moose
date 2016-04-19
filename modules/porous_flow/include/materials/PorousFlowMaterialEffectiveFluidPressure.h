@@ -53,11 +53,29 @@ protected:
   /// d(quadpoint saturation)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_qp_dvar;
 
-  /// computed effective fluid pressure (at quadpoints)
-  MaterialProperty<Real> & _pf;
+  /// nodal porepressure of each phase
+  const MaterialProperty<std::vector<Real> > & _porepressure_nodal;
 
-  /// d(_pf)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dpf_dvar;
+  /// d(nodal porepressure)/d(PorousFlow variable)
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_nodal_dvar;
+
+  /// nodal saturation of each phase
+  const MaterialProperty<std::vector<Real> > & _saturation_nodal;
+
+  /// d(nodal saturation)/d(PorousFlow variable)
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_nodal_dvar;
+
+  /// computed effective fluid pressure (at quadpoints)
+  MaterialProperty<Real> & _pf_qp;
+
+  /// d(_pf_qp)/d(PorousFlow variable)
+  MaterialProperty<std::vector<Real> > & _dpf_qp_dvar;
+
+  /// computed effective fluid pressure (at nodes)
+  MaterialProperty<Real> & _pf_nodal;
+
+  /// d(_pf_nodal)/d(PorousFlow variable)
+  MaterialProperty<std::vector<Real> > & _dpf_nodal_dvar;
 
   virtual void computeQpProperties();
 };

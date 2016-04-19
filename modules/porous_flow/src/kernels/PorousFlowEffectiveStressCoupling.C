@@ -25,8 +25,8 @@ PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(const Input
   _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
   _coefficient(getParam<Real>("biot_coefficient")),
   _component(getParam<unsigned int>("component")),
-  _pf(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure")),
-  _dpf_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_dvar"))
+  _pf(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
+  _dpf_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_qp_dvar"))
 {
   if (_component >= _mesh.dimension())
     mooseError("PorousFlowEffectiveStressCoupling: component should not be greater than the mesh dimension\n");

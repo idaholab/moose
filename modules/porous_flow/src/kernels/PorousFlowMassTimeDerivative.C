@@ -40,7 +40,6 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
     mooseError("The Dictator proclaims that the number of components in this simulation is " << _porflow_name_UO.num_components() << " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = " << _component_index << ".  The Dictator does not take such mistakes lightly");
 }
 
-/// Note that this kernel lumps the mass terms to the nodes, so that there is no mass at the qp's.
 Real
 PorousFlowMassTimeDerivative::computeQpResidual()
 {
@@ -80,13 +79,19 @@ PorousFlowMassTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 Real
 PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
 {
-  /// As mass is lumped to the nodes, only non-zero terms are for _i==_j
-  if (_i != _j)
-    return 0.0;
+  const unsigned int num_phases = _fluid_density[_i].size();
 
-  unsigned int num_phases = _fluid_density[_i].size();
-
+  // porosity is dependent on variables that are lumped to the nodes,
+  // but it can depend on the gradient
+  // of variables, which are NOT lumped to the nodes, hence:
   Real dmass = 0.0;
+  for (unsigned ph = 0; ph < num_phases; ++ph)
+    dmass += _fluid_density[_i][ph]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index]*_dporosity_dgradvar[_i][pvar]*_grad_phi[_j][_i];
+
+  if (_i != _j)
+    return _test[_i][_qp]*dmass/_dt;
+
+  /// As the fluid mass is lumped to the nodes, only non-zero terms are for _i==_j
   for (unsigned ph = 0; ph < num_phases; ++ph)
   {
     dmass += _dfluid_density_dvar[_i][ph][pvar]*_fluid_saturation[_i][ph]*_mass_frac[_i][ph][_component_index]*_porosity[_i];
