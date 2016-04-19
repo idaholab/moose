@@ -62,8 +62,6 @@
 #include "OutOfPlaneStress.h"
 #include "StressDivergenceRZ.h"
 #include "StressDivergenceRSpherical.h"
-#include "StressDivergenceTruss.h"
-#include "TrussMaterial.h"
 #include "RateDepSmearCrackModel.h"
 #include "RateDepSmearIsoCrackModel.h"
 
@@ -136,7 +134,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(PowerLawCreep);
   registerMaterial(PowerLawCreepModel);
   registerMaterial(SolidModel);
-  registerMaterial(TrussMaterial);
   registerMaterial(RateDepSmearCrackModel);
   registerMaterial(RateDepSmearIsoCrackModel);
 
@@ -146,7 +143,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerKernel(OutOfPlaneStress);
   registerKernel(StressDivergenceRZ);
   registerKernel(StressDivergenceRSpherical);
-  registerKernel(StressDivergenceTruss);
 
   registerPostprocessor(HomogenizedElasticConstants);
   registerPostprocessor(JIntegral);
