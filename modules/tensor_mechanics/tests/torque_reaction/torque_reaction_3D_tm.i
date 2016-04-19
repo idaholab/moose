@@ -159,8 +159,8 @@
 
   l_max_its = 30
   nl_max_its = 20
-  nl_abs_tol = 1e-12
-  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-14
+  nl_rel_tol = 1e-12
   l_tol = 1e-8
 
   start_time = 0.0
