@@ -33,11 +33,11 @@ protected:
   /// Phase number of fluid that this relative permeability relates to
   const unsigned int _phase_num;
   /// Pore pressure at the nodes
-  const MaterialProperty<std::vector<Real> > & _porepressure;
+  const MaterialProperty<std::vector<Real> > & _porepressure_nodal;
   /// Pore pressure at the qps
   const MaterialProperty<std::vector<Real> > & _porepressure_qp;
   /// Fluid temperature at the nodes
-  const MaterialProperty<std::vector<Real> > & _temperature;
+  const MaterialProperty<std::vector<Real> > & _temperature_nodal;
   /// Fluid temperature at the qps
   const MaterialProperty<std::vector<Real> > & _temperature_qp;
   /// The PorousFlowDictator UserObject

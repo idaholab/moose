@@ -31,15 +31,13 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   unsigned int _component_index;
 
-  /// holds info on the Richards variables
-  const PorousFlowDictator & _porflow_name_UO;
+  /// holds info on the PorousFlow variables
+  const PorousFlowDictator & _dictator_UO;
 
   bool _var_is_porflow_var;
 
@@ -57,11 +55,11 @@ protected:
 
   const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_density_dvar;
 
-  const MaterialProperty<std::vector<Real> > & _fluid_saturation;
+  const MaterialProperty<std::vector<Real> > & _fluid_saturation_nodal;
 
-  const MaterialProperty<std::vector<Real> > & _fluid_saturation_old;
+  const MaterialProperty<std::vector<Real> > & _fluid_saturation_nodal_old;
 
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_saturation_dvar;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_saturation_nodal_dvar;
 
   const MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
 

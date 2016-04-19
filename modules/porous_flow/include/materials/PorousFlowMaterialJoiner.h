@@ -50,11 +50,11 @@ protected:
   /// Name of material property to be joined
   const std::string _pf_prop;
   /// Derivatives of nodal porepressure variable wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_dvar;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_nodal_dvar;
   /// Derivatives of nodal saturation variable wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_dvar;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_nodal_dvar;
   /// Derivatives of nodal temperature variable wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_dvar;
+  const MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_nodal_dvar;
   /// Derivatives of quadpoint porepressure variable wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_qp_dvar;
   /// Derivatives of quadpoint saturation variable wrt PorousFlow variables

@@ -25,7 +25,7 @@ PorousFlowMaterialRelativePermeabilityBase::PorousFlowMaterialRelativePermeabili
   _phase_num(getParam<unsigned int>("phase")),
   _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
   _saturation_variable_name(_dictator_UO.saturationVariableNameDummy()),
-  _saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation")),
+  _saturation_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
   _relative_permeability(declareProperty<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num))),
   _drelative_permeability_ds(declarePropertyDerivative<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num), _saturation_variable_name))
 {

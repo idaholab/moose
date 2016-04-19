@@ -7,7 +7,6 @@
 // Kernels
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowAdvectiveFlux.h"
-#include "PorousFlowTestKernel.h"
 #include "PorousFlowEffectiveStressCoupling.h"
 #include "PorousFlowMassVolumetricExpansion.h"
 
@@ -15,6 +14,7 @@
 #include "PorousFlowDictator.h"
 
 // Materials
+#include "PorousFlowStateBase.h"
 #include "PorousFlowMaterial1PhaseP_VG.h"
 #include "PorousFlowMaterial1PhaseMD_Gaussian.h"
 #include "PorousFlowMaterial2PhasePS.h"
@@ -39,6 +39,7 @@
 #include "PorousFlowMaterialIdealGas.h"
 #include "PorousFlowMaterialMethane.h"
 #include "PorousFlowMaterialWater.h"
+#include "PorousFlowMaterialBrine.h"
 
 // Postprocessors
 #include "PorousFlowFluidMass.h"
@@ -87,7 +88,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   // Kernels
   registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowAdvectiveFlux);
-  registerKernel(PorousFlowTestKernel);
   registerKernel(PorousFlowEffectiveStressCoupling);
   registerKernel(PorousFlowMassVolumetricExpansion);
 
@@ -95,6 +95,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerUserObject(PorousFlowDictator);
 
   // Materials
+  registerMaterial(PorousFlowStateBase);
   registerMaterial(PorousFlowMaterial1PhaseP_VG);
   registerMaterial(PorousFlowMaterial1PhaseMD_Gaussian);
   registerMaterial(PorousFlowMaterial2PhasePS);
@@ -119,6 +120,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMaterialIdealGas);
   registerMaterial(PorousFlowMaterialMethane);
   registerMaterial(PorousFlowMaterialWater);
+  registerMaterial(PorousFlowMaterialBrine);
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);

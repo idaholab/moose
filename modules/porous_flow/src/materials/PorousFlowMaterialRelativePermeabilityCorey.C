@@ -32,6 +32,6 @@ PorousFlowMaterialRelativePermeabilityCorey::PorousFlowMaterialRelativePermeabil
 void
 PorousFlowMaterialRelativePermeabilityCorey::computeQpProperties()
 {
-  _relative_permeability[_qp] = std::pow(_saturation[_qp][_phase_num], _n);
-  _drelative_permeability_ds[_qp] = _n * std::pow(_saturation[_qp][_phase_num], _n - 1.0);
+  _relative_permeability[_qp] = std::pow(_saturation_nodal[_qp][_phase_num], _n);
+  _drelative_permeability_ds[_qp] = _n * std::pow(_saturation_nodal[_qp][_phase_num], _n - 1.0);
 }

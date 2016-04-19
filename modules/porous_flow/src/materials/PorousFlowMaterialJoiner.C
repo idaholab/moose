@@ -33,9 +33,9 @@ PorousFlowMaterialJoiner::PorousFlowMaterialJoiner(const InputParameters & param
     _num_phases(_dictator_UO.num_phases()),
     _pf_prop(getParam<std::string>("material_property")),
 
-    _dporepressure_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_dvar")),
-    _dsaturation_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_dvar")),
-    _dtemperature_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_dvar")),
+    _dporepressure_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
+    _dsaturation_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
+    _dtemperature_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_nodal_dvar")),
     _dporepressure_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),
     _dsaturation_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar")),
     _dtemperature_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_qp_dvar")),
@@ -82,9 +82,9 @@ PorousFlowMaterialJoiner::computeQpProperties()
       }
       else
       {
-        _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dp[ph])[_qp] * _dporepressure_dvar[_qp][ph][v];
-        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_ds[ph])[_qp] * _dsaturation_dvar[_qp][ph][v];
-        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][ph][v];
+        _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dp[ph])[_qp] * _dporepressure_nodal_dvar[_qp][ph][v];
+        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_ds[ph])[_qp] * _dsaturation_nodal_dvar[_qp][ph][v];
+        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_nodal_dvar[_qp][ph][v];
       }
     }
   }
