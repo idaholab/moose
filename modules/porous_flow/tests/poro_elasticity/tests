@@ -5,9 +5,9 @@
     exodiff = vol_expansion.e
   [../]
   [./undrained_oedometer]
-    type = Exodiff
+    type = CSVDiff
     input = undrained_oedometer.i
-    exodiff = undrained_oedometer.e
+    csvdiff = undrained_oedometer.csv
   [../]
   #[./mandel]
   #  type = CSVDiff
