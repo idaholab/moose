@@ -4,6 +4,11 @@
     input = vol_expansion.i
     exodiff = vol_expansion.e
   [../]
+  [./undrained_oedometer]
+    type = Exodiff
+    input = undrained_oedometer.i
+    exodiff = undrained_oedometer.e
+  [../]
   #[./mandel]
   #  type = CSVDiff
   #  input = mandel.i

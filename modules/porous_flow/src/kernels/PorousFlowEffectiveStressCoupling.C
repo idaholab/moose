@@ -29,7 +29,7 @@ PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(const Input
   _dpf_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_qp_dvar"))
 {
   if (_component >= _mesh.dimension())
-    mooseError("PorousFlowEffectiveStressCoupling: component should not be greater than the mesh dimension\n");
+    mooseError("PorousFlowEffectiveStressCoupling: component should not be greater than the mesh dimension");
 }
 
 Real
