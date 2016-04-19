@@ -27,24 +27,24 @@ KKSMultiACBulkF::KKSMultiACBulkF(const InputParameters & parameters) :
 Real
 KKSMultiACBulkF::computeDFDOP(PFFunctionType type)
 {
-  Real res = 0.0;
+  Real sum = 0.0;
 
   switch (type)
   {
     case Residual:
     {
       for (unsigned int n = 0; n < _num_Fj; ++n)
-        res += (*_prop_dhjdetai[n])[_qp] * (*_prop_Fj[n])[_qp];
+        sum += (*_prop_dhjdetai[n])[_qp] * (*_prop_Fj[n])[_qp];
 
-      return res + _wi * _prop_dgi[_qp];
+      return sum + _wi * _prop_dgi[_qp];
     }
 
     case Jacobian:
     {
       for (unsigned int n = 0; n < _num_Fj; ++n)
-        res += (*_prop_d2hjdetai2[n])[_qp] * (*_prop_Fj[n])[_qp];
+        sum += (*_prop_d2hjdetai2[n])[_qp] * (*_prop_Fj[n])[_qp];
 
-      return _phi[_j][_qp] * res + _wi * _prop_d2gi[_qp];
+      return _phi[_j][_qp] * sum + _wi * _prop_d2gi[_qp];
     }
   }
 

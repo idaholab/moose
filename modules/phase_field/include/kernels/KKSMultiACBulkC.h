@@ -48,16 +48,11 @@ protected:
   //
   /// Derivative of the free energy function \f$ \frac d{dc_1} F_1 \f$
   const MaterialProperty<Real> & _prop_dF1dc1;
-  //
-  // /// Second derivative of the free energy function \f$ \frac {d^2}{dc_a^2} F_a \f$
-  // const MaterialProperty<Real> & _prop_d2Fadca2;
-  //
-  // /// Second derivative of the free energy function \f$ \frac {d^2}{dc_b^2} F_b \f$
-  // const MaterialProperty<Real> & _prop_d2Fbdcb2;
-  //
-  // /// Mixed partial derivatives of the free energy function wrt ca and
-  // /// any other coupled variables \f$ \frac {d^2}{dc_a dq} F_a \f$
-  // std::vector<const MaterialProperty<Real>* > _prop_d2Fadcadarg;
+  /// Second derivative of the free energy function \f$ \frac {d^2}{dc_1^2} F_1 \f$
+  const MaterialProperty<Real> & _prop_d2F1dc12;
+  /// Mixed partial derivatives of the free energy function wrt c1 and
+  /// any other coupled variables \f$ \frac {d^2}{dc_1 dv} F_1 \f$
+  std::vector<const MaterialProperty<Real>* > _prop_d2F1dc1darg;
 };
 
 #endif //KKSMULTIACBULKC_H
