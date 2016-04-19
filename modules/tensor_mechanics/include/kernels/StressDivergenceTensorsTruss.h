@@ -4,55 +4,46 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef STRESSDIVERGENCETRUSS_H
-#define STRESSDIVERGENCETRUSS_H
+#ifndef STRESSDIVERGENCETENSORSTRUSS_H
+#define STRESSDIVERGENCETENSORSTRUSS_H
 
 #include "Kernel.h"
 
 //Forward Declarations
-class ColumnMajorMatrix;
-class SymmElasticityTensor;
-class SymmTensor;
+class StressDivergenceTensorsTruss;
 
-class StressDivergenceTruss : public Kernel
+template<>
+InputParameters validParams<StressDivergenceTensorsTruss>();
+
+class StressDivergenceTensorsTruss : public Kernel
 {
 public:
-
-  StressDivergenceTruss(const InputParameters & parameters);
-    virtual ~StressDivergenceTruss() {}
+  StressDivergenceTensorsTruss(const InputParameters & parameters);
+  virtual ~StressDivergenceTensorsTruss() {}
 
 protected:
   virtual void initialSetup();
   virtual void computeResidual();
   virtual Real computeQpResidual() {return 0;}
-
+  virtual Real computeStiffness(unsigned int i, unsigned int j);
   virtual void computeJacobian();
-
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
-  void computeStiffness(ColumnMajorMatrix & stiff_global);
+  std::string _base_name;
 
   const MaterialProperty<Real> & _axial_stress;
-  const MaterialProperty<Real> & _E_over_L;
+  const MaterialProperty<Real> & _e_over_l;
 
 private:
   const unsigned int _component;
-
-  const bool _xdisp_coupled;
-  const bool _ydisp_coupled;
-  const bool _zdisp_coupled;
+  const unsigned int _ndisp;
   const bool _temp_coupled;
 
-  const unsigned int _xdisp_var;
-  const unsigned int _ydisp_var;
-  const unsigned int _zdisp_var;
   const unsigned int _temp_var;
+  std::vector<unsigned int> _disp_var;
 
   const VariableValue & _area;
   const std::vector<RealGradient> * _orientation;
 };
 
-template<>
-InputParameters validParams<StressDivergenceTruss>();
-
-#endif //STRESSDIVERGENCETRUSS_H
+#endif //STRESSDIVERGENCETENSORSTRUSS_H

@@ -15,37 +15,35 @@ class TrussMaterial;
 template<>
 InputParameters validParams<TrussMaterial>();
 
-/**
- * LinearIsotropic material for use in simple applications that don't need material properties.
- */
 class TrussMaterial : public Material
 {
 public:
   TrussMaterial(const InputParameters & parameters);
 
-  virtual ~TrussMaterial();
-
 protected:
-
-  MooseVariable * _disp_x_var;
-  MooseVariable * _disp_y_var;
-  MooseVariable * _disp_z_var;
-
-
+  virtual void initQpStatefulProperties();
   virtual void computeProperties();
 
-  MaterialProperty<Real> & _axial_stress;
-  MaterialProperty<Real> & _e_over_l;
-  Real _youngs_modulus;
+  virtual void computeQpStrain() = 0;
+  virtual void computeQpStress() = 0;
+
+  std::vector<MooseVariable *> _disp_var;
+
+  std::string _base_name;
+
+  unsigned int _ndisp;
+  const Real _my_youngs_modulus;
   bool _youngs_modulus_coupled;
   const VariableValue & _youngs_modulus_var;
 
-  bool _has_temp;
-  const VariableValue & _temp;
-  Real _t_ref;
-  Real _alpha;
+  MaterialProperty<Real> & _total_stretch;
+  MaterialProperty<Real> & _elastic_stretch;
+  MaterialProperty<Real> & _axial_stress;
+  MaterialProperty<Real> & _e_over_l;
 
-  unsigned int _dim;
+  Real _origin_length;
+  Real _current_length;
+  Real _youngs_modulus;
 };
 
 #endif //TRUSSMATERIAL_H

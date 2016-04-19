@@ -1,5 +1,5 @@
 #
-# Truss
+# Truss in two dimensional space
 #
 # The truss is made of five equilateral triangles supported at each end.
 # The truss starts at (0,0).  At (1,0), there is a point load of 25.
@@ -16,7 +16,7 @@
 
 [Mesh]
   type = FileMesh
-  file = truss.e
+  file = truss_2d.e
   displacements = 'disp_x disp_y'
 []
 
@@ -43,7 +43,7 @@
   [./area]
     order = CONSTANT
     family = MONOMIAL
-#    initial_condition = 1.0
+#    initial_condition = 1.0 
   [../]
   [./react_x]
     order = FIRST
@@ -77,7 +77,7 @@
     type = DirichletBC
     variable = disp_x
     boundary = 1
-    value = 0.0
+    value = 0
   [../]
   [./fixy1]
     type = DirichletBC
@@ -85,7 +85,6 @@
     boundary = 1
     value = 0
   [../]
-
 
   [./fixy4]
     type = DirichletBC
@@ -152,22 +151,20 @@
 
 [Kernels]
   [./solid_x]
-    type = StressDivergenceTruss
+    type = StressDivergenceTensorsTruss
     block = 1
-    variable = disp_x
-    disp_x = disp_x
-    disp_y = disp_y
+    displacements = 'disp_x disp_y'
     component = 0
+    variable = disp_x
     area = area
     save_in = react_x
   [../]
   [./solid_y]
-    type = StressDivergenceTruss
+    type = StressDivergenceTensorsTruss
     block = 1
-    variable = disp_y
+    displacements = 'disp_x disp_y'
     component = 1
-    disp_x = disp_x
-    disp_y = disp_y
+    variable = disp_y
     area = area
     save_in = react_y
   [../]
@@ -175,11 +172,10 @@
 
 [Materials]
   [./linelast]
-    type = TrussMaterial
+    type = LinearElasticTruss
     block = 1
-    disp_x = disp_x
-    disp_y = disp_y
     youngs_modulus = 1e6
+    displacements = 'disp_x disp_y'
   [../]
 []
 
