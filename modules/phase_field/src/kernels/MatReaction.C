@@ -33,7 +33,7 @@ MatReaction::MatReaction(const InputParameters & parameters) :
   // Get reaction rate derivatives
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariable *ivar = _coupled_moose_vars[i];
+    MooseVariable * ivar = _coupled_moose_vars[i];
     _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", ivar->name());
   }
 }

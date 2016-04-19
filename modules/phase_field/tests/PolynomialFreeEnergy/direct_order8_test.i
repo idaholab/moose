@@ -34,7 +34,6 @@
     type = CahnHilliard
     variable = c
     f_name = F
-    args = c
   [../]
   [./gradient_energy]
     type = CHInterface

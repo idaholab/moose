@@ -23,8 +23,8 @@ InputParameters validParams<ParsedAux>()
 
   params.addRequiredParam<std::string>("function", "function expression");
   params.addCoupledVar("args", "coupled variables");
-  params.addParam<std::vector<std::string> >("constant_names", std::vector<std::string>(), "Vector of constants used in the parsed function (use this for kB etc.)");
-  params.addParam<std::vector<std::string> >( "constant_expressions", std::vector<std::string>(), "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<std::string> >("constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string> >("constant_expressions", "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;
 }

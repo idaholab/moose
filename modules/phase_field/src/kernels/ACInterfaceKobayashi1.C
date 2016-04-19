@@ -40,9 +40,10 @@ ACInterfaceKobayashi1::ACInterfaceKobayashi1(const InputParameters & parameters)
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < nvar; ++i)
   {
-    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _coupled_moose_vars[i]->name());
-    _depsdarg[i] = &getMaterialPropertyDerivative<Real>("eps_name", _coupled_moose_vars[i]->name());
-    _ddepsdarg[i] = &getMaterialPropertyDerivative<Real>("deps_name", _coupled_moose_vars[i]->name());
+    const VariableName iname = _coupled_moose_vars[i]->name();
+    _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", iname);
+    _depsdarg[i] = &getMaterialPropertyDerivative<Real>("eps_name", iname);
+    _ddepsdarg[i] = &getMaterialPropertyDerivative<Real>("deps_name", iname);
   }
 }
 
