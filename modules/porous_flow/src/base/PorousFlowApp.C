@@ -7,7 +7,6 @@
 // Kernels
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowAdvectiveFlux.h"
-#include "PorousFlowTestKernel.h"
 #include "PorousFlowEffectiveStressCoupling.h"
 #include "PorousFlowMassVolumetricExpansion.h"
 
@@ -88,7 +87,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   // Kernels
   registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowAdvectiveFlux);
-  registerKernel(PorousFlowTestKernel);
   registerKernel(PorousFlowEffectiveStressCoupling);
   registerKernel(PorousFlowMassVolumetricExpansion);
 
