@@ -17,6 +17,7 @@
 #include "PressureAction.h"
 
 #include "StressDivergenceTensors.h"
+#include "StressDivergenceTensorsTruss.h"
 #include "CosseratStressDivergenceTensors.h"
 #include "StressDivergenceRZTensors.h"
 #include "StressDivergenceRSphericalTensors.h"
@@ -27,6 +28,7 @@
 #include "DynamicStressDivergenceTensors.h"
 
 #include "LinearElasticMaterial.h"
+#include "LinearElasticTruss.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
 #include "FiniteStrainRatePlasticMaterial.h"
@@ -149,6 +151,7 @@ void
 TensorMechanicsApp::registerObjects(Factory & factory)
 {
   registerKernel(StressDivergenceTensors);
+  registerKernel(StressDivergenceTensorsTruss);
   registerKernel(CosseratStressDivergenceTensors);
   registerKernel(StressDivergenceRZTensors);
   registerKernel(StressDivergenceRSphericalTensors);
@@ -160,6 +163,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(DynamicStressDivergenceTensors);
 
   registerMaterial(LinearElasticMaterial);
+  registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
   registerMaterial(FiniteStrainMohrCoulomb);

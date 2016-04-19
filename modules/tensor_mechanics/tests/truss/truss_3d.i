@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = twoTrussLine.e
+  file = truss_3d.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -20,7 +20,7 @@
 []
 
 [AuxVariables]
-  [./axial_stress]
+ [./axial_stress]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -31,7 +31,7 @@
   [./area]
     order = CONSTANT
     family = MONOMIAL
-#    initial_condition = 1.0
+#    initial_condition = 1.0 
   [../]
   [./react_x]
     order = FIRST
@@ -141,7 +141,6 @@
 
 [Executioner]
   type = Transient
-
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'jacobi   101'
@@ -158,35 +157,29 @@
 
 [Kernels]
   [./solid_x]
-    type = StressDivergenceTruss
+    type = StressDivergenceTensorsTruss
     block = '1 2'
-    variable = disp_x
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
     component = 0
+    variable = disp_x
     area = area
     save_in = react_x
   [../]
   [./solid_y]
-    type = StressDivergenceTruss
+    type = StressDivergenceTensorsTruss
     block = '1 2'
-    variable = disp_y
+    displacements = 'disp_x disp_y disp_z'
     component = 1
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    variable = disp_y
     area = area
     save_in = react_y
   [../]
   [./solid_z]
-    type = StressDivergenceTruss
+    type = StressDivergenceTensorsTruss
     block = '1 2'
-    variable = disp_z
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
     component = 2
+    variable = disp_z
     area = area
     save_in = react_z
   [../]
@@ -194,19 +187,16 @@
 
 [Materials]
   [./linelast]
-    type = TrussMaterial
+    type = LinearElasticTruss
     block = '1 2'
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     youngs_modulus = 1e6
-#    thermal_expansion = 0.1
-#    t_ref = 0.5
-#    temp = temp
+    displacements = 'disp_x disp_y disp_z'
+#    thermal_expansion_coeff = 0.1
+#    temperature_ref = 0.5
+#    temperature = temp
   [../]
 []
 
 [Outputs]
-  file_base = solid_mech_truss_out
   exodus = true
 []
