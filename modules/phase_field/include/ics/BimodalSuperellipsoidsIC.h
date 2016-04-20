@@ -37,15 +37,27 @@ public:
   virtual void computeSuperellipsoidExponents();
 
 protected:
+  /// Variables to describe the specified (larger) superellipsoids
+  std::vector<Real> _x_positions;
+  std::vector<Real> _y_positions;
+  std::vector<Real> _z_positions;
+  std::vector<Real> _input_as;
+  std::vector<Real> _input_bs;
+  std::vector<Real> _input_cs;
+  std::vector<Real> _input_ns;
 
-  unsigned int _numbub;
-  Real _bubspac;
+  unsigned int _npart;
+  Real _small_spac;
+  Real _large_spac;
+
+  Real _small_a;
+  Real _small_b;
+  Real _small_c;
+  Real _small_n;
+  Real _size_variation;
+  MooseEnum _size_variation_type;
 
   unsigned int _numtries;
-  Real _radius;
-  Real _radius_variation;
-  MooseEnum _radius_variation_type;
-
   Point _bottom_left;
   Point _top_right;
   Point _range;
