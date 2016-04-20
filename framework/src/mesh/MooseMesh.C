@@ -687,8 +687,8 @@ MooseMesh::nodeToElemMap()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     if (!_node_to_elem_map_built)
     {
-      MeshBase::const_element_iterator el = getMesh().elements_begin();
-      const MeshBase::const_element_iterator end = getMesh().elements_end();
+      MeshBase::const_element_iterator el = getMesh().active_elements_begin();
+      const MeshBase::const_element_iterator end = getMesh().active_elements_end();
 
       for (; el != end; ++el)
         for (unsigned int n = 0; n < (*el)->n_nodes(); n++)
