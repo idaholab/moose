@@ -8,12 +8,13 @@
     type = 'Exodiff'
     input = 'torque_reaction_3D_tm.i'
     exodiff = 'torque_reaction_3D_tm_out.e'
+    abs_zero = 1.e-8
   [../]
   [./torque_reaction_cylinder]
     type = 'Exodiff'
     input = 'torque_reaction_cylinder.i'
     exodiff = 'torque_reaction_cylinder_out.e'
-    abs_zero = 5e-7
+    abs_zero = 5.e-7
   [../]
   [./disp_about_axis_motion]
     type = 'Exodiff'
