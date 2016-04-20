@@ -1,0 +1,9 @@
+[Tests]
+  [./contact_initial_adaptivity]
+    type = 'Exodiff'
+    input = 'contact_initial_adaptivity.i'
+    exodiff = 'contact_initial_adaptivity_out.e'
+    abs_zero = 1e-10
+    superlu = true
+  [../]
+[]

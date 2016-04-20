@@ -1,0 +1,22 @@
+## /Applications/Cubit-14.0/Cubit.app/Contents/MacOS/cubitclx
+## Cubit Version 14.0
+## Cubit Build 387010
+## Revised 2013-06-11 10:13:37 -0600 (Tue, 11 Jun 2013)
+## Running 04/20/2016 08:24:25 AM
+## Command Options:
+## -warning = On
+## -information = On
+create surface rectangle width 0.5 height 2
+create surface rectangle width 0.5 height 1.25
+volume 1 move x 0.25
+volume 2 move x 0.75
+volume all size 0.25
+mesh surface all
+block 1 surface 1
+block 2 surface 2
+block all element type QUAD4
+sideset 1 curve 2
+sideset 2 curve 4
+sideset 3 curve 6
+sideset 4 curve 8
+export mesh "2blocks.e" overwrite
