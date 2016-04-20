@@ -27,4 +27,11 @@
     max_parallel = 1
     compiler = "GCC CLANG"
   [../]
+
+  [./filetimesequence]
+    type = 'Exodiff'
+    prereq = timesequence_no_start_time
+    input = 'filetimesequence.i'
+    exodiff = 'filetimesequence_out.e'
+  [../]
 []
