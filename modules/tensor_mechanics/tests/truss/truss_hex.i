@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = trussTest.e
+  file = truss_hex.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -79,7 +79,6 @@
     boundary = 1
     value = 0
   [../]
-
 
   [./fixx2]
     type = DirichletBC
@@ -179,76 +178,76 @@
 []
 
 [Kernels]
-  [./solid_x]
-    type = StressDivergenceTruss
+  [./truss_x]
+    type = StressDivergenceTensorsTruss
     block = '1 2'
     variable = disp_x
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
     component = 0
     area = area
     save_in = react_x
   [../]
-  [./solid_y]
-    type = StressDivergenceTruss
+  [./truss_y]
+    type = StressDivergenceTensorsTruss
     block = '1 2'
     variable = disp_y
     component = 1
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
     area = area
     save_in = react_y
   [../]
-  [./solid_z]
-    type = StressDivergenceTruss
+  [./truss_z]
+    type = StressDivergenceTensorsTruss
     block = '1 2'
     variable = disp_z
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     component = 2
+    displacements = 'disp_x disp_y disp_z'
     area = area
     save_in = react_z
   [../]
-[]
-
-[SolidMechanics]
-#  [./solid]
-#    type = truss
-#    disp_x = disp_x
-#    disp_y = disp_y
-#    disp_z = disp_z
-#    area = area
-#    save_in = react_x
-#    save_in = react_y
-#    save_in = react_z
-#  [../]
-  [./dummyHex]
+  [./hex_x]
+    type = StressDivergenceTensors
     block = 1000
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    variable = disp_x
+    component = 0
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+  [./hex_y]
+    type = StressDivergenceTensors
+    block = 1000
+    variable = disp_y
+    component = 1
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+  [./hex_z]
+    type = StressDivergenceTensors
+    block = 1000
+    variable = disp_z
+    component = 2
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
 [Materials]
-  [./goo]
-    type = Elastic
+   [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     block = 1000
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     youngs_modulus = 1e6
     poissons_ratio = 0
   [../]
+  [./strain]
+    type = ComputeSmallStrain
+    block = 1000
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
+    block = 1000
+  [../]
   [./linelast]
-    type = TrussMaterial
+    type = LinearElasticTruss
     block = '1 2'
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    displacements = 'disp_x disp_y disp_z'
     youngs_modulus = 1e6
 #    thermal_expansion = 0.1
 #    t_ref = 0.5
