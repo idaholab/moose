@@ -1,0 +1,107 @@
+[Tests]
+  [./mass01]
+    type = 'PetscJacobianTester'
+    input = 'mass01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass02]
+    type = 'PetscJacobianTester'
+    input = 'mass02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass03]
+    type = 'PetscJacobianTester'
+    input = 'mass03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass04]
+    type = 'PetscJacobianTester'
+    input = 'mass04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass05]
+    type = 'PetscJacobianTester'
+    input = 'mass05.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass06]
+    type = 'PetscJacobianTester'
+    input = 'mass06.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass07]
+    type = 'PetscJacobianTester'
+    input = 'mass07.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass08]
+    type = 'PetscJacobianTester'
+    input = 'mass08.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./fflux01]
+    type = 'PetscJacobianTester'
+    input = 'fflux01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./fflux02]
+    type = 'PetscJacobianTester'
+    input = 'fflux02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./fflux03]
+    type = 'PetscJacobianTester'
+    input = 'fflux03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./fflux04]
+    type = 'PetscJacobianTester'
+    input = 'fflux04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./fflux05]
+    type = 'PetscJacobianTester'
+    input = 'fflux05.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./fflux06]
+    type = 'PetscJacobianTester'
+    input = 'fflux06.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./eff_stress01]
+    type = 'PetscJacobianTester'
+    input = 'eff_stress01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./mass_vol_exp01]
+    type = 'PetscJacobianTester'
+    input = 'mass_vol_exp01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./mass_vol_exp02]
+    type = 'PetscJacobianTester'
+    input = 'mass_vol_exp02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+[]
