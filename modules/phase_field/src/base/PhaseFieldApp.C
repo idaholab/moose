@@ -125,6 +125,7 @@
 #include "RegularSolutionFreeEnergy.h"
 #include "StrainGradDispDerivatives.h"
 #include "SwitchingFunctionMaterial.h"
+#include "ThirdPhaseSuppressionMaterial.h"
 
 /*
  * Postprocessors
@@ -346,6 +347,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(RegularSolutionFreeEnergy);
   registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunctionMaterial);
+  registerMaterial(ThirdPhaseSuppressionMaterial);
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
