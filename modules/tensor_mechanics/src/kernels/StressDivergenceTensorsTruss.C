@@ -114,18 +114,19 @@ StressDivergenceTensorsTruss::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     unsigned int coupled_component = 0;
-    bool active = false;
+    bool disp_coupled = false;
 
     for (unsigned int i = 0; i < _ndisp; ++i)
       if (jvar == _disp_var[i])
       {
         coupled_component = i;
-        active = true;
+        disp_coupled = true;
+        break;
       }
 
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-    if (active)
+    if (disp_coupled)
       for (unsigned int i = 0; i < _test.size(); ++i)
         for (unsigned int j = 0; j < _phi.size(); ++j)
           ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, coupled_component);
