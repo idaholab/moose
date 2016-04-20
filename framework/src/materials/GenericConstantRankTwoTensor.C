@@ -12,7 +12,7 @@ InputParameters validParams<GenericConstantRankTwoTensor>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<std::vector<Real> >("tensor_values", "Vector of values defining the constant rank two tensor");
-  params.addRequiredParam<MaterialPropertyName>("tensor_name", "Name of teh tensor material property to be created");
+  params.addRequiredParam<MaterialPropertyName>("tensor_name", "Name of the tensor material property to be created");
   return params;
 }
 
