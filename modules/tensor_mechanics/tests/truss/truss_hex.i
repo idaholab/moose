@@ -1,3 +1,7 @@
+# This test is designed to check 
+# whether truss element works well with other multi-dimensional element
+# e.g. the hex element in this case, by assigning different brock number
+# to different types of elements.  
 [Mesh]
   type = FileMesh
   file = truss_hex.e
@@ -205,27 +209,31 @@
     area = area
     save_in = react_z
   [../]
-  [./hex_x]
-    type = StressDivergenceTensors
+  [./TensorMechanics]
     block = 1000
-    variable = disp_x
-    component = 0
     displacements = 'disp_x disp_y disp_z'
   [../]
-  [./hex_y]
-    type = StressDivergenceTensors
-    block = 1000
-    variable = disp_y
-    component = 1
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-  [./hex_z]
-    type = StressDivergenceTensors
-    block = 1000
-    variable = disp_z
-    component = 2
-    displacements = 'disp_x disp_y disp_z'
-  [../]
+#  [./hex_x]
+#    type = StressDivergenceTensors
+#    block = 1000
+#    variable = disp_x
+#    component = 0
+#    displacements = 'disp_x disp_y disp_z'
+#  [../]
+#  [./hex_y]
+#    type = StressDivergenceTensors
+#    block = 1000
+#    variable = disp_y
+#    component = 1
+#    displacements = 'disp_x disp_y disp_z'
+#  [../]
+#  [./hex_z]
+#    type = StressDivergenceTensors
+#    block = 1000
+#    variable = disp_z
+#    component = 2
+#    displacements = 'disp_x disp_y disp_z'
+#  [../]
 []
 
 [Materials]
