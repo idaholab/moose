@@ -232,21 +232,15 @@ class RunApp(Tester):
     specs = self.specs
     if specs.isValid('expect_out'):
       if specs['match_literal']:
-        out_ok = self.checkOutputForLiteral(output, specs['expect_out'])
+        have_expected_out = self.checkOutputForLiteral(output, specs['expect_out'])
       else:
-        out_ok = self.checkOutputForPattern(output, specs['expect_out'])
-      # Process out_ok
-      if (out_ok and retcode != 0):
-        reason = 'OUT FOUND BUT CRASH'
-      elif (not out_ok):
-        reason = 'NO EXPECTED OUT'
+        have_expected_out = self.checkOutputForPattern(output, specs['expect_out'])
+      if (not have_expected_out):
+        reason = 'EXPECTED OUTPUT MISSING'
 
-    elif specs.isValid('absent_out'):
-      out_ok = self.checkOutputForPattern(output, specs['absent_out'])
-      # Process out_ok
-      if (not out_ok and retcode != 0):
-        reason = 'OUTPUT ABSENT BUT CRASH'
-      elif (out_ok):
+    if reason == '' and specs.isValid('absent_out'):
+      have_absent_out = self.checkOutputForPattern(output, specs['absent_out'])
+      if (have_absent_out):
         reason = 'OUTPUT NOT ABSENT'
 
     if reason == '':
