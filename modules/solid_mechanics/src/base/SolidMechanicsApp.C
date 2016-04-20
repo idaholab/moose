@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "SolidMechanicsApp.h"
+#include "TensorMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -81,9 +82,11 @@ SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
+  TensorMechanicsApp::registerObjects(_factory);
   SolidMechanicsApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
   SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
 }
 

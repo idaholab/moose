@@ -6,6 +6,8 @@
 /****************************************************************/
 
 #include "XFEMApp.h"
+#include "SolidMechanicsApp.h"
+#include "TensorMechanicsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -32,9 +34,13 @@ XFEMApp::XFEMApp(const InputParameters &parameters) :
   srand(processor_id());
 
   Moose::registerObjects(_factory);
+  SolidMechanicsApp::registerObjects(_factory);
+  TensorMechanicsApp::registerObjects(_factory);
   XFEMApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
+  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
   XFEMApp::associateSyntax(_syntax, _action_factory);
 }
 
