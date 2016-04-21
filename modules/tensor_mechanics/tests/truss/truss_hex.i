@@ -1,7 +1,7 @@
-# This test is designed to check 
+# This test is designed to check
 # whether truss element works well with other multi-dimensional element
 # e.g. the hex element in this case, by assigning different brock number
-# to different types of elements.  
+# to different types of elements.
 [Mesh]
   type = FileMesh
   file = truss_hex.e
