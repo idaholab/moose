@@ -4,7 +4,14 @@
     input = diffusion.i
     exodiff = 'diffusion_out.e'
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
   [../]
+  [./diffusion_xfem_flux_bc]
+    type = Exodiff
+    input = diffusion_flux_bc.i
+    exodiff = 'diffusion_flux_bc_out.e'
+    map = false
+    unique_id = true
+  [../]
+
 []

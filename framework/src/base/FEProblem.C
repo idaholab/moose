@@ -3675,6 +3675,7 @@ FEProblem::initXFEM(MooseSharedPointer<XFEMInterface> xfem)
   if (_displaced_mesh)
     _xfem->setSecondMesh(&_displaced_mesh->getMesh());
   _xfem->setMaterialData(&_material_data);
+  _xfem->setBoundaryMaterialData(&_bnd_material_data);
 
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; ++i)
