@@ -47,6 +47,7 @@
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
 #include "FaceFaceConstraint.h"
+#include "ElemElemConstraint.h"
 #include "ScalarKernel.h"
 #include "Parser.h"
 #include "Split.h"
@@ -60,6 +61,7 @@
 #include "TimeIntegrator.h"
 #include "Predictor.h"
 #include "Assembly.h"
+#include "ElementPairLocator.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -1205,6 +1207,65 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       _fe_problem.addCachedResidual(tid);
     }
   }
+
+  // go over element-element constraint interface
+  std::map<unsigned int, MooseSharedPointer<ElementPairLocator> > * element_pair_locators = NULL;
+
+  if (!displaced)
+  {
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
+    element_pair_locators = &geom_search_data._element_pair_locators;
+  }
+  else
+  {
+    GeometricSearchData & displaced_geom_search_data = _fe_problem.getDisplacedProblem()->geomSearchData();
+    element_pair_locators = &displaced_geom_search_data._element_pair_locators;
+  }
+
+  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator it = element_pair_locators->begin();
+       it != element_pair_locators->end();
+       ++it)
+  {
+    ElementPairLocator & elem_pair_loc = *it->second;
+
+    if (_constraints.hasActiveElemElemConstraints(it->first))
+    {
+      // ElemElemConstraint objects
+      const std::vector<MooseSharedPointer<ElemElemConstraint> > & _element_constraints = _constraints.getActiveElemElemConstraints(it->first);
+
+      // go over pair elements
+      const std::list<std::pair<const Elem*, const Elem*> > & elem_pairs = elem_pair_loc.getElemPairs();
+      for (std::list<std::pair<const Elem *, const Elem*> >::const_iterator it = elem_pairs.begin();
+           it != elem_pairs.end(); ++it)
+      {
+        const Elem * elem = it->first;
+        const Elem * pair_elem = it->second;
+
+        if (elem->processor_id() != processor_id())
+          continue;
+
+        const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem);
+
+        // for each element process constraints on the
+        for (std::vector<MooseSharedPointer<ElemElemConstraint> >::const_iterator ec_it = _element_constraints.begin(); ec_it != _element_constraints.end(); ++ec_it)
+        {
+          MooseSharedPointer<ElemElemConstraint> ec = *ec_it;
+
+          _fe_problem.reinitElemPhys(elem, info._constraint_q_point, tid);
+          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._constraint_q_point, tid);
+
+          ec->subProblem().prepareShapes(ec->variable().number(), tid);
+          ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
+
+          ec->reinit(info);
+          ec->computeResidual();
+          _fe_problem.cacheResidual(tid);
+          _fe_problem.cacheResidualNeighbor(tid);
+        }
+        _fe_problem.addCachedResidual(tid);
+      }
+    }
+  }
 }
 
 
@@ -1776,8 +1837,66 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       }
     }
   }
-}
 
+  // go over element-element constraint interface
+  std::map<unsigned int, MooseSharedPointer<ElementPairLocator> > * element_pair_locators = NULL;
+
+  if (!displaced)
+  {
+    GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
+    element_pair_locators = &geom_search_data._element_pair_locators;
+  }
+  else
+  {
+    GeometricSearchData & displaced_geom_search_data = _fe_problem.getDisplacedProblem()->geomSearchData();
+    element_pair_locators = &displaced_geom_search_data._element_pair_locators;
+  }
+
+  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator it = element_pair_locators->begin();
+       it != element_pair_locators->end();
+       ++it)
+  {
+    ElementPairLocator & elem_pair_loc = *it->second;
+
+    if (_constraints.hasActiveElemElemConstraints(it->first))
+    {
+      // ElemElemConstraint objects
+      const std::vector<MooseSharedPointer<ElemElemConstraint> > & _element_constraints = _constraints.getActiveElemElemConstraints(it->first);
+
+      // go over pair elements
+      const std::list<std::pair<const Elem*, const Elem*> > & elem_pairs = elem_pair_loc.getElemPairs();
+      for (std::list<std::pair<const Elem *, const Elem*> >::const_iterator it = elem_pairs.begin();
+           it != elem_pairs.end(); ++it)
+      {
+        const Elem * elem = it->first;
+        const Elem * pair_elem = it->second;
+
+        if (elem->processor_id() != processor_id())
+          continue;
+
+        const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(elem);
+
+        // for each element process constraints on the
+        for (std::vector<MooseSharedPointer<ElemElemConstraint> >::const_iterator ec_it = _element_constraints.begin(); ec_it != _element_constraints.end(); ++ec_it)
+        {
+          MooseSharedPointer<ElemElemConstraint> ec = *ec_it;
+
+          _fe_problem.reinitElemPhys(elem, info._constraint_q_point, tid);
+          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._constraint_q_point, tid);
+
+          ec->subProblem().prepareShapes(ec->variable().number(), tid);
+          ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
+
+          ec->reinit(info);
+          ec->computeJacobian();
+          _fe_problem.cacheJacobian(tid);
+          _fe_problem.cacheJacobianNeighbor(tid);
+        }
+        _fe_problem.addCachedJacobian(jacobian, tid);
+      }
+    }
+  }
+}
 
 void
 NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)

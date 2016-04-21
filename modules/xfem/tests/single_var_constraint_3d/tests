@@ -1,0 +1,34 @@
+[Tests]
+  [./stationary_equal_3d]
+    type = Exodiff
+    input = stationary_equal_3d.i
+    exodiff = 'stationary_equal_3d_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./stationary_fluxjump_3d]
+    type = Exodiff
+    input = stationary_fluxjump_3d.i
+    exodiff = 'stationary_fluxjump_3d_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./stationary_jump_3d]
+    type = Exodiff
+    input = stationary_jump_3d.i
+    exodiff = 'stationary_jump_3d_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./stationary_jump_fluxjump_3d]
+    type = Exodiff
+    input = stationary_jump_fluxjump_3d.i
+    exodiff = 'stationary_jump_fluxjump_3d_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+[]
