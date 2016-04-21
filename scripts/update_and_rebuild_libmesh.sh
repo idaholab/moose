@@ -96,6 +96,7 @@ if [ -z "$go_fast" ]; then
                --enable-unique-ptr \
                --enable-openmp \
                --disable-maintainer-mode \
+               --with-metis=PETSc \
                $DISABLE_TIMESTAMPS $*
 else
   # The build directory must already exist: you can't do --fast for
