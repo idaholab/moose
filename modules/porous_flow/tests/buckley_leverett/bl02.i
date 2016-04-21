@@ -20,7 +20,7 @@
       type = FunctionIC
       # want pp = 'max((1000000-x/5*1000000)-20000,-20000)' .
       # In the saturated zone
-      # md = log(density0) + porepressure/bulk
+      # md = log(density_P0) + porepressure/bulk
       function = '6.907755278982137+max((1000000-x/5*1000000)-20000,-20000)/2E6-if(max((1000000-x/5*1000000)-20000,-20000)>0,0,max((1000000-x/5*1000000)-20000,-20000)*max((1000000-x/5*1000000)-20000,-20000)*1E-4*1E-4)'
       # following is sharp in md
       #function = 'if(x<5,6.907755278982137+(1000000-20000)/2E6,-0.1)'
@@ -108,7 +108,7 @@
     type = PorousFlowMaterial1PhaseMD_Gaussian
     mass_density = md
     al = 1E-4 #(0.018)
-    density0 = 1000
+    density_P0 = 1000
     bulk_modulus = 2E6
   [../]
   [./massfrac]
@@ -116,7 +116,7 @@
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
-    density0 = 1000
+    density_P0 = 1000
     bulk_modulus = 2E6
     phase = 0
   [../]

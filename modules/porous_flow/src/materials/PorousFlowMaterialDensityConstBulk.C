@@ -13,7 +13,7 @@ template<>
 InputParameters validParams<PorousFlowMaterialDensityConstBulk>()
 {
   InputParameters params = validParams<PorousFlowMaterialFluidPropertiesBase>();
-  params.addRequiredParam<Real>("density0", "The density of each phase at zero porepressure");
+  params.addRequiredParam<Real>("density_P0", "The density of each phase at zero porepressure");
   params.addRequiredParam<Real>("bulk_modulus", "The constant bulk modulus of each phase");
   params.addClassDescription("This Material calculates a fluid density from its porepressure, assuming constant bulk modulus for the fluid");
   return params;
@@ -22,7 +22,7 @@ InputParameters validParams<PorousFlowMaterialDensityConstBulk>()
 PorousFlowMaterialDensityConstBulk::PorousFlowMaterialDensityConstBulk(const InputParameters & parameters) :
     PorousFlowMaterialFluidPropertiesBase(parameters),
 
-    _dens0(getParam<Real>("density0")),
+    _dens0(getParam<Real>("density_P0")),
     _bulk(getParam<Real>("bulk_modulus")),
     _density_nodal(declareProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
     _density_nodal_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),

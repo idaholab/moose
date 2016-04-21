@@ -56,7 +56,7 @@
     type = PorousFlowMaterial1PhaseMD_Gaussian
     mass_density = md
     al = 1.1
-    density0 = 0.8
+    density_P0 = 0.8
     bulk_modulus = 1.5
   [../]
   [./massfrac]
@@ -64,7 +64,7 @@
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
-    density0 = 1
+    density_P0 = 1
     bulk_modulus = 1.5
     phase = 0
   [../]

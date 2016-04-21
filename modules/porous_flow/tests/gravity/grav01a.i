@@ -73,7 +73,7 @@
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
-    density0 = 1
+    density_P0 = 1
     bulk_modulus = 1.2
     phase = 0
   [../]

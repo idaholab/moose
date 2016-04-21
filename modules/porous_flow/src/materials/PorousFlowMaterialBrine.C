@@ -3,7 +3,7 @@
 /*                                                              */
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
-/****************************************************************/
+/**********************************************2******************/
 
 #include "PorousFlowMaterialBrine.h"
 #include "Conversion.h"
@@ -189,12 +189,12 @@ PorousFlowMaterialBrine::haliteDensity(Real pressure, Real temperature) const
   Real pbar = pressure * 1.e-5;
 
   // Halite density at 0 Pa
-  Real density0 = 2.17043e3 - 2.4599e-1 * temperature - 9.5797e-5 * temperature * temperature;
+  Real density_P0 = 2.17043e3 - 2.4599e-1 * temperature - 9.5797e-5 * temperature * temperature;
 
   // Halite density as a function of pressure
   Real l = 5.727e-3 + 2.715e-3 * std::exp(temperature / 733.4);
 
-  return density0 + l * pbar;
+  return density_P0 + l * pbar;
 }
 
 Real

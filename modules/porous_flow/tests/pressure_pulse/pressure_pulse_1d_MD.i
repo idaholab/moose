@@ -1,5 +1,5 @@
 # Pressure pulse in 1D with 1 phase - transient
-# Using the "MD" formulation (where primary variable is log(mass-density)
+# Using the "MD" formulation (where primary variable is log(mass-density
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -56,7 +56,7 @@
   [../]
   [./dens0]
     type = PorousFlowMaterialDensityConstBulk
-    density0 = 1000
+    density_P0 = 1000
     bulk_modulus = 2E9
     phase = 0
   [../]
