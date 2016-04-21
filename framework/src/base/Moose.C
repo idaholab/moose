@@ -286,7 +286,7 @@
 #include "ConstantDT.h"
 #include "FunctionDT.h"
 #include "TimeSequenceStepper.h"
-#include "FileTimeSequenceStepper.h"
+#include "ExodusTimeSequenceStepper.h"
 #include "IterationAdaptiveDT.h"
 #include "SolutionTimeAdaptiveDT.h"
 #include "DT2.h"
@@ -701,7 +701,7 @@ registerObjects(Factory & factory)
   registerTimeStepper(ConstantDT);
   registerTimeStepper(FunctionDT);
   registerTimeStepper(TimeSequenceStepper);
-  registerTimeStepper(FileTimeSequenceStepper);
+  registerTimeStepper(ExodusTimeSequenceStepper);
   registerTimeStepper(IterationAdaptiveDT);
   registerTimeStepper(SolutionTimeAdaptiveDT);
   registerTimeStepper(DT2);

@@ -12,28 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FILETIMESEQUENCESTEPPER_H
-#define FILETIMESEQUENCESTEPPER_H
+#ifndef EXODUSTIMESEQUENCESTEPPER_H
+#define EXODUSTIMESEQUENCESTEPPER_H
 
 #include "TimeSequenceStepperBase.h"
 
-class FileTimeSequenceStepper;
+class ExodusTimeSequenceStepper;
 
 template<>
-InputParameters validParams<FileTimeSequenceStepper>();
+InputParameters validParams<ExodusTimeSequenceStepper>();
 
 /**
  * Solves the PDEs at a sequence of time points given as a vector in the input file.
  * Adjusts the time sequence vector according to Transient start_time and end_time.
  */
-class FileTimeSequenceStepper : public TimeSequenceStepperBase
+class ExodusTimeSequenceStepper : public TimeSequenceStepperBase
 {
 public:
-  FileTimeSequenceStepper(const InputParameters & parameters);
+  ExodusTimeSequenceStepper(const InputParameters & parameters);
 
 protected:
   /// The ExodusII file that is being read
   std::string _mesh_file;
 };
 
-#endif //FILETIMESEQUENCESTEPPER_H
+#endif //EXODUSTIMESEQUENCESTEPPER_H

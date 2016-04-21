@@ -68,7 +68,7 @@
   type = Transient
   end_time = 4.0
   [./TimeStepper]
-    type = FileTimeSequenceStepper
+    type = ExodusTimeSequenceStepper
     mesh = timesequence_no_start_time.e
   [../]
 []

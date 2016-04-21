@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FileTimeSequenceStepper.h"
+#include "ExodusTimeSequenceStepper.h"
 #include "MooseUtils.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 
 template<>
-InputParameters validParams<FileTimeSequenceStepper>()
+InputParameters validParams<ExodusTimeSequenceStepper>()
 {
   InputParameters params = validParams<TimeSequenceStepperBase>();
   params.addRequiredParam<MeshFileName>("mesh", "The name of the mesh file to extract the time sequence from (must be an exodusII file).");
@@ -26,7 +26,7 @@ InputParameters validParams<FileTimeSequenceStepper>()
   return params;
 }
 
-FileTimeSequenceStepper::FileTimeSequenceStepper(const InputParameters & parameters) :
+ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & parameters) :
     TimeSequenceStepperBase(parameters),
     _mesh_file(getParam<MeshFileName>("mesh"))
 {

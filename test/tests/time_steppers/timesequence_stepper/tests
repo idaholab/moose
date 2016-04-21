@@ -28,10 +28,10 @@
     compiler = "GCC CLANG"
   [../]
 
-  [./filetimesequence]
+  [./exodustimesequence]
     type = 'Exodiff'
     prereq = timesequence_no_start_time
-    input = 'filetimesequence.i'
-    exodiff = 'filetimesequence_out.e'
+    input = 'exodustimesequence.i'
+    exodiff = 'exodustimesequence_out.e'
   [../]
 []
