@@ -1,0 +1,12 @@
+[Tests]
+  [./flux_gb]
+    type = 'Exodiff'
+    input = 'flux_gb.i'
+    exodiff = 'flux_gb_out.e'
+  [../]
+  [./simple_transient_diffusion_flux]
+    type = 'Exodiff'
+    input = 'simple_transient_diffusion_flux.i'
+    exodiff = 'simple_transient_diffusion_flux_out.e'
+  [../]
+[]
