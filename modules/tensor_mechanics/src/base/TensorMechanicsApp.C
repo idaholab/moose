@@ -59,6 +59,7 @@
 #include "ComputeLinearElasticStress.h"
 #include "ComputeFiniteStrainElasticStress.h"
 #include "ComputeEigenstrain.h"
+#include "ComputeVariableBaseEigenStrain.h"
 #include "ComputeVariableEigenstrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "FiniteStrainHyperElasticViscoPlastic.h"
@@ -70,6 +71,11 @@
 #include "ComputeReturnMappingStress.h"
 #include "RecomputeRadialReturnStressIncrement.h"
 #include "RecomputeRadialReturnIsotropicPlasticity.h"
+#include "StressBasedChemicalPotential.h"
+#include "FluxBasedStrainIncrement.h"
+#include "GBRelaxationStrainIncrement.h"
+#include "SumTensorIncrements.h"
+#include "ComputeStrainIncrementBasedStress.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -195,6 +201,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeLinearElasticStress);
   registerMaterial(ComputeFiniteStrainElasticStress);
   registerMaterial(ComputeEigenstrain);
+  registerMaterial(ComputeVariableBaseEigenStrain);
   registerMaterial(ComputeVariableEigenstrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
@@ -206,6 +213,11 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeReturnMappingStress);
   registerMaterial(RecomputeRadialReturnStressIncrement);
   registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
+  registerMaterial(StressBasedChemicalPotential);
+  registerMaterial(FluxBasedStrainIncrement);
+  registerMaterial(GBRelaxationStrainIncrement);
+  registerMaterial(SumTensorIncrements);
+  registerMaterial(ComputeStrainIncrementBasedStress);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

@@ -30,6 +30,7 @@
 #include "CHPFCRFF.h"
 #include "CHSplitChemicalPotential.h"
 #include "CHSplitConcentration.h"
+#include "CHSplitFlux.h"
 #include "CHSplitVar.h"
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
@@ -108,6 +109,8 @@
 #include "ExternalForceDensityMaterial.h"
 #include "ForceDensityMaterial.h"
 #include "GBAnisotropy.h"
+#include "GBDependentAnisotropicTensor.h"
+#include "GBDependentDiffusivity.h"
 #include "GBEvolution.h"
 #include "GrainAdvectionVelocity.h"
 #include "InterfaceOrientationMaterial.h"
@@ -121,6 +124,7 @@
 #include "PFFracBulkRateMaterial.h"
 #include "PFMobility.h"
 #include "PFParamsPolyFreeEnergy.h"
+#include "PhaseNormalTensor.h"
 #include "PolynomialFreeEnergy.h"
 #include "RegularSolutionFreeEnergy.h"
 #include "StrainGradDispDerivatives.h"
@@ -260,6 +264,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHPFCRFF);
   registerKernel(CHSplitChemicalPotential);
   registerKernel(CHSplitConcentration);
+  registerKernel(CHSplitFlux);
   registerKernel(CHSplitVar);
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
@@ -332,6 +337,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(ForceDensityMaterial);
   registerMaterial(GBAnisotropy);
   registerMaterial(GBEvolution);
+  registerMaterial(GBDependentAnisotropicTensor);
+  registerMaterial(GBDependentDiffusivity);
   registerMaterial(GrainAdvectionVelocity);
   registerMaterial(InterfaceOrientationMaterial);
   registerMaterial(KKSXeVacSolidMaterial);
@@ -343,6 +350,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PFCTradMaterial);
   registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFParamsPolyFreeEnergy);
+  registerMaterial(PhaseNormalTensor);
   registerMaterial(PolynomialFreeEnergy);
   registerMaterial(RegularSolutionFreeEnergy);
   registerMaterial(StrainGradDispDerivatives);
