@@ -14,4 +14,9 @@
     input = 'variable_cahnhilliard.i'
     exodiff = 'variable_cahnhilliard_out.e'
   [../]
+  [./composite]
+    type = 'Exodiff'
+    input = 'composite.i'
+    exodiff = 'composite_out.e'
+  [../]
 []

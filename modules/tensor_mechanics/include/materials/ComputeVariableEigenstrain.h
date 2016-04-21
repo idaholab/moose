@@ -8,11 +8,13 @@
 #define COMPUTEVARIABLEEIGENSTRAIN_H
 
 #include "ComputeEigenstrain.h"
+#include "DerivativeMaterialInterface.h"
 
 /**
- * ComputeVariableEigenstrain computes an Eigenstrain that is a function of a single variable defined by a base tensor and a scalar function defined in a Derivative Material.
+ * ComputeVariableEigenstrain computes an Eigenstrain that is a function of a single
+ * variable defined by a base tensor and a scalar function defined in a Derivative Material.
  */
-class ComputeVariableEigenstrain : public ComputeEigenstrain
+class ComputeVariableEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrain>
 {
 public:
   ComputeVariableEigenstrain(const InputParameters & parameters);
