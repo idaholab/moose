@@ -158,13 +158,9 @@ template<typename T>
 inline void
 dataStore(std::ostream & stream, std::vector<T> & v, void * context)
 {
-  // Moose::out<<"Vector dataStore"<<std::endl;
-
   // First store the size of the vector
   unsigned int size = v.size();
   stream.write((char *) &size, sizeof(size));
-
-  // Moose::out<<"Size: "<<size<<std::endl;
 
   for (unsigned int i = 0; i < size; i++)
     storeHelper(stream, v[i], context);
@@ -174,8 +170,6 @@ template<typename T>
 inline void
 dataStore(std::ostream & stream, MooseSharedPointer<T> & v, void * context)
 {
-  // Moose::out<<"SharedPointer dataStore"<<std::endl;
-
   T * tmp = v.get();
 
   storeHelper(stream, tmp, context);
@@ -185,13 +179,9 @@ template<typename T>
 inline void
 dataStore(std::ostream & stream, std::set<T> & s, void * context)
 {
-  // Moose::out<<"Set dataStore"<<std::endl;
-
   // First store the size of the set
   unsigned int size = s.size();
   stream.write((char *) &size, sizeof(size));
-
-  // Moose::out<<"Size: "<<size<<std::endl;
 
   typename std::set<T>::iterator it = s.begin();
   typename std::set<T>::iterator end = s.end();
@@ -207,13 +197,9 @@ template<typename T>
 inline void
 dataStore(std::ostream & stream, std::list<T> & l, void * context)
 {
-  // Moose::out<<"Set dataStore"<<std::endl;
-
   // First store the size of the set
   unsigned int size = l.size();
   stream.write((char *) &size, sizeof(size));
-
-  // Moose::out<<"Size: "<<size<<std::endl;
 
   typename std::list<T>::iterator it = l.begin();
   typename std::list<T>::iterator end = l.end();
@@ -230,27 +216,19 @@ template<typename T, typename U>
 inline void
 dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
 {
-  // Moose::out<<"Map dataStore"<<std::endl;
-
   // First store the size of the map
   unsigned int size = m.size();
   stream.write((char *) &size, sizeof(size));
-
-  //// Moose::out<<"Size: "<<size<<std::endl;
 
   typename std::map<T,U>::iterator it = m.begin();
   typename std::map<T,U>::iterator end = m.end();
 
   for (; it != end; ++it)
   {
-    // Moose::out<<"First"<<std::endl;
-    // Moose::out<<"Key: "<<it->first<<std::endl;
-
     T & key = const_cast<T&>(it->first);
 
     storeHelper(stream, key, context);
 
-    // Moose::out<<"Second"<<std::endl;
     storeHelper(stream, it->second, context);
   }
 }
@@ -259,27 +237,19 @@ template<typename T, typename U>
 inline void
 dataStore(std::ostream & stream, HashMap<T,U> & m, void * context)
 {
-  // Moose::out<<"HashMap dataStore"<<std::endl;
-
   // First store the size of the map
   unsigned int size = m.size();
   stream.write((char *) &size, sizeof(size));
-
-  // Moose::out<<"Size: "<<size<<std::endl;
 
   typename HashMap<T,U>::iterator it = m.begin();
   typename HashMap<T,U>::iterator end = m.end();
 
   for (; it != end; ++it)
   {
-    // Moose::out<<"First"<<std::endl;
-    // Moose::out<<"Key: "<<it->first<<std::endl;
-
     T & key = const_cast<T&>(it->first);
 
     storeHelper(stream, key, context);
 
-    // Moose::out<<"Second"<<std::endl;
     storeHelper(stream, it->second, context);
   }
 }
@@ -306,8 +276,6 @@ template<typename T>
 inline void
 dataLoad(std::istream & stream, T & v, void * /*context*/)
 {
-  // Moose::out<<"Generic dataLoad"<<std::endl;
-
   stream.read((char *) &v, sizeof(v));
 }
 
@@ -329,13 +297,9 @@ template<typename T>
 inline void
 dataLoad(std::istream & stream, std::vector<T> & v, void * context)
 {
-  //// Moose::out<<"Vector dataLoad"<<std::endl;
-
   // First read the size of the vector
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
-
-  // Moose::out<<"Size: "<<size<<std::endl;
 
   v.resize(size);
 
@@ -356,13 +320,9 @@ template<typename T>
 inline void
 dataLoad(std::istream & stream, std::set<T> & s, void * context)
 {
-  // Moose::out<<"Set dataLoad"<<std::endl;
-
   // First read the size of the set
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
-
-  //// Moose::out<<"Size: "<<size<<std::endl;
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -376,13 +336,9 @@ template<typename T>
 inline void
 dataLoad(std::istream & stream, std::list<T> & l, void * context)
 {
-  // Moose::out<<"Set dataLoad"<<std::endl;
-
   // First read the size of the set
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
-
-  //// Moose::out<<"Size: "<<size<<std::endl;
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -396,15 +352,11 @@ template<typename T, typename U>
 inline void
 dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
 {
-  // Moose::out<<"Map dataLoad"<<std::endl;
-
   m.clear();
 
   // First read the size of the map
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
-
-  // Moose::out<<"Size: "<<size<<std::endl;
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -421,15 +373,9 @@ template<typename T, typename U>
 inline void
 dataLoad(std::istream & stream, HashMap<T,U> & m, void * context)
 {
-  // Moose::out<<"HashMap dataLoad"<<std::endl;
-
-  // m.clear();
-
   // First read the size of the map
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
-
-  // Moose::out<<"Size: "<<size<<std::endl;
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -462,7 +408,6 @@ template<typename P>
 inline void
 storeHelper(std::ostream & stream, P & data, void * context)
 {
-  // Moose::out<<"Generic storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -471,7 +416,6 @@ template<typename P>
 inline void
 storeHelper(std::ostream & stream, std::vector<P> & data, void * context)
 {
-  // Moose::out<<"Vector storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -480,7 +424,6 @@ template<typename P>
 inline void
 storeHelper(std::ostream & stream, MooseSharedPointer<P> & data, void * context)
 {
-  // Moose::out<<"MooseSharedPointer storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -489,7 +432,6 @@ template<typename P>
 inline void
 storeHelper(std::ostream & stream, std::set<P> & data, void * context)
 {
-  // Moose::out<<"Set storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -498,17 +440,14 @@ template<typename P, typename Q>
 inline void
 storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
 {
-  //// Moose::out<<"Map storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
-
 
 // HashMap Helper Function
 template<typename P, typename Q>
 inline void
 storeHelper(std::ostream & stream, HashMap<P,Q> & data, void * context)
 {
-  // Moose::out<<"HashMap storeHelper"<<std::endl;
   dataStore(stream, data, context);
 }
 
@@ -517,7 +456,6 @@ template<typename P>
 inline void
 loadHelper(std::istream & stream, P & data, void * context)
 {
-  // Moose::out<<"Generic loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 
@@ -526,7 +464,6 @@ template<typename P>
 inline void
 loadHelper(std::istream & stream, std::vector<P> & data, void * context)
 {
-  // Moose::out<<"Vector loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 
@@ -535,7 +472,6 @@ template<typename P>
 inline void
 loadHelper(std::istream & stream, MooseSharedPointer<P> & data, void * context)
 {
-  // Moose::out<<"Vector loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 
@@ -544,7 +480,6 @@ template<typename P>
 inline void
 loadHelper(std::istream & stream, std::set<P> & data, void * context)
 {
-  // Moose::out<<"Set loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 
@@ -553,7 +488,6 @@ template<typename P, typename Q>
 inline void
 loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
 {
-  // Moose::out<<"Map loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 
@@ -562,7 +496,6 @@ template<typename P, typename Q>
 inline void
 loadHelper(std::istream & stream, HashMap<P,Q> & data, void * context)
 {
-  // Moose::out<<"HashMap loadHelper"<<std::endl;
   dataLoad(stream, data, context);
 }
 

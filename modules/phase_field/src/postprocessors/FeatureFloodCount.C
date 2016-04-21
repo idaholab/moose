@@ -33,7 +33,8 @@ struct DereferenceSorter
   }
 };
 
-template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
+template<>
+void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
   storeHelper(stream, feature._ghosted_ids, context);
   storeHelper(stream, feature._halo_ids, context);
@@ -46,18 +47,21 @@ template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData 
   storeHelper(stream, feature._intersects_boundary, context);
 }
 
-template<> void dataStore(std::ostream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
+template<>
+void dataStore(std::ostream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
 {
   dataStore(stream, *feature, context);
 }
 
-template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
+template<>
+void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
 {
   storeHelper(stream, bbox.min(), context);
   storeHelper(stream, bbox.max(), context);
 }
 
-template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context)
+template<>
+void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
   loadHelper(stream, feature._ghosted_ids, context);
   loadHelper(stream, feature._halo_ids, context);
@@ -70,14 +74,16 @@ template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData &
   loadHelper(stream, feature._intersects_boundary, context);
 }
 
-template<> void dataLoad(std::istream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
+template<>
+void dataLoad(std::istream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
 {
   feature = MooseSharedPointer<FeatureFloodCount::FeatureData>(new FeatureFloodCount::FeatureData());
 
   dataLoad(stream, *feature, context);
 }
 
-template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
+template<>
+void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context)
 {
   loadHelper(stream, bbox.min(), context);
   loadHelper(stream, bbox.max(), context);
