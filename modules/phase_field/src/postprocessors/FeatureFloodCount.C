@@ -415,19 +415,6 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
         // Periodic node ids
         appendPeriodicNeighborNodes(feature);
       }
-
-//  // DEBUGGING
-//  _console  << "*********************************************************************************************\n"
-//            << "BEGIN POPULATE DATA STRUCTURES\n"
-//            << "*********************************************************************************************\n";
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
-//         it != _partial_feature_sets[rank][map_num].end(); ++it)
-//      _console << *it;
-//  _console  << "*********************************************************************************************\n"
-//            << "END POPULATE DATA STRUCTURES\n"
-//            << "*********************************************************************************************\n";
-//  // DEBUGGING
 }
 
 void
@@ -486,20 +473,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
   processor_id_type n_procs = _app.n_processors();
 
-//  // DEBUGGING
-//  _console << "*********************************************************************************************\n"
-//            << "BEGIN BEFORE MERGE\n"
-//            << "*********************************************************************************************\n";
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    for (processor_id_type rank = 0; rank < n_procs; ++rank)
-//      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
-//           it != _partial_feature_sets[rank][map_num].end(); ++it)
-//        _console << *it;
-//  _console << "*********************************************************************************************\n"
-//            << "END BEFORE MERGE\n"
-//            << "*********************************************************************************************\n";
-//  // DEBUGGING
-
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
   {
     for (processor_id_type rank1 = 0; rank1 < n_procs; ++rank1)
@@ -551,12 +524,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
               // Was there overlap in the physical region?
               bool physical_intersection = (it1->_ghosted_ids.size() + it2->_ghosted_ids.size() > set_union.size());
-
-//              // DEBUGGING
-//              _console << "Var idx: " << it1->_var_idx << ": merging " << it1->_min_entity_id << " and " << it2->_min_entity_id << " due to "
-//                        << (physical_intersection ? " physical intersection.\n" : " virtual intersection.\n");
-//              _console << *it1 << *it2;
-//              // DEBUGGING
 
               it1->_ghosted_ids.swap(set_union);
               it2->_ghosted_ids.clear();
@@ -631,20 +598,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
       _partial_feature_sets[rank][map_num].clear();
     }
-
-
-//  // DEBUGGING
-//  _console << "*********************************************************************************************\n"
-//            << "BEGIN AFTER MERGE\n"
-//            << "*********************************************************************************************\n";
-//  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-//    for (std::vector<MooseSharedPointer<FeatureData> >::iterator it = _feature_sets[map_num].begin();
-//         it != _feature_sets[map_num].end(); ++it)
-//      _console << **it;
-//  _console << "*********************************************************************************************\n"
-//            << "END AFTER MERGE\n"
-//            << "*********************************************************************************************\n";
-//  // DEBUGGING
 
   Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }

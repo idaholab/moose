@@ -90,29 +90,6 @@ GrainTracker::finalize()
 
   _console << "Finished inside of trackGrains" << std::endl;
 
-//  // DEBUGGING
-//  if (processor_id() == 0)
-//  {
-//    _outfile << "Time: " << _t << '\n';
-//    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator it = _unique_grains.begin(); it != _unique_grains.end(); ++it)
-//    {
-//      if (it->second->_status == MARKED)
-//      {
-//        MooseSharedPointer<FeatureData> feature = it->second;
-//        for (unsigned int i = 0; i < feature->_bboxes.size(); ++i)
-//          _outfile << it->first << ","
-//                   << feature->_bboxes[i].min()(0) << "," << feature->_bboxes[i].max()(0) << ","
-//                   << feature->_bboxes[i].min()(1) << "," << feature->_bboxes[i].max()(1) << ","
-//                   << feature->_bboxes[i].min()(2) << "," << feature->_bboxes[i].max()(2) <<'\n';
-//      }
-//    }
-//    _outfile << '\n';
-//    _outfile.flush();
-//  }
-//  // DEBUGGING
-
-
-
   Moose::perf_log.push("remapGrains()","GrainTracker");
   if (_remap)
     remapGrains();
