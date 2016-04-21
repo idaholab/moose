@@ -41,7 +41,7 @@ public:
 
   // EFAfragment3D specific methods
   void combine_tip_faces();
-  bool is_face_interior(unsigned int face_id) const;
+  bool isFaceInterior(unsigned int face_id) const;
   std::vector<unsigned int> get_interior_face_id() const;
   bool isThirdInteriorFace(unsigned int face_id) const;
   unsigned int numFaces() const;

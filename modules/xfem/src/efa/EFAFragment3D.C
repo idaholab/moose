@@ -152,7 +152,7 @@ EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode*> &Embe
       for (unsigned int i = 0; i < emb_faces.size(); ++i)
       {
         unsigned int face_id = getFaceID(emb_faces[i]);
-        if (!is_face_interior(face_id) && emb_faces[i]->hasIntersection())
+        if (!isFaceInterior(face_id) && emb_faces[i]->hasIntersection())
           counter += 1; // count the appropriate emb's faces
       }
       if (counter == 0)
@@ -189,10 +189,10 @@ EFAFragment3D::combine_tip_faces()
 }
 
 bool
-EFAFragment3D::is_face_interior(unsigned int face_id) const
+EFAFragment3D::isFaceInterior(unsigned int face_id) const
 {
   if (!_host_elem)
-    EFAError("in is_face_interior() fragment must have host elem");
+    EFAError("in isFaceInterior() fragment must have host elem");
 
   bool face_in_elem_face = false;
   for (unsigned int i = 0; i < _host_elem->numFaces(); ++i)
@@ -215,7 +215,7 @@ EFAFragment3D::get_interior_face_id() const
   std::vector<unsigned int> interior_face_id;
   for (unsigned int i = 0; i < _faces.size(); ++i)
   {
-    if (is_face_interior(i))
+    if (isFaceInterior(i))
       interior_face_id.push_back(i);
   }
   return interior_face_id;

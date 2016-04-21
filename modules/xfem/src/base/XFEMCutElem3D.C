@@ -33,7 +33,7 @@ XFEMCutElem3D::~XFEMCutElem3D()
 Point
 XFEMCutElem3D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) const
 {
-  Point node_coor(0.0,0.0,0.0);
+  Point node_coor(0.0, 0.0, 0.0);
   std::vector<EFANode*> master_nodes;
   std::vector<Point> master_points;
   std::vector<double> master_weights;
@@ -112,11 +112,11 @@ XFEMCutElem3D::computeMomentFittingWeights()
 Point
 XFEMCutElem3D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
-  Point orig(0.0,0.0,0.0);
+  Point orig(0.0, 0.0, 0.0);
   std::vector<std::vector<EFANode*> > cut_plane_nodes;
   for (unsigned int i = 0; i < _efa_elem3d.getFragment(0)->numFaces(); ++i)
   {
-    if (_efa_elem3d.getFragment(0)->is_face_interior(i))
+    if (_efa_elem3d.getFragment(0)->isFaceInterior(i))
     {
       EFAFace* face = _efa_elem3d.getFragment(0)->getFace(i);
       std::vector<EFANode*> node_line;
@@ -135,7 +135,7 @@ XFEMCutElem3D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh
 
     for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
       orig += cut_plane_points[i];
-    orig *= (1.0/cut_plane_points.size());
+    orig /= cut_plane_points.size();
   }
   return orig;
 }
@@ -143,11 +143,11 @@ XFEMCutElem3D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh
 Point
 XFEMCutElem3D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh) const
 {
-  Point normal(0.0,0.0,0.0);
+  Point normal(0.0, 0.0, 0.0);
   std::vector<std::vector<EFANode*> > cut_plane_nodes;
   for (unsigned int i = 0; i < _efa_elem3d.getFragment(0)->numFaces(); ++i)
   {
-    if (_efa_elem3d.getFragment(0)->is_face_interior(i))
+    if (_efa_elem3d.getFragment(0)->isFaceInterior(i))
     {
       EFAFace* face = _efa_elem3d.getFragment(0)->getFace(i);
       std::vector<EFANode*> node_line;
@@ -164,19 +164,19 @@ XFEMCutElem3D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh
     for (unsigned int i = 0; i < cut_plane_nodes[plane_id].size(); ++i)
       cut_plane_points.push_back(getNodeCoordinates(cut_plane_nodes[plane_id][i], displaced_mesh));
 
-    Point center(0.0,0.0,0.0);
+    Point center(0.0, 0.0, 0.0);
     for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
       center += cut_plane_points[i];
-    center *= (1.0/cut_plane_points.size());
+    center /= cut_plane_points.size();
 
     for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
     {
-      unsigned int iplus1(i < cut_plane_points.size()-1 ? i+1 : 0);
+      unsigned int iplus1 = i < cut_plane_points.size() - 1 ? i + 1 : 0;
       Point ray1 = cut_plane_points[i] - center;
       Point ray2 = cut_plane_points[iplus1] - center;
       normal += ray1.cross(ray2);
     }
-    normal *= (1.0/cut_plane_points.size());
+    normal /= cut_plane_points.size();
   }
   Xfem::normalizePoint(normal);
   return normal;
@@ -207,7 +207,36 @@ XFEMCutElem3D::numCutPlanes() const
 {
   unsigned int counter = 0;
   for (unsigned int i = 0; i < _efa_elem3d.getFragment(0)->numFaces(); ++i)
-    if (_efa_elem3d.getFragment(0)->is_face_interior(i))
+    if (_efa_elem3d.getFragment(0)->isFaceInterior(i))
       counter += 1;
   return counter;
+}
+
+void
+XFEMCutElem3D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase* displaced_mesh) const
+{
+  intersectionPoints.clear();
+  std::vector<std::vector<EFANode*> > cut_plane_nodes;
+  for (unsigned int i = 0; i < _efa_elem3d.getFragment(0)->numFaces(); ++i)
+  {
+    if (_efa_elem3d.getFragment(0)->isFaceInterior(i))
+    {
+      EFAFace* face = _efa_elem3d.getFragment(0)->getFace(i);
+      std::vector<EFANode*> node_line;
+      for (unsigned int j = 0; j < face->numNodes(); ++j)
+        node_line.push_back(face->getNode(j));
+      cut_plane_nodes.push_back(node_line);
+    }
+  }
+  if (cut_plane_nodes.size() == 0)
+    mooseError("No cut plane found in this element");
+
+  if (plane_id < cut_plane_nodes.size()) // valid plane_id
+  {
+    intersectionPoints.resize(cut_plane_nodes[plane_id].size());
+    for (unsigned int i = 0; i < cut_plane_nodes[plane_id].size(); ++i)
+      intersectionPoints[i] = getNodeCoordinates(cut_plane_nodes[plane_id][i], displaced_mesh);
+  }
+
+  normal = getCutPlaneNormal(plane_id, displaced_mesh);
 }
