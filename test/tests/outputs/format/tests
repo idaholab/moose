@@ -49,6 +49,7 @@
     input = 'output_test_tecplot_binary.i'
     check_files = 'output_test_tecplot_binary_out_0000.dat'
     tecplot = false
+    allow_warnings = false
   [../]
 
   [./dump_test]
