@@ -4,33 +4,33 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPOSITEMOBILITYTENSOR_H
-#define COMPOSITEMOBILITYTENSOR_H
+#ifndef COMPOSITEEIGENSTRAIN_H
+#define COMPOSITEEIGENSTRAIN_H
 
-#include "Material.h"
+#include "ComputeStressFreeStrainBase.h"
 #include "CompositeTensorBase.h"
+#include "RankTwoTensor.h"
 
 /**
- * CompositeMobilityTensor provides a simple RealTensorValue type
- * MaterialProperty that can be used as a mobility in a phase field simulation.
- * This mobility is computes as a weighted sum of base mobilities where each weight
+ * CompositeEigenstrain provides a simple RankTwoTensor type
+ * MaterialProperty that can be used as an Eigenstrain tensor in a mechanics simulation.
+ * This tensor is computes as a weighted sum of base Eigenstrain tensors where each weight
  * can be a scalar material property that may depend on simulation variables.
  * The generic logic that computes a weighted sum of tensors is located in the
  * templated base class CompositeTensorBase.
  */
-class CompositeMobilityTensor : public CompositeTensorBase<RealTensorValue, Material>
+class CompositeEigenstrain : public CompositeTensorBase<RankTwoTensor, ComputeStressFreeStrainBase>
 {
 public:
-  CompositeMobilityTensor(const InputParameters & parameters);
+  CompositeEigenstrain(const InputParameters & parameters);
 
 protected:
-  void computeQpProperties();
+  virtual void computeQpStressFreeStrain();
 
   const std::string _M_name;
-  MaterialProperty<RealTensorValue> & _M;
 };
 
 template<>
-InputParameters validParams<CompositeMobilityTensor>();
+InputParameters validParams<CompositeEigenstrain>();
 
-#endif //COMPOSITEMOBILITYTENSOR_H
+#endif //COMPOSITEEIGENSTRAIN_H

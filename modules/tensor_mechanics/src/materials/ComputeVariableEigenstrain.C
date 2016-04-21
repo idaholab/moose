@@ -16,7 +16,7 @@ InputParameters validParams<ComputeVariableEigenstrain>()
 }
 
 ComputeVariableEigenstrain::ComputeVariableEigenstrain(const InputParameters & parameters) :
-    ComputeEigenstrain(parameters),
+    DerivativeMaterialInterface<ComputeEigenstrain>(parameters),
     _num_args(coupledComponents("args")),
     _dprefactor(_num_args),
     _d2prefactor(_num_args),

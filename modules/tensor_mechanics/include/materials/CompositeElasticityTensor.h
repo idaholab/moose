@@ -7,6 +7,7 @@
 #ifndef COMPOSITEELASTICITYTENSOR_H
 #define COMPOSITEELASTICITYTENSOR_H
 
+#include "Material.h"
 #include "CompositeTensorBase.h"
 #include "RankFourTensor.h"
 
@@ -18,13 +19,18 @@
  * The generic logic that computes a weighted sum of tensors is located in the
  * templated base class CompositeTensorBase.
  */
-class CompositeElasticityTensor : public CompositeTensorBase<RankFourTensor>
+class CompositeElasticityTensor : public CompositeTensorBase<RankFourTensor, Material>
 {
 public:
   CompositeElasticityTensor(const InputParameters & parameters);
 
 protected:
-  std::string _base_name;
+  void computeQpProperties();
+
+  const std::string _base_name;
+  const std::string _M_name;
+
+  MaterialProperty<RankFourTensor> & _M;
 };
 
 template<>

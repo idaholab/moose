@@ -151,6 +151,7 @@
 
 // materials
 #include "GenericConstantMaterial.h"
+#include "GenericConstantRankTwoTensor.h"
 #include "GenericFunctionMaterial.h"
 
 // PPS
@@ -558,6 +559,7 @@ registerObjects(Factory & factory)
 
   // materials
   registerMaterial(GenericConstantMaterial);
+  registerMaterial(GenericConstantRankTwoTensor);
   registerMaterial(GenericFunctionMaterial);
 
   // PPS

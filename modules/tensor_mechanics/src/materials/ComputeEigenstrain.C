@@ -4,6 +4,7 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "ComputeEigenstrain.h"
 
 template<>
@@ -26,6 +27,6 @@ ComputeEigenstrain::ComputeEigenstrain(const InputParameters & parameters) :
 void
 ComputeEigenstrain::computeQpStressFreeStrain()
 {
-  //Define Eigenstrain
+  // Define Eigenstrain
   _stress_free_strain[_qp] = _eigen_base_tensor * _prefactor[_qp];
 }
