@@ -69,11 +69,11 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
   // Build fe's for the helpers
   buildFE(FEType(FIRST, LAGRANGE));
   buildFaceFE(FEType(FIRST, LAGRANGE));
-  buildNeighborFE(FEType(FIRST,LAGRANGE));
+  buildNeighborFE(FEType(FIRST, LAGRANGE));
   buildFaceNeighborFE(FEType(FIRST, LAGRANGE));
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current mesh
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
   {
     _holder_fe_helper[dim] = &_fe[dim][FEType(FIRST, LAGRANGE)];
     (*_holder_fe_helper[dim])->get_phi();
@@ -97,16 +97,16 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
 
 Assembly::~Assembly()
 {
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe[dim].begin(); it != _fe[dim].end(); ++it)
       delete it->second;
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe_face[dim].begin(); it != _fe_face[dim].end(); ++it)
       delete it->second;
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe_neighbor[dim].begin(); it != _fe_neighbor[dim].end(); ++it)
       delete it->second;
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     for (std::map<FEType, FEBase *>::iterator it = _fe_face_neighbor[dim].begin(); it != _fe_face_neighbor[dim].end(); ++it)
       delete it->second;
 
@@ -144,7 +144,7 @@ Assembly::buildFE(FEType type)
     _fe_shape_data[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
   {
     if (!_fe[dim][type])
       _fe[dim][type] = FEBase::build(dim, type).release();
@@ -166,7 +166,7 @@ Assembly::buildFaceFE(FEType type)
     _fe_shape_data_face[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face[dim][type])
       _fe_face[dim][type] = FEBase::build(dim, type).release();
@@ -184,7 +184,7 @@ Assembly::buildNeighborFE(FEType type)
     _fe_shape_data_neighbor[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_neighbor[dim][type])
       _fe_neighbor[dim][type] = FEBase::build(dim, type).release();
@@ -202,7 +202,7 @@ Assembly::buildFaceNeighborFE(FEType type)
     _fe_shape_data_face_neighbor[type] = new FEShapeData;
 
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face_neighbor[dim][type])
       _fe_face_neighbor[dim][type] = FEBase::build(dim, type).release();
@@ -326,19 +326,19 @@ void
 Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
 {
   _holder_qrule_volume.clear();
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     _holder_qrule_volume[dim] = QBase::build(type, dim, volume_order).release();
 
   _holder_qrule_face.clear();
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     _holder_qrule_face[dim] = QBase::build(type, dim - 1, face_order).release();
 
   _holder_qrule_neighbor.clear();
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim, face_order);
 
   _holder_qrule_arbitrary.clear();
-  for (unsigned int dim=1; dim<=_mesh_dimension; dim++)
+  for (unsigned int dim = 1; dim <= _mesh_dimension; dim++)
     _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, order);
 }
 
@@ -815,7 +815,6 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Poin
   // Save off the physical points
   _current_physical_points = physical_points;
 }
-
 
 DenseMatrix<Number> &
 Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)

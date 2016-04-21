@@ -1180,7 +1180,6 @@ FEProblem::reinitNeighborPhys(const Elem * neighbor, const std::vector<Point> & 
     _displaced_problem->reinitNeighborPhys(_displaced_mesh->elem(neighbor->id()), physical_points, tid);
 }
 
-
 void
 FEProblem::getDiracElements(std::set<const Elem *> & elems)
 {

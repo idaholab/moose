@@ -1252,7 +1252,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
           MooseSharedPointer<ElemElemConstraint> ec = *ec_it;
 
           _fe_problem.reinitElemPhys(elem, info._constraint_q_point, tid);
-          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._constraint_q_point, tid);
+          _fe_problem.reinitNeighborPhys(pair_elem, info._constraint_q_point, tid);
 
           ec->subProblem().prepareShapes(ec->variable().number(), tid);
           ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
@@ -1882,7 +1882,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
           MooseSharedPointer<ElemElemConstraint> ec = *ec_it;
 
           _fe_problem.reinitElemPhys(elem, info._constraint_q_point, tid);
-          _fe_problem.reinitNeighborPhys(pair_elem, 0, info._constraint_q_point, tid);
+          _fe_problem.reinitNeighborPhys(pair_elem, info._constraint_q_point, tid);
 
           ec->subProblem().prepareShapes(ec->variable().number(), tid);
           ec->subProblem().prepareNeighborShapes(ec->variable().number(), tid);
