@@ -32,6 +32,23 @@ else
   cd - >/dev/null # Make this quiet
 fi
 
+# If the user sets both METHOD and METHODS, and they are not the same,
+# this is an error.  Neither is treated as being more important than
+# the other currently.
+if [[ -n "$METHOD" && -n "$METHODS" ]]; then
+  if [ "$METHOD" != "$METHODS" ]; then
+    echo "Error: Both METHOD and METHODS are set, but are not equal."
+    echo "Please set one or the other."
+    exit 1
+  fi
+fi
+
+# If the user set METHOD, we'll use that for METHODS in our script
+if [ -n "$METHOD" ]; then
+  export METHODS="$METHOD"
+fi
+
+# Finally, if METHODS is still not set, set a default value.
 export METHODS=${METHODS:="opt oprof dbg"}
 
 cd $SCRIPT_DIR/..
