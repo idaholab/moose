@@ -12,30 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EQUALVALUECONSTRAINT_H
-#define EQUALVALUECONSTRAINT_H
+#ifndef EQUALGRADIENTCONSTRAINT_H
+#define EQUALGRADIENTCONSTRAINT_H
 
 #include "FaceFaceConstraint.h"
 
-class EqualValueConstraint;
+class EqualGradientConstraint;
 
 template<>
-InputParameters validParams<EqualValueConstraint>();
+InputParameters validParams<EqualGradientConstraint>();
 
 /**
- * Constrain the value of a variable to be the same on both sides of an
- * interface.
+ * Constrain a specified component of the gradient of a variable to be the same
+ * on both sides of an interface.
  */
-class EqualValueConstraint : public FaceFaceConstraint
+class EqualGradientConstraint : public FaceFaceConstraint
 {
 public:
-  EqualValueConstraint(const InputParameters & parameters);
-  virtual ~EqualValueConstraint();
+  EqualGradientConstraint(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpResidualSide(Moose::ConstraintType res_type);
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
+
+  const unsigned int _component;
 };
 
-#endif /* EQUALVALUECONSTRAINT_H */
+#endif /* EQUALGRADIENTCONSTRAINT_H */

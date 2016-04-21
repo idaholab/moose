@@ -52,9 +52,11 @@ FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
     _slave_penetration_locator(getMortarPenetrationLocator(_iface._master, _iface._slave, Moose::Slave, Order(_slave_var.order()))),
 
     _test_master(_master_var.phi()),
+    _grad_test_master(_master_var.gradPhi()),
     _phi_master(_master_var.phi()),
 
     _test_slave(_slave_var.phi()),
+    _grad_test_slave(_slave_var.gradPhi()),
     _phi_slave(_slave_var.phi())
 {
 }
@@ -69,8 +71,10 @@ FaceFaceConstraint::reinit()
   unsigned int nqp = _qrule->n_points();
 
   _u_master.resize(nqp);
+  _grad_u_master.resize(nqp);
   _phys_points_master.resize(nqp);
   _u_slave.resize(nqp);
+  _grad_u_slave.resize(nqp);
   _phys_points_slave.resize(nqp);
   _test = _assembly.getFE(_var.feType(), _dim-1)->get_phi();                     // yes we need to do a copy here
   _JxW_lm = _assembly.getFE(_var.feType(), _dim-1)->get_JxW();                   // another copy here to preserve the right JxW
@@ -85,15 +89,22 @@ FaceFaceConstraint::reinit()
     if (master_pinfo && slave_pinfo)
     {
       Elem * master_side = master_pinfo->_elem->build_side(master_pinfo->_side_num, true).release();
+
       std::vector<std::vector<Real> > & master_side_phi = master_pinfo->_side_phi;
+      std::vector<std::vector<RealGradient> > & master_side_grad_phi = master_pinfo->_side_grad_phi;
+      mooseAssert(master_side_phi.size() == master_side_grad_phi.size(), "phi and grad phi size are different");
       _u_master[_qp] = _master_var.getValue(master_side, master_side_phi);
+      _grad_u_master[_qp] = _master_var.getGradient(master_side, master_side_grad_phi);
       _phys_points_master[_qp] = master_pinfo->_closest_point;
       _elem_master = master_pinfo->_elem;
       delete master_side;
 
       Elem * slave_side = slave_pinfo->_elem->build_side(slave_pinfo->_side_num, true).release();
       std::vector<std::vector<Real> > & slave_side_phi = slave_pinfo->_side_phi;
+      std::vector<std::vector<RealGradient> > & slave_side_grad_phi = slave_pinfo->_side_grad_phi;
+      mooseAssert(slave_side_phi.size() == slave_side_grad_phi.size(), "phi and grad phi size are different");
       _u_slave[_qp] = _slave_var.getValue(slave_side, slave_side_phi);
+      _grad_u_slave[_qp] = _slave_var.getGradient(slave_side, slave_side_grad_phi);
       _phys_points_slave[_qp] = slave_pinfo->_closest_point;
       _elem_slave = slave_pinfo->_elem;
       delete slave_side;

@@ -256,6 +256,7 @@
 #include "TiedValueConstraint.h"
 #include "CoupledTiedValueConstraint.h"
 #include "AddBoundsVectorsAction.h"
+#include "EqualGradientConstraint.h"
 #include "EqualValueConstraint.h"
 #include "EqualValueBoundaryConstraint.h"
 #include "LinearNodalConstraint.h"
@@ -663,6 +664,7 @@ registerObjects(Factory & factory)
   // Constraints
   registerConstraint(TiedValueConstraint);
   registerConstraint(CoupledTiedValueConstraint);
+  registerConstraint(EqualGradientConstraint);
   registerConstraint(EqualValueConstraint);
   registerConstraint(EqualValueBoundaryConstraint);
   registerConstraint(LinearNodalConstraint);

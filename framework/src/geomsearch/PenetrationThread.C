@@ -361,6 +361,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
             points[0] = p_info[face_index]->_closest_point_ref;
             fe->reinit(p_info[face_index]->_side, &points);
             p_info[face_index]->_side_phi = fe->get_phi();
+            p_info[face_index]->_side_grad_phi = fe->get_dphi();
             p_info[face_index]->_dxyzdxi = fe->get_dxyzdxi();
             p_info[face_index]->_dxyzdeta = fe->get_dxyzdeta();
             p_info[face_index]->_d2xyzdxideta = fe->get_d2xyzdxideta();
@@ -1614,7 +1615,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
   //   _mesh.get_boundary_info().sides_with_boundary_id(sides, elem, boundary_id);
   // }
   getSidesOnMasterBoundary(sides, elem);
-//  _mesh.sidesWithBoundaryID(sides, elem, _master_boundary);
+  // _mesh.sidesWithBoundaryID(sides, elem, _master_boundary);
 
   for (unsigned int i=0; i<sides.size(); ++i)
   {
@@ -1676,6 +1677,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
     bool contact_point_on_side;
     std::vector<Node*> off_edge_nodes;
     std::vector<std::vector<Real> > side_phi;
+    std::vector<std::vector<RealGradient> > side_grad_phi;
     std::vector<RealGradient> dxyzdxi;
     std::vector<RealGradient> dxyzdeta;
     std::vector<RealGradient> d2xyzdxideta;
@@ -1693,6 +1695,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
                           contact_on_face_ref,
                           off_edge_nodes,
                           side_phi,
+                          side_grad_phi,
                           dxyzdxi,
                           dxyzdeta,
                           d2xyzdxideta);
