@@ -3,26 +3,24 @@
     type = 'Exodiff'
     input = 'flood_aux.i'
     exodiff = 'out.e'
-    max_parallel = 1                      # different bubble map in parallel caused by a different mesh sweep
   [../]
 
   [./test_elemental]
     type = 'Exodiff'
     input = 'flood_aux_elemental.i'
     exodiff = 'flood_aux_elemental_out.e'
-    max_parallel = 1                      # different bubble map in parallel caused by a different mesh sweep
   [../]
 
   [./simple_test]
     type = 'Exodiff'
     input = 'simple_test.i'
     exodiff = 'simple_test_out.e'
+    max_parallel = 4                     # Only 4 elements
   [../]
 
   [./two_var_test]
     type = 'Exodiff'
     input = 'nodal_flood_periodic_2var.i'
     exodiff = 'out_2var.e'
-    max_parallel = 1                      # different bubble map in parallel caused by a different mesh sweep
   [../]
 []

@@ -8,10 +8,10 @@
 #define FEATUREFLOODCOUNTAUX_H
 
 #include "AuxKernel.h"
+#include "FeatureFloodCount.h"
 
 //Forward Declarations
 class FeatureFloodCountAux;
-class FeatureFloodCount;
 
 template<>
 InputParameters validParams<FeatureFloodCountAux>();
@@ -39,6 +39,8 @@ protected:
   const unsigned int _var_idx;
   const MooseEnum _field_display;
   bool _var_coloring;
+
+  const FeatureFloodCount::FIELD_TYPE _field_type;
 };
 
 #endif //FEATUREFLOODCOUNTAUX_H

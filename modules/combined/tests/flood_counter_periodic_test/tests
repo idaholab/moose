@@ -10,5 +10,6 @@
    input = 'nodal_flood_particle_distribution.i'
    csvdiff = 'nodal_flood_particle_distribution.csv'
    recover = false  # grain tracker CSV output isn't designed to work with recover
+   max_parallel = 1
   [../]
 []

@@ -19,6 +19,7 @@
 #include <iterator>
 
 #include "libmesh/periodic_boundaries.h"
+#include "libmesh/mesh_tools.h"
 
 //Forward Declarations
 class FeatureFloodCount;
@@ -48,37 +49,95 @@ public:
 
   virtual void initialize();
   virtual void execute();
-//  virtual void threadJoin(const UserObject & y);
   virtual void finalize();
   virtual Real getValue();
 
+  enum FIELD_TYPE
+  {
+    UNIQUE_REGION,
+    VARIABLE_COLORING,
+    GHOSTED_ENTITIES,
+    HALOS,
+    ACTIVE_BOUNDS,
+    CENTROID,
+  };
+
   // Retrieve field information
-  virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
-  virtual Real getElementalValue(dof_id_type element_id) const;
+  virtual Real getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
 
-  virtual Real getEntityValue(dof_id_type entity_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
-
-//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getNodalValues(dof_id_type /*node_id*/) const;
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
 
-protected:
-  class BubbleData
+  /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
+  enum STATUS
   {
-  public:
-    BubbleData(std::set<dof_id_type> & entity_ids, unsigned int var_idx) :
-        _entity_ids(entity_ids),
+    NOT_MARKED,
+    MARKED,
+    INACTIVE
+  };
+
+  struct FeatureData
+  {
+    FeatureData(unsigned int var_idx = std::numeric_limits<unsigned int>::max()) :
         _var_idx(var_idx),
+        _bboxes(1), // Assume at least one bounding box
+        _min_entity_id(DofObject::invalid_id),
+        _status(NOT_MARKED),
+        _merged(false),
         _intersects_boundary(false)
+    {
+    }
+
+    FeatureData(const FeatureData & f) :
+        _ghosted_ids(f._ghosted_ids),
+        _local_ids(f._local_ids),
+        _halo_ids(f._halo_ids),
+        _periodic_nodes(f._periodic_nodes),
+        _var_idx(f._var_idx),
+        _bboxes(f._bboxes),
+        _min_entity_id(f._min_entity_id),
+        _status(NOT_MARKED),
+        _merged(f._merged),
+        _intersects_boundary(f._intersects_boundary)
     {}
 
-    std::set<dof_id_type> _entity_ids;
+    void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
+    void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
+
+    void inflateBoundingBoxes(RealVectorValue inflation_amount)
+    {
+      for (unsigned int i = 0; i < _bboxes.size(); ++i)
+      {
+        _bboxes[i].max() += inflation_amount;
+        _bboxes[i].min() -= inflation_amount;
+      }
+    }
+
+    bool isStichable(const FeatureData & rhs) const;
+
+    void expandBBox(const FeatureData & rhs);
+
+    bool operator<(const FeatureData & rhs) const
+    {
+      return _min_entity_id < rhs._min_entity_id;
+    }
+
+    friend std::ostream & operator<< (std::ostream & out, const FeatureData & feature);
+
+    std::set<dof_id_type> _ghosted_ids;
+    std::set<dof_id_type> _local_ids;
+    std::set<dof_id_type> _halo_ids;
     std::set<dof_id_type> _periodic_nodes;
     unsigned int _var_idx;
+    std::vector<MeshTools::BoundingBox> _bboxes;
+    dof_id_type _min_entity_id;
+    STATUS _status;
+    bool _merged;
     bool _intersects_boundary;
   };
 
+protected:
   /**
    * This method is used to populate any of the data structures used for storing field data (nodal or elemental).
    * It is called at the end of finalize and can make use of any of the data structures created during
@@ -86,41 +145,55 @@ protected:
    */
   virtual void updateFieldInfo();
 
-  /**
-   * This method will "mark" all entities on neighboring elements that
-   * are above the supplied threshold. If live_region == -1, that means the
-   * region is inactive (unmarked areas)
-   */
-  void flood(const DofObject *dof_object, int current_idx, int live_region);
+  void inflateBoundingBoxes(RealVectorValue inflation_amount);
 
   /**
-   * These routines packs/unpack the _bubble_map data into a structure suitable for parallel
+   * This method will "mark" all entities on neighboring elements that
+   * are above the supplied threshold. If feature is NULL, we are exploring
+   * for a new region to mark, otherwise we are in the recursive calls
+   * currently marking a region.
+   */
+  void flood(const DofObject * dof_object, int current_idx, FeatureData * feature);
+
+  // TODO: doco
+  void visitElementalNeighbors(const Elem * elem, int current_idx, FeatureData * feature, bool recurse);
+  void visitNodalNeighbors(const Node * elem, int current_idx, FeatureData * feature, bool recurse);
+
+  /**
+   * This routine uses the local flooded data to build up the local feature data structures (_feature_sets).
+   * This routine does not perform any communication so the _feature_sets data structure will only contain
+   * information from the local processor after calling this routine. Any existing data in the _feature_sets
+   * structure is destroyed by calling this routine.
+   *
+   *
+   * _feature_sets layout:
+   * The outer vector is sized to one when _single_map_mode == true, otherwise it is sized for the number
+   * of coupled variables. The inner list represents the flooded regions (local only after this call
+   * but fully populated after parallel communication and stitching).
+   */
+  void populateDataStructuresFromFloodData();
+
+  /**
+   * These routines packs/unpack the _feature_map data into a structure suitable for parallel
    * communication operations. See the comments in these routines for the exact
    * data structure layout.
    */
-  void pack(std::vector<unsigned int> & packed_data) const;
-  void unpack(const std::vector<unsigned int> & packed_data);
+  void serialize(std::string & serialized_buffer);
+  void deserialize(std::vector<std::string> & serialized_buffers);
 
   /**
-   * This routine merges the data in _bubble_sets from separate threads/processes to resolve
+   * This routine merges the data in _feature_sets from separate threads/processes to resolve
    * any bubbles that were counted as unique by multiple processors.
    */
   void mergeSets(bool use_periodic_boundary_info);
 
-  /**
-   * This routine broadcasts a std::list<BubbleData> to other ranks. It includes both the
-   * serialization and de-serialization routines.
-   * @param list the list to broadcast
-   * @param owner_id the rank initiating the broadcast
-   * @param map_num the number in the _bubble_sets datastructure that will be replaced by the results of the broadcast
-   */
-  void communicateOneList(std::list<BubbleData> & list, unsigned int owner_id, unsigned int map_num);
+  void communicateAndMerge();
 
   /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
-  void appendPeriodicNeighborNodes(BubbleData & data) const;
+  void appendPeriodicNeighborNodes(FeatureData & data) const;
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining
@@ -159,14 +232,6 @@ protected:
       }
       return false;
     }
-
-  // Attempt to make a lower bound computation of memory consumed by this object
-  virtual unsigned long calculateUsage() const;
-
-  template<typename T>
-  static unsigned long bytesHelper(T container);
-
-  void formatBytesUsed() const;
 
   /*************************************************
    *************** Data Structures *****************
@@ -215,17 +280,11 @@ protected:
   const unsigned int _maps_size;
 
   /**
-   * This variable keeps track of which nodes have been visited during execution.  We don't use the _bubble_map
+   * This variable keeps track of which nodes have been visited during execution.  We don't use the _feature_map
    * for this since we don't want to explicitly store data for all the unmarked nodes in a serialized datastructures.
    * This keeps our overhead down since this variable never needs to be communicated.
    */
   std::vector<std::map<dof_id_type, bool> > _entities_visited;
-
-  /**
-   * The bubble maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
-   * of them so we can create one per variable if that level of detail is desired.
-   */
-  std::vector<std::map<dof_id_type, int> > _bubble_maps;
 
   /**
    * This map keeps track of which variables own which nodes.  We need a vector of them for multimap mode where
@@ -234,32 +293,41 @@ protected:
    */
   std::vector<std::map<dof_id_type, int> > _var_index_maps;
 
-  /// The data structure used to marshall the data between processes and/or threads
-  std::vector<unsigned int> _packed_data;
-
   /// The data structure used to find neighboring elements give a node ID
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
 
-  /// This data structure is used to keep track of which bubbles are owned by which variables (index).
-  std::vector<unsigned int> _region_to_var_idx;
-
-  /// This data structure holds the offset value for unique bubble ids (updated inside of finalize)
-  std::vector<unsigned int> _region_offsets;
+  // The number of features seen by this object
+  unsigned int _feature_count;
 
   /**
-   * The data structure used to join partial bubbles between processes and/or threads.  We may have a list of BubbleData
-   * per variable in multi-map mode
+   * The data structure used to hold partial and communicated feature data.
+   * The data structure mirrors that found in _feature_sets, but contains
+   * one additional vector indexed by processor id
    */
-  std::vector<std::list<BubbleData> > _bubble_sets;
+  std::vector<std::vector<std::vector<FeatureData> > > _partial_feature_sets;
 
-  /// The scalar counters used during the marking stage of the flood algorithm. Up to one per variable
-  std::vector<unsigned int> _region_counts;
+  /**
+   * The data structure used to hold the globally unique features. The outer vector
+   * is indexed by variable number, the inner vector is indexed by feature number
+   */
+  std::vector<std::vector<MooseSharedPointer<FeatureData> > > _feature_sets;
+
+  /**
+   * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
+   * of them so we can create one per variable if that level of detail is desired.
+   */
+  std::vector<std::map<dof_id_type, int> > _feature_maps;
+
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
 
   /// Average value of the domain which can optionally be used to find bubbles in a field
   const PostprocessorValue & _element_average_value;
+
+  // TODO: Doco
+  std::map<dof_id_type, int> _ghosted_entity_ids;
+  std::map<dof_id_type, int> _halo_ids;
 
   /**
    * The data structure which is a list of nodes that are constrained to other nodes
@@ -277,11 +345,7 @@ protected:
    * The vector hold the volume of each flooded bubble.  Note: this vector is only populated
    * when requested by passing a file name to write this information to.
    */
-  std::vector<Real> _all_bubble_volumes;
-
-  // Memory Usage
-  const bool _track_memory;
-  unsigned long _bytes_used;
+  std::vector<Real> _all_feature_volumes;
 
   // Dummy value for unimplemented method
   static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
@@ -306,15 +370,6 @@ protected:
    */
   bool _is_elemental;
 };
-
-template<typename T>
-unsigned long
-FeatureFloodCount::bytesHelper(T container)
-{
-  typename T::value_type t;
-  return sizeof(t) * container.size();
-}
-
 
 template <class T>
 void
@@ -356,6 +411,14 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
     the_stream << std::endl;
   }
 }
+
+template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+template<> void dataStore(std::ostream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context);
+template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);
+
+template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+template<> void dataLoad(std::istream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context);
+template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
 
 
 #endif //FEATUREFLOODCOUNT_H

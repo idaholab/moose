@@ -34,7 +34,7 @@ FauxGrainTracker::~FauxGrainTracker()
 }
 
 Real
-FauxGrainTracker::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bool /*show_var_coloring*/) const
+FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE field_type, unsigned int var_idx) const
 {
   mooseAssert(var_idx < _vars.size(), "Index out of range");
 
@@ -44,21 +44,6 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, unsigned int var_idx, bo
     return entity_it->second;
   else
     return 0;
-}
-
-Real
-FauxGrainTracker::getNodalValue(dof_id_type node_id, unsigned int var_idx, bool show_var_coloring) const
-{
-  if (_t_step < _tracking_step)
-    return 0;
-
-  return getEntityValue(node_id, var_idx, show_var_coloring);
-}
-
-Real
-FauxGrainTracker::getElementalValue(dof_id_type /*element_id*/) const
-{
-  return 0;
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &

@@ -42,6 +42,10 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -57,14 +61,23 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
+    execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
+    execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
+  [../]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    execute_on = 'initial timestep_end'
+    bubble_object = grain_tracker
+    field_display = CENTROID
   [../]
 []
 
@@ -82,7 +95,6 @@
     block = 0
     T = 500 # K
     wGB = 100 # nm
-
     GBmob0 = 2.5e-6
     Q = 0.23
     GBenergy = 0.708
@@ -92,7 +104,13 @@
 
 [Postprocessors]
   [./grain_tracker]
-    type = GrainTracker
+    type = FeatureFloodCount
+    variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11'
+    threshold = 0.1
+    execute_on = timestep_end
+    use_single_map = false
+    enable_var_coloring = true
+    condense_map_info = true
   [../]
   [./DOFs]
     type = NumDOFs
@@ -101,12 +119,10 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   scheme = bdf2
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
   l_tol = 1.0e-4
@@ -121,3 +137,4 @@
 [Outputs]
   exodus = true
 []
+
