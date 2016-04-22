@@ -12,19 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "TimeSequenceStepper.h"
+#include "ExodusTimeSequenceStepper.h"
+#include "MooseUtils.h"
+#include "libmesh/serial_mesh.h"
+#include "libmesh/exodusII_io.h"
 
 template<>
-InputParameters validParams<TimeSequenceStepper>()
+InputParameters validParams<ExodusTimeSequenceStepper>()
 {
   InputParameters params = validParams<TimeSequenceStepperBase>();
-  params.addRequiredParam<std::vector<Real> >("time_sequence", "The values of t");
-  params.addClassDescription("Solves the Transient problem at a sequence of given time points.");
+  params.addRequiredParam<MeshFileName>("mesh", "The name of the mesh file to extract the time sequence from (must be an exodusII file).");
+  params.addClassDescription("Solves the Transient problem at a sequence of time points taken from a specified exodus file.");
   return params;
 }
 
-TimeSequenceStepper::TimeSequenceStepper(const InputParameters & parameters) :
-    TimeSequenceStepperBase(parameters)
+ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & parameters) :
+    TimeSequenceStepperBase(parameters),
+    _mesh_file(getParam<MeshFileName>("mesh"))
 {
-  setupSequence(getParam<std::vector<Real> >("time_sequence"));
+  // Check that the required file exists
+  MooseUtils::checkFileReadable(_mesh_file);
+
+  // dummy mesh
+  SerialMesh mesh(_communicator);
+
+  // Read the Exodus file
+  ExodusII_IO exodusII_io(mesh);
+  exodusII_io.read(_mesh_file);
+  setupSequence(exodusII_io.get_time_steps());
 }
