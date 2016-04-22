@@ -46,6 +46,7 @@ class Tester(MooseObject):
     params.addParam('cxx11',         ['ALL'], "A test that runs only if CXX11 is available ('ALL', 'TRUE', 'FALSE')")
     params.addParam('asio',          ['ALL'], "A test that runs only if ASIO is available ('ALL', 'TRUE', 'FALSE')")
     params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
+    params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
 
     return params
 
@@ -196,6 +197,12 @@ class Tester(MooseObject):
     for file in self.specs['depend_files']:
       if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
         reason = 'skipped (DEPEND FILES)'
+        return (False, reason)
+
+    # Check to make sure environment variable exists
+    for var in self.specs['env_vars']:
+      if not os.environ.has_key(var):
+        reason = 'skipped (ENV VAR NOT SET)'
         return (False, reason)
 
     # Check the return values of the derived classes
