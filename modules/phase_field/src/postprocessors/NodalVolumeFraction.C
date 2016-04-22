@@ -37,7 +37,7 @@ NodalVolumeFraction::finalize()
   FeatureFloodCount::finalize();
 
   // If the bubble volume calculation wasn't done yet, do now.
-  if (_all_bubble_volumes.empty())
+  if (_all_feature_volumes.empty())
     FeatureFloodCount::calculateBubbleVolumes();
   calculateBubbleFraction();
 
@@ -78,7 +78,7 @@ NodalVolumeFraction::calculateBubbleFraction()
   Real volume(0.0);
 
   //sum the values in the vector to get total volume
-  for (std::vector<Real>::const_iterator it = _all_bubble_volumes.begin(); it != _all_bubble_volumes.end(); ++it)
+  for (std::vector<Real>::const_iterator it = _all_feature_volumes.begin(); it != _all_feature_volumes.end(); ++it)
   {
     volume += *it;
   }
@@ -91,4 +91,3 @@ NodalVolumeFraction::calculateAvramiValue()
 {
   return std::log(std::log(1.0/(1.0 - (_volume_fraction/_equil_fraction) ) ) );
 }
-

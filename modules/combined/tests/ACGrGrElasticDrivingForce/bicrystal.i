@@ -59,10 +59,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./centroids]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./C1111]
     order = CONSTANT
     family = MONOMIAL
@@ -120,23 +116,16 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    execute_on = timestep_end
     bubble_object = grain_tracker
+    execute_on = 'initial timestep_begin'
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    execute_on = timestep_end
     bubble_object = grain_tracker
+    execute_on = 'initial timestep_begin'
     field_display = VARIABLE_COLORING
-  [../]
-  [./centroids]
-    type = FeatureFloodCountAux
-    variable = centroids
-    execute_on = timestep_end
-    bubble_object = grain_tracker
-    field_display = CENTROID
   [../]
   [./C1111]
     type = RankFourAux
@@ -152,6 +141,7 @@
     type = FeatureFloodCountAux
     variable = active_bounds_elemental
     field_display = ACTIVE_BOUNDS
+    execute_on = 'initial timestep_begin'
     bubble_object = grain_tracker
   [../]
   [./euler_angle]
@@ -219,15 +209,10 @@
 [UserObjects]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.1
-    convex_hull_buffer = 5.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
     connecting_threshold = 0.05
     compute_op_maps = true
-    execute_on = 'initial timestep_begin'
     flood_entity_type = elemental
+    execute_on = 'initial timestep_begin'
     outputs = none
   [../]
   [./euler_angle_file]

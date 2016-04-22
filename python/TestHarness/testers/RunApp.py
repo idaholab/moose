@@ -9,7 +9,6 @@ class RunApp(Tester):
     params = Tester.validParams()
     params.addRequiredParam('input',      "The input file to use for this test.")
     params.addParam('test_name',          "The name of the test - populated automatically")
-    params.addParam('skip_test_harness_cli_args', False, "Skip adding global TestHarness CLI Args for this test")
     params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
@@ -88,7 +87,7 @@ class RunApp(Tester):
       # and it is NOT supplied already in the cli-args option\
       specs['cli_args'].append('--error')
 
-    if options.error_unused and '--error-unused' not in specs['cli_args'] and '--warn-unused' not in specs['cli_args']:
+    if options.error_unused and '--error-unused' not in specs['cli_args'] and '--warn-unused' not in specs['cli_args'] and not specs["allow_warnings"]:
       # The user has passed the error-unused option to the test harness
       # and it is NOT supplied already in the cli-args option
       # also, neither is the conflicting option "warn-unused"
@@ -101,9 +100,6 @@ class RunApp(Tester):
 
     if options.colored == False:
       specs['cli_args'].append('--no-color')
-
-    if options.cli_args and not specs['skip_test_harness_cli_args']:
-      specs['cli_args'].insert(0, options.cli_args)
 
     if options.scaling and specs['scale_refine'] > 0:
       specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))

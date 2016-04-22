@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 25
+  nx = 40
+  ny = 40
   nz = 0
   xmax = 1000
   ymax = 1000
@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  op_num = 12
+  op_num = 6
   var_name_base = gr
 []
 
@@ -23,8 +23,8 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      rand_seed = 8675
-      grain_num = 12
+      rand_seed = 12
+      grain_num = 8
     [../]
   [../]
 []
@@ -42,6 +42,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -53,24 +57,34 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
+    execute_on = 'initial timestep_end'
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
+    execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
+    execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
+  [../]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    execute_on = 'initial timestep_end'
+    bubble_object = grain_tracker
+    field_display = CENTROID
   [../]
 []
 
 [BCs]
   [./Periodic]
-    [./all]
+    [./All]
       auto_direction = 'x y'
     [../]
   [../]
@@ -78,70 +92,62 @@
 
 [Materials]
   [./CuGrGr]
+    # Material properties
     type = GBEvolution
-    block = 0
-    T = 500 # K
-    wGB = 100 # nm
-    GBmob0 = 2.5e-6
-    Q = 0.23
-    GBenergy = 0.708
-    molar_volume = 7.11e-6
+    block = 0 # Block ID (only one block in this problem)
+    T = 500 # Constant temperature of the simulation (for mobility calculation)
+    wGB = 90 # Width of the diffuse GB
+    GBmob0 = 2.5e-6 #m^4(Js) for copper from Schoenfelder1997
+    Q = 0.23 #eV for copper from Schoenfelder1997
+    GBenergy = 0.708 #J/m^2 from Schoenfelder1997
+  [../]
+[]
+
+[Preconditioning]
+  active = ''
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []
 
 [Postprocessors]
   [./grain_tracker]
     type = GrainTracker
+    threshold = 0.1
+    connecting_threshold = 0.05
+    convex_hull_buffer = 5.0
+    execute_on = 'initial timestep_end'
+    remap_grains = true
+    use_single_map = false
+    enable_var_coloring = true
+    condense_map_info = true
     flood_entity_type = ELEMENTAL
-    bubble_volume_file = grain_volumes.csv
   [../]
+
   [./DOFs]
     type = NumDOFs
   [../]
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
+  # !CH2 petsc_options = '-snes -ksp_monitor '
+  # scheme = 'bdf2'
   type = Transient
-  scheme = bdf2
-  solve_type = PJFNK
+
+  #Preconditioned JFNK (default)
+  solve_type = 'PJFNK'
+
+
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
-  l_tol = 1.0e-4
+  l_tol = 1.0e-6
   l_max_its = 30
-  nl_max_its = 20
-  nl_rel_tol = 1.0e-9
+  nl_rel_tol = 1.0e-10
+  nl_max_its = 30
   start_time = 0.0
-  num_steps = 2
-  dt = 100.0
-[]
-
-[Adaptivity]
-  marker = error_marker
-  max_h_level = 1
-  [./Markers]
-    active = 'error_marker'
-    [./bnds_marker]
-      type = ValueThresholdMarker
-      invert = true
-      refine = 0.85
-      coarsen = 0.975
-      third_state = DO_NOTHING
-      variable = bnds
-    [../]
-    [./error_marker]
-      type = ErrorFractionMarker
-      coarsen = 0.1
-      indicator = bnds_error
-      refine = 0.7
-    [../]
-  [../]
-  [./Indicators]
-    [./bnds_error]
-      type = GradientJumpIndicator
-      variable = bnds
-    [../]
-  [../]
+  num_steps = 100
+  dt = 30
 []
 
 [Outputs]

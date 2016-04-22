@@ -19,7 +19,7 @@ InputParameters validParams<TensorMechanicsRSphericalAction>()
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variable for the problem (should only be a single variable)");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-
+  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernel will be applied to");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_r", "Auxiliary variables to save the r displacement residuals.");
   return params;
 }
@@ -36,14 +36,14 @@ TensorMechanicsRSphericalAction::act()
   std::vector<VariableName> coupled_displacements;
   unsigned int dim = displacements.size();
 
-  // Error checking:  Can only take one displacement variables in RSpherical kernel
+  // Error checking:  Can only take one displacement variable in StressDivergenceRSphericalTensors kernel
   mooseAssert(dim == 1, "Expected a single displacement variable but recieved " << dim);
 
   for (unsigned int i = 0; i < dim; ++i)
     coupled_displacements.push_back(displacements[i]);
 
-  std::vector<std::vector<AuxVariableName> > save_in;
-  save_in.assign(1, getParam<std::vector<AuxVariableName> >("save_in_disp_r"));
+  std::vector<std::vector<AuxVariableName> > save_in(dim);
+    save_in.assign(1, getParam<std::vector<AuxVariableName> >("save_in_disp_r"));
 
   // Set up the information needed to pass to create the new kernel
   InputParameters params = _factory.getValidParams("StressDivergenceRSphericalTensors");
@@ -53,6 +53,10 @@ TensorMechanicsRSphericalAction::act()
 
   if (isParamValid("base_name"))
     params.set<std::string>("base_name") = getParam<std::string>("base_name");
+
+// Check whether this StressDivergenceRSphericalTensors kernel is restricted to certain block?
+  if (isParamValid("block"))
+    params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
 
   for (unsigned int i = 0; i < dim; ++i)
   {

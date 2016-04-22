@@ -31,5 +31,6 @@
     type = CheckFiles
     input = default_names.i
     check_files = 'default_names_out.e default_names_oversample.e'
+    recover = false
   [../]
 []

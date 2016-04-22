@@ -7,5 +7,6 @@
     max_threads = 1 # NanAtCountKernel changes behavior with threads
     recover = false
     petsc_version = '>=3.6.1'
+    allow_warnings = true
   [../]
 []

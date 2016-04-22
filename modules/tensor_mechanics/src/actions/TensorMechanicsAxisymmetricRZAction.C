@@ -19,7 +19,7 @@ InputParameters validParams<TensorMechanicsAxisymmetricRZAction>()
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variables for the problem");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-
+  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernel will be applied to");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_r", "Auxiliary variables to save the r displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals.");
 
@@ -38,7 +38,7 @@ TensorMechanicsAxisymmetricRZAction::act()
   std::vector<VariableName> coupled_displacements;
   unsigned int dim = displacements.size();
 
-  //Error checking:  Can only take two displacement variables in AxisymmetricRZ
+  //Error checking:  Can only take two displacement variables in StressDivergenceRZTensors kernel
   mooseAssert(dim == 2, "Expected two displacement variables but recieved " << dim);
 
   for (unsigned int i = 0; i < dim; ++i)
@@ -61,9 +61,12 @@ TensorMechanicsAxisymmetricRZAction::act()
   if (isParamValid("base_name"))
     params.set<std::string>("base_name") = getParam<std::string>("base_name");
 
+// Check whether this StressDivergenceRZTensors kernel is restricted to certain block?
+  if (isParamValid("block"))
+    params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
+
   for (unsigned int i = 0; i < dim; ++i)
   {
-    // Create kernel name dependent on the displacement variable
     std::string kernel_name = "TensorMechanicsAxisymmetricRZ_" + Moose::stringify(i);
 
     params.set<unsigned int>("component") = i;

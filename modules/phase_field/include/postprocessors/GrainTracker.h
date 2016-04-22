@@ -14,10 +14,10 @@
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 #include "libmesh/auto_ptr.h"
-#include "libmesh/sphere.h"
 
 class GrainTracker;
 class EBSDReader;
+struct GrainDistance;
 
 template<>
 InputParameters validParams<GrainTracker>();
@@ -32,6 +32,20 @@ public:
 
   virtual void finalize();
 
+  struct CacheValues
+  {
+    Real current;
+    Real old;
+    Real older;
+  };
+
+  enum REMAP_CACHE_MODE
+  {
+    FILL,
+    USE,
+    BYPASS
+  };
+
   /**
    * Accessor for retrieving nodal field information (unique grains or variable indicies)
    * @param node_id the node identifier for which to retrieve field data
@@ -39,16 +53,7 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the nodal value
    */
-  virtual Real getNodalValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
-
-  virtual Real getEntityValue(dof_id_type node_id, unsigned int var_idx=0, bool show_var_coloring=false) const;
-
-  /**
-   * Accessor for retrieving elemental field data (grain centroids).
-   * @param element_id the element identifier for which to retrieve field data
-   * @return the elemental value
-   */
-  virtual Real getElementalValue(dof_id_type element_id) const;
+  virtual Real getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
@@ -57,30 +62,21 @@ public:
    */
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
-  // Debugging routine used for printing grain data structure information
-  void print();
-
-  /// This struct holds the nodesets and bounding spheres for each flooded region.
-  struct BoundingSphereInfo;
-
-  /// This struct hold the information necessary to identify and track a unique grain;
-  struct UniqueGrain;
-
 protected:
   /// This routine is called at the of finalize to update the field data
   virtual void updateFieldInfo();
 
   /**
-   * This method uses the bubble sets to build bounding spheres around each cluster of nodes.  In this class it will be called before periodic
-   * information has been added so that each bubble piece will have a unique sphere.  It populates the _bounding_spheres vector.
-   */
-  void buildBoundingSpheres();
-
-  /**
-   * This method first finds all of the bounding spheres from the _bounding_spheres vector that belong to the same bubble by using the
-   * overlapping periodic information (if periodic boundary conditions are active). If this is the first step that we beginning to track
-   * grains, each of these sets of spheres and the centroid are used to designate a unique grain which is stored in the _unique_grains
-   * datastructure.
+   * This method serves two purposes:
+   * 1) When the tracking phase starts (_t_step == _tracking_step) it assigns a unique id to every FeatureData object
+   *    found by the FeatureFloodCount object. If an EBSDReader is linked into the GrainTracker the information from the
+   *    reader is used to assign grain information, otherwise it's ordered by each Feature's "minimum entity id" and
+   *    assigned a non-negative integer.
+   *
+   * 2) On subsequent time_steps, incoming FeatureData objects are compared to previous time_step information to
+   *    track grains between time steps.
+   *
+   * This method updates the _unique_grains datastructure.
    */
   void trackGrains();
 
@@ -90,25 +86,46 @@ protected:
   void remapGrains();
 
   /**
-   * This method swaps the values at all the nodes in grain_it1, with the values in grain_it2.
+   * Populates and sorts a min_distances vector with the minimum distances to all grains in the simulation
+   * for a given grain. There are _vars.size() entries in the outer vector, one for each order parameter.
+   * A list of grains with the same OP are ordered in lists per OP.
    */
-  void swapSolutionValues(std::map<unsigned int, UniqueGrain *>::iterator & grain_it1, std::map<unsigned int, UniqueGrain *>::iterator & grain_it2, unsigned int attempt_number);
-  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, NumericVector<Real> & solution, NumericVector<Real> & solution_old, NumericVector<Real> & solution_older);
+  void computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain, std::vector<std::list<GrainDistance> > & min_distances);
 
   /**
-   * This method returns the periodic distance between two spheres.  If ignore_radii is true, then the distance will be between the two
-   * sphere centers.  If ignore_radii is false, then the distance will be between the edges of the two spheres.
+   * This is the recursive part of the remapping algorithm. It attempts to remap a grain to a new index and recurses until max_depth
+   * is reached.
    */
-  Real boundingRegionDistance(std::vector<BoundingSphereInfo *> & spheres1, std::vector<BoundingSphereInfo *> & spheres2, bool ignore_radii) const;
+  bool attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
 
-  Point centerOfMass(UniqueGrain & grain) const;
+  /**
+   * A routine for moving all of the solution values from a given grain to a new variable number. It is called
+   * with different modes to only cache, or actually do the work, or bypass the cache altogether.
+   */
+  void swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+                          REMAP_CACHE_MODE cache_mode, unsigned int depth);
+
+  /**
+   * Helper method for actually performing the swaps.
+   */
+  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
+                                REMAP_CACHE_MODE cache_mode);
+
+  /**
+   * This method returns the periodic distance between two bounding boxes.  If use_centroids_only is true, then the distance will be between the two
+   * bounding box centers.  If ignore_radii is false, then the distance will be -1 or 1 depending on whether the intersect or not (respectively).
+   */
+  Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2, bool use_centroids_only) const;
+
+  /**
+   * This method colors neighbors of halo entries to expand the halo as desired for a given simulation.
+   */
+  void expandHalos();
 
   /**
    * Calculate the volume of each grain maintaining proper order and dumping results to CSV
    */
   virtual void calculateBubbleVolumes();
-
-  virtual unsigned long calculateUsage() const;
 
   /*************************************************
    *************** Data Structures *****************
@@ -117,8 +134,11 @@ protected:
   /// The timestep to begin tracking grains
   const int _tracking_step;
 
-  /// The value added to each bounding sphere radius to detect earlier intersection
-  const Real _hull_buffer;
+  /// The thickness of the halo surrounding each grain
+  const unsigned int _halo_level;
+
+  /// Depth of renumbing recursion (a depth of zero means no recursion)
+  const unsigned int _max_renumbering_recursion = 2;
 
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
@@ -126,11 +146,8 @@ protected:
   /// A reference to the nonlinear system (used for retrieving solution vectors)
   NonlinearSystem & _nl;
 
-  /// This data structure holds the raw lists of bounding spheres for each variable index.  It is used during the tracking routine
-  std::vector<std::list<BoundingSphereInfo *> > _bounding_spheres;
-
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-  std::map<unsigned int, UniqueGrain *> & _unique_grains;
+  std::map<unsigned int, MooseSharedPointer<FeatureData> > & _unique_grains;
 
   /**
    * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
@@ -142,44 +159,7 @@ protected:
   /// Optional ESBD Reader
   const EBSDReader * _ebsd_reader;
 
-public:
-  /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
-  enum STATUS
-  {
-    NOT_MARKED,
-    MARKED,
-    INACTIVE
-  };
-
-  /// This struct holds the nodesets and bounding spheres for each flooded region.
-  struct BoundingSphereInfo
-  {
-    BoundingSphereInfo(unsigned int node_id, const Point & center, Real radius);
-
-    unsigned int member_node_id;
-    libMesh::Sphere b_sphere;
-  };
-
-  /// This struct hold the information necessary to identify and track a unique grain;
-  struct UniqueGrain
-  {
-    UniqueGrain(unsigned int var_idx, const std::vector<BoundingSphereInfo *> & b_sphere_ptrs, const std::set<dof_id_type> *nodes_pt, STATUS status);
-    ~UniqueGrain();
-
-    unsigned int variable_idx;
-    std::vector<BoundingSphereInfo *> sphere_ptrs;
-    STATUS status;
-    /**
-     * Pointer to the actual nodes ids.  Note: This pointer is not always valid.  It is invalid
-     * after new sets are built before "trackGrains" has been re-run.  This is intentional and lets us
-     * avoid making unnecessary copies of the set when we don't need it.
-     */
-    const std::set<dof_id_type> *entities_ptr;
-  };
-
   bool _compute_op_maps;
-
-  bool _center_mass_tracking;
 
   /**
    * Data structure for active order parameter information on elements:
@@ -189,11 +169,28 @@ public:
 };
 
 
-template<> void dataStore(std::ostream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context);
-template<> void dataLoad(std::istream & stream, GrainTracker::UniqueGrain * & unique_grain, void * context);
+/**
+ * This struct is used to hold distance information to other grains in the simulation. It is used
+ * for sorting and during the remapping algorithm.
+ */
+struct GrainDistance
+{
+  GrainDistance();
+  GrainDistance(Real distance, unsigned int grain_id, unsigned int var_index);
 
-template<> void dataStore(std::ostream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context);
-template<> void dataLoad(std::istream & stream, GrainTracker::BoundingSphereInfo * & bound_sphere_info, void * context);
+  bool operator<(const GrainDistance & rhs) const;
 
+  Real _distance;
+  unsigned int _grain_id;
+  unsigned int _var_index;
+};
+
+/**
+ * GrainDistance sort functor
+ */
+struct GrainDistanceSorter
+{
+  bool operator()(const std::list<GrainDistance> & lhs, const std::list<GrainDistance> & rhs) const;
+};
 
 #endif

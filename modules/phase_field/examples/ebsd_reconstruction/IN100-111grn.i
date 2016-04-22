@@ -5,7 +5,7 @@
 []
 
 [GlobalParams]
-  op_num = 30
+  op_num = 8
   var_name_base = gr
 []
 
@@ -23,18 +23,21 @@
 [AuxVariables]
   [./bnds]
   [../]
-  [./gt_indices]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./unique_grains]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./T]
+  [./ghost_elements]
     order = CONSTANT
     family = MONOMIAL
-    initial_condition = 500
+  [../]
+  [./halos]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./var_indices]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -57,9 +60,23 @@
     variable = bnds
     execute_on = 'initial timestep_end'
   [../]
-  [./gt_indices]
+  [./ghost_elements]
     type = FeatureFloodCountAux
-    variable = gt_indices
+    variable = ghost_elements
+    field_display = GHOSTED_ENTITIES
+    execute_on = 'initial timestep_end'
+    bubble_object = grain_tracker
+  [../]
+  [./halos]
+    type = FeatureFloodCountAux
+    variable = halos
+    field_display = HALOS
+    execute_on = 'initial timestep_end'
+    bubble_object = grain_tracker
+  [../]
+  [./var_indices]
+    type = FeatureFloodCountAux
+    variable = var_indices
     execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
@@ -78,7 +95,7 @@
     # T = 500 # K
     type = GBEvolution
     block = 0
-    T = T
+    T = 500
     wGB = 0.6               # um
     GBmob0 = 2.5e-6         # m^4/(Js) from Schoenfelder 1997
     Q = 0.23                # Migration energy in eV
@@ -107,16 +124,16 @@
   [./grain_tracker]
     type = GrainTracker
     threshold = 0.1
-    convex_hull_buffer = -3
+    convex_hull_buffer = 0.0
     use_single_map = false
     enable_var_coloring = true
     condense_map_info = true
     connecting_threshold = 0.05
-    bubble_volume_file = IN100-grn-vols.txt
     execute_on = 'initial timestep_end'
-    tracking_step = 0
-    ebsd_reader = ebsd
     flood_entity_type = ELEMENTAL
+    halo_level = 2
+    bubble_volume_file = IN100-grn-vols.txt
+    ebsd_reader = ebsd
   [../]
 []
 
@@ -144,24 +161,23 @@
     optimal_iterations = 7
   [../]
 
-  #[./Adaptivity]
-  #  initial_adaptivity = 3
-  #  refine_fraction = 0.7
-  #  coarsen_fraction = 0.1
-  #  max_h_level = 4
-  #  print_changed_info = true
-  #[../]
-[]
-
-[Outputs]
-  csv = true
-  [./exodus]
-    type = Exodus
-    file_base = IN100-111grn
-    execute_on = 'initial timestep_end'
+  [./Adaptivity]
+    initial_adaptivity = 2
+    refine_fraction = 0.7
+    coarsen_fraction = 0.1
+    max_h_level = 2
+    print_changed_info = true
   [../]
 []
 
-[Problem]
-  use_legacy_uo_initialization = false
+[Outputs]
+  exodus = true
+  checkpoint = true
+  csv = true
+  [./console]
+    type = Console
+    max_rows = 20
+    perf_log = true
+    perf_log_interval = 10
+  [../]
 []
