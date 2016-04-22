@@ -200,6 +200,9 @@ MooseVariable::prepareIC()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
   _nodal_u.resize(_dof_indices.size());
+
+  unsigned int nqp = _qrule->n_points();
+  _u.resize(nqp);
 }
 
 void
@@ -1508,21 +1511,16 @@ MooseVariable::computeNodalNeighborValues()
 void
 MooseVariable::setNodalValue(const DenseVector<Number> & values)
 {
-  for (unsigned int i=0; i<values.size(); i++)
+  for (unsigned int i = 0; i < values.size(); i++)
     _nodal_u[i] = values(i);
 
   _has_nodal_value = true;
 
-  if (isNodal())
-    mooseError("Variable " + name() + " has to be nodal!");
-  else
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
   {
-    for (unsigned int qp=0; qp<_u.size(); qp++)
-    {
-      _u[qp] = 0;
-      for (unsigned int i=0; i < _nodal_u.size(); i++)
-        _u[qp] += _phi[i][qp] * _nodal_u[i];
-    }
+    _u[qp] = 0;
+    for (unsigned int i = 0; i < _nodal_u.size(); i++)
+      _u[qp] += _phi[i][qp] * _nodal_u[i];
   }
 }
 
@@ -1552,11 +1550,9 @@ MooseVariable::setNodalValue(Number value, unsigned int idx/* = 0*/)
   _nodal_u[idx] = value;                  // update variable nodal value
   _has_nodal_value = true;
 
-  if (!isNodal()) // If this is an elemental variable, then update the qp values as well
-  {
-    for (unsigned int qp=0; qp<_u.size(); qp++)
-      _u[qp] = value;
-  }
+  // Update the qp values as well
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+    _u[qp] = value;
 }
 
 void
