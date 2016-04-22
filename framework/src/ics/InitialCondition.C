@@ -555,8 +555,7 @@ InitialCondition::compute()
 //      if ((dof_indices[i] >= first) && (dof_indices[i] < last))
       {
         solution.set(dof_indices[i], Ue(i));
-        if (cont == C_ZERO)
-          _var.setNodalValue(Ue(i), i);
       }
+    _var.setNodalValue(Ue);
   }
 }
