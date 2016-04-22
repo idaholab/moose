@@ -27,4 +27,11 @@
     max_parallel = 1
     compiler = "GCC CLANG"
   [../]
+
+  [./exodustimesequence]
+    type = 'Exodiff'
+    prereq = timesequence_no_start_time
+    input = 'exodustimesequence.i'
+    exodiff = 'exodustimesequence_out.e'
+  [../]
 []

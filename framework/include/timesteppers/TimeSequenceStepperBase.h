@@ -12,24 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef TIMESEQUENCESTEPPER_H
-#define TIMESEQUENCESTEPPER_H
+#ifndef TIMESEQUENCESTEPPERBASE_H
+#define TIMESEQUENCESTEPPERBASE_H
 
-#include "TimeSequenceStepperBase.h"
+#include "TimeStepper.h"
 
-class TimeSequenceStepper;
+class TimeSequenceStepperBase;
 
 template<>
-InputParameters validParams<TimeSequenceStepper>();
+InputParameters validParams<TimeSequenceStepperBase>();
 
 /**
- * Solves the PDEs at a sequence of time points given as a vector in the input file.
+ * Solves the PDEs at a sequence of given time points.
  * Adjusts the time sequence vector according to Transient start_time and end_time.
  */
-class TimeSequenceStepper : public TimeSequenceStepperBase
+class TimeSequenceStepperBase : public TimeStepper
 {
 public:
-  TimeSequenceStepper(const InputParameters & parameters);
+  TimeSequenceStepperBase(const InputParameters & parameters);
+
+  void setupSequence(const std::vector<Real> & times);
+  virtual void init() {}
+  virtual void step();
+
+protected:
+  virtual Real computeInitialDT();
+  virtual Real computeDT();
+  virtual Real computeFailedDT();
+
+  /// the step that the time stepper is currently at
+  unsigned int & _current_step;
+
+  /// stores the sequence of time points
+  std::vector<Real> & _time_sequence;
 };
 
-#endif //TIMESEQUENCESTEPPER_H
+#endif //TIMESEQUENCESTEPPERBASE_H
