@@ -30,14 +30,26 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
     TimeSequenceStepperBase(parameters),
     _mesh_file(getParam<MeshFileName>("mesh"))
 {
-  // Check that the required file exists
-  MooseUtils::checkFileReadable(_mesh_file);
+  // Read the Exodus file on processor 0
+  std::vector<Real> times;
+  if (processor_id() == 0)
+  {
+    // Check that the required file exists
+    MooseUtils::checkFileReadable(_mesh_file);
 
-  // dummy mesh
-  SerialMesh mesh(_communicator);
+    // dummy mesh
+    SerialMesh mesh(_communicator);
 
-  // Read the Exodus file
-  ExodusII_IO exodusII_io(mesh);
-  exodusII_io.read(_mesh_file);
-  setupSequence(exodusII_io.get_time_steps());
+    ExodusII_IO exodusII_io(mesh);
+    exodusII_io.read(_mesh_file);
+    times = exodusII_io.get_time_steps();
+  }
+
+  // distribute timestep list
+  unsigned int num_steps = times.size();
+  _communicator.broadcast(num_steps);
+  times.resize(num_steps);
+  _communicator.broadcast(times);
+
+  setupSequence(times);
 }
