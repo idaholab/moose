@@ -138,7 +138,7 @@ protected:
   const unsigned int _halo_level;
 
   /// Depth of renumbing recursion (a depth of zero means no recursion)
-  const unsigned int _max_renumbering_recursion = 2;
+  static const unsigned int _max_renumbering_recursion = 2;
 
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
