@@ -21,6 +21,7 @@
 #include "MooseApp.h"
 #include "MaterialPropertyStorage.h"
 #include "RestartableData.h"
+#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/checkpoint_io.h"
@@ -47,6 +48,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters) :
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
+    _parallel_mesh(_problem_ptr->mesh().isParallelMesh()),
     _restartable_data(_app.getRestartableData()),
     _recoverable_data(_app.getRecoverableData()),
     _material_property_storage(_problem_ptr->getMaterialPropertyStorage()),
@@ -153,8 +155,15 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     processor_id_type proc_id = processor_id();
 
     // Delete checkpoint files (_mesh.cpr)
-
-    if (proc_id == 0)
+    if (_parallel_mesh)
+    {
+      std::ostringstream oss;
+      oss << delete_files.checkpoint << '-' << proc_id;
+      ret = remove(oss.str().c_str());
+      if (ret != 0)
+        mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
+    }
+    else if (proc_id == 0)
     {
       ret = remove(delete_files.checkpoint.c_str());
       if (ret != 0)

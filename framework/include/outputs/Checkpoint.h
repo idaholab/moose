@@ -94,6 +94,9 @@ private:
   /// True if outputing checkpoint files in binary format
   bool _binary;
 
+  /// True if running with parallel mesh
+  bool _parallel_mesh;
+
   /// Reference to the restartable data
   const RestartableDatas & _restartable_data;
 

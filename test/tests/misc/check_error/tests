@@ -399,6 +399,7 @@
     input = 'override_name_variable_test.i'
     expect_out = "The following variables were overridden or supplied multiple times:"
     max_parallel = 1
+    allow_warnings = true
   [../]
 
   [./rz_3d_error_check_test]
@@ -430,8 +431,7 @@
     expect_out = "The following parameters were unused in your input file"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused'
-    # Don't allow --error-unused on this test
-    skip_test_harness_cli_args = true
+    allow_warnings = true
     max_parallel = 1 # warning can mix on multiple processes
   [../]
 
@@ -440,8 +440,7 @@
     expect_out = "The following parameters were unused on the command line"
     input = 'unused_param_test.i'
     cli_args = '--warn-unused Executioner/unused_param=true'
-    # Don't allow --error-unused on this test
-    skip_test_harness_cli_args = true
+    allow_warnings = true
     max_parallel = 1 # warning can mix on multiple processes
   [../]
 

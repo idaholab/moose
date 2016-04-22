@@ -45,6 +45,7 @@
     type = 'RunApp'
     input = 'exec_on_mismatch.i'
     expect_out = 'MultiAppTransfer execute_on flags do not match'
+    allow_warnings = true
     max_parallel = 1
   [../]
 []
