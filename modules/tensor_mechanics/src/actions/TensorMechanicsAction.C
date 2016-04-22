@@ -23,7 +23,7 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("temp", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-
+  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernel will be applied to");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "Auxiliary variables to save the x displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "Auxiliary variables to save the y displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals.");
@@ -90,6 +90,10 @@ TensorMechanicsAction::act()
 
   if (isParamValid("base_name"))
     params.set<std::string>("base_name") = getParam<std::string>("base_name");
+
+// Check whether this StressDivergenceTensor kernel is restricted to certain block?
+  if (isParamValid("block"))
+    params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
 
   for (unsigned int i = 0; i < dim; ++i)
   {
