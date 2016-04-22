@@ -101,6 +101,9 @@ class RunApp(Tester):
     if options.colored == False:
       specs['cli_args'].append('--no-color')
 
+    if options.cli_args:
+      specs['cli_args'].insert(0, options.cli_args)
+
     if options.scaling and specs['scale_refine'] > 0:
       specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
 
