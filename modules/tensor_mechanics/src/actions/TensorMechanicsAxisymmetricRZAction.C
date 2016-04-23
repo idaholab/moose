@@ -37,19 +37,24 @@ TensorMechanicsAxisymmetricRZAction::act()
   unsigned int _ndisp = displacements.size();
 
   //Error checking:  Can only take two displacement variables in StressDivergenceRZTensors kernel
-  mooseAssert(_ndisp == 2, "Expected two displacement variables but recieved " << _ndisp);
+  if (_ndisp != 2)
+    mooseError("Number of displacement variables should be 2 but recieved " << _ndisp);
 
   std::vector<VariableName> coupled_displacements;
   for (unsigned int i = 0; i < _ndisp; ++i)
     coupled_displacements.push_back(displacements[i]);
 
   std::vector<AuxVariableName> this_save_in = getParam<std::vector<AuxVariableName> >("save_in");
+  if (isParamValid("save_in") && this_save_in.size() != _ndisp)
+    mooseError("Number of save_in variables should equal to the number of displacement variables: " << _ndisp);
   std::vector<std::vector<AuxVariableName> > save_in(_ndisp);
   if (isParamValid("save_in"))
     for (unsigned int i = 0; i < _ndisp; ++i)
       save_in[i].push_back(this_save_in[i]);
 
   std::vector<AuxVariableName> this_diag_save_in = getParam<std::vector<AuxVariableName> >("diag_save_in");
+  if (isParamValid("diag_save_in") && this_diag_save_in.size() != _ndisp)
+    mooseError("Number of diag_save_in variables should equal to the number of displacement variables: " << _ndisp);
   std::vector<std::vector<AuxVariableName> > diag_save_in(_ndisp);
   if (isParamValid("diag_save_in"))
     for (unsigned int i = 0; i < _ndisp; ++i)

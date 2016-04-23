@@ -47,7 +47,13 @@ TorqueReaction::execute()
   Point normal_position_component = position - (position * _direction_vector) / _direction_vector.norm_sq() * _direction_vector;
 
   // Define the force vector from the reaction force/ residuals from the stress divergence kernel
-  Point force((*_react[0])[_qp], (*_react[1])[_qp], (*_react[2])[_qp]);
+  Real _rz;
+  if (_nrt == 3)
+    _rz = (*_react[2])[_qp];
+  else
+    _rz = 0.0;
+
+  Point force((*_react[0])[_qp], (*_react[1])[_qp], _rz);
 
   // Cross the normal component of the position vector with the force
   RealVectorValue torque = normal_position_component.cross(force);
