@@ -26,8 +26,7 @@ ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParamete
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
     _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
-    _T_old(coupledValueOld("temperature"))
+    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment"))
 {
 }
 
@@ -55,9 +54,6 @@ ComputeIncrementalSmallStrain::computeProperties()
     computeTotalStrainIncrement(total_strain_increment);
 
     _strain_increment[_qp] = total_strain_increment;
-
-    //Remove thermal expansion
-    _strain_increment[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T_old[_qp]));
 
     //Remove the Eigen strain increment
     _strain_increment[_qp] -= _stress_free_strain_increment[_qp];

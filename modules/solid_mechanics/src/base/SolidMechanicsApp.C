@@ -45,7 +45,7 @@
 #include "PowerLawCreepModel.h"
 #include "LineMaterialSymmTensorSampler.h"
 #include "InteractionIntegralBenchmarkBC.h"
-#include "MaterialTensorIntegral.h"
+#include "MaterialTensorIntegralSM.h"
 #include "CrackDataSampler.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
@@ -140,7 +140,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(JIntegral);
   registerPostprocessor(CrackFrontData);
   registerPostprocessor(InteractionIntegral);
-  registerPostprocessor(MaterialTensorIntegral);
+  registerPostprocessor(MaterialTensorIntegralSM);
   registerPostprocessor(MixedModeEquivalentK);
 
   registerVectorPostprocessor(CrackDataSampler);

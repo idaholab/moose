@@ -1,0 +1,10 @@
+[Tests]
+
+ [./planestrain]
+    type = 'Exodiff'
+    input = 'planestrain.i'
+    exodiff = 'planestrain_out.e'
+    custom_cmp = 'planestrain.exodiff'
+ [../]
+
+[]

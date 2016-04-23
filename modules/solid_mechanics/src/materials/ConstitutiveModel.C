@@ -141,7 +141,6 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
 
     strain_increment.addDiag(-inc_thermal_strain);
     d_strain_dT.addDiag(-d_thermal_strain_d_temp);
-
   }
 
   bool modified = true;

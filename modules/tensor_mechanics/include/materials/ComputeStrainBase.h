@@ -34,6 +34,7 @@ protected:
   const VariableValue & _T;
   const Real _T0;
   const Real _thermal_expansion_coeff;
+  bool _no_thermal_eigenstrains;
 
   std::string _base_name;
 
