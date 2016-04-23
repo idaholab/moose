@@ -20,7 +20,8 @@ InputParameters validParams<TensorMechanicsRSphericalAction>()
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernel will be applied to");
-  params.addParam<std::vector<AuxVariableName> >("save_in_disp_r", "Auxiliary variables to save the r displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("save_in", "Auxiliary variables to save the r displacement residuals.");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "Auxiliary variables to save the r displacement diagonal preconditoner terms.");
   return params;
 }
 
@@ -33,19 +34,27 @@ void
 TensorMechanicsRSphericalAction::act()
 {
   std::vector<NonlinearVariableName> displacements = getParam<std::vector<NonlinearVariableName> > ("displacements");
-  std::vector<VariableName> coupled_displacements;
-  unsigned int dim = displacements.size();
+  unsigned int _ndisp = displacements.size();
 
   // Error checking:  Can only take one displacement variable in StressDivergenceRSphericalTensors kernel
-  mooseAssert(dim == 1, "Expected a single displacement variable but recieved " << dim);
+  mooseAssert(_ndisp == 1, "Expected a single displacement variable but recieved " << _ndisp);
 
-  for (unsigned int i = 0; i < dim; ++i)
+  std::vector<VariableName> coupled_displacements;
+  for (unsigned int i = 0; i < _ndisp; ++i)
     coupled_displacements.push_back(displacements[i]);
 
-  std::vector<std::vector<AuxVariableName> > save_in(dim);
-    save_in.assign(1, getParam<std::vector<AuxVariableName> >("save_in_disp_r"));
+  std::vector<AuxVariableName> this_save_in = getParam<std::vector<AuxVariableName> >("save_in");
+  std::vector<std::vector<AuxVariableName> > save_in(_ndisp);
+  if (isParamValid("save_in"))
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      save_in[i].push_back(this_save_in[i]);
 
-  // Set up the information needed to pass to create the new kernel
+  std::vector<AuxVariableName> this_diag_save_in = getParam<std::vector<AuxVariableName> >("diag_save_in");
+  std::vector<std::vector<AuxVariableName> > diag_save_in(_ndisp);
+  if (isParamValid("diag_save_in"))
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      diag_save_in[i].push_back(this_diag_save_in[i]);
+
   InputParameters params = _factory.getValidParams("StressDivergenceRSphericalTensors");
   params.set<std::vector<VariableName> >("displacements") = coupled_displacements;
 
@@ -58,16 +67,15 @@ TensorMechanicsRSphericalAction::act()
   if (isParamValid("block"))
     params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
 
-  for (unsigned int i = 0; i < dim; ++i)
+  for (unsigned int i = 0; i < _ndisp; ++i)
   {
-    // Create kernel name dependent on the displacement variable
     std::string kernel_name = "TensorMechanicsRSpherical_" + Moose::stringify(i);
 
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
     params.set<std::vector<AuxVariableName> >("save_in") = save_in[i];
+    params.set<std::vector<AuxVariableName> >("diag_save_in") = diag_save_in[i];
 
-    // Create the kernel
     _problem->addKernel("StressDivergenceRSphericalTensors", kernel_name, params);
   }
 }

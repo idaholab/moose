@@ -23,7 +23,6 @@
   nz = 1
 []
 
-
 [Variables]
   [./disp_x]
   [../]
@@ -32,7 +31,6 @@
   [./disp_z]
   [../]
 []
-
 
 [AuxVariables]
   [./stress_xx]
@@ -55,12 +53,9 @@
   [../]
 []
 
-
 [Kernels]
   [./TensorMechanics]
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
-    save_in_disp_z = saved_z
+    save_in = 'saved_x saved_y saved_z'
   [../]
 []
 
@@ -98,21 +93,18 @@
     boundary = bottom
     value = 0.0
   [../]
-
   [./bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-
   [./bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value = 0.0
   [../]
-
   [./top_shear_z]
     type = FunctionPresetBC
     variable = disp_z
@@ -144,7 +136,6 @@
   [../]
 []
 
-
 [Executioner]
   type = Transient
 
@@ -174,18 +165,14 @@
   [./_dt]
     type = TimestepSize
   [../]
-
   [./torque]
     type = TorqueReaction
     boundary = top
-    react_x = saved_x
-    react_y = saved_y
-    react_z = saved_z
+    react = 'saved_x saved_y saved_z'
     axis_origin = '0.5 0. 0.5'
     direction_vector = '-1. 0. 1.'
   [../]
 []
-
 
 [Outputs]
   file_base = torque_reaction_3D_tm_out

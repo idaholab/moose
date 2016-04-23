@@ -43,7 +43,7 @@
 [Kernels]
   [./StressDivergence1DRSpherical]
     use_displaced_mesh = true
-    save_in_disp_r = residual_r
+    save_in = residual_r
   [../]
 []
 
@@ -114,7 +114,6 @@
   type = Transient
   solve_type = PJFNK
   line_search = none
-
 
 # controls for linear iterations
   l_max_its = 100

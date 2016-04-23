@@ -45,8 +45,7 @@
 [Kernels]
   [./StressDivergence2DAxisymmetricRZ]
     use_displaced_mesh = true
-    #save_in_disp_r = force_r
-    save_in_disp_z = force_z
+    save_in = 'force_r force_z'
   [../]
 []
 
@@ -75,10 +74,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-#  [./force_r]
-#    order = FIRST
-#    family = LAGRANGE
-#  [../]
 []
 
 [AuxKernels]
@@ -206,6 +201,11 @@
   [./stressZ]
     type = ElementAverageValue
     variable = stress_z
+  [../]
+  [./force_r]
+    type = NodalSum
+    variable = force_r
+    boundary = top
   [../]
   [./force_z]
     type = NodalSum
