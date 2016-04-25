@@ -100,7 +100,7 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidSemiaxes()
     //Vary semiaxes
     switch (_size_variation_type)
     {
-    case 0: //Uniform distrubtion, maintaining constant shape
+    case 0: //Random distrubtion, maintaining constant shape
     {
       Real rand_num = _random.rand(_tid);
       _as[i] = _small_a*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
@@ -164,7 +164,7 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
 
     Point newcenter = 0.0;
 
-    while (dsmall_min < _small_spac && dlarge_min < _large_spac && num_tries < _numtries)
+    while ((dsmall_min < _small_spac || dlarge_min < _large_spac) && num_tries < _numtries)
     {
       num_tries++;
 
@@ -232,12 +232,7 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
 
         if (tmp_dsmall_min < dsmall_min) dsmall_min = tmp_dsmall_min;
       }
-
-      if (i == 0)
-      {
-        dsmall_min = _range.norm();
-        dlarge_min = _range.norm();
-      }
+      if (i == _x_positions.size()) dsmall_min = _range.norm();
     }
 
     if (num_tries == _numtries)
