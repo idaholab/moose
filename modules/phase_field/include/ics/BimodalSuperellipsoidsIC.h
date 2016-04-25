@@ -23,7 +23,7 @@ InputParameters validParams<BimodalSuperellipsoidsIC>();
  * BimodalSuperellipsoidsIC takes a specified number of superellipsoids, each with given parameters
  * These are intended to be the larger particles. Then the IC creates a specified number
  * of particles at random locations. These are the smaller particles. As each random particle
- * is placed it it checked to make sure it does not collide with previously placed particles (either
+ * is placed, it it checked to make sure it does not collide with previously placed particles (either
  * large or small ones).
  **/
 class BimodalSuperellipsoidsIC : public SmoothSuperellipsoidBaseIC
@@ -46,10 +46,10 @@ protected:
   std::vector<Real> _input_cs;
   std::vector<Real> _input_ns;
 
+  /// Variables to describe the randomly placed (smaller) superellipsoids
   unsigned int _npart;
   Real _small_spac;
   Real _large_spac;
-
   Real _small_a;
   Real _small_b;
   Real _small_c;

@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 100
-  ny = 100
+  nx = 25
+  ny = 25
   xmax = 50
   ymax = 50
   elem_type = QUAD4
@@ -26,16 +26,15 @@
     bs = '8.0 8.0'
     cs = '1 1'
     ns = '3.5 3.5'
-    npart = 20
-    numtries = 10000
+    npart = 5
     invalue = 1.0
     outvalue = -0.8
-    int_width = 1.0
+    int_width = 4.0
     large_spac = 5
     small_spac = 2
-    small_a = 2
-    small_b = 2
-    small_c = 2
+    small_a = 5
+    small_b = 5
+    small_c = 5
     small_n = 2
     size_variation_type = normal
     size_variation = 0.5
