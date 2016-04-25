@@ -65,6 +65,12 @@ public:
   void buildFaceFE(FEType type);
 
   /**
+   * Build FEs for a neighbor with a type
+   * @param type The type of FE
+   */
+  void buildNeighborFE(FEType type);
+
+  /**
    * Build FEs for a neighbor face with a type
    * @param type The type of FE
    */
@@ -85,6 +91,14 @@ public:
    * @return A _reference_ to the pointer.  Make sure to store this as a reference!
    */
   FEBase * & getFEFace(FEType type, unsigned int dim);
+
+  /**
+   * Get a reference to a pointer that will contain the current 'neighbor' FE.
+   * @param type The type of FE
+   * @param dim The dimension of the current volume
+   * @return A _reference_ to the pointer.  Make sure to store this as a reference!
+   */
+  FEBase * & getFENeighbor(FEType type, unsigned int dim);
 
   /**
    * Get a reference to a pointer that will contain the current "neighbor" FE.
@@ -294,14 +308,16 @@ public:
   void reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor, unsigned int neighbor_side);
 
   /**
-   * Reinitializes the neighbor at the reference coordinates given.
-   */
-  void reinitNeighborAtReference(const Elem * neighbor, const std::vector<Point> & reference_points);
-
-  /**
-   * Reinitializes the neighbor at the physical coordinates given.
+   * Reinitializes the neighbor at the physical coordinates on neighbor side given.
    */
   void reinitNeighborAtPhysical(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points);
+
+  /**
+   * Reinitializes the neighbor at the physical coordinates within element given.
+   */
+  void reinitNeighborAtPhysical(const Elem * neighbor, const std::vector<Point> & physical_points);
+
+  void reinitNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
   /**
    * Reinitialize assembly data for a node
@@ -418,10 +434,13 @@ public:
   const VariablePhiGradient & gradPhiFace() { return _grad_phi_face; }
   const VariablePhiSecond & secondPhiFace() { return _second_phi_face; }
 
+  const VariablePhiValue & phiNeighbor() { return _phi_neighbor; }
+  const VariablePhiGradient & gradPhiNeighbor() { return _grad_phi_neighbor; }
+  const VariablePhiSecond & secondPhiNeighbor() { return _second_phi_neighbor; }
+
   const VariablePhiValue & phiFaceNeighbor() { return _phi_face_neighbor; }
   const VariablePhiGradient & gradPhiFaceNeighbor() { return _grad_phi_face_neighbor; }
   const VariablePhiSecond & secondPhiFaceNeighbor() { return _second_phi_face_neighbor; }
-
 
   const VariablePhiValue & fePhi(FEType type);
   const VariablePhiGradient & feGradPhi(FEType type);
@@ -430,6 +449,10 @@ public:
   const VariablePhiValue & fePhiFace(FEType type);
   const VariablePhiGradient & feGradPhiFace(FEType type);
   const VariablePhiSecond & feSecondPhiFace(FEType type);
+
+  const VariablePhiValue & fePhiNeighbor(FEType type);
+  const VariablePhiGradient & feGradPhiNeighbor(FEType type);
+  const VariablePhiSecond & feSecondPhiNeighbor(FEType type);
 
   const VariablePhiValue & fePhiFaceNeighbor(FEType type);
   const VariablePhiGradient & feGradPhiFaceNeighbor(FEType type);
@@ -482,6 +505,10 @@ protected:
    * @param side The side of the element we are reiniting on
    */
   void reinitFEFace(const Elem * elem, unsigned int side);
+
+  void reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
+
+  void reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
   void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor);
   void cacheResidualBlock(std::vector<Real> & cached_residual_values,
@@ -536,6 +563,8 @@ protected:
   std::map<FEType, FEBase *> _current_fe_face;
   /// The "neighbor" fe object that matches the current elem
   std::map<FEType, FEBase *> _current_fe_neighbor;
+  /// The "neighbor face" fe object that matches the current elem
+  std::map<FEType, FEBase *> _current_fe_face_neighbor;
 
   /**** Volume Stuff ****/
 
@@ -601,8 +630,9 @@ protected:
 
   /// types of finite elements
   std::map<unsigned int, std::map<FEType, FEBase *> > _fe_neighbor;
+  std::map<unsigned int, std::map<FEType, FEBase *> > _fe_face_neighbor;
   /// Each dimension's helper objects
-  std::map<unsigned int, FEBase **> _holder_fe_neighbor_helper;
+  std::map<unsigned int, FEBase **> _holder_fe_face_neighbor_helper;
 
   /// quadrature rule used on neighbors
   QBase * _current_qrule_neighbor;
@@ -666,6 +696,10 @@ protected:
   VariablePhiGradient _grad_phi_face;
   VariablePhiSecond _second_phi_face;
 
+  VariablePhiValue _phi_neighbor;
+  VariablePhiGradient _grad_phi_neighbor;
+  VariablePhiSecond _second_phi_neighbor;
+
   VariablePhiValue _phi_face_neighbor;
   VariablePhiGradient _grad_phi_face_neighbor;
   VariablePhiSecond _second_phi_face_neighbor;
@@ -712,6 +746,7 @@ protected:
   // Shape function values, gradients. second derivatives for each FE type
   std::map<FEType, FEShapeData * > _fe_shape_data;
   std::map<FEType, FEShapeData * > _fe_shape_data_face;
+  std::map<FEType, FEShapeData * > _fe_shape_data_neighbor;
   std::map<FEType, FEShapeData * > _fe_shape_data_face_neighbor;
 
   /// Values cached by calling cacheResidual() (the first vector is for TIME vs NONTIME)
