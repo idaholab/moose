@@ -77,3 +77,17 @@
    fun:ompi_attr_create_keyval
    ...
 }
+{
+   OpenMPI2_buildq_machines
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   obj:*
+   fun:orte_grpcomm_base_comm_stop
+   fun:orte_grpcomm_base_close
+   fun:mca_base_framework_close
+   fun:orte_ess_base_app_finalize
+   obj:*
+   fun:orte_finalize
+   fun:ompi_mpi_finalize
+}
