@@ -378,9 +378,25 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbo
   prepareAssemblyNeighbor(tid);
 
   // Compute values at the points
-//  unsigned int bnd_id = 0;
+  _displaced_nl.reinitNeighborFace(neighbor, neighbor_side, 0, tid);
+  _displaced_aux.reinitNeighborFace(neighbor, neighbor_side, 0, tid);
+}
+
+void
+DisplacedProblem::reinitNeighborPhys(const Elem * neighbor, const std::vector<Point> & physical_points, THREAD_ID tid)
+{
+  // Reinit shape functions
+  _assembly[tid]->reinitNeighborAtPhysical(neighbor, physical_points);
+
+  // Set the neighbor dof indices
+  _displaced_nl.prepareNeighbor(tid);
+  _displaced_aux.prepareNeighbor(tid);
+
+  prepareAssemblyNeighbor(tid);
+
+  // Compute values at the points
   _displaced_nl.reinitNeighbor(neighbor, tid);
-  _displaced_aux.reinitNeighbor(neighbor,tid);
+  _displaced_aux.reinitNeighbor(neighbor, tid);
 }
 
 void
