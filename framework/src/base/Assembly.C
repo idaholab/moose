@@ -126,6 +126,8 @@ Assembly::~Assembly()
     delete it->second;
   for (std::map<FEType, FEShapeData * >::iterator it = _fe_shape_data_face.begin(); it != _fe_shape_data_face.end(); ++it)
     delete it->second;
+  for (std::map<FEType, FEShapeData * >::iterator it = _fe_shape_data_neighbor.begin(); it != _fe_shape_data_neighbor.end(); ++it)
+    delete it->second;
   for (std::map<FEType, FEShapeData * >::iterator it = _fe_shape_data_face_neighbor.begin(); it != _fe_shape_data_face_neighbor.end(); ++it)
     delete it->second;
 
