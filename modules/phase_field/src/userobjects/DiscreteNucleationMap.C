@@ -36,6 +36,7 @@ DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters)
     _int_width(getParam<Real>("int_width")),
     _nucleus_list(_inserter.getNucleusList())
 {
+  _zero_map.assign(_fe_problem.getMaxQps(), 0.0);
 }
 
 void
@@ -50,7 +51,6 @@ DiscreteNucleationMap::initialize()
     _rebuild_map = false;
 
   _mesh_changed = false;
-  _zero_map.assign(_fe_problem.getMaxQps(), 0.0);
 }
 
 void
