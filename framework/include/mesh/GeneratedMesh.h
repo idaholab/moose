@@ -17,8 +17,6 @@
 
 #include "MooseMesh.h"
 
-#include "MooseEnum.h"
-
 class GeneratedMesh;
 
 template<>
