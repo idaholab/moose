@@ -21,22 +21,40 @@ class RunParallel:
   ## Return this return code if the process must be killed because of timeout
   TIMEOUT = -999999
 
-  def __init__(self, harness, max_processes=1, average_load=64.0):
+  def __init__(self, harness, max_processes=None, average_load=64.0):
     ## The test harness to run callbacks on
     self.harness = harness
 
     # Retrieve and store the TestHarness options for use in this object
     self.options = harness.getOptions()
 
-    ## List of currently running jobs as (Popen instance, command, test, time when expires) tuples
+    # For backwards compatibitliy the RunParallel class can be initialized
+    # with no "max_processes" argument and it'll default to a soft limit.
+    # If however a max_processes  is passed we'll treat it as a hard limit.
+    # The difference is whether or not we allow single jobs to exceed
+    # the number of slots.
+    if max_processes == None:
+      self.soft_limit = True
+      self.job_slots = 1
+    else:
+      self.soft_limit = False
+      self.job_slots = max_processes # hard limit
+
+    # Current slots in use
+    self.slots_in_use = 0
+
+    ## List of currently running jobs as (Popen instance, command, test, time when expires, slots) tuples
     # None means no job is running in this slot
-    self.jobs = [None] * max_processes
+    self.jobs = [None] * self.job_slots
 
     # Requested average load level to stay below
     self.average_load = average_load
 
     # queue for jobs needing a prereq
     self.queue = deque()
+
+    # queue for jobs that are always too big (can run at the end if we have soft limits)
+    self.big_queue = deque()
 
     # Jobs that have been finished
     self.finished_jobs = set()
@@ -51,10 +69,21 @@ class RunParallel:
     self.reported_timer = clock()
 
   ## run the command asynchronously and call testharness.testOutputAndFinish when complete
-  def run(self, tester, command, recurse=True):
+  def run(self, tester, command, recurse=True, slot_check=True):
     # First see if any of the queued jobs can be run but only if recursion is allowed on this run
     if recurse:
-      self.startReadyJobs()
+      self.startReadyJobs(slot_check)
+
+    # Get the number of slots that this job takes
+    slots = tester.getProcs(self.options) * tester.getThreads(self.options)
+
+    # Is this job always too big?
+    if slot_check and slots > self.job_slots:
+      if self.soft_limit:
+        self.big_queue.append([tester, command, os.getcwd()])
+      else:
+        self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+      return
 
     # Now make sure that this job doesn't have an unsatisfied prereq
     if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs) and self.options.pbs is None:
@@ -65,8 +94,13 @@ class RunParallel:
     self.satisfyLoad()
 
     # Wait for a job to finish if the jobs queue is full
-    while self.jobs.count(None) == 0:
+    while self.jobs.count(None) == 0 or self.slots_in_use >= self.job_slots:
       self.spinwait()
+
+    # Will this new job fit without exceeding the available job slots?
+    if slot_check and self.slots_in_use + slots > self.job_slots:
+      self.queue.append([tester, command, os.getcwd()])
+      return
 
     # Pre-run preperation
     tester.prepare()
@@ -94,9 +128,10 @@ class RunParallel:
       print "Error in launching a new task"
       raise
 
-    self.jobs[job_index] = (p, command, tester, clock(), f)
+    self.jobs[job_index] = (p, command, tester, clock(), f, slots)
+    self.slots_in_use = self.slots_in_use + slots
 
-  def startReadyJobs(self):
+  def startReadyJobs(self, slot_check):
     queue_items = len(self.queue)
     for i in range(0, queue_items):
       (tester, command, dirpath) = self.queue.popleft()
@@ -104,13 +139,13 @@ class RunParallel:
       sys.path.append(os.path.abspath(dirpath))
       os.chdir(dirpath)
       # We want to avoid "dual" recursion so pass a False flag here
-      self.run(tester, command, False)
+      self.run(tester, command, recurse=False, slot_check=slot_check)
       os.chdir(saved_dir)
       sys.path.pop()
 
   ## Return control the the test harness by finalizing the test output and calling the callback
   def returnToTestHarness(self, job_index):
-    (p, command, tester, time, f) = self.jobs[job_index]
+    (p, command, tester, time, f, slots) = self.jobs[job_index]
 
     log( 'Command %d done:    %s' % (job_index, command) )
     did_pass = True
@@ -140,6 +175,7 @@ class RunParallel:
       self.skipped_jobs.add(tester.specs['test_name'])
 
     self.jobs[job_index] = None
+    self.slots_in_use = self.slots_in_use - slots
 
   ## Don't return until one of the running processes exits.
   #
@@ -151,11 +187,12 @@ class RunParallel:
     slot_freed = False
     for tuple in self.jobs:
       if tuple != None:
-        (p, command, tester, start_time, f) = tuple
+        (p, command, tester, start_time, f, slots) = tuple
         if p.poll() != None or now > (start_time + float(tester.specs['max_time'])):
           # finish up as many jobs as possible, don't sleep until
           # we've cleared all of the finished jobs
           self.returnToTestHarness(job_index)
+
           # We just output to the screen so reset the test harness "activity" timer
           self.reported_timer = now
 
@@ -205,10 +242,44 @@ class RunParallel:
   def join(self):
     while self.jobs.count(None) != len(self.jobs):
       self.spinwait()
-      self.startReadyJobs()
+      self.startReadyJobs(slot_check=True)
 
+    # At this point there are no running jobs but there may still be jobs in queue
+    # for three reasons:
+    # 1) There are testers that require more slots than were available for this run.
+    # 2) There is a tester that is waiting on a prereq that was skipped.
+    # 3) There is an invalid or cyclic dependency in one or more test specifications
+
+    # Handle the first case if the user has explicitely provided a jobs argument
+    # We'll allow larger jobs if the TestHarness is run with without any jobs argument
+    if self.soft_limit:
+      print "\nOversized Jobs:\n"
+
+      # Dump the big jobs into the front of the queue
+      self.queue.extendleft(self.big_queue)
+      # Run the queue again without the slot check
+      self.startReadyJobs(slot_check=False)
+      while self.jobs.count(None) != len(self.jobs):
+        self.spinwait()
+        self.startReadyJobs(slot_check=False)
+
+    # Now we need to see which jobs are too big to fit based on the available slots
+    for i in range(0, len(self.queue)):
+      (tester, command, dirpath) = self.queue.popleft()
+      slots = tester.getProcs(self.options) * tester.getThreads(self.options)
+
+      # If the user is running the script with no options, we'll just exceed the slots for
+      # these remaining big jobs. Otherwise, we'll skip them
+      if not self.soft_limit:
+        if slots >= self.job_slots:
+          self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+          self.skipped_jobs.add(tester.specs['test_name'])
+      else:
+        print "Internal error in TestHarness: Large jobs remain with a soft limit in place"
+        sys.exit(1)
+
+    # Handle the second case (skipped prereqs)
     if len(self.queue) != 0:
-      # See if there are any tests left in the queue simply because their dependencies where skipped
       keep_going = True
       while keep_going:
         keep_going = False
