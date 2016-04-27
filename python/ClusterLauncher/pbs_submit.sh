@@ -3,6 +3,7 @@
 #PBS -l select=<CHUNKS>:ncpus=<NCPUS_PER_CHUNK>:mpiprocs=<MPI_PROCS_PER_CHUNK>
 #PBS -l place=<PLACE>
 #PBS -l walltime=<WALLTIME>
+<PBS_PROJECT>
 <PBS_STDOUT>
 <PBS_STDERR>
 <NOTIFICATIONS>

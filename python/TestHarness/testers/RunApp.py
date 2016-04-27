@@ -208,6 +208,10 @@ class RunApp(Tester):
     if options.PBSEmulator:
       self.specs['pbs_stdout'] = 'pbs_stdout = PBS_EMULATOR'
       self.specs['pbs_stderr'] = 'pbs_stderr = PBS_EMULATOR'
+    else:
+      self.specs.addStringSubParam('pbs_project', 'PBS_PROJECT', "Identify this job submission with this project")
+      self.specs['pbs_project'] = 'pbs_project = %s' % (options.pbs_project)
+
 
     # Do all of the replacements for the valid parameters
     for spec in self.specs.valid_keys():

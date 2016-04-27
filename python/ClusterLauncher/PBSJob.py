@@ -19,6 +19,7 @@ class PBSJob(Job):
     params.addParam('copy_files', "A list of files specifically to copy")
 
     params.addStringSubParam('pbs_o_workdir', 'PBS_O_WORKDIR', "Move to this directory")
+    params.addStringSubParam('pbs_project', '#PBS -P PBS_PROJECT', "Identify as PBS_PROJECT in the PBS queuing system")
     params.addStringSubParam('pbs_stdout', '#PBS -o PBS_STDOUT', "Save stdout to this location")
     params.addStringSubParam('pbs_stderr', '#PBS -e PBS_STDERR', "Save stderr to this location")
 
