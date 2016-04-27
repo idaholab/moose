@@ -30,6 +30,8 @@ public:
    * Constructing the object
    * @param parameters Parameters that come from constructing the object
    */
+  ScalarCoupleable(const MooseObject * moose_object);
+  // DEPRECATED CONSTRUCTED
   ScalarCoupleable(const InputParameters & parameters);
 
   /**
@@ -44,6 +46,8 @@ public:
   const std::vector<MooseVariableScalar *> & getCoupledMooseScalarVars();
 
 protected:
+  // Reference to the interface's input parameters
+  const InputParameters & _sc_parameters;
 
   /**
    * Returns true if a variables has been coupled_as name.

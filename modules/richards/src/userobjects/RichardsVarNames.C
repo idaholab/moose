@@ -24,7 +24,7 @@ InputParameters validParams<RichardsVarNames>()
 
 RichardsVarNames::RichardsVarNames(const InputParameters & parameters) :
     GeneralUserObject(parameters),
-    Coupleable(parameters, false),
+    Coupleable(this, false),
     ZeroInterface(parameters),
     _num_v(coupledComponents("richards_vars")),
     _var_types(getParam<MooseEnum>("var_types"))
@@ -125,5 +125,3 @@ RichardsVarNames::nodal_var_old(unsigned int richards_var_num) const
 {
   return _moose_nodal_var_value_old[richards_var_num];
 }
-
-

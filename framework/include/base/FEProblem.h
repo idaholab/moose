@@ -996,6 +996,13 @@ public:
    */
   void updateActiveObjects();
 
+  /**
+   * Register a MOOSE object dependency so we can either order
+   * operations properly or report when we cannot.
+   * a -> b (a depends on b)
+   */
+  void reportMooseObjectDependency(MooseObject * a, MooseObject * b);
+
 protected:
 
   ///@{

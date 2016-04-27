@@ -111,7 +111,7 @@ InputParameters validParams<FeatureFloodCount>()
 
 FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    Coupleable(parameters, false),
+    Coupleable(this, false),
     MooseVariableDependencyInterface(),
     ZeroInterface(parameters),
     _vars(getCoupledMooseVars()),

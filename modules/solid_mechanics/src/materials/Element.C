@@ -5,17 +5,17 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "Element.h"
-
 #include "Nonlinear3D.h"
+#include "SolidModel.h"
 
 namespace SolidMechanics
 {
 
 
-Element::Element( SolidModel & solid_model,
-                  const std::string & /*name*/,
-                  const InputParameters & parameters ) :
-  Coupleable(parameters, false),
+Element::Element(SolidModel & solid_model,
+                 const std::string & /*name*/,
+                 const InputParameters & parameters ) :
+  Coupleable(&solid_model, false),
   ZeroInterface(parameters),
   _solid_model( solid_model )
 {

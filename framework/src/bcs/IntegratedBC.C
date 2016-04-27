@@ -42,7 +42,7 @@ InputParameters validParams<IntegratedBC>()
 IntegratedBC::IntegratedBC(const InputParameters & parameters) :
     BoundaryCondition(parameters),
     RandomInterface(parameters, _fe_problem, _tid, false),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
