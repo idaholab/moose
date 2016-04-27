@@ -129,6 +129,7 @@
 #include "PolynomialFreeEnergy.h"
 #include "RegularSolutionFreeEnergy.h"
 #include "StrainGradDispDerivatives.h"
+#include "SwitchingFunction3PhaseMaterial.h"
 #include "SwitchingFunctionMaterial.h"
 #include "ThirdPhaseSuppressionMaterial.h"
 
@@ -357,6 +358,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(PolynomialFreeEnergy);
   registerMaterial(RegularSolutionFreeEnergy);
   registerMaterial(StrainGradDispDerivatives);
+  registerMaterial(SwitchingFunction3PhaseMaterial);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(ThirdPhaseSuppressionMaterial);
 
