@@ -38,7 +38,7 @@ InputParameters validParams<AuxScalarKernel>()
 
 AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters) :
     MooseObject(parameters),
-    ScalarCoupleable(parameters),
+    ScalarCoupleable(this),
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),

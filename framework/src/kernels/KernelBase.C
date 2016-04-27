@@ -50,7 +50,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, false),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),

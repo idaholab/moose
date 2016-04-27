@@ -16,12 +16,54 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "FEProblem.h"
+#include "MooseError.h" // mooseDeprecated
+
+ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object) :
+    _sc_parameters(moose_object->parameters()),
+    _sc_fe_problem(*_sc_parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _sc_is_implicit(_sc_parameters.have_parameter<bool>("implicit") ? _sc_parameters.get<bool>("implicit") : true),
+    _coupleable_params(_sc_parameters)
+{
+  SubProblem & problem = *_sc_parameters.get<SubProblem *>("_subproblem");
+
+  THREAD_ID tid = _sc_parameters.have_parameter<THREAD_ID>("_tid") ? _sc_parameters.get<THREAD_ID>("_tid") : 0;
+
+  // Coupling
+  for (std::set<std::string>::const_iterator iter = _sc_parameters.coupledVarsBegin();
+       iter != _sc_parameters.coupledVarsEnd();
+       ++iter)
+  {
+    std::string name = *iter;
+    if (_sc_parameters.getVecMooseType(*iter) != std::vector<std::string>())
+    {
+      std::vector<std::string> vars = _sc_parameters.getVecMooseType(*iter);
+      for (unsigned int i = 0; i < vars.size(); i++)
+      {
+        std::string coupled_var_name = vars[i];
+        if (problem.hasScalarVariable(coupled_var_name))
+        {
+          MooseVariableScalar * scalar_var = &problem.getScalarVariable(tid, coupled_var_name);
+          _coupled_scalar_vars[name].push_back(scalar_var);
+          _coupled_moose_scalar_vars.push_back(scalar_var);
+        }
+        else if (problem.hasVariable(coupled_var_name))
+          ; // ignore normal variables
+        else
+          mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
+      }
+    }
+  }
+}
+
 
 ScalarCoupleable::ScalarCoupleable(const InputParameters & parameters) :
+    _sc_parameters(parameters),
     _sc_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sc_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
     _coupleable_params(parameters)
 {
+  mooseDeprecated("Deprecated constructor: Please contact the MOOSE team for assistance in removing this warning");
+
   SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
 
   THREAD_ID tid = parameters.have_parameter<THREAD_ID>("_tid") ? parameters.get<THREAD_ID>("_tid") : 0;

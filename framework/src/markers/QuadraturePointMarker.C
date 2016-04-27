@@ -37,7 +37,7 @@ InputParameters validParams<QuadraturePointMarker>()
 
 QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters) :
     Marker(parameters),
-    Coupleable(parameters, false),
+    Coupleable(this, false),
     MaterialPropertyInterface(this),
     _qrule(_assembly.qRule()),
     _q_point(_assembly.qPoints()),

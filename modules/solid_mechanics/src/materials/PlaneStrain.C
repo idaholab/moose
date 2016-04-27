@@ -14,7 +14,7 @@ PlaneStrain::PlaneStrain(SolidModel & solid_model,
                          const std::string & name,
                          const InputParameters & parameters)
   :Element(solid_model, name, parameters),
-   ScalarCoupleable(parameters),
+   ScalarCoupleable(&solid_model),
    _large_strain(solid_model.getParam<bool>("large_strain")),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),

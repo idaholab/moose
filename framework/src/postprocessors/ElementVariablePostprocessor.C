@@ -30,7 +30,7 @@ InputParameters validParams<ElementVariablePostprocessor>()
 
 ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters & parameters) :
     ElementPostprocessor(parameters),
-    MooseVariableInterface(parameters, false),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),
     _u_dot(coupledDot("variable")),

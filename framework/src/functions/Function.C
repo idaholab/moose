@@ -32,7 +32,7 @@ Function::Function(const InputParameters & parameters) :
     UserObjectInterface(this),
     Restartable(parameters, "Functions"),
     MeshChangedInterface(parameters),
-    ScalarCoupleable(parameters)
+    ScalarCoupleable(this)
 {
 }
 

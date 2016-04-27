@@ -30,7 +30,7 @@ InputParameters validParams<ScalarInitialCondition>()
 
 ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters) :
     MooseObject(parameters),
-    ScalarCoupleable(parameters),
+    ScalarCoupleable(this),
     FunctionInterface(this),
     DependencyResolverInterface(),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),

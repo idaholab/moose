@@ -21,6 +21,7 @@
 // Forward declarations
 class InputParameters;
 class MooseVariable;
+class MooseObject;
 
 /**
  * Interface for objects that needs coupling capabilities
@@ -34,6 +35,8 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
    */
+  Coupleable(const MooseObject * moose_object, bool nodal);
+  // DEPRECATED CONSTRUCTOR
   Coupleable(const InputParameters & parameters, bool nodal);
 
   /**
@@ -223,6 +226,9 @@ protected:
   virtual const VariableValue & coupledNodalDot(const std::string & var_name, unsigned int comp = 0);
 
 protected:
+  // Reference to the interface's input parameters
+  const InputParameters & _c_parameters;
+
   // Reference to FEProblem
   FEProblem & _c_fe_problem;
 
