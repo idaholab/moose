@@ -218,6 +218,7 @@
 #include "VectorOfPostprocessors.h"
 #include "LeastSquaresFit.h"
 #include "ElementsAlongLine.h"
+#include "ElementsAlongPlane.h"
 #include "IntersectionPointsAlongLine.h"
 #include "LineMaterialRealSampler.h"
 #include "LineFunctionSampler.h"
@@ -626,6 +627,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(VectorOfPostprocessors);
   registerVectorPostprocessor(LeastSquaresFit);
   registerVectorPostprocessor(ElementsAlongLine);
+  registerVectorPostprocessor(ElementsAlongPlane);
   registerVectorPostprocessor(IntersectionPointsAlongLine);
   registerVectorPostprocessor(LineMaterialRealSampler);
   registerVectorPostprocessor(LineFunctionSampler);
