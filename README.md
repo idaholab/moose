@@ -1,6 +1,8 @@
 MOOSE
 =====
 
+[![Join the chat at https://gitter.im/idaholab/moose](https://badges.gitter.im/idaholab/moose.svg)](https://gitter.im/idaholab/moose?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element, multiphysics framework primarily developed by [Idaho National Laboratory](http://www.inl.gov). It provides a high-level interface to some of the most sophisticated [nonlinear solver technology](http://www.mcs.anl.gov/petsc/) on the planet. MOOSE presents a straightforward API that aligns well with the real-world problems scientists and engineers need to tackle. Every detail about how an engineer interacts with MOOSE has been thought through, from the installation process through running your simulation on state of the art supercomputers, the MOOSE system will accelerate your research.
 
 Some of the capability at your fingertips:
