@@ -1,0 +1,27 @@
+[Tests]
+  [./theis1]
+    type = 'CSVDiff'
+    input = 'theis1.i'
+    csvdiff = 'theis1_pressure_0016.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./theis2]
+    type = 'CSVDiff'
+    input = 'theis2.i'
+    csvdiff = 'theis2_pressure_0006.csv'
+    rel_err = 1.0E-5
+  [../]  
+  [./theis3]
+    type = 'CSVDiff'
+    input = 'theis3.i'
+    csvdiff = 'theis3_pressure_0011.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./theis4]
+    type = 'CSVDiff'
+    input = 'theis4.i'
+    csvdiff = 'theis4_pressure_0018.csv'
+    rel_err = 1.0E-5
+  [../]
+
+[]

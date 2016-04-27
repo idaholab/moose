@@ -1,0 +1,129 @@
+\documentclass[]{scrreprt}
+\usepackage{amsmath,amsfonts,graphicx}
+\usepackage{multirow}
+\usepackage{pslatex}
+\usepackage{tabularx}
+\usepackage{comment}
+\usepackage{xspace}
+\usepackage{array}
+
+\usepackage{hyperref}
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+
+\graphicspath{
+{figures/}
+}
+
+\def\species{\mathrm{sp}}
+\def\phase{\mathrm{ph}}
+\def\massfrac{\chi}
+\def\flux{\mathbf{F}}
+\def\darcyvel{\mathbf{v}}
+\def\energydens{\mathcal{E}}
+\def\d{\mathrm{d}}
+
+\newcommand{\uo}{\mbox{UO\textsubscript{2}}\xspace}
+
+\setcounter{secnumdepth}{3}
+
+
+\begin{document}
+
+
+\title{Mass-Conservation Tests}
+\author{CSIRO}
+\maketitle
+
+\tableofcontents
+
+\chapter{PorousFlowFluidMass postprocessor}
+
+\section{Single-phase, single-component}
+\label{1phase1comp.sec}
+
+The total fluid mass of species $\species$ within a volume $V$ is
+\begin{equation}
+\int_{V} \phi\sum_{\phase}\rho_{\phase} S_{\phase}\massfrac_{\phase}^{\species} \ .
+\end{equation}
+It must be checked that MOOSE calculates this correctly in order that
+mass-balances be correct, and also because this quantity is used in a
+number of other tests
+
+A 1D model with $-1\leq x \leq 1$, and with three elements of size 1 is
+created with the following properties:
+\begin{center}
+\begin{tabular}{|ll|}
+\hline
+Constant fluid bulk modulus & 1\,Pa \\
+Fluid density at zero pressure & 1\,kg.m$^{-3}$ \\
+Van Genuchten $m$ & 0.5 \\
+Van Genuchten $\alpha$ & 1\,Pa$^{-1}$ \\
+Porosity & 0.1 \\
+\hline
+\end{tabular}
+\end{center}
+The porepressure is set at $P=x$.
+
+Recall that in PorousFlow, mass is lumped to the nodes.  Therefore,
+the integral above is evaluated at the nodes, and a sum of the results
+is outputted as the PorousFlowFluidMass postprocessor.
+Using the properties given above, this yields:
+\begin{center}
+\begin{tabular}{|ccccc|}
+\hline
+$x$ & $p$ & Density & Saturation & Nodal mass \\
+\hline
+-1 & -1 & 0.367879441 & 0.707106781 & 0.008671002 \\
+-0.333333333 & -0.333333333 & 0.716531311 & 0.948683298 & 0.02265871 \\
+-0.333333333 & -0.333333333 & 0.716531311 & 0.948683298 & 0.02265871 \\
+0.333333333 & 0.333333333 & 1.395612425 & 1 & 0.046520414 \\
+0.333333333 & 0.333333333 & 1.395612425 & 1 & 0.046520414 \\
+1& 1 & 2.718281828 & 1 & 0.090609394 \\
+\hline
+ & & & Total & 0.237638643 \\
+\hline
+\end{tabular}
+\end{center}
+MOOSE also gives the total mass as 0.237638643\,kg.  This test is part of
+the automatic test suite that is run every time the code is updated.
+
+\newpage
+
+\section{Single-phase, two-components}
+
+The same test as Section~\ref{1phase1comp.sec} is run but with two
+components.  The mass fraction is fixed at
+\begin{equation}
+\massfrac_{\phase=0}^{\species=0} = x^{2} \ .
+\end{equation}
+
+\begin{center}
+\begin{tabular}{|ccccccc|}
+\hline
+$x$ & $p$ & Density & Saturation & $\massfrac_{\phase=0}^{\species=0}$
+& Nodal mass$_{\species=0}$ & Nodal mass$_{\species=1}$ \\
+\hline
+-1 & -1 & 0.367879441 & 0.707106781 & 1 & 0.008671 & 0 \\
+-0.333333333 & -0.333333333 & 0.716531311 & 0.948683298 & 0.111111 &
+0.00251763 & 0.02014108 \\
+-0.333333333 & -0.333333333 & 0.716531311 & 0.948683298 & 0.111111 &
+0.00251763 & 0.02014108 \\
+0.333333333 & 0.333333333 & 1.395612425 & 1 & 0.111111 & 0.00516893 &
+0.04135148 \\
+0.333333333 & 0.333333333 & 1.395612425 & 1 & 0.111111 & 0.00516893 &
+0.04135148 \\
+1& 1 & 2.718281828 & 1 & 1 & 0.09060939 & 0 \\
+\hline
+ & & & & Total & 0.11465353 & 0.12298511 \\
+\hline
+\end{tabular}
+\end{center}
+
+MOOSE produces the expected answer.
+
+
+\end{document}
+
