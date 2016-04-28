@@ -17,5 +17,6 @@
     prereq = test_failure
     superlu = true
     allow_warnings = true
+    compiler = 'INTEL GCC' # 6855
   [../]
 []
