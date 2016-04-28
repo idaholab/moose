@@ -16,12 +16,19 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "FEProblem.h"
+#include "MooseError.h" // mooseDeprecated
 
+NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object, bool nodal, bool neighbor_nodal) :
+    Coupleable(moose_object, nodal),
+    _neighbor_nodal(neighbor_nodal)
+{
+}
 
 NeighborCoupleable::NeighborCoupleable(const InputParameters & parameters, bool nodal, bool neighbor_nodal) :
     Coupleable(parameters, nodal),
     _neighbor_nodal(neighbor_nodal)
 {
+  mooseDeprecated("Deprecated constructor: Please contact the MOOSE team for assistance in removing this warning");
 }
 
 NeighborCoupleable::~NeighborCoupleable()

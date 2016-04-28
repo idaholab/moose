@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialEffectiveFluidPressure.h"
 
 template<>
@@ -22,8 +21,8 @@ PorousFlowMaterialEffectiveFluidPressure::PorousFlowMaterialEffectiveFluidPressu
     DerivativeMaterialInterface<Material>(parameters),
 
     _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_ph(_dictator_UO.num_phases()),
-    _num_var(_dictator_UO.num_variables()),
+    _num_ph(_dictator_UO.numPhases()),
+    _num_var(_dictator_UO.numVariables()),
 
     _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
     _dporepressure_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),

@@ -28,11 +28,13 @@
     type = 'Exodiff'
     input = 'crysp_cutback.i'
     exodiff = 'crysp_cutback_out.e'
+    allow_warnings = true
   [../]
   [./test_substep]
     type = 'Exodiff'
     input = 'crysp_substep.i'
     exodiff = 'crysp_substep_out.e'
+    allow_warnings = true
   [../]
   [./test_linesearch]
     type = 'Exodiff'

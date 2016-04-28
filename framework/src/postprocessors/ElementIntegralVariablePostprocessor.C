@@ -24,7 +24,7 @@ InputParameters validParams<ElementIntegralVariablePostprocessor>()
 
 ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(const InputParameters & parameters) :
     ElementIntegralPostprocessor(parameters),
-    MooseVariableInterface(parameters, false),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),
     _u_dot(coupledDot("variable"))

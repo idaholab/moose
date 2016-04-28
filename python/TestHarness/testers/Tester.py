@@ -80,6 +80,11 @@ class Tester(MooseObject):
   def prepare(self):
     return
 
+  def getThreads(self, options):
+    return 1
+
+  def getProcs(self, options):
+    return 1
 
   # This method should return the executable command that will be executed by the tester
   def getCommand(self, options):

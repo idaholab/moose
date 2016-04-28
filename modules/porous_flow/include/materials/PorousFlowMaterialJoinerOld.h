@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef PORFLOWMATERIALJOINEROLD_H
 #define PORFLOWMATERIALJOINEROLD_H
 
@@ -30,7 +29,6 @@ public:
   PorousFlowMaterialJoinerOld(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 

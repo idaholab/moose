@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialDensityBuilder.h"
 
 #include "Conversion.h"
@@ -24,7 +23,7 @@ PorousFlowMaterialDensityBuilder::PorousFlowMaterialDensityBuilder(const InputPa
     DerivativeMaterialInterface<Material>(parameters),
 
     _porflow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_phases(_porflow_name_UO.num_phases()),
+    _num_phases(_porflow_name_UO.numPhases()),
 
     _density(declareProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
     _density_qp(declareProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
@@ -53,7 +52,7 @@ PorousFlowMaterialDensityBuilder::initQpStatefulProperties()
   _density_old[_qp].resize(_num_phases);
   _ddensity_dvar[_qp].resize(_num_phases);
   _ddensity_qp_dvar[_qp].resize(_num_phases);
-  const unsigned int num_var = _porflow_name_UO.num_variables();
+  const unsigned int num_var = _porflow_name_UO.numVariables();
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _ddensity_dvar[_qp][ph].resize(num_var);
@@ -64,7 +63,7 @@ PorousFlowMaterialDensityBuilder::initQpStatefulProperties()
 void
 PorousFlowMaterialDensityBuilder::computeQpProperties()
 {
-  const unsigned int num_var = _porflow_name_UO.num_variables();
+  const unsigned int num_var = _porflow_name_UO.numVariables();
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
@@ -76,7 +75,6 @@ PorousFlowMaterialDensityBuilder::computeQpProperties()
       _ddensity_qp_dvar[_qp][ph][v] = (*_dphase_density_qp_dvar[ph])[_qp][v];
     }
   }
-
 
   /*
    *  YAQI HACK !!

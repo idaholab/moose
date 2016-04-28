@@ -38,7 +38,7 @@ InputParameters validParams<InitialCondition>()
 
 InitialCondition::InitialCondition(const InputParameters & parameters) :
     MooseObject(parameters),
-    Coupleable(parameters, getParam<SystemBase *>("_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<VariableName>("variable")).isNodal()),
+    Coupleable(this, getParam<SystemBase *>("_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<VariableName>("variable")).isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
     BlockRestrictable(parameters),

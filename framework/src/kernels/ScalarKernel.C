@@ -37,7 +37,7 @@ InputParameters validParams<ScalarKernel>()
 
 ScalarKernel::ScalarKernel(const InputParameters & parameters) :
     MooseObject(parameters),
-    ScalarCoupleable(parameters),
+    ScalarCoupleable(this),
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),

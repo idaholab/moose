@@ -26,17 +26,19 @@ public:
   PorousFlowSquarePulsePointSource(const InputParameters & parameters);
 
   virtual void addPoints();
+
   virtual Real computeQpResidual();
 
 protected:
   /// The constant mass flux (kg/s)
   Real _mass_flux;
-  /// Vector of points that specify the location of the point source (sink)
-  std::vector<Real> _point_param;
+
   /// The location of the point source (sink)
   Point _p;
+
   /// The time at which the point source (sink) starts operating
   Real _start_time;
+
   /// The time at which the point source (sink) stops operating
   Real _end_time;
 };

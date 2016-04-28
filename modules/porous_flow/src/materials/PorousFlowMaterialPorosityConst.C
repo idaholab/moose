@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialPorosityConst.h"
 
 #include "Conversion.h"
@@ -44,7 +43,7 @@ PorousFlowMaterialPorosityConst::initQpStatefulProperties()
   _porosity_nodal[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
   _porosity_qp[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
 
-  const unsigned int num_var = _porflow_name_UO.num_variables();
+  const unsigned int num_var = _porflow_name_UO.numVariables();
   _dporosity_nodal_dvar[_qp].resize(num_var, 0.0);
   _dporosity_qp_dvar[_qp].resize(num_var, 0.0);
   _dporosity_nodal_dgradvar[_qp].resize(num_var, RealGradient());

@@ -29,7 +29,6 @@ public:
   PorousFlowMaterialMassFractionBuilder(const InputParameters & parameters);
 
 protected:
-
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _dictator_UO;
 
@@ -55,7 +54,6 @@ protected:
   virtual void computeQpProperties();
 
  private:
-
   /**
    * Number of mass-fraction variables provided by the user
    * This needs to be _num_phases*(_num_components - 1), since the

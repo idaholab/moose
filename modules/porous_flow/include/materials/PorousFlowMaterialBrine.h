@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALBRINE_H
 #define POROUSFLOWMATERIALBRINE_H
 
@@ -27,11 +26,11 @@ public:
   PorousFlowMaterialBrine(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
+
   virtual void computeQpProperties();
 
-/**
+  /**
    * Density of brine.
    * From Driesner, The system H2o-NaCl. Part II: Correlations for molar volume,
    * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
@@ -141,6 +140,7 @@ protected:
 
   /// Molar mass of NaCl
   Real _Mnacl;
+
   /// Mass fraction of NaCl
   Real _xnacl;
 };

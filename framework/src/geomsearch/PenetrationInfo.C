@@ -23,8 +23,16 @@
 #include "Moose.h"
 #include "MooseMesh.h"
 
-PenetrationInfo::PenetrationInfo(const Node * node, const Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, const Point & closest_point_on_face_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta)
-  : _node(node),
+PenetrationInfo::PenetrationInfo(const Node * node, const Elem * elem, Elem * side, unsigned int side_num,
+                                 RealVectorValue norm, Real norm_distance, Real tangential_distance,
+                                 const Point & closest_point, const Point & closest_point_ref, const Point & closest_point_on_face_ref,
+                                 std::vector<Node *> off_edge_nodes,
+                                 const std::vector<std::vector<Real> > & side_phi,
+                                 const std::vector<std::vector<RealGradient> > & side_grad_phi,
+                                 const std::vector<RealGradient> & dxyzdxi,
+                                 const std::vector<RealGradient> & dxyzdeta,
+                                 const std::vector<RealGradient> & d2xyzdxideta) :
+    _node(node),
     _elem(elem),
     _side(side),
     _side_num(side_num),
@@ -36,6 +44,7 @@ PenetrationInfo::PenetrationInfo(const Node * node, const Elem * elem, Elem * si
     _closest_point_on_face_ref(closest_point_on_face_ref),
     _off_edge_nodes(off_edge_nodes),
     _side_phi(side_phi),
+    _side_grad_phi(side_grad_phi),
     _dxyzdxi(dxyzdxi),
     _dxyzdeta(dxyzdeta),
     _d2xyzdxideta(d2xyzdxideta),
@@ -72,6 +81,7 @@ PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
     _closest_point_on_face_ref(p._closest_point_on_face_ref),
     _off_edge_nodes(p._off_edge_nodes),
     _side_phi(p._side_phi),
+    _side_grad_phi(p._side_grad_phi),
     _dxyzdxi(p._dxyzdxi),
     _dxyzdeta(p._dxyzdeta),
     _d2xyzdxideta(p._d2xyzdxideta),
@@ -107,6 +117,7 @@ PenetrationInfo::PenetrationInfo()
     _closest_point_on_face_ref(0),
     _off_edge_nodes(0),
     _side_phi(0),
+    _side_grad_phi(0),
     _dxyzdxi(0),
     _dxyzdeta(0),
     _d2xyzdxideta(0),
@@ -159,6 +170,7 @@ dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context)
     storeHelper(stream, pinfo->_closest_point_on_face_ref, context);
     storeHelper(stream, pinfo->_off_edge_nodes, context);
     storeHelper(stream, pinfo->_side_phi, context);
+    storeHelper(stream, pinfo->_side_grad_phi, context);
     storeHelper(stream, pinfo->_dxyzdxi, context);
     storeHelper(stream, pinfo->_dxyzdeta, context);
     storeHelper(stream, pinfo->_d2xyzdxideta, context);
@@ -212,6 +224,7 @@ dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context)
     loadHelper(stream, pinfo->_closest_point_on_face_ref, context);
     loadHelper(stream, pinfo->_off_edge_nodes, context);
     loadHelper(stream, pinfo->_side_phi, context);
+    loadHelper(stream, pinfo->_side_grad_phi, context);
     loadHelper(stream, pinfo->_dxyzdxi, context);
     loadHelper(stream, pinfo->_dxyzdeta, context);
     loadHelper(stream, pinfo->_d2xyzdxideta, context);

@@ -265,14 +265,15 @@ public:
    * @param phi Evaluated shape functions at a point
    * @return The variable value
    */
-  Number getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi) const;
+  Real getValue(const Elem * elem, const std::vector<std::vector<Real> > & phi) const;
+  RealGradient getGradient(const Elem * elem, const std::vector<std::vector<RealGradient> > & phi) const;
 
   /**
    * Retrieve the Elemental DOF
    * @param elem The element we are computing on
    * @return The variable value
    */
-  Number getElementalValue(const Elem * elem, unsigned int idx=0) const;
+  Number getElementalValue(const Elem * elem, unsigned int idx = 0) const;
 
   /**
    * Whether or not this variable is actually using the shape function value.

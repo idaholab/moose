@@ -24,7 +24,7 @@ InputParameters validParams<SideIntegralVariableUserObject>()
 
 SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParameters & parameters) :
     SideIntegralUserObject(parameters),
-    MooseVariableInterface(parameters, false),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {

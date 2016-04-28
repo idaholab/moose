@@ -31,7 +31,7 @@ InputParameters validParams<NodalBC>()
 NodalBC::NodalBC(const InputParameters & parameters) :
     BoundaryCondition(parameters),
     RandomInterface(parameters, _fe_problem, _tid, true),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, true),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _current_node(_var.node()),
     _u(_var.nodalSln()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),

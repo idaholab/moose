@@ -5,11 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWEFFECTIVESATURATIONVG_H
 #define POROUSFLOWEFFECTIVESATURATIONVG_H
 
-#include "GeneralUserObject.h"
+#include "MooseTypes.h"
 
 /**
  * Utility functions for van-genuchten effective saturation
@@ -21,7 +20,6 @@
 class PorousFlowEffectiveSaturationVG
 {
 public:
-
   /**
    * effective saturation as a fcn of porepressure
    * @param p porepressure
@@ -45,7 +43,6 @@ public:
    * @param m van-genuchten m parameter
    */
   static Real d2seff(Real p, Real al, Real m);
-
 };
 
 #endif // POROUSFLOWEFFECTIVESATURATIONVG_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef PORFLOWMATERIAL2PHASEPS_H
 #define PORFLOWMATERIAL2PHASEPS_H
 
@@ -26,7 +25,6 @@ public:
   PorousFlowMaterial2PhasePS(const InputParameters & parameters);
 
 protected:
-
   /**
    * Assemble std::vectors of porepressure, saturation and temperature at the nodes
    * and quadpoints

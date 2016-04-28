@@ -29,7 +29,6 @@ public:
   PorousFlowMaterialPermeabilityConst(const InputParameters & parameters);
 
 protected:
-
   /// constant value of permeability tensor
   const RealTensorValue _input_permeability;
 

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef PORFLOWMATERIAL2PHASEPS_VG_H
 #define PORFLOWMATERIAL2PHASEPS_VG_H
 
@@ -27,7 +26,6 @@ public:
   PorousFlowMaterial2PhasePS_VG(const InputParameters & parameters);
 
 protected:
-
   /**
    * Capillary pressure as a function of saturation.
    * Default is constant capillary pressure = 0.0.

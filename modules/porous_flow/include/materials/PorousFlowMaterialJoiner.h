@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef PORFLOWMATERIALJOINER_H
 #define PORFLOWMATERIALJOINER_H
 
@@ -30,7 +29,6 @@ public:
   PorousFlowMaterialJoiner(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
 
   /// The variable names UserObject for the Porous-Flow variables

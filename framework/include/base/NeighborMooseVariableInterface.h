@@ -31,6 +31,7 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if the variable is nodal
    */
+  NeighborMooseVariableInterface(const MooseObject * moose_object, bool nodal);
   NeighborMooseVariableInterface(const InputParameters & parameters, bool nodal);
 
   virtual ~NeighborMooseVariableInterface();

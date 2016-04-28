@@ -27,7 +27,7 @@ InputParameters validParams<NodalVariablePostprocessor>()
 
 NodalVariablePostprocessor::NodalVariablePostprocessor(const InputParameters & parameters) :
     NodalPostprocessor(parameters),
-    MooseVariableInterface(parameters, true),
+    MooseVariableInterface(this, true),
     _u(coupledValue("variable"))
 {
 }

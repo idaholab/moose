@@ -38,9 +38,9 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters) :
     Indicator(parameters),
     TransientInterface(this),
     PostprocessorInterface(this),
-    Coupleable(parameters, false),
-    ScalarCoupleable(parameters),
-    MooseVariableInterface(parameters, false),
+    Coupleable(this, false),
+    ScalarCoupleable(this),
+    MooseVariableInterface(this, false),
     MaterialPropertyInterface(this),
     ZeroInterface(parameters),
 

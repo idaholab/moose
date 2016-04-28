@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALCAPILLARYPRESSURELINEAR_H
 #define POROUSFLOWMATERIALCAPILLARYPRESSURELINEAR_H
 
@@ -26,7 +25,6 @@ public:
   PorousFlowMaterialCapillaryPressureLinear(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
 
   /// The maximum value of the capillary pressure

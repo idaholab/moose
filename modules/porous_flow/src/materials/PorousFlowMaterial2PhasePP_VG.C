@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterial2PhasePP_VG.h"
 
 template<>
@@ -27,8 +26,8 @@ PorousFlowMaterial2PhasePP_VG::PorousFlowMaterial2PhasePP_VG(const InputParamete
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m"))
 {
-  if (_dictator_UO.num_phases() != 2)
-    mooseError("The Dictator announces that the number of phases is " << _dictator_UO.num_phases() << " whereas PorousFlowMaterial2PhasePP_VG can only be used for 2-phase simulation.  When you have an efficient government, you have a dictatorship.");
+  if (_dictator_UO.numPhases() != 2)
+    mooseError("The Dictator announces that the number of phases is " << _dictator_UO.numPhases() << " whereas PorousFlowMaterial2PhasePP_VG can only be used for 2-phase simulation.  When you have an efficient government, you have a dictatorship.");
 }
 
 Real

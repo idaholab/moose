@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWVARIABLEBASE_H
 #define POROUSFLOWVARIABLEBASE_H
 
@@ -29,7 +28,6 @@ public:
   PorousFlowVariableBase(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 

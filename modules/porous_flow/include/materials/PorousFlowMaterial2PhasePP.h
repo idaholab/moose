@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef PORFLOWMATERIAL2PHASEPP_H
 #define PORFLOWMATERIAL2PHASEPP_H
 
@@ -29,7 +28,6 @@ public:
   PorousFlowMaterial2PhasePP(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
@@ -85,7 +83,6 @@ protected:
   const VariableGradient & _phase1_gradp_qp;
   /// Moose variable number of the phase1 porepressure
   const unsigned int _phase1_porepressure_varnum;
-
 };
 
 #endif //PORFLOWMATERIAL2PHASEPP_H

@@ -38,12 +38,25 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD
 {
   mooseAssert(var_idx < _vars.size(), "Index out of range");
 
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, unsigned int>::const_iterator entity_it = _entity_id_to_var_num.find(entity_id);
+  switch (field_type)
+  {
+    case UNIQUE_REGION:
+    case VARIABLE_COLORING:
+    {
+      LIBMESH_BEST_UNORDERED_MAP<dof_id_type, unsigned int>::const_iterator entity_it = _entity_id_to_var_num.find(entity_id);
 
-  if (entity_it != _entity_id_to_var_num.end())
-    return entity_it->second;
-  else
-    return 0;
+      if (entity_it != _entity_id_to_var_num.end())
+        return entity_it->second;
+      else
+        return 0;
+      break;
+    }
+
+    // We don't want to error here because this should be a drop in replacement for the real grain tracker.
+    // Instead we'll just return zero and continue
+    default:
+      return 0;
+  }
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &

@@ -21,12 +21,12 @@ InputParameters validParams<PorousFlowEffectiveStressCoupling>()
 }
 
 PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(const InputParameters & parameters) :
-  Kernel(parameters),
-  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-  _coefficient(getParam<Real>("biot_coefficient")),
-  _component(getParam<unsigned int>("component")),
-  _pf(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
-  _dpf_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_qp_dvar"))
+    Kernel(parameters),
+    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _coefficient(getParam<Real>("biot_coefficient")),
+    _component(getParam<unsigned int>("component")),
+    _pf(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
+    _dpf_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_qp_dvar"))
 {
   if (_component >= _mesh.dimension())
     mooseError("PorousFlowEffectiveStressCoupling: component should not be greater than the mesh dimension");
@@ -35,9 +35,8 @@ PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(const Input
 Real
 PorousFlowEffectiveStressCoupling::computeQpResidual()
 {
-  return -_coefficient*_pf[_qp]*_grad_test[_i][_qp](_component);
+  return -_coefficient * _pf[_qp] * _grad_test[_i][_qp](_component);
 }
-
 
 Real
 PorousFlowEffectiveStressCoupling::computeQpJacobian()
@@ -45,7 +44,7 @@ PorousFlowEffectiveStressCoupling::computeQpJacobian()
   if (_dictator_UO.not_porflow_var(_var.number()))
     return 0.0;
   const unsigned int pvar = _dictator_UO.porflow_var_num(_var.number());
-  return -_coefficient*_phi[_j][_qp]*_dpf_dvar[_qp][pvar]*_grad_test[_i][_qp](_component);
+  return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
 }
 
 Real
@@ -54,6 +53,6 @@ PorousFlowEffectiveStressCoupling::computeQpOffDiagJacobian(unsigned int jvar)
   if (_dictator_UO.not_porflow_var(jvar))
     return 0.0;
   const unsigned int pvar = _dictator_UO.porflow_var_num(jvar);
-  return -_coefficient*_phi[_j][_qp]*_dpf_dvar[_qp][pvar]*_grad_test[_i][_qp](_component);
+  return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
 }
 

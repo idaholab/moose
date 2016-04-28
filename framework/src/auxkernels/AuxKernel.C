@@ -58,7 +58,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),

@@ -433,7 +433,6 @@ PorousFlowMaterialWater::dDensityRegion2_dP(Real pressure, Real temperature) con
   int J2[43] = {0, 1, 2, 3, 6, 1, 2, 4, 7, 36, 0, 1, 3, 6, 35, 1, 2, 3, 7, 3, 16, 35, 0, 11, 25, 8, 36, 13,
                 4, 10, 14, 29, 50, 57, 20, 35, 48, 21, 53, 39, 26, 40, 58};
 
-
   /// Ideal gas component of region 2 - Eq. (16)
   Real tau2 = t_star2 / tk;
   Real pi2 = pressure / p_star2;

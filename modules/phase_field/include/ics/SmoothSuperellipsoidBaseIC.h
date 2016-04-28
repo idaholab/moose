@@ -39,9 +39,9 @@ protected:
   virtual Real computeSuperellipsoidValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
   RealGradient computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
 
-  virtual void computeSuperellipsoidCenters() = 0;
   virtual void computeSuperellipsoidSemiaxes() = 0;
   virtual void computeSuperellipsoidExponents() = 0;
+  virtual void computeSuperellipsoidCenters() = 0;
 
   MooseMesh & _mesh;
 

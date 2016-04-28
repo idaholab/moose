@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterial1PhaseP.h"
 
 template<>
@@ -26,8 +25,8 @@ PorousFlowMaterial1PhaseP::PorousFlowMaterial1PhaseP(const InputParameters & par
     _gradp_qp_var(coupledGradient("porepressure")),
     _porepressure_varnum(coupled("porepressure"))
 {
-  if (_dictator_UO.num_phases() != 1)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.num_phases() << " whereas PorousFlowMaterial1PhaseP can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
+  if (_dictator_UO.numPhases() != 1)
+    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.numPhases() << " whereas PorousFlowMaterial1PhaseP can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
 void
@@ -69,14 +68,14 @@ PorousFlowMaterial1PhaseP::computeQpProperties()
   // prepare the derivative matrix with zeroes
   for (unsigned phase = 0; phase < _num_phases; ++phase)
   {
-    _dporepressure_nodal_dvar[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
-    _dporepressure_qp_dvar[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
-    _dgradp_qp_dgradv[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
-    _dgradp_qp_dv[_qp][phase].assign(_dictator_UO.num_variables(), RealGradient());
+    _dporepressure_nodal_dvar[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
+    _dporepressure_qp_dvar[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
+    _dgradp_qp_dgradv[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
+    _dgradp_qp_dv[_qp][phase].assign(_dictator_UO.numVariables(), RealGradient());
   }
 
   // _porepressure is only dependent on _porepressure, and its derivative is 1
-  if (!(_dictator_UO.not_porflow_var(_porepressure_varnum)))
+  if (!_dictator_UO.not_porflow_var(_porepressure_varnum))
   {
     // _porepressure is a PorousFlow variable
     _dporepressure_nodal_dvar[_qp][0][_dictator_UO.porflow_var_num(_porepressure_varnum)] = 1;
@@ -84,17 +83,16 @@ PorousFlowMaterial1PhaseP::computeQpProperties()
     _dgradp_qp_dgradv[_qp][0][_dictator_UO.porflow_var_num(_porepressure_varnum)] = 1;
   }
 
-
   // prepare the derivative matrix with zeroes
   for (unsigned phase = 0; phase < _num_phases; ++phase)
   {
-    _dsaturation_nodal_dvar[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
-    _dsaturation_qp_dvar[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
-    _dgrads_qp_dgradv[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
-    _dgrads_qp_dv[_qp][phase].assign(_dictator_UO.num_variables(), RealGradient());
+    _dsaturation_nodal_dvar[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
+    _dsaturation_qp_dvar[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
+    _dgrads_qp_dgradv[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
+    _dgrads_qp_dv[_qp][phase].assign(_dictator_UO.numVariables(), RealGradient());
   }
 
-  if (!(_dictator_UO.not_porflow_var(_porepressure_varnum)))
+  if (!_dictator_UO.not_porflow_var(_porepressure_varnum))
   {
     // _porepressure is a porflow variable
     _dsaturation_nodal_dvar[_qp][0][_dictator_UO.porflow_var_num(_porepressure_varnum)] = dEffectiveSaturation_dP(_porepressure_nodal_var[_qp]);
@@ -106,12 +104,12 @@ PorousFlowMaterial1PhaseP::computeQpProperties()
   // prepare the derivative matrix with zeroes
   for (unsigned phase = 0; phase < _num_phases; ++phase)
   {
-    _dtemperature_nodal_dvar[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
-    _dtemperature_qp_dvar[_qp][phase].assign(_dictator_UO.num_variables(), 0.0);
+    _dtemperature_nodal_dvar[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
+    _dtemperature_qp_dvar[_qp][phase].assign(_dictator_UO.numVariables(), 0.0);
   }
 
   // _temperature is only dependent on _temperature, and its derivative is = 1
-  if (!(_dictator_UO.not_porflow_var(_temperature_varnum)))
+  if (!_dictator_UO.not_porflow_var(_temperature_varnum))
   {
     // _temperature is a porflow variable
     _dtemperature_nodal_dvar[_qp][0][_dictator_UO.porflow_var_num(_temperature_varnum)] = 1.0;

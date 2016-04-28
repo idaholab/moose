@@ -2473,6 +2473,12 @@ FEProblem::updateActiveObjects()
 }
 
 void
+FEProblem::reportMooseObjectDependency(MooseObject * a, MooseObject * b)
+{
+  //<< "Object " << a->name() << " -> " << b->name() << std::endl;
+}
+
+void
 FEProblem::reinitBecauseOfGhostingOrNewGeomObjects()
 {
   // Need to see if _any_ processor has ghosted elems or geometry objects.

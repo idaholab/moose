@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIAL1PHASEMD_GAUSSIAN_H
 #define POROUSFLOWMATERIAL1PHASEMD_GAUSSIAN_H
 
@@ -29,7 +28,6 @@ public:
   PorousFlowMaterial1PhaseMD_Gaussian(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 

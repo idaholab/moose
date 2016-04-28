@@ -12,7 +12,7 @@ InputParameters validParams<PorousFlowTimeLimitedConstantPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<Real>("mass_flux", "The mass flux at this point in kg/s (positive is flux in, negative is flux out)");
-  params.addRequiredParam<std::vector<Real> >("point", "The x,y,z coordinates of the point");
+  params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");
   params.addParam<Real>("end_time", 1.0e30, "The time at which the source will end");
   return params;
 }
@@ -20,15 +20,9 @@ InputParameters validParams<PorousFlowTimeLimitedConstantPointSource>()
 PorousFlowTimeLimitedConstantPointSource::PorousFlowTimeLimitedConstantPointSource(const InputParameters & parameters) :
     DiracKernel(parameters),
     _mass_flux(getParam<Real>("mass_flux")),
-    _point_param(getParam<std::vector<Real> >("point")),
+    _p(getParam<Point>("point")),
     _end_time(getParam<Real>("end_time"))
 {
-  _p(0) = _point_param[0];
-
-  if (_point_param.size() > 1)
-    _p(1) = _point_param[1];
-  if (_point_param.size() > 2)
-      _p(2) = _point_param[2];
 }
 
 void
@@ -40,14 +34,14 @@ PorousFlowTimeLimitedConstantPointSource::addPoints()
 Real
 PorousFlowTimeLimitedConstantPointSource::computeQpResidual()
 {
-  Real rate = 0.;
+  Real rate = 0.0;
 
   /**
    * If t - dt < end_time, then the Dirac point is still active.
-   * * In this case, if t <= end_time, then the rate is equal to mass_flux.
-   * * If t > end_time, then this time step is the one that exceeds
-   *   the specified end time. For this case, mass_flux is scaled so that then
-   *   total mass added (or removed) is correct (end_time * mass_flux).
+   * In this case, if t <= end_time, then the rate is equal to mass_flux.
+   * If t > end_time, then this time step is the one that exceeds
+   * the specified end time. For this case, mass_flux is scaled so that then
+   * total mass added (or removed) is correct (end_time * mass_flux).
    *
    * If t - dt > end_time, the Dirac point is made inactive by setting residual = 0
    */

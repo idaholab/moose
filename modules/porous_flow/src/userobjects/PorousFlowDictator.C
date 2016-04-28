@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 //  Holds maps between PorousFlow variables (porepressure, saturations) and the variable number used by MOOSE.
 #include "PorousFlowDictator.h"
 
@@ -22,7 +21,7 @@ InputParameters validParams<PorousFlowDictator>()
 
 PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
     GeneralUserObject(parameters),
-    Coupleable(parameters, false),
+    Coupleable(this, false),
     ZeroInterface(parameters),
     _num_variables(coupledComponents("porous_flow_vars")),
     _num_phases(getParam<unsigned int>("number_fluid_phases")),
@@ -31,20 +30,10 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
   unsigned int max_moose_var_num_seen = 0;
 
   _moose_var_num.resize(_num_variables);
-  _moose_var_value.resize(_num_variables);
-  _moose_var_value_old.resize(_num_variables);
-  _moose_nodal_var_value.resize(_num_variables);
-  _moose_nodal_var_value_old.resize(_num_variables);
-  _moose_grad_var.resize(_num_variables);
   for (unsigned int i = 0; i < _num_variables; ++i)
   {
     _moose_var_num[i] = coupled("porous_flow_vars", i);
     max_moose_var_num_seen = (max_moose_var_num_seen > _moose_var_num[i] ? max_moose_var_num_seen : _moose_var_num[i]);
-    _moose_var_value[i] = &coupledValue("porous_flow_vars", i); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
-    _moose_var_value_old[i] = (_is_transient ? &coupledValueOld("porous_flow_vars", i) : &_zero);
-    _moose_nodal_var_value[i] = &coupledNodalValue("porous_flow_vars", i); // coupledNodalValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
-    _moose_nodal_var_value_old[i] = (_is_transient ? &coupledNodalValueOld("porous_flow_vars", i) : &_zero);
-    _moose_grad_var[i] = &coupledGradient("porous_flow_vars", i);
   }
 
   _pf_var_num.resize(max_moose_var_num_seen + 1);
@@ -62,23 +51,24 @@ void
 PorousFlowDictator::execute()
 {}
 
-void PorousFlowDictator::finalize()
+void
+PorousFlowDictator::finalize()
 {}
 
 unsigned int
-PorousFlowDictator::num_variables() const
+PorousFlowDictator::numVariables() const
 {
   return _num_variables;
 }
 
 unsigned int
-PorousFlowDictator::num_phases() const
+PorousFlowDictator::numPhases() const
 {
   return _num_phases;
 }
 
 unsigned int
-PorousFlowDictator::num_components() const
+PorousFlowDictator::numComponents() const
 {
   return _num_components;
 }
@@ -87,7 +77,7 @@ unsigned int
 PorousFlowDictator::porflow_var_num(unsigned int moose_var_num) const
 {
   if (moose_var_num >= _pf_var_num.size() || _pf_var_num[moose_var_num] == _num_variables)
-    mooseError("The moose variable with number " << moose_var_num << " is not a PorousFlow variable according to the PorousFlowDictator UserObject");
+    mooseError("The Dictator proclaims that the moose variable with number " << moose_var_num << ".  Exiting with error code 1984.");
   return _pf_var_num[moose_var_num];
 }
 
@@ -97,36 +87,6 @@ PorousFlowDictator::not_porflow_var(unsigned int moose_var_num) const
   if (moose_var_num >= _pf_var_num.size() || _pf_var_num[moose_var_num] == _num_variables)
     return true;
   return false;
-}
-
-const VariableValue *
-PorousFlowDictator::porflow_vals(unsigned int porflow_var_num) const
-{
-  return _moose_var_value[porflow_var_num]; // moose_var_value is a vector of pointers to VariableValuees
-}
-
-const VariableValue *
-PorousFlowDictator::porflow_vals_old(unsigned int porflow_var_num) const
-{
-  return _moose_var_value_old[porflow_var_num];
-}
-
-const VariableGradient *
-PorousFlowDictator::grad_var(unsigned int porflow_var_num) const
-{
-  return _moose_grad_var[porflow_var_num];
-}
-
-const VariableValue *
-PorousFlowDictator::nodal_var(unsigned int porflow_var_num) const
-{
-  return _moose_nodal_var_value[porflow_var_num];
-}
-
-const VariableValue *
-PorousFlowDictator::nodal_var_old(unsigned int porflow_var_num) const
-{
-  return _moose_nodal_var_value_old[porflow_var_num];
 }
 
 const VariableName

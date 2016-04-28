@@ -8,7 +8,6 @@
 #define POROUSFLOWEFFECTIVESTRESSCOUPLING_H
 
 #include "Kernel.h"
-
 #include "PorousFlowDictator.h"
 
 //Forward Declarations
@@ -18,23 +17,22 @@ template<>
 InputParameters validParams<PorousFlowEffectiveStressCoupling>();
 
 /**
- * PorousFlowEffectiveStressCoupling computes -coefficient*effective_porepressure*grad_test[component]
+ * PorousFlowEffectiveStressCoupling computes
+ * -coefficient*effective_porepressure*grad_component(test)
+ * where component is the spatial component (not
+ * a fluid component!)
  */
 class PorousFlowEffectiveStressCoupling : public Kernel
 {
 public:
-
   PorousFlowEffectiveStressCoupling(const InputParameters & parameters);
 
  protected:
-
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
- private:
 
   /// The Porous-Flow dictator that holds global info about the simulation
   const PorousFlowDictator & _dictator_UO;
@@ -42,7 +40,8 @@ public:
   /// Biot coefficient
   const Real _coefficient;
 
-  unsigned int _component;
+  /// the spatial component
+  const unsigned int _component;
 
   /// effective porepressure
   const MaterialProperty<Real> & _pf;

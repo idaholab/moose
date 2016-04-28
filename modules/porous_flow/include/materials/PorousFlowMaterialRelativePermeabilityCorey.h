@@ -26,7 +26,6 @@ public:
   PorousFlowMaterialRelativePermeabilityCorey(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
 
   /// Core exponent n for the phase

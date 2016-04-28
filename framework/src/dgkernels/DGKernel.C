@@ -55,7 +55,7 @@ DGKernel::DGKernel(const InputParameters & parameters) :
     TransientInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(parameters, false, false),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     TwoMaterialPropertyInterface(this),
     Restartable(parameters, "DGKernels"),
     MeshChangedInterface(parameters),

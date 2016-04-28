@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALSIMPLECO2_H
 #define POROUSFLOWMATERIALSIMPLECO2_H
 
@@ -30,7 +29,6 @@ public:
   PorousFlowMaterialSimpleCO2(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 

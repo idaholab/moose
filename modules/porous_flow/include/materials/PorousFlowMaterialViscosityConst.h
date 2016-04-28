@@ -25,7 +25,6 @@ public:
   PorousFlowMaterialViscosityConst(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
 
   /// constant value of viscosity

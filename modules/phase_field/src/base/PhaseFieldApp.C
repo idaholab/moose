@@ -65,6 +65,7 @@
 /*
  * Initial Conditions
  */
+#include "BimodalSuperellipsoidsIC.h"
 #include "ClosePackIC.h"
 #include "CrossIC.h"
 #include "HexPolycrystalIC.h"
@@ -181,6 +182,7 @@
  * Meshes
  */
 #include "EBSDMesh.h"
+#include "MortarPeriodicMesh.h"
 
 /*
  * Actions
@@ -298,6 +300,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerDeprecatedObjectName(AllenCahn, "ACParsed", "15/04/2016 00:00");
   registerDeprecatedObjectName(CahnHilliard, "CHParsed", "11/01/2015 00:00");
 
+  registerInitialCondition(BimodalSuperellipsoidsIC);
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
   registerInitialCondition(HexPolycrystalIC);
@@ -394,6 +397,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerVectorPostprocessor(GrainForcesPostprocessor);
 
   registerMesh(EBSDMesh);
+  registerMesh(MortarPeriodicMesh);
 }
 
 // External entry point for dynamic syntax association

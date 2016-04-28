@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialViscosityConst.h"
 
 #include "Conversion.h"
@@ -31,8 +30,8 @@ PorousFlowMaterialViscosityConst::PorousFlowMaterialViscosityConst(const InputPa
 
     _viscosity(declareProperty<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num)))
 {
-  if (_phase_num >= _dictator_UO.num_phases())
-    mooseError("PorousFlowMaterialViscosityConst: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
+  if (_phase_num >= _dictator_UO.numPhases())
+    mooseError("PorousFlowMaterialViscosityConst: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.numPhases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
 }
 
 void

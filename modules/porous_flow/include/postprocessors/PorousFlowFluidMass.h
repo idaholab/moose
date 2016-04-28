@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWFLUIDMASS_H
 #define POROUSFLOWFLUIDMASS_H
 
@@ -24,7 +23,6 @@ InputParameters validParams<PorousFlowFluidMass>();
 class PorousFlowFluidMass: public ElementIntegralVariablePostprocessor
 {
 public:
-
   PorousFlowFluidMass(const InputParameters & parameters);
 
 protected:
@@ -46,7 +44,6 @@ protected:
 
   /// fluid mass-fraction matrix
   const MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
-
 };
 
 #endif //POROUSFLOWFLUIDMASS_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialRelativePermeabilityCorey.h"
 
 #include "Conversion.h"

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALCAPILLARYPRESSUREVGP_H
 #define POROUSFLOWMATERIALCAPILLARYPRESSUREVGP_H
 
@@ -31,7 +30,6 @@ public:
   PorousFlowMaterialCapillaryPressureVGP(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
   /// Effective phase saturation as a function of phase pore pressure
   Real effectiveSaturation(Real pressure) const;

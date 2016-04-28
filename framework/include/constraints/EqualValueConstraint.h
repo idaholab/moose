@@ -23,7 +23,8 @@ template<>
 InputParameters validParams<EqualValueConstraint>();
 
 /**
- *
+ * Constrain the value of a variable to be the same on both sides of an
+ * interface.
  */
 class EqualValueConstraint : public FaceFaceConstraint
 {
@@ -36,6 +37,5 @@ protected:
   virtual Real computeQpResidualSide(Moose::ConstraintType res_type);
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 };
-
 
 #endif /* EQUALVALUECONSTRAINT_H */

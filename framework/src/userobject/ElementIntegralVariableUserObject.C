@@ -24,7 +24,7 @@ InputParameters validParams<ElementIntegralVariableUserObject>()
 
 ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(const InputParameters & parameters) :
     ElementIntegralUserObject(parameters),
-    MooseVariableInterface(parameters, false),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {

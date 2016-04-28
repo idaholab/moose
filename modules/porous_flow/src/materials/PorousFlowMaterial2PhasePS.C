@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterial2PhasePS.h"
 
 template<>
@@ -34,8 +33,8 @@ PorousFlowMaterial2PhasePS::PorousFlowMaterial2PhasePS(const InputParameters & p
 
     _pc(getParam<Real>("pc"))
 {
-  if (_dictator_UO.num_phases() != 2)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.num_phases() << " whereas PorousFlowMaterial2PhasePS can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
+  if (_dictator_UO.numPhases() != 2)
+    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.numPhases() << " whereas PorousFlowMaterial2PhasePS can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
 }
 
 void
@@ -77,7 +76,7 @@ PorousFlowMaterial2PhasePS::computeQpProperties()
   */
 
   // _porepressure depends on _phase0_porepressure, and its derivative is 1
-  if (!(_dictator_UO.not_porflow_var(_phase0_porepressure_varnum)))
+  if (!_dictator_UO.not_porflow_var(_phase0_porepressure_varnum))
   {
     // _phase0_porepressure is a PorousFlow variable
     for (unsigned phase = 0; phase < _num_phases; ++phase)
@@ -93,9 +92,8 @@ PorousFlowMaterial2PhasePS::computeQpProperties()
   const Real dpc_qp = dCapillaryPressure_dS(_phase1_saturation_qp[_qp]);
   const Real d2pc_qp = d2CapillaryPressure_dS2(_phase1_saturation_qp[_qp]);
 
-
   // _saturation is only dependent on _phase1_saturation, and its derivative is +/- 1
-  if (!(_dictator_UO.not_porflow_var(_phase1_saturation_varnum)))
+  if (!_dictator_UO.not_porflow_var(_phase1_saturation_varnum))
   {
     const unsigned int svar = _dictator_UO.porflow_var_num(_phase1_saturation_varnum);
     // _phase1_saturation is a porflow variable
@@ -114,7 +112,7 @@ PorousFlowMaterial2PhasePS::computeQpProperties()
   }
 
   // _temperature is only dependent on temperature, and its derivative is = 1
-  if (!(_dictator_UO.not_porflow_var(_temperature_varnum)))
+  if (!_dictator_UO.not_porflow_var(_temperature_varnum))
   {
     // _phase0_temperature is a PorousFlow variable
     for (unsigned int phase = 0; phase < _num_phases; ++phase)

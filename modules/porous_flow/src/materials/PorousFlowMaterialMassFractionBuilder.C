@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialMassFractionBuilder.h"
 
 #include "Conversion.h"
@@ -25,8 +24,8 @@ PorousFlowMaterialMassFractionBuilder::PorousFlowMaterialMassFractionBuilder(con
     DerivativeMaterialInterface<Material>(parameters),
 
     _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_phases(_dictator_UO.num_phases()),
-    _num_components(_dictator_UO.num_components()),
+    _num_phases(_dictator_UO.numPhases()),
+    _num_components(_dictator_UO.numComponents()),
 
     _mass_frac(declareProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
     _mass_frac_old(declarePropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
@@ -54,7 +53,7 @@ PorousFlowMaterialMassFractionBuilder::PorousFlowMaterialMassFractionBuilder(con
 void
 PorousFlowMaterialMassFractionBuilder::initQpStatefulProperties()
 {
-  const unsigned int num_var = _dictator_UO.num_variables();
+  const unsigned int num_var = _dictator_UO.numVariables();
   _mass_frac[_qp].resize(_num_phases);
   _mass_frac_old[_qp].resize(_num_phases);
   _grad_mass_frac[_qp].resize(_num_phases);
@@ -76,7 +75,7 @@ PorousFlowMaterialMassFractionBuilder::initQpStatefulProperties()
   {
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
-      if (!(_dictator_UO.not_porflow_var(_mf_vars_num[i])))
+      if (!_dictator_UO.not_porflow_var(_mf_vars_num[i]))
       {
         // _mf_vars[i] is a PorousFlow variable
         const unsigned int pf_var_num = _dictator_UO.porflow_var_num(_mf_vars_num[i]);
@@ -86,7 +85,6 @@ PorousFlowMaterialMassFractionBuilder::initQpStatefulProperties()
       i++;
     }
   }
-  //
   build_mass_frac(_qp);
 }
 

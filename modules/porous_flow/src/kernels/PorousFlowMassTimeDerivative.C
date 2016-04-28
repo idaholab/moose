@@ -18,26 +18,26 @@ InputParameters validParams<PorousFlowMassTimeDerivative>()
 }
 
 PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters & parameters) :
-  TimeKernel(parameters),
-  _component_index(getParam<unsigned int>("component_index")),
-  _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-  _var_is_porflow_var(!(_dictator_UO.not_porflow_var(_var.number()))),
-  _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
-  _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")),
-  _dporosity_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar")),
-  _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar")),
-  _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
-  _fluid_density_old(getMaterialPropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density")),
-  _dfluid_density_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
-  _fluid_saturation_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
-  _fluid_saturation_nodal_old(getMaterialPropertyOld<std::vector<Real> >("PorousFlow_saturation_nodal")),
-  _dfluid_saturation_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
-  _mass_frac(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
-  _mass_frac_old(getMaterialPropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
-  _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar"))
+    TimeKernel(parameters),
+    _component_index(getParam<unsigned int>("component_index")),
+    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _var_is_porflow_var(!_dictator_UO.not_porflow_var(_var.number())),
+    _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
+    _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")),
+    _dporosity_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar")),
+    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar")),
+    _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
+    _fluid_density_old(getMaterialPropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density")),
+    _dfluid_density_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
+    _fluid_saturation_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
+    _fluid_saturation_nodal_old(getMaterialPropertyOld<std::vector<Real> >("PorousFlow_saturation_nodal")),
+    _dfluid_saturation_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
+    _mass_frac(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
+    _mass_frac_old(getMaterialPropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
+    _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar"))
 {
-  if (_component_index >= _dictator_UO.num_components())
-    mooseError("The Dictator proclaims that the number of components in this simulation is " << _dictator_UO.num_components() << " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = " << _component_index << ".  The Dictator does not take such mistakes lightly");
+  if (_component_index >= _dictator_UO.numComponents())
+    mooseError("The Dictator proclaims that the number of components in this simulation is " << _dictator_UO.numComponents() << " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = " << _component_index << ".  The Dictator does not take such mistakes lightly");
 }
 
 Real
@@ -62,7 +62,7 @@ Real
 PorousFlowMassTimeDerivative::computeQpJacobian()
 {
   /// If the variable is not a PorousFlow variable (very unusual), the diag Jacobian terms are 0
-  if (!(_var_is_porflow_var))
+  if (!_var_is_porflow_var)
     return 0.0;
   return computeQpJac(_dictator_UO.porflow_var_num(_var.number()));
 }
@@ -89,7 +89,7 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
     dmass += _fluid_density[_i][ph] * _fluid_saturation_nodal[_i][ph] * _mass_frac[_i][ph][_component_index] * _dporosity_dgradvar[_i][pvar] * _grad_phi[_j][_i];
 
   if (_i != _j)
-    return _test[_i][_qp]*dmass/_dt;
+    return _test[_i][_qp] * dmass/_dt;
 
   /// As the fluid mass is lumped to the nodes, only non-zero terms are for _i==_j
   for (unsigned ph = 0; ph < num_phases; ++ph)

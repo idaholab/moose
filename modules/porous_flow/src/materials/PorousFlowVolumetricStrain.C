@@ -28,7 +28,7 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
 
     _consistent(getParam<bool>("consistent_with_displaced_mesh")),
     _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_var(_dictator_UO.num_variables()),
+    _num_var(_dictator_UO.numVariables()),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _disp_var_num(3),

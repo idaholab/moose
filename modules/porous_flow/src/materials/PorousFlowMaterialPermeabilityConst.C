@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialPermeabilityConst.h"
 
 template<>
@@ -41,7 +40,7 @@ PorousFlowMaterialPermeabilityConst::computeQpProperties()
 {
   _permeability[_qp] = _input_permeability;
 
-  const unsigned int num_var = _PorousFlow_name_UO.num_variables();
+  const unsigned int num_var = _PorousFlow_name_UO.numVariables();
   _dpermeability_dvar[_qp].resize(num_var, RealTensorValue());
 }
 

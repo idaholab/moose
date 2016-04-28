@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowVariableBase.h"
 
 template<>
@@ -22,8 +21,8 @@ PorousFlowVariableBase::PorousFlowVariableBase(const InputParameters & parameter
     DerivativeMaterialInterface<Material>(parameters),
 
     _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_phases(_dictator_UO.num_phases()),
-    _num_components(_dictator_UO.num_components()),
+    _num_phases(_dictator_UO.numPhases()),
+    _num_components(_dictator_UO.numComponents()),
     _temperature_nodal_var(coupledNodalValue("temperature")),
     _temperature_qp_var(coupledValue("temperature")),
     _temperature_varnum(coupled("temperature")),
@@ -85,7 +84,7 @@ void
 PorousFlowVariableBase::computeQpProperties()
 {
   /// The number of PorousFlow variables
-  unsigned int num_vars = _dictator_UO.num_variables();
+  unsigned int num_vars = _dictator_UO.numVariables();
 
   /// Prepare the derivative matrices with zeroes
   for (unsigned phase = 0; phase < _num_phases; ++phase)

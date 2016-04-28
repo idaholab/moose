@@ -26,7 +26,6 @@ public:
   PorousFlowMaterialMethane(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 

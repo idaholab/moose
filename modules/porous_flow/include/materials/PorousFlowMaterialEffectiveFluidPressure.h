@@ -31,7 +31,6 @@ public:
   PorousFlowMaterialEffectiveFluidPressure(const InputParameters & parameters);
 
 protected:
-
   /// The dictator UserObject for the Porous-Flow variables
   const PorousFlowDictator & _dictator_UO;
 

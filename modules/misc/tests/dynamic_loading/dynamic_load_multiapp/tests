@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'misc_master.i'
     exodiff = 'misc_master_out.e misc_master_out_sub_app0.e'
+    allow_warnings = true
     library_mode = 'DYNAMIC'
     recover = false # See #5207
   [../]
@@ -11,6 +12,7 @@
     type = 'RunException'
     input = 'misc_master_bad.i'
     expect_err = 'Unable to locate library for "InvalidApp"'
+    allow_warnings = true
     library_mode = 'DYNAMIC'
   [../]
 []

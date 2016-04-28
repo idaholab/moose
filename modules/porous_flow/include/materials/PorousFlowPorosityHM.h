@@ -30,7 +30,6 @@ public:
   PorousFlowPorosityHM(const InputParameters & parameters);
 
 protected:
-
   /// porosity at zero strain and zero porepressure
   const Real _phi0;
 

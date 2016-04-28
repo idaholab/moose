@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterial1PhaseMD_Gaussian.h"
 
 template<>
@@ -35,8 +34,8 @@ PorousFlowMaterial1PhaseMD_Gaussian::PorousFlowMaterial1PhaseMD_Gaussian(const I
     _gradmd_qp_var(coupledGradient("mass_density")),
     _md_varnum(coupled("mass_density"))
 {
-  if (_dictator_UO.num_phases() != 1)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.num_phases() << " whereas PorousFlowMaterial1PhaseMD_Gaussian can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
+  if (_dictator_UO.numPhases() != 1)
+    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.numPhases() << " whereas PorousFlowMaterial1PhaseMD_Gaussian can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
 void
@@ -121,13 +120,12 @@ PorousFlowMaterial1PhaseMD_Gaussian::computeQpProperties()
   }
 
   // _temperature is only dependent on _temperature, and its derivative is = 1
-  if (!(_dictator_UO.not_porflow_var(_temperature_varnum)))
+  if (!_dictator_UO.not_porflow_var(_temperature_varnum))
   {
     // _temperature is a PorousFlow variable
     _dtemperature_nodal_dvar[_qp][0][_dictator_UO.porflow_var_num(_temperature_varnum)] = 1.0;
     _dtemperature_qp_dvar[_qp][0][_dictator_UO.porflow_var_num(_temperature_varnum)] = 1.0;
   }
-
 }
 
 void

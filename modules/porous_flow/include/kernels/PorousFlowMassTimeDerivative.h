@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef PORFLOWMASSTIMEDERIVATIVE_H
 #define PORFLOWMASSTIMEDERIVATIVE_H
 
@@ -26,20 +25,23 @@ InputParameters validParams<PorousFlowMassTimeDerivative>();
 class PorousFlowMassTimeDerivative : public TimeKernel
 {
 public:
-
   PorousFlowMassTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
+
   virtual Real computeQpJacobian();
+
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _component_index;
+  /// the fluid component index
+  const unsigned int _component_index;
 
   /// holds info on the PorousFlow variables
   const PorousFlowDictator & _dictator_UO;
 
-  bool _var_is_porflow_var;
+  /// whether the Variable for this Kernel is a porous-flow variable according to the Dictator
+  const bool _var_is_porflow_var;
 
   const MaterialProperty<Real> & _porosity;
 
@@ -73,7 +75,6 @@ protected:
    * @param wrt_num take the derivative of the residual wrt this PorousFlow variable
    */
   Real computeQpJac(unsigned int pvar);
-
 };
 
 #endif //PORFLOWMASSTIMEDERIVATIVE_H

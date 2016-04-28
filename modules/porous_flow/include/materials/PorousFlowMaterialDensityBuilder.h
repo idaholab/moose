@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef PORFLOWMATERIALDENSITYBUILDER_H
 #define PORFLOWMATERIALDENSITYBUILDER_H
 
@@ -30,7 +29,6 @@ public:
   PorousFlowMaterialDensityBuilder(const InputParameters & parameters);
 
 protected:
-
   /// The variable names UserObject for the Porous-Flow variables
   const PorousFlowDictator & _porflow_name_UO;
 

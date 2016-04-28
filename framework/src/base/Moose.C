@@ -218,6 +218,7 @@
 #include "VectorOfPostprocessors.h"
 #include "LeastSquaresFit.h"
 #include "ElementsAlongLine.h"
+#include "ElementsAlongPlane.h"
 #include "IntersectionPointsAlongLine.h"
 #include "LineMaterialRealSampler.h"
 #include "LineFunctionSampler.h"
@@ -256,6 +257,7 @@
 #include "TiedValueConstraint.h"
 #include "CoupledTiedValueConstraint.h"
 #include "AddBoundsVectorsAction.h"
+#include "EqualGradientConstraint.h"
 #include "EqualValueConstraint.h"
 #include "EqualValueBoundaryConstraint.h"
 #include "LinearNodalConstraint.h"
@@ -626,6 +628,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(VectorOfPostprocessors);
   registerVectorPostprocessor(LeastSquaresFit);
   registerVectorPostprocessor(ElementsAlongLine);
+  registerVectorPostprocessor(ElementsAlongPlane);
   registerVectorPostprocessor(IntersectionPointsAlongLine);
   registerVectorPostprocessor(LineMaterialRealSampler);
   registerVectorPostprocessor(LineFunctionSampler);
@@ -663,6 +666,7 @@ registerObjects(Factory & factory)
   // Constraints
   registerConstraint(TiedValueConstraint);
   registerConstraint(CoupledTiedValueConstraint);
+  registerConstraint(EqualGradientConstraint);
   registerConstraint(EqualValueConstraint);
   registerConstraint(EqualValueBoundaryConstraint);
   registerConstraint(LinearNodalConstraint);

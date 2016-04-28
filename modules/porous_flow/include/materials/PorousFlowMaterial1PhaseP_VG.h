@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIAL1PHASEP_VG_H
 #define POROUSFLOWMATERIAL1PHASEP_VG_H
 
@@ -28,7 +27,6 @@ public:
   PorousFlowMaterial1PhaseP_VG(const InputParameters & parameters);
 
 protected:
-
   /**
    * Effective saturation as a function of porepressure using van Genuchten
    * formulation.

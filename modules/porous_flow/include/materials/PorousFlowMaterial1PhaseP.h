@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIAL1PHASEP_H
 #define POROUSFLOWMATERIAL1PHASEP_H
 
@@ -30,7 +29,6 @@ public:
   PorousFlowMaterial1PhaseP(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 

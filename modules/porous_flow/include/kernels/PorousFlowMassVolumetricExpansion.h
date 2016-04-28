@@ -5,13 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMASSVOLUMETRICEXPANSION_H
 #define POROUSFLOWMASSVOLUMETRICEXPANSION_H
 
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
-
 #include "RankTwoTensor.h"
 
 // Forward Declarations
@@ -28,7 +26,6 @@ InputParameters validParams<PorousFlowMassVolumetricExpansion>();
 class PorousFlowMassVolumetricExpansion : public TimeKernel
 {
 public:
-
   PorousFlowMassVolumetricExpansion(const InputParameters & parameters);
 
 protected:
@@ -38,12 +35,14 @@ protected:
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  unsigned int _component_index;
+  /// the fluid component index
+  const unsigned int _component_index;
 
   /// holds info on the Richards variables
   const PorousFlowDictator & _dictator_UO;
 
-  bool _var_is_porflow_var;
+  /// whether the Variable for this Kernel is a porous-flow variable according to the Dictator
+  const bool _var_is_porflow_var;
 
   /// number of displacement variables
   unsigned int _ndisp;
@@ -74,13 +73,20 @@ protected:
   const MaterialProperty<std::vector<RealGradient> > & _dstrain_rate_qp_dvar;
 
   /**
-   * Derivative of residual with respect to PorousFlow variable number pvar
+   * Derivative of mass part of the residual with respect to the Variable
+   * with variable number jvar.
    * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param wrt_num take the derivative of the residual wrt this PorousFlow variable
+   * @param jvar take the derivative of the mass part of the residual wrt this variable number
    */
-  Real computedMassQpJac(unsigned int pvar);
-  Real computedVolQpJac(unsigned int pvar);
+  Real computedMassQpJac(unsigned int jvar);
 
+  /**
+   * Derivative of volumetric-strain part of the residual with respect to the Variable
+   * with variable number jvar.
+   * This is used by both computeQpJacobian and computeQpOffDiagJacobian
+   * @param jvar take the derivative of the volumetric-strain part of the residual wrt this variable number
+   */
+  Real computedVolQpJac(unsigned int pvar);
 };
 
 #endif //POROUSFLOWMASSVOLUMETRICEXPANSION_H

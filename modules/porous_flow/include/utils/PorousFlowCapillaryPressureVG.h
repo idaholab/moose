@@ -8,7 +8,7 @@
 #ifndef POROUSFLOWCAPILLARYPRESSUREVG_H
 #define POROUSFLOWCAPILLARYPRESSUREVG_H
 
-#include "GeneralUserObject.h"
+#include "MooseTypes.h"
 
 /**
  * van Genuchten capillary pressure for multiphase flow in porous media.

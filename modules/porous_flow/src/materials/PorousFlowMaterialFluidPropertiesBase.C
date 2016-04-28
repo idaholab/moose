@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialFluidPropertiesBase.h"
 #include "Conversion.h"
 
@@ -34,8 +33,8 @@ PorousFlowMaterialFluidPropertiesBase::PorousFlowMaterialFluidPropertiesBase(con
   _t_c2k = 273.15;
   _R = 8.3144621;
 
-  if (_phase_num >= _dictator_UO.num_phases())
-    mooseError("PorousFlowMaterialFluidProperties: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << " in " << _name << ".  Be aware that the Dictator does not tolerate mistakes.");
+  if (_phase_num >= _dictator_UO.numPhases())
+    mooseError("PorousFlowMaterialFluidProperties: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.numPhases() << " while you have foolishly entered phase = " << _phase_num << " in " << _name << ".  Be aware that the Dictator does not tolerate mistakes.");
 }
 
 void

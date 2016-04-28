@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialCapillaryPressureVGP.h"
 #include "Conversion.h"
 

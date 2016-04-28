@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialRelativePermeabilityBase.h"
 #include "Conversion.h"
 
@@ -29,8 +28,8 @@ PorousFlowMaterialRelativePermeabilityBase::PorousFlowMaterialRelativePermeabili
   _relative_permeability(declareProperty<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num))),
   _drelative_permeability_ds(declarePropertyDerivative<Real>("PorousFlow_relative_permeability" + Moose::stringify(_phase_num), _saturation_variable_name))
 {
-  if (_phase_num >= _dictator_UO.num_phases())
-    mooseError("PorousFlowMaterialRelativePermeability: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.num_phases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
+  if (_phase_num >= _dictator_UO.numPhases())
+    mooseError("PorousFlowMaterialRelativePermeability: The Dictator proclaims that the number of fluid phases is " << _dictator_UO.numPhases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
 }
 
 void

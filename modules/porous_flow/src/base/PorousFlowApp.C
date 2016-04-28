@@ -49,14 +49,9 @@
 // Postprocessors
 #include "PorousFlowFluidMass.h"
 
-
 //dirac kernel
-
-
-
 #include "PorousFlowTimeLimitedConstantPointSource.h"
 #include "PorousFlowSquarePulsePointSource.h"
-
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -87,7 +82,8 @@ PorousFlowApp::~PorousFlowApp()
 }
 
 // External entry point for dynamic application loading
-extern "C" void PorousFlowApp__registerApps() { PorousFlowApp::registerApps(); }
+extern "C" void
+PorousFlowApp__registerApps() { PorousFlowApp::registerApps(); }
 void
 PorousFlowApp::registerApps()
 {
@@ -95,7 +91,8 @@ PorousFlowApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void PorousFlowApp__registerObjects(Factory & factory) { PorousFlowApp::registerObjects(factory); }
+extern "C" void
+PorousFlowApp__registerObjects(Factory & factory) { PorousFlowApp::registerObjects(factory); }
 void
 PorousFlowApp::registerObjects(Factory & factory)
 {
@@ -144,17 +141,14 @@ PorousFlowApp::registerObjects(Factory & factory)
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
 
-
   //Dirac Kernel
-
-
-
   registerDiracKernel(PorousFlowTimeLimitedConstantPointSource);
   registerDiracKernel(PorousFlowSquarePulsePointSource);
 }
 
 // External entry point for dynamic syntax association
-extern "C" void PorousFlowApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { PorousFlowApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+PorousFlowApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { PorousFlowApp::associateSyntax(syntax, action_factory); }
 void
 PorousFlowApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {

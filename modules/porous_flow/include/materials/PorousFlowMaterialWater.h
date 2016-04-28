@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALWATER_H
 #define POROUSFLOWMATERIALWATER_H
 
@@ -26,7 +25,6 @@ public:
   PorousFlowMaterialWater(const InputParameters & parameters);
 
 protected:
-
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 

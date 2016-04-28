@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALFLUIDPROPERTIESBASE_H
 #define POROUSFLOWMATERIALFLUIDPROPERTIESBASE_H
 
@@ -27,7 +26,6 @@ public:
   PorousFlowMaterialFluidPropertiesBase(const InputParameters & parameters);
 
 protected:
-
   /// Somehow should be able to make this pure virtual?
   virtual void computeQpProperties();
 

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALCAPILLARYPRESSURECONSTANT_H
 #define POROUSFLOWMATERIALCAPILLARYPRESSURECONSTANT_H
 
@@ -25,7 +24,6 @@ public:
   PorousFlowMaterialCapillaryPressureConstant(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
 
   /// The capillary pressure (Pa)

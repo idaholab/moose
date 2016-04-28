@@ -32,6 +32,7 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
    */
+  NeighborCoupleable(const MooseObject * moose_object, bool nodal, bool neighbor_nodal);
   NeighborCoupleable(const InputParameters & parameters, bool nodal, bool neighbor_nodal);
 
   virtual ~NeighborCoupleable();

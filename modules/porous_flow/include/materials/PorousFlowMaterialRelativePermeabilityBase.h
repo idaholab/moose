@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWMATERIALRELATIVEPERMEABILITYBASE_H
 #define POROUSFLOWMATERIALRELATIVEPERMEABILITYBASE_H
 
@@ -27,7 +26,6 @@ public:
   PorousFlowMaterialRelativePermeabilityBase(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
 
   /// Phase number of fluid that this relative permeability relates to

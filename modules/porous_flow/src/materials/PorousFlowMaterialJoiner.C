@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowMaterialJoiner.h"
 #include "Conversion.h"
 
@@ -30,7 +29,7 @@ PorousFlowMaterialJoiner::PorousFlowMaterialJoiner(const InputParameters & param
     _temperature_variable_name(_dictator_UO.temperatureVariableNameDummy()),
     _mass_fraction_variable_name(_dictator_UO.massFractionVariableNameDummy()),
     _use_qps(getParam<bool>("use_qps")),
-    _num_phases(_dictator_UO.num_phases()),
+    _num_phases(_dictator_UO.numPhases()),
     _pf_prop(getParam<std::string>("material_property")),
 
     _dporepressure_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
@@ -64,7 +63,7 @@ PorousFlowMaterialJoiner::computeQpProperties()
 {
   _property[_qp].resize(_num_phases);
   _dproperty_dvar[_qp].resize(_num_phases);
-  const unsigned int num_var = _dictator_UO.num_variables();
+  const unsigned int num_var = _dictator_UO.numVariables();
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
     _dproperty_dvar[_qp][ph].resize(num_var);

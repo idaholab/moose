@@ -5,11 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWCAPILLARYRSC_H
 #define POROUSFLOWCAPILLARYRSC_H
 
-#include "GeneralUserObject.h"
+#include "MooseTypes.h"
 
 /**
  * Rogers-Stallybrass-Clements version of effective saturation as a function of CAPILLARY pressure.
@@ -19,7 +18,6 @@
 class PorousFlowCapillaryRSC
 {
 public:
-
   /**
    * effective saturation as a function of capillary pressure
    * @param pc capillary pressure
@@ -43,7 +41,6 @@ public:
    * @param scale RSC's scale parameter
    */
   static Real d2seff(Real pc, Real shift, Real scale);
-
 };
 
 #endif // POROUSFLOWCAPILLARYRSC_H

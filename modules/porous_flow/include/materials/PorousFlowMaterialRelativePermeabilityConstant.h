@@ -24,7 +24,6 @@ public:
   PorousFlowMaterialRelativePermeabilityConstant(const InputParameters & parameters);
 
 protected:
-
   virtual void computeQpProperties();
 };
 

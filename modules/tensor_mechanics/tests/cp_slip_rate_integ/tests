@@ -8,6 +8,7 @@
     type = 'Exodiff'
     input = 'crysp_substep.i'
     exodiff = 'crysp_substep_out.e'
+    allow_warnings = true
     max_time = 350
     valgrind = HEAVY
   [../]
@@ -15,6 +16,7 @@
     type = 'Exodiff'
     input = 'crysp_linesearch.i'
     exodiff = 'crysp_linesearch_out.e'
+    allow_warnings = true
     max_time = 350
     valgrind = HEAVY
   [../]

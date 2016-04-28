@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowPorosityHM.h"
 
 #include "Conversion.h"
@@ -31,7 +30,7 @@ PorousFlowPorosityHM::PorousFlowPorosityHM(const InputParameters & parameters) :
     _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
     _biot(getParam<Real>("biot_coefficient")),
     _solid_bulk(getParam<Real>("solid_bulk")),
-    _num_var(_dictator_UO.num_variables()),
+    _num_var(_dictator_UO.numVariables()),
     _coeff((_biot - 1)/_solid_bulk),
 
     _ndisp(coupledComponents("displacements")),
