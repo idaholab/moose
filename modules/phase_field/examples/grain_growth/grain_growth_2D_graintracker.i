@@ -19,7 +19,7 @@
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 18 # Number of order parameters used
+  op_num = 8 # Number of order parameters used
   var_name_base = gr # Base name of grains
 []
 
@@ -121,13 +121,8 @@
   [./grain_tracker]
     type = GrainTracker
     threshold = 0.2
-    convex_hull_buffer = 5.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
-    execute_on = 'initial timestep_end'
   [../]
   [./dt]
     # Outputs the current time step
