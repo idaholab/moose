@@ -35,9 +35,9 @@ void
 SmoothSuperellipsoidBaseIC::initialSetup()
 {
   //Compute centers, semiaxes, exponents, and initialize vector sizes
-  computeSuperellipsoidCenters();
   computeSuperellipsoidSemiaxes();
   computeSuperellipsoidExponents();
+  computeSuperellipsoidCenters();
 
   if (_centers.size() != _as.size())
     mooseError("_center and semiaxis _as vectors are not the same size in the Superellipsoid IC");
