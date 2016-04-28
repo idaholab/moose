@@ -2,6 +2,9 @@
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and its modules.
 #       This can be overridden by using the MOOSE_DIR environment variable
 
+# list of application-wise excluded source files
+excluded_srcfiles :=
+
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
 ##############################################################################
@@ -12,7 +15,9 @@
 SRC_DIRS    := $(APPLICATION_DIR)/src
 PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
-srcfiles    := $(shell find $(SRC_DIRS) -name "*.C" -not -name main.C)
+excluded_srcfiles += main.C
+find_excludes     := $(foreach i, $(excluded_srcfiles), -not -name $(i))
+srcfiles    := $(shell find $(SRC_DIRS) -name "*.C" $(find_excludes))
 csrcfiles   := $(shell find $(SRC_DIRS) -name "*.c")
 fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
 f90srcfiles := $(shell find $(SRC_DIRS) -name "*.f90")
