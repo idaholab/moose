@@ -25,8 +25,8 @@
 #include "EFAFragment3D.h"
 #include "EFAFuncs.h"
 
-XFEM::XFEM (MooseApp & app, const MooseSharedPointer<FEProblem> fe_problem) :
-    XFEMInterface(app, fe_problem),
+XFEM::XFEM (const InputParameters & params) :
+    XFEMInterface(params),
     _efa_mesh(Moose::out)
 {
 #ifndef LIBMESH_ENABLE_UNIQUE_ID
