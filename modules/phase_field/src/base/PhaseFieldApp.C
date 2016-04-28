@@ -182,6 +182,7 @@
  * Meshes
  */
 #include "EBSDMesh.h"
+#include "MortarPeriodicMesh.h"
 
 /*
  * Actions
@@ -396,6 +397,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerVectorPostprocessor(GrainForcesPostprocessor);
 
   registerMesh(EBSDMesh);
+  registerMesh(MortarPeriodicMesh);
 }
 
 // External entry point for dynamic syntax association

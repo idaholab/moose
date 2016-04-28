@@ -121,6 +121,8 @@ protected:
    * Values of the constrained variable on the master side
    */
   std::vector<Real> _u_master;
+  std::vector<RealGradient> _grad_u_master;
+
   /**
    * Physical points on the master side
    */
@@ -133,6 +135,8 @@ protected:
    * Values of test functions on the master side
    */
   const VariableTestValue & _test_master;
+  const VariableTestGradient & _grad_test_master;
+
   /**
    * Values of shape function on the master side
    */
@@ -142,6 +146,8 @@ protected:
    * Values of the constrained variable on the slave side
    */
   std::vector<Real> _u_slave;
+  std::vector<RealGradient> _grad_u_slave;
+
   /**
    * Physical points on the slave side
    */
@@ -154,6 +160,8 @@ protected:
    * Values of test functions on the slave side
    */
   const VariableTestValue & _test_slave;
+  const VariableTestGradient & _grad_test_slave;
+
   /**
    * Values of shape function on the slave side
    */

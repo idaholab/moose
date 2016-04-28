@@ -1673,6 +1673,30 @@ MooseVariable::getValue(const Elem * elem, const std::vector<std::vector<Real> >
   return value;
 }
 
+RealGradient
+MooseVariable::getGradient(const Elem * elem, const std::vector<std::vector<RealGradient> > & grad_phi) const
+{
+  std::vector<dof_id_type> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  RealGradient value;
+  if (isNodal())
+  {
+    for (unsigned int i = 0; i < dof_indices.size(); ++i)
+    {
+      //The zero index is because we only have one point that the phis are evaluated at
+      value += grad_phi[i][0] * (*_sys.currentSolution())(dof_indices[i]);
+    }
+  }
+  else
+  {
+    mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
+    value = 0.0;
+  }
+
+  return value;
+}
+
 Real
 MooseVariable::getElementalValue(const Elem * elem, unsigned int idx) const
 {
