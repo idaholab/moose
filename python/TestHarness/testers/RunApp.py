@@ -60,7 +60,24 @@ class RunApp(Tester):
 
     return (True, '')
 
+  def getThreads(self, options):
+    #Set number of threads to be used lower bound
+    nthreads = max(options.nthreads, int(self.specs['min_threads']))
+    #Set number of threads to be used upper bound
+    nthreads = min(nthreads, int(self.specs['max_threads']))
+    return nthreads
 
+  def getProcs(self, options):
+    if options.parallel == None:
+      default_ncpus = 1
+    else:
+      default_ncpus = options.parallel
+
+    # Raise the floor
+    ncpus = max(default_ncpus, int(self.specs['min_parallel']))
+    # Lower the ceiling
+    ncpus = min(ncpus, int(self.specs['max_parallel']))
+    return ncpus
 
   def getCommand(self, options):
     specs = self.specs
@@ -71,11 +88,6 @@ class RunApp(Tester):
     if not options.dry_run and not os.path.exists(specs['executable']):
       print 'Application not found: ' + str(specs['executable'])
       sys.exit(1)
-
-    if options.parallel == None:
-      default_ncpus = 1
-    else:
-      default_ncpus = options.parallel
 
     if options.parallel_mesh and '--parallel-mesh' not in specs['cli_args']:
       # The user has passed the parallel-mesh option to the test harness
@@ -111,15 +123,14 @@ class RunApp(Tester):
     # work well when dozens of expect_err jobs run at the same time.
     specs['cli_args'].append('--no-gdb-backtrace')
 
-    # Raise the floor
-    ncpus = max(default_ncpus, int(specs['min_parallel']))
-    # Lower the ceiling
-    ncpus = min(ncpus, int(specs['max_parallel']))
+    # Get the number of processors and threads the Tester requires
+    ncpus = self.getProcs(options)
+    nthreads = self.getThreads(options)
 
-    #Set number of threads to be used lower bound
-    nthreads = max(options.nthreads, int(specs['min_threads']))
-    #Set number of threads to be used upper bound
-    nthreads = min(nthreads, int(specs['max_threads']))
+    if options.parallel == None:
+      default_ncpus = 1
+    else:
+      default_ncpus = options.parallel
 
     caveats = []
     if nthreads > options.nthreads:
