@@ -104,6 +104,7 @@ findContactPoint(PenetrationInfo & p_info,
     p_info._dxyzdeta = dxyz_deta;
     p_info._d2xyzdxideta = d2xyz_dxieta;
     p_info._side_phi = _fe->get_phi();
+    p_info._side_grad_phi = _fe->get_dphi();
     contact_point_on_side = true;
     return;
   }
@@ -254,11 +255,13 @@ findContactPoint(PenetrationInfo & p_info,
   }
 
   const std::vector<std::vector<Real> > & phi = _fe->get_phi();
+  const std::vector<std::vector<RealGradient> > & grad_phi = _fe->get_dphi();
 
   points[0] = p_info._closest_point_ref;
   _fe->reinit(side, &points);
 
   p_info._side_phi = phi;
+  p_info._side_grad_phi = grad_phi;
   p_info._dxyzdxi = dxyz_dxi;
   p_info._dxyzdeta = dxyz_deta;
   p_info._d2xyzdxideta = d2xyz_dxieta;

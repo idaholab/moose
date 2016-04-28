@@ -1,0 +1,7 @@
+[Tests]
+  [./mortarperiodic]
+    type = 'Exodiff'
+    input = 'mortarperiodic.i'
+    exodiff = 'mortarperiodic_out.e'
+  [../]
+[]
