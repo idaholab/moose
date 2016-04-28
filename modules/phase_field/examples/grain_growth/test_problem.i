@@ -133,7 +133,7 @@
   [./ngrains]
     type = GrainTracker
     threshold = 0.1
-    connecting_threshold = 0.05
+    connecting_threshold = 0.09
     execute_on = 'initial timestep_end'
     flood_entity_type = ELEMENTAL
   [../]
@@ -166,10 +166,10 @@
   [../]
   [./Adaptivity]
     # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-    initial_adaptivity = 2 # Number of times mesh is adapted to initial condition
+    initial_adaptivity = 4 # Number of times mesh is adapted to initial condition
     refine_fraction = 0.7 # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-    max_h_level = 4 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+    max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
   [../]
 []
 

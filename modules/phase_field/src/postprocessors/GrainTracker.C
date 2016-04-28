@@ -20,7 +20,7 @@
 #include <algorithm>
 
 // Forward Declaration (Helper Functor)
-class GrainDistanceSorter;
+struct GrainDistanceSorter;
 
 template<>
 InputParameters validParams<GrainTracker>()
