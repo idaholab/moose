@@ -8,7 +8,7 @@
 #define BIMODALSUPERELLIPSOIDSIC_H
 
 #include "Kernel.h"
-#include "SmoothSuperellipsoidBaseIC.h"
+#include "SpecifiedSmoothSuperellipsoidIC.h"
 
 // System includes
 #include <string>
@@ -24,9 +24,10 @@ InputParameters validParams<BimodalSuperellipsoidsIC>();
  * These are intended to be the larger particles. Then the IC creates a specified number
  * of particles at random locations. These are the smaller particles. As each random particle
  * is placed, it it checked to make sure it does not collide with previously placed particles (either
- * large or small ones).
+ * large or small ones). Variables to describe the specified (larger) superellipsoids are inherited
+ * from the parent class.
  **/
-class BimodalSuperellipsoidsIC : public SmoothSuperellipsoidBaseIC
+class BimodalSuperellipsoidsIC : public SpecifiedSmoothSuperellipsoidIC
 {
 public:
   BimodalSuperellipsoidsIC(const InputParameters & parameters);
@@ -37,15 +38,6 @@ public:
   virtual void computeSuperellipsoidExponents();
 
 protected:
-  /// Variables to describe the specified (larger) superellipsoids
-  std::vector<Real> _x_positions;
-  std::vector<Real> _y_positions;
-  std::vector<Real> _z_positions;
-  std::vector<Real> _input_as;
-  std::vector<Real> _input_bs;
-  std::vector<Real> _input_cs;
-  std::vector<Real> _input_ns;
-
   /// Variables to describe the randomly placed (smaller) superellipsoids
   unsigned int _npart;
   Real _small_spac;

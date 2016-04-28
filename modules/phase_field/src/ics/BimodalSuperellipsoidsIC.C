@@ -11,15 +11,8 @@
 template<>
 InputParameters validParams<BimodalSuperellipsoidsIC>()
 {
-  InputParameters params = validParams<SmoothSuperellipsoidBaseIC>();
+  InputParameters params = validParams<SpecifiedSmoothSuperellipsoidIC>();
   params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly)");
-  params.addRequiredParam<std::vector<Real> >("x_positions", "The x-coordinate for each large superellipsoid center");
-  params.addRequiredParam<std::vector<Real> >("y_positions", "The y-coordinate for each large superellipsoid center");
-  params.addRequiredParam<std::vector<Real> >("z_positions", "The z-coordinate for each large superellipsoid center");
-  params.addRequiredParam<std::vector<Real> >("as", "Semiaxis a for each large superellipsoid");
-  params.addRequiredParam<std::vector<Real> >("bs", "Semiaxis b for each large superellipsoid");
-  params.addRequiredParam<std::vector<Real> >("cs", "Semiaxis c for each large superellipsoid");
-  params.addRequiredParam<std::vector<Real> >("ns", "Exponent n for each large superellipsoid");
   params.addRequiredParam<unsigned int>("npart", "The number of random (small) particles to place");
   params.addRequiredParam<Real>("small_spac", "minimum spacing between small particles, measured from closest edge to closest edge");
   params.addRequiredParam<Real>("large_spac", "minimum spacing between large and small particles, measured from closest edge to closest edge");
@@ -35,14 +28,7 @@ InputParameters validParams<BimodalSuperellipsoidsIC>()
 }
 
 BimodalSuperellipsoidsIC::BimodalSuperellipsoidsIC(const InputParameters & parameters) :
-    SmoothSuperellipsoidBaseIC(parameters),
-    _x_positions(getParam<std::vector<Real> >("x_positions")),
-    _y_positions(getParam<std::vector<Real> >("y_positions")),
-    _z_positions(getParam<std::vector<Real> >("z_positions")),
-    _input_as(getParam<std::vector<Real> >("as")),
-    _input_bs(getParam<std::vector<Real> >("bs")),
-    _input_cs(getParam<std::vector<Real> >("cs")),
-    _input_ns(getParam<std::vector<Real> >("ns")),
+    SpecifiedSmoothSuperellipsoidIC(parameters),
     _npart(getParam<unsigned int>("npart")),
     _small_spac(getParam<Real>("small_spac")),
     _large_spac(getParam<Real>("large_spac")),
@@ -70,10 +56,10 @@ BimodalSuperellipsoidsIC::initialSetup()
 
   switch (_size_variation_type)
   {
-  case 2: //No variation
-    if (_size_variation > 0.0)
-      mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
-    break;
+    case 2: //No variation
+      if (_size_variation > 0.0)
+        mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
+      break;
   }
 
   SmoothSuperellipsoidBaseIC::initialSetup();
@@ -100,23 +86,23 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidSemiaxes()
     //Vary semiaxes
     switch (_size_variation_type)
     {
-    case 0: //Random distrubtion, maintaining constant shape
-    {
-      Real rand_num = _random.rand(_tid);
-      _as[i] = _small_a*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
-      _bs[i] = _small_b*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
-      _cs[i] = _small_c*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
-      break;
-    }
-    case 1: //Normal distribution of semiaxis size, maintaining constant shape
-      _as[i] = _random.randNormal(_tid, _small_a, _size_variation);
-      _bs[i] = _as[i] * _small_b / _small_a;
-      _cs[i] = _as[i] * _small_c / _small_a;
-      break;
-    case 2: //No variation
-      _as[i] = _small_a;
-      _bs[i] = _small_b;
-      _cs[i] = _small_c;
+      case 0: //Random distrubtion, maintaining constant shape
+      {
+        Real rand_num = _random.rand(_tid);
+        _as[i] = _small_a*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
+        _bs[i] = _small_b*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
+        _cs[i] = _small_c*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
+        break;
+      }
+      case 1: //Normal distribution of semiaxis size, maintaining constant shape
+        _as[i] = _random.randNormal(_tid, _small_a, _size_variation);
+        _bs[i] = _as[i] * _small_b / _small_a;
+        _cs[i] = _as[i] * _small_c / _small_a;
+        break;
+      case 2: //No variation
+        _as[i] = _small_a;
+        _bs[i] = _small_b;
+        _cs[i] = _small_c;
     }
 
     if (_as[i] < 0.0) _as[i] = 0.0;
