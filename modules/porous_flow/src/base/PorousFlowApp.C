@@ -3,6 +3,9 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// UserObjects
+#include "PorousFlowDictator.h"
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -42,6 +45,7 @@ extern "C" void PorousFlowApp__registerObjects(Factory & factory) { PorousFlowAp
 void
 PorousFlowApp::registerObjects(Factory & factory)
 {
+  registerUserObject(PorousFlowDictator);
 }
 
 // External entry point for dynamic syntax association
