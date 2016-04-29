@@ -29,6 +29,7 @@ SOLID_MECHANICS   := yes
 TENSOR_MECHANICS  := yes
 PHASE_FIELD       := yes
 XFEM              := yes
+POROUS_FLOW       := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
