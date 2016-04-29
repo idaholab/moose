@@ -34,7 +34,6 @@ void findElementsIntersectedByPlane(const Plane & plane, const MeshBase & mesh, 
   for (; el != end_el; ++el)
   {
     const Elem * elem = *el;
-    const unsigned int dim = elem->dim();
     bool intersected = false;
 
     // Check whether the first node of this element is below or above the plane
