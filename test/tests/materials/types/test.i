@@ -29,6 +29,14 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./stdvec0_qp0]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stdvec0_qp1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./realvec0]
     order = CONSTANT
     family = MONOMIAL
@@ -113,6 +121,22 @@
     variable = stdvec1
     property = stdvec_prop
     index = 1
+    execute_on = timestep_end
+  [../]
+  [./stdvec0_qp0]
+    type = MaterialStdVectorAux
+    variable = stdvec0_qp0
+    property = stdvec_prop_qp
+    index = 0
+    selected_qp = 0
+    execute_on = timestep_end
+  [../]
+  [./stdvec0_qp1]
+    type = MaterialStdVectorAux
+    variable = stdvec0_qp1
+    property = stdvec_prop_qp
+    index = 0
+    selected_qp = 1
     execute_on = timestep_end
   [../]
   [./densemat00]
@@ -243,5 +267,6 @@
 []
 
 [Outputs]
+  file_base = test_out
   exodus = true
 []
