@@ -20,6 +20,13 @@
 //Forward Declarations
 class NumDOFs;
 
+// libMesh forward declarations
+namespace libMesh
+{
+class System;
+class EquationSystems;
+}
+
 template<>
 InputParameters validParams<NumDOFs>();
 
@@ -35,6 +42,20 @@ public:
    * This will return the degrees of freedom in the system.
    */
   virtual Real getValue();
+
+
+protected:
+  enum SystemEnum
+  {
+    NL,
+    AUX,
+    ALL
+  };
+
+  const SystemEnum _system_enum;
+
+  const System * _system_pointer;
+  const EquationSystems * _es_pointer;
 };
 
 #endif //NUMDOFS_H
