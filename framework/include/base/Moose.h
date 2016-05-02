@@ -89,15 +89,15 @@ extern bool _throw_on_error;
 /**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)
  */
-#define COLOR_BLACK   (Moose::_color_console ? BLACK : "")
-#define COLOR_RED     (Moose::_color_console ? RED : "")
-#define COLOR_GREEN   (Moose::_color_console ? GREEN : "")
-#define COLOR_YELLOW  (Moose::_color_console ? YELLOW : "")
-#define COLOR_BLUE    (Moose::_color_console ? BLUE : "")
-#define COLOR_MAGENTA (Moose::_color_console ? MAGENTA : "")
-#define COLOR_CYAN    (Moose::_color_console ? CYAN : "")
-#define COLOR_WHITE   (Moose::_color_console ? WHITE : "")
-#define COLOR_DEFAULT (Moose::_color_console ? DEFAULT : "")
+#define COLOR_BLACK   (Moose::_color_console ? XTERM_BLACK : "")
+#define COLOR_RED     (Moose::_color_console ? XTERM_RED : "")
+#define COLOR_GREEN   (Moose::_color_console ? XTERM_GREEN : "")
+#define COLOR_YELLOW  (Moose::_color_console ? XTERM_YELLOW : "")
+#define COLOR_BLUE    (Moose::_color_console ? XTERM_BLUE : "")
+#define COLOR_MAGENTA (Moose::_color_console ? XTERM_MAGENTA : "")
+#define COLOR_CYAN    (Moose::_color_console ? XTERM_CYAN : "")
+#define COLOR_WHITE   (Moose::_color_console ? XTERM_WHITE : "")
+#define COLOR_DEFAULT (Moose::_color_console ? XTERM_DEFAULT : "")
 
 /**
  * Import libMesh::out, and libMesh::err for use in MOOSE.
