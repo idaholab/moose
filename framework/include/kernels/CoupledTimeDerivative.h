@@ -36,10 +36,9 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
   const VariableValue & _v_dot;
   const VariableValue & _dv_dot;
-  unsigned int _v_var;
+  const unsigned int _v_var;
 };
 
 #endif //COUPLEDTIMEDERIVATIVE_H

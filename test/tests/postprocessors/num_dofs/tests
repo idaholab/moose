@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'num_dofs.i'
+    csvdiff = 'num_dofs_out.csv'
+  [../]
+[]
