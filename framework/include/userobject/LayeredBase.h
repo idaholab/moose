@@ -118,6 +118,9 @@ private:
 
   /// Subproblem for the child object
   SubProblem & _layered_base_subproblem;
+
+  /// Whether the values are cumulative over the layers
+  bool _cumulative;
 };
 
 #endif
