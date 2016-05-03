@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 3
-  ny = 3
+  dim = 1
+  nx = 2
+  # ny = 3
 []
 
 [Variables]
@@ -15,11 +15,11 @@
     [../]
   [../]
   [./v]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
     [./InitialCondition]
       type = FunctionIC
-      function = (y-0.5)^2
+      function = (x-0.5)^2
     [../]
   [../]
   [./w]
@@ -52,10 +52,10 @@
     type = TimeDerivative
     variable = v
   [../]
-  [./time_w]
-    type = TimeDerivative
-    variable = w
-  [../]
+  # [./time_w]
+  #   type = TimeDerivative
+  #   variable = w
+  # [../]
 []
 
 [UserObjects]
@@ -79,6 +79,9 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  petsc_options = '-snes_test_display'
+  petsc_options_iname = '-snes_type'
+  petsc_options_value = 'test'
   dt = 0.1
   num_steps = 2
 []

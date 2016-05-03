@@ -340,7 +340,7 @@ public:
   /**
    * Returns true if we are currently computing Jacobian
    */
-  virtual const bool & currentlyComputingJacobian() { return _currently_computing_jacobian; }
+  virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
 
   /**
    * Returns true if we are in or beyond the initialSetup stage

@@ -67,6 +67,7 @@ ComputeUserObjectsThread::subdomainChanged()
   _fe_problem.prepareMaterials(_subdomain, _tid);
 
   // ShapeElementUserObject requested Jacobian variables
+  if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
   {
     std::set<MooseVariable *> jacobian_moose_vars;
 
@@ -79,9 +80,9 @@ ComputeUserObjectsThread::subdomainChanged()
         const std::set<MooseVariable *> & mv_deps = shape_element_uo->jacobianMooseVariables();
         jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
       }
-    }
 
-    _jacobian_moose_vars.assign(jacobian_moose_vars.begin(), jacobian_moose_vars.end());
+      _jacobian_moose_vars.assign(jacobian_moose_vars.begin(), jacobian_moose_vars.end());
+    }
   }
 }
 

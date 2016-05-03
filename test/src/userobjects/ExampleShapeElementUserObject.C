@@ -41,7 +41,7 @@ ExampleShapeElementUserObject::initialize()
   // Jacobian term storage is up to the user. One option is using an std::vector
   // We resize it to the total number of DOFs in the system and zero it out.
   // WARNING: this can be large number (smart sparse storage could be a future improvement)
-  if (_currently_computing_jacobian)
+  // if (_currently_computing_jacobian)
     _jacobian_storage.assign(_subproblem.es().n_dofs(), 0.0);
 }
 
