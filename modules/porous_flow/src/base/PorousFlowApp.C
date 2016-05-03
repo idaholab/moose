@@ -41,13 +41,13 @@
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowWater.h"
+#include "PorousFlowJoiner.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowEffectiveStressCoupling.h"
 #include "PorousFlowMassVolumetricExpansion.h"
-
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -127,6 +127,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowWater);
+  registerMaterial(PorousFlowJoiner);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
