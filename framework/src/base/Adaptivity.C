@@ -44,6 +44,8 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _steps(0),
     _print_mesh_changed(false),
     _t(_subproblem.time()),
+    _step(_subproblem.timeStep()),
+    _interval(1),
     _start_time(-std::numeric_limits<Real>::max()),
     _stop_time(std::numeric_limits<Real>::max()),
     _cycles_per_step(1),
@@ -133,7 +135,7 @@ bool
 Adaptivity::adaptMesh()
 {
   bool meshChanged = false;
-  if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time))
+  if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0)
   {
     if (_use_new_system)
     {
