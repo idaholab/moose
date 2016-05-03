@@ -209,6 +209,7 @@ class RunApp(Tester):
       self.specs['pbs_stdout'] = 'pbs_stdout = PBS_EMULATOR'
       self.specs['pbs_stderr'] = 'pbs_stderr = PBS_EMULATOR'
     else:
+      # The PBS Emulator fails when using the PROJECT argument (#PBS -P <project name>)
       self.specs.addStringSubParam('pbs_project', 'PBS_PROJECT', "Identify this job submission with this project")
       self.specs['pbs_project'] = 'pbs_project = %s' % (options.pbs_project)
 
