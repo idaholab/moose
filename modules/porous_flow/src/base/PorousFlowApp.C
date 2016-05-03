@@ -10,6 +10,17 @@
 // Postprocessors
 #include "PorousFlowFluidMass.h"
 
+// Materials
+#include "PorousFlow1PhaseMD_Gaussian.h"
+#include "PorousFlow2PhasePP.h"
+#include "PorousFlow2PhasePS_VG.h"
+#include "PorousFlow1PhaseP.h"
+#include "PorousFlow2PhasePP_VG.h"
+#include "PorousFlowMassFraction.h"
+#include "PorousFlow1PhaseP_VG.h"
+#include "PorousFlow2PhasePS.h"
+#include "PorousFlowVariableBase.h"
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -56,6 +67,17 @@ PorousFlowApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
+
+  // Materials
+  registerMaterial(PorousFlow1PhaseMD_Gaussian);
+  registerMaterial(PorousFlow2PhasePP);
+  registerMaterial(PorousFlow2PhasePS_VG);
+  registerMaterial(PorousFlow1PhaseP);
+  registerMaterial(PorousFlow2PhasePP_VG);
+  registerMaterial(PorousFlowMassFraction);
+  registerMaterial(PorousFlow1PhaseP_VG);
+  registerMaterial(PorousFlow2PhasePS);
+  registerMaterial(PorousFlowVariableBase);
 }
 
 // External entry point for dynamic syntax association
