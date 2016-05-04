@@ -1,12 +1,20 @@
 /****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "FindValueOnLine.h"
 #include "MooseMesh.h"
+#include "MooseUtils.h"
 
 template<>
 InputParameters validParams<FindValueOnLine>()
@@ -17,7 +25,7 @@ InputParameters validParams<FindValueOnLine>()
   params.addParam<Point>("end_point", "End point of the sampling line.");
   params.addParam<Real>("target", "Target value to locate.");
   params.addParam<unsigned int>("depth", 30, "Maximum number of bisections to perform.");
-  params.addParam<Real>("tol", 1e-10, "Stop search if a value within a symmetric interval of this with around the target is found.");
+  params.addParam<Real>("tol", 1e-10, "Stop search if a value is found that is equal to the target with this tolerance applied.");
   params.addCoupledVar("v", "Variable to inspect");
   return params;
 }
@@ -30,7 +38,7 @@ FindValueOnLine::FindValueOnLine(const InputParameters & parameters) :
     _length((_end_point - _start_point).norm()),
     _target(getParam<Real>("target")),
     _depth(getParam<unsigned int>("depth")),
-    _tol(getParam<Real>("tol") / 2.0),
+    _tol(getParam<Real>("tol")),
     _coupled_var(getVar("v", 0)),
     _position(0.0),
     _mesh(_subproblem.mesh()),
@@ -64,7 +72,7 @@ FindValueOnLine::execute()
     Real value = getValueAtPoint(p);
 
     // have we hit the target value yet?
-    if (value > _target - _tol && value < _target + _tol)
+    if (MooseUtils::absoluteFuzzyEqual(value, _target, _tol))
       break;
 
     // bisect

@@ -168,6 +168,7 @@
 #include "ElementL2Error.h"
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
+#include "FindValueOnLine.h"
 #include "FunctionValuePostprocessor.h"
 #include "NodalVariableValue.h"
 #include "NumDOFs.h"
@@ -579,6 +580,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementVectorL2Error);
   registerPostprocessor(ScalarL2Error);
   registerPostprocessor(EmptyPostprocessor);
+  registerPostprocessor(FindValueOnLine);
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(NumDOFs);
   registerPostprocessor(TimestepSize);
