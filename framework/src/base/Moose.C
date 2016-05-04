@@ -208,6 +208,7 @@
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
 #include "ElementL2Difference.h"
+#include "TimeExtremeValue.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -618,6 +619,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ExecutionerAttributeReporter);
   registerPostprocessor(PercentChangePostprocessor);
   registerPostprocessor(ElementL2Difference);
+  registerPostprocessor(TimeExtremeValue);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
