@@ -136,6 +136,7 @@
  * Postprocessors
  */
 #include "FeatureFloodCount.h"
+#include "FindValueOnLine.h"
 #include "GrainTracker.h"
 #include "FauxGrainTracker.h"
 #include "NodalVolumeFraction.h"
@@ -361,6 +362,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(ThirdPhaseSuppressionMaterial);
 
   registerPostprocessor(FeatureFloodCount);
+  registerPostprocessor(FindValueOnLine);
   registerPostprocessor(GrainTracker);
   registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(NodalVolumeFraction);
