@@ -47,4 +47,11 @@
     exodiff = 'out.e-s002'
     group = 'adaptive'
   [../]
+
+  [./interval]
+    type = 'Exodiff'
+    input = 'interval.i'
+    exodiff = 'interval_out.e-s002'
+    group = 'adaptive'
+  [../]
 []
