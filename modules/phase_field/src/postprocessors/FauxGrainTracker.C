@@ -43,7 +43,7 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD
     case UNIQUE_REGION:
     case VARIABLE_COLORING:
     {
-      LIBMESH_BEST_UNORDERED_MAP<dof_id_type, unsigned int>::const_iterator entity_it = _entity_id_to_var_num.find(entity_id);
+      std::map<dof_id_type, unsigned int>::const_iterator entity_it = _entity_id_to_var_num.find(entity_id);
 
       if (entity_it != _entity_id_to_var_num.end())
         return entity_it->second;
@@ -57,6 +57,8 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD
     default:
       return 0;
   }
+
+  return 0;
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
@@ -75,6 +77,8 @@ FauxGrainTracker::initialize()
 void
 FauxGrainTracker::execute()
 {
+  Moose::perf_log.push("execute()", "FauxGrainTracker");
+
   const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
   for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
@@ -120,6 +124,19 @@ FauxGrainTracker::execute()
       }
     }
   }
+
+  Moose::perf_log.pop("execute()", "FauxGrainTracker");
+}
+
+void
+FauxGrainTracker::finalize()
+{
+  Moose::perf_log.push("finalize()", "FauxGrainTracker");
+
+  _communicator.set_union(_variables_used, 0);
+  _communicator.set_union(_entity_id_to_var_num, 0);
+
+  Moose::perf_log.pop("finalize()", "FauxGrainTracker");
 }
 
 Real

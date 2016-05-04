@@ -31,7 +31,7 @@ public:
 
   virtual void initialize();
 
-  virtual void finalize() {}
+  virtual void finalize();
 
   virtual Real getValue();
 
@@ -55,7 +55,7 @@ public:
 
 private:
   /// The mapping of entities to grains, in this case always the order parameter
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, unsigned int> _entity_id_to_var_num;
+  std::map<dof_id_type, unsigned int> _entity_id_to_var_num;
 
   /// Used as the lightweight grain counter
   std::set<unsigned int> _variables_used;
