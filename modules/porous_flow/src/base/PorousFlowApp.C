@@ -7,6 +7,9 @@
 // UserObjects
 #include "PorousFlowDictator.h"
 
+// Postprocessors
+#include "PorousFlowFluidMass.h"
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -48,7 +51,11 @@ extern "C" void PorousFlowApp__registerObjects(Factory & factory) { PorousFlowAp
 void
 PorousFlowApp::registerObjects(Factory & factory)
 {
+  // UserObjects
   registerUserObject(PorousFlowDictator);
+
+  // Postprocessors
+  registerPostprocessor(PorousFlowFluidMass);
 }
 
 // External entry point for dynamic syntax association
