@@ -110,6 +110,12 @@
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
 
+#include "CavityPressureAction.h"
+#include "CavityPressurePostprocessor.h"
+#include "CavityPressurePPAction.h"
+#include "CavityPressureUserObject.h"
+#include "CavityPressureUOAction.h"
+
 #include "Pressure.h"
 #include "DisplacementAboutAxis.h"
 
@@ -241,6 +247,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(HEVPEqvPlasticStrain);
   registerUserObject(HEVPEqvPlasticStrainRate);
   registerUserObject(HEVPFlowRatePowerLawJ2);
+  registerUserObject(CavityPressureUserObject);
   registerUserObject(CrystalPlasticitySlipRateGSS);
   registerUserObject(CrystalPlasticitySlipResistanceGSS);
   registerUserObject(CrystalPlasticityStateVariable);
@@ -258,6 +265,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(Pressure);
   registerBoundaryCondition(DisplacementAboutAxis);
 
+  registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(Mass);
   registerPostprocessor(TorqueReaction);
 }
@@ -267,6 +275,11 @@ extern "C" void TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFacto
 void
 TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  syntax.registerActionSyntax("EmptyAction", "BCs/CavityPressure");
+  syntax.registerActionSyntax("CavityPressureAction", "BCs/CavityPressure/*");
+  syntax.registerActionSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
+  syntax.registerActionSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
+
   syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
   syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
@@ -276,6 +289,9 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
+  registerAction(CavityPressureAction, "add_bc");
+  registerAction(CavityPressurePPAction, "add_postprocessor");
+  registerAction(CavityPressureUOAction, "add_user_object");
   registerAction(TensorMechanicsAction, "add_kernel");
   registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");

@@ -24,16 +24,9 @@ public:
 
 private:
   const std::vector<BoundaryName> _boundary;
-  const NonlinearVariableName _disp_x;
-  const NonlinearVariableName _disp_y;
-  const NonlinearVariableName _disp_z;
-  std::vector<std::vector<AuxVariableName> > _save_in_vars;
-  std::vector<bool> _has_save_in_vars;
 
 protected:
-  std::string _kernel_name;
   bool _use_displaced_mesh;
 };
-
 
 #endif // CAVITYPRESSUREACTION_H
