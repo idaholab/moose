@@ -30,6 +30,8 @@ public:
 
   virtual void initialize();
 
+  virtual void execute();
+
   virtual void finalize();
 
   struct CacheValues

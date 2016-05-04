@@ -68,11 +68,18 @@ GrainTracker::initialize()
   _elemental_data.clear();
 }
 
+void
+GrainTracker::execute()
+{
+  Moose::perf_log.push("execute()", "GrainTracker");
+  FeatureFloodCount::execute();
+  Moose::perf_log.pop("execute()", "GrainTracker");
+}
 
 void
 GrainTracker::finalize()
 {
-  Moose::perf_log.push("finalize()","GrainTracker");
+  Moose::perf_log.push("finalize()", "GrainTracker");
 
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
@@ -98,9 +105,6 @@ GrainTracker::finalize()
   updateFieldInfo();
 
   _console << "Finished inside of updateFieldInfo" << std::endl;
-
-
-  Moose::perf_log.pop("finalize()","GrainTracker");
 
   // Calculate and out output bubble volume data
   if (_pars.isParamValid("bubble_volume_file"))
@@ -129,6 +133,8 @@ GrainTracker::finalize()
       }
     }
   }
+
+  Moose::perf_log.pop("finalize()", "GrainTracker");
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &

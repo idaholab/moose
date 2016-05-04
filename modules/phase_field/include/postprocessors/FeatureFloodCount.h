@@ -59,7 +59,7 @@ public:
     GHOSTED_ENTITIES,
     HALOS,
     ACTIVE_BOUNDS,
-    CENTROID,
+    CENTROID
   };
 
   // Retrieve field information
