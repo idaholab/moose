@@ -47,20 +47,23 @@
 #include <dlfcn.h>
 #include <sys/utsname.h> // utsname
 
+// C++ includes
+#include <numeric> // std::accumulate
+
 #define QUOTE(macro) stringifyName(macro)
 
-// Call this using the QUOTE() macro to generate the last argument.
-void print_yes_no(std::stringstream & oss,
-                  const std::string & feature,
-                  const std::string & defined)
-{
-  oss << std::setw(ConsoleUtils::console_field_width) << std::string("  ") + feature + std::string(": ");
-  if (defined == "1")
-    oss << "yes";
-  else
-    oss << "no";
-  oss << '\n';
-}
+// Don't trip over any macros with the same name
+#ifdef EXPAND
+#undef EXPAND
+#endif
+
+// When CXX11 is not detected, we check an alternate macro name.
+#ifdef LIBMESH_HAVE_CXX11
+#define EXPAND(FOO) QUOTE(FOO)
+#else
+#define EXPAND(FOO) QUOTE(FOO ## _BUT_DISABLED)
+#endif
+
 
 template<>
 InputParameters validParams<MooseApp>()
@@ -92,7 +95,6 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("error_override", "-o --error-override", false, "Error when encountering overridden or parameters supplied multiple times");
 
   params.addCommandLineParam<bool>("parallel_mesh", "--parallel-mesh", false, "The libMesh Mesh underlying MooseMesh should always be a ParallelMesh");
-  params.addCommandLineParam<bool>("check_cxx11", "--check-cxx11", false, "Print a compiler C++11 compatibility check at end of simulation");
 
   params.addCommandLineParam<unsigned int>("refinements", "-r <n>", 0, "Specify additional initial uniform refinements for automatic scaling");
 
@@ -174,98 +176,92 @@ MooseApp::MooseApp(InputParameters parameters) :
 
 MooseApp::~MooseApp()
 {
-  // Look for --check-cxx11 on command line.
-  bool check_cxx11 = getParam<bool>("check_cxx11");
-
-  if (check_cxx11)
+  // Warn if the compiler *does not* have support for the C++11
+  // features we plan to initially require support for in MOOSE.  The
+  // user can completely opt out of seeing this warning by setting the
+  // environment variable MOOSE_CXX11_IGNORE
+  char * moose_cxx11_ignore = std::getenv("MOOSE_CXX11_IGNORE");
+  if (!moose_cxx11_ignore)
   {
-    // Get system information
-    struct utsname sys_info;
-    uname(&sys_info);
+    // Array of feature descriptions
+    const char * feature_descriptions[] = {
+      "alias declarations",
+      "auto keyword",
+      "constexpr keyword",
+      "decltype keyword",
+      "deleted functions",
+      "lambdas",
+      "move keyword",
+      "override keyword",
+      "range-based for",
+      "rvalue references",
+      "std::shared_ptr",
+      "std::unique_ptr",
+      "variadic templates",
+    };
 
-    // Get compiler name and version
-#ifdef __clang__
-    std::string
-      compiler_name = "Clang",
-      compiler_version = QUOTE(__clang_major__) "." QUOTE(__clang_minor__) "." QUOTE(__clang_patchlevel__);
-#elif __INTEL_COMPILER
-    std::string
-      compiler_name = "Intel",
-      compiler_version = QUOTE(__INTEL_COMPILER_BUILD_DATE);
-#elif __GNUG__
-    std::string
-      compiler_name = "GCC",
-      compiler_version = QUOTE(__GNUC__) "." QUOTE(__GNUC_MINOR__) "." QUOTE(__GNUC_PATCHLEVEL__);
-#else
-    std::string
-      compiler_name = "Unknown compiler",
-      compiler_version = "Unknown version";
-#endif
+    // Array of true/false values
+    const int tf_array[] = {
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_ALIAS_DECLARATIONS)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_AUTO)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_CONSTEXPR)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_DECLTYPE)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_DELETED_FUNCTIONS)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_LAMBDA)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_MOVE)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_OVERRIDE)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_RANGEFOR)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_RVALUE_REFERENCES)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_SHARED_PTR)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_UNIQUE_PTR)),
+      setBool(EXPAND(LIBMESH_HAVE_CXX11_VARIADIC_TEMPLATES))
+    };
 
-    std::stringstream oss;
+    int n_entries = sizeof(tf_array)/sizeof(int);
+    int success = std::accumulate(tf_array, tf_array+n_entries, 0);
 
-    oss << "----------------------------------------" << '\n';
-    oss << std::left << "C++11 compiler compatibility report: " << '\n';
-    oss << "OS: " << sys_info.version << '\n';
-    oss << "Compiler: " << compiler_name << ' ' << compiler_version << '\n';
-    oss << "----------------------------------------" << '\n';
-#ifdef LIBMESH_HAVE_CXX11
-    print_yes_no(oss, "Basic functionality", QUOTE(LIBMESH_HAVE_CXX11));
-    print_yes_no(oss, "Alias declarations", QUOTE(LIBMESH_HAVE_CXX11_ALIAS_DECLARATIONS));
-    print_yes_no(oss, "auto keyword", QUOTE(LIBMESH_HAVE_CXX11_AUTO));
-    print_yes_no(oss, "constexpr keyword", QUOTE(LIBMESH_HAVE_CXX11_CONSTEXPR));
-    print_yes_no(oss, "decltype keyword", QUOTE(LIBMESH_HAVE_CXX11_DECLTYPE));
-    print_yes_no(oss, "Deleted functions", QUOTE(LIBMESH_HAVE_CXX11_DELETED_FUNCTIONS));
-    print_yes_no(oss, "'final' keyword", QUOTE(LIBMESH_HAVE_CXX11_FINAL));
-    print_yes_no(oss, "Initializer lists", QUOTE(LIBMESH_HAVE_CXX11_INITIALIZER_LIST));
-    print_yes_no(oss, "Lambdas", QUOTE(LIBMESH_HAVE_CXX11_LAMBDA));
-    print_yes_no(oss, "'move' keyword", QUOTE(LIBMESH_HAVE_CXX11_MOVE));
-    print_yes_no(oss, "'nullptr' keyword", QUOTE(LIBMESH_HAVE_CXX11_NULLPTR));
-    print_yes_no(oss, "'override' keyword", QUOTE(LIBMESH_HAVE_CXX11_OVERRIDE));
-    print_yes_no(oss, "range-based for", QUOTE(LIBMESH_HAVE_CXX11_RANGEFOR));
-    print_yes_no(oss, "<regex>", QUOTE(LIBMESH_HAVE_CXX11_REGEX));
-    print_yes_no(oss, "rvalue references", QUOTE(LIBMESH_HAVE_CXX11_RVALUE_REFERENCES));
-    print_yes_no(oss, "std::shared_ptr", QUOTE(LIBMESH_HAVE_CXX11_SHARED_PTR));
-    print_yes_no(oss, "<thread>", QUOTE(LIBMESH_HAVE_CXX11_THREAD));
-    print_yes_no(oss, "<type_traits>", QUOTE(LIBMESH_HAVE_CXX11_TYPE_TRAITS));
-    print_yes_no(oss, "std::unique_ptr", QUOTE(LIBMESH_HAVE_CXX11_UNIQUE_PTR));
-    print_yes_no(oss, "Variadic templates", QUOTE(LIBMESH_HAVE_CXX11_VARIADIC_TEMPLATES));
-#else
-    print_yes_no(oss, "Alias declarations", QUOTE(LIBMESH_HAVE_CXX11_ALIAS_DECLARATIONS_BUT_DISABLED));
-    print_yes_no(oss, "auto keyword", QUOTE(LIBMESH_HAVE_CXX11_AUTO_BUT_DISABLED));
-    print_yes_no(oss, "constexpr keyword", QUOTE(LIBMESH_HAVE_CXX11_CONSTEXPR_BUT_DISABLED));
-    print_yes_no(oss, "decltype keyword", QUOTE(LIBMESH_HAVE_CXX11_DECLTYPE_BUT_DISABLED));
-    print_yes_no(oss, "Deleted functions", QUOTE(LIBMESH_HAVE_CXX11_DELETED_FUNCTIONS_BUT_DISABLED));
-    print_yes_no(oss, "'final' keyword", QUOTE(LIBMESH_HAVE_CXX11_FINAL_BUT_DISABLED));
-    print_yes_no(oss, "Initializer lists", QUOTE(LIBMESH_HAVE_CXX11_INITIALIZER_LIST_BUT_DISABLED));
-    print_yes_no(oss, "Lambdas", QUOTE(LIBMESH_HAVE_CXX11_LAMBDA_BUT_DISABLED));
-    print_yes_no(oss, "'move' keyword", QUOTE(LIBMESH_HAVE_CXX11_MOVE_BUT_DISABLED));
-    print_yes_no(oss, "'nullptr' keyword", QUOTE(LIBMESH_HAVE_CXX11_NULLPTR_BUT_DISABLED));
-    print_yes_no(oss, "'override' keyword", QUOTE(LIBMESH_HAVE_CXX11_OVERRIDE_BUT_DISABLED));
-    print_yes_no(oss, "range-based for", QUOTE(LIBMESH_HAVE_CXX11_RANGEFOR_BUT_DISABLED));
-    print_yes_no(oss, "<regex>", QUOTE(LIBMESH_HAVE_CXX11_REGEX_BUT_DISABLED));
-    print_yes_no(oss, "rvalue references", QUOTE(LIBMESH_HAVE_CXX11_RVALUE_REFERENCES_BUT_DISABLED));
-    print_yes_no(oss, "std::shared_ptr", QUOTE(LIBMESH_HAVE_CXX11_SHARED_PTR_BUT_DISABLED));
-    print_yes_no(oss, "<thread>", QUOTE(LIBMESH_HAVE_CXX11_THREAD_BUT_DISABLED));
-    print_yes_no(oss, "<type_traits>", QUOTE(LIBMESH_HAVE_CXX11_TYPE_TRAITS_BUT_DISABLED));
-    print_yes_no(oss, "std::unique_ptr", QUOTE(LIBMESH_HAVE_CXX11_UNIQUE_PTR_BUT_DISABLED));
-    print_yes_no(oss, "Variadic templates", QUOTE(LIBMESH_HAVE_CXX11_VARIADIC_TEMPLATES_BUT_DISABLED));
-#endif
-
-    // Print the C++11 compatibility stuff to Moose::out.
-    Moose::out << '\n' << oss.str();
-
-    // Also print to file on processor 0, with instructions for sending it to moose-users.
-    if (_comm->rank() == 0)
+    // Print prominent warning to screen if compiler does not support
+    // one of the features we require.
+    if (success < n_entries)
     {
-      const std::string filename = "moose_cxx11_compatibility_check.txt";
-      std::ofstream check_file(filename.c_str());
-      check_file << oss.str();
+      // Get compiler name and version
+#ifdef __clang__
+      std::string
+        compiler_name = "Clang",
+        compiler_version = QUOTE(__clang_major__) "." QUOTE(__clang_minor__) "." QUOTE(__clang_patchlevel__);
+#elif __INTEL_COMPILER
+      std::string
+        compiler_name = "Intel",
+        compiler_version = QUOTE(__INTEL_COMPILER_BUILD_DATE);
+#elif __GNUG__
+      std::string
+        compiler_name = "GCC",
+        compiler_version = QUOTE(__GNUC__) "." QUOTE(__GNUC_MINOR__) "." QUOTE(__GNUC_PATCHLEVEL__);
+#else
+      std::string
+        compiler_name = "Unknown compiler",
+        compiler_version = "Unknown version";
+#endif
 
-      Moose::out << "\nC++11 compatiblity information written to: " << filename << '\n';
-      Moose::out << "Please send this file to moose-users@googlegroups.com" << "\n\n";
+      std::stringstream oss;
+      oss << "--------------------------------------------------------------------------------\n";
+      oss << "Warning!\n";
+      oss << "MOOSE will soon start using the following C++11 features, but\n";
+      oss << "your compiler, " << compiler_name << ' ' << compiler_version << ", does not support the ones marked 'no' below:\n";
+      for (int i=0; i<n_entries; ++i)
+        printYesNo(oss, feature_descriptions[i], tf_array[i]);
+      oss << '\n';
+      oss << "These features will require the following minimum compiler versions:\n";
+      oss << "* GCC >= 4.8.4\n";
+      oss << "* Clang >= 3.4.0\n";
+      oss << "* Intel >= 20130607\n";
+      oss << "\n";
+      oss << "Please upgrade your compiler as soon as possible, or send mail to\n";
+      oss << "moose-users@googlegroups.com for assistance.\n";
+      oss << "--------------------------------------------------------------------------------\n";
+
+      Moose::out << '\n' << oss.str();
     }
-
   }
 
   _action_warehouse.clear();
@@ -326,18 +322,6 @@ MooseApp::setupOptions()
   if (getParam<bool>("minimal"))
     createMinimalApp();
 
-  else if (getParam<bool>("check_cxx11"))
-  {
-    Moose::perf_log.disable_logging();
-
-    /**
-     * Do nothing here but we don't want to fall into the catch-all
-     * at the bottom of this if/else cascade which prints the Usage
-     * among other things. This CLI option will be checked during
-     * destruction and will print information out there.
-     */
-    _ready_to_exit = true;
-  }
   else if (getParam<bool>("help"))
   {
     Moose::perf_log.disable_logging();
@@ -1190,4 +1174,28 @@ MooseApp::createMinimalApp()
   }
 
   _action_warehouse.build();
+}
+
+// Call this using the QUOTE() macro to generate the last argument.
+void
+MooseApp::printYesNo(std::stringstream & oss,
+                       const std::string & feature,
+                       bool defined)
+{
+  oss << std::setw(ConsoleUtils::console_field_width) << std::string("  ") + feature + std::string(": ");
+  if (defined)
+    oss << COLOR_GREEN << "yes" << COLOR_DEFAULT;
+  else
+    oss << COLOR_RED << "no" << COLOR_DEFAULT;
+  oss << '\n';
+}
+
+// Call this using the QUOTE() macro to generate the argument.
+bool
+MooseApp::setBool(const std::string & value)
+{
+  if (value == "1")
+    return true;
+
+  return false;
 }
