@@ -36,9 +36,21 @@ public:
    */
   virtual Real getValue();
 
-protected:
-  MooseEnum _column;
+  enum PerfLogCols
+  {
+    N_CALLS,
+    TOTAL_TIME,
+    AVERAGE_TIME,
+    TOTAL_TIME_WITH_SUB,
+    AVERAGE_TIME_WITH_SUB,
+    PERCENT_OF_ACTIVE_TIME,
+    PERCENT_OF_ACTIVE_TIME_WITH_SUB
+  };
 
+protected:
+  PerfLogCols _column;
+
+  std::string _category;
   std::string _event;
 };
 
