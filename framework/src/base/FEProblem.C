@@ -3682,6 +3682,9 @@ FEProblem::possiblyRebuildGeomSearchPatches()
 void
 FEProblem::adaptMesh()
 {
+  if (!_adaptivity.isAdaptivityDue())
+    return;
+
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {

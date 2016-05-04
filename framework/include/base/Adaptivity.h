@@ -194,6 +194,11 @@ public:
   void setMaxHLevel(unsigned int level) { _max_h_level = level; }
 
   /**
+   * Set the interval (number of timesteps) between refinement steps.
+   */
+  void setInterval(unsigned int interval) { _interval = interval; }
+
+  /**
    * Get the MooseVariable corresponding to the Marker Field Name that is actually going to be used
    * to refine / coarsen the mesh.
    *
@@ -215,6 +220,11 @@ public:
    * Update the ErrorVectors that have been requested through calls to getErrorVector().
    */
   void updateErrorVectors();
+
+  /**
+   * Query if an adaptivity step should be performed at the current time / time step
+   */
+  bool isAdaptivityDue();
 
 protected:
   FEProblem & _subproblem;
@@ -244,6 +254,10 @@ protected:
 
   /// Time
   Real & _t;
+  /// Time Step
+  int & _step;
+  /// intreval between adaptivity runs
+  unsigned int _interval;
   /// When adaptivity start
   Real _start_time;
   /// When adaptivity stops

@@ -33,6 +33,7 @@ InputParameters validParams<AdaptivityAction>()
   MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator", "KellyErrorEstimator");
 
   params.addParam<unsigned int>("steps",                       0, "The number of adaptivity steps to perform at any one time for steady state");
+  params.addRangeCheckedParam<unsigned int>("interval",        1, "interval>0", "The number of time steps betweeen each adaptivity phase");
   params.addParam<unsigned int>("initial_adaptivity",          0, "The number of adaptivity steps to perform using the initial conditions");
   params.addParam<Real> ("refine_fraction",                    0.0, "The fraction of elements or error to refine. Should be between 0 and 1.");
   params.addParam<Real> ("coarsen_fraction",                   0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.");
@@ -106,6 +107,7 @@ AdaptivityAction::act()
   }
 
   adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+  adapt.setInterval(getParam<unsigned int>("interval"));
 }
 
 #endif //LIBMESH_ENABLE_AMR
