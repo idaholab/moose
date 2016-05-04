@@ -135,66 +135,65 @@ bool
 Adaptivity::adaptMesh()
 {
   bool meshChanged = false;
-  if (_mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0)
+
+  if (_use_new_system)
   {
-    if (_use_new_system)
+    if (_marker_variable_name != "") // Only flag if a marker variable name has been set
     {
-      if (_marker_variable_name != "") // Only flag if a marker variable name has been set
-      {
-        _mesh_refinement->clean_refinement_flags();
+      _mesh_refinement->clean_refinement_flags();
 
-        std::vector<Number> serialized_solution;
-        _subproblem.getAuxiliarySystem().solution().close();
-        _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
+      std::vector<Number> serialized_solution;
+      _subproblem.getAuxiliarySystem().solution().close();
+      _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-        FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level);
-        ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
-                                 _subproblem.mesh().getMesh().active_elements_end(), 1);
-        Threads::parallel_reduce(all_elems, fet);
-        _subproblem.getAuxiliarySystem().solution().close();
-      }
-    }
-    else
-    {
-      // Compute the error for each active element
-      _error_estimator->estimate_error(_subproblem.getNonlinearSystem().sys(), *_error);
-
-      // Flag elements to be refined and coarsened
-      _mesh_refinement->flag_elements_by_error_fraction (*_error);
-
-      if (_displaced_problem)
-        // Reuse the error vector and refine the displaced mesh
-        _displaced_mesh_refinement->flag_elements_by_error_fraction (*_error);
-    }
-
-    // If the DisplacedProblem is active, undisplace the DisplacedMesh
-    // in preparation for refinement.  We can't safely refine the
-    // DisplacedMesh directly, since the Hilbert keys computed on the
-    // inconsistenly-displaced Mesh are different on different
-    // processors, leading to inconsistent Hilbert keys.  We must do
-    // this before the undisplaced Mesh is refined, so that the
-    // element and node numbering is still consistent.
-    if (_displaced_problem)
-      _displaced_problem->undisplaceMesh();
-
-    // Perform refinement and coarsening
-    meshChanged = _mesh_refinement->refine_and_coarsen_elements();
-
-    if (_displaced_problem && meshChanged)
-    {
-      // Now do refinement/coarsening
-      bool dispMeshChanged = _displaced_mesh_refinement->refine_and_coarsen_elements();
-
-      // Since the undisplaced mesh changed, the displaced mesh better have changed!
-      mooseAssert(dispMeshChanged, "Undisplaced mesh changed, but displaced mesh did not!");
-    }
-
-    if (meshChanged && _print_mesh_changed)
-    {
-      _console << "\nMesh Changed:\n";
-      _mesh.printInfo();
+      FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level);
+      ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
+                               _subproblem.mesh().getMesh().active_elements_end(), 1);
+      Threads::parallel_reduce(all_elems, fet);
+      _subproblem.getAuxiliarySystem().solution().close();
     }
   }
+  else
+  {
+    // Compute the error for each active element
+    _error_estimator->estimate_error(_subproblem.getNonlinearSystem().sys(), *_error);
+
+    // Flag elements to be refined and coarsened
+    _mesh_refinement->flag_elements_by_error_fraction (*_error);
+
+    if (_displaced_problem)
+      // Reuse the error vector and refine the displaced mesh
+      _displaced_mesh_refinement->flag_elements_by_error_fraction (*_error);
+  }
+
+  // If the DisplacedProblem is active, undisplace the DisplacedMesh
+  // in preparation for refinement.  We can't safely refine the
+  // DisplacedMesh directly, since the Hilbert keys computed on the
+  // inconsistenly-displaced Mesh are different on different
+  // processors, leading to inconsistent Hilbert keys.  We must do
+  // this before the undisplaced Mesh is refined, so that the
+  // element and node numbering is still consistent.
+  if (_displaced_problem)
+    _displaced_problem->undisplaceMesh();
+
+  // Perform refinement and coarsening
+  meshChanged = _mesh_refinement->refine_and_coarsen_elements();
+
+  if (_displaced_problem && meshChanged)
+  {
+    // Now do refinement/coarsening
+    bool dispMeshChanged = _displaced_mesh_refinement->refine_and_coarsen_elements();
+
+    // Since the undisplaced mesh changed, the displaced mesh better have changed!
+    mooseAssert(dispMeshChanged, "Undisplaced mesh changed, but displaced mesh did not!");
+  }
+
+  if (meshChanged && _print_mesh_changed)
+  {
+    _console << "\nMesh Changed:\n";
+    _mesh.printInfo();
+  }
+
   return meshChanged;
 }
 
@@ -316,6 +315,14 @@ Adaptivity::updateErrorVectors()
       it != _indicator_field_to_error_vector.end();
       ++it)
     _subproblem.comm().sum((std::vector<float>&)*(it->second));
+}
+
+bool
+Adaptivity::isAdaptivityDue()
+{
+  return    _mesh_refinement_on
+         && (_start_time <= _t && _t < _stop_time)
+         && _step % _interval == 0;
 }
 
 #endif //LIBMESH_ENABLE_AMR

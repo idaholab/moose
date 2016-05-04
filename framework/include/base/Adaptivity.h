@@ -221,6 +221,11 @@ public:
    */
   void updateErrorVectors();
 
+  /**
+   * Query if an adaptivity step should be performed at the current time / time step
+   */
+  bool isAdaptivityDue();
+
 protected:
   FEProblem & _subproblem;
   MooseMesh & _mesh;
