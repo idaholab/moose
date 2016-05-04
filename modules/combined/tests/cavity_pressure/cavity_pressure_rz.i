@@ -100,7 +100,6 @@
       volume = internalVolume
       startup_time = 0.5
       output = ppress
-      use_displaced_mesh = true
       displacements = 'disp_x disp_y'
     [../]
   [../]

@@ -273,7 +273,6 @@
       volume = internalVolume
       startup_time = 0.5
       output = ppress
-      use_displaced_mesh = true
       displacements = 'disp_x disp_y disp_z'
       save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
     [../]
