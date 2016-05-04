@@ -3691,6 +3691,9 @@ FEProblem::adaptMesh()
       computeMarkers();
     if (_adaptivity.adaptMesh())
       meshChanged();
+
+    // Show adaptivity progress
+    _console << std::flush;
   }
 }
 #endif //LIBMESH_ENABLE_AMR
