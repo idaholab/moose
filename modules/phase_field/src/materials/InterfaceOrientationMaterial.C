@@ -7,6 +7,7 @@
 
 #include "InterfaceOrientationMaterial.h"
 #include "MooseMesh.h"
+#include "MathUtils.h"
 
 template<>
 InputParameters validParams<InterfaceOrientationMaterial>()
@@ -45,7 +46,7 @@ InterfaceOrientationMaterial::computeQpProperties()
 
   // cosine of the gradient orientation angle
   Real n;
-  if (_grad_op[_qp].norm() == 0)
+  if (_grad_op[_qp].norm_sq() == 0)
     n = 0;
   else
     n = _grad_op[_qp](0) / _grad_op[_qp].norm();
@@ -56,10 +57,10 @@ InterfaceOrientationMaterial::computeQpProperties()
   if (n < -cutoff)
     n = -cutoff;
 
-  const Real angle = std::acos(n);
+  const Real angle = std::acos(n) * MathUtils::sign(_grad_op[_qp](1));
 
   // Compute derivative of angle wrt n
-  const Real dangledn = - 1.0 / std::sqrt(1.0 - n * n);
+  const Real dangledn = - MathUtils::sign(_grad_op[_qp](1)) / std::sqrt(1.0 - n * n);
 
   // Compute derivative of n with respect to grad_op
   RealGradient dndgrad_op;
@@ -74,8 +75,8 @@ InterfaceOrientationMaterial::computeQpProperties()
 
   // Calculate interfacial parameter epsilon and its derivatives
   _eps[_qp]= _eps_bar * (_delta * std::cos(_j * (angle - _theta0 * libMesh::pi/180.0)) + 1.0);
-  _deps[_qp]= - _eps_bar * _delta * _delta * std::sin(_j * (angle - _theta0 * libMesh::pi/180.0));
-  Real d2eps = - _eps_bar * _delta * _delta * _delta * std::cos(_j * (angle - _theta0 * libMesh::pi/180.0));
+  _deps[_qp]= - _eps_bar * _delta * _j * std::sin(_j * (angle - _theta0 * libMesh::pi/180.0));
+  Real d2eps = - _eps_bar * _delta * _j * _j * std::cos(_j * (angle - _theta0 * libMesh::pi/180.0));
 
   // Compute derivatives of epsilon and its derivative wrt grad_op
   _depsdgrad_op[_qp] = _deps[_qp] * dangledn * dndgrad_op;
