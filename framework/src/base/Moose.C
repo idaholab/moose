@@ -189,7 +189,6 @@
 #include "SideIntegralVariablePostprocessor.h"
 #include "NodalMaxValue.h"
 #include "NodalProxyMaxValue.h"
-#include "PlotFunction.h"
 #include "ScalarL2Error.h"
 #include "ElementalVariableValue.h"
 #include "ElementL2Norm.h"
