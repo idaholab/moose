@@ -87,7 +87,7 @@ Split::setup(const std::string& prefix)
     val="";
     for (unsigned int j = 0; j < _vars.size(); ++j)
       val += (j ? "," : "") + _vars[j];
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
   }
 
   // block options
@@ -96,7 +96,7 @@ Split::setup(const std::string& prefix)
     val = "";
     for (unsigned int j = 0; j < _blocks.size(); ++j)
       val += (j ? "," : "") + _blocks[j];
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
   }
 
   // side options
@@ -105,7 +105,7 @@ Split::setup(const std::string& prefix)
     val = "";
     for (unsigned int j = 0; j < _sides.size(); ++j)
       val += (j ? "," : "") + _sides[j];
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
   }
 
   // unside options
@@ -114,7 +114,7 @@ Split::setup(const std::string& prefix)
     val = "";
     for (unsigned int j = 0; j < _unsides.size(); ++j)
       val += (j ? "," : "") + _unsides[j];
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
   }
 
   if (_splitting.size()) {
@@ -122,7 +122,7 @@ Split::setup(const std::string& prefix)
     // with the following parameters (unless overridden by the user-specified petsc_options below).
     opt = prefix + "pc_type";
     val = "fieldsplit";
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
 
     // set Splitting Type
     const char * petsc_splitting_type[] = {
@@ -132,7 +132,7 @@ Split::setup(const std::string& prefix)
       "schur"
     };
     opt = prefix + "pc_fieldsplit_type";
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), petsc_splitting_type[_splitting_type]);
+    Moose::PetscSupport::setSinglePetscOption(opt, petsc_splitting_type[_splitting_type]);
 
     if (_splitting_type == SplittingTypeSchur)
     {
@@ -144,7 +144,7 @@ Split::setup(const std::string& prefix)
         "full"
       };
       opt = prefix + "pc_fieldsplit_schur_fact_type";
-      Moose::PetscSupport::setSinglePetscOption(opt.c_str(), petsc_schur_type[_splitting_type]);
+      Moose::PetscSupport::setSinglePetscOption(opt, petsc_schur_type[_splitting_type]);
 
       // set Schur Preconditioner
       const char * petsc_schur_pre[] = {
@@ -157,7 +157,7 @@ Split::setup(const std::string& prefix)
         #endif
       };
       opt = prefix + "pc_fieldsplit_schur_precondition";
-      Moose::PetscSupport::setSinglePetscOption(opt.c_str(), petsc_schur_pre[_schur_pre]);
+      Moose::PetscSupport::setSinglePetscOption(opt, petsc_schur_pre[_schur_pre]);
 
       // set Schur AInv
       const char * petsc_schur_ainv[] = {
@@ -165,7 +165,7 @@ Split::setup(const std::string& prefix)
         "lump"
       };
       opt = prefix + "mat_schur_complement_ainv_type";
-      Moose::PetscSupport::setSinglePetscOption(opt.c_str(), petsc_schur_ainv[_schur_ainv]);
+      Moose::PetscSupport::setSinglePetscOption(opt, petsc_schur_ainv[_schur_ainv]);
     }
     // FIXME: How would we support the user-provided Pmat?
 
@@ -174,13 +174,13 @@ Split::setup(const std::string& prefix)
     std::ostringstream sval;
     sval << _splitting.size();
     val = sval.str();
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
 
     opt = dmprefix + "fieldsplit_names";
     val = "";
     for (unsigned int i = 0; i < _splitting.size(); ++i)
       val += (i ? "," : "") + _splitting[i];
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
 
     // Finally, recursively configure the splits contained within this split.
     for (unsigned int i = 0; i < _splitting.size(); ++i)
@@ -199,7 +199,7 @@ Split::setup(const std::string& prefix)
     if (op[0] != '-')
       mooseError("Invalid petsc option name " << op << " for Split " << _name);
     std::string opt = prefix + op.substr(1);
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), PETSC_NULL);
+    Moose::PetscSupport::setSinglePetscOption(opt);
   }
   for (unsigned j = 0; j < _petsc_options.inames.size(); ++j)
   {
@@ -208,7 +208,7 @@ Split::setup(const std::string& prefix)
     if (op[0] != '-')
       mooseError("Invalid petsc option name " << op << " for Split " << _name);
     std::string opt = prefix + op.substr(1);
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), _petsc_options.values[j].c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, _petsc_options.values[j]);
   }
 }
 

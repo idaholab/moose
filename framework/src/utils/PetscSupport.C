@@ -102,18 +102,18 @@ setSolverOptions(SolverParams & solver_params)
   switch (solver_params._type)
   {
   case Moose::ST_PJFNK:
-    setSinglePetscOption("-snes_mf_operator", PETSC_NULL);
+    setSinglePetscOption("-snes_mf_operator");
     break;
 
   case Moose::ST_JFNK:
-    setSinglePetscOption("-snes_mf", PETSC_NULL);
+    setSinglePetscOption("-snes_mf");
     break;
 
   case Moose::ST_NEWTON:
     break;
 
   case Moose::ST_FD:
-    setSinglePetscOption("-snes_fd", PETSC_NULL);
+    setSinglePetscOption("-snes_fd");
     break;
 
   case Moose::ST_LINEAR:
@@ -131,7 +131,7 @@ setSolverOptions(SolverParams & solver_params)
     setSinglePetscOption("-snes_type", "ls");
     setSinglePetscOption("-snes_ls", stringify(ls_type));
 #else
-    setSinglePetscOption("-snes_linesearch_type", stringify(ls_type).c_str());
+    setSinglePetscOption("-snes_linesearch_type", stringify(ls_type));
 #endif
   }
 }
@@ -187,9 +187,9 @@ petscSetOptions(FEProblem & problem)
 
   // Add any additional options specified in the input file
   for (MooseEnumIterator it = petsc.flags.begin(); it != petsc.flags.end(); ++it)
-    setSinglePetscOption(it->c_str(), PETSC_NULL);
+    setSinglePetscOption(it->c_str());
   for (unsigned int i=0; i<petsc.inames.size(); ++i)
-    setSinglePetscOption(petsc.inames[i].c_str(), petsc.values[i].c_str());
+    setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
   SolverParams& solver_params = problem.solverParams();
   if (solver_params._type != Moose::ST_JFNK  &&
@@ -633,16 +633,16 @@ getCommonPetscKeys()
 }
 
 void
-setSinglePetscOption(const char * name, const char * value)
+setSinglePetscOption(const std::string & name, const std::string & value)
 {
   PetscErrorCode ierr;
 
 #if PETSC_VERSION_LESS_THAN(3,7,0)
-  ierr = PetscOptionsSetValue(name, value);
+  ierr = PetscOptionsSetValue(name.c_str(), value == "" ? PETSC_NULL : value.c_str());
 #else
   // PETSc 3.7.0 and later version.  First argument is the options
   // database to use, NULL indicates the default global database.
-  ierr = PetscOptionsSetValue(PETSC_NULL, name, value);
+  ierr = PetscOptionsSetValue(PETSC_NULL, name.c_str(), value == "" ? PETSC_NULL : value.c_str());
 #endif
 
   // Not convenient to use the usual error checking macro, because we

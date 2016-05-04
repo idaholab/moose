@@ -110,7 +110,7 @@ MultiMooseEnum getCommonPetscKeys();
  * MOOSE code, it is instead intended to be called by stuff in
  * MOOSE::PetscSupport.
  */
-void setSinglePetscOption(const char * name, const char * value);
+void setSinglePetscOption(const std::string & name, const std::string & value = "");
 
 }
 }

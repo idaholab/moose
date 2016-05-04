@@ -78,17 +78,17 @@ ContactSplit::setup(const std::string& prefix)
       oval << _contact_master.size();
       val  =  oval.str();
     }
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
     for (unsigned int j = 0;  j < _contact_master.size(); ++j) {
       std::ostringstream oopt;
       oopt << dmprefix << "contact_" << j;
       opt = oopt.str();
       val = _contact_master[j]+","+_contact_slave[j];
-      Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+      Moose::PetscSupport::setSinglePetscOption(opt, val);
       if (_contact_displaced[j]) {
   opt = opt + "_displaced";
   val = "yes";
-  Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+  Moose::PetscSupport::setSinglePetscOption(opt, val);
       }
     }
   }
@@ -100,17 +100,17 @@ ContactSplit::setup(const std::string& prefix)
       oval << _uncontact_master.size();
       val  =  oval.str();
     }
-    Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+    Moose::PetscSupport::setSinglePetscOption(opt, val);
     for (unsigned int j = 0;  j < _uncontact_master.size(); ++j) {
       std::ostringstream oopt;
       oopt << dmprefix << "uncontact_" << j;
       opt = oopt.str();
       val = _uncontact_master[j]+","+_uncontact_slave[j];
-      Moose::PetscSupport::setSinglePetscOption(opt.c_str(),val.c_str());
+      Moose::PetscSupport::setSinglePetscOption(opt, val);
       if (_uncontact_displaced[j]) {
   opt = opt + "_displaced";
   val = "yes";
-  Moose::PetscSupport::setSinglePetscOption(opt.c_str(), val.c_str());
+  Moose::PetscSupport::setSinglePetscOption(opt, val);
       }
     }
   }
