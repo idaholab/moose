@@ -16,7 +16,7 @@ InputParameters validParams<CavityPressureAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
-  params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variables");
+  params.addParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variables");
   params.addParam<NonlinearVariableName>("disp_x", "The x displacement");//deprecated
   params.addParam<NonlinearVariableName>("disp_y", "The y displacement");//deprecated
   params.addParam<NonlinearVariableName>("disp_z", "The z displacement");//deprecated
@@ -54,7 +54,7 @@ CavityPressureAction::act()
     }
   }
   else
-    mooseError("The input file should specify a string of displacement names; these names should match the Variable block names");
+    mooseError("The input file should specify a string of displacement names, e.g. 'displacements = disp_x disp_y disp_z'; these names should match the Variable block names");
 
   unsigned int _ndisp = displacements.size();
 
@@ -69,17 +69,17 @@ CavityPressureAction::act()
   else if (isParamValid("save_in_disp_x"))
   {
     mooseDeprecated("CavityPressureAction has been updated to accept a string of save_in variable names, e.g. save_in = 'save_in_disp_x save_in_disp_y save_in_disp_z' in the input file.");
-    save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_x"));
+    save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
     if (isParamValid("save_in_disp_y"))
     {
-      save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_y"));
+      save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
       if (isParamValid("save_in_disp_z"))
-        save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_z"));
+        save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
     }
   }
 
   if ((isParamValid("save_in") || isParamValid("save_in_disp_x")) && save_in.size() != _ndisp)
-    mooseError("Number of save_in variables should equal to the number of displacement variables: " << _ndisp);
+    mooseError("Number of save_in variables should equal to the number of displacement variables " << _ndisp);
 
   PostprocessorName ppname;
   if (isParamValid("output"))
