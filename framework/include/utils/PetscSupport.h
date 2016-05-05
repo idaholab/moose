@@ -103,6 +103,15 @@ MultiMooseEnum getCommonPetscFlags();
 
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc iname options (keys in key-value pairs)
 MultiMooseEnum getCommonPetscKeys();
+
+/**
+ * A wrapper function for dealing with different versions of
+ * PetscOptionsSetValue.  This is not generally called from
+ * MOOSE code, it is instead intended to be called by stuff in
+ * MOOSE::PetscSupport.
+ */
+void setSinglePetscOption(const std::string & name, const std::string & value = "");
+
 }
 }
 
