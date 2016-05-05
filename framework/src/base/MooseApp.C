@@ -93,6 +93,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("warn_unused", "-w --warn-unused", false, "Warn about unused input file options");
   params.addCommandLineParam<bool>("error_unused", "-e --error-unused", false, "Error when encountering unused input file options");
   params.addCommandLineParam<bool>("error_override", "-o --error-override", false, "Error when encountering overridden or parameters supplied multiple times");
+  params.addCommandLineParam<bool>("error_deprecated", "--error-deprecated", false, "Turn deprecated code messages into Errors");
 
   params.addCommandLineParam<bool>("parallel_mesh", "--parallel-mesh", false, "The libMesh Mesh underlying MooseMesh should always be a ParallelMesh");
 
@@ -305,6 +306,7 @@ MooseApp::setupOptions()
     Moose::_trap_fpe = false;
 
   Moose::_warnings_are_errors = getParam<bool>("error");
+  Moose::_deprecated_is_error = getParam<bool>("error_deprecated");
   Moose::_color_console = !getParam<bool>("no_color");
 
   // If there's no threading model active, but the user asked for

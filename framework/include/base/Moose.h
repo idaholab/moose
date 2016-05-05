@@ -76,9 +76,14 @@ extern bool _trap_fpe;
 extern bool _color_console;
 
 /**
- * Variable to toggle any warning into an error
+ * Variable to toggle any warning into an error (includes deprecated code warnings)
  */
 extern bool _warnings_are_errors;
+
+/**
+ * Variable to toggle only deprecated warnings as errors.
+ */
+extern bool _deprecated_is_error;
 
 /**
  * Variable to turn on exceptions during mooseError() and mooseWarning(), should
