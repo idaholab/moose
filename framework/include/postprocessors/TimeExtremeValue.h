@@ -12,46 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef PERFORMANCEDATA_H
-#define PERFORMANCEDATA_H
+#ifndef TIMEEXTREMEVALUE_H
+#define TIMEEXTREMEVALUE_H
 
 #include "GeneralPostprocessor.h"
 
 //Forward Declarations
-class PerformanceData;
+class TimeExtremeValue;
 
+// Input parameters
 template<>
-InputParameters validParams<PerformanceData>();
+InputParameters validParams<TimeExtremeValue>();
 
-class PerformanceData : public GeneralPostprocessor
+/// A postprocessor for reporting the max/min value of another postprocessor over time
+class TimeExtremeValue : public GeneralPostprocessor
 {
 public:
-  PerformanceData(const InputParameters & parameters);
-
-  virtual void initialize() {}
-  virtual void execute() {}
-
-  /**
-   * This will return the elapsed wall time.
-   */
-  virtual Real getValue();
-
-  enum PerfLogCols
+  /// What type of extreme value we are going to compute
+  enum ExtremeType
   {
-    N_CALLS,
-    TOTAL_TIME,
-    AVERAGE_TIME,
-    TOTAL_TIME_WITH_SUB,
-    AVERAGE_TIME_WITH_SUB,
-    PERCENT_OF_ACTIVE_TIME,
-    PERCENT_OF_ACTIVE_TIME_WITH_SUB
+    MAX,
+    MIN
   };
 
-protected:
-  PerfLogCols _column;
+  /**
+   * Class constructor
+   * @param parameters The input parameters
+   */
+  TimeExtremeValue(const InputParameters & parameters);
+  virtual void initialize() {}
+  virtual void execute();
+  virtual Real getValue();
 
-  std::string _category;
-  std::string _event;
+protected:
+  const PostprocessorValue & _postprocessor;
+
+  /// The extreme value type ("min" or "max")
+  ExtremeType _type;
+
+  /// The extreme value
+  Real & _value;
 };
 
-#endif // PERFORMANCEDATA_H
+#endif

@@ -168,6 +168,7 @@
 #include "ElementL2Error.h"
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
+#include "FindValueOnLine.h"
 #include "FunctionValuePostprocessor.h"
 #include "NodalVariableValue.h"
 #include "NumDOFs.h"
@@ -207,6 +208,7 @@
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
 #include "ElementL2Difference.h"
+#include "TimeExtremeValue.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -579,6 +581,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementVectorL2Error);
   registerPostprocessor(ScalarL2Error);
   registerPostprocessor(EmptyPostprocessor);
+  registerPostprocessor(FindValueOnLine);
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(NumDOFs);
   registerPostprocessor(TimestepSize);
@@ -617,6 +620,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ExecutionerAttributeReporter);
   registerPostprocessor(PercentChangePostprocessor);
   registerPostprocessor(ElementL2Difference);
+  registerPostprocessor(TimeExtremeValue);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
