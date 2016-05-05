@@ -1156,6 +1156,8 @@ bool _color_console = true;
 
 bool _warnings_are_errors = false;
 
+bool _deprecated_is_error = false;
+
 bool _throw_on_error = false;
 
 } // namespace Moose
