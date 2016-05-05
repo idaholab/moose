@@ -1,4 +1,5 @@
 #include "FunctionMaterialPropertyDescriptor.h"
+#include "DerivativeMaterialInterface.h"
 #include "Material.h"
 #include "Kernel.h"
 #include <algorithm>
@@ -27,7 +28,7 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const std
     _fparser_name = _base_name;
   }
 
-  updatePropertyReference();
+  _value = NULL;
 }
 
 FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() :
@@ -40,16 +41,25 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(const Fun
     _base_name(rhs._base_name),
     _dependent_vars(rhs._dependent_vars),
     _derivative_vars(rhs._derivative_vars),
-    _value(rhs._value),
+    _value(NULL),
     _parent(rhs._parent)
 {
+}
+
+std::vector<FunctionMaterialPropertyDescriptor>
+FunctionMaterialPropertyDescriptor::parseVector(const std::vector<std::string> & expression_list, MooseObject * parent)
+{
+  std::vector<FunctionMaterialPropertyDescriptor> fmpds;
+  for (std::vector<std::string>::const_iterator i = expression_list.begin(); i != expression_list.end(); ++i)
+    fmpds.push_back(FunctionMaterialPropertyDescriptor(*i, parent));
+  return fmpds;
 }
 
 void
 FunctionMaterialPropertyDescriptor::addDerivative(const VariableName & var)
 {
   _derivative_vars.push_back(var);
-  updatePropertyReference();
+  _value = NULL;
 }
 
 bool
@@ -57,6 +67,16 @@ FunctionMaterialPropertyDescriptor::dependsOn(const std::string & var) const
 {
   return    std::find(_dependent_vars.begin(), _dependent_vars.end(), var) != _dependent_vars.end()
          || std::find(_derivative_vars.begin(), _derivative_vars.end(), var) != _derivative_vars.end();
+}
+
+std::vector<VariableName>
+FunctionMaterialPropertyDescriptor::getDependentVariables()
+{
+  std::set<VariableName> all;
+  all.insert(_dependent_vars.begin(), _dependent_vars.end());
+  all.insert(_derivative_vars.begin(), _derivative_vars.end());
+
+  return std::vector<VariableName>(all.begin(), all.end());
 }
 
 void
@@ -145,17 +165,22 @@ FunctionMaterialPropertyDescriptor::printDebug()
   Moose::out << "] " << getPropertyName() << '\n';
 }
 
-void
-FunctionMaterialPropertyDescriptor::updatePropertyReference()
+const MaterialProperty<Real> &
+FunctionMaterialPropertyDescriptor::value() const
 {
-  Material * _material_parent = dynamic_cast<Material *>(_parent);
-  Kernel * _kernel_parent = dynamic_cast<Kernel *>(_parent);
+  if (_value == NULL)
+  {
+    DerivativeMaterialInterface<Material> * _material_parent = dynamic_cast<DerivativeMaterialInterface<Material> *>(_parent);
+    DerivativeMaterialInterface<Kernel> * _kernel_parent = dynamic_cast<DerivativeMaterialInterface<Kernel> *>(_parent);
 
-  // get the material property reference
-  if (_material_parent)
-    _value = &(_material_parent->getMaterialProperty<Real>(getPropertyName()));
-  else if (_kernel_parent)
-    _value = &(_kernel_parent->getMaterialProperty<Real>(getPropertyName()));
-  else
-    mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a Kernel object.");
+    // get the material property reference
+    if (_material_parent)
+      _value = &(_material_parent->getMaterialPropertyDerivative<Real>(_base_name, _derivative_vars));
+    else if (_kernel_parent)
+      _value = &(_kernel_parent->getMaterialPropertyDerivative<Real>(_base_name, _derivative_vars));
+    else
+      mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a Kernel object.");
+  }
+
+  return *_value;
 }

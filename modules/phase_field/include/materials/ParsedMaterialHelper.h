@@ -61,7 +61,7 @@ protected:
   /// variable names used in the expression (depends on the map_mode)
   std::vector<std::string> _variable_names;
 
-  /// convenicnce typedef for the material property descriptors
+  /// convenience typedef for the material property descriptors
   typedef std::vector<FunctionMaterialPropertyDescriptor> MatPropDescriptorList;
 
   /// Material property descriptors (obtained by parsing _mat_prop_expressions)

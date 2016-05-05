@@ -42,6 +42,11 @@ DerivativeParsedMaterialHelper::functionsPostParse()
 
   // generate derivatives
   assembleDerivatives();
+
+  // force a value update to get the property at least once and register it for the dependencies
+  unsigned int nmat_props = _mat_prop_descriptors.size();
+  for (unsigned int i = 0; i < nmat_props; ++i)
+    _mat_prop_descriptors[i].value();
 }
 
 ParsedMaterialHelper::MatPropDescriptorList::iterator
@@ -63,6 +68,36 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
 {
   // need to check for zero derivatives here, otherwise at least one order is generated
   if (_derivative_order < 1) return;
+
+  // if we are not on thread 0 we fetch all data from the thread 0 copy that already did all the work
+  if (_tid > 0)
+  {
+    // get the master object from thread 0
+    const MaterialWarehouse<Material> & material_warehouse = _fe_problem.getMaterialWarehouse();
+    const ExecuteMooseObjectWarehouse<Material> & warehouse = material_warehouse[_material_data_type];
+
+    MooseSharedPointer<DerivativeParsedMaterialHelper> master =
+      MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelper>(warehouse.getActiveObject(name()));
+
+    // copy parsers and declare properties
+    for (unsigned int i = 0; i < master->_derivatives.size(); ++i)
+    {
+      Derivative newderivative;
+      newderivative.first = &declarePropertyDerivative<Real>(_F_name, master->_derivatives[i].darg_names);
+      newderivative.second = ADFunctionPtr(new ADFunction(*master->_derivatives[i].second));
+      _derivatives.push_back(newderivative);
+    }
+
+    // copy coupled material properties
+    for (unsigned int i = 0; i < master->_mat_prop_descriptors.size(); ++i)
+    {
+      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i]);
+      _mat_prop_descriptors.push_back(newdescriptor);
+    }
+
+    // size parameter buffer
+    _func_params.resize(master->_func_params.size());
+  }
 
   // set up job queue. We need a deque here to be able to iterate over the currently queued items.
   std::deque<QueueItem> queue;
@@ -137,6 +172,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
         Derivative newderivative;
         newderivative.first = &declarePropertyDerivative<Real>(_F_name, darg_names);
         newderivative.second = newitem._F;
+        newderivative.darg_names = darg_names;
         _derivatives.push_back(newderivative);
       }
 

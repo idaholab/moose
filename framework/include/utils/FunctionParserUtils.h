@@ -35,6 +35,9 @@ public:
   /// Shorthand for an smart pointer to an autodiff function parser object.
   typedef MooseSharedPointer<ADFunction> ADFunctionPtr;
 
+  /// apply input paramters to internal feature flags of the parser object
+  void setParserFeatureFlags(ADFunctionPtr &);
+
 protected:
   /// Evaluate FParser object and check EvalError
   Real evaluate(ADFunctionPtr &);
@@ -44,10 +47,13 @@ protected:
                            const std::vector<std::string> & constant_names,
                            const std::vector<std::string> & constant_expressions);
 
-  /// feature flags
+  //@{ feature flags
   bool _enable_jit;
+  bool _enable_ad_cache;
   bool _disable_fpoptimizer;
+  bool _enable_auto_optimize;
   bool _fail_on_evalerror;
+  //@}
 
   /// appropriate not a number value to return
   const Real _nan;
