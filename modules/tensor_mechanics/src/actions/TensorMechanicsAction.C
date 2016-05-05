@@ -75,12 +75,12 @@ TensorMechanicsAction::act()
   else if (isParamValid("save_in_disp_x"))
   {
     mooseDeprecated("StressDivergenceTensors has been updated to accept a string of save_in variable names, e.g. save_in = 'save_in_disp_x save_in_disp_y save_in_disp_z' in the input file.");
-    save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_x"));
+    save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
     if (isParamValid("save_in_disp_y"))
     {
-      save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_y"));
+      save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
       if (isParamValid("save_in_disp_z"))
-        save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_z"));
+        save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
     }
   }
 
@@ -97,12 +97,12 @@ TensorMechanicsAction::act()
   else if (isParamValid("diag_save_in_disp_x"))
   {
     mooseDeprecated("StressDivergenceTensors has been updated to accept a string of diag_save_in variable names, e.g. diag_save_in = 'diag_save_in_disp_x diag_save_in_disp_y diag_save_in_disp_z' in the input file.");
-    diag_save_in.push_back(getParam<std::vector<AuxVariableName> >("diag_save_in_disp_x"));
+    diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_x");
     if (isParamValid("diag_save_in_disp_y"))
     {
-      diag_save_in.push_back(getParam<std::vector<AuxVariableName> >("diag_save_in_disp_y"));
+      diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_y");
       if (isParamValid("diag_save_in_disp_z"))
-        diag_save_in.push_back(getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z"));
+        diag_save_in[2] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
     }
   }
 

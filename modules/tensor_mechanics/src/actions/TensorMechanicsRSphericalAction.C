@@ -56,7 +56,7 @@ TensorMechanicsRSphericalAction::act()
   else if (isParamValid("save_in_disp_r"))
   {
     mooseDeprecated("StressDivergenceRSphericalTensors has been updated to accept 'save_in = save_in_disp_r' in the input file.");
-    save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_r"));
+    save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
   }
 
   if ((isParamValid("save_in") || isParamValid("save_in_disp_r")) && save_in.size() != _ndisp)
@@ -72,7 +72,7 @@ TensorMechanicsRSphericalAction::act()
   else if (isParamValid("diag_save_in_disp_r"))
   {
     mooseDeprecated("StressDivergenceRSphericalTensors has been updated to accept 'diag_save_in = diag_save_in_disp_r' in the input file.");
-    diag_save_in.push_back(getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r"));
+    diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r");
   }
 
   if ((isParamValid("diag_save_in") || isParamValid("diag_save_in_disp_r")) && diag_save_in.size() != _ndisp)
