@@ -15,8 +15,6 @@ InputParameters validParams<CavityPressurePostprocessor>()
   params.addRequiredParam<UserObjectName>("cavity_pressure_uo", "The CavityPressureUserObject that computes the initial moles");
   params.addRequiredParam<std::string>("quantity", "The quantity to report");
   params.set<bool>("use_displaced_mesh") = true;
-
-  params.addPrivateParam<std::string>("built_by_action", "");// Hide from input file dump
   return params;
 }
 
