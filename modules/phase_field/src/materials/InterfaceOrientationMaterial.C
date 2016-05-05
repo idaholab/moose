@@ -42,14 +42,14 @@ InterfaceOrientationMaterial::InterfaceOrientationMaterial(const InputParameters
 void
 InterfaceOrientationMaterial::computeQpProperties()
 {
-  Real cutoff = 0.99999;
+  const Real tol = 1e-9;
+  const Real cutoff = 1.0 - tol;
 
   // cosine of the gradient orientation angle
-  Real n;
-  if (_grad_op[_qp].norm_sq() == 0)
-    n = 0;
-  else
-    n = _grad_op[_qp](0) / _grad_op[_qp].norm();
+  Real n = 0.0;
+  const Real nsq = _grad_op[_qp].norm_sq();
+  if (nsq > tol)
+    n = _grad_op[_qp](0) / std::sqrt(nsq);
 
   if (n > cutoff)
     n = cutoff;
@@ -64,9 +64,7 @@ InterfaceOrientationMaterial::computeQpProperties()
 
   // Compute derivative of n with respect to grad_op
   RealGradient dndgrad_op;
-  if (_grad_op[_qp].norm_sq() == 0)
-    dndgrad_op = 0;
-  else
+  if (nsq > tol)
   {
     dndgrad_op(0) = _grad_op[_qp](1) * _grad_op[_qp](1);
     dndgrad_op(1) = - _grad_op[_qp](0) * _grad_op[_qp](1);
