@@ -650,6 +650,11 @@ private:
   friend class FEProblem;
   friend class Restartable;
   friend class SubProblem;
+
+  /// Helper functions used for C++11 compatibility stuff.  These will
+  /// eventually go away...
+  void printYesNo(std::stringstream & oss, const std::string & feature, bool defined);
+  bool setBool(const std::string & value);
 };
 
 template <typename T>
