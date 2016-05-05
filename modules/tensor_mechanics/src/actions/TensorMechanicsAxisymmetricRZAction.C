@@ -20,8 +20,12 @@ InputParameters validParams<TensorMechanicsAxisymmetricRZAction>()
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernel will be applied to");
-  params.addParam<std::vector<AuxVariableName> >("save_in", "Auxiliary variables to save the displacement residuals.");
-  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "Auxiliary variables to save the displacement diagonal preconditioner terms.");
+  params.addParam<std::vector<AuxVariableName> >("save_in", "Auxiliary variables to save the displacement residuals");
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_r", "Auxiliary variables to save the r displacement residuals");//deprecated
+  params.addParam<std::vector<AuxVariableName> >("save_in_disp_z", "Auxiliary variables to save the z displacement residuals");//deprecated
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "Auxiliary variables to save the displacement diagonal preconditioner terms");
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_r", "Auxiliary variables to save the r displacement diagonal preconditioner term");//deprecated
+  params.addParam<std::vector<AuxVariableName> >("diag_save_in_disp_z", "Auxiliary variables to save the z displacement diagonal preconditioner term");//deprecated
   return params;
 }
 
@@ -44,21 +48,41 @@ TensorMechanicsAxisymmetricRZAction::act()
   for (unsigned int i = 0; i < _ndisp; ++i)
     coupled_displacements.push_back(displacements[i]);
 
-  std::vector<AuxVariableName> this_save_in = getParam<std::vector<AuxVariableName> >("save_in");
-  if (isParamValid("save_in") && this_save_in.size() != _ndisp)
-    mooseError("Number of save_in variables should equal to the number of displacement variables: " << _ndisp);
   std::vector<std::vector<AuxVariableName> > save_in(_ndisp);
   if (isParamValid("save_in"))
+  {
+    std::vector<AuxVariableName> this_save_in = getParam<std::vector<AuxVariableName> >("save_in");
     for (unsigned int i = 0; i < _ndisp; ++i)
       save_in[i].push_back(this_save_in[i]);
+  }
+  else if (isParamValid("save_in_disp_r"))
+  {
+    mooseDeprecated("StressDivergenceRZTensors has been updated to accept a string of save_in variable names, e.g. save_in = 'save_in_disp_r save_in_disp_z' in the input file.");
+    save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_r"));
+    if (isParamValid("save_in_disp_z"))
+      save_in.push_back(getParam<std::vector<AuxVariableName> >("save_in_disp_z"));
+  }
 
-  std::vector<AuxVariableName> this_diag_save_in = getParam<std::vector<AuxVariableName> >("diag_save_in");
-  if (isParamValid("diag_save_in") && this_diag_save_in.size() != _ndisp)
-    mooseError("Number of diag_save_in variables should equal to the number of displacement variables: " << _ndisp);
+  if ((isParamValid("save_in") || isParamValid("save_in_disp_r")) && save_in.size() != _ndisp)
+    mooseError("Number of save_in variables should equal to the number of displacement variables: " << _ndisp);
+
   std::vector<std::vector<AuxVariableName> > diag_save_in(_ndisp);
   if (isParamValid("diag_save_in"))
+  {
+    std::vector<AuxVariableName> this_diag_save_in = getParam<std::vector<AuxVariableName> >("diag_save_in");
     for (unsigned int i = 0; i < _ndisp; ++i)
       diag_save_in[i].push_back(this_diag_save_in[i]);
+  }
+  else if (isParamValid("diag_save_in_disp_r"))
+  {
+    mooseDeprecated("StressDivergenceRZTensors has been updated to accept a string of diag_save_in variable names, e.g. diag_save_in = 'diag_save_in_disp_r diag_save_in_disp_z' in the input file.");
+    diag_save_in.push_back(getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r"));
+    if (isParamValid("diag_save_in_disp_z"))
+      diag_save_in.push_back(getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z"));
+  }
+
+  if ((isParamValid("diag_save_in") || isParamValid("diag_save_in_disp_r")) && diag_save_in.size() != _ndisp)
+    mooseError("Number of diag_save_in variables should equal to the number of displacement variables: " << _ndisp);
 
   InputParameters params = _factory.getValidParams("StressDivergenceRZTensors");
   params.set<std::vector<VariableName> >("displacements") = coupled_displacements;

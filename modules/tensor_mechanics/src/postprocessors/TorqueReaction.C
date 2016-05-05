@@ -12,6 +12,9 @@ InputParameters validParams<TorqueReaction>()
 {
   InputParameters params = validParams<NodalPostprocessor>();
   params.addParam<std::vector<AuxVariableName> >("react", "The reaction variables");
+  params.addParam<AuxVariableName>("react_x", "The x reaction variable");//deprecated
+  params.addParam<AuxVariableName>("react_y", "The y reaction variable");//deprecated
+  params.addParam<AuxVariableName>("react_z", "The z reaction variable");//deprecated
   params.addParam<RealVectorValue>("axis_origin", Point(), "Origin of the axis of rotation used to calculate the torque");
   params.addRequiredParam<RealVectorValue>("direction_vector", "The direction vector of the axis of rotation about which the calculated torque is calculated");
   params.set<bool>("use_displaced_mesh") = true;
@@ -24,7 +27,21 @@ TorqueReaction::TorqueReaction(const InputParameters & parameters) :
     _axis_origin(getParam<RealVectorValue>("axis_origin")),
     _direction_vector(getParam<RealVectorValue>("direction_vector"))
 {
-  const std::vector<AuxVariableName> & reacts(getParam<std::vector<AuxVariableName> >("react"));
+  std::vector<AuxVariableName> reacts;
+  if (isParamValid("react"))
+    reacts = getParam<std::vector<AuxVariableName> >("react");
+  else if (isParamValid("react_x"))
+  {
+    mooseDeprecated("TorqueReaction has been updated to accept a string of react variable names, e.g. react = 'react_x react_y react_z' in the input file.");
+    reacts.push_back(getParam<AuxVariableName>("react_x"));
+    if (isParamValid("react_y"))
+     {
+       reacts.push_back(getParam<AuxVariableName>("react_y"));
+       if (isParamValid("react_z"))
+         reacts.push_back(getParam<AuxVariableName>("react_z"));
+    }
+  }
+
   _nrt = reacts.size();
 
   for (unsigned int i = 0; i < _nrt; ++i)
