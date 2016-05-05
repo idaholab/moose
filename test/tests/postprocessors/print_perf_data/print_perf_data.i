@@ -33,6 +33,14 @@
 []
 
 [Postprocessors]
+  [./elapsed_alive]
+    type = PerformanceData
+    event = 'ALIVE'
+  [../]
+  [./elapsed_active]
+    type = PerformanceData
+    event = 'ACTIVE'
+  [../]
   [./res_calls]
     type = PerformanceData
     column = n_calls
@@ -88,4 +96,5 @@
 [Outputs]
   exodus = true
   csv = true
+  print_perf_log = true
 []
