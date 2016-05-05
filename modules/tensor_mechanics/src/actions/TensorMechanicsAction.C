@@ -76,15 +76,19 @@ TensorMechanicsAction::act()
   {
     mooseDeprecated("StressDivergenceTensors has been updated to accept a string of save_in variable names, e.g. save_in = 'save_in_disp_x save_in_disp_y save_in_disp_z' in the input file.");
     save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_x");
-    if (isParamValid("save_in_disp_y"))
-    {
-      save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
-      if (isParamValid("save_in_disp_z"))
-        save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
-    }
+  }
+  else if (isParamValid("save_in_disp_y"))
+  {
+    mooseDeprecated("StressDivergenceTensors has been updated to accept a string of save_in variable names, e.g. save_in = 'save_in_disp_x save_in_disp_y save_in_disp_z' in the input file.");
+    save_in[1] = getParam<std::vector<AuxVariableName> >("save_in_disp_y");
+  }
+  else if (isParamValid("save_in_disp_z"))
+  {
+    mooseDeprecated("StressDivergenceTensors has been updated to accept a string of save_in variable names, e.g. save_in = 'save_in_disp_x save_in_disp_y save_in_disp_z' in the input file.");
+     save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
   }
 
-  if ((isParamValid("save_in") || isParamValid("save_in_disp_x")) && save_in.size() != _ndisp)
+  if (isParamValid("save_in") && save_in.size() != _ndisp)
     mooseError("Number of save_in variables should equal to the number of displacement variables: " << _ndisp);
 
   std::vector<std::vector<AuxVariableName> > diag_save_in(_ndisp);
@@ -98,15 +102,19 @@ TensorMechanicsAction::act()
   {
     mooseDeprecated("StressDivergenceTensors has been updated to accept a string of diag_save_in variable names, e.g. diag_save_in = 'diag_save_in_disp_x diag_save_in_disp_y diag_save_in_disp_z' in the input file.");
     diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_x");
-    if (isParamValid("diag_save_in_disp_y"))
-    {
-      diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_y");
-      if (isParamValid("diag_save_in_disp_z"))
-        diag_save_in[2] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
-    }
+  }
+  else if (isParamValid("diag_save_in_disp_y"))
+  {
+    mooseDeprecated("StressDivergenceTensors has been updated to accept a string of diag_save_in variable names, e.g. diag_save_in = 'diag_save_in_disp_x diag_save_in_disp_y diag_save_in_disp_z' in the input file.");
+    diag_save_in[1] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_y");
+  }
+  else if (isParamValid("diag_save_in_disp_z"))
+  {
+    mooseDeprecated("StressDivergenceTensors has been updated to accept a string of diag_save_in variable names, e.g. diag_save_in = 'diag_save_in_disp_x diag_save_in_disp_y diag_save_in_disp_z' in the input file.");
+    diag_save_in[2] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_z");
   }
 
-  if ((isParamValid("diag_save_in") || isParamValid("diag_save_in_disp_x")) && diag_save_in.size() != _ndisp)
+  if (isParamValid("diag_save_in") && diag_save_in.size() != _ndisp)
     mooseError("Number of diag_save_in variables should equal to the number of displacement variables: " << _ndisp);
 
   InputParameters params = _factory.getValidParams("StressDivergenceTensors");

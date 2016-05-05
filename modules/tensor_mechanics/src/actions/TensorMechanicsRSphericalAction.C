@@ -59,8 +59,8 @@ TensorMechanicsRSphericalAction::act()
     save_in[0] = getParam<std::vector<AuxVariableName> >("save_in_disp_r");
   }
 
-  if ((isParamValid("save_in") || isParamValid("save_in_disp_r")) && save_in.size() != _ndisp)
-    mooseError("Number of save_in variables should equal to the number of displacement variables: " << _ndisp);
+  if (isParamValid("save_in") && save_in.size() != _ndisp)
+    mooseError("Number of save_in variables should equal to the number of displacement variables " << _ndisp);
 
   std::vector<std::vector<AuxVariableName> > diag_save_in(_ndisp);
   if (isParamValid("diag_save_in"))
@@ -75,8 +75,8 @@ TensorMechanicsRSphericalAction::act()
     diag_save_in[0] = getParam<std::vector<AuxVariableName> >("diag_save_in_disp_r");
   }
 
-  if ((isParamValid("diag_save_in") || isParamValid("diag_save_in_disp_r")) && diag_save_in.size() != _ndisp)
-    mooseError("Number of diag_save_in variables should equal to the number of displacement variables: " << _ndisp);
+  if (isParamValid("diag_save_in") && diag_save_in.size() != _ndisp)
+    mooseError("Number of diag_save_in variables should equal to the number of displacement variables " << _ndisp);
 
   InputParameters params = _factory.getValidParams("StressDivergenceRSphericalTensors");
   params.set<std::vector<VariableName> >("displacements") = coupled_displacements;
