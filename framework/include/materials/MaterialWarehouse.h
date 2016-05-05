@@ -50,13 +50,11 @@ public:
   void addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, THREAD_ID tid = 0);
 
 protected:
-
   /// Stroage for neighbor material objects (Block are stored in the base class)
   ExecuteMooseObjectWarehouse<T> _neighbor_materials;
 
   /// Stroage for face material objects (Block are stored in the base class)
   ExecuteMooseObjectWarehouse<T> _face_materials;
-
 };
 
 

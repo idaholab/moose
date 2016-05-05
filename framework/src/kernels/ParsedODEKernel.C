@@ -60,6 +60,9 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
   // base function object
   _func_F =  ADFunctionPtr(new ADFunction());
 
+  // set FParser interneal feature flags
+  setParserFeatureFlags(_func_F);
+
   // add the constant expressions
   addFParserConstants(_func_F,
                       getParam<std::vector<std::string> >("constant_names"),

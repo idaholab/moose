@@ -34,7 +34,7 @@ protected:
   MatPropDescriptorList::iterator findMatPropDerivative(const FunctionMaterialPropertyDescriptor &);
 
   struct QueueItem;
-  typedef std::pair<MaterialProperty<Real> *, ADFunctionPtr> Derivative;
+  struct Derivative;
 
   /// The requested derivatives of the free energy
   std::vector<Derivative> _derivatives;
@@ -49,13 +49,21 @@ protected:
   unsigned int _derivative_order;
 };
 
-struct DerivativeParsedMaterialHelper::QueueItem {
+struct DerivativeParsedMaterialHelper::QueueItem
+{
   QueueItem() : _dargs(0) {}
   QueueItem(ADFunctionPtr & F) : _F(F), _dargs(0) {}
   QueueItem(const QueueItem & rhs) : _F(rhs._F), _dargs(rhs._dargs) {}
 
   ADFunctionPtr _F;
   std::vector<unsigned int> _dargs;
+};
+
+struct DerivativeParsedMaterialHelper::Derivative
+{
+  MaterialProperty<Real> * first;
+  ADFunctionPtr second;
+  std::vector<VariableName> darg_names;
 };
 
 #endif // DERIVATIVEPARSEDMATERIALHELPER_H

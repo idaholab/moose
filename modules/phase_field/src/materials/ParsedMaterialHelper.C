@@ -60,6 +60,9 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   // build base function object
   _func_F = ADFunctionPtr(new ADFunction());
 
+  // set FParser internal feature flags
+  setParserFeatureFlags(_func_F);
+
   // initialize constants
   addFParserConstants(_func_F, constant_names, constant_expressions);
 
@@ -145,6 +148,11 @@ void
 ParsedMaterialHelper::functionsPostParse()
 {
   functionsOptimize();
+
+  // force a value update to get the property at least once and register it for the dependencies
+  unsigned int nmat_props = _mat_prop_descriptors.size();
+  for (unsigned int i = 0; i < nmat_props; ++i)
+    _mat_prop_descriptors[i].value();
 }
 
 void
