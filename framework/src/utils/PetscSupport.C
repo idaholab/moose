@@ -184,7 +184,11 @@ petscSetOptions(FEProblem & problem)
     char ** args;
 
     PetscGetArgs(&argc, &args);
+#if PETSC_VERSION_LESS_THAN(3,7,0)
     PetscOptionsInsert(&argc, &args, NULL);
+#else
+    PetscOptionsInsert(PETSC_NULL, &argc, &args, NULL);
+#endif
   }
 
   setSolverOptions(problem.solverParams());
