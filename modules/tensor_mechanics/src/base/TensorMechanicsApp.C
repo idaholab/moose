@@ -69,7 +69,7 @@
 #include "ComputeDeformGradBasedStress.h"
 #include "VolumeDeformGradCorrectedStress.h"
 #include "ComputeReturnMappingStress.h"
-#include "RecomputeRadialReturnStressIncrement.h"
+#include "RecomputeRadialReturn.h"
 #include "RecomputeRadialReturnIsotropicPlasticity.h"
 #include "StressBasedChemicalPotential.h"
 #include "FluxBasedStrainIncrement.h"
@@ -211,7 +211,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeDeformGradBasedStress);
   registerMaterial(VolumeDeformGradCorrectedStress);
   registerMaterial(ComputeReturnMappingStress);
-  registerMaterial(RecomputeRadialReturnStressIncrement);
+  registerMaterial(RecomputeRadialReturn);
   registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
   registerMaterial(StressBasedChemicalPotential);
   registerMaterial(FluxBasedStrainIncrement);

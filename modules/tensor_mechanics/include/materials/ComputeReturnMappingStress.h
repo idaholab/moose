@@ -31,7 +31,6 @@ protected:
   virtual void computeQpStress();
 
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  const MaterialProperty<RankTwoTensor> & _return_stress_increment;
   const MaterialProperty<RankTwoTensor> & _inelastic_strain_increment;
   Material & _recompute_return_material;
 };

@@ -4,12 +4,12 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "RecomputeRadialReturnStressIncrement.h"
+#include "RecomputeRadialReturn.h"
 
 template<>
-InputParameters validParams<RecomputeRadialReturnStressIncrement>()
+InputParameters validParams<RecomputeRadialReturn>()
 {
-  InputParameters params = validParams<RecomputeGeneralReturnStressIncrement>();
+  InputParameters params = validParams<RecomputeGeneralReturn>();
 
   // Newton Iteration control parameters
   params.addParam<bool>("output_iteration_info", false, "Set true to output newton iteration information from the radial return material");
@@ -19,8 +19,8 @@ InputParameters validParams<RecomputeRadialReturnStressIncrement>()
   return params;
 }
 
-RecomputeRadialReturnStressIncrement::RecomputeRadialReturnStressIncrement(const InputParameters & parameters) :
-    RecomputeGeneralReturnStressIncrement(parameters),
+RecomputeRadialReturn::RecomputeRadialReturn(const InputParameters & parameters) :
+    RecomputeGeneralReturn(parameters),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
     _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
@@ -29,14 +29,14 @@ RecomputeRadialReturnStressIncrement::RecomputeRadialReturnStressIncrement(const
 }
 
 void
-RecomputeRadialReturnStressIncrement::computeStressIncrement()
+RecomputeRadialReturn::computeInelasticStrainIncrement()
 {
-  // Given the stretching, compute the stress increment and add iteration to the old stress. Also update the inelastic strain
+  // Given the stretching, update the inelastic strain
   // Compute the stress in the intermediate configuration while retaining the stress history
-  _return_stress_increment[_qp] = _elasticity_tensor[_qp] * _strain_increment[_qp] + _stress_old[_qp];
+  RankTwoTensor stress = _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
 
   // compute the deviatoric trial stress and trial strain from the current intermediate configuration
-  RankTwoTensor deviatoric_trial_stress = _return_stress_increment[_qp].deviatoric();
+  RankTwoTensor deviatoric_trial_stress = stress.deviatoric();
 
   // compute the effective trial stress
   Real dev_trial_stress_squared = deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
@@ -104,7 +104,7 @@ RecomputeRadialReturnStressIncrement::computeStressIncrement()
       if (_output_iteration_info_on_error)
         Moose::err << iteration_output;
 
-      mooseError("Exceeded maximum iterations in RecomputeRadialReturnStressIncrement solve for material: " << _name << ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
+      mooseError("Exceeded maximum iterations in RecomputeRadialReturn solve for material: " << _name << ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
     }
 
     // compute inelastic strain increments while avoiding a potential divide by zero
@@ -113,9 +113,6 @@ RecomputeRadialReturnStressIncrement::computeStressIncrement()
   }
   else
     _inelastic_strain_increment[_qp].zero();
-
-  // compute stress update
-  _return_stress_increment[_qp] = _elasticity_tensor[_qp] * (_strain_increment[_qp] - _inelastic_strain_increment[_qp]);
 
   computeStressFinalize(_inelastic_strain_increment[_qp]);
 }
