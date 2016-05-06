@@ -10,20 +10,20 @@
     # Check that mesh information prints when the mesh changes
     type = RunApp
     input = 'system_info_mesh.i'
-    expect_out = 'time\s=\s0.1.*?Nodes:.*?time\s=\s0.2.*?Nodes:.*?time\s=\s0.3.*?Nodes:'
+    expect_out = 'time\s=\s0.1.*?Nodes:.*?time\s=\s0.2.*?Nodes:.*?time\s=\s0.3'
   [../]
 
   [./aux]
     # Check that Aux system information prints when the mesh changes
     type = RunApp
     input = 'system_info_mesh.i'
-    expect_out = 'Num DOFs:\s*2889'
+    expect_out = 'Num DOFs:\s*1892'
   [../]
 
   [./nonlinear]
     # Check that Nonlinear system information prints when the mesh changes
     type = RunApp
     input = 'system_info_mesh.i'
-    expect_out = 'Num DOFs:\s*1009'
+    expect_out = 'Num DOFs:\s*672'
   [../]
 []

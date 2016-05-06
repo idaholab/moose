@@ -228,32 +228,35 @@ Transient::postStep()
 void
 Transient::execute()
 {
-
   preExecute();
+
+  if (_app.isRecovering())
+    incrementStepOrReject();
 
   // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
   // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
   // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we might remove this call and regold the test
   // in the future eventually.
-  if (!_app.isRecovering())
+  else
     _problem.advanceState();
 
+
   // Start time loop...
-  while (true)
+  while (keepGoing())
   {
-    if (_first != true)
-      incrementStepOrReject();
-
+#ifdef LIBMESH_ENABLE_AMR
+    if (!_first && _problem.adaptivity().isOn())
+      _problem.adaptMesh();
+#endif
     _first = false;
-
-    if (!keepGoing())
-      break;
 
     preStep();
     computeDT();
     takeStep();
     endStep();
     postStep();
+
+    incrementStepOrReject();
 
     _steps_taken++;
   }
@@ -280,11 +283,6 @@ Transient::incrementStepOrReject()
     }
     else
     {
-#ifdef LIBMESH_ENABLE_AMR
-      if (_problem.adaptivity().isOn())
-        _problem.adaptMesh();
-#endif
-
       _time_old = _time; // = _time_old + _dt;
       _t_step++;
 
@@ -305,9 +303,6 @@ Transient::incrementStepOrReject()
     _time_stepper->rejectStep();
     _time = _time_old;
   }
-
-  _first = false;
-
 }
 
 void
