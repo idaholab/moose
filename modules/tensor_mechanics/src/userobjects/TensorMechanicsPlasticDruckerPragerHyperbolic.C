@@ -33,7 +33,7 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::yieldFunction(const RankTwoTensor
 {
   Real aaa;
   Real bbb;
-  AandB(intnl, aaa, bbb);
+  bothAB(intnl, aaa, bbb);
   return std::sqrt(stress.secondInvariant() + _smoother2) + stress.trace() * bbb - aaa;
 }
 
@@ -42,7 +42,6 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::df_dsig(const RankTwoTensor & str
 {
   return 0.5 * stress.dsecondInvariant()/std::sqrt(stress.secondInvariant() + _smoother2) + stress.dtrace() * bbb;
 }
-
 
 RankFourTensor
 TensorMechanicsPlasticDruckerPragerHyperbolic::dflowPotential_dstress(const RankTwoTensor & stress, Real /*intnl*/) const
@@ -58,7 +57,6 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::modelName() const
 {
   return "DruckerPragerHyperbolic";
 }
-
 
 bool
 TensorMechanicsPlasticDruckerPragerHyperbolic::returnMap(const RankTwoTensor & trial_stress,
@@ -105,10 +103,10 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::returnMap(const RankTwoTensor & t
   dpm[0] = 0;
   unsigned int iter = 0;
   do {
-    AandB(intnl_old + dpm[0], aaa, bbb);
-    dAandB(intnl_old + dpm[0], daaa, dbbb);
-    Bonly(intnl_old + dpm[0], dilation, bbb_flow);
-    dBonly(intnl_old + dpm[0], dilation, dbbb_flow);
+    bothAB(intnl_old + dpm[0], aaa, bbb);
+    dbothAB(intnl_old + dpm[0], daaa, dbbb);
+    onlyB(intnl_old + dpm[0], dilation, bbb_flow);
+    donlyB(intnl_old + dpm[0], dilation, dbbb_flow);
     ll = aaa - bbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow);
     dll = daaa - dbbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) + bbb * bulky * 3 * (bbb_flow + dpm[0] * dbbb_flow);
     residual = bbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) - aaa + std::sqrt(J2trial / std::pow(1 + dpm[0] * mu / ll, 2) + _smoother2);
@@ -123,8 +121,8 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::returnMap(const RankTwoTensor & t
   yf[0] = 0;
   returned_intnl = intnl_old + dpm[0];
 
-  AandB(returned_intnl, aaa, bbb);
-  Bonly(returned_intnl, dilation, bbb_flow);
+  bothAB(returned_intnl, aaa, bbb);
+  onlyB(returned_intnl, dilation, bbb_flow);
   ll = aaa - bbb * (Tr_trial - dpm[0] * bulky * 3.0 * bbb_flow);
   returned_stress = trial_stress.deviatoric()/(1.0 + dpm[0] * mu / ll); // this is the deviatoric part only
 
@@ -154,11 +152,11 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::consistentTangentOperator(const R
   const Real la = E_ijkl(0,0,0,0) - 2.0 * mu;
   const Real bulky = 3.0 * la + 2.0 * mu;
   Real bbb;
-  Bonly(intnl, friction, bbb);
+  onlyB(intnl, friction, bbb);
   Real bbb_flow;
-  Bonly(intnl, dilation, bbb_flow);
+  onlyB(intnl, dilation, bbb_flow);
   Real dbbb_flow;
-  dBonly(intnl, dilation, dbbb_flow);
+  donlyB(intnl, dilation, dbbb_flow);
   const Real bbb_flow_mod = bbb_flow + cumulative_pm[0] * dbbb_flow;
   const Real J2 = stress.secondInvariant();
   const RankTwoTensor sij = stress.deviatoric();

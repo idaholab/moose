@@ -10,9 +10,7 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticDruckerPrager;
-
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticDruckerPrager>();
@@ -29,12 +27,10 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
  public:
   TensorMechanicsPlasticDruckerPrager(const InputParameters & parameters);
 
-
   /// Returns the model name (DruckerPrager)
   virtual std::string modelName() const;
 
  protected:
-
   /// Hardening model for cohesion
   const TensorMechanicsHardeningModel & _mc_cohesion;
 
@@ -109,16 +105,16 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
   const bool _zero_psi_hardening;
 
   /// Calculates aaa and bbb as a function of the internal parameter intnl
-  void AandB(Real intnl, Real & aaa, Real & bbb) const;
+  void bothAB(Real intnl, Real & aaa, Real & bbb) const;
 
   /// Calculates d(aaa)/d(intnl) and d(bbb)/d(intnl) as a function of the internal parameter intnl
-  void dAandB(Real intnl, Real & daaa, Real & dbbb) const;
+  void dbothAB(Real intnl, Real & daaa, Real & dbbb) const;
 
   /**
    * bbb (friction) and bbb_flow (dilation) are computed using the same function,
-   * Bonly, and this parameter tells that function whether to compute bbb or bbb_flow
+   * onlyB, and this parameter tells that function whether to compute bbb or bbb_flow
    */
-  enum fric_or_dil { friction = 0, dilation = 1 };
+  enum FrictionDilation { friction = 0, dilation = 1 };
 
   /**
    * Calculate bbb or bbb_flow
@@ -126,7 +122,7 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
    * @param fd if fd==friction then bbb is calculated.  if fd==dilation then bbb_flow is calculated
    * @param bbb either bbb or bbb_flow, depending on fd
    */
-  void Bonly(Real intnl, int fd, Real & bbb) const;
+  void onlyB(Real intnl, int fd, Real & bbb) const;
 
   /**
    * Calculate d(bbb)/d(intnl) or d(bbb_flow)/d(intnl)
@@ -134,14 +130,12 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
    * @param fd if fd==friction then bbb is calculated.  if fd==dilation then bbb_flow is calculated
    * @param bbb either bbb or bbb_flow, depending on fd
    */
-  void dBonly(Real intnl, int fd, Real & dbbb) const;
+  void donlyB(Real intnl, int fd, Real & dbbb) const;
 
   /// Function that's used in dyieldFunction_dstress and flowPotential
   virtual RankTwoTensor df_dsig(const RankTwoTensor & stress, Real bbb) const;
 
-
  private:
-
   Real _aaa;
   Real _bbb;
   Real _bbb_flow;
@@ -160,7 +154,6 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
    * @param[out] bbb The Drucker-Prager bbb quantity
    */
   void initializeAandB(Real intnl, Real & aaa, Real & bbb) const;
-
 
   /**
    * Returns the Drucker-Prager parameters
