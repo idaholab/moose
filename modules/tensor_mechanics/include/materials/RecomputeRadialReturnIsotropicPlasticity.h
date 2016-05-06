@@ -7,12 +7,8 @@
 #ifndef RECOMPUTERADIALRETURNISOTROPICPLASTICITY_H
 #define RECOMPUTERADIALRETURNISOTROPICPLASTICITY_H
 
-#include "RecomputeRadialReturnStressIncrement.h"
-#include "PiecewiseLinear.h"
+#include "RecomputeRadialReturn.h"
 #include "MooseMesh.h"
-
-// forward declarations
-class PiecewiseLinear;
 
 /**
  * This class uses the Discrete material in a radial return isotropic plasticity
@@ -33,7 +29,7 @@ class PiecewiseLinear;
  * Press, pg. 146 - 149.
  */
 
-class RecomputeRadialReturnIsotropicPlasticity : public RecomputeRadialReturnStressIncrement
+class RecomputeRadialReturnIsotropicPlasticity : public RecomputeRadialReturn
 {
 public:
   RecomputeRadialReturnIsotropicPlasticity(const InputParameters & parameters);

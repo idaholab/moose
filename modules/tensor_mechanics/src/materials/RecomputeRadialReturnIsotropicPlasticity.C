@@ -6,10 +6,12 @@
 /****************************************************************/
 #include "RecomputeRadialReturnIsotropicPlasticity.h"
 
+#include "Function.h"
+
 template<>
 InputParameters validParams<RecomputeRadialReturnIsotropicPlasticity>()
 {
-  InputParameters params = validParams<RecomputeRadialReturnStressIncrement>();
+  InputParameters params = validParams<RecomputeRadialReturn>();
 
   // Linear strain hardening parameters
   params.addParam<FunctionName>("yield_stress_function", "Yield stress as a function of temperature");
@@ -23,7 +25,7 @@ InputParameters validParams<RecomputeRadialReturnIsotropicPlasticity>()
 
 
 RecomputeRadialReturnIsotropicPlasticity::RecomputeRadialReturnIsotropicPlasticity(const InputParameters & parameters) :
-    RecomputeRadialReturnStressIncrement(parameters),
+    RecomputeRadialReturn(parameters),
     _yield_stress_function(isParamValid("yield_stress_function") ? &getFunction("yield_stress_function") : NULL),
     _yield_stress(getParam<Real>("yield_stress")),
     _hardening_constant(getParam<Real>("hardening_constant")),
@@ -74,7 +76,7 @@ RecomputeRadialReturnIsotropicPlasticity::resetQpProperties()
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
   _scalar_plastic_strain[_qp] = 0.;
 
-  RecomputeRadialReturnStressIncrement::resetQpProperties();
+  RecomputeRadialReturn::resetQpProperties();
 }
 
 void
