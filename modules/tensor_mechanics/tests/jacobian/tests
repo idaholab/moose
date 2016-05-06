@@ -163,6 +163,28 @@
     cli_args = '--no-trap-fpe'
   [../]
 
+  [./cto19]
+    type = 'PetscJacobianTester'
+    input = 'cto19.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto20]
+    type = 'PetscJacobianTester'
+    input = 'cto20.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto21]
+    type = 'PetscJacobianTester'
+    input = 'cto21.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+
   [./poro01]
     type = 'PetscJacobianTester'
     input = 'poro01.i'
