@@ -21,6 +21,10 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeProperties();
 
+  /// Computes the current and old deformation gradients and passes back the
+  /// total strain increment tensor
+  virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
+
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
   MaterialProperty<RankTwoTensor> & _mechanical_strain_old;

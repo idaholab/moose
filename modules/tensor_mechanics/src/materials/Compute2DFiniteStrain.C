@@ -32,19 +32,12 @@ Compute2DFiniteStrain::computeProperties()
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    // Deformation gradient calculation in cylinderical coordinates
-    RankTwoTensor A;    // Deformation gradient
-    RankTwoTensor Fbar; // Old Deformation gradient
-
-    // Step through calculating the current and old deformation gradients
+    // Deformation gradient calculation for 2D problems
     // Note: x_disp is the radial displacement, y_disp is the axial displacement
-    for (unsigned int j = 0; j < 2; ++j)
-    {
-      A(0,j) = (*_grad_disp[0])[_qp](j);
-      Fbar(0,j) = (*_grad_disp_old[0])[_qp](j);
-      A(1,j) = (*_grad_disp[1])[_qp](j);
-      Fbar(1,j) = (*_grad_disp_old[1])[_qp](j);
-    }
+    RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); //Deformation gradient
+    RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
+
+    // Compute the deformation gradient (2,*) value for plane strain, generalized plane strain, or axisymmetric problems
     A(2,2) = computeDeformGradZZ();
     Fbar(2,2) = computeDeformGradZZold();
 

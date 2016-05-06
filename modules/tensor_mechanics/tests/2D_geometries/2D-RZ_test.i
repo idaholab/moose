@@ -69,15 +69,11 @@
     poissons_ratio = 0.345
     block = 1
   [../]
-
-  [./small_strain_arz]
-    type = ComputeAxisymmetricRZSmallStrain
+  [./strain]
     displacements = 'disp_r disp_z'
     block = 1
   [../]
-
-  [./_elastic_strain]
-    type = ComputeLinearElasticStress
+  [./stress]
     block = 1
   [../]
 []
