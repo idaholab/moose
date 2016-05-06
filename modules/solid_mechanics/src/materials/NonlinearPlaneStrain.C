@@ -20,7 +20,7 @@ NonlinearPlaneStrain::NonlinearPlaneStrain( SolidModel & solid_model,
                                             const std::string & name,
                                             const InputParameters & parameters )
   :Nonlinear( solid_model, name, parameters ),
-   ScalarCoupleable(parameters),
+   ScalarCoupleable(&solid_model),
    _grad_disp_x(coupledGradient("disp_x")),
    _grad_disp_y(coupledGradient("disp_y")),
    _have_strain_zz(isCoupled("strain_zz")),

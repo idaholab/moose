@@ -24,13 +24,6 @@ NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object, bool no
 {
 }
 
-NeighborCoupleable::NeighborCoupleable(const InputParameters & parameters, bool nodal, bool neighbor_nodal) :
-    Coupleable(parameters, nodal),
-    _neighbor_nodal(neighbor_nodal)
-{
-  mooseDeprecated("Deprecated constructor: Please contact the MOOSE team for assistance in removing this warning");
-}
-
 NeighborCoupleable::~NeighborCoupleable()
 {
 }
