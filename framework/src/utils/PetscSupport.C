@@ -173,7 +173,11 @@ petscSetOptions(FEProblem & problem)
   if (petsc.inames.size() != petsc.values.size())
     mooseError("PETSc names and options are not the same length");
 
+#if PETSC_VERSION_LESS_THAN(3,7,0)
   PetscOptionsClear();
+#else
+  PetscOptionsClear(PETSC_NULL);
+#endif
 
   { // Get any options specified on the command-line
     int argc;
