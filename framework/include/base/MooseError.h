@@ -120,6 +120,22 @@
 
 #define mooseDoOnce(do_this) do { static bool did_this_already = false; if (!did_this_already) { did_this_already = true; do_this; } } while (0)
 
+#define mooseInfo(msg)                                                              \
+    do                                                                              \
+    {                                                                               \
+      mooseDoOnce(                                                                  \
+        {                                                                           \
+          Moose::out                                                                \
+            << (Moose::_color_console ? XTERM_CYAN : "")                            \
+            << "\n\n*** Info ***\n"                                                 \
+            << msg                                                                  \
+            << "\nat " << __FILE__ << ", line " << __LINE__                         \
+            << (Moose::_color_console ? XTERM_DEFAULT : "")                         \
+            << "\n" << std::endl;                                                   \
+        }                                                                           \
+        );                                                                          \
+    } while (0)
+
 #define mooseDeprecated(msg)                                                                                \
   do                                                                                                        \
   {                                                                                                         \
