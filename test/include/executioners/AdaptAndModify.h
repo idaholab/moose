@@ -23,7 +23,7 @@ class AdaptAndModify : public Transient
 public:
   AdaptAndModify(const InputParameters & parameters);
 
-  virtual void incrementStepOrReject();
+  virtual bool incrementStepOrReject();
 
   virtual void endStep(Real input_time = -1.0);
 

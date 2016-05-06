@@ -77,12 +77,12 @@ public:
 
   virtual void preStep();
 
-  virtual void postStep();
+  virtual bool postStep();
 
   /**
    * This is where the solve step is actually incremented.
    */
-  virtual void incrementStepOrReject();
+  virtual bool incrementStepOrReject();
 
   virtual void endStep(Real input_time = -1.0);
 

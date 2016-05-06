@@ -350,44 +350,43 @@ Transient::preStep()
   _time_stepper->preStep();
 }
 
-void
+bool
 Transient::postStep()
 {
   _time_stepper->postStep();
+
+  return incrementStepOrReject();
 }
 
 void
 Transient::execute()
 {
-
   preExecute();
 
-  // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a
-  // wrong answer and might need to be regolded.
-  // The reason is that we actually move the solution back in time before we actually start solving
-  // (which I think is wrong).  So this call here
-  // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we
-  // might remove this call and regold the test
-  // in the future eventually.
-  if (!_app.isRecovering())
-    _problem.advanceState();
-
   // Start time loop...
-  while (true)
+  bool keep_going = _num_steps > 0;
+
+  if (_app.isRecovering())
+    keep_going = postStep();
+  else
   {
-    if (_first != true)
-      incrementStepOrReject();
+    // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have
+    // a wrong answer and might need to be regolded.
+    // The reason is that we actually move the solution back in time before we actually start
+    // solving (which I think is wrong).  So this call here
+    // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However,
+    // we might remove this call and regold the test
+    // in the future eventually.
+    _problem.advanceState();
+  }
 
-    _first = false;
-
-    if (!keepGoing())
-      break;
-
+  while (keep_going)
+  {
     preStep();
     computeDT();
     takeStep();
     endStep();
-    postStep();
+    keep_going = postStep();
 
     _steps_taken++;
   }
@@ -414,11 +413,15 @@ Transient::computeDT()
   _time_stepper->computeStep(); // This is actually when DT gets computed
 }
 
-void
+bool
 Transient::incrementStepOrReject()
 {
+  bool keep_going;
+
   if (lastSolveConverged())
   {
+    keep_going = keepGoing();
+
     if (_xfem_repeat_step)
     {
       _time = _time_old;
@@ -426,7 +429,9 @@ Transient::incrementStepOrReject()
     else
     {
 #ifdef LIBMESH_ENABLE_AMR
-      _problem.adaptMesh();
+      // Only perform adaptivity if the solve will continue
+      if (keep_going && _problem.adaptivity().isOn())
+        _problem.adaptMesh();
 #endif
 
       _time_old = _time; // = _time_old + _dt;
@@ -460,9 +465,11 @@ Transient::incrementStepOrReject()
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
     _time_stepper->rejectStep();
     _time = _time_old;
+
+    keep_going = keepGoing();
   }
 
-  _first = false;
+  return keep_going;
 }
 
 void
@@ -854,10 +861,10 @@ Transient::keepGoing()
   }
 
   // Check for stop condition based upon number of simulation steps and/or solution end time:
-  if (static_cast<unsigned int>(_t_step) > _num_steps)
+  if (static_cast<unsigned int>(_t_step + 1) > _num_steps)
     keep_going = false;
 
-  if ((_time > _end_time) || (fabs(_time - _end_time) <= _timestep_tolerance))
+  if ((_time > _end_time) || (fabs((_time)-_end_time) <= _timestep_tolerance))
     keep_going = false;
 
   if (!lastSolveConverged() && _abort)
