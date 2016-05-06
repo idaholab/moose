@@ -216,10 +216,13 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
    */
   unsigned int rows, columns;
   std::vector<std::vector<double> > covMatrix;
+  std::vector<std::vector<double> > symmetricCovMatrix;
   // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+  // compute the nearest symmetric covariance matrix
+  computeNearestSymmetricMatrix(covMatrix,symmetricCovMatrix);
   _mu = mu;
-  _cov_matrix = covMatrix;
+  _cov_matrix = symmetricCovMatrix;
   _rank = (unsigned int) rank;
   _covarianceType = std::string(type);
   if(_rank > _mu.size()) {
@@ -239,6 +242,8 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 
   //compute the svd
   computeSVD(_rank);
+  //setup the nearest symmetric semi-positive definite covariance matrix
+  resetSingularValues(_leftSingularVectors, _rightSingularVectors, _singularValues,_svdTransformedMatrix); 
 
   int numberOfDiscretizations = 10;
   unsigned int dimensions = _mu.size();
