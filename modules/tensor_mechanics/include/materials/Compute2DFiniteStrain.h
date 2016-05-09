@@ -23,7 +23,13 @@ public:
 
 protected:
   virtual void computeProperties();
+
+  /// Computes the current deformation gradient; as a virtual function, this function is
+  /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeDeformGradZZ() = 0;
+
+  /// Computes the old deformation gradient; as a virtual function, this function is
+  /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeDeformGradZZold() = 0;
 };
 

@@ -96,17 +96,14 @@
 []
 
 [Materials]
-  active = 'Elasticity_tensor strain stress'
   [./Elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
   [../]
   [./strain]
-    type = ComputeRSphericalSmallStrain
   [../]
   [./stress]
-    type = ComputeLinearElasticStress
   [../]
 []
 

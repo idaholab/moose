@@ -4,33 +4,32 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-#include "ComputeAxisymmetricRZFiniteStrain.h"
+#include "ComputeAxisymmetricRZIncrementalStrain.h"
 #include "Assembly.h"
 
 template<>
-InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>()
+InputParameters validParams<ComputeAxisymmetricRZIncrementalStrain>()
 {
-  InputParameters params = validParams<Compute2DFiniteStrain>();
+  InputParameters params = validParams<Compute2DIncrementalStrain>();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains under axisymmetric assumptions.");
   return params;
 }
 
-ComputeAxisymmetricRZFiniteStrain::ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters) :
-    Compute2DFiniteStrain(parameters),
+ComputeAxisymmetricRZIncrementalStrain::ComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters) :
+    Compute2DIncrementalStrain(parameters),
     _disp_old_0(coupledValueOld("displacements", 0))
 {
 }
 
 void
-ComputeAxisymmetricRZFiniteStrain::initialSetup()
+ComputeAxisymmetricRZIncrementalStrain::initialSetup()
 {
   if (_assembly.coordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric simulations.");
 }
 
 Real
-ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZ()
+ComputeAxisymmetricRZIncrementalStrain::computeDeformGradZZ()
 {
   if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
@@ -39,7 +38,7 @@ ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZ()
 }
 
 Real
-ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZold()
+ComputeAxisymmetricRZIncrementalStrain::computeDeformGradZZold()
 {
   if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);

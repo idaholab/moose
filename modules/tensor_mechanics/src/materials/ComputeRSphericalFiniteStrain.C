@@ -26,6 +26,13 @@ ComputeRSphericalFiniteStrain::ComputeRSphericalFiniteStrain(const InputParamete
 }
 
 void
+ComputeRSphericalFiniteStrain::initialSetup()
+{
+  if (_assembly.coordSystem() != Moose::COORD_RSPHERICAL)
+    mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
+}
+
+void
 ComputeRSphericalFiniteStrain::computeProperties()
 {
   // Method from Rashid, 1993
@@ -45,7 +52,7 @@ ComputeRSphericalFiniteStrain::computeProperties()
     Fbar(0,0) = (*_grad_disp_old[0])[_qp](0);
 
     // The polar and azimuthal strains are functions of radial displacement
-    if (_q_point[_qp](0) != 0.0)
+    if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     {
       A(1,1) = (*_disp[0])[_qp] / _q_point[_qp](0);
       Fbar(1,1) = _disp_old_0[_qp] / _q_point[_qp](0);

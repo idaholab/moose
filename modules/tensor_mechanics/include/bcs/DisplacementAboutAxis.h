@@ -29,7 +29,7 @@ public:
   DisplacementAboutAxis(const InputParameters & parameters);
 
 protected:
-  /// Evaluate the function at the current quadrature point and timestep.
+  /// Evaluate the boundary condition at the current quadrature point and timestep.
   virtual Real computeQpValue();
   virtual void initialSetup();
 
