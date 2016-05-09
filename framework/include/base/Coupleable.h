@@ -36,8 +36,6 @@ public:
    * @param nodal true if we need to couple with nodal values, otherwise false
    */
   Coupleable(const MooseObject * moose_object, bool nodal);
-  // DEPRECATED CONSTRUCTOR
-  Coupleable(const InputParameters & parameters, bool nodal);
 
   /**
    * Destructor for object

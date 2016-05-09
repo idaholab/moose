@@ -21,6 +21,13 @@
 #include "PorousFlow2PhasePS.h"
 #include "PorousFlowVariableBase.h"
 
+// Kernels
+#include "PorousFlowAdvectiveFlux.h"
+#include "PorousFlowMassTimeDerivative.h"
+#include "PorousFlowEffectiveStressCoupling.h"
+#include "PorousFlowMassVolumetricExpansion.h"
+
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -78,6 +85,12 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlow1PhaseP_VG);
   registerMaterial(PorousFlow2PhasePS);
   registerMaterial(PorousFlowVariableBase);
+
+  // Kernels
+  registerKernel(PorousFlowAdvectiveFlux);
+  registerKernel(PorousFlowMassTimeDerivative);
+  registerKernel(PorousFlowEffectiveStressCoupling);
+  registerKernel(PorousFlowMassVolumetricExpansion);
 }
 
 // External entry point for dynamic syntax association

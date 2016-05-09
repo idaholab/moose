@@ -19,7 +19,6 @@
 #include "MooseVariable.h"
 #include "InputParameters.h"
 #include "MooseObject.h"
-#include "MooseError.h" // mooseDeprecated
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
     _c_parameters(moose_object->parameters()),
@@ -43,55 +42,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
     if (_c_parameters.getVecMooseType(name) != std::vector<std::string>())
     {
       std::vector<std::string> vars = _c_parameters.getVecMooseType(*iter);
-      for (unsigned int i = 0; i < vars.size(); i++)
-      {
-        std::string coupled_var_name = vars[i];
-        if (problem.hasVariable(coupled_var_name))
-        {
-          MooseVariable * moose_var = &problem.getVariable(tid, coupled_var_name);
-          _coupled_vars[name].push_back(moose_var);
-          _coupled_moose_vars.push_back(moose_var);
-        }
-        else if (problem.hasScalarVariable(coupled_var_name))
-          ; // ignore scalar variables
-        else
-          mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
-      }
-    }
-    else // This means it was optional coupling.  Let's assign a unique id to this variable
-      _optional_var_index[name] = std::numeric_limits<unsigned int>::max() - _optional_var_index.size();
-  }
-
-  _default_value_zero.resize(_coupleable_max_qps);
-  _default_gradient.resize(_coupleable_max_qps);
-  _default_second.resize(_coupleable_max_qps);
-}
-
-// DEPRECATED CONSTRUCTOR
-Coupleable::Coupleable(const InputParameters & parameters, bool nodal) :
-    _c_parameters(parameters),
-    _c_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _nodal(nodal),
-    _c_is_implicit(parameters.have_parameter<bool>("implicit") ? parameters.get<bool>("implicit") : true),
-    _coupleable_params(parameters),
-    _coupleable_neighbor(parameters.have_parameter<bool>("_neighbor") ? parameters.get<bool>("_neighbor") : false),
-    _coupleable_max_qps(_c_fe_problem.getMaxQps())
-{
-  mooseDeprecated("Deprecated constructor: Please contact the MOOSE team for assistance in removing this warning");
-
-  SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
-
-  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
-
-  // Coupling
-  for (std::set<std::string>::const_iterator iter = parameters.coupledVarsBegin();
-       iter != parameters.coupledVarsEnd();
-       ++iter)
-  {
-    std::string name = *iter;
-    if (parameters.getVecMooseType(name) != std::vector<std::string>())
-    {
-      std::vector<std::string> vars = parameters.getVecMooseType(*iter);
       for (unsigned int i = 0; i < vars.size(); i++)
       {
         std::string coupled_var_name = vars[i];

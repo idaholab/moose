@@ -31,8 +31,6 @@ public:
    * @param parameters Parameters that come from constructing the object
    */
   ScalarCoupleable(const MooseObject * moose_object);
-  // DEPRECATED CONSTRUCTED
-  ScalarCoupleable(const InputParameters & parameters);
 
   /**
    * Destructor for object
