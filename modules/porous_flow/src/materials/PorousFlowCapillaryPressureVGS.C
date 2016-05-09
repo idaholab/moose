@@ -21,12 +21,12 @@ InputParameters validParams<PorousFlowCapillaryPressureVGS>()
 }
 
 PorousFlowCapillaryPressureVGS::PorousFlowCapillaryPressureVGS(const InputParameters & parameters) :
-  PorousFlowCapillaryPressureBase(parameters),
-  _sat_lr(getParam<Real>("sat_lr")),
-  _sat_ls(getParam<Real>("sat_ls")),
-  _m(getParam<Real>("m")),
-  _pc_max(getParam<Real>("pc_max")),
-  _p0(getParam<Real>("p0"))
+    PorousFlowCapillaryPressureBase(parameters),
+    _sat_lr(getParam<Real>("sat_lr")),
+    _sat_ls(getParam<Real>("sat_ls")),
+    _m(getParam<Real>("m")),
+    _pc_max(getParam<Real>("pc_max")),
+    _p0(getParam<Real>("p0"))
 {
 }
 
@@ -47,14 +47,14 @@ PorousFlowCapillaryPressureVGS::computeQpProperties()
 Real
 PorousFlowCapillaryPressureVGS::effectiveSaturation(Real saturation) const
 {
-  return (saturation - _sat_lr)/(_sat_ls - _sat_lr);
+  return (saturation - _sat_lr) / (_sat_ls - _sat_lr);
 }
 
 Real
 PorousFlowCapillaryPressureVGS::capillaryPressure(Real saturation) const
 {
   Real sat_eff = effectiveSaturation(saturation);
-  Real cp = _p0 * std::pow(std::pow(sat_eff, -1.0/_m) - 1.0, 1.0 - _m);
+  Real cp = _p0 * std::pow(std::pow(sat_eff, -1.0 / _m) - 1.0, 1.0 - _m);
 
   /// Return the max of this and _cp_max
   return std::max(cp, _pc_max);

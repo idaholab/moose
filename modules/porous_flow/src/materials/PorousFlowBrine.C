@@ -52,6 +52,11 @@ PorousFlowBrine::computeQpProperties()
 Real
 PorousFlowBrine::density(Real pressure, Real temperature, Real xnacl) const
 {
+  /*
+   * From Driesner, The system H2o-NaCl. Part II: Correlations for molar volume,
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
+   */
   Real n1, n2, n11, n12, n1x1, n20, n21, n22, n23, n2x1, Tv;
   Real water_density, density;
 
@@ -125,6 +130,11 @@ PorousFlowBrine::dDensity_dT(Real /*pressure*/, Real /*temperature*/, Real /*xna
 Real
 PorousFlowBrine::viscosity(Real temperature, Real water_density, Real xnacl) const
 {
+  /*
+   * Viscosity of brine.
+   * From Phillips et al, A technical databook for geothermal energy utilization,
+   * LbL-12810 (1981).
+   */
   // Correlation requires molar concentration (mol/kg)
   Real mol = xnacl / ((1.0 - xnacl) * _Mnacl);
   Real mol2 = mol * mol;
@@ -145,6 +155,12 @@ PorousFlowBrine::dViscosity_dT(Real /*temperature*/, Real /*density*/, Real /*xn
 Real
 PorousFlowBrine::pSat(Real temperature, Real xnacl) const
 {
+  /*
+   * Brine vapour pressure
+   * From Haas, Physical properties of the coexisting phases and thermochemical
+   * properties of the H20 component in boiling NaCl solutions, Geological Survey
+   * Bulletin, 1421-A (1976).
+   */
   // Temperature in K
   Real tk = temperature + _t_c2k;
 
@@ -185,6 +201,12 @@ PorousFlowBrine::dViscosity_dDensity(Real temperature, Real water_density, Real 
 Real
 PorousFlowBrine::haliteDensity(Real pressure, Real temperature) const
 {
+  /*
+   * Density of halite (solid NaCl)
+   * From Driesner, The system H2o-NaCl. Part II: Correlations for molar volume,
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
+   */
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.e-5;
 
@@ -200,6 +222,16 @@ PorousFlowBrine::haliteDensity(Real pressure, Real temperature) const
 Real
 PorousFlowBrine::haliteSolubility(Real temperature) const
 {
+  /*
+   * Halite solubility
+   * Originally from Potter et al., A new method for determining the solubility
+   * of salts in aqueous solutions at elevated temperatures, J. Res. U.S. Geol.
+   * Surv., 5, 389-395 (1977). Equation describing halite solubility is repeated
+   * in Chou, Phase relations in the system NaCI-KCI-H20. III: Solubilities of
+   * halite in vapor-saturated liquids above 445°C and redetermination of phase
+   * equilibrium properties in the system NaCI-HzO to 1000°C and 1500 bars,
+   * Geochimica et Cosmochimica Acta 51, 1965-1975 (1987).
+   */
   Real solubility = (26.18 + 7.2e-3 * temperature + 1.06e-4 * temperature * temperature) / 100.0;
 
   return solubility;

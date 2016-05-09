@@ -42,8 +42,8 @@ PorousFlowEffectiveFluidPressure::PorousFlowEffectiveFluidPressure(const InputPa
 void
 PorousFlowEffectiveFluidPressure::computeQpProperties()
 {
-  _pf_qp[_qp] = 0;
-  _pf_nodal[_qp] = 0;
+  _pf_qp[_qp] = 0.0;
+  _pf_nodal[_qp] = 0.0;
   _dpf_qp_dvar[_qp].assign(_num_var, 0.0);
   _dpf_nodal_dvar[_qp].assign(_num_var, 0.0);
   for (unsigned ph = 0; ph < _num_ph; ++ph)

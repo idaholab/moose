@@ -252,10 +252,10 @@ protected:
   const Real _Mco2;
 
   /// Critical pressure (Pa)
-  const Real _p_critical;
+  const Real _critical_pressure;
 
   /// Critical temperature (C)
-  const Real _t_critical;
+  const Real _critical_temperature;
 };
 
 #endif //POROUSFLOWSIMPLECO2_H

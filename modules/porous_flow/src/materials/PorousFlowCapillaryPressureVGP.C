@@ -47,16 +47,12 @@ PorousFlowCapillaryPressureVGP::computeQpProperties()
 Real
 PorousFlowCapillaryPressureVGP::effectiveSaturation(Real pressure) const
 {
-  Real n, seff;
-
   if (pressure >= 0.0)
     return 1.0;
-  else
-  {
-    n = 1.0 / (1.0 - _m);
-    seff = 1.0 + std::pow(- _al * pressure, n);
-    return std::pow(seff, - _m);
-  }
+
+  const Real n = 1.0 / (1.0 - _m);
+  const Real seff = 1.0 + std::pow(- _al * pressure, n);
+  return std::pow(seff, - _m);
 }
 
 Real
@@ -64,14 +60,12 @@ PorousFlowCapillaryPressureVGP::dEffectiveSaturation(Real pressure) const
 {
   if (pressure >= 0.0)
     return 0.0;
-  else
-  {
-    Real n = 1.0 / (1.0 - _m);
-    Real inner = 1.0 + std::pow(- _al * pressure, n);
-    Real dinner_dp = - n * _al * std::pow(- _al * pressure, n - 1.0);
-    Real dseff_dp = - _m * std::pow(inner, - _m - 1.0) * dinner_dp;
-    return dseff_dp;
-  }
+
+  const Real n = 1.0 / (1.0 - _m);
+  const Real inner = 1.0 + std::pow(- _al * pressure, n);
+  const Real dinner_dp = - n * _al * std::pow(- _al * pressure, n - 1.0);
+  const Real dseff_dp = - _m * std::pow(inner, - _m - 1.0) * dinner_dp;
+  return dseff_dp;
 }
 
 Real
@@ -79,13 +73,11 @@ PorousFlowCapillaryPressureVGP::d2EffectiveSaturation(Real pressure) const
 {
   if (pressure >= 0.0)
     return 0.0;
-  else
-  {
-    Real n = 1.0 / (1.0 - _m);
-    Real inner = 1.0 + std::pow(- _al * pressure, n);
-    Real dinner_dp = - n * _al * std::pow(- _al * pressure, n - 1.0);
-    Real d2inner_dp2 = n * (n - 1.0) * _al * _al * std::pow(- _al * pressure, n - 2.0);
-    Real d2seff_dp2 = _m * (_m + 1.0) * std::pow(inner, - _m - 2.0) * std::pow(dinner_dp, 2.0) - _m * std::pow(inner, - _m - 1.0) * d2inner_dp2;
-    return d2seff_dp2;
-  }
+
+  const Real n = 1.0 / (1.0 - _m);
+  const Real inner = 1.0 + std::pow(- _al * pressure, n);
+  const Real dinner_dp = - n * _al * std::pow(- _al * pressure, n - 1.0);
+  const Real d2inner_dp2 = n * (n - 1.0) * _al * _al * std::pow(- _al * pressure, n - 2.0);
+  const Real d2seff_dp2 = _m * (_m + 1.0) * std::pow(inner, - _m - 2.0) * std::pow(dinner_dp, 2.0) - _m * std::pow(inner, - _m - 1.0) * d2inner_dp2;
+  return d2seff_dp2;
 }

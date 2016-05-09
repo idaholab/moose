@@ -71,22 +71,22 @@ PorousFlowMethane::dDensity_dP(Real temperature) const
 Real
 PorousFlowMethane::dDensity_dT(Real pressure, Real temperature) const
 {
-  Real tk = temperature + _t_c2k;
+  const Real tk = temperature + _t_c2k;
   return - pressure * _Mch4 / (_R * tk * tk);
 }
 
 Real
 PorousFlowMethane::viscosity(Real temperature) const
 {
-  Real a[6] = {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
+  const Real a[6] = {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
     -2.7237166e-14};
 
   Real viscosity;
-  Real tk = temperature + _t_c2k;
-  Real tk2 = tk * tk;
-  Real tk3 = tk2 * tk;
-  Real tk4 = tk3 * tk;
-  Real tk5 = tk4 * tk;
+  const Real tk = temperature + _t_c2k;
+  const Real tk2 = tk * tk;
+  const Real tk3 = tk2 * tk;
+  const Real tk4 = tk3 * tk;
+  const Real tk5 = tk4 * tk;
 
   viscosity = a[0] + a[1] * tk + a[2] * tk2 + a[3] * tk3 + a[4] * tk4 + a[5] * tk5;
 
@@ -96,14 +96,14 @@ PorousFlowMethane::viscosity(Real temperature) const
 Real
 PorousFlowMethane::dViscosity_dT(Real temperature) const
 {
-  Real a[6] = {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
+  const Real a[6] = {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
     -2.7237166e-14};
 
   Real dviscosity;
-  Real tk = temperature + _t_c2k;
-  Real tk2 = tk * tk;
-  Real tk3 = tk2 * tk;
-  Real tk4 = tk3 * tk;
+  const Real tk = temperature + _t_c2k;
+  const Real tk2 = tk * tk;
+  const Real tk3 = tk2 * tk;
+  const Real tk4 = tk3 * tk;
 
   dviscosity = a[1] + 2.0 * a[2] * tk + 3.0 * a[3] * tk2 + 4.0 * a[4] * tk3 + 5.0 * a[5] * tk4;
 

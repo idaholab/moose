@@ -29,8 +29,8 @@ PorousFlowSimpleCO2::PorousFlowSimpleCO2(const InputParameters & parameters) :
     _viscosity_nodal(declareProperty<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num))),
     _dviscosity_nodal_dt(declarePropertyDerivative<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num), _temperature_variable_name)),
     _Mco2(44.0e-3),
-    _p_critical(7.3773e6),
-    _t_critical(30.9782)
+    _critical_pressure(7.3773e6),
+    _critical_temperature(30.9782)
 {
 }
 
@@ -63,10 +63,10 @@ PorousFlowSimpleCO2::density(Real pressure, Real temperature) const
 {
   Real rho;
 
-  if (pressure <= _p_critical)
+  if (pressure <= _critical_pressure)
     rho = gasDensity(pressure, temperature);
 
-  else // if (pressure > _p_critical)
+  else // if (pressure > _critical_pressure)
     rho = supercriticalDensity(pressure, temperature);
 
   return rho;
@@ -77,10 +77,10 @@ PorousFlowSimpleCO2::viscosity(Real pressure, Real temperature, Real density) co
 {
   Real mu;
 
-  if (pressure <= _p_critical)
+  if (pressure <= _critical_pressure)
     mu = gasViscosity(temperature, density);
 
-  else // if (pressure > _p_critical)
+  else // if (pressure > _critical_pressure)
     mu = supercriticalViscosity(pressure, temperature);
 
   return mu;
@@ -91,10 +91,10 @@ PorousFlowSimpleCO2::dDensity_dP(Real pressure, Real temperature) const
 {
   Real drho;
 
-  if (pressure <= _p_critical)
+  if (pressure <= _critical_pressure)
     drho = dGasDensity_dP(pressure, temperature);
 
-  else // if (pressure > _p_critical)
+  else // if (pressure > _critical_pressure)
     drho = dSupercriticalDensity_dP(pressure, temperature);
 
   return drho;
@@ -105,10 +105,10 @@ PorousFlowSimpleCO2::dDensity_dT(Real pressure, Real temperature) const
 {
   Real drho;
 
-  if (pressure <= _p_critical)
+  if (pressure <= _critical_pressure)
     drho = dGasDensity_dT(pressure, temperature);
 
-  else // if (pressure > _p_critical)
+  else // if (pressure > _critical_pressure)
     drho = dSupercriticalDensity_dT(pressure, temperature);
 
   return drho;
@@ -117,12 +117,18 @@ PorousFlowSimpleCO2::dDensity_dT(Real pressure, Real temperature) const
 Real
 PorousFlowSimpleCO2::gasViscosity(Real temperature, Real density) const
 {
-  Real tk = temperature + _t_c2k;
-  Real tstar = tk / 251.196;
-  Real a[5] = {0.235156, -0.491266, 5.211155e-2, 5.347906e-2, -1.537102e-2};
-  Real d[5] = {0.4071119e-2, 0.7198037e-4, 0.2411697e-16, 0.2971072e-22, -0.1627888e-22};
-  int j[5] = {1, 1, 4, 1, 2};
-  int i[5] = {1, 2, 6, 8, 8};
+  /*
+   * Viscosity of supercritical CO2. From Ouyang, New correlations for predicting
+   * the density and viscosity of supercritical Carbon Dioxide under conditions
+   * expected in Carbon Capture and Sequestration operations, The Open Petroleum
+   * Engineering Journal, 4, 13-21 (2011)
+   */
+  const Real tk = temperature + _t_c2k;
+  const Real tstar = tk / 251.196;
+  const Real a[5] = {0.235156, -0.491266, 5.211155e-2, 5.347906e-2, -1.537102e-2};
+  const Real d[5] = {0.4071119e-2, 0.7198037e-4, 0.2411697e-16, 0.2971072e-22, -0.1627888e-22};
+  const int j[5] = {1, 1, 4, 1, 2};
+  const int i[5] = {1, 2, 6, 8, 8};
 
   // Zero-denisty viscosity
   Real sum = 0.0;
@@ -130,8 +136,8 @@ PorousFlowSimpleCO2::gasViscosity(Real temperature, Real density) const
   for (int n = 0; n < 5; ++n)
     sum += a[n] * std::pow(std::log(tstar), n);
 
-  Real theta = std::exp(sum);
-  Real mu0 = 1.00697 * std::sqrt(tk) / theta;
+  const Real theta = std::exp(sum);
+  const Real mu0 = 1.00697 * std::sqrt(tk) / theta;
 
   Real b[5];
   for (unsigned int n = 0; n < 5; ++n)
@@ -149,41 +155,41 @@ PorousFlowSimpleCO2::gasViscosity(Real temperature, Real density) const
 Real
 PorousFlowSimpleCO2::supercriticalViscosity(Real pressure, Real temperature) const
 {
-  Real b0[5] = {-1.958098980443E+01, 1.123243298270E+00, -2.320378874100E-02,
+  const Real b0[5] = {-1.958098980443E+01, 1.123243298270E+00, -2.320378874100E-02,
     2.067060943050E-04, -6.740205984528E-07};
-  Real b1[5] = {4.187280585109E-02, -2.425666731623E-03, 5.051177210444E-05,
+  const Real b1[5] = {4.187280585109E-02, -2.425666731623E-03, 5.051177210444E-05,
     -4.527585394282E-07, 1.483580144144E-09};
-  Real b2[5] = {-3.164424775231E-05, 1.853493293079E-06, -3.892243662924E-08,
+  const Real b2[5] = {-3.164424775231E-05, 1.853493293079E-06, -3.892243662924E-08,
     3.511599795831E-10, -1.156613338683E-12};
-  Real b3[5] = {1.018084854204E-08, -6.013995738056E-10, 1.271924622771E-11,
+  const Real b3[5] = {1.018084854204E-08, -6.013995738056E-10, 1.271924622771E-11,
     -1.154170663233E-13, 3.819260251596E-16};
-  Real b4[5] = {-1.185834697489E-12, 7.052301533772E-14, -1.500321307714E-15,
+  const Real b4[5] = {-1.185834697489E-12, 7.052301533772E-14, -1.500321307714E-15,
     1.368104294236E-17, -4.545472651918E-20};
 
-  Real c0[5] = {1.856798626054E-02, 3.083186834281E-03, -1.004022090988E-04,
+  const Real c0[5] = {1.856798626054E-02, 3.083186834281E-03, -1.004022090988E-04,
     8.331453343531E-07, -1.824126204417E-09};
-  Real c1[5] = {6.519276827948E-05, -3.174897980949E-06, 7.524167185714E-08,
+  const Real c1[5] = {6.519276827948E-05, -3.174897980949E-06, 7.524167185714E-08,
     -6.141534284471E-10, 1.463896995503E-12};
-  Real c2[5] = {-1.310632653461E-08, 7.702474418324E-10, -1.830098887313E-11,
+  const Real c2[5] = {-1.310632653461E-08, 7.702474418324E-10, -1.830098887313E-11,
     1.530419648245E-13, -3.852361658746E-16};
-  Real c3[5] = {1.335772487425E-12, -8.113168443709E-14, 1.921794651400E-15,
+  const Real c3[5] = {1.335772487425E-12, -8.113168443709E-14, 1.921794651400E-15,
     -1.632868926659E-17, 4.257160059035E-20};
-  Real c4[5] = {-5.047795395464E-17, 3.115707980951E-18, -7.370406590957E-20,
+  const Real c4[5] = {-5.047795395464E-17, 3.115707980951E-18, -7.370406590957E-20,
     6.333570782917E-22, -1.691344581198E-24};
 
   Real a0, a1, a2, a3, a4;
 
-  Real t1 = temperature;
-  Real t2 = t1 * t1;
-  Real t3 = t2 * t1;
-  Real t4 = t3 * t1;
+  const Real t1 = temperature;
+  const Real t2 = t1 * t1;
+  const Real t3 = t2 * t1;
+  const Real t4 = t3 * t1;
 
   // Correlation uses pressure in psia
-  Real pa2psia = 1.45037738007e-4;
-  Real p1 = pressure * pa2psia;
-  Real p2 = p1 * p1;
-  Real p3 = p2 * p1;
-  Real p4 = p3 * p1;
+  const Real pa2psia = 1.45037738007e-4;
+  const Real p1 = pressure * pa2psia;
+  const Real p2 = p1 * p1;
+  const Real p3 = p2 * p1;
+  const Real p4 = p3 * p1;
 
   if (p1 <= 3000)
   {
@@ -203,7 +209,7 @@ PorousFlowSimpleCO2::supercriticalViscosity(Real pressure, Real temperature) con
     a4 = c4[0] + c4[1] * t1 + c4[2] * t2 + c4[3] * t3 + c4[4] * t4;
   }
 
- Real mu = a0 + a1 * p1 + a2 * p2 + a3 * p3 + a4 * p4;
+ const Real mu = a0 + a1 * p1 + a2 * p2 + a3 * p3 + a4 * p4;
 
  return mu * 1e-3; //cP to Pa.s
 }
@@ -211,10 +217,14 @@ PorousFlowSimpleCO2::supercriticalViscosity(Real pressure, Real temperature) con
 Real
 PorousFlowSimpleCO2::partialDensity(Real temperature) const
 {
-  Real t2 = temperature * temperature;
-  Real t3 = t2 * temperature;
+  /*
+   * Partial density of dissolved CO2. From Garcia, Density of aqueous
+   * solutions of CO2, LBNL-49023 (2001).
+   */
+  const Real t2 = temperature * temperature;
+  const Real t3 = t2 * temperature;
 
-  Real V = 37.51 - 9.585e-2 * temperature + 8.74e-4 * t2 - 5.044e-7 * t3;
+  const Real V = 37.51 - 9.585e-2 * temperature + 8.74e-4 * t2 - 5.044e-7 * t3;
 
   return 1.e6 * _Mco2 / V;
 }
@@ -222,41 +232,47 @@ PorousFlowSimpleCO2::partialDensity(Real temperature) const
 Real
 PorousFlowSimpleCO2::supercriticalDensity(Real pressure, Real temperature) const
 {
-  Real b0[5] = {-2.148322085348e5, 1.168116599408e4, -2.302236659392e2,
+  /*
+   * Density of supercritical CO2. From Ouyang, New correlations for predicting
+   * the density and viscosity of supercritical Carbon Dioxide under conditions
+   * expected in Carbon Capture and Sequestration operations, The Open Petroleum
+   * Engineering Journal, 4, 13-21 (2011)
+   */
+  const Real b0[5] = {-2.148322085348e5, 1.168116599408e4, -2.302236659392e2,
     1.967428940167, -6.184842764145e-3};
-  Real b1[5] = {4.757146002428e2, -2.619250287624e1, 5.215134206837e-1,
+  const Real b1[5] = {4.757146002428e2, -2.619250287624e1, 5.215134206837e-1,
     -4.494511089838e-3, 1.423058795982e-5};
-  Real b2[5] = {-3.713900186613e-1, 2.072488876536e-2, -4.169082831078e-4,
+  const Real b2[5] = {-3.713900186613e-1, 2.072488876536e-2, -4.169082831078e-4,
     3.622975674137e-6, -1.155050860329e-8};
-  Real b3[5] = {1.228907393482e-4, -6.930063746226e-6, 1.406317206628e-7,
+  const Real b3[5] = {1.228907393482e-4, -6.930063746226e-6, 1.406317206628e-7,
     -1.230995287169e-9, 3.948417428040e-12};
-  Real b4[5] = {-1.466408011784e-8, 8.338008651366e-10, -1.704242447194e-11,
+  const Real b4[5] = {-1.466408011784e-8, 8.338008651366e-10, -1.704242447194e-11,
     1.500878861807e-13, -4.838826574173e-16};
 
-  Real c0[5] = {6.897382693936e2, 2.730479206931, -2.254102364542e-2,
+  const Real c0[5] = {6.897382693936e2, 2.730479206931, -2.254102364542e-2,
     -4.651196146917e-3, 3.439702234956e-5};
-  Real c1[5] = {2.213692462613e-1, -6.547268255814e-3, 5.982258882656e-5,
+  const Real c1[5] = {2.213692462613e-1, -6.547268255814e-3, 5.982258882656e-5,
     2.274997412526e-6, -1.888361337660e-8};
-  Real c2[5] = {-5.118724890479e-5, 2.019697017603e-6, -2.311332097185e-8,
+  const Real c2[5] = {-5.118724890479e-5, 2.019697017603e-6, -2.311332097185e-8,
     -4.079557404679e-10, 3.893599641874e-12};
-  Real c3[5] ={5.517971126745e-9, -2.415814703211e-10, 3.121603486524e-12,
+  const Real c3[5] ={5.517971126745e-9, -2.415814703211e-10, 3.121603486524e-12,
     3.171271084870e-14, -3.560785550401e-16};
-  Real c4[5] = {-2.184152941323e-13, 1.010703706059e-14, -1.406620681883e-16,
+  const Real c4[5] = {-2.184152941323e-13, 1.010703706059e-14, -1.406620681883e-16,
     -8.957731136447e-19, 1.215810469539e-20};
 
   Real a0, a1, a2, a3, a4;
 
-  Real t1 = temperature;
-  Real t2 = t1 * t1;
-  Real t3 = t2 * t1;
-  Real t4 = t3 * t1;
+  const Real t1 = temperature;
+  const Real t2 = t1 * t1;
+  const Real t3 = t2 * t1;
+  const Real t4 = t3 * t1;
 
   // Correlation uses pressure in psia
-  Real pa2psia = 1.45037738007e-4;
-  Real p1 = pressure * pa2psia;
-  Real p2 = p1 * p1;
-  Real p3 = p2 * p1;
-  Real p4 = p3 * p1;
+  const Real pa2psia = 1.45037738007e-4;
+  const Real p1 = pressure * pa2psia;
+  const Real p2 = p1 * p1;
+  const Real p3 = p2 * p1;
+  const Real p4 = p3 * p1;
 
   if (p1 <= 3000)
   {
@@ -282,12 +298,12 @@ PorousFlowSimpleCO2::supercriticalDensity(Real pressure, Real temperature) const
 Real
 PorousFlowSimpleCO2::gasDensity(Real pressure, Real temperature) const
 {
-  Real tk = temperature + _t_c2k;
-  Real tc = std::pow((tk * 1.e-2), 10./3.);
-  Real pc = pressure * 1.e-6;
+  const Real tk = temperature + _t_c2k;
+  const Real tc = std::pow((tk * 1.e-2), 10./3.);
+  const Real pc = pressure * 1.e-6;
 
-  Real vc1 = 1.8882e-4 * tk;
-  Real vc2 = - pc * (8.24e-2 + 1.249e-2 * pc) / tc;
+  const Real vc1 = 1.8882e-4 * tk;
+  const Real vc2 = - pc * (8.24e-2 + 1.249e-2 * pc) / tc;
 
   return pc / (vc1 + vc2);
 }
@@ -295,13 +311,13 @@ PorousFlowSimpleCO2::gasDensity(Real pressure, Real temperature) const
 Real
 PorousFlowSimpleCO2::dGasDensity_dP(Real pressure, Real temperature) const
 {
-  Real tk = temperature + _t_c2k;
-  Real tc = std::pow((tk * 1.e-2), 10./3.);
-  Real pc = pressure * 1.e-6;
+  const Real tk = temperature + _t_c2k;
+  const Real tc = std::pow((tk * 1.e-2), 10./3.);
+  const Real pc = pressure * 1.e-6;
 
-  Real vc1 = 1.8882e-4 * tk;
-  Real vc2 = - pc * (8.24e-2 + 1.249e-2 * pc) / tc;
-  Real dvc2 = - (8.24e-2 + 2.498e-2 * pc) / tc;
+  const Real vc1 = 1.8882e-4 * tk;
+  const Real vc2 = - pc * (8.24e-2 + 1.249e-2 * pc) / tc;
+  const Real dvc2 = - (8.24e-2 + 2.498e-2 * pc) / tc;
 
   return (vc1 + vc2 - pc * dvc2) / ((vc1 + vc2) * (vc1 + vc2)) * 1e-6;
 }
@@ -309,15 +325,15 @@ PorousFlowSimpleCO2::dGasDensity_dP(Real pressure, Real temperature) const
 Real
 PorousFlowSimpleCO2::dGasDensity_dT(Real pressure, Real temperature) const
 {
-  Real tk = temperature + _t_c2k;
-  Real tc = std::pow((tk * 1.e-2), 10./3.);
-  Real pc = pressure * 1.e-6;
+  const Real tk = temperature + _t_c2k;
+  const Real tc = std::pow((tk * 1.e-2), 10./3.);
+  const Real pc = pressure * 1.e-6;
 
-  Real vc1 = 1.8882e-4 * tk;
-  Real vc2 = - pc * (8.24e-2 + 1.249e-2 * pc) / tc;
-  Real dtc = (0.1 / 3.0) * std::pow((tk * 1.e-2), 7./3.);
-  Real dvc1 = 1.8882e-4;
-  Real dvc2 = - vc2 / tc;
+  const Real vc1 = 1.8882e-4 * tk;
+  const Real vc2 = - pc * (8.24e-2 + 1.249e-2 * pc) / tc;
+  const Real dtc = (0.1 / 3.0) * std::pow((tk * 1.e-2), 7./3.);
+  const Real dvc1 = 1.8882e-4;
+  const Real dvc2 = - vc2 / tc;
 
   return - pc / (vc1 + vc2) / (vc1 + vc2) * (dvc1 + dvc2 * dtc);
 }
@@ -325,36 +341,36 @@ PorousFlowSimpleCO2::dGasDensity_dT(Real pressure, Real temperature) const
 Real
 PorousFlowSimpleCO2::dSupercriticalDensity_dP(Real pressure, Real temperature) const
 {
-  Real b1[5] = {4.757146002428e2, -2.619250287624e1, 5.215134206837e-1,
+  const Real b1[5] = {4.757146002428e2, -2.619250287624e1, 5.215134206837e-1,
     -4.494511089838e-3, 1.423058795982e-5};
-  Real b2[5] = {-3.713900186613e-1, 2.072488876536e-2, -4.169082831078e-4,
+  const Real b2[5] = {-3.713900186613e-1, 2.072488876536e-2, -4.169082831078e-4,
     3.622975674137e-6, -1.155050860329e-8};
-  Real b3[5] = {1.228907393482e-4, -6.930063746226e-6, 1.406317206628e-7,
+  const Real b3[5] = {1.228907393482e-4, -6.930063746226e-6, 1.406317206628e-7,
     -1.230995287169e-9, 3.948417428040e-12};
-  Real b4[5] = {-1.466408011784e-8, 8.338008651366e-10, -1.704242447194e-11,
+  const Real b4[5] = {-1.466408011784e-8, 8.338008651366e-10, -1.704242447194e-11,
     1.500878861807e-13, -4.838826574173e-16};
 
-  Real c1[5] = {2.213692462613e-1, -6.547268255814e-3, 5.982258882656e-5,
+  const Real c1[5] = {2.213692462613e-1, -6.547268255814e-3, 5.982258882656e-5,
     2.274997412526e-6, -1.888361337660e-8};
-  Real c2[5] = {-5.118724890479e-5, 2.019697017603e-6, -2.311332097185e-8,
+  const Real c2[5] = {-5.118724890479e-5, 2.019697017603e-6, -2.311332097185e-8,
     -4.079557404679e-10, 3.893599641874e-12};
-  Real c3[5] ={5.517971126745e-9, -2.415814703211e-10, 3.121603486524e-12,
+  const Real c3[5] ={5.517971126745e-9, -2.415814703211e-10, 3.121603486524e-12,
     3.171271084870e-14, -3.560785550401e-16};
-  Real c4[5] = {-2.184152941323e-13, 1.010703706059e-14, -1.406620681883e-16,
+  const Real c4[5] = {-2.184152941323e-13, 1.010703706059e-14, -1.406620681883e-16,
     -8.957731136447e-19, 1.215810469539e-20};
 
   Real a1, a2, a3, a4;
 
-  Real t1 = temperature;
-  Real t2 = t1 * t1;
-  Real t3 = t2 * t1;
-  Real t4 = t3 * t1;
+  const Real t1 = temperature;
+  const Real t2 = t1 * t1;
+  const Real t3 = t2 * t1;
+  const Real t4 = t3 * t1;
 
   // Correlation uses pressure in psia
-  Real pa2psia = 1.45037738007e-4;
-  Real p1 = pressure * pa2psia;
-  Real p2 = p1 * p1;
-  Real p3 = p2 * p1;
+  const Real pa2psia = 1.45037738007e-4;
+  const Real p1 = pressure * pa2psia;
+  const Real p2 = p1 * p1;
+  const Real p3 = p2 * p1;
 
   if (p1 <= 3000)
   {
@@ -378,40 +394,40 @@ PorousFlowSimpleCO2::dSupercriticalDensity_dP(Real pressure, Real temperature) c
 Real
 PorousFlowSimpleCO2::dSupercriticalDensity_dT(Real pressure, Real temperature) const
 {
-  Real b0[5] = {-2.148322085348e5, 1.168116599408e4, -2.302236659392e2,
+  const Real b0[5] = {-2.148322085348e5, 1.168116599408e4, -2.302236659392e2,
     1.967428940167, -6.184842764145e-3};
-  Real b1[5] = {4.757146002428e2, -2.619250287624e1, 5.215134206837e-1,
+  const Real b1[5] = {4.757146002428e2, -2.619250287624e1, 5.215134206837e-1,
     -4.494511089838e-3, 1.423058795982e-5};
-  Real b2[5] = {-3.713900186613e-1, 2.072488876536e-2, -4.169082831078e-4,
+  const Real b2[5] = {-3.713900186613e-1, 2.072488876536e-2, -4.169082831078e-4,
     3.622975674137e-6, -1.155050860329e-8};
-  Real b3[5] = {1.228907393482e-4, -6.930063746226e-6, 1.406317206628e-7,
+  const Real b3[5] = {1.228907393482e-4, -6.930063746226e-6, 1.406317206628e-7,
     -1.230995287169e-9, 3.948417428040e-12};
-  Real b4[5] = {-1.466408011784e-8, 8.338008651366e-10, -1.704242447194e-11,
+  const Real b4[5] = {-1.466408011784e-8, 8.338008651366e-10, -1.704242447194e-11,
     1.500878861807e-13, -4.838826574173e-16};
 
-  Real c0[5] = {6.897382693936e2, 2.730479206931, -2.254102364542e-2,
+  const Real c0[5] = {6.897382693936e2, 2.730479206931, -2.254102364542e-2,
     -4.651196146917e-3, 3.439702234956e-5};
-  Real c1[5] = {2.213692462613e-1, -6.547268255814e-3, 5.982258882656e-5,
+  const Real c1[5] = {2.213692462613e-1, -6.547268255814e-3, 5.982258882656e-5,
     2.274997412526e-6, -1.888361337660e-8};
-  Real c2[5] = {-5.118724890479e-5, 2.019697017603e-6, -2.311332097185e-8,
+  const Real c2[5] = {-5.118724890479e-5, 2.019697017603e-6, -2.311332097185e-8,
     -4.079557404679e-10, 3.893599641874e-12};
-  Real c3[5] ={5.517971126745e-9, -2.415814703211e-10, 3.121603486524e-12,
+  const Real c3[5] ={5.517971126745e-9, -2.415814703211e-10, 3.121603486524e-12,
     3.171271084870e-14, -3.560785550401e-16};
-  Real c4[5] = {-2.184152941323e-13, 1.010703706059e-14, -1.406620681883e-16,
+  const Real c4[5] = {-2.184152941323e-13, 1.010703706059e-14, -1.406620681883e-16,
     -8.957731136447e-19, 1.215810469539e-20};
 
   Real a0, a1, a2, a3, a4;
 
-  Real t1 = temperature;
-  Real t2 = t1 * t1;
-  Real t3 = t2 * t1;
+  const Real t1 = temperature;
+  const Real t2 = t1 * t1;
+  const Real t3 = t2 * t1;
 
   // Correlation uses pressure in psia
-  Real pa2psia = 1.45037738007e-4;
-  Real p1 = pressure * pa2psia;
-  Real p2 = p1 * p1;
-  Real p3 = p2 * p1;
-  Real p4 = p3 * p1;
+  const Real pa2psia = 1.45037738007e-4;
+  const Real p1 = pressure * pa2psia;
+  const Real p2 = p1 * p1;
+  const Real p3 = p2 * p1;
+  const Real p4 = p3 * p1;
 
   if (p1 <= 3000)
   {
@@ -439,10 +455,10 @@ PorousFlowSimpleCO2::dViscosity_dDensity(Real pressure, Real temperature, Real d
 {
   Real dmu_drho;
 
-  if (pressure <= _p_critical)
+  if (pressure <= _critical_pressure)
     dmu_drho = dGasViscosity_dDensity(temperature, density);
 
-  else // if (pressure > _p_critical)
+  else // if (pressure > _critical_pressure)
     dmu_drho = dSupercriticalViscosity_dDensity(pressure, temperature);
 
   return dmu_drho;
@@ -451,11 +467,11 @@ PorousFlowSimpleCO2::dViscosity_dDensity(Real pressure, Real temperature, Real d
 Real
 PorousFlowSimpleCO2::dGasViscosity_dDensity(Real temperature, Real density) const
 {
-  Real tk = temperature + _t_c2k;
-  Real tstar = tk / 251.196;
-  Real d[5] = {0.4071119e-2, 0.7198037e-4, 0.2411697e-16, 0.2971072e-22, -0.1627888e-22};
-  int j[5] = {1, 1, 4, 1, 2};
-  int i[5] = {1, 2, 6, 8, 8};
+  const Real tk = temperature + _t_c2k;
+  const Real tstar = tk / 251.196;
+  const Real d[5] = {0.4071119e-2, 0.7198037e-4, 0.2411697e-16, 0.2971072e-22, -0.1627888e-22};
+  const int j[5] = {1, 1, 4, 1, 2};
+  const int i[5] = {1, 2, 6, 8, 8};
 
   Real b[5];
   for (unsigned int n = 0; n < 5; ++n)
@@ -473,14 +489,14 @@ PorousFlowSimpleCO2::dGasViscosity_dDensity(Real temperature, Real density) cons
 Real
 PorousFlowSimpleCO2::dSupercriticalViscosity_dDensity(Real pressure, Real temperature) const
 {
-  Real dmu_drho = 0.;
+  Real dmu_drho = 0.0;
 
   /**
    * The correlation for supercritical CO2 gives viscosity as a function of pressure. Therefore, The
    * derivative of viscosity wrt density is given by the chain rule.
    * Note that if d(density)/d(pressure) = 0, so should d(viscosity)/d(density)
    */
-  Real drho_dp = dSupercriticalDensity_dP(pressure, temperature);
+  const Real drho_dp = dSupercriticalDensity_dP(pressure, temperature);
 
   if (drho_dp != 0.0)
     dmu_drho += dSupercriticalViscosity_dP(pressure, temperature) / drho_dp;
@@ -491,36 +507,36 @@ PorousFlowSimpleCO2::dSupercriticalViscosity_dDensity(Real pressure, Real temper
 Real
 PorousFlowSimpleCO2::dSupercriticalViscosity_dP(Real pressure, Real temperature) const
 {
-  Real b1[5] = {4.187280585109E-02, -2.425666731623E-03, 5.051177210444E-05,
+  const Real b1[5] = {4.187280585109E-02, -2.425666731623E-03, 5.051177210444E-05,
     -4.527585394282E-07, 1.483580144144E-09};
-  Real b2[5] = {-3.164424775231E-05, 1.853493293079E-06, -3.892243662924E-08,
+  const Real b2[5] = {-3.164424775231E-05, 1.853493293079E-06, -3.892243662924E-08,
     3.511599795831E-10, -1.156613338683E-12};
-  Real b3[5] = {1.018084854204E-08, -6.013995738056E-10, 1.271924622771E-11,
+  const Real b3[5] = {1.018084854204E-08, -6.013995738056E-10, 1.271924622771E-11,
     -1.154170663233E-13, 3.819260251596E-16};
-  Real b4[5] = {-1.185834697489E-12, 7.052301533772E-14, -1.500321307714E-15,
+  const Real b4[5] = {-1.185834697489E-12, 7.052301533772E-14, -1.500321307714E-15,
     1.368104294236E-17, -4.545472651918E-20};
 
-  Real c1[5] = {6.519276827948E-05, -3.174897980949E-06, 7.524167185714E-08,
+  const Real c1[5] = {6.519276827948E-05, -3.174897980949E-06, 7.524167185714E-08,
     -6.141534284471E-10, 1.463896995503E-12};
-  Real c2[5] = {-1.310632653461E-08, 7.702474418324E-10, -1.830098887313E-11,
+  const Real c2[5] = {-1.310632653461E-08, 7.702474418324E-10, -1.830098887313E-11,
     1.530419648245E-13, -3.852361658746E-16};
-  Real c3[5] = {1.335772487425E-12, -8.113168443709E-14, 1.921794651400E-15,
+  const Real c3[5] = {1.335772487425E-12, -8.113168443709E-14, 1.921794651400E-15,
     -1.632868926659E-17, 4.257160059035E-20};
-  Real c4[5] = {-5.047795395464E-17, 3.115707980951E-18, -7.370406590957E-20,
+  const Real c4[5] = {-5.047795395464E-17, 3.115707980951E-18, -7.370406590957E-20,
     6.333570782917E-22, -1.691344581198E-24};
 
   Real a1, a2, a3, a4;
 
-  Real t1 = temperature;
-  Real t2 = t1 * t1;
-  Real t3 = t2 * t1;
-  Real t4 = t3 * t1;
+  const Real t1 = temperature;
+  const Real t2 = t1 * t1;
+  const Real t3 = t2 * t1;
+  const Real t4 = t3 * t1;
 
   // Correlation uses pressure in psia
-  Real pa2psia = 1.45037738007e-4;
-  Real p1 = pressure * pa2psia;
-  Real p2 = p1 * p1;
-  Real p3 = p2 * p1;
+  const Real pa2psia = 1.45037738007e-4;
+  const Real p1 = pressure * pa2psia;
+  const Real p2 = p1 * p1;
+  const Real p3 = p2 * p1;
 
   if (p1 <= 3000)
   {
@@ -538,7 +554,7 @@ PorousFlowSimpleCO2::dSupercriticalViscosity_dP(Real pressure, Real temperature)
     a4 = c4[0] + c4[1] * t1 + c4[2] * t2 + c4[3] * t3 + c4[4] * t4;
   }
 
- Real dmu = a1 + 2.0 * a2 * p1 + 3.0 * a3 * p2 + 4.0 * a4 * p3;
+ const Real dmu = a1 + 2.0 * a2 * p1 + 3.0 * a3 * p2 + 4.0 * a4 * p3;
 
  return dmu * pa2psia * 1e-3; // cP to Pa.s
 }
@@ -553,6 +569,12 @@ PorousFlowSimpleCO2::dViscosity_dT(Real /*pressure*/, Real /*temperature*/, Real
 std::vector<Real>
 PorousFlowSimpleCO2::henryConstants() const
 {
+  /*
+   * Henry's law constant coefficients for dissolution of CO2 into water.
+   * From Guidelines on the Henry's constant and vapour
+   * liquid distribution constant for gases in H20 and D20 at high
+   * temperatures, IAPWS (2004).
+   */
   std::vector<Real> co2henry;
   co2henry.push_back(-8.55445);
   co2henry.push_back(4.01195);

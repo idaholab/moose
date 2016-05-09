@@ -65,16 +65,16 @@ PorousFlowPorosityHM::computeQpProperties()
   _porosity_nodal[_qp] = _biot + (_phi0 - _biot) * std::exp(-_vol_strain_qp[_qp] + _coeff * _pf_nodal[_qp]);
   _porosity_qp[_qp] = _biot + (_phi0 - _biot) * std::exp(-_vol_strain_qp[_qp] + _coeff * _pf_qp[_qp]);
 
-  _dporosity_qp_dvar[_qp].resize(_num_var, 0.0);
-  _dporosity_nodal_dvar[_qp].resize(_num_var, 0.0);
+  _dporosity_qp_dvar[_qp].resize(_num_var);
+  _dporosity_nodal_dvar[_qp].resize(_num_var);
   for (unsigned v = 0; v < _num_var; ++v)
   {
     _dporosity_qp_dvar[_qp][v] = _coeff * _dpf_qp_dvar[_qp][v] * (_porosity_qp[_qp] - _biot);
     _dporosity_nodal_dvar[_qp][v] = _coeff * _dpf_nodal_dvar[_qp][v] * (_porosity_nodal[_qp] - _biot);
   }
 
-  _dporosity_qp_dgradvar[_qp].resize(_num_var, RealGradient());
-  _dporosity_nodal_dgradvar[_qp].resize(_num_var, RealGradient());
+  _dporosity_qp_dgradvar[_qp].resize(_num_var);
+  _dporosity_nodal_dgradvar[_qp].resize(_num_var);
   for (unsigned v = 0; v < _num_var; ++v)
   {
     _dporosity_qp_dgradvar[_qp][v] = -(_porosity_qp[_qp] - _biot) * _dvol_strain_qp_dvar[_qp][v];
