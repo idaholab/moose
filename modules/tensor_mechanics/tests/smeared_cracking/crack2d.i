@@ -67,8 +67,7 @@
   [./TensorMechanics]
     displacements = 'disp_x disp_y'
     use_displaced_mesh = false
-    save_in_disp_x = resid_x
-    save_in_disp_y = resid_y
+    save_in = 'resid_x resid_y'
   [../]
 
 []
