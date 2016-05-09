@@ -23,8 +23,8 @@ public:
   struct ControlLogicNameEntry
   {
     ControlLogicNameEntry(const std::string & object_name, const std::string par_name) :
-      _object_name(object_name),
-      _par_name(par_name)
+        _object_name(object_name),
+        _par_name(par_name)
     {
     }
 
@@ -40,8 +40,8 @@ public:
   struct ControlLogicMapContainer
   {
     ControlLogicMapContainer(const std::string & controllable_par_name, unsigned int & position) :
-      _controllable_par_name(controllable_par_name),
-      _position(position)
+        _controllable_par_name(controllable_par_name),
+        _position(position)
     {
     }
 
@@ -161,7 +161,7 @@ protected:
   /// Global mesh this component works on
   RELAP7Mesh & _mesh;
   /// Global physical mesh this component works on
-  RELAP7Mesh * & _phys_mesh;
+  RELAP7Mesh *& _phys_mesh;
 
   /// List of subdomain IDs this components owns
   std::vector<unsigned int> _subdomains;

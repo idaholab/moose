@@ -21,7 +21,7 @@ InputParameters validParams<PipeBase>();
  * subdivided into _n_elems elements (of type EDGE2).
  */
 class PipeBase : public GeometricalComponent,
-    public FlowModel
+  public FlowModel
 {
 public:
   PipeBase(const InputParameters & params);
