@@ -443,7 +443,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
       // might live on nodes connected to this element.
       for (unsigned int n=0; n<elem->n_nodes(); n++)
       {
-        Node * node = elem->get_node(n);
+        Node * node = elem->node_ptr(n);
 
         // Have to get each variable's dofs
         for (unsigned int v=0; v<n_vars; v++)

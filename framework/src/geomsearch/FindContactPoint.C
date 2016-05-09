@@ -66,13 +66,13 @@ findContactPoint(PenetrationInfo & p_info,
 
   if (dim == 1)
   {
-    Node * left(master_elem->get_node(0));
+    Node * left(master_elem->node_ptr(0));
     Node * right(left);
     Real leftCoor((*left)(0));
     Real rightCoor(leftCoor);
     for (unsigned i(1); i < master_elem->n_nodes(); ++i)
     {
-      Node * curr = master_elem->get_node(i);
+      Node * curr = master_elem->node_ptr(i);
       Real coor = (*curr)(0);
       if (coor < leftCoor)
       {
@@ -287,12 +287,12 @@ void restrictPointToFace(Point& p,
       if (xi < -1.0)
       {
         xi = -1.0;
-        off_edge_nodes.push_back(side->get_node(0));
+        off_edge_nodes.push_back(side->node_ptr(0));
       }
       else if (xi > 1.0)
       {
         xi = 1.0;
-        off_edge_nodes.push_back(side->get_node(1));
+        off_edge_nodes.push_back(side->node_ptr(1));
       }
       break;
     }
@@ -307,43 +307,43 @@ void restrictPointToFace(Point& p,
       {
         xi = 0.0;
         eta = 0.0;
-        off_edge_nodes.push_back(side->get_node(0));
+        off_edge_nodes.push_back(side->node_ptr(0));
       }
       else if (xi > 0.0 && xi < 1.0
                && eta < 0.0)
       {
         eta = 0.0;
-        off_edge_nodes.push_back(side->get_node(0));
-        off_edge_nodes.push_back(side->get_node(1));
+        off_edge_nodes.push_back(side->node_ptr(0));
+        off_edge_nodes.push_back(side->node_ptr(1));
       }
       else if (eta > 0.0 && eta < 1.0
                && xi < 0.0)
       {
         xi = 0.0;
-        off_edge_nodes.push_back(side->get_node(2));
-        off_edge_nodes.push_back(side->get_node(0));
+        off_edge_nodes.push_back(side->node_ptr(2));
+        off_edge_nodes.push_back(side->node_ptr(0));
       }
       else if (xi >= 1.0
                && (eta - xi) <= -1.0)
       {
         xi = 1.0;
         eta = 0.0;
-        off_edge_nodes.push_back(side->get_node(1));
+        off_edge_nodes.push_back(side->node_ptr(1));
       }
       else if (eta >= 1.0
                && (eta - xi) >= 1.0)
       {
         xi = 0.0;
         eta = 1.0;
-        off_edge_nodes.push_back(side->get_node(2));
+        off_edge_nodes.push_back(side->node_ptr(2));
       }
       else if ((xi + eta) > 1.0)
       {
         Real delta = (xi+eta-1.0)/2.0;
         xi -= delta;
         eta -= delta;
-        off_edge_nodes.push_back(side->get_node(1));
-        off_edge_nodes.push_back(side->get_node(2));
+        off_edge_nodes.push_back(side->node_ptr(1));
+        off_edge_nodes.push_back(side->node_ptr(2));
       }
       break;
     }
@@ -359,17 +359,17 @@ void restrictPointToFace(Point& p,
         if (eta < -1.0)
         {
           eta = -1.0;
-          off_edge_nodes.push_back(side->get_node(0));
+          off_edge_nodes.push_back(side->node_ptr(0));
         }
         else if (eta > 1.0)
         {
           eta = 1.0;
-          off_edge_nodes.push_back(side->get_node(3));
+          off_edge_nodes.push_back(side->node_ptr(3));
         }
         else
         {
-          off_edge_nodes.push_back(side->get_node(3));
-          off_edge_nodes.push_back(side->get_node(0));
+          off_edge_nodes.push_back(side->node_ptr(3));
+          off_edge_nodes.push_back(side->node_ptr(0));
         }
       }
       else if (xi > 1.0)
@@ -378,17 +378,17 @@ void restrictPointToFace(Point& p,
         if (eta < -1.0)
         {
           eta = -1.0;
-          off_edge_nodes.push_back(side->get_node(1));
+          off_edge_nodes.push_back(side->node_ptr(1));
         }
         else if (eta > 1.0)
         {
           eta = 1.0;
-          off_edge_nodes.push_back(side->get_node(2));
+          off_edge_nodes.push_back(side->node_ptr(2));
         }
         else
         {
-          off_edge_nodes.push_back(side->get_node(1));
-          off_edge_nodes.push_back(side->get_node(2));
+          off_edge_nodes.push_back(side->node_ptr(1));
+          off_edge_nodes.push_back(side->node_ptr(2));
         }
       }
       else
@@ -396,14 +396,14 @@ void restrictPointToFace(Point& p,
         if (eta < -1.0)
         {
           eta = -1.0;
-          off_edge_nodes.push_back(side->get_node(0));
-          off_edge_nodes.push_back(side->get_node(1));
+          off_edge_nodes.push_back(side->node_ptr(0));
+          off_edge_nodes.push_back(side->node_ptr(1));
         }
         else if (eta > 1.0)
         {
           eta = 1.0;
-          off_edge_nodes.push_back(side->get_node(2));
-          off_edge_nodes.push_back(side->get_node(3));
+          off_edge_nodes.push_back(side->node_ptr(2));
+          off_edge_nodes.push_back(side->node_ptr(3));
         }
       }
       break;

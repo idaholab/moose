@@ -48,7 +48,7 @@ NodalNormalsCorner::execute()
 
   for (unsigned int nd = 0; nd < _current_side_elem->n_nodes(); nd++)
   {
-    const Node * node = _current_side_elem->get_node(nd);
+    const Node * node = _current_side_elem->node_ptr(nd);
     if (boundary_info.has_boundary_id(node, _corner_boundary_id) &&
         node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
       {

@@ -351,7 +351,7 @@ MooseMesh::node(const dof_id_type i) const
   if (i > getMesh().max_node_id())
     return *(*_quadrature_nodes.find(i)).second;
 
-  return getMesh().node(i);
+  return getMesh().node_ref(i);
 }
 
 Node &
@@ -360,7 +360,7 @@ MooseMesh::node(const dof_id_type i)
   if (i > getMesh().max_node_id())
     return *_quadrature_nodes[i];
 
-  return getMesh().node(i);
+  return getMesh().node_ref(i);
 }
 
 const Node*
@@ -479,7 +479,7 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
     const Elem * elem = *it;
     for (unsigned int n = 0; n < elem->n_nodes(); ++n)
     {
-      Node * node = elem->get_node(n);
+      Node * node = elem->node_ptr(n);
 
       _semilocal_node_list.insert(node);
     }
@@ -490,10 +490,10 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
       it!=ghosted_elems.end();
       ++it)
   {
-    Elem * elem = getMesh().elem(*it);
+    Elem * elem = getMesh().elem_ptr(*it);
     for (unsigned int n = 0; n < elem->n_nodes(); n++)
     {
-      Node * node = elem->get_node(n);
+      Node * node = elem->node_ptr(n);
 
       _semilocal_node_list.insert(node);
     }
@@ -586,7 +586,7 @@ MooseMesh::buildBndElemList()
   _bnd_elems.resize(n);
   for (int i = 0; i < n; i++)
   {
-    _bnd_elems[i] = new BndElement(getMesh().elem(elems[i]), sides[i], ids[i]);
+    _bnd_elems[i] = new BndElement(getMesh().elem_ptr(elems[i]), sides[i], ids[i]);
     _bnd_elem_ids[ids[i]].insert(elems[i]);
   }
 }
@@ -735,7 +735,7 @@ MooseMesh::cacheInfo()
 
     for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
     {
-      Node & node = *elem->get_node(nd);
+      Node & node = *elem->node_ptr(nd);
       _block_node_list[node.id()].insert(elem->subdomain_id());
     }
   }
@@ -1061,11 +1061,11 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
           // At this point we have matching sides - lets find matching nodes
           for (unsigned int i = 0; i < elem_side->n_nodes(); ++i)
           {
-            Node * master_node = elem->get_node(i);
+            Node * master_node = elem->node_ptr(i);
             Point master_point = periodic->get_corresponding_pos(*master_node);
             for (unsigned int j = 0; j < neigh_side->n_nodes(); ++j)
             {
-              Node *slave_node = neigh_side->get_node(j);
+              Node *slave_node = neigh_side->node_ptr(j);
               if (master_point.absolute_fuzzy_equals(*slave_node))
               {
                 // Avoid inserting any duplicates
@@ -1910,13 +1910,13 @@ MooseMesh::nElem() const
 Elem *
 MooseMesh::elem(const dof_id_type i)
 {
-  return getMesh().elem(i);
+  return getMesh().elem_ptr(i);
 }
 
 const Elem *
 MooseMesh::elem(const dof_id_type i) const
 {
-  return getMesh().elem(i);
+  return getMesh().elem_ptr(i);
 }
 
 bool
@@ -2076,7 +2076,7 @@ MooseMesh::ghostGhostedBoundaries()
   {
     if (_ghosted_boundaries.find(ids[i]) != _ghosted_boundaries.end())
     {
-      Elem * elem = mesh.elem(elems[i]);
+      Elem * elem = mesh.elem_ptr(elems[i]);
 
 #ifdef LIBMESH_ENABLE_AMR
       elem->family_tree(family_tree);
@@ -2090,7 +2090,7 @@ MooseMesh::ghostGhostedBoundaries()
         boundary_elems_to_ghost.insert(felem);
 
         for (unsigned int n = 0; n < felem->n_nodes(); ++n)
-          connected_nodes_to_ghost.insert (felem->get_node(n));
+          connected_nodes_to_ghost.insert (felem->node_ptr(n));
       }
     }
   }

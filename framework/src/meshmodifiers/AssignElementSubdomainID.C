@@ -52,7 +52,7 @@ AssignElementSubdomainID::modify()
     std::vector<dof_id_type> elemids = getParam<std::vector<dof_id_type> >("element_ids");
     for (dof_id_type i = 0; i < elemids.size(); ++i)
     {
-      Elem * elem = mesh.query_elem(elemids[i]);
+      Elem * elem = mesh.query_elem_ptr(elemids[i]);
       if (!elem)
         mooseError("invalid element ID is in element_ids");
       else

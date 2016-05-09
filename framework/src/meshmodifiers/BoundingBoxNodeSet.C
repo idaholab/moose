@@ -69,7 +69,7 @@ BoundingBoxNodeSet::modify()
       {
         for (unsigned int j = 0; j < elem->n_nodes(); ++j)
         {
-          const Node * node = elem->get_node(j);
+          const Node * node = elem->node_ptr(j);
 
           for (unsigned int j = 0; j < boundary_ids.size(); ++j)
             boundary_info.add_node(node, boundary_ids[j]);
