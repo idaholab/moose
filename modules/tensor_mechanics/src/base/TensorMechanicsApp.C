@@ -53,6 +53,8 @@
 #include "ComputeAxisymmetricRZSmallStrain.h"
 #include "ComputeRSphericalSmallStrain.h"
 #include "ComputeIncrementalSmallStrain.h"
+#include "ComputeAxisymmetricRZIncrementalStrain.h"
+#include "ComputeRSphericalIncrementalStrain.h"
 #include "ComputeFiniteStrain.h"
 #include "ComputeAxisymmetricRZFiniteStrain.h"
 #include "ComputeRSphericalFiniteStrain.h"
@@ -202,6 +204,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetricRZSmallStrain);
   registerMaterial(ComputeRSphericalSmallStrain);
   registerMaterial(ComputeIncrementalSmallStrain);
+  registerMaterial(ComputeAxisymmetricRZIncrementalStrain);
+  registerMaterial(ComputeRSphericalIncrementalStrain);
   registerMaterial(ComputeFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZFiniteStrain);
   registerMaterial(ComputeRSphericalFiniteStrain);

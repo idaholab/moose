@@ -4,31 +4,31 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTERSPHERICALFINITESTRAIN_H
-#define COMPUTERSPHERICALFINITESTRAIN_H
+#ifndef COMPUTERSPHERICALINCREMENTALSTRAIN_H
+#define COMPUTERSPHERICALINCREMENTALSTRAIN_H
 
-#include "ComputeFiniteStrain.h"
+#include "ComputeIncrementalSmallStrain.h"
 
 /**
- * ComputeRSphericalFiniteStrain defines a strain increment and a rotation increment
- * for finite strains in 1D spherical symmetry geometries.  The strains in the
+ * ComputeRSphericalIncrementalStrain defines a strain increment only
+ * for small strains in 1D spherical symmetry geometries.  The strains in the
  * polar and azimuthal directions are functions of the radial displacement.
 
  */
-class ComputeRSphericalFiniteStrain : public ComputeFiniteStrain
+class ComputeRSphericalIncrementalStrain : public ComputeIncrementalSmallStrain
 {
 public:
-  ComputeRSphericalFiniteStrain(const InputParameters & parameters);
+  ComputeRSphericalIncrementalStrain(const InputParameters & parameters);
 
 protected:
   virtual void initialSetup();
 
   /// Computes the current and old deformation gradients with the assumptions for
   /// 1D spherical symmetry geometries: \f$ \epsilon_{\theta} = \epsilon_{\phi} = \frac{u_r}{r} \f$
-  virtual void computeProperties();
+  virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
 
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 };
 
-#endif //COMPUTERSPHERICALFINITESTRAIN_H
+#endif //COMPUTERSPHERICALINCREMENTALSTRAIN_H

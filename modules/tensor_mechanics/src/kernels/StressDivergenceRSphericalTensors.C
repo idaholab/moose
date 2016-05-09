@@ -36,7 +36,7 @@ StressDivergenceRSphericalTensors::computeQpResidual()
   {
     div = _grad_test[_i][_qp](0) * _stress[_qp](0,0) + //stress_{rr} part 1
         + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](1,1) + //stress_{\theta \theta}
-        + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2); //stress_{\phi |phi}
+        + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2); //stress_{\phi \phi}
   }
   else
     mooseError("Invalid component for this 1D RSpherical problem.");
