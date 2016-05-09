@@ -18,6 +18,6 @@
     type = 'RunException'
     input = 'real_parameter_reporter.i'
     cli_args = 'Postprocessors/coef_value/parameter=Kernels/diff/coef2'
-    expect_err = "no double parameter named \"coef2\" found."
+    expect_err = "Unable to locate the parameter: Kernels/diff/coef2."
   [../]
 []
