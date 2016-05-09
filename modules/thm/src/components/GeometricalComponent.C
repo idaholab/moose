@@ -36,7 +36,7 @@ GeometricalComponent::doBuildMesh()
   // NOTE: we are using 1D elements, so shifting each component by 1 is ok for now
   // When using 2D or even 3D meshes, this has to be way smarter
   for (unsigned int node_id = _first_node_id; node_id < _last_node_id; node_id++)
-    _mesh.node(node_id)(2) += id();
+    _mesh.nodeRef(node_id)(2) += id();
 }
 
 void
@@ -63,7 +63,7 @@ GeometricalComponent::displaceMesh()
 
   for (unsigned int node_id = _first_node_id; node_id < _last_node_id; ++node_id)
   {
-    Node & current_node = _phys_mesh->node(node_id);
+    Node & current_node = _phys_mesh->nodeRef(node_id);
     RealVectorValue p(current_node(0), current_node(1), current_node(2));
     // move to the origin, rotate about x-axis, transform to follow the direction and move to its position
     current_node = R * (Rx * (p - z_offset)) + _position;
