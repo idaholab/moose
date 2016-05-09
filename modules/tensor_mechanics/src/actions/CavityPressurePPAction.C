@@ -14,10 +14,8 @@ template<>
 InputParameters validParams<CavityPressurePPAction>()
 {
   InputParameters params = validParams<Action>();
-
-  params.addParam<std::string>("output", "The name to use for the cavity pressure value.");
-  params.addParam<std::string>("output_initial_moles", "The name to use when reporting the initial moles of gas.");
-
+  params.addParam<std::string>("output", "The name to use for the cavity pressure value");
+  params.addParam<std::string>("output_initial_moles", "The name to use when reporting the initial moles of gas");
   return params;
 }
 
@@ -31,27 +29,19 @@ CavityPressurePPAction::act()
 {
   std::string uo_name = _name + "UserObject";
 
-  const std::string pp_name = "CavityPressurePostprocessor";
-
-  InputParameters params = _factory.getValidParams(pp_name);
-
+  InputParameters params = _factory.getValidParams("CavityPressurePostprocessor");
   params.set<MultiMooseEnum>("execute_on") = "linear";
-
   params.set<UserObjectName>("cavity_pressure_uo") = uo_name;
-
   params.set<std::string>("quantity") = "cavity_pressure";
+
   if (isParamValid("output"))
-  {
-    _problem->addPostprocessor(pp_name, getParam<std::string>("output"), params);
-  }
+    _problem->addPostprocessor("CavityPressurePostprocessor", getParam<std::string>("output"), params);
   else
-  {
-    _problem->addPostprocessor(pp_name, _name, params);
-  }
+    _problem->addPostprocessor("CavityPressurePostprocessor", _name, params);
 
   if (isParamValid("output_initial_moles"))
   {
     params.set<std::string>("quantity") = "initial_moles";
-    _problem->addPostprocessor(pp_name, getParam<std::string>("output_initial_moles"), params);
+    _problem->addPostprocessor("CavityPressurePostprocessor", getParam<std::string>("output_initial_moles"), params);
   }
 }

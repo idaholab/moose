@@ -45,12 +45,7 @@
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
-#include "CavityPressureAction.h"
-#include "CavityPressurePostprocessor.h"
 #include "LineMaterialSymmTensorSampler.h"
-#include "CavityPressurePPAction.h"
-#include "CavityPressureUserObject.h"
-#include "CavityPressureUOAction.h"
 #include "PresetVelocity.h"
 #include "InteractionIntegralBenchmarkBC.h"
 #include "MaterialTensorIntegral.h"
@@ -151,7 +146,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(JIntegral);
   registerPostprocessor(CrackFrontData);
   registerPostprocessor(InteractionIntegral);
-  registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(MaterialTensorIntegral);
   registerPostprocessor(MixedModeEquivalentK);
 
@@ -159,7 +153,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerVectorPostprocessor(LineMaterialSymmTensorSampler);
 
   registerUserObject(MaterialTensorOnLine);
-  registerUserObject(CavityPressureUserObject);
   registerUserObject(CrackFrontDefinition);
 }
 
@@ -168,11 +161,6 @@ extern "C" void SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactor
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("EmptyAction", "BCs/CavityPressure");
-  syntax.registerActionSyntax("CavityPressureAction", "BCs/CavityPressure/*");
-  syntax.registerActionSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
-  syntax.registerActionSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
-
   syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_user_object");
@@ -182,9 +170,6 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_vector_postprocessor");
   syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral","add_material");
 
-  registerAction(CavityPressureAction, "add_bc");
-  registerAction(CavityPressurePPAction, "add_postprocessor");
-  registerAction(CavityPressureUOAction, "add_user_object");
   registerAction(SolidMechanicsAction, "add_kernel");
   registerAction(DomainIntegralAction, "add_user_object");
   registerAction(DomainIntegralAction, "add_aux_variable");

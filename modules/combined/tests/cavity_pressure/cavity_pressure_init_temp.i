@@ -14,36 +14,29 @@
 #   Block 2 sits in the cavity and has a volume of 1.  Thus, the total
 #   initial volume is 7.
 # The test adjusts n, T, and V in the following way:
-#   n => n0 + alpha*t
-#   T => T0 + beta*t
-#   V => V0 + gamma*t
+#   n => n0 + alpha * t
+#   T => T0 + beta * t
+#   V => V0 + gamma * t
 # with
 #   alpha = n0
-#   beta = T0/2
-#   gamma = -(0.003322259...)*V0
+#   beta = T0 / 2
+#   gamma = -(0.003322259...) * V0
 #   T0 = 240.54443866068704
 #   V0 = 7
 #   n0 = f(p0)
 #   p0 = 100
-#   R = 8.314472 J* K^(−1)*mol^(−1)
+#   R = 8.314472 J * K^(−1) * mol^(−1)
 #
-# So, n0 = p0*V0/R/T0 = 100*7/8.314472/240.544439
+# So, n0 = p0 * V0 / R / T0 = 100 * 7 / 8.314472 / 240.544439
 #        = 0.35
 #
-# The parameters combined at t=1 gives p = 301.
+# The parameters combined at t = 1 gives p = 301.
 #
 # This test sets the initial temperature to 500, but the CavityPressure
 #   is told that that initial temperature is T0.  Thus, the final solution
 #   is unchanged.
-#
 
-[GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
-[]
-
-[Mesh]#Comment
+[Mesh]
   file = cavity_pressure.e
   displacements = 'disp_x disp_y disp_z'
 []
@@ -73,29 +66,23 @@
 []
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./temp]
     order = FIRST
     family = LAGRANGE
-#    initial_condition = 240.54443866068704
     initial_condition = 500
   [../]
-
   [./material_input]
     order = FIRST
     family = LAGRANGE
@@ -104,7 +91,6 @@
 []
 
 [AuxVariables]
-
   [./pressure_residual_x]
     order = FIRST
     family = LAGRANGE
@@ -141,76 +127,69 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
-[] # AuxVariables
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
 []
 
 [Kernels]
-
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y disp_z'
+    use_displaced_mesh = true
+  [../]
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
   [./material_input_dummy]
     type = HeatConduction
     variable = material_input
   [../]
-
 []
 
-
 [AuxKernels]
-
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 0
     variable = stress_xx
-    index = 0
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 1
     variable = stress_yy
-    index = 1
   [../]
   [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 2
     variable = stress_zz
-    index = 2
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 1
     variable = stress_xy
-    index = 3
   [../]
   [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 2
     variable = stress_yz
-    index = 4
   [../]
   [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 0
     variable = stress_zx
-    index = 5
   [../]
-
-[] # AuxKernels
-
+[]
 
 [BCs]
-
   [./no_x_exterior]
     type = DirichletBC
     variable = disp_x
@@ -229,7 +208,6 @@
     boundary = '11 12'
     value = 0.0
   [../]
-
   [./prescribed_left]
     type = FunctionPresetBC
     variable = disp_x
@@ -242,44 +220,36 @@
     boundary = 14
     function = displ_negative
   [../]
-
   [./no_y]
     type = DirichletBC
     variable = disp_y
     boundary = '15 16'
     value = 0.0
   [../]
-
   [./no_z]
     type = DirichletBC
     variable = disp_z
     boundary = '17 18'
     value = 0.0
   [../]
-
   [./no_x_interior]
     type = DirichletBC
     variable = disp_x
     boundary = '1 2'
     value = 0.0
   [../]
-
   [./no_y_interior]
     type = DirichletBC
     variable = disp_y
     boundary = '3 4'
     value = 0.0
   [../]
-
   [./no_z_interior]
     type = DirichletBC
     variable = disp_z
     boundary = '5 6'
     value = 0.0
   [../]
-
-
-
   [./temperatureInterior]
     type = FunctionPresetBC
     boundary = 100
@@ -292,8 +262,6 @@
     function = material_input_function
     variable = material_input
   [../]
-
-
   [./CavityPressure]
     [./1]
       boundary = 100
@@ -305,50 +273,55 @@
       volume = internalVolume
       startup_time = 0.5
       output = ppress
-      save_in_disp_x = pressure_residual_x
-      save_in_disp_y = pressure_residual_y
-      save_in_disp_z = pressure_residual_z
+      displacements = 'disp_x disp_y disp_z'
+      save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
     [../]
   [../]
-
-[] # BCs
-
+[]
 
 [Materials]
-
-  [./stiffStuff]
-    type = Elastic
+  [./elast_tensor1]
+    type = ComputeElasticityTensor
+    C_ijkl = '0 5'
+#    youngs_modulus = 1e1
+#    poissons_ratio = 0
+    fill_method = symmetric_isotropic
     block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e1
-    poissons_ratio = 0.0
-    thermal_expansion = 0
   [../]
-
-  [./stiffStuff2]
-    type = Elastic
+  [./strain1]
+    type = ComputeFiniteStrain
+    thermal_expansion_coeff = 0
+    displacements = 'disp_x disp_y disp_z'
+    block = 1
+  [../]
+  [./stress1]
+    type = ComputeFiniteStrainElasticStress
+    block = 1
+  [../]
+  [./elast_tensor2]
+    type = ComputeElasticityTensor
+    C_ijkl = '0 5'
+#    youngs_modulus = 1e1
+#    poissons_ratio = 0
+    fill_method = symmetric_isotropic
     block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-    thermal_expansion = 0
   [../]
-
+  [./strain2]
+    type = ComputeFiniteStrain
+    thermal_expansion_coeff = 0
+    displacements = 'disp_x disp_y disp_z'
+    block = 2
+  [../]
+  [./stress2]
+    type = ComputeFiniteStrainElasticStress
+    block = 2
+  [../]
   [./heatconduction]
     type = HeatConductionMaterial
     block = '1 2'
     thermal_conductivity = 1.0
     specific_heat = 1.0
   [../]
-
   [./density]
     type = Density
     block = '1 2'
@@ -361,13 +334,10 @@
 []
 
 [Executioner]
-
   type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm       lu'
@@ -388,7 +358,6 @@
     boundary = 100
     execute_on = 'initial linear'
   [../]
-
   [./aveTempInterior]
     type = SideAverageValue
     boundary = 100
@@ -401,7 +370,6 @@
     variable = material_input
     execute_on = linear
   [../]
-
 []
 
 [Outputs]
