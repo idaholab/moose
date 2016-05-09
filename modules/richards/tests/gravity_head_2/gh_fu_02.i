@@ -269,8 +269,8 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -snes_atol -snes_rtol -snes_max_it'
+    petsc_options_value = 'gmres asm lu NONZERO 1E-10 1E-10 10000'
   [../]
 []
 
