@@ -26,7 +26,7 @@ SwitchingFunction3PhaseMaterial::SwitchingFunction3PhaseMaterial(const InputPara
   EBFunction h_i;
   //Definition of the switching function for the expression builder
   h_i(_eta_i,_eta_j,_eta_k) = _eta_i * _eta_i/4.0 * (15.0 * (1.0 - _eta_i) * (1.0 + _eta_i
-                                - (_eta_k - _eta_j) * (_eta_k - _eta_j)) + _eta_i * (9.0 * _eta_i * _eta_i - 5.0));
+                              - (_eta_k - _eta_j) * (_eta_k - _eta_j)) + _eta_i * (9.0 * _eta_i * _eta_i - 5.0));
 
   //Parse function for automatic differentiation
   functionParse(h_i);

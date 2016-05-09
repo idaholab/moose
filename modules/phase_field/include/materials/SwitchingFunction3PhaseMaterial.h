@@ -22,7 +22,7 @@ InputParameters validParams<SwitchingFunction3PhaseMaterial>();
  * 011602 (2005).
  */
 class SwitchingFunction3PhaseMaterial : public DerivativeParsedMaterialHelper,
-                                  public ExpressionBuilder
+                                        public ExpressionBuilder
 {
 public:
   SwitchingFunction3PhaseMaterial(const InputParameters & parameters);
