@@ -17,18 +17,11 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
-#include "MooseError.h" // mooseDeprecated
 
 
 NeighborMooseVariableInterface::NeighborMooseVariableInterface(const MooseObject * moose_object, bool nodal) :
     MooseVariableInterface(moose_object, nodal)
 {
-}
-
-NeighborMooseVariableInterface::NeighborMooseVariableInterface(const InputParameters & parameters, bool nodal) :
-    MooseVariableInterface(parameters, nodal)
-{
-  mooseDeprecated("Deprecated constructor: Please contact the MOOSE team for assistance in removing this warning");
 }
 
 NeighborMooseVariableInterface::~NeighborMooseVariableInterface()

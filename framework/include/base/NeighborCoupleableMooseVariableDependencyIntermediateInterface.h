@@ -19,7 +19,6 @@
 #include "ScalarCoupleable.h"
 #include "NeighborMooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
-#include "MooseError.h" // mooseDeprecated
 
 /**
  * Intermediate base class that ties together all the interfaces for getting
@@ -37,20 +36,6 @@ public:
     ScalarCoupleable(moose_object),
     NeighborMooseVariableInterface(moose_object, nodal)
   {
-    const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-    for (unsigned int i=0; i<coupled_vars.size(); i++)
-      addMooseVariableDependency(coupled_vars[i]);
-
-    addMooseVariableDependency(mooseVariable());
-  }
-
-  NeighborCoupleableMooseVariableDependencyIntermediateInterface(const InputParameters & parameters, bool nodal, bool neighbor_nodal) :
-    NeighborCoupleable(parameters, nodal, neighbor_nodal),
-    ScalarCoupleable(parameters),
-    NeighborMooseVariableInterface(parameters, nodal)
-  {
-    mooseDeprecated("Deprecated constructor: Please contact the MOOSE team for assistance in removing this warning");
-
     const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
     for (unsigned int i=0; i<coupled_vars.size(); i++)
       addMooseVariableDependency(coupled_vars[i]);
