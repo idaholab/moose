@@ -45,6 +45,6 @@ Real
 CInterfacePosition::getValue()
 {
   unsigned int node_id = NodalProxyMaxValue::getValue();
-  return _mesh.node(node_id)(_direction_index);
+  return _mesh.nodeRef(node_id)(_direction_index);
 }
 

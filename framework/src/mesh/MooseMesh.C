@@ -348,6 +348,20 @@ MooseMesh::update()
 const Node &
 MooseMesh::node(const dof_id_type i) const
 {
+  // mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
+  return nodeRef(i);
+}
+
+Node &
+MooseMesh::node(const dof_id_type i)
+{
+  // mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
+  return nodeRef(i);
+}
+
+const Node &
+MooseMesh::nodeRef(const dof_id_type i) const
+{
   if (i > getMesh().max_node_id())
     return *(*_quadrature_nodes.find(i)).second;
 
@@ -355,7 +369,7 @@ MooseMesh::node(const dof_id_type i) const
 }
 
 Node &
-MooseMesh::node(const dof_id_type i)
+MooseMesh::nodeRef(const dof_id_type i)
 {
   if (i > getMesh().max_node_id())
     return *_quadrature_nodes[i];

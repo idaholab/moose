@@ -1036,7 +1036,7 @@ FEProblem::reinitNode(const Node * node, THREAD_ID tid)
   _assembly[tid]->reinit(node);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitNode(&_displaced_mesh->node(node->id()), tid);
+    _displaced_problem->reinitNode(&_displaced_mesh->nodeRef(node->id()), tid);
 
   _nl.reinitNode(node, tid);
   _aux.reinitNode(node, tid);
@@ -1048,7 +1048,7 @@ FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
   _assembly[tid]->reinit(node);
 
   if (_displaced_problem != NULL && _reinit_displaced_face)
-    _displaced_problem->reinitNodeFace(&_displaced_mesh->node(node->id()), bnd_id, tid);
+    _displaced_problem->reinitNodeFace(&_displaced_mesh->nodeRef(node->id()), bnd_id, tid);
 
   _nl.reinitNodeFace(node, bnd_id, tid);
   _aux.reinitNodeFace(node, bnd_id, tid);
@@ -1081,7 +1081,7 @@ FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
   _assembly[tid]->reinitNodeNeighbor(node);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->node(node->id()), tid);
+    _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->nodeRef(node->id()), tid);
 
   _nl.reinitNodeNeighbor(node, tid);
   _aux.reinitNodeNeighbor(node, tid);

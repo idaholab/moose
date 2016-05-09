@@ -172,7 +172,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
     res_vec(i) = _residual_copy(dof_number);
   }
 
-  const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+  const RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
   const RealVectorValue pen_force(_penalty * distance_vec);
   Real resid = 0;
 

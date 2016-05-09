@@ -113,7 +113,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
-    const Node & node = _mesh.node(*nd);
+    const Node & node = _mesh.nodeRef(*nd);
 
     // We're going to get a reference to the pointer for the pinfo for this node
     // This will allow us to manipulate this pointer without having to go through

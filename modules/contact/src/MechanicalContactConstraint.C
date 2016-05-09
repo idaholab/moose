@@ -176,7 +176,7 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
     pinfo->_mech_status_old = pinfo->_mech_status;
 
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(*pinfo);
-    const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.node(slave_node_num));
+    const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(slave_node_num));
 
     // Capture
     if ( ! pinfo->isCaptured() && MooseUtils::absoluteFuzzyGreaterEqual(distance, 0, _capture_tolerance))
@@ -239,7 +239,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
     dof_id_type dof_number = node->dof_number(0, _vars(i), 0);
     res_vec(i) = _residual_copy(dof_number);
   }
-  RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+  RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
   const Real penalty = getPenalty(*pinfo);
   RealVectorValue pen_force(penalty * distance_vec);
 
@@ -325,7 +325,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
         }
         case CF_PENALTY:
         {
-          distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
+          distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.nodeRef(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
           pen_force = penalty * distance_vec;
 
           // Frictional capacity

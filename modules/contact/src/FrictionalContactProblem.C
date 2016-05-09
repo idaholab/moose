@@ -371,7 +371,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
               // RealVectorValue current_coords = *node;
               // RealVectorValue correction = info._closest_point - current_coords;
 
-              const Node & undisp_node = _mesh.node(node->id());
+              const Node & undisp_node = _mesh.nodeRef(node->id());
               RealVectorValue solution = info._closest_point - undisp_node;
 
               for (unsigned int i=0; i<dim; ++i)

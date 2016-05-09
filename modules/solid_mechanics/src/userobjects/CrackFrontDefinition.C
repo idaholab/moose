@@ -242,7 +242,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<dof_id_type>& nodes)
 
       for (std::set<dof_id_type>::iterator sit=nodes.begin(); sit != nodes.end(); ++sit)
       {
-        Node & curr_node = _mesh.node(*sit);
+        Node & curr_node = _mesh.nodeRef(*sit);
         if (sit == nodes.begin())
         {
           node0coor0 = curr_node(axis0);
@@ -391,8 +391,8 @@ void
 CrackFrontDefinition::orderEndNodes(std::vector<dof_id_type> &end_nodes)
 {
   //Choose the node to be the first node.  Do that based on undeformed coordinates for repeatability.
-  Node & node0 = _mesh.node(end_nodes[0]);
-  Node & node1 = _mesh.node(end_nodes[1]);
+  Node & node0 = _mesh.nodeRef(end_nodes[0]);
+  Node & node1 = _mesh.nodeRef(end_nodes[1]);
 
   unsigned int num_positive_coor0 = 0;
   unsigned int num_positive_coor1 = 0;
@@ -449,7 +449,7 @@ CrackFrontDefinition::pickLoopCrackEndNodes(std::vector<dof_id_type> &end_nodes,
   //the greatest x coordinate if the nodes are equidistant from the origin
   for (std::set<dof_id_type>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
   {
-    Node & node = _mesh.node(*nit);
+    Node & node = _mesh.nodeRef(*nit);
     Real dist = node.norm();
     if (dist > max_dist)
     {
@@ -1351,7 +1351,7 @@ CrackFrontDefinition::createQFunctionRings()
            ++nit)
       {
         std::vector<const Node *> neighbors;
-        MeshTools::find_nodal_neighbors(_mesh.getMesh(), _mesh.node(*nit), nodes_to_elem_map, neighbors);
+        MeshTools::find_nodal_neighbors(_mesh.getMesh(), _mesh.nodeRef(*nit), nodes_to_elem_map, neighbors);
         for (unsigned int inei=0; inei<neighbors.size(); ++inei)
         {
           std::set<dof_id_type>::iterator thisit = connected_nodes_this_cfn.find(neighbors[inei]->id());
@@ -1470,7 +1470,7 @@ CrackFrontDefinition::addNodesToQFunctionRing(std::set<dof_id_type>& nodes_new_r
        ++nit)
   {
     std::vector<const Node *> neighbors;
-    MeshTools::find_nodal_neighbors(_mesh.getMesh(), _mesh.node(*nit), nodes_to_elem_map, neighbors);
+    MeshTools::find_nodal_neighbors(_mesh.getMesh(), _mesh.nodeRef(*nit), nodes_to_elem_map, neighbors);
     for (unsigned int inei=0; inei<neighbors.size(); ++inei)
     {
       std::set<dof_id_type>::const_iterator previt = nodes_all_rings.find(neighbors[inei]->id());
