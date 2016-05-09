@@ -106,7 +106,7 @@ SlaveConstraint::addPoints()
 
       for (unsigned int i=0; i<connected_elems.size() && !elem; ++i)
       {
-        Elem * cur_elem = _mesh.elem(connected_elems[i]);
+        Elem * cur_elem = _mesh.elemPtr(connected_elems[i]);
         if (cur_elem->processor_id() == processor_id())
           elem = cur_elem;
       }

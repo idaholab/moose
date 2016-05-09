@@ -119,7 +119,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
         const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[node_id];
 
         for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-          if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+          if (_mesh.elemPtr(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
           {
             need_to_track = true;
             break; // Break out of element loop
@@ -139,7 +139,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
             const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[neighbor_node_id];
 
             for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-              if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+              if (_mesh.elemPtr(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
               {
                 need_to_track = true;
                 break; // Break out of element loop

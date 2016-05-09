@@ -187,7 +187,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
       for (unsigned int j=0; j<closest_elems.size(); j++)
       {
         dof_id_type elem_id = closest_elems[j];
-        const Elem * elem = _mesh.elem(elem_id);
+        const Elem * elem = _mesh.elemPtr(elem_id);
 
         std::vector<PenetrationInfo*> thisElemInfo;
         std::vector<const Node*> nodesThatMustBeOnSide;
@@ -1512,7 +1512,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
   {
     if (elems_to_exclude.find(elems_connected_to_node[ecni]) != elems_to_exclude.end())
       continue;
-    const Elem * elem = _mesh.elem(elems_connected_to_node[ecni]);
+    const Elem * elem = _mesh.elemPtr(elems_connected_to_node[ecni]);
 
     std::vector<const Node*> nodevec;
     for (unsigned int ni=0; ni<elem->n_nodes(); ++ni)

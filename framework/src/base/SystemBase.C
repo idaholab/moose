@@ -423,7 +423,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
       elem_id != ghosted_elems.end();
       ++elem_id)
   {
-    Elem * elem = _mesh.elem(*elem_id);
+    Elem * elem = _mesh.elemPtr(*elem_id);
 
     if (elem->active())
     {

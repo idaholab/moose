@@ -85,7 +85,7 @@ FlagElementsThread::onElement(const Elem *elem)
   const_cast<Elem *>(elem)->set_refinement_flag((Elem::RefinementState)marker_value);
 
   if (_displaced_problem)
-    _displaced_problem->mesh().elem(elem->id())->set_refinement_flag((Elem::RefinementState)marker_value);
+    _displaced_problem->mesh().elemPtr(elem->id())->set_refinement_flag((Elem::RefinementState)marker_value);
 }
 
 void

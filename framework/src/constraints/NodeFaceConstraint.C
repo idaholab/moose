@@ -238,7 +238,7 @@ NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
 
     std::vector<dof_id_type> dof_indices;
 
-    var.getDofIndices(_mesh.elem(cur_elem), dof_indices);
+    var.getDofIndices(_mesh.elemPtr(cur_elem), dof_indices);
 
     for (unsigned int di=0; di < dof_indices.size(); di++)
       unique_dof_indices.insert(dof_indices[di]);

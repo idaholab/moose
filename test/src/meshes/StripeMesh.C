@@ -58,7 +58,7 @@ StripeMesh::buildMesh()
   for (unsigned int en = 0; en < nElem(); en++)
   {
     // get an element
-    Elem * e = elem(en);
+    Elem * e = elemPtr(en);
 
     if (!e)
     {

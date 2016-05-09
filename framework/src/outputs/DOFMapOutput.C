@@ -177,10 +177,10 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
         // get the list of unique DOFs for this variable
         std::set<dof_id_type> dofs;
         for (unsigned int i = 0; i < _mesh.nElem(); ++i)
-          if (_mesh.elem(i)->subdomain_id() == *sd)
+          if (_mesh.elemPtr(i)->subdomain_id() == *sd)
           {
             std::vector<dof_id_type> di;
-            dof_map.dof_indices(_mesh.elem(i), di, var);
+            dof_map.dof_indices(_mesh.elemPtr(i), di, var);
             dofs.insert(di.begin(), di.end());
           }
         oss << join(dofs.begin(), dofs.end(), ", ") << "]}";
