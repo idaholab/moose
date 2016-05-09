@@ -177,7 +177,7 @@ GrainTracker::expandHalos()
                entity_it != orig_halo_ids.end(); ++entity_it)
           {
             if (_is_elemental)
-              visitElementalNeighbors(_mesh.elem(*entity_it), feature._var_idx, &feature, /*recurse =*/false);
+              visitElementalNeighbors(_mesh.elemPtr(*entity_it), feature._var_idx, &feature, /*recurse =*/false);
             else
               visitNodalNeighbors(_mesh.nodePtr(*entity_it), feature._var_idx, &feature, /*recurse =*/false);
           }

@@ -106,7 +106,7 @@ SlaveConstraint::addPoints()
 
       for (unsigned int i=0; i<connected_elems.size() && !elem; ++i)
       {
-        Elem * cur_elem = _mesh.elem(connected_elems[i]);
+        Elem * cur_elem = _mesh.elemPtr(connected_elems[i]);
         if (cur_elem->processor_id() == processor_id())
           elem = cur_elem;
       }
@@ -131,7 +131,7 @@ SlaveConstraint::computeQpResidual()
 
   if (_formulation == CF_DEFAULT)
   {
-    RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+    RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
     RealVectorValue pen_force(_penalty * distance_vec);
     if (_normalize_penalty)
       pen_force *= area;
@@ -207,7 +207,7 @@ SlaveConstraint::computeQpJacobian()
       d2.zero();
     }
 
-    const RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+    const RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
     const Real ATA11( A1 * A1 );
     const Real ATA12( A1 * A2 );
     const Real ATA22( A2 * A2 );

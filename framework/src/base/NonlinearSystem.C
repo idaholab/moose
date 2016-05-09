@@ -974,7 +974,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
-        Node & slave_node = _mesh.node(slave_node_num);
+        Node & slave_node = _mesh.nodeRef(slave_node_num);
 
         if (slave_node.processor_id() == processor_id())
         {
@@ -1067,7 +1067,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
-        Node & slave_node = _mesh.node(slave_node_num);
+        Node & slave_node = _mesh.nodeRef(slave_node_num);
 
         if (slave_node.processor_id() == processor_id())
         {
@@ -1443,7 +1443,7 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 void
 NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
 {
-  const Node & node = _mesh.node(node_id);
+  const Node & node = _mesh.nodeRef(node_id);
   unsigned int s = number();
   if (node.has_dofs(s))
   {
@@ -1480,7 +1480,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
           dof_id_type cur_elem = elems[el];
 
           std::vector<dof_id_type> dof_indices;
-          dofMap().dof_indices(_mesh.elem(cur_elem), dof_indices);
+          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
 
           for (unsigned int di=0; di < dof_indices.size(); di++)
             unique_slave_indices.insert(dof_indices[di]);
@@ -1502,7 +1502,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
             dof_id_type cur_elem = elems[el];
 
             std::vector<dof_id_type> dof_indices;
-            dofMap().dof_indices(_mesh.elem(cur_elem), dof_indices);
+            dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
 
             for (unsigned int di=0; di < dof_indices.size(); di++)
               unique_master_indices.insert(dof_indices[di]);
@@ -1634,7 +1634,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
-        Node & slave_node = _mesh.node(slave_node_num);
+        Node & slave_node = _mesh.nodeRef(slave_node_num);
 
         if (slave_node.processor_id() == processor_id())
         {

@@ -81,7 +81,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     for (unsigned int k=0; k<n_master_nodes; k++)
     {
       dof_id_type master_id = _trial_master_nodes[k];
-      const Node * cur_node = &_mesh.node(master_id);
+      const Node * cur_node = _mesh.nodePtr(master_id);
       Real distance = ((*cur_node) - node).norm();
 
       neighbors.push(std::make_pair(master_id, distance));
@@ -111,7 +111,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 
     bool need_to_track = false;
 
-    if (_mesh.node(node_id).processor_id() == processor_id)
+    if (_mesh.nodeRef(node_id).processor_id() == processor_id)
       need_to_track = true;
     else
     {
@@ -119,7 +119,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
         const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[node_id];
 
         for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-          if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+          if (_mesh.elemPtr(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
           {
             need_to_track = true;
             break; // Break out of element loop
@@ -132,14 +132,14 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
         {
           dof_id_type neighbor_node_id = neighbor_nodes[neighbor_it];
 
-          if (_mesh.node(neighbor_node_id).processor_id() == processor_id)
+          if (_mesh.nodeRef(neighbor_node_id).processor_id() == processor_id)
             need_to_track = true;
           else // Now see if we own any of the elements connected to the neighbor nodes
           {
             const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[neighbor_node_id];
 
             for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-              if (_mesh.elem(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+              if (_mesh.elemPtr(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
               {
                 need_to_track = true;
                 break; // Break out of element loop

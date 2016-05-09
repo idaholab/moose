@@ -59,7 +59,7 @@ AutoPositionsMultiApp::fillPositions()
 
     for (unsigned int i=0; i<boundary_node_ids.size(); i++)
     {
-      Node & node = master_mesh.node(boundary_node_ids[i]);
+      Node & node = master_mesh.nodeRef(boundary_node_ids[i]);
 
       _positions.push_back(node);
     }

@@ -54,7 +54,7 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters
 
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if ((*in != _master_node_id) && (_mesh.node(*in).processor_id() == _subproblem.processor_id()))
+      if ((*in != _master_node_id) && (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
         _connected_nodes.push_back(*in); //_connected_nodes defines slave nodes in the base class
     }
   }
@@ -68,7 +68,7 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters
     std::vector<unsigned int>::iterator its;
     for (its = _slave_node_ids.begin(); its != _slave_node_ids.end(); ++its)
     {
-      if ((_mesh.node(*its).processor_id() == _subproblem.processor_id()) && (*its != _master_node_id))
+      if ((_mesh.nodeRef(*its).processor_id() == _subproblem.processor_id()) && (*its != _master_node_id))
         _connected_nodes.push_back(*its);
     }
   }

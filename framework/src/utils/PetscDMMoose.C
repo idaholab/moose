@@ -477,7 +477,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
     // for (dof_id_type i = 0; i < sides.size(); ++i) {
     //   boundary_id_type s = sides[i];
     //   if (!dmm->sidenames->count(s)) continue;
-    //  const Node& node = dmm->nl->sys().get_mesh().node(snodes[i]);
+    //  const Node& node = dmm->nl->sys().get_mesh().node_ref(snodes[i]);
     //  // determine v's dof on node and insert into indices
     // }
     ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
@@ -525,7 +525,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       std::vector<dof_id_type>& slave_nodes = locator->_nearest_node._slave_nodes;
       for (dof_id_type i = 0; i < slave_nodes.size(); ++i) {
         if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
-        Node& slave_node = dmm->nl->sys().get_mesh().node(slave_nodes[i]);
+        Node& slave_node = dmm->nl->sys().get_mesh().node_ref(slave_nodes[i]);
         dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
     indices.insert(dof);
@@ -552,7 +552,7 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
       std::vector<dof_id_type>& slave_nodes = locator->_nearest_node._slave_nodes;
       for (dof_id_type i = 0; i < slave_nodes.size(); ++i) {
         if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
-        Node& slave_node = dmm->nl->sys().get_mesh().node(slave_nodes[i]);
+        Node& slave_node = dmm->nl->sys().get_mesh().node_ref(slave_nodes[i]);
         dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
     unindices.insert(dof);

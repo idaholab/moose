@@ -73,7 +73,7 @@ NodalNormalsPreprocessor::execute()
   for (unsigned int i = 0; i < _current_elem->n_nodes(); i++)
   {
     // Extract a pointer to a node
-    const Node * node = _current_elem->get_node(i);
+    const Node * node = _current_elem->node_ptr(i);
 
     // Only continue if the node is on a boundary
     if (_mesh.isBoundaryNode(node->id()))

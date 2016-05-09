@@ -186,7 +186,7 @@ InitialCondition::compute()
     {
       libmesh_assert(nc == 1);
       _qp = n;
-      _current_node = _current_elem->get_node(n);
+      _current_node = _current_elem->node_ptr(n);
       Ue(current_dof) = value(*_current_node);
       dof_is_fixed[current_dof] = true;
       current_dof++;
@@ -195,7 +195,7 @@ InitialCondition::compute()
     else if (fe_type.family == HERMITE)
     {
       _qp = n;
-      _current_node = _current_elem->get_node(n);
+      _current_node = _current_elem->node_ptr(n);
       Ue(current_dof) = value(*_current_node);
       dof_is_fixed[current_dof] = true;
       current_dof++;
@@ -275,7 +275,7 @@ InitialCondition::compute()
     else if (cont == C_ONE)
     {
       libmesh_assert(nc == 1 + dim);
-      _current_node = _current_elem->get_node(n);
+      _current_node = _current_elem->node_ptr(n);
       Ue(current_dof) = value(*_current_node);
       dof_is_fixed[current_dof] = true;
       current_dof++;

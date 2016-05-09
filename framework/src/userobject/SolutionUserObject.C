@@ -338,7 +338,7 @@ SolutionUserObject::directValue(const Node * node, const std::string & var_name)
 
   // Get the node id and associated dof
   dof_id_type node_id = node->id();
-  dof_id_type dof_id = _system->get_mesh().node(node_id).dof_number(sys_num, var_num, 0);
+  dof_id_type dof_id = _system->get_mesh().node_ref(node_id).dof_number(sys_num, var_num, 0);
 
   // Return the desired value for the dof
   return directValue(dof_id);

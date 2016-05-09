@@ -75,9 +75,6 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
   _boxes.resize(_multi_app.numLocalApps());
   _box_ids.resize(_multi_app.numLocalApps());
 
-  // How much to inflate each bounding box by (helps with non-matching surfaces)
-  unsigned int inflation = 0.01;
-
   comm->barrier();
 
   for (unsigned int app=0; app<_multi_app.numLocalApps(); app++)

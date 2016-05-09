@@ -29,7 +29,7 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
     GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
-    _element(_mesh.getMesh().query_elem(parameters.get<unsigned int>("elementid")))
+    _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid")))
 {
   // This class only works with SerialMesh, since it relies on a
   // specific element numbering that we can't guarantee with ParallelMesh

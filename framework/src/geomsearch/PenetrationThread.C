@@ -113,7 +113,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
   for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
   {
-    const Node & node = _mesh.node(*nd);
+    const Node & node = _mesh.nodeRef(*nd);
 
     // We're going to get a reference to the pointer for the pinfo for this node
     // This will allow us to manipulate this pointer without having to go through
@@ -187,7 +187,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
       for (unsigned int j=0; j<closest_elems.size(); j++)
       {
         dof_id_type elem_id = closest_elems[j];
-        const Elem * elem = _mesh.elem(elem_id);
+        const Elem * elem = _mesh.elemPtr(elem_id);
 
         std::vector<PenetrationInfo*> thisElemInfo;
         std::vector<const Node*> nodesThatMustBeOnSide;
@@ -731,8 +731,8 @@ PenetrationThread::getSideCornerNodes(Elem* side,
   const ElemType t(side->type());
   corner_nodes.clear();
 
-  corner_nodes.push_back(side->get_node(0));
-  corner_nodes.push_back(side->get_node(1));
+  corner_nodes.push_back(side->node_ptr(0));
+  corner_nodes.push_back(side->node_ptr(1));
   switch (t)
   {
     case EDGE2:
@@ -745,7 +745,7 @@ PenetrationThread::getSideCornerNodes(Elem* side,
     case TRI3:
     case TRI6:
     {
-      corner_nodes.push_back(side->get_node(2));
+      corner_nodes.push_back(side->node_ptr(2));
       break;
     }
 
@@ -753,8 +753,8 @@ PenetrationThread::getSideCornerNodes(Elem* side,
     case QUAD8:
     case QUAD9:
     {
-      corner_nodes.push_back(side->get_node(2));
-      corner_nodes.push_back(side->get_node(3));
+      corner_nodes.push_back(side->node_ptr(2));
+      corner_nodes.push_back(side->node_ptr(3));
       break;
     }
 
@@ -802,7 +802,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
         {
           xi = -1.0;
           off_of_this_edge=true;
-          closest_node = side->get_node(0);
+          closest_node = side->node_ptr(0);
         }
       }
       else if (local_node_indices[0] == 1)
@@ -811,7 +811,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
         {
           xi = 1.0;
           off_of_this_edge=true;
-          closest_node = side->get_node(1);
+          closest_node = side->node_ptr(1);
         }
       }
       else
@@ -832,9 +832,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
           eta = 0.0;
           off_of_this_edge=true;
           if (xi<0.0)
-            closest_node = side->get_node(0);
+            closest_node = side->node_ptr(0);
           else if (xi>1.0)
-            closest_node = side->get_node(1);
+            closest_node = side->node_ptr(1);
         }
       }
       else if ((local_node_indices[0] == 1) &&
@@ -847,9 +847,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
           eta -= delta;
           off_of_this_edge=true;
           if (xi>1.0)
-            closest_node = side->get_node(1);
+            closest_node = side->node_ptr(1);
           else if (xi<0.0)
-            closest_node = side->get_node(2);
+            closest_node = side->node_ptr(2);
         }
       }
       else if ((local_node_indices[0] == 0) &&
@@ -860,9 +860,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
           xi = 0.0;
           off_of_this_edge=true;
           if (eta>1.0)
-            closest_node = side->get_node(2);
+            closest_node = side->node_ptr(2);
           else if (eta<0.0)
-            closest_node = side->get_node(0);
+            closest_node = side->node_ptr(0);
         }
       }
       else
@@ -885,9 +885,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
           eta = -1.0;
           off_of_this_edge=true;
           if (xi<-1.0)
-            closest_node = side->get_node(0);
+            closest_node = side->node_ptr(0);
           else if (xi>1.0)
-            closest_node = side->get_node(1);
+            closest_node = side->node_ptr(1);
         }
       }
       else if ((local_node_indices[0] == 1) &&
@@ -898,9 +898,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
           xi = 1.0;
           off_of_this_edge=true;
           if (eta<-1.0)
-            closest_node = side->get_node(1);
+            closest_node = side->node_ptr(1);
           else if (eta>1.0)
-            closest_node = side->get_node(2);
+            closest_node = side->node_ptr(2);
         }
       }
       else if ((local_node_indices[0] == 2) &&
@@ -911,9 +911,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
           eta = 1.0;
           off_of_this_edge=true;
           if (xi<-1.0)
-            closest_node = side->get_node(3);
+            closest_node = side->node_ptr(3);
           else if (xi>1.0)
-            closest_node = side->get_node(2);
+            closest_node = side->node_ptr(2);
         }
       }
       else if ((local_node_indices[0] == 0) &&
@@ -924,9 +924,9 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
           xi = -1.0;
           off_of_this_edge=true;
           if (eta<-1.0)
-            closest_node = side->get_node(0);
+            closest_node = side->node_ptr(0);
           else if (eta>1.0)
-            closest_node = side->get_node(3);
+            closest_node = side->node_ptr(3);
         }
       }
       else
@@ -967,13 +967,13 @@ PenetrationThread::restrictPointToFace(Point& p,
       {
         xi = -1.0;
         off_of_this_face=true;
-        closest_node = side->get_node(0);
+        closest_node = side->node_ptr(0);
       }
       else if (xi > 1.0)
       {
         xi = 1.0;
         off_of_this_face=true;
-        closest_node = side->get_node(1);
+        closest_node = side->node_ptr(1);
       }
       break;
     }
@@ -987,13 +987,13 @@ PenetrationThread::restrictPointToFace(Point& p,
         off_of_this_face=true;
         if (xi < 0.5)
         {
-          closest_node = side->get_node(0);
+          closest_node = side->node_ptr(0);
           if (xi<0.0)
             xi = 0.0;
         }
         else
         {
-          closest_node = side->get_node(1);
+          closest_node = side->node_ptr(1);
           if (xi>1.0)
             xi = 1.0;
         }
@@ -1006,7 +1006,7 @@ PenetrationThread::restrictPointToFace(Point& p,
         off_of_this_face=true;
         if (xi>0.5)
         {
-          closest_node = side->get_node(1);
+          closest_node = side->node_ptr(1);
           if (xi>1.0)
           {
             xi = 1.0;
@@ -1015,7 +1015,7 @@ PenetrationThread::restrictPointToFace(Point& p,
         }
         else
         {
-          closest_node = side->get_node(2);
+          closest_node = side->node_ptr(2);
           if (xi<0.0)
           {
             xi = 0.0;
@@ -1029,13 +1029,13 @@ PenetrationThread::restrictPointToFace(Point& p,
         off_of_this_face=true;
         if (eta>0.5)
         {
-          closest_node = side->get_node(2);
+          closest_node = side->node_ptr(2);
           if (eta>1.0)
             eta = 1.0;
         }
         else
         {
-          closest_node = side->get_node(0);
+          closest_node = side->node_ptr(0);
           if (eta<0.0)
             eta = 0.0;
         }
@@ -1053,13 +1053,13 @@ PenetrationThread::restrictPointToFace(Point& p,
         off_of_this_face=true;
         if (xi < 0.0)
         {
-          closest_node = side->get_node(0);
+          closest_node = side->node_ptr(0);
           if (xi < -1.0)
             xi = -1.0;
         }
         else
         {
-          closest_node = side->get_node(1);
+          closest_node = side->node_ptr(1);
           if (xi > 1.0)
             xi = 1.0;
         }
@@ -1070,13 +1070,13 @@ PenetrationThread::restrictPointToFace(Point& p,
         off_of_this_face=true;
         if (eta < 0.0)
         {
-          closest_node = side->get_node(1);
+          closest_node = side->node_ptr(1);
           if (eta < -1.0)
             eta = -1.0;
         }
         else
         {
-          closest_node = side->get_node(2);
+          closest_node = side->node_ptr(2);
           if (eta > 1.0)
             eta = 1.0;
         }
@@ -1087,13 +1087,13 @@ PenetrationThread::restrictPointToFace(Point& p,
         off_of_this_face=true;
         if (xi < 0.0)
         {
-          closest_node = side->get_node(3);
+          closest_node = side->node_ptr(3);
           if (xi < -1.0)
             xi = -1.0;
         }
         else
         {
-          closest_node = side->get_node(2);
+          closest_node = side->node_ptr(2);
           if (xi > 1.0)
             xi = 1.0;
         }
@@ -1104,13 +1104,13 @@ PenetrationThread::restrictPointToFace(Point& p,
         off_of_this_face=true;
         if (eta < 0.0)
         {
-          closest_node = side->get_node(0);
+          closest_node = side->node_ptr(0);
           if (eta < -1.0)
             eta = -1.0;
         }
         else
         {
-          closest_node = side->get_node(3);
+          closest_node = side->node_ptr(3);
           if (eta > 1.0)
             eta = 1.0;
         }
@@ -1378,7 +1378,7 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if (xi < -smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(0));
+        en.push_back(side->node_ptr(0));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 + xi)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1388,7 +1388,7 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       else if (xi > smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(1));
+        en.push_back(side->node_ptr(1));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 - xi)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1404,8 +1404,8 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if (eta < -smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(0));
-        en.push_back(side->get_node(1));
+        en.push_back(side->node_ptr(0));
+        en.push_back(side->node_ptr(1));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 + eta)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1415,8 +1415,8 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if ((xi+eta) > smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(1));
-        en.push_back(side->get_node(2));
+        en.push_back(side->node_ptr(1));
+        en.push_back(side->node_ptr(2));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 - xi - eta)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1426,8 +1426,8 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if (xi < -smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(2));
-        en.push_back(side->get_node(0));
+        en.push_back(side->node_ptr(2));
+        en.push_back(side->node_ptr(0));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 + xi)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1444,8 +1444,8 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if (eta < -smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(0));
-        en.push_back(side->get_node(1));
+        en.push_back(side->node_ptr(0));
+        en.push_back(side->node_ptr(1));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 + eta)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1455,8 +1455,8 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if (xi > smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(1));
-        en.push_back(side->get_node(2));
+        en.push_back(side->node_ptr(1));
+        en.push_back(side->node_ptr(2));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 - xi)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1466,8 +1466,8 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if (eta > smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(2));
-        en.push_back(side->get_node(3));
+        en.push_back(side->node_ptr(2));
+        en.push_back(side->node_ptr(3));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 - eta)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1477,8 +1477,8 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
       if (xi < -smooth_limit)
       {
         std::vector<const Node*> en;
-        en.push_back(side->get_node(3));
-        en.push_back(side->get_node(0));
+        en.push_back(side->node_ptr(3));
+        en.push_back(side->node_ptr(0));
         edge_nodes.push_back(en);
         Real fw = 0.5 - (1.0 + xi)/(2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
@@ -1512,14 +1512,14 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
   {
     if (elems_to_exclude.find(elems_connected_to_node[ecni]) != elems_to_exclude.end())
       continue;
-    const Elem * elem = _mesh.elem(elems_connected_to_node[ecni]);
+    const Elem * elem = _mesh.elemPtr(elems_connected_to_node[ecni]);
 
     std::vector<const Node*> nodevec;
     for (unsigned int ni=0; ni<elem->n_nodes(); ++ni)
     {
       if (elem->is_vertex(ni))
       {
-        nodevec.push_back(elem->get_node(ni));
+        nodevec.push_back(elem->node_ptr(ni));
       }
     }
     std::vector<const Node*> common_nodes;
@@ -1642,7 +1642,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
     std::vector<const Node*> nodevec;
     for (unsigned int ni=0; ni<side->n_nodes(); ++ni)
     {
-      nodevec.push_back(side->get_node(ni));
+      nodevec.push_back(side->node_ptr(ni));
     }
     std::sort(nodevec.begin(),nodevec.end());
     std::vector<const Node*> common_nodes;

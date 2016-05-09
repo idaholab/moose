@@ -331,7 +331,7 @@ dataLoad(std::istream & stream, const Elem * & e, void * context)
   loadHelper(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
-    e = mesh->elem(id);
+    e = mesh->elemPtr(id);
   else
     e = NULL;
 }
@@ -371,7 +371,7 @@ dataLoad(std::istream & stream, Elem * & e, void * context)
   loadHelper(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
-    e = mesh->elem(id);
+    e = mesh->elemPtr(id);
   else
     e = NULL;
 }
