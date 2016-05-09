@@ -38,7 +38,7 @@ ResetDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
   Node & displaced_node = **nd;
 
   // Get the same node from the reference mesh.
-  Node & reference_node = _ref_mesh.node(displaced_node.id());
+  Node & reference_node = _ref_mesh.nodeRef(displaced_node.id());
 
   // Undisplace the node
   for (unsigned int i=0; i<LIBMESH_DIM; ++i)

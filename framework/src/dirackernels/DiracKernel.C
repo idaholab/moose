@@ -328,7 +328,7 @@ DiracKernel::currentPointCachedID()
 bool
 DiracKernel::hasPointsOnElem(const Elem * elem)
 {
-  return _local_dirac_kernel_info.getElements().count(_mesh.elem(elem->id())) != 0;
+  return _local_dirac_kernel_info.getElements().count(_mesh.elemPtr(elem->id())) != 0;
 }
 
 bool

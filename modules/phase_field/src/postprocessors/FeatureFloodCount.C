@@ -801,7 +801,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
   {
     for (std::set<dof_id_type>::iterator entity_it = data._local_ids.begin(); entity_it != data._local_ids.end(); ++entity_it)
     {
-      Elem * elem = _mesh.elem(*entity_it);
+      Elem * elem = _mesh.elemPtr(*entity_it);
 
       for (unsigned int node_n = 0; node_n < elem->n_nodes(); node_n++)
       {

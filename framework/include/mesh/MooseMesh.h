@@ -223,6 +223,8 @@ public:
    */
   virtual const Node & node (const dof_id_type i) const;
   virtual Node & node (const dof_id_type i);
+  virtual const Node & nodeRef (const dof_id_type i) const;
+  virtual Node & nodeRef (const dof_id_type i);
   virtual const Node* nodePtr(const dof_id_type i) const;
   virtual Node* nodePtr(const dof_id_type i);
 
@@ -231,6 +233,8 @@ public:
    */
   virtual Elem * elem(const dof_id_type i);
   virtual const Elem * elem(const dof_id_type i) const;
+  virtual Elem * elemPtr(const dof_id_type i);
+  virtual const Elem * elemPtr(const dof_id_type i) const;
 
   /**
    * Setter/getter for the _is_changed flag.

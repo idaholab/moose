@@ -712,7 +712,7 @@ FEProblem::prepare(const Elem * elem, THREAD_ID tid)
   _assembly[tid]->prepare();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
-    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), tid);
+    _displaced_problem->prepare(_displaced_mesh->elemPtr(elem->id()), tid);
 }
 
 void
@@ -722,7 +722,7 @@ FEProblem::prepareFace(const Elem * elem, THREAD_ID tid)
   _aux.prepareFace(tid, false);
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
-    _displaced_problem->prepareFace(_displaced_mesh->elem(elem->id()), tid);
+    _displaced_problem->prepareFace(_displaced_mesh->elemPtr(elem->id()), tid);
 }
 
 void
@@ -735,7 +735,7 @@ FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, cons
   _assembly[tid]->prepareBlock(ivar, jvar, dof_indices);
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
-    _displaced_problem->prepare(_displaced_mesh->elem(elem->id()), ivar, jvar, dof_indices, tid);
+    _displaced_problem->prepare(_displaced_mesh->elemPtr(elem->id()), ivar, jvar, dof_indices, tid);
 }
 
 void
@@ -920,7 +920,7 @@ FEProblem::prepareNeighborShapes(unsigned int var, THREAD_ID tid)
 void
 FEProblem::addGhostedElem(dof_id_type elem_id)
 {
-  if (_mesh.elem(elem_id)->processor_id() != processor_id())
+  if (_mesh.elemPtr(elem_id)->processor_id() != processor_id())
     _ghosted_elems.insert(elem_id);
 }
 
@@ -985,7 +985,7 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 
   bool have_points = n_points > 0;
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
-    have_points |= _displaced_problem->reinitDirac(_displaced_mesh->elem(elem->id()), tid);
+    have_points |= _displaced_problem->reinitDirac(_displaced_mesh->elemPtr(elem->id()), tid);
 
   return have_points;
 }
@@ -997,7 +997,7 @@ FEProblem::reinitElem(const Elem * elem, THREAD_ID tid)
   _aux.reinitElem(elem, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitElem(_displaced_mesh->elem(elem->id()), tid);
+    _displaced_problem->reinitElem(_displaced_mesh->elemPtr(elem->id()), tid);
 }
 
 void
@@ -1015,7 +1015,7 @@ FEProblem::reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_e
   _assembly[tid]->prepare();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
-    _displaced_problem->reinitElemPhys(_displaced_mesh->elem(elem->id()), phys_points_in_elem, tid);
+    _displaced_problem->reinitElemPhys(_displaced_mesh->elemPtr(elem->id()), phys_points_in_elem, tid);
 }
 
 void
@@ -1027,7 +1027,7 @@ FEProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_i
   _aux.reinitElemFace(elem, side, bnd_id, tid);
 
   if (_displaced_problem != NULL && _reinit_displaced_face)
-    _displaced_problem->reinitElemFace(_displaced_mesh->elem(elem->id()), side, bnd_id, tid);
+    _displaced_problem->reinitElemFace(_displaced_mesh->elemPtr(elem->id()), side, bnd_id, tid);
 }
 
 void
@@ -1036,7 +1036,7 @@ FEProblem::reinitNode(const Node * node, THREAD_ID tid)
   _assembly[tid]->reinit(node);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitNode(&_displaced_mesh->node(node->id()), tid);
+    _displaced_problem->reinitNode(&_displaced_mesh->nodeRef(node->id()), tid);
 
   _nl.reinitNode(node, tid);
   _aux.reinitNode(node, tid);
@@ -1048,7 +1048,7 @@ FEProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid)
   _assembly[tid]->reinit(node);
 
   if (_displaced_problem != NULL && _reinit_displaced_face)
-    _displaced_problem->reinitNodeFace(&_displaced_mesh->node(node->id()), bnd_id, tid);
+    _displaced_problem->reinitNodeFace(&_displaced_mesh->nodeRef(node->id()), bnd_id, tid);
 
   _nl.reinitNodeFace(node, bnd_id, tid);
   _aux.reinitNodeFace(node, bnd_id, tid);
@@ -1081,7 +1081,7 @@ FEProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
   _assembly[tid]->reinitNodeNeighbor(node);
 
   if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->node(node->id()), tid);
+    _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->nodeRef(node->id()), tid);
 
   _nl.reinitNodeNeighbor(node, tid);
   _aux.reinitNodeNeighbor(node, tid);
@@ -1149,7 +1149,7 @@ FEProblem::reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side,
 
   // Do the same for the displaced problem
   if (_displaced_problem != NULL)
-    _displaced_problem->reinitNeighborPhys(_displaced_mesh->elem(neighbor->id()), neighbor_side, physical_points, tid);
+    _displaced_problem->reinitNeighborPhys(_displaced_mesh->elemPtr(neighbor->id()), neighbor_side, physical_points, tid);
 }
 
 void
@@ -1171,7 +1171,7 @@ FEProblem::reinitNeighborPhys(const Elem * neighbor, const std::vector<Point> & 
 
   // Do the same for the displaced problem
   if (_displaced_problem != NULL)
-    _displaced_problem->reinitNeighborPhys(_displaced_mesh->elem(neighbor->id()), physical_points, tid);
+    _displaced_problem->reinitNeighborPhys(_displaced_mesh->elemPtr(neighbor->id()), physical_points, tid);
 }
 
 void
@@ -1191,7 +1191,7 @@ FEProblem::getDiracElements(std::set<const Elem *> & elems)
       std::set<const Elem *>::iterator end = displaced_elements.end();
 
       for (;it != end; ++it)
-        elems.insert(_mesh.elem((*it)->id()));
+        elems.insert(_mesh.elemPtr((*it)->id()));
     }
   }
 }

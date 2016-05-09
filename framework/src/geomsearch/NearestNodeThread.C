@@ -46,7 +46,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
   {
     dof_id_type node_id = *nd;
 
-    const Node & node = _mesh.node(node_id);
+    const Node & node = _mesh.nodeRef(node_id);
 
     const Node * closest_node = NULL;
     Real closest_distance = std::numeric_limits<Real>::max();
@@ -57,7 +57,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
 
     for (unsigned int k=0; k<n_neighbor_nodes; k++)
     {
-      const Node * cur_node = &_mesh.node(neighbor_nodes[k]);
+      const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
       Real distance = ((*cur_node) - node).norm();
 
       if (distance < closest_distance)

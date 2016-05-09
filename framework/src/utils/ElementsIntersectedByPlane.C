@@ -37,13 +37,13 @@ void findElementsIntersectedByPlane(const Plane & plane, const MeshBase & mesh, 
     bool intersected = false;
 
     // Check whether the first node of this element is below or above the plane
-    const Node node0 = *elem->get_node(0);
+    const Node & node0 = elem->node_ref(0);
     bool node0_above_plane = plane.above_surface(node0);
 
     // Loop over the rest of the nodes and check if any node is on the other side of the plane
     for (unsigned int i = 1; i < elem->n_nodes(); ++i)
     {
-      const Node node = *elem->get_node(i);
+      const Node & node = elem->node_ref(i);
 
       bool node_above_plane = plane.above_surface(node);
       if (node0_above_plane != node_above_plane)

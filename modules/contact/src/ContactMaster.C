@@ -145,7 +145,7 @@ ContactMaster::updateContactSet(bool beginning_of_step)
     }
 
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(*pinfo);
-    const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.node(slave_node_num));
+    const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(slave_node_num));
 
     // Capture
     if ( ! pinfo->isCaptured() && MooseUtils::absoluteFuzzyGreaterEqual(distance, 0, _capture_tolerance))
@@ -213,7 +213,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
 
   const Real area = nodalArea(*pinfo);
 
-  RealVectorValue distance_vec(_mesh.node(node->id()) - pinfo->_closest_point);
+  RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
   RealVectorValue pen_force(_penalty * distance_vec);
   if (_normalize_penalty)
     pen_force *= area;
@@ -240,7 +240,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
   }
   else if (_model == CM_COULOMB && _formulation == CF_PENALTY)
   {
-    distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.node(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
+    distance_vec = pinfo->_incremental_slip + (pinfo->_normal * (_mesh.nodeRef(node->id()) - pinfo->_closest_point)) * pinfo->_normal;
     pen_force = _penalty * distance_vec;
     if (_normalize_penalty)
       pen_force *= area;

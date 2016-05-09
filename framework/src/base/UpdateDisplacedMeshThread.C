@@ -92,7 +92,7 @@ UpdateDisplacedMeshThread::onNode(SemiLocalNodeRange::const_iterator & nd)
 {
   Node & displaced_node = *(*nd);
 
-  Node & reference_node = _ref_mesh.node(displaced_node.id());
+  Node & reference_node = _ref_mesh.nodeRef(displaced_node.id());
 
   for (unsigned int i=0; i<_num_var_nums; i++)
   {

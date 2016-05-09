@@ -52,7 +52,7 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
 
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if (_mesh.node(*in).processor_id() == _subproblem.processor_id())
+      if (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id())
         _connected_nodes.push_back(*in); //defining slave nodes in the base class
     }
   }
@@ -60,7 +60,7 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   {
     for (its = _slave_node_ids.begin(); its != _slave_node_ids.end(); ++its)
     {
-      if (_mesh.node(*its).processor_id() == _subproblem.processor_id())
+      if (_mesh.nodeRef(*its).processor_id() == _subproblem.processor_id())
         _connected_nodes.push_back(*its);
     }
   }

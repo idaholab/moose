@@ -87,7 +87,7 @@ AddExtraNodeset::modify()
     bool on_node = false;
     for (unsigned int j = 0; j<elem->n_nodes(); ++j)
     {
-      const Node * node = elem->get_node(j);
+      const Node * node = elem->node_ptr(j);
 
       Point q;
       for (unsigned int k = 0; k < dim; ++k)

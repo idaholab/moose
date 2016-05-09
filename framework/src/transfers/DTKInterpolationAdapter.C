@@ -58,7 +58,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
         it != semi_local_nodes.end();
         ++it)
     {
-      const Node & node = mesh.node(*it);
+      const Node & node = mesh.node_ref(*it);
 
       vertices[i] = node.id();
 
@@ -73,8 +73,8 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   }
 
   // Currently assuming all elements are the same!
-  DataTransferKit::DTK_ElementTopology element_topology = get_element_topology(mesh.elem(0));
-  GlobalOrdinal n_nodes_per_elem = mesh.elem(0)->n_nodes();
+  DataTransferKit::DTK_ElementTopology element_topology = get_element_topology(mesh.elem_ptr(0));
+  GlobalOrdinal n_nodes_per_elem = mesh.elem_ptr(0)->n_nodes();
 
   GlobalOrdinal n_local_elem = mesh.n_local_elem();
 
@@ -96,7 +96,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
       elements[i] = elem.id();
 
       for (GlobalOrdinal j=0; j<n_nodes_per_elem; j++)
-        connectivity[(j*n_local_elem)+i] = elem.node(j);
+        connectivity[(j*n_local_elem)+i] = elem.node_id(j);
 
       {
         Point centroid = elem.centroid();
@@ -276,7 +276,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
     if (is_nodal)
       dof_object = mesh.node_ptr(vertices[i]);
     else
-      dof_object = mesh.elem(elements[i]);
+      dof_object = mesh.elem_ptr(elements[i]);
 
     if (dof_object->processor_id() == mesh.processor_id())
     {
@@ -333,7 +333,7 @@ DTKInterpolationAdapter::get_semi_local_nodes(std::set<GlobalOrdinal> & semi_loc
     const Elem & elem = *(*it);
 
     for (unsigned int j=0; j<elem.n_nodes(); j++)
-      semi_local_nodes.insert(elem.node(j));
+      semi_local_nodes.insert(elem.node_id(j));
   }
 }
 

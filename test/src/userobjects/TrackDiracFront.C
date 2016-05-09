@@ -77,7 +77,7 @@ TrackDiracFront::localElementConnectedToCurrentNode()
   // Look through all of the elements connected to this node and find one owned by the local processor
   for (unsigned int i=0; i<connected_elems.size(); i++)
   {
-    Elem * elem = _mesh.elem(connected_elems[i]);
+    Elem * elem = _mesh.elemPtr(connected_elems[i]);
 
     if (elem->processor_id() == pid) // Is this element owned by the local processor?
       return elem;
