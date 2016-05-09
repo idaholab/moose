@@ -14,8 +14,8 @@ InputParameters validParams<SolidMaterialProperties>();
  *
  */
 class SolidMaterialProperties :
-    public GeneralUserObject,
-    public ZeroInterface
+  public GeneralUserObject,
+  public ZeroInterface
 {
 public:
   SolidMaterialProperties(const InputParameters & parameters);

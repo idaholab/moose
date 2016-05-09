@@ -5,7 +5,8 @@
 
 using namespace libMesh;
 
-namespace WallFriction {
+namespace WallFriction
+{
 
 /**
  * Churchill's friction factor formula
