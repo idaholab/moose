@@ -105,6 +105,7 @@ CahnHilliardBase<T>:: initialSetup()
    * the residual.
    */
   this->template validateCoupling<Real>("f_name", _var.name());
+  this->template validateDerivativeMaterialPropertyBase<Real>("f_name");
 }
 
 template<typename T>
