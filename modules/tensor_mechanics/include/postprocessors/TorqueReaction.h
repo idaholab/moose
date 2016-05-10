@@ -44,17 +44,13 @@ public:
 
 protected:
   AuxiliarySystem & _aux;
-  MooseVariable & _react_x_var;
-  MooseVariable & _react_y_var;
-  /// Use a pointer for the z-case to allow 2D problems
-  MooseVariable * const _react_z_var;
 
-  const VariableValue & _react_x;
-  const VariableValue & _react_y;
-  const VariableValue & _react_z;
+  std::vector<const VariableValue *> _react;
 
   const Point _axis_origin;
   const Point _direction_vector;
+
+  unsigned int _nrt;
 
   Real _sum;
 };
