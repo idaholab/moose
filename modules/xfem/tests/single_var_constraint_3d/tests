@@ -30,5 +30,6 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    abs_zero = 1e-8
   [../]
 []
