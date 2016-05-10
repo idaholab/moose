@@ -49,6 +49,12 @@
    fun:*
 }
 {
+   tbb_scalable_allocator_bug_gcc_5_3_0
+   Memcheck:Cond
+   fun:_ZN3rml8internal13isLargeObjectILNS0_12MemoryOriginE0EEEbPv
+   fun:*
+}
+{
    openmpi_mpi_init_leak
    Memcheck:Leak
    ...
@@ -89,4 +95,20 @@
    obj:*
    fun:orte_finalize
    fun:ompi_mpi_finalize
+}
+{
+   openmpi_on_rod
+   Memcheck:Addr8
+   fun:_wordcopy_fwd_dest_aligned
+   fun:__GI_memmove
+   fun:argz_insert
+   fun:lt_argz_insert
+   fun:lt_argz_insertinorder
+   fun:lt_argz_insertdir
+   fun:list_files_by_dir
+   fun:foreachfile_callback
+   fun:foreach_dirinpath
+   fun:lt_dlforeachfile
+   fun:mca_base_component_find
+   fun:mca_base_framework_components_register
 }
