@@ -55,4 +55,9 @@
     input = 'acmultiinterface_aux.i'
     exodiff = 'acmultiinterface_aux_out.e'
   [../]
+  [./switchingfunction3phasematerial]
+    type = 'Exodiff'
+    input = 'switchingfunction3phasematerial.i'
+    exodiff = 'switchingfunction3phasematerial_out.e'
+  [../]
 []
