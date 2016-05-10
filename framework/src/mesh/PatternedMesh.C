@@ -45,6 +45,8 @@ InputParameters validParams<PatternedMesh>()
 
   params.addRequiredParam<std::vector<std::vector<unsigned int> > >("pattern", "A double-indexed array starting with the upper-left corner");
 
+  params.addClassDescription("Creates a 2D mesh from a specified set of unique 'tiles' meshes and a two-dimensional pattern.");
+
   return params;
 }
 

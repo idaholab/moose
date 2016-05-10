@@ -22,6 +22,16 @@ class PatternedMesh;
 template<>
 InputParameters validParams<PatternedMesh>();
 
+/**
+ * Reads one or more 2D mesh files and stitches them together based on
+ * a provided two-dimensional pattern array.  Assigns new boundary
+ * ids/names to the left, right, top, and bottom boundaries as
+ * specified by user.  The boundary nodes of the read in meshes must
+ * match up relative to the stitching pattern specified by the user --
+ * no new nodes are added in order to generate a conforming grid, and
+ * non-conforming grids (with nodes in the middle of edges) are not
+ * allowed.
+ */
 class PatternedMesh : public MooseMesh
 {
 public:
