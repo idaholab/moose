@@ -250,9 +250,9 @@ class RunParallel:
     # 2) There is a tester that is waiting on a prereq that was skipped.
     # 3) There is an invalid or cyclic dependency in one or more test specifications
 
-    # Handle the first case if the user has explicitely provided a jobs argument
+    # Handle the first case if the user has not explicitely provided a jobs argument
     # We'll allow larger jobs if the TestHarness is run with without any jobs argument
-    if self.soft_limit:
+    if len(self.big_queue) and self.soft_limit:
       print "\nOversized Jobs:\n"
 
       # Dump the big jobs into the front of the queue
@@ -274,6 +274,10 @@ class RunParallel:
         if slots >= self.job_slots:
           self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
           self.skipped_jobs.add(tester.specs['test_name'])
+        else:
+          # Job should have fit but still never ran, just add it back to the queue for now
+          # and figure out why later
+          self.queue.append([tester, command, dirpath])
       else:
         print "Internal error in TestHarness: Large jobs remain with a soft limit in place"
         sys.exit(1)
