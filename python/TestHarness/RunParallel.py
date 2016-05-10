@@ -263,26 +263,8 @@ class RunParallel:
         self.spinwait()
         self.startReadyJobs(slot_check=False)
 
-    # Now we need to see which jobs are too big to fit based on the available slots
-    for i in range(0, len(self.queue)):
-      (tester, command, dirpath) = self.queue.popleft()
-      slots = tester.getProcs(self.options) * tester.getThreads(self.options)
-
-      # If the user is running the script with no options, we'll just exceed the slots for
-      # these remaining big jobs. Otherwise, we'll skip them
-      if not self.soft_limit:
-        if slots >= self.job_slots:
-          self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
-          self.skipped_jobs.add(tester.specs['test_name'])
-        else:
-          # Job should have fit but still never ran, just add it back to the queue for now
-          # and figure out why later
-          self.queue.append([tester, command, dirpath])
-      else:
-        print "Internal error in TestHarness: Large jobs remain with a soft limit in place"
-        sys.exit(1)
-
-    # Handle the second case (skipped prereqs)
+    # If we had a soft limit then we'll have run the oversized jobs but we still
+    # have three cases (see note above) of jobs left to handle. We'll do that here
     if len(self.queue) != 0:
       keep_going = True
       while keep_going:
@@ -290,15 +272,27 @@ class RunParallel:
         queue_items = len(self.queue)
         for i in range(0, queue_items):
           (tester, command, dirpath) = self.queue.popleft()
-          if len(set(tester.specs['prereq']) & self.skipped_jobs):
+          slots = tester.getProcs(self.options) * tester.getThreads(self.options)
+
+          # If the user is running the script with no options, we'll just exceed the slots for
+          # these remaining big jobs. Otherwise, we'll skip them
+          if not self.soft_limit and slots > self.job_slots:
+            self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+            self.skipped_jobs.add(tester.specs['test_name'])
+            keep_going = True
+          # Do we have unsatisfied dependencies left?
+          elif len(set(tester.specs['prereq']) & self.skipped_jobs):
             self.harness.handleTestResult(tester.specs, '', 'skipped (skipped dependency)')
             self.skipped_jobs.add(tester.specs['test_name'])
             keep_going = True
+          # We need to keep trying in case there is a chain of unresolved dependencies
+          # and we hit them out of order in this loop
           else:
             self.queue.append([tester, command, dirpath])
+
       # Anything left is a cyclic dependency
       if len(self.queue) != 0:
-        print "Cyclic or Invalid Dependency Detected!"
+        print "\nCyclic or Invalid Dependency Detected!"
         for (tester, command, dirpath) in self.queue:
           print tester.specs['test_name']
         sys.exit(1)
