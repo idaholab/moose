@@ -772,6 +772,9 @@ protected:
   /// Temporary work vector to keep from reallocating it
   std::vector<dof_id_type> _temp_dof_indices;
 
+  /// Temporary work data for reinitAtPhysical()
+  std::vector<Point> _temp_reference_points;
+
   /**
    * Storage for cached Jacobian entries
    */
