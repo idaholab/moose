@@ -27,7 +27,8 @@ InputParameters validParams<RealControlParameterReporter>()
 }
 
 RealControlParameterReporter::RealControlParameterReporter(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
+    GeneralPostprocessor(parameters),
+    _parameter(NULL)
 {
 }
 
@@ -36,7 +37,10 @@ RealControlParameterReporter::initialSetup()
 {
   MooseObjectParameterName name(getParam<std::string>("parameter"));
   const InputParameters & params = getMooseApp().getInputParameterWarehouse().getInputParametersObject(name.tag(), name.name(), _tid);
-  _parameter = &params.get<Real>(name.parameter());
+  if (!params.isParamValid(name.parameter()))
+    mooseError("Unable to locate the parameter: " << name);
+  else
+    _parameter = &(params.get<Real>(name.parameter()));
 }
 
 Real
