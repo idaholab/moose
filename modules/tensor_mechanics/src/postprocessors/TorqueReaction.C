@@ -11,10 +11,7 @@ template<>
 InputParameters validParams<TorqueReaction>()
 {
   InputParameters params = validParams<NodalPostprocessor>();
-  params.addRequiredParam<AuxVariableName>("react_x", "The x reaction variable");
-  params.addRequiredParam<AuxVariableName>("react_y", "The y reaction variable");
-  params.addParam<AuxVariableName>("react_z", "The z reaction variable");
-
+  params.addRequiredParam<std::vector<AuxVariableName> >("react", "The reaction variables");
   params.addParam<RealVectorValue>("axis_origin", Point(), "Origin of the axis of rotation used to calculate the torque");
   params.addRequiredParam<RealVectorValue>("direction_vector", "The direction vector of the axis of rotation about which the calculated torque is calculated");
   params.set<bool>("use_displaced_mesh") = true;
@@ -24,15 +21,14 @@ InputParameters validParams<TorqueReaction>()
 TorqueReaction::TorqueReaction(const InputParameters & parameters) :
     NodalPostprocessor(parameters),
     _aux(_fe_problem.getAuxiliarySystem()),
-    _react_x_var(_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_x"))),
-    _react_y_var(_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_y"))),
-    _react_z_var(isParamValid("react_z") ? &_aux.getVariable(_tid, parameters.get<AuxVariableName>("react_z")) : NULL),
-    _react_x(_react_x_var.nodalSln()),
-    _react_y(_react_y_var.nodalSln()),
-    _react_z(_react_z_var ? _react_z_var->nodalSln() : _zero),
     _axis_origin(getParam<RealVectorValue>("axis_origin")),
     _direction_vector(getParam<RealVectorValue>("direction_vector"))
 {
+  std::vector<AuxVariableName> reacts = getParam<std::vector<AuxVariableName> >("react");
+  _nrt = reacts.size();
+
+  for (unsigned int i = 0; i < _nrt; ++i)
+    _react.push_back(&_aux.getVariable(_tid, reacts[i]).nodalSln());
 }
 
 void
@@ -48,11 +44,16 @@ TorqueReaction::execute()
   Point position = (*_current_node) - _axis_origin;
 
   // Determine the component of the vector in the direction of the rotation direction vector
-
   Point normal_position_component = position - (position * _direction_vector) / _direction_vector.norm_sq() * _direction_vector;
 
   // Define the force vector from the reaction force/ residuals from the stress divergence kernel
-  Point force(_react_x[_qp], _react_y[_qp], _react_z[_qp]);
+  Real _rz;
+  if (_nrt == 3)
+    _rz = (*_react[2])[_qp];
+  else
+    _rz = 0.0;
+
+  Point force((*_react[0])[_qp], (*_react[1])[_qp], _rz);
 
   // Cross the normal component of the position vector with the force
   RealVectorValue torque = normal_position_component.cross(force);

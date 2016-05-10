@@ -24,7 +24,6 @@
   ny = 1
 []
 
-
 [Variables]
   [./disp_x]
   [../]
@@ -47,11 +46,9 @@
   [../]
 []
 
-
 [Kernels]
   [./TensorMechanics]
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
+    save_in = 'saved_x saved_y'
   [../]
 []
 
@@ -87,7 +84,6 @@
     boundary = left
     value = 0.0
   [../]
-
   [./right_shear_y]
     type = FunctionPresetBC
     variable = disp_y
@@ -112,7 +108,6 @@
     block = 0
   [../]
 []
-
 
 [Executioner]
   type = Transient
@@ -143,16 +138,13 @@
   [./_dt]
     type = TimestepSize
   [../]
-
   [./torque]
     type = TorqueReaction
     boundary = right
-    react_x = saved_x
-    react_y = saved_y
+    react = 'saved_x saved_y'
     direction_vector = '0. 0. 1.'
   [../]
 []
-
 
 [Outputs]
   file_base = torque_reaction_tm_out

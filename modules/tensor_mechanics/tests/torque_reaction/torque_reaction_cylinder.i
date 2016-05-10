@@ -14,7 +14,6 @@
   file = cylinder.e
 []
 
-
 [Variables]
   [./disp_x]
   [../]
@@ -23,7 +22,6 @@
   [./disp_z]
   [../]
 []
-
 
 [AuxVariables]
   [./stress_xx]      # stress aux variables are defined for output; this is a way to get integration point variables to the output file
@@ -38,7 +36,6 @@
   [../]
 []
 
-
 [Functions]
   [./rampConstantAngle]
     type = PiecewiseLinear
@@ -50,9 +47,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
-    save_in_disp_z = saved_z
+    save_in = 'saved_x saved_y saved_z'
     use_displaced_mesh = true
   [../]
 []
@@ -69,28 +64,24 @@
 []
 
 [BCs]
-
   [./bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
   [../]
-
   [./top_x]
     type = DisplacementAboutAxis
     boundary = 2
@@ -101,7 +92,6 @@
     component = 0
     variable = disp_x
   [../]
-
   [./top_y]
     type = DisplacementAboutAxis
     boundary = 2
@@ -112,7 +102,6 @@
     component = 1
     variable = disp_y
   [../]
-
   [./top_z]
     type = DisplacementAboutAxis
     boundary = 2
@@ -142,7 +131,6 @@
   [../]
 []
 
-
 [Executioner]
 
   type = Transient
@@ -171,14 +159,11 @@
   [./torque]
     type = TorqueReaction
     boundary = 2
-    react_x = saved_x
-    react_y = saved_y
-    react_z = saved_z
+    react = 'saved_x saved_y saved_z'
     axis_origin = '10. 10. 10.'
     direction_vector = '0 -1.0 1.0'
   [../]
 []
-
 
 [Outputs]
   file_base = torque_reaction_cylinder_out

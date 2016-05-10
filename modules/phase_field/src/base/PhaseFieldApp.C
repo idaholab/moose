@@ -195,6 +195,8 @@
 #include "CHPFCRFFSplitVariablesAction.h"
 #include "HHPFCRFFSplitKernelAction.h"
 #include "HHPFCRFFSplitVariablesAction.h"
+#include "MatVecRealGradAuxKernelAction.h"
+#include "MultiAuxVariablesAction.h"
 #include "PFCRFFKernelAction.h"
 #include "PFCRFFVariablesAction.h"
 #include "PolycrystalElasticDrivingForceAction.h"
@@ -204,6 +206,7 @@
 #include "PolycrystalVariablesAction.h"
 #include "PolycrystalVoronoiICAction.h"
 #include "ReconVarICAction.h"
+#include "RigidBodyMultiKernelAction.h"
 #include "Tricrystal2CircleGrainsICAction.h"
 
 /*
@@ -415,6 +418,8 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
   syntax.registerActionSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
   syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
+  syntax.registerActionSyntax("MatVecRealGradAuxKernelAction", "AuxKernels/MatVecRealGradAuxKernel");
+  syntax.registerActionSyntax("MultiAuxVariablesAction", "AuxVariables/MultiAuxVariables");
   syntax.registerActionSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
   syntax.registerActionSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
   syntax.registerActionSyntax("PolycrystalElasticDrivingForceAction", "Kernels/PolycrystalElasticDrivingForce");
@@ -424,6 +429,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
   syntax.registerActionSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
   syntax.registerActionSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
+  syntax.registerActionSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
   syntax.registerActionSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
 
   registerAction(BicrystalBoundingBoxICAction, "add_ic");
@@ -435,6 +441,8 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(DisplacementGradientsAction, "add_kernel");
   registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
+  registerAction(MatVecRealGradAuxKernelAction, "add_aux_kernel");
+  registerAction(MultiAuxVariablesAction, "add_aux_variable");
   registerAction(PFCRFFKernelAction, "add_kernel");
   registerAction(PFCRFFVariablesAction, "add_variable");
   registerAction(PolycrystalElasticDrivingForceAction, "add_kernel");
@@ -444,5 +452,6 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalVariablesAction, "add_variable");
   registerAction(PolycrystalVoronoiICAction, "add_ic");
   registerAction(ReconVarICAction, "add_ic");
+  registerAction(RigidBodyMultiKernelAction, "add_kernel");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
 }
