@@ -348,14 +348,14 @@ MooseMesh::update()
 const Node &
 MooseMesh::node(const dof_id_type i) const
 {
-  // mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
+  mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
   return nodeRef(i);
 }
 
 Node &
 MooseMesh::node(const dof_id_type i)
 {
-  // mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
+  mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
   return nodeRef(i);
 }
 
@@ -1924,14 +1924,14 @@ MooseMesh::nElem() const
 Elem *
 MooseMesh::elem(const dof_id_type i)
 {
-  // mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
+  mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
   return elemPtr(i);
 }
 
 const Elem *
 MooseMesh::elem(const dof_id_type i) const
 {
-  // mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
+  mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
   return elemPtr(i);
 }
 
