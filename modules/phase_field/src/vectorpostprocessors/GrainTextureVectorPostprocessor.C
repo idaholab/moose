@@ -1,0 +1,71 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#include "GrainTextureVectorPostprocessor.h"
+#include "Assembly.h"
+
+
+template<>
+InputParameters validParams<GrainTextureVectorPostprocessor>()
+{
+  InputParameters params = validParams<ElementVectorPostprocessor>();
+  params += validParams<SamplerBase>();
+  params.addClassDescription("Gives out info on the grain boundary properties");
+  params.addRequiredParam<UserObjectName>("euler_angle_provider", "The EulerAngleProvider User object");
+  params.addRequiredCoupledVar("unique_grains", "The grain number");
+  params.addRequiredParam<unsigned int>("grain_num", "the number of grains");
+  return params;
+}
+
+GrainTextureVectorPostprocessor::GrainTextureVectorPostprocessor(const InputParameters & parameters):
+  ElementVectorPostprocessor(parameters),
+  SamplerBase(parameters, this, _communicator),
+  _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
+  _unique_grains(coupledValue("unique_grains")),
+  _ncrys(getParam<unsigned int>("grain_num")),
+  _values(4)
+  {
+    if (_euler.getGrainNum() < _ncrys)
+      mooseError("Euler angle provider has too few angles.");
+
+    std::vector<std::string> output_variables(4);
+    output_variables[0] = "unique_grain";
+    output_variables[1] = "euler_angle_z";
+    output_variables[2] = "euler_angle_x\'";
+    output_variables[3] = "euler_angle_z\"";
+    SamplerBase::setupVariables(output_variables);
+  }
+
+void
+GrainTextureVectorPostprocessor::initialize()
+{
+  SamplerBase::initialize();
+}
+
+void
+GrainTextureVectorPostprocessor::execute()
+{
+  _values[0] = _unique_grains[0] + 1; // Index starts at 0, but we want to display first grain as grain 1.
+
+  const EulerAngles & angle = _euler.getEulerAngles(_unique_grains[0]);
+  _values[1] = angle.phi1; // Get the Z   rotation
+  _values[2] = angle.Phi;  // Get the X'  rotation
+  _values[3] = angle.phi2; // Get the Z'' rotation
+  SamplerBase::addSample(_current_elem->centroid() /* x,y,z coordinates of elem centroid */, _current_elem->id(), _values);
+}
+
+void
+GrainTextureVectorPostprocessor::threadJoin(const UserObject & y)
+{
+  const GrainTextureVectorPostprocessor & vpp = static_cast<const GrainTextureVectorPostprocessor &>(y);
+  SamplerBase::threadJoin(vpp);
+}
+
+void
+GrainTextureVectorPostprocessor::finalize()
+{
+  SamplerBase::finalize();
+}
