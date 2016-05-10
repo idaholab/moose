@@ -31,6 +31,7 @@ protected:
   virtual void iterationFinalize(unsigned qp, Real scalar);
 
   virtual Real computeHardening(unsigned qp, Real scalar);
+  virtual Real computeHardeningVariable(unsigned qp, Real scalar);
 
   Function * _yield_stress_function;
   Real _yield_stress;
@@ -48,9 +49,6 @@ protected:
 
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
-
-private:
-
 };
 
 template<>

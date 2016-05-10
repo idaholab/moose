@@ -23,6 +23,7 @@
 #include "HomogenizedElasticConstants.h"
 #include "IsotropicPlasticity.h"
 #include "IsotropicPowerLawHardening.h"
+#include "IsotropicTempDepHardening.h"
 #include "LinearAnisotropicMaterial.h"
 #include "LinearGeneralAnisotropicMaterial.h"
 #include "LinearIsotropicMaterial.h"
@@ -117,6 +118,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(InteractionIntegralAuxFields);
   registerMaterial(IsotropicPlasticity);
   registerMaterial(IsotropicPowerLawHardening);
+  registerMaterial(IsotropicTempDepHardening);
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearGeneralAnisotropicMaterial);
   registerMaterial(LinearIsotropicMaterial);
