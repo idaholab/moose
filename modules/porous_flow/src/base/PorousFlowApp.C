@@ -20,6 +20,27 @@
 #include "PorousFlow1PhaseP_VG.h"
 #include "PorousFlow2PhasePS.h"
 #include "PorousFlowVariableBase.h"
+#include "PorousFlowBrine.h"
+#include "PorousFlowCapillaryPressureBase.h"
+#include "PorousFlowCapillaryPressureConstant.h"
+#include "PorousFlowCapillaryPressureLinear.h"
+#include "PorousFlowCapillaryPressureVGS.h"
+#include "PorousFlowCapillaryPressureVGP.h"
+#include "PorousFlowDensityConstBulk.h"
+#include "PorousFlowEffectiveFluidPressure.h"
+#include "PorousFlowFluidPropertiesBase.h"
+#include "PorousFlowIdealGas.h"
+#include "PorousFlowMethane.h"
+#include "PorousFlowPermeabilityConst.h"
+#include "PorousFlowPorosityConst.h"
+#include "PorousFlowPorosityHM.h"
+#include "PorousFlowPorosityUnity.h"
+#include "PorousFlowRelativePermeabilityCorey.h"
+#include "PorousFlowRelativePermeabilityUnity.h"
+#include "PorousFlowSimpleCO2.h"
+#include "PorousFlowViscosityConst.h"
+#include "PorousFlowVolumetricStrain.h"
+#include "PorousFlowWater.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -85,6 +106,27 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlow1PhaseP_VG);
   registerMaterial(PorousFlow2PhasePS);
   registerMaterial(PorousFlowVariableBase);
+  registerMaterial(PorousFlowBrine);
+  registerMaterial(PorousFlowCapillaryPressureBase);
+  registerMaterial(PorousFlowCapillaryPressureConstant);
+  registerMaterial(PorousFlowCapillaryPressureLinear);
+  registerMaterial(PorousFlowCapillaryPressureVGS);
+  registerMaterial(PorousFlowCapillaryPressureVGP);
+  registerMaterial(PorousFlowDensityConstBulk);
+  registerMaterial(PorousFlowEffectiveFluidPressure);
+  registerMaterial(PorousFlowFluidPropertiesBase);
+  registerMaterial(PorousFlowIdealGas);
+  registerMaterial(PorousFlowMethane);
+  registerMaterial(PorousFlowPermeabilityConst);
+  registerMaterial(PorousFlowPorosityConst);
+  registerMaterial(PorousFlowPorosityHM);
+  registerMaterial(PorousFlowPorosityUnity);
+  registerMaterial(PorousFlowRelativePermeabilityCorey);
+  registerMaterial(PorousFlowRelativePermeabilityUnity);
+  registerMaterial(PorousFlowSimpleCO2);
+  registerMaterial(PorousFlowViscosityConst);
+  registerMaterial(PorousFlowVolumetricStrain);
+  registerMaterial(PorousFlowWater);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);

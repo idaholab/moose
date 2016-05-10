@@ -90,6 +90,7 @@
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 #include "TensorMechanicsPlasticJ2.h"
 #include "TensorMechanicsPlasticMeanCap.h"
+#include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
 #include "TensorMechanicsHardeningConstant.h"
 #include "TensorMechanicsHardeningGaussian.h"
 #include "TensorMechanicsHardeningExponential.h"
@@ -241,6 +242,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
   registerUserObject(TensorMechanicsPlasticJ2);
   registerUserObject(TensorMechanicsPlasticMeanCap);
+  registerUserObject(TensorMechanicsPlasticDruckerPragerHyperbolic);
   registerUserObject(TensorMechanicsHardeningConstant);
   registerUserObject(TensorMechanicsHardeningGaussian);
   registerUserObject(TensorMechanicsHardeningExponential);
