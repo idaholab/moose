@@ -27,9 +27,9 @@ InputParameters validParams<PatternedMesh>()
   InputParameters params = validParams<MooseMesh>();
   params.addRequiredParam<std::vector<MeshFileName> >("files", "The name of the mesh files to read.  They are automatically assigned ids starting with zero.");
 
-  params.addParam<Real>("x_width", 0, "The tile width in the x direction");
-  params.addParam<Real>("y_width", 0, "The tile width in the y direction");
-  params.addParam<Real>("z_width", 0, "The tile width in the z direction");
+  params.addRangeCheckedParam<Real>("x_width", 0, "x_width>=0", "The tile width in the x direction");
+  params.addRangeCheckedParam<Real>("y_width", 0, "y_width>=0", "The tile width in the y direction");
+  params.addRangeCheckedParam<Real>("z_width", 0, "z_width>=0", "The tile width in the z direction");
 
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left_boundary", "name of the left (x) boundary");
