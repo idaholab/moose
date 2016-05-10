@@ -1,0 +1,15 @@
+reset
+
+create surface rectangle width 1.2 height 1.2 zplane 
+curve 3 4 1 2  interval 5
+
+mesh surface all
+
+Sideset 1 curve 3  
+Sideset 2 curve 4  
+Sideset 3 curve 1  
+Sideset 4 curve 2  
+
+block 1 surface 1  
+
+block 1 element type quad4
