@@ -252,7 +252,7 @@ class RunParallel:
 
     # Handle the first case if the user has not explicitely provided a jobs argument
     # We'll allow larger jobs if the TestHarness is run with without any jobs argument
-    if self.soft_limit:
+    if len(self.big_queue) and self.soft_limit:
       print "\nOversized Jobs:\n"
 
       # Dump the big jobs into the front of the queue
