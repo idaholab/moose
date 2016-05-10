@@ -159,3 +159,6 @@ framework/contrib/asio/
 
 # phase_field/tests/solution_rasterizer
 out.xyz
+
+#Jit output
+.jitdir/
