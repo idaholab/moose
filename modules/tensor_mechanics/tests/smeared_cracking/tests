@@ -3,7 +3,8 @@
     type = 'Exodiff'
     input = 'cracking_exponential.i'
     exodiff = 'cracking_exponential_out.e'
-    rel_err = 1.0e-03       
+    rel_err = 1.0e-03
+    compiler = 'GCC CLANG'
   [../]
   [./single_edge_notch]
     type = 'Exodiff'
