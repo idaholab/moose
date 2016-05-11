@@ -729,19 +729,6 @@ NonlinearSystem::getSplit(const std::string & name)
   return _splits.getActiveObject(name);
 }
 
-NumericVector<Number> &
-NonlinearSystem::addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual)
-{
-  if (hasVector(vector_name))
-    return getVector(vector_name);
-
-  NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
-
-  if (zero_for_residual)
-    _vecs_to_zero_for_residual.push_back(vec);
-  return *vec;
-}
-
 void
 NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {

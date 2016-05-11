@@ -135,12 +135,12 @@ public:
   /**
    * Check if the named vector exists in the system.
    */
-  virtual bool hasVector(std::string name) = 0;
+  virtual bool hasVector(const std::string & name) = 0;
 
   /**
    * Get a raw NumericVector
    */
-  virtual NumericVector<Number> & getVector(std::string name) = 0;
+  virtual NumericVector<Number> & getVector(const std::string & name) = 0;
 
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
@@ -501,7 +501,7 @@ public:
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
-  virtual void computeVariables(const NumericVector<Number>& /*soln*/)
+  virtual void computeVariables(const NumericVector<Number> & /*soln*/)
   {
   }
 
@@ -512,8 +512,39 @@ public:
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
   virtual Number & duDotDu() { return _du_dot_du; }
 
-  virtual bool hasVector(std::string name) { return _sys.have_vector(name); }
-  virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
+  /**
+   * Check if the named vector exists in the system.
+   */
+  virtual bool hasVector(const std::string & name) { return _sys.have_vector(name); }
+
+  /**
+   * Get a raw NumericVector with the given name.
+   */
+  virtual NumericVector<Number> & getVector(const std::string & name) { return _sys.get_vector(name); }
+
+  /**
+   * Adds a solution length vector to the system.
+   *
+   * @param vector_name The name of the vector.
+   * @param project Whether or not to project this vector when doing mesh refinement.
+   *                If the vector is just going to be recomputed then there is no need to project it.
+   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
+   *                                            GHOSTED is needed if you are going to be accessing off-processor entries.
+   *                                            The ghosting pattern is the same as the solution vector.
+   */
+  virtual NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type)
+  {
+    if (hasVector(vector_name))
+      return getVector(vector_name);
+
+    NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
+    return *vec;
+  }
+
+  /**
+   * Remove a vector from the system with the given name.
+   */
+  virtual void removeVector(const std::string & name) { _sys.remove_vector(name); }
 
   virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/) { return *_dummy_vec; }
 
