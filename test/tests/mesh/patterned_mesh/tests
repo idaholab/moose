@@ -1,0 +1,17 @@
+[Tests]
+  [./patterned_generation]
+    type = 'Exodiff'
+    input = 'patterned_mesh.i'
+    cli_args = '--mesh-only'
+    exodiff = 'patterned_mesh_in.e'
+    recover = false
+  [../]
+
+  [./patterned_run]
+    type = 'Exodiff'
+    input = 'mesh_tester.i'
+    exodiff = 'mesh_tester_out.e'
+    recover = false
+    prereq = 'patterned_generation'
+  [../]
+[]
