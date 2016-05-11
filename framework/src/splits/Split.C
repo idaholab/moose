@@ -78,7 +78,6 @@ Split::Split (const InputParameters & parameters) :
 void
 Split::setup(const std::string& prefix)
 {
-  PetscErrorCode ierr;
   std::string dmprefix = prefix + "dm_moose_", opt, val;
 
   // var options

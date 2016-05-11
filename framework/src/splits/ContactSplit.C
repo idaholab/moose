@@ -67,7 +67,6 @@ ContactSplit::ContactSplit (const InputParameters & params) :
 void
 ContactSplit::setup(const std::string& prefix)
 {
-  PetscErrorCode ierr;
   std::string    dmprefix = prefix+"dm_moose_", opt, val;
 
   // contacts options
