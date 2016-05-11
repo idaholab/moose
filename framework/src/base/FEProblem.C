@@ -3200,6 +3200,20 @@ FEProblem::restoreSolutions()
 }
 
 void
+FEProblem::saveOldSolutions()
+{
+  _nl.saveOldSolutions();
+  _aux.saveOldSolutions();
+}
+
+void
+FEProblem::restoreOldSolutions()
+{
+  _nl.restoreOldSolutions();
+  _aux.restoreOldSolutions();
+}
+
+void
 FEProblem::outputStep(ExecFlagType type)
 {
   _nl.update();

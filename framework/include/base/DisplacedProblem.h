@@ -71,6 +71,16 @@ public:
   virtual void solve();
   virtual bool converged();
 
+  /**
+   * Allocate vectors and save old solutions into them.
+   */
+  virtual void saveOldSolutions();
+
+  /**
+   * Restore old solutions from the backup vectors and deallocate them.
+   */
+  virtual void restoreOldSolutions();
+
   virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 

@@ -95,16 +95,6 @@ public:
   const std::set<VariableName> & getEigenVariableNames() const { return _eigen_var_names; }
 
   /**
-   * Save the old solutions
-   */
-  void saveOldSolutions();
-
-  /**
-   * Restore the old solutions
-   */
-  void restoreOldSolutions();
-
-  /**
    * Weather or not the system contains eigen kernels
    */
   bool containsEigenKernel() const;
@@ -117,12 +107,6 @@ protected:
 
   bool _active_on_old;
 
-  // Used for saving old solutions so that they wont be accidentally changed
-  // FIXME: can be removed in the future when STEP is available.
-  NumericVector<Real> * _sys_sol_old;
-  NumericVector<Real> * _sys_sol_older;
-  NumericVector<Real> * _aux_sol_old;
-  NumericVector<Real> * _aux_sol_older;
   /// counter of eigen kernels
   unsigned int _eigen_kernel_counter;
 };

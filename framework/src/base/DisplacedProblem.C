@@ -119,6 +119,20 @@ DisplacedProblem::initAdaptivity()
 }
 
 void
+DisplacedProblem::saveOldSolutions()
+{
+  _displaced_nl.saveOldSolutions();
+  _displaced_aux.saveOldSolutions();
+}
+
+void
+DisplacedProblem::restoreOldSolutions()
+{
+  _displaced_nl.restoreOldSolutions();
+  _displaced_aux.restoreOldSolutions();
+}
+
+void
 DisplacedProblem::syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
 {
   (*_displaced_nl.sys().solution) = soln;

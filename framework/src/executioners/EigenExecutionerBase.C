@@ -197,7 +197,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // FIXME: currently power iteration use old and older solutions,
   // so save old and older solutions before they are changed by the power iteration
-  _eigen_sys.saveOldSolutions();
+  _problem.saveOldSolutions();
 
   // save solver control parameters to be modified by the power iteration
   Real tol1 = _problem.es().parameters.get<Real> ("linear solver tolerance");
@@ -344,7 +344,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol2;
 
   //FIXME: currently power iteration use old and older solutions, so restore them
-  _eigen_sys.restoreOldSolutions();
+  _problem.restoreOldSolutions();
 }
 
 void

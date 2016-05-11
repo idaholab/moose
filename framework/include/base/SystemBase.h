@@ -422,7 +422,9 @@ public:
       _solution(*_sys.solution),
       _solution_old(*_sys.old_local_solution),
       _solution_older(*_sys.older_local_solution),
-      _dummy_vec(NULL)
+      _dummy_vec(NULL),
+      _saved_old(NULL),
+      _saved_older(NULL)
   {
   }
 
@@ -542,6 +544,38 @@ public:
   }
 
   /**
+   * Save the old and older solutions.
+   */
+  virtual void saveOldSolutions()
+  {
+    if (!_saved_old)
+      _saved_old = &addVector("save_solution_old", false, PARALLEL);
+    if (!_saved_older)
+      _saved_older = &addVector("save_solution_older", false, PARALLEL);
+    *_saved_old = solutionOld();
+    *_saved_older = solutionOlder();
+  }
+
+  /**
+   * Restore the old and older solutions when the saved solutions present.
+   */
+  virtual void restoreOldSolutions()
+  {
+    if (_saved_old)
+    {
+      solutionOld() = *_saved_old;
+      removeVector("save_solution_old");
+      _saved_old = NULL;
+    }
+    if (_saved_older)
+    {
+      solutionOlder() = *_saved_older;
+      removeVector("save_solution_older");
+      _saved_older = NULL;
+    }
+  }
+
+  /**
    * Remove a vector from the system with the given name.
    */
   virtual void removeVector(const std::string & name) { _sys.remove_vector(name); }
@@ -657,6 +691,10 @@ protected:
   NumericVector<Number> * _dummy_vec;                     // to satisfy the interface
 
   std::vector<VarCopyInfo> _var_to_copy;
+
+  // Used for saving old solutions so that they wont be accidentally changed
+  NumericVector<Real> * _saved_old;
+  NumericVector<Real> * _saved_older;
 };
 
 
