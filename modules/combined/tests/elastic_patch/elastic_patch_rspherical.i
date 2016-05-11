@@ -55,6 +55,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./density]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 
 [] # AuxVariables
 
@@ -93,6 +97,11 @@
     tensor = stress
     variable = stress_zz
     index = 2
+  [../]
+  [./density]
+    type = MaterialRealAux
+    property = density
+    variable = density
   [../]
 
 [] # AuxKernels
