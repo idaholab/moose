@@ -188,6 +188,8 @@ public:
    */
   MooseSharedPointer<Split> getSplit(const std::string & name);
 
+  void zeroVectorForResidual(const std::string & vector_name);
+
   void setInitialSolution();
 
   /**
@@ -584,8 +586,8 @@ protected:
   /// true if DG is active (optimization reasons)
   bool _doing_dg;
 
-  /// NumericVectors that will be zeroed before a residual computation
-  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;
+  /// vectors that will be zeroed before a residual computation
+  std::vector<std::string> _vecs_to_zero_for_residual;
 
   unsigned int _n_iters;
   unsigned int _n_linear_iters;

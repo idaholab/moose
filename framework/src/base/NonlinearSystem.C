@@ -730,6 +730,16 @@ NonlinearSystem::getSplit(const std::string & name)
 }
 
 void
+NonlinearSystem::zeroVectorForResidual(const std::string & vector_name)
+{
+  for (unsigned int i = 0; i < _vecs_to_zero_for_residual.size(); ++i)
+    if (vector_name == _vecs_to_zero_for_residual[i])
+      return;
+
+  _vecs_to_zero_for_residual.push_back(vector_name);
+}
+
+void
 NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {
   Moose::perf_log.push("compute_residual()", "Execution");
@@ -738,12 +748,14 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
   Moose::enableFPE();
 
-  for (std::vector<NumericVector<Number> *>::iterator it = _vecs_to_zero_for_residual.begin();
-      it != _vecs_to_zero_for_residual.end();
-      ++it)
+  for (unsigned int i = 0; i < _vecs_to_zero_for_residual.size(); ++i)
   {
-    (*it)->close();
-    (*it)->zero();
+    if (hasVector(_vecs_to_zero_for_residual[i]))
+    {
+      NumericVector<Number> & vec = getVector(_vecs_to_zero_for_residual[i]);
+      vec.close();
+      vec.zero();
+    }
   }
 
   try
