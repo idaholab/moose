@@ -60,6 +60,14 @@ GeometricSearchData::update(GeometricSearchType type)
           it != _slave_to_qslave.end();
           ++it)
         generateQuadratureNodes(it->first, it->second);
+
+      // reinit on displaced mesh before update
+      for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
+           epl_it != _element_pair_locators.end(); ++epl_it)
+      {
+        ElementPairLocator & epl = *epl_it->second;
+        epl.reinit();
+      }
     }
 
     // Update the position of quadrature nodes first
@@ -97,6 +105,13 @@ GeometricSearchData::update(GeometricSearchType type)
 
       pl->detectPenetration();
     }
+  }
+
+  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
+       epl_it != _element_pair_locators.end(); ++epl_it)
+  {
+    ElementPairLocator & epl = *epl_it->second;
+    epl.update();
   }
 }
 

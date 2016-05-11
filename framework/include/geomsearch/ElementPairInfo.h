@@ -38,17 +38,32 @@ class ElementPairInfo
 {
 public:
 
-  ElementPairInfo(const Elem * elem,
-                  const std::vector<Point> & constraint_q_point,
-                  const std::vector<Real> & constraint_JxW,
-                  const Point & normal);
+  ElementPairInfo(const Elem * elem1,
+                  const Elem * elem2,
+                  const std::vector<Point> & elem1_constraint_q_point,
+                  const std::vector<Point> & elem2_constraint_q_point,
+                  const std::vector<Real> & elem1_constraint_JxW,
+                  const std::vector<Real> & elem2_constraint_JxW,
+                  const Point & elem1_normal,
+                  const Point & elem2_normal);
 
   virtual ~ElementPairInfo();
 
-  const Elem * _elem;
-  std::vector<Point> _constraint_q_point;
-  std::vector<Real> _constraint_JxW;
-  Point _normal;
+  virtual void update(const std::vector<Point> & elem1_constraint_q_point,
+                      const std::vector<Point> & elem2_constraint_q_point,
+                      const std::vector<Real> & elem1_constraint_JxW,
+                      const std::vector<Real> & elem2_constraint_JxW,
+                      const Point & elem1_normal,
+                      const Point & elem2_normal);
+
+  const Elem * _elem1;
+  const Elem * _elem2;
+  std::vector<Point> _elem1_constraint_q_point;
+  std::vector<Point> _elem2_constraint_q_point;
+  std::vector<Real> _elem1_constraint_JxW;
+  std::vector<Real> _elem2_constraint_JxW;
+  Point _elem1_normal;
+  Point _elem2_normal;
 };
 
 #endif // ELEMENTPAIRLOCATOR_H

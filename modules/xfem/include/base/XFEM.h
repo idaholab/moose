@@ -142,6 +142,7 @@ public:
   void setCrackGrowthMethod(bool use_crack_growth_increment, Real crack_growth_increment);
   virtual bool getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule, const MooseArray<Point> & q_points);
   virtual const ElementPairLocator::ElementPairList * getXFEMCutElemPairs() const {return & _sibling_elems;}
+  virtual const ElementPairLocator::ElementPairList * getXFEMDisplacedCutElemPairs() const {return & _sibling_displaced_elems;}
   virtual void getXFEMIntersectionInfo(const Elem * elem,
                                        unsigned int plane_id,
                                        Point & normal, std::vector<Point> & intersectionPoints,
@@ -179,6 +180,7 @@ private:
   std::map<unique_id_type, XFEMCutElem*> _cut_elem_map;
   std::set<const Elem*> _crack_tip_elems;
   ElementPairLocator::ElementPairList _sibling_elems;
+  ElementPairLocator::ElementPairList _sibling_displaced_elems;
 
   std::map<const Elem*, std::vector<Point> > _elem_crack_origin_direction_map;
 
