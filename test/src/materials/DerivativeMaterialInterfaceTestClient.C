@@ -38,6 +38,12 @@ DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(con
 {
 }
 
+void
+DerivativeMaterialInterfaceTestClient::initialSetup()
+{
+  if (!_by_name)
+   validateDerivativeMaterialPropertyBase<Real>("prop_name");
+}
 
 void
 DerivativeMaterialInterfaceTestClient::computeQpProperties()

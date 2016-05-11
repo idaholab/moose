@@ -27,13 +27,6 @@
     block = 0
     outputs = exodus
   [../]
-
-  [./dummy]
-    type = GenericConstantMaterial
-    prop_names = prop
-    block = 0
-    prop_values = 0
-  [../]
 []
 
 [Executioner]

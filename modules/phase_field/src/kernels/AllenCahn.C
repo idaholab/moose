@@ -32,6 +32,7 @@ AllenCahn::initialSetup()
 {
   ACBulk<Real>::initialSetup();
   validateNonlinearCoupling<Real>("f_name");
+  validateDerivativeMaterialPropertyBase<Real>("f_name");
 }
 
 Real

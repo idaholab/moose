@@ -100,6 +100,15 @@ public:
   void validateNonlinearCoupling(const MaterialPropertyName & base, const VariableName & c1 = "", const VariableName & c2 = "", const VariableName & c3 = "");
   ///@}
 
+  /**
+   * Check if the material property base exists. Print a warning if it doesn't. This is
+   * useful in materials that pull in only _derivative_ properties, which are optional.
+   * If the base property name has a typo all derivatives will be set to zero without the
+   * user ever knowing.
+   */
+  template<typename U>
+  void validateDerivativeMaterialPropertyBase(const std::string & base);
+
 private:
   /// Check if a material property is present with the applicable restrictions
   template<typename U>
@@ -357,6 +366,22 @@ void
 DerivativeMaterialInterface<T>::validateNonlinearCoupling(const MaterialPropertyName & base, const VariableName & c1, const VariableName & c2, const VariableName & c3)
 {
   validateCoupling<U>(base, buildVariableVector(c1, c2, c3), false);
+}
+
+template<class T>
+template<typename U>
+void
+DerivativeMaterialInterface<T>::validateDerivativeMaterialPropertyBase(const std::string & base)
+{
+  // resolve the input parameter name base to the actual material property name
+  const MaterialPropertyName prop_name = this->template getParam<MaterialPropertyName>(base);
+
+  // check if the material property does not exist on the blocks of the current object,
+  // and check if it is not a plain number in the input file
+  if (!haveMaterialProperty<U>(prop_name) && this->template defaultMaterialProperty<U>(prop_name) == 0)
+    mooseWarning(   "The material property '" << prop_name
+                 << "' does not exist. The kernel '" << this->name()
+                 << "' only needs its derivatives, but this may indicate a typo in the input file.");
 }
 
 template<class T>
