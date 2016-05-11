@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 // MOOSE includes
 #include "ClosePackIC.h"
 #include "MooseMesh.h"

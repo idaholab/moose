@@ -70,6 +70,7 @@
 #include "CrossIC.h"
 #include "HexPolycrystalIC.h"
 #include "LatticeSmoothCircleIC.h"
+#include "MultiBoundingBoxIC.h"
 #include "MultiSmoothCircleIC.h"
 #include "PFCFreezingIC.h"
 #include "PolycrystalRandomIC.h"
@@ -309,6 +310,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(CrossIC);
   registerInitialCondition(HexPolycrystalIC);
   registerInitialCondition(LatticeSmoothCircleIC);
+  registerInitialCondition(MultiBoundingBoxIC);
   registerInitialCondition(MultiSmoothCircleIC);
   registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalRandomIC);
