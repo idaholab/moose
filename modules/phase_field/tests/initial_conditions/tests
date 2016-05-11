@@ -110,4 +110,22 @@
     input = HexPolycrystalIC.i
     exodiff = HexPolycrystalIC_out.e
   [../]
+
+  [./MultiBoundingBoxIC1D]
+    type = Exodiff
+    input = MultiBoundingBoxIC1D.i
+    exodiff = MultiBoundingBoxIC1D_out.e
+  [../]
+
+  [./MultiBoundingBoxIC2D]
+    type = Exodiff
+    input = MultiBoundingBoxIC2D.i
+    exodiff = MultiBoundingBoxIC2D_out.e
+  [../]
+
+  [./MultiBoundingBoxIC3D]
+    type = Exodiff
+    input = MultiBoundingBoxIC3D.i
+    exodiff = MultiBoundingBoxIC3D_out.e
+  [../]
 []
