@@ -81,7 +81,26 @@ public:
    */
   virtual void restoreOldSolutions();
 
+  /**
+   * Copy the solutions on the undisplaced systems to the displaced systems.
+   */
+  virtual void syncSolutions();
+
+  /**
+   * Synchronize the solutions on the displaced systems to the given solutions.
+   */
   virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
+
+  /**
+   * Copy the solutions on the undisplaced systems to the displaced systems and
+   * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
+   */
+  virtual void updateMesh();
+
+  /**
+   * Synchronize the solutions on the displaced systems to the given solutions and
+   * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
+   */
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 
   virtual bool isTransient() const;
