@@ -23,4 +23,11 @@
     type = 'RunApp'
     input = 'multiblock.i'
   [../]
+
+  [./warn]
+    type = 'RunException'
+    input = 'warn.i'
+    expect_err = "The material property 'prop' does not exist."
+    recover = false
+  [../]
 []

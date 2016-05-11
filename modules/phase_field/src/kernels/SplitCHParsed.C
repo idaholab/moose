@@ -39,6 +39,7 @@ SplitCHParsed::initialSetup()
    * do not have Jacobian entries.
    */
   validateNonlinearCoupling<Real>("f_name", _var.name());
+  validateDerivativeMaterialPropertyBase<Real>("f_name");
 }
 
 Real

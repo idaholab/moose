@@ -54,6 +54,7 @@ void
 KKSSplitCHCRes::initialSetup()
 {
   validateNonlinearCoupling<Real>("fa_name");
+  validateDerivativeMaterialPropertyBase<Real>("fa_name");
 }
 
 Real
