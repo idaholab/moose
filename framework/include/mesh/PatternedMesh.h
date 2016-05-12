@@ -17,6 +17,8 @@
 
 #include "MooseMesh.h"
 
+#include "libmesh/serial_mesh.h"
+
 class PatternedMesh;
 
 template<>
