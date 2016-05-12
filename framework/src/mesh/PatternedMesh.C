@@ -102,7 +102,7 @@ PatternedMesh::~PatternedMesh()
     delete _meshes[i];
 
   // Don't delete the first row - it is the real mesh - it will be cleaned up later
-  for (unsigned int i = 1; i < _meshes.size(); i++)
+  for (unsigned int i = 1; i < _row_meshes.size(); i++)
     delete _row_meshes[i];
 }
 
