@@ -13,7 +13,7 @@
 
 namespace PolycrystalICTools
 {
-std::vector<unsigned int>
+std::vector<unsigned>
 assignPointsToVariables(const std::vector<Point> & centerpoints,
                         const Real op_num,
                         const MooseMesh & mesh,
@@ -25,6 +25,16 @@ assignPointToGrain(const Point & p,
                    const MooseMesh & mesh,
                    const MooseVariable & var,
                    const Real maxsize);
+
+std::vector<std::vector<bool> >
+buildGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & node_to_grain,
+                         MooseMesh & mesh,
+                         unsigned int n_grains);
+
+std::vector<unsigned int>
+assignOpsToGrains(const std::vector<std::vector<bool> > & adjacency_matrix,
+                  unsigned int n_grains,
+                  unsigned int n_ops);
 }
 
 
