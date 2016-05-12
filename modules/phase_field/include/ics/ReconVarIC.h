@@ -43,7 +43,7 @@ private:
   unsigned int _grain_num;
 
   std::vector<Point> _centerpoints;
-  std::vector<Real> _assigned_op;
+  std::vector<unsigned int> _assigned_op;
 
   const std::map<dof_id_type, std::vector<Real> > & _node_to_grain_weight_map;
 };

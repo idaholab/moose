@@ -45,6 +45,7 @@ public:
 
   virtual void initialSetup();
 
+protected:
   MooseMesh & _mesh;
 
   /// mesh dimension
@@ -67,7 +68,7 @@ public:
   Point _range;
 
   std::vector<Point> _centerpoints;
-  std::vector<Real> _assigned_op;
+  std::vector<unsigned int> _assigned_op;
 };
 
 #endif //POLYCRYSTALREDUCEDIC_H
