@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'reassign_subdomain_ids.i'
+    exodiff = 'reassign_subdomain_ids_out.e'
+  [../]
+[]
