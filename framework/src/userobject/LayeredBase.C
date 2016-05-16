@@ -36,6 +36,8 @@ InputParameters validParams<LayeredBase>()
 
   params.addParam<unsigned int>("average_radius", 1, "When using 'average' sampling this is how the number of values both above and below the layer that will be averaged.");
 
+  params.addParam<bool>("cumulative", false, "When true the value in each layer is the sum of the values up to and including that layer");
+
   return params;
 }
 
@@ -46,7 +48,8 @@ LayeredBase::LayeredBase(const InputParameters & parameters) :
     _direction(_direction_enum),
     _sample_type(parameters.get<MooseEnum>("sample_type")),
     _average_radius(parameters.get<unsigned int>("average_radius")),
-    _layered_base_subproblem(*parameters.get<SubProblem *>("_subproblem"))
+    _layered_base_subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _cumulative(parameters.get<bool>("cumulative"))
 {
   if (_layered_base_params.isParamValid("num_layers") && _layered_base_params.isParamValid("bounds"))
     mooseError("'bounds' and 'num_layers' cannot both be set in " << _layered_base_name);
@@ -215,6 +218,17 @@ LayeredBase::finalize()
 {
   _layered_base_subproblem.comm().sum(_layer_values);
   _layered_base_subproblem.comm().max(_layer_has_value);
+
+  if (_cumulative)
+  {
+    Real value = 0;
+
+    for (unsigned i = 0; i < _num_layers; ++i)
+    {
+      value += getLayerValue(i);
+      setLayerValue(i, value);
+    }
+  }
 }
 
 void
