@@ -6,6 +6,12 @@
     group = 'requirements'
   [../]
 
+  [./cumulative]
+    type = 'Exodiff'
+    input = 'cumulative_layered_integral.i'
+    exodiff = 'cumulative_layered_integral_out.e'
+  [../]
+
   [./average_sample]
     type = 'Exodiff'
     input = 'average_sample.i'
