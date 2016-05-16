@@ -112,3 +112,10 @@
    fun:mca_base_component_find
    fun:mca_base_framework_components_register
 }
+{
+   Super_LU
+   Memcheck:Cond
+   ...
+   fun:MatLUFactorNumeric_SuperLU_DIST
+   ...
+}
