@@ -20,7 +20,7 @@ protected:
 
   const VariableValue & _u_old;
   const Real _velocity;
-  Function * const _function;
+  Function & _function;
 };
 
 template<>
