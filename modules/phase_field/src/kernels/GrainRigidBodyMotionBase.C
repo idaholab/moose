@@ -12,7 +12,7 @@ InputParameters validParams<GrainRigidBodyMotionBase>()
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Base class for adding rigid mody motion to grains");
   params.addRequiredCoupledVar("c", "Concentration");
-  params.addRequiredCoupledVar("v", "Array of coupled variable names");
+  params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variable names");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define type of force density under consideration");
   return params;
 }

@@ -15,7 +15,7 @@ InputParameters validParams<ExternalForceDensityMaterial>()
   params.addParam<FunctionName>("force_x", 0.0, "The forcing function in x direction.");
   params.addParam<FunctionName>("force_y", 0.0, "The forcing function in y direction.");
   params.addParam<FunctionName>("force_z", 0.0, "The forcing function in z direction.");
-  params.addCoupledVar("etas", "Array of coupled order parameters");
+  params.addRequiredCoupledVarWithAutoBuild("etas", "var_name_base", "op_num", "Array of coupled order parameters");
   params.addCoupledVar("c", "Concentration field");
   params.addParam<Real>("k", 1.0, "stiffness constant multiplier");
   return params;
