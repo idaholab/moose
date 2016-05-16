@@ -33,7 +33,6 @@ PolycrystalReducedIC::PolycrystalReducedIC(const InputParameters & parameters) :
     _grain_num(getParam<unsigned int>("grain_num")),
     _op_index(getParam<unsigned int>("op_index")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
-    _cody_test(getParam<bool>("cody_test")),
     _columnar_3D(getParam<bool>("columnar_3D"))
 {
 }
@@ -52,10 +51,6 @@ PolycrystalReducedIC::initialSetup()
   if (_op_num > _grain_num)
      mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
-  if (_cody_test)
-    if (_op_num != 5 || _grain_num != 10)
-      mooseError("ERROR in PolycrystalReducedIC: Numbers aren't correct for Cody's test.");
-
   MooseRandom::seed(_rand_seed);
 
   //Randomly generate the centers of the individual grains represented by the Voronoi tesselation
@@ -63,57 +58,17 @@ PolycrystalReducedIC::initialSetup()
   _assigned_op.resize(_grain_num);
   std::vector<Real> distances(_grain_num);
 
-  std::vector<Point> holder;
-
-  if (_cody_test)
-  {
-    holder.resize(_grain_num);
-    holder[0] = Point(0.2, 0.99, 0.0);
-    holder[1] = Point(0.5, 0.99, 0.0);
-    holder[2] = Point(0.8, 0.99, 0.0);
-
-    holder[3] = Point(0.2, 0.5, 0.0);
-    holder[4] = Point(0.5, 0.5, 0.0);
-    holder[5] = Point(0.8, 0.5, 0.0);
-
-    holder[6] = Point(0.1, 0.1, 0.0);
-    holder[7] = Point(0.5, 0.05, 0.0);
-    holder[8] = Point(0.9, 0.1, 0.0);
-
-    holder[9] = Point(0.5, 0.1, 0.0);
-  }
-
   //Assign actual center point positions
   for (unsigned int grain = 0; grain < _grain_num; grain++)
   {
     for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    {
-      if (_cody_test)
-        _centerpoints[grain](i) = _bottom_left(i) + _range(i)*holder[grain](i);
-      else
-        _centerpoints[grain](i) = _bottom_left(i) + _range(i)*MooseRandom::rand();
-    }
+      _centerpoints[grain](i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
     if (_columnar_3D)
-        _centerpoints[grain](2) = _bottom_left(2) + _range(2)*0.5;
+      _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
   }
 
-  //Assign grains to each order parameter
-  if (_cody_test)
-  {
-    _assigned_op[0] = 0.0;
-    _assigned_op[1] = 0.0;
-    _assigned_op[2] = 0.0;
-    _assigned_op[3] = 1.0;
-    _assigned_op[4] = 1.0;
-    _assigned_op[5] = 1.0;
-    _assigned_op[6] = 2.0;
-    _assigned_op[7] = 0.0;
-    _assigned_op[8] = 2.0;
-    _assigned_op[9] = 4.0;
-  }
-  else
-    //Assign grains to specific order parameters in a way that maximizes the distance
-    _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
+  //Assign grains to specific order parameters in a way that maximizes the distance
+  _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
 }
 
 Real
