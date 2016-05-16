@@ -1,0 +1,7 @@
+[Tests]
+  [./GrandPotentialPFM]
+    type = 'Exodiff'
+    input = 'GrandPotentialPFM.i'
+    exodiff = 'GrandPotentialPFM_out.e'
+  [../]
+[]

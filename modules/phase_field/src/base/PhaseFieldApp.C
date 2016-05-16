@@ -35,6 +35,7 @@
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
+#include "CoupledSusceptibilityTimeDerivative.h"
 #include "GradientComponent.h"
 #include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
@@ -58,6 +59,7 @@
 #include "SplitCHParsed.h"
 #include "SplitCHWRes.h"
 #include "SplitCHWResAniso.h"
+#include "SusceptibilityTimeDerivative.h"
 #include "SwitchingFunctionConstraintEta.h"
 #include "SwitchingFunctionConstraintLagrange.h"
 #include "SwitchingFunctionPenalty.h"
@@ -276,6 +278,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
+  registerKernel(CoupledSusceptibilityTimeDerivative);
   registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
@@ -299,6 +302,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SplitCHParsed);
   registerKernel(SplitCHWRes);
   registerKernel(SplitCHWResAniso);
+  registerKernel(SusceptibilityTimeDerivative);
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
