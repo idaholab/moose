@@ -45,7 +45,7 @@ private:
   virtual RealGradient gradient(const Point & p);
 
   std::vector<Point> _centerpoints;
-  std::vector<Real> _assigned_op;
+  std::vector<unsigned int> _assigned_op;
 
   // define type for distance and point
   struct DistancePoint
