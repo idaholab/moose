@@ -15,6 +15,11 @@ class CosseratStressDivergenceTensors;
 template<>
 InputParameters validParams<CosseratStressDivergenceTensors>();
 
+/**
+ * Computes grad_i(stress_{i component})
+ * This is exactly the same as StressDivergenceTensors,
+ * only the Jacobian entries are correct for the Cosserat case
+ */
 class CosseratStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
@@ -23,10 +28,11 @@ public:
 protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
-  const unsigned int _wc_x_var;
-  const unsigned int _wc_y_var;
-  const unsigned int _wc_z_var;
+  /// Number of Cosserat rotation variables supplied by user
+  const unsigned int _nrots;
+
+  /// The MOOSE variable numbers of the Cosserat rotation variables
+  std::vector<unsigned int> _wc_var;
 };
 
 #endif //COSSERATSTRESSDIVERGENCETENSORS_H

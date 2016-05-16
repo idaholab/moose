@@ -11,4 +11,12 @@
     exodiff = 'cosserat_tension_out.e'
     abs_zero = 1e-9
   [../]
+
+  [./except01]
+    type = RunException
+    input = cosserat_tension.i
+    cli_args = 'Kernels/x_moment/component=1 Outputs/file_base=except01'
+    expect_err = 'MomentBalancing: The variable for this Kernel must be equal to the Cosserat rotation variable defined by the "component" and the "Cosserat_rotations" parameters'
+    prereq = tension
+  [../]
 []

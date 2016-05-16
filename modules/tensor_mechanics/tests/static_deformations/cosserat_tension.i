@@ -8,12 +8,8 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
-  disp_x = disp_x
-  wc_z = wc_z
-  wc_y = wc_y
-  wc_x = wc_x
+  displacements = 'disp_x disp_y disp_z'
+  Cosserat_rotations = 'wc_x wc_y wc_z'
 []
 
 [Postprocessors]
@@ -81,41 +77,38 @@
   [./cx_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_x
-    displacements = 'disp_x disp_y disp_z'
     component = 0
   [../]
   [./cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
-    displacements = 'disp_x disp_y disp_z'
     component = 1
   [../]
   [./cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./x_couple]
     type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
-    base_name = coupled
+    base_name = couple
   [../]
   [./y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
-    base_name = coupled
+    base_name = couple
   [../]
   [./z_couple]
     type = StressDivergenceTensors
     variable = wc_z
     displacements = 'wc_x wc_y wc_z'
     component = 2
-    base_name = coupled
+    base_name = couple
   [../]
   [./x_moment]
     type = MomentBalancing
@@ -184,6 +177,9 @@
 [Materials]
   [./cosserat]
     type = CosseratLinearElasticMaterial
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     block = 0
     B_ijkl = 0.5
     C_ijkl = '1 2 1.3333'
@@ -208,5 +204,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
+  file_base = cosserat_tension_out
   exodus = true
 []
