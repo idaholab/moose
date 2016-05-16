@@ -44,14 +44,7 @@
 {
    tbb_scalable_allocator_bug
    Memcheck:Cond
-   fun:_ZN3rml8internal13isLargeObjectEPv
-   fun:scalable_free
-   fun:*
-}
-{
-   tbb_scalable_allocator_bug_gcc_5_3_0
-   Memcheck:Cond
-   fun:_ZN3rml8internal13isLargeObjectILNS0_12MemoryOriginE0EEEbPv
+   fun:_ZN3rml8internal13isLargeObject*
    fun:*
 }
 {
@@ -111,4 +104,11 @@
    fun:lt_dlforeachfile
    fun:mca_base_component_find
    fun:mca_base_framework_components_register
+}
+{
+   Super_LU
+   Memcheck:Cond
+   ...
+   fun:MatLUFactorNumeric_SuperLU_DIST
+   ...
 }
