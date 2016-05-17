@@ -179,7 +179,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     std::ostringstream oss;
     oss << "_" << i;
     // do not project, since this will be recomputed, but make it ghosted, since the near nullspace builder might march over all nodes
-    _nl.addVector("NullSpace"+oss.str(),false,GHOSTED,false);
+    _nl.addVector("NullSpace" + oss.str(), false, GHOSTED);
   }
   _subspace_dim["NullSpace"] = dimNullSpace;
   for (unsigned int i = 0; i < dimNearNullSpace; ++i)
@@ -187,7 +187,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     std::ostringstream oss;
     oss << "_" << i;
     // do not project, since this will be recomputed, but make it ghosted, since the near-nullspace builder might march over all semilocal nodes
-    _nl.addVector("NearNullSpace"+oss.str(),false,GHOSTED,false);
+    _nl.addVector("NearNullSpace" + oss.str(), false, GHOSTED);
   }
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
 
@@ -520,7 +520,7 @@ void FEProblem::initialSetup()
   Moose::perf_log.pop("reinit() after updateGeomSearch()", "Setup");
 
   if (_displaced_mesh)
-    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+    _displaced_problem->updateMesh();
 
   Moose::perf_log.push("Initial updateGeomSearch()", "Setup");
   updateGeomSearch(); // Call all of the rest of the geometric searches
@@ -635,7 +635,7 @@ void FEProblem::initialSetup()
     reinitScalars(tid);
 
   if (_displaced_mesh)
-    _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
+    _displaced_problem->syncSolutions();
 
   // Writes all calls to _console from initialSetup() methods
   _app.getOutputWarehouse().mooseConsole();
@@ -2373,7 +2373,7 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup &
   {
     serializeSolution();
     if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+    _displaced_problem->updateMesh();
 
     if (_use_legacy_uo_aux_computation)
         _aux.compute(EXEC_LINEAR);
@@ -2464,7 +2464,7 @@ FEProblem::updateActiveObjects()
 }
 
 void
-FEProblem::reportMooseObjectDependency(MooseObject * a, MooseObject * b)
+FEProblem::reportMooseObjectDependency(MooseObject * /*a*/, MooseObject * /*b*/)
 {
   //<< "Object " << a->name() << " -> " << b->name() << std::endl;
 }
@@ -3079,7 +3079,7 @@ FEProblem::solve()
 
   // sync solutions in displaced problem
   if (_displaced_problem)
-    _displaced_problem->syncSolutions(*_nl.currentSolution(), *_aux.currentSolution());
+    _displaced_problem->syncSolutions();
 
   Moose::perf_log.pop("solve()", "Execution");
 }
@@ -3196,7 +3196,21 @@ FEProblem::restoreSolutions()
   _aux.restoreSolutions();
 
   if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+    _displaced_problem->updateMesh();
+}
+
+void
+FEProblem::saveOldSolutions()
+{
+  _nl.saveOldSolutions();
+  _aux.saveOldSolutions();
+}
+
+void
+FEProblem::restoreOldSolutions()
+{
+  _nl.restoreOldSolutions();
+  _aux.restoreOldSolutions();
 }
 
 void
@@ -3334,7 +3348,7 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
   if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(soln, *_aux.currentSolution());
+    _displaced_problem->updateMesh();
 
 
 
@@ -3384,7 +3398,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
     if (_displaced_problem != NULL)
-      _displaced_problem->updateMesh(soln, *_aux.currentSolution());
+      _displaced_problem->updateMesh();
 
     for (unsigned int tid = 0; tid < n_threads; tid++)
     {
@@ -3435,7 +3449,7 @@ void
 FEProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
   if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh(*_nl.currentSolution(), *_aux.currentSolution());
+    _displaced_problem->updateMesh();
 
   _aux.compute(EXEC_NONLINEAR);
 

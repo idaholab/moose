@@ -372,6 +372,16 @@ public:
   virtual void restoreSolutions();
 
   /**
+   * Allocate vectors and save old solutions into them.
+   */
+  virtual void saveOldSolutions();
+
+  /**
+   * Restore old solutions from the backup vectors and deallocate them.
+   */
+  virtual void restoreOldSolutions();
+
+  /**
    * Output the current step.
    * Will ensure that everything is in the proper state to be outputted.
    * Then tell the OutputWarehouse to do its thing

@@ -188,20 +188,7 @@ public:
    */
   MooseSharedPointer<Split> getSplit(const std::string & name);
 
-
-  /**
-   * Adds a solution length vector to the system.
-   *
-   * @param vector_name The name of the vector.
-   * @param project Whether or not to project this vector when doing mesh refinement.
-   *                If the vector is just going to be recomputed then there is no need to project it.
-   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
-   *                                            GHOSTED is needed if you are going to be accessing off-processor entries.
-   *                                            The ghosting pattern is the same as the solution vector.
-   * @param zero_for_residual Whether or not to zero this vector at the beginning of computeResidual.  Useful when
-   *                          you are going to accumulate something into this vector during computeResidual
-   */
-  NumericVector<Number>& addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual = false);
+  void zeroVectorForResidual(const std::string & vector_name);
 
   void setInitialSolution();
 
@@ -599,8 +586,8 @@ protected:
   /// true if DG is active (optimization reasons)
   bool _doing_dg;
 
-  /// NumericVectors that will be zeroed before a residual computation
-  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;
+  /// vectors that will be zeroed before a residual computation
+  std::vector<std::string> _vecs_to_zero_for_residual;
 
   unsigned int _n_iters;
   unsigned int _n_linear_iters;

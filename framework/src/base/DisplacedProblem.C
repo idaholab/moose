@@ -119,10 +119,63 @@ DisplacedProblem::initAdaptivity()
 }
 
 void
+DisplacedProblem::saveOldSolutions()
+{
+  _displaced_nl.saveOldSolutions();
+  _displaced_aux.saveOldSolutions();
+}
+
+void
+DisplacedProblem::restoreOldSolutions()
+{
+  _displaced_nl.restoreOldSolutions();
+  _displaced_aux.restoreOldSolutions();
+}
+
+void
+DisplacedProblem::syncSolutions()
+{
+  (*_displaced_nl.sys().solution) = *_mproblem.getNonlinearSystem().currentSolution();
+  (*_displaced_aux.sys().solution) = *_mproblem.getAuxiliarySystem().currentSolution();
+  _displaced_nl.update();
+  _displaced_aux.update();
+}
+
+void
 DisplacedProblem::syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
 {
   (*_displaced_nl.sys().solution) = soln;
   (*_displaced_aux.sys().solution) = aux_soln;
+  _displaced_nl.update();
+  _displaced_aux.update();
+}
+
+void
+DisplacedProblem::updateMesh()
+{
+  Moose::perf_log.push("updateDisplacedMesh()", "Execution");
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  syncSolutions();
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i]->invalidateCache();
+
+  _nl_solution = _mproblem.getNonlinearSystem().currentSolution();
+  _aux_solution = _mproblem.getAuxiliarySystem().currentSolution();
+
+  UpdateDisplacedMeshThread udmt(_mproblem, *this);
+
+  Threads::parallel_reduce(*_mesh.getActiveSemiLocalNodeRange(), udmt);
+
+  // Update the geometric searches that depend on the displaced mesh
+  _geometric_search_data.update();
+
+  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
+  _dirac_kernel_info.updatePointLocator(_mesh);
+
+  Moose::perf_log.pop("updateDisplacedMesh()", "Execution");
 }
 
 void
