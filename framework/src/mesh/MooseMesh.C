@@ -84,10 +84,13 @@ InputParameters validParams<MooseMesh>()
   MooseEnum patch_update_strategy("never always auto", "never");
   params.addParam<MooseEnum>("patch_update_strategy", patch_update_strategy,  "How often to update the geometric search 'patch'.  The default is to never update it (which is the most efficient but could be a problem with lots of relative motion).  'always' will update the patch every timestep which might be time consuming.  'auto' will attempt to determine when the patch size needs to be updated automatically.");
 
+  // Note: This parameter is named to match 'construct_side_list_from_node_list' in SetupMeshAction
+  params.addParam<bool>("construct_node_list_from_side_list", true, "Whether or not to generate nodesets from the sidesets (usually a good idea).");
+
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup("dim nemesis patch_update_strategy", "Advanced");
+  params.addParamNamesToGroup("dim nemesis patch_update_strategy construct_node_list_from_side_list", "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
@@ -122,7 +125,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _patch_size(40),
     _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
-    _allow_recovery(true)
+    _allow_recovery(true),
+    _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list"))
 {
   switch (_mesh_distribution_type)
   {
@@ -289,34 +293,26 @@ MooseMesh::prepare(bool force)
   for (MeshBase::element_iterator el = getMesh().elements_begin(); el != el_end; ++el)
     _mesh_subdomains.insert((*el)->subdomain_id());
 
+  // Make sure nodesets have been generated
+  buildNodeListFromSideList();
+
   // Collect (local) boundary IDs
   const std::set<BoundaryID> & local_bids = getMesh().get_boundary_info().get_boundary_ids();
   _mesh_boundary_ids.insert(local_bids.begin(), local_bids.end());
 
+  const std::set<BoundaryID> & local_node_bids = getMesh().get_boundary_info().get_node_boundary_ids();
+  _mesh_nodeset_ids.insert(local_node_bids.begin(), local_node_bids.end());
+
+  const std::set<BoundaryID> & local_side_bids = getMesh().get_boundary_info().get_side_boundary_ids();
+  _mesh_sideset_ids.insert(local_side_bids.begin(), local_side_bids.end());
+
   // Communicate subdomain and boundary IDs if this is a parallel mesh
   if (!getMesh().is_serial())
   {
-    // Pack our subdomain IDs into a vector
-    std::vector<SubdomainID> mesh_subdomains_vector(_mesh_subdomains.begin(),
-                                                    _mesh_subdomains.end());
-
-    // Gather them all into an enlarged vector
-    _communicator.allgather(mesh_subdomains_vector);
-
-    // Attempt to insert any new IDs into the set (any existing ones will be skipped)
-    _mesh_subdomains.insert(mesh_subdomains_vector.begin(),
-                            mesh_subdomains_vector.end());
-
-    // Pack our boundary IDs into a vector for communication
-    std::vector<BoundaryID> mesh_boundary_ids_vector(_mesh_boundary_ids.begin(),
-                                                     _mesh_boundary_ids.end());
-
-    // Gather them all into an enlarged vector
-    _communicator.allgather(mesh_boundary_ids_vector);
-
-    // Attempt to insert any new IDs into the set (any existing ones will be skipped)
-    _mesh_boundary_ids.insert(mesh_boundary_ids_vector.begin(),
-                              mesh_boundary_ids_vector.end());
+    _communicator.set_union(_mesh_subdomains);
+    _communicator.set_union(_mesh_boundary_ids);
+    _communicator.set_union(_mesh_nodeset_ids);
+    _communicator.set_union(_mesh_sideset_ids);
   }
 
   detectOrthogonalDimRanges();
@@ -1219,7 +1215,8 @@ MooseMesh::detectPairedSidesets()
   // Grab a reference to the BoundaryInfo object
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
-  boundary_info.build_node_list_from_side_list();
+  buildNodeListFromSideList();
+
   unsigned int dim = getMesh().mesh_dimension();
   unsigned int z_dim = dim == 3 ? 2 : 1;  // Determine how many z loops there are, we always need to loop at least once!
 
@@ -1870,7 +1867,8 @@ MooseMesh::getAnyID() const
 void
 MooseMesh::buildNodeListFromSideList()
 {
-  getMesh().get_boundary_info().build_node_list_from_side_list();
+  if (_construct_node_list_from_side_list)
+    getMesh().get_boundary_info().build_node_list_from_side_list();
 }
 
 void
@@ -1987,6 +1985,18 @@ const std::set<BoundaryID> &
 MooseMesh::meshBoundaryIds() const
 {
   return _mesh_boundary_ids;
+}
+
+const std::set<BoundaryID> &
+MooseMesh::meshSidesetIds() const
+{
+  return _mesh_sideset_ids;
+}
+
+const std::set<BoundaryID> &
+MooseMesh::meshNodesetIds() const
+{
+  return _mesh_nodeset_ids;
 }
 
 void

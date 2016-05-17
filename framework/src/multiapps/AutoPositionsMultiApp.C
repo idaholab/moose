@@ -33,7 +33,7 @@ InputParameters validParams<AutoPositionsMultiApp>()
 
 AutoPositionsMultiApp::AutoPositionsMultiApp(const InputParameters & parameters):
     TransientMultiApp(parameters),
-    BoundaryRestrictable(parameters)
+    BoundaryRestrictable(parameters, true) // true for applying to nodesets
 {
 }
 
