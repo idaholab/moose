@@ -140,7 +140,7 @@ GrainTracker::finalize()
 const std::vector<std::pair<unsigned int, unsigned int> > &
 GrainTracker::getElementalValues(dof_id_type elem_id) const
 {
-  const std::map<unsigned int, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _elemental_data.find(elem_id);
+  const std::map<dof_id_type, std::vector<std::pair<unsigned int, unsigned int> > >::const_iterator pos = _elemental_data.find(elem_id);
 
   if (pos != _elemental_data.end())
     return pos->second;
