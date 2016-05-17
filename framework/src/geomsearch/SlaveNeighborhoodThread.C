@@ -67,10 +67,8 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 {
   processor_id_type processor_id = _mesh.processor_id();
 
-  for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
+  for (const auto & node_id : range)
   {
-    dof_id_type node_id = *nd;
-
     const Node & node = *_mesh.nodePtr(node_id);
 
     std::priority_queue<std::pair<unsigned int, Real>, std::vector<std::pair<unsigned int, Real> >, ComparePair> neighbors;
@@ -118,8 +116,8 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       { // See if we own any of the elements connected to the slave node
         const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[node_id];
 
-        for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-          if (_mesh.elemPtr(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+        for (const auto & dof : elems_connected_to_node)
+          if (_mesh.elemPtr(dof)->processor_id() == processor_id)
           {
             need_to_track = true;
             break; // Break out of element loop
@@ -128,18 +126,16 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 
       if (!need_to_track)
       { // Now check the neighbor nodes to see if we own any of them
-        for (unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
+        for (const auto & neighbor_node_id : neighbor_nodes)
         {
-          dof_id_type neighbor_node_id = neighbor_nodes[neighbor_it];
-
           if (_mesh.nodeRef(neighbor_node_id).processor_id() == processor_id)
             need_to_track = true;
           else // Now see if we own any of the elements connected to the neighbor nodes
           {
             const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[neighbor_node_id];
 
-            for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-              if (_mesh.elemPtr(elems_connected_to_node[elem_id_it])->processor_id() == processor_id)
+            for (const auto & dof : elems_connected_to_node)
+              if (_mesh.elemPtr(dof)->processor_id() == processor_id)
               {
                 need_to_track = true;
                 break; // Break out of element loop
@@ -163,8 +159,8 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       { // Add the elements connected to the slave node to the ghosted list
         const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[node_id];
 
-        for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-          _ghosted_elems.insert(elems_connected_to_node[elem_id_it]);
+        for (const auto & dof : elems_connected_to_node)
+          _ghosted_elems.insert(dof);
       }
 
       // Now add elements connected to the neighbor nodes to the ghosted list
@@ -172,8 +168,8 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       {
         const std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[neighbor_nodes[neighbor_it]];
 
-        for (unsigned int elem_id_it=0; elem_id_it < elems_connected_to_node.size(); elem_id_it++)
-          _ghosted_elems.insert(elems_connected_to_node[elem_id_it]);
+        for (const auto & dof : elems_connected_to_node)
+          _ghosted_elems.insert(dof);
       }
     }
   }
