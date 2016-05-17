@@ -8,10 +8,10 @@
 #define GRAINTEXTUREVECTORPOSTPROCESSOR
 
 #include "ElementVectorPostprocessor.h"
-#include "EulerAngleProvider.h"
 #include "SamplerBase.h"
 
 // Forward declarations
+class EulerAngleProvider;
 class GrainTextureVectorPostprocessor;
 
 template<>
@@ -22,7 +22,8 @@ InputParameters validParams<GrainTextureVectorPostprocessor>();
  *  the coordinates, grain number, and Euler Angles associated with each element.
  *  Currently only works with a uniform, structured grid (no mesh adaptivity).
  */
-class GrainTextureVectorPostprocessor: public ElementVectorPostprocessor, protected SamplerBase
+class GrainTextureVectorPostprocessor: public ElementVectorPostprocessor,
+                                       protected SamplerBase
 {
 public:
   GrainTextureVectorPostprocessor(const InputParameters & parameters);

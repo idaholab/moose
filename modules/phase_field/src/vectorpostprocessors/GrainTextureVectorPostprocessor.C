@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "GrainTextureVectorPostprocessor.h"
+#include "EulerAngleProvider.h"
 #include "Assembly.h"
-
 
 template<>
 InputParameters validParams<GrainTextureVectorPostprocessor>()
@@ -20,24 +20,24 @@ InputParameters validParams<GrainTextureVectorPostprocessor>()
   return params;
 }
 
-GrainTextureVectorPostprocessor::GrainTextureVectorPostprocessor(const InputParameters & parameters):
-  ElementVectorPostprocessor(parameters),
-  SamplerBase(parameters, this, _communicator),
-  _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
-  _unique_grains(coupledValue("unique_grains")),
-  _ncrys(getParam<unsigned int>("grain_num")),
-  _values(4)
-  {
-    if (_euler.getGrainNum() < _ncrys)
-      mooseError("Euler angle provider has too few angles.");
+GrainTextureVectorPostprocessor::GrainTextureVectorPostprocessor(const InputParameters & parameters) :
+    ElementVectorPostprocessor(parameters),
+    SamplerBase(parameters, this, _communicator),
+    _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
+    _unique_grains(coupledValue("unique_grains")),
+    _ncrys(getParam<unsigned int>("grain_num")),
+    _values(4)
+{
+  if (_euler.getGrainNum() < _ncrys)
+    mooseError("Euler angle provider has too few angles.");
 
-    std::vector<std::string> output_variables(4);
-    output_variables[0] = "unique_grain";
-    output_variables[1] = "euler_angle_z";
-    output_variables[2] = "euler_angle_x\'";
-    output_variables[3] = "euler_angle_z\"";
-    SamplerBase::setupVariables(output_variables);
-  }
+  std::vector<std::string> output_variables(4);
+  output_variables[0] = "unique_grain";
+  output_variables[1] = "euler_angle_z";
+  output_variables[2] = "euler_angle_x\'";
+  output_variables[3] = "euler_angle_z\"";
+  SamplerBase::setupVariables(output_variables);
+}
 
 void
 GrainTextureVectorPostprocessor::initialize()
