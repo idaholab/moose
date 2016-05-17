@@ -290,9 +290,9 @@ void
 MooseVariable::reinitNodes(const std::vector<dof_id_type> & nodes)
 {
   _dof_indices.clear();
-  for (unsigned int i = 0; i < nodes.size(); i++)
+  for (const auto & node_id : nodes)
   {
-    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(node_id);
     if (nd && (_subproblem.mesh().isSemiLocal(nd)))
     {
       if (nd->n_dofs(_sys.number(), _var_num) > 0)
@@ -313,9 +313,9 @@ void
 MooseVariable::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes)
 {
   _dof_indices_neighbor.clear();
-  for (unsigned int i = 0; i < nodes.size(); i++)
+  for (const auto & node_id : nodes)
   {
-    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(node_id);
     if (nd && (_subproblem.mesh().isSemiLocal(nd)))
     {
       if (nd->n_dofs(_sys.number(), _var_num) > 0)

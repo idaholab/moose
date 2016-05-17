@@ -46,13 +46,13 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // Boundary Restricted
   std::vector<BoundaryID> nodeset_ids;
   _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node, nodeset_ids);
-  for (std::vector<BoundaryID>::const_iterator bnd_it = nodeset_ids.begin(); bnd_it != nodeset_ids.end(); ++bnd_it)
+  for (const auto & bnd : nodeset_ids)
   {
-    if (_user_objects.hasActiveBoundaryObjects(*bnd_it, _tid))
+    if (_user_objects.hasActiveBoundaryObjects(bnd, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBoundaryObjects(*bnd_it, _tid);
-      for (std::vector<MooseSharedPointer<NodalUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->execute();
+      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
+      for (const auto & uo : objects)
+        uo->execute();
     }
   }
 
@@ -65,21 +65,17 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   std::vector<MooseSharedPointer<NodalUserObject> > computed;
 
   const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
-  for (std::set<SubdomainID>::const_iterator blk_it = block_ids.begin(); blk_it != block_ids.end(); ++blk_it)
-  {
-    if (_user_objects.hasActiveBlockObjects(*blk_it, _tid))
+  for (const auto & block : block_ids)
+    if (_user_objects.hasActiveBlockObjects(block, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBlockObjects(*blk_it, _tid);
-      for (std::vector<MooseSharedPointer<NodalUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      {
-        if (!(*it)->isUniqueNodeExecute() || std::count(computed.begin(), computed.end(), *it) == 0)
+      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBlockObjects(block, _tid);
+      for (const auto & uo : objects)
+        if (!uo->isUniqueNodeExecute() || std::count(computed.begin(), computed.end(), uo) == 0)
         {
-          (*it)->execute();
-          computed.push_back(*it);
+          uo->execute();
+          computed.push_back(uo);
         }
-      }
     }
-  }
 }
 
 void

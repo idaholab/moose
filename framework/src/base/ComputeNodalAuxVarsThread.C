@@ -43,9 +43,9 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
   const Node * node = *node_it;
 
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
+  for (const auto & it : _sys._nodal_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
@@ -56,21 +56,21 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   // Loop over all SubdomainIDs for the curnent node, if an AuxKernel is active on this block then compute it.
   const std::set<SubdomainID> & block_ids = _sys.mesh().getNodeBlockIds(*node);
-  for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
+  for (const auto & block : block_ids)
   {
-    std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = block_kernels.find(*block_it);
+    std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = block_kernels.find(block);
 
     if (iter != block_kernels.end())
-      for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
-        (*aux_it)->compute();
+      for (const auto & aux : iter->second)
+        aux->compute();
   }
 
   // We are done, so update the solution vector
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
+    for (const auto & it : _sys._nodal_vars[_tid])
     {
-      MooseVariable * var = it->second;
+      MooseVariable * var = it.second;
       var->insert(_sys.solution());
     }
   }

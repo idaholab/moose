@@ -56,10 +56,10 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
   BoundaryID boundary_id = bnode->_bnd_id;
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
-  for (std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator it = ce.begin(); it != ce.end(); ++it)
+  for (const auto & it : ce)
   {
-    MooseVariable & ivariable = *(*it).first;
-    MooseVariable & jvariable = *(*it).second;
+    MooseVariable & ivariable = *(it.first);
+    MooseVariable & jvariable = *(it.second);
 
     unsigned int ivar = ivariable.number();
     unsigned int jvar = jvariable.number();
@@ -71,10 +71,8 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     {
       // Loop over each NodalKernel to see if it's involved with the jvar
       const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
-      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = objects.begin(); nodal_kernel_it != objects.end(); ++nodal_kernel_it)
+      for (const auto & nodal_kernel : objects)
       {
-        const MooseSharedPointer<NodalKernel> & nodal_kernel = *nodal_kernel_it;
-
         // If this NodalKernel isn't operating on this ivar... skip it
         if (nodal_kernel->variable().number() != ivar)
           break;
@@ -87,10 +85,10 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         }
 
         // See if this NodalKernel is coupled to the jvar
-        const std::vector<MooseVariable *> & coupled_vars = (*nodal_kernel_it)->getCoupledMooseVars();
-        for (std::vector<MooseVariable *>::const_iterator var_it = coupled_vars.begin(); var_it != coupled_vars.end(); ++var_it)
+        const std::vector<MooseVariable *> & coupled_vars = nodal_kernel->getCoupledMooseVars();
+        for (const auto & var : coupled_vars)
         {
-          if ( (*var_it)->number() == jvar )
+          if (var->number() == jvar)
           {
             active_involved_kernels.push_back(nodal_kernel);
             break; // It only takes one
@@ -103,9 +101,9 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     if (!active_involved_kernels.empty())
     {
       // prepare variables
-      for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
+      for (const auto & it : _sys._nodal_vars[_tid])
       {
-        MooseVariable * var = it->second;
+        MooseVariable * var = it.second;
         var->prepareAux();
       }
 
@@ -115,10 +113,8 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         if (node->processor_id() == _fe_problem.processor_id())
         {
           _fe_problem.reinitNodeFace(node, boundary_id,  _tid);
-          for (std::vector<MooseSharedPointer<NodalKernel> >::iterator nodal_kernel_it = active_involved_kernels.begin();
-               nodal_kernel_it != active_involved_kernels.end();
-               ++nodal_kernel_it)
-            (*nodal_kernel_it)->computeOffDiagJacobian(jvar);
+          for (const auto & nodal_kernel : active_involved_kernels)
+            nodal_kernel->computeOffDiagJacobian(jvar);
 
           _num_cached++;
         }

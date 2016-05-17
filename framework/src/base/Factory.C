@@ -179,7 +179,7 @@ std::vector<std::string>
 Factory::getConstructedObjects() const
 {
   std::vector<std::string> list;
-  for (std::set<std::string>::iterator i = _constructed_types.begin(); i != _constructed_types.end(); ++i)
-    list.push_back(*i);
+  for (const auto & name : _constructed_types)
+    list.push_back(name);
   return list;
 }

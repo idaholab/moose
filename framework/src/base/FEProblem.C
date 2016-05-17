@@ -236,9 +236,8 @@ FEProblem::~FEProblem()
   delete _resurrector;
 
   // Random data objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end(); ++it)
-    delete it->second;
+  for (auto & it : _random_data_objects)
+    delete it.second;
 }
 
 Moose::CoordinateSystemType
@@ -272,8 +271,8 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const Multi
     else
       mooseError("Multiple coordinate systems specified, but no blocks given.");
 
-    for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
-      _coord_sys[*it] = coord_type;
+    for (const auto & sbd : subdomains)
+      _coord_sys[sbd] = coord_type;
   }
   else
   {
@@ -281,9 +280,9 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const Multi
     if (coord_sys.size() == 0)
     {
       // set all blocks to cartesian coordinate system
-      for (unsigned int i = 0; i < blocks.size(); i++)
+      for (const auto & block : blocks)
       {
-        SubdomainID sid = _mesh.getSubdomainID(blocks[i]);
+        SubdomainID sid = _mesh.getSubdomainID(block);
         _coord_sys[sid] = Moose::COORD_XYZ;
       }
     }
@@ -291,9 +290,9 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const Multi
     {
       // set all blocks to the coordinate system specified by `coord_sys[0]`
       Moose::CoordinateSystemType coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
-      for (unsigned int i = 0; i < blocks.size(); i++)
+      for (const auto & block : blocks)
       {
-        SubdomainID sid = _mesh.getSubdomainID(blocks[i]);
+        SubdomainID sid = _mesh.getSubdomainID(block);
         _coord_sys[sid] = coord_type;
       }
     }
@@ -309,12 +308,9 @@ FEProblem::setCoordSystem(const std::vector<SubdomainName> & blocks, const Multi
         _coord_sys[sid] = coord_type;
       }
 
-      for (std::set<SubdomainID>::const_iterator it = subdomains.begin(); it != subdomains.end(); ++it)
-      {
-        SubdomainID sid = *it;
+      for (const auto & sid : subdomains)
         if (_coord_sys.find(sid) == _coord_sys.end())
           mooseError("Subdomain '" + Moose::stringify(sid) + "' does not have a coordinate system specified.");
-      }
     }
   }
 }
@@ -527,10 +523,8 @@ void FEProblem::initialSetup()
   Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
   // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
-       ++it)
-    it->second->updateSeeds(EXEC_INITIAL);
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_INITIAL);
 
   if (_app.isRestarting() || _app.isRecovering())
   {
@@ -657,10 +651,8 @@ void FEProblem::timestepSetup()
   _nl.timestepSetup();
 
   // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
-       ++it)
-    it->second->updateSeeds(EXEC_TIMESTEP_BEGIN);
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
@@ -1184,11 +1176,8 @@ FEProblem::getDiracElements(std::set<const Elem *> & elems)
 
     { // Use the ids from the displaced elements to get the undisplaced elements
       // and add them to the list
-      std::set<const Elem *>::iterator it = displaced_elements.begin();
-      std::set<const Elem *>::iterator end = displaced_elements.end();
-
-      for (;it != end; ++it)
-        elems.insert(_mesh.elemPtr((*it)->id()));
+      for (const auto & elem : displaced_elements)
+        elems.insert(_mesh.elemPtr(elem->id()));
     }
   }
 }
@@ -1688,10 +1677,8 @@ FEProblem::projectSolution()
   if (processor_id() == (n_processors()-1) && _scalar_ics.hasActiveObjects())
   {
     const std::vector<MooseSharedPointer<ScalarInitialCondition> > & ics = _scalar_ics.getActiveObjects();
-    for (std::vector<MooseSharedPointer<ScalarInitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
+    for (const auto & ic : ics)
     {
-      MooseSharedPointer<ScalarInitialCondition> ic = (*it);
-
       MooseVariableScalar & var = ic->variable();
       var.reinit();
 
@@ -1853,8 +1840,8 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
     _all_materials.updateVariableDependency(needed_moose_vars, tid);
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
-  for (std::set<BoundaryID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
-    _materials.updateBoundaryVariableDependency(*it, needed_moose_vars, tid);
+  for (const auto & id : ids)
+    _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
 
   const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(), current_active_elemental_moose_variables.end());
@@ -2194,12 +2181,11 @@ FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
 void
 FEProblem::parentOutputPositionChanged()
 {
-  std::map<ExecFlagType, MooseObjectWarehouse<MultiApp> >::const_iterator it;
-  for (it = _multi_apps.begin(); it != _multi_apps.end(); ++it)
+  for (const auto & it : _multi_apps)
   {
-    const std::vector<MooseSharedPointer<MultiApp> > & objects = it->second.getActiveObjects();
-    for (std::vector<MooseSharedPointer<MultiApp> >::const_iterator jt = objects.begin(); jt != objects.end(); ++jt)
-      (*jt)->parentOutputPositionChanged();
+    const std::vector<MooseSharedPointer<MultiApp> > & objects = it.second.getActiveObjects();
+    for (const auto & obj : objects)
+      obj->parentOutputPositionChanged();
   }
 }
 
@@ -2220,13 +2206,13 @@ FEProblem::computeIndicators()
 
     // Indicator Fields
     const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicators.getActiveObjects();
-    for (std::vector<MooseSharedPointer<Indicator> >::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
-      fields.push_back((*it)->name());
+    for (const auto & indicator : indicators)
+      fields.push_back(indicator->name());
 
     // InternalSideIndicator Fields
     const std::vector<MooseSharedPointer<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveObjects();
-    for (std::vector<MooseSharedPointer<InternalSideIndicator> >::const_iterator it = internal_indicators.begin(); it != internal_indicators.end(); ++it)
-      fields.push_back((*it)->name());
+    for (const auto & internal_indicator : internal_indicators)
+      fields.push_back(internal_indicator->name());
 
     _aux.zeroVariables(fields);
   }
@@ -2256,8 +2242,8 @@ FEProblem::computeMarkers()
 
     // Marker Fields
     const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects();
-    for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = markers.begin(); it != markers.end(); ++it)
-      fields.push_back((*it)->name());
+    for (const auto & marker : markers)
+      fields.push_back(marker->name());
 
     _aux.zeroVariables(fields);
   }
@@ -2270,8 +2256,8 @@ FEProblem::computeMarkers()
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
       const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects(tid);
-      for (std::vector<MooseSharedPointer<Marker> >::const_iterator it = markers.begin(); it != markers.end(); ++it)
-        (*it)->markerSetup();
+      for (const auto & marker : markers)
+        marker->markerSetup();
     }
 
     ComputeMarkerThread cmt(*this, getAuxiliarySystem());
@@ -2413,15 +2399,15 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup &
   if (general.hasActiveObjects())
   {
     const std::vector<MooseSharedPointer<GeneralUserObject> > & objects = general.getActiveObjects();
-    for (std::vector<MooseSharedPointer<GeneralUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    for (const auto & obj : objects)
     {
-      (*it)->initialize();
-      (*it)->execute();
-      (*it)->finalize();
+      obj->initialize();
+      obj->execute();
+      obj->finalize();
 
-      MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(*it);
+      MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(obj);
       if (pp)
-        _pps_data.storeValue((*it)->name(), pp->getValue());
+        _pps_data.storeValue(obj->name(), pp->getValue());
     }
   }
 }
@@ -2431,8 +2417,8 @@ FEProblem::executeControls(const ExecFlagType & exec_type)
 {
   _control_warehouse.setup(exec_type);
   const std::vector<MooseSharedPointer<Control> > & objects = _control_warehouse[exec_type].getActiveObjects();
-  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-    (*it)->execute();
+  for (const auto & control : objects)
+    control->execute();
 }
 
 void
@@ -2636,8 +2622,8 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   const std::vector<MooseSharedPointer<MultiApp> > & multi_apps = _multi_apps[type].getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
-  for (std::vector<MooseSharedPointer<MultiApp> >::const_iterator it = multi_apps.begin(); it != multi_apps.end(); ++it)
-    (*it)->preTransfer(_dt, _time);
+  for (const auto & multi_app : multi_apps)
+    multi_app->preTransfer(_dt, _time);
 
   // Execute Transfers _to_ MultiApps
   if (_to_multi_app_transfers[type].hasActiveObjects())
@@ -2645,11 +2631,11 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _to_multi_app_transfers[type].getActiveObjects();
 
     _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
-    for (std::vector<MooseSharedPointer<Transfer> >::const_iterator it = transfers.begin(); it != transfers.end(); ++it)
+    for (const auto & transfer : transfers)
     {
-      Moose::perf_log.push((*it)->name(), "Transfers");
-      (*it)->execute();
-      Moose::perf_log.pop((*it)->name(), "Transfers");
+      Moose::perf_log.push(transfer->name(), "Transfers");
+      transfer->execute();
+      Moose::perf_log.pop(transfer->name(), "Transfers");
     }
 
     _console << "Waiting For Transfers To Finish" << '\n';
@@ -2668,8 +2654,8 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
 
     bool success = true;
 
-    for (std::vector<MooseSharedPointer<MultiApp> >::const_iterator it = multi_apps.begin(); it != multi_apps.end(); ++it)
-      success = (*it)->solveStep(_dt, _time, auto_advance);
+    for (const auto & multi_app : multi_apps)
+      success = multi_app->solveStep(_dt, _time, auto_advance);
 
     _console << "Waiting For Other Processors To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
@@ -2688,11 +2674,11 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _from_multi_app_transfers[type].getActiveObjects();
 
     _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
-    for (std::vector<MooseSharedPointer<Transfer> >::const_iterator it = transfers.begin(); it != transfers.end(); ++it)
+    for (const auto & transfer : transfers)
     {
-      Moose::perf_log.push((*it)->name(), "Transfers");
-      (*it)->execute();
-      Moose::perf_log.pop((*it)->name(), "Transfers");
+      Moose::perf_log.push(transfer->name(), "Transfers");
+      transfer->execute();
+      Moose::perf_log.pop(transfer->name(), "Transfers");
     }
 
     _console << "Waiting For Transfers To Finish" << '\n';
@@ -2717,8 +2703,8 @@ FEProblem::advanceMultiApps(ExecFlagType type)
   {
     _console << "Advancing MultiApps" << std::endl;
 
-    for (unsigned int i=0; i<multi_apps.size(); i++)
-      multi_apps[i]->advanceStep();
+    for (const auto & multi_app : multi_apps)
+      multi_app->advanceStep();
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
@@ -2736,8 +2722,8 @@ FEProblem::backupMultiApps(ExecFlagType type)
   {
     _console << "Backing Up MultiApps" << std::endl;
 
-    for (unsigned int i=0; i<multi_apps.size(); i++)
-      multi_apps[i]->backup();
+    for (const auto & multi_app : multi_apps)
+      multi_app->backup();
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
@@ -2758,9 +2744,9 @@ FEProblem::restoreMultiApps(ExecFlagType type, bool force)
     else
       _console << "\nRestoring MultiApps" << std::endl;
 
-    for (unsigned int i=0; i<multi_apps.size(); i++)
-      if (force || multi_apps[i]->needsRestoration())
-        multi_apps[i]->restore();
+    for (const auto & multi_app : multi_apps)
+      if (force || multi_app->needsRestoration())
+        multi_app->restore();
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
@@ -2776,8 +2762,8 @@ FEProblem::computeMultiAppsDT(ExecFlagType type)
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
-  for (unsigned int i=0; i<multi_apps.size(); i++)
-    smallest_dt = std::min(smallest_dt, multi_apps[i]->computeDT());
+  for (const auto & multi_app : multi_apps)
+    smallest_dt = std::min(smallest_dt, multi_app->computeDT());
 
   return smallest_dt;
 }
@@ -2789,8 +2775,8 @@ FEProblem::execTransfers(ExecFlagType type)
   if (_transfers[type].hasActiveObjects())
   {
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _transfers[type].getActiveObjects();
-    for (std::vector<MooseSharedPointer<Transfer> >::const_iterator it = transfers.begin(); it != transfers.end(); ++it)
-      (*it)->execute();
+    for (const auto & transfer : transfers)
+      transfer->execute();
   }
 }
 
@@ -3336,10 +3322,8 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
   unsigned int n_threads = libMesh::n_threads();
 
   // Random interface objects
-  for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-       it != _random_data_objects.end();
-       ++it)
-    it->second->updateSeeds(EXEC_LINEAR);
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_LINEAR);
 
   execTransfers(EXEC_LINEAR);
 
@@ -3385,10 +3369,8 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     unsigned int n_threads = libMesh::n_threads();
 
     // Random interface objects
-    for (std::map<std::string, RandomData *>::iterator it = _random_data_objects.begin();
-         it != _random_data_objects.end();
-         ++it)
-      it->second->updateSeeds(EXEC_NONLINEAR);
+    for (const auto & it : _random_data_objects)
+      it.second->updateSeeds(EXEC_NONLINEAR);
 
     _currently_computing_jacobian = true;
 
@@ -3795,8 +3777,8 @@ FEProblem::meshChanged()
 
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
 
-  for (std::vector<MeshChangedInterface *>::iterator it = _notify_when_mesh_changes.begin(); it != _notify_when_mesh_changes.end(); ++it)
-      (*it)->meshChanged();
+  for (const auto & mci : _notify_when_mesh_changes)
+    mci->meshChanged();
 }
 
 void
@@ -3846,16 +3828,16 @@ FEProblem::checkProblemIntegrity()
        */
       bool check_material_coverage = false;
       std::set<SubdomainID> ids = _all_materials.getActiveBlocks();
-      for (std::set<SubdomainID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
+      for (const auto & id : ids)
       {
-        local_mesh_subs.erase(*it);
+        local_mesh_subs.erase(id);
         check_material_coverage = true;
       }
 
       // also exclude mortar spaces from the material check
       std::vector<MooseMesh::MortarInterface *> & mortar_ifaces = _mesh.getMortarInterfaces();
-      for (std::vector<MooseMesh::MortarInterface *>::iterator it = mortar_ifaces.begin(); it != mortar_ifaces.end(); ++it)
-        local_mesh_subs.erase((*it)->_id);
+      for (const auto & mortar_iface : mortar_ifaces)
+        local_mesh_subs.erase(mortar_iface->_id);
 
       // Check Material Coverage
       if (check_material_coverage && !local_mesh_subs.empty())
@@ -3874,8 +3856,8 @@ FEProblem::checkProblemIntegrity()
 
     // Check that material properties exist when requested by other properties on a given block
     const std::vector<MooseSharedPointer<Material> > & materials = _all_materials.getActiveObjects();
-    for (std::vector<MooseSharedPointer<Material> >::const_iterator it = materials.begin(); it != materials.end(); ++it)
-      (*it)->checkStatefulSanity();
+    for (const auto & material : materials)
+      material->checkStatefulSanity();
 
     checkDependMaterialsHelper(_all_materials.getActiveBlockObjects());
   }
@@ -3921,9 +3903,9 @@ FEProblem::checkDisplacementOrders()
       const std::vector<std::string> & displacement_variables =
         _displaced_problem->getDisplacementVarNames();
 
-      for (unsigned int var = 0; var<displacement_variables.size(); ++var)
+      for (const auto & var_name : displacement_variables)
       {
-        MooseVariable & mv = _displaced_problem->getVariable(/*tid=*/0, displacement_variables[var]);
+        MooseVariable & mv = _displaced_problem->getVariable(/*tid=*/0, var_name);
         if (mv.order() != SECOND)
           mooseError("Error: mesh has SECOND order elements, so all displacement variables must be SECOND order.");
       }
@@ -3943,9 +3925,8 @@ FEProblem::checkUserObjects()
   std::set<std::string> names;
 
   const std::vector<MooseSharedPointer<UserObject> > & objects = _all_user_objects.getActiveObjects();
-  for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-    names.insert((*it)->name());
-
+  for (const auto & obj : objects)
+    names.insert(obj->name());
 
   // See if all referenced blocks are covered
   mesh_subdomains.insert(Moose::ANY_BLOCK_ID);
@@ -3957,16 +3938,16 @@ FEProblem::checkUserObjects()
   {
     std::ostringstream oss;
     oss << "One or more UserObjects is referencing a nonexistent block:\n";
-    for (std::set<SubdomainID>::iterator i = difference.begin(); i != difference.end();  ++i)
-      oss << *i << "\n";
+    for (const auto & id : difference)
+      oss << id << "\n";
     mooseError(oss.str());
   }
 
   // check that all requested UserObjects were defined in the input file
-  for (std::map<std::string, PostprocessorValue*>::const_iterator it = _pps_data.values().begin(); it != _pps_data.values().end(); ++it)
+  for (const auto & it : _pps_data.values())
   {
-    if (names.find(it->first) == names.end())
-      mooseError("Postprocessor '" + it->first + "' requested but not specified in the input file.");
+    if (names.find(it.first) == names.end())
+      mooseError("Postprocessor '" + it.first + "' requested but not specified in the input file.");
   }
 }
 
@@ -3974,29 +3955,30 @@ FEProblem::checkUserObjects()
 void
 FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & materials_map)
 {
-  for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator j = materials_map.begin(); j != materials_map.end(); ++j)
+  for (const auto & it : materials_map)
   {
     /// These two sets are used to make sure that all dependent props on a block are actually supplied
     std::set<std::string> block_depend_props, block_supplied_props;
 
-    for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_iter=j->second.begin(); mat_iter != j->second.end(); ++mat_iter)
+    for (const auto & mat1 : it.second)
     {
-      const std::set<std::string> & depend_props = (*mat_iter)->getRequestedItems();
+      const std::set<std::string> & depend_props = mat1->getRequestedItems();
       block_depend_props.insert(depend_props.begin(), depend_props.end());
 
       // See if any of the active materials supply this property
-      for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_iter2=j->second.begin(); mat_iter2 != j->second.end(); ++mat_iter2)
+      for (const auto & mat2 : it.second)
       {
         // Don't check THIS material for a coupled property
-        if (mat_iter == mat_iter2) continue;
+        if (mat1 == mat2)
+          continue;
 
-        const std::set<std::string> & supplied_props = (*mat_iter2)->Material::getSuppliedItems();
+        const std::set<std::string> & supplied_props = mat2->Material::getSuppliedItems();
         block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
       }
     }
 
     // Add zero material properties specific to this block and unrestricted
-    block_supplied_props.insert(_zero_block_material_props[j->first].begin(), _zero_block_material_props[j->first].end());
+    block_supplied_props.insert(_zero_block_material_props[it.first].begin(), _zero_block_material_props[it.first].end());
     block_supplied_props.insert(_zero_block_material_props[Moose::ANY_BLOCK_ID].begin(), _zero_block_material_props[Moose::ANY_BLOCK_ID].end());
 
     // Error check to make sure all properties consumed by materials are supplied on this block
@@ -4007,54 +3989,57 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
     if (!difference.empty())
     {
       std::ostringstream oss;
-      oss << "One or more Material Properties were not supplied on block " << j->first << ":\n";
-      for (std::set<std::string>::iterator i = difference.begin(); i != difference.end();  ++i)
-        oss << *i << "\n";
+      oss << "One or more Material Properties were not supplied on block " << it.first << ":\n";
+      for (const auto & name : difference)
+        oss << name << "\n";
       mooseError(oss.str());
     }
   }
 
   // This loop checks that materials are not supplied by multiple Material objects
-  for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator map_it = materials_map.begin(); map_it != materials_map.end(); ++map_it)
+  for (const auto & it : materials_map)
   {
-    const std::vector<MooseSharedPointer<Material> > & materials = map_it->second;
+    const std::vector<MooseSharedPointer<Material> > & materials = it.second;
     std::set<std::string> inner_supplied, outer_supplied;
 
-    for (std::vector<MooseSharedPointer<Material> >::const_iterator outer_it = materials.begin(); outer_it != materials.end(); ++outer_it)
+    for (const auto & outer_mat : materials)
     {
       // Storage for properties for this material (outer) and all other materials (inner)
-      outer_supplied = (*outer_it)->getSuppliedItems();
+      outer_supplied = outer_mat->getSuppliedItems();
       inner_supplied.clear();
 
       // Property to material map for error reporting
       std::map<std::string, std::set<std::string> > prop_to_mat;
-      for (std::set<std::string>::const_iterator it = outer_supplied.begin(); it != outer_supplied.end(); ++it)
-        prop_to_mat[*it].insert((*outer_it)->name());
+      for (const auto & name : outer_supplied)
+        prop_to_mat[name].insert(outer_mat->name());
 
-      for (std::vector<MooseSharedPointer<Material> >::const_iterator inner_it = materials.begin(); inner_it != materials.end(); ++inner_it)
+      for (const auto & inner_mat : materials)
       {
-        if (outer_it == inner_it)
+        if (outer_mat == inner_mat)
           continue;
-        inner_supplied.insert((*inner_it)->getSuppliedItems().begin(), (*inner_it)->getSuppliedItems().end());
+        inner_supplied.insert(inner_mat->getSuppliedItems().begin(),
+                              inner_mat->getSuppliedItems().end());
 
-        for (std::set<std::string>::const_iterator it = inner_supplied.begin(); it != inner_supplied.end(); ++it)
-          prop_to_mat[*it].insert((*inner_it)->name());
+        for (const auto & inner_supplied_name : inner_supplied)
+          prop_to_mat[inner_supplied_name].insert(inner_mat->name());
       }
 
       // Test that a property isn't supplied on multiple blocks
       std::set<std::string> intersection;
-      std::set_intersection(outer_supplied.begin(), outer_supplied.end(), inner_supplied.begin(), inner_supplied.end(), std::inserter(intersection, intersection.end()));
+      std::set_intersection(outer_supplied.begin(), outer_supplied.end(),
+                            inner_supplied.begin(), inner_supplied.end(),
+                            std::inserter(intersection, intersection.end()));
 
       if (!intersection.empty())
       {
         std::ostringstream oss;
-        oss << "The following material properties are declared on block " << map_it->first << " by multiple materials:\n";
+        oss << "The following material properties are declared on block " << it.first << " by multiple materials:\n";
         oss << ConsoleUtils::indent(2) << std::setw(30) << std::left << "Material Property" << "Material Objects\n";
-        for (std::set<std::string>::const_iterator it = intersection.begin(); it != intersection.end(); ++it)
+        for (const auto & outer_name : intersection)
         {
-          oss << ConsoleUtils::indent(2) << std::setw(30) << std::left << *it;
-          for (std::set<std::string>::const_iterator jt = prop_to_mat[*it].begin(); jt != prop_to_mat[*it].end(); ++jt)
-            oss << *jt << " ";
+          oss << ConsoleUtils::indent(2) << std::setw(30) << std::left << outer_name;
+          for (const auto & inner_name : prop_to_mat[outer_name])
+            oss << inner_name << " ";
           oss << '\n';
         }
 

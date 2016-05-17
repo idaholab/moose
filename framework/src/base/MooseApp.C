@@ -176,8 +176,8 @@ MooseApp::~MooseApp()
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
-  for (std::map<std::pair<std::string, std::string>, void *>::iterator it = _lib_handles.begin(); it != _lib_handles.end(); ++it)
-    dlclose(it->second);
+  for (const auto & it : _lib_handles)
+    dlclose(it.second);
 #endif
 }
 
@@ -299,8 +299,8 @@ MooseApp::setupOptions()
 
     std::multimap<std::string, Syntax::ActionInfo> syntax = _syntax.getAssociatedActions();
     Moose::out << "**START SYNTAX DATA**\n";
-    for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = syntax.begin(); it != syntax.end(); ++it)
-      Moose::out << it->first << "\n";
+    for (const auto & it : syntax)
+      Moose::out << it.first << "\n";
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
@@ -372,8 +372,8 @@ MooseApp::runInputFile()
     // TODO: ask multiapps for their constructed objects
     std::vector<std::string> obj_list = _factory.getConstructedObjects();
     Moose::out << "**START OBJECT DATA**\n";
-    for (unsigned int i = 0; i < obj_list.size(); ++i)
-      Moose::out << obj_list[i] << "\n";
+    for (const auto & name : obj_list)
+      Moose::out << name << "\n";
     Moose::out << "**END OBJECT DATA**\n" << std::endl;
     _ready_to_exit = true;
     return;
@@ -610,10 +610,10 @@ MooseApp::getCheckpointFiles()
 
   // Add the directories from any existing checkpoint objects
   const std::vector<Action *> actions = _action_warehouse.getActionsByName("add_output");
-  for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+  for (const auto & action : actions)
   {
     // Get the parameters from the MooseObjectAction
-    MooseObjectAction * moose_object_action = static_cast<MooseObjectAction *>(*it);
+    MooseObjectAction * moose_object_action = static_cast<MooseObjectAction *>(action);
     const InputParameters & params = moose_object_action->getObjectParams();
 
     // Loop through the actions and add the necessary directories to the list to check
@@ -624,7 +624,7 @@ MooseApp::getCheckpointFiles()
       else
       {
         std::ostringstream oss;
-        oss << "_" << (*it)->name() << "_cp";
+        oss << "_" << action->name() << "_cp";
         checkpoint_dirs.push_back(FileOutput::getOutputFileBase(*this, oss.str()));
       }
     }
@@ -774,11 +774,11 @@ MooseApp::dynamicRegistration(const Parameters & params)
   }
 
   // Attempt to dynamically load the library
-  for (std::vector<std::string>::const_iterator path_it = paths.begin(); path_it != paths.end(); ++path_it)
-    if (MooseUtils::checkFileReadable(*path_it + '/' + library_name, false, false))
-      loadLibraryAndDependencies(*path_it + '/' + library_name, params);
+  for (const auto & path : paths)
+    if (MooseUtils::checkFileReadable(path + '/' + library_name, false, false))
+      loadLibraryAndDependencies(path + '/' + library_name, params);
     else
-      mooseWarning("Unable to open library file \"" << *path_it + '/' + library_name << "\". Double check for spelling errors.");
+      mooseWarning("Unable to open library file \"" << path + '/' + library_name << "\". Double check for spelling errors.");
 }
 
 void
@@ -900,8 +900,8 @@ MooseApp::getLoadedLibraryPaths() const
 {
   // Return the paths but not the open file handles
   std::set<std::string> paths;
-  for (std::map<std::pair<std::string, std::string>, void *>::const_iterator it = _lib_handles.begin(); it != _lib_handles.end(); ++it)
-    paths.insert(it->first.first);
+  for (const auto & it : _lib_handles)
+    paths.insert(it.first.first);
 
   return paths;
 }
@@ -938,20 +938,20 @@ MooseApp::executeMeshModifiers()
   DependencyResolver<MooseSharedPointer<MeshModifier> > resolver;
 
   // Add all of the dependencies into the resolver and sort them
-  for (std::map<std::string, MooseSharedPointer<MeshModifier> >::const_iterator it = _mesh_modifiers.begin(); it != _mesh_modifiers.end(); ++it)
+  for (const auto & it : _mesh_modifiers)
   {
     // Make sure an item with no dependencies comes out too!
-    resolver.addItem(it->second);
+    resolver.addItem(it.second);
 
-    std::vector<std::string> & modifiers = it->second->getDependencies();
-    for (std::vector<std::string>::const_iterator depend_name_it = modifiers.begin(); depend_name_it != modifiers.end(); ++depend_name_it)
+    std::vector<std::string> & modifiers = it.second->getDependencies();
+    for (const auto & depend_name : modifiers)
     {
-      std::map<std::string, MooseSharedPointer<MeshModifier> >::const_iterator depend_it = _mesh_modifiers.find(*depend_name_it);
+      std::map<std::string, MooseSharedPointer<MeshModifier> >::const_iterator depend_it = _mesh_modifiers.find(depend_name);
 
       if (depend_it == _mesh_modifiers.end())
-        mooseError("The MeshModifier \"" << *depend_name_it << "\" was not created, did you make a spelling mistake or forget to include it in your input file?");
+        mooseError("The MeshModifier \"" << depend_name << "\" was not created, did you make a spelling mistake or forget to include it in your input file?");
 
-      resolver.insertDependency(it->second, depend_it->second);
+      resolver.insertDependency(it.second, depend_it->second);
     }
   }
 
@@ -963,12 +963,8 @@ MooseApp::executeMeshModifiers()
     MooseMesh * displaced_mesh = _action_warehouse.displacedMesh().get();
 
     // Run the MeshModifiers in the proper order
-    for (std::vector<MooseSharedPointer<MeshModifier> >::const_iterator it = ordered_modifiers.begin(); it != ordered_modifiers.end(); ++it)
-    {
-      MeshModifier * modifier_ptr = it->get();
-
-      modifier_ptr->modifyMesh(mesh, displaced_mesh);
-    }
+    for (const auto & modifier : ordered_modifiers)
+      modifier->modifyMesh(mesh, displaced_mesh);
 
     /**
      * Set preparation flag after modifers are run. The final preparation

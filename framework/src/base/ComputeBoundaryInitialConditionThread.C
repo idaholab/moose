@@ -41,10 +41,8 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
   if (warehouse.hasActiveBoundaryObjects(boundary_id, _tid))
   {
     const std::vector<MooseSharedPointer<InitialCondition> > & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
-    for (std::vector<MooseSharedPointer<InitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
+    for (const auto & ic : ics)
     {
-      MooseSharedPointer<InitialCondition> ic = (*it);
-
       if (node->processor_id() == _fe_problem.processor_id())
       {
         MooseVariable & var = ic->variable();

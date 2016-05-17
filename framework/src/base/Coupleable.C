@@ -42,9 +42,8 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
     if (_c_parameters.getVecMooseType(name) != std::vector<std::string>())
     {
       std::vector<std::string> vars = _c_parameters.getVecMooseType(*iter);
-      for (unsigned int i = 0; i < vars.size(); i++)
+      for (const auto & coupled_var_name : vars)
       {
-        std::string coupled_var_name = vars[i];
         if (problem.hasVariable(coupled_var_name))
         {
           MooseVariable * moose_var = &problem.getVariable(tid, coupled_var_name);
@@ -68,10 +67,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
 
 Coupleable::~Coupleable()
 {
-  for (std::map<std::string, VariableValue *>::iterator it = _default_value.begin(); it != _default_value.end(); ++it)
+  for (auto & it : _default_value)
   {
-    it->second->release();
-    delete it->second;
+    it.second->release();
+    delete it.second;
   }
   _default_value_zero.release();
   _default_gradient.release();
