@@ -105,9 +105,9 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
   std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
-  for (std::map<std::string, std::vector<MooseVariable *> >::iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
-    for (std::vector<MooseVariable *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-      _depend_vars.insert((*it2)->name());
+  for (const auto & it : coupled_vars)
+    for (const auto & var : it.second)
+      _depend_vars.insert(var->name());
 }
 
 AuxKernel::~AuxKernel()
@@ -153,8 +153,8 @@ AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
   if (is_old)
   {
     std::vector<VariableName> var_names = getParam<std::vector<VariableName> >(var_name);
-    for (std::vector<VariableName>::const_iterator it = var_names.begin(); it != var_names.end(); ++it)
-      _depend_vars.erase(*it);
+    for (const auto & name : var_names)
+      _depend_vars.erase(name);
   }
 }
 
