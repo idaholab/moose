@@ -59,8 +59,8 @@ OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_name
 
   // Check for 'none'; hide variables on all outputs
   if (_oi_outputs.find("none") != _oi_outputs.end())
-    for (std::set<OutputName>::const_iterator it = avail.begin(); it != avail.end(); ++ it)
-      _oi_output_warehouse.addInterfaceHideVariables(*it, variable_names);
+    for (const auto & name : avail)
+      _oi_output_warehouse.addInterfaceHideVariables(name, variable_names);
 
   // Check for empty and 'all' in 'outputs' parameter; do not perform any variable restrictions in these cases
   else if (_oi_outputs.empty() || _oi_outputs.find("all") != _oi_outputs.end())
@@ -74,8 +74,8 @@ OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_name
     std::set_difference(avail.begin(), avail.end(), _oi_outputs.begin(), _oi_outputs.end(), std::inserter(hide, hide.begin()));
 
     // If 'outputs' is specified add the object name to the list of items to hide
-    for (std::set<OutputName>::const_iterator it = hide.begin(); it != hide.end(); ++ it)
-      _oi_output_warehouse.addInterfaceHideVariables(*it, variable_names);
+    for (const auto & name : hide)
+      _oi_output_warehouse.addInterfaceHideVariables(name, variable_names);
   }
 }
 

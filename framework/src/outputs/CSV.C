@@ -102,22 +102,22 @@ CSV::output(const ExecFlagType & type)
 
   // Output each VectorPostprocessor's data to a file
   if (_write_vector_table)
-    for (std::map<std::string, FormattedTable>::iterator it = _vector_postprocessor_tables.begin(); it != _vector_postprocessor_tables.end(); ++it)
+    for (auto & it : _vector_postprocessor_tables)
     {
       std::ostringstream output;
-      output << _file_base << "_" << MooseUtils::shortName(it->first);
+      output << _file_base << "_" << MooseUtils::shortName(it.first);
       output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right << timeStep() << ".csv";
 
       if (_set_delimiter)
-        it->second.setDelimiter(_delimiter);
-      it->second.setPrecision(_precision);
-      it->second.printCSV(output.str(), 1, _align);
+        it.second.setDelimiter(_delimiter);
+      it.second.setPrecision(_precision);
+      it.second.printCSV(output.str(), 1, _align);
 
       if (_time_data)
       {
         std::ostringstream filename;
-        filename << _file_base << "_" << MooseUtils::shortName(it->first) << "_time.csv";
-        _vector_postprocessor_time_tables[it->first].printCSV(filename.str());
+        filename << _file_base << "_" << MooseUtils::shortName(it.first) << "_time.csv";
+        _vector_postprocessor_time_tables[it.first].printCSV(filename.str());
       }
     }
 

@@ -46,43 +46,43 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->initialSetup();
+  for (const auto & obj : _all_objects)
+    obj->initialSetup();
 }
 
 void
 OutputWarehouse::timestepSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->timestepSetup();
+  for (const auto & obj : _all_objects)
+    obj->timestepSetup();
 }
 
 void
 OutputWarehouse::solveSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->solveSetup();
+  for (const auto & obj : _all_objects)
+    obj->solveSetup();
 }
 
 void
 OutputWarehouse::jacobianSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->jacobianSetup();
+  for (const auto & obj : _all_objects)
+    obj->jacobianSetup();
 }
 
 void
 OutputWarehouse::residualSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->residualSetup();
+  for (const auto & obj : _all_objects)
+    obj->residualSetup();
 }
 
 void
 OutputWarehouse::subdomainSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->subdomainSetup();
+  for (const auto & obj : _all_objects)
+    obj->subdomainSetup();
 }
 
 void
@@ -126,8 +126,8 @@ OutputWarehouse::getOutputNames()
   if (_object_names.empty())
   {
     std::vector<Action *> actions =  _app.actionWarehouse().getActionsByName("add_output");
-    for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
-      _object_names.insert((*it)->name());
+    for (const auto & act : actions)
+      _object_names.insert(act->name());
   }
   return _object_names;
 }
@@ -146,8 +146,8 @@ OutputWarehouse::outputStep(ExecFlagType type)
   if (_force_output)
     type = EXEC_FORCED;
 
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->outputStep(type);
+  for (const auto & obj : _all_objects)
+    obj->outputStep(type);
 
   /**
    * This is one of three locations where we explicitly flush the output buffers during a simulation:
@@ -167,8 +167,8 @@ OutputWarehouse::outputStep(ExecFlagType type)
 void
 OutputWarehouse::meshChanged()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->meshChanged();
+  for (const auto & obj : _all_objects)
+    obj->meshChanged();
 }
 
 void
@@ -178,8 +178,8 @@ OutputWarehouse::mooseConsole()
   std::vector<Console *> objects = getOutputs<Console>();
   if (!objects.empty())
   {
-    for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->mooseConsole(_console_buffer.str());
+    for (const auto & obj : objects)
+      obj->mooseConsole(_console_buffer.str());
 
     // Reset
     _console_buffer.clear();
@@ -210,9 +210,9 @@ OutputWarehouse::flushConsoleBuffer()
 void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+  for (const auto & obj : _all_objects)
   {
-    FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
+    FileOutput * ptr = dynamic_cast<FileOutput *>(obj);
     if (ptr != NULL)
     {
       std::map<std::string, unsigned int>::const_iterator it = input.find(ptr->name());
@@ -233,9 +233,9 @@ OutputWarehouse::getFileNumbers()
 {
 
   std::map<std::string, unsigned int> output;
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+  for (const auto & obj : _all_objects)
   {
-    FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
+    FileOutput * ptr = dynamic_cast<FileOutput *>(obj);
     if (ptr != NULL)
       output[ptr->name()] = ptr->getFileNumber();
   }
@@ -277,9 +277,9 @@ OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name, st
 void
 OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
 {
-  for (std::set<OutputName>::const_iterator it = names.begin(); it != names.end(); ++it)
-    if (!isReservedName(*it) && !hasOutput(*it))
-      mooseError("The output object '" << *it << "' is not a defined output object");
+  for (const auto & name : names)
+    if (!isReservedName(name) && !hasOutput(name))
+      mooseError("The output object '" << name << "' is not a defined output object");
 }
 
 
@@ -304,8 +304,8 @@ OutputWarehouse::setOutputExecutionType(ExecFlagType type)
 void
 OutputWarehouse::allowOutput(bool state)
 {
-  for (std::vector<Output *>::iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->allowOutput(state);
+  for (const auto & obj : _all_objects)
+    obj->allowOutput(state);
 }
 
 void

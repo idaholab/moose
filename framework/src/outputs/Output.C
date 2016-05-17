@@ -105,8 +105,8 @@ Output::Output(const InputParameters & parameters) :
   if (isParamValid("additional_execute_on"))
   {
     MultiMooseEnum add = getParam<MultiMooseEnum>("additional_execute_on");
-    for (MooseEnumIterator it = add.begin(); it != add.end(); ++it)
-      _execute_on.push_back(*it);
+    for (auto & me : add)
+      _execute_on.push_back(me);
   }
 }
 

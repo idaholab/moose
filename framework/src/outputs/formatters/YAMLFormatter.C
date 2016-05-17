@@ -45,27 +45,27 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
   std::ostringstream oss;
   std::string indent(depth*2, ' ');
 
-  for (InputParameters::iterator iter = params.begin(); iter != params.end(); ++iter)
+  for (auto & iter : params)
   {
-    std::string name = iter->first;
+    std::string name = iter.first;
     // First make sure we want to see this parameter, also block active and type
-    if (params.isPrivate(iter->first) || name == "active" || (search_string != "" && search_string != iter->first) || haveSeenIt(prefix, iter->first))
+    if (params.isPrivate(iter.first) || name == "active" || (search_string != "" && search_string != iter.first) || haveSeenIt(prefix, iter.first))
       continue;
 
     found = true;
 
     // Mark it as "seen"
-    seenIt(prefix, iter->first);
+    seenIt(prefix, iter.first);
 
     // Block params may be required and will have a doc string
-    std::string required = params.isParamRequired(iter->first) ? "Yes" : "No";
+    std::string required = params.isParamRequired(iter.first) ? "Yes" : "No";
 
     oss << indent << "  - name: " << name << "\n";
     oss << indent << "    required: " << required << "\n";
     oss << indent << "    default: !!str ";
 
     // Only output default if it has one
-    if (params.isParamValid(iter->first))
+    if (params.isParamValid(iter.first))
     {
       //prints the value, which is the default value when dumping the tree
       //because it hasn't been changed
@@ -76,36 +76,32 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
 
       // remove additional '\n' possibly generated in output (breaks YAML parsing)
       std::string tmp_str = toss.str();
-      for (std::string::iterator it=tmp_str.begin(); it!=tmp_str.end(); ++it)
-      {
-        if ( *it == '\n')
-        {
-          *it = ' ';
-        }
-      }
+      for (auto & ch : tmp_str)
+        if (ch == '\n')
+          ch = ' ';
       oss << tmp_str;
     }
-    else if (params.hasDefaultCoupledValue(iter->first))
-      oss <<  params.defaultCoupledValue(iter->first);
+    else if (params.hasDefaultCoupledValue(iter.first))
+      oss <<  params.defaultCoupledValue(iter.first);
 
-    std::string doc = params.getDocString(iter->first);
+    std::string doc = params.getDocString(iter.first);
     MooseUtils::escape(doc);
     // Print the type
-    oss << "\n" << indent << "    cpp_type: " << params.type(iter->first)
-        << "\n" << indent << "    group_name: " << params.getGroupName(iter->first);
+    oss << "\n" << indent << "    cpp_type: " << params.type(iter.first)
+        << "\n" << indent << "    group_name: " << params.getGroupName(iter.first);
 
     {
-      InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter->second);
+      InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter.second);
       if (enum_type)
         oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
     }
     {
-      InputParameters::Parameter<MultiMooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MultiMooseEnum>*>(iter->second);
+      InputParameters::Parameter<MultiMooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MultiMooseEnum>*>(iter.second);
       if (enum_type)
         oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
     }
     {
-      InputParameters::Parameter<std::vector<MooseEnum> > * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum> >*>(iter->second);
+      InputParameters::Parameter<std::vector<MooseEnum> > * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum> >*>(iter.second);
       if (enum_type)
         oss << "\n" << indent << "    options: " << (enum_type->get())[0].getRawNames();
     }
@@ -150,31 +146,23 @@ YAMLFormatter::printBlockClose(const std::string &/*name*/, short /*depth*/) con
 }
 
 void
-YAMLFormatter::buildOutputString(std::ostringstream & output, const InputParameters::iterator iter)
+YAMLFormatter::buildOutputString(std::ostringstream & output, const std::iterator_traits<InputParameters::iterator>::value_type & p)
 {
-
   // Account for Point
-  InputParameters::Parameter<Point> * ptr0 = dynamic_cast<InputParameters::Parameter<Point>*>(iter->second);
+  InputParameters::Parameter<Point> * ptr0 = dynamic_cast<InputParameters::Parameter<Point>*>(p.second);
 
   // Account for RealVectorValues
-  InputParameters::Parameter<RealVectorValue> * ptr1  = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(iter->second);
+  InputParameters::Parameter<RealVectorValue> * ptr1  = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(p.second);
 
   // Output the Point components
   if (ptr0)
-  {
     output << ptr0->get().operator()(0) << " " << ptr0->get().operator()(1) << " " << ptr0->get().operator()(2);
-  }
 
   // Output the RealVectorValue components
   else if (ptr1)
-  {
     output << ptr1->get().operator()(0) << " " << ptr1->get().operator()(1) << " " << ptr1->get().operator()(2);
-  }
 
   // General case, call the print operator
   else
-  {
-    iter->second->print(output);
-  }
-
+    p.second->print(output);
 }
