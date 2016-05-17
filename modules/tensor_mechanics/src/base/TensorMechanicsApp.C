@@ -120,6 +120,8 @@
 #include "CavityPressureUserObject.h"
 #include "CavityPressureUOAction.h"
 
+#include "DashpotBC.h"
+#include "PresetVelocity.h"
 #include "Pressure.h"
 #include "DisplacementAboutAxis.h"
 
@@ -270,6 +272,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
 
+  registerBoundaryCondition(DashpotBC);
+  registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
   registerBoundaryCondition(DisplacementAboutAxis);
 
