@@ -49,8 +49,9 @@ public:
    * Populates the _bnd_ids for the given boundary names supplied
    * with the 'boundary' input parameter
    * @param parameters The input parameters
+   * @param nodal True indicates that the object is operating on nodesets, false for sidesets
    */
-  BoundaryRestrictable(const InputParameters & parameters);
+  BoundaryRestrictable(const InputParameters & parameters, bool nodal);
 
   /**
    * Class constructor
@@ -58,8 +59,9 @@ public:
    * see the general class documentation for details.
    * @param parameters The input parameters (see the detailed help for additional information)
    * @param block_ids The block ids that the object is restricted to
+   * @param nodal True indicates that the object is operating on nodesets, false for sidesets
    */
-  BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids);
+  BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids, bool nodal);
 
   /**
    * Empty class destructor
@@ -199,6 +201,9 @@ private:
 
   /// Pointer to MaterialData for boundary (@see hasBoundaryMaterialProperty)
   MooseSharedPointer<MaterialData> _bnd_material_data;
+
+  /// Whether or not this object is restricted to nodesets
+  bool _bnd_nodal;
 
   /**
    * An initialization routine needed for dual constructors

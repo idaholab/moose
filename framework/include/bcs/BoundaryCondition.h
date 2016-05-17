@@ -62,8 +62,9 @@ public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
+   * @param nodal Whether this BC is applied to nodes or not
    */
-  BoundaryCondition(const InputParameters & parameters);
+  BoundaryCondition(const InputParameters & parameters, bool nodal);
 
   /**
    * Gets the variable this BC is active on

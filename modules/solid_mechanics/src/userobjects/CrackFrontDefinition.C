@@ -50,7 +50,7 @@ const Real CrackFrontDefinition::_tol = 1e-10;
 
 CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters) :
     GeneralUserObject(parameters),
-    BoundaryRestrictable(parameters),
+    BoundaryRestrictable(parameters, true), // false means nodesets
     _aux(_fe_problem.getAuxiliarySystem()),
     _mesh(_subproblem.mesh()),
     _treat_as_2d(getParam<bool>("2d")),

@@ -29,7 +29,7 @@ InputParameters validParams<NodalBC>()
 
 
 NodalBC::NodalBC(const InputParameters & parameters) :
-    BoundaryCondition(parameters),
+    BoundaryCondition(parameters, true), // true is for being Nodal
     RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _current_node(_var.node()),
