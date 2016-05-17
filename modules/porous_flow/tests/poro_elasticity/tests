@@ -1,0 +1,32 @@
+[Tests]
+  [./vol_expansion]
+    type = Exodiff
+    input = vol_expansion.i
+    exodiff = vol_expansion.e
+  [../]
+  [./undrained_oedometer]
+    type = CSVDiff
+    input = undrained_oedometer.i
+    csvdiff = undrained_oedometer.csv
+  [../]
+  [./pp_generation]
+    type = CSVDiff
+    input = pp_generation.i
+    csvdiff = pp_generation.csv
+  [../]
+  [./pp_generation_unconfined]
+    type = CSVDiff
+    input = pp_generation_unconfined.i
+    csvdiff = pp_generation_unconfined.csv
+  [../]
+  [./mandel]
+    type = CSVDiff
+    input = mandel.i
+    csvdiff = mandel.csv
+  [../]
+  [./terzaghi]
+    type = CSVDiff
+    input = terzaghi.i
+    csvdiff = terzaghi.csv
+  [../]
+[]

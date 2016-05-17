@@ -34,7 +34,7 @@ PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
     _num_var(_dictator_UO.numVariables()),
     _pf_prop(getParam<std::string>("material_property")),
     _include_old(getParam<bool>("include_old")),
-    _at_qps(getParam<bool>("position")),
+    _at_qps(getParam<bool>("at_qps")),
 
     _dporepressure_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
     _dsaturation_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
