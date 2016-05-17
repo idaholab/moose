@@ -94,6 +94,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("error_unused", "-e --error-unused", false, "Error when encountering unused input file options");
   params.addCommandLineParam<bool>("error_override", "-o --error-override", false, "Error when encountering overridden or parameters supplied multiple times");
   params.addCommandLineParam<bool>("error_deprecated", "--error-deprecated", false, "Turn deprecated code messages into Errors");
+  params.addCommandLineParam<bool>("allow_deprecated", "--allow-deprecated", false, "Can be used in conjunction with --error to turn off deprecated errors");
 
   params.addCommandLineParam<bool>("parallel_mesh", "--parallel-mesh", false, "The libMesh Mesh underlying MooseMesh should always be a ParallelMesh");
 
@@ -173,6 +174,9 @@ MooseApp::MooseApp(InputParameters parameters) :
     _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
   else
     mooseError("Valid CommandLine object required");
+
+  if (getParam<bool>("error_deprecated") && getParam<bool>("allow_deprecated"))
+    mooseError("Both error deprecated and allowed deprecated were set.");
 }
 
 MooseApp::~MooseApp()
@@ -305,8 +309,21 @@ MooseApp::setupOptions()
   else if (isParamValid("no_trap_fpe"))
     Moose::_trap_fpe = false;
 
+  // Turn all warnings in MOOSE to errors (almost see next logic block)
   Moose::_warnings_are_errors = getParam<bool>("error");
-  Moose::_deprecated_is_error = getParam<bool>("error_deprecated");
+
+  /**
+   * Deprecated messages can be toggled to errors independently from everything else.
+   * Normally they are toggled with the --error flag but that behavior can
+   * be modified with the --allow-warnings.
+   */
+  if (getParam<bool>("error_deprecated") ||
+      (Moose::_warnings_are_errors && !getParam<bool>("allow_deprecated")))
+    Moose::_deprecated_is_error = true;
+  else
+    Moose::_deprecated_is_error = false;
+
+  // Toggle the color console off
   Moose::_color_console = !getParam<bool>("no_color");
 
   // If there's no threading model active, but the user asked for
