@@ -16,7 +16,6 @@ class RunApp(Tester):
     params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
     params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
     params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
-    params.addParam('allow_deprecated_until', time.strptime(time.ctime(0)), "A test that only runs if current date is less than specified date")
 
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
@@ -28,6 +27,8 @@ class RunApp(Tester):
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
+
+    params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
 
     # Valgrind
     params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -45,6 +46,9 @@ class RunApp(Tester):
       self.mpi_command = 'mpiexec -host localhost'
       self.force_mpi = False
 
+    # Handle the special allow_deprecated_until parameter
+    if params.isValid('allow_deprecated_until') and params['allow_deprecated_until'] > time.localtime():
+      self.specs['cli_args'].append('--allow-deprecated')
 
   def getInputFile(self):
     return self.specs['input'].strip()
@@ -84,11 +88,6 @@ class RunApp(Tester):
     specs = self.specs
     # Create the command line string to run
     command = ''
-
-    # If deprecated day is not epoch and today is greater than deprecated day
-    if specs.isValid('allow_deprecated_until') and self.specs['allow_deprecated_until'] != time.strptime(time.ctime(0)) \
-       and time.mktime(time.gmtime()) > time.mktime(self.specs['allow_deprecated_until']):
-      specs['cli_args'].append('--allow-deprecated')
 
     # Check for built application
     if not options.dry_run and not os.path.exists(specs['executable']):
