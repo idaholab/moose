@@ -16,35 +16,25 @@ template<>
 InputParameters validParams<CosseratStressDivergenceTensors>()
 {
   InputParameters params = validParams<StressDivergenceTensors>();
-  params.addCoupledVar("wc_x", "The Cosserat rotation about x");
-  params.addCoupledVar("wc_y", "The Cosserat rotation about y");
-  params.addCoupledVar("wc_z", "The Cosserat rotation about z");
+  params.addRequiredCoupledVar("Cosserat_rotations", "The 3 Cosserat rotation variables");
   return params;
 }
 
 CosseratStressDivergenceTensors::CosseratStressDivergenceTensors(const InputParameters & parameters) :
     StressDivergenceTensors(parameters),
-    _wc_x_var(coupled("wc_x")),
-    _wc_y_var(coupled("wc_y")),
-    _wc_z_var(coupled("wc_z"))
+    _nrots(coupledComponents("Cosserat_rotations")),
+    _wc_var(_nrots)
 {
+  for (unsigned i = 0; i < _nrots; ++i)
+    _wc_var[i] = coupled("Cosserat_rotations", i);
 }
 
 Real
 CosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned int coupled_component = 3;
-
-  // What does 2D look like here?
-  if (jvar == _wc_x_var)
-    coupled_component = 0;
-  else if (jvar == _wc_y_var)
-    coupled_component = 1;
-  else if (jvar == _wc_z_var)
-    coupled_component = 2;
-
-  if (coupled_component < 3)
-    return ElasticityTensorTools::elasticJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
+  for (unsigned int v = 0; v < _nrots; ++v)
+    if (jvar == _wc_var[v])
+      return ElasticityTensorTools::elasticJacobianWC(_Jacobian_mult[_qp], _component, v, _grad_test[_i][_qp], _phi[_j][_qp]);
 
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
 }

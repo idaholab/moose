@@ -30,6 +30,7 @@ RecomputeRadialReturnIsotropicPlasticity::RecomputeRadialReturnIsotropicPlastici
     _yield_stress(getParam<Real>("yield_stress")),
     _hardening_constant(getParam<Real>("hardening_constant")),
     _hardening_function(isParamValid("hardening_function") ? &getFunction("hardening_function") : NULL),
+    _shear_modulus(0.0),
 
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
@@ -39,7 +40,6 @@ RecomputeRadialReturnIsotropicPlasticity::RecomputeRadialReturnIsotropicPlastici
 
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
-    _shear_modulus(declareProperty<Real>("shear_modulus")),
     _temperature(coupledValue("temp"))
 {
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)
@@ -82,7 +82,7 @@ RecomputeRadialReturnIsotropicPlasticity::resetQpProperties()
 void
 RecomputeRadialReturnIsotropicPlasticity::computeStressInitialize(Real effectiveTrialStress)
 {
-  getIsotropicShearModulus();
+  _shear_modulus = getIsotropicShearModulus();
   computeYieldStress();
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
 }
@@ -101,7 +101,7 @@ RecomputeRadialReturnIsotropicPlasticity::computeResidual(Real effectiveTrialStr
 
     // The order here is important: the final term can be small, and we don't want it lost to roundoff.
     residual = effectiveTrialStress - _yield_stress - _hardening_variable[_qp];
-    residual -= 3.0 * _shear_modulus[_qp] * scalar;
+    residual -= 3.0 * _shear_modulus * scalar;
   }
   return residual;
 }
@@ -111,7 +111,7 @@ RecomputeRadialReturnIsotropicPlasticity::computeDerivative(Real /*effectiveTria
 {
   Real derivative = 1.0;
   if (_yield_condition > 0.0)
-    derivative = -3.0 * _shear_modulus[_qp] - _hardening_slope;
+    derivative = -3.0 * _shear_modulus - _hardening_slope;
 
   return derivative;
 }
@@ -155,13 +155,4 @@ RecomputeRadialReturnIsotropicPlasticity::computeYieldStress()
     if (_yield_stress <= 0.0)
       mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
   }
-}
-
-
-void
-RecomputeRadialReturnIsotropicPlasticity::getIsotropicShearModulus()
-{
-  _shear_modulus[_qp] = _elasticity_tensor[_qp](1,2,1,2);
-  if ((_mesh.dimension() == 3) && (_shear_modulus[_qp] != _elasticity_tensor[_qp](1,3,1,3)))
-    mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
 }

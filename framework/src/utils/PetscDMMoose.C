@@ -640,7 +640,18 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
     ierr = ISDestroy(&lembedding); CHKERRQ(ierr);
     // We could get the index offset from a corresponding global vector, but subDMs don't yet have global vectors
     ierr = ISGetLocalSize(dmm->embedding,&len);CHKERRQ(ierr);
-    ierr = MPI_Scan(&len,&off,1,MPI_INT,MPI_SUM,((PetscObject)dm)->comm);CHKERRQ(ierr);
+
+    ierr = MPI_Scan(&len, &off, 1,
+#ifdef PETSC_USE_64BIT_INDICES
+                    MPI_LONG_LONG_INT,
+#else
+                    MPI_INT,
+#endif
+                    MPI_SUM,
+                    ((PetscObject)dm)->comm);
+    CHKERRQ(ierr);
+
+
     off -= len;
     for (i = 0; i < llen; ++i) rindices[i] += off;
     ierr = ISCreateGeneral(((PetscObject)dm)->comm,llen,rindices,PETSC_OWN_POINTER,&(dinfo.rembedding));CHKERRQ(ierr);

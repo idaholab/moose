@@ -4,12 +4,8 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
-  disp_x = disp_x
-  wc_z = wc_z
-  wc_y = wc_y
-  wc_x = wc_x
+  displacements = 'disp_x disp_y disp_z'
+  Cosserat_rotations = 'wc_x wc_y wc_z'
 []
 
 [Variables]
@@ -49,7 +45,7 @@
   [../]
   [./TensorMechanics]
     displacements = 'wc_x wc_y wc_z'
-    base_name = coupled
+    base_name = couple
   [../]
   [./x_moment]
     type = MomentBalancing
@@ -72,6 +68,9 @@
 [Materials]
   [./cosserat]
     type = CosseratLinearElasticMaterial
+    disp_z = disp_z
+    disp_y = disp_y
+    disp_x = disp_x
     block = 0
     B_ijkl = 1.0
     C_ijkl = '1 2 1.333'

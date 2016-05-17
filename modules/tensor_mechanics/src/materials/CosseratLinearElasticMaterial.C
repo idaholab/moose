@@ -4,15 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-// Original class author: A.M. Jokisaari, O. Heinonen
 
 #include "CosseratLinearElasticMaterial.h"
-
-/**
- * CosseratLinearElasticMaterial handles a fully anisotropic, single-crystal material's elastic
- * constants.  It takes all 21 independent stiffness tensor inputs.  This can be extended or
- * simplified to specify HCP, monoclinic, cubic, etc as needed.
- */
 
 template<>
 InputParameters validParams<CosseratLinearElasticMaterial>()
@@ -21,9 +14,7 @@ InputParameters validParams<CosseratLinearElasticMaterial>()
   params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
   params.addParam<Real>("T0", 300, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("T", 300, "Temperature in Kelvin");
-  params.addCoupledVar("wc_x", 0, "Cosserat rotation around x axis");
-  params.addCoupledVar("wc_y", 0, "Cosserat rotation around y axis");
-  params.addCoupledVar("wc_z", 0, "Cosserat rotation around z axis");
+  params.addRequiredCoupledVar("Cosserat_rotations", "The 3 Cosserat rotation variables");
   params.addRequiredParam<std::vector<Real> >("B_ijkl", "Flexural bending rigidity tensor.  Should have 9 entries.");
   params.addParam<std::vector<Real> >("applied_strain_vector","Applied strain: e11, e22, e33, e23, e13, e12");
 
@@ -36,29 +27,29 @@ InputParameters validParams<CosseratLinearElasticMaterial>()
 
 CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const InputParameters & parameters) :
     TensorMechanicsMaterial(parameters),
-    _eigenstrain(declareProperty<RankTwoTensor>("eigenstrain")),
-    _symmetric_strain(declareProperty<RankTwoTensor>("symmetric_strain")),
-    _antisymmetric_strain(declareProperty<RankTwoTensor>("antisymmetric_strain")),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
-    _symmetric_stress(declareProperty<RankTwoTensor>("symmetric_stress")),
-    _antisymmetric_stress(declareProperty<RankTwoTensor>("antisymmetric_stress")),
-    _stress_couple(declareProperty<RankTwoTensor>("coupled_stress")),
+    _stress_couple(declareProperty<RankTwoTensor>("couple_stress")),
     _elastic_flexural_rigidity_tensor(declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
-    _Jacobian_mult_couple(declareProperty<RankFourTensor>("coupled_Jacobian_mult")),
+    _Jacobian_mult_couple(declareProperty<RankFourTensor>("couple_Jacobian_mult")),
     _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
     _Bijkl(),
     _T(coupledValue("T")),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
     _T0(getParam<Real>("T0")),
     _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector")),
-    _wc_x(coupledValue("wc_x")),
-    _wc_y(coupledValue("wc_y")),
-    _wc_z(coupledValue("wc_z")),
-    _grad_wc_x(coupledGradient("wc_x")),
-    _grad_wc_y(coupledGradient("wc_y")),
-    _grad_wc_z(coupledGradient("wc_z")),
+    _nrots(coupledComponents("Cosserat_rotations")),
+    _wc(_nrots),
+    _grad_wc(_nrots),
     _fill_method_bending(getParam<MooseEnum>("fill_method_bending"))
 {
+  if (_nrots != 3)
+    mooseError("CosseratLinearElasticMaterial: This Material is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
+  for (unsigned i = 0; i < _nrots; ++i)
+  {
+    _wc[i] = &coupledValue("Cosserat_rotations", i);
+    _grad_wc[i] = &coupledGradient("Cosserat_rotations", i);
+  }
+
   //Initialize applied strain tensor from input vector
   if (_applied_strain_vector.size() == 6)
     _applied_strain_tensor.fillFromInputVector(_applied_strain_vector);
@@ -71,36 +62,29 @@ CosseratLinearElasticMaterial::CosseratLinearElasticMaterial(const InputParamete
 void
 CosseratLinearElasticMaterial::computeQpStrain()
 {
-  //strain = (grad_disp + grad_disp^T)/2
-  RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
-  RealVectorValue wc_vector(_wc_x[_qp], _wc_y[_qp], _wc_z[_qp]);
+  RankTwoTensor strain(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+  RealVectorValue wc_vector((*_wc[0])[_qp], (*_wc[1])[_qp], (*_wc[2])[_qp]);
 
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned k = 0; k < LIBMESH_DIM; ++k)
-        grad_tensor(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
+        strain(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
 
-  _symmetric_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
-  _antisymmetric_strain[_qp] = (grad_tensor - grad_tensor.transpose()) / 2.0;
-  _elastic_strain[_qp] = grad_tensor;
+  _elastic_strain[_qp] = strain;
 
-  RankTwoTensor wc_grad_tensor(_grad_wc_x[_qp], _grad_wc_y[_qp], _grad_wc_z[_qp]);
-  _curvature[_qp] = wc_grad_tensor;
+  _curvature[_qp] = RankTwoTensor((*_grad_wc[0])[_qp], (*_grad_wc[1])[_qp], (*_grad_wc[2])[_qp]);
 }
 
 void
 CosseratLinearElasticMaterial::computeQpStress()
 {
-  //Calculation and Apply stress free strain
+  //Calculation and apply stress free strain
   RankTwoTensor stress_free_strain = computeStressFreeStrain();
 
   _elastic_strain[_qp] += stress_free_strain;
 
-  // stress = C * e
+  // stress = E * e
   _stress[_qp] = _elasticity_tensor[_qp] * _elastic_strain[_qp];
-
-  _symmetric_stress[_qp] = (_stress[_qp] + _stress[_qp].transpose()) / 2.0;
-  _antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
 
   _stress_couple[_qp] = _elastic_flexural_rigidity_tensor[_qp] * _curvature[_qp];
 }
