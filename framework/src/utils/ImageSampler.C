@@ -144,8 +144,8 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   // Storage for the file names
   _files = vtkSmartPointer<vtkStringArray>::New();
 
-  for (unsigned i=0; i<filenames.size(); ++i)
-    _files->InsertNextValue(filenames[i]);
+  for (const auto & filename : filenames)
+    _files->InsertNextValue(filename);
 
   // Error if no files where located
   if (_files->GetNumberOfValues() == 0)

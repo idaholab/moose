@@ -102,9 +102,10 @@ PetscErrorCode DMMooseGetContacts(DM dm, std::vector<std::pair<std::string,std::
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
-  for (std::map<DM_Moose::ContactID,DM_Moose::ContactName>::const_iterator it = dmm->contactnames->begin(); it != dmm->contactnames->end(); ++it) {
-    contactnames.push_back(it->second);
-    displaced.push_back((*dmm->contact_displaced)[it->second]);
+  for (const auto & it : *(dmm->contactnames))
+  {
+    contactnames.push_back(it.second);
+    displaced.push_back((*dmm->contact_displaced)[it.second]);
   }
   PetscFunctionReturn(0);
 }
@@ -121,9 +122,10 @@ PetscErrorCode DMMooseGetUnContacts(DM dm, std::vector<std::pair<std::string,std
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
-  for (std::map<DM_Moose::ContactID,DM_Moose::ContactName>::const_iterator it = dmm->uncontactnames->begin(); it != dmm->uncontactnames->end(); ++it) {
-    uncontactnames.push_back(it->second);
-    displaced.push_back((*dmm->uncontact_displaced)[it->second]);
+  for (const auto & it : *(dmm->uncontactnames))
+  {
+    uncontactnames.push_back(it.second);
+    displaced.push_back((*dmm->uncontact_displaced)[it.second]);
   }
   PetscFunctionReturn(0);
 }
@@ -140,7 +142,8 @@ PetscErrorCode DMMooseGetSides(DM dm, std::vector<std::string>& sidenames)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
-  for (std::map<std::string, BoundaryID>::const_iterator it = dmm->sideids->begin(); it != dmm->sideids->end(); ++it) sidenames.push_back(it->first);
+  for (const auto & it : *(dmm->sideids))
+    sidenames.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
@@ -156,7 +159,8 @@ PetscErrorCode DMMooseGetUnSides(DM dm, std::vector<std::string>& sidenames)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
-  for (std::map<std::string, BoundaryID>::const_iterator it = dmm->unsideids->begin(); it != dmm->unsideids->end(); ++it) sidenames.push_back(it->first);
+  for (const auto & it : *(dmm->unsideids))
+    sidenames.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
@@ -172,7 +176,8 @@ PetscErrorCode DMMooseGetBlocks(DM dm, std::vector<std::string>& blocknames)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)dm->data;
-  for (std::map<std::string, subdomain_id_type>::const_iterator it = dmm->blockids->begin(); it != dmm->blockids->end(); ++it) blocknames.push_back(it->first);
+  for (const auto & it : *(dmm->blockids))
+    blocknames.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
@@ -188,9 +193,8 @@ PetscErrorCode DMMooseGetVariables(DM dm, std::vector<std::string>& varnames)
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE,&ismoose);CHKERRQ(ierr);
   if (!ismoose) SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "Got DM oftype %s, not of type %s", ((PetscObject)dm)->type_name, DMMOOSE);
   DM_Moose *dmm = (DM_Moose *)(dm->data);
-  for (std::map<std::string, unsigned int>::const_iterator it = dmm->varids->begin(); it != dmm->varids->end(); ++it){
-    varnames.push_back(it->first);
-  }
+  for (const auto & it : *(dmm->varids))
+    varnames.push_back(it.first);
   PetscFunctionReturn(0);
 }
 
@@ -300,9 +304,10 @@ PetscErrorCode DMMooseSetContacts(DM dm, const std::vector<std::pair<std::string
   if (dmm->contacts) delete dmm->contacts;
   dmm->contact_displaced->clear();
   dmm->contacts = new std::set<DM_Moose::ContactName>();
-  for (unsigned int i = 0; i < contacts.size(); ++i) {
+  for (unsigned int i = 0; i < contacts.size(); ++i)
+  {
     dmm->contacts->insert(contacts[i]);
-    dmm->contact_displaced->insert(std::pair<DM_Moose::ContactName,PetscBool>(contacts[i],displaced[i]));
+    dmm->contact_displaced->insert(std::make_pair(contacts[i], displaced[i]));
   }
   PetscFunctionReturn(0);
 }
@@ -324,9 +329,10 @@ PetscErrorCode DMMooseSetUnContacts(DM dm, const std::vector<std::pair<std::stri
   if (dmm->uncontacts) delete dmm->uncontacts;
   dmm->uncontact_displaced->clear();
   dmm->uncontacts = new std::set<DM_Moose::ContactName>();
-  for (unsigned int i = 0; i < uncontacts.size(); ++i) {
+  for (unsigned int i = 0; i < uncontacts.size(); ++i)
+  {
     dmm->uncontacts->insert(uncontacts[i]);
-    dmm->uncontact_displaced->insert(std::pair<DM_Moose::ContactName,PetscBool>(uncontacts[i],displaced[i]));
+    dmm->uncontact_displaced->insert(std::make_pair(uncontacts[i], displaced[i]));
   }
   PetscFunctionReturn(0);
 }
@@ -363,9 +369,10 @@ PetscErrorCode DMMooseSetSplitNames(DM dm, const std::vector<std::string>& split
   DM_Moose *dmm = (DM_Moose *)(dm->data);
 
   if (dmm->splits) {
-    for (std::map<std::string,DM_Moose::SplitInfo>::iterator it = dmm->splits->begin(); it != dmm->splits->end(); ++it) {
-      ierr = DMDestroy(&(it->second.dm));CHKERRQ(ierr);
-      ierr = ISDestroy(&(it->second.rembedding));CHKERRQ(ierr);
+    for (auto & it : *(dmm->splits))
+    {
+      ierr = DMDestroy(&(it.second.dm)); CHKERRQ(ierr);
+      ierr = ISDestroy(&(it.second.rembedding)); CHKERRQ(ierr);
     }
     delete dmm->splits;
     dmm->splits = PETSC_NULL;
@@ -376,14 +383,14 @@ PetscErrorCode DMMooseSetSplitNames(DM dm, const std::vector<std::string>& split
   }
   dmm->splits   = new std::map<std::string, DM_Moose::SplitInfo>();
   dmm->splitlocs = new std::multimap<std::string,unsigned int>();
-  for (unsigned int i = 0; i < splitnames.size(); ++i) {
+  for (unsigned int i = 0; i < splitnames.size(); ++i)
+  {
     DM_Moose::SplitInfo info;
     info.dm = PETSC_NULL;
     info.rembedding = PETSC_NULL;
     std::string name = splitnames[i];
     (*dmm->splits)[name] = info;
-    std::pair<std::string,unsigned int> pair(name,i);
-    dmm->splitlocs->insert(pair);
+    dmm->splitlocs->insert(std::make_pair(name, i));
   }
   PetscFunctionReturn(0);
 }
@@ -403,13 +410,13 @@ PetscErrorCode DMMooseGetSplitNames(DM dm, std::vector<std::string>& splitnames)
   if (!dm->setupcalled) SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "DM not set up");
   splitnames.clear();
   splitnames.reserve(dmm->splitlocs->size());
-  if (dmm->splitlocs && dmm->splitlocs->size()) {
-    for (std::multimap<std::string, unsigned int >::const_iterator lit = dmm->splitlocs->begin(); lit != dmm->splitlocs->end(); ++lit) {
-      std::string sname = lit->first;
-      unsigned int sloc = lit->second;
+  if (dmm->splitlocs && dmm->splitlocs->size())
+    for (const auto & lit : *(dmm->splitlocs))
+    {
+      std::string sname = lit.first;
+      unsigned int sloc = lit.second;
       splitnames[sloc] = sname;
     }
-  }
   PetscFunctionReturn(0);
 }
 
@@ -422,157 +429,199 @@ static PetscErrorCode DMMooseGetEmbedding_Private(DM dm, IS *embedding)
 
   PetscFunctionBegin;
   if (!embedding) PetscFunctionReturn(0);
-  if (!dmm->embedding) {
-    /* The rules interpreting the coexistence of blocks (un)sides/(un)contacts are these
-       [sides and contacts behave similarly, so 'sides' means 'sides/contacts']
-       ['ANY' means 'not NONE' and covers 'ALL' as well, unless there is a specific 'ALL' clause, which overrides 'ANY'; 'NOT ALL' means not ALL and not NONE]
-       [there are always some blocks, since by default 'ALL' is assumed, unless it is overridden by a specific list, which implies ANY]
-       In general,
-       (1)  ALL blocks      and ANY sides are interpreted as the INTERSECTION of blocks and sides, equivalent to just the sides (since ALL blocks are assumed to be a cover).
-       (2)  NOT ALL blocks  and ANY or NO sides are interpreted as the UNION of blocks and sides.
-       (3a) ANY unsides and ANY blocks are interpreted as the DIFFERENCE of blocks and unsides.
-       (3b) ANY unsides and ANY sides are interpreted as the DIFFERENCE of sides and unsides.
-       (4)  NO  unsides means NO DIFFERENCE is needed.
-       The result is easily computed by first computing the result of (1 & 2) followed by difference with the result of (3 & 4).
-       To simply (1 & 2) observe the following:
-       - The intersection is computed only if ALL blocks and ANY sides, and the result is the sides, so block dofs do not need to be computed.
-       - Otherwise the union is computed, and initially consists of the blocks' dofs, to which the sides' dofs are added, if ANY.
-       - The result is called 'indices'
-       To satisfy (3 & 4) simply cmpute subtrahend set 'unindices' as all of the unsides' dofs:
-       Then take the set difference of 'indices' and 'unindices', putting the result in 'dindices'.
-    */
-
-    if (!dmm->allvars || !dmm->allblocks || !dmm->nosides || !dmm->nounsides || !dmm->nocontacts || !dmm->nouncontacts) {
-      DofMap& dofmap = dmm->nl->sys().get_dof_map();
-      std::set<dof_id_type>               indices;
+  if (!dmm->embedding)
+  {
+    // The rules interpreting the coexistence of blocks (un)sides/(un)contacts are these
+    // [sides and contacts behave similarly, so 'sides' means 'sides/contacts']
+    // ['ANY' means 'not NONE' and covers 'ALL' as well, unless there is a specific 'ALL' clause, which overrides 'ANY'; 'NOT ALL' means not ALL and not NONE]
+    // [there are always some blocks, since by default 'ALL' is assumed, unless it is overridden by a specific list, which implies ANY]
+    // In general,
+    // (1)  ALL blocks      and ANY sides are interpreted as the INTERSECTION of blocks and sides, equivalent to just the sides (since ALL blocks are assumed to be a cover).
+    // (2)  NOT ALL blocks  and ANY or NO sides are interpreted as the UNION of blocks and sides.
+    // (3a) ANY unsides and ANY blocks are interpreted as the DIFFERENCE of blocks and unsides.
+    // (3b) ANY unsides and ANY sides are interpreted as the DIFFERENCE of sides and unsides.
+    // (4)  NO  unsides means NO DIFFERENCE is needed.
+    // The result is easily computed by first computing the result of (1 & 2) followed by difference with the result of (3 & 4).
+    // To simply (1 & 2) observe the following:
+    // - The intersection is computed only if ALL blocks and ANY sides, and the result is the sides, so block dofs do not need to be computed.
+    // - Otherwise the union is computed, and initially consists of the blocks' dofs, to which the sides' dofs are added, if ANY.
+    // - The result is called 'indices'
+    // To satisfy (3 & 4) simply cmpute subtrahend set 'unindices' as all of the unsides' dofs:
+    // Then take the set difference of 'indices' and 'unindices', putting the result in 'dindices'.
+    if (!dmm->allvars || !dmm->allblocks || !dmm->nosides || !dmm->nounsides || !dmm->nocontacts || !dmm->nouncontacts)
+    {
+      DofMap & dofmap = dmm->nl->sys().get_dof_map();
+      std::set<dof_id_type> indices;
       std::set<dof_id_type> unindices;
-      for (std::map<std::string, unsigned int>::const_iterator vit = dmm->varids->begin(); vit != dmm->varids->end(); ++vit){
-        unsigned int v = vit->second;
-  /* Iterate only over this DM's blocks. */
-  if (!dmm->allblocks || (dmm->nosides && dmm->nocontacts)) {
-    for (std::map<std::string, subdomain_id_type>::const_iterator bit = dmm->blockids->begin(); bit != dmm->blockids->end(); ++bit) {
-      subdomain_id_type b = bit->second;
-      MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
-      MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
-      for ( ; el != end_el; ++el) {
-        const Elem* elem = *el;
-        std::vector<dof_id_type> evindices;
-        // Get the degree of freedom indices for the given variable off the current element.
-        dofmap.dof_indices(elem, evindices, v);
-        for (dof_id_type i = 0; i < evindices.size(); ++i) {
-    dof_id_type dof = evindices[i];
-    if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) /* might want to use variable_first/last_local_dof instead */
-      indices.insert(dof);
+      for (const auto & vit : *(dmm->varids))
+      {
+        unsigned int v = vit.second;
+        // Iterate only over this DM's blocks.
+        if (!dmm->allblocks || (dmm->nosides && dmm->nocontacts))
+        {
+          for (const auto & bit : *(dmm->blockids))
+          {
+            subdomain_id_type b = bit.second;
+            MeshBase::const_element_iterator el     = dmm->nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
+            MeshBase::const_element_iterator end_el = dmm->nl->sys().get_mesh().active_local_subdomain_elements_end(b);
+            for ( ; el != end_el; ++el)
+            {
+              const Elem * elem = *el;
+
+              // Get the degree of freedom indices for the given variable off the current element.
+              std::vector<dof_id_type> evindices;
+              dofmap.dof_indices(elem, evindices, v);
+
+              // might want to use variable_first/last_local_dof instead
+              for (const auto & dof : evindices)
+                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                  indices.insert(dof);
+            }
+          }
+        }
+
+        // Iterate over the sides from this split.
+        if (dmm->sideids->size())
+        {
+          // For some reason the following may return an empty node list
+          // std::vector<dof_id_type> snodes;
+          // std::vector<boundary_id_type> sides;
+          // dmm->nl->sys().get_mesh().get_boundary_info().build_node_list(snodes, sides);
+          // // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
+          // for (dof_id_type i = 0; i < sides.size(); ++i) {
+          //   boundary_id_type s = sides[i];
+          //   if (!dmm->sidenames->count(s)) continue;
+          //  const Node& node = dmm->nl->sys().get_mesh().node_ref(snodes[i]);
+          //  // determine v's dof on node and insert into indices
+          // }
+          ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
+          for (const auto & bnode : bnodes)
+          {
+            BoundaryID boundary_id = bnode->_bnd_id;
+            if (dmm->sidenames->find(boundary_id) == dmm->sidenames->end())
+              continue;
+
+            const Node * node = bnode->_node;
+            dof_id_type dof = node->dof_number(dmm->nl->sys().number(),v,0);
+
+            // might want to use variable_first/last_local_dof instead
+            if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+              indices.insert(dof);
+          }
+        }
+
+        // Iterate over the sides excluded from this split.
+        if (dmm->unsideids->size())
+        {
+          ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
+          for (const auto & bnode : bnodes)
+          {
+            BoundaryID boundary_id = bnode->_bnd_id;
+            if (dmm->unsidenames->find(boundary_id) == dmm->unsidenames->end())
+              continue;
+            const Node * node = bnode->_node;
+
+            // might want to use variable_first/last_local_dof instead
+            dof_id_type dof = node->dof_number(dmm->nl->sys().number(),v,0);
+            if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+              unindices.insert(dof);
+          }
+        }
+
+        // Iterate over the contacts included in this split.
+        if (dmm->contactnames->size())
+        {
+          for (const auto & it : *(dmm->contactnames))
+          {
+            PetscBool displaced = (*dmm->contact_displaced)[it.second];
+            PenetrationLocator * locator;
+            if (displaced)
+            {
+              MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
+              if (!displaced_problem)
+              {
+                std::ostringstream err;
+                err << "Cannot use a displaced contact (" << it.second.first << "," << it.second.second << ") with an undisplaced problem";
+                mooseError(err.str());
+              }
+              locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
+            }
+            else
+              locator = dmm->nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
+
+            std::vector<dof_id_type> & slave_nodes = locator->_nearest_node._slave_nodes;
+            for (dof_id_type i = 0; i < slave_nodes.size(); ++i)
+            {
+              if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end())
+                continue;
+
+              Node & slave_node = dmm->nl->sys().get_mesh().node_ref(slave_nodes[i]);
+              dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
+
+              // might want to use variable_first/last_local_dof instead
+              if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                indices.insert(dof);
+            }
+          }
+        }
+
+        // Iterate over the contacts excluded from this split.
+        if (dmm->uncontactnames->size())
+        {
+          for (const auto & it : *(dmm->uncontactnames))
+          {
+            PetscBool displaced = (*dmm->uncontact_displaced)[it.second];
+            PenetrationLocator * locator;
+            if (displaced)
+            {
+              MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
+              if (!displaced_problem)
+              {
+                std::ostringstream err;
+                err << "Cannot use a displaced uncontact (" << it.second.first << "," << it.second.second << ") with an undisplaced problem";
+                mooseError(err.str());
+              }
+              locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
+            }
+            else
+              locator = dmm->nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
+
+            std::vector<dof_id_type> & slave_nodes = locator->_nearest_node._slave_nodes;
+            for (dof_id_type i = 0; i < slave_nodes.size(); ++i)
+            {
+              if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end())
+                continue;
+
+              // might want to use variable_first/last_local_dof instead
+              Node & slave_node = dmm->nl->sys().get_mesh().node_ref(slave_nodes[i]);
+              dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
+              if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                unindices.insert(dof);
+            }
+          }
         }
       }
-    }
-  }
-  /* Iterate over the sides from this split. */
-  if (dmm->sideids->size()) {
-    // For some reason the following may return an empty node list
-    // std::vector<dof_id_type> snodes;
-    // std::vector<boundary_id_type> sides;
-    // dmm->nl->sys().get_mesh().get_boundary_info().build_node_list(snodes, sides);
-    // // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
-    // for (dof_id_type i = 0; i < sides.size(); ++i) {
-    //   boundary_id_type s = sides[i];
-    //   if (!dmm->sidenames->count(s)) continue;
-    //  const Node& node = dmm->nl->sys().get_mesh().node_ref(snodes[i]);
-    //  // determine v's dof on node and insert into indices
-    // }
-    ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator bnodeit = bnodes.begin(); bnodeit != bnodes.end(); ++bnodeit) {
-      const BndNode * bnode = *bnodeit;
-      BoundaryID      boundary_id = bnode->_bnd_id;
-      if (dmm->sidenames->find(boundary_id) == dmm->sidenames->end()) continue;
-      const Node*     node = bnode->_node;
-      dof_id_type dof = node->dof_number(dmm->nl->sys().number(),v,0);
-      if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
-        indices.insert(dof);
-      }
-    }
-  }
-  /* Iterate over the sides excluded from this split. */
-  if (dmm->unsideids->size()) {
-    ConstBndNodeRange & bnodes = *dmm->nl->mesh().getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator bnodeit = bnodes.begin(); bnodeit != bnodes.end(); ++bnodeit) {
-      const BndNode * bnode = *bnodeit;
-      BoundaryID      boundary_id = bnode->_bnd_id;
-      if (dmm->unsidenames->find(boundary_id) == dmm->unsidenames->end()) continue;
-      const Node*     node = bnode->_node;
-      dof_id_type dof = node->dof_number(dmm->nl->sys().number(),v,0);
-      if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
-        unindices.insert(dof);
-      }
-    }
-  }
-  /* Iterate over the contacts included in this split. */
-  if (dmm->contactnames->size()) {
-    for (std::map<DM_Moose::ContactID, DM_Moose::ContactName>::const_iterator it = dmm->contactnames->begin(); it != dmm->contactnames->end(); ++it) {
-      PetscBool displaced = (*dmm->contact_displaced)[it->second];
-      PenetrationLocator *locator;
-      if (displaced) {
-        MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
-        if (!displaced_problem) {
-    std::ostringstream err;
-    err << "Cannot use a displaced contact (" << it->second.first << "," << it->second.second << ") with an undisplaced problem";
-    mooseError(err.str());
-        }
-        locator = displaced_problem->geomSearchData()._penetration_locators[it->first];
-      } else {
-        locator = dmm->nl->_fe_problem.geomSearchData()._penetration_locators[it->first];
-      }
-      std::vector<dof_id_type>& slave_nodes = locator->_nearest_node._slave_nodes;
-      for (dof_id_type i = 0; i < slave_nodes.size(); ++i) {
-        if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
-        Node& slave_node = dmm->nl->sys().get_mesh().node_ref(slave_nodes[i]);
-        dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
-        if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
-    indices.insert(dof);
-        }
-      }
-    }
-  }
-  /* Iterate over the contacts excluded from this split. */
-  if (dmm->uncontactnames->size()) {
-    for (std::map<DM_Moose::ContactID, DM_Moose::ContactName>::const_iterator it = dmm->uncontactnames->begin(); it != dmm->uncontactnames->end(); ++it) {
-      PetscBool displaced = (*dmm->uncontact_displaced)[it->second];
-      PenetrationLocator *locator;
-      if (displaced) {
-        MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->nl->_fe_problem.getDisplacedProblem();
-        if (!displaced_problem) {
-    std::ostringstream err;
-    err << "Cannot use a displaced uncontact (" << it->second.first << "," << it->second.second << ") with an undisplaced problem";
-    mooseError(err.str());
-        }
-        locator = displaced_problem->geomSearchData()._penetration_locators[it->first];
-      } else {
-        locator = dmm->nl->_fe_problem.geomSearchData()._penetration_locators[it->first];
-      }
-      std::vector<dof_id_type>& slave_nodes = locator->_nearest_node._slave_nodes;
-      for (dof_id_type i = 0; i < slave_nodes.size(); ++i) {
-        if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end()) continue;
-        Node& slave_node = dmm->nl->sys().get_mesh().node_ref(slave_nodes[i]);
-        dof_id_type dof = slave_node.dof_number(dmm->nl->sys().number(),v,0);
-        if (dof >= dofmap.first_dof() && dof < dofmap.end_dof()) { /* might want to use variable_first/last_local_dof instead */
-    unindices.insert(dof);
-        }
-      }
-    }
-  }
-      }
+
       std::set<dof_id_type> dindices;
-      std::set_difference(indices.begin(),indices.end(),unindices.begin(),unindices.end(),std::inserter(dindices,dindices.end()));
-      PetscInt *darray;
+      std::set_difference(indices.begin(),
+                          indices.end(),
+                          unindices.begin(),
+                          unindices.end(),
+                          std::inserter(dindices,dindices.end()));
+      PetscInt * darray;
       ierr = PetscMalloc(sizeof(PetscInt)*dindices.size(),&darray);CHKERRQ(ierr);
       dof_id_type i = 0;
-      for (std::set<dof_id_type>::const_iterator it = dindices.begin(); it != dindices.end(); ++it) {
-  darray[i] = *it;
-  ++i;
+      for (const auto & dof : dindices)
+      {
+        darray[i] = dof;
+        ++i;
       }
       ierr = ISCreateGeneral(((PetscObject)dm)->comm, dindices.size(),darray, PETSC_OWN_POINTER, &dmm->embedding); CHKERRQ(ierr);
-    } else { /* if (dmm->allblocks && dmm->allvars && dmm->nosides && dmm->nounsides && dmm->nocontacts && dmm->nouncontacts) */
-      /* DMCreateGlobalVector is defined() */
+    }
+    else
+    {
+      // if (dmm->allblocks && dmm->allvars && dmm->nosides && dmm->nounsides && dmm->nocontacts && dmm->nouncontacts)
+      // DMCreateGlobalVector is defined()
       Vec v;
       PetscInt low, high;
 
@@ -601,9 +650,9 @@ static PetscErrorCode  DMCreateFieldDecomposition_Moose(DM dm, PetscInt *len, ch
   if (namelist) {ierr = PetscMalloc(*len*sizeof(char*),namelist);CHKERRQ(ierr);}
   if (islist)   {ierr = PetscMalloc(*len*sizeof(IS),islist);CHKERRQ(ierr);}
   if (dmlist)   {ierr = PetscMalloc(*len*sizeof(DM),dmlist);CHKERRQ(ierr);}
-  for (std::multimap<std::string, unsigned int>::const_iterator dit = dmm->splitlocs->begin(); dit != dmm->splitlocs->end(); ++dit) {
-    unsigned int                         d = dit->second;
-    std::string                          dname = dit->first;
+  for (const auto & dit : *(dmm->splitlocs)) {
+    unsigned int                         d = dit.second;
+    std::string                          dname = dit.first;
     DM_Moose::SplitInfo&                 dinfo = (*dmm->splits)[dname];
     if (!dinfo.dm) {
       ierr = DMCreateMoose(((PetscObject)dm)->comm, *dmm->nl, &dinfo.dm);CHKERRQ(ierr);
@@ -1043,73 +1092,98 @@ static PetscErrorCode  DMView_Moose(DM dm, PetscViewer viewer)
     ierr = PetscObjectGetOptionsPrefix((PetscObject)dm, &prefix); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "DM Moose with name %s and prefix %s\n", name, prefix); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "variables:", name, prefix); CHKERRQ(ierr);
-    std::map<std::string,unsigned int>::iterator vit = dmm->varids->begin();
-    std::map<std::string,unsigned int>::const_iterator vend = dmm->varids->end();
-    for (; vit != vend; ++vit) {
-      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", vit->first.c_str(), vit->second); CHKERRQ(ierr);
+    for (const auto & vit : *(dmm->varids))
+    {
+      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", vit.first.c_str(), vit.second);
+      CHKERRQ(ierr);
     }
     ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "blocks:"); CHKERRQ(ierr);
-    std::map<std::string, subdomain_id_type>::iterator bit = dmm->blockids->begin();
-    std::map<std::string, subdomain_id_type>::const_iterator bend = dmm->blockids->end();
-    for (; bit != bend; ++bit) {
-      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", bit->first.c_str(), bit->second); CHKERRQ(ierr);
+    for (const auto & bit : *(dmm->blockids))
+    {
+      ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", bit.first.c_str(), bit.second);
+      CHKERRQ(ierr);
     }
-    ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
-    if (dmm->sideids->size()) {
+    ierr = PetscViewerASCIIPrintf(viewer, "\n"); CHKERRQ(ierr);
+
+    if (dmm->sideids->size())
+    {
       ierr = PetscViewerASCIIPrintf(viewer, "sides:"); CHKERRQ(ierr);
-      std::map<std::string,BoundaryID>::iterator sit = dmm->sideids->begin();
-      std::map<std::string,BoundaryID>::const_iterator send = dmm->sideids->end();
-      for (; sit != send; ++sit) {
-  ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", sit->first.c_str(), sit->second);CHKERRQ(ierr);
+      for (const auto & sit : *(dmm->sideids))
+      {
+        ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", sit.first.c_str(), sit.second);
+        CHKERRQ(ierr);
       }
-      ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
+      ierr = PetscViewerASCIIPrintf(viewer, "\n"); CHKERRQ(ierr);
     }
-    if (dmm->unsideids->size()) {
+
+    if (dmm->unsideids->size())
+    {
       ierr = PetscViewerASCIIPrintf(viewer, "unsides:");CHKERRQ(ierr);
-      std::map<std::string,BoundaryID>::iterator sit = dmm->unsideids->begin();
-      std::map<std::string,BoundaryID>::const_iterator send = dmm->unsideids->end();
-      for (; sit != send; ++sit) {
-  ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", sit->first.c_str(), sit->second);CHKERRQ(ierr);
+      for (const auto & sit : *(dmm->unsideids))
+      {
+        ierr = PetscViewerASCIIPrintf(viewer, "(%s,%D) ", sit.first.c_str(), sit.second);
+        CHKERRQ(ierr);
       }
       ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     }
-    if (dmm->contactnames->size()) {
+
+    if (dmm->contactnames->size())
+    {
       ierr = PetscViewerASCIIPrintf(viewer, "contacts:");CHKERRQ(ierr);
-      for (std::map<DM_Moose::ContactID,DM_Moose::ContactName>::iterator cit = dmm->contactnames->begin(); cit != dmm->contactnames->end(); ++cit) {
-  ierr = PetscViewerASCIIPrintf(viewer, "(%s,%s,", cit->second.first.c_str(), cit->second.second.c_str());CHKERRQ(ierr);
-  if ((*dmm->contact_displaced)[cit->second]) {
-    ierr = PetscViewerASCIIPrintf(viewer, "displaced) ", cit->second.first.c_str(), cit->second.second.c_str());CHKERRQ(ierr);
-  } else {
-    ierr = PetscViewerASCIIPrintf(viewer, "undisplaced) ", cit->second.first.c_str(), cit->second.second.c_str());CHKERRQ(ierr);
-  }
+      for (const auto & cit : *(dmm->contactnames))
+      {
+        ierr = PetscViewerASCIIPrintf(viewer, "(%s,%s,", cit.second.first.c_str(), cit.second.second.c_str());
+        CHKERRQ(ierr);
+        if ((*dmm->contact_displaced)[cit.second])
+        {
+          ierr = PetscViewerASCIIPrintf(viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          CHKERRQ(ierr);
+        }
+        else
+        {
+          ierr = PetscViewerASCIIPrintf(viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          CHKERRQ(ierr);
+        }
       }
       ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     }
-    if (dmm->uncontactnames->size()) {
+
+    if (dmm->uncontactnames->size())
+    {
       ierr = PetscViewerASCIIPrintf(viewer, "uncontacts:");CHKERRQ(ierr);
-      for (std::map<DM_Moose::ContactID,DM_Moose::ContactName>::iterator cit = dmm->uncontactnames->begin(); cit != dmm->uncontactnames->end(); ++cit) {
-  ierr = PetscViewerASCIIPrintf(viewer, "(%s,%s,", cit->second.first.c_str(), cit->second.second.c_str());CHKERRQ(ierr);
-  if ((*dmm->uncontact_displaced)[cit->second]) {
-    ierr = PetscViewerASCIIPrintf(viewer, "displaced) ", cit->second.first.c_str(), cit->second.second.c_str());CHKERRQ(ierr);
-  } else {
-    ierr = PetscViewerASCIIPrintf(viewer, "undisplaced) ", cit->second.first.c_str(), cit->second.second.c_str());CHKERRQ(ierr);
-  }
+      for (const auto & cit : *(dmm->uncontactnames))
+      {
+        ierr = PetscViewerASCIIPrintf(viewer, "(%s,%s,", cit.second.first.c_str(), cit.second.second.c_str());CHKERRQ(ierr);
+        if ((*dmm->uncontact_displaced)[cit.second])
+        {
+          ierr = PetscViewerASCIIPrintf(viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          CHKERRQ(ierr);
+        }
+        else
+        {
+          ierr = PetscViewerASCIIPrintf(viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+          CHKERRQ(ierr);
+        }
       }
       ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     }
-    if (dmm->splitlocs && dmm->splitlocs->size()) {
+
+    if (dmm->splitlocs && dmm->splitlocs->size())
+    {
       ierr = PetscViewerASCIIPrintf(viewer, "Field decomposition:");CHKERRQ(ierr);
-      /* FIX: decompositions might have different sizes and components on different ranks. */
-      for (std::multimap<std::string, unsigned int>::const_iterator dit = dmm->splitlocs->begin(); dit != dmm->splitlocs->end(); ++dit) {
-  std::string dname = dit->first;
-  ierr = PetscViewerASCIIPrintf(viewer, " %s", dname.c_str());CHKERRQ(ierr);
+      // FIX: decompositions might have different sizes and components on different ranks.
+      for (const auto & dit : *(dmm->splitlocs))
+      {
+        std::string dname = dit.first;
+        ierr = PetscViewerASCIIPrintf(viewer, " %s", dname.c_str());CHKERRQ(ierr);
       }
       ierr = PetscViewerASCIIPrintf(viewer, "\n");CHKERRQ(ierr);
     }
-  } else {
-    SETERRQ(PETSC_COMM_SELF, PETSC_ERR_SUP, "Non-ASCII viewers are not supported");
   }
+  else
+    SETERRQ(PETSC_COMM_SELF, PETSC_ERR_SUP, "Non-ASCII viewers are not supported");
+
   PetscFunctionReturn(0);
 }
 
@@ -1164,11 +1238,11 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
   if (dmm->sides) {
     dmm->nosides = PETSC_FALSE;
     std::set<BoundaryID> ids;
-    for (std::set<std::string>::iterator nameit = dmm->sides->begin(); nameit != dmm->sides->end(); ++nameit) {
-      std::string name = *nameit;
+    for (const auto & name : *(dmm->sides))
+    {
       boundary_id_type id = dmm->nl->mesh().getBoundaryID(name);
-      dmm->sidenames->insert(std::pair<boundary_id_type,std::string>(id,name));
-      dmm->sideids->insert(std::pair<std::string,boundary_id_type>(name,id));
+      dmm->sidenames->insert(std::make_pair(id, name));
+      dmm->sideids->insert(std::make_pair(name, id));
     }
     delete dmm->sides;
     dmm->sides = PETSC_NULL;
@@ -1179,57 +1253,65 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
   if (dmm->unsides) {
     dmm->nounsides = PETSC_FALSE;
     std::set<BoundaryID> ids;
-    for (std::set<std::string>::iterator nameit = dmm->unsides->begin(); nameit != dmm->unsides->end(); ++nameit) {
-      std::string name = *nameit;
+    for (const auto & name : *(dmm->unsides))
+    {
       boundary_id_type id = dmm->nl->mesh().getBoundaryID(name);
-      dmm->unsidenames->insert(std::pair<boundary_id_type,std::string>(id,name));
-      dmm->unsideids->insert(std::pair<std::string,boundary_id_type>(name,id));
+      dmm->unsidenames->insert(std::make_pair(id, name));
+      dmm->unsideids->insert(std::make_pair(name, id));
     }
     delete dmm->unsides;
     dmm->unsides = PETSC_NULL;
   }
   dmm->nocontacts = PETSC_TRUE;
-  if (dmm->contacts) {
+
+  if (dmm->contacts)
+  {
     dmm->nocontacts = PETSC_FALSE;
-    for (std::set<DM_Moose::ContactName>::iterator cit = dmm->contacts->begin(); cit != dmm->contacts->end(); ++cit) {
-      try {
-  if ((*dmm->contact_displaced)[*cit]) {
-    dmm->nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cit->first,cit->second);
-  } else {
-    dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cit->first,cit->second);
-  }
+    for (const auto & cpair : *(dmm->contacts))
+    {
+      try
+      {
+        if ((*dmm->contact_displaced)[cpair])
+          dmm->nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+        else
+          dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
-      catch(...) {
-  std::ostringstream err;
-  err << "Problem retrieving contact for PenetrationLocator with master " << cit->first << " and slave " << cit->second;
-  mooseError(err.str());
+      catch(...)
+      {
+        std::ostringstream err;
+        err << "Problem retrieving contact for PenetrationLocator with master " << cpair.first << " and slave " << cpair.second;
+        mooseError(err.str());
       }
-      BoundaryID master_id = dmm->nl->mesh().getBoundaryID(cit->first);
-      BoundaryID slave_id = dmm->nl->mesh().getBoundaryID(cit->second);
-      DM_Moose::ContactID  cid(master_id,slave_id);
-      dmm->contactnames->insert(std::pair<DM_Moose::ContactID,DM_Moose::ContactName>(cid,*cit));
+      BoundaryID master_id = dmm->nl->mesh().getBoundaryID(cpair.first);
+      BoundaryID slave_id = dmm->nl->mesh().getBoundaryID(cpair.second);
+      DM_Moose::ContactID cid(master_id, slave_id);
+      dmm->contactnames->insert(std::make_pair(cid, cpair));
     }
   }
+
   dmm->nouncontacts = PETSC_TRUE;
-  if (dmm->uncontacts) {
+  if (dmm->uncontacts)
+  {
     dmm->nouncontacts = PETSC_FALSE;
-    for (std::set<DM_Moose::ContactName>::iterator cit = dmm->uncontacts->begin(); cit != dmm->uncontacts->end(); ++cit) {
-      try {
-  if ((*dmm->uncontact_displaced)[*cit]) {
-    dmm->nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cit->first,cit->second);
-  } else {
-    dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cit->first,cit->second);
-  }
+    for (const auto & cpair : *(dmm->uncontacts))
+    {
+      try
+      {
+        if ((*dmm->uncontact_displaced)[cpair])
+          dmm->nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+        else
+          dmm->nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
-      catch(...) {
-  std::ostringstream err;
-  err << "Problem retrieving uncontact for PenetrationLocator with master " << cit->first << " and slave " << cit->second;
-  mooseError(err.str());
+      catch(...)
+      {
+        std::ostringstream err;
+        err << "Problem retrieving uncontact for PenetrationLocator with master " << cpair.first << " and slave " << cpair.second;
+        mooseError(err.str());
       }
-      BoundaryID master_id = dmm->nl->mesh().getBoundaryID(cit->first);
-      BoundaryID slave_id = dmm->nl->mesh().getBoundaryID(cit->second);
-      DM_Moose::ContactID   cid(master_id,slave_id);
-      dmm->uncontactnames->insert(std::pair<DM_Moose::ContactID,DM_Moose::ContactName>(cid,*cit));
+      BoundaryID master_id = dmm->nl->mesh().getBoundaryID(cpair.first);
+      BoundaryID slave_id = dmm->nl->mesh().getBoundaryID(cpair.second);
+      DM_Moose::ContactID cid(master_id, slave_id);
+      dmm->uncontactnames->insert(std::make_pair(cid, cpair));
     }
   }
 
@@ -1254,17 +1336,16 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
   dmm->blocknames->clear();
   std::set<subdomain_id_type> blocks;
   ierr = DMMooseGetMeshBlocks_Private(dm,blocks);CHKERRQ(ierr);
-  std::set<subdomain_id_type>::iterator bit = blocks.begin();
-  std::set<subdomain_id_type>::iterator bend = blocks.end();
-  if (bit == bend) SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "No mesh blocks found.");
-  for (; bit != bend; ++bit) {
-    subdomain_id_type bid = *bit;
+  if (blocks.empty())
+    SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_PLIB, "No mesh blocks found.");
+
+  for (const auto & bid : blocks)
+  {
     std::string bname = mesh.subdomain_name(bid);
     if (!bname.length()) {
-      /* Block names are currently implemented for Exodus II meshes
-   only, so we might have to make up our own block names and
-   maintain our own mapping of block ids to names.
-      */
+      // Block names are currently implemented for Exodus II meshes
+      // only, so we might have to make up our own block names and
+      // maintain our own mapping of block ids to names.
       std::ostringstream ss;
       ss << bid;
       bname = ss.str();
@@ -1279,9 +1360,10 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
       // Equivalently, skip this block if dmm->blocks is dmm->blocks is null or empty or excludes this block.
       if (!dmm->blocks || !dmm->blocks->size() || dmm->blocks->find(bname) == dmm->blocks->end()) continue;
     }
-    dmm->blockids->insert(std::pair<std::string, subdomain_id_type>(bname,bid));
-    dmm->blocknames->insert(std::pair<unsigned int,std::string>(bid,bname));
+    dmm->blockids->insert(std::make_pair(bname, bid));
+    dmm->blocknames->insert(std::make_pair(bid, bname));
   }
+
   if (dmm->blockids->size() == blocks.size()) dmm->allblocks = PETSC_TRUE; else dmm->allblocks = PETSC_FALSE;
   if (dmm->blocks) {
     delete dmm->blocks;
@@ -1290,36 +1372,37 @@ static PetscErrorCode  DMSetUp_Moose_Pre(DM dm)
 
   std::string name = dmm->nl->sys().name();
   name += "_vars";
-  for (std::map<unsigned int, std::string>::const_iterator vit = dmm->varnames->begin(); vit != dmm->varnames->end(); ++vit) {
-    name += "_"+vit->second;
-  }
+  for (const auto & vit : *(dmm->varnames))
+    name += "_" + vit.second;
+
   name += "_blocks";
-  for (std::map<unsigned int, std::string>::const_iterator bit = dmm->blocknames->begin(); bit != dmm->blocknames->end(); ++bit) {
-    name += "_"+bit->second;
-  }
-  if (dmm->sidenames && dmm->sidenames->size()) {
+
+  for (const auto & bit : *(dmm->blocknames))
+    name += "_" + bit.second;
+
+  if (dmm->sidenames && dmm->sidenames->size())
+  {
     name += "_sides";
-    for (std::map<BoundaryID, std::string>::const_iterator sit = dmm->sidenames->begin(); sit != dmm->sidenames->end(); ++sit) {
-      name += "_"+sit->second;
-    }
+    for (const auto & sit : *(dmm->sidenames))
+      name += "_" + sit.second;
   }
-  if (dmm->unsidenames && dmm->unsidenames->size()) {
+  if (dmm->unsidenames && dmm->unsidenames->size())
+  {
     name += "_unsides";
-    for (std::map<BoundaryID, std::string>::const_iterator sit = dmm->unsidenames->begin(); sit != dmm->unsidenames->end(); ++sit) {
-      name += "_"+sit->second;
-    }
+    for (const auto & sit : *(dmm->unsidenames))
+      name += "_" + sit.second;
   }
-  if (dmm->contactnames && dmm->contactnames->size()) {
+  if (dmm->contactnames && dmm->contactnames->size())
+  {
     name += "_contacts";
-    for (std::map<DM_Moose::ContactID, DM_Moose::ContactName>::const_iterator cit = dmm->contactnames->begin(); cit != dmm->contactnames->end(); ++cit) {
-      name += "_master_"+cit->second.first+"_slave_"+cit->second.second;
-    }
+    for (const auto & cit : *(dmm->contactnames))
+      name += "_master_" + cit.second.first + "_slave_" + cit.second.second;
   }
-  if (dmm->uncontactnames && dmm->uncontactnames->size()) {
+  if (dmm->uncontactnames && dmm->uncontactnames->size())
+  {
     name += "_uncontacts";
-    for (std::map<DM_Moose::ContactID, DM_Moose::ContactName>::const_iterator cit = dmm->uncontactnames->begin(); cit != dmm->uncontactnames->end(); ++cit) {
-      name += "_master_"+cit->second.first+"_slave_"+cit->second.second;
-    }
+    for (const auto & cit : *(dmm->uncontactnames))
+      name += "_master_" + cit.second.first + "_slave_" + cit.second.second;
   }
   ierr = PetscObjectSetName((PetscObject)dm,name.c_str());CHKERRQ(ierr);
   PetscFunctionReturn(0);
@@ -1338,8 +1421,9 @@ PetscErrorCode  DMMooseReset(DM dm)
   if (!ismoose)  PetscFunctionReturn(0);
   if (!dmm->nl) SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
   ierr = ISDestroy(&dmm->embedding);CHKERRQ(ierr);
-  for (std::map<std::string,DM_Moose::SplitInfo>::iterator it = dmm->splits->begin(); it != dmm->splits->end(); ++it) {
-    DM_Moose::SplitInfo& split = it->second;
+  for (auto & it : *(dmm->splits))
+  {
+    DM_Moose::SplitInfo & split = it.second;
     ierr = ISDestroy(&split.rembedding);CHKERRQ(ierr);
     if (split.dm) {
       ierr = DMMooseReset(split.dm);CHKERRQ(ierr);
@@ -1624,9 +1708,10 @@ static PetscErrorCode  DMDestroy_Moose(DM dm)
   delete dmm->uncontactnames;
   delete dmm->uncontact_displaced;
   if (dmm->splits) {
-    for (std::map<std::string, DM_Moose::SplitInfo>::iterator sit = dmm->splits->begin(); sit != dmm->splits->end(); ++sit) {
-      ierr = DMDestroy(&(sit->second.dm));CHKERRQ(ierr);
-      ierr = ISDestroy(&(sit->second.rembedding));CHKERRQ(ierr);
+    for (auto & sit : *(dmm->splits))
+    {
+      ierr = DMDestroy(&(sit.second.dm));CHKERRQ(ierr);
+      ierr = ISDestroy(&(sit.second.rembedding));CHKERRQ(ierr);
     }
     delete dmm->splits;
   }

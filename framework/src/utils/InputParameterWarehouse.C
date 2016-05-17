@@ -55,8 +55,8 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
   if (ptr->isParamValid("control_tags"))
   {
     const std::vector<std::string> & tags = ptr->get<std::vector<std::string> >("control_tags");
-    for (std::vector<std::string>::const_iterator it = tags.begin(); it != tags.end(); ++it)
-      _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(*it, name),  ptr));
+    for (const auto & tag : tags)
+      _input_parameters[tid].insert(std::pair<MooseObjectName, MooseSharedPointer<InputParameters> >(MooseObjectName(tag, name),  ptr));
   }
 
   // Set the name and tid parameters
