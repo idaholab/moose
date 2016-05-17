@@ -54,11 +54,9 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
   {
     GlobalOrdinal i = 0;
 
-    for (std::set<GlobalOrdinal>::iterator it = semi_local_nodes.begin();
-        it != semi_local_nodes.end();
-        ++it)
+    for (const auto & dof : semi_local_nodes)
     {
-      const Node & node = mesh.node_ref(*it);
+      const Node & node = mesh.node_ref(dof);
 
       vertices[i] = node.id();
 
@@ -255,14 +253,12 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
   // We're only going to update values for points that were not missed
   std::vector<bool> missed(values->size(), false);
 
-  for (Teuchos::ArrayView<const GlobalOrdinal>::const_iterator i=missed_points.begin();
-      i != missed_points.end();
-      ++i)
-    missed[*i] = true;
+  for (const auto & dof : missed_points)
+    missed[dof] = true;
 
   unsigned int i=0;
   // Loop over the values (one for each node) and assign the value of this variable at each node
-  for (FieldContainerType::iterator it=values->begin(); it != values->end(); ++it)
+  for (const auto & val : *values)
   {
     // If this point "missed" then skip it
     if (missed[i])
@@ -282,7 +278,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
     {
       // The 0 is for the component... this only works for LAGRANGE!
       dof_id_type dof = dof_object->dof_number(sys->number(), var_num, 0);
-      sys->solution->set(dof, *it);
+      sys->solution->set(dof, val);
     }
 
     i++;

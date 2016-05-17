@@ -60,7 +60,7 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
     MeshBase::node_iterator it = mesh.local_nodes_begin();
     MeshBase::node_iterator it_end = mesh.local_nodes_end();
 
-    for (;it!=it_end;++it)
+    for (; it != it_end; ++it)
     {
       Node * node = *it;
 
@@ -82,7 +82,7 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
     MeshBase::element_iterator it = mesh.local_elements_begin();
     MeshBase::element_iterator it_end = mesh.local_elements_end();
 
-    for (;it!=it_end;++it)
+    for (; it != it_end; ++it)
     {
       Elem * elem = *it;
 

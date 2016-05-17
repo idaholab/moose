@@ -37,17 +37,17 @@ CommandLine::~CommandLine()
 void
 CommandLine::addCommandLineOptionsFromParams(InputParameters & params)
 {
-  for (InputParameters::iterator it = params.begin(); it != params.end(); ++it)
+  for (const auto & it : params)
   {
     Option cli_opt;
     std::vector<std::string> syntax;
-    std::string orig_name = it->first;
+    std::string orig_name = it.first;
 
     cli_opt.description = params.getDocString(orig_name);
     syntax = params.getSyntax(orig_name);
     cli_opt.cli_syntax = syntax;
     cli_opt.required = false;
-    InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+    InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it.second);
     if (bool_type)
       cli_opt.argument_type = CommandLine::NONE;
     else
@@ -60,41 +60,41 @@ CommandLine::addCommandLineOptionsFromParams(InputParameters & params)
 void
 CommandLine::populateInputParams(InputParameters & params)
 {
-  for (InputParameters::iterator it = params.begin(); it != params.end(); ++it)
+  for (const auto & it : params)
   {
-    std::string orig_name = it->first;
+    std::string orig_name = it.first;
     if (search(orig_name))
     {
       {
-        InputParameters::Parameter<std::string> * string_type = dynamic_cast<InputParameters::Parameter<std::string>*>(it->second);
+        InputParameters::Parameter<std::string> * string_type = dynamic_cast<InputParameters::Parameter<std::string>*>(it.second);
         if (string_type)
         {
           search(orig_name, params.set<std::string>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<Real> * real_type = dynamic_cast<InputParameters::Parameter<Real>*>(it->second);
+        InputParameters::Parameter<Real> * real_type = dynamic_cast<InputParameters::Parameter<Real>*>(it.second);
         if (real_type)
         {
           search(orig_name, params.set<Real>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<unsigned int> * uint_type = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it->second);
+        InputParameters::Parameter<unsigned int> * uint_type = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it.second);
         if (uint_type)
         {
           search(orig_name, params.set<unsigned int>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<int> * int_type = dynamic_cast<InputParameters::Parameter<int>*>(it->second);
+        InputParameters::Parameter<int> * int_type = dynamic_cast<InputParameters::Parameter<int>*>(it.second);
         if (int_type)
         {
           search(orig_name, params.set<int>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it->second);
+        InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it.second);
         if (bool_type)
         {
           search(orig_name, params.set<bool>(orig_name));
@@ -110,26 +110,21 @@ CommandLine::populateInputParams(InputParameters & params)
 void
 CommandLine::addOption(const std::string & name, Option cli_opt)
 {
-  for (unsigned int i = 0; i < cli_opt.cli_syntax.size(); i++)
-  {
-    std::string stx = cli_opt.cli_syntax[i];
+  for (const auto & stx : cli_opt.cli_syntax)
     cli_opt.cli_switch.push_back(stx.substr(0, stx.find_first_of(" =")));
-  }
 
   _cli_options[name] = cli_opt;
 }
 
 bool
-CommandLine::search(const std::string &option_name)
+CommandLine::search(const std::string & option_name)
 {
   std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
   if (pos != _cli_options.end())
   {
-    for (unsigned int i=0; i<pos->second.cli_switch.size(); ++i)
-    {
-      if (_get_pot->search(pos->second.cli_switch[i]))
+    for (const auto & search_string : pos->second.cli_switch)
+      if (_get_pot->search(search_string))
         return true;
-    }
 
     if (pos->second.required)
     {
@@ -153,18 +148,19 @@ CommandLine::printUsage() const
   Moose::out << "Usage: " << command << " [<options>]\n\n"
              << "Options:\n" << std::left;
 
-  for (std::map<std::string, Option>::const_iterator i = _cli_options.begin(); i != _cli_options.end(); ++i)
+  for (const auto & i : _cli_options)
   {
-    if (i->second.cli_syntax.empty())
+    if (i.second.cli_syntax.empty())
       continue;
 
     std::stringstream oss;
-    for (unsigned int j = 0; j < i->second.cli_syntax.size(); ++j)
+    for (unsigned int j = 0; j < i.second.cli_syntax.size(); ++j)
     {
-      if (j) oss << " ";
-      oss << i->second.cli_syntax[j];
+      if (j)
+        oss << " ";
+      oss << i.second.cli_syntax[j];
     }
-    Moose::out << "  " << std::setw(50) << oss.str() << i->second.description << "\n";
+    Moose::out << "  " << std::setw(50) << oss.str() << i.second.description << "\n";
   }
 
   Moose::out << "\nSolver Options:\n"

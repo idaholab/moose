@@ -132,8 +132,8 @@ NodalKernel::computeResidual()
     if (_has_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i=0; i<_save_in.size(); i++)
-        _save_in[i]->sys().solution().add(_save_in[i]->nodalDofIndex(), res);
+      for (const auto & var : _save_in)
+        var->sys().solution().add(var->nodalDofIndex(), res);
     }
   }
 }
@@ -152,8 +152,8 @@ NodalKernel::computeJacobian()
     if (_has_diag_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i=0; i<_diag_save_in.size(); i++)
-        _diag_save_in[i]->sys().solution().add(_diag_save_in[i]->nodalDofIndex(), cached_val);
+      for (const auto & var : _diag_save_in)
+        var->sys().solution().add(var->nodalDofIndex(), cached_val);
     }
   }
 }

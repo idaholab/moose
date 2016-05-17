@@ -76,15 +76,15 @@ MaterialData::swap(const Elem & elem, unsigned int side/* = 0*/)
 void
 MaterialData::reinit(const std::vector<MooseSharedPointer<Material> > & mats)
 {
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
-    (*it)->computeProperties();
+  for (const auto & mat : mats)
+    mat->computeProperties();
 }
 
 void
 MaterialData::reset(const std::vector<MooseSharedPointer<Material> > & mats)
 {
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator it = mats.begin(); it != mats.end(); ++it)
-    (*it)->resetProperties();
+  for (const auto & mat : mats)
+    mat->resetProperties();
 }
 
 void

@@ -340,15 +340,11 @@ DiracKernel::currentPointCachedID()
   // Do a linear search in the (hopefully small) vector of Points for this Elem
   reverse_cache_t::mapped_type & points = it->second;
 
-  reverse_cache_t::mapped_type::iterator
-    points_it = points.begin(),
-    points_end = points.end();
-
-  for (; points_it != points_end; ++points_it)
+  for (const auto & points_it : points)
   {
     // If the current_point equals the cached point, return the associated id
-    if (_current_point.relative_fuzzy_equals(points_it->first))
-      return points_it->second;
+    if (_current_point.relative_fuzzy_equals(points_it.first))
+      return points_it.second;
   }
 
   // If we made it here, we didn't find the cached point, so return invalid_uint

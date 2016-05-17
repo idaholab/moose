@@ -61,8 +61,8 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters) :
     _du_dot_du(_var.duDotDu())
 {
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 
   addMooseVariableDependency(mooseVariable());
 }
