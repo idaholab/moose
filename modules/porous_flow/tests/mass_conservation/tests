@@ -1,0 +1,26 @@
+[Tests]
+  [./mass01]
+    type = 'CSVDiff'
+    input = 'mass01.i'
+    csvdiff = 'mass01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./mass02]
+    type = 'CSVDiff'
+    input = 'mass02.i'
+    csvdiff = 'mass02.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./mass03]
+    type = 'CSVDiff'
+    input = 'mass03.i'
+    csvdiff = 'mass03.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./mass04]
+    type = 'CSVDiff'
+    input = 'mass04.i'
+    csvdiff = 'mass04.csv'
+    rel_err = 1.0E-5
+  [../]
+[]
