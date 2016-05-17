@@ -7,6 +7,9 @@
 // UserObjects
 #include "PorousFlowDictator.h"
 
+// DiracKernels
+#include "PorousFlowSquarePulsePointSource.h"
+
 // Postprocessors
 #include "PorousFlowFluidMass.h"
 
@@ -92,6 +95,9 @@ PorousFlowApp::registerObjects(Factory & factory)
 {
   // UserObjects
   registerUserObject(PorousFlowDictator);
+
+  // DiracKernels
+  registerDiracKernel(PorousFlowSquarePulsePointSource);
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
