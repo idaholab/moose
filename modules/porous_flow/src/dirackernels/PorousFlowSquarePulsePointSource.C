@@ -52,9 +52,9 @@ PorousFlowSquarePulsePointSource::computeQpResidual()
   else if (_t - _dt < _start_time)
   {
     if (_t <= _end_time)
-	    factor = (_t - _start_time) / _dt ;
+      factor = (_t - _start_time) / _dt ;
     else
-	    factor = (_end_time - _start_time) / _dt ;
+      factor = (_end_time - _start_time) / _dt ;
   }
   else
   {
