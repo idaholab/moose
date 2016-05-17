@@ -32,7 +32,7 @@ protected:
   virtual void computeQpProperties();
 
   /// The variable names UserObject for the PorousFlow variables
-  const PorousFlowDictator & _dictator_UO;
+  const PorousFlowDictator & _dictator;
 
   /// Number of phases
   const unsigned int _num_phases;

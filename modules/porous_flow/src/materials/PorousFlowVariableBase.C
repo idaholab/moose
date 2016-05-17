@@ -13,7 +13,7 @@ InputParameters validParams<PorousFlowVariableBase>()
 {
   InputParameters params = validParams<Material>();
   params.addCoupledVar("temperature", 20.0, "Fluid temperature");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names");
   params.addClassDescription("Base class for thermophysical variable materials. Provides pressure, saturation and temperature material properties for all phases as required");
   return params;
 }
@@ -21,10 +21,10 @@ InputParameters validParams<PorousFlowVariableBase>()
 PorousFlowVariableBase::PorousFlowVariableBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_phases(_dictator_UO.numPhases()),
-    _num_components(_dictator_UO.numComponents()),
-    _num_pf_vars(_dictator_UO.numVariables()),
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _num_phases(_dictator.numPhases()),
+    _num_components(_dictator.numComponents()),
+    _num_pf_vars(_dictator.numVariables()),
     _temperature_nodal_var(coupledNodalValue("temperature")),
     _temperature_qp_var(coupledValue("temperature")),
     _temperature_varnum(coupled("temperature")),
