@@ -53,8 +53,8 @@ ElementDeleterBase::modify()
    * TODO: We need to sort these not because they have to be deleted in a certain order in libMesh,
    *       but because the order of deletion might impact what happens to any existing sidesets or nodesets.
    */
-  for (std::set<Elem *>::const_iterator it = deleteable_elems.begin(); it != deleteable_elems.end(); ++it)
-    mesh.delete_elem(*it);
+  for (const auto & elem : deleteable_elems)
+    mesh.delete_elem(elem);
 
   /**
    * Deleting nodes and elements leaves NULLs in the mesh datastructure. We need to get rid of those.

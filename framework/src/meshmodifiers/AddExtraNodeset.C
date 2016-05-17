@@ -65,9 +65,9 @@ AddExtraNodeset::modify()
 
   // add nodes with their ids
   const std::vector<unsigned int> & nodes = getParam<std::vector<unsigned int> >("nodes");
-  for (unsigned int i = 0; i < nodes.size(); i++)
-    for (unsigned int j = 0; j < boundary_ids.size(); ++j)
-      boundary_info.add_node(nodes[i], boundary_ids[j]);
+  for (const auto & node_id : nodes)
+    for (const auto & boundary_id : boundary_ids)
+      boundary_info.add_node(node_id, boundary_id);
 
   // add nodes with their coordinates
   const std::vector<Real> & coord = getParam<std::vector<Real> >("coord");
@@ -95,8 +95,8 @@ AddExtraNodeset::modify()
 
       if (p.absolute_fuzzy_equals(q, getParam<Real>("tolerance")))
       {
-        for (unsigned int j = 0; j < boundary_ids.size(); ++j)
-          boundary_info.add_node(node, boundary_ids[j]);
+        for (const auto & boundary_id : boundary_ids)
+          boundary_info.add_node(node, boundary_id);
 
         on_node = true;
         break;
