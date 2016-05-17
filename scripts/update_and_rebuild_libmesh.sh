@@ -9,6 +9,16 @@ do
   fi
 done
 
+# check if C++11 is enabled
+DISABLE_CXX11='--disable-cxx11'
+for i in "$@"
+do
+  if [ "$i" == "--enable-cxx11" ]; then
+    DISABLE_CXX11='';
+    break;
+  fi
+done
+
 # If --fast was used, it means we are going to skip configure, so
 # don't allow the user to pass any other flags to the script thinking
 # they are going to do something.
@@ -92,7 +102,7 @@ if [ -z "$go_fast" ]; then
                --enable-silent-rules \
                --enable-unique-id \
                --disable-warnings \
-               --disable-cxx11 \
+               $DISABLE_CXX11 \
                --enable-unique-ptr \
                --enable-openmp \
                --disable-maintainer-mode \
