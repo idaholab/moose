@@ -73,6 +73,7 @@
 #include "ComputeReturnMappingStress.h"
 #include "RecomputeRadialReturn.h"
 #include "RecomputeRadialReturnIsotropicPlasticity.h"
+#include "RecomputeRadialReturnPowerLawCreep.h"
 #include "StressBasedChemicalPotential.h"
 #include "FluxBasedStrainIncrement.h"
 #include "GBRelaxationStrainIncrement.h"
@@ -227,6 +228,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeReturnMappingStress);
   registerMaterial(RecomputeRadialReturn);
   registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
+  registerMaterial(RecomputeRadialReturnPowerLawCreep);
   registerMaterial(StressBasedChemicalPotential);
   registerMaterial(FluxBasedStrainIncrement);
   registerMaterial(GBRelaxationStrainIncrement);

@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "RecomputeRadialReturn.h"
 
+#include "MooseMesh.h"
+
 template<>
 InputParameters validParams<RecomputeRadialReturn>()
 {
@@ -115,4 +117,13 @@ RecomputeRadialReturn::computeInelasticStrainIncrement()
     _inelastic_strain_increment[_qp].zero();
 
   computeStressFinalize(_inelastic_strain_increment[_qp]);
+}
+
+Real
+RecomputeRadialReturn::getIsotropicShearModulus()
+{
+  Real shear_modulus = _elasticity_tensor[_qp](1,2,1,2);
+  if (_mesh.dimension() == 3 && shear_modulus != _elasticity_tensor[_qp](1,3,1,3))
+    mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
+  return shear_modulus;
 }

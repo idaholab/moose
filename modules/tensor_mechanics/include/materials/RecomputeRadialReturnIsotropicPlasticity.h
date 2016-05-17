@@ -8,7 +8,6 @@
 #define RECOMPUTERADIALRETURNISOTROPICPLASTICITY_H
 
 #include "RecomputeRadialReturn.h"
-#include "MooseMesh.h"
 
 /**
  * This class uses the Discrete material in a radial return isotropic plasticity
@@ -46,7 +45,6 @@ protected:
 
   virtual void computeYieldStress();
   virtual Real computeHardening(Real scalar);
-  virtual void getIsotropicShearModulus();
 
   Function * const _yield_stress_function;
   Real _yield_stress;
@@ -55,6 +53,7 @@ protected:
 
   Real _yield_condition;
   Real _hardening_slope;
+  Real _shear_modulus;
 
   MaterialProperty<RankTwoTensor> & _plastic_strain;
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
@@ -63,7 +62,6 @@ protected:
 
   MaterialProperty<Real> & _hardening_variable;
   MaterialProperty<Real> & _hardening_variable_old;
-  MaterialProperty<Real> & _shear_modulus;
   const VariableValue & _temperature;
 };
 
