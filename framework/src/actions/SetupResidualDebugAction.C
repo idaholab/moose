@@ -46,10 +46,8 @@ SetupResidualDebugAction::act()
   _problem->getNonlinearSystem().debuggingResiduals(true);
 
   // debug variable residuals
-  for (std::vector<NonlinearVariableName>::const_iterator it = _show_var_residual.begin(); it != _show_var_residual.end(); ++it)
+  for (const auto & var_name : _show_var_residual)
   {
-    NonlinearVariableName var_name = *it;
-
     // add aux-variable
     MooseVariable & var = _problem->getVariable(0, var_name);
     const std::set<SubdomainID> & subdomains = var.activeSubdomains();
