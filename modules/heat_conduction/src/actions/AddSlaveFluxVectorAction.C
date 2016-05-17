@@ -24,6 +24,6 @@ AddSlaveFluxVectorAction::AddSlaveFluxVectorAction(const InputParameters & param
 void
 AddSlaveFluxVectorAction::act()
 {
-  _problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED, true);
+  _problem->getNonlinearSystem().addVector("slave_flux", false, GHOSTED);
+  _problem->getNonlinearSystem().zeroVectorForResidual("slave_flux");
 }
-

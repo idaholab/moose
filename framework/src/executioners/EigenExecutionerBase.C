@@ -35,7 +35,6 @@ InputParameters validParams<EigenExecutionerBase>()
   params.addParamNamesToGroup("normalization normal_factor output_before_normalization", "Normalization");
   params.addParamNamesToGroup("auto_initialization time", "Advanced");
 
-  params.addParam<bool>("output_on_final", false, "True to disable all the intemediate exodus outputs");
   params.addPrivateParam<bool>("_eigen", true);
 
   return params;
@@ -50,12 +49,12 @@ EigenExecutionerBase::eigenvalueOld()
 EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
     Executioner(parameters),
     _problem(_fe_problem),
-     _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
-     _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
-     _source_integral(getPostprocessorValue("bx_norm")),
-     _source_integral_old(1),
-     _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
-                    : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
+    _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
+    _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
+    _source_integral(getPostprocessorValue("bx_norm")),
+    _source_integral_old(1),
+    _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
+                   : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
 {
   //FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
@@ -119,6 +118,9 @@ EigenExecutionerBase::init()
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
   makeBXConsistent(_eigenvalue);
+
+  if (_problem.getDisplacedProblem() != NULL)
+    _problem.getDisplacedProblem()->syncSolutions();
 
   /* a time step check point */
   _problem.onTimestepEnd();
@@ -197,7 +199,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // FIXME: currently power iteration use old and older solutions,
   // so save old and older solutions before they are changed by the power iteration
-  _eigen_sys.saveOldSolutions();
+  _problem.saveOldSolutions();
+  if (_problem.getDisplacedProblem() != NULL)
+    _problem.getDisplacedProblem()->saveOldSolutions();
 
   // save solver control parameters to be modified by the power iteration
   Real tol1 = _problem.es().parameters.get<Real> ("linear solver tolerance");
@@ -238,7 +242,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     // properties in stateful materials.
     _problem.getNonlinearSystem().copyOldSolutions();
     _problem.getAuxiliarySystem().copyOldSolutions();
-    if ( _problem.getDisplacedProblem() != NULL )
+    if (_problem.getDisplacedProblem() != NULL)
     {
       _problem.getDisplacedProblem()->nlSys().copyOldSolutions();
       _problem.getDisplacedProblem()->auxSys().copyOldSolutions();
@@ -344,7 +348,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol2;
 
   //FIXME: currently power iteration use old and older solutions, so restore them
-  _eigen_sys.restoreOldSolutions();
+  _problem.restoreOldSolutions();
+  if (_problem.getDisplacedProblem() != NULL)
+    _problem.getDisplacedProblem()->restoreOldSolutions();
 }
 
 void

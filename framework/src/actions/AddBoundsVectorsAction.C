@@ -31,7 +31,7 @@ AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) :
 void
 AddBoundsVectorsAction::act()
 {
-  _problem->getNonlinearSystem().addVector("lower_bound", false, GHOSTED, false);
-  _problem->getNonlinearSystem().addVector("upper_bound", false, GHOSTED, false);
+  _problem->getNonlinearSystem().addVector("lower_bound", false, GHOSTED);
+  _problem->getNonlinearSystem().addVector("upper_bound", false, GHOSTED);
 }
 

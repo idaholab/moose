@@ -31,7 +31,7 @@ DisplacedSystem::init()
 }
 
 NumericVector<Number> &
-DisplacedSystem::getVector(std::string name)
+DisplacedSystem::getVector(const std::string & name)
 {
   if (_sys.have_vector(name))
     return _sys.get_vector(name);

@@ -135,12 +135,12 @@ public:
   /**
    * Check if the named vector exists in the system.
    */
-  virtual bool hasVector(std::string name) = 0;
+  virtual bool hasVector(const std::string & name) = 0;
 
   /**
    * Get a raw NumericVector
    */
-  virtual NumericVector<Number> & getVector(std::string name) = 0;
+  virtual NumericVector<Number> & getVector(const std::string & name) = 0;
 
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
@@ -422,7 +422,9 @@ public:
       _solution(*_sys.solution),
       _solution_old(*_sys.old_local_solution),
       _solution_older(*_sys.older_local_solution),
-      _dummy_vec(NULL)
+      _dummy_vec(NULL),
+      _saved_old(NULL),
+      _saved_older(NULL)
   {
   }
 
@@ -501,7 +503,7 @@ public:
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
-  virtual void computeVariables(const NumericVector<Number>& /*soln*/)
+  virtual void computeVariables(const NumericVector<Number> & /*soln*/)
   {
   }
 
@@ -512,8 +514,71 @@ public:
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
   virtual Number & duDotDu() { return _du_dot_du; }
 
-  virtual bool hasVector(std::string name) { return _sys.have_vector(name); }
-  virtual NumericVector<Number> & getVector(std::string name) { return _sys.get_vector(name); }
+  /**
+   * Check if the named vector exists in the system.
+   */
+  virtual bool hasVector(const std::string & name) { return _sys.have_vector(name); }
+
+  /**
+   * Get a raw NumericVector with the given name.
+   */
+  virtual NumericVector<Number> & getVector(const std::string & name) { return _sys.get_vector(name); }
+
+  /**
+   * Adds a solution length vector to the system.
+   *
+   * @param vector_name The name of the vector.
+   * @param project Whether or not to project this vector when doing mesh refinement.
+   *                If the vector is just going to be recomputed then there is no need to project it.
+   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
+   *                                            GHOSTED is needed if you are going to be accessing off-processor entries.
+   *                                            The ghosting pattern is the same as the solution vector.
+   */
+  virtual NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type)
+  {
+    if (hasVector(vector_name))
+      return getVector(vector_name);
+
+    NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
+    return *vec;
+  }
+
+  /**
+   * Save the old and older solutions.
+   */
+  virtual void saveOldSolutions()
+  {
+    if (!_saved_old)
+      _saved_old = &addVector("save_solution_old", false, PARALLEL);
+    if (!_saved_older)
+      _saved_older = &addVector("save_solution_older", false, PARALLEL);
+    *_saved_old = solutionOld();
+    *_saved_older = solutionOlder();
+  }
+
+  /**
+   * Restore the old and older solutions when the saved solutions present.
+   */
+  virtual void restoreOldSolutions()
+  {
+    if (_saved_old)
+    {
+      solutionOld() = *_saved_old;
+      removeVector("save_solution_old");
+      _saved_old = NULL;
+    }
+    if (_saved_older)
+    {
+      solutionOlder() = *_saved_older;
+      removeVector("save_solution_older");
+      _saved_older = NULL;
+    }
+  }
+
+  /**
+   * Remove a vector from the system with the given name.
+   */
+  virtual void removeVector(const std::string & name) { _sys.remove_vector(name); }
 
   virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/) { return *_dummy_vec; }
 
@@ -626,6 +691,10 @@ protected:
   NumericVector<Number> * _dummy_vec;                     // to satisfy the interface
 
   std::vector<VarCopyInfo> _var_to_copy;
+
+  // Used for saving old solutions so that they wont be accidentally changed
+  NumericVector<Real> * _saved_old;
+  NumericVector<Real> * _saved_older;
 };
 
 

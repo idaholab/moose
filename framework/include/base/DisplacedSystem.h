@@ -33,7 +33,7 @@ public:
 
   virtual void init();
 
-  virtual NumericVector<Number> & getVector(std::string name);
+  virtual NumericVector<Number> & getVector(const std::string & name);
 
   virtual NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
 

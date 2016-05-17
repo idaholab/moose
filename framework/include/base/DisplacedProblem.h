@@ -71,7 +71,36 @@ public:
   virtual void solve();
   virtual bool converged();
 
+  /**
+   * Allocate vectors and save old solutions into them.
+   */
+  virtual void saveOldSolutions();
+
+  /**
+   * Restore old solutions from the backup vectors and deallocate them.
+   */
+  virtual void restoreOldSolutions();
+
+  /**
+   * Copy the solutions on the undisplaced systems to the displaced systems.
+   */
+  virtual void syncSolutions();
+
+  /**
+   * Synchronize the solutions on the displaced systems to the given solutions.
+   */
   virtual void syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
+
+  /**
+   * Copy the solutions on the undisplaced systems to the displaced systems and
+   * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
+   */
+  virtual void updateMesh();
+
+  /**
+   * Synchronize the solutions on the displaced systems to the given solutions and
+   * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
+   */
   virtual void updateMesh(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln);
 
   virtual bool isTransient() const;

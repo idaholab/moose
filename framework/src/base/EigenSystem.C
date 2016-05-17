@@ -21,10 +21,6 @@ EigenSystem::EigenSystem(FEProblem & fe_problem, const std::string & name) :
     NonlinearSystem(fe_problem, name),
     _all_eigen_vars(false),
     _active_on_old(false),
-    _sys_sol_old(NULL),
-    _sys_sol_older(NULL),
-    _aux_sol_old(NULL),
-    _aux_sol_older(NULL),
     _eigen_kernel_counter(0)
 {
 }
@@ -256,32 +252,6 @@ EigenSystem::buildSystemDoFIndices(SYSTEMTAG tag)
       }
     }
   }
-}
-
-void
-EigenSystem::saveOldSolutions()
-{
-  if (!_sys_sol_old)
-    _sys_sol_old= &addVector("save_flux_old", false, PARALLEL);
-  if (!_aux_sol_old)
-    _aux_sol_old = &_fe_problem.getAuxiliarySystem().addVector("save_aux_old",  false, PARALLEL);
-  if (!_sys_sol_older)
-    _sys_sol_older = &addVector("save_flux_older", false, PARALLEL);
-  if (!_aux_sol_older)
-    _aux_sol_older = &_fe_problem.getAuxiliarySystem().addVector("save_aux_older",  false, PARALLEL);
-  *_sys_sol_old   = solutionOld();
-  *_sys_sol_older = solutionOlder();
-  *_aux_sol_old   = _fe_problem.getAuxiliarySystem().solutionOld();
-  *_aux_sol_older = _fe_problem.getAuxiliarySystem().solutionOlder();
-}
-
-void
-EigenSystem::restoreOldSolutions()
-{
-  solutionOld() = *_sys_sol_old;
-  solutionOlder() = *_sys_sol_older;
-  _fe_problem.getAuxiliarySystem().solutionOld() = *_aux_sol_old;
-  _fe_problem.getAuxiliarySystem().solutionOlder() = *_aux_sol_older;
 }
 
 bool

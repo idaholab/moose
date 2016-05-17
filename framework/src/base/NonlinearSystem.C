@@ -729,17 +729,14 @@ NonlinearSystem::getSplit(const std::string & name)
   return _splits.getActiveObject(name);
 }
 
-NumericVector<Number> &
-NonlinearSystem::addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual)
+void
+NonlinearSystem::zeroVectorForResidual(const std::string & vector_name)
 {
-  if (hasVector(vector_name))
-    return getVector(vector_name);
+  for (unsigned int i = 0; i < _vecs_to_zero_for_residual.size(); ++i)
+    if (vector_name == _vecs_to_zero_for_residual[i])
+      return;
 
-  NumericVector<Number> * vec = &_sys.add_vector(vector_name, project, type);
-
-  if (zero_for_residual)
-    _vecs_to_zero_for_residual.push_back(vec);
-  return *vec;
+  _vecs_to_zero_for_residual.push_back(vector_name);
 }
 
 void
@@ -751,12 +748,14 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
   Moose::enableFPE();
 
-  for (std::vector<NumericVector<Number> *>::iterator it = _vecs_to_zero_for_residual.begin();
-      it != _vecs_to_zero_for_residual.end();
-      ++it)
+  for (unsigned int i = 0; i < _vecs_to_zero_for_residual.size(); ++i)
   {
-    (*it)->close();
-    (*it)->zero();
+    if (hasVector(_vecs_to_zero_for_residual[i]))
+    {
+      NumericVector<Number> & vec = getVector(_vecs_to_zero_for_residual[i]);
+      vec.close();
+      vec.zero();
+    }
   }
 
   try
