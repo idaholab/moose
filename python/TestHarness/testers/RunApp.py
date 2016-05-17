@@ -1,4 +1,4 @@
-import re, os, sys
+import re, os, sys, time
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value
 
@@ -16,6 +16,7 @@ class RunApp(Tester):
     params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
     params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
     params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
+    params.addParam('allow_deprecated_until', time.strptime(time.ctime(0)), "A test that only runs if current date is less than specified date")
 
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
@@ -83,6 +84,11 @@ class RunApp(Tester):
     specs = self.specs
     # Create the command line string to run
     command = ''
+
+    # If deprecated day is not epoch and today is greater than deprecated day
+    if specs.isValid('allow_deprecated_until') and self.specs['allow_deprecated_until'] != time.strptime(time.ctime(0)) \
+       and time.mktime(time.gmtime()) > time.mktime(self.specs['allow_deprecated_until']):
+      specs['cli_args'].append('--allow-deprecated')
 
     # Check for built application
     if not options.dry_run and not os.path.exists(specs['executable']):

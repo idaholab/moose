@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, sys, re
+import os, sys, re, time
 
 import ParseGetPot, Factory
 from MooseObject import MooseObject
@@ -72,9 +72,16 @@ class Parser:
                 print "Unrecognized (key,value) pair: (", key, ',', value, ")"
                 params['error_code'] = 0x02
                 error_code = error_code | params['error_code']
-
-              # Otherwise, just do normal assignment
+            # Prevent date types from being stored as strings
+            elif params.isValid(key) and (type(params[key]) == type(time.localtime())):
+              try:
+                params[key] = time.strptime(value, "%m/%d/%Y")
+              except ValueError:
+                # Input file has invalid date. But we still want to return a
+                # valid date type object... (12/31/1969)
+                params[key] = time.strptime(time.ctime(0))
             else:
+              # Otherwise, just do normal assignment
               params[key] = value
       else:
         self.params_ignored.add(key)
