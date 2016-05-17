@@ -15,7 +15,6 @@
 #include "CLSHPlasticMaterial.h"
 #include "CLSHPlasticModel.h"
 #include "CombinedCreepPlasticity.h"
-#include "DashpotBC.h"
 #include "Elastic.h"
 #include "ElasticModel.h"
 #include "ElasticEnergyAux.h"
@@ -38,7 +37,6 @@
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
-#include "MaterialVectorAux.h"
 #include "AccumulateAux.h"
 #include "DomainIntegralQFunction.h"
 #include "DomainIntegralTopologicalQFunction.h"
@@ -46,7 +44,6 @@
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
 #include "LineMaterialSymmTensorSampler.h"
-#include "PresetVelocity.h"
 #include "InteractionIntegralBenchmarkBC.h"
 #include "MaterialTensorIntegral.h"
 #include "CrackDataSampler.h"
@@ -103,14 +100,11 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
-  registerAux(MaterialVectorAux);
   registerAux(AccumulateAux);
   registerAux(DomainIntegralQFunction);
   registerAux(DomainIntegralTopologicalQFunction);
   registerAux(ElementsOnLineAux);
 
-  registerBoundaryCondition(DashpotBC);
-  registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
   registerMaterial(AbaqusCreepMaterial);

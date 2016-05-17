@@ -40,7 +40,7 @@ InputParameters validParams<IntegratedBC>()
 }
 
 IntegratedBC::IntegratedBC(const InputParameters & parameters) :
-    BoundaryCondition(parameters),
+    BoundaryCondition(parameters, false), // False is because this is NOT nodal
     RandomInterface(parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this),

@@ -31,7 +31,7 @@ InputParameters validParams<BoundaryRestrictableRequired>()
   return params;
 }
 
-BoundaryRestrictableRequired::BoundaryRestrictableRequired(const InputParameters & parameters) :
-    BoundaryRestrictable(parameters)
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(const InputParameters & parameters, bool nodal) :
+    BoundaryRestrictable(parameters, nodal)
 {
 }

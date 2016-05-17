@@ -35,9 +35,9 @@ InputParameters validParams<BoundaryCondition>()
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(const InputParameters & parameters) :
+BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool nodal) :
     MooseObject(parameters),
-    BoundaryRestrictableRequired(parameters),
+    BoundaryRestrictableRequired(parameters, nodal),
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),

@@ -142,7 +142,7 @@
 #define mooseDeprecated(msg)                                                                                \
   do                                                                                                        \
   {                                                                                                         \
-    if (Moose::_warnings_are_errors || Moose::_deprecated_is_error)                                         \
+    if (Moose::_deprecated_is_error)                                                                        \
       mooseError("\n\nDeprecated code:\n" << msg << '\n');                                                  \
     else                                                                                                    \
       mooseDoOnce(                                                                                          \

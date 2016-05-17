@@ -50,7 +50,7 @@ InputParameters validParams<DGKernel>()
 DGKernel::DGKernel(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters),
+    BoundaryRestrictable(parameters, false), // false for _not_ nodal
     SetupInterface(this),
     TransientInterface(this),
     FunctionInterface(this),

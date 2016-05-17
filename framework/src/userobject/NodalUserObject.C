@@ -33,7 +33,7 @@ InputParameters validParams<NodalUserObject>()
 NodalUserObject::NodalUserObject(const InputParameters & parameters) :
     UserObject(parameters),
     BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters, blockIDs()),
+    BoundaryRestrictable(parameters, blockIDs(), true), // true for applying to nodesets
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     UserObjectInterface(this),
     Coupleable(this, true),

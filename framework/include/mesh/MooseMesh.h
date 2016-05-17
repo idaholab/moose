@@ -328,10 +328,22 @@ public:
   const std::set<SubdomainID> & meshSubdomains() const;
 
   /**
-   * Returns a read-only reference to the set of subdomains currently
+   * Returns a read-only reference to the set of boundary IDs currently
    * present in the Mesh.
    */
   const std::set<BoundaryID> & meshBoundaryIds() const;
+
+  /**
+   * Returns a read-only reference to the set of sidesets currently
+   * present in the Mesh.
+   */
+  const std::set<BoundaryID> & meshSidesetIds() const;
+
+  /**
+   * Returns a read-only reference to the set of nodesets currently
+   * present in the Mesh.
+   */
+  const std::set<BoundaryID> & meshNodesetIds() const;
 
   /**
    * Sets the mapping between BoundaryID and normal vector
@@ -827,6 +839,7 @@ protected:
    */
   std::set<SubdomainID> _mesh_subdomains;
 
+  ///@{
   /**
    * A set of boundary IDs currently present in the mesh.
    * In serial, this is equivalent to the values returned
@@ -834,6 +847,9 @@ protected:
    * it will contain off-processor boundary IDs as well.
    */
   std::set<BoundaryID> _mesh_boundary_ids;
+  std::set<BoundaryID> _mesh_sideset_ids;
+  std::set<BoundaryID> _mesh_nodeset_ids;
+  ///@}
 
   /// The boundary to normal map - valid only when AddAllSideSetsByNormals is active
   UniquePtr<std::map<BoundaryID, RealVectorValue> > _boundary_to_normal_map;
@@ -995,6 +1011,9 @@ private:
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
+
+  /// Whether or not to allow generation of nodesets from sidesets
+  bool _construct_node_list_from_side_list;
 };
 
 
