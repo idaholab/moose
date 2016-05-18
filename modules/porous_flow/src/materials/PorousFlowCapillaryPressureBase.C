@@ -6,35 +6,27 @@
 /****************************************************************/
 
 #include "PorousFlowCapillaryPressureBase.h"
-#include "Conversion.h"
 
 template<>
 InputParameters validParams<PorousFlowCapillaryPressureBase>()
 {
-  InputParameters params = validParams<Material>();
-  params.addRequiredParam<unsigned int>("phase", "The phase number");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
+  InputParameters params = validParams<PorousFlowMaterialBase>();
   params.addClassDescription("Base class for PorousFlow capillary pressure materials");
   return params;
 }
 
 PorousFlowCapillaryPressureBase::PorousFlowCapillaryPressureBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-
-    _phase_num(getParam<unsigned int>("phase")),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    PorousFlowMaterialBase(parameters),
     _saturation_variable_name(_dictator.saturationVariableNameDummy()),
     _saturation_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
     _saturation_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_qp")),
-    _capillary_pressure_nodal(declareProperty<Real>("PorousFlow_capillary_pressure_nodal" + Moose::stringify(_phase_num))),
-    _dcapillary_pressure_nodal_ds(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + Moose::stringify(_phase_num), _saturation_variable_name)),
-    _d2capillary_pressure_nodal_ds2(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + Moose::stringify(_phase_num), _saturation_variable_name, _saturation_variable_name)),
-    _capillary_pressure_qp(declareProperty<Real>("PorousFlow_capillary_pressure_qp" + Moose::stringify(_phase_num))),
-    _dcapillary_pressure_qp_ds(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_qp" + Moose::stringify(_phase_num), _saturation_variable_name)),
-    _d2capillary_pressure_qp_ds2(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_qp" + Moose::stringify(_phase_num), _saturation_variable_name, _saturation_variable_name))
+    _capillary_pressure_nodal(declareProperty<Real>("PorousFlow_capillary_pressure_nodal" + _phase)),
+    _dcapillary_pressure_nodal_ds(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + _phase, _saturation_variable_name)),
+    _d2capillary_pressure_nodal_ds2(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + _phase, _saturation_variable_name, _saturation_variable_name)),
+    _capillary_pressure_qp(declareProperty<Real>("PorousFlow_capillary_pressure_qp" + _phase)),
+    _dcapillary_pressure_qp_ds(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_qp" + _phase, _saturation_variable_name)),
+    _d2capillary_pressure_qp_ds2(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_qp" + _phase, _saturation_variable_name, _saturation_variable_name))
 {
-  if (_phase_num >= _dictator.numPhases())
-    mooseError("PorousFlowCapillaryPressure: The Dictator proclaims that the number of fluid phases is " << _dictator.numPhases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
 }
 
 void
