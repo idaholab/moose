@@ -39,10 +39,6 @@ InputParameters validParams<PatternedMesh>()
   params.addParam<BoundaryName>("top_boundary", "top_boundary", "name of the top (y) boundary");
   params.addParam<BoundaryName>("bottom_boundary", "bottom_boundary", "name of the bottom (y) boundary");
 
-  // z boundary names
-  params.addParam<BoundaryName>("front_boundary", "front_boundary", "name of the front (z) boundary");
-  params.addParam<BoundaryName>("back_boundary", "back_boundary", "name of the back (z) boundary");
-
   params.addRequiredParam<std::vector<std::vector<unsigned int> > >("pattern", "A double-indexed array starting with the upper-left corner");
 
   params.addClassDescription("Creates a 2D mesh from a specified set of unique 'tiles' meshes and a two-dimensional pattern.");
@@ -118,7 +114,7 @@ PatternedMesh::buildMesh()
 {
   // stitch_meshes() is only implemented for SerialMesh.  So make sure
   // we have one here before continuing.
-  SerialMesh* the_mesh = dynamic_cast<SerialMesh*>( &getMesh() );
+  SerialMesh * the_mesh = dynamic_cast<SerialMesh*>(&getMesh());
 
   if (!the_mesh)
     mooseError("Error, PatternedMesh calls stitch_meshes() which only works on SerialMesh.");
@@ -128,20 +124,21 @@ PatternedMesh::buildMesh()
     BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
     BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
     BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
-    BoundaryID front = getBoundaryID(getParam<BoundaryName>("front_boundary"));
-    BoundaryID back = getBoundaryID(getParam<BoundaryName>("back_boundary"));
 
     // Build each row mesh
-    for (int i = 0; i < _pattern.size(); i++)
-    {
-      for (int j = 0; j < _pattern[i].size(); j++)
+    for (unsigned int i = 0; i < _pattern.size(); i++)
+      for (unsigned int j = 0; j < _pattern[i].size(); j++)
       {
+        Real
+          deltax = j*_x_width,
+          deltay = i*_y_width;
+
         // If this is the first cell of the row initialize the row mesh
         if (j == 0)
         {
           _row_meshes[i]->read(_files[_pattern[i][j]]);
 
-          MeshTools::Modification::translate(*_row_meshes[i], j*_x_width, -i*_y_width, 0);
+          MeshTools::Modification::translate(*_row_meshes[i], deltax, -deltay, 0);
 
           continue;
         }
@@ -149,18 +146,17 @@ PatternedMesh::buildMesh()
         SerialMesh & cell_mesh = *_meshes[_pattern[i][j]];
 
         // Move the mesh into the right spot.  -i because we are starting at the top
-        MeshTools::Modification::translate(cell_mesh, j*_x_width, -i*_y_width, 0);
+        MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
 
         _row_meshes[i]->stitch_meshes(dynamic_cast<SerialMesh &>(cell_mesh), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
 
         // Undo the translation
-        MeshTools::Modification::translate(cell_mesh, -j*_x_width, i*_y_width, 0);
+        MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
       }
-    }
 
     // Now stitch together the rows
     // We're going to stitch them all to row 0 (which is the real mesh)
-    for (int i = 1; i < _pattern.size(); i++)
+    for (unsigned int i = 1; i < _pattern.size(); i++)
       _row_meshes[0]->stitch_meshes(*_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
   }
 }

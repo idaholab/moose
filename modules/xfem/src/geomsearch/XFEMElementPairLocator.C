@@ -23,7 +23,6 @@ XFEMElementPairLocator::reinit()
        it != _elem_pairs->end(); ++it)
   {
     const Elem * elem = it->first;
-    const Elem * elem2 = it->second;
 
     std::vector<Point> intersectionPoints;
 
