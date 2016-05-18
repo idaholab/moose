@@ -58,7 +58,7 @@ RecomputeRadialReturnPowerLawCreep::resetQpProperties()
 }
 
 void
-RecomputeRadialReturnPowerLawCreep::computeStressInitialize(Real effectiveTrialStress)
+RecomputeRadialReturnPowerLawCreep::computeStressInitialize(Real /*effectiveTrialStress*/)
 {
   _shear_modulus = getIsotropicShearModulus();
 

@@ -91,7 +91,6 @@ MortarPeriodicMesh::buildMesh()
 {
   // hard code teh elem type for now (otherwise I have to duplicate too much stuff from libmesh)
   ElemType elem_type_2D = Utility::string_to_enum<ElemType>("QUAD4");
-  ElemType elem_type_3D = Utility::string_to_enum<ElemType>("HEX8");
 
   switch (_dim)
   {
