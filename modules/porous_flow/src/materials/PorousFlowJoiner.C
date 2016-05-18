@@ -12,9 +12,7 @@
 template<>
 InputParameters validParams<PorousFlowJoiner>()
 {
-  InputParameters params = validParams<Material>();
-
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addRequiredParam<std::string>("material_property", "The property that you want joined into a std::vector");
   params.addParam<bool>("at_qps", false, "If true then join quadpoint properties, otherwise join nodal properties");
   params.addParam<bool>("include_old", false, "Join old properties into vectors as well as the current properties");
@@ -23,15 +21,12 @@ InputParameters validParams<PorousFlowJoiner>()
 }
 
 PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+    PorousFlowMaterialVectorBase(parameters),
 
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _pressure_variable_name(_dictator.pressureVariableNameDummy()),
     _saturation_variable_name(_dictator.saturationVariableNameDummy()),
     _temperature_variable_name(_dictator.temperatureVariableNameDummy()),
     _mass_fraction_variable_name(_dictator.massFractionVariableNameDummy()),
-    _num_phases(_dictator.numPhases()),
-    _num_var(_dictator.numVariables()),
     _pf_prop(getParam<std::string>("material_property")),
     _include_old(getParam<bool>("include_old")),
     _at_qps(getParam<bool>("at_qps")),

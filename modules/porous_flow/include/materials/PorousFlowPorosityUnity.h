@@ -8,10 +8,7 @@
 #ifndef POROUSFLOWPOROSITYUNITY_H
 #define POROUSFLOWPOROSITYUNITY_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
-
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterialVectorBase.h"
 
 //Forward Declarations
 class PorousFlowPorosityUnity;
@@ -23,14 +20,14 @@ InputParameters validParams<PorousFlowPorosityUnity>();
  * Base class Material designed to provide the porosity.
  * In this class porosity = 1
  */
-class PorousFlowPorosityUnity : public DerivativeMaterialInterface<Material>
+class PorousFlowPorosityUnity : public PorousFlowMaterialVectorBase
 {
 public:
   PorousFlowPorosityUnity(const InputParameters & parameters);
 
 protected:
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator;
+    virtual void initQpStatefulProperties();
+    virtual void computeQpProperties();
 
   /// nodal porosity
   MaterialProperty<Real> & _porosity_nodal;
@@ -55,9 +52,6 @@ protected:
 
   /// d(quadpoint porosity)/d(PorousFlow variable)
   MaterialProperty<std::vector<RealGradient> > & _dporosity_qp_dgradvar;
-
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
 };
 
 #endif //POROUSFLOWPOROSITYUNITY_H

@@ -13,7 +13,6 @@ template<>
 InputParameters validParams<PorousFlowPorosityHM>()
 {
   InputParameters params = validParams<PorousFlowPorosityUnity>();
-
   params.addRequiredParam<Real>("porosity_zero", "The porosity at zero volumetric strain and zero effective porepressure");
   params.addRangeCheckedParam<Real>("biot_coefficient", 1, "biot_coefficient>=0&biot_coefficient<=1", "Biot coefficient");
   params.addRequiredRangeCheckedParam<Real>("solid_bulk", "solid_bulk>0", "Bulk modulus of the drained porous solid skeleton");
@@ -28,7 +27,6 @@ PorousFlowPorosityHM::PorousFlowPorosityHM(const InputParameters & parameters) :
     _phi0(getParam<Real>("porosity_zero")),
     _biot(getParam<Real>("biot_coefficient")),
     _solid_bulk(getParam<Real>("solid_bulk")),
-    _num_var(_dictator.numVariables()),
     _coeff((_biot - 1.0)/_solid_bulk),
 
     _ndisp(coupledComponents("displacements")),
@@ -81,4 +79,3 @@ PorousFlowPorosityHM::computeQpProperties()
     _dporosity_nodal_dgradvar[_qp][v] = -(_porosity_nodal[_qp] - _biot) * _dvol_strain_qp_dvar[_qp][v];
   }
 }
-
