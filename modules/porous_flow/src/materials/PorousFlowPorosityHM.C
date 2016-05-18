@@ -28,7 +28,7 @@ PorousFlowPorosityHM::PorousFlowPorosityHM(const InputParameters & parameters) :
     _phi0(getParam<Real>("porosity_zero")),
     _biot(getParam<Real>("biot_coefficient")),
     _solid_bulk(getParam<Real>("solid_bulk")),
-    _num_var(_dictator.numVariables()),
+    _num_var(_dictator_UO.numVariables()),
     _coeff((_biot - 1.0)/_solid_bulk),
 
     _ndisp(coupledComponents("displacements")),

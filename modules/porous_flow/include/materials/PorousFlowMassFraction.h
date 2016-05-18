@@ -30,7 +30,7 @@ public:
 
 protected:
   /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator;
+  const PorousFlowDictator & _dictator_UO;
 
   /// Number of fluid phases
   const unsigned int _num_phases;

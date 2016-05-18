@@ -29,7 +29,7 @@ protected:
   const bool _consistent;
 
   /// The dictator UserObject for the Porous-Flow simulation
-  const PorousFlowDictator & _dictator;
+  const PorousFlowDictator & _dictator_UO;
 
   /// number of porous-flow variables
   const unsigned int _num_var;

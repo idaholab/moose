@@ -33,10 +33,10 @@ PorousFlow1PhaseMD_Gaussian::PorousFlow1PhaseMD_Gaussian(const InputParameters &
     _md_qp_var(coupledValue("mass_density")),
     _gradmd_qp_var(coupledGradient("mass_density")),
     _md_varnum(coupled("mass_density")),
-    _pvar(_dictator.isPorousFlowVariable(_md_varnum) ? _dictator.porousFlowVariableNum(_md_varnum) : 0)
+    _pvar(_dictator_UO.isPorousFlowVariable(_md_varnum) ? _dictator_UO.porousFlowVariableNum(_md_varnum) : 0)
 {
-  if (_dictator.numPhases() != 1)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow1PhaseMD_Gaussian can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
+  if (_dictator_UO.numPhases() != 1)
+    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.numPhases() << " whereas PorousFlow1PhaseMD_Gaussian can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
 void
@@ -54,7 +54,7 @@ PorousFlow1PhaseMD_Gaussian::computeQpProperties()
 
   buildPS();
 
-  if (_dictator.notPorousFlowVariable(_md_varnum))
+  if (_dictator_UO.notPorousFlowVariable(_md_varnum))
     return;
 
   if (_md_nodal_var[_qp] >= _logdens0)
@@ -96,11 +96,11 @@ PorousFlow1PhaseMD_Gaussian::computeQpProperties()
   }
 
   // _temperature is only dependent on _temperature, and its derivative is = 1
-  if (!_dictator.notPorousFlowVariable(_temperature_varnum))
+  if (!_dictator_UO.notPorousFlowVariable(_temperature_varnum))
   {
     // _temperature is a PorousFlow variable
-    _dtemperature_nodal_dvar[_qp][0][_dictator.porousFlowVariableNum(_temperature_varnum)] = 1.0;
-    _dtemperature_qp_dvar[_qp][0][_dictator.porousFlowVariableNum(_temperature_varnum)] = 1.0;
+    _dtemperature_nodal_dvar[_qp][0][_dictator_UO.porousFlowVariableNum(_temperature_varnum)] = 1.0;
+    _dtemperature_qp_dvar[_qp][0][_dictator_UO.porousFlowVariableNum(_temperature_varnum)] = 1.0;
   }
 }
 

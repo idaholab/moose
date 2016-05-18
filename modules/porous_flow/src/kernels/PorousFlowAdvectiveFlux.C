@@ -16,10 +16,10 @@ template<>
 InputParameters validParams<PorousFlowAdvectiveFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<unsigned int>("fluid_component", 0, "The index corresponding to the fluid component for this kernel");
+  params.addParam<unsigned int>("component_index", 0, "The index corresponding to the component for this kernel");
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector downwards (m/s^2)");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
-  params.addClassDescription("Fully-upwinded advective flux of the component given by fluid_component");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of PorousFlow variable names");
+  params.addClassDescription("Fully-upwinded advective flux of the component given by component_index");
   return params;
 }
 
@@ -41,9 +41,9 @@ PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & paramet
     _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_porepressure_qp_dvar")),
     _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability")),
     _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_dvar")),
-    _porousflow_dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _fluid_component(getParam<unsigned int>("fluid_component")),
-    _num_phases(_porousflow_dictator.numPhases()),
+    _porousflow_dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _component_index(getParam<unsigned int>("component_index")),
+    _num_phases(_porousflow_dictator_UO.numPhases()),
     _gravity(getParam<RealVectorValue>("gravity"))
 {
 }
@@ -57,10 +57,10 @@ PorousFlowAdvectiveFlux::darcyQp(unsigned int ph)
 Real
 PorousFlowAdvectiveFlux::darcyQpJacobian(unsigned int jvar, unsigned int ph)
 {
-  if (_porousflow_dictator.notPorousFlowVariable(jvar))
+  if (_porousflow_dictator_UO.notPorousFlowVariable(jvar))
     return 0.0;
 
-  const unsigned int pvar = _porousflow_dictator.porousFlowVariableNum(jvar);
+  const unsigned int pvar = _porousflow_dictator_UO.porousFlowVariableNum(jvar);
   return _grad_test[_i][_qp] * (_dpermeability_dvar[_qp][pvar] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph]*_gravity) + _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity) + _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]) );
 }
 
@@ -92,11 +92,11 @@ PorousFlowAdvectiveFlux::computeOffDiagJacobian(unsigned int jvar)
 void
 PorousFlowAdvectiveFlux::upwind(JacRes res_or_jac, unsigned int jvar)
 {
-  if ((res_or_jac == CALCULATE_JACOBIAN) && _porousflow_dictator.notPorousFlowVariable(jvar))
+  if ((res_or_jac == CALCULATE_JACOBIAN) && _porousflow_dictator_UO.notPorousFlowVariable(jvar))
       return;
 
   /// The PorousFlow variable index corresponding to the variable number jvar
-  const unsigned int pvar = ((res_or_jac == CALCULATE_JACOBIAN) ? _porousflow_dictator.porousFlowVariableNum(jvar) : 0);
+  const unsigned int pvar = ((res_or_jac == CALCULATE_JACOBIAN) ? _porousflow_dictator_UO.porousFlowVariableNum(jvar) : 0);
 
   /// The number of nodes in the element
   const unsigned int num_nodes = _test.size();
@@ -224,13 +224,13 @@ PorousFlowAdvectiveFlux::upwind(JacRes res_or_jac, unsigned int jvar)
       {
         upwind_node[n] = true;
         /// The massfrac*mobility at the upstream node
-        mobility = _mass_fractions[n][ph][_fluid_component] * _fluid_density_node[n][ph] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
+        mobility = _mass_fractions[n][ph][_component_index] * _fluid_density_node[n][ph] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
         if (res_or_jac == CALCULATE_JACOBIAN)
         {
           /// The derivative of the massfrac*mobility wrt the PorousFlow variable
-          dmobility = _dmass_fractions_dvar[n][ph][_fluid_component][pvar] * _fluid_density_node[n][ph] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
-          dmobility += _mass_fractions[n][ph][_fluid_component] * _dfluid_density_node_dvar[n][ph][pvar] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
-          dmobility += _mass_fractions[n][ph][_fluid_component] * _fluid_density_node[n][ph] * _drelative_permeability_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
+          dmobility = _dmass_fractions_dvar[n][ph][_component_index][pvar] * _fluid_density_node[n][ph] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
+          dmobility += _mass_fractions[n][ph][_component_index] * _dfluid_density_node_dvar[n][ph][pvar] * _relative_permeability[n][ph] / _fluid_viscosity[n][ph];
+          dmobility += _mass_fractions[n][ph][_component_index] * _fluid_density_node[n][ph] * _drelative_permeability_dvar[n][ph][pvar] / _fluid_viscosity[n][ph];
           dmobility -= mobility / _fluid_viscosity[n][ph] * _dfluid_viscosity_dvar[n][ph][pvar];
 
           for (_j = 0; _j < _phi.size(); _j++)

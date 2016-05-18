@@ -32,7 +32,7 @@ public:
 
 protected:
   /// The dictator UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator;
+  const PorousFlowDictator & _dictator_UO;
 
   /// number of phases in this simulation
   const unsigned int _num_ph;

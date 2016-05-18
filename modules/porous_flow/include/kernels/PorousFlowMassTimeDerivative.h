@@ -35,10 +35,10 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// the fluid component index
-  const unsigned int _fluid_component;
+  const unsigned int _component_index;
 
   /// holds info on the PorousFlow variables
-  const PorousFlowDictator & _dictator;
+  const PorousFlowDictator & _dictator_UO;
 
   /// whether the Variable for this Kernel is a porous-flow variable according to the Dictator
   const bool _var_is_porflow_var;

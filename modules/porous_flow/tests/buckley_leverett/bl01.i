@@ -17,7 +17,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator = dictator
+  PorousFlowDictator_UO = dictator
 []
 
 [Variables]
@@ -32,12 +32,12 @@
 [Kernels]
   [./mass0]
     type = PorousFlowMassTimeDerivative
-    fluid_component = 0
+    component_index = 0
     variable = pp
   [../]
   [./flux0]
     type = PorousFlowAdvectiveFlux
-    fluid_component = 0
+    component_index = 0
     variable = pp
     gravity = '0 0 0'
   [../]

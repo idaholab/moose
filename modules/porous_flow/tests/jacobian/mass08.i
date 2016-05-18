@@ -8,7 +8,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator = dictator
+  PorousFlowDictator_UO = dictator
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -68,7 +68,7 @@
   [../]
   [./mass0]
     type = PorousFlowMassTimeDerivative
-    fluid_component = 0
+    component_index = 0
     variable = pp
   [../]
 []

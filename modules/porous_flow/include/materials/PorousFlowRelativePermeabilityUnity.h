@@ -33,7 +33,7 @@ protected:
   const unsigned int _phase_num;
 
   /// The PorousFlowDictator UserObject
-  const PorousFlowDictator & _dictator;
+  const PorousFlowDictator & _dictator_UO;
 
   /// Name of (dummy) saturation primary variable
   VariableName _saturation_variable_name;

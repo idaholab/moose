@@ -27,7 +27,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   block = 0
-  PorousFlowDictator = dictator
+  PorousFlowDictator_UO = dictator
 []
 
 [Variables]

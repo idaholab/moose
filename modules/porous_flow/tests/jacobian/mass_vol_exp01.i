@@ -17,7 +17,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   block = 0
-  PorousFlowDictator = dictator
+  PorousFlowDictator_UO = dictator
 []
 
 [Variables]
@@ -79,7 +79,7 @@
   [../]
   [./poro]
     type = PorousFlowMassVolumetricExpansion
-    fluid_component = 0
+    component_index = 0
     variable = porepressure
   [../]
 []

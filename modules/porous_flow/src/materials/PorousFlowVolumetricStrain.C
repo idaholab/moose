@@ -16,7 +16,7 @@ InputParameters validParams<PorousFlowVolumetricStrain>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addParam<bool>("consistent_with_displaced_mesh", true, "The volumetric strain rate will include terms that ensure fluid mass conservation in the displaced mesh");
   params.addClassDescription("Compute volumetric strain and the volumetric_strain rate, for use in PorousFlow.");
   params.set<bool>("stateful_displacements") = true;
@@ -27,8 +27,8 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
     DerivativeMaterialInterface<Material>(parameters),
 
     _consistent(getParam<bool>("consistent_with_displaced_mesh")),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _num_var(_dictator.numVariables()),
+    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _num_var(_dictator_UO.numVariables()),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _disp_var_num(3),
@@ -57,7 +57,7 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
   {
     _disp[i] = &_zero;
     _disp_var_num[i] = 0;
-    while (_dictator.isPorousFlowVariable(_disp_var_num[i]))
+    while (_dictator_UO.isPorousFlowVariable(_disp_var_num[i]))
       _disp_var_num[i]++; // increment until disp_var_num[i] is not a porflow var
     _grad_disp[i] = &_grad_zero;
     _grad_disp_old[i] = &_grad_zero;
@@ -82,10 +82,10 @@ PorousFlowVolumetricStrain::computeQpProperties()
   _dvol_strain_rate_qp_dvar[_qp].resize(_num_var, RealGradient());
   _dvol_total_strain_qp_dvar[_qp].resize(_num_var, RealGradient());
   for (unsigned i = 0 ; i < _ndisp ; ++i)
-    if (_dictator.isPorousFlowVariable(_disp_var_num[i]))
+    if (_dictator_UO.isPorousFlowVariable(_disp_var_num[i]))
     {
     // the i_th displacement is a porous-flow variable
-      const unsigned int pvar = _dictator.porousFlowVariableNum(_disp_var_num[i]);
+      const unsigned int pvar = _dictator_UO.porousFlowVariableNum(_disp_var_num[i]);
       _dvol_strain_rate_qp_dvar[_qp][pvar](i) = 1.0/_dt/andy;
       _dvol_total_strain_qp_dvar[_qp][pvar](i) = 1.0;
     }

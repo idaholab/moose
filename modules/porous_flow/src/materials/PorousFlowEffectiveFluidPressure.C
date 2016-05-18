@@ -12,7 +12,7 @@ InputParameters validParams<PorousFlowEffectiveFluidPressure>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material calculates an effective fluid pressure: effective_stress = total_stress + biot_coeff*effective_fluid_pressure.  The effective_fluid_pressure = sum_{phases}(S_phase * P_phase)");
   return params;
 }
@@ -20,9 +20,9 @@ InputParameters validParams<PorousFlowEffectiveFluidPressure>()
 PorousFlowEffectiveFluidPressure::PorousFlowEffectiveFluidPressure(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _num_ph(_dictator.numPhases()),
-    _num_var(_dictator.numVariables()),
+    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _num_ph(_dictator_UO.numPhases()),
+    _num_var(_dictator_UO.numVariables()),
 
     _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
     _dporepressure_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),

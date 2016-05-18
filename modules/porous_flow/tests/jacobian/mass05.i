@@ -9,7 +9,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator = dictator
+  PorousFlowDictator_UO = dictator
 []
 
 [Variables]
@@ -73,17 +73,17 @@
 [Kernels]
   [./mass_sp0]
     type = PorousFlowMassTimeDerivative
-    fluid_component = 0
+    component_index = 0
     variable = ppwater
   [../]
   [./mass_sp1]
     type = PorousFlowMassTimeDerivative
-    fluid_component = 1
+    component_index = 1
     variable = ppgas
   [../]
   [./mass_sp2]
     type = PorousFlowMassTimeDerivative
-    fluid_component = 2
+    component_index = 2
     variable = massfrac_ph0_sp0
   [../]
 []

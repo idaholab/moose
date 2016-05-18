@@ -16,7 +16,7 @@ InputParameters validParams<PorousFlowRelativePermeabilityCorey>()
 
   params.addRequiredParam<Real>("n_j", "The Corey exponent of phase j.");
   params.addRequiredParam<unsigned int>("phase", "The phase number j");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material calculates relative permeability of either phase Sj, using the simple Corey model (Sj-Sjr)^n/(1-S1r-S2r)");
   return params;
 }

@@ -25,21 +25,21 @@ PorousFlow2PhasePS::PorousFlow2PhasePS(const InputParameters & parameters) :
     _phase0_porepressure_qp(coupledValue("phase0_porepressure")),
     _phase0_gradp_qp(coupledGradient("phase0_porepressure")),
     _phase0_porepressure_varnum(coupled("phase0_porepressure")),
-    _pvar(_dictator.isPorousFlowVariable(_phase0_porepressure_varnum) ? _dictator.porousFlowVariableNum(_phase0_porepressure_varnum) : 0),
+    _pvar(_dictator_UO.isPorousFlowVariable(_phase0_porepressure_varnum) ? _dictator_UO.porousFlowVariableNum(_phase0_porepressure_varnum) : 0),
 
     _phase1_saturation_nodal(coupledNodalValue("phase1_saturation")),
     _phase1_saturation_qp(coupledValue("phase1_saturation")),
     _phase1_grads_qp(coupledGradient("phase1_saturation")),
     _phase1_saturation_varnum(coupled("phase1_saturation")),
-    _svar(_dictator.isPorousFlowVariable(_phase1_saturation_varnum) ? _dictator.porousFlowVariableNum(_phase1_saturation_varnum) : 0),
+    _svar(_dictator_UO.isPorousFlowVariable(_phase1_saturation_varnum) ? _dictator_UO.porousFlowVariableNum(_phase1_saturation_varnum) : 0),
 
-    _tvar(_dictator.isPorousFlowVariable(_temperature_varnum) ? _dictator.porousFlowVariableNum(_temperature_varnum) : 0),
+    _tvar(_dictator_UO.isPorousFlowVariable(_temperature_varnum) ? _dictator_UO.porousFlowVariableNum(_temperature_varnum) : 0),
 
     _pc(getParam<Real>("pc"))
 
 {
-  if (_dictator.numPhases() != 2)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow2PhasePS can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
+  if (_dictator_UO.numPhases() != 2)
+    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.numPhases() << " whereas PorousFlow2PhasePS can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
 }
 
 void
@@ -58,7 +58,7 @@ PorousFlow2PhasePS::computeQpProperties()
   buildQpPPSS();
 
   // _porepressure depends on _phase0_porepressure, and its derivative is 1
-  if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
+  if (_dictator_UO.isPorousFlowVariable(_phase0_porepressure_varnum))
   {
     // _phase0_porepressure is a PorousFlow variable
     for (unsigned phase = 0; phase < _num_phases; ++phase)
@@ -75,7 +75,7 @@ PorousFlow2PhasePS::computeQpProperties()
   const Real d2pc_qp = d2CapillaryPressure_dS2(_phase1_saturation_qp[_qp]);
 
   // _saturation is only dependent on _phase1_saturation, and its derivative is +/- 1
-  if (_dictator.isPorousFlowVariable(_phase1_saturation_varnum))
+  if (_dictator_UO.isPorousFlowVariable(_phase1_saturation_varnum))
   {
     // _phase1_saturation is a porflow variable
     _dsaturation_nodal_dvar[_qp][0][_svar] = -1.0;
@@ -93,7 +93,7 @@ PorousFlow2PhasePS::computeQpProperties()
   }
 
   // _temperature is only dependent on temperature, and its derivative is = 1
-  if (_dictator.isPorousFlowVariable(_temperature_varnum))
+  if (_dictator_UO.isPorousFlowVariable(_temperature_varnum))
   {
     // _phase0_temperature is a PorousFlow variable
     for (unsigned int phase = 0; phase < _num_phases; ++phase)

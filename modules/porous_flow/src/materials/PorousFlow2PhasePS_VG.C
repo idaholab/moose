@@ -29,8 +29,8 @@ PorousFlow2PhasePS_VG::PorousFlow2PhasePS_VG(const InputParameters & parameters)
     _pc_max(getParam<Real>("pc_max")),
     _p0(getParam<Real>("p0"))
 {
-  if (_dictator.numPhases() != 2)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow2PhasePS_VG can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
+  if (_dictator_UO.numPhases() != 2)
+    mooseError("The Dictator proclaims that the number of phases is " << _dictator_UO.numPhases() << " whereas PorousFlow2PhasePS_VG can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
 }
 
 Real
