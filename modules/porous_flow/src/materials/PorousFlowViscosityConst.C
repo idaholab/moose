@@ -7,8 +7,6 @@
 
 #include "PorousFlowViscosityConst.h"
 
-#include "Conversion.h"
-
 template<>
 InputParameters validParams<PorousFlowViscosityConst>()
 {
@@ -20,12 +18,9 @@ InputParameters validParams<PorousFlowViscosityConst>()
 
 PorousFlowViscosityConst::PorousFlowViscosityConst(const InputParameters & parameters) :
     PorousFlowFluidPropertiesBase(parameters),
-
     _input_viscosity(getParam<Real>("viscosity")),
     _viscosity(declareProperty<Real>("PorousFlow_viscosity" + _phase))
 {
-  if (_phase_num >= _dictator.numPhases())
-    mooseError("PorousFlowViscosityConst: The Dictator proclaims that the number of fluid phases is " << _dictator.numPhases() << " while you have foolishly entered phase = " << _phase_num << ".  Be aware that the Dictator does not tolerate mistakes.");
 }
 
 void

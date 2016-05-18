@@ -7,8 +7,6 @@
 
 #include "PorousFlowPorosityConst.h"
 
-#include "Conversion.h"
-
 template<>
 InputParameters validParams<PorousFlowPorosityConst>()
 {
@@ -30,11 +28,10 @@ PorousFlowPorosityConst::initQpStatefulProperties()
   _porosity_nodal[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
   _porosity_qp[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
 
-  const unsigned int num_var = _dictator.numVariables();
-  _dporosity_nodal_dvar[_qp].assign(num_var, 0.0);
-  _dporosity_qp_dvar[_qp].assign(num_var, 0.0);
-  _dporosity_nodal_dgradvar[_qp].assign(num_var, RealGradient());
-  _dporosity_qp_dgradvar[_qp].assign(num_var, RealGradient());
+  _dporosity_nodal_dvar[_qp].assign(_num_var, 0.0);
+  _dporosity_qp_dvar[_qp].assign(_num_var, 0.0);
+  _dporosity_nodal_dgradvar[_qp].assign(_num_var, RealGradient());
+  _dporosity_qp_dgradvar[_qp].assign(_num_var, RealGradient());
 }
 
 void
@@ -43,4 +40,3 @@ PorousFlowPorosityConst::computeQpProperties()
   _porosity_nodal[_qp] = _input_porosity;
   _porosity_qp[_qp] = _input_porosity;
 }
-

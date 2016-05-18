@@ -12,20 +12,14 @@
 template<>
 InputParameters validParams<PorousFlowMassFraction>()
 {
-  InputParameters params = validParams<Material>();
-
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addCoupledVar("mass_fraction_vars", "List of variables that represent the mass fractions.  Format is 'f_ph0^c0 f_ph0^c1 f_ph0^c2 ... f_ph0^c(N-1) f_ph1^c0 f_ph1^c1 fph1^c2 ... fph1^c(N-1) ... fphP^c0 f_phP^c1 fphP^c2 ... fphP^c(N-1)' where N=num_components and P=num_phases, and it is assumed that f_ph^cN=1-sum(f_ph^c,{c,0,N-1}) so that f_ph^cN need not be given.  If no variables are provided then num_phases=1=num_components.");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material forms a std::vector<std::vector ...> of mass-fractions out of the individual mass fractions");
   return params;
 }
 
 PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _num_phases(_dictator.numPhases()),
-    _num_components(_dictator.numComponents()),
+    PorousFlowMaterialVectorBase(parameters),
 
     _mass_frac(declareProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
     _mass_frac_old(declarePropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
@@ -55,7 +49,6 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
 void
 PorousFlowMassFraction::initQpStatefulProperties()
 {
-  const unsigned int num_var = _dictator.numVariables();
   _mass_frac[_qp].resize(_num_phases);
   _mass_frac_old[_qp].resize(_num_phases);
   _grad_mass_frac[_qp].resize(_num_phases);
@@ -67,7 +60,7 @@ PorousFlowMassFraction::initQpStatefulProperties()
     _grad_mass_frac[_qp][ph].resize(_num_components);
     _dmass_frac_dvar[_qp][ph].resize(_num_components);
     for (unsigned int comp = 0; comp < _num_components; ++comp)
-      _dmass_frac_dvar[_qp][ph][comp].assign(num_var, 0.0);
+      _dmass_frac_dvar[_qp][ph][comp].assign(_num_var, 0.0);
   }
 
   // the derivative matrix is fixed for all time

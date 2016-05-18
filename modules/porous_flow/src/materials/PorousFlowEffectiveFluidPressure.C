@@ -10,20 +10,13 @@
 template<>
 InputParameters validParams<PorousFlowEffectiveFluidPressure>()
 {
-  InputParameters params = validParams<Material>();
-
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addClassDescription("This Material calculates an effective fluid pressure: effective_stress = total_stress + biot_coeff*effective_fluid_pressure.  The effective_fluid_pressure = sum_{phases}(S_phase * P_phase)");
   return params;
 }
 
 PorousFlowEffectiveFluidPressure::PorousFlowEffectiveFluidPressure(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _num_ph(_dictator.numPhases()),
-    _num_var(_dictator.numVariables()),
-
+    PorousFlowMaterialVectorBase(parameters),
     _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
     _dporepressure_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),
     _saturation_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_qp")),
@@ -46,7 +39,7 @@ PorousFlowEffectiveFluidPressure::computeQpProperties()
   _pf_nodal[_qp] = 0.0;
   _dpf_qp_dvar[_qp].assign(_num_var, 0.0);
   _dpf_nodal_dvar[_qp].assign(_num_var, 0.0);
-  for (unsigned ph = 0; ph < _num_ph; ++ph)
+  for (unsigned ph = 0; ph < _num_phases; ++ph)
   {
     _pf_qp[_qp] += _saturation_qp[_qp][ph] * _porepressure_qp[_qp][ph];
     _pf_nodal[_qp] += _saturation_nodal[_qp][ph] * _porepressure_nodal[_qp][ph];
