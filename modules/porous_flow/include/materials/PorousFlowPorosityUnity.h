@@ -30,7 +30,7 @@ public:
 
 protected:
   /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator_UO;
+  const PorousFlowDictator & _dictator;
 
   /// nodal porosity
   MaterialProperty<Real> & _porosity_nodal;
