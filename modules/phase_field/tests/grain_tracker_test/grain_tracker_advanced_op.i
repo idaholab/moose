@@ -23,7 +23,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      rand_seed = 8675
+      rand_seed = 1
       grain_num = 40
       advanced_op_assignment = true
     [../]
@@ -114,6 +114,7 @@
 
 [Outputs]
   csv = true
+  print_perf_log = true
 []
 
 [Problem]

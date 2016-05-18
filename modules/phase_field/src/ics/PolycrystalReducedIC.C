@@ -61,7 +61,7 @@ PolycrystalReducedIC::initialSetup()
   for (unsigned int grain = 0; grain < _grain_num; grain++)
   {
     for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-        _centerpoints[grain](i) = _bottom_left(i) + _range(i)*MooseRandom::rand();
+      _centerpoints[grain](i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
     if (_columnar_3D)
       _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
   }
@@ -71,26 +71,43 @@ PolycrystalReducedIC::initialSetup()
     _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
   else
   {
-    /**
-     * We first need to build a node to grain map (i.e. every node in the mesh needs to say
-     * which grain it belongs to). For Voronoi, this is straightforward and we have a utility
-     * already setup to handle this case.
-     */
-    std::map<dof_id_type, unsigned int> node_to_grain;
-    const MeshBase::node_iterator end = _mesh.getMesh().active_nodes_end();
-    for (MeshBase::node_iterator nl = _mesh.getMesh().active_nodes_begin(); nl != end; ++nl)
-    {
-      unsigned int grain_index = PolycrystalICTools::assignPointToGrain(**nl, _centerpoints, _mesh, _var, _range.norm());
+    std::map<dof_id_type, unsigned int> entity_to_grain;
 
-      node_to_grain.insert(std::pair<dof_id_type, unsigned int>((*nl)->id(), grain_index));
+    // TODO: Add a nodal option
+    if (false)
+    {
+      /**
+       * We first need to build a node to grain map (i.e. every node in the mesh needs to say
+       * which grain it belongs to). For Voronoi, this is straightforward and we have a utility
+       * already setup to handle this case.
+       */
+      const MeshBase::node_iterator end = _mesh.getMesh().active_nodes_end();
+      for (MeshBase::node_iterator nl = _mesh.getMesh().active_nodes_begin(); nl != end; ++nl)
+      {
+        unsigned int grain_index = PolycrystalICTools::assignPointToGrain(**nl, _centerpoints, _mesh, _var, _range.norm());
+
+        entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*nl)->id(), grain_index));
+      }
+    }
+    else
+    {
+      const MeshBase::element_iterator end = _mesh.getMesh().active_elements_end();
+      for (MeshBase::element_iterator el = _mesh.getMesh().active_elements_begin(); el != end; ++el)
+      {
+        Point centroid = (*el)->centroid();
+
+        unsigned int grain_index = PolycrystalICTools::assignPointToGrain(centroid, _centerpoints, _mesh, _var, _range.norm());
+
+        entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*el)->id(), grain_index));
+      }
     }
 
     /**
      * Now we need to construct a neighbor graph using our node to grain map information.
      * We have a utility for this too. This one makes no assumptions about how the
-     * grain structure was built. It uses the node_to_grain map.
+     * grain structure was built. It uses the entity_to_grain map.
      */
-    std::vector<std::vector<bool> > grain_neighbor_graph = PolycrystalICTools::buildGrainAdjacencyGraph(node_to_grain, _mesh, _grain_num);
+    AdjacencyGraph grain_neighbor_graph = PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, _grain_num, true);
 
     /**
      * Now we need to assign ops in some optimal fashion.

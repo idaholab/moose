@@ -46,9 +46,9 @@ public:
   virtual void initialSetup();
 
 protected:
-  bool assignColors(const std::vector<std::vector<bool> > & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int grain) const;
+  bool assignColors(const AdjacencyGraph & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int grain) const;
 
-  bool isGraphValid(const std::vector<std::vector<bool> > & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int grain, unsigned int color) const;
+  bool isGraphValid(const AdjacencyGraph & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int grain, unsigned int color) const;
 
   MooseMesh & _mesh;
 
