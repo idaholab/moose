@@ -1,4 +1,4 @@
-import re, os, sys
+import re, os, sys, time
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value
 
@@ -28,6 +28,8 @@ class RunApp(Tester):
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
 
+    params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
+
     # Valgrind
     params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
@@ -44,6 +46,9 @@ class RunApp(Tester):
       self.mpi_command = 'mpiexec -host localhost'
       self.force_mpi = False
 
+    # Handle the special allow_deprecated_until parameter
+    if params.isValid('allow_deprecated_until') and params['allow_deprecated_until'] > time.localtime():
+      self.specs['cli_args'].append('--allow-deprecated')
 
   def getInputFile(self):
     return self.specs['input'].strip()

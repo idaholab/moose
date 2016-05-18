@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, sys, re
+import os, sys, re, time
 
 import ParseGetPot, Factory
 from MooseObject import MooseObject
@@ -24,6 +24,8 @@ class Parser:
     0x01 - pyGetpot parsing error
     0x02 - Unrecogonized Boolean key/value pair
     0x04 - Missing required parameter
+    0x08 - Bad value
+    0x10 - Mismatched type
   """
   def parse(self, filename):
     error_code = 0x00
@@ -60,9 +62,26 @@ class Parser:
           if re.match('".*"', value):   # Strip quotes
             params[key] = value[1:-1]
           else:
+            if key in params.strict_types:
+              # The developer wants to enforce a specific type without setting a valid value
+              strict_type = params.strict_types[key]
+
+              if strict_type == time.struct_time:
+                # Dates have to be parsed
+                try:
+                  params[key] = time.strptime(value, "%m/%d/%Y")
+                except ValueError:
+                  print "Bad Value for key '" + full_name + '/' + key + "': " + value
+                  params['error_code'] = 0x08
+                  error_code = error_code | params['error_code']
+              elif strict_type != type(value):
+                print "Mismatched type for key '" + full_name + '/' + key + "': " + value
+                params['error_code'] = 0x10
+                error_code = error_code | params['error_code']
+
             # Prevent bool types from being stored as strings.  This can lead to the
             # strange situation where string('False') evaluates to true...
-            if params.isValid(key) and (type(params[key]) == type(bool())):
+            elif params.isValid(key) and (type(params[key]) == type(bool())):
               # We support using the case-insensitive strings {true, false} and the string '0', '1'.
               if (value.lower()=='true') or (value=='1'):
                 params[key] = True
@@ -72,9 +91,8 @@ class Parser:
                 print "Unrecognized (key,value) pair: (", key, ',', value, ")"
                 params['error_code'] = 0x02
                 error_code = error_code | params['error_code']
-
-              # Otherwise, just do normal assignment
             else:
+              # Otherwise, just do normal assignment
               params[key] = value
       else:
         self.params_ignored.add(key)

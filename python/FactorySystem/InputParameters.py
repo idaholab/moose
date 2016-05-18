@@ -1,6 +1,7 @@
 class InputParameters:
   def __init__(self, *args):
     self.valid = {}
+    self.strict_types = {}
     self.desc = {}
     self.substitute = {}
     self.required = set()
@@ -14,6 +15,16 @@ class InputParameters:
   def addParam(self, name, *args):
     if len(args) == 2:
       self.valid[name] = args[0]
+    self.desc[name] = args[-1]
+
+  def addRequiredParamWithType(self, name, my_type, *args):
+    self.required.add(name)
+    self.addParamWithType(name, my_type, *args)
+
+  def addParamWithType(self, name, my_type, *args):
+    if len(args) == 3:
+      self.valid[name] = args[0]
+    self.strict_types[name] = my_type
     self.desc[name] = args[-1]
 
   def addPrivateParam(self, name, *args):
@@ -57,7 +68,6 @@ class InputParameters:
 
     # Return this InputParameters object
     return self
-
 
   def type(self, key):
     if key in self.valid:
