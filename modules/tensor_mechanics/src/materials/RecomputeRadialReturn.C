@@ -11,18 +11,27 @@
 template<>
 InputParameters validParams<RecomputeRadialReturn>()
 {
-  InputParameters params = validParams<RecomputeGeneralReturn>();
+  InputParameters params = validParams<Material>();
+
+  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
 
   // Newton Iteration control parameters
   params.addParam<bool>("output_iteration_info", false, "Set true to output newton iteration information from the radial return material");
   params.addParam<bool>("output_iteration_info_on_error", false, "Set true to output the recompute material iteration information when a step fails");
   params.addParam<Real>("relative_tolerance", 1e-8, "Relative convergence tolerance for the newton iteration within the radial return material");
   params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for newton iteration within the radial return material");
+  params.addParam<unsigned int>("max_iterations", 30, "Maximum number of newton iterations in the radial return material");
+
+  params.addPrivateParam<bool>("compute", false); //The return stress increment classes are intended to be iterative materials
   return params;
 }
 
 RecomputeRadialReturn::RecomputeRadialReturn(const InputParameters & parameters) :
-    RecomputeGeneralReturn(parameters),
+    Material(parameters),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
+    _elastic_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "elastic_strain")),
+    _max_its(parameters.get<unsigned int>("max_iterations")),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
     _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
@@ -31,14 +40,15 @@ RecomputeRadialReturn::RecomputeRadialReturn(const InputParameters & parameters)
 }
 
 void
-RecomputeRadialReturn::computeInelasticStrainIncrement()
+RecomputeRadialReturn::computeStress(RankTwoTensor & strain_increment,
+                                     RankTwoTensor & inelastic_strain_increment,
+                                     RankTwoTensor & stress_new)
 {
   // Given the stretching, update the inelastic strain
   // Compute the stress in the intermediate configuration while retaining the stress history
-  RankTwoTensor stress = _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
 
   // compute the deviatoric trial stress and trial strain from the current intermediate configuration
-  RankTwoTensor deviatoric_trial_stress = stress.deviatoric();
+  RankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
 
   // compute the effective trial stress
   Real dev_trial_stress_squared = deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
@@ -110,13 +120,16 @@ RecomputeRadialReturn::computeInelasticStrainIncrement()
     }
 
     // compute inelastic strain increments while avoiding a potential divide by zero
-      _inelastic_strain_increment[_qp] = deviatoric_trial_stress;
-      _inelastic_strain_increment[_qp] *= (3.0 / 2.0 * scalar_effective_inelastic_strain / effective_trial_stress);
+    inelastic_strain_increment = deviatoric_trial_stress;
+    inelastic_strain_increment *= (3.0 / 2.0 * scalar_effective_inelastic_strain / effective_trial_stress);
   }
   else
-    _inelastic_strain_increment[_qp].zero();
+    inelastic_strain_increment.zero();
 
-  computeStressFinalize(_inelastic_strain_increment[_qp]);
+  strain_increment -= inelastic_strain_increment;
+  stress_new = _elasticity_tensor[_qp] * (strain_increment + _elastic_strain_old[_qp]);
+
+  computeStressFinalize(inelastic_strain_increment);
 }
 
 Real
@@ -126,4 +139,10 @@ RecomputeRadialReturn::getIsotropicShearModulus()
   if (_mesh.dimension() == 3 && shear_modulus != _elasticity_tensor[_qp](1,3,1,3))
     mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
   return shear_modulus;
+}
+
+void
+RecomputeRadialReturn::setQp(unsigned qp)
+{
+  _qp = qp;
 }
