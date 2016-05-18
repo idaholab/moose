@@ -92,7 +92,6 @@ if [ -z "$go_fast" ]; then
                --enable-silent-rules \
                --enable-unique-id \
                --disable-warnings \
-               --disable-cxx11 \
                --enable-unique-ptr \
                --enable-openmp \
                --disable-maintainer-mode \
