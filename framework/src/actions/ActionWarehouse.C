@@ -43,8 +43,8 @@ void
 ActionWarehouse::build()
 {
   _ordered_names = _syntax.getSortedTask();
-  for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
-    buildBuildableActions(*it);
+  for (const auto & it : _ordered_names)
+    buildBuildableActions(it);
 }
 
 void
