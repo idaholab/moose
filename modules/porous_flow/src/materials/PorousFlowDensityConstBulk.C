@@ -6,7 +6,6 @@
 /****************************************************************/
 
 #include "PorousFlowDensityConstBulk.h"
-#include "Conversion.h"
 
 template<>
 InputParameters validParams<PorousFlowDensityConstBulk>()
@@ -23,11 +22,11 @@ PorousFlowDensityConstBulk::PorousFlowDensityConstBulk(const InputParameters & p
 
     _dens0(getParam<Real>("density_P0")),
     _bulk(getParam<Real>("bulk_modulus")),
-    _density_nodal(declareProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _density_nodal_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _ddensity_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num), _pressure_variable_name)),
-    _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num))),
-    _ddensity_qp_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num), _pressure_variable_name))
+    _density_nodal(declareProperty<Real>("PorousFlow_fluid_phase_density" + _phase)),
+    _density_nodal_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + _phase)),
+    _ddensity_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + _phase, _pressure_variable_name)),
+    _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
+    _ddensity_qp_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name))
 {
 }
 
