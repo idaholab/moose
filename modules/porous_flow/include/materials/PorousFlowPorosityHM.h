@@ -30,7 +30,7 @@ protected:
   virtual void initQpStatefulProperties();
 
   virtual void computeQpProperties();
-  
+
   /// porosity at zero strain and zero porepressure
   const Real _phi0;
 
