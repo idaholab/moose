@@ -28,7 +28,16 @@ public:
   EqualValueBoundaryConstraint(const InputParameters & parameters);
   virtual ~EqualValueBoundaryConstraint();
 
+  /**
+   * Called on this object when the mesh changes
+   */
+  virtual void meshChanged();
+
 protected:
+  /**
+   * Update the sets of nodes with constrained DOFs
+   */
+  void updateConstrainedNodes();
 
   /**
    * Computes the residual for the current slave node
