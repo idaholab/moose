@@ -225,8 +225,8 @@
   [./kentucky]
     type = IsotropicTempDepHardening
     block = 1
-    temp_dep_hardening_functions = 'hf1 hf2'
-    temp_dep_hardening_functions_temps = '300.0 800.0'
+    hardening_functions = 'hf1 hf2'
+    temperatures = '300.0 800.0'
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
     temp = temp

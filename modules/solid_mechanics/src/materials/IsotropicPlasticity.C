@@ -34,8 +34,8 @@ IsotropicPlasticity::IsotropicPlasticity(const InputParameters & parameters)
 
    _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
    _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain")),
-   _scalar_plastic_strain(_hardening_function ? &declareProperty<Real>("scalar_plastic_strain") : NULL),
-   _scalar_plastic_strain_old(_hardening_function ? &declarePropertyOld<Real>("scalar_plastic_strain") : NULL),
+   _scalar_plastic_strain(&declareProperty<Real>("scalar_plastic_strain")),
+   _scalar_plastic_strain_old(&declarePropertyOld<Real>("scalar_plastic_strain")),
 
    _hardening_variable(declareProperty<Real>("hardening_variable")),
    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
@@ -94,10 +94,10 @@ IsotropicPlasticity::computeResidual(unsigned qp, Real effectiveTrialStress, Rea
   _hardening_slope = 0;
   if (_yield_condition > 0)
   {
-    _hardening_slope = computeHardening(qp, scalar);
+    _hardening_slope = computeHardeningDerivative(qp, scalar);
     // The order here is important.  The final term can be small, and we don't want it lost to roundoff.
     residual = (effectiveTrialStress - _hardening_variable[qp] - _yield_stress) - (3 * _shear_modulus * scalar);
-    _hardening_variable[qp] = computeHardeningVariable(qp, scalar);
+    _hardening_variable[qp] = computeHardeningValue(qp, scalar);
   }
   return residual;
 }
@@ -116,14 +116,14 @@ void
 IsotropicPlasticity::iterationFinalize(unsigned qp, Real scalar)
 {
   if (_yield_condition > 0)
-    _hardening_variable[qp] = computeHardeningVariable(qp, scalar);
+    _hardening_variable[qp] = computeHardeningValue(qp, scalar);
 
   if (_scalar_plastic_strain)
     (*_scalar_plastic_strain)[qp] = (*_scalar_plastic_strain_old)[qp] + scalar;
 }
 
 Real
-IsotropicPlasticity::computeHardening(unsigned qp, Real /*scalar*/)
+IsotropicPlasticity::computeHardeningDerivative(unsigned qp, Real /*scalar*/)
 {
   Real slope = _hardening_constant;
   if (_hardening_function)
@@ -137,9 +137,17 @@ IsotropicPlasticity::computeHardening(unsigned qp, Real /*scalar*/)
 }
 
 Real
-IsotropicPlasticity::computeHardeningVariable(unsigned qp, Real scalar)
+IsotropicPlasticity::computeHardeningValue(unsigned qp, Real scalar)
 {
-  return _hardening_variable_old[qp] + (_hardening_slope * scalar);
+  Real hardening = _hardening_variable_old[qp] + (_hardening_slope * scalar);
+  if (_hardening_function)
+  {
+    const Real strain_old = (*_scalar_plastic_strain_old)[qp];
+    Point p;
+
+    hardening = _hardening_function->value(strain_old + scalar, p) - _yield_stress;
+  }
+  return hardening;
 }
 
 void
