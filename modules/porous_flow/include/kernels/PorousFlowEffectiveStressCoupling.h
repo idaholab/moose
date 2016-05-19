@@ -35,7 +35,7 @@ public:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// The Porous-Flow dictator that holds global info about the simulation
-  const PorousFlowDictator & _dictator_UO;
+  const PorousFlowDictator & _dictator;
 
   /// Biot coefficient
   const Real _coefficient;

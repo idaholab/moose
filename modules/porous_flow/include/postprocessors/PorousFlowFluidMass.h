@@ -29,10 +29,10 @@ protected:
   virtual Real computeQpIntegral();
 
   /// the fluid component for which you want the mass
-  const unsigned int _component_index;
+  const unsigned int _fluid_component;
 
   /// holds info on the PorousFlow variables
-  const PorousFlowDictator & _dictator_UO;
+  const PorousFlowDictator & _dictator;
 
   /// porosity at the nodes
   const MaterialProperty<Real> & _porosity;

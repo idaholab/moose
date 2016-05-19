@@ -15,7 +15,7 @@ InputParameters validParams<PorousFlowMassFraction>()
   InputParameters params = validParams<Material>();
 
   params.addCoupledVar("mass_fraction_vars", "List of variables that represent the mass fractions.  Format is 'f_ph0^c0 f_ph0^c1 f_ph0^c2 ... f_ph0^c(N-1) f_ph1^c0 f_ph1^c1 fph1^c2 ... fph1^c(N-1) ... fphP^c0 f_phP^c1 fphP^c2 ... fphP^c(N-1)' where N=num_components and P=num_phases, and it is assumed that f_ph^cN=1-sum(f_ph^c,{c,0,N-1}) so that f_ph^cN need not be given.  If no variables are provided then num_phases=1=num_components.");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material forms a std::vector<std::vector ...> of mass-fractions out of the individual mass fractions");
   return params;
 }
@@ -23,9 +23,9 @@ InputParameters validParams<PorousFlowMassFraction>()
 PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_phases(_dictator_UO.numPhases()),
-    _num_components(_dictator_UO.numComponents()),
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _num_phases(_dictator.numPhases()),
+    _num_components(_dictator.numComponents()),
 
     _mass_frac(declareProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
     _mass_frac_old(declarePropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
@@ -55,7 +55,7 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
 void
 PorousFlowMassFraction::initQpStatefulProperties()
 {
-  const unsigned int num_var = _dictator_UO.numVariables();
+  const unsigned int num_var = _dictator.numVariables();
   _mass_frac[_qp].resize(_num_phases);
   _mass_frac_old[_qp].resize(_num_phases);
   _grad_mass_frac[_qp].resize(_num_phases);
@@ -77,10 +77,10 @@ PorousFlowMassFraction::initQpStatefulProperties()
   {
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
-      if (_dictator_UO.isPorousFlowVariable(_mf_vars_num[i]))
+      if (_dictator.isPorousFlowVariable(_mf_vars_num[i]))
       {
         // _mf_vars[i] is a PorousFlow variable
-        const unsigned int pf_var_num = _dictator_UO.porousFlowVariableNum(_mf_vars_num[i]);
+        const unsigned int pf_var_num = _dictator.porousFlowVariableNum(_mf_vars_num[i]);
         _dmass_frac_dvar[_qp][ph][comp][pf_var_num] = 1.0;
         _dmass_frac_dvar[_qp][ph][_num_components - 1][pf_var_num] = -1.0;
       }

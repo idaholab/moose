@@ -48,7 +48,7 @@ protected:
   virtual void computeQpProperties();
 
   /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator_UO;
+  const PorousFlowDictator & _dictator;
 
   /// Name of (dummy) pressure variable
   const VariableName _pressure_variable_name;

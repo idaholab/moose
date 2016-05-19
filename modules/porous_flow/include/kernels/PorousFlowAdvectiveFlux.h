@@ -109,10 +109,10 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
 
   /// PorousFlow UserObject
-  const PorousFlowDictator & _porousflow_dictator_UO;
+  const PorousFlowDictator & _porousflow_dictator;
 
-  /// Index of the component that this kernel acts on
-  const unsigned int _component_index;
+  /// Index of the fluid component that this kernel acts on
+  const unsigned int _fluid_component;
 
   /// The number of fluid phases
   const unsigned int _num_phases;
