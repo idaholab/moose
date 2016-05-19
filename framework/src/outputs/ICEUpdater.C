@@ -19,8 +19,8 @@
 #include <sstream>
 #include "MooseTypes.h"
 
-// Currently the ICE Updater requires TBB
-#ifdef LIBMESH_HAVE_CXX11
+// Currently the ICE Updater requires C++11 threads.
+#ifdef LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
 
 template<>
 InputParameters validParams<ICEUpdater>()
@@ -122,4 +122,4 @@ void ICEUpdater::outputPostprocessors()
   }
 }
 
-#endif // LIBMESH_HAVE_CXX11
+#endif // LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
