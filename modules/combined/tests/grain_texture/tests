@@ -1,0 +1,14 @@
+[Tests]
+  [./2D]
+    type = 'CSVDiff'
+    input = 'grain_texture_test_1.i'
+    csvdiff = 'grain_texture_test_1_out_textureInfo_0001.csv'
+    recover = false
+  [../]
+  [./3D]
+    type = 'CSVDiff'
+    input = 'grain_texture_test_2.i'
+    csvdiff = 'grain_texture_test_2_out_textureInfo_0001.csv'
+    recover = false
+  [../]
+[]

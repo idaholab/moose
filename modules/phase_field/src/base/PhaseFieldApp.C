@@ -217,6 +217,7 @@
  */
  #include "GrainCentersPostprocessor.h"
  #include "GrainForcesPostprocessor.h"
+ #include "GrainTextureVectorPostprocessor.h"
 
 
 template<>
@@ -406,6 +407,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerVectorPostprocessor(GrainCentersPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
+  registerVectorPostprocessor(GrainTextureVectorPostprocessor);
 
   registerMesh(EBSDMesh);
   registerMesh(MortarPeriodicMesh);
