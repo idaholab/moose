@@ -56,6 +56,8 @@ public:
 
   virtual void reinit(){};
 
+  virtual void update(){};
+
   const ElementPairList & getElemPairs() const
   {
     if (_elem_pairs == NULL)
@@ -63,17 +65,17 @@ public:
     return *_elem_pairs;
   }
 
-  const ElementPairInfo & getElemPairInfo(const Elem* elem) const
+  const ElementPairInfo & getElemPairInfo(std::pair<const Elem*, const Elem*> elem_pair) const
   {
-    std::map<const Elem*, ElementPairInfo>::const_iterator it = _element_pair_info.find(elem);
+    std::map<std::pair<const Elem*, const Elem*>, ElementPairInfo>::const_iterator it = _element_pair_info.find(elem_pair);
     if (it == _element_pair_info.end())
-      mooseError("Could not find ElemenPairInfo for specified element");
+      mooseError("Could not find ElemenPairInfo for specified element pair");
     return it->second;
   }
 
 protected:
   const ElementPairList * _elem_pairs;
-  std::map<const Elem*, ElementPairInfo> _element_pair_info;
+  std::map<std::pair<const Elem*, const Elem*>, ElementPairInfo> _element_pair_info;
   unsigned int _interface_id;
 };
 

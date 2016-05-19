@@ -37,7 +37,7 @@ XFEMSingleVariableConstraint::~XFEMSingleVariableConstraint()
 void
 XFEMSingleVariableConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
 {
-  _interface_normal = element_pair_info._normal;
+  _interface_normal = element_pair_info._elem1_normal;
   ElemElemConstraint::reinitConstraintQuadrature(element_pair_info);
 }
 
