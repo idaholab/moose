@@ -416,7 +416,7 @@
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
 #include "ControlOutput.h"
-#ifdef LIBMESH_HAVE_CXX11
+#ifdef LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
 #include "ICEUpdater.h"
 #endif
 
@@ -778,7 +778,7 @@ registerObjects(Factory & factory)
   registerOutput(ControlOutput);
 
   // Currently the ICE Updater requires TBB
-  #ifdef LIBMESH_HAVE_CXX11
+  #ifdef LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
   registerOutput(ICEUpdater);
   #endif
 
