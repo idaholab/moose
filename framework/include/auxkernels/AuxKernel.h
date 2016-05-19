@@ -106,6 +106,8 @@ public:
 
   template<typename T>
   const T & getUserObject(const std::string & name);
+  template<typename T>
+  const T & getUserObjectByName(const UserObjectName & name);
 
   const UserObject & getUserObjectBase(const std::string & name);
 
@@ -231,6 +233,14 @@ AuxKernel::getUserObject(const std::string & name)
 {
   _depend_uo.insert(_pars.get<UserObjectName>(name));
   return UserObjectInterface::getUserObject<T>(name);
+}
+
+template<typename T>
+const T &
+AuxKernel::getUserObjectByName(const UserObjectName & name)
+{
+  _depend_uo.insert(name);
+  return UserObjectInterface::getUserObjectByName<T>(name);
 }
 
 #endif //AUXKERNEL_H
