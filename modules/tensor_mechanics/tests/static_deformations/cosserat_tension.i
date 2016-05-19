@@ -175,15 +175,17 @@
 []
 
 [Materials]
-  [./cosserat]
-    type = CosseratLinearElasticMaterial
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    block = 0
+  [./elasticity_tensor]
+    type = ComputeCosseratElasticityTensor
     B_ijkl = 0.5
-    C_ijkl = '1 2 1.3333'
+    E_ijkl = '1 2 1.3333'
     fill_method = 'general_isotropic'
+  [../]
+  [./strain]
+    type = ComputeCosseratSmallStrain
+  [../]
+  [./stress]
+    type = ComputeCosseratLinearElasticStress
   [../]
 []
 

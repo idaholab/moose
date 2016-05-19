@@ -14,7 +14,7 @@ InputParameters validParams<PorousFlowEffectiveStressCoupling>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Adds -BiotCoefficient*effective_porepressure*grad_test[component]");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addRangeCheckedParam<Real>("biot_coefficient", 1, "biot_coefficient>=0&biot_coefficient<=1", "Biot coefficient");
   params.addRequiredParam<unsigned int>("component", "The gradient direction (0 for x, 1 for y and 2 for z)");
   return params;
@@ -22,7 +22,7 @@ InputParameters validParams<PorousFlowEffectiveStressCoupling>()
 
 PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(const InputParameters & parameters) :
     Kernel(parameters),
-    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _coefficient(getParam<Real>("biot_coefficient")),
     _component(getParam<unsigned int>("component")),
     _pf(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
@@ -41,18 +41,18 @@ PorousFlowEffectiveStressCoupling::computeQpResidual()
 Real
 PorousFlowEffectiveStressCoupling::computeQpJacobian()
 {
-  if (_dictator_UO.notPorousFlowVariable(_var.number()))
+  if (_dictator.notPorousFlowVariable(_var.number()))
     return 0.0;
-  const unsigned int pvar = _dictator_UO.porousFlowVariableNum(_var.number());
+  const unsigned int pvar = _dictator.porousFlowVariableNum(_var.number());
   return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
 }
 
 Real
 PorousFlowEffectiveStressCoupling::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_dictator_UO.notPorousFlowVariable(jvar))
+  if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
-  const unsigned int pvar = _dictator_UO.porousFlowVariableNum(jvar);
+  const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
   return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
 }
 

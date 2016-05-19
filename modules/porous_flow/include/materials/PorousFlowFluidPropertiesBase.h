@@ -45,7 +45,7 @@ protected:
   const MaterialProperty<std::vector<Real> > & _temperature_qp;
 
   /// The PorousFlowDictator UserObject
-  const PorousFlowDictator & _dictator_UO;
+  const PorousFlowDictator & _dictator;
 
   /// Name of (dummy) pressure primary variable
   const VariableName _pressure_variable_name;
