@@ -83,16 +83,18 @@
 
 
 [Materials]
-  [./cosserat]
-    type = CosseratLinearElasticMaterial
-    disp_z = disp_z
-    disp_y = disp_y
-    disp_x = disp_x
-    block = 0
+  [./elasticity_tensor]
+    type = ComputeCosseratElasticityTensor
     B_ijkl = '1 2.2 2.333 1.9 0.89 2.1'
     fill_method_bending = 'antisymmetric'
-    C_ijkl = '1 2.2 2.333 1.9 0.89 2.1'
+    E_ijkl = '1 2.2 2.333 1.9 0.89 2.1'
     fill_method = 'antisymmetric'
+  [../]
+  [./strain]
+    type = ComputeCosseratSmallStrain
+  [../]
+  [./stress]
+    type = ComputeCosseratLinearElasticStress
   [../]
 []
 
