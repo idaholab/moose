@@ -14,15 +14,14 @@
 #
 
 [GlobalParams]
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
+  displacements = 'disp_x disp_y disp_z'
+  order = FIRST
+  family = LAGRANGE
 []
 
-[Mesh]#Comment
+[Mesh]
   file = hoops.e
-  displacements = 'disp_x disp_y disp_z'
-[] # Mesh
+[]
 
 [Functions]
   [./pressure]
@@ -31,26 +30,16 @@
     y = '0. 1.'
     scale_factor = 1e3
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
 
@@ -126,62 +115,65 @@
 
 [] # AuxVariables
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
 [AuxKernels]
-
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
-    execute_on = timestep_end
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-    execute_on = timestep_end
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
+    index_i = 0
+    index_j = 0
     execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
+  [../]
+  [./stress_yy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_yy
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
+  [../]
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 2
+    index_j = 2
     execute_on = timestep_end
   [../]
   [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yz
-    index = 4
+    index_i = 1
+    index_j = 2
     execute_on = timestep_end
   [../]
   [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_zx
-    index = 5
+    index_i = 2
+    index_j = 0
     execute_on = timestep_end
   [../]
   [./hoop1]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = hoop
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = HoopStress
     variable = hoop1
     block = 1
     point1 = '20 20 -4'
@@ -189,9 +181,9 @@
     execute_on = timestep_end
   [../]
   [./hoop2]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = hoop
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = HoopStress
     variable = hoop2
     block = 2
     point1 = '-25 12 20'
@@ -199,9 +191,9 @@
     execute_on = timestep_end
   [../]
   [./hoop3]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = hoop
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = HoopStress
     variable = hoop3
     block = 3
     point1 = '0 -20 20'
@@ -209,9 +201,9 @@
     execute_on = timestep_end
   [../]
   [./radial1]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = radial
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = RadialStress
     variable = radial1
     block = 1
     point1 = '20 20 -4'
@@ -219,9 +211,9 @@
     execute_on = timestep_end
   [../]
   [./radial2]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = radial
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = RadialStress
     variable = radial2
     block = 2
     point1 = '-25 12 20'
@@ -229,9 +221,9 @@
     execute_on = timestep_end
   [../]
   [./radial3]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = radial
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = RadialStress
     variable = radial3
     block = 3
     point1 = '0 -20 20'
@@ -239,9 +231,9 @@
     execute_on = timestep_end
   [../]
   [./axial1]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = axial
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = AxialStress
     variable = axial1
     block = 1
     point1 = '20 20 -4'
@@ -249,9 +241,9 @@
     execute_on = timestep_end
   [../]
   [./axial2]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = axial
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = AxialStress
     variable = axial2
     block = 2
     point1 = '-25 12 20'
@@ -259,9 +251,9 @@
     execute_on = timestep_end
   [../]
   [./axial3]
-    type = MaterialTensorAux
-    tensor = stress
-    quantity = axial
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = AxialStress
     variable = axial3
     block = 3
     point1 = '0 -20 20'
@@ -296,25 +288,29 @@
     [./internal_pressure]
       boundary = 1
       function = pressure
+      disp_x = disp_x
+      disp_y = disp_y
+      disp_z = disp_z
     [../]
   [../]
 
 [] # BCs
 
 [Materials]
-
-  [./stiffStuff1]
-    type = Elastic
-    block = '1 2 3'
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.35
+    block = '1 2 3'
   [../]
-
+  [./small_strain]
+    type = ComputeIncrementalSmallStrain
+    block = '1 2 3'
+  [../]
+  [./elastic_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2 3'
+  [../]
 [] # Materials
 
 [Executioner]
@@ -332,9 +328,9 @@
 
   line_search = 'none'
 
-
+  l_tol = 1e-8
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-7
+  nl_abs_tol = 1e-14
 
   l_max_its = 20
 
@@ -346,4 +342,5 @@
 
 [Outputs]
   exodus = true
+  file_base = hoop_stress_out
 [] # Outputs

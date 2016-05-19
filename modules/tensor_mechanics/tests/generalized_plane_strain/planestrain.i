@@ -1,19 +1,18 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
+  displacements = 'disp_x disp_y'
+  block = 1
 []
 
 [Mesh]
   file = square.e
-  displacements = 'disp_x disp_y'
 []
 
 [Variables]
   [./disp_x]
   [../]
   [./disp_y]
-  [../]
-  [./strain_zz]
   [../]
 []
 
@@ -23,8 +22,6 @@
   [./saved_x]
   [../]
   [./saved_y]
-  [../]
-  [./saved_z]
   [../]
 
   [./stress_xx]
@@ -64,50 +61,19 @@
 
 [Postprocessors]
   [./react_z]
-    type = MaterialTensorIntegralSM
-    tensor = stress
-    index = 2
-  [../]
-  [./min_strain_zz]
-    type = NodalExtremeValue
-    variable = strain_zz
-    value_type = min
-  [../]
-  [./max_strain_zz]
-    type = NodalExtremeValue
-    variable = strain_zz
-    value_type = max
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    save_in_disp_x = saved_x
-    save_in_disp_y = saved_y
-    temp = temp
+    type = MaterialTensorIntegral
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 2
+    use_displaced_mesh = true
   [../]
 []
 
 [Kernels]
-  [./solid_z]
-    type = OutOfPlaneStress
-    variable = strain_zz
-    save_in = saved_z
-    disp_x = disp_x
-    disp_y = disp_y
+  [./TensorMechanics]
+    save_in = 'saved_x saved_y'
+    use_displaced_mesh = true
     temp = temp
-  [../]
-[]
-
-[Constraints]
-  [./szz]
-    type = EqualValueBoundaryConstraint
-    variable = strain_zz
-    master = '8'
-    slave = 10
-    penalty = 1e12
   [../]
 []
 
@@ -119,61 +85,68 @@
     use_displaced_mesh = false
   [../]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
   [../]
   [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_zz
-    index = 2
+    index_i = 2
+    index_j = 2
   [../]
 
   [./strain_xx]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = strain_xx
-    index = 0
+    index_i = 0
+    index_j = 0
   [../]
   [./strain_xy]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = strain_xy
-    index = 3
+    index_i = 0
+    index_j = 1
   [../]
   [./strain_yy]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
   [../]
   [./strain_zz]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = aux_strain_zz
-    index = 2
+    index_i = 2
+    index_j = 2
   [../]
 []
 
 [Functions]
-  [./pull]
-    type = PiecewiseLinear
-    x='0     1  100'
-    y='0  0.00 0.00'
+  [./pull-top]
+    type = ParsedFunction
+    value = t*0.1
   [../]
   [./tempfunc]
     type = ParsedFunction
@@ -197,18 +170,22 @@
 []
 
 [Materials]
-  [./linelast]
-    type = Elastic
-    block = 1
-    disp_x = disp_x
-    disp_y = disp_y
-    poissons_ratio = 0.3
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
-    thermal_expansion = 0.02
-    stress_free_temperature = 0.5
-    temp = temp
-    formulation = PlaneStrain
-    strain_zz = strain_zz
+    poissons_ratio = 0.3
+  [../]
+  [./small_strain]
+    type = ComputeSmallStrain
+  [../]
+  [./elastic_stress]
+    type = ComputeLinearElasticStress
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenStrain
+    thermal_expansion_coefficient = 0.02
+    Temperature = temp
+    stress_free_reference_temperature = 0.5
   [../]
 []
 
@@ -221,19 +198,18 @@
 
 # controls for linear iterations
   l_max_its = 100
-  l_tol = 1e-4
+  l_tol = 1e-8
 
 # controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-5
+  nl_abs_tol = 1e-12
 
 # time control
   start_time = 0.0
   dt = 1.0
   dtmin = 1.0
   end_time = 2.0
-  num_steps = 5000
 []
 
 [Outputs]

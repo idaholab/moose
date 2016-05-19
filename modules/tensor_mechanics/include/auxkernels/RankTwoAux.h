@@ -25,13 +25,11 @@ class RankTwoAux : public AuxKernel
 {
 public:
   RankTwoAux(const InputParameters & parameters);
-  virtual ~RankTwoAux() {}
 
 protected:
   virtual Real computeValue();
 
 private:
-
   const MaterialProperty<RankTwoTensor> & _tensor;
   const unsigned int _i;
   const unsigned int _j;

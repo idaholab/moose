@@ -1133,6 +1133,18 @@ XFEM::cutMeshWithEFA()
     _sibling_elems.push_back(std::make_pair(sibling_elem_vec[0], sibling_elem_vec[1]));
   }
 
+  // add sibling elems on displaced mesh
+  if (_mesh2)
+  {
+    for (ElementPairLocator::ElementPairList::iterator it = _sibling_elems.begin();
+         it != _sibling_elems.end(); ++it)
+    {
+      Elem * elem =  _mesh2->elem(it->first->id());
+      Elem * elem_pair = _mesh2->elem(it->second->id());
+      _sibling_displaced_elems.push_back(std::make_pair(elem, elem_pair));
+    }
+  }
+
   //clear the temporary map
   temporary_parent_children_map.clear();
 

@@ -78,15 +78,20 @@
     C_ijkl = '2.15e5 0.74e5'
     block = 1
   [../]
-  [./srain]
+  [./strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y'
-    thermal_expansion_coeff = 1e-6
-    temperature = T
     block = 1
   [../]
   [./stress]
     type = ComputeLinearElasticStress
+    block = 1
+  [../]
+  [./thermal_strain]
+    type= ComputeThermalExpansionEigenStrain
+    thermal_expansion_coefficient = 1e-6
+    Temperature = T
+    stress_free_reference_temperature = 273
     block = 1
   [../]
 []
