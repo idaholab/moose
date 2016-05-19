@@ -37,7 +37,9 @@
 #include "FiniteStrainCPSlipRateRes.h"
 #include "FiniteStrainUObasedCP.h"
 #include "ComputeMultiPlasticityStress.h"
-#include "CosseratLinearElasticMaterial.h"
+#include "ComputeCosseratLinearElasticStress.h"
+#include "ComputeCosseratSmallStrain.h"
+#include "ComputeCosseratElasticityTensor.h"
 #include "ElementPropertyReadFileTest.h"
 #include "TwoPhaseStressMaterial.h"
 #include "MultiPhaseStressMaterial.h"
@@ -192,7 +194,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(FiniteStrainCPSlipRateRes);
   registerMaterial(FiniteStrainUObasedCP);
   registerMaterial(ComputeMultiPlasticityStress);
-  registerMaterial(CosseratLinearElasticMaterial);
+  registerMaterial(ComputeCosseratLinearElasticStress);
+  registerMaterial(ComputeCosseratSmallStrain);
+  registerMaterial(ComputeCosseratElasticityTensor);
   registerMaterial(ElementPropertyReadFileTest);
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(MultiPhaseStressMaterial);
