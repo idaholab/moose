@@ -33,9 +33,14 @@
 # The parameters combined at t = 1 gives p = 301.
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  order = FIRST
+  family = LAGRANGE
+[]
+
 [Mesh]
   file = cavity_pressure.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -64,41 +69,25 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 240.54443866068704
   [../]
   [./material_input]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 0
   [../]
 []
 
 [AuxVariables]
   [./pressure_residual_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./pressure_residual_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./pressure_residual_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./stress_xx]
     order = CONSTANT
@@ -128,7 +117,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
   [../]
   [./heat]
@@ -269,7 +257,6 @@
       volume = internalVolume
       startup_time = 0.5
       output = ppress
-      displacements = 'disp_x disp_y disp_z'
       save_in = 'pressure_residual_x pressure_residual_y pressure_residual_z'
     [../]
   [../]
@@ -284,8 +271,6 @@
   [../]
   [./strain1]
     type = ComputeFiniteStrain
-    thermal_expansion_coeff = 0
-    displacements = 'disp_x disp_y disp_z'
     block = 1
   [../]
   [./stress1]
@@ -300,8 +285,6 @@
   [../]
   [./strain2]
     type = ComputeFiniteStrain
-    thermal_expansion_coeff = 0
-    displacements = 'disp_x disp_y disp_z'
     block = 2
   [../]
   [./stress2]

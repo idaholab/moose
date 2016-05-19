@@ -5,27 +5,27 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef MATERIALTENSORINTEGRAL_H
-#define MATERIALTENSORINTEGRAL_H
+#ifndef MATERIALTENSORINTEGRALSM_H
+#define MATERIALTENSORINTEGRALSM_H
 
 #include "ElementIntegralPostprocessor.h"
 #include "MaterialTensorCalculator.h"
 
 //Forward Declarations
-class MaterialTensorIntegral;
+class MaterialTensorIntegralSM;
 class SymmTensor;
 
 template<>
-InputParameters validParams<MaterialTensorIntegral>();
+InputParameters validParams<MaterialTensorIntegralSM>();
 
 /**
  * This postprocessor computes an element integral of a
  * component of a material tensor
  */
-class MaterialTensorIntegral: public ElementIntegralPostprocessor
+class MaterialTensorIntegralSM: public ElementIntegralPostprocessor
 {
 public:
-  MaterialTensorIntegral(const InputParameters & parameters);
+  MaterialTensorIntegralSM(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();
@@ -34,4 +34,4 @@ protected:
   const MaterialProperty<SymmTensor> & _tensor;
 };
 
-#endif
+#endif //MATERIALTENSORINTEGRALSM_H

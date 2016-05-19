@@ -33,7 +33,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
 
   const MaterialProperty<RankTwoTensor> & _stress_free_strain_increment;
-  const VariableValue & _T_old;
+   const VariableValue & _T_old; //Deprecated, use ComputeThermalExpansionEigenStrain instead
 
   const Real & _current_elem_volume;
   std::vector<RankTwoTensor> _Fhat;

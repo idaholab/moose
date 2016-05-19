@@ -63,6 +63,7 @@
 #include "ComputeEigenstrain.h"
 #include "ComputeVariableBaseEigenStrain.h"
 #include "ComputeVariableEigenstrain.h"
+#include "ComputeThermalExpansionEigenStrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 #include "LinearIsoElasticPFDamage.h"
@@ -133,6 +134,7 @@
 
 #include "Mass.h"
 #include "TorqueReaction.h"
+#include "MaterialTensorIntegral.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -218,6 +220,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeEigenstrain);
   registerMaterial(ComputeVariableBaseEigenStrain);
   registerMaterial(ComputeVariableEigenstrain);
+  registerMaterial(ComputeThermalExpansionEigenStrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
   registerMaterial(LinearIsoElasticPFDamage);
@@ -282,6 +285,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(Mass);
   registerPostprocessor(TorqueReaction);
+  registerPostprocessor(MaterialTensorIntegral);
 }
 
 // External entry point for dynamic syntax association
