@@ -102,7 +102,6 @@
 
   [./strain]
     type = ComputeFiniteStrain
-    thermal_expansion_coeff = 0
     block = 1
   [../]
 
