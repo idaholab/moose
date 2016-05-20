@@ -20,13 +20,6 @@
     expect_err = 'Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value'
   [../]
 
-  [./small1]
-    type = 'CSVDiff'
-    input = 'small_deform1.i'
-    csvdiff = 'small_deform1.csv'
-    rel_err = 1.0E-5
-    abs_zero = 1.0E-5
-  [../]
   [./small2]
     type = 'CSVDiff'
     input = 'small_deform2.i'
