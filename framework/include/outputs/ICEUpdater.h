@@ -24,7 +24,7 @@
 class Updater;
 
 // Currently the ICE Updater requires C++11 threads and std::condition_variable
-#ifdef LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
+#if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 
 // Forward declarations
 class ICEUpdater;
