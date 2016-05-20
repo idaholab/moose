@@ -20,7 +20,7 @@ InputParameters validParams<RichardsMaterial>()
   InputParameters params = validParams<Material>();
 
   params.addRequiredParam<Real>("mat_porosity", "The porosity of the material.  Should be between 0 and 1.  Eg, 0.1");
-  params.addCoupledVar("por_change", "An auxillary variable describing porosity changes.  Porosity = mat_porosity + por_change.  If this is not provided, zero is used.");
+  params.addCoupledVar("por_change", 0, "An auxillary variable describing porosity changes.  Porosity = mat_porosity + por_change.  If this is not provided, zero is used.");
   params.addRequiredParam<RealTensorValue>("mat_permeability", "The permeability tensor (m^2).");
   params.addCoupledVar("perm_change", "A list of auxillary variable describing permeability changes.  There must be 9 of these, corresponding to the xx, xy, xz, yx, yy, yz, zx, zy, zz components respectively.  Permeability = mat_permeability*10^(perm_change).");
   params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
@@ -40,8 +40,8 @@ RichardsMaterial::RichardsMaterial(const InputParameters & parameters) :
     Material(parameters),
 
     _material_por(getParam<Real>("mat_porosity")),
-    _por_change(isCoupled("por_change") ? coupledValue("por_change") : _zero),
-    _por_change_old(isCoupled("por_change") ? coupledValueOld("por_change") : _zero),
+    _por_change(coupledValue("por_change")),
+    _por_change_old(coupledValueOld("por_change")),
 
     _material_perm(getParam<RealTensorValue>("mat_permeability")),
 
