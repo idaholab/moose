@@ -19,7 +19,7 @@
 #include <sstream>
 #include "MooseTypes.h"
 
-// Currently the ICE Updater requires C++11 threads.
+// Currently the ICE Updater requires std::thread and std::condition_variable.
 #if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 
 template<>
@@ -122,4 +122,4 @@ void ICEUpdater::outputPostprocessors()
   }
 }
 
-#endif // LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
+#endif
