@@ -95,8 +95,8 @@ RecomputeRadialReturnIsotropicPlasticity::computeResidual(Real effectiveTrialStr
 
   if (_yield_condition > 0.)
   {
-    _hardening_slope = computeHardening(scalar);
-    _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_slope * scalar);
+    _hardening_slope = computeHardeningDerivative(scalar);
+    _hardening_variable[_qp] = computeHardeningValue(scalar);
 
     // The order here is important: the final term can be small, and we don't want it lost to roundoff.
     residual = effectiveTrialStress - _yield_stress - _hardening_variable[_qp];
@@ -118,9 +118,10 @@ RecomputeRadialReturnIsotropicPlasticity::computeDerivative(Real /*effectiveTria
 void
 RecomputeRadialReturnIsotropicPlasticity::iterationFinalize(Real scalar)
 {
-  _hardening_variable[_qp] = _hardening_variable_old[_qp] + (_hardening_slope * scalar);
+  if (_yield_condition > 0.0)
+    _hardening_variable[_qp] = computeHardeningValue(scalar);
 
-  if (_hardening_function)
+  if ((_scalar_plastic_strain_old) != NULL)
     _scalar_plastic_strain[_qp] = (*_scalar_plastic_strain_old)[_qp] + scalar;
 }
 
@@ -131,7 +132,21 @@ RecomputeRadialReturnIsotropicPlasticity::computeStressFinalize(const RankTwoTen
 }
 
 Real
-RecomputeRadialReturnIsotropicPlasticity::computeHardening(Real /*scalar*/)
+RecomputeRadialReturnIsotropicPlasticity::computeHardeningValue(Real scalar)
+{
+  Real value = _hardening_variable_old[_qp] + (_hardening_slope * scalar);
+  if (_hardening_function)
+  {
+    const Real strain_old = (*_scalar_plastic_strain_old)[_qp];
+    Point p;
+
+    value = _hardening_function->value(strain_old + scalar, p) - _yield_stress;
+  }
+  return value;
+}
+
+Real
+RecomputeRadialReturnIsotropicPlasticity::computeHardeningDerivative(Real /*scalar*/)
 {
   Real slope = _hardening_constant;
   if (_hardening_function)

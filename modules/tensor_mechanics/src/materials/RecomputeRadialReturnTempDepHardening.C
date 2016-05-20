@@ -4,16 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "IsotropicTempDepHardening.h"
-
-#include "SymmIsotropicElasticityTensor.h"
+#include "RecomputeRadialReturnTempDepHardening.h"
 
 #include "PiecewiseLinear.h"
 
 template<>
-InputParameters validParams<IsotropicTempDepHardening>()
+InputParameters validParams<RecomputeRadialReturnTempDepHardening>()
 {
-  InputParameters params = validParams<IsotropicPlasticity>();
+  InputParameters params = validParams<RecomputeRadialReturnIsotropicPlasticity>();
 
   params.set<Real>("yield_stress") = 1.0;
   params.set<Real>("hardening_constant") = 1.0;
@@ -29,8 +27,9 @@ InputParameters validParams<IsotropicTempDepHardening>()
   return params;
 }
 
-IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & parameters) :
-    IsotropicPlasticity(parameters),
+
+RecomputeRadialReturnTempDepHardening::RecomputeRadialReturnTempDepHardening(const InputParameters & parameters) :
+    RecomputeRadialReturnIsotropicPlasticity(parameters),
     _hardening_functions_names(getParam<std::vector<FunctionName> >("hardening_functions")),
     _hf_temperatures(getParam<std::vector<Real> >("temperatures"))
 {
@@ -65,29 +64,24 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
 
   _interp_yield_stress = new LinearInterpolation(_hf_temperatures, yield_stress_vec);
 
-  _scalar_plastic_strain = &declareProperty<Real>("scalar_plastic_strain");
   _scalar_plastic_strain_old = &declarePropertyOld<Real>("scalar_plastic_strain");
 }
 
 void
-IsotropicTempDepHardening::computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor)
+RecomputeRadialReturnTempDepHardening::computeStressInitialize(Real effectiveTrialStress)
 {
-  const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
-  if (!eT)
-    mooseError("IsotropicPlasticity requires a SymmIsotropicElasticityTensor");
-
-  _shear_modulus = eT->shearModulus();
-  initializeHardeningFunctions(qp);
-  computeYieldStress(qp);
-  _yield_condition = effectiveTrialStress - _hardening_variable_old[qp] - _yield_stress;
-  _hardening_variable[qp] = _hardening_variable_old[qp];
-  _plastic_strain[qp] = _plastic_strain_old[qp];
+  _shear_modulus = getIsotropicShearModulus();
+  initializeHardeningFunctions();
+  computeYieldStress();
+  _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
 void
-IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
+RecomputeRadialReturnTempDepHardening::initializeHardeningFunctions()
 {
-  Real temp = _temperature[qp];
+  Real temp = _temperature[_qp];
   if (temp > _hf_temperatures[0] && temp < _hf_temperatures.back())
   {
     for (unsigned int i = 0; i < _hf_temperatures.size() - 1; ++i)
@@ -118,10 +112,12 @@ IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
     mooseError("The hardening function fraction cannot be less than zero.");
 }
 
+
 Real
-IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
+RecomputeRadialReturnTempDepHardening::computeHardeningValue(Real scalar)
 {
-  const Real strain = (*_scalar_plastic_strain_old)[qp] + scalar;
+  const Real strain = (*_scalar_plastic_strain_old)[_qp] + scalar;
+  Real temp = _temperature[_qp];
   Real stress = 0.0;
   Point p;
 
@@ -132,10 +128,10 @@ IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
 }
 
 Real
-IsotropicTempDepHardening::computeHardeningDerivative(unsigned qp, Real /*scalar*/)
+RecomputeRadialReturnTempDepHardening::computeHardeningDerivative(Real /*scalar*/)
 {
-  const Real strain_old = (*_scalar_plastic_strain_old)[qp];
-  Real temp = _temperature[qp];
+  const Real strain_old = (*_scalar_plastic_strain_old)[_qp];
+  Real temp = _temperature[_qp];
   Real derivative = 0.0;
   Point p;
 
@@ -146,10 +142,9 @@ IsotropicTempDepHardening::computeHardeningDerivative(unsigned qp, Real /*scalar
 }
 
 void
-IsotropicTempDepHardening::computeYieldStress(unsigned qp)
+RecomputeRadialReturnTempDepHardening::computeYieldStress()
 {
-  _yield_stress = _interp_yield_stress->sample(_temperature[qp]);
-
-  if (_yield_stress <= 0)
-    mooseError("Yield stress must be greater than zero");
+    _yield_stress = _interp_yield_stress->sample(_temperature[_qp]);
+    if (_yield_stress <= 0.0)
+      mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
 }

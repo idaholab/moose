@@ -74,10 +74,3 @@ IsotropicPowerLawHardening::computeHardeningDerivative(unsigned /*qp*/, Real sca
 
   return slope;
 }
-
-// Real
-// IsotropicPowerLawHardening::computeHardeningValue(unsigned qp, Real scalar)
-// {
-//   const Real strain = (*_scalar_plastic_strain_old)[qp] + scalar;
-//   return _K * std::pow(strain, _n);
-// }

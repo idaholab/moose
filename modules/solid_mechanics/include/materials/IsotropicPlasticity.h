@@ -30,8 +30,8 @@ protected:
   virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar);
   virtual void iterationFinalize(unsigned qp, Real scalar);
 
-  virtual Real computeHardeningDerivative(unsigned qp, Real scalar);
   virtual Real computeHardeningValue(unsigned qp, Real scalar);
+  virtual Real computeHardeningDerivative(unsigned qp, Real scalar);
 
   Function * _yield_stress_function;
   Real _yield_stress;

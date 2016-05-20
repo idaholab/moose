@@ -1,7 +1,7 @@
 #
 # This is a test of the piece-wise linear strain hardening model using the
 # small strain formulation.  This test exercises the temperature-dependent
-# yield stress.
+# hardening curve capability.
 #
 # Test procedure:
 # 1. The element is pulled to and then beyond the yield stress for a given
@@ -28,9 +28,18 @@
 #    +------------------
 #           total strain
 #
+# The exact same problem was run in Abaqus with exactly the same result.
 
 [Mesh]
-  file = 1x1x1_cube.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -48,15 +57,15 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./temp]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
 
 [AuxVariables]
+  [./temp]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 500.0
+  [../]
 
   [./stress_yy]
     order = CONSTANT
@@ -82,7 +91,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
 []
 
 
@@ -102,74 +110,73 @@
     x = '0.0  0.01 0.02 0.03 0.1'
     y = '4000 4020 4040 4060 4200'
   [../]
-  [./temp]
+  [./temp_hist]
     type = PiecewiseLinear
     x = '0   1   2   3   4'
     y = '500 500 500 600 400'
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
-[]
-
 [Kernels]
-  [./heat]
-    type = HeatConduction
-    variable = temp
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
 [AuxKernels]
+  [./temp_aux]
+    type = FunctionAux
+    variable = temp
+    function = temp_hist
+  [../]
 
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
   [../]
 
   [./total_strain_yy]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = total_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
   [../]
 
   [./plastic_strain_xx]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_xx
-    index = 0
+    index_i = 0
+    index_j = 0
   [../]
 
   [./plastic_strain_yy]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
   [../]
 
   [./plastic_strain_zz]
-    type = MaterialTensorAux
-    tensor = plastic_strain
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
     variable = plastic_strain_zz
-    index = 2
+    index_i = 2
+    index_j = 2
   [../]
-
 []
 
 
 [BCs]
-
   [./y_pull_function]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = 5
+    boundary = 3
     function = top_pull
   [../]
 
@@ -183,59 +190,53 @@
   [./y_bot]
     type = PresetBC
     variable = disp_y
-    boundary = 3
+    boundary = 1
     value = 0.0
   [../]
 
   [./z_bot]
     type = PresetBC
     variable = disp_z
-    boundary = 2
+    boundary = 0
     value = 0.0
-  [../]
-
-  [./temp]
-    type = FunctionPresetBC
-    variable = temp
-    function = temp
-    boundary = 4
   [../]
 []
 
 [Postprocessors]
   [./stress_yy_el]
     type = ElementalVariableValue
-    variable = stress_yy    
+    variable = stress_yy
     elementid = 0
   [../]
 []
 
 [Materials]
-  [./vermont]
-    type = SolidModel
-    formulation = Linear
-    block = 1
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    block = 0
     youngs_modulus = 2e5
-    poissons_ratio = .3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    constitutive_model = kentucky
+    poissons_ratio = 0.3
   [../]
-  [./kentucky]
-    type = IsotropicTempDepHardening
-    block = 1
+
+  [./small_strain]
+    type = ComputeIncrementalSmallStrain
+    block = 0
+  [../]
+
+  [./temp_dep_hardening]
+    type = RecomputeRadialReturnTempDepHardening
+    block = 0
     hardening_functions = 'hf1 hf2'
     temperatures = '300.0 800.0'
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
     temp = temp
   [../]
-  [./utah]
-    type = HeatConductionMaterial
-    block = 1
-    specific_heat = 1
-    thermal_conductivity = 1
+
+  [./radial_return_stress]
+    type = ComputeReturnMappingStress
+    block = 0
+    return_mapping_models = 'temp_dep_hardening'
   [../]
 []
 
