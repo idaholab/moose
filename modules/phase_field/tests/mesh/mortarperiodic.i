@@ -7,6 +7,7 @@
   xmax = 1.2
   ymin = 0.1
   ymax = 0.9
+  periodic_directions = 'y'
 []
 
 [AuxVariables]
