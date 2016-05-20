@@ -12,34 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RANKFOURTENSORTEST_H
-#define RANKFOURTENSORTEST_H
+#ifndef MATRIXTOOLSTEST_H
+#define MATRIXTOOLSTEST_H
 
 //CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
-#include "RankFourTensor.h"
+#include "MatrixTools.h"
 
-class RankFourTensorTest : public CppUnit::TestFixture
+class MatrixToolsTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( RankFourTensorTest );
+  CPPUNIT_TEST_SUITE( MatrixToolsTest );
 
-  CPPUNIT_TEST( invSymmTest1 );
-  CPPUNIT_TEST( invSymmTest2 );
+  CPPUNIT_TEST( matrixInversionTest1 );
+  CPPUNIT_TEST( matrixInversionTest2 );
+  CPPUNIT_TEST( matrixInversionTest3 );
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  RankFourTensorTest();
-  ~RankFourTensorTest();
+  MatrixToolsTest();
+  ~MatrixToolsTest();
 
-  void invSymmTest1();
-  void invSymmTest2();
-
- private:
-  RankFourTensor _iSymmetric;
+  void matrixInversionTest1();
+  void matrixInversionTest2();
+  void matrixInversionTest3();
 };
 
-#endif  // RANKFOURTENSORTEST_H
+#endif  // MATRIXTOOLSTEST_H

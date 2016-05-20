@@ -7,14 +7,11 @@
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 #include "MooseException.h"
+#include "MatrixTools.h"
 
 // Any other includes here
 #include "MaterialProperty.h"
 #include <ostream>
-
-#if PETSC_VERSION_LESS_THAN(3,5,0)
-  extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
-#endif
 
 template<>
 void mooseSetToZero<RankFourTensor>(RankFourTensor & v)
@@ -411,7 +408,7 @@ RankFourTensor::invSymm() const
       mat[i*ntens+j] /= 2.0; // because of double-counting above
 
   // use LAPACK to find the inverse
-  error = matrixInversion(mat, ntens);
+  error = MatrixTools::inverse(mat, ntens);
   if (error != 0)
     throw MooseException("Error in Matrix  Inversion in RankFourTensor");
 
@@ -590,33 +587,6 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
     default:
       mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
   }
-}
-
-int
-RankFourTensor::matrixInversion(std::vector<PetscScalar> & A, int n) const
-{
-  int return_value,
-      buffer_size = n * 64;
-  std::vector<PetscBLASInt> ipiv(n);
-  std::vector<PetscScalar> buffer(buffer_size);
-
-  // Following does a LU decomposition of "square matrix A"
-  // upon return "A = P*L*U" if return_value == 0
-  // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
-  LAPACKgetrf_(&n, &n, &A[0], &n, &ipiv[0], &return_value);
-
-  if (return_value != 0)
-    // couldn't LU decompose because: illegal value in A; or, A singular
-    return return_value;
-
-  // get the inverse of A
-#if PETSC_VERSION_LESS_THAN(3,5,0)
-  FORTRAN_CALL(dgetri)(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
-#else
-  LAPACKgetri_(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
-#endif
-
-  return return_value;
 }
 
 void
