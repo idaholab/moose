@@ -61,6 +61,7 @@ RecomputeRadialReturnIsotropicPlasticity::initQpStatefulProperties()
   //set a default non-physical value to catch uninitalized yield condition--could cause problems later on
   _yield_condition = -1.0;
   _hardening_variable[_qp] = 0.0;
+  _hardening_variable_old[_qp] = 0.0;
   _hardening_slope = 0.0;
   _plastic_strain[_qp].zero();
 
@@ -72,11 +73,7 @@ RecomputeRadialReturnIsotropicPlasticity::initQpStatefulProperties()
 void
 RecomputeRadialReturnIsotropicPlasticity::resetQpProperties()
 {
-  _hardening_variable[_qp] = _hardening_variable_old[_qp];
-  _plastic_strain[_qp] = _plastic_strain_old[_qp];
   _scalar_plastic_strain[_qp] = 0.;
-
-  RecomputeRadialReturn::resetQpProperties();
 }
 
 void
@@ -85,6 +82,8 @@ RecomputeRadialReturnIsotropicPlasticity::computeStressInitialize(Real effective
   _shear_modulus = getIsotropicShearModulus();
   computeYieldStress();
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
+  _hardening_variable[_qp] = _hardening_variable_old[_qp];
+  _plastic_strain[_qp] = _plastic_strain_old[_qp];
 }
 
 Real

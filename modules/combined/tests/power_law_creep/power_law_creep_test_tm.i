@@ -207,7 +207,7 @@
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 1
-    return_mapping_stress_model = 'power_law_creep'
+    return_mapping_models = 'power_law_creep'
   [../]
 
   [./thermal]

@@ -53,8 +53,6 @@ void
 RecomputeRadialReturnPowerLawCreep::resetQpProperties()
 {
   _creep_strain[_qp] = _creep_strain_old[_qp];
-
-  RecomputeRadialReturn::resetQpProperties();
 }
 
 void

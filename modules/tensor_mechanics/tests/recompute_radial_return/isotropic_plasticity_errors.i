@@ -162,7 +162,7 @@
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 0
-    return_mapping_stress_model = 'isotropic_plasticity_recompute'
+    return_mapping_models = 'isotropic_plasticity_recompute'
   [../]
 []
 

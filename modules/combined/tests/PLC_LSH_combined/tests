@@ -14,6 +14,13 @@
     prereq = combined
     valgrind = 'HEAVY'
   [../]
+  [./combined2TM]
+    type = 'Exodiff'
+    input = 'PLC_LSH_combined2TM.i'
+    exodiff = 'PLC_LSH_combined2TM_out.e'
+    abs_zero = 1e-09
+    valgrind = 'HEAVY'
+  [../]
 
   [./lsh]
     type = 'Exodiff'
