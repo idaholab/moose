@@ -9,6 +9,8 @@
 
 #include "ComputeFiniteStrainElasticStress.h"
 
+class RecomputeRadialReturn;
+
 /**
  * ComputeReturnMappingStress computes the stress, with a return mapping
  * stress increment following elasticity theory for finite strains. The elastic
@@ -16,9 +18,7 @@
  * increment tensor from the mechanical strain tensor.  Mechanical strain is
  * considered as the sum of the elastic and inelastic (plastic, creep, ect) strains.
  *
- * This material is used to call the recompute iterative materials through
- * RecomputeReturnStressIncrement; RecomputeReturnStressIncrement defines the
- * _return_stress_increment and _inelastic_strain_increment Rank2 tensors.
+ * This material is used to call the recompute iterative materials.
  */
 
 class ComputeReturnMappingStress : public ComputeFiniteStrainElasticStress
@@ -27,12 +27,22 @@ public:
   ComputeReturnMappingStress(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
+  virtual void initialSetup();
+
   virtual void computeQpStress();
 
+  virtual void computeStress(RankTwoTensor & strain_increment,
+                             RankTwoTensor & stress_new);
+
+  const unsigned int _max_its;
+  const Real _relative_tolerance;
+  const Real _absolute_tolerance;
+  const bool _output_iteration_info;
+
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  const MaterialProperty<RankTwoTensor> & _inelastic_strain_increment;
-  Material & _recompute_return_material;
+  std::vector<RecomputeRadialReturn*> _models;
 };
 
 #endif //COMPUTERETURNMAPPINGSTRESS_H
