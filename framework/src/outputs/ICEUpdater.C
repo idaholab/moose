@@ -20,7 +20,7 @@
 #include "MooseTypes.h"
 
 // Currently the ICE Updater requires C++11 threads.
-#ifdef LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
+#if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 
 template<>
 InputParameters validParams<ICEUpdater>()

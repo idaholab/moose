@@ -35,7 +35,7 @@
 
 #include "Updater.h"
 
-#ifdef LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
+#if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 #include "NetworkingToolFactory.h"
 
 std::vector<std::string> &split(const std::string &s, char delim,

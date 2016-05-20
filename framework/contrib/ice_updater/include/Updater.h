@@ -43,7 +43,7 @@
 #include "MooseError.h"
 #include "INetworkingTool.h"
 
-#ifdef LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
+#if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 
 #include <condition_variable>
 #include <mutex>
