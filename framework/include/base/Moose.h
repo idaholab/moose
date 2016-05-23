@@ -28,6 +28,15 @@ using namespace libMesh;
 class ActionFactory;
 class Factory;
 
+
+/**
+ * MOOSE now contains C++11 code, so give a reasonable error message
+ * stating the minimum required compiler versions.
+ */
+#ifndef LIBMESH_HAVE_CXX11
+#error MOOSE requires a C++11 compatible compiler (GCC >= 4.8.4, Clang >= 3.4.0, Intel >= 20130607). Please update your compiler and try again.
+#endif
+
 /**
  * Testing a condition on a local CPU that need to be propagated across all processes.
  *
