@@ -8,7 +8,7 @@
   ymin = 1
   ymax = 3
   # This test uses SolutionUserObject which doesn't work with DistributedMesh.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

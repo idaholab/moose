@@ -2,7 +2,7 @@
   file = exodus_refined_restart_1.e
   # Restart relies on the ExodusII_IO::copy_nodal_solution()
   # functionality, which only works with ReplicatedMesh.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

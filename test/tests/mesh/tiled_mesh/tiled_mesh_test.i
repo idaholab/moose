@@ -19,5 +19,5 @@
 
   # You can only run this test with ReplicatedMesh because the underlying
   # algorithm, stitch_meshes(), only works with ReplicatedMesh.
-  distribution = serial
+  parallel_type = replicated
 []

@@ -2,7 +2,7 @@
   # This test uses SolutionUserObject which doesn't work with DistributedMesh.
   type = FileMesh
   file = cubesource.e
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

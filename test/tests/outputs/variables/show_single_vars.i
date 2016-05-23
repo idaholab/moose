@@ -10,7 +10,7 @@
   elem_type = QUAD4
   # This test uses ElementalVariableValue postprocessors on specific
   # elements, if you use DistributedMesh the elements get renumbered.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Functions]

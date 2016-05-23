@@ -6,7 +6,7 @@
   # has been renumbered (it will be reunumbered if you are running with
   # DistributedMesh in parallel).  Hence, we restrict this test to run with
   # ReplicatedMesh only.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

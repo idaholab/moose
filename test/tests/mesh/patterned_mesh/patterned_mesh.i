@@ -19,5 +19,5 @@
   left_boundary = 4
   y_width = 1.2
   x_width = 1.2
-  distribution = SERIAL
+  parallel_type = replicated
 []

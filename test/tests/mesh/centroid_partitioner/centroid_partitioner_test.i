@@ -33,7 +33,7 @@
   # The centroid partitioner behaves differently depending on
   # whether you are using Serial or DistributedMesh, so to get
   # repeatable results, we restrict this test to using ReplicatedMesh.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

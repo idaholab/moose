@@ -5,7 +5,7 @@
   ny = 20
   nz = 20
   # The MultiAppUserObjectTransfer object only works with ReplicatedMesh
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

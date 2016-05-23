@@ -12,7 +12,7 @@
   # DistributedMesh, the nodes get renumbered and thus the
   # NodalVariableValue postprocessor's output is necessarily
   # different.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

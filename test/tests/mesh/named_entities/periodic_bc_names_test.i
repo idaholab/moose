@@ -10,7 +10,7 @@
   elem_type = QUAD4
   # This test will not work in parallel with DistributedMesh enabled
   # due to a bug in PeriodicBCs.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

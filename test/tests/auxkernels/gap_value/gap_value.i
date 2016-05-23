@@ -4,7 +4,7 @@
   # This test will not work in parallel with DistributedMesh enabled
   # due to a bug in the GeometricSearch system.  See #2121 for more
   # information.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

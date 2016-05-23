@@ -12,7 +12,7 @@
   file = gap_test.e
   # This test uses the geometric search system, which does not currently work
   # in parallel with DistributedMesh enabled.  For more information, see #2121.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

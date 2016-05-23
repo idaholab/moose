@@ -13,7 +13,7 @@
   elem_type = QUAD4
   stripes = 3
   # StripeMesh currently only works correctly with ReplicatedMesh.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Functions]

@@ -11,7 +11,7 @@
   # output strongly depends on the number of processors you run it on,
   # and, apparently, the type of Mesh.  To reduce this variability, we
   # limit it to run with ReplicatedMesh only.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]
