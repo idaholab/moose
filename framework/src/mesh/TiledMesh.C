@@ -59,7 +59,7 @@ TiledMesh::TiledMesh(const InputParameters & parameters) :
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
 {
-  // The TiledMesh class only works with SerialMesh
+  // The TiledMesh class only works with ReplicatedMesh
   errorIfParallelDistribution("TiledMesh");
 }
 
@@ -80,12 +80,12 @@ TiledMesh::clone() const
 void
 TiledMesh::buildMesh()
 {
-  // stitch_meshes() is only implemented for SerialMesh.  So make sure
+  // stitch_meshes() is only implemented for ReplicatedMesh.  So make sure
   // we have one here before continuing.
-  SerialMesh* serial_mesh = dynamic_cast<SerialMesh*>( &getMesh() );
+  ReplicatedMesh * serial_mesh = dynamic_cast<ReplicatedMesh *>( &getMesh() );
 
   if (!serial_mesh)
-    mooseError("Error, TiledMesh calls stitch_meshes() which only works on SerialMesh.");
+    mooseError("Error, TiledMesh calls stitch_meshes() which only works on ReplicatedMesh.");
   else
   {
     std::string mesh_file(getParam<MeshFileName>("file"));
@@ -114,7 +114,7 @@ TiledMesh::buildMesh()
       for (unsigned int i = 1; i < getParam<unsigned int>("x_tiles"); ++i)
       {
         MeshTools::Modification::translate(*clone, _x_width, 0, 0);
-        serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+        serial_mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
       }
     }
     {
@@ -124,7 +124,7 @@ TiledMesh::buildMesh()
       for (unsigned int i = 1; i < getParam<unsigned int>("y_tiles"); ++i)
       {
         MeshTools::Modification::translate(*clone, 0, _y_width, 0);
-        serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+        serial_mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone), top, bottom, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
       }
     }
     {
@@ -134,7 +134,7 @@ TiledMesh::buildMesh()
       for (unsigned int i = 1; i < getParam<unsigned int>("z_tiles"); ++i)
       {
         MeshTools::Modification::translate(*clone, 0, 0, _z_width);
-        serial_mesh->stitch_meshes(dynamic_cast<SerialMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+        serial_mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone), front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
       }
     }
   }

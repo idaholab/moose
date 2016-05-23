@@ -36,7 +36,7 @@ NodalVariableValue::NodalVariableValue(const InputParameters & parameters) :
     _node_ptr(_mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid"))),
     _scale_factor(getParam<Real>("scale_factor"))
 {
-  // This class only works with SerialMesh, since it relies on a
+  // This class only works with ReplicatedMesh, since it relies on a
   // specific node numbering that we can't guarantee with ParallelMesh
   _mesh.errorIfParallelDistribution("NodalVariableValue");
 

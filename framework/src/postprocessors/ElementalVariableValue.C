@@ -31,7 +31,7 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid")))
 {
-  // This class only works with SerialMesh, since it relies on a
+  // This class only works with ReplicatedMesh, since it relies on a
   // specific element numbering that we can't guarantee with ParallelMesh
   _mesh.errorIfParallelDistribution("ElementalVariableValue");
 }

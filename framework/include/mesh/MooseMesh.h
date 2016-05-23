@@ -754,7 +754,7 @@ public:
 
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
-  /// the underlying libMesh mesh is a SerialMesh or ParallelMesh.
+  /// the underlying libMesh mesh is a ReplicatedMesh or ParallelMesh.
   MooseEnum _mesh_distribution_type;
 
   /// False by default.  Final value is determined by several factors

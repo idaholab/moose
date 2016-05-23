@@ -4,7 +4,7 @@
 [Mesh]
   file = elem_part1_out.e
   # This problem uses ExodusII_IO::copy_elemental_solution(), which only
-  # works with SerialMesh
+  # works with ReplicatedMesh
   distribution = serial
 []
 

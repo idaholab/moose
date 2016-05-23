@@ -164,7 +164,7 @@ MultiAppUserObjectTransfer::execute()
       unsigned int to_sys_num = to_sys.number();
 
       // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppUserObjectTransfer only works with SerialMesh!");
+      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppUserObjectTransfer only works with ReplicatedMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 

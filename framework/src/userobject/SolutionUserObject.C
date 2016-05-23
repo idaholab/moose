@@ -399,9 +399,9 @@ SolutionUserObject::initialSetup()
 
 
   // Create a libmesh::Mesh object for storing the loaded data.  Since
-  // SolutionUserObject is restricted to only work with SerialMesh
-  // (see above) we can force the Mesh used here to be a SerialMesh.
-  _mesh = new SerialMesh(_communicator);
+  // SolutionUserObject is restricted to only work with ReplicatedMesh
+  // (see above) we can force the Mesh used here to be a ReplicatedMesh.
+  _mesh = new ReplicatedMesh(_communicator);
 
   // ExodusII mesh file supplied
   if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/ true))

@@ -38,7 +38,7 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
     MooseUtils::checkFileReadable(_mesh_file);
 
     // dummy mesh
-    SerialMesh mesh(_communicator);
+    ReplicatedMesh mesh(_communicator);
 
     ExodusII_IO exodusII_io(mesh);
     exodusII_io.read(_mesh_file);

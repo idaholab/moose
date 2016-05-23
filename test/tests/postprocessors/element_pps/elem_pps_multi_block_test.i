@@ -12,7 +12,7 @@
   ny = 3
   elem_type = QUAD4
   stripes = 3
-  # StripeMesh currently only works correctly with SerialMesh.
+  # StripeMesh currently only works correctly with ReplicatedMesh.
   distribution = serial
 []
 

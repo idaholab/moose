@@ -54,7 +54,7 @@ PatternedMesh::PatternedMesh(const InputParameters & parameters) :
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
 {
-  // The PatternedMesh class only works with SerialMesh
+  // The PatternedMesh class only works with ReplicatedMesh
   errorIfParallelDistribution("PatternedMesh");
 
   _meshes.resize(_files.size());
@@ -62,7 +62,7 @@ PatternedMesh::PatternedMesh(const InputParameters & parameters) :
   // Read in all of the meshes
   for (unsigned int i = 0; i < _files.size(); i++)
   {
-    SerialMesh * mesh = new SerialMesh(_communicator);
+    ReplicatedMesh * mesh = new ReplicatedMesh(_communicator);
     mesh->read(_files[i]);
 
     _meshes[i] = mesh;
@@ -71,12 +71,12 @@ PatternedMesh::PatternedMesh(const InputParameters & parameters) :
   _row_meshes.resize(_pattern.size());
 
   // The zeroth row (which is the top row) will be the real mesh
-  _row_meshes[0] = dynamic_cast<SerialMesh*>( &getMesh() );
+  _row_meshes[0] = dynamic_cast<ReplicatedMesh *>( &getMesh() );
 
   // Create a mesh for all the other rows
   for (unsigned int i = 1; i < _pattern.size(); i++)
   {
-    SerialMesh * mesh = new SerialMesh(_communicator);
+    ReplicatedMesh * mesh = new ReplicatedMesh(_communicator);
     _row_meshes[i] = mesh;
   }
 }
@@ -112,12 +112,12 @@ PatternedMesh::clone() const
 void
 PatternedMesh::buildMesh()
 {
-  // stitch_meshes() is only implemented for SerialMesh.  So make sure
+  // stitch_meshes() is only implemented for ReplicatedMesh.  So make sure
   // we have one here before continuing.
-  SerialMesh * the_mesh = dynamic_cast<SerialMesh*>(&getMesh());
+  ReplicatedMesh * the_mesh = dynamic_cast<ReplicatedMesh *>(&getMesh());
 
   if (!the_mesh)
-    mooseError("Error, PatternedMesh calls stitch_meshes() which only works on SerialMesh.");
+    mooseError("Error, PatternedMesh calls stitch_meshes() which only works on ReplicatedMesh.");
   else
   {
     BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
@@ -143,12 +143,12 @@ PatternedMesh::buildMesh()
           continue;
         }
 
-        SerialMesh & cell_mesh = *_meshes[_pattern[i][j]];
+        ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
 
         // Move the mesh into the right spot.  -i because we are starting at the top
         MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
 
-        _row_meshes[i]->stitch_meshes(dynamic_cast<SerialMesh &>(cell_mesh), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+        _row_meshes[i]->stitch_meshes(dynamic_cast<ReplicatedMesh &>(cell_mesh), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
 
         // Undo the translation
         MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);

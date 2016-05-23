@@ -1,5 +1,5 @@
 [Mesh]
-  # This MeshModifier currently only works with SerialMesh.
+  # This MeshModifier currently only works with ReplicatedMesh.
   # For more information, refer to #2129.
   type = GeneratedMesh
   dim = 2

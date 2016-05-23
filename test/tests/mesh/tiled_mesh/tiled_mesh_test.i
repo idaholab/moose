@@ -17,7 +17,7 @@
   y_tiles = 2
   z_tiles = 2
 
-  # You can only run this test with SerialMesh because the underlying
-  # algorithm, stitch_meshes(), only works with SerialMesh.
+  # You can only run this test with ReplicatedMesh because the underlying
+  # algorithm, stitch_meshes(), only works with ReplicatedMesh.
   distribution = serial
 []

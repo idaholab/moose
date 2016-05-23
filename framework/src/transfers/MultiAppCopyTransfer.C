@@ -72,7 +72,7 @@ MultiAppCopyTransfer::execute()
       unsigned int from_sys_num = from_sys.number();
 
       // Only works with a serialized mesh to transfer from!
-      mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with SerialMesh!");
+      mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with ReplicatedMesh!");
 
       unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
@@ -165,7 +165,7 @@ MultiAppCopyTransfer::execute()
       unsigned int to_sys_num = to_sys.number();
 
       // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with SerialMesh!");
+      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with ReplicatedMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
@@ -193,7 +193,7 @@ MultiAppCopyTransfer::execute()
         unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
         // Only works with a serialized mesh to transfer from!
-        mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with SerialMesh!");
+        mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with ReplicatedMesh!");
 
         //Create a serialized version of the solution vector
 //        NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();

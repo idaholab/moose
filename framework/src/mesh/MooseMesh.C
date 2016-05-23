@@ -61,8 +61,8 @@ InputParameters validParams<MooseMesh>()
   MooseEnum mesh_distribution_type("PARALLEL=0 SERIAL DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>("distribution", mesh_distribution_type,
                              "PARALLEL: Always use libMesh::ParallelMesh "
-                             "SERIAL: Always use libMesh::SerialMesh "
-                             "DEFAULT: Use libMesh::SerialMesh unless --parallel-mesh is specified on the command line");
+                             "SERIAL: Always use libMesh::ReplicatedMesh "
+                             "DEFAULT: Use libMesh::ReplicatedMesh unless --parallel-mesh is specified on the command line");
 
   params.addParam<bool>("nemesis", false,
                         "If nemesis=true and file=foo.e, actually reads "
@@ -140,7 +140,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
   case 2: // DEFAULT
     // The user did not specify 'distribution = XYZ' in the input file,
     // so we allow the --parallel-mesh command line arg to possibly turn
-    // on ParallelMesh.  If the command line arg is not present, we pick SerialMesh.
+    // on ParallelMesh.  If the command line arg is not present, we pick ReplicatedMesh.
     if (_app.getParallelMeshOnCommandLine())
       _use_parallel_mesh = true;
 
@@ -165,7 +165,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     }
   }
   else
-    _mesh = new SerialMesh(_communicator, dim);
+    _mesh = new ReplicatedMesh(_communicator, dim);
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
@@ -1570,7 +1570,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
                                 int child,
                                 int child_side)
 {
-  SerialMesh mesh(_communicator);
+  ReplicatedMesh mesh(_communicator);
   mesh.skip_partitioning(true);
 
   unsigned int dim = template_elem->dim();

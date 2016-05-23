@@ -74,7 +74,7 @@ MeshExtruder::modify()
                                          _num_layers);
 
   // The first argument to build_extrusion() is required to be UnstructuredMesh&, a common
-  // base class of both SerialMesh and ParallelMesh, hence the dynamic_cast...
+  // base class of both ReplicatedMesh and ParallelMesh, hence the dynamic_cast...
   MeshTools::Generation::build_extrusion(dynamic_cast<libMesh::UnstructuredMesh&>(_mesh_ptr->getMesh()),
                                          source_mesh->getMesh(),
                                          _num_layers,

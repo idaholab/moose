@@ -16,7 +16,7 @@
   xmin = .21
   xmax = .79
   displacements = 'disp_x disp_y'
-  # The MultiAppInterpolationTransfer object only works with SerialMesh
+  # The MultiAppInterpolationTransfer object only works with ReplicatedMesh
   distribution = serial
 []
 

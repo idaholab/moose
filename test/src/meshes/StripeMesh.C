@@ -28,7 +28,7 @@ StripeMesh::StripeMesh(const InputParameters & parameters) :
     GeneratedMesh(parameters),
     _n_stripes(getParam<unsigned int>("stripes"))
 {
-  // The StripeMesh class only works with SerialMesh
+  // The StripeMesh class only works with ReplicatedMesh
   errorIfParallelDistribution("StripeMesh");
 }
 
@@ -62,7 +62,7 @@ StripeMesh::buildMesh()
 
     if (!e)
     {
-      mooseError("Error getting element " << en << ". StripeMesh only works with SerialMesh...");
+      mooseError("Error getting element " << en << ". StripeMesh only works with ReplicatedMesh...");
     }
     else
     {
