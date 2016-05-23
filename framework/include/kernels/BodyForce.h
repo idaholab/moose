@@ -42,6 +42,7 @@ protected:
 
   Real _value;
   Function & _function;
+  const PostprocessorValue * const _postprocessor;
 };
 
 #endif
