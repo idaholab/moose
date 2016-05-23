@@ -27,6 +27,10 @@ public:
   PorousFlowPorosityHM(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties();
+
+  virtual void computeQpProperties();
+
   /// porosity at zero strain and zero porepressure
   const Real _phi0;
 
@@ -35,9 +39,6 @@ protected:
 
   /// drained bulk modulus of the porous skeleton
   const Real _solid_bulk;
-
-  /// number of porous-flow variables
-  const unsigned int _num_var;
 
   /// short-hand number (biot-1)/solid_bulk
   const Real _coeff;
@@ -65,10 +66,6 @@ protected:
 
   /// d(effective qp porepressure)/(d porflow variable)
   const MaterialProperty<std::vector<Real> > & _dpf_qp_dvar;
-
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
 };
 
 #endif //POROUSFLOWPOROSITYHM_H

@@ -8,10 +8,7 @@
 #ifndef POROUSFLOWMASSFRACTION_H
 #define POROUSFLOWMASSFRACTION_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
-
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterialVectorBase.h"
 
 //Forward Declarations
 class PorousFlowMassFraction;
@@ -23,21 +20,12 @@ InputParameters validParams<PorousFlowMassFraction>();
  * Material designed to form a std::vector<std::vector>
  * of mass fractions from the individual mass fraction variables
  */
-class PorousFlowMassFraction : public DerivativeMaterialInterface<Material>
+class PorousFlowMassFraction : public PorousFlowMaterialVectorBase
 {
 public:
   PorousFlowMassFraction(const InputParameters & parameters);
 
 protected:
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator;
-
-  /// Number of fluid phases
-  const unsigned int _num_phases;
-
-  /// Number of fluid components
-  const unsigned int _num_components;
-
   /// Mass fraction matrix
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
 
