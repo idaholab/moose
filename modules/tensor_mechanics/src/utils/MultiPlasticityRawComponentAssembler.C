@@ -12,7 +12,7 @@ InputParameters validParams<MultiPlasticityRawComponentAssembler>()
   InputParameters params = emptyInputParameters();
   MooseEnum specialIC("none rock joint", "none");
   params.addParam<MooseEnum>("specialIC", specialIC, "For certain combinations of plastic models, the set of active constraints can be initialized optimally.  'none': no special initialization is performed.  For all other choices, the plastic_models must be chosen to have the following types.  'rock': 'TensileMulti MohrCoulombMulti'.  'joint': 'WeakPlaneTensile WeakPlaneShear'.");
-  params.addRequiredParam<std::vector<UserObjectName> >("plastic_models", "List of names of user objects that define the plastic models that could be active for this material.");
+  params.addParam<std::vector<UserObjectName> >("plastic_models", "List of names of user objects that define the plastic models that could be active for this material.  If no plastic_models are provided, only elasticity will be used.");
   params.addClassDescription("RawComponentAssembler class to calculate yield functions, etc, used in multi-surface finite-strain plasticity");
   return params;
 }
