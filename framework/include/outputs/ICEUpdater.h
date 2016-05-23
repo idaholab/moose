@@ -73,4 +73,4 @@ protected:
 
 #endif
 
-#endif // LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
+#endif
