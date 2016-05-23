@@ -14,9 +14,8 @@
 template<>
 InputParameters validParams<PorousFlowVolumetricStrain>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addParam<bool>("consistent_with_displaced_mesh", true, "The volumetric strain rate will include terms that ensure fluid mass conservation in the displaced mesh");
   params.addClassDescription("Compute volumetric strain and the volumetric_strain rate, for use in PorousFlow.");
   params.set<bool>("stateful_displacements") = true;
@@ -24,11 +23,8 @@ InputParameters validParams<PorousFlowVolumetricStrain>()
 }
 
 PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-
+    PorousFlowMaterialVectorBase(parameters),
     _consistent(getParam<bool>("consistent_with_displaced_mesh")),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _num_var(_dictator.numVariables()),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _disp_var_num(3),

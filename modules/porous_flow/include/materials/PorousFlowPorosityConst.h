@@ -26,12 +26,12 @@ public:
   PorousFlowPorosityConst(const InputParameters & parameters);
 
 protected:
-  /// constant input value of porosity
-  const Real _input_porosity;
-
   virtual void initQpStatefulProperties();
 
   virtual void computeQpProperties();
+
+  /// constant input value of porosity
+  const Real _input_porosity;
 };
 
 #endif //POROUSFLOWPOROSITYCONST_H

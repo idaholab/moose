@@ -8,10 +8,7 @@
 #ifndef POROUSFLOWJOINER_H
 #define POROUSFLOWJOINER_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
-
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterialVectorBase.h"
 
 //Forward Declarations
 class PorousFlowJoiner;
@@ -37,7 +34,7 @@ InputParameters validParams<PorousFlowJoiner>();
  *
  * Only values at the nodes are used - not at the quadpoints
  */
-class PorousFlowJoiner : public DerivativeMaterialInterface<Material>
+class PorousFlowJoiner : public PorousFlowMaterialVectorBase
 {
 public:
   PorousFlowJoiner(const InputParameters & parameters);
@@ -46,9 +43,6 @@ protected:
   virtual void initQpStatefulProperties();
 
   virtual void computeQpProperties();
-
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator;
 
   /// Name of (dummy) pressure variable
   const VariableName _pressure_variable_name;
@@ -61,12 +55,6 @@ protected:
 
   /// Name of (dummy) mass fraction variable
   const VariableName _mass_fraction_variable_name;
-
-  /// Number of phases
-  const unsigned int _num_phases;
-
-  /// Number of porous flow variables
-  const unsigned int _num_var;
 
   /// Name of material property to be joined
   const std::string _pf_prop;

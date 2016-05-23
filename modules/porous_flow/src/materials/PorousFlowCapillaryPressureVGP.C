@@ -6,7 +6,6 @@
 /****************************************************************/
 
 #include "PorousFlowCapillaryPressureVGP.h"
-#include "Conversion.h"
 
 template<>
 InputParameters validParams<PorousFlowCapillaryPressureVGP>()
@@ -23,8 +22,8 @@ PorousFlowCapillaryPressureVGP::PorousFlowCapillaryPressureVGP(const InputParame
     _pressure_variable_name(_dictator.pressureVariableNameDummy()),
     _porepressure_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal")),
     _porepressure_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
-    _dcapillary_pressure_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + Moose::stringify(_phase_num), _pressure_variable_name)),
-    _d2capillary_pressure_nodal_dp2(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + Moose::stringify(_phase_num), _pressure_variable_name, _pressure_variable_name)),
+    _dcapillary_pressure_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + _phase, _pressure_variable_name)),
+    _d2capillary_pressure_nodal_dp2(declarePropertyDerivative<Real>("PorousFlow_capillary_pressure_nodal" + _phase, _pressure_variable_name, _pressure_variable_name)),
     _al(getParam<Real>("al")),
     _m(getParam<Real>("m"))
 {

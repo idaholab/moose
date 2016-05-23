@@ -6,7 +6,6 @@
 /**********************************************2******************/
 
 #include "PorousFlowBrine.h"
-#include "Conversion.h"
 
 template<>
 InputParameters validParams<PorousFlowBrine>()

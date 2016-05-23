@@ -6,7 +6,6 @@
 /****************************************************************/
 
 #include "PorousFlowMethane.h"
-#include "Conversion.h"
 
 template<>
 InputParameters validParams<PorousFlowMethane>()
@@ -19,15 +18,15 @@ InputParameters validParams<PorousFlowMethane>()
 PorousFlowMethane::PorousFlowMethane(const InputParameters & parameters) :
     PorousFlowFluidPropertiesBase(parameters),
 
-    _density_nodal(declareProperty<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _density_nodal_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num))),
-    _ddensity_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num), _pressure_variable_name)),
-    _ddensity_nodal_dt(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + Moose::stringify(_phase_num), _temperature_variable_name)),
-    _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num))),
-    _ddensity_qp_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num), _pressure_variable_name)),
-    _ddensity_qp_dt(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num), _temperature_variable_name)),
-    _viscosity_nodal(declareProperty<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num))),
-    _dviscosity_nodal_dt(declarePropertyDerivative<Real>("PorousFlow_viscosity" + Moose::stringify(_phase_num), _temperature_variable_name)),
+    _density_nodal(declareProperty<Real>("PorousFlow_fluid_phase_density" + _phase)),
+    _density_nodal_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + _phase)),
+    _ddensity_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + _phase, _pressure_variable_name)),
+    _ddensity_nodal_dt(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + _phase, _temperature_variable_name)),
+    _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
+    _ddensity_qp_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name)),
+    _ddensity_qp_dt(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _temperature_variable_name)),
+    _viscosity_nodal(declareProperty<Real>("PorousFlow_viscosity" + _phase)),
+    _dviscosity_nodal_dt(declarePropertyDerivative<Real>("PorousFlow_viscosity" + _phase, _temperature_variable_name)),
     _Mch4(16.0425e-3)
 {
 }

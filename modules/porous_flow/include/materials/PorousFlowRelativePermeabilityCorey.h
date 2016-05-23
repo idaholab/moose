@@ -8,7 +8,7 @@
 #ifndef POROUSFLOWRELATIVEPERMEABILITYCOREY_H
 #define POROUSFLOWRELATIVEPERMEABILITYCOREY_H
 
-#include "PorousFlowRelativePermeabilityUnity.h"
+#include "PorousFlowRelativePermeabilityBase.h"
 
 class PorousFlowRelativePermeabilityCorey;
 
@@ -17,10 +17,9 @@ InputParameters validParams<PorousFlowRelativePermeabilityCorey>();
 
 /**
  * Material designed to calculate Corey-type relative permeability
- * of an arbitrary phase given the saturation and
- * Corey exponent of that phase.
+ * of an arbitrary phase given the saturation and Corey exponent of that phase
  */
-class PorousFlowRelativePermeabilityCorey : public PorousFlowRelativePermeabilityUnity
+class PorousFlowRelativePermeabilityCorey : public PorousFlowRelativePermeabilityBase
 {
 public:
   PorousFlowRelativePermeabilityCorey(const InputParameters & parameters);
@@ -28,7 +27,7 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  /// Core exponent n for the phase
+  /// Corey exponent n for the specified phase
   const Real _n;
 };
 
