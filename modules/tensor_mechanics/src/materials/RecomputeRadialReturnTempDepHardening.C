@@ -33,21 +33,19 @@ RecomputeRadialReturnTempDepHardening::RecomputeRadialReturnTempDepHardening(con
     _hardening_functions_names(getParam<std::vector<FunctionName> >("hardening_functions")),
     _hf_temperatures(getParam<std::vector<Real> >("temperatures"))
 {
-  const unsigned len = _hardening_functions_names.size();
+  const unsigned int len = _hardening_functions_names.size();
   if (len < 2)
     mooseError("At least two stress-strain curves must be provided in hardening_functions");
   _hardening_functions.resize(len);
 
-  const unsigned len_temps = _hf_temperatures.size();
+  const unsigned int len_temps = _hf_temperatures.size();
   if (len != len_temps)
     mooseError("The vector of hardening function temperatures must have the same length as the vector of temperature dependent hardening functions.");
 
   //Check that the temperatures are strictly increasing
   for (unsigned int i = 1; i < len_temps; ++i)
-  {
     if (_hf_temperatures[i] <= _hf_temperatures[i-1])
       mooseError("The temperature dependent hardening functions and corresponding temperatures should be listed in order of increasing temperature.");
-  }
 
   std::vector<Real> yield_stress_vec;
   for (unsigned int i = 0; i < len; ++i)
@@ -58,8 +56,7 @@ RecomputeRadialReturnTempDepHardening::RecomputeRadialReturnTempDepHardening(con
 
     _hardening_functions[i] = f;
 
-    Point p;
-    yield_stress_vec.push_back(f->value(0.0, p));
+    yield_stress_vec.push_back(f->value(0.0, Point()));
   }
 
   _interp_yield_stress = new LinearInterpolation(_hf_temperatures, yield_stress_vec);
@@ -81,7 +78,7 @@ RecomputeRadialReturnTempDepHardening::computeStressInitialize(Real effectiveTri
 void
 RecomputeRadialReturnTempDepHardening::initializeHardeningFunctions()
 {
-  Real temp = _temperature[_qp];
+  const Real temp = _temperature[_qp];
   if (temp > _hf_temperatures[0] && temp < _hf_temperatures.back())
   {
     for (unsigned int i = 0; i < _hf_temperatures.size() - 1; ++i)
@@ -117,12 +114,9 @@ Real
 RecomputeRadialReturnTempDepHardening::computeHardeningValue(Real scalar)
 {
   const Real strain = (*_scalar_plastic_strain_old)[_qp] + scalar;
-  Real temp = _temperature[_qp];
-  Real stress = 0.0;
-  Point p;
-
-  stress += (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->value(strain, p);
-  stress += _hf_fraction * _hardening_functions[_hf_index+1]->value(strain, p);
+  const Point p;
+  const Real stress =   (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->value(strain, p)
+                      + _hf_fraction * _hardening_functions[_hf_index+1]->value(strain, p);
 
   return stress - _yield_stress;
 }
@@ -131,20 +125,16 @@ Real
 RecomputeRadialReturnTempDepHardening::computeHardeningDerivative(Real /*scalar*/)
 {
   const Real strain_old = (*_scalar_plastic_strain_old)[_qp];
-  Real temp = _temperature[_qp];
-  Real derivative = 0.0;
-  Point p;
+  const Point p;
 
-  derivative += (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->timeDerivative(strain_old, p);
-  derivative += _hf_fraction * _hardening_functions[_hf_index+1]->timeDerivative(strain_old, p);
-
-  return derivative;
+  return   (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->timeDerivative(strain_old, p)
+         + _hf_fraction * _hardening_functions[_hf_index+1]->timeDerivative(strain_old, p);
 }
 
 void
 RecomputeRadialReturnTempDepHardening::computeYieldStress()
 {
-    _yield_stress = _interp_yield_stress->sample(_temperature[_qp]);
-    if (_yield_stress <= 0.0)
-      mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
+  _yield_stress = _interp_yield_stress->sample(_temperature[_qp]);
+  if (_yield_stress <= 0.0)
+    mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
 }
