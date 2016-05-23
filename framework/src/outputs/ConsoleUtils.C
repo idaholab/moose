@@ -68,7 +68,7 @@ outputMeshInformation(FEProblem & problem, bool verbose)
   {
     oss << "Mesh: " << '\n'
         << std::setw(console_field_width) << "  Distribution: " << (moose_mesh.isDistributedMesh() ? "parallel" : "serial")
-        << (moose_mesh.isDistributionForced() ? " (forced) " : "") << '\n'
+        << (moose_mesh.isParallelTypeForced() ? " (forced) " : "") << '\n'
         << std::setw(console_field_width) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
         << std::setw(console_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n';
   }

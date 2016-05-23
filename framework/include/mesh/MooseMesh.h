@@ -707,7 +707,13 @@ public:
   /**
    * Tell the user if the distribution was overriden for any reason
    */
-  bool isDistributionForced() const { return _distribution_overridden; }
+  bool isDistributionForced() const
+  {
+    mooseDeprecated("isDistributionForced() is deprecated, call isParallelTypeFoced() instead.");
+    return isParallelTypeForced();
+  }
+
+  bool isParallelTypeForced() const { return _parallel_type_overridden; }
 
   /*
    * Set/Get the partitioner name
@@ -763,11 +769,16 @@ protected:
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
   MooseEnum _mesh_distribution_type;
 
+  /// Can be set to DISTRIBUTED, REPLICATED, or DEFAULT.  Determines whether
+  /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
+  MooseEnum _mesh_parallel_type;
+
   /// False by default.  Final value is determined by several factors
   /// including the 'distribution' setting in the input file, and whether
   /// or not the Mesh file is a Nemesis file.
   bool _use_distributed_mesh;
   bool _distribution_overridden;
+  bool _parallel_type_overridden;
 
   /// Pointer to underlying libMesh mesh object
   libMesh::MeshBase * _mesh;
