@@ -10,7 +10,7 @@
     type = 'RunApp'
     input = 'unique_ids.i'
     unique_ids = True
-    cli_args = '--parallel-mesh'
+    cli_args = '--distributed-mesh'
     min_parallel = 2
     prereq = serial_mesh
   [../]
