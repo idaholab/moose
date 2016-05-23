@@ -44,7 +44,8 @@ protected:
   virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement);
 
   virtual void computeYieldStress();
-  virtual Real computeHardening(Real scalar);
+  virtual Real computeHardeningValue(Real scalar);
+  virtual Real computeHardeningDerivative(Real scalar);
 
   Function * const _yield_stress_function;
   Real _yield_stress;

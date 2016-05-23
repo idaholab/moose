@@ -24,7 +24,7 @@ public:
 protected:
   virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);
 
-  virtual Real computeHardening(unsigned qp, Real scalar);
+  virtual Real computeHardeningDerivative(unsigned qp, Real scalar);
 
   virtual void computeYieldStress(unsigned qp);
 
