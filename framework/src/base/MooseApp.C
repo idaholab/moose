@@ -52,19 +52,6 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-// Don't trip over any macros with the same name
-#ifdef EXPAND
-#undef EXPAND
-#endif
-
-// When CXX11 is not detected, we check an alternate macro name.
-#ifdef LIBMESH_HAVE_CXX11
-#define EXPAND(FOO) QUOTE(FOO)
-#else
-#define EXPAND(FOO) QUOTE(FOO ## _BUT_DISABLED)
-#endif
-
-
 template<>
 InputParameters validParams<MooseApp>()
 {
@@ -181,94 +168,6 @@ MooseApp::MooseApp(InputParameters parameters) :
 
 MooseApp::~MooseApp()
 {
-  // Warn if the compiler *does not* have support for the C++11
-  // features we plan to initially require support for in MOOSE.  The
-  // user can completely opt out of seeing this warning by setting the
-  // environment variable MOOSE_CXX11_IGNORE
-  char * moose_cxx11_ignore = std::getenv("MOOSE_CXX11_IGNORE");
-  if (!moose_cxx11_ignore)
-  {
-    // Array of feature descriptions
-    const char * feature_descriptions[] = {
-      "alias declarations",
-      "auto keyword",
-      "constexpr keyword",
-      "decltype keyword",
-      "deleted functions",
-      "lambdas",
-      "move keyword",
-      "override keyword",
-      "range-based for",
-      "rvalue references",
-      "std::shared_ptr",
-      "std::unique_ptr",
-      "variadic templates",
-    };
-
-    // Array of true/false values
-    const int tf_array[] = {
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_ALIAS_DECLARATIONS)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_AUTO)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_CONSTEXPR)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_DECLTYPE)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_DELETED_FUNCTIONS)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_LAMBDA)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_MOVE)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_OVERRIDE)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_RANGEFOR)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_RVALUE_REFERENCES)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_SHARED_PTR)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_UNIQUE_PTR)),
-      setBool(EXPAND(LIBMESH_HAVE_CXX11_VARIADIC_TEMPLATES))
-    };
-
-    int n_entries = sizeof(tf_array)/sizeof(int);
-    int success = std::accumulate(tf_array, tf_array+n_entries, 0);
-
-    // Print prominent warning to screen if compiler does not support
-    // one of the features we require.
-    if (success < n_entries)
-    {
-      // Get compiler name and version
-#ifdef __clang__
-      std::string
-        compiler_name = "Clang",
-        compiler_version = QUOTE(__clang_major__) "." QUOTE(__clang_minor__) "." QUOTE(__clang_patchlevel__);
-#elif __INTEL_COMPILER
-      std::string
-        compiler_name = "Intel",
-        compiler_version = QUOTE(__INTEL_COMPILER_BUILD_DATE);
-#elif __GNUG__
-      std::string
-        compiler_name = "GCC",
-        compiler_version = QUOTE(__GNUC__) "." QUOTE(__GNUC_MINOR__) "." QUOTE(__GNUC_PATCHLEVEL__);
-#else
-      std::string
-        compiler_name = "Unknown compiler",
-        compiler_version = "Unknown version";
-#endif
-
-      std::stringstream oss;
-      oss << "--------------------------------------------------------------------------------\n";
-      oss << "Warning!\n";
-      oss << "MOOSE will soon start using the following C++11 features, but\n";
-      oss << "your compiler, " << compiler_name << ' ' << compiler_version << ", does not support the ones marked 'no' below:\n";
-      for (int i=0; i<n_entries; ++i)
-        printYesNo(oss, feature_descriptions[i], tf_array[i]);
-      oss << '\n';
-      oss << "These features will require the following minimum compiler versions:\n";
-      oss << "* GCC >= 4.8.4\n";
-      oss << "* Clang >= 3.4.0\n";
-      oss << "* Intel >= 20130607\n";
-      oss << "\n";
-      oss << "Please upgrade your compiler as soon as possible, or send mail to\n";
-      oss << "moose-users@googlegroups.com for assistance.\n";
-      oss << "--------------------------------------------------------------------------------\n";
-
-      Moose::out << '\n' << oss.str();
-    }
-  }
-
   _action_warehouse.clear();
   _executioner.reset();
 
@@ -1193,28 +1092,4 @@ MooseApp::createMinimalApp()
   }
 
   _action_warehouse.build();
-}
-
-// Call this using the QUOTE() macro to generate the last argument.
-void
-MooseApp::printYesNo(std::stringstream & oss,
-                       const std::string & feature,
-                       bool defined)
-{
-  oss << std::setw(ConsoleUtils::console_field_width) << std::string("  ") + feature + std::string(": ");
-  if (defined)
-    oss << COLOR_GREEN << "yes" << COLOR_DEFAULT;
-  else
-    oss << COLOR_RED << "no" << COLOR_DEFAULT;
-  oss << '\n';
-}
-
-// Call this using the QUOTE() macro to generate the argument.
-bool
-MooseApp::setBool(const std::string & value)
-{
-  if (value == "1")
-    return true;
-
-  return false;
 }
