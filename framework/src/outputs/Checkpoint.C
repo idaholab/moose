@@ -48,7 +48,7 @@ Checkpoint::Checkpoint(const InputParameters & parameters) :
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
-    _parallel_mesh(_problem_ptr->mesh().isParallelMesh()),
+    _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
     _recoverable_data(_app.getRecoverableData()),
     _material_property_storage(_problem_ptr->getMaterialPropertyStorage()),

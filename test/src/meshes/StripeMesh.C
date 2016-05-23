@@ -29,7 +29,7 @@ StripeMesh::StripeMesh(const InputParameters & parameters) :
     _n_stripes(getParam<unsigned int>("stripes"))
 {
   // The StripeMesh class only works with ReplicatedMesh
-  errorIfParallelDistribution("StripeMesh");
+  errorIfDistributedMesh("StripeMesh");
 }
 
 StripeMesh::StripeMesh(const StripeMesh & other_mesh) :

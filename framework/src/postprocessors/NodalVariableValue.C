@@ -37,8 +37,8 @@ NodalVariableValue::NodalVariableValue(const InputParameters & parameters) :
     _scale_factor(getParam<Real>("scale_factor"))
 {
   // This class only works with ReplicatedMesh, since it relies on a
-  // specific node numbering that we can't guarantee with ParallelMesh
-  _mesh.errorIfParallelDistribution("NodalVariableValue");
+  // specific node numbering that we can't guarantee with DistributedMesh
+  _mesh.errorIfDistributedMesh("NodalVariableValue");
 
   if (_node_ptr == NULL)
     mooseError("Node #" << getParam<unsigned int>("nodeid") << " specified in '" << name() << "' not found in the mesh!");

@@ -219,7 +219,7 @@ SolutionUserObject::readExodusII()
     mooseError("In SolutionUserObject, exodus file contains no timesteps.");
 
   // Account for parallel mesh
-  if (dynamic_cast<ParallelMesh *>(_mesh))
+  if (dynamic_cast<DistributedMesh *>(_mesh))
   {
     _mesh->allow_renumbering(true);
     _mesh->prepare_for_use(/*false*/);
@@ -391,11 +391,11 @@ SolutionUserObject::initialSetup()
     return;
 
   // Several aspects of SolutionUserObject won't work if the FEProblem's MooseMesh is
-  // a ParallelMesh:
+  // a DistributedMesh:
   // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
   // .) We don't know if directValue will be used, which may request
   //    a value on a Node we don't have.
-  _fe_problem.mesh().errorIfParallelDistribution("SolutionUserObject");
+  _fe_problem.mesh().errorIfDistributedMesh("SolutionUserObject");
 
 
   // Create a libmesh::Mesh object for storing the loaded data.  Since

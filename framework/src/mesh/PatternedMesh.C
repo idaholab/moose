@@ -55,7 +55,7 @@ PatternedMesh::PatternedMesh(const InputParameters & parameters) :
     _z_width(getParam<Real>("z_width"))
 {
   // The PatternedMesh class only works with ReplicatedMesh
-  errorIfParallelDistribution("PatternedMesh");
+  errorIfDistributedMesh("PatternedMesh");
 
   _meshes.resize(_files.size());
 

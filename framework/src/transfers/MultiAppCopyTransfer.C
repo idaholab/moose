@@ -40,8 +40,8 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters) :
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
-  // This transfer does not work with ParallelMesh
-  _fe_problem.mesh().errorIfParallelDistribution("MultiAppCopyTransfer");
+  // This transfer does not work with DistributedMesh
+  _fe_problem.mesh().errorIfDistributedMesh("MultiAppCopyTransfer");
 }
 
 void

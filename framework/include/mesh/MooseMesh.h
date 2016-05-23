@@ -687,16 +687,22 @@ public:
 
   /**
    * Generate a unified error message if the underlying libMesh mesh
-   * is a ParallelMesh.  Clients of MooseMesh can use this function to
-   * throw an error if they know they don't work with ParallelMesh.
+   * is a DistributedMesh.  Clients of MooseMesh can use this function to
+   * throw an error if they know they don't work with DistributedMesh.
    * See, for example, the NodalVariableValue class.
+   */
+  void errorIfDistributedMesh(std::string name) const;
+
+  /**
+   * Deprecated.  Just calls errorIfDistributedMesh().
    */
   void errorIfParallelDistribution(std::string name) const;
 
   /**
    * Returns the final Mesh distribution type.
    */
-  bool isParallelMesh() const { return _use_parallel_mesh; }
+  bool isDistributedMesh() const { return _use_distributed_mesh; }
+  bool isParallelMesh() const { mooseDeprecated("isParallelMesh() is deprecated, call isDistributedMesh() instead."); return isDistributedMesh(); }
 
   /**
    * Tell the user if the distribution was overriden for any reason
@@ -754,17 +760,17 @@ public:
 
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
-  /// the underlying libMesh mesh is a ReplicatedMesh or ParallelMesh.
+  /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
   MooseEnum _mesh_distribution_type;
 
   /// False by default.  Final value is determined by several factors
   /// including the 'distribution' setting in the input file, and whether
   /// or not the Mesh file is a Nemesis file.
-  bool _use_parallel_mesh;
+  bool _use_distributed_mesh;
   bool _distribution_overridden;
 
   /// Pointer to underlying libMesh mesh object
-  libMesh::MeshBase* _mesh;
+  libMesh::MeshBase * _mesh;
 
   /// The partitioner used on this mesh
   MooseEnum _partitioner_name;

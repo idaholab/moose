@@ -31,7 +31,7 @@
   centroid_partitioner_direction = y
 
   # The centroid partitioner behaves differently depending on
-  # whether you are using Serial or ParallelMesh, so to get
+  # whether you are using Serial or DistributedMesh, so to get
   # repeatable results, we restrict this test to using ReplicatedMesh.
   distribution = serial
 []

@@ -60,7 +60,7 @@ TiledMesh::TiledMesh(const InputParameters & parameters) :
     _z_width(getParam<Real>("z_width"))
 {
   // The TiledMesh class only works with ReplicatedMesh
-  errorIfParallelDistribution("TiledMesh");
+  errorIfDistributedMesh("TiledMesh");
 }
 
 TiledMesh::TiledMesh(const TiledMesh & other_mesh) :

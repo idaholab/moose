@@ -2,7 +2,7 @@
   type = FileMesh
   file = trapezoid.e
   uniform_refine = 1
-  # This test will not work in parallel with ParallelMesh enabled
+  # This test will not work in parallel with DistributedMesh enabled
   # due to a bug in PeriodicBCs.
   distribution = serial
 []

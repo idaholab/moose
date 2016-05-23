@@ -3,7 +3,7 @@
   # The SolutionUserObject uses the copy_nodal_solution() capability
   # of the Exodus reader, and therefore won't work if the initial mesh
   # has been renumbered (it will be reunumbered if you are running with
-  # ParallelMesh in parallel).  Hence, we restrict this test to run with
+  # DistributedMesh in parallel).  Hence, we restrict this test to run with
   # ReplicatedMesh only.
   distribution = serial
 []

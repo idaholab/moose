@@ -8,7 +8,7 @@
   ymin = 0.0
   ymax = 1.0
 
-  distribution = serial # This uses SolutionUserObject which doesn't work with ParallelMesh.
+  distribution = serial # This uses SolutionUserObject which doesn't work with DistributedMesh.
 []
 
 [Variables]

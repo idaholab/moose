@@ -1,6 +1,6 @@
 [Mesh]
   file = cubesource.e
-  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
+  # This test uses SolutionUserObject which doesn't work with DistributedMesh.
   distribution = serial
 []
 

@@ -1,7 +1,7 @@
 [Mesh]
   file = curvi.e
   # This mesh only has one element.  It does seem to work if you
-  # use ReplicatedMesh on two processors, but it hangs with ParallelMesh
+  # use ReplicatedMesh on two processors, but it hangs with DistributedMesh
   # on two processors.
   distribution = serial
 []
