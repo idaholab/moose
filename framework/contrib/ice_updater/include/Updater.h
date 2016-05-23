@@ -414,7 +414,7 @@ public:
 
 
 
-#else // !LIBMESH_HAVE_CXX11
+#else
 
 
 
@@ -445,6 +445,6 @@ public:
   void updateProgress(int) {}
 };
 
-#endif // LIBMESH_HAVE_CXX11_THREAD && LIBMESH_HAVE_CXX11_CONDITION_VARIABLE
+#endif
 
 #endif
