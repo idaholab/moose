@@ -17,11 +17,7 @@ class MultiAuxVariablesAction: public AddAuxVariableAction
 {
 public:
   MultiAuxVariablesAction(InputParameters params);
-
   virtual void act();
-
-  std::vector<unsigned int> _op_num;
-  std::vector<std::string> _var_name_base;
 };
 
 template<>
