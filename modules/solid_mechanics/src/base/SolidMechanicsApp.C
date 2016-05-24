@@ -17,7 +17,6 @@
 #include "CombinedCreepPlasticity.h"
 #include "Elastic.h"
 #include "ElasticModel.h"
-#include "ElasticEnergyAux.h"
 #include "ElementsOnLineAux.h"
 #include "HomogenizationKernel.h"
 #include "HomogenizedElasticConstants.h"
@@ -98,7 +97,6 @@ extern "C" void SolidMechanicsApp__registerObjects(Factory & factory) { SolidMec
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
 {
-  registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
   registerAux(AccumulateAux);

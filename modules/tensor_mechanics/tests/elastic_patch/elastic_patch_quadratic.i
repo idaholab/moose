@@ -9,9 +9,9 @@
 
 # The cube is displaced on all exterior nodes using the functions,
 #
-#    ux = 1e-4*(2x + y + z)/2
-#    uy = 1e-4*(x + 2y + z)/2
-#    ux = 1e-4*(x + y + 2z)/2
+#    ux = 1e-4 * (2x + y + z) / 2
+#    uy = 1e-4 * (x + 2y + z) / 2
+#    ux = 1e-4 * (x + y + 2z) / 2
 #
 #  giving uniform strains of
 #
@@ -34,18 +34,16 @@
 # Thus
 #
 #    stress xx = 4e5 * (3e-4) + 2 * 4e5 * 1e-4 = 200
-#    stress xy = 2 * 4e5 * 1e-4/2 = 40
+#    stress xy = 2 * 4e5 * 1e-4 / 2 = 40
 #
-
-[Mesh]
-
-  file = elastic_patch_quadratic.e
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-
+[]
+[Mesh]
+  file = elastic_patch_quadratic.e
 [] # Mesh
 
 [Functions]
-
   [./xDispFunc]
     type = ParsedFunction
     value = 5e-5*(2*x+y+z)
@@ -58,30 +56,24 @@
     type = ParsedFunction
     value = 5e-5*(x+y+2*z)
   [../]
-
 [] # Functions
 
 [Variables]
-
   [./disp_x]
     order = SECOND
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = SECOND
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = SECOND
     family = LAGRANGE
   [../]
-
 [] # Variables
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -130,146 +122,133 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
 [] # AuxVariables
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
 [AuxKernels]
-
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 0
     variable = stress_xx
-    index = 0
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 1
     variable = stress_yy
-    index = 1
   [../]
   [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 2
     variable = stress_zz
-    index = 2
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 1
     variable = stress_xy
-    index = 3
   [../]
   [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 2
     variable = stress_yz
-    index = 4
   [../]
   [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 0
     variable = stress_zx
-    index = 5
   [../]
   [./elastic_energy]
-    type = ElasticEnergyAux
+    type = TensorElasticEnergyAux
     variable = elastic_energy
   [../]
   [./vonmises]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = VonMisesStress
     variable = vonmises
-    quantity = vonmises
   [../]
   [./hydrostatic]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = Hydrostatic
     variable = hydrostatic
-    quantity = hydrostatic
   [../]
   [./fi]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = FirstInvariant
     variable = firstinv
-    quantity = firstinvariant
   [../]
   [./si]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = SecondInvariant
     variable = secondinv
-    quantity = secondinvariant
   [../]
   [./ti]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = ThirdInvariant
     variable = thirdinv
-    quantity = thirdinvariant
   [../]
-
 [] # AuxKernels
 
 [BCs]
-
   [./all_nodes_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = '1 2 3 4 6 7 8 9 10 12 15 17 18 19 20 21 23 24 25 26'
     function = xDispFunc
   [../]
-
- [./all_nodes_y]
+  [./all_nodes_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = '1 2 3 4 6 7 8 9 10 12 15 17 18 19 20 21 23 24 25 26'
     function = yDispFunc
   [../]
- [./all_nodes_z]
+  [./all_nodes_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = '1 2 3 4 6 7 8 9 10 12 15 17 18 19 20 21 23 24 25 26'
     function = zDispFunc
   [../]
-
 [] # BCs
 
 [Materials]
-
-  [./stiffStuff1]
-    type = SolidModel
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./elast_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-    constitutive_model = elastic
   [../]
-  [./elastic]
-    type = ElasticModel
-    block = 1
+  [./strain]
+    type = ComputeSmallStrain
   [../]
-
+  [./stress]
+    type = ComputeLinearElasticStress
+  [../]
 [] # Materials
 
 [Executioner]
-
   type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
 
   nl_rel_tol = 1e-6
 
@@ -279,7 +258,6 @@
   dt = 1.0
   num_steps = 1
   end_time = 1.0
-
 [] # Executioner
 
 [Outputs]

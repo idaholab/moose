@@ -23,6 +23,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+  block = '1 2 3 4 5 6 7'
 []
 
 [Mesh]#Comment
@@ -107,10 +108,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-#  [./elastic_energy]
-#    order = CONSTANT
-#    family = MONOMIAL
-#  [../]
+  [./elastic_energy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./vonmises]
     order = CONSTANT
     family = MONOMIAL
@@ -199,10 +200,10 @@
     index_i = 2
     index_j = 0
   [../]
-#  [./elastic_energy]
-#    type = ElasticEnergyAux
-#    variable = elastic_energy
-#  [../]
+  [./elastic_energy]
+    type = TensorElasticEnergyAux
+    variable = elastic_energy
+  [../]
   [./vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
@@ -423,19 +424,16 @@
 
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = '1 2 3 4 5 6 7'
     youngs_modulus = 1e6
     poissons_ratio = 0.0
   [../]
 
   [./strain]
     type = ComputeFiniteStrain
-    block = '1 2 3 4 5 6 7'
   [../]
 
   [./stress]
     type = ComputeFiniteStrainElasticStress
-    block = '1 2 3 4 5 6 7'
   [../]
 
 [] # Materials

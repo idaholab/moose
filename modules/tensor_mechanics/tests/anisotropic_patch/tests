@@ -2,7 +2,7 @@
   [./test]
     type = 'Exodiff'
     input = 'anisotropic_patch_test.i'
-    exodiff = 'out.e'
+    exodiff = 'anisotropic_patch_test_out.e'
     scale_refine = 1
   [../]
 []
