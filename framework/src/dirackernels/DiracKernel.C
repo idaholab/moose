@@ -87,15 +87,14 @@ void
 DiracKernel::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  const auto & multiplicities = _dirac_kernel_info.getPoints()[_current_elem].second;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     _current_point = _physical_point[_qp];
     if (isActiveAtPoint(_current_elem, _current_point))
-    {
       for (_i = 0; _i < _test.size(); _i++)
-        re(_i) += computeQpResidual();
-    }
+        re(_i) += multiplicities[_qp] * computeQpResidual();
   }
 }
 
@@ -103,16 +102,17 @@ void
 DiracKernel::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  const auto & multiplicities = _dirac_kernel_info.getPoints()[_current_elem].second;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     _current_point = _physical_point[_qp];
     if (isActiveAtPoint(_current_elem, _current_point))
+    {
       for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
-        {
-          ke(_i, _j) += computeQpJacobian();
-        }
+          ke(_i, _j) += multiplicities[_qp] * computeQpJacobian();
+    }
   }
 }
 
@@ -126,6 +126,7 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    const auto & multiplicities = _dirac_kernel_info.getPoints()[_current_elem].second;
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
@@ -133,7 +134,7 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
       if (isActiveAtPoint(_current_elem, _current_point))
         for (_i=0; _i<_test.size(); _i++)
           for (_j=0; _j<_phi.size(); _j++)
-            ke(_i, _j) += computeQpOffDiagJacobian(jvar);
+            ke(_i, _j) += multiplicities[_qp] * computeQpOffDiagJacobian(jvar);
     }
   }
 }
