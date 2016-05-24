@@ -34,7 +34,7 @@ DiracKernelInfo::addPoint(const Elem * elem, Point p)
 {
   _elements.insert(elem);
 
-  auto & multi_point_list = _points[elem];
+  std::pair<std::vector<Point>, std::vector<unsigned int> > & multi_point_list = _points[elem];
 
   const unsigned int npoint = multi_point_list.first.size();
   mooseAssert(npoint == multi_point_list.second.size(), "Different sizes for location and multiplicity data");

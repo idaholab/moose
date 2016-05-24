@@ -32,8 +32,8 @@ MaterialMultiPointSource::MaterialMultiPointSource(const InputParameters & param
 void
 MaterialMultiPointSource::addPoints()
 {
-  for (auto & p : _points)
-    addPoint(p);
+  for (unsigned int i = 0; i < _points.size(); ++i)
+    addPoint(_points[i]);
 }
 
 Real
