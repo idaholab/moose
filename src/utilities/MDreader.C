@@ -2,7 +2,7 @@
 //  Multi-dimensional array reader
 //
 
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -181,7 +181,7 @@ void import_matrix_from_txt_file(const std::string filename_X, std::vector <doub
         //std::cout << "cols:" << cols << std::endl;
 
         for ( i=1;i<32767;i++){
-            if ( getline(file_X, line) == 0 ) break;
+            if (!getline(file_X, line) ) break;
             ReadNumbers( line, v );
         }
 
