@@ -35,7 +35,7 @@ InputParameters nearestPointBaseValidParams()
 {
   InputParameters params = validParams<ElementIntegralVariableUserObject>();
 
-  params.addRequiredParam<std::vector<Real> >("points", "Computations will be lumped into values at these points.");
+  params.addRequiredParam<std::vector<Point> >("points", "Computations will be lumped into values at these points.");
 
   // Add in the valid parameters
   params += validParams<UserObjectType>();
@@ -79,51 +79,36 @@ protected:
    * @param p The point.
    * @return The UserObject closest to p.
    */
-  UserObjectType * nearestUserObject(const Point & p) const;
+  std::shared_ptr<UserObjectType> nearestUserObject(const Point & p) const;
 
   std::vector<Point> _points;
-  std::vector<UserObjectType *> _user_objects;
+  std::vector<std::shared_ptr<UserObjectType> > _user_objects;
 };
 
 
 template<typename UserObjectType>
 NearestPointBase<UserObjectType>::NearestPointBase(const InputParameters & parameters) :
-    ElementIntegralVariableUserObject(parameters)
+    ElementIntegralVariableUserObject(parameters),
+    _points(getParam<std::vector<Point> >("points"))
 {
-  const std::vector<Real> & points_vec = getParam<std::vector<Real> >("points");
-
-  {
-    unsigned int num_vec_entries = points_vec.size();
-
-    mooseAssert(num_vec_entries % LIBMESH_DIM == 0, "Wrong number of entries in 'points'");
-
-    _points.reserve(num_vec_entries / LIBMESH_DIM);
-
-    // Read the points out of the vector
-    for (unsigned int i=0; i<num_vec_entries; i+=3)
-      _points.push_back(Point(points_vec[i], points_vec[i+1], points_vec[i+2]));
-  }
-
   _user_objects.reserve(_points.size());
 
   // Build each of the UserObject objects:
-  for (unsigned int i=0; i<_points.size(); i++)
-    _user_objects.push_back(new UserObjectType(parameters));
+  for (unsigned int i = 0; i < _points.size(); i++)
+    _user_objects.push_back(std::make_shared<UserObjectType>(parameters));
 }
 
 template<typename UserObjectType>
 NearestPointBase<UserObjectType>::~NearestPointBase()
 {
-  for (unsigned int i=0; i<_user_objects.size(); i++)
-    delete _user_objects[i];
 }
 
 template<typename UserObjectType>
 void
 NearestPointBase<UserObjectType>::initialize()
 {
-  for (unsigned int i=0; i<_user_objects.size(); i++)
-    _user_objects[i]->initialize();
+  for (auto & user_object : _user_objects)
+    user_object->initialize();
 }
 
 template<typename UserObjectType>
@@ -137,17 +122,17 @@ template<typename UserObjectType>
 void
 NearestPointBase<UserObjectType>::finalize()
 {
-  for (unsigned int i=0; i<_user_objects.size(); i++)
-    _user_objects[i]->finalize();
+  for (auto & user_object : _user_objects)
+    user_object->finalize();
 }
 
 template<typename UserObjectType>
 void
 NearestPointBase<UserObjectType>::threadJoin(const UserObject & y)
 {
-  const NearestPointBase & npla = static_cast<const NearestPointBase &>(y);
+  auto & npla = static_cast<const NearestPointBase &>(y);
 
-  for (unsigned int i=0; i<_user_objects.size(); i++)
+  for (unsigned int i = 0; i < _user_objects.size(); i++)
     _user_objects[i]->threadJoin(*npla._user_objects[i]);
 }
 
@@ -159,13 +144,13 @@ NearestPointBase<UserObjectType>::spatialValue(const Point & p) const
 }
 
 template<typename UserObjectType>
-UserObjectType *
+std::shared_ptr<UserObjectType>
 NearestPointBase<UserObjectType>::nearestUserObject(const Point & p) const
 {
   unsigned int closest = 0;
   Real closest_distance = std::numeric_limits<Real>::max();
 
-  for (unsigned int i=0; i<_points.size(); i++)
+  for (unsigned int i = 0; i < _points.size(); i++)
   {
     const Point & current_point = _points[i];
 
