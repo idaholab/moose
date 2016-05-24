@@ -36,7 +36,13 @@ InputParameters validParams<DiracKernel>()
                         "Note that in the case this is true but no displacements are provided in "
                         "the Mesh block the undisplaced mesh will still be used.");
 
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addParam<bool>("allow_duplicate_points",
+                        false,
+                        "By default points added to a DiracKernel are dropped if a point at the same location"
+                        "has been added before. If this option is set to true the 'multiplicity' of these duplicate "
+                        "points is retained.");
+
+  params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_points", "Advanced");
 
   params.declareControllable("enable");
   params.registerBase("DiracKernel");
@@ -77,7 +83,8 @@ DiracKernel::DiracKernel(const InputParameters & parameters) :
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
     _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu())
+    _du_dot_du(_var.duDotDu()),
+    _allow_duplicate_points(parameters.get<bool>("allow_duplicate_points"))
 {
   // Stateful material properties are not allowed on DiracKernels
   statefulPropertiesAllowed(false);
@@ -87,14 +94,22 @@ void
 DiracKernel::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  const auto & multiplicities = _dirac_kernel_info.getPoints()[_current_elem].second;
+
+  const std::vector<unsigned int> * multiplicities = _allow_duplicate_points ? &_local_dirac_kernel_info.getPoints()[_current_elem].second : NULL;
+  unsigned int local_qp = 0;
+  Real multiplicity = 1.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     _current_point = _physical_point[_qp];
     if (isActiveAtPoint(_current_elem, _current_point))
+    {
+      if (_allow_duplicate_points)
+        multiplicity = (*multiplicities)[local_qp++];
+
       for (_i = 0; _i < _test.size(); _i++)
-        re(_i) += multiplicities[_qp] * computeQpResidual();
+        re(_i) += multiplicity * computeQpResidual();
+    }
   }
 }
 
@@ -102,16 +117,22 @@ void
 DiracKernel::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  const auto & multiplicities = _dirac_kernel_info.getPoints()[_current_elem].second;
+
+  const std::vector<unsigned int> * multiplicities = _allow_duplicate_points ? &_local_dirac_kernel_info.getPoints()[_current_elem].second : NULL;
+  unsigned int local_qp = 0;
+  Real multiplicity = 1.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     _current_point = _physical_point[_qp];
     if (isActiveAtPoint(_current_elem, _current_point))
     {
+      if (_allow_duplicate_points)
+        multiplicity = (*multiplicities)[local_qp++];
+
       for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
-          ke(_i, _j) += multiplicities[_qp] * computeQpJacobian();
+          ke(_i, _j) += multiplicity * computeQpJacobian();
     }
   }
 }
@@ -126,15 +147,23 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
-    const auto & multiplicities = _dirac_kernel_info.getPoints()[_current_elem].second;
+
+    const std::vector<unsigned int> * multiplicities = _allow_duplicate_points ? &_local_dirac_kernel_info.getPoints()[_current_elem].second : NULL;
+    unsigned int local_qp = 0;
+    Real multiplicity = 1.0;
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       _current_point = _physical_point[_qp];
       if (isActiveAtPoint(_current_elem, _current_point))
+      {
+        if (_allow_duplicate_points)
+          multiplicity = (*multiplicities)[local_qp++];
+
         for (_i=0; _i<_test.size(); _i++)
           for (_j=0; _j<_phi.size(); _j++)
-            ke(_i, _j) += multiplicities[_qp] * computeQpOffDiagJacobian(jvar);
+            ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar);
+      }
     }
   }
 }
