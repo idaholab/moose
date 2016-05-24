@@ -216,8 +216,8 @@ protected:
   /// Derivative of u_dot wrt u
   const VariableValue & _du_dot_du;
 
-  /// fully consider duplicate points
-  const bool _allow_duplicate_points;
+  /// drop duplicate points or consider them in residual and Jacobian
+  const bool _drop_duplicate_points;
 
 private:
   /// Data structure for caching user-defined IDs which can be mapped to

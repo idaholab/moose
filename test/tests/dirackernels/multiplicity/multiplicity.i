@@ -64,7 +64,7 @@
   [./material_source3]
     type = MaterialMultiPointSource
     variable = u3
-    allow_duplicate_points = true
+    drop_duplicate_points = false
     points = '0.2 0.3 0.0
               0.2 0.3 0.0'
   [../]
