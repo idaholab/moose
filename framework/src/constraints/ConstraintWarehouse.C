@@ -101,6 +101,33 @@ ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
   return it->second.getActiveObjects();
 }
 
+std::vector<MooseSharedPointer<NodeFaceConstraint> >
+ConstraintWarehouse::getAllNodeFaceConstraints(THREAD_ID tid)
+{
+  std::vector<MooseSharedPointer<NodeFaceConstraint> > all_constraints;
+
+  // Undisplaced
+  for (auto & boundary_warehouse_pair : _node_face_constraints)
+  {
+    auto & warehouse = boundary_warehouse_pair.second;
+
+    all_constraints.insert(all_constraints.end(),
+                           warehouse.getObjects(tid).begin(),
+                           warehouse.getObjects(tid).end());
+  }
+
+  // Displaced
+  for (auto & boundary_warehouse_pair : _displaced_node_face_constraints)
+  {
+    auto & warehouse = boundary_warehouse_pair.second;
+
+    all_constraints.insert(all_constraints.end(),
+                           warehouse.getObjects(tid).begin(),
+                           warehouse.getObjects(tid).end());
+  }
+
+  return all_constraints;
+}
 
 const std::vector<MooseSharedPointer<FaceFaceConstraint> > &
 ConstraintWarehouse::getActiveFaceFaceConstraints(const std::string & interface) const

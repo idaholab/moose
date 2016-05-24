@@ -67,6 +67,14 @@ public:
 
   virtual bool addCouplingEntriesToJacobian() { return true; }
 
+  /**
+   * Constraints can override this to specify dof pairs that are linked by this
+   * Constraint in order to get storage for their derivatives pre-allocated in the Jacobian
+   *
+   * @param graph This links dof_row -> dof_columns.  The job of this routine is to add extra row->column linkages.
+   */
+  void augmentJacobianGraph(std::map<dof_id_type, std::vector<dof_id_type> > & graph) {}
+
 protected:
   SubProblem & _subproblem;
   SystemBase & _sys;

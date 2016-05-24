@@ -59,6 +59,10 @@
   [../]
 []
 
+[Problem]
+  error_on_jacobian_nonzero_reallocation=true
+[../]
+
 [Executioner]
   # l_tol = 1e-1
   # l_tol = 1e-
@@ -72,4 +76,3 @@
   file_base = out
   exodus = true
 []
-

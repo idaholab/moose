@@ -50,6 +50,11 @@ public:
   const std::vector<MooseSharedPointer<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
   ///@}
 
+  /**
+   * Accessor for the complete list of NodeFaceConstraints
+   */
+  std::vector<MooseSharedPointer<NodeFaceConstraint> > getAllNodeFaceConstraints(THREAD_ID tid = 0);
+
   ///@{
   /**
    * Deterimine if active objects exist.

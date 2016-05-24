@@ -1455,73 +1455,11 @@ NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & do
 void
 NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<dof_id_type, std::vector<dof_id_type> > & graph)
 {
-  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
-
-  for (std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = nearest_node_locators.begin();
-      it != nearest_node_locators.end();
-      ++it)
   {
-    std::vector<dof_id_type> & slave_nodes = it->second->_slave_nodes;
+    auto nfcs = _constraints.getAllNodeFaceConstraints(0);
 
-    for (unsigned int i=0; i<slave_nodes.size(); i++)
-    {
-      std::set<dof_id_type> unique_slave_indices;
-      std::set<dof_id_type> unique_master_indices;
-
-      dof_id_type slave_node = slave_nodes[i];
-
-      {
-        std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[slave_node];
-
-        // Get the dof indices from each elem connected to the node
-        for (unsigned int el=0; el < elems.size(); ++el)
-        {
-          dof_id_type cur_elem = elems[el];
-
-          std::vector<dof_id_type> dof_indices;
-          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
-
-          for (unsigned int di=0; di < dof_indices.size(); di++)
-            unique_slave_indices.insert(dof_indices[di]);
-        }
-      }
-
-      std::vector<dof_id_type> master_nodes = it->second->_neighbor_nodes[slave_node];
-
-      for (unsigned int k=0; k<master_nodes.size(); k++)
-      {
-        dof_id_type master_node = master_nodes[k];
-
-        {
-          std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[master_node];
-
-          // Get the dof indices from each elem connected to the node
-          for (unsigned int el=0; el < elems.size(); ++el)
-          {
-            dof_id_type cur_elem = elems[el];
-
-            std::vector<dof_id_type> dof_indices;
-            dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
-
-            for (unsigned int di=0; di < dof_indices.size(); di++)
-              unique_master_indices.insert(dof_indices[di]);
-          }
-        }
-      }
-
-      for (std::set<dof_id_type>::iterator sit=unique_slave_indices.begin(); sit != unique_slave_indices.end(); ++sit)
-      {
-        dof_id_type slave_id = *sit;
-
-        for (std::set<dof_id_type>::iterator mit=unique_master_indices.begin(); mit != unique_master_indices.end(); ++mit)
-        {
-          dof_id_type master_id = *mit;
-
-          graph[slave_id].push_back(master_id);
-          graph[master_id].push_back(slave_id);
-        }
-      }
-    }
+    for (auto & nfc : nfcs)
+      nfc->augmentJacobianGraph(graph);
   }
 
   // handle node-to-node constraints

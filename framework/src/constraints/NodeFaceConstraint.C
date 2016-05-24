@@ -18,6 +18,7 @@
 #include "MooseEnum.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
+#include "NearestNodeLocator.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
@@ -246,6 +247,74 @@ NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
 
   for (std::set<dof_id_type>::iterator sit=unique_dof_indices.begin(); sit != unique_dof_indices.end(); ++sit)
     _connected_dof_indices.push_back(*sit);
+}
+
+void
+NodeFaceConstraint::augmentJacobianGraph(std::map<dof_id_type, std::vector<dof_id_type> > & graph)
+{
+  NearestNodeLocator & nearest_node = _penetration_locator._nearest_node;
+
+  std::vector<dof_id_type> & slave_nodes = nearest_node._slave_nodes;
+
+  for (unsigned int i=0; i<slave_nodes.size(); i++)
+  {
+    std::set<dof_id_type> unique_slave_indices;
+    std::set<dof_id_type> unique_master_indices;
+
+    dof_id_type slave_node = slave_nodes[i];
+
+    {
+      std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[slave_node];
+
+      // Get the dof indices from each elem connected to the node
+      for (unsigned int el=0; el < elems.size(); ++el)
+      {
+        dof_id_type cur_elem = elems[el];
+
+        std::vector<dof_id_type> dof_indices;
+        _dof_map.dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+
+        for (unsigned int di=0; di < dof_indices.size(); di++)
+          unique_slave_indices.insert(dof_indices[di]);
+      }
+    }
+
+    std::vector<dof_id_type> master_nodes = nearest_node._neighbor_nodes[slave_node];
+
+    for (unsigned int k=0; k<master_nodes.size(); k++)
+    {
+      dof_id_type master_node = master_nodes[k];
+
+      {
+        std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[master_node];
+
+        // Get the dof indices from each elem connected to the node
+        for (unsigned int el=0; el < elems.size(); ++el)
+        {
+          dof_id_type cur_elem = elems[el];
+
+          std::vector<dof_id_type> dof_indices;
+          _dof_map.dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+
+          for (unsigned int di=0; di < dof_indices.size(); di++)
+            unique_master_indices.insert(dof_indices[di]);
+        }
+      }
+    }
+
+    for (std::set<dof_id_type>::iterator sit=unique_slave_indices.begin(); sit != unique_slave_indices.end(); ++sit)
+    {
+      dof_id_type slave_id = *sit;
+
+      for (std::set<dof_id_type>::iterator mit=unique_master_indices.begin(); mit != unique_master_indices.end(); ++mit)
+      {
+        dof_id_type master_id = *mit;
+
+        graph[slave_id].push_back(master_id);
+        graph[master_id].push_back(slave_id);
+      }
+    }
+  }
 }
 
 bool
