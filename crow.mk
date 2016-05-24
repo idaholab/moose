@@ -111,7 +111,7 @@ $(CROW_DIR)/control_modules/_crowtools.so : $(CROW_DIR)/control_modules/crowtool
 #swig -c++ -python $(SWIG_PY_FLAGS) -I$(CROW_DIR)/include/tools/  -I$(CROW_DIR)/include/utilities/ $(CROW_DIR)/control_modules/crowtools.i
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
-	$(libmesh_CXX) $(libmeh_CPPFLAGS) $(PYTHON_INCLUDE) $(app_INCLUDES)  $(libmesh_INCLUDE) \
+	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(PYTHON_INCLUDE) $(app_INCLUDES)  $(libmesh_INCLUDE) -std=c++11 \
 	 -c  $(CROW_MODULES)/crowtools_wrap.cxx -o $(CROW_DIR)/control_modules/crowtools_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \
