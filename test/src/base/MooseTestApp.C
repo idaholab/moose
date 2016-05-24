@@ -203,6 +203,7 @@
 #include "ReportingConstantSource.h"
 #include "FrontSource.h"
 #include "MaterialPointSource.h"
+#include "MaterialMultiPointSource.h"
 #include "StatefulPointSource.h"
 #include "CachingPointSource.h"
 #include "BadCachingPointSource.h"
@@ -433,6 +434,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerDiracKernel(ReportingConstantSource);
   registerDiracKernel(FrontSource);
   registerDiracKernel(MaterialPointSource);
+  registerDiracKernel(MaterialMultiPointSource);
   registerDiracKernel(StatefulPointSource);
   registerDiracKernel(CachingPointSource);
   registerDiracKernel(BadCachingPointSource);
