@@ -17,10 +17,11 @@
 
 // MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
+#include "NearestPointBase.h"
+#include "LayeredAverage.h"
 
 // Forward Declarations
 class NearestPointLayeredAverage;
-class LayeredAverage;
 
 template<>
 InputParameters validParams<NearestPointLayeredAverage>();
@@ -32,37 +33,10 @@ InputParameters validParams<NearestPointLayeredAverage>();
  * Given a list of points this object computes the layered average
  * closest to each one of those points.
  */
-class NearestPointLayeredAverage : public ElementIntegralVariableUserObject
+class NearestPointLayeredAverage : public NearestPointBase<LayeredAverage>
 {
 public:
   NearestPointLayeredAverage(const InputParameters & parameters);
-  ~NearestPointLayeredAverage();
-
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
-
-  /**
-   * Given a Point return the integral value associated with the layer
-   * that point falls in for the layered average closest to that
-   * point.
-   *
-   * @param p The point to look for in the layers.
-   */
-  virtual Real spatialValue(const Point & p) const;
-
-protected:
-  /**
-   * Get the LayeredAverage that is closest to the point.
-   *
-   * @param p The point.
-   * @return The LayeredAverage closest to p.
-   */
-  LayeredAverage * nearestLayeredAverage(const Point & p) const;
-
-  std::vector<Point> _points;
-  std::vector<LayeredAverage *> _layered_averages;
 };
 
 #endif

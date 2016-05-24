@@ -13,17 +13,5 @@
 /****************************************************************/
 
 // MOOSE includes
-#include "NearestPointLayeredAverage.h"
-#include "LayeredAverage.h"
-
-template<>
-InputParameters validParams<NearestPointLayeredAverage>()
-{
-  InputParameters params = nearestPointBaseValidParams<LayeredAverage>();
-
-  return params;
-}
-
-NearestPointLayeredAverage::NearestPointLayeredAverage(const InputParameters & parameters) :
-    NearestPointBase<LayeredAverage>(parameters)
-{}
+#include "NearestPointBase.h"
+#include "UserObject.h"

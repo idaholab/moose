@@ -11,7 +11,7 @@ InputParameters validParams<GrainAdvectionVelocity>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Calculation the advection velocity of grain due to rigid vody translation and rotation");
-  params.addCoupledVar("etas", "Array of other coupled order parameters");
+  params.addRequiredCoupledVarWithAutoBuild("etas", "var_name_base", "op_num", "Array of other coupled order parameters");
   params.addCoupledVar("c", "Concentration field");
   params.addParam<Real>("translation_constant", 500, "constant value characterizing grain translation");
   params.addParam<Real>("rotation_constant", 1.0, "constant value characterizing grain rotation");
