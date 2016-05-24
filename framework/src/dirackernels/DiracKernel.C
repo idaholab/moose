@@ -90,7 +90,7 @@ DiracKernel::computeResidual()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    _current_point=_physical_point[_qp];
+    _current_point = _physical_point[_qp];
     if (isActiveAtPoint(_current_elem, _current_point))
     {
       for (_i = 0; _i < _test.size(); _i++)

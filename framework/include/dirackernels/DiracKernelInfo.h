@@ -68,10 +68,12 @@ public:
    */
   std::set<const Elem *> & getElements() { return _elements; }
 
+  typedef std::map<const Elem *, std::pair<std::vector<Point>, std::vector<unsigned int> > > MultiPointMap;
+
   /**
    * Returns a writeable reference to the _points container.
    */
-  std::map<const Elem *, std::vector<Point> > & getPoints() { return _points; }
+  MultiPointMap & getPoints() { return _points; }
 
   /**
    * Called during FEProblem::meshChanged() to update the PointLocator
@@ -90,7 +92,7 @@ protected:
   std::set<const Elem *> _elements;
 
   /// The list of physical xyz Points that need to be evaluated in each element.
-  std::map<const Elem *, std::vector<Point> > _points;
+  MultiPointMap _points;
 
   /// The DiracKernelInfo object manages a PointLocator object which is used
   /// by all DiracKernels to find Points.  It needs to be centrally managed and it

@@ -316,7 +316,7 @@ DisplacedProblem::prepareAssemblyNeighbor(THREAD_ID tid)
 bool
 DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 {
-  std::vector<Point> & points = _dirac_kernel_info.getPoints()[elem];
+  std::vector<Point> & points = _dirac_kernel_info.getPoints()[elem].first;
 
   unsigned int n_points = points.size();
 
