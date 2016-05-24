@@ -88,6 +88,11 @@ public:
   const Elem * findPoint(Point p, const MooseMesh& mesh);
 
 protected:
+  /**
+   * Check if two points are equal with respect to a tolerance
+   */
+  bool pointsFuzzyEqual(const Point &, const Point &);
+
   /// The list of elements that need distributions.
   std::set<const Elem *> _elements;
 
@@ -99,6 +104,9 @@ protected:
   /// also needs to be rebuilt in FEProblem::meshChanged() to work with Mesh
   /// adaptivity.
   UniquePtr<PointLocatorBase> _point_locator;
+
+  /// threshold distance squared below which two points are considered identical
+  const Real _point_equal_distance_sq;
 };
 
 #endif //DIRACKERNELINFO_H
