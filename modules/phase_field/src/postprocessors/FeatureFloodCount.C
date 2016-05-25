@@ -103,6 +103,7 @@ InputParameters validParams<FeatureFloodCount>()
   params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether bubbles are defined to be less than or greater than the threshold value.");
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
   params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
+  params.set<bool>("use_displaced_mesh") = true;
 
   MooseEnum flood_type("NODAL ELEMENTAL", "NODAL");
   params.addParam<MooseEnum>("flood_entity_type", flood_type, "Determines whether the flood algorithm runs on nodes or elements");
@@ -152,7 +153,7 @@ FeatureFloodCount::initialize()
 {
   // Get a pointer to the PeriodicBoundaries buried in libMesh
   // TODO: Can we do this in the constructor (i.e. are all objects necessary for this call in existance during ctor?)
-  _pbs = dynamic_cast<FEProblem *>(&_subproblem)->getNonlinearSystem().dofMap().get_periodic_boundaries();
+  _pbs = _fe_problem.getNonlinearSystem().dofMap().get_periodic_boundaries();
 
   // Clear the bubble marking maps and region counters and other data structures
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
@@ -683,7 +684,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureD
   {
     const Elem * elem = static_cast<const Elem *>(dof_object);
     std::vector<Point> centroid(1, elem->centroid());
-    _fe_problem.reinitElemPhys(elem, centroid, 0);
+    _subproblem.reinitElemPhys(elem, centroid, 0);
     entity_value = _vars[current_idx]->sln()[0];
   }
   else
