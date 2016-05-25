@@ -201,7 +201,7 @@
     index_j = 0
   [../]
   [./elastic_energy]
-    type = TensorElasticEnergyAux
+    type = ElasticEnergyAux
     variable = elastic_energy
   [../]
   [./vonmises]

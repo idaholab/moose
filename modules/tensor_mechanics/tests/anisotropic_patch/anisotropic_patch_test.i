@@ -179,7 +179,7 @@
     variable = stress_zx
   [../]
   [./elastic_energy]
-    type = TensorElasticEnergyAux
+    type = ElasticEnergyAux
     variable = elastic_energy
   [../]
   [./vonmises]

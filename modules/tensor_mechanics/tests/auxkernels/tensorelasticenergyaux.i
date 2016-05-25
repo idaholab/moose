@@ -44,7 +44,7 @@
 
 [AuxKernels]
   [./elastic_energy]
-    type = TensorElasticEnergyAux
+    type = ElasticEnergyAux
     variable = E
   [../]
 []

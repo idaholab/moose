@@ -11,7 +11,6 @@
     exodiff = 'elastic_patch_out.e'
     min_parallel = '2'
     prereq = 'test_elastic_patch'
-    platform = 'DARWIN'
   [../]
 
   [./test_elastic_patch_quadratic]

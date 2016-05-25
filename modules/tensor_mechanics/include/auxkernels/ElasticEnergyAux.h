@@ -4,24 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef TENSORELASTICENERGYAUX_H
-#define TENSORELASTICENERGYAUX_H
+#ifndef ELASTICENERGYAUX_H
+#define ELASTICENERGYAUX_H
 
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
 //Forward declarations
-class TensorElasticEnergyAux;
+class ElasticEnergyAux;
 
 template<>
-InputParameters validParams<TensorElasticEnergyAux>();
+InputParameters validParams<ElasticEnergyAux>();
 
-
-class TensorElasticEnergyAux : public AuxKernel
+class ElasticEnergyAux : public AuxKernel
 {
 public:
-  TensorElasticEnergyAux(const InputParameters & parameters);
-  virtual ~TensorElasticEnergyAux() {}
+  ElasticEnergyAux(const InputParameters & parameters);
+  virtual ~ElasticEnergyAux() {}
 
 protected:
   virtual Real computeValue();
@@ -32,4 +31,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
-#endif // TENSORELASTICENERGYAUX_H
+#endif // ELASTICENERGYAUX_H
