@@ -28,7 +28,6 @@
 #include "DynamicStressDivergenceTensors.h"
 #include "OutOfPlanePressure.h"
 
-#include "LinearElasticMaterial.h"
 #include "LinearElasticTruss.h"
 #include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
@@ -188,7 +187,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(DynamicStressDivergenceTensors);
   registerKernel(OutOfPlanePressure);
 
-  registerMaterial(LinearElasticMaterial);
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
