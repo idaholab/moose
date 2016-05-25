@@ -68,80 +68,80 @@ ComputeDiracThread::subdomainChanged()
 void
 ComputeDiracThread::onElement(const Elem * elem)
 {
-  bool has_dirac_kernels_on_elem = _fe_problem.reinitDirac(elem, _tid);
+  const bool has_dirac_kernels_on_elem = _fe_problem.reinitDirac(elem, _tid);
+  if (!has_dirac_kernels_on_elem)
+    return;
+
   std::set<MooseVariable *> needed_moose_vars;
   const std::vector<MooseSharedPointer<DiracKernel> > & dkernels = _dirac_kernels.getActiveObjects(_tid);
 
-  if (has_dirac_kernels_on_elem)
+  // Only call reinitMaterials() if one or more DiracKernels has
+  // actually called getMaterialProperty().  Loop over all the
+  // DiracKernels and check whether this is the case.
+  bool need_reinit_materials = false;
   {
-    // Only call reinitMaterials() if one or more DiracKernels has
-    // actually called getMaterialProperty().  Loop over all the
-    // DiracKernels and check whether this is the case.
-    bool need_reinit_materials = false;
-    {
-      for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
-      {
-        // If any of the DiracKernels have had getMaterialProperty()
-        // called, we need to reinit Materials.
-        if ((*it)->getMaterialPropertyCalled())
-        {
-          need_reinit_materials = true;
-          break;
-        }
-      }
-    }
-
-    if (need_reinit_materials)
-      _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
-
     for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
     {
-      MooseSharedPointer<DiracKernel> dirac_kernel = *it;
-
-      if (dirac_kernel->hasPointsOnElem(elem))
+      // If any of the DiracKernels have had getMaterialProperty()
+      // called, we need to reinit Materials.
+      if ((*it)->getMaterialPropertyCalled())
       {
-        if (_jacobian == NULL)
-          dirac_kernel->computeResidual();
-        else
+        need_reinit_materials = true;
+        break;
+      }
+    }
+  }
+
+  if (need_reinit_materials)
+    _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
+
+  for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
+  {
+    MooseSharedPointer<DiracKernel> dirac_kernel = *it;
+
+    if (dirac_kernel->hasPointsOnElem(elem))
+    {
+      if (_jacobian == NULL)
+        dirac_kernel->computeResidual();
+      else
+      {
+        // Get a list of coupled variables from the SubProblem
+        std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries =
+          dirac_kernel->subProblem().assembly(_tid).couplingEntries();
+
+        // Loop over the list of coupled variable pairs
         {
-          // Get a list of coupled variables from the SubProblem
-          std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries =
-            dirac_kernel->subProblem().assembly(_tid).couplingEntries();
+          std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator
+            var_pair_iter = coupling_entries.begin(),
+            var_pair_end = coupling_entries.end();
 
-          // Loop over the list of coupled variable pairs
+          for (; var_pair_iter != var_pair_end; ++var_pair_iter)
           {
-            std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator
-              var_pair_iter = coupling_entries.begin(),
-              var_pair_end = coupling_entries.end();
+            MooseVariable * ivariable = var_pair_iter->first;
+            MooseVariable * jvariable = var_pair_iter->second;
 
-            for (; var_pair_iter != var_pair_end; ++var_pair_iter)
+            // A variant of the check that is in
+            // ComputeFullJacobianThread::computeJacobian().  We
+            // only want to call computeOffDiagJacobian() if both
+            // variables are active on this subdomain, and the
+            // off-diagonal variable actually has dofs.
+            if (dirac_kernel->variable().number() == ivariable->number()
+                && ivariable->activeOnSubdomain(_subdomain)
+                && jvariable->activeOnSubdomain(_subdomain)
+                && (jvariable->numberOfDofs() > 0))
             {
-              MooseVariable * ivariable = var_pair_iter->first;
-              MooseVariable * jvariable = var_pair_iter->second;
-
-              // A variant of the check that is in
-              // ComputeFullJacobianThread::computeJacobian().  We
-              // only want to call computeOffDiagJacobian() if both
-              // variables are active on this subdomain, and the
-              // off-diagonal variable actually has dofs.
-              if (dirac_kernel->variable().number() == ivariable->number()
-                  && ivariable->activeOnSubdomain(_subdomain)
-                  && jvariable->activeOnSubdomain(_subdomain)
-                  && (jvariable->numberOfDofs() > 0))
-              {
-                dirac_kernel->subProblem().prepareShapes(jvariable->number(), _tid);
-                dirac_kernel->computeOffDiagJacobian(jvariable->number());
-              }
+              dirac_kernel->subProblem().prepareShapes(jvariable->number(), _tid);
+              dirac_kernel->computeOffDiagJacobian(jvariable->number());
             }
           }
         }
       }
     }
-
-    // Note that we do not call swapBackMaterials() here as they were
-    // never swapped in the first place.  This avoids messing up
-    // stored values of stateful material properties.
   }
+
+  // Note that we do not call swapBackMaterials() here as they were
+  // never swapped in the first place.  This avoids messing up
+  // stored values of stateful material properties.
 }
 
 void

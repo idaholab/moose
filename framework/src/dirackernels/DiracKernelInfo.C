@@ -20,7 +20,8 @@
 #include "libmesh/elem.h"
 
 DiracKernelInfo::DiracKernelInfo() :
-    _point_locator()
+    _point_locator(),
+    _point_equal_distance_sq(libMesh::TOLERANCE * libMesh::TOLERANCE)
 {
 }
 
@@ -33,11 +34,22 @@ DiracKernelInfo::addPoint(const Elem * elem, Point p)
 {
   _elements.insert(elem);
 
-  if (!hasPoint(elem, p))
-  {
-    std::vector<Point> & point_list = _points[elem];
-    point_list.push_back(p);
-  }
+  std::pair<std::vector<Point>, std::vector<unsigned int> > & multi_point_list = _points[elem];
+
+  const unsigned int npoint = multi_point_list.first.size();
+  mooseAssert(npoint == multi_point_list.second.size(), "Different sizes for location and multiplicity data");
+
+  for (unsigned int i = 0; i < npoint; ++i)
+    if (pointsFuzzyEqual(multi_point_list.first[i], p))
+    {
+      // a point at the same (within a tolerance) location as p exists, increase its multiplicity
+      multi_point_list.second[i]++;
+      return;
+    }
+
+  // no prior point found at this location, add it with a multiplicity of one
+  multi_point_list.first.push_back(p);
+  multi_point_list.second.push_back(1);
 }
 
 void
@@ -52,19 +64,15 @@ DiracKernelInfo::clearPoints()
 bool
 DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 {
-  std::vector<Point> & point_list = _points[elem];
+  std::vector<Point> & point_list = _points[elem].first;
 
   std::vector<Point>::iterator
     it = point_list.begin(),
     end = point_list.end();
 
   for (; it != end; ++it)
-  {
-    Real delta = (*it - p).norm_sq();
-
-    if (delta < TOLERANCE*TOLERANCE)
+    if (pointsFuzzyEqual(*it, p))
       return true;
-  }
 
   // If we haven't found it, we don't have it.
   return false;
@@ -108,8 +116,6 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
   }
 }
 
-
-
 const Elem *
 DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
 {
@@ -133,4 +139,11 @@ DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
   // gets "deactivated".
 
   return elem;
+}
+
+bool
+DiracKernelInfo::pointsFuzzyEqual(const Point & a, const Point & b)
+{
+  const Real dist_sq = (a - b).norm_sq();
+  return dist_sq < _point_equal_distance_sq;
 }
