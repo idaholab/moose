@@ -1,11 +1,11 @@
 [Mesh]
-  # This MeshModifier currently only works with SerialMesh.
+  # This MeshModifier currently only works with ReplicatedMesh.
   # For more information, refer to #2129.
   type = GeneratedMesh
   dim = 2
   nx = 2
   ny = 2
-  distribution = serial
+  parallel_type = replicated
 []
 
 [MeshModifiers]

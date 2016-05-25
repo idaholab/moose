@@ -11,8 +11,8 @@
 [Mesh]
   file = gap_test.e
   # This test uses the geometric search system, which does not currently work
-  # in parallel with ParallelMesh enabled.  For more information, see #2121.
-  distribution = serial
+  # in parallel with DistributedMesh enabled.  For more information, see #2121.
+  parallel_type = replicated
 []
 
 [Variables]

@@ -55,8 +55,8 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
     _interp_type(getParam<MooseEnum>("interp_type")),
     _radius(getParam<Real>("radius"))
 {
-  // This transfer does not work with ParallelMesh
-  _fe_problem.mesh().errorIfParallelDistribution("MultiAppInterpolationTransfer");
+  // This transfer does not work with DistributedMesh
+  _fe_problem.mesh().errorIfDistributedMesh("MultiAppInterpolationTransfer");
   _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
   _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
 }
@@ -269,7 +269,7 @@ MultiAppInterpolationTransfer::execute()
       unsigned int to_sys_num = to_sys.number();
 
       // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppInterpolationTransfer only works with SerialMesh!");
+      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppInterpolationTransfer only works with ReplicatedMesh!");
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 

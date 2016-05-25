@@ -54,7 +54,7 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
     _cached_from_inds(declareRestartableData<std::map<unsigned int, unsigned int> >("cached_from_ids")),
     _cached_qp_inds(declareRestartableData<std::map<unsigned int, unsigned int> >("cached_qp_inds"))
 {
-  // This transfer does not work with ParallelMesh
+  // This transfer does not work with DistributedMesh
   _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
   _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
 }

@@ -94,10 +94,10 @@ class RunApp(Tester):
       print 'Application not found: ' + str(specs['executable'])
       sys.exit(1)
 
-    if options.parallel_mesh and '--parallel-mesh' not in specs['cli_args']:
+    if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in specs['cli_args'] or '--distributed-mesh' not in specs['cli_args']):
       # The user has passed the parallel-mesh option to the test harness
       # and it is NOT supplied already in the cli-args option
-      specs['cli_args'].append('--parallel-mesh')
+      specs['cli_args'].append('--distributed-mesh')
 
     if options.error and '--error' not in specs['cli_args'] and not specs["allow_warnings"]:
       # The user has passed the error option to the test harness

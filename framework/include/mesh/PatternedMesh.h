@@ -53,10 +53,10 @@ protected:
   const std::vector<std::vector<unsigned int> > & _pattern;
 
   // Holds the pointers to the meshes
-  std::vector<SerialMesh *> _meshes;
+  std::vector<ReplicatedMesh *> _meshes;
 
   // Holds a mesh for each row, these will be stitched together in the end
-  std::vector<SerialMesh *> _row_meshes;
+  std::vector<ReplicatedMesh *> _row_meshes;
 
   const Real _x_width;
   const Real _y_width;

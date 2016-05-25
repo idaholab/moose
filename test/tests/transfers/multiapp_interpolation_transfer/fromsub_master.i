@@ -14,8 +14,8 @@
   nx = 10
   ny = 10
   displacements = 'disp_x disp_y'
-  # The MultiAppInterpolationTransfer object only works with SerialMesh
-  distribution = serial
+  # The MultiAppInterpolationTransfer object only works with ReplicatedMesh
+  parallel_type = replicated
 []
 
 [Variables]

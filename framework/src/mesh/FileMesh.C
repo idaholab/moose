@@ -66,8 +66,8 @@ FileMesh::buildMesh()
   Moose::perf_log.push("Read Mesh", "Setup");
   if (_is_nemesis)
   {
-    // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
-    ParallelMesh& pmesh = cast_ref<ParallelMesh&>(getMesh());
+    // Nemesis_IO only takes a reference to DistributedMesh, so we can't be quite so short here.
+    DistributedMesh & pmesh = cast_ref<DistributedMesh &>(getMesh());
     Nemesis_IO(pmesh).read(_file_name);
 
     getMesh().allow_renumbering(false);
@@ -106,7 +106,7 @@ FileMesh::buildMesh()
 void
 FileMesh::read(const std::string & file_name)
 {
-  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_nemesis)
+  if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
     getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/false);
   else
     getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/true);

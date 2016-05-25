@@ -83,7 +83,8 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("error_deprecated", "--error-deprecated", false, "Turn deprecated code messages into Errors");
   params.addCommandLineParam<bool>("allow_deprecated", "--allow-deprecated", false, "Can be used in conjunction with --error to turn off deprecated errors");
 
-  params.addCommandLineParam<bool>("parallel_mesh", "--parallel-mesh", false, "The libMesh Mesh underlying MooseMesh should always be a ParallelMesh");
+  params.addCommandLineParam<bool>("parallel_mesh", "--parallel-mesh", false, "This command line option is deprecated, use --distributed-mesh instead.");
+  params.addCommandLineParam<bool>("distributed_mesh", "--distributed-mesh", false, "The libMesh Mesh underlying MooseMesh should always be a DistributedMesh");
 
   params.addCommandLineParam<unsigned int>("refinements", "-r <n>", 0, "Specify additional initial uniform refinements for automatic scaling");
 
@@ -140,7 +141,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     _error_overridden(false),
     _ready_to_exit(false),
     _initial_from_file(false),
-    _parallel_mesh_on_command_line(false),
+    _distributed_mesh_on_command_line(false),
     _recover(false),
     _restart(false),
     _half_transient(false),
@@ -197,7 +198,14 @@ MooseApp::setupOptions()
   if (getParam<bool>("error_override"))
     setErrorOverridden();
 
-  _parallel_mesh_on_command_line = getParam<bool>("parallel_mesh");
+  // Warn if user passed the old command line arg, but still accept it.
+  if (getParam<bool>("parallel_mesh"))
+  {
+    mooseWarning("The --parallel-mesh command line option is deprecated, use --distributed-mesh instead.");
+    _distributed_mesh_on_command_line = getParam<bool>("parallel_mesh");
+  }
+
+  _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
   _half_transient = getParam<bool>("half_transient");
   _pars.set<bool>("timing") = getParam<bool>("timing");
 

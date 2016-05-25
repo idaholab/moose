@@ -49,7 +49,7 @@ AddAllSideSetsByNormals::modify()
     mooseError("_mesh_ptr must be initialized before calling AddAllSideSetsByNormals::modify()!");
 
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
-  _mesh_ptr->errorIfParallelDistribution("AddAllSideSetsByNormals");
+  _mesh_ptr->errorIfDistributedMesh("AddAllSideSetsByNormals");
 
   // Get the current list of boundaries so we can generate new ones that won't conflict
   _mesh_boundary_ids = _mesh_ptr->meshBoundaryIds();

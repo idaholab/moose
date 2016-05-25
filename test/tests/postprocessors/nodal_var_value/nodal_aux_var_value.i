@@ -8,11 +8,11 @@
   ymin = 0
   ymax = 1
   elem_type = QUAD4
-  # This test can only be run with SerialMesh since, in parallel with
-  # ParallelMesh, the nodes get renumbered and thus the
+  # This test can only be run with ReplicatedMesh since, in parallel with
+  # DistributedMesh, the nodes get renumbered and thus the
   # NodalVariableValue postprocessor's output is necessarily
   # different.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]
