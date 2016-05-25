@@ -5,10 +5,32 @@
     csvdiff = 'internal_volume_rspherical_out.csv'
   [../]
 
+  [./test_rspherical_error]
+    type = RunException
+    input = 'internal_volume_rspherical.i'
+    cli_args = 'Postprocessors/intVolTotal/component=1'
+    expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
+  [../]
+
   [./test_rz]
     type = 'CSVDiff'
     input = 'internal_volume_rz.i'
     csvdiff = 'out_rz.csv'
+  [../]
+
+  [./test_rz2]
+    type = 'CSVDiff'
+    input = 'internal_volume_rz.i'
+    csvdiff = 'out_rz.csv'
+    cli_args = 'Postprocessors/internalVolume/component=1 Outputs/file_base=out_rz'
+    prereq = test_rz
+  [../]
+
+  [./test_rz_error]
+    type = RunException
+    input = 'internal_volume_rz.i'
+    cli_args = 'Postprocessors/internalVolume/component=2'
+    expect_err = 'With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.'
   [../]
 
   [./test_hex20]
