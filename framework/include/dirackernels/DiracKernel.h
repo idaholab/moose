@@ -216,6 +216,9 @@ protected:
   /// Derivative of u_dot wrt u
   const VariableValue & _du_dot_du;
 
+  /// drop duplicate points or consider them in residual and Jacobian
+  const bool _drop_duplicate_points;
+
 private:
   /// Data structure for caching user-defined IDs which can be mapped to
   /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.
