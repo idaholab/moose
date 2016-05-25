@@ -5,14 +5,13 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "AccumulateAux.h"
 
 template<>
 InputParameters validParams<AccumulateAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredCoupledVar("accumulate_from_variable","Variable whose values are to be accumulated into the current variable");
+  params.addRequiredCoupledVar("accumulate_from_variable", "Variable whose values are to be accumulated into the current variable");
   return params;
 }
 

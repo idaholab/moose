@@ -28,7 +28,7 @@ LineMaterialRealSampler::LineMaterialRealSampler(const InputParameters & paramet
 }
 
 Real
-LineMaterialRealSampler::getScalarFromProperty(const Real & property, const Point * /*curr_point*/)
+LineMaterialRealSampler::getScalarFromProperty(const Real & property, const Point & /*curr_point*/)
 {
   return property;
 }

@@ -66,3 +66,4 @@ ElementsOnLineAux::computeValue()
   mooseError("From ElementsOnLineAux: computeValue() is not defined");
   return 0;
 }
+

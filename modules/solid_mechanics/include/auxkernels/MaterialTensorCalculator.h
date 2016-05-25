@@ -57,7 +57,7 @@ protected:
 
 public:
   Real getTensorQuantity(const SymmTensor & tensor,
-                         const Point * curr_point,
+                         const Point & curr_point,
                          RealVectorValue &direction);
 };
 

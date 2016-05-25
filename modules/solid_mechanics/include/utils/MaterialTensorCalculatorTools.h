@@ -118,10 +118,10 @@ Real axialStress(const SymmTensor & symm_stress, const Point & point1, const Poi
  * of rotation and the normal from the current position to the axis of rotation.
  * @param point1 The starting point of the rotation axis for a cylinderical system
  * @param point2 The end point of the rotation axis
- * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
+ * @param curr_point The reference corresponding to the stress (pass in _q_point[_qp])
  * @param direction The direction vector in which the scalar stress value is calculated.
  */
-Real hoopStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point * curr_point, RealVectorValue & direction);
+Real hoopStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point & curr_point, RealVectorValue & direction);
 
 /* The radial stress is calculated as
  * radial_stress = normal^T_i * \sigma_{ij} * normal_j
@@ -129,10 +129,10 @@ Real hoopStress(const SymmTensor & symm_stress, const Point & point1, const Poin
  * the user-defined axis of rotation; the axis direction is specified with two points.
  * @param point1 The starting point of the rotation axis for a cylinderical system
  * @param point2 The end point of the rotation axis
- * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
+ * @param curr_point The reference corresponding to the stress (pass in _q_point[_qp])
  * @param direction The direction vector in which the scalar stress value is calculated.
 */
-Real radialStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point * curr_point, RealVectorValue & direction);
+Real radialStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point & curr_point, RealVectorValue & direction);
 
 /*
  * This method is a helper method for the hoopStress and radialStress methods to
@@ -140,10 +140,10 @@ Real radialStress(const SymmTensor & symm_stress, const Point & point1, const Po
  * of rotation; the rotation axis direction is specified by inputing two points.
  * @param point1 The starting point of the rotation axis for a cylinderical system
  * @param point2 The end point of the rotation axis
- * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
+ * @param curr_point The reference corresponding to the stress (pass in _q_point[_qp])
  * @param normalPosition The vector from the current point that is normal to the rotation axis
  */
-void normalPositionVector(const Point & point1, const Point & point2, const Point * curr_point, Point & normalPosition);
+void normalPositionVector(const Point & point1, const Point & point2, const Point & curr_point, Point & normalPosition);
 
 /*
  * This method calculates the scalar value of the supplied rank-2 tensor in the

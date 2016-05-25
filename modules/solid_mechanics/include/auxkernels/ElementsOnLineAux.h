@@ -37,3 +37,4 @@ template<>
 InputParameters validParams<ElementsOnLineAux>();
 
 #endif // ELEMENTSONLINEAUX_H
+

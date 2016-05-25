@@ -50,7 +50,7 @@ MaterialTensorAux::computeValue()
     qp_call = _qp;
 
   Real value = _material_tensor_calculator.getTensorQuantity(_tensor[qp_call],
-                                                             &_q_point[qp_call],
+                                                             _q_point[qp_call],
                                                              direction);
   return value;
 }
