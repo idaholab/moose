@@ -443,9 +443,6 @@ protected:
   // damping
   VariableValue _increment;
 
-  /// scaling factor for this variable
-  Real _scaling_factor;
-
   friend class NodeFaceConstraint;
   friend class ValueThresholdMarker;
   friend class ValueRangeMarker;
