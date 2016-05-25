@@ -30,6 +30,8 @@ class InternalVolume : public SideIntegralPostprocessor
 public:
   InternalVolume( const InputParameters & parameters);
 
+  void initialSetup();
+
 protected:
   virtual Real computeQpIntegral();
   virtual Real getValue();
