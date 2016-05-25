@@ -83,7 +83,7 @@ RandomData::updateGenerators()
    * processor based on their individual processor ids before generating seeds for
    * the mesh entities.
    */
-  if (_rd_mesh.isParallelMesh())
+  if (_rd_mesh.isDistributedMesh())
   {
     unsigned int parallel_seed;
     for (processor_id_type proc_id = 0; proc_id < _rd_problem.n_processors(); ++proc_id)

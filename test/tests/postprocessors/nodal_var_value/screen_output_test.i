@@ -1,8 +1,8 @@
 [Mesh]
   file = square-2x2-nodeids.e
   # This test uses a NodalVariableValue postprocessor, which
-  # only works with SerialMesh
-  distribution = serial
+  # only works with ReplicatedMesh
+  parallel_type = replicated
 []
 
 [Variables]

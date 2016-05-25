@@ -5,7 +5,6 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  distribution = DEFAULT
   elem_type = QUAD4
   nx = 25
   ny = 25

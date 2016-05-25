@@ -60,9 +60,16 @@ InputParameters validParams<MooseMesh>()
 
   MooseEnum mesh_distribution_type("PARALLEL=0 SERIAL DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>("distribution", mesh_distribution_type,
-                             "PARALLEL: Always use libMesh::ParallelMesh "
-                             "SERIAL: Always use libMesh::SerialMesh "
-                             "DEFAULT: Use libMesh::SerialMesh unless --parallel-mesh is specified on the command line");
+                             "PARALLEL: Always use libMesh::DistributedMesh "
+                             "SERIAL: Always use libMesh::ReplicatedMesh "
+                             "DEFAULT: Use libMesh::ReplicatedMesh unless --distributed-mesh is specified on the command line "
+                             "The distribution flag is deprecated, use parallel_type={DISTRIBUTED,REPLICATED} instead.");
+
+  MooseEnum mesh_parallel_type("DISTRIBUTED=0 REPLICATED DEFAULT", "DEFAULT");
+  params.addParam<MooseEnum>("parallel_type", mesh_parallel_type,
+                             "DISTRIBUTED: Always use libMesh::DistributedMesh "
+                             "REPLICATED: Always use libMesh::ReplicatedMesh "
+                             "DEFAULT: Use libMesh::ReplicatedMesh unless --distributed-mesh is specified on the command line");
 
   params.addParam<bool>("nemesis", false,
                         "If nemesis=true and file=foo.e, actually reads "
@@ -101,8 +108,10 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "Mesh"),
     _mesh_distribution_type(getParam<MooseEnum>("distribution")),
-    _use_parallel_mesh(false),
+    _mesh_parallel_type(getParam<MooseEnum>("parallel_type")),
+    _use_distributed_mesh(false),
     _distribution_overridden(false),
+    _parallel_type_overridden(false),
     _mesh(NULL),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
@@ -128,36 +137,60 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list"))
 {
+  // This flag is deprecated, but we still allow it to be used. It
+  // will still do the same thing as it did before, but now it will
+  // print a deprecated message.
   switch (_mesh_distribution_type)
   {
   case 0: // PARALLEL
-    _use_parallel_mesh = true;
+    mooseDeprecated("Using 'distribution = PARALLEL' in the Mesh block is deprecated, use 'parallel_type = DISTRIBUTED' instead.");
+    _use_distributed_mesh = true;
+    break;
+
+  case 1: // SERIAL
+    mooseDeprecated("Using 'distribution = SERIAL' in the Mesh block is deprecated, use 'parallel_type = REPLICATED' instead.");
+    if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
+      _distribution_overridden = true;
+    break;
+
+  case 2: // DEFAULT
+    // If the user did not specify any 'distribution = foo' in his
+    // input file, there's nothing to do.  In particular, we do not
+    // want to allow the command line to override the default mesh
+    // type in this case.
+    break;
+  }
+
+  switch (_mesh_parallel_type)
+  {
+  case 0: // PARALLEL
+    _use_distributed_mesh = true;
     break;
   case 1: // SERIAL
-    if (_app.getParallelMeshOnCommandLine() || _is_nemesis)
-      _distribution_overridden = true;
+    if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
+      _parallel_type_overridden = true;
     break;
   case 2: // DEFAULT
     // The user did not specify 'distribution = XYZ' in the input file,
-    // so we allow the --parallel-mesh command line arg to possibly turn
-    // on ParallelMesh.  If the command line arg is not present, we pick SerialMesh.
-    if (_app.getParallelMeshOnCommandLine())
-      _use_parallel_mesh = true;
+    // so we allow the --distributed-mesh command line arg to possibly turn
+    // on DistributedMesh.  If the command line arg is not present, we pick ReplicatedMesh.
+    if (_app.getDistributedMeshOnCommandLine())
+      _use_distributed_mesh = true;
 
     break;
     // No default switch needed for MooseEnum
   }
 
   // If the user specifies 'nemesis = true' in the Mesh block, we
-  // must use ParallelMesh.
+  // must use DistributedMesh.
   if (_is_nemesis)
-    _use_parallel_mesh = true;
+    _use_distributed_mesh = true;
 
   unsigned dim = getParam<MooseEnum>("dim");
 
-  if (_use_parallel_mesh)
+  if (_use_distributed_mesh)
   {
-    _mesh = new ParallelMesh(_communicator, dim);
+    _mesh = new DistributedMesh(_communicator, dim);
     if (_partitioner_name != "default" && _partitioner_name != "parmetis")
     {
       _partitioner_name = "parmetis";
@@ -165,14 +198,15 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     }
   }
   else
-    _mesh = new SerialMesh(_communicator, dim);
+    _mesh = new ReplicatedMesh(_communicator, dim);
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     MooseObject(other_mesh._pars),
     Restartable(_pars, "Mesh"),
     _mesh_distribution_type(other_mesh._mesh_distribution_type),
-    _use_parallel_mesh(other_mesh._use_parallel_mesh),
+    _mesh_parallel_type(other_mesh._mesh_parallel_type),
+    _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
     _mesh(other_mesh.getMesh().clone().release()),
     _partitioner_name(other_mesh._partitioner_name),
@@ -272,7 +306,7 @@ MooseMesh::freeBndElems()
 void
 MooseMesh::prepare(bool force)
 {
-  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_nemesis)
+  if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
   {
     // Call prepare_for_use() and allow renumbering
     getMesh().allow_renumbering(true);
@@ -1570,7 +1604,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
                                 int child,
                                 int child_side)
 {
-  SerialMesh mesh(_communicator);
+  ReplicatedMesh mesh(_communicator);
   mesh.skip_partitioning(true);
 
   unsigned int dim = template_elem->dim();
@@ -1768,7 +1802,7 @@ MooseMesh::init()
     {
     case -3: // default
       // We'll use the default partitioner, but notify the user of which one is being used...
-      if (_use_parallel_mesh)
+      if (_use_distributed_mesh)
         _partitioner_name = "parmetis";
       else
         _partitioner_name = "metis";
@@ -2056,33 +2090,28 @@ namespace // Anonymous namespace for helper
   // iterator_traits will work.
   // This object specifically is used to insert extra ghost elems into the mesh
   template <typename T>
-  struct extra_ghost_elem_inserter
-    : std::iterator<std::output_iterator_tag, T>
+  struct extra_ghost_elem_inserter : std::iterator<std::output_iterator_tag, T>
   {
-    extra_ghost_elem_inserter(ParallelMesh& m) : mesh(m) {}
+    extra_ghost_elem_inserter(DistributedMesh & m) : mesh(m) {}
 
-    void operator=(const Elem* e) { mesh.add_extra_ghost_elem(const_cast<Elem *>(e)); }
+    void operator=(const Elem * e) { mesh.add_extra_ghost_elem(const_cast<Elem *>(e)); }
 
-    void operator=(Node* n) { mesh.add_node(n); }
+    void operator=(Node * n) { mesh.add_node(n); }
 
-    void operator=(Point* p) { mesh.add_point(*p); }
+    void operator=(Point * p) { mesh.add_point(*p); }
 
-    extra_ghost_elem_inserter& operator++() {
-      return *this;
-    }
+    extra_ghost_elem_inserter & operator++() { return *this; }
 
-    extra_ghost_elem_inserter operator++(int) {
-      return extra_ghost_elem_inserter(*this);
-    }
+    extra_ghost_elem_inserter operator++(int) { return extra_ghost_elem_inserter(*this); }
 
     // We don't return a reference-to-T here because we don't want to
     // construct one or have any of its methods called.  We just want
     // to allow the returned object to be able to do mesh insertions
     // with operator=().
-    extra_ghost_elem_inserter& operator*() { return *this; }
+    extra_ghost_elem_inserter & operator*() { return *this; }
   private:
 
-    ParallelMesh& mesh;
+    DistributedMesh & mesh;
   };
 
 } // anonymous namespace
@@ -2092,14 +2121,14 @@ void
 MooseMesh::ghostGhostedBoundaries()
 {
   // No need to do this if using a serial mesh
-  if (!_use_parallel_mesh)
+  if (!_use_distributed_mesh)
     return;
 
   std::vector<dof_id_type> elems;
   std::vector<unsigned short int> sides;
   std::vector<boundary_id_type> ids;
 
-  ParallelMesh & mesh = dynamic_cast<ParallelMesh &>(getMesh());
+  DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
 
   mesh.clear_extra_ghost_elems();
 
@@ -2289,14 +2318,21 @@ MooseMesh::isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id) const
 }
 
 void
+MooseMesh::errorIfDistributedMesh(std::string name) const
+{
+  if (_use_distributed_mesh)
+    mooseError("Cannot use " << name << " with DistributedMesh!\n"
+               << "Consider specifying parallel_type = 'replicated' in your input file\n"
+               << "to prevent it from being run with DistributedMesh.");
+}
 
+void
 MooseMesh::errorIfParallelDistribution(std::string name) const
 {
-  if (_use_parallel_mesh)
-    mooseError("Cannot use " << name << " with ParallelMesh!\n"
-               << "Consider specifying distribution = 'serial' in your input file\n"
-               << "to prevent it from being run with ParallelMesh.");
+  mooseDeprecated("errorIfParallelDistribution() is deprecated, call errorIfDistributedMesh() instead.");
+  errorIfDistributedMesh(name);
 }
+
 
 MooseMesh::MortarInterface *
 MooseMesh::getMortarInterfaceByName(const std::string name)

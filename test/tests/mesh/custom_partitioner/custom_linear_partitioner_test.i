@@ -25,7 +25,7 @@
     type = LibmeshPartitioner
     partitioner = linear
   [../]
-  distribution = serial
+  parallel_type = replicated
 []
 
 

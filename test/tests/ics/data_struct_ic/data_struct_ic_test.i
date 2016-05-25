@@ -5,7 +5,7 @@
   dim = 2
 
   # DataStructIC creates an IC based on node numbering
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

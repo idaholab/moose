@@ -8,8 +8,8 @@
 [Mesh]
   type = FileMesh
   file = cubesource.e
-  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
-  distribution = serial
+  # This test uses SolutionUserObject which doesn't work with DistributedMesh.
+  parallel_type = replicated
 []
 
 [Variables]
