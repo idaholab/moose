@@ -150,4 +150,11 @@
     prereq = aux_nonlinear_solution_adapt
     max_threads = 1 # ticket 2283
   [../]
+
+  [./thread_test]
+    type = CSVDiff
+    input = 'thread_xda.i'
+    csvdiff = 'thread_xda_out.csv'
+    min_threads = 2
+  [../]
 []

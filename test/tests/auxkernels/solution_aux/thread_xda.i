@@ -1,7 +1,7 @@
 [Mesh]
   # This test uses SolutionUserObject which doesn't work with ParallelMesh.
   type = GeneratedMesh
-  distribution = SERIAL
+  parallel_type = REPLICATED
   dim = 2
   nx = 2
   ny = 2
@@ -74,5 +74,5 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
