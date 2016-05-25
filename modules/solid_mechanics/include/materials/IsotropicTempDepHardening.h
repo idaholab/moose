@@ -26,7 +26,7 @@ protected:
 
   void initializeHardeningFunctions(unsigned qp);
 
-  LinearInterpolation * _interp_yield_stress;
+  MooseSharedPointer<LinearInterpolation> _interp_yield_stress;
   const std::vector<FunctionName> _hardening_functions_names;
   std::vector<PiecewiseLinear *> _hardening_functions;
   std::vector<Real> _hf_temperatures;

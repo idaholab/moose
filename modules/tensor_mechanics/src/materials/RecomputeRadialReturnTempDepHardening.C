@@ -59,7 +59,7 @@ RecomputeRadialReturnTempDepHardening::RecomputeRadialReturnTempDepHardening(con
     yield_stress_vec.push_back(f->value(0.0, Point()));
   }
 
-  _interp_yield_stress = new LinearInterpolation(_hf_temperatures, yield_stress_vec);
+  _interp_yield_stress = MooseSharedPointer<LinearInterpolation>(new LinearInterpolation(_hf_temperatures, yield_stress_vec));
 
   _scalar_plastic_strain_old = &declarePropertyOld<Real>("scalar_plastic_strain");
 }
