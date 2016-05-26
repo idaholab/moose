@@ -967,22 +967,7 @@ MooseApp::executeMeshModifiers()
     {
       MeshModifier * modifier_ptr = it->get();
 
-      modifier_ptr->setMeshPointer(mesh);
-      modifier_ptr->modify();
-
-      if (displaced_mesh)
-      {
-        modifier_ptr->setMeshPointer(displaced_mesh);
-        modifier_ptr->modify();
-      }
-
-      // Prepare the mesh in-between modifiers if necessary
-      if (modifier_ptr->forcePrepare())
-      {
-        mesh->prepare();
-        if (displaced_mesh)
-          displaced_mesh->prepare();
-      }
+      modifier_ptr->modifyMesh(mesh, displaced_mesh);
     }
 
     /**

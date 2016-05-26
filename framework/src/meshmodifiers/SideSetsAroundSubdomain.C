@@ -57,14 +57,15 @@ SideSetsAroundSubdomain::~SideSetsAroundSubdomain()
 }
 
 void
-SideSetsAroundSubdomain::modify()
+SideSetsAroundSubdomain::initialize()
 {
-  if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling SideSetsAroundSubdomain::modify()!");
-
   // Initialize the BlockRestrictable parent
   initializeBlockRestrictable(_pars);
+}
 
+void
+SideSetsAroundSubdomain::modify()
+{
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
 
