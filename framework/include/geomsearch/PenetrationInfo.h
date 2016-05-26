@@ -36,7 +36,17 @@ class Elem;
 class PenetrationInfo
 {
 public:
-  PenetrationInfo(const Node * node, const Elem * elem, Elem * side, unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance, const Point & closest_point, const Point & closest_point_ref, const Point & closest_point_on_face_ref, std::vector<Node*> off_edge_nodes, const std::vector<std::vector<Real> > & side_phi, const std::vector<std::vector<RealGradient> > & side_grad_phi, const std::vector<RealGradient> & dxyzdxi, const std::vector<RealGradient> & dxyzdeta, const std::vector<RealGradient> & d2xyzdxideta);
+  PenetrationInfo(const Node * node, const Elem * elem, Elem * side,
+                  unsigned int side_num, RealVectorValue norm, Real norm_distance, Real tangential_distance,
+                  const Point & closest_point,
+                  const Point & closest_point_ref,
+                  const Point & closest_point_on_face_ref,
+                  std::vector<const Node *> off_edge_nodes,
+                  const std::vector<std::vector<Real> > & side_phi,
+                  const std::vector<std::vector<RealGradient> > & side_grad_phi,
+                  const std::vector<RealGradient> & dxyzdxi,
+                  const std::vector<RealGradient> & dxyzdeta,
+                  const std::vector<RealGradient> & d2xyzdxideta);
 
   PenetrationInfo(const PenetrationInfo & p);
 
@@ -67,7 +77,7 @@ public:
   Point _closest_point;
   Point _closest_point_ref;
   Point _closest_point_on_face_ref;
-  std::vector<Node*> _off_edge_nodes;
+  std::vector<const Node*> _off_edge_nodes;
   std::vector<std::vector<Real> > _side_phi;
   std::vector<std::vector<RealGradient> > _side_grad_phi;
   std::vector<RealGradient> _dxyzdxi;

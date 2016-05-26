@@ -66,13 +66,13 @@ findContactPoint(PenetrationInfo & p_info,
 
   if (dim == 1)
   {
-    Node * left(master_elem->node_ptr(0));
-    Node * right(left);
-    Real leftCoor((*left)(0));
-    Real rightCoor(leftCoor);
-    for (unsigned i(1); i < master_elem->n_nodes(); ++i)
+    const Node * left = master_elem->node_ptr(0);
+    const Node * right = left;
+    Real leftCoor = (*left)(0);
+    Real rightCoor = leftCoor;
+    for (unsigned i = 1; i < master_elem->n_nodes(); ++i)
     {
-      Node * curr = master_elem->node_ptr(i);
+      const Node * curr = master_elem->node_ptr(i);
       Real coor = (*curr)(0);
       if (coor < leftCoor)
       {
@@ -85,7 +85,7 @@ findContactPoint(PenetrationInfo & p_info,
         rightCoor = coor;
       }
     }
-    Node * nearestNode(left);
+    const Node * nearestNode = left;
     Point nearestPoint(leftCoor, 0, 0);
     if (side->node(0) == right->id())
     {
@@ -270,7 +270,7 @@ findContactPoint(PenetrationInfo & p_info,
 
 void restrictPointToFace(Point& p,
                          const Elem* side,
-                         std::vector<Node*> &off_edge_nodes)
+                         std::vector<const Node *> & off_edge_nodes)
 {
   const ElemType t(side->type());
   off_edge_nodes.clear();

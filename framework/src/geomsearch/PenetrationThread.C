@@ -214,7 +214,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
           {
             Point closest_coor;
             Real tangential_distance(0.0);
-            Node* closest_node_on_ridge(NULL);
+            const Node * closest_node_on_ridge = NULL;
             unsigned int index=0;
             Point closest_coor_ref;
             bool found_ridge_contact_point = findRidgeContactPoint(closest_coor,
@@ -345,7 +345,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
             }
             else
             { //peak
-              Node* closest_node_on_face;
+              const Node * closest_node_on_face;
               bool restricted = restrictPointToFace(p_info[face_index]->_closest_point_ref, closest_node_on_face, p_info[face_index]->_side);
               if (restricted)
               {
@@ -578,8 +578,8 @@ PenetrationThread::interactionsOffCommonEdge(PenetrationInfo * pi1,
                                              PenetrationInfo * pi2)
 {
   CommonEdgeResult common_edge(NO_COMMON);
-  const std::vector<Node*> &off_edge_nodes1(pi1->_off_edge_nodes);
-  const std::vector<Node*> &off_edge_nodes2(pi2->_off_edge_nodes);
+  const std::vector<const Node *> & off_edge_nodes1 = pi1->_off_edge_nodes;
+  const std::vector<const Node *> & off_edge_nodes2 = pi2->_off_edge_nodes;
   const unsigned dim1(pi1->_side->dim());
   const unsigned dim2(pi2->_side->dim());
 
@@ -632,7 +632,7 @@ PenetrationThread::interactionsOffCommonEdge(PenetrationInfo * pi1,
 bool
 PenetrationThread::findRidgeContactPoint(Point &contact_point,
                                          Real & tangential_distance,
-                                         Node* &closest_node,
+                                         const Node * & closest_node,
                                          unsigned int &index,
                                          Point &contact_point_ref,
                                          std::vector<PenetrationInfo*> &p_info,
@@ -666,12 +666,12 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
 
   bool found_point1, found_point2;
   Point closest_coor_ref1(pi1->_closest_point_ref);
-  Node* closest_node1;
-  found_point1 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref1,closest_node1,pi1->_side,common_nodes);
+  const Node * closest_node1;
+  found_point1 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref1, closest_node1, pi1->_side, common_nodes);
 
   Point closest_coor_ref2(pi2->_closest_point_ref);
-  Node* closest_node2;
-  found_point2 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref2,closest_node2,pi2->_side,common_nodes);
+  const Node * closest_node2;
+  found_point2 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref2, closest_node2, pi2->_side, common_nodes);
 
   if (!found_point1 || !found_point2)
     return false;
@@ -768,7 +768,7 @@ PenetrationThread::getSideCornerNodes(Elem* side,
 
 bool
 PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
-                                                      Node* &closest_node,
+                                                      const Node * & closest_node,
                                                       const Elem* side,
                                                       const std::vector<Node*> &edge_nodes)
 {
@@ -947,7 +947,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
 
 bool
 PenetrationThread::restrictPointToFace(Point& p,
-                                       Node* &closest_node,
+                                       const Node * & closest_node,
                                        const Elem* side)
 {
   const ElemType t(side->type());
@@ -1675,7 +1675,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
     Real tangential_distance = 0.;
     RealGradient normal;
     bool contact_point_on_side;
-    std::vector<Node*> off_edge_nodes;
+    std::vector<const Node *> off_edge_nodes;
     std::vector<std::vector<Real> > side_phi;
     std::vector<std::vector<RealGradient> > side_grad_phi;
     std::vector<RealGradient> dxyzdxi;
