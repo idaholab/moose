@@ -19,6 +19,9 @@ InputParameters validParams<MeshModifier>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<std::vector<std::string> >("depends_on", "The MeshModifiers that this modifier relies upon (i.e. must execute before this one)");
+  params.addParam<bool>("force_prepare", false,
+                        "Normally all MeshModifiers run before the mesh is prepared for use. This flag can be set on an individual modifier "
+                        "to force preperation between modifiers where they might be needed.");
 
   params.registerBase("MeshModifier");
 
@@ -29,7 +32,8 @@ MeshModifier::MeshModifier(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "MeshModifiers"),
     _mesh_ptr(NULL),
-    _depends_on(getParam<std::vector<std::string> >("depends_on"))
+    _depends_on(getParam<std::vector<std::string> >("depends_on")),
+    _force_prepare(getParam<bool>("force_prepare"))
 {
 }
 

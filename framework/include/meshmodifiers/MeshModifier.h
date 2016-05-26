@@ -56,11 +56,17 @@ public:
 
   std::vector<std::string> & getDependencies() { return _depends_on; }
 
+  bool forcePrepare() const { return _force_prepare; }
+
 protected:
   MooseMesh *_mesh_ptr;
 
 private:
+  /// A list of modifiers that are required to run before this modifier may run
   std::vector<std::string> _depends_on;
+
+  /// Flag to determine if the mesh should be prepared after this modifier is run
+  const bool _force_prepare;
 };
 
 #endif //MESHMODIFIER_H

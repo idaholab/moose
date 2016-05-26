@@ -28,6 +28,10 @@ InputParameters validParams<SideSetsAroundSubdomain>()
   params.addRequiredParam<std::vector<BoundaryName> >("new_boundary", "The list of boundary IDs to create on the supplied subdomain");
   params.addParam<Point>("normal", "If supplied, only faces with normal equal to this, up to normal_tol, will be added to the sidesets specified");
   params.addRangeCheckedParam<Real>("normal_tol", 0.1, "normal_tol>=0 & normal_tol<=2", "If normal is supplied then faces are only added if face_normal.normal_hat >= 1 - normal_tol, where normal_hat = normal/|normal|");
+
+  // We can't perform block/boundary restrictable checks on construction for MeshModifiers
+  params.set<bool>("delay_initialization") = true;
+
   params.addClassDescription("Adds element faces that are on the exterior of the given block to the sidesets specified");
   return params;
 }
@@ -57,6 +61,9 @@ SideSetsAroundSubdomain::modify()
 {
   if (!_mesh_ptr)
     mooseError("_mesh_ptr must be initialized before calling SideSetsAroundSubdomain::modify()!");
+
+  // Initialize the BlockRestrictable parent
+  initializeBlockRestrictable(_pars);
 
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
