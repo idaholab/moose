@@ -21,10 +21,13 @@
 #  stress yz = 2 * 5e5 * 2e-6 / 2 = 1
 #  stress zx = 2 * 5e5 * 3e-6 / 2 = 1.5
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  block = '1 2 3 4 5 6 7'
+[]
 
 [Mesh]#Comment
-  file = elastic_patch.e
-  displacements = 'disp_x disp_y disp_z'
+  file = anisotropic_patch_test.e
 [] # Mesh
 
 [Functions]
@@ -61,26 +64,21 @@
 [] # Functions
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-
 [] # Variables
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -129,136 +127,94 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./maxprincipal]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./medprincipal]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./minprincipal]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./direction]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
 [] # AuxVariables
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
 [AuxKernels]
-
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 0
     variable = stress_xx
-    index = 0
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 1
     variable = stress_yy
-    index = 1
   [../]
   [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 2
     variable = stress_zz
-    index = 2
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 1
     variable = stress_xy
-    index = 3
   [../]
   [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 2
     variable = stress_yz
-    index = 4
   [../]
   [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 0
     variable = stress_zx
-    index = 5
   [../]
   [./elastic_energy]
     type = ElasticEnergyAux
     variable = elastic_energy
   [../]
   [./vonmises]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = VonMisesStress
     variable = vonmises
-    quantity = vonmises
   [../]
   [./hydrostatic]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = Hydrostatic
     variable = hydrostatic
-    quantity = hydrostatic
   [../]
   [./fi]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = FirstInvariant
     variable = firstinv
-    quantity = firstinvariant
   [../]
   [./si]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = SecondInvariant
     variable = secondinv
-    quantity = secondinvariant
   [../]
   [./ti]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    scalar_type = ThirdInvariant
     variable = thirdinv
-    quantity = thirdinvariant
   [../]
-  [./maxprincipal]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = maxprincipal
-    quantity = MaxPRiNCIpAl
-  [../]
-  [./medprincipal]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = medprincipal
-    quantity = MEdPRiNCIpAl
-  [../]
-  [./minprincipal]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = minprincipal
-    quantity = MiNPRiNCIpAl
-  [../]
-  [./direction]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = direction
-    quantity = direction
-    direction = '1 1 1'
-  [../]
-
-
 [] # AuxKernels
 
 [BCs]
-
   [./node1_x]
     type = DirichletBC
     variable = disp_x
@@ -410,101 +366,34 @@
     boundary = 8
     value = 0.0
   [../]
-
-
 [] # BCs
 
 [Materials]
-
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
+  [./elastic_tensor]
+    type = ComputeElasticityTensor
+    C_ijkl = '1e6 0.0 0.0 1e6 0.0 1e6 0.5e6 0.5e6 0.5e6'
+    fill_method = symmetric9
+    euler_angle_1 = 18.0
+    euler_angle_2 = 43.0
+    euler_angle_3 = 177.0
+#    Isotropic material constants
+#    The three euler angles do not matter
+#    youngs_modulus = 1e6
+#    poissons_ratio = 0.0
   [../]
-  [./stiffStuff2]
-    type = Elastic
-    block = 2
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
+  [./strain]
+    type = ComputeSmallStrain
   [../]
-  [./stiffStuff3]
-    type = Elastic
-    block = 3
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
+  [./stress]
+    type = ComputeLinearElasticStress
   [../]
-  [./stiffStuff4]
-    type = Elastic
-    block = 4
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-  [./stiffStuff5]
-    type = Elastic
-    block = 5
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-  [./stiffStuff6]
-    type = Elastic
-    block = 6
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-  [./stiffStuff7]
-    type = Elastic
-    block = 7
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
-    youngs_modulus = 1e6
-    poissons_ratio = 0.0
-  [../]
-
 [] # Materials
 
 [Executioner]
-
   type = Transient
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
 
   nl_abs_tol = 1e-10
 
@@ -517,5 +406,9 @@
 [] # Executioner
 
 [Outputs]
-  exodus = true
+  file_base = anisotropic_patch_test_out
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
 [] # Outputs
