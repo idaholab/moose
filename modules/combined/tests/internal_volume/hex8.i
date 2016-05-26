@@ -11,7 +11,7 @@
 #   the net result is seven.
 #
 
-[Mesh]#Comment
+[Mesh]
   file = meshes/hex8.e
   displacements = 'disp_x disp_y disp_z'
 []
@@ -26,7 +26,6 @@
 []
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -41,7 +40,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
 []
 
 [SolidMechanics]
@@ -53,7 +51,6 @@
 []
 
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -107,22 +104,11 @@
 []
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
-
-  nl_abs_tol = 1e-10
-
-  l_max_its = 20
 
   start_time = 0.0
   dt = 1.0
-  #num_steps = 3
   end_time = 3.0
 []
 

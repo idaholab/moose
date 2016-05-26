@@ -37,7 +37,6 @@
     type = 'CSVDiff'
     input = 'hex20.i'
     csvdiff = 'hex20_out.csv'
-    max_parallel = 1
   [../]
 
   [./rz_quad8]

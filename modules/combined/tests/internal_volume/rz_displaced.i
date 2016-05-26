@@ -50,7 +50,6 @@
 []
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -60,7 +59,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
 []
 
 [AuxVariables]
@@ -87,7 +85,6 @@
 []
 
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -111,7 +108,6 @@
 []
 
 [Materials]
-
   [./stiffStuff]
     type = Elastic
     block = 1
@@ -122,20 +118,11 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-
 []
 
 [Executioner]
-
   type = Transient
-
   solve_type = PJFNK
-
-
-
-  nl_abs_tol = 1e-10
-
-  l_max_its = 20
 
   start_time = 0.0
   dt = 1.0

@@ -27,7 +27,6 @@
 []
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -37,7 +36,6 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
 []
 
 [SolidMechanics]
@@ -47,9 +45,7 @@
   [../]
 []
 
-
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -99,16 +95,8 @@
 []
 
 [Executioner]
-
   type = Transient
-
   solve_type = PJFNK
-
-
-
-  nl_abs_tol = 1e-10
-
-  l_max_its = 20
 
   start_time = 0.0
   dt = 1.0

@@ -9,7 +9,7 @@
 #   is 7.
 #
 
-[Mesh]#Comment
+[Mesh]
   file = meshes/hex20.e
   displacements = 'disp_x disp_y disp_z'
 []
@@ -24,7 +24,6 @@
 []
 
 [Variables]
-
   [./disp_x]
     order = SECOND
     family = LAGRANGE
@@ -39,7 +38,6 @@
     order = SECOND
     family = LAGRANGE
   [../]
-
 []
 
 [SolidMechanics]
@@ -111,34 +109,16 @@
 []
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-
-  line_search = 'none'
-
-
-  nl_abs_tol = 1e-10
-
-  l_max_its = 20
+  solve_type = PJFNK
 
   start_time = 0.0
   dt = 1.0
-  #num_steps = 3
   end_time = 3.0
 
   [./Quadrature]
     order = THIRD
   [../]
-
 []
 
 [Postprocessors]
