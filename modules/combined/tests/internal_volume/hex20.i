@@ -7,12 +7,10 @@
 # The mesh is composed of one block (1) with an interior cavity of volume 8.
 #   Block 2 sits in the cavity and has a volume of 1.  Thus, the total volume
 #   is 7.
-# The internal volume is scaled by two and adjusted by negative seven.  Thus,
-#   the net result is seven.
 #
 
 [Mesh]#Comment
-  file = internal_volume.e
+  file = meshes/hex20.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -28,17 +26,17 @@
 [Variables]
 
   [./disp_x]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 
   [./disp_y]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 
   [./disp_z]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 
@@ -53,7 +51,6 @@
 []
 
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -69,7 +66,7 @@
   [../]
 
   [./prescribed_z]
-    type = FunctionDirichletBC
+    type = FunctionPresetBC
     variable = disp_z
     boundary = 100
     function = step
@@ -106,6 +103,13 @@
   [../]
 []
 
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  []
+[]
+
 [Executioner]
 
   type = Transient
@@ -114,6 +118,12 @@
   solve_type = 'PJFNK'
 
 
+
+  petsc_options_iname = '-pc_type -ksp_gmres_restart'
+  petsc_options_value = 'lu       101'
+
+
+  line_search = 'none'
 
 
   nl_abs_tol = 1e-10
@@ -124,14 +134,17 @@
   dt = 1.0
   #num_steps = 3
   end_time = 3.0
+
+  [./Quadrature]
+    order = THIRD
+  [../]
+
 []
 
 [Postprocessors]
   [./internalVolume]
     type = InternalVolume
     boundary = 100
-    scale_factor = 2
-    addition = -7
     execute_on = 'initial timestep_end'
   [../]
 
@@ -143,7 +156,6 @@
 []
 
 [Outputs]
-  file_base = out
   exodus = true
   csv = true
 []

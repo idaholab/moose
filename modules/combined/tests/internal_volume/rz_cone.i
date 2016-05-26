@@ -12,7 +12,7 @@
 []
 
 [Mesh]#Comment
-  file = internal_volume_rz_cone.e
+  file = meshes/rz_cone.e
 []
 
 [Functions]

@@ -36,8 +36,8 @@
   coord_type = RZ
 []
 
-[Mesh]#Comment
-  file = internal_volume_rz_displaced_quad8.e
+[Mesh]
+  file = meshes/rz_displaced_quad8.e
   displacements = 'disp_x disp_y'
 []
 

@@ -14,7 +14,7 @@
 []
 
 [Mesh]#Comment
-  file = internal_volume_rz.e
+  file = meshes/rz_quad8.e
 []
 
 [Functions]
@@ -29,12 +29,12 @@
 [Variables]
 
   [./disp_x]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 
   [./disp_y]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 
@@ -65,7 +65,7 @@
   [../]
 
   [./Pressure]
-    [./fred]
+    [./the_pressure]
       boundary = 3
       function = pressure
       disp_x = disp_x
@@ -113,6 +113,11 @@
   start_time = 0.0
   dt = 1.0
   end_time = 1.0
+
+  [./Quadrature]
+    order = THIRD
+  [../]
+
 []
 
 [Postprocessors]
@@ -124,7 +129,6 @@
 []
 
 [Outputs]
-  file_base = out_rz
   exodus = true
   csv = true
 []

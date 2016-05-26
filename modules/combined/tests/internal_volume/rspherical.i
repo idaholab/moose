@@ -14,7 +14,7 @@
 []
 
 [Mesh]#Comment
-  file = internal_volume_rspherical.e
+  file = meshes/rspherical.e
   construct_side_list_from_node_list = true
 []
 
