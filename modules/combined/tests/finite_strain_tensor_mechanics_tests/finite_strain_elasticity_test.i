@@ -307,16 +307,20 @@
 []
 
 [Materials]
-  # Materials
-  [./Goo]
-    # reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
-    type = FiniteStrainElasticMaterial
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
     block = '1 2 3 4 5 6 7'
-    fill_method = symmetric9
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
     C_ijkl = '1.0e6  0.0   0.0 1.0e6  0.0  1.0e6 0.5e6 0.5e6 0.5e6'
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = '1 2 3 4 5 6 7'
+    displacements = 'disp_x disp_y disp_z'
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1 2 3 4 5 6 7'
   [../]
 []
 
