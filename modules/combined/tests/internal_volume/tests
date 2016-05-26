@@ -1,74 +1,71 @@
 [Tests]
-  [./test_rspherical]
+  [./rspherical]
     type = 'CSVDiff'
-    input = 'internal_volume_rspherical.i'
-    csvdiff = 'internal_volume_rspherical_out.csv'
+    input = 'rspherical.i'
+    csvdiff = 'rspherical_out.csv'
   [../]
 
-  [./test_rspherical_error]
+  [./rspherical_error]
     type = RunException
-    input = 'internal_volume_rspherical.i'
+    input = 'rspherical.i'
     cli_args = 'Postprocessors/intVolTotal/component=1'
     expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
   [../]
 
-  [./test_rz]
+  [./rz]
     type = 'CSVDiff'
-    input = 'internal_volume_rz.i'
-    csvdiff = 'out_rz.csv'
+    input = 'rz.i'
+    csvdiff = 'rz_out.csv'
   [../]
 
-  [./test_rz2]
+  [./rz2]
     type = 'CSVDiff'
-    input = 'internal_volume_rz.i'
-    csvdiff = 'out_rz.csv'
-    cli_args = 'Postprocessors/internalVolume/component=1 Outputs/file_base=out_rz'
-    prereq = test_rz
+    input = 'rz.i'
+    csvdiff = 'rz_out.csv'
+    cli_args = 'Postprocessors/internalVolume/component=1'
+    prereq = rz
   [../]
 
-  [./test_rz_error]
+  [./rz_error]
     type = RunException
-    input = 'internal_volume_rz.i'
+    input = 'rz.i'
     cli_args = 'Postprocessors/internalVolume/component=2'
     expect_err = 'With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.'
   [../]
 
-  [./test_hex20]
+  [./hex20]
     type = 'CSVDiff'
-    input = 'internal_volume_hex20.i'
-    csvdiff = 'out.csv'
-    prereq = 'test'
-    max_parallel = 1
+    input = 'hex20.i'
+    csvdiff = 'hex20_out.csv'
   [../]
 
-  [./test_quad8_rz]
+  [./rz_quad8]
     type = 'CSVDiff'
-    input = 'internal_volume_rz_quad8.i'
-    csvdiff = 'out_rz.csv'
-    prereq = 'test_rz'
+    input = 'rz_quad8.i'
+    csvdiff = 'rz_quad8_out.csv'
   [../]
 
-  [./test_rz_cone]
+  [./rz_cone]
     type = 'CSVDiff'
-    input = 'internal_volume_rz_cone.i'
-    csvdiff = 'internal_volume_rz_cone_out.csv'
+    input = 'rz_cone.i'
+    csvdiff = 'rz_cone_out.csv'
   [../]
 
-  [./test]
+  [./hex8]
     type = 'CSVDiff'
-    input = 'internal_volume.i'
-    csvdiff = 'out.csv'
+    input = 'hex8.i'
+    csvdiff = 'hex8_out.csv'
   [../]
 
-  [./test_rz_displaced]
+  [./rz_displaced]
     type = 'CSVDiff'
-    input = 'internal_volume_rz_displaced.i'
-    csvdiff = 'internal_volume_rz_displaced_out.csv'
+    input = 'rz_displaced.i'
+    csvdiff = 'rz_displaced_out.csv'
   [../]
 
-  [./test_rz_displaced_quad8]
+  [./rz_displaced_quad8]
     type = 'CSVDiff'
-    input = 'internal_volume_rz_displaced_quad8.i'
-    csvdiff = 'internal_volume_rz_displaced_quad8_out.csv'
+    input = 'rz_displaced_quad8.i'
+    csvdiff = 'rz_displaced_quad8_out.csv'
   [../]
 []

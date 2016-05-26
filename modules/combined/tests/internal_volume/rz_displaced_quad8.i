@@ -36,8 +36,8 @@
   coord_type = RZ
 []
 
-[Mesh]#Comment
-  file = internal_volume_rz_displaced_quad8.e
+[Mesh]
+  file = meshes/rz_displaced_quad8.e
   displacements = 'disp_x disp_y'
 []
 
@@ -56,7 +56,6 @@
 []
 
 [Variables]
-
   [./disp_x]
     order = SECOND
     family = LAGRANGE
@@ -66,7 +65,6 @@
     order = SECOND
     family = LAGRANGE
   [../]
-
 []
 
 [SolidMechanics]
@@ -76,9 +74,7 @@
   [../]
 []
 
-
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -108,7 +104,6 @@
 []
 
 [Materials]
-
   [./stiffStuff]
     type = Elastic
     block = 1
@@ -119,20 +114,11 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-
 []
 
 [Executioner]
-
   type = Transient
-
   solve_type = PJFNK
-
-
-
-  nl_abs_tol = 1e-10
-
-  l_max_its = 20
 
   start_time = 0.0
   dt = 1.0
