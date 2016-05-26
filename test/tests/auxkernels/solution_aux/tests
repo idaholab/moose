@@ -152,5 +152,6 @@
     input = 'thread_xda.i'
     csvdiff = 'thread_xda_out.csv'
     min_threads = 2
+    prereq = aux_nonlinear_solution_from_xda
   [../]
 []
