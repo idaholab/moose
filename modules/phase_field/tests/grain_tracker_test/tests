@@ -10,6 +10,14 @@
     max_time = 500
   [../]
 
+  [./test_advanced_op_assignment]
+    type = 'CSVDiff'
+    input = 'grain_tracker_advanced_op.i'
+    csvdiff = 'grain_tracker_advanced_op_out.csv'
+    recover = false # No solve
+    max_parallel = 1
+  [../]
+
   [./test_elemental]
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'

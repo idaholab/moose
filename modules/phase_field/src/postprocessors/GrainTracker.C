@@ -1034,7 +1034,7 @@ GrainDistanceSorter::operator()(const std::list<GrainDistance> & lhs, const std:
 {
   // These empty cases are here to make this comparison stable
   if (lhs.empty())
-    return rhs.empty();
+    return false;
   else if (rhs.empty())
     return true;
   else
