@@ -8,26 +8,27 @@
 #define ELASTICENERGYAUX_H
 
 #include "AuxKernel.h"
+#include "RankTwoTensor.h"
 
+//Forward declarations
 class ElasticEnergyAux;
-class SymmTensor;
 
 template<>
 InputParameters validParams<ElasticEnergyAux>();
 
-
 class ElasticEnergyAux : public AuxKernel
 {
 public:
-  ElasticEnergyAux( const InputParameters & parameters);
-
+  ElasticEnergyAux(const InputParameters & parameters);
   virtual ~ElasticEnergyAux() {}
 
 protected:
   virtual Real computeValue();
 
-  const MaterialProperty<SymmTensor> & _stress;
-  const MaterialProperty<SymmTensor> & _elastic_strain;
+  std::string _base_name;
+
+  const MaterialProperty<RankTwoTensor> & _stress;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
 #endif // ELASTICENERGYAUX_H

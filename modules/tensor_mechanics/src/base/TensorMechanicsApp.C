@@ -112,7 +112,7 @@
 #include "CylindricalRankTwoAux.h"
 #include "RankTwoAux.h"
 #include "RankFourAux.h"
-#include "TensorElasticEnergyAux.h"
+#include "ElasticEnergyAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "RankTwoScalarAux.h"
 #include "StressDivergencePFFracTensors.h"
@@ -277,7 +277,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);
   registerAux(RankFourAux);
-  registerAux(TensorElasticEnergyAux);
+  registerAux(ElasticEnergyAux);
   registerAux(CrystalPlasticityRotationOutAux);
   registerAux(RankTwoScalarAux);
   registerAux(NewmarkAccelAux);

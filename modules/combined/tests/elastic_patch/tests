@@ -1,26 +1,4 @@
 [Tests]
-
-  [./test]
-    type = Exodiff
-    input = 'elastic_patch.i'
-    exodiff = 'elastic_patch_out.e'
-  [../]
-
-  [./test2Procs]
-    type = Exodiff
-    input = 'elastic_patch.i'
-    exodiff = 'elastic_patch_out.e'
-    min_parallel = '2'
-    prereq = 'test'
-    platform = 'DARWIN'
-  [../]
-
-  [./test_quadratic]
-    type = Exodiff
-    input = 'elastic_patch_quadratic.i'
-    exodiff = 'elastic_patch_quadratic_out.e'
-  [../]
-
   [./test_plane_strain]
     type = Exodiff
     input = 'elastic_patch_plane_strain.i'
