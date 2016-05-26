@@ -375,6 +375,9 @@ protected:
    * Determines if the flood counter is elements or not (nodes)
    */
   bool _is_elemental;
+
+  /// used for testing if a neighbor element is semilocal
+  std::set<const Elem *> _semilocal_elem_list;
 };
 
 template <class T>
