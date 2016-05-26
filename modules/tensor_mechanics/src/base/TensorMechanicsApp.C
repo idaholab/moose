@@ -30,7 +30,6 @@
 
 #include "LinearElasticMaterial.h"
 #include "LinearElasticTruss.h"
-#include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
 #include "FiniteStrainRatePlasticMaterial.h"
 #include "FiniteStrainCrystalPlasticity.h"
@@ -40,7 +39,6 @@
 #include "ComputeCosseratLinearElasticStress.h"
 #include "ComputeCosseratSmallStrain.h"
 #include "ComputeCosseratElasticityTensor.h"
-#include "ElementPropertyReadFileTest.h"
 #include "TwoPhaseStressMaterial.h"
 #include "MultiPhaseStressMaterial.h"
 #include "SimpleEigenStrainMaterial.h"
@@ -190,7 +188,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 
   registerMaterial(LinearElasticMaterial);
   registerMaterial(LinearElasticTruss);
-  registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
   registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
@@ -200,7 +197,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeCosseratLinearElasticStress);
   registerMaterial(ComputeCosseratSmallStrain);
   registerMaterial(ComputeCosseratElasticityTensor);
-  registerMaterial(ElementPropertyReadFileTest);
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(MultiPhaseStressMaterial);
   registerMaterial(SimpleEigenStrainMaterial);
