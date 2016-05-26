@@ -63,6 +63,9 @@ InputParameters validParams<SolutionUserObject>()
   return params;
 }
 
+// Static mutex definition
+Threads::spin_mutex SolutionUserObject::_solution_user_object_mutex;
+
 SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
     GeneralUserObject(parameters),
     _file_type(MooseEnum("xda=0 exodusII=1 xdr=2")),
@@ -649,15 +652,18 @@ SolutionUserObject::evalMeshFunction(const Point & p, const unsigned int local_v
   DenseVector<Number> output;
 
   // Extract a value from the _mesh_function
-  if (func_num == 1)
-    (*_mesh_function)(p, 0.0, output);
+  {
+    Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
+    if (func_num == 1)
+      (*_mesh_function)(p, 0.0, output);
 
-  // Extract a value from _mesh_function2
-  else if (func_num == 2)
-    (*_mesh_function2)(p, 0.0, output);
+    // Extract a value from _mesh_function2
+    else if (func_num == 2)
+      (*_mesh_function2)(p, 0.0, output);
 
-  else
-    mooseError("The func_num must be 1 or 2");
+    else
+      mooseError("The func_num must be 1 or 2");
+  }
 
   // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
   if (output.size() == 0)

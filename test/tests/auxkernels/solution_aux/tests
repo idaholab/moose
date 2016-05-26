@@ -108,7 +108,6 @@
     input = 'output_error.i'
     expect_err = "Failed to access the data for variable 'u' at point"
     prereq = 'build'
-    max_threads = 1 # Expect error test
   [../]
 
   [./aux_nonlinear_solution]
@@ -122,7 +121,6 @@
     input = 'aux_nonlinear_solution_xda.i'
     exodiff = 'aux_nonlinear_solution_xda_out.e'
     prereq = aux_nonlinear_solution
-    max_threads = 1 # ticket 2283
   [../]
 
   [./aux_nonlinear_solution_from_xdr]
@@ -130,7 +128,6 @@
     input = 'aux_nonlinear_solution_xdr.i'
     exodiff = 'aux_nonlinear_solution_xdr_out.e'
     prereq = aux_nonlinear_solution
-    max_threads = 1 # ticket 2283
     # This test reads a binary file that was written with 4-byte dof
     # ids.  At this time, it is only possible to read it back in with
     # a libmesh that also uses 4-byte dof ids.
@@ -148,6 +145,12 @@
     input = 'aux_nonlinear_solution_adapt_xda.i'
     exodiff = 'aux_nonlinear_solution_adapt_xda_out.e'
     prereq = aux_nonlinear_solution_adapt
-    max_threads = 1 # ticket 2283
+  [../]
+
+  [./thread_test]
+    type = CSVDiff
+    input = 'thread_xda.i'
+    csvdiff = 'thread_xda_out.csv'
+    min_threads = 2
   [../]
 []
