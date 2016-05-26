@@ -523,7 +523,12 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
     const Elem * elem = *it;
     for (unsigned int n = 0; n < elem->n_nodes(); ++n)
     {
-      Node * node = elem->node_ptr(n);
+      // Since elem is const here but we require a non-const Node * to
+      // store in the _semilocal_node_list (otherwise things like
+      // UpdateDisplacedMeshThread don't work), we are using the "old"
+      // Elem interface to get a non-constant Node pointer from a
+      // constant Elem.
+      Node * node = elem->get_node(n);
 
       _semilocal_node_list.insert(node);
     }
@@ -1105,7 +1110,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
           // At this point we have matching sides - lets find matching nodes
           for (unsigned int i = 0; i < elem_side->n_nodes(); ++i)
           {
-            Node * master_node = elem->node_ptr(i);
+            const Node * master_node = elem->node_ptr(i);
             Point master_point = periodic->get_corresponding_pos(*master_node);
             for (unsigned int j = 0; j < neigh_side->n_nodes(); ++j)
             {
@@ -2156,8 +2161,13 @@ MooseMesh::ghostGhostedBoundaries()
         const Elem * felem = family_tree[leaf];
         boundary_elems_to_ghost.insert(felem);
 
+        // The entries of connected_nodes_to_ghost need to be
+        // non-constant, so that they will work in things like
+        // UpdateDisplacedMeshThread.  Therefore, we are using the
+        // "old" interface to get a non-const Node pointer from a
+        // constant Elem.
         for (unsigned int n = 0; n < felem->n_nodes(); ++n)
-          connected_nodes_to_ghost.insert (felem->node_ptr(n));
+          connected_nodes_to_ghost.insert (felem->get_node(n));
       }
     }
   }

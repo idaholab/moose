@@ -36,7 +36,7 @@ findContactPoint(PenetrationInfo & p_info,
 void
 restrictPointToFace(Point& p,
                     const Elem* side,
-                    std::vector<Node*> &off_edge_nodes);
+                    std::vector<const Node *> & off_edge_nodes);
 
 }
 
