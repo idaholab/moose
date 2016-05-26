@@ -265,6 +265,9 @@ protected:
 
   /// True if initial_setup has executed
   bool _initialized;
+
+private:
+  static Threads::spin_mutex _solution_user_object_mutex;
 };
 
 #endif //SOLUTIONUSEROBJECT_H
