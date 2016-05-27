@@ -29,13 +29,10 @@ public:
   FauxGrainTracker(const InputParameters & parameters);
   virtual ~FauxGrainTracker();
 
-  virtual void initialize();
-
-  virtual void finalize();
-
-  virtual Real getValue();
-
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual Real getValue() override;
+  virtual void execute() override;
 
   /**
    * Accessor for retrieving either nodal or elemental information (unique grains or variable indicies)
@@ -44,14 +41,14 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the entity value
    */
-  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE field_type, unsigned int var_idx) const;
+  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE field_type, unsigned int var_idx) const override;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
    * holds the ith node with the inner vector holds the list of active unique grains.
    * (unique_grain_id, variable_idx)
    */
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
 
 private:
   /// The mapping of entities to grains, in this case always the order parameter

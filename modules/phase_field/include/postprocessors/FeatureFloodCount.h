@@ -47,10 +47,10 @@ public:
   FeatureFloodCount(const InputParameters & parameters);
   ~FeatureFloodCount();
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual Real getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual Real getValue() override;
 
   enum FIELD_TYPE
   {
@@ -377,8 +377,8 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
 {
   if (processor_id() == 0)
   {
-    // typdef makes subsequent code easier to read...
-    typedef std::map<std::string, MooseSharedPointer<std::ofstream> >::iterator iterator_t;
+    // alias declaration
+    using iterator_t = std::map<std::string, MooseSharedPointer<std::ofstream> >::iterator;
 
     // Try to find the filename
     iterator_t handle_it = _file_handles.find(file_name);

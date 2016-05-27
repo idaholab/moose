@@ -28,11 +28,9 @@ public:
   GrainTracker(const InputParameters & parameters);
   virtual ~GrainTracker();
 
-  virtual void initialize();
-
-  virtual void execute();
-
-  virtual void finalize();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
   struct CacheValues
   {
@@ -55,18 +53,17 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the nodal value
    */
-  virtual Real getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
+  virtual Real getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx=0) const override;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
    * holds the ith node with the inner vector holds the list of active unique grains.
    * (unique_grain_id, variable_idx)
    */
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
 
 protected:
-  /// This routine is called at the of finalize to update the field data
-  virtual void updateFieldInfo();
+  virtual void updateFieldInfo() override;
 
   /**
    * This method serves two purposes:
@@ -127,7 +124,7 @@ protected:
   /**
    * Calculate the volume of each grain maintaining proper order and dumping results to CSV
    */
-  virtual void calculateBubbleVolumes();
+  virtual void calculateBubbleVolumes() override;
 
   /*************************************************
    *************** Data Structures *****************
