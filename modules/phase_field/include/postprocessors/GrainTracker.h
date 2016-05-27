@@ -184,12 +184,4 @@ struct GrainDistance
   unsigned int _var_index;
 };
 
-/**
- * GrainDistance sort functor
- */
-struct GrainDistanceSorter
-{
-  bool operator()(const std::list<GrainDistance> & lhs, const std::list<GrainDistance> & rhs) const;
-};
-
 #endif

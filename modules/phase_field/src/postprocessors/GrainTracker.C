@@ -19,9 +19,6 @@
 #include <limits>
 #include <algorithm>
 
-// Forward Declaration (Helper Functor)
-struct GrainDistanceSorter;
-
 template<>
 InputParameters validParams<GrainTracker>()
 {
@@ -606,7 +603,18 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
    * min_distance of a variable is explicitly set up above.
    */
 
-  std::sort(min_distances.begin(), min_distances.end(), GrainDistanceSorter());
+  std::sort(min_distances.begin(), min_distances.end(),
+            [](const std::list<GrainDistance> & lhs, const std::list<GrainDistance> & rhs)
+            {
+              // Sort lists in reverse order (largest distance first)
+              // These empty cases are here to make this comparison stable
+              if (lhs.empty())
+                return false;
+              else if (rhs.empty())
+                return true;
+              else
+                return lhs.begin()->_distance > rhs.begin()->_distance;
+            });
 
   _console << "\n********************************************\nDistances list for grain " << grain_id << '\n';
   for (unsigned int i = 0; i < min_distances.size(); ++i)
@@ -1007,20 +1015,4 @@ bool
 GrainDistance::operator<(const GrainDistance & rhs) const
 {
   return _distance < rhs._distance;
-}
-
-
-/**
- * GrainDistance sort functor (sorts in reverse order!)
- */
-bool
-GrainDistanceSorter::operator()(const std::list<GrainDistance> & lhs, const std::list<GrainDistance> & rhs) const
-{
-  // These empty cases are here to make this comparison stable
-  if (lhs.empty())
-    return false;
-  else if (rhs.empty())
-    return true;
-  else
-    return lhs.begin()->_distance > rhs.begin()->_distance;
 }

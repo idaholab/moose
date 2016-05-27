@@ -23,16 +23,6 @@
 #include <algorithm>
 #include <limits>
 
-// TODO: Replace this with something better that can handle MooseSharedPointer<T>
-template<typename T>
-struct DereferenceSorter
-{
-  bool operator()(const T & lhs, const T & rhs) const
-  {
-    return *lhs < *rhs;
-  }
-};
-
 template<>
 void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
@@ -614,7 +604,11 @@ FeatureFloodCount::updateFieldInfo()
      * We use the "min_entity_id" inside each feature to assign it's position in the
      * sorted indices vector.
      */
-    Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector, DereferenceSorter<MooseSharedPointer<FeatureData> >());
+    Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector,
+                        [](const MooseSharedPointer<FeatureData> & lhs, const MooseSharedPointer<FeatureData> & rhs)
+                        {
+                          return *lhs < *rhs;
+                        });
 
     // Clear out the original markings since they aren't unique globally
     _feature_maps[map_num].clear();
