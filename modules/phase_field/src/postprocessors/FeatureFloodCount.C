@@ -381,15 +381,10 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     for (processor_id_type rank = 0; rank < n_procs; ++rank)
-      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
-           it != _partial_feature_sets[rank][map_num].end(); ++it)
+      for (auto & feature : _partial_feature_sets[rank][map_num])
       {
-        FeatureData & feature = *it;
-
-        for (std::set<dof_id_type>::iterator entity_it = feature._local_ids.begin(); entity_it != feature._local_ids.end(); ++entity_it)
+        for (auto & entity_id : feature._local_ids)
         {
-          dof_id_type entity_id = *entity_it;
-
           // TODO: This may not be good enough for the elemental case
           const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
 
@@ -587,12 +582,11 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   for (processor_id_type rank = 0; rank < n_procs; ++rank)
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     {
-      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
-           it != _partial_feature_sets[rank][map_num].end(); ++it)
+      for (auto & feature : _partial_feature_sets[rank][map_num])
       {
-        if (!it->_merged)
+        if (!feature._merged)
         {
-          _feature_sets[map_num].push_back(MooseSharedPointer<FeatureData>(new FeatureData(*it)));
+          _feature_sets[map_num].push_back(MooseSharedPointer<FeatureData>(std::make_shared<FeatureData>(feature)));
           ++_feature_count;
         }
       }
@@ -627,26 +621,26 @@ FeatureFloodCount::updateFieldInfo()
 
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : map_num;
-    for (std::vector<size_t>::const_iterator idx_it = index_vector.begin(); idx_it != index_vector.end(); ++idx_it)
+    for (auto idx : index_vector)
     {
-      const FeatureData & feature = *_feature_sets[map_num][*idx_it];
+      const FeatureData & feature = *_feature_sets[map_num][idx];
 
       // Loop over the entitiy ids of this feature and update our local map
-      for (std::set<dof_id_type>::const_iterator entity_it = feature._local_ids.begin(); entity_it != feature._local_ids.end(); ++entity_it)
+      for (auto entity : feature._local_ids)
       {
-        _feature_maps[map_idx][*entity_it] = feature_number;
+        _feature_maps[map_idx][entity] = feature_number;
 
         if (_var_index_mode)
-          _var_index_maps[map_idx][*entity_it] = feature._var_idx;
+          _var_index_maps[map_idx][entity] = feature._var_idx;
       }
 
       // Loop over the halo ids to update cells with halo information
-      for (std::set<dof_id_type>::const_iterator entity_it = feature._halo_ids.begin(); entity_it != feature._halo_ids.end(); ++entity_it)
-        _halo_ids[*entity_it] = feature_number;
+      for (auto entity : feature._halo_ids)
+        _halo_ids[entity] = feature_number;
 
       // Loop over the ghosted ids to update cells with ghost information
-      for (std::set<dof_id_type>::const_iterator entity_it = feature._ghosted_ids.begin(); entity_it != feature._ghosted_ids.end(); ++entity_it)
-        _ghosted_entity_ids[*entity_it] = feature_number;
+      for (auto entity : feature._ghosted_ids)
+        _ghosted_entity_ids[entity] = feature_number;
 
       ++feature_number;
     }
@@ -738,16 +732,14 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, int current_idx, F
   }
 
   // Loop over all active element neighbors
-  for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin();
-       neighbor_it != all_active_neighbors.end(); ++neighbor_it)
+  for (const auto neighbor_ptr : all_active_neighbors)
   {
-    const Elem * neighbor = *neighbor_it;
-    processor_id_type my_proc_id = processor_id();
+    auto my_proc_id = processor_id();
 
     // Only recurse on elems this processor can see
-    if (neighbor && neighbor->is_semilocal(my_proc_id))
+    if (neighbor_ptr && neighbor_ptr->is_semilocal(my_proc_id))
     {
-      if (neighbor->processor_id() != my_proc_id)
+      if (neighbor_ptr->processor_id() != my_proc_id)
         feature->_ghosted_ids.insert(elem->id());
 
       /**
@@ -756,10 +748,10 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, int current_idx, F
        * We will not update the _entities_visited data structure
        * here.
        */
-      feature->_halo_ids.insert(neighbor->id());
+      feature->_halo_ids.insert(neighbor_ptr->id());
 
       if (recurse)
-        flood(neighbor, current_idx, feature);
+        flood(neighbor_ptr, current_idx, feature);
     }
   }
 }
@@ -796,19 +788,17 @@ FeatureFloodCount::visitNodalNeighbors(const Node * node, int current_idx, Featu
 void
 FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
 {
-  typedef std::multimap<dof_id_type, dof_id_type>::const_iterator IterType;
-
   if (_is_elemental)
   {
-    for (std::set<dof_id_type>::iterator entity_it = data._local_ids.begin(); entity_it != data._local_ids.end(); ++entity_it)
+    for (auto entity : data._local_ids)
     {
-      Elem * elem = _mesh.elemPtr(*entity_it);
+      Elem * elem = _mesh.elemPtr(entity);
 
       for (unsigned int node_n = 0; node_n < elem->n_nodes(); node_n++)
       {
-        std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(elem->node(node_n));
+        auto iters = _periodic_node_map.equal_range(elem->node(node_n));
 
-        for (IterType it = iters.first; it != iters.second; ++it)
+        for (auto it = iters.first; it != iters.second; ++it)
         {
           data._periodic_nodes.insert(it->first);
           data._periodic_nodes.insert(it->second);
@@ -818,11 +808,11 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
   }
   else
   {
-    for (std::set<dof_id_type>::iterator entity_it = data._local_ids.begin(); entity_it != data._local_ids.end(); ++entity_it)
+    for (auto entity : data._local_ids)
     {
-      std::pair<IterType, IterType> iters = _periodic_node_map.equal_range(*entity_it);
+      auto iters = _periodic_node_map.equal_range(entity);
 
-      for (IterType it = iters.first; it != iters.second; ++it)
+      for (auto it = iters.first; it != iters.second; ++it)
       {
         data._periodic_nodes.insert(it->first);
         data._periodic_nodes.insert(it->second);
@@ -838,9 +828,8 @@ FeatureFloodCount::inflateBoundingBoxes(RealVectorValue inflation_amount)
 
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     for (processor_id_type rank = 0; rank < n_procs; ++rank)
-      for (std::vector<FeatureData>::iterator it = _partial_feature_sets[rank][map_num].begin();
-           it != _partial_feature_sets[rank][map_num].end(); ++it)
-        it->inflateBoundingBoxes(inflation_amount);
+      for (auto & feature : _partial_feature_sets[rank][map_num])
+        feature.inflateBoundingBoxes(inflation_amount);
 }
 
 void
@@ -867,16 +856,10 @@ FeatureFloodCount::calculateBubbleVolumes()
     // For each of the _maps_size FeatureData lists, determine if the set
     // of nodes includes any boundary nodes.
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-    {
-      std::vector<MooseSharedPointer<FeatureData> >::iterator
-        bubble_it = _feature_sets[map_num].begin(),
-        bubble_end = _feature_sets[map_num].end();
-
       // Determine boundary intersection for each FeatureData object
-      for (; bubble_it != bubble_end; ++bubble_it)
-        (*bubble_it)->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
-                                                           (*bubble_it)->_local_ids.begin(), (*bubble_it)->_local_ids.end());
-    }
+      for (const auto & feature_ptr : _feature_sets[map_num])
+        feature_ptr->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
+                                                          feature_ptr->_local_ids.begin(), feature_ptr->_local_ids.end());
   }
 
   // Size our temporary data structure
@@ -1035,29 +1018,29 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
   if (debug)
   {
     out << "Ghosted Entities: ";
-    for (std::set<dof_id_type>::const_iterator it = feature._ghosted_ids.begin(); it != feature._ghosted_ids.end(); ++it)
-      out << *it << " ";
+    for (auto ghosted_id : feature._ghosted_ids)
+      out << ghosted_id << " ";
 
     out << "\nLocal Entities: ";
-    for (std::set<dof_id_type>::const_iterator it = feature._local_ids.begin();  it != feature._local_ids.end(); ++it)
-      out << *it << " ";
+    for (auto local_id : feature._local_ids)
+      out << local_id << " ";
 
     out << "\nHalo Entities: ";
-    for (std::set<dof_id_type>::const_iterator it = feature._halo_ids.begin();  it != feature._halo_ids.end(); ++it)
-      out << *it << " ";
+    for (auto halo_id : feature._halo_ids)
+      out << halo_id << " ";
 
     out << "\nPeriodic Node IDs: ";
-    for (std::set<dof_id_type>::const_iterator it = feature._periodic_nodes.begin();  it != feature._periodic_nodes.end(); ++it)
-      out << *it << " ";
+    for (auto periodic_node : feature._periodic_nodes)
+      out << periodic_node << " ";
   }
 
   out << "\nBBoxes:";
   Real volume = 0;
-  for (std::vector<MeshTools::BoundingBox>::const_iterator it = feature._bboxes.begin(); it != feature._bboxes.end(); ++it)
+  for (const auto & bbox : feature._bboxes)
   {
-    out << "\nMax: " << it->max() << " Min: " << it->min();
-    volume += (it->max()(0) - it->min()(0)) * (it->max()(1) - it->min()(1)) *
-      (MooseUtils::absoluteFuzzyEqual(it->max()(2), it->min()(2)) ? 1 : it->max()(2) - it->min()(2));
+    out << "\nMax: " << bbox.max() << " Min: " << bbox.min();
+    volume += (bbox.max()(0) - bbox.min()(0)) * (bbox.max()(1) - bbox.min()(1)) *
+      (MooseUtils::absoluteFuzzyEqual(bbox.max()(2), bbox.min()(2)) ? 1 : bbox.max()(2) - bbox.min()(2));
   }
 
   if (debug)
