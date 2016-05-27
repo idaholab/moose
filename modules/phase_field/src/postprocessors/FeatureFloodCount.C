@@ -131,7 +131,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _partial_feature_sets(_app.n_processors()),
     _feature_sets(_maps_size),
     _feature_maps(_maps_size),
-    _pbs(NULL),
+    _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
@@ -200,7 +200,7 @@ FeatureFloodCount::execute()
     if (_is_elemental)
     {
       for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
-        flood(current_elem, var_num, NULL /* Designates inactive feature */);
+        flood(current_elem, var_num, nullptr /* Designates inactive feature */);
     }
     else
     {
@@ -210,7 +210,7 @@ FeatureFloodCount::execute()
         const Node * current_node = current_elem->get_node(i);
 
         for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
-          flood(current_node, var_num, NULL /* Designates inactive feature */);
+          flood(current_node, var_num, nullptr /* Designates inactive feature */);
       }
     }
   }
@@ -251,7 +251,7 @@ void FeatureFloodCount::communicateAndMerge()
    * Each processor needs information from all other processors to create a complete
    * global feature map.
    */
-  _communicator.allgather_packed_range((void *)(NULL), send_buffers.begin(), send_buffers.end(),
+  _communicator.allgather_packed_range((void *)(nullptr), send_buffers.begin(), send_buffers.end(),
                                        std::back_inserter(recv_buffers));
 
   deserialize(recv_buffers);
@@ -656,7 +656,7 @@ FeatureFloodCount::updateFieldInfo()
 void
 FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureData * feature)
 {
-  if (dof_object == NULL)
+  if (dof_object == nullptr)
     return;
 
   // Retrieve the id of the current entity

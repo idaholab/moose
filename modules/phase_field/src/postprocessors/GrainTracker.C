@@ -40,7 +40,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _remap(getParam<bool>("remap_grains")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, MooseSharedPointer<FeatureData> > >("unique_grains")),
-    _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : NULL),
+    _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
     _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
   if (!_is_elemental && _compute_op_maps)
