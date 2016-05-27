@@ -84,6 +84,12 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
   if (_blk_feproblem != NULL)
     _blk_material_data = _blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
 
+  /**
+   * The _initialized value needs to be set early so that calls to helper functions during
+   * initialization may succeed.
+   */
+  _initialized = true;
+
   // The 'block' input is defined
   if (parameters.isParamValid("block"))
   {
@@ -147,8 +153,6 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
       mooseError(msg.str());
     }
   }
-
-  _initialized = true;
 }
 
 bool
@@ -232,8 +236,7 @@ BlockRestrictable::hasBlocks(std::set<SubdomainID> ids) const
 bool
 BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids) const
 {
-  // TODO: Uncomment the following line - see #7088
-  //mooseAssert(_initialized, "BlockRestrictable not initialized");
+  mooseAssert(_initialized, "BlockRestrictable not initialized");
 
   // An empty input is assumed to be ANY_BLOCK_ID
   if (ids.empty() || ids.find(Moose::ANY_BLOCK_ID) != ids.end())
