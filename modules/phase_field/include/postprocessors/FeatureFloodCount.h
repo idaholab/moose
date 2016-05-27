@@ -339,7 +339,7 @@ protected:
    * The filename and filehandle used if bubble volumes are being recorded to a file.
    * MooseSharedPointer is used so we don't have to worry about cleaning up after ourselves...
    */
-  std::map<std::string, MooseSharedPointer<std::ofstream> > _file_handles;
+  std::map<std::string, std::unique_ptr<std::ofstream> > _file_handles;
 
   /**
    * The vector hold the volume of each flooded bubble.  Note: this vector is only populated
@@ -378,7 +378,7 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
   if (processor_id() == 0)
   {
     // alias declaration
-    using iterator_t = std::map<std::string, MooseSharedPointer<std::ofstream> >::iterator;
+    using iterator_t = std::map<std::string, std::unique_ptr<std::ofstream> >::iterator;
 
     // Try to find the filename
     iterator_t handle_it = _file_handles.find(file_name);
@@ -390,7 +390,7 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
 
       // Store the new filename in the map
       std::pair<iterator_t, bool> result =
-        _file_handles.insert(std::make_pair(file_name, MooseSharedPointer<std::ofstream>(new std::ofstream(file_name.c_str()))));
+        _file_handles.insert(std::make_pair(file_name, std::unique_ptr<std::ofstream>(new std::ofstream(file_name.c_str()))));
 
       // Be sure that the insert worked!
       mooseAssert(result.second, "Insertion into _file_handles map failed!");
