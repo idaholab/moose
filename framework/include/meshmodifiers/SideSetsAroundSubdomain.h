@@ -38,6 +38,8 @@ public:
 
   virtual ~SideSetsAroundSubdomain();
 
+  virtual void initialize();
+
   virtual void modify();
 
 protected:

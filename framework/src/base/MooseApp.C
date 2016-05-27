@@ -967,16 +967,13 @@ MooseApp::executeMeshModifiers()
     {
       MeshModifier * modifier_ptr = it->get();
 
-      modifier_ptr->setMeshPointer(mesh);
-      modifier_ptr->modify();
-
-      if (displaced_mesh)
-      {
-        modifier_ptr->setMeshPointer(displaced_mesh);
-        modifier_ptr->modify();
-      }
+      modifier_ptr->modifyMesh(mesh, displaced_mesh);
     }
 
+    /**
+     * Set preparation flag after modifers are run. The final preparation
+     * will be handled by the SetupMeshComplete Action.
+     */
     mesh->prepared(false);
     if (displaced_mesh)
       displaced_mesh->prepared(false);

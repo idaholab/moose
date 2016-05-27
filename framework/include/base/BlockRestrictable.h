@@ -197,6 +197,11 @@ protected:
    */
   virtual bool hasBlockMaterialPropertyHelper(const std::string & prop_name);
 
+  /**
+   * An initialization routine needed for dual constructors
+   */
+  void initializeBlockRestrictable(const InputParameters & parameters);
+
 private:
 
   /// Set of block ids supplied by the user via the input file
@@ -204,6 +209,8 @@ private:
 
   /// Vector the block names supplied by the user via the input file
   std::vector<SubdomainName> _blocks;
+
+  bool _initialized;
 
   /// Flag for allowing dual restriction
   const bool _blk_dual_restrictable;
@@ -222,11 +229,6 @@ private:
 
   /// Thread id for this object
   THREAD_ID _blk_tid;
-
-  /**
-   * An initialization routine needed for dual constructors
-   */
-  void initializeBlockRestrictable(const InputParameters & parameters);
 
   /**
    * A helper function for extracting the subdomain IDs for a variable

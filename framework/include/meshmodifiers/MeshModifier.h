@@ -43,10 +43,25 @@ public:
   virtual ~MeshModifier();
 
   /**
-   * This function gets called prior to modify to set the current
-   * mesh pointer.
+   * The base method called to trigger modification to the Mesh.
+   * This method can trigger (re-)initialiation of the Mesh if
+   * necessary, modify the mesh through the virtual override, and
+   * also force prepare the mesh if requested.
    */
-  void setMeshPointer(MooseMesh *mesh) { _mesh_ptr = mesh; }
+  void modifyMesh(MooseMesh * mesh, MooseMesh * displaced_mesh);
+
+  /**
+   * Return the MeshModifiers that must run before this MeshModifier
+   */
+  std::vector<std::string> & getDependencies() { return _depends_on; }
+
+protected:
+
+  /**
+   * This method is called _immediatly_ before modify to perform any necessary
+   * initialization on the modififer before it runs.
+   */
+  virtual void initialize() {}
 
   /**
    * Pure virtual modify function MUST be overridden by children classes.
@@ -54,13 +69,21 @@ public:
    */
   virtual void modify() = 0;
 
-  std::vector<std::string> & getDependencies() { return _depends_on; }
+  /**
+   * Utility for performing the same operation on both undiplaced and
+   * displaced meshes.
+   */
+  void modifyMeshHelper(MooseMesh * mesh);
 
-protected:
+  /// Pointer to the mesh
   MooseMesh *_mesh_ptr;
 
 private:
+  /// A list of modifiers that are required to run before this modifier may run
   std::vector<std::string> _depends_on;
+
+  /// Flag to determine if the mesh should be prepared after this modifier is run
+  const bool _force_prepare;
 };
 
 #endif //MESHMODIFIER_H

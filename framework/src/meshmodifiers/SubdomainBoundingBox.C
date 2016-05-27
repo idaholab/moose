@@ -67,4 +67,3 @@ SubdomainBoundingBox::modify()
   if (isParamValid("block_name"))
     _mesh_ptr->getMesh().subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
 }
-
