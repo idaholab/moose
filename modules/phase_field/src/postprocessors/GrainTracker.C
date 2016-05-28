@@ -36,7 +36,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _halo_level(getParam<unsigned int>("halo_level")),
     _remap(getParam<bool>("remap_grains")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
-    _unique_grains(declareRestartableData<std::map<unsigned int, MooseSharedPointer<FeatureData> > >("unique_grains")),
+    _unique_grains(declareRestartableData<std::map<unsigned int, std::unique_ptr<FeatureData> > >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
     _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
@@ -280,7 +280,7 @@ GrainTracker::trackGrains()
           {
             Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
                        << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-            _unique_grains[next_index] = _feature_sets[map_num][feature_num];
+            _unique_grains[next_index] = std::move(_feature_sets[map_num][feature_num]);
 
             _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
 
@@ -290,7 +290,7 @@ GrainTracker::trackGrains()
           {
             Moose::out << "Assigning center " << closest_match_idx << " "
                        << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-            _unique_grains[closest_match_idx] = _feature_sets[map_num][feature_num];
+            _unique_grains[closest_match_idx] = std::move(_feature_sets[map_num][feature_num]);
 
             _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
 
@@ -316,10 +316,8 @@ GrainTracker::trackGrains()
       for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
         for (unsigned int feature_num = 0; feature_num < _feature_sets[map_num].size(); ++feature_num)
         {
-          auto feature_ptr = _feature_sets[map_num][feature_num];
-
-          feature_ptr->_status = MARKED;
-          _unique_grains[counter++] = feature_ptr;
+          _feature_sets[map_num][feature_num]->_status = MARKED;
+          _unique_grains[counter++] = std::move(_feature_sets[map_num][feature_num]);
         }
     }
     return;  // Return early - no matching or tracking to do
@@ -368,16 +366,15 @@ GrainTracker::trackGrains()
    * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
    */
   for (const auto & new_to_exist_kv : new_grain_idx_to_existing_grain_idx)
-  {
-                                                                // map index     feature index
-    MooseSharedPointer<FeatureData> feature_ptr = _feature_sets[new_to_exist_kv.first.first][new_to_exist_kv.first.second];
+  {                                                             // map index     feature index
+    std::unique_ptr<FeatureData> feature_ptr(std::move(_feature_sets[new_to_exist_kv.first.first][new_to_exist_kv.first.second]));
 
     // If there is only a single mapping - we've found the correct grain
     if (new_to_exist_kv.second.size() == 1)
     {
       unsigned int curr_idx = (new_to_exist_kv.second)[0];
       feature_ptr->_status = MARKED;                          // Mark it
-      _unique_grains[curr_idx] = feature_ptr;                 // transfer ownership of new grain
+      _unique_grains[curr_idx] = std::move(feature_ptr);      // transfer ownership of new grain
     }
 
     // More than one existing grain is mapping to a new one (i.e. multiple values exist for a single key)
@@ -405,7 +402,7 @@ GrainTracker::trackGrains()
         if (i == min_idx)
         {
           feature_ptr->_status = MARKED;                          // Mark it
-          _unique_grains[curr_idx] = feature_ptr;                 // transfer ownership of new grain
+          _unique_grains[curr_idx] = std::move(feature_ptr);      // transfer ownership of new grain
         }
         else
         {
@@ -423,7 +420,7 @@ GrainTracker::trackGrains()
    */
   for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     for (unsigned int i = 0; i < _feature_sets[map_num].size(); ++i)
-      if (_feature_sets[map_num][i]->_status == NOT_MARKED)
+      if (_feature_sets[map_num][i] && _feature_sets[map_num][i]->_status == NOT_MARKED)
       {
         _console << COLOR_YELLOW
                  << "*****************************************************************************\n"
@@ -431,7 +428,7 @@ GrainTracker::trackGrains()
                  << "\nCreating new unique grain: " << _unique_grains.size() << '\n' <<  *_feature_sets[map_num][i]
                  << "\n*****************************************************************************\n" << COLOR_DEFAULT;
         _feature_sets[map_num][i]->_status = MARKED;
-        _unique_grains[_unique_grains.size()] = _feature_sets[map_num][i];   // transfer ownership
+        _unique_grains[_unique_grains.size()] = std::move(_feature_sets[map_num][i]);   // transfer ownership
       }
 
   /**
@@ -473,14 +470,12 @@ GrainTracker::remapGrains()
   do
   {
     grains_remapped = false;
-    for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it1 = _unique_grains.begin();
-         grain_it1 != _unique_grains.end(); ++grain_it1)
+    for (auto grain_it1 = _unique_grains.begin(); grain_it1 != _unique_grains.end(); ++grain_it1)
     {
       if (grain_it1->second->_status == INACTIVE)
         continue;
 
-      for (std::map<unsigned int, MooseSharedPointer<FeatureData> >::iterator grain_it2 = _unique_grains.begin();
-           grain_it2 != _unique_grains.end(); ++grain_it2)
+      for (auto grain_it2 = _unique_grains.begin(); grain_it2 != _unique_grains.end(); ++grain_it2)
       {
         // Don't compare a grain with itself and don't try to remap inactive grains
         if (grain_it1 == grain_it2 || grain_it2->second->_status == INACTIVE)
@@ -502,10 +497,10 @@ GrainTracker::remapGrains()
           for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
             if (max < _max_renumbering_recursion)
             {
-              if (attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) || attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
+              if (attemptGrainRenumber(*grain_it1->second, grain_it1->first, 0, max) || attemptGrainRenumber(*grain_it2->second, grain_it2->first, 0, max))
                 break;
             }
-            else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) && !attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
+            else if (!attemptGrainRenumber(*grain_it1->second, grain_it1->first, 0, max) && !attemptGrainRenumber(*grain_it2->second, grain_it2->first, 0, max))
               mooseError(COLOR_RED << "Unable to find any suitable grains for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
 
           grains_remapped = true;
@@ -517,7 +512,7 @@ GrainTracker::remapGrains()
 }
 
 void
-GrainTracker::computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain,
+GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
                                            std::vector<std::list<GrainDistance> > & min_distances)
 {
   /**
@@ -548,13 +543,13 @@ GrainTracker::computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain
    */
   for (auto & grain_kv : _unique_grains)
   {
-    if (grain_kv.second->_status == INACTIVE || grain_kv.second->_var_idx == grain->_var_idx)
+    if (grain_kv.second->_status == INACTIVE || grain_kv.second->_var_idx == grain._var_idx)
       continue;
 
     unsigned int target_var_index = grain_kv.second->_var_idx;
     unsigned int target_grain_id = grain_kv.first;
 
-    Real curr_sphere_diff = boundingRegionDistance(grain->_bboxes, grain_kv.second->_bboxes, false);
+    Real curr_sphere_diff = boundingRegionDistance(grain._bboxes, grain_kv.second->_bboxes, false);
 
     GrainDistance grain_distance_obj(curr_sphere_diff, target_grain_id, target_var_index);
 
@@ -575,13 +570,13 @@ GrainTracker::computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain
 }
 
 bool
-GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsigned int grain_id, unsigned int depth, unsigned int max)
+GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, unsigned int depth, unsigned int max)
 {
   // End the recursion of our breadth first search
   if (depth > max)
     return false;
 
-  unsigned int curr_var_idx = grain->_var_idx;
+  unsigned int curr_var_idx = grain._var_idx;
 
   std::map<Node *, CacheValues> cache;
 
@@ -655,11 +650,11 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
         break;
 
       mooseAssert(_unique_grains.find(next_target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
-      MooseSharedPointer<FeatureData> next_target_grain = _unique_grains[next_target_it->_grain_id];
+      FeatureData & next_target_grain = *_unique_grains[next_target_it->_grain_id];
 
       // If any grains touch we're done here
-      if (setsIntersect(grain->_halo_ids.begin(), grain->_halo_ids.end(),
-                        next_target_grain->_halo_ids.begin(), next_target_grain->_halo_ids.end()))
+      if (setsIntersect(grain._halo_ids.begin(), grain._halo_ids.end(),
+                        next_target_grain._halo_ids.begin(), next_target_grain._halo_ids.end()))
         intersection_hit = true;
       else
         oss << " #" << next_target_it->_grain_id;
@@ -682,10 +677,10 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
 
     // If we reach this part of the loop, there is no simple renumbering that can be done.
     mooseAssert(_unique_grains.find(target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
-    MooseSharedPointer<FeatureData> target_grain = _unique_grains[target_it->_grain_id];
+    FeatureData & target_grain = *_unique_grains[target_it->_grain_id];
 
     // Make sure this grain isn't marked. If it is, we can't recurse here
-    if (target_grain->_merged)
+    if (target_grain._merged)
       return false;
 
     // Save the solution values in case we overright them during recursion
@@ -693,8 +688,8 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
 
     // TODO: Make sure this distance is -1 or higher or fine intersections only exist for a single variable
     // Propose a new variable index for the current grain and recurse
-    grain->_var_idx = target_it->_var_index;
-    grain->_merged = true;
+    grain._var_idx = target_it->_var_index;
+    grain._merged = true;
     if (attemptGrainRenumber(target_grain, target_it->_grain_id, depth+1, max))
     {
       // SUCCESS!
@@ -706,31 +701,31 @@ GrainTracker::attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsign
 
       // NOTE: swapSolutionValues currently reads the current variable index off the grain. We need to set
       //       back here before calling this method.
-      grain->_var_idx = curr_var_idx;
+      grain._var_idx = curr_var_idx;
       swapSolutionValues(grain, target_it->_var_index, cache, USE, depth);
 
       return true;
     }
     else
       // Need to set our var index back after failed recursive step
-      grain->_var_idx = curr_var_idx;
+      grain._var_idx = curr_var_idx;
 
     // Always "unmark" the grain after the recursion so it can be used by other remap operations
-    grain->_merged = false;
+    grain._merged = false;
   }
 
   return false;
 }
 
 void
-GrainTracker::swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+GrainTracker::swapSolutionValues(FeatureData & grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
                                  REMAP_CACHE_MODE cache_mode, unsigned int depth)
 {
   MeshBase & mesh = _mesh.getMesh();
 
   // Remap the grain
   std::set<Node *> updated_nodes_tmp; // Used only in the elemental case
-  for (auto entity : grain->_local_ids)
+  for (auto entity : grain._local_ids)
   {
     if (_is_elemental)
     {
@@ -744,16 +739,16 @@ GrainTracker::swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned
         if (updated_nodes_tmp.find(curr_node) == updated_nodes_tmp.end())
         {
           updated_nodes_tmp.insert(curr_node);         // cache this node so we don't attempt to remap it again within this loop
-          swapSolutionValuesHelper(curr_node, grain->_var_idx, var_idx, cache, cache_mode);
+          swapSolutionValuesHelper(curr_node, grain._var_idx, var_idx, cache, cache_mode);
         }
       }
     }
     else
-      swapSolutionValuesHelper(mesh.query_node_ptr(entity), grain->_var_idx, var_idx, cache, cache_mode);
+      swapSolutionValuesHelper(mesh.query_node_ptr(entity), grain._var_idx, var_idx, cache, cache_mode);
   }
 
   // Update the variable index in the unique grain datastructure
-  grain->_var_idx = var_idx;
+  grain._var_idx = var_idx;
 
   // Close all of the solution vectors (we only need to do this once after all swaps are complete)
   if (depth == 0)

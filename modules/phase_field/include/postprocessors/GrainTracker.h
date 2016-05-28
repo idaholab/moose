@@ -89,19 +89,19 @@ protected:
    * for a given grain. There are _vars.size() entries in the outer vector, one for each order parameter.
    * A list of grains with the same OP are ordered in lists per OP.
    */
-  void computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain, std::vector<std::list<GrainDistance> > & min_distances);
+  void computeMinDistancesFromGrain(FeatureData & grain, std::vector<std::list<GrainDistance> > & min_distances);
 
   /**
    * This is the recursive part of the remapping algorithm. It attempts to remap a grain to a new index and recurses until max_depth
    * is reached.
    */
-  bool attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
+  bool attemptGrainRenumber(FeatureData & grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
 
   /**
    * A routine for moving all of the solution values from a given grain to a new variable number. It is called
    * with different modes to only cache, or actually do the work, or bypass the cache altogether.
    */
-  void swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+  void swapSolutionValues(FeatureData &  grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
                           REMAP_CACHE_MODE cache_mode, unsigned int depth);
 
   /**
@@ -146,7 +146,7 @@ protected:
   NonlinearSystem & _nl;
 
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-  std::map<unsigned int, MooseSharedPointer<FeatureData> > & _unique_grains;
+  std::map<unsigned int, std::unique_ptr<FeatureData> > & _unique_grains;
 
   /**
    * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures

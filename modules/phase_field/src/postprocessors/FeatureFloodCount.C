@@ -38,7 +38,7 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
 }
 
 template<>
-void dataStore(std::ostream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
+void dataStore(std::ostream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context)
 {
   dataStore(stream, *feature, context);
 }
@@ -65,9 +65,9 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
 }
 
 template<>
-void dataLoad(std::istream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context)
+void dataLoad(std::istream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context)
 {
-  feature = MooseSharedPointer<FeatureFloodCount::FeatureData>(new FeatureFloodCount::FeatureData());
+  feature = std::unique_ptr<FeatureFloodCount::FeatureData>(new FeatureFloodCount::FeatureData());
 
   dataLoad(stream, *feature, context);
 }
@@ -576,7 +576,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       {
         if (!feature._merged)
         {
-          _feature_sets[map_num].push_back(MooseSharedPointer<FeatureData>(std::make_shared<FeatureData>(feature)));
+          _feature_sets[map_num].push_back(std::unique_ptr<FeatureData>(new FeatureData(feature)));
           ++_feature_count;
         }
       }
@@ -605,7 +605,7 @@ FeatureFloodCount::updateFieldInfo()
      * sorted indices vector.
      */
     Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector,
-                        [](const MooseSharedPointer<FeatureData> & lhs, const MooseSharedPointer<FeatureData> & rhs)
+                        [](const std::unique_ptr<FeatureData> & lhs, const std::unique_ptr<FeatureData> & rhs)
                         {
                           return *lhs < *rhs;
                         });
@@ -879,9 +879,8 @@ FeatureFloodCount::calculateBubbleVolumes()
 
     for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
     {
-      std::vector<MooseSharedPointer<FeatureData> >::const_iterator
-        bubble_it = _feature_sets[map_num].begin(),
-        bubble_end = _feature_sets[map_num].end();
+      auto bubble_it = _feature_sets[map_num].cbegin();
+      auto bubble_end = _feature_sets[map_num].cend();
 
       for (unsigned int bubble_counter = 0; bubble_it != bubble_end; ++bubble_it, ++bubble_counter)
       {

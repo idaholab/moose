@@ -310,7 +310,7 @@ protected:
    * The data structure used to hold the globally unique features. The outer vector
    * is indexed by variable number, the inner vector is indexed by feature number
    */
-  std::vector<std::vector<MooseSharedPointer<FeatureData> > > _feature_sets;
+  std::vector<std::vector<std::unique_ptr<FeatureData> > > _feature_sets;
 
   /**
    * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
