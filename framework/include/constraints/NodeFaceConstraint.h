@@ -74,6 +74,14 @@ public:
   virtual void getConnectedDofIndices(unsigned int var_num);
 
   /**
+   * Constraints can override this to specify dof pairs that are linked by this
+   * Constraint in order to get storage for their derivatives pre-allocated in the Jacobian
+   *
+   * @param graph This links dof_row -> dof_columns.  The job of this routine is to add extra row->column linkages.
+   */
+  void augmentJacobianGraph(std::map<dof_id_type, std::vector<dof_id_type> > & graph);
+
+  /**
    * Compute the value the slave node should have at the beginning of a timestep.
    */
   virtual Real computeQpSlaveValue() = 0;
