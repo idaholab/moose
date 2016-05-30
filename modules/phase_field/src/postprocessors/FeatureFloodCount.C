@@ -115,7 +115,9 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
+    _n_vars(_vars.size()),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
+    _n_procs(_app.n_processors()),
     _entities_visited(_vars.size()), // This map is always sized to the number of variables
     _feature_count(0),
     _partial_feature_sets(_app.n_processors()),
@@ -127,7 +129,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
 {
   // Size the data structures to hold the correct number of maps
-  for (unsigned int rank = 0; rank < _app.n_processors(); ++rank)
+  for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
     _partial_feature_sets[rank].resize(_maps_size);
 
   if (_var_index_mode)
@@ -146,7 +148,7 @@ FeatureFloodCount::initialize()
   _pbs = _fe_problem.getNonlinearSystem().dofMap().get_periodic_boundaries();
 
   // Clear the bubble marking maps and region counters and other data structures
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
     _feature_maps[map_num].clear();
     _feature_sets[map_num].clear();
@@ -155,8 +157,7 @@ FeatureFloodCount::initialize()
       _var_index_maps[map_num].clear();
   }
 
-  // TODO: use iterator
-  for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+  for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
     _entities_visited[var_num].clear();
 
   // Build a new node to element map
@@ -189,17 +190,17 @@ FeatureFloodCount::execute()
     // Loop over elements or nodes
     if (_is_elemental)
     {
-      for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+      for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
         flood(current_elem, var_num, nullptr /* Designates inactive feature */);
     }
     else
     {
-      unsigned int n_nodes = current_elem->n_vertices();
-      for (unsigned int i = 0; i < n_nodes; ++i)
+      auto n_nodes = current_elem->n_vertices();
+      for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
       {
         const Node * current_node = current_elem->get_node(i);
 
-        for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+        for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
           flood(current_node, var_num, nullptr /* Designates inactive feature */);
       }
     }
@@ -367,10 +368,9 @@ void
 FeatureFloodCount::populateDataStructuresFromFloodData()
 {
   MeshBase & mesh = _mesh.getMesh();
-  processor_id_type n_procs = _app.n_processors();
 
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-    for (processor_id_type rank = 0; rank < n_procs; ++rank)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+    for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
       for (auto & feature : _partial_feature_sets[rank][map_num])
       {
         for (auto & entity_id : feature._local_ids)
@@ -434,7 +434,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
 
   mooseAssert(serialized_buffers.size() == _app.n_processors(), "Unexpected size of serialized_buffers: " << serialized_buffers.size());
 
-  for (unsigned int rank = 0; rank < serialized_buffers.size(); ++rank)
+  for (auto rank = decltype(_n_procs)(0); rank < serialized_buffers.size(); ++rank)
   {
     /**
      * We should already have the local processor data in the features data structure.
@@ -457,15 +457,13 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
   std::set<dof_id_type> set_union;
 
-  processor_id_type n_procs = _app.n_processors();
-
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
-    for (processor_id_type rank1 = 0; rank1 < n_procs; ++rank1)
+    for (auto rank1 = decltype(_n_procs)(0); rank1 < _n_procs; ++rank1)
     {
     REPEAT_MERGE_LOOPS:
 
-      for (processor_id_type rank2 = 0; rank2 < n_procs; ++rank2)
+      for (auto rank2 = decltype(_n_procs)(0); rank2 < _n_procs; ++rank2)
       {
         for (std::vector<FeatureData>::iterator it1 = _partial_feature_sets[rank1][map_num].begin();
              it1 != _partial_feature_sets[rank1][map_num].end(); /* no increment ++it1 */)
@@ -564,13 +562,13 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   } // map loop
 
 
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     _feature_sets[map_num].clear();
 
   // Now consolidate the data structure
   _feature_count = 0;
-  for (processor_id_type rank = 0; rank < n_procs; ++rank)
-    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
+    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     {
       for (auto & feature : _partial_feature_sets[rank][map_num])
       {
@@ -597,7 +595,7 @@ FeatureFloodCount::updateFieldInfo()
   std::vector<size_t> index_vector;
 
   unsigned int feature_number = 0;
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
     /**
      * Perform an indirect sort to give a parallel unique sorting to the identified features.
@@ -614,10 +612,10 @@ FeatureFloodCount::updateFieldInfo()
     _feature_maps[map_num].clear();
 
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
-    unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : map_num;
+    auto map_idx = (_single_map_mode || _condense_map_info) ? decltype(map_num)(0) : map_num;
     for (auto idx : index_vector)
     {
-      const FeatureData & feature = *_feature_sets[map_num][idx];
+      const auto & feature = *_feature_sets[map_num][idx];
 
       // Loop over the entitiy ids of this feature and update our local map
       for (auto entity : feature._local_ids)
@@ -648,13 +646,13 @@ FeatureFloodCount::updateFieldInfo()
 }
 
 void
-FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureData * feature)
+FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx, FeatureData * feature)
 {
   if (dof_object == nullptr)
     return;
 
   // Retrieve the id of the current entity
-  dof_id_type entity_id = dof_object->id();
+  auto entity_id = dof_object->id();
 
   // Has this entity already been marked? - if so move along
   if (_entities_visited[current_idx].find(entity_id) != _entities_visited[current_idx].end())
@@ -664,7 +662,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureD
   _entities_visited[current_idx][entity_id] = true;
 
   // Determine which threshold to use based on whether this is an established region
-  Real threshold = feature ? _step_connecting_threshold : _step_threshold;
+  auto threshold = feature ? _step_connecting_threshold : _step_threshold;
 
   // Get the value of the current variable for the current entity
   Real entity_value;
@@ -690,8 +688,8 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureD
    * If we reach this point (i.e. we haven't returned early from this routine),
    * we've found a new mesh entity that's part of a feature.
    */
-  unsigned int map_num = _single_map_mode ? 0 : current_idx;
-  processor_id_type rank = processor_id();
+  auto map_num = _single_map_mode ? decltype(current_idx)(0) : current_idx;
+  auto rank = processor_id();
 
   // New Feature (we need to create it and add it to our data structure)
   if (!feature)
@@ -710,7 +708,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, int current_idx, FeatureD
 }
 
 void
-FeatureFloodCount::visitElementalNeighbors(const Elem * elem, int current_idx, FeatureData * feature, bool recurse)
+FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool recurse)
 {
   mooseAssert(elem, "Elem is NULL");
 
@@ -751,7 +749,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, int current_idx, F
 }
 
 void
-FeatureFloodCount::visitNodalNeighbors(const Node * node, int current_idx, FeatureData * feature, bool recurse)
+FeatureFloodCount::visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool recurse)
 {
   mooseAssert(node, "Node is NULL");
 
@@ -762,7 +760,7 @@ FeatureFloodCount::visitNodalNeighbors(const Node * node, int current_idx, Featu
   for (unsigned int i = 0; i < neighbors.size(); ++i)
   {
     const Node * neighbor_node = neighbors[i];
-    processor_id_type my_proc_id = processor_id();
+    auto my_proc_id = processor_id();
 
     // Only recurse on nodes this processor can see
     if (_mesh.isSemiLocal(const_cast<Node *>(neighbor_node)))
@@ -818,10 +816,8 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
 void
 FeatureFloodCount::inflateBoundingBoxes(RealVectorValue inflation_amount)
 {
-  processor_id_type n_procs = _app.n_processors();
-
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
-    for (processor_id_type rank = 0; rank < n_procs; ++rank)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+    for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
       for (auto & feature : _partial_feature_sets[rank][map_num])
         feature.inflateBoundingBoxes(inflation_amount);
 }
@@ -849,7 +845,7 @@ FeatureFloodCount::calculateBubbleVolumes()
 
     // For each of the _maps_size FeatureData lists, determine if the set
     // of nodes includes any boundary nodes.
-    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
       // Determine boundary intersection for each FeatureData object
       for (const auto & feature_ptr : _feature_sets[map_num])
         feature_ptr->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
@@ -858,7 +854,7 @@ FeatureFloodCount::calculateBubbleVolumes()
 
   // Size our temporary data structure
   std::vector<std::vector<Real> > bubble_volumes(_maps_size);
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     bubble_volumes[map_num].resize(_feature_sets[map_num].size());
 
   // Clear pre-existing values and allocate space to store the volume
@@ -874,10 +870,10 @@ FeatureFloodCount::calculateBubbleVolumes()
   for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
   {
     Elem * elem = *el;
-    unsigned int elem_n_nodes = elem->n_nodes();
-    Real curr_volume = elem->volume();
+    auto elem_n_nodes = elem->n_nodes();
+    auto curr_volume = elem->volume();
 
-    for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     {
       auto bubble_it = _feature_sets[map_num].cbegin();
       auto bubble_end = _feature_sets[map_num].cend();
@@ -886,9 +882,9 @@ FeatureFloodCount::calculateBubbleVolumes()
       {
         // Count the number of nodes on this element which are flooded.
         unsigned int flooded_nodes = 0;
-        for (unsigned int node = 0; node < elem_n_nodes; ++node)
+        for (auto node = decltype(elem_n_nodes)(0); node < elem_n_nodes; ++node)
         {
-          dof_id_type node_id = elem->node(node);
+          auto node_id = elem->node(node);
           if ((*bubble_it)->_local_ids.find(node_id) != (*bubble_it)->_local_ids.end())
             ++flooded_nodes;
         }
@@ -916,19 +912,19 @@ FeatureFloodCount::calculateBubbleVolumes()
     // Compute the total area using a bounding box.  FIXME: this
     // assumes the domain is rectangular and 2D, and is probably a
     // little expensive so we should only do it once if possible.
-    MeshTools::BoundingBox bbox = MeshTools::bounding_box(_mesh);
-    Real total_volume = (bbox.max()(0)-bbox.min()(0))*(bbox.max()(1)-bbox.min()(1));
+    auto bbox = MeshTools::bounding_box(_mesh);
+    auto total_volume = (bbox.max()(0)-bbox.min()(0))*(bbox.max()(1)-bbox.min()(1));
 
     // Sum up the partial boundary grain volume contributions from all processors
     _communicator.sum(_total_volume_intersecting_boundary);
 
     // Scale the boundary intersecting grain volumes by the total domain volume
-    for (unsigned int i = 0; i < _total_volume_intersecting_boundary.size(); ++i)
-      _total_volume_intersecting_boundary[i] /= total_volume;
+    for (auto & total_volume_intersecting_boundary_item : _total_volume_intersecting_boundary)
+      total_volume_intersecting_boundary_item /= total_volume;
   }
 
   // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
-  for (unsigned int map_num = 0; map_num < _maps_size; ++map_num)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     _all_feature_volumes.insert(_all_feature_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
 
   // do all the sums!
@@ -957,9 +953,9 @@ bool
 FeatureFloodCount::FeatureData::isStichable(const FeatureData & rhs) const
 {
   // See if any of the bounding boxes in either FeatureData object intersect
-  for (unsigned int i = 0; i < _bboxes.size(); ++i)
-    for (unsigned int j = 0; j < rhs._bboxes.size(); ++j)
-      if (_bboxes[i].intersect(rhs._bboxes[j]))
+  for (const auto & bbox_lhs : _bboxes)
+    for (const auto & bbox_rhs : rhs._bboxes)
+      if (bbox_lhs.intersect(bbox_rhs))
         return true;
 
   return false;

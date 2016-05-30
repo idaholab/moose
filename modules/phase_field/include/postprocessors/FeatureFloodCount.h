@@ -153,11 +153,11 @@ protected:
    * for a new region to mark, otherwise we are in the recursive calls
    * currently marking a region.
    */
-  void flood(const DofObject * dof_object, int current_idx, FeatureData * feature);
+  void flood(const DofObject * dof_object, unsigned long current_idx, FeatureData * feature);
 
   // TODO: doco
-  void visitElementalNeighbors(const Elem * elem, int current_idx, FeatureData * feature, bool recurse);
-  void visitNodalNeighbors(const Node * elem, int current_idx, FeatureData * feature, bool recurse);
+  void visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool recurse);
+  void visitNodalNeighbors(const Node * elem, unsigned long current_idx, FeatureData * feature, bool recurse);
 
   /**
    * This routine uses the local flooded data to build up the local feature data structures (_feature_sets).
@@ -256,7 +256,7 @@ protected:
    * Assumption: We are going to assume that either all variables are periodic or none are.
    *             This assumption can be relaxed at a later time if necessary.
    */
-  unsigned int _var_number;
+  unsigned long _var_number;
 
   /// This variable is used to indicate whether or not multiple maps are used during flooding
   const bool _single_map_mode;
@@ -276,8 +276,14 @@ protected:
    */
   const bool _use_less_than_threshold_comparison;
 
-  /// Convienence variable holding the size of all the datastructures size by the number of maps
-  const unsigned int _maps_size;
+  // Convenience variable holding the number of variables coupled into this object
+  const unsigned long _n_vars;
+
+  /// Convenience variable holding the size of all the datastructures size by the number of maps
+  const unsigned long _maps_size;
+
+  /// Convenience variable holding the number of processors in this simulation
+  const processor_id_type _n_procs;
 
   /**
    * This variable keeps track of which nodes have been visited during execution.  We don't use the _feature_map
@@ -337,7 +343,7 @@ protected:
 
   /**
    * The filename and filehandle used if bubble volumes are being recorded to a file.
-   * MooseSharedPointer is used so we don't have to worry about cleaning up after ourselves...
+   * std::unique_ptr is used so we don't have to worry about cleaning up after ourselves...
    */
   std::map<std::string, std::unique_ptr<std::ofstream> > _file_handles;
 
@@ -377,11 +383,8 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
 {
   if (processor_id() == 0)
   {
-    // alias declaration
-    using iterator_t = std::map<std::string, std::unique_ptr<std::ofstream> >::iterator;
-
     // Try to find the filename
-    iterator_t handle_it = _file_handles.find(file_name);
+    auto handle_it = _file_handles.find(file_name);
 
     // If the file_handle isn't found, create it
     if (handle_it == _file_handles.end())
@@ -389,8 +392,7 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
       MooseUtils::checkFileWriteable(file_name);
 
       // Store the new filename in the map
-      std::pair<iterator_t, bool> result =
-        _file_handles.insert(std::make_pair(file_name, std::unique_ptr<std::ofstream>(new std::ofstream(file_name.c_str()))));
+      auto result = _file_handles.insert(std::make_pair(file_name, std::unique_ptr<std::ofstream>(new std::ofstream(file_name.c_str()))));
 
       // Be sure that the insert worked!
       mooseAssert(result.second, "Insertion into _file_handles map failed!");
@@ -413,11 +415,11 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
 }
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
-template<> void dataStore(std::ostream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context);
+template<> void dataStore(std::ostream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context);
 template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);
 
 template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
-template<> void dataLoad(std::istream & stream, MooseSharedPointer<FeatureFloodCount::FeatureData> & feature, void * context);
+template<> void dataLoad(std::istream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context);
 template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
 
 
