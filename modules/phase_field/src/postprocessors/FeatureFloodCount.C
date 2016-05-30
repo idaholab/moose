@@ -574,7 +574,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       {
         if (!feature._merged)
         {
-          _feature_sets[map_num].push_back(std::unique_ptr<FeatureData>(new FeatureData(feature)));
+          _feature_sets[map_num].emplace_back(std::unique_ptr<FeatureData>(new FeatureData(feature)));
           ++_feature_count;
         }
       }
@@ -693,7 +693,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
 
   // New Feature (we need to create it and add it to our data structure)
   if (!feature)
-    _partial_feature_sets[rank][map_num].push_back(FeatureData(current_idx));
+    _partial_feature_sets[rank][map_num].emplace_back(current_idx);
 
   // Get a handle to the feature we will update (always the last feature in the data structure)
   feature = &_partial_feature_sets[rank][map_num].back();
