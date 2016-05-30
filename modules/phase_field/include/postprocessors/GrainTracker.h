@@ -111,10 +111,15 @@ protected:
                                 REMAP_CACHE_MODE cache_mode);
 
   /**
-   * This method returns the periodic distance between two bounding boxes.  If use_centroids_only is true, then the distance will be between the two
-   * bounding box centers.  If ignore_radii is false, then the distance will be -1 or 1 depending on whether the intersect or not (respectively).
+   * This method returns the minimum periodic distance between two vectors of bounding boxes. If the bounding boxes overlap
+   * the result is always -1.0.
    */
-  Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2, bool use_centroids_only) const;
+  Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2) const;
+
+  /**
+   * This method returns the minimum periodic distance between the centroids of two vectors of bounding boxes.
+   */
+  Real centroidRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2) const;
 
   /**
    * This method colors neighbors of halo entries to expand the halo as desired for a given simulation.

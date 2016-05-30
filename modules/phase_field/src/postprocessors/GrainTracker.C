@@ -237,7 +237,7 @@ GrainTracker::trackGrains()
         Moose::out << "EBSD Grain " << gr << " " << center_points[gr] << '\n';
       }
 
-      // To find the minimum distance we will use the boundingRegionDistance routine.
+      // To find the minimum distance we will use the centroidRegionDistance routine.
       std::vector<MeshTools::BoundingBox> ebsd_vector(1);
 
       std::set<unsigned int> used_indices;
@@ -261,12 +261,12 @@ GrainTracker::trackGrains()
 
           for (unsigned int j = 0; j < center_points.size(); ++j)
           {
-            // Update the ebsd bbox data to be used in the boundingRegionDistance calculation
+            // Update the ebsd bbox data to be used in the centroidRegionDistance calculation
             // Since we are using centroid matching we'll just make it easy and set both the min/max of the box to the same
             // value (i.e. a zero sized box).
             ebsd_vector[0].min() = ebsd_vector[0].max() = center_points[j];
 
-            Real curr_centroid_diff = boundingRegionDistance(ebsd_vector, _feature_sets[map_num][feature_num]->_bboxes, true);
+            Real curr_centroid_diff = centroidRegionDistance(ebsd_vector, _feature_sets[map_num][feature_num]->_bboxes);
             if (curr_centroid_diff <= min_centroid_diff)
             {
               closest_match_idx = j;
@@ -343,7 +343,7 @@ GrainTracker::trackGrains()
     {
       if (grain_pair.second->_var_idx == _feature_sets[map_idx][new_grain_idx]->_var_idx)  // Do the variables indicies match?
       {
-        Real curr_centroid_diff = boundingRegionDistance(grain_pair.second->_bboxes, _feature_sets[map_idx][new_grain_idx]->_bboxes, true);
+        Real curr_centroid_diff = centroidRegionDistance(grain_pair.second->_bboxes, _feature_sets[map_idx][new_grain_idx]->_bboxes);
         if (curr_centroid_diff <= min_centroid_diff)
         {
           found_one = true;
@@ -385,7 +385,7 @@ GrainTracker::trackGrains()
       {
         unsigned int curr_idx = (new_to_exist_kv.second)[i];
 
-        Real curr_centroid_diff = boundingRegionDistance(feature_ptr->_bboxes, _unique_grains[curr_idx]->_bboxes, true);
+        Real curr_centroid_diff = centroidRegionDistance(feature_ptr->_bboxes, _unique_grains[curr_idx]->_bboxes);
         if (curr_centroid_diff <= min_centroid_diff)
         {
           min_idx = i;
@@ -430,8 +430,8 @@ GrainTracker::trackGrains()
       }
 
   /**
-   * Finally we need to mark any grains in the unique list that aren't marked as inactive.  These are the variables that
-   * unique grains that didn't match up to any bounding sphere.  Should only happen if it's the last active grain for
+   * Finally we need to mark any grains in the unique list that aren't marked as inactive.  These are the unique grains
+   * that didn't match up to any new feature. This should only happen if it's the last active grain for
    * this particular variable.
    */
   for (auto & grain_pair : _unique_grains)
@@ -547,7 +547,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
     unsigned int target_var_index = grain_pair.second->_var_idx;
     unsigned int target_grain_id = grain_pair.first;
 
-    Real curr_sphere_diff = boundingRegionDistance(grain._bboxes, grain_pair.second->_bboxes, false);
+    Real curr_sphere_diff = boundingRegionDistance(grain._bboxes, grain_pair.second->_bboxes);
 
     GrainDistance grain_distance_obj(curr_sphere_diff, target_grain_id, target_var_index);
 
@@ -870,13 +870,10 @@ GrainTracker::updateFieldInfo()
 }
 
 Real
-GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2, bool use_centroids_only) const
+GrainTracker::centroidRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2) const
 {
   /**
-   * The region that each grain covers is represented by a bounding box large enough to encompassing all the points
-   * within that grain. When using periodic boundaries, we may have several discrete "pieces" of a grain each represented
-   * by a bounding box. The distance between any two grains is defined as the minimum distance between any pair of boxes,
-   * one selected from each grain.
+   * Find the minimum centroid distance between any to pieces of the grains.
    */
   auto min_distance = std::numeric_limits<Real>::max();
   for (const auto & bbox1 : bboxes1)
@@ -887,39 +884,57 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
     {
       const auto centroid_point2 = (bbox2.max() + bbox2.min()) / 2.0;
 
-      auto curr_distance = std::numeric_limits<Real>::max();
+      // Here we'll calculate a distance between the centroids
+      auto curr_distance = _mesh.minPeriodicDistance(_var_number, centroid_point1, centroid_point2);
 
-      if (use_centroids_only)
-        // Here we'll calculate a distance between the centroids
-        curr_distance = _mesh.minPeriodicDistance(_var_number, centroid_point1, centroid_point2);
-      else
+      if (curr_distance < min_distance)
+        min_distance = curr_distance;
+    }
+  }
+
+  return min_distance;
+}
+
+Real
+GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2) const
+{
+  /**
+   * The region that each grain covers is represented by a bounding box large enough to encompassing all the points
+   * within that grain. When using periodic boundaries, we may have several discrete "pieces" of a grain each represented
+   * by a bounding box. The distance between any two grains is defined as the minimum distance between any pair of boxes,
+   * one selected from each grain.
+   */
+  auto min_distance = std::numeric_limits<Real>::max();
+  for (const auto & bbox1 : bboxes1)
+  {
+    for (const auto & bbox2 : bboxes2)
+    {
+      // AABB squared distance
+      Real curr_distance = 0.0;
+      bool boxes_overlap = true;
+      for (unsigned int dim = 0; dim < LIBMESH_DIM; ++dim)
       {
-        // AABB squared distance
-        Real result = 0.0;
-        bool boxes_overlap = true;
-        for (unsigned int dim = 0; dim < LIBMESH_DIM; ++dim)
+        const auto & min1 = bbox1.min()(dim);
+        const auto & max1 = bbox1.max()(dim);
+        const auto & min2 = bbox2.min()(dim);
+        const auto & max2 = bbox2.max()(dim);
+
+        if (min1 > max2)
         {
-          const auto & min1 = bbox1.min()(dim);
-          const auto & max1 = bbox1.max()(dim);
-          const auto & min2 = bbox2.min()(dim);
-          const auto & max2 = bbox2.max()(dim);
-
-          if (min1 > max2)
-          {
-            const auto delta = max2 - min1;
-            result += delta * delta;
-            boxes_overlap = false;
-          }
-          else if (min2 > max1)
-          {
-            const auto delta = max1 - min2;
-            result += delta * delta;
-            boxes_overlap = false;
-          }
+          const auto delta = max2 - min1;
+          curr_distance += delta * delta;
+          boxes_overlap = false;
         }
-
-        curr_distance = boxes_overlap ? -1 /* all overlaps are treated the same */ : result;
+        else if (min2 > max1)
+        {
+          const auto delta = max1 - min2;
+          curr_distance += delta * delta;
+          boxes_overlap = false;
+        }
       }
+
+      if (boxes_overlap)
+        return -1.0; /* all overlaps are treated the same */
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;
