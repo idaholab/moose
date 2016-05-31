@@ -42,6 +42,6 @@ Real dseff(Real p, Real al, Real m);
  * @param m van-genuchten m parameter
  */
 Real d2seff(Real p, Real al, Real m);
-};
+}
 
 #endif // POROUSFLOWEFFECTIVESATURATIONVG_H
