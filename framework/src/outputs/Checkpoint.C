@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// STL includes
+// C POSIX includes
 #include <sys/stat.h>
 
 // Moose includes
