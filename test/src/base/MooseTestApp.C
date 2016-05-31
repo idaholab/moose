@@ -154,6 +154,7 @@
 #include "ImplicitStateful.h"
 #include "MaterialDerivativeTestMaterial.h"
 #include "QpMaterial.h"
+#include "AuxCoupledMaterial.h"
 
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
@@ -450,8 +451,12 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(RecomputeMaterial);
   registerMaterial(NewtonMaterial);
   registerMaterial(ThrowMaterial);
+<<<<<<< 1c6702600c6b8df849eeeeab0be2b4e60d77d99e
   registerMaterial(MaterialDerivativeTestMaterial);
   registerMaterial(QpMaterial);
+=======
+  registerMaterial(AuxCoupledMaterial);
+>>>>>>> Creates a test that exercises the dependency problem
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
