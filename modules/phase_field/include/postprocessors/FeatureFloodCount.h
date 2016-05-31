@@ -52,6 +52,8 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
+  virtual void meshChanged() override;
+
   enum FIELD_TYPE
   {
     UNIQUE_REGION,
@@ -378,6 +380,9 @@ protected:
 
   /// used for testing if a neighbor element is semilocal
   std::set<const Elem *> _semilocal_elem_list;
+
+  /// flag that indicates if an up to date list of semilocal (active) elements has been built
+  bool _semilocal_elem_list_built;
 };
 
 template <class T>
