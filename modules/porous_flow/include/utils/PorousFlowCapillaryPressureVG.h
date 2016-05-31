@@ -67,6 +67,6 @@ Real dCapillaryPressure(Real s, Real m, Real sat_r, Real sat_s, Real p0, Real pc
  * @return d^2(capillary pressure)/ds^2 (Pa)
  */
 Real d2CapillaryPressure(Real s, Real m, Real sat_r, Real sat_s, Real p0, Real pc_max);
-};
+}
 
 #endif // POROUSFLOWCAPILLARYPRESSUREVG_H
