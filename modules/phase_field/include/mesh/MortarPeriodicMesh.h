@@ -8,7 +8,7 @@
 #ifndef MORTARPERIODICMESH_H
 #define MORTARPERIODICMESH_H
 
-#include "MooseMesh.h"
+#include "GeneratedMesh.h"
 
 class MortarPeriodicMesh;
 
@@ -19,7 +19,7 @@ InputParameters validParams<MortarPeriodicMesh>();
  * Mesh generated from parameters with additional subdomains for mortar interfaces
  * to enforce periodicity constraints
  */
-class MortarPeriodicMesh : public MooseMesh
+class MortarPeriodicMesh : public GeneratedMesh
 {
 public:
   MortarPeriodicMesh(const InputParameters & parameters);
@@ -28,25 +28,19 @@ public:
 
   virtual MooseMesh & clone() const;
 
+  ///{@ public interfaces for the mortar periodicity action
+  const std::vector<SubdomainID> & getMortarSubdomains() const { return _mortar_subdomains; }
+  const MultiMooseEnum & getPeriodicDirections() const { return _periodic_dirs; }
+  ///@}
+
 protected:
   virtual void buildMesh();
 
-  void addLineMesh(unsigned int nelem, Real x0, Real y0, Real x1, Real y1, subdomain_id_type id);
+  /// periodic directions
+  MultiMooseEnum _periodic_dirs;
 
-  /// The dimension of the mesh
-  MooseEnum _dim;
-
-  /// Number of elements in x, y, z direction
-  int _nx, _ny, _nz;
-
-  /// The min/max values for x,y,z component
-  Real _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
-
-  /// block IDs for the mortar interface blocks
-  subdomain_id_type _block_x, _block_y, _block_z;
-
-  /// reference to the underlying unstructured mesh object
-  UnstructuredMesh & _us_mesh;
+  // subdomain IDs for the mortar interfaces for each dimension
+  std::vector<SubdomainID> _mortar_subdomains;
 };
 
 #endif //MORTARPERIODICMESH_H

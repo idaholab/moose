@@ -11,17 +11,18 @@
   xmax = 0.5
   ymin = -0.5
   ymax = 0.5
+  periodic_directions = 'x y'
 
   [./MortarInterfaces]
     [./left_right]
       master = 1
       slave = 3
-      subdomain = 1
+      subdomain = 10
     [../]
     [./up_down]
       master = 0
       slave = 2
-      subdomain = 2
+      subdomain = 11
     [../]
   [../]
 []
@@ -30,12 +31,12 @@
   [./cnode]
     type = AddExtraNodeset
     coord = '0.0 0.0'
-    new_boundary = 10
+    new_boundary = 100
   [../]
   [./anode]
     type = AddExtraNodeset
     coord = '0.0 0.5'
-    new_boundary = 11
+    new_boundary = 101
   [../]
 []
 
@@ -87,46 +88,46 @@
   [../]
 
   # Lagrange multipliers for gradient component periodicity
-  [./lm_up_down_xx]
-    order = FIRST
-    family = LAGRANGE
-    block = 2
-  [../]
-  [./lm_up_down_xy]
-    order = FIRST
-    family = LAGRANGE
-    block = 2
-  [../]
-  [./lm_up_down_yx]
-    order = FIRST
-    family = LAGRANGE
-    block = 2
-  [../]
-  [./lm_up_down_yy]
-    order = FIRST
-    family = LAGRANGE
-    block = 2
-  [../]
-
   [./lm_left_right_xx]
     order = FIRST
     family = LAGRANGE
-    block = 1
+    block = 10
   [../]
   [./lm_left_right_xy]
     order = FIRST
     family = LAGRANGE
-    block = 1
+    block = 10
   [../]
   [./lm_left_right_yx]
     order = FIRST
     family = LAGRANGE
-    block = 1
+    block = 10
   [../]
   [./lm_left_right_yy]
     order = FIRST
     family = LAGRANGE
-    block = 1
+    block = 10
+  [../]
+
+  [./lm_up_down_xx]
+    order = FIRST
+    family = LAGRANGE
+    block = 11
+  [../]
+  [./lm_up_down_xy]
+    order = FIRST
+    family = LAGRANGE
+    block = 11
+  [../]
+  [./lm_up_down_yx]
+    order = FIRST
+    family = LAGRANGE
+    block = 11
+  [../]
+  [./lm_up_down_yy]
+    order = FIRST
+    family = LAGRANGE
+    block = 11
   [../]
 []
 
@@ -219,7 +220,7 @@
   # declare a few constants, such as mobilities (L,M) and interface gradient prefactors (kappa*)
   [./consts]
     type = GenericConstantMaterial
-    block = '0 1 2'
+    block = '0 10 11'
     prop_names  = 'M   kappa_c'
     prop_values = '0.2 0.01   '
   [../]
@@ -341,13 +342,13 @@
   # fix center point location
   [./centerfix_x]
     type = PresetBC
-    boundary = 10
+    boundary = 100
     variable = disp_x
     value = 0
   [../]
   [./centerfix_y]
     type = PresetBC
-    boundary = 10
+    boundary = 100
     variable = disp_y
     value = 0
   [../]
@@ -355,7 +356,7 @@
   # fix side point x coordinate to inhibit rotation
   [./angularfix]
     type = PresetBC
-    boundary = 11
+    boundary = 101
     variable = disp_x
     value = 0
   [../]
