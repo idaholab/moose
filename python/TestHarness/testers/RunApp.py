@@ -295,3 +295,25 @@ class RunApp(Tester):
       return False
     else:
       return True
+
+  def deleteFilesAndFolders(self, test_dir, paths, delete_folders=True):
+    # First delete the files (at the end of each of the paths)
+    if self.specs['delete_output_before_running'] == True:
+      for file in paths:
+        full_path = os.path.join(test_dir, file)
+        if os.path.exists(full_path):
+          try:
+            os.remove(full_path)
+          except:
+            print "Unable to remove file: " + full_path
+
+      # Now try to delete directories that might have been created
+      if delete_folders:
+        for file in paths:
+          path = os.path.dirname(file)
+          while path != '':
+            (path, tail) = os.path.split(path)
+            try:
+              os.rmdir(os.path.join(test_dir, path, tail))
+            except:
+              print "Unable to remove directory: " + tail

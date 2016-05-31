@@ -15,6 +15,7 @@ class Exodiff(RunApp):
     params.addParam('custom_cmp',            "Custom comparison file")
     params.addParam('use_old_floor',  False, "Use Exodiff old floor option")
     params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
+    params.addParam('delete_output_folders', True, "Delete output folders before running")
     params.addParam('map',  True, "Use geometrical mapping to match up elements.  This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh.")
 
     return params
@@ -25,13 +26,7 @@ class Exodiff(RunApp):
 
   def prepare(self):
     if self.specs['delete_output_before_running'] == True:
-      for file in self.specs['exodiff']:
-        full_path = os.path.join(self.specs['test_dir'], file)
-        if os.path.exists(full_path):
-          try:
-            os.remove(full_path)
-          except:
-            print "Unable to remove file: " + full_path
+      self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['exodiff'], self.specs['delete_output_folders'])
 
   def processResultsCommand(self, moose_dir, options):
     commands = []
