@@ -18,7 +18,7 @@ InputParameters validParams<RankTwoScalarAux>()
   params.addParam<unsigned int>("selected_qp", "Evaluate the tensor at this quadpoint.  This option only needs to be used if you are interested in a particular quadpoint in each element: otherwise do not include this parameter in your input file");
   params.addParamNamesToGroup("selected_qp", "Advanced");
 
-  params.addParam<Point>("point1", Point(), "Start point for axis used to calculate some cylinderical material tensor quantities" );
+  params.addParam<Point>("point1", Point(0, 0, 0), "Start point for axis used to calculate some cylinderical material tensor quantities" );
   params.addParam<Point>("point2", Point(0, 1, 0), "End point for axis used to calculate some material tensor quantities");
   params.addParam<Point>("direction", Point(0, 0, 1), "Direction vector");
   return params;
@@ -47,5 +47,5 @@ RankTwoScalarAux::computeValue()
     qp = _selected_qp;
   }
 
-  return RankTwoScalarTools::getQuantity(_tensor[qp], _scalar_type, _point1, _point2, & _q_point[_qp], _input_direction);
+  return RankTwoScalarTools::getQuantity(_tensor[qp], _scalar_type, _point1, _point2, _q_point[qp], _input_direction);
 }

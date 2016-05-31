@@ -144,10 +144,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-#  [./direction]
-#    order = CONSTANT
-#    family = MONOMIAL
-#  [../]
+  [./direction]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 
 [] # AuxVariables
 
@@ -252,13 +252,13 @@
     variable = minprincipal
     scalar_type = MiNPRiNCIpAl
   [../]
-#  [./direction]
-#    type = RankTwoScalarAux
-#    rank_two_tensor = stress
-#    variable = direction
-#    scalar_type = direction
-#    direction = '1 1 1'
-#  [../]
+  [./direction]
+    type = RankTwoScalarAux
+    rank_two_tensor = stress
+    variable = direction
+    scalar_type = direction
+    direction = '1 1 1'
+  [../]
 
 
 [] # AuxKernels
