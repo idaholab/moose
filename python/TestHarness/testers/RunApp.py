@@ -316,4 +316,13 @@ class RunApp(Tester):
             try:
               os.rmdir(os.path.join(test_dir, path, tail))
             except:
-              print "Unable to remove directory: " + tail
+              # There could definitely be problems with removing the directory
+              # because it might be non-empty due to checkpoint files or other
+              # files being created on different operating systems. We just
+              # don't care for the most part and we don't want to error out.
+              # As long as our test boxes clean before each test, we'll notice
+              # the case where these files aren't being generated for a
+              # particular run.
+              #
+              # TL;DR; Just pass...
+              pass
