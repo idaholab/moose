@@ -45,9 +45,9 @@ void
 ComputeElemAuxVarsThread::subdomainChanged()
 {
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._elem_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
@@ -56,10 +56,10 @@ ComputeElemAuxVarsThread::subdomainChanged()
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = kernels.begin(); aux_it != kernels.end(); ++aux_it)
+    for (const auto & aux : kernels)
     {
-      (*aux_it)->subdomainSetup();
-      const std::set<MooseVariable *> & mv_deps = (*aux_it)->getMooseVariableDependencies();
+      aux->subdomainSetup();
+      const std::set<MooseVariable *> & mv_deps = aux->getMooseVariableDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
@@ -81,8 +81,8 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = kernels.begin(); aux_it != kernels.end(); ++aux_it)
-      (*aux_it)->compute();
+    for (const auto & aux : kernels)
+      aux->compute();
 
     if (_need_materials)
       _fe_problem.swapBackMaterials(_tid);
@@ -90,9 +90,9 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
     // update the solution vector
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+      for (const auto & it : _aux_sys._elem_vars[_tid])
       {
-        MooseVariable * var = it->second;
+        MooseVariable * var = it.second;
         var->insert(_system.solution());
       }
     }

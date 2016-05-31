@@ -167,39 +167,30 @@ ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
   MooseObjectWarehouse<Constraint>::updateActive();
   _nodal_constraints.updateActive();
 
-  {
-    std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> >::iterator it;
-    for (it = _node_face_constraints.begin(); it != _node_face_constraints.end(); ++it)
-      it->second.updateActive();
-    for (it = _displaced_node_face_constraints.begin(); it != _displaced_node_face_constraints.end(); ++it)
-      it->second.updateActive();
-  }
+  for (auto & it : _node_face_constraints)
+    it.second.updateActive();
 
-  {
-    std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> >::iterator it;
-    for (std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> >::iterator it = _node_face_constraints.begin(); it != _node_face_constraints.end(); ++it)
-      it->second.updateActive();
-  }
+  for (auto & it : _displaced_node_face_constraints)
+    it.second.updateActive();
 
-  {
-    std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> >::iterator it;
-    for (it = _element_constraints.begin(); it != _element_constraints.end(); ++it)
-      it->second.updateActive();
-  }
+  // FIXME: We call updateActive() on the NodeFaceConstraints again?
+  for (auto & it : _node_face_constraints)
+    it.second.updateActive();
+
+  for (auto & it : _element_constraints)
+    it.second.updateActive();
 }
 
 
 void
 ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID/*tid=0*/) const
 {
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> >::const_iterator it;
-
-  for (it = _face_face_constraints.begin(); it != _face_face_constraints.end(); ++it)
+  for (const auto & it : _face_face_constraints)
   {
-    const std::vector<MooseSharedPointer<FaceFaceConstraint> > & objects = it->second.getActiveObjects();
-    for (std::vector<MooseSharedPointer<FaceFaceConstraint> >::const_iterator jt = objects.begin(); jt != objects.end(); ++jt)
+    const std::vector<MooseSharedPointer<FaceFaceConstraint> > & objects = it.second.getActiveObjects();
+    for (const auto & ffc : objects)
     {
-      MooseVariable & var = (*jt)->variable();
+      MooseVariable & var = ffc->variable();
       unique_variables.insert(var.name());
       const std::set<SubdomainID> & subdomains = var.activeSubdomains();
       subdomains_covered.insert(subdomains.begin(), subdomains.end());

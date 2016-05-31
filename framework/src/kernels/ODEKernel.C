@@ -56,11 +56,8 @@ ODEKernel::computeJacobian()
 
   // compute off-diagonal jacobians wrt scalar variables
   const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
-  for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
-  {
-    MooseVariableScalar * jvar = *it;
-    computeOffDiagJacobian(jvar->number());
-  }
+  for (const auto & var : scalar_vars)
+    computeOffDiagJacobian(var->number());
 }
 
 void

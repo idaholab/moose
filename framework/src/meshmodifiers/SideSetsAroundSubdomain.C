@@ -115,8 +115,8 @@ SideSetsAroundSubdomain::modify()
 
           // Add the boundaries, if appropriate
           if (add_to_bdy)
-            for (unsigned int i = 0; i < boundary_ids.size(); ++i)
-              boundary_info.add_side(elem, side, boundary_ids[i]);
+            for (const auto & boundary_id : boundary_ids)
+              boundary_info.add_side(elem, side, boundary_id);
         }
     }
   }

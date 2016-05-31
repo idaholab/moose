@@ -82,11 +82,9 @@ LinearInterpolation::sampleDerivative(Real x) const
 Real
 LinearInterpolation::integrate()
 {
-  Real answer(0);
-  for (unsigned int i(1); i < _x.size(); ++i)
-  {
+  Real answer = 0;
+  for (unsigned int i = 1; i < _x.size(); ++i)
     answer += 0.5*(_y[i]+_y[i-1])*(_x[i]-_x[i-1]);
-  }
 
   return answer;
 }

@@ -59,7 +59,6 @@ KernelWarehouse::updateActive(THREAD_ID tid)
 {
   MooseObjectWarehouse<KernelBase>::updateActive(tid);
 
-  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::iterator it;
-  for (it = _variable_kernel_storage.begin(); it != _variable_kernel_storage.end(); ++it)
-    it->second.updateActive(tid);
+  for (auto & it : _variable_kernel_storage)
+    it.second.updateActive(tid);
 }

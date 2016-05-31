@@ -50,9 +50,9 @@ AssignElementSubdomainID::modify()
   if (isParamValid("element_ids"))
   {
     std::vector<dof_id_type> elemids = getParam<std::vector<dof_id_type> >("element_ids");
-    for (dof_id_type i = 0; i < elemids.size(); ++i)
+    for (const auto & dof : elemids)
     {
-      Elem * elem = mesh.query_elem_ptr(elemids[i]);
+      Elem * elem = mesh.query_elem_ptr(dof);
       if (!elem)
         mooseError("invalid element ID is in element_ids");
       else
@@ -83,27 +83,27 @@ AssignElementSubdomainID::modify()
   std::map<ElemType, std::set<SubdomainID> > type2blocks;
   for (dof_id_type e = 0; e<elements.size(); ++e)
   {
-    Elem* elem = elements[e];
+    Elem * elem = elements[e];
     ElemType type = elem->type();
     SubdomainID newid = bids[e];
 
     bool has_type = false;
-    for (std::map<ElemType, std::set<SubdomainID> >::iterator it = type2blocks.begin(); it != type2blocks.end(); ++it)
+    for (auto & it : type2blocks)
     {
-      if (it->first == type)
+      if (it.first == type)
       {
         has_type = true;
-        it->second.insert(newid);
+        it.second.insert(newid);
       }
-      else
-        if (it->second.count(newid)>0)
-          mooseError("trying to assign elements with different types with the same subdomain ID");
+      else if (it.second.count(newid) > 0)
+        mooseError("trying to assign elements with different types with the same subdomain ID");
     }
+
     if (!has_type)
     {
       std::set<SubdomainID> blocks;
       blocks.insert(newid);
-      type2blocks.insert(std::pair<ElemType, std::set<SubdomainID> >(type, blocks));
+      type2blocks.insert(std::make_pair(type, blocks));
     }
 
     elem->subdomain_id() = newid;

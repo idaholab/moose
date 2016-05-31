@@ -43,15 +43,15 @@ void
 ActionWarehouse::build()
 {
   _ordered_names = _syntax.getSortedTask();
-  for (const auto & it : _ordered_names)
-    buildBuildableActions(it);
+  for (const auto & name : _ordered_names)
+    buildBuildableActions(name);
 }
 
 void
 ActionWarehouse::clear()
 {
-  for (std::vector<MooseSharedPointer<Action> >::iterator it = _all_ptrs.begin(); it != _all_ptrs.end(); ++it)
-    it->reset();
+  for (auto & ptr : _all_ptrs)
+    ptr.reset();
 
   _action_blocks.clear();
   _generator_valid = false;
@@ -115,10 +115,8 @@ ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
 
 
   //TODO: Now we need to weed out the double registrations!
-  for (std::set<std::string>::iterator it = tasks.begin(); it != tasks.end(); ++it)
+  for (const auto & task : tasks)
   {
-    const std::string & task = *it;
-
     // Some error checking
     if (!_syntax.hasTask(task))
       mooseError("A(n) " << task << " is not a registered task");
@@ -134,22 +132,22 @@ ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
       {
         const std::string & base = mparams.get<std::string>("_moose_base");
 
-        if (!_syntax.verifyMooseObjectTask(base, *it))
-          mooseError("Task " << *it << " is not registered to build " << base << " derived objects");
+        if (!_syntax.verifyMooseObjectTask(base, task))
+          mooseError("Task " << task << " is not registered to build " << base << " derived objects");
       }
       else
         mooseError("Unable to locate registered base parameter for " << moa->getMooseObjectType());
     }
 
     // Add the current task to current action
-    action->appendTask(*it);
+    action->appendTask(task);
 
     if (_show_parser)
-      Moose::err << COLOR_YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type() << " (" << COLOR_YELLOW << *it << COLOR_DEFAULT << ")\n";
+      Moose::err << COLOR_YELLOW << "Adding Action:         " << COLOR_DEFAULT << action->type() << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")\n";
 
     // Add it to the warehouse
     _all_ptrs.push_back(action);
-    _action_blocks[*it].push_back(action.get());
+    _action_blocks[task].push_back(action.get());
   }
 
   if (_show_parser)
@@ -216,15 +214,15 @@ ActionWarehouse::checkUnsatisfiedActions() const
   std::stringstream oss;
   bool empty = true;
 
-  for (std::set<std::string>::const_iterator i = _unsatisfied_dependencies.begin(); i != _unsatisfied_dependencies.end(); ++i)
+  for (const auto & udep : _unsatisfied_dependencies)
   {
-    if (_action_blocks.find(*i) == _action_blocks.end())
+    if (_action_blocks.find(udep) == _action_blocks.end())
     {
       if (empty)
         empty = false;
       else
         oss << " ";
-      oss << *i;
+      oss << udep;
     }
   }
 
@@ -245,22 +243,22 @@ ActionWarehouse::printActionDependencySets() const
   std::ostringstream oss;
 
   const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedTaskSet();
-  for (std::vector<std::set<std::string> >::const_iterator i = ordered_names.begin(); i != ordered_names.end(); ++i)
+  for (const auto & task_set : ordered_names)
   {
     oss << "[DBG][ACT] (" << COLOR_YELLOW;
-    std::copy(i->begin(), i->end(), infix_ostream_iterator<std::string>(oss, ", "));
+    std::copy(task_set.begin(), task_set.end(), infix_ostream_iterator<std::string>(oss, ", "));
     oss << COLOR_DEFAULT << ")\n";
 
-    for (std::set<std::string>::const_iterator j = i->begin(); j != i->end(); ++j)
+    for (const auto & task : task_set)
     {
-      if (_action_blocks.find(*j) == _action_blocks.end()) continue;
-      for (std::vector<Action *>::const_iterator k = _action_blocks.at(*j).begin(); k != _action_blocks.at(*j).end(); ++k)
-      {
-        Action * act = *k;
+      if (_action_blocks.find(task) == _action_blocks.end())
+        continue;
 
+      for (const auto & act : _action_blocks.at(task))
+      {
         // The Syntax of the Action if it exists
-        if ((*k)->name() != "")
-          oss << "[DBG][ACT]\t" << COLOR_GREEN << (*k)->name() << COLOR_DEFAULT << '\n';
+        if (act->name() != "")
+          oss << "[DBG][ACT]\t" << COLOR_GREEN << act->name() << COLOR_DEFAULT << '\n';
 
         // The task sets
         oss << "[DBG][ACT]\t" << act->type();
@@ -270,7 +268,7 @@ ActionWarehouse::printActionDependencySets() const
           oss << " (";
           // Break the current Action's tasks into 2 sets, those intersecting with current set and then the difference.
           std::set<std::string> intersection, difference;
-          std::set_intersection(tasks.begin(), tasks.end(), i->begin(), i->end(),
+          std::set_intersection(tasks.begin(), tasks.end(), task_set.begin(), task_set.end(),
                                 std::inserter(intersection, intersection.end()));
           std::set_difference(tasks.begin(), tasks.end(), intersection.begin(), intersection.end(),
                               std::inserter(difference, difference.end()));
@@ -301,11 +299,8 @@ ActionWarehouse::executeAllActions()
     _console << "\n[DBG][ACT] Executing actions:" << std::endl;
   }
 
-  for (std::vector<std::string>::iterator it = _ordered_names.begin(); it != _ordered_names.end(); ++it)
-  {
-    std::string task = *it;
+  for (const auto & task : _ordered_names)
     executeActionsWithAction(task);
-  }
 }
 
 void
@@ -340,32 +335,29 @@ ActionWarehouse::printInputFile(std::ostream & out)
   std::map<std::string, std::vector<Action *> >::iterator iter;
 
   std::vector<Action *> ordered_actions;
-  ordered_actions.clear();
-  for (iter = _action_blocks.begin(); iter != _action_blocks.end(); ++iter)
-    for (std::vector<Action *>::iterator j = iter->second.begin(); j != iter->second.end(); ++j)
-      ordered_actions.push_back(*j);
+  for (const auto & block : _action_blocks)
+    for (const auto & act : block.second)
+      ordered_actions.push_back(act);
 
-  for (std::vector<Action* >::iterator i = ordered_actions.begin();
-       i != ordered_actions.end();
-       ++i)
+  for (const auto & act : ordered_actions)
   {
     std::string name;
-    if ((*i)->isParamValid("parser_syntax"))
-      name = (*i)->getParam<std::string>("parser_syntax");
+    if (act->isParamValid("parser_syntax"))
+      name = act->getParam<std::string>("parser_syntax");
     else
-      name = (*i)->name();
-    const std::set<std::string> & tasks = ((*i)->getAllTasks());
+      name = act->name();
+    const std::set<std::string> & tasks = act->getAllTasks();
     mooseAssert(!tasks.empty(), "Task list is empty");
 
     bool is_parent;
     if (_syntax.isAssociated(name, &is_parent) != "")
      {
-      InputParameters params = (*i)->parameters();
+      InputParameters params = act->parameters();
 
       // TODO: Do we need to insert more nodes for each task?
       tree.insertNode(name, *tasks.begin(), true, &params);
 
-      MooseObjectAction *moose_object_action = dynamic_cast<MooseObjectAction *>(*i);
+      MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(act);
       if (moose_object_action)
        {
         InputParameters obj_params = moose_object_action->getObjectParams();

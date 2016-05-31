@@ -151,7 +151,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
       std::istringstream i(item);
       Real d;
       i >> d;
-      data.push_back( d );
+      data.push_back(d);
     }
 
     if (linenum == 1)
@@ -166,19 +166,19 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
   z.reshape(linenum-1,itemnum-1);
   unsigned int offset(0);
   // Extract the first line's data (the x axis data)
-  for (unsigned int j(0); j < itemnum-1; ++j)
+  for (unsigned int j = 0; j < itemnum-1; ++j)
   {
     x[j] = data[offset];
     ++offset;
   }
-  for (unsigned int i(0); i < linenum-1; ++i)
+  for (unsigned int i = 0; i < linenum-1; ++i)
   {
     // Extract the y axis entry for this line
     y[i] = data[offset];
     ++offset;
 
     // Extract the function values for this row in the matrix
-    for (unsigned int j(0); j < itemnum-1; ++j)
+    for (unsigned int j = 0; j < itemnum-1; ++j)
     {
       z(i,j) = data[offset];
       ++offset;

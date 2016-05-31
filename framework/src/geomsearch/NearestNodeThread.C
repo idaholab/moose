@@ -42,10 +42,8 @@ NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*spl
 void
 NearestNodeThread::operator() (const NodeIdRange & range)
 {
-  for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
+  for (const auto & node_id : range)
   {
-    dof_id_type node_id = *nd;
-
     const Node & node = _mesh.nodeRef(node_id);
 
     const Node * closest_node = NULL;

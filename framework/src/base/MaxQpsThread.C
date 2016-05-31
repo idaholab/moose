@@ -51,10 +51,8 @@ MaxQpsThread::operator() (const ConstElemRange & range)
 
   // For short circuiting reinit
   std::set<ElemType> seen_it;
-  for (ConstElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  for (const auto & elem : range)
   {
-    const Elem * elem = *elem_it;
-
     // Only reinit if the element type has not previously been seen
     if (seen_it.insert(elem->type()).second)
     {

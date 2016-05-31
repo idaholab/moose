@@ -80,11 +80,11 @@ ComputeDiracThread::onElement(const Elem * elem)
   // DiracKernels and check whether this is the case.
   bool need_reinit_materials = false;
   {
-    for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
+    for (const auto & dirac_kernel : dkernels)
     {
       // If any of the DiracKernels have had getMaterialProperty()
       // called, we need to reinit Materials.
-      if ((*it)->getMaterialPropertyCalled())
+      if (dirac_kernel->getMaterialPropertyCalled())
       {
         need_reinit_materials = true;
         break;
@@ -95,10 +95,8 @@ ComputeDiracThread::onElement(const Elem * elem)
   if (need_reinit_materials)
     _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
 
-  for (std::vector<MooseSharedPointer<DiracKernel> >::const_iterator it = dkernels.begin(); it != dkernels.end(); ++it)
+  for (const auto & dirac_kernel : dkernels)
   {
-    MooseSharedPointer<DiracKernel> dirac_kernel = *it;
-
     if (dirac_kernel->hasPointsOnElem(elem))
     {
       if (_jacobian == NULL)

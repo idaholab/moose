@@ -194,8 +194,8 @@ petscSetOptions(FEProblem & problem)
   setSolverOptions(problem.solverParams());
 
   // Add any additional options specified in the input file
-  for (MooseEnumIterator it = petsc.flags.begin(); it != petsc.flags.end(); ++it)
-    setSinglePetscOption(it->c_str());
+  for (const auto & flag : petsc.flags)
+    setSinglePetscOption(flag.c_str());
   for (unsigned int i=0; i<petsc.inames.size(); ++i)
     setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
@@ -508,31 +508,31 @@ storePetscOptions(FEProblem & fe_problem, const InputParameters & params)
   Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
 
   // Update the PETSc single flags
-  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+  for (const auto & option : petsc_options)
   {
     /**
      * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
      * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
      */
-    if (*it == "-log_summary")
+    if (option == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
     // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
     else
     {
       std::string help_string;
-      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
+      if (option == "-snes" || option == "-snes_mf" || option == "-snes_mf_operator")
         help_string = "Please set the solver type through \"solve_type\".";
-      else if (*it == "-ksp_monitor")
+      else if (option == "-ksp_monitor")
         help_string = "Please use \"Outputs/print_linear_residuals=true\"";
 
       if (help_string != "")
-        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
+        mooseWarning("The PETSc option " << option << " should not be used directly in a MOOSE input file. " << help_string);
     }
 
     // Update the stored items, but do not create duplicates
-    if (find(po.flags.begin(), po.flags.end(), *it) == po.flags.end())
-      po.flags.push_back(*it);
+    if (find(po.flags.begin(), po.flags.end(), option) == po.flags.end())
+      po.flags.push_back(option);
   }
 
   // Check that the name value pairs are sized correctly

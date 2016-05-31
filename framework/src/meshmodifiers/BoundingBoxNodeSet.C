@@ -71,8 +71,8 @@ BoundingBoxNodeSet::modify()
         {
           const Node * node = elem->node_ptr(j);
 
-          for (unsigned int j = 0; j < boundary_ids.size(); ++j)
-            boundary_info.add_node(node, boundary_ids[j]);
+          for (const auto & boundary_id : boundary_ids)
+            boundary_info.add_node(node, boundary_id);
 
           found_node = true;
         }

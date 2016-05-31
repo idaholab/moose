@@ -133,9 +133,8 @@ PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner ()
 {
   this->clear();
 
-  std::vector<Preconditioner<Number> *>::iterator it;
-  for (it = _preconditioners.begin(); it != _preconditioners.end(); ++it)
-    delete *it;
+  for (auto & pc : _preconditioners)
+    delete pc;
 }
 
 void
@@ -153,7 +152,7 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var, std::vector<unsigned int
   _pre_type[var] = type;
 
   _off_diag_mats[var].resize(off_diag.size());
-  for (unsigned int i=0;i<off_diag.size();i++)
+  for (unsigned int i = 0; i < off_diag.size(); i++)
   {
     //Add the matrix to hold the off-diagonal piece
     _off_diag_mats[var][i] = &precond_system.add_matrix(_nl.sys().variable_name(off_diag[i]));
@@ -176,7 +175,7 @@ PhysicsBasedPreconditioner::init ()
   if (_solve_order.size() == 0)
   {
     _solve_order.resize(num_systems);
-    for (unsigned int i=0;i<num_systems;i++)
+    for (unsigned int i = 0; i < num_systems; i++)
       _solve_order[i]=i;
   }
 
@@ -216,7 +215,7 @@ PhysicsBasedPreconditioner::setup()
       blocks.push_back(block);
     }
 
-    for (unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
+    for (unsigned int diag = 0; diag < _off_diag[system_var].size(); diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
       std::string coupled_name = _nl.sys().variable_name(coupled_var);
@@ -229,8 +228,8 @@ PhysicsBasedPreconditioner::setup()
   _fe_problem.computeJacobianBlocks(blocks);
 
   // cleanup
-  for (unsigned int i=0; i<blocks.size(); i++)
-    delete blocks[i];
+  for (auto & block : blocks)
+    delete block;
 }
 
 void
@@ -260,7 +259,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 
     //Modify the RHS by subtracting off the matvecs of the solutions for the other preconditioning
     //systems with the off diagonal blocks in this system.
-    for (unsigned int diag=0;diag<_off_diag[system_var].size();diag++)
+    for (unsigned int diag = 0; diag < _off_diag[system_var].size(); diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
       LinearImplicitSystem & coupled_system = *_systems[coupled_var];

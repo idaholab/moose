@@ -76,8 +76,8 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
   {
     const std::vector<MooseSharedPointer<ElementUserObject> > & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
-    for (std::vector<MooseSharedPointer<ElementUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->execute();
+    for (const auto & uo : objects)
+      uo->execute();
   }
 
   _fe_problem.swapBackMaterials(_tid);
@@ -94,8 +94,8 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     _fe_problem.setCurrentBoundaryID(bnd_id);
 
     const std::vector<MooseSharedPointer<SideUserObject> > & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
-    for (std::vector<MooseSharedPointer<SideUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->execute();
+    for (const auto & uo : objects)
+      uo->execute();
 
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
     _fe_problem.swapBackMaterialsFace(_tid);
@@ -123,13 +123,13 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<InternalSideUserObject> > & objects = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
-      for (std::vector<MooseSharedPointer<InternalSideUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+      for (const auto & uo : objects)
       {
-        if ( !(*it)->blockRestricted())
-          (*it)->execute();
+        if (!uo->blockRestricted())
+          uo->execute();
 
-        else if ( (*it)->hasBlocks(neighbor->subdomain_id()) )
-          (*it)->execute();
+        else if (uo->hasBlocks(neighbor->subdomain_id()))
+          uo->execute();
       }
       _fe_problem.swapBackMaterialsFace(_tid);
       _fe_problem.swapBackMaterialsNeighbor(_tid);

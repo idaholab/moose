@@ -685,16 +685,14 @@ Transient::lastSolveConverged()
 void
 Transient::preExecute()
 {
-  /*
   // Add time period start times to sync times
-  const std::vector<MooseSharedPointer<Control> > & controls = _problem.getControlWarehouse().getActiveObjects();
-  for (std::vector<MooseSharedPointer<Control> >::const_iterator it = controls.begin(); it != controls.end(); ++it)
-  {
-    MooseSharedPointer<TimePeriod> tp = MooseSharedNamespace::dynamic_pointer_cast<TimePeriod>(*it);
-    if (tp)
-      _time_stepper->addSyncTime(tp->getSyncTimes());
-  }
-  */
+  // const std::vector<MooseSharedPointer<Control> > & controls = _problem.getControlWarehouse().getActiveObjects();
+  // for (auto & control : controls)
+  // {
+  //   MooseSharedPointer<TimePeriod> tp = MooseSharedNamespace::dynamic_pointer_cast<TimePeriod>(control);
+  //   if (tp)
+  //     _time_stepper->addSyncTime(tp->getSyncTimes());
+  // }
   _time_stepper->preExecute();
 }
 

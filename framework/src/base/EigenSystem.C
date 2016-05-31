@@ -92,11 +92,8 @@ EigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
     }
     else
     {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
-      for (; it !=it_end; ++it)
-        solution().set( *it, solution()(*it)*scaling_factor );
+      for (const auto & dof : _eigen_var_indices)
+        solution().set(dof, solution()(dof) * scaling_factor);
     }
   }
   solution().close();
@@ -123,34 +120,31 @@ EigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coef
     }
     else
     {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
       if (coefficients.size()>2)
       {
-        for (; it !=it_end; ++it)
+        for (const auto & dof : _eigen_var_indices)
         {
-          Real t = solution()(*it) * coefficients[0];
-          t += solutionOld()(*it) * coefficients[1];
-          t += solutionOlder()(*it) * coefficients[2];
-          solution().set( *it, t );
+          Real t = solution()(dof) * coefficients[0];
+          t += solutionOld()(dof) * coefficients[1];
+          t += solutionOlder()(dof) * coefficients[2];
+          solution().set(dof, t);
         }
       }
       else if (coefficients.size()>1)
       {
-        for (; it !=it_end; ++it)
+        for (const auto & dof : _eigen_var_indices)
         {
-          Real t = solution()(*it) * coefficients[0];
-          t += solutionOld()(*it) * coefficients[1];
-          solution().set( *it, t );
+          Real t = solution()(dof) * coefficients[0];
+          t += solutionOld()(dof) * coefficients[1];
+          solution().set(dof, t);
         }
       }
       else
       {
-        for (; it !=it_end; ++it)
+        for (const auto & dof : _eigen_var_indices)
         {
-          Real t = solution()(*it) * coefficients[0];
-          solution().set( *it, t );
+          Real t = solution()(dof) * coefficients[0];
+          solution().set(dof, t);
         }
       }
     }
@@ -174,11 +168,8 @@ EigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
     }
     else
     {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
-      for (; it !=it_end; ++it)
-        solution().set( *it, v );
+      for (const auto & dof : _eigen_var_indices)
+        solution().set(dof, v);
     }
   }
   solution().close();
@@ -200,11 +191,8 @@ EigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
     }
     else
     {
-      std::set<dof_id_type>::iterator it      = _eigen_var_indices.begin();
-      std::set<dof_id_type>::iterator it_end  = _eigen_var_indices.end();
-
-      for (; it !=it_end; ++it)
-        solutionOld().set( *it, v );
+      for (const auto & dof : _eigen_var_indices)
+        solutionOld().set(dof, v);
     }
   }
   solutionOld().close();

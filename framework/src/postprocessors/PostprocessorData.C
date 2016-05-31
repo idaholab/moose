@@ -76,9 +76,9 @@ PostprocessorData::storeValue(const std::string & name, PostprocessorValue value
 void
 PostprocessorData::copyValuesBack()
 {
-  for (std::map<std::string, PostprocessorValue*>::iterator it = _values.begin(); it != _values.end(); ++it)
+  for (const auto & it : _values)
   {
-    getPostprocessorValueOlder(it->first) = getPostprocessorValueOld(it->first);
-    getPostprocessorValueOld(it->first) = getPostprocessorValue(it->first);
+    getPostprocessorValueOlder(it.first) = getPostprocessorValueOld(it.first);
+    getPostprocessorValueOld(it.first) = getPostprocessorValue(it.first);
   }
 }

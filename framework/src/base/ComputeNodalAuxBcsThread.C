@@ -47,9 +47,9 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   BoundaryID boundary_id = bnode->_bnd_id;
 
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._nodal_vars[_tid].begin(); it != _aux_sys._nodal_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._nodal_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
@@ -64,10 +64,10 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
     const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = kernels.find(boundary_id);
     if (iter != kernels.end())
     {
-          _fe_problem.reinitNodeFace(node, boundary_id, _tid);
+      _fe_problem.reinitNodeFace(node, boundary_id, _tid);
 
-          for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
-            (*aux_it)->compute();
+      for (const auto & aux : iter->second)
+        aux->compute();
     }
   }
 
@@ -75,9 +75,9 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     // update the solution vector
-    for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._nodal_vars[_tid].begin(); it != _aux_sys._nodal_vars[_tid].end(); ++it)
+    for (const auto & it : _aux_sys._nodal_vars[_tid])
     {
-      MooseVariable * var = it->second;
+      MooseVariable * var = it.second;
       var->insert(_aux_sys.solution());
     }
   }

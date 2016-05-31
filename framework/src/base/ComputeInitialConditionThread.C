@@ -35,10 +35,8 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
 
   // Iterate over all the elements in the range
-  for (ConstElemRange::const_iterator elem_it=range.begin(); elem_it != range.end(); ++elem_it)
+  for (const auto & elem : range)
   {
-    const Elem* elem = *elem_it;
-
     SubdomainID subdomain = elem->subdomain_id();
 
     _fe_problem.prepare(elem, _tid);

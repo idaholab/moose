@@ -61,11 +61,11 @@ TableOutput::outputPostprocessors()
   const std::set<std::string> & out = getPostprocessorOutput();
 
   // Loop through the postprocessor names and extract the values from the PostprocessorData storage
-  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (const auto & out_name : out)
   {
-    PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
-    _postprocessor_table.addData(*it, value, time());
-    _all_data_table.addData(*it, value, time());
+    PostprocessorValue value = _problem_ptr->getPostprocessorValue(out_name);
+    _postprocessor_table.addData(out_name, value, time());
+    _all_data_table.addData(out_name, value, time());
   }
 }
 
@@ -76,10 +76,8 @@ TableOutput::outputVectorPostprocessors()
   const std::set<std::string> & out = getVectorPostprocessorOutput();
 
   // Loop through the postprocessor names and extract the values from the VectorPostprocessorData storage
-  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (const auto & vpp_name : out)
   {
-    std::string vpp_name = *it;
-
     const std::map<std::string, VectorPostprocessorValue*> & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
 
     FormattedTable & table = _vector_postprocessor_tables[vpp_name];
@@ -87,12 +85,12 @@ TableOutput::outputVectorPostprocessors()
     table.clear();
     table.outputTimeColumn(false);
 
-    for (std::map<std::string, VectorPostprocessorValue*>::const_iterator vec_it = vectors.begin(); vec_it != vectors.end(); ++vec_it)
+    for (const auto & vec_it : vectors)
     {
-      VectorPostprocessorValue vector = *(vec_it->second);
+      VectorPostprocessorValue vector = *(vec_it.second);
 
       for (unsigned int i=0; i<vector.size(); i++)
-        table.addData(vec_it->first, vector[i], i);
+        table.addData(vec_it.first, vector[i], i);
     }
 
     if (_time_data)
@@ -110,10 +108,10 @@ TableOutput::outputScalarVariables()
   const std::set<std::string> & out = getScalarOutput();
 
   // Loop through each variable
-  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (const auto & out_name : out)
   {
     // Get reference to the variable (0 is for TID)
-    MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, *it);
+    MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, out_name);
 
     // Make sure the value of the variable is in sync with the solution vector
     scalar_var.reinit();
@@ -125,8 +123,8 @@ TableOutput::outputScalarVariables()
     // If the variable has a single component, simply output the value with the name
     if (n == 1)
     {
-      _scalar_table.addData(*it, value[0], time());
-      _all_data_table.addData(*it, value[0], time());
+      _scalar_table.addData(out_name, value[0], time());
+      _all_data_table.addData(out_name, value[0], time());
     }
 
     // Multi-component variables are appended with the component index
@@ -134,7 +132,7 @@ TableOutput::outputScalarVariables()
       for (unsigned int i = 0; i < n; ++i)
       {
         std::ostringstream os;
-        os << *it << "_" << i;
+        os << out_name << "_" << i;
         _scalar_table.addData(os.str(), value[i], time());
         _all_data_table.addData(os.str(), value[i], time());
       }

@@ -17,6 +17,7 @@
 
 #include "SyntaxTree.h"
 #include <sstream>
+#include <iterator>
 
 /**
  * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by any YAML formatter.
@@ -42,7 +43,7 @@ protected:
    * @param output Reference to the output string
    * @param iter InputParameters iterator that is being output
    */
-  void buildOutputString(std::ostringstream & output, const InputParameters::iterator iter);
+  void buildOutputString(std::ostringstream & output, const std::iterator_traits<InputParameters::iterator>::value_type & p);
 };
 
 #endif /* YAMLFORMATTER_H */

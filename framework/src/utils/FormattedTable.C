@@ -64,7 +64,7 @@ FormattedTable::FormattedTable() :
     _csv_precision(14)
 {}
 
-FormattedTable::FormattedTable(const FormattedTable &o) :
+FormattedTable::FormattedTable(const FormattedTable & o) :
     _column_names(o._column_names),
     _output_file_name(""),
     _stream_open(o._stream_open),
@@ -76,10 +76,8 @@ FormattedTable::FormattedTable(const FormattedTable &o) :
   if (_stream_open)
     mooseError ("Copying a FormattedTable with an open stream is not supported");
 
-  std::map<Real, std::map<std::string, Real> >::const_iterator it = o._data.begin();
-
-  for ( ; it != o._data.end(); ++it)
-    _data[it->first] = it->second;
+  for (const auto & it : o._data)
+    _data[it.first] = it.second;
 }
 
 FormattedTable::~FormattedTable()
@@ -140,9 +138,7 @@ FormattedTable::printNoDataRow(char intersect_char, char fill_char,
   out.fill(fill_char);
   out << std::right << intersect_char << std::setw(_column_width+2) << intersect_char;
   for (std::set<std::string>::iterator header = col_begin; header != col_end; ++header)
-  {
     out << std::setw(col_widths[*header]+2) << intersect_char;
-  }
   out << "\n";
 
   // Clear the fill character
@@ -234,9 +230,7 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
   printRowDivider(out, col_widths, col_begin, col_end);
   out << "|" << std::setw(_column_width) << std::left << " time" << " |";
   for (header = col_begin; header != col_end; ++header)
-  {
     out << " " << std::setw(col_widths[*header])  <<  *header << "|";
-  }
   out << "\n";
   printRowDivider(out, col_widths, col_begin, col_end);
 
@@ -261,7 +255,7 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
     out << "|" << std::right << std::setw(_column_width) << std::scientific << i->first << " |";
     for (header = col_begin; header != col_end; ++header)
     {
-      std::map<std::string, Real> &tmp = i->second;
+      std::map<std::string, Real> & tmp = i->second;
       out << std::setw(col_widths[*header]) << tmp[*header] << " |";
     }
     out << "\n";
@@ -273,9 +267,6 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
 void
 FormattedTable::printCSV(const std::string & file_name, int interval, bool align)
 {
-  std::map<Real, std::map<std::string, Real> >::iterator i;
-  std::set<std::string>::iterator header;
-
   if (!_stream_open)
   {
     _output_file_name = file_name;
@@ -300,27 +291,27 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
   {
     // Set the initial width to the names of the columns
     width["time"] = 4;
-    for (std::set<std::string>::const_iterator it = _column_names.begin(); it != _column_names.end(); ++it)
-      width[*it] = it->size();
+    for (const auto & col_name : _column_names)
+      width[col_name] = col_name.size();
 
     // Loop through the various times
-    for (std::map<Real, std::map<std::string, Real> >::const_iterator it = _data.begin(); it != _data.end(); ++it)
+    for (const auto & it : _data)
     {
       // Update the time width
       {
         std::ostringstream oss;
-        oss << std::setprecision(_csv_precision) << it->first;
+        oss << std::setprecision(_csv_precision) << it.first;
         unsigned int w = oss.str().size();
         width["time"] = std::max(width["time"], w);
       }
 
       // Loop through the data for the current time and update the widths
-      for (std::map<std::string, Real>::const_iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+      for (const auto & jt : it.second)
       {
         std::ostringstream oss;
-        oss << std::setprecision(_csv_precision) << jt->second;
+        oss << std::setprecision(_csv_precision) << jt.second;
         unsigned int w = oss.str().size();
-        width[jt->first] = std::max(width[jt->first], w);
+        width[jt.first] = std::max(width[jt.first], w);
       }
     }
   }
@@ -337,15 +328,15 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
       first = false;
     }
 
-    for (header = _column_names.begin(); header != _column_names.end(); ++header)
+    for (const auto & col_name : _column_names)
     {
       if (!first)
         _output_file << _csv_delimiter;
 
       if (align)
-        _output_file << std::right <<  std::setw(width[*header]) << *header;
+        _output_file << std::right <<  std::setw(width[col_name]) << col_name;
       else
-        _output_file << *header;
+        _output_file << col_name;
       first = false;
     }
   }
@@ -353,7 +344,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
   _output_file << "\n";
 
   int counter = 0;
-  for (i = _data.begin(); i != _data.end(); ++i)
+  for (auto & i : _data)
   {
     if (counter++ % interval == 0)
     {
@@ -362,15 +353,15 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
       if (_output_time)
       {
         if (align)
-          _output_file << std::setprecision(_csv_precision) << std::right <<  std::setw(width["time"]) << i->first;
+          _output_file << std::setprecision(_csv_precision) << std::right <<  std::setw(width["time"]) << i.first;
         else
-          _output_file << std::setprecision(_csv_precision) << i->first;
+          _output_file << std::setprecision(_csv_precision) << i.first;
         first = false;
       }
 
-      for (header = _column_names.begin(); header != _column_names.end(); ++header)
+      for (const auto & col_name : _column_names)
       {
-        std::map<std::string, Real> &tmp = i->second;
+        std::map<std::string, Real> & tmp = i.second;
 
         if (!first)
           _output_file << _csv_delimiter;
@@ -378,9 +369,9 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
           first = false;
 
         if (align)
-          _output_file << std::setprecision(_csv_precision)  << std::right <<  std::setw(width[*header]) << tmp[*header];
+          _output_file << std::setprecision(_csv_precision)  << std::right <<  std::setw(width[col_name]) << tmp[col_name];
         else
-          _output_file << std::setprecision(_csv_precision)  << tmp[*header];
+          _output_file << std::setprecision(_csv_precision)  << tmp[col_name];
       }
       _output_file << "\n";
     }
@@ -403,24 +394,25 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   // TODO: run this once at end of simulation, right now it runs every iteration
   // TODO: do I need to be more careful escaping column names?
   // Note: open and close the files each time, having open files may mess with gnuplot
-  std::map<Real, std::map<std::string, Real> >::iterator i;
-  std::set<std::string>::iterator header;
 
   // supported filetypes: ps, png
   std::string extension, terminal;
   if (format == "png")
   {
-    extension = ".png"; terminal = "png";
+    extension = ".png";
+    terminal = "png";
   }
 
   else if (format == "ps")
   {
-    extension = ".ps";  terminal = "postscript";
+    extension = ".ps";
+    terminal = "postscript";
   }
 
   else if (format == "gif")
   {
-    extension = ".gif"; terminal = "gif";
+    extension = ".gif";
+    terminal = "gif";
   }
 
   else
@@ -432,17 +424,17 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   datfile.open(dat_name.c_str(), std::ios::trunc | std::ios::out);
 
   datfile << "# time";
-  for (header = _column_names.begin(); header != _column_names.end(); ++header)
-    datfile << '\t' << *header;
+  for (const auto & col_name : _column_names)
+    datfile << '\t' << col_name;
   datfile << '\n';
 
-  for (i = _data.begin(); i != _data.end(); ++i)
+  for (auto & i : _data)
   {
-    datfile << i->first;
-    for (header = _column_names.begin(); header != _column_names.end(); ++header)
+    datfile << i.first;
+    for (const auto & col_name : _column_names)
     {
-      std::map<std::string, Real> &tmp = i->second;
-      datfile << '\t' << tmp[*header];
+      std::map<std::string, Real> & tmp = i.second;
+      datfile << '\t' << tmp[col_name];
     }
     datfile << '\n';
   }
@@ -458,22 +450,22 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
 
   // plot all postprocessors in one plot
   int column = 2;
-  for (header = _column_names.begin(); header != _column_names.end(); ++header)
+  for (const auto & col_name : _column_names)
   {
-    gpfile << " '" << dat_name << "' using 1:" << column << " title '" << *header << "' with linespoints";
+    gpfile << " '" << dat_name << "' using 1:" << column << " title '" << col_name << "' with linespoints";
     column++;
-    if ( column - 2 < (int) _column_names.size() )
+    if (column - 2 < static_cast<int>(_column_names.size()))
       gpfile << ", \\\n";
   }
   gpfile << "\n\n";
 
   // plot the postprocessors individually
   column = 2;
-  for (header = _column_names.begin(); header != _column_names.end(); ++header)
+  for (const auto & col_name : _column_names)
   {
-    gpfile << "set output '" << *header << extension << "'\n";
-    gpfile << "set ylabel '" << *header << "'\n";
-    gpfile << "plot '" << dat_name << "' using 1:" << column << " title '" << *header << "' with linespoints\n\n";
+    gpfile << "set output '" << col_name << extension << "'\n";
+    gpfile << "set ylabel '" << col_name << "'\n";
+    gpfile << "plot '" << dat_name << "' using 1:" << column << " title '" << col_name << "' with linespoints\n\n";
     column++;
   }
 

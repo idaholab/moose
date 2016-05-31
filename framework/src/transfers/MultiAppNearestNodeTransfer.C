@@ -119,12 +119,9 @@ MultiAppNearestNodeTransfer::execute()
           BoundaryID target_bnd_id = _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
 
           ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
-          for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin(); nd != bnd_nodes.end(); ++nd)
-          {
-            const BndNode * bnode = *nd;
+          for (const auto & bnode : bnd_nodes)
             if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
               target_local_nodes.push_back(bnode->_node);
-          }
         }
         else
         {
@@ -137,19 +134,17 @@ MultiAppNearestNodeTransfer::execute()
             target_local_nodes[i] = *nodes_it;
         }
 
-        for (std::vector<Node *>::iterator node_it = target_local_nodes.begin(); node_it != target_local_nodes.end(); ++node_it)
+        for (const auto & node : target_local_nodes)
         {
-          Node * node = *node_it;
-
           // Skip this node if the variable has no dofs at it.
           if (node->n_dofs(sys_num, var_num) < 1)
             continue;
 
           // Find which bboxes might have the nearest node to this point.
           Real nearest_max_distance = std::numeric_limits<Real>::max();
-          for (unsigned int i_from = 0; i_from < bboxes.size(); i_from++)
+          for (const auto & bbox : bboxes)
           {
-            Real distance = bboxMaxDistance(*node, bboxes[i_from]);
+            Real distance = bboxMaxDistance(*node, bbox);
             if (distance < nearest_max_distance)
               nearest_max_distance = distance;
           }
@@ -191,9 +186,9 @@ MultiAppNearestNodeTransfer::execute()
 
           // Find which bboxes might have the nearest node to this point.
           Real nearest_max_distance = std::numeric_limits<Real>::max();
-          for (unsigned int i_from = 0; i_from < bboxes.size(); i_from++)
+          for (const auto & bbox : bboxes)
           {
-            Real distance = bboxMaxDistance(centroid, bboxes[i_from]);
+            Real distance = bboxMaxDistance(centroid, bbox);
             if (distance < nearest_max_distance)
               nearest_max_distance = distance;
           }
@@ -382,12 +377,9 @@ MultiAppNearestNodeTransfer::execute()
         BoundaryID target_bnd_id = _to_meshes[i_to]->getBoundaryID(getParam<BoundaryName>("target_boundary"));
 
         ConstBndNodeRange & bnd_nodes = *(_to_meshes[i_to])->getBoundaryNodeRange();
-        for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin(); nd != bnd_nodes.end(); ++nd)
-        {
-          const BndNode * bnode = *nd;
+        for (const auto & bnode : bnd_nodes)
           if (bnode->_bnd_id == target_bnd_id && bnode->_node->processor_id() == processor_id())
             target_local_nodes.push_back(bnode->_node);
-        }
       }
       else
       {
@@ -400,10 +392,8 @@ MultiAppNearestNodeTransfer::execute()
           target_local_nodes[i] = *nodes_it;
       }
 
-      for (std::vector<Node *>::iterator node_it = target_local_nodes.begin(); node_it != target_local_nodes.end(); ++node_it)
+      for (const auto & node : target_local_nodes)
       {
-        Node * node = *node_it;
-
         // Skip this node if the variable has no dofs at it.
         if (node->n_dofs(sys_num, var_num) < 1)
           continue;
@@ -517,9 +507,8 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, Mo
     BoundaryID src_bnd_id = mesh->getBoundaryID(getParam<BoundaryName>("source_boundary"));
 
     ConstBndNodeRange & bnd_nodes = *mesh->getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+    for (const auto & bnode : bnd_nodes)
     {
-      const BndNode * bnode = *nd;
       if (bnode->_bnd_id == src_bnd_id)
       {
         Node * node = bnode->_node;
@@ -562,15 +551,9 @@ MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, MeshTools::BoundingBox bbo
 
   std::vector<Point> all_points(8);
   for (unsigned int x = 0; x < 2; x++)
-  {
     for (unsigned int y = 0; y < 2; y++)
-    {
       for (unsigned int z = 0; z < 2; z++)
-      {
         all_points[x + 2*y + 4*z] = Point(source_points[x](0), source_points[y](1), source_points[z](2));
-      }
-    }
-  }
 
   Real max_distance = 0.;
 
@@ -592,15 +575,9 @@ MultiAppNearestNodeTransfer::bboxMinDistance(Point p, MeshTools::BoundingBox bbo
 
   std::vector<Point> all_points(8);
   for (unsigned int x = 0; x < 2; x++)
-  {
     for (unsigned int y = 0; y < 2; y++)
-    {
       for (unsigned int z = 0; z < 2; z++)
-      {
         all_points[x + 2*y + 4*z] = Point(source_points[x](0), source_points[y](1), source_points[z](2));
-      }
-    }
-  }
 
   Real min_distance = 0.;
 
@@ -621,12 +598,9 @@ MultiAppNearestNodeTransfer::getLocalNodes(MooseMesh * mesh, std::vector<Node *>
     BoundaryID src_bnd_id = mesh->getBoundaryID(getParam<BoundaryName>("source_boundary"));
 
     ConstBndNodeRange & bnd_nodes = *mesh->getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
-    {
-      const BndNode * bnode = *nd;
+    for (const auto & bnode : bnd_nodes)
       if (bnode->_bnd_id == src_bnd_id && bnode->_node->processor_id() == processor_id())
         local_nodes.push_back(bnode->_node);
-    }
   }
   else
   {
@@ -637,8 +611,6 @@ MultiAppNearestNodeTransfer::getLocalNodes(MooseMesh * mesh, std::vector<Node *>
 
     unsigned int i = 0;
     for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it, ++i)
-    {
       local_nodes[i] = *node_it;
-    }
   }
 }

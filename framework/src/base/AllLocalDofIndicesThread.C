@@ -48,10 +48,8 @@ AllLocalDofIndicesThread::operator() (const ConstElemRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  for (ConstElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  for (const auto & elem : range)
   {
-    const Elem * elem = *elem_it;
-
     std::vector<dof_id_type> dof_indices;
 
     dof_id_type local_dof_begin = _dof_map.first_dof();

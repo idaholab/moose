@@ -59,8 +59,8 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters) :
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
   const std::vector<MooseVariableScalar *> & coupled_vars = getCoupledMooseScalarVars();
-  for (std::vector<MooseVariableScalar *>::const_iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
-    _depend_vars.insert((*it)->name());
+  for (const auto & var : coupled_vars)
+    _depend_vars.insert(var->name());
 }
 
 AuxScalarKernel::~AuxScalarKernel()

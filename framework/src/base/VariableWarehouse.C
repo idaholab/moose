@@ -23,8 +23,8 @@ VariableWarehouse::VariableWarehouse()
 
 VariableWarehouse::~VariableWarehouse()
 {
-  for (std::vector<MooseVariableBase *>::iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    delete *it;
+  for (auto & var : _all_objects)
+    delete var;
 }
 
 void
@@ -55,17 +55,17 @@ VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariable *var)
 void
 VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable *var)
 {
-  for (std::set<BoundaryID>::const_iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
-    addBoundaryVar(*it, var);
+  for (const auto & bid : boundary_ids)
+    addBoundaryVar(bid, var);
 }
 
 void
 VariableWarehouse::addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariable *> > & vars)
 {
-  for (std::set<BoundaryID>::const_iterator bnd_it = boundary_ids.begin(); bnd_it != boundary_ids.end(); ++bnd_it)
-    for (std::map<std::string, std::vector<MooseVariable *> >::const_iterator it = vars.begin(); it != vars.end(); ++it)
-      for (std::vector<MooseVariable *>::const_iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
-        addBoundaryVar(*bnd_it, *jt);
+  for (const auto & bid : boundary_ids)
+    for (const auto & it : vars)
+      for (const auto & var : it.second)
+        addBoundaryVar(bid, var);
 }
 
 MooseVariableBase *

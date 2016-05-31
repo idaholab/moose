@@ -85,13 +85,10 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
       _master_node_vector.push_back(_slave_node_ids[0]); //_master_node_vector defines master nodes in the base class
 
-    //Fill in _connected_nodes, which defines slave nodes in the base class
-    std::vector<unsigned int>::iterator its;
-    for (its = _slave_node_ids.begin(); its != _slave_node_ids.end(); ++its)
-    {
-      if ((_mesh.nodeRef(*its).processor_id() == _subproblem.processor_id()) && (*its != _master_node_vector[0]))
-        _connected_nodes.push_back(*its);
-    }
+    // Fill in _connected_nodes, which defines slave nodes in the base class
+    for (const auto & dof : _slave_node_ids)
+      if ((_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id()) && (dof != _master_node_vector[0]))
+        _connected_nodes.push_back(dof);
   }
 
   // Add elements connected to master node to Ghosted Elements

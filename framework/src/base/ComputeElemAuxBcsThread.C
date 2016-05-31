@@ -50,10 +50,8 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
   // Reference to all boundary restricted AuxKernels for the current thread
   const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > > & boundary_kernels = _storage.getActiveBoundaryObjects(_tid);
 
-  for (ConstBndElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  for (const auto & belem : range)
   {
-    const BndElement * belem = *elem_it;
-
     const Elem * elem = belem->_elem;
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
@@ -61,9 +59,9 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
     if (elem->processor_id() == _problem.processor_id())
     {
       // prepare variables
-      for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
+      for (const auto & it : _sys._elem_vars[_tid])
       {
-        MooseVariable * var = it->second;
+        MooseVariable * var = it.second;
         var->prepareAux();
       }
 
@@ -84,8 +82,8 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
         // Set the active boundary id so that BoundaryRestrictable::_boundary_id is correct
         _problem.setCurrentBoundaryID(boundary_id);
 
-        for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = iter->second.begin(); aux_it != iter->second.end(); ++aux_it)
-          (*aux_it)->compute();
+        for (const auto & aux : iter->second)
+          aux->compute();
 
         if (_need_materials)
           _problem.swapBackMaterialsFace(_tid);
@@ -97,9 +95,9 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       // update the solution vector
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for (std::map<std::string, MooseVariable *>::iterator it = _sys._elem_vars[_tid].begin(); it != _sys._elem_vars[_tid].end(); ++it)
+        for (const auto & it : _sys._elem_vars[_tid])
         {
-          MooseVariable * var = it->second;
+          MooseVariable * var = it.second;
           var->insert(_sys.solution());
         }
       }

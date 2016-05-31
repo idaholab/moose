@@ -165,8 +165,8 @@ Console::Console(const InputParameters & parameters) :
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
   const MultiMooseEnum & common_execute_on = common_action->getParam<MultiMooseEnum>("execute_on");
-  for (MooseEnumIterator it = common_execute_on.begin(); it != common_execute_on.end(); ++it)
-    _execute_on.push_back(*it);
+  for (auto & mme : common_execute_on)
+    _execute_on.push_back(mme);
 
   // If --timing was used from the command-line, do nothing, all logs are enabled
   if (!_timing)
