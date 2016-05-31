@@ -342,10 +342,9 @@ public:
   virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
 
   /**
-   * The relative (both to solution size and dt) change in the L2 norm of the solution vector.
-   * Call just after a converged solve.
+   * The relative L2 norm of the difference between solution and old solution vector.
    */
-  virtual Real solutionChangeNorm();
+  virtual Real relativeSolutionDifferenceNorm();
 
   virtual void onTimestepBegin();
   virtual void onTimestepEnd();
