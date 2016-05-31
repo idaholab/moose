@@ -9,6 +9,7 @@
 
     # Currently fails in parallel #5995
     max_parallel = 1
+    deleted = '#7123'
   [../]
 
   [./tosub]
@@ -18,6 +19,7 @@
     dtk = True
     method = 'OPT OPROF'
     recover = false
+    deleted = '#7123'
   [../]
 
   [./multilevel]
@@ -30,5 +32,6 @@
 
     # Currently fails in parallel #5995
     max_parallel = 1
+    deleted = '#7123'
   [../]
 []

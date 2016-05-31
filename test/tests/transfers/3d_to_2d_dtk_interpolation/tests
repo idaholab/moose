@@ -6,5 +6,6 @@
     dtk = True
     method = 'OPT OPROF'
     recover = false
+    deleted = '#7123'
   [../]
 []
