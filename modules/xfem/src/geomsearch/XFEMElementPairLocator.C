@@ -21,6 +21,10 @@ XFEMElementPairLocator::XFEMElementPairLocator(MooseSharedPointer<XFEM> xfem, un
 void
 XFEMElementPairLocator::reinit()
 {
+  // Does not support secondary cut yet.
+  if (_xfem->has_secondary_cut())
+    return;
+
   _element_pair_info.clear();
 
   for (std::list<std::pair<const Elem *, const Elem*> >::const_iterator it = _elem_pairs->begin();
@@ -71,33 +75,5 @@ XFEMElementPairLocator::reinit()
 void
 XFEMElementPairLocator::update()
 {
-  for (std::map<std::pair<const Elem*, const Elem*>, ElementPairInfo>::iterator it = _element_pair_info.begin();
-       it != _element_pair_info.end(); ++it)
-  {
-    const Elem * elem1 = it->first.first;
-    const Elem * elem2 = it->first.second;
-
-    std::vector<Point> intersectionPoints1, intersectionPoints2;
-    Point normal1, normal2;
-    std::vector<Point> q_points1, q_points2;
-    std::vector<Real> weights1, weights2;
-
-    unsigned int plane_id = 0; // Only support one cut plane for the time being
-
-    _xfem->getXFEMIntersectionInfo(elem1, plane_id, normal1, intersectionPoints1, _use_displaced_mesh);
-
-    _xfem->getXFEMIntersectionInfo(elem2, plane_id, normal2, intersectionPoints2, _use_displaced_mesh);
-
-    if (intersectionPoints1.size() == 2)
-      _xfem->getXFEMqRuleOnLine(intersectionPoints1, q_points1, weights1);
-    else if (intersectionPoints1.size() > 2)
-      _xfem->getXFEMqRuleOnSurface(intersectionPoints1, q_points1, weights1);
-
-    if (intersectionPoints2.size() == 2)
-      _xfem->getXFEMqRuleOnLine(intersectionPoints2, q_points2, weights2);
-    else if (intersectionPoints2.size() > 2)
-      _xfem->getXFEMqRuleOnSurface(intersectionPoints2, q_points2, weights2);
-
-    it->second.update(q_points1, q_points2, weights1, weights2, normal1, normal2);
-  }
+  reinit();
 }

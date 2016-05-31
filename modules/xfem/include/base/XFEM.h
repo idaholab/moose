@@ -153,6 +153,8 @@ public:
   virtual void getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
                                   std::vector<Point> & quad_pts,
                                   std::vector<Real> & quad_wts) const;
+  bool has_secondary_cut(){return _has_secondary_cut;}
+
 private:
 
   void getFragmentEdges(const Elem* elem,
@@ -169,6 +171,8 @@ private:
    */
   std::vector<Real> _XFEM_cut_data;
   std::string _XFEM_cut_type;
+
+  bool _has_secondary_cut;
 
   Xfem::XFEM_QRULE _XFEM_qrule;
 

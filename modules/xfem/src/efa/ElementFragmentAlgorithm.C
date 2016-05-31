@@ -211,7 +211,7 @@ ElementFragmentAlgorithm::addElemEdgeIntersection(unsigned int elemid, unsigned 
   curr_elem->addEdgeCut(edgeid, position, NULL, _embedded_nodes, true);
 }
 
-void
+bool
 ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid, unsigned int frag_edge_id, double position)
 {
   // N.B. this method must be called after addEdgeIntersection
@@ -222,7 +222,7 @@ ElementFragmentAlgorithm::addFragEdgeIntersection(unsigned int elemid, unsigned 
   EFAElement2D *elem = dynamic_cast<EFAElement2D*>(eit->second);
   if (!elem)
     EFAError("addFragEdgeIntersection: elem "<<elemid<<" is not of type EFAelement2D");
-  elem->addFragmentEdgeCut(frag_edge_id, position, _embedded_nodes);
+  return elem->addFragmentEdgeCut(frag_edge_id, position, _embedded_nodes);
 }
 
 void
