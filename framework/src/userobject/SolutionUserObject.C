@@ -248,12 +248,12 @@ SolutionUserObject::readExodusII()
   // Build nodal/elemental variable lists, limit to variables listed in 'system_variables', if provided
   if (!_system_variables.empty())
   {
-    for (std::vector<std::string>::const_iterator it = _system_variables.begin(); it != _system_variables.end(); ++it)
+    for (const auto & var_name : _system_variables)
     {
-      if (std::find(all_nodal.begin(), all_nodal.end(), *it) != all_nodal.end())
-        nodal.push_back(*it);
-      if (std::find(all_elemental.begin(), all_elemental.end(), *it) != all_elemental.end())
-        elemental.push_back(*it);
+      if (std::find(all_nodal.begin(), all_nodal.end(), var_name) != all_nodal.end())
+        nodal.push_back(var_name);
+      if (std::find(all_elemental.begin(), all_elemental.end(), var_name) != all_elemental.end())
+        elemental.push_back(var_name);
     }
   }
   else
@@ -263,11 +263,11 @@ SolutionUserObject::readExodusII()
   }
 
   // Add the variables to the system
-  for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
-    _system->add_variable(*it, FIRST);
+  for (const auto & var_name : nodal)
+    _system->add_variable(var_name, FIRST);
 
-  for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
-    _system->add_variable(*it, CONSTANT, MONOMIAL);
+  for (const auto & var_name : elemental)
+    _system->add_variable(var_name, CONSTANT, MONOMIAL);
 
   // Initialize the equations systems
   _es->init();
@@ -281,11 +281,11 @@ SolutionUserObject::readExodusII()
     _system2 = &_es2->get_system(_system_name);
 
     // Add the variables to the system
-    for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
-      _system2->add_variable(*it, FIRST);
+    for (const auto & var_name : nodal)
+      _system2->add_variable(var_name, FIRST);
 
-    for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
-      _system2->add_variable(*it, CONSTANT, MONOMIAL);
+    for (const auto & var_name : elemental)
+      _system2->add_variable(var_name, CONSTANT, MONOMIAL);
 
     // Initialize
     _es2->init();
@@ -294,16 +294,16 @@ SolutionUserObject::readExodusII()
     updateExodusBracketingTimeIndices(0.0);
 
     // Copy the solutions from the first system
-    for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
+    for (const auto & var_name : nodal)
     {
-      _exodusII_io->copy_nodal_solution(*_system, *it, *it, _exodus_index1+1);
-      _exodusII_io->copy_nodal_solution(*_system2, *it, *it, _exodus_index2+1);
+      _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1+1);
+      _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2+1);
     }
 
-    for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
+    for (const auto & var_name : elemental)
     {
-      _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_index1+1);
-      _exodusII_io->copy_elemental_solution(*_system2, *it, *it, _exodus_index2+1);
+      _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1+1);
+      _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2+1);
     }
 
     // Update the systems
@@ -320,11 +320,11 @@ SolutionUserObject::readExodusII()
       mooseError("In SolutionUserObject, timestep = "<<_exodus_time_index<<", but there are only "<<num_exo_times<<" time steps.");
 
     // Copy the values from the ExodusII file
-    for (std::vector<std::string>::const_iterator it = nodal.begin(); it != nodal.end(); ++it)
-      _exodusII_io->copy_nodal_solution(*_system, *it, *it,  _exodus_time_index);
+    for (const auto & var_name : nodal)
+      _exodusII_io->copy_nodal_solution(*_system, var_name, var_name,  _exodus_time_index);
 
-    for (std::vector<std::string>::const_iterator it = elemental.begin(); it != elemental.end(); ++it)
-      _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_time_index);
+    for (const auto & var_name : elemental)
+      _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
 
     // Update the equations systems
     _system->update();
@@ -444,15 +444,15 @@ SolutionUserObject::initialSetup()
   if (_system_variables.empty())
   {
     _system->get_all_variable_numbers(var_nums);
-    for (std::vector<unsigned int>::const_iterator it = var_nums.begin(); it != var_nums.end(); ++it)
-      _system_variables.push_back(_system->variable_name(*it));
+    for (const auto & var_num : var_nums)
+      _system_variables.push_back(_system->variable_name(var_num));
   }
 
   // Otherwise, gather the numbers for the variables given
   else
   {
-    for (std::vector<std::string>::const_iterator it = _system_variables.begin(); it != _system_variables.end(); ++it)
-      var_nums.push_back(_system->variable_number(*it));
+    for (const auto & var_name : _system_variables)
+      var_nums.push_back(_system->variable_number(var_name));
   }
 
   // Create the MeshFunction for working with the solution data
@@ -504,24 +504,24 @@ SolutionUserObject::updateExodusTimeInterpolation(Real time)
     if (updateExodusBracketingTimeIndices(time))
     {
 
-      for (std::vector<std::string>::const_iterator it = _system_variables.begin(); it != _system_variables.end(); ++it)
+      for (const auto & var_name : _system_variables)
       {
-        if (_local_variable_nodal[*it])
-          _exodusII_io->copy_nodal_solution(*_system, *it, _exodus_index1+1);
+        if (_local_variable_nodal[var_name])
+          _exodusII_io->copy_nodal_solution(*_system, var_name, _exodus_index1+1);
         else
-          _exodusII_io->copy_elemental_solution(*_system, *it, *it, _exodus_index1+1);
+          _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1+1);
       }
 
       _system->update();
       _es->update();
       _system->solution->localize(*_serialized_solution);
 
-      for (std::vector<std::string>::const_iterator it = _system_variables.begin(); it != _system_variables.end(); ++it)
+      for (const auto & var_name : _system_variables)
       {
-        if (_local_variable_nodal[*it])
-          _exodusII_io->copy_nodal_solution(*_system2, *it, _exodus_index2+1);
+        if (_local_variable_nodal[var_name])
+          _exodusII_io->copy_nodal_solution(*_system2, var_name, _exodus_index2+1);
         else
-          _exodusII_io->copy_elemental_solution(*_system2, *it, *it, _exodus_index2+1);
+          _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2+1);
       }
 
       _system2->update();

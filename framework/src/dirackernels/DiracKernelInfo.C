@@ -66,12 +66,8 @@ DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 {
   std::vector<Point> & point_list = _points[elem].first;
 
-  std::vector<Point>::iterator
-    it = point_list.begin(),
-    end = point_list.end();
-
-  for (; it != end; ++it)
-    if (pointsFuzzyEqual(*it, p))
+  for (const auto & pt : point_list)
+    if (pointsFuzzyEqual(pt, p))
       return true;
 
   // If we haven't found it, we don't have it.

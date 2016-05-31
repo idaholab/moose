@@ -1,12 +1,16 @@
 [Mesh]
   type = MortarPeriodicMesh
-  dim = 2
+  dim = 3
   nx = 3
   ny = 2
+  nz = 4
   xmin = 0.3
   xmax = 1.2
   ymin = 0.1
   ymax = 0.9
+  zmin = 0.2
+  zmax = 1.1
+  periodic_directions = 'x y z'
 []
 
 [AuxVariables]

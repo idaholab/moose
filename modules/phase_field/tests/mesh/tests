@@ -1,7 +1,15 @@
 [Tests]
-  [./mortarperiodic]
+  [./mortarperiodic_hex8]
     type = 'Exodiff'
     input = 'mortarperiodic.i'
-    exodiff = 'mortarperiodic_out.e'
+    cli_args = 'Mesh/elem_type=HEX8 Outputs/file_base=mortarperiodic_hex8'
+    exodiff = 'mortarperiodic_hex8.e'
+  [../]
+
+  [./mortarperiodic_hex27]
+    type = 'Exodiff'
+    input = 'mortarperiodic.i'
+    cli_args = 'Mesh/elem_type=HEX27 Outputs/file_base=mortarperiodic_hex27'
+    exodiff = 'mortarperiodic_hex27.e'
   [../]
 []

@@ -75,11 +75,11 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   std::set<std::string> output_object_properties;
 
   std::vector<Action *> output_actions =  _app.actionWarehouse().getActionsByName("add_output");
-  for (std::vector<Action *>::const_iterator it = output_actions.begin(); it != output_actions.end(); ++it)
+  for (const auto & act : output_actions)
   {
     // Extract the Output action
-    AddOutputAction * action = dynamic_cast<AddOutputAction *>(*it);
-    mooseAssert(action != NULL, "No AddOutputAction with the name " << *it << " exists");
+    AddOutputAction * action = dynamic_cast<AddOutputAction *>(act);
+    mooseAssert(action != NULL, "No AddOutputAction with the name " << act->name() << " exists");
 
     // Add the material property names from the output object parameters to the list of properties to output
     InputParameters & params = action->getObjectParams();
@@ -92,13 +92,13 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   }
 
   // Loop through each material object
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
+  for (const auto & mat : materials)
   {
     // Extract the names of the output objects to which the material properties will be exported
-    std::set<OutputName> outputs = (*material_iter)->getOutputs();
+    std::set<OutputName> outputs = mat->getOutputs();
 
     // Extract the property names that will actually be output
-    std::vector<std::string> output_properties = (*material_iter)->getParam<std::vector<std::string> >("output_properties");
+    std::vector<std::string> output_properties = mat->getParam<std::vector<std::string> >("output_properties");
 
     // Append the properties listed in the Outputs block
     if (outputs_has_properties)
@@ -116,50 +116,49 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
     {
       // Add the material property for output if the name is contained in the 'output_properties' list
       // or if the list is empty (all properties)
-      const std::set<std::string> names = (*material_iter)->getSuppliedItems();
-      for (std::set<std::string>::const_iterator name_iter = names.begin(); name_iter != names.end(); ++name_iter)
+      const std::set<std::string> names = mat->getSuppliedItems();
+      for (const auto & name : names)
       {
         // Add the material property for output
-        if (output_properties.empty() || std::find(output_properties.begin(), output_properties.end(), *name_iter) != output_properties.end())
+        if (output_properties.empty() || std::find(output_properties.begin(), output_properties.end(), name) != output_properties.end())
         {
-          if (hasProperty<Real>(*name_iter))
-            materialOutputHelper<Real>(*name_iter, *material_iter);
+          if (hasProperty<Real>(name))
+            materialOutputHelper<Real>(name, mat);
 
-          else if (hasProperty<RealVectorValue>(*name_iter))
-            materialOutputHelper<RealVectorValue>(*name_iter, *material_iter);
+          else if (hasProperty<RealVectorValue>(name))
+            materialOutputHelper<RealVectorValue>(name, mat);
 
-          else if (hasProperty<RealTensorValue>(*name_iter))
-            materialOutputHelper<RealTensorValue>(*name_iter, *material_iter);
+          else if (hasProperty<RealTensorValue>(name))
+            materialOutputHelper<RealTensorValue>(name, mat);
 
           else
-            mooseWarning("The type for material property '" << *name_iter << "' is not supported for automatic output.");
+            mooseWarning("The type for material property '" << name << "' is not supported for automatic output.");
         }
 
         // If the material object as limited outputs, store the variables associated with the output objects
         if (!outputs.empty())
-          for (std::set<OutputName>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
-            _material_variable_names_map[*it].insert(_material_variable_names.begin(), _material_variable_names.end());
-
+          for (const auto & output_name : outputs)
+            _material_variable_names_map[output_name].insert(_material_variable_names.begin(),
+                                                             _material_variable_names.end());
       }
     }
   }
 
   // Create the AuxVariables
   FEType fe_type(CONSTANT, MONOMIAL); // currently only elemental variables are support for material property output
-  for (std::set<std::string>::iterator it = _variable_names.begin(); it != _variable_names.end(); ++it)
-    problem_ptr->addAuxVariable(*it, fe_type);
+  for (const auto & var_name : _variable_names)
+    problem_ptr->addAuxVariable(var_name, fe_type);
 
   // When a Material object has 'output_properties' defined all other properties not listed must be added to
   // the hide list for the output objects so that properties that are not desired do not appear.
-  for (std::map<OutputName, std::set<std::string> >::const_iterator it = _material_variable_names_map.begin();
-       it != _material_variable_names_map.end(); ++it)
+  for (const auto & it : _material_variable_names_map)
   {
     std::set<std::string> hide;
     std::set_difference(_variable_names.begin(), _variable_names.end(),
-                        it->second.begin(), it->second.end(),
+                        it.second.begin(), it.second.end(),
                         std::inserter(hide, hide.begin()));
 
-    _output_warehouse.addInterfaceHideVariables(it->first, hide);
+    _output_warehouse.addInterfaceHideVariables(it.first, hide);
   }
 }
 

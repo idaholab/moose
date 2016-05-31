@@ -242,19 +242,19 @@ outputOutputInformation(MooseApp & app)
 
   const std::vector<Output *> outputs = app.getOutputWarehouse().getOutputs<Output>();
   oss << "Outputs:\n";
-  for (std::vector<Output *>::const_iterator it = outputs.begin(); it != outputs.end(); ++it)
+  for (const auto & out : outputs)
   {
     // Display the "execute_on" settings
-    const MultiMooseEnum & execute_on = (*it)->executeOn();
-    oss << "  " << std::setw(console_field_width-2) << (*it)->name() <<  "\"" << execute_on << "\"\n";
+    const MultiMooseEnum & execute_on = out->executeOn();
+    oss << "  " << std::setw(console_field_width-2) << out->name() <<  "\"" << execute_on << "\"\n";
 
     // Display the advanced "execute_on" settings, only if they are different from "execute_on"
-    if ((*it)->isAdvanced())
+    if (out->isAdvanced())
     {
-      const OutputOnWarehouse & adv_on = (*it)->advancedExecuteOn();
-      for (std::map<std::string, MultiMooseEnum>::const_iterator adv_it = adv_on.begin(); adv_it != adv_on.end(); ++adv_it)
-        if (execute_on != adv_it->second)
-          oss << "    " << std::setw(console_field_width-4) << adv_it->first + ":" <<  "\"" << adv_it->second << "\"\n";
+      const OutputOnWarehouse & adv_on = out->advancedExecuteOn();
+      for (const auto & adv_it : adv_on)
+        if (execute_on != adv_it.second)
+          oss << "    " << std::setw(console_field_width-4) << adv_it.first + ":" <<  "\"" << adv_it.second << "\"\n";
     }
   }
 

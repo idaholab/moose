@@ -148,8 +148,8 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
     {
       std::ostringstream msg;
       msg << "The object '" << name << "' contains the following block ids that do no exist on the mesh:";
-      for (std::vector<SubdomainID>::iterator it = diff.begin(); it != diff.end(); ++it)
-        msg << " " << *it;
+      for (const auto & id : diff)
+        msg << " " << id;
       mooseError(msg.str());
     }
   }
@@ -303,18 +303,18 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
   const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
 
   // Loop over each id for this object
-  for (std::set<SubdomainID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
+  for (const auto & id : ids)
   {
     // Storage of material properties that have been DECLARED on this id
     std::set<std::string> declared_props;
 
     // If block materials exist, populated the set of properties that were declared
-    if (warehouse.hasActiveBlockObjects(*id_it))
+    if (warehouse.hasActiveBlockObjects(id))
     {
-      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBlockObjects(*id_it);
-      for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBlockObjects(id);
+      for (const auto & mat : mats)
       {
-        const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
+        const std::set<std::string> & mat_props = mat->getSuppliedItems();
         declared_props.insert(mat_props.begin(), mat_props.end());
       }
     }

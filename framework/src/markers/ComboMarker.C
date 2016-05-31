@@ -27,8 +27,8 @@ ComboMarker::ComboMarker(const InputParameters & parameters) :
     Marker(parameters),
     _names(parameters.get<std::vector<MarkerName> >("markers"))
 {
-  for (unsigned int i=0; i<_names.size(); i++)
-    _markers.push_back(&getMarkerValue(_names[i]));
+  for (const auto & marker_name : _names)
+    _markers.push_back(&getMarkerValue(marker_name));
 }
 
 Marker::MarkerValue
@@ -37,8 +37,9 @@ ComboMarker::computeElementMarker()
   // We start with DONT_MARK because it's -1
   MarkerValue marker_value = DONT_MARK;
 
-  for (unsigned int i=0; i<_markers.size(); i++)
-    marker_value = std::max(marker_value, (MarkerValue)(*_markers[i])[0]);
+  for (const auto & var : _markers)
+    marker_value = std::max(marker_value,
+                            static_cast<MarkerValue>((*var)[0]));
 
   return marker_value;
 }

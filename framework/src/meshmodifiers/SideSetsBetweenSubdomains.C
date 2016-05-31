@@ -67,8 +67,8 @@ SideSetsBetweenSubdomains::modify()
       if (neighbor != NULL && neighbor->subdomain_id() == paired_id)  // is this side between the two blocks?
 
         // Add the boundaries
-        for (unsigned int i=0; i<boundary_ids.size(); ++i)
-          boundary_info.add_side(elem, side, boundary_ids[i]);
+        for (const auto & boundary_id : boundary_ids)
+          boundary_info.add_side(elem, side, boundary_id);
     }
   }
 

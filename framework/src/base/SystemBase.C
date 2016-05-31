@@ -162,10 +162,8 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 
     solution.close();
 
-    for (std::set<dof_id_type>::iterator it = dof_indices_to_zero.begin();
-        it != dof_indices_to_zero.end();
-        ++it)
-      solution.set(*it, 0);
+    for (const auto & dof : dof_indices_to_zero)
+      solution.set(dof, 0);
 
     solution.close();
 
@@ -191,9 +189,9 @@ SystemBase::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
   std::vector<MooseVariable *> vars = _vars[0].variables();
-  for (std::vector<MooseVariable *>::iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    FEType fe_type = (*it)->feType();
+    FEType fe_type = var->feType();
     if (fe_type.default_quadrature_order() > order)
       order = fe_type.default_quadrature_order();
   }
@@ -208,23 +206,18 @@ SystemBase::prepare(THREAD_ID tid)
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-      (*it)->clearDofIndices();
+    for (const auto & var : vars)
+      var->clearDofIndices();
 
-    for (std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
-        it != active_elemental_moose_variables.end();
-        ++it)
-      if (&(*it)->sys() == this)
-        (*it)->prepare();
+    for (const auto & var : active_elemental_moose_variables)
+      if (&(var->sys()) == this)
+        var->prepare();
   }
   else
   {
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-    {
-      MooseVariable *var = *it;
+    for (const auto & var : vars)
       var->prepare();
-    }
   }
 }
 
@@ -238,10 +231,9 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     std::vector<MooseVariable *> newly_prepared_vars;
 
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+    for (const auto & var : vars)
     {
-      MooseVariable *var = *it;
-      if (&var->sys() == this && !active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
+      if (&(var->sys()) == this && !active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
       {
         var->prepare();
         newly_prepared_vars.push_back(var);
@@ -259,11 +251,8 @@ void
 SystemBase::prepareNeighbor(THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->prepareNeighbor();
-  }
 }
 
 
@@ -274,20 +263,15 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
-    for (std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
-        it != active_elemental_moose_variables.end();
-        ++it)
-      if (&(*it)->sys() == this)
-        (*it)->computeElemValues();
+    for (const auto & var : active_elemental_moose_variables)
+      if (&(var->sys()) == this)
+        var->computeElemValues();
   }
   else
   {
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-    {
-      MooseVariable *var = *it;
+    for (const auto & var : vars)
       var->computeElemValues();
-    }
   }
 }
 
@@ -295,42 +279,32 @@ void
 SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->computeElemValuesFace();
-  }
 }
 
 void
 SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->computeNeighborValuesFace();
-  }
 }
 
 void
 SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->computeNeighborValues();
-  }
 }
 
 void
 SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     if (var->isNodal())
     {
       var->reinitNode();
@@ -343,9 +317,8 @@ void
 SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     if (var->isNodal())
     {
       var->reinitNode();
@@ -358,9 +331,8 @@ void
 SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     if (var->isNodal())
     {
       var->reinitNodeNeighbor();
@@ -373,9 +345,8 @@ void
 SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     var->reinitNodes(nodes);
     var->computeNodalValues();
   }
@@ -385,9 +356,8 @@ void
 SystemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     var->reinitNodesNeighbor(nodes);
     var->computeNodalNeighborValues();
   }
@@ -397,11 +367,8 @@ void
 SystemBase::reinitScalars(THREAD_ID tid)
 {
   const std::vector<MooseVariableScalar *> & vars = _vars[tid].scalars();
-  for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariableScalar *var = *it;
+  for (const auto & var : vars)
     var->reinit();
-  }
 }
 
 void
@@ -419,24 +386,18 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 
   unsigned int n_vars = sys.n_vars();
 
-  for (std::set<dof_id_type>::iterator elem_id = ghosted_elems.begin();
-      elem_id != ghosted_elems.end();
-      ++elem_id)
+  for (const auto & elem_id : ghosted_elems)
   {
-    Elem * elem = _mesh.elemPtr(*elem_id);
+    Elem * elem = _mesh.elemPtr(elem_id);
 
     if (elem->active())
     {
       dof_map.dof_indices(elem, dof_indices);
 
-      for (unsigned int i=0; i<dof_indices.size(); i++)
-      {
-        dof_id_type dof = dof_indices[i];
-
-        // Only need to ghost it if it's actually not on this processor
+      // Only need to ghost it if it's actually not on this processor
+      for (const auto & dof : dof_indices)
         if (dof < dof_map.first_dof() || dof >= dof_map.end_dof())
           send_list.push_back(dof);
-      }
 
       // Now add the DoFs from all of the nodes.  This is necessary because of block
       // restricted variables.  A variable might not live _on_ this element but it

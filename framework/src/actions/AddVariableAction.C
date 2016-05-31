@@ -154,9 +154,9 @@ AddVariableAction::getSubdomainIDs()
   // Extract and return the block ids supplied in the input
   std::set<SubdomainID> blocks;
   std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
-  for (std::vector<SubdomainName>::iterator it = block_param.begin(); it != block_param.end(); ++it)
+  for (const auto & subdomain_name : block_param)
   {
-    SubdomainID blk_id = _problem->mesh().getSubdomainID(*it);
+    SubdomainID blk_id = _problem->mesh().getSubdomainID(subdomain_name);
     blocks.insert(blk_id);
   }
   return blocks;

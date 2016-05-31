@@ -59,15 +59,12 @@ ComputeJacobianThread::computeJacobian()
   if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
-    for (std::vector<MooseSharedPointer<KernelBase> >::const_iterator it = kernels.begin(); it != kernels.end(); ++it)
-    {
-      MooseSharedPointer<KernelBase> kernel = *it;
+    for (const auto & kernel : kernels)
       if (kernel->isImplicit())
       {
         kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
         kernel->computeJacobian();
       }
-    }
   }
 }
 
@@ -75,15 +72,12 @@ void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
   const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
-  for (std::vector<MooseSharedPointer<IntegratedBC> >::const_iterator it = bcs.begin(); it != bcs.end(); ++it)
-  {
-    MooseSharedPointer<IntegratedBC> bc = *it;
+  for (const auto & bc : bcs)
     if (bc->shouldApply() && bc->isImplicit())
     {
       bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
       bc->computeJacobian();
     }
-  }
 }
 
 void
@@ -91,9 +85,7 @@ ComputeJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 {
   // No need to call hasActiveObjects, this is done in the calling method (see onInternalSide)
   const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
-  for (std::vector<MooseSharedPointer<DGKernel> >::const_iterator it = dgks.begin(); it != dgks.end(); ++it)
-  {
-    MooseSharedPointer<DGKernel> dg = *it;
+  for (const auto & dg : dgks)
     if (dg->isImplicit())
     {
       dg->subProblem().prepareFaceShapes(dg->variable().number(), _tid);
@@ -101,7 +93,6 @@ ComputeJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
       if (dg->hasBlocks(neighbor->subdomain_id()))
         dg->computeJacobian();
     }
-  }
 }
 
 void
@@ -109,16 +100,13 @@ ComputeJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
 {
   // No need to call hasActiveObjects, this is done in the calling method (see onInterface)
   const std::vector<MooseSharedPointer<InterfaceKernel> > & intks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
-  for (std::vector<MooseSharedPointer<InterfaceKernel> >::const_iterator it = intks.begin(); it != intks.end(); ++it)
-  {
-    MooseSharedPointer<InterfaceKernel> intk = *it;
+  for (const auto & intk : intks)
     if (intk->isImplicit())
     {
       intk->subProblem().prepareFaceShapes(intk->variable().number(), _tid);
       intk->subProblem().prepareNeighborShapes(intk->variable().number(), _tid);
       intk->computeJacobian(intk->variable().number());
     }
-  }
 }
 
 void

@@ -57,40 +57,40 @@ MaterialPropertyDebugOutput::printMaterialMap() const
   // Active materials on block
   {
     const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBlockObjects();
-    for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    for (const auto & it : objects)
     {
-      active_block << "    Block ID " << it->first << ":\n";
-      printMaterialProperties(active_block, it->second);
+      active_block << "    Block ID " << it.first << ":\n";
+      printMaterialProperties(active_block, it.second);
     }
   }
 
   // Active face materials on blocks
   {
     const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse[Moose::FACE_MATERIAL_DATA].getBlockObjects();
-    for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    for (const auto & it : objects)
     {
-      active_face << "    Block ID " << it->first << ":\n";
-      printMaterialProperties(active_face, it->second);
+      active_face << "    Block ID " << it.first << ":\n";
+      printMaterialProperties(active_face, it.second);
     }
   }
 
   // Active neighbor materials on blocks
   {
     const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse[Moose::NEIGHBOR_MATERIAL_DATA].getBlockObjects();
-    for (std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    for (const auto & it : objects)
     {
-      active_neighbor << "    Block ID " << it->first << ":\n";
-      printMaterialProperties(active_neighbor, it->second);
+      active_neighbor << "    Block ID " << it.first << ":\n";
+      printMaterialProperties(active_neighbor, it.second);
     }
   }
 
   // Active boundary materials
   {
     const std::map<BoundaryID, std::vector<MooseSharedPointer<Material> > > & objects = warehouse.getBoundaryObjects();
-    for (std::map<BoundaryID, std::vector<MooseSharedPointer<Material> > >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+    for (const auto & it : objects)
     {
-      active_boundary << "    Boundary ID " << it->first << ":\n";
-      printMaterialProperties(active_boundary, it->second);
+      active_boundary << "    Boundary ID " << it.first << ":\n";
+      printMaterialProperties(active_boundary, it.second);
     }
   }
 
@@ -113,21 +113,21 @@ void
 MaterialPropertyDebugOutput::printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<Material> > & materials) const
 {
   // Loop through all material objects
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator jt = materials.begin(); jt != materials.end(); ++jt)
+  for (const auto & mat : materials)
   {
     // Get a list of properties for the current material
-    const std::set<std::string> & props = (*jt)->getSuppliedItems();
+    const std::set<std::string> & props = mat->getSuppliedItems();
 
     // Adds the material name to the output stream
-    output << std::left << std::setw(ConsoleUtils::console_field_width) << "      Material Name: " << (*jt)->name() << '\n';
+    output << std::left << std::setw(ConsoleUtils::console_field_width) << "      Material Name: " << mat->name() << '\n';
 
     // Build stream for properties using the ConsoleUtils helper functions to wrap the names if there are too many for one line
     std::streampos begin_string_pos = output.tellp();
     std::streampos curr_string_pos = begin_string_pos;
     output << std::left << std::setw(ConsoleUtils::console_field_width) << "      Property Names: ";
-    for (std::set<std::string>::const_iterator prop_it = props.begin(); prop_it != props.end(); ++prop_it)
+    for (const auto & prop : props)
     {
-      output << "\"" << (*prop_it) << "\" ";
+      output << "\"" << prop << "\" ";
       curr_string_pos = output.tellp();
       ConsoleUtils::insertNewline(output, begin_string_pos, curr_string_pos);
     }

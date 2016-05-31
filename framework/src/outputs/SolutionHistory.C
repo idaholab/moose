@@ -49,8 +49,8 @@ SolutionHistory::output(const ExecFlagType & /*type*/)
   slh_file.open(filename().c_str(), std::ios::app);
   slh_file << nl_sys._current_nl_its;
 
-  for (unsigned int i = 0; i < nl_sys._current_l_its.size(); i++)
-    slh_file << " " << nl_sys._current_l_its[i];
+  for (const auto & linear_its : nl_sys._current_l_its)
+    slh_file << " " << linear_its;
 
   slh_file << std::endl;
 }

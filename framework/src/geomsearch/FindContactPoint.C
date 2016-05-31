@@ -124,9 +124,8 @@ findContactPoint(PenetrationInfo & p_info,
   Real update_size = std::numeric_limits<Real>::max();
 
   //Least squares
-  for (unsigned int it=0; it<3 && update_size > TOLERANCE*1e3; ++it)
+  for (unsigned int it = 0; it < 3 && update_size > TOLERANCE*1e3; ++it)
   {
-
     DenseMatrix<Real> jac(dim-1, dim-1);
 
     jac(0,0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
@@ -167,7 +166,7 @@ findContactPoint(PenetrationInfo & p_info,
   unsigned nit=0;
 
   // Newton Loop
-  for (; nit<12 && update_size > TOLERANCE*TOLERANCE; nit++)
+  for (; nit < 12 && update_size > TOLERANCE*TOLERANCE; nit++)
   {
     d = slave_point - phys_point[0];
 

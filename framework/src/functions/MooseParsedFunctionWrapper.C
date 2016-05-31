@@ -33,10 +33,11 @@ MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblem & feproblem,
   _function_ptr = new ParsedFunction<Real,RealGradient>(_function_str, &_vars, &_vals);
 
   // Loop through the Postprocessor and Scalar variables and point the libMesh::ParsedFunction to the PostprocessorValue
-  for (unsigned int i = 0; i < _pp_index.size(); ++i)
-    _addr.push_back(&_function_ptr->getVarAddress(_vars[_pp_index[i]]));
-  for (unsigned int i = 0; i < _scalar_index.size(); ++i)
-    _addr.push_back(&_function_ptr->getVarAddress(_vars[_scalar_index[i]]));
+  for (const auto & index : _pp_index)
+    _addr.push_back(&_function_ptr->getVarAddress(_vars[index]));
+
+  for (const auto & index : _scalar_index)
+    _addr.push_back(&_function_ptr->getVarAddress(_vars[index]));
 }
 
 MooseParsedFunctionWrapper::~MooseParsedFunctionWrapper()

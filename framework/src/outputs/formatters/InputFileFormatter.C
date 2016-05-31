@@ -50,8 +50,12 @@ InputFileFormatter::printBlockClose(const std::string & /*name*/, short depth) c
 }
 
 std::string
-InputFileFormatter::printParams(const std::string & /*prefix*/, const std::string &fully_qualified_name, InputParameters &params,
-                                short depth, const std::string &search_string, bool &found)
+InputFileFormatter::printParams(const std::string & /*prefix*/,
+                                const std::string & fully_qualified_name,
+                                InputParameters & params,
+                                short depth,
+                                const std::string & search_string,
+                                bool & found)
 {
   std::stringstream oss;
 
@@ -60,60 +64,60 @@ InputFileFormatter::printParams(const std::string & /*prefix*/, const std::strin
   std::string forward  = "";
   std::string backdots = "";
   int         offset   = 30;
-  for (int i=0; i<depth; ++i)
+  for (int i = 0; i < depth; ++i)
   {
     spacing += "  ";
     forward = ".";
     offset -= 2;
   }
 
-  for (InputParameters::iterator iter = params.begin(); iter != params.end(); ++iter)
+  for (const auto & iter : params)
   {
     // We only want non-private params and params that we haven't already seen
-    if (params.isPrivate(iter->first) || haveSeenIt(fully_qualified_name, iter->first))
+    if (params.isPrivate(iter.first) || haveSeenIt(fully_qualified_name, iter.first))
       continue;
 
     std::string value = "INVALID";
-    if (params.isParamValid(iter->first))
+    if (params.isParamValid(iter.first))
     {
       // Print the parameter's value to a stringstream.
       std::ostringstream toss;
-      iter->second->print(toss);
+      iter.second->print(toss);
       value = MooseUtils::trim(toss.str());
     }
-    else if (params.hasDefaultCoupledValue(iter->first))
+    else if (params.hasDefaultCoupledValue(iter.first))
     {
       std::ostringstream toss;
-      toss << params.defaultCoupledValue(iter->first);
+      toss << params.defaultCoupledValue(iter.first);
       value = toss.str();
     }
 
     // See if we match the search string
-    if (wildCardMatch(iter->first, search_string) || wildCardMatch(value, search_string))
+    if (wildCardMatch(iter.first, search_string) || wildCardMatch(value, search_string))
     {
       // Don't print active if it is the default all, that means it's not in the input file - unless of course we are in dump mode
-      if (!_dump_mode && iter->first == "active")
+      if (!_dump_mode && iter.first == "active")
       {
-        libMesh::Parameters::Parameter<std::vector<std::string> > * val = dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string> >*>(iter->second);
+        libMesh::Parameters::Parameter<std::vector<std::string> > * val = dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string> >*>(iter.second);
         const std::vector<std::string> & active = val->get();
         if (val != NULL && active.size() == 1 && active[0] == "__all__")
           continue;
       }
 
       // Mark it as "seen"
-      seenIt(fully_qualified_name, iter->first);
+      seenIt(fully_qualified_name, iter.first);
 
       // Don't print type if it is blank
-      if (iter->first == "type")
+      if (iter.first == "type")
       {
-        libMesh::Parameters::Parameter<std::string> * val = dynamic_cast<libMesh::Parameters::Parameter<std::string>*>(iter->second);
+        libMesh::Parameters::Parameter<std::string> * val = dynamic_cast<libMesh::Parameters::Parameter<std::string>*>(iter.second);
         const std::string & active = val->get();
         if (val != NULL && active == "")
           continue;
       }
 
       found = true;
-      oss << spacing << "  " << std::left << std::setw(offset) << iter->first << " = ";
+      oss << spacing << "  " << std::left << std::setw(offset) << iter.first << " = ";
       // std::setw() takes an int
       int l_offset = 30;
 
@@ -130,7 +134,7 @@ InputFileFormatter::printParams(const std::string & /*prefix*/, const std::strin
         oss << quotes << value << quotes;
         l_offset -= value.size();
       }
-      else if (_dump_mode && params.isParamRequired(iter->first))
+      else if (_dump_mode && params.isParamRequired(iter.first))
       {
         oss << "(required)";
         l_offset -= 10;
@@ -140,13 +144,13 @@ InputFileFormatter::printParams(const std::string & /*prefix*/, const std::strin
       if (_dump_mode)
       {
         std::vector<std::string> elements;
-        std::string doc = params.getDocString(iter->first);
+        std::string doc = params.getDocString(iter.first);
         if (MooseUtils::trim(doc) != "")
         {
           MooseUtils::tokenize(doc, elements, 68, " \t");
 
-          for (unsigned int i=0; i<elements.size(); ++i)
-            MooseUtils::escape(elements[i]);
+          for (auto & element : elements)
+            MooseUtils::escape(element);
 
           oss << std::right << std::setw(l_offset) << "# " << elements[0];
           for (unsigned int i=1; i<elements.size(); ++i)

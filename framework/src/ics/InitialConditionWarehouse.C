@@ -26,9 +26,8 @@ void
 InitialConditionWarehouse::initialSetup(THREAD_ID tid)
 {
   MooseObjectWarehouseBase<InitialCondition>::sort(tid);
-  std::vector<MooseSharedPointer<InitialCondition> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->initialSetup();
+  for (const auto & ic : _active_objects[tid])
+    ic->initialSetup();
 }
 
 

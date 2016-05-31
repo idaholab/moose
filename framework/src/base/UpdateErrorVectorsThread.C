@@ -32,12 +32,10 @@ UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem, std::
     _solution(_aux_sys.solution())
 {
   // Build up this map once so we don't have to do these lookups over and over again
-  for (std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
-      it != _indicator_field_to_error_vector.end();
-      ++it)
+  for (const auto & it : _indicator_field_to_error_vector)
   {
-    unsigned int var_num = _aux_sys.getVariable(0, it->first).number();
-    _indicator_field_number_to_error_vector[var_num] = it->second;
+    unsigned int var_num = _aux_sys.getVariable(0, it.first).number();
+    _indicator_field_number_to_error_vector[var_num] = it.second;
   }
 }
 
@@ -55,14 +53,12 @@ UpdateErrorVectorsThread::UpdateErrorVectorsThread(UpdateErrorVectorsThread & x,
 }
 
 void
-UpdateErrorVectorsThread::onElement(const Elem *elem)
+UpdateErrorVectorsThread::onElement(const Elem * elem)
 {
-  for (std::map<unsigned int, ErrorVector *>::iterator it=_indicator_field_number_to_error_vector.begin();
-      it != _indicator_field_number_to_error_vector.end();
-      ++it)
+  for (const auto & it : _indicator_field_number_to_error_vector)
   {
-    unsigned int var_num = it->first;
-    ErrorVector & ev = *(it->second);
+    unsigned int var_num = it.first;
+    ErrorVector & ev = *(it.second);
 
     dof_id_type dof_number = elem->dof_number(_system_number, var_num, 0);
     Real value = _solution(dof_number);

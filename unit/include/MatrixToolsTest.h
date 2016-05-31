@@ -12,31 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionScalarIC.h"
-#include "Function.h"
+#ifndef MATRIXTOOLSTEST_H
+#define MATRIXTOOLSTEST_H
 
-template<>
-InputParameters validParams<FunctionScalarIC>()
+//CPPUnit includes
+#include "GuardedHelperMacros.h"
+
+// Moose includes
+#include "MatrixTools.h"
+
+class MatrixToolsTest : public CppUnit::TestFixture
 {
-  InputParameters params = validParams<ScalarInitialCondition>();
-  params.addRequiredParam<std::vector<FunctionName> >("function", "The initial condition function.");
-  return params;
-}
 
-FunctionScalarIC::FunctionScalarIC(const InputParameters & parameters) :
-    ScalarInitialCondition(parameters),
-    _ncomp(_var.order())
-{
-  std::vector<FunctionName> funcs = getParam<std::vector<FunctionName> >("function");
-  if (funcs.size() != _ncomp)
-    mooseError("number of functions must be equal to the scalar variable order");
+  CPPUNIT_TEST_SUITE( MatrixToolsTest );
 
-  for (const auto & func_name : funcs)
-    _func.push_back(&getFunctionByName(func_name));
-}
+  CPPUNIT_TEST( matrixInversionTest1 );
+  CPPUNIT_TEST( matrixInversionTest2 );
+  CPPUNIT_TEST( matrixInversionTest3 );
 
-Real
-FunctionScalarIC::value()
-{
-  return _func[_i]->value(_t, Point(0, 0, 0));
-}
+  CPPUNIT_TEST_SUITE_END();
+
+public:
+  MatrixToolsTest();
+  ~MatrixToolsTest();
+
+  void matrixInversionTest1();
+  void matrixInversionTest2();
+  void matrixInversionTest3();
+};
+
+#endif  // MATRIXTOOLSTEST_H

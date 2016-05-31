@@ -68,8 +68,8 @@ MultiMooseEnum::operator==(const MultiMooseEnum & value) const
     return false;
 
   // Return false if this enum does not contain an item from the other
-  for (MooseEnumIterator it = value.begin(); it != value.end(); ++it)
-    if (!contains(*it))
+  for (const auto & me : value)
+    if (!contains(me))
       return false;
 
   // If you get here, they must be the same
@@ -108,8 +108,8 @@ MultiMooseEnum::contains(const MultiMooseEnum & value) const
 {
   std::set<int> lookup_set(_current_ids.begin(), _current_ids.end());
 
-  for (std::vector<int>::const_iterator it = value._current_ids.begin(); it != value._current_ids.end(); ++it)
-    if (lookup_set.find(*it) == lookup_set.end())
+  for (const auto & id : value._current_ids)
+    if (lookup_set.find(id) == lookup_set.end())
       return false;
 
   return true;
@@ -275,8 +275,8 @@ MultiMooseEnum::unique_items_size() const
 void
 MultiMooseEnum::checkDeprecated() const
 {
-  for (std::set<std::string>::const_iterator it = _current_names.begin(); it != _current_names.end(); ++it)
-    checkDeprecatedBase(*it);
+  for (const auto & name : _current_names)
+    checkDeprecatedBase(name);
 }
 
 std::ostream &

@@ -85,23 +85,19 @@ RestartableDataIO::serializeRestartableData(const std::map<std::string, Restarta
     stream.write((const char *) &n_data, sizeof(n_data));
 
     // data names
-    for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-         it != restartable_data.end();
-         ++it)
+    for (const auto & it : restartable_data)
     {
-      std::string name = it->first;
+      std::string name = it.first;
       stream.write(name.c_str(), name.length() + 1); // trailing 0!
     }
   }
   {
     std::ostringstream data_blk;
 
-    for (std::map<std::string, RestartableDataValue *>::const_iterator it = restartable_data.begin();
-         it != restartable_data.end();
-         ++it)
+    for (const auto & it : restartable_data)
     {
       std::ostringstream data;
-      it->second->store(data);
+      it.second->store(data);
 
       // Store the size of the data then the data
       unsigned int data_size = static_cast<unsigned int>(data.tellp());

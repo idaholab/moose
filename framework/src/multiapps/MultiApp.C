@@ -250,8 +250,8 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   if (!_reset_happened && target_time + 1e-14 >= _reset_time)
   {
     _reset_happened = true;
-    for (unsigned int i=0; i<_reset_apps.size(); i++)
-      resetApp(_reset_apps[i]);
+    for (auto & app : _reset_apps)
+      resetApp(app);
   }
 
   // Now move any apps that should be moved

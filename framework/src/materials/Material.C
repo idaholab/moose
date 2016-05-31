@@ -90,8 +90,8 @@ Material::Material(const InputParameters & parameters) :
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }
 
 
@@ -113,11 +113,9 @@ Material::initQpStatefulProperties()
 void
 Material::checkStatefulSanity() const
 {
-  for (std::map<std::string, int>::const_iterator it = _props_to_flags.begin(); it != _props_to_flags.end(); ++it)
-  {
-    if (static_cast<int>(it->second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it->second);
-  }
+  for (const auto & it : _props_to_flags)
+    if (static_cast<int>(it.second) % 2 == 0) // Only Stateful properties declared!
+      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it.second);
 }
 
 
@@ -132,21 +130,21 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
   }
 
   // Store material properties for block ids
-  for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
+  for (const auto & block_id : blockIDs())
   {
     // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
     if (!is_get)
       _supplied_props.insert(prop_name);
-    _fe_problem.storeMatPropName(*it, prop_name);
+    _fe_problem.storeMatPropName(block_id, prop_name);
   }
 
   // Store material properties for the boundary ids
-  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
+  for (const auto & boundary_id : boundaryIDs())
   {
     // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
     if (!is_get)
       _supplied_props.insert(prop_name);
-    _fe_problem.storeMatPropName(*it, prop_name);
+    _fe_problem.storeMatPropName(boundary_id, prop_name);
   }
 }
 

@@ -68,8 +68,8 @@ PenetrationLocator::~PenetrationLocator()
     for (unsigned int dim = 0; dim < _fe[i].size(); dim++)
       delete _fe[i][dim];
 
-  for (std::map<dof_id_type, PenetrationInfo *>::iterator it = _penetration_info.begin(); it != _penetration_info.end(); ++it)
-    delete it->second;
+  for (auto & it : _penetration_info)
+    delete it.second;
 }
 
 void

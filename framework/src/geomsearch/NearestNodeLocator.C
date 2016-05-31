@@ -116,9 +116,8 @@ NearestNodeLocator::findNodes()
 
     // Data structures to hold the Nodal Boundary conditions
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+    for (const auto & bnode : bnd_nodes)
     {
-      const BndNode * bnode = *nd;
       BoundaryID boundary_id = bnode->_bnd_id;
       dof_id_type node_id = bnode->_node->id();
 
@@ -146,10 +145,8 @@ NearestNodeLocator::findNodes()
     _slave_nodes = snt._slave_nodes;
     _neighbor_nodes = snt._neighbor_nodes;
 
-    for (std::set<dof_id_type>::iterator it = snt._ghosted_elems.begin();
-        it != snt._ghosted_elems.end();
-        ++it)
-      _subproblem.addGhostedElem(*it);
+    for (const auto & dof : snt._ghosted_elems)
+      _subproblem.addGhostedElem(dof);
 
     // Cache the slave_node_range so we don't have to build it each time
     _slave_node_range = new NodeIdRange(_slave_nodes.begin(), _slave_nodes.end(), 1);

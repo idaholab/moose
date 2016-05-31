@@ -6,6 +6,7 @@
 /****************************************************************/
 #include "ComputeMultiPlasticityStress.h"
 #include "MultiPlasticityDebugger.h"
+#include "MatrixTools.h"
 
 #include "MooseException.h"
 #include "RotationMatrix.h" // for rotVecToZ
@@ -1344,7 +1345,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
       num_currently_active += 1;
 
   // zzz is a matrix in the form that can be easily
-  // inverted by RankFourTensor::matrixInversion.
+  // inverted by MatrixTools::inverse
   // Eg for num_currently_active = 3
   // (zzz[0] zzz[1] zzz[2])
   // (zzz[3] zzz[4] zzz[5])
@@ -1374,7 +1375,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   if (num_currently_active > 0)
   {
     // invert zzz, in place.  if num_currently_active = 0 then zzz is not needed.
-    const int ierr = RankFourTensor().matrixInversion(zzz, num_currently_active);
+    const int ierr = MatrixTools::inverse(zzz, num_currently_active);
     if (ierr != 0)
       return E_ijkl; // in the very rare case of zzz being singular, just return the "elastic" tangent operator
   }

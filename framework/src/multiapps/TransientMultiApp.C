@@ -243,12 +243,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             transfer.close();
             transfer_old.close();
 
-            std::set<dof_id_type>::iterator it  = _transferred_dofs.begin();
-            std::set<dof_id_type>::iterator end = _transferred_dofs.end();
-
-            for (; it != end; ++it)
+            for (const auto & dof : _transferred_dofs)
             {
-              dof_id_type dof = *it;
               solution.set(dof, (transfer_old(dof) * one_minus_step_percent) + (transfer(dof) * step_percent));
 //            solution.set(dof, transfer_old(dof));
 //            solution.set(dof, transfer(dof));
