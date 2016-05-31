@@ -52,6 +52,8 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
+  virtual void meshChanged() override;
+
   enum FIELD_TYPE
   {
     UNIQUE_REGION,
@@ -375,6 +377,12 @@ protected:
    * Determines if the flood counter is elements or not (nodes)
    */
   bool _is_elemental;
+
+  /// used for testing if a neighbor element is semilocal
+  std::set<const Elem *> _semilocal_elem_list;
+
+  /// flag that indicates if an up to date list of semilocal (active) elements has been built
+  bool _semilocal_elem_list_built;
 };
 
 template <class T>

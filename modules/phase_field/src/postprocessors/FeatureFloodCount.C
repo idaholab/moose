@@ -126,7 +126,8 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
-    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
+    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false),
+    _semilocal_elem_list_built(false)
 {
   // Size the data structures to hold the correct number of maps
   for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
@@ -177,6 +178,21 @@ FeatureFloodCount::initialize()
 
   // Reset the feature count
   _feature_count = 0;
+
+  // build semilocal element list
+  if (_is_elemental && !_semilocal_elem_list_built)
+  {
+    MeshBase::const_element_iterator       el  = _mesh.getMesh().active_elements_begin();
+    const MeshBase::const_element_iterator end = _mesh.getMesh().active_elements_end();
+    const processor_id_type my_pid = processor_id();
+
+    _semilocal_elem_list.clear();
+    for (; el != end; ++el)
+      if ((*el)->is_semilocal(my_pid))
+        _semilocal_elem_list.insert(*el);
+
+    _semilocal_elem_list_built = true;
+  }
 }
 
 void
@@ -302,6 +318,12 @@ Real
 FeatureFloodCount::getValue()
 {
   return _feature_count;
+}
+
+void
+FeatureFloodCount::meshChanged()
+{
+  _semilocal_elem_list_built = false;
 }
 
 Real
@@ -729,7 +751,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
     auto my_proc_id = processor_id();
 
     // Only recurse on elems this processor can see
-    if (neighbor_ptr && neighbor_ptr->is_semilocal(my_proc_id))
+    if (neighbor_ptr && _semilocal_elem_list.find(neighbor_ptr) != _semilocal_elem_list.end())
     {
       if (neighbor_ptr->processor_id() != my_proc_id)
         feature->_ghosted_ids.insert(elem->id());
