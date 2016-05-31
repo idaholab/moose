@@ -97,6 +97,17 @@ public:
   ///@}
 
   /**
+   * Retrieve pointer to a material property with the mesh blocks where it is defined
+   * The name required by this method is the name defined in the input file.
+   * This function can be thought as the combination of getMaterialPropertyByName and getMaterialPropertyBlocks.
+   * It can be called after the action of all actions.
+   * @param name The name of the material property to retrieve
+   * @return Pointer to the material property with the name 'name' and the set of blocks where the property is valid
+   */
+  template<typename T>
+  std::pair<const MaterialProperty<T> *, std::set<SubdomainID> > getBlockMaterialProperty(const MaterialPropertyName & name);
+
+  /**
    * Return a material property that is initialized to zero by default and does
    * not need to (but can) be declared by another material.
    */
@@ -366,6 +377,19 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
   markMatPropRequested(name);
 
   return _material_data->getPropertyOlder<T>(name);
+}
+
+template<typename T>
+std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >
+MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName & name)
+{
+  if (_mi_block_ids.empty())
+    mooseError("getBlockMaterialProperty must be called by a block restrictable object");
+
+  if (!hasMaterialPropertyByName<T>(name))
+    return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(NULL, std::set<SubdomainID>());
+
+  return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(&_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
 }
 
 template<typename T>
