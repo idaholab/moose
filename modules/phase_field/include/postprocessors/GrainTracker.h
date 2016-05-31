@@ -28,11 +28,9 @@ public:
   GrainTracker(const InputParameters & parameters);
   virtual ~GrainTracker();
 
-  virtual void initialize();
-
-  virtual void execute();
-
-  virtual void finalize();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
   struct CacheValues
   {
@@ -55,18 +53,17 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the nodal value
    */
-  virtual Real getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
+  virtual Real getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx=0) const override;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
    * holds the ith node with the inner vector holds the list of active unique grains.
    * (unique_grain_id, variable_idx)
    */
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
+  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
 
 protected:
-  /// This routine is called at the of finalize to update the field data
-  virtual void updateFieldInfo();
+  virtual void updateFieldInfo() override;
 
   /**
    * This method serves two purposes:
@@ -92,19 +89,19 @@ protected:
    * for a given grain. There are _vars.size() entries in the outer vector, one for each order parameter.
    * A list of grains with the same OP are ordered in lists per OP.
    */
-  void computeMinDistancesFromGrain(MooseSharedPointer<FeatureData> grain, std::vector<std::list<GrainDistance> > & min_distances);
+  void computeMinDistancesFromGrain(FeatureData & grain, std::vector<std::list<GrainDistance> > & min_distances);
 
   /**
    * This is the recursive part of the remapping algorithm. It attempts to remap a grain to a new index and recurses until max_depth
    * is reached.
    */
-  bool attemptGrainRenumber(MooseSharedPointer<FeatureData> grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
+  bool attemptGrainRenumber(FeatureData & grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
 
   /**
    * A routine for moving all of the solution values from a given grain to a new variable number. It is called
    * with different modes to only cache, or actually do the work, or bypass the cache altogether.
    */
-  void swapSolutionValues(MooseSharedPointer<FeatureData> grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+  void swapSolutionValues(FeatureData &  grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
                           REMAP_CACHE_MODE cache_mode, unsigned int depth);
 
   /**
@@ -114,10 +111,15 @@ protected:
                                 REMAP_CACHE_MODE cache_mode);
 
   /**
-   * This method returns the periodic distance between two bounding boxes.  If use_centroids_only is true, then the distance will be between the two
-   * bounding box centers.  If ignore_radii is false, then the distance will be -1 or 1 depending on whether the intersect or not (respectively).
+   * This method returns the minimum periodic distance between two vectors of bounding boxes. If the bounding boxes overlap
+   * the result is always -1.0.
    */
-  Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2, bool use_centroids_only) const;
+  Real boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2) const;
+
+  /**
+   * This method returns the minimum periodic distance between the centroids of two vectors of bounding boxes.
+   */
+  Real centroidRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2) const;
 
   /**
    * This method colors neighbors of halo entries to expand the halo as desired for a given simulation.
@@ -127,7 +129,7 @@ protected:
   /**
    * Calculate the volume of each grain maintaining proper order and dumping results to CSV
    */
-  virtual void calculateBubbleVolumes();
+  virtual void calculateBubbleVolumes() override;
 
   /*************************************************
    *************** Data Structures *****************
@@ -149,7 +151,7 @@ protected:
   NonlinearSystem & _nl;
 
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-  std::map<unsigned int, MooseSharedPointer<FeatureData> > & _unique_grains;
+  std::map<unsigned int, std::unique_ptr<FeatureData> > & _unique_grains;
 
   /**
    * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
@@ -185,14 +187,6 @@ struct GrainDistance
   Real _distance;
   unsigned int _grain_id;
   unsigned int _var_index;
-};
-
-/**
- * GrainDistance sort functor
- */
-struct GrainDistanceSorter
-{
-  bool operator()(const std::list<GrainDistance> & lhs, const std::list<GrainDistance> & rhs) const;
 };
 
 #endif
