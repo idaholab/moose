@@ -1274,15 +1274,24 @@ FEProblem::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 {
   if (warehouse.hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<T> > & objects = warehouse.getActiveObjects(0);
-    for (unsigned int i = 0; i < objects.size(); ++i)
+    const auto & objects = warehouse.getActiveObjects(0);
+
+    // Join them down to processor 0
+    for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
     {
-      for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-        objects[i]->threadJoin(*(warehouse.getActiveObjects(tid)[i]));
+      const auto & other_objects = warehouse.getActiveObjects(tid);
 
-      objects[i]->finalize();
+      for (unsigned int i = 0; i < objects.size(); ++i)
+        objects[i]->threadJoin(*(other_objects[i]));
+    }
 
-      MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(objects[i]);
+    // Finalize them and save off PP values
+    for (auto & object : objects)
+    {
+      object->finalize();
+
+      auto pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(object);
+
       if (pp)
         _pps_data.storeValue(pp->PPName(), pp->getValue());
     }
