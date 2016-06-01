@@ -19,6 +19,7 @@
 #include "XFEMMaterialTensorMarkerUserObject.h"
 #include "XFEMAction.h"
 #include "XFEMSingleVariableConstraint.h"
+#include "XFEMPressure.h"
 
 template<>
 InputParameters validParams<XFEMApp>()
@@ -73,6 +74,9 @@ XFEMApp::registerObjects(Factory & factory)
   //UserObjects
   registerUserObject(XFEMMarkerUserObject);
   registerUserObject(XFEMMaterialTensorMarkerUserObject);
+
+  //DiracKernels
+  registerDiracKernel(XFEMPressure);
 }
 
 // External entry point for dynamic syntax association
