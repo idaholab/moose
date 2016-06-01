@@ -80,7 +80,8 @@ FileOutput::FileOutput(const InputParameters & parameters) :
   // Check the file directory of file_base and create if needed
   std::string base = "./" + _file_base;
   base = base.substr(0, base.find_last_of('/'));
-  if (access(base.c_str(), W_OK) == -1)
+
+  if (_app.processor_id() == 0 && access(base.c_str(), W_OK) == -1)
   {
     //Directory does not exist. Loop through incremental directories and create as needed.
     std::vector<std::string> path_names;
