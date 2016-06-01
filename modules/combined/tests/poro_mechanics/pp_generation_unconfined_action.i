@@ -87,6 +87,7 @@
 
 [Kernels]
   [./PoroMechanics]
+    use_displaced_mesh = false
   [../]
   [./poro_timederiv]
     type = PoroFullSatTimeDerivative

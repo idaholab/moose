@@ -150,18 +150,21 @@
     type = StressDivergenceTensors
     variable = disp_x
     component = 0
+    use_displaced_mesh = false
   [../]
   [./grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     component = 1
+    use_displaced_mesh = false
   [../]
   [./grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     component = 2
+    use_displaced_mesh = false
   [../]
-    [./poro_x]
+  [./poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
     component = 0

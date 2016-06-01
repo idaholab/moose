@@ -64,18 +64,21 @@
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
+    use_displaced_mesh = false
   [../]
   [./grad_stress_y]
     type = StressDivergenceTensors
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
+    use_displaced_mesh = false
   [../]
   [./grad_stress_z]
     type = StressDivergenceTensors
     variable = disp_z
     displacements = 'disp_x disp_y disp_z'
     component = 2
+    use_displaced_mesh = false
   [../]
   [./poro]
     type = PorousFlowMassVolumetricExpansion

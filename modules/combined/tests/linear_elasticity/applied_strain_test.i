@@ -1,5 +1,3 @@
-
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -48,6 +46,7 @@
 
 [Kernels]
   [./TensorMechanics]
+    use_displaced_mesh = false
   [../]
 []
 

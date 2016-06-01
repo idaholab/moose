@@ -25,6 +25,7 @@
 
 [Kernels]
   [./TensorMechanics]
+    use_displaced_mesh = false
   [../]
 []
 

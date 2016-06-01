@@ -80,7 +80,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    use_displaced_mesh = true
   [../]
 []
 

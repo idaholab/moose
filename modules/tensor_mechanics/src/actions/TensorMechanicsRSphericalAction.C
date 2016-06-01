@@ -18,7 +18,7 @@ InputParameters validParams<TensorMechanicsRSphericalAction>()
   params.addClassDescription("Set up stress divergence kernel for the 1D spherical problem");
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variable for the problem (should only be a single variable)");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  params.addParam<bool>("use_displaced_mesh", true, "Whether to use displaced mesh in the kernels");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernel will be applied to");
   params.addParam<std::vector<AuxVariableName> >("save_in", "The r displacement residuals");
   params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The r displacement diagonal preconditoner term");
