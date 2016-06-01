@@ -32,6 +32,7 @@ XFEM::XFEM (const InputParameters & params) :
 #ifndef LIBMESH_ENABLE_UNIQUE_ID
   mooseError("MOOSE requires unique ids to be enabled in libmesh (configure with --enable-unique-id) to use XFEM!");
 #endif
+  _has_secondary_cut = false;
 }
 
 XFEM::~XFEM ()
@@ -392,9 +393,13 @@ XFEM::markCutEdgesByGeometry(Real time)
       {
         if (!CEMElem->getFragment(0)->isSecondaryInteriorEdge(frag_cut_edges[i].host_side_id))
         {
-          _efa_mesh.addFragEdgeIntersection(elem->id(), frag_cut_edges[i].host_side_id,
-                                            frag_cut_edges[i].distance);
-          marked_edges = true;
+          if (_efa_mesh.addFragEdgeIntersection(elem->id(), frag_cut_edges[i].host_side_id, frag_cut_edges[i].distance))
+          {
+            marked_edges = true;
+
+            if (!isElemAtCrackTip(elem))
+              _has_secondary_cut = true;
+          }
         }
       }
     }
@@ -765,7 +770,9 @@ XFEM::markCutEdgesByState(Real time)
           if (initCutIntersectionEdge(crack_tip_origin,normal,edge_ends[0],edge_ends[1],distance) &&
               (!CEMElem->getFragment(0)->isSecondaryInteriorEdge(i)))
           {
-            _efa_mesh.addFragEdgeIntersection(elem->id(), edge_id_keep, distance_keep);
+            if (_efa_mesh.addFragEdgeIntersection(elem->id(), edge_id_keep, distance_keep))
+              if (!isElemAtCrackTip(elem))
+                _has_secondary_cut = true;
             break;
           }
         }
@@ -1104,6 +1111,20 @@ XFEM::cutMeshWithEFA()
           elem_to_delete == it->second)
       {
         _sibling_elems.erase(it);
+        break;
+      }
+    }
+
+    //Delete any entries in _sibling_displaced_elems for this element.
+    for (ElementPairLocator::ElementPairList::iterator it = _sibling_displaced_elems.begin();
+       it != _sibling_displaced_elems.end(); ++it)
+    {
+      Elem *elem_to_delete2 = _mesh2->elem(DeleteElements[i]->id());
+
+      if (elem_to_delete2 == it->first ||
+          elem_to_delete2 == it->second)
+      {
+        _sibling_displaced_elems.erase(it);
         break;
       }
     }
