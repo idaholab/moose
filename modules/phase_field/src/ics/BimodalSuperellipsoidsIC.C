@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<BimodalSuperellipsoidsIC>()
 {
   InputParameters params = validParams<SpecifiedSmoothSuperellipsoidIC>();
-  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly)");
+  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly outside the larger particles)");
   params.addRequiredParam<unsigned int>("npart", "The number of random (small) particles to place");
   params.addRequiredParam<Real>("small_spac", "minimum spacing between small particles, measured from closest edge to closest edge");
   params.addRequiredParam<Real>("large_spac", "minimum spacing between large and small particles, measured from closest edge to closest edge");
@@ -218,6 +218,7 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
 
         if (tmp_dsmall_min < dsmall_min) dsmall_min = tmp_dsmall_min;
       }
+      //Cause while statement to exit for the first randomly placed particle
       if (i == _x_positions.size()) dsmall_min = _range.norm();
     }
 

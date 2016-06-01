@@ -70,6 +70,7 @@
 /*
  * Initial Conditions
  */
+#include "BimodalInverseSuperellipsoidsIC.h"
 #include "BimodalSuperellipsoidsIC.h"
 #include "ClosePackIC.h"
 #include "CrossIC.h"
@@ -317,6 +318,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerDeprecatedObjectName(AllenCahn, "ACParsed", "15/04/2016 00:00");
   registerDeprecatedObjectName(CahnHilliard, "CHParsed", "11/01/2015 00:00");
 
+  registerInitialCondition(BimodalInverseSuperellipsoidsIC);
   registerInitialCondition(BimodalSuperellipsoidsIC);
   registerInitialCondition(ClosePackIC);
   registerInitialCondition(CrossIC);
