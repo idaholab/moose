@@ -487,6 +487,21 @@ RankTwoTensor::mixedProductIkJl(const RankTwoTensor & b) const
   return result;
 }
 
+RankFourTensor
+RankTwoTensor::mixedProductJkIl(const RankTwoTensor & b) const
+{
+  RankFourTensor result;
+  const RankTwoTensor &a = *this;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(i,j,k,l) = a(j,k) * b(i,l);
+
+  return result;
+}
+
 RankTwoTensor
 RankTwoTensor::deviatoric() const
 {

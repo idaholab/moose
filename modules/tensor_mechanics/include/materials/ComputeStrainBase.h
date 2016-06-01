@@ -43,6 +43,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _total_strain;
 
   const bool _stateful_displacements;
+
+  bool _volumetric_locking_correction;
 };
 
 #endif //COMPUTESTRAINBASE_H
