@@ -45,8 +45,6 @@ protected:
   const Point _point1;
   const Point _point2;
   Point _input_direction;
-
-private:
 };
 
 #endif //RANKTWOSCALARAUX_H

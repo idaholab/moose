@@ -12,6 +12,24 @@ class RankTwoTensor;
 namespace RankTwoScalarTools
 {
 /*
+ * Return the scalar_type MooseEnum
+ */
+MooseEnum scalarOptions();
+
+/*
+ * Return scalar quantity of a rank two tensor based on the user specified scalar_type
+ * @param point1 The starting point of the rotation axis for a cylinderical system
+ * @param point2 The end point of the rotation axis
+ * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
+ * @param direction The direction vector in which the scalar stress value is calculated
+ * point1 and point2 are required only for the cases of axialStress, hoopStress and radialStress
+ * curr_point is required only for the cases of hoopStress and radialStress
+ * direction is required only for directionValueTensor
+ * for all other cases, these parameters will take the default values
+ */
+Real getQuantity(const RankTwoTensor & tensor, const MooseEnum scalar_type, const Point & point1, const Point & point2, const Point & curr_point, Point & direction);
+
+/*
  * Extracts the value of the tensor component at the specified indices
  */
 Real component(const RankTwoTensor & r2tensor, unsigned int i, unsigned int j);
@@ -109,7 +127,7 @@ Real calcEigenValues(const RankTwoTensor & r2tensor, unsigned int index);
  * @param point2 The end point of the rotation axis
  * @param direction The direction vector in which the scalar stress value is calculated.
  */
-Real axialStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, RealVectorValue & direction);
+Real axialStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, Point & direction);
 
 /*
  * The hoop stress is calculated as
@@ -121,7 +139,7 @@ Real axialStress(const RankTwoTensor & stress, const Point & point1, const Point
  * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
  * @param direction The direction vector in which the scalar stress value is calculated.
  */
-Real hoopStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, const Point * curr_point, RealVectorValue & direction);
+Real hoopStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, const Point & curr_point, Point & direction);
 
 /* The radial stress is calculated as
  * radial_stress = normal^T_i * \sigma_{ij} * normal_j
@@ -132,7 +150,7 @@ Real hoopStress(const RankTwoTensor & stress, const Point & point1, const Point 
  * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
  * @param direction The direction vector in which the scalar stress value is calculated.
 */
-Real radialStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, const Point * curr_point, RealVectorValue & direction);
+Real radialStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, const Point & curr_point, Point & direction);
 
 /*
  * This method is a helper method for the hoopStress and radialStress methods to
@@ -143,13 +161,13 @@ Real radialStress(const RankTwoTensor & stress, const Point & point1, const Poin
  * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
  * @param normalPosition The vector from the current point that is normal to the rotation axis
  */
-void normalPositionVector(const Point & point1, const Point & point2, const Point * curr_point, Point & normalPosition);
+void normalPositionVector(const Point & point1, const Point & point2, const Point & curr_point, Point & normalPosition);
 
 /*
  * This method calculates the scalar value of the supplied rank-2 tensor in the
  * direction specified by the user.
  */
-Real directionValueTensor(const RankTwoTensor & r2tensor, Point & input_direction);
+Real directionValueTensor(const RankTwoTensor & r2tensor, Point & direction);
 
 /*
  * Triaxiality is the ratio of the hydrostatic stress to the von Mises stress.
