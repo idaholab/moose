@@ -1558,7 +1558,7 @@ EFAElement2D::addEdgeCut(unsigned int edge_id, double position, EFANode* embedde
   } // If add_to_neighbor required
 }
 
-void
+bool
 EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id, double position,
                                  std::map< unsigned int, EFANode*> &EmbeddedNodes)
 {
@@ -1618,6 +1618,8 @@ EFAElement2D::addFragmentEdgeCut(unsigned int frag_edge_id, double position,
     // neighbor fragment, the neighbor has already been treated in addEdgeIntersection;
     // for an interior edge, there is no neighbor fragment
   }
+
+  return isValidIntersection;
 }
 
 std::vector<EFAFragment2D*>

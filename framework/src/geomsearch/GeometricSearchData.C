@@ -86,10 +86,14 @@ GeometricSearchData::update(GeometricSearchType type)
     }
   }
 
-  for (const auto & epl_it : _element_pair_locators)
+  if (type == ALL || type == PENETRATION)
   {
-    ElementPairLocator & epl = *(epl_it.second);
-    epl.update();
+    for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
+         epl_it != _element_pair_locators.end(); ++epl_it)
+    {
+      ElementPairLocator & epl = *epl_it->second;
+      epl.update();
+    }
   }
 }
 

@@ -109,7 +109,7 @@ public:
 
   void addEdgeCut(unsigned int edge_id, double position, EFANode* embedded_node,
                     std::map< unsigned int, EFANode*> &EmbeddedNodes, bool add_to_neighbor);
-  void addFragmentEdgeCut(unsigned int frag_edge_id, double position,
+  bool addFragmentEdgeCut(unsigned int frag_edge_id, double position,
                          std::map< unsigned int, EFANode*> &EmbeddedNodes);
   std::vector<EFAFragment2D*> branchingSplit(std::map<unsigned int, EFANode*> &EmbeddedNodes);
 
