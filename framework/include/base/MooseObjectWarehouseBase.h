@@ -21,6 +21,7 @@
 #include "BlockRestrictable.h"
 #include "MooseVariable.h"
 #include "TransientInterface.h"
+#include "MooseVariableDependencyInterface.h"
 
 /**
  * A base storage container for MooseObjects.
