@@ -55,6 +55,7 @@
 []
 
 [Outputs]
+  exodus = true
   xda = true
   [./xdr]
     type = XDR
