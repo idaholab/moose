@@ -25,6 +25,7 @@
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
                                                    const MooseObjectWarehouse<AuxKernel> & storage) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage)
 {
@@ -33,6 +34,7 @@ ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
 // Splitting Constructor
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+    _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _storage(x._storage)
 {
@@ -56,6 +58,10 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
 
   if (node->processor_id() == _fe_problem.processor_id())
   {
+    std::set<MooseVariable *> needed_moose_vars;
+    _storage.updateVariableDependency(needed_moose_vars, _tid);
+    _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
     // Get a map of all active block restricted AuxKernel objects
     const auto & kernels = _storage.getActiveBoundaryObjects(_tid);
 

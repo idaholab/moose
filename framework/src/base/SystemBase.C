@@ -211,18 +211,21 @@ SystemBase::prepare(THREAD_ID tid)
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
-    const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (const auto & var : vars)
-      var->clearDofIndices();
+
+
+    //const std::vector<MooseVariable *> & vars = _vars[tid].variables();
+    //for (const auto & var : vars)
+    //  var->clearDofIndices();
 
     for (const auto & var : active_elemental_moose_variables)
       if (&(var->sys()) == this)
         var->prepare();
+
   }
   else
   {
     mooseError("Should not be here");
-    // const std::vector<MooseVariable *> & vars = _vars[tid].variables();
+    //const std::vector<MooseVariable *> & vars = _vars[tid].variables();
     //for (const auto & var : vars)
     //  var->prepare();
   }

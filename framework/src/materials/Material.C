@@ -99,6 +99,9 @@ Material::Material(const InputParameters & parameters) :
 {
   // Fill in the MooseVariable dependencies
   addMooseVariableDependency(getCoupledMooseVars());
+
+  for (auto & var : getCoupledMooseVars())
+    std::cout << "  " << var->name() << std::endl;
 }
 
 void

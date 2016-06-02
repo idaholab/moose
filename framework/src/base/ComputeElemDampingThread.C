@@ -47,7 +47,7 @@ void
 ComputeElemDampingThread::subdomainChanged()
 {
   std::set<MooseVariable *> needed_moose_vars;
-  _element_dampers.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
+  _element_dampers.updateVariableDependency(needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 }
 

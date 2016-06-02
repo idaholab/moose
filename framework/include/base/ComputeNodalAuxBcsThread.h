@@ -31,6 +31,7 @@ public:
   void join(const ComputeNodalAuxBcsThread & /*y*/);
 
 protected:
+  FEProblem & _fe_problem;
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
