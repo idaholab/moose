@@ -1379,7 +1379,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
     {
       MatrixTools::inverse(zzz, num_currently_active);
     }
-    catch(const MatrixTools::MatrixInversionException & e)
+    catch(const MooseException & e)
     {
       // in the very rare case of zzz being singular, just return the "elastic" tangent operator
       #ifdef DEBUG
@@ -1464,7 +1464,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   {
     s_inv = stress_coeff.invSymm();
   }
-  catch (MooseException & e)
+  catch (const MooseException & e)
   {
     return strain_coeff; // when stress_coeff is singular (perhaps for incompressible plasticity?) return the "linear" tangent operator
   }

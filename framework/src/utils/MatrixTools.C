@@ -20,9 +20,9 @@ inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real>
 
   // check the matrix m exists and is square
   if (n == 0)
-    throw NoInputMatrixException();
+    throw MooseException("Input matrix empty during matrix inversion.");
   if (n != m_inv.size() || n != m[0].size() || n != m_inv[0].size())
-    throw MatrixMismatchException();
+    throw MooseException("Input and output matrix are not same size square matrices.");
 
   // build the vectorial representation
   std::vector<PetscScalar> A;
@@ -50,12 +50,13 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
 
   // Following does a LU decomposition of "square matrix A"
   // upon return "A = P*L*U" if return_value == 0
-  // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
+  // Here I use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
   int return_value;
   LAPACKgetrf_(reinterpret_cast<int *>(&n), reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &return_value);
 
   if (return_value != 0)
-    throw MatrixInversionException(return_value);
+    throw MooseException(return_value < 0 ? "Argument " + Moose::stringify(-return_value) + " was invalid during LU factorization in MatrixTools::inverse."
+                                          : "Matrix on-diagonal entry " + Moose::stringify(return_value) + " was exactly zero during LU factorization in MatrixTools::inverse.");
 
   // get the inverse of A
   int buffer_size = buffer.size();
@@ -64,6 +65,10 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
 #else
   LAPACKgetri_(reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &buffer[0], &buffer_size, &return_value);
 #endif
+
+  if (return_value != 0)
+    throw MooseException(return_value < 0 ? "Argument " + Moose::stringify(-return_value) + " was invalid during invert in MatrixTools::inverse."
+                                          : "Matrix on-diagonal entry " + Moose::stringify(return_value) + " was exactly zero during invert in MatrixTools::inverse.");
 }
 
 }

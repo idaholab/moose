@@ -316,8 +316,7 @@ RankFourTensor
 RankFourTensor::invSymm() const
 {
   unsigned int ntens = N * (N+1) / 2;
-  int nskip = N-1;
-  int error;
+  int nskip = N - 1;
 
   RankFourTensor result;
   const RankFourTensor & a = *this;

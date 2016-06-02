@@ -74,17 +74,17 @@ MatrixToolsTest::matrixInversionTest2()
   mat3[7] = m[2][1] = 8.0;
   mat3[8] = m[2][2] = 9.0;
 
-  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(mat3, 3), MatrixTools::MatrixInversionException);
-  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m), MatrixTools::MatrixInversionException);
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(mat3, 3), MooseException);
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m), MooseException);
 
   std::vector<std::vector<Real> > m2(2);
   for (auto & row : m)
     row.resize(3);
 
-  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m2), MatrixTools::MatrixMismatchException);
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m2), MooseException);
 
   std::vector<std::vector<Real> > m3(0);
-  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m3, m3), MatrixTools::NoInputMatrixException);
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m3, m3), MooseException);
 }
 
 void
