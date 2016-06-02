@@ -221,9 +221,10 @@ SystemBase::prepare(THREAD_ID tid)
   }
   else
   {
-    const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (const auto & var : vars)
-      var->prepare();
+    mooseError("Should not be here");
+    // const std::vector<MooseVariable *> & vars = _vars[tid].variables();
+    //for (const auto & var : vars)
+    //  var->prepare();
   }
 }
 

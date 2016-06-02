@@ -1192,6 +1192,10 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _to_multi_app_transfers[type].getActiveObjects();
 
+    std::set<MooseVariable *> needed_moose_vars;
+    _to_multi_app_transfers[type].updateVariableDependency(needed_moose_vars);
+    setActiveElementalMooseVariables(needed_moose_vars, 0);
+
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
     {
@@ -1235,7 +1239,16 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _from_multi_app_transfers[type].getActiveObjects();
 
+<<<<<<< 283838fde7d550a5543e94f030f1047b0082b571
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
+=======
+    std::set<MooseVariable *> needed_moose_vars;
+    _from_multi_app_transfers[type].updateVariableDependency(needed_moose_vars);
+    setActiveElementalMooseVariables(needed_moose_vars, 0);
+
+
+    _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
+>>>>>>> Updates to migrate to complete integration with variable dependency interface
     for (const auto & transfer : transfers)
     {
       Moose::perf_log.push(transfer->name(), "Transfers");

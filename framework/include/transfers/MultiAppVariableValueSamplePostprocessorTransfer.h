@@ -16,6 +16,7 @@
 #define MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
 
 #include "MultiAppTransfer.h"
+#include "MooseVariableDependencyInterface.h"
 
 // Forward declarations
 class MultiAppVariableValueSamplePostprocessorTransfer;
@@ -29,7 +30,8 @@ InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>();
  * MultiApp.
  */
 class MultiAppVariableValueSamplePostprocessorTransfer :
-  public MultiAppTransfer
+  public MultiAppTransfer,
+  public MooseVariableDependencyInterface
 {
 public:
   MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
@@ -37,8 +39,9 @@ public:
   virtual void execute() override;
 
 protected:
-  AuxVariableName _postprocessor_name;
-  PostprocessorName _from_var_name;
+  PostprocessorName _postprocessor_name;
+  AuxVariableName _from_var_name;
+
 };
 
 #endif // MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H

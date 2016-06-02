@@ -34,6 +34,10 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
 
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
 
+  std::set<MooseVariable *> needed_moose_vars;
+  warehouse.updateVariableDependency(needed_moose_vars, _tid);
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
   // Iterate over all the elements in the range
   for (const auto & elem : range)
   {

@@ -164,6 +164,7 @@ MooseVariable::isNodal() const
 void
 MooseVariable::clearDofIndices()
 {
+  // mooseDeprecated("This function is no longer used, the variable dependencies calls should always set/get the proper dependencies (see SystemBase::prepare).");
   _dof_indices.clear();
 }
 

@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "MultiAppTransfer.h"
+#include "MooseVariableDependencyInterface.h"
 
 // Forward declarations
 class MultiAppVariableValueSampleTransfer;
@@ -29,7 +30,8 @@ InputParameters validParams<MultiAppVariableValueSampleTransfer>();
  * the MultiApp is.  Copies that value into a field in the MultiApp.
  */
 class MultiAppVariableValueSampleTransfer :
-  public MultiAppTransfer
+  public MultiAppTransfer,
+  public MooseVariableDependencyInterface
 {
 public:
   MultiAppVariableValueSampleTransfer(const InputParameters & parameters);

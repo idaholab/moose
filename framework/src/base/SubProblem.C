@@ -62,14 +62,16 @@ SubProblem::getActiveElementalMooseVariables(THREAD_ID tid)
 bool
 SubProblem::hasActiveElementalMooseVariables(THREAD_ID tid)
 {
+  // mooseDeprecated("This function is no longer used, the variable dependencies calls should always set/get the proper dependencies.");
   return _has_active_elemental_moose_variables[tid];
 }
 
 void
 SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
 {
-  // _has_active_elemental_moose_variables[tid] = 0;
-  // _active_elemental_moose_variables[tid].clear();
+  // mooseDeprecated("This function is no longer used, the variable dependencies calls should always set/get the proper dependencies.");
+  _has_active_elemental_moose_variables[tid] = 0;
+  _active_elemental_moose_variables[tid].clear();
 }
 
 std::set<SubdomainID>

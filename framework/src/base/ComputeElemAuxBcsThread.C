@@ -57,6 +57,11 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
 
     if (elem->processor_id() == _problem.processor_id())
     {
+
+      std::set<MooseVariable *> needed_moose_vars;
+      _storage.updateBoundaryVariableDependency(boundary_id, needed_moose_vars, _tid);
+      _problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
       // prepare variables
       for (const auto & it : _aux_sys._elem_vars[_tid])
       {
