@@ -19,9 +19,6 @@ MatrixToolsTest::MatrixToolsTest()
 {
 }
 
-MatrixToolsTest::~MatrixToolsTest()
-{}
-
 void
 MatrixToolsTest::matrixInversionTest1()
 {
@@ -41,15 +38,13 @@ MatrixToolsTest::matrixInversionTest1()
   mat2[2] = m[1][0] = 0.5;
   mat2[3] = m[1][1] = 1.0;
 
-  int error = MatrixTools::inverse(mat2, 2);
-  CPPUNIT_ASSERT(error == 0);
+  MatrixTools::inverse(mat2, 2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1, mat2[0], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-2, mat2[1], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.5, mat2[2], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(2, mat2[3], 1E-5);
 
-  error = MatrixTools::inverse(m, m);
-  CPPUNIT_ASSERT(error == 0);
+  MatrixTools::inverse(m, m);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1, m[0][0], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-2, m[0][1], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.5, m[1][0], 1E-5);
@@ -79,11 +74,17 @@ MatrixToolsTest::matrixInversionTest2()
   mat3[7] = m[2][1] = 8.0;
   mat3[8] = m[2][2] = 9.0;
 
-  int error = MatrixTools::inverse(mat3, 3);
-  CPPUNIT_ASSERT(error != 0);
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(mat3, 3), MatrixTools::MatrixInversionException);
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m), MatrixTools::MatrixInversionException);
 
-  error = MatrixTools::inverse(m, m);
-  CPPUNIT_ASSERT(error != 0);
+  std::vector<std::vector<Real> > m2(2);
+  for (auto & row : m)
+    row.resize(3);
+
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m, m2), MatrixTools::MatrixMismatchException);
+
+  std::vector<std::vector<Real> > m3(0);
+  CPPUNIT_ASSERT_THROW(MatrixTools::inverse(m3, m3), MatrixTools::NoInputMatrixException);
 }
 
 void
@@ -112,8 +113,7 @@ MatrixToolsTest::matrixInversionTest3()
   mat3[7] = m[2][1] = 6.0;
   mat3[8] = m[2][2] = 0.0;
 
-  int error = MatrixTools::inverse(mat3, 3);
-  CPPUNIT_ASSERT(error == 0);
+  MatrixTools::inverse(mat3, 3);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-24, mat3[0], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(18, mat3[1], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(5, mat3[2], 1E-5);
@@ -124,8 +124,7 @@ MatrixToolsTest::matrixInversionTest3()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(4, mat3[7], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1, mat3[8], 1E-5);
 
-  error = MatrixTools::inverse(m, m);
-  CPPUNIT_ASSERT(error == 0);
+  MatrixTools::inverse(m, m);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-24, m[0][0], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(18, m[0][1], 1E-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(5, m[0][2], 1E-5);

@@ -408,9 +408,7 @@ RankFourTensor::invSymm() const
       mat[i*ntens+j] /= 2.0; // because of double-counting above
 
   // use LAPACK to find the inverse
-  error = MatrixTools::inverse(mat, ntens);
-  if (error != 0)
-    throw MooseException("Error in Matrix  Inversion in RankFourTensor");
+  MatrixTools::inverse(mat, ntens);
 
   // build the resulting rank-four tensor
   // using the inverse of the above algorithm

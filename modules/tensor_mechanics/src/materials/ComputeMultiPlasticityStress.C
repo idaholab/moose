@@ -1375,9 +1375,18 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   if (num_currently_active > 0)
   {
     // invert zzz, in place.  if num_currently_active = 0 then zzz is not needed.
-    const int ierr = MatrixTools::inverse(zzz, num_currently_active);
-    if (ierr != 0)
-      return E_ijkl; // in the very rare case of zzz being singular, just return the "elastic" tangent operator
+    try
+    {
+      MatrixTools::inverse(zzz, num_currently_active);
+    }
+    catch(const MatrixTools::MatrixInversionException & e)
+    {
+      // in the very rare case of zzz being singular, just return the "elastic" tangent operator
+      #ifdef DEBUG
+        mooseWarning(e.what());
+      #endif
+      return E_ijkl;
+    }
   }
 
 

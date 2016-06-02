@@ -34,7 +34,6 @@ class MatrixToolsTest : public CppUnit::TestFixture
 
 public:
   MatrixToolsTest();
-  ~MatrixToolsTest();
 
   void matrixInversionTest1();
   void matrixInversionTest2();

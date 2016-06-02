@@ -9,6 +9,7 @@
 
 #include "MooseTypes.h"
 #include "PetscSupport.h"
+#include "Conversion.h"
 #include "petscblaslapack.h"
 #include <vector>
 
@@ -20,7 +21,7 @@ namespace MatrixTools
  * @ param[out] m_inv The inverse of m, which must be of the same size as m.
  * @ return if zero then the inversion was successful.  Otherwise m was not square, contained illegal entries or was singular
  */
-int inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv);
+void inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv);
 
 /**
  * Inverts the dense "matrix" A using LAPACK routines
@@ -28,7 +29,36 @@ int inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<R
  * @param n size of the vector A
  * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
  */
-int inverse(std::vector<PetscScalar> & A, unsigned int n);
+void inverse(std::vector<PetscScalar> & A, unsigned int n);
+
+/**
+ * Exception classe that captur the things that can go wrong with matrix inversion
+ */
+class LUDecompositionException : public MooseException
+{
+public:
+  LUDecompositionException() : MooseException("LU decomposition failed during matrix inversion.") {}
+};
+
+class NoInputMatrixException : public MooseException
+{
+public:
+  NoInputMatrixException() : MooseException("Input matrix empty during matrix inversion.") {}
+};
+
+class MatrixMismatchException : public MooseException
+{
+public:
+  MatrixMismatchException() : MooseException("Input and output matrix are not same size square matrices.") {}
+};
+
+class MatrixInversionException : public MooseException
+{
+public:
+  MatrixInversionException(int error) :
+      MooseException(error < 0 ? "Argument " + Moose::stringify(-error) + " was invalid during matrix inversion."
+                               : "Matrix on-diagonal entry " + Moose::stringify(error) + " was exactly zero. Inversion failed.") {}
+};
 }
 
 #endif //MATRIXTOOLS_H
