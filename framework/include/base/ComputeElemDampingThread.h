@@ -44,6 +44,8 @@ public:
 
   Real damping();
 
+  virtual void post();
+
 protected:
   Real _damping;
   NonlinearSystemBase & _nl;

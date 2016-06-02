@@ -391,7 +391,7 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   std::set<MooseVariable *> needed_moose_vars;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
-    _all_materials.updateVariableDependency(needed_moose_vars, tid);
+    _all_materials.updateBlockVariableDependency(blk_id, needed_moose_vars, tid);
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
@@ -971,6 +971,7 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup &
       if (pp)
         _pps_data.storeValue(obj->name(), pp->getValue());
     }
+    clearActiveElementalMooseVariables(0);
   }
 }
 
@@ -1207,7 +1208,8 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished\n" << COLOR_DEFAULT << std::endl;
+    clearActiveElementalMooseVariables(0);
+    _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished\m" << COLOR_DEFAULT << std::endl;
   }
   else if (multi_apps.size())
     _console << COLOR_CYAN << "\nNo Transfers on " <<  Moose::stringify(type) << " To MultiApps\n" << COLOR_DEFAULT << std::endl;
@@ -1239,16 +1241,11 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _from_multi_app_transfers[type].getActiveObjects();
 
-<<<<<<< 283838fde7d550a5543e94f030f1047b0082b571
-    _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
-=======
     std::set<MooseVariable *> needed_moose_vars;
     _from_multi_app_transfers[type].updateVariableDependency(needed_moose_vars);
     setActiveElementalMooseVariables(needed_moose_vars, 0);
 
-
-    _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
->>>>>>> Updates to migrate to complete integration with variable dependency interface
+    _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
     {
       Moose::perf_log.push(transfer->name(), "Transfers");
@@ -1259,6 +1256,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 
+    clearActiveElementalMooseVariables(0);
     _console << COLOR_CYAN << "Transfers " << Moose::stringify(type) << " Are Finished\n" << COLOR_DEFAULT << std::endl;
   }
   else if (multi_apps.size())

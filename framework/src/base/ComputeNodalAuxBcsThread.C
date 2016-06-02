@@ -47,6 +47,11 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
 
   BoundaryID boundary_id = bnode->_bnd_id;
 
+  std::set<MooseVariable *> needed_moose_vars;
+  _storage.updateBoundaryVariableDependency(boundary_id, needed_moose_vars, _tid);
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
+
   // prepare variables
   for (const auto & it : _aux_sys._nodal_vars[_tid])
   {
@@ -58,10 +63,6 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
 
   if (node->processor_id() == _fe_problem.processor_id())
   {
-    std::set<MooseVariable *> needed_moose_vars;
-    _storage.updateVariableDependency(needed_moose_vars, _tid);
-    _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
-
     // Get a map of all active block restricted AuxKernel objects
     const auto & kernels = _storage.getActiveBoundaryObjects(_tid);
 
@@ -86,6 +87,8 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
       var->insert(_aux_sys.solution());
     }
   }
+
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void

@@ -695,6 +695,7 @@ NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residua
         nc->computeResidual(residual);
       }
     }
+    _fe_problem.clearActiveElementalMooseVariables(tid);
     _fe_problem.addCachedResidualDirectly(residual, tid);
     residual.close();
   }
@@ -724,6 +725,7 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
         nc->computeJacobian(jacobian);
       }
     }
+    _fe_problem.clearActiveElementalMooseVariables(tid);
     _fe_problem.addCachedJacobian(jacobian, tid);
     jacobian.close();
   }
@@ -798,6 +800,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
         }
       }
     }
+    _fe_problem.clearActiveElementalMooseVariables(0);
   }
 
   // See if constraints were applied anywhere
@@ -899,6 +902,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
           }
         }
       }
+      _fe_problem.clearActiveElementalMooseVariables(0);
     }
     if (_assemble_constraints_separately)
     {
@@ -987,6 +991,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
           _fe_problem.cacheResidual(tid);
         }
       }
+      _fe_problem.clearActiveElementalMooseVariables(tid);
       _fe_problem.addCachedResidual(tid);
     }
   }
@@ -1046,6 +1051,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
         }
         _fe_problem.addCachedResidual(tid);
       }
+      _fe_problem.clearActiveElementalMooseVariables(0);
     }
   }
 }
@@ -1602,9 +1608,9 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
           ffc->computeJacobianSide(Moose::Slave);
           _fe_problem.cacheJacobian(tid);
         }
-
         _fe_problem.addCachedJacobian(jacobian, tid);
       }
+      _fe_problem.clearActiveElementalMooseVariables(tid);
     }
   }
 
@@ -1663,6 +1669,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
         }
         _fe_problem.addCachedJacobian(jacobian, tid);
       }
+      _fe_problem.clearActiveElementalMooseVariables(tid);
     }
   }
 }

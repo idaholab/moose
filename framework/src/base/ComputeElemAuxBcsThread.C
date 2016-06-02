@@ -44,8 +44,6 @@ ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Th
 void
 ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
 {
-  std::cout << "ComputeElemAuxBcsThread::operator()" << std::endl;
-
   ParallelUniqueId puid;
   _tid = puid.id;
 
@@ -63,17 +61,9 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
     {
       std::set<MooseVariable *> needed_moose_vars;
       _storage.updateBoundaryVariableDependency(boundary_id, needed_moose_vars, _tid);
-
       if (_need_materials)
         _problem.getMaterialWarehouse().updateBoundaryVariableDependency(boundary_id, needed_moose_vars, _tid);
-
       _problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
-
-      std::cout << "needed_moose_vars = ";
-      for (auto & var : needed_moose_vars)
-        std::cout << var->name() << " ";
-      std::cout << std::endl;
-
 
       // prepare variables
       for (const auto & it : _aux_sys._elem_vars[_tid])
@@ -120,6 +110,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       }
     }
   }
+  _problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void

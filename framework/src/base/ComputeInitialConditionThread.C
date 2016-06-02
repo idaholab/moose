@@ -52,6 +52,8 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
         ic->compute();
     }
   }
+
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
 
 

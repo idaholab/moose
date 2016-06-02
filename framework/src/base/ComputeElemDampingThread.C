@@ -86,3 +86,9 @@ ComputeElemDampingThread::join(const ComputeElemDampingThread & y)
   if (y._damping < _damping)
     _damping = y._damping;
 }
+
+void
+ComputeElemDampingThread::post()
+{
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
+}

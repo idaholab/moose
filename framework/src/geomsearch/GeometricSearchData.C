@@ -306,7 +306,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
     {
       if (boundary_id == (BoundaryID)slave_id)
       {
-        _subproblem.prepare(elem, 0);
+        // _subproblem.prepare(elem, 0);
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
 
         for (unsigned int qp=0; qp<points_face.size(); qp++)
