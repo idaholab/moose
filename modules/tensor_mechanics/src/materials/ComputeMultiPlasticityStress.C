@@ -1382,9 +1382,6 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
     catch(const MooseException & e)
     {
       // in the very rare case of zzz being singular, just return the "elastic" tangent operator
-      #ifdef DEBUG
-        mooseWarning(e.what());
-      #endif
       return E_ijkl;
     }
   }
