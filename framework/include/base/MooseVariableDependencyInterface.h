@@ -33,11 +33,14 @@ public:
 
 protected:
 
+  ///@{
   /**
-   * Call this function ot add the passed in MooseVariable as a variable that _this_ object depends on.
+   * Call this function to add the passed in MooseVariable(s) as a variable that _this_ object depends on.
    */
   void addMooseVariableDependency(MooseVariable * var) { _moose_variable_dependencies.insert(var); }
   void addMooseVariableDependency(std::vector<MooseVariable *> vars) { _moose_variable_dependencies.insert(vars.begin(), vars.end()); }
+  ///@}
+
 private:
   std::set<MooseVariable *> _moose_variable_dependencies;
 };
