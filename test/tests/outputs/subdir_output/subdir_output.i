@@ -1,19 +1,16 @@
 [Mesh]
-  file = square.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -21,19 +18,16 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0
   [../]
-
   [./right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1
   [../]
 []
@@ -43,10 +37,13 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+
+
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
-# Test for bad output directory
 [Outputs]
-  file_base = bad_dir/out
+  file_base = sub1/sub2/subdir_output_out
   exodus = true
 []

@@ -4,6 +4,7 @@
     type = 'CheckFiles'
     input = 'recover1.i'
     check_files = 'test_recover_dir_cp/0005.xdr'
+    delete_output_folders = false
     cli_args = 'Executioner/num_steps=5'
   [../]
   [./part2]
@@ -14,6 +15,7 @@
     cli_args = '--recover test_recover_dir_cp/0005'
     prereq = 'part1'
     delete_output_before_running = false
+    delete_output_folders = false
     recover = false
   [../]
 []
