@@ -68,8 +68,8 @@ SubProblem::hasActiveElementalMooseVariables(THREAD_ID tid)
 void
 SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
 {
-  _has_active_elemental_moose_variables[tid] = 0;
-  _active_elemental_moose_variables[tid].clear();
+  // _has_active_elemental_moose_variables[tid] = 0;
+  // _active_elemental_moose_variables[tid].clear();
 }
 
 std::set<SubdomainID>

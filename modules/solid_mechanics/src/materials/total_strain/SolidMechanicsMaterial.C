@@ -47,5 +47,3 @@ SolidMechanicsMaterial::SolidMechanicsMaterial(const InputParameters & parameter
    _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
    _elastic_strain(createProperty<SymmTensor>("elastic_strain"))
 {}
-
-

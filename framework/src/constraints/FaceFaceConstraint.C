@@ -59,6 +59,8 @@ FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
     _grad_test_slave(_slave_var.gradPhi()),
     _phi_slave(_slave_var.phi())
 {
+  addMooseVariableDependency(&_master_var);
+  addMooseVariableDependency(&_slave_var);
 }
 
 void
