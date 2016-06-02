@@ -295,3 +295,34 @@ class RunApp(Tester):
       return False
     else:
       return True
+
+  def deleteFilesAndFolders(self, test_dir, paths, delete_folders=True):
+    # First delete the files (at the end of each of the paths)
+    if self.specs['delete_output_before_running'] == True:
+      for file in paths:
+        full_path = os.path.join(test_dir, file)
+        if os.path.exists(full_path):
+          try:
+            os.remove(full_path)
+          except:
+            print "Unable to remove file: " + full_path
+
+      # Now try to delete directories that might have been created
+      if delete_folders:
+        for file in paths:
+          path = os.path.dirname(file)
+          while path != '':
+            (path, tail) = os.path.split(path)
+            try:
+              os.rmdir(os.path.join(test_dir, path, tail))
+            except:
+              # There could definitely be problems with removing the directory
+              # because it might be non-empty due to checkpoint files or other
+              # files being created on different operating systems. We just
+              # don't care for the most part and we don't want to error out.
+              # As long as our test boxes clean before each test, we'll notice
+              # the case where these files aren't being generated for a
+              # particular run.
+              #
+              # TL;DR; Just pass...
+              pass
