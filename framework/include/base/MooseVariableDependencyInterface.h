@@ -16,6 +16,7 @@
 #define MOOSEVARIABLEDEPENDENCYINTERFACE_H
 
 #include <set>
+#include <vector>
 
 // Forward declarations
 class MooseVariable;
@@ -23,13 +24,13 @@ class MooseVariable;
 class MooseVariableDependencyInterface
 {
 public:
-  MooseVariableDependencyInterface() {}
+  MooseVariableDependencyInterface();
 
   /**
    * Retrieve the set of MooseVariables that _this_ object depends on.
    * @return The MooseVariables that MUST be reinited before evaluating this object
    */
-  const std::set<MooseVariable *> & getMooseVariableDependencies() const { return _moose_variable_dependencies; }
+  const std::set<MooseVariable *> & getMooseVariableDependencies();
 
 protected:
 
@@ -37,12 +38,18 @@ protected:
   /**
    * Call this function to add the passed in MooseVariable(s) as a variable that _this_ object depends on.
    */
-  void addMooseVariableDependency(MooseVariable * var) { _moose_variable_dependencies.insert(var); }
-  void addMooseVariableDependency(std::vector<MooseVariable *> vars) { _moose_variable_dependencies.insert(vars.begin(), vars.end()); }
+  void addMooseVariableDependency(MooseVariable * var);
+  void addMooseVariableDependency(std::vector<MooseVariable *> vars);
   ///@}
 
 private:
+
+  /// The set of variables that this object depends on.
   std::set<MooseVariable *> _moose_variable_dependencies;
+
+  /// A flag to produce a warning if the add method is not called.
+  bool _variable_dependency_added;
+
 };
 
 #endif // MOOSEVARIABLEDEPENDENCYINTERFACE_H
