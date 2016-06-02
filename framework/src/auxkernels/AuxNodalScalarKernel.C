@@ -29,10 +29,7 @@ AuxNodalScalarKernel::AuxNodalScalarKernel(const InputParameters & parameters) :
     MooseVariableDependencyInterface(),
     _node_ids(getParam<std::vector<dof_id_type> >("nodes"))
 {
-  // Fill in the MooseVariable dependencies
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
+  addMooseVariableDependency(getCoupledMooseVars());
 }
 
 void

@@ -36,10 +36,7 @@ public:
     ScalarCoupleable(moose_object),
     MooseVariableInterface(moose_object, nodal)
   {
-    const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-    for (unsigned int i=0; i<coupled_vars.size(); i++)
-      addMooseVariableDependency(coupled_vars[i]);
-
+    addMooseVariableDependency(getCoupledMooseVars());
     addMooseVariableDependency(mooseVariable());
   }
 };

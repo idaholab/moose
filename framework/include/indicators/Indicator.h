@@ -20,7 +20,6 @@
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
-#include "MooseVariableDependencyInterface.h"
 #include "Restartable.h"
 #include "OutputInterface.h"
 
@@ -39,7 +38,6 @@ class Indicator :
   public SetupInterface,
   public FunctionInterface,
   public UserObjectInterface,
-  public MooseVariableDependencyInterface,
   public Restartable,
   public OutputInterface
 {
