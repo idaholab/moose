@@ -8,7 +8,7 @@
   [./pointer_load_error]
     type = 'RunApp'
     input = 'pointer_load_error.i'
-    max_parallel = 16
+    max_parallel = 1 # Sometimes times out in parallel after producing correct message
   [../]
 
   [./pointer_load_error2]
@@ -16,6 +16,6 @@
     input = 'pointer_load_error2.i'
     expect_err = 'Attempting to load a raw pointer type:'
     prereq = pointer_load_error
-    max_parallel = 16
+    max_parallel = 1 # Sometimes times out in parallel after producing correct message
   [../]
 []
