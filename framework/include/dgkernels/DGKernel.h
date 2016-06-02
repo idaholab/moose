@@ -27,6 +27,7 @@
 #include "FunctionInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "Restartable.h"
+#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
 // Forward Declarations
@@ -55,6 +56,7 @@ class DGKernel :
   public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
   protected TwoMaterialPropertyInterface,
   public Restartable,
+  public ZeroInterface,
   public MeshChangedInterface
 {
 public:
