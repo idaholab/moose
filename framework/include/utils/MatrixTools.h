@@ -24,11 +24,11 @@ int inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<R
 
 /**
  * Inverts the dense "matrix" A using LAPACK routines
- * @param A upon input this is a row vector representing an n-by-n matrix.  Upon output it is the inverse (as a row-vector)
- * @param n size of A
+ * @param A upon input this is a row vector representing a square matrix of size sqrt(n)*sqrt(n).  Upon output it is the inverse (as a row-vector)
+ * @param n size of the vector A
  * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
  */
-int inverse(std::vector<PetscScalar> & A, int n);
+int inverse(std::vector<PetscScalar> & A, unsigned int n);
 }
 
 #endif //MATRIXTOOLS_H
