@@ -530,13 +530,11 @@ MooseVariable::nodalValueDotNeighbor()
     mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
 }
 
-
 // FIXME: this and computeElemeValues() could be refactored to reuse most of
 //        the common code, instead of duplicating it.
 void
 MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real perturbation_scale, Real& perturbation)
 {
-
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule->n_points();
 
@@ -772,7 +770,6 @@ MooseVariable::restoreUnperturbedElemValues()
 void
 MooseVariable::computeElemValues()
 {
-
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule->n_points();
 

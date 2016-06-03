@@ -126,7 +126,9 @@ protected:
   SubProblem & _subproblem;
   /// System this kernel is part of
   SystemBase & _sys;
+  /// Nonlinear system, displaced if this kernel is on the auxiliary displaced system
   SystemBase & _nl_sys;
+  /// Auxiliary undisplaced system
   AuxiliarySystem & _aux_sys;
   /// Thread ID
   THREAD_ID _tid;
@@ -134,14 +136,16 @@ protected:
   Assembly & _assembly;
   /// Variable this kernel is acting on
   MooseVariable & _var;
+  /// Displaced problem (valid only when it exists)
+  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  /// The paired variable on the displaced mesh
+  MooseVariable * _displaced_var;
   /// true if the kernel is nodal, false if it is elemental
   bool _nodal;
   /// true if the kernel is boundary kernel, false if it is interior kernels
   bool _bnd;
   /// Mesh this kernel is active on
   MooseMesh & _mesh;
-  /// Dimension of the problem being solved
-//  unsigned int _dim;
 
   /// Active quadrature points
   const MooseArray< Point > & _q_point;
