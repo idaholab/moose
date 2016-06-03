@@ -105,6 +105,10 @@ MooseEnum::operator==(const char * name) const
   std::string upper(name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
+  if (std::find(_names.begin(), _names.end(), upper) == _names.end())
+    if (_out_of_range_index == 0)     // Are out of range values allowed?
+      mooseError(std::string("Invalid string comparison \"") + upper + "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
+
   return _current_name == upper;
 }
 
