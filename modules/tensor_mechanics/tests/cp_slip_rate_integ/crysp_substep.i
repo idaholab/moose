@@ -2,17 +2,17 @@
   type = GeneratedMesh
   dim = 3
   elem_type = HEX8
-  displacements = 'ux uy uz'
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
-  [./ux]
+  [./disp_x]
     block = 0
   [../]
-  [./uy]
+  [./disp_y]
     block = 0
   [../]
-  [./uz]
+  [./disp_z]
     block = 0
   [../]
 []
@@ -49,7 +49,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    displacements = 'ux uy uz'
+    displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
   [../]
 []
@@ -95,59 +95,55 @@
 [BCs]
   [./symmy]
     type = PresetBC
-    variable = uy
+    variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmx]
     type = PresetBC
-    variable = ux
+    variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmz]
     type = PresetBC
-    variable = uz
+    variable = disp_z
     boundary = back
     value = 0
   [../]
   [./tdisp]
     type = FunctionPresetBC
-    variable = uz
+    variable = disp_z
     boundary = front
     function = tdisp
   [../]
 []
 
 [Materials]
-  active = 'crysp'
   [./crysp]
     type = FiniteStrainCPSlipRateRes
     block = 0
-    disp_y = uy
-    disp_x = ux
     gtol = 1e-2
     slip_sys_file_name = input_slip_sys.txt
-    disp_z = uz
-    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     nss = 12
     num_slip_sys_flowrate_props = 2 #Number of properties in a slip system
     flowprops = '1 4 0.001 0.01 5 8 0.001 0.01 9 12 0.001 0.01'
     hprops = '1.0 541.5 60.8 109.8 2.5'
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
-    fill_method = symmetric9
     tan_mod_type = exact
     slip_incr_tol = 1
     maximum_substep_iteration = 8
   [../]
-  [./elastic]
-    type = FiniteStrainElasticMaterial
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
     block = 0
-    disp_y = uy
-    disp_x = ux
-    disp_z = uz
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -183,22 +179,22 @@
 
 [Executioner]
   type = Transient
-  dt = 0.2
+
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options_iname = -pc_hypre_type
-  petsc_options_value = boomerang
-  nl_abs_tol = 1e-10
-  nl_rel_step_tol = 1e-10
-  dtmax = 10.0
+  petsc_options_iname = 'pc_type'
+  petsc_options_value = 'lu'
+
   nl_rel_tol = 1e-10
-  ss_check_tol = 1e-10
-  end_time = 1
+  nl_abs_tol = 1e-10
+
+  dt = 0.2
+  dtmax = 10.0
   dtmin = 0.05
-  num_steps = 10
-  nl_abs_step_tol = 1e-10
+
+  end_time = 1
 []
 
 [Outputs]

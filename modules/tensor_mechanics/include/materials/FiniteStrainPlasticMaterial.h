@@ -9,7 +9,7 @@
 #ifndef FINITESTRAINPLASTICMATERIAL_H
 #define FINITESTRAINPLASTICMATERIAL_H
 
-#include "FiniteStrainMaterial.h"
+#include "ComputeStressBase.h"
 
 class FiniteStrainPlasticMaterial;
 
@@ -24,7 +24,7 @@ InputParameters validParams<FiniteStrainPlasticMaterial>();
  * and K is the yield stress, specified as a piecewise-linear function by the user.
  * Integration is performed in an incremental manner using Newton Raphson.
  */
-class FiniteStrainPlasticMaterial : public FiniteStrainMaterial
+class FiniteStrainPlasticMaterial : public ComputeStressBase
 {
 public:
   FiniteStrainPlasticMaterial(const InputParameters & parameters);
@@ -38,6 +38,10 @@ protected:
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
+  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
+  const MaterialProperty<RankTwoTensor> & _rotation_increment;
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   Real _rtol;
   Real _ftol;
   Real _eptol;
