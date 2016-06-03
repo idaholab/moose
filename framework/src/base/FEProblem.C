@@ -3228,26 +3228,12 @@ FEProblem::initPetscOutput()
 
 
 Real
-FEProblem::solutionChangeNorm()
+FEProblem::relativeSolutionDifferenceNorm()
 {
-  if (!_solve)
+  if (_solve)
+    return _nl.relativeSolutionDifferenceNorm();
+  else
     return 0;
-
-  NumericVector<Number> & current_solution  = (*_nl.sys().current_local_solution);
-  NumericVector<Number> & old_solution = (*_nl.sys().old_local_solution);
-
-  NumericVector<Number> & difference = *NumericVector<Number>::build(_communicator).release();
-  difference.init(current_solution, true);
-
-  difference = current_solution;
-
-  difference -= old_solution;
-
-  Real abs_change = difference.l2_norm();
-
-  delete &difference;
-
-  return (abs_change / current_solution.l2_norm()) / _dt;
 }
 
 void

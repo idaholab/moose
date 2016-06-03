@@ -114,6 +114,7 @@ Transient::Transient(const InputParameters & parameters) :
     _trans_ss_check(getParam<bool>("trans_ss_check")),
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
+    _sln_diff_norm(declareRecoverableData<Real>("sln_diff_norm", 0.0)),
     _old_time_solution_norm(declareRecoverableData<Real>("old_time_solution_norm", 0.0)),
     _sync_times(_app.getOutputWarehouse().getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
@@ -438,7 +439,8 @@ Transient::solveStep(Real input_dt)
       if (_picard_max_its <= 1)
         _time_stepper->acceptStep();
 
-      _solution_change_norm = _problem.solutionChangeNorm();
+      _sln_diff_norm = _problem.relativeSolutionDifferenceNorm();
+      _solution_change_norm = _sln_diff_norm / _dt;
 
       _problem.onTimestepEnd();
       _problem.execute(EXEC_TIMESTEP_END);
@@ -489,7 +491,7 @@ Transient::endStep(Real input_time)
     //output
     if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
       _next_interval_output_time += _time_interval_output_interval;
-   }
+  }
 }
 
 Real
@@ -633,25 +635,19 @@ Transient::keepGoing()
       !_xfem_repeat_step &&
       _trans_ss_check == true && _time > _ss_tmin)
   {
-    // Compute new time solution l2_norm
-    Real new_time_solution_norm = _problem.getNonlinearSystem().currentSolution()->l2_norm();
-
-    // Compute l2_norm relative error
-    Real ss_relerr_norm = fabs(new_time_solution_norm - _old_time_solution_norm)/new_time_solution_norm;
-
-    // Check current solution relative error norm against steady-state tolerance
-    if (ss_relerr_norm < _ss_check_tol)
+    // Check solution difference relative norm against steady-state tolerance
+    if (_sln_diff_norm < _ss_check_tol)
     {
       _console << "Steady-State Solution Achieved at time: " << _time << std::endl;
-      //Output last solve if not output previously by forcing it
+      // Output last solve if not output previously by forcing it
       keep_going = false;
     }
     else // Keep going
     {
       // Update solution norm for next time step
-      _old_time_solution_norm = new_time_solution_norm;
+      _old_time_solution_norm = _problem.getNonlinearSystem().currentSolution()->l2_norm();
       // Print steady-state relative error norm
-      _console << "Steady-State Relative Differential Norm: " << ss_relerr_norm << std::endl;
+      _console << "Steady-State Relative Differential Norm: " << _sln_diff_norm << std::endl;
     }
   }
 
