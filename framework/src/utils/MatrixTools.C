@@ -13,17 +13,16 @@
 
 namespace MatrixTools
 {
-int inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv)
+void
+inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv)
 {
   unsigned int n = m.size();
 
   // check the matrix m exists and is square
-  if (n < 1)
-    return 1;
-  if (n != m_inv.size())
-    return 1;
-  if (n != m[0].size() || n != m_inv[0].size())
-    return 1;
+  if (n == 0)
+    throw MooseException("Input matrix empty during matrix inversion.");
+  if (n != m_inv.size() || n != m[0].size() || n != m_inv[0].size())
+    throw MooseException("Input and output matrix are not same size square matrices.");
 
   // build the vectorial representation
   std::vector<PetscScalar> A;
@@ -31,47 +30,45 @@ int inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<R
     for (const auto & matrix_entry : rowvec)
       A.push_back(matrix_entry);
 
-  int error = inverse(A, n);
-
-  if (error != 0)
-    return error;
+  inverse(A, n);
 
   // build the inverse
-  unsigned i = 0;
+  unsigned int i = 0;
   for (auto & rowvec : m_inv)
     for (auto & inv_entry : rowvec)
       inv_entry = A[i++];
-
-  return 0;
 }
 
-int inverse(std::vector<PetscScalar> & A, unsigned int n)
+void
+inverse(std::vector<PetscScalar> & A, unsigned int n)
 {
-  int return_value;
+  mooseAssert(n >= 1, "MatrixTools::inverse - n (leading dimension) needs to be positive");
+  mooseAssert(n == static_cast<int>(n), "MatrixTools::inverse - n (leading dimension) too large");
 
-  int ni = (int) n;
-  int buffer_size = ni * 64;
-  mooseAssert(ni > 0, "MatrixTools::inverse - ni is not positive");
-  mooseAssert(buffer_size > 0, "MatrixTools::inverse - buffer_size is not positive");
   std::vector<PetscBLASInt> ipiv(n);
-  std::vector<PetscScalar> buffer(buffer_size);
+  std::vector<PetscScalar> buffer(n * 64);
 
   // Following does a LU decomposition of "square matrix A"
   // upon return "A = P*L*U" if return_value == 0
-  // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
-  LAPACKgetrf_(&ni, &ni, &A[0], &ni, &ipiv[0], &return_value);
+  // Here I use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
+  int return_value;
+  LAPACKgetrf_(reinterpret_cast<int *>(&n), reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &return_value);
 
   if (return_value != 0)
-    // couldn't LU decompose because: illegal value in A; or, A singular
-    return return_value;
+    throw MooseException(return_value < 0 ? "Argument " + Moose::stringify(-return_value) + " was invalid during LU factorization in MatrixTools::inverse."
+                                          : "Matrix on-diagonal entry " + Moose::stringify(return_value) + " was exactly zero during LU factorization in MatrixTools::inverse.");
 
   // get the inverse of A
+  int buffer_size = buffer.size();
 #if PETSC_VERSION_LESS_THAN(3,5,0)
-  FORTRAN_CALL(dgetri)(&ni, &A[0], &ni, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+  FORTRAN_CALL(dgetri)(reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &buffer[0], &buffer_size, &return_value);
 #else
-  LAPACKgetri_(&ni, &A[0], &ni, &ipiv[0], &buffer[0], &buffer_size, &return_value);
+  LAPACKgetri_(reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &buffer[0], &buffer_size, &return_value);
 #endif
 
-  return return_value;
+  if (return_value != 0)
+    throw MooseException(return_value < 0 ? "Argument " + Moose::stringify(-return_value) + " was invalid during invert in MatrixTools::inverse."
+                                          : "Matrix on-diagonal entry " + Moose::stringify(return_value) + " was exactly zero during invert in MatrixTools::inverse.");
 }
+
 }
