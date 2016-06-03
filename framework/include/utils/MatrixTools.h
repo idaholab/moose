@@ -9,6 +9,7 @@
 
 #include "MooseTypes.h"
 #include "PetscSupport.h"
+#include "Conversion.h"
 #include "petscblaslapack.h"
 #include <vector>
 
@@ -20,7 +21,7 @@ namespace MatrixTools
  * @ param[out] m_inv The inverse of m, which must be of the same size as m.
  * @ return if zero then the inversion was successful.  Otherwise m was not square, contained illegal entries or was singular
  */
-int inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv);
+void inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv);
 
 /**
  * Inverts the dense "matrix" A using LAPACK routines
@@ -28,7 +29,7 @@ int inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<R
  * @param n size of the vector A
  * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
  */
-int inverse(std::vector<PetscScalar> & A, unsigned int n);
+void inverse(std::vector<PetscScalar> & A, unsigned int n);
 }
 
 #endif //MATRIXTOOLS_H
