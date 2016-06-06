@@ -91,18 +91,13 @@ public:
     {
     }
 
-    FeatureData(const FeatureData & f) :
-        _ghosted_ids(f._ghosted_ids),
-        _local_ids(f._local_ids),
-        _halo_ids(f._halo_ids),
-        _periodic_nodes(f._periodic_nodes),
-        _var_idx(f._var_idx),
-        _bboxes(f._bboxes),
-        _min_entity_id(f._min_entity_id),
-        _status(NOT_MARKED),
-        _merged(f._merged),
-        _intersects_boundary(f._intersects_boundary)
-    {}
+    // Copy constructors
+    FeatureData(const FeatureData & f) = default;
+    FeatureData & operator=(const FeatureData & f) = default;
+
+    // Move constructors
+    FeatureData(FeatureData && f) = default;
+    FeatureData & operator=(FeatureData && f) = default;
 
     void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
     void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
