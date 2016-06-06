@@ -7,6 +7,7 @@ InputParameters validParams<GeometricalComponent>()
   InputParameters params = validParams<Component>();
 
   params.addRequiredParam<Point>("position", "Origin (start) of the pipe");
+  params.addParam<RealVectorValue>("offset", RealVectorValue(), "Offset of the origin for mesh generation");
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the pipe");
   params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
 
@@ -16,6 +17,7 @@ InputParameters validParams<GeometricalComponent>()
 GeometricalComponent::GeometricalComponent(const InputParameters & parameters) :
     Component(parameters),
     _position(getParam<Point>("position")),
+    _offset(getParam<RealVectorValue>("offset")),
     _dir(getParam<RealVectorValue>("orientation")),
     _rotation(getParam<Real>("rotation"))
 {
@@ -66,7 +68,7 @@ GeometricalComponent::displaceMesh()
     Node & current_node = _phys_mesh->nodeRef(node_id);
     RealVectorValue p(current_node(0), current_node(1), current_node(2));
     // move to the origin, rotate about x-axis, transform to follow the direction and move to its position
-    current_node = R * (Rx * (p - z_offset)) + _position;
+    current_node = R * (Rx * (p + _offset - z_offset)) + _position;
   }
 }
 

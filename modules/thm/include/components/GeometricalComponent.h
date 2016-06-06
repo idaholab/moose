@@ -34,6 +34,8 @@ protected:
   unsigned int _last_node_id;
   /// Physical position in the space
   Point _position;
+  /// Offset for mesh generation
+  Point _offset;
   /// Direction this pipe is going to
   RealVectorValue _dir;
   /// Rotation of the component around x-axis in non-displaced space
