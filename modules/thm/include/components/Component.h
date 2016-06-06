@@ -84,6 +84,8 @@ public:
 
   virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomains; }
 
+  virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() { return _coord_sys; }
+
   /**
    * Get the ids associated with the component.  These can either be subdomain ids or boundary ids depending
    * on what you are asking for.
@@ -163,6 +165,8 @@ protected:
 
   /// List of subdomain IDs this components owns
   std::vector<unsigned int> _subdomains;
+  /// List of coordinate system per subdomain (the same length as _subdomains and items correspond to _subdomains entries)
+  std::vector<Moose::CoordinateSystemType> _coord_sys;
 
   /// Mapping from a friendly name to MOOSE object name
   std::map<std::string, std::map<std::string, std::vector<ControlLogicNameEntry> > > _rname_map;
@@ -175,6 +179,8 @@ protected:
 
   virtual unsigned int getNextSubdomainId();
   virtual unsigned int getNextBCId();
+  /// Sets the coordinate system for block_id sudomain
+  virtual void setSubdomainCoordSystem(unsigned int block_id, Moose::CoordinateSystemType coord_type);
 
   /**
    * Split the control logic name into "section name" and "property name"

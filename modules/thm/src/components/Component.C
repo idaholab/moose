@@ -107,8 +107,12 @@ Component::getNextSubdomainId()
 {
   unsigned int sd_id = subdomain_ids++;
   _subdomains.push_back(sd_id);
+  _coord_sys.push_back(Moose::COORD_XYZ);
   if (_parent)
+  {
     _parent->_subdomains.push_back(sd_id);
+    _parent->_coord_sys.push_back(Moose::COORD_XYZ);
+  }
   return sd_id;
 }
 
@@ -117,6 +121,25 @@ Component::getNextBCId()
 {
   unsigned int id = bc_ids++;
   return id;
+}
+
+void
+Component::setSubdomainCoordSystem(unsigned int block_id, Moose::CoordinateSystemType coord_type)
+{
+  if (_parent)
+    _parent->setSubdomainCoordSystem(block_id, coord_type);
+
+  for (unsigned int i = 0; i < _subdomains.size(); i++)
+  {
+    if (_subdomains[i] == block_id)
+    {
+      _coord_sys[i] = coord_type;
+      return;
+    }
+  }
+
+  mooseError(name() << ": Trying to set coordinate system " << coord_type << " on a block id '" << block_id << "',"
+    " but this component does not have such a block.");
 }
 
 void
