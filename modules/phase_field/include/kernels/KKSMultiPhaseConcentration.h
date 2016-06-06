@@ -40,23 +40,20 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  const unsigned int _ncj;
+  const unsigned int _num_j;
   std::vector<const VariableValue *> _cjs;
   std::vector<unsigned int> _cjs_var;
+  /// Position of the nonlinear variable in the list of cj's
+  int _k;
 
   const VariableValue & _c;
   unsigned int _c_var;
 
-  // const VariableValue & _eta;
-  // unsigned int _eta_var;
-
   /// Switching functions for each phase \f$ h_j \f$
   std::vector<MaterialPropertyName> _hj_names;
-  unsigned int _nhj;
   std::vector<const MaterialProperty<Real> *> _prop_hj;
 
   /// Order parameters for each phase \f$ \eta_j \f$
-  unsigned int _num_etas;
   std::vector<VariableName> _eta_names;
   std::vector<unsigned int> _eta_vars;
 

@@ -21,46 +21,54 @@ InputParameters validParams<KKSMultiPhaseConcentration>()
 // Phase interpolation func
 KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & parameters) :
     DerivativeMaterialInterface<Kernel>(parameters),
-    _ncj(coupledComponents("cj")),
-    _cjs(_ncj),
-    _cjs_var(_ncj),
+    _num_j(coupledComponents("cj")),
+    _cjs(_num_j),
+    _cjs_var(_num_j),
+    _k(-1),
     _c(coupledValue("c")),
     _c_var(coupled("c")),
     _hj_names(getParam<std::vector<MaterialPropertyName> >("hj_names")),
-    _nhj(_hj_names.size()),
-    _prop_hj(_nhj),
-    _num_etas(coupledComponents("etas")),
-    _eta_names(_num_etas),
-    _eta_vars(_num_etas),
-    _prop_dhjdetai(_nhj)
+    _prop_hj(_hj_names.size()),
+    _eta_names(coupledComponents("etas")),
+    _eta_vars(coupledComponents("etas")),
+    _prop_dhjdetai(_num_j)
 {
-  //Check to make sure the the number of cj's is the same as the number of hj's
-  if (_ncj != _nhj)
-    mooseError("Need to pass in as many hj_names as cj_names in KKSMultiPhaseConcentration " << name());
-  //Check to make sure the the number of etas is the same as the number of hj's
-  if (_num_etas != _nhj)
-    mooseError("Need to pass in as many hj_names as etas in KKSMultiPhaseConcentration " << name());
+  //Check to make sure the the number of hj's is the same as the number of cj's
+  if (_num_j != _hj_names.size())
+    mooseError("Need to pass in as many hj_names as cjs in KKSMultiPhaseConcentration" << name());
+  //Check to make sure the the number of etas is the same as the number of cj's
+  if (_num_j != _eta_names.size())
+    mooseError("Need to pass in as many etas as cjs in KKSMultiPhaseConcentration" << name());
+
+  if (_num_j == 0)
+    mooseError("Need to supply at least 1 phase concentration cj in KKSMultiPhaseConcentration" << name());
 
   // get order parameter names and variable indices
-  for (unsigned int i = 0; i < _num_etas; ++i)
+  for (unsigned int i = 0; i < _num_j; ++i)
   {
     _eta_names[i] = getVar("etas", i)->name();
     _eta_vars[i] = coupled("etas", i);
   }
 
   // Load concentration variables into the arrays
-  for (unsigned int m = 0; m < _ncj; ++m)
+  for (unsigned int m = 0; m < _num_j; ++m)
   {
-    //_cj_names[i] = getVar("cj", i)->name();
     _cjs[m] = &coupledValue("cj", m);
     _cjs_var[m] = coupled("cj", m);
     _prop_hj[m] = &getMaterialPropertyByName<Real>(_hj_names[m]);
-    _prop_dhjdetai[m].resize(_nhj);
+    _prop_dhjdetai[m].resize(_num_j);
+    // Set _k to the position of the nonlinear variable in the list of cj's
+    if (coupled("cj", m) == _var.number())
+      _k = m;
 
     // Get derivatives of switching functions wrt order parameters
-    for (unsigned int n = 0; n < _num_etas; ++n)
+    for (unsigned int n = 0; n < _num_j; ++n)
       _prop_dhjdetai[m][n] = &getMaterialPropertyDerivative<Real>(_hj_names[m], _eta_names[n]);
   }
+
+  // Check to make sure the nonlinear variable is set to one of the cj's
+  if (_k < 0)
+    mooseError("Need to set nonlinear variable to one of the cj's in KKSMultiPhaseConcentration" << name());
 }
 
 Real
@@ -68,7 +76,7 @@ KKSMultiPhaseConcentration::computeQpResidual()
 {
   // R = sum_i (h_i * c_i) - c
   Real sum_ch = 0.0;
-  for (unsigned int m = 0; m < _ncj; ++m)
+  for (unsigned int m = 0; m < _num_j; ++m)
     sum_ch += (*_cjs[m])[_qp] * (*_prop_hj[m])[_qp];
 
   return _test[_i][_qp] * (sum_ch - _c[_qp]);
@@ -77,8 +85,7 @@ KKSMultiPhaseConcentration::computeQpResidual()
 Real
 KKSMultiPhaseConcentration::computeQpJacobian()
 {
-  // The last phase concentration is the nonlinear variable
-  return _test[_i][_qp] * (*_prop_hj[_ncj - 1])[_qp] * _phi[_j][_qp];
+  return _test[_i][_qp] * (*_prop_hj[_k])[_qp] * _phi[_j][_qp];
 }
 
 Real
@@ -87,16 +94,16 @@ KKSMultiPhaseConcentration::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _c_var)
     return -_test[_i][_qp] * _phi[_j][_qp];
 
-  for (unsigned int m = 0; m < _ncj - 1; ++m)
+  for (unsigned int m = 0; m < _num_j; ++m)
     if (jvar == _cjs_var[m])
       return _test[_i][_qp] * (*_prop_hj[m])[_qp] * _phi[_j][_qp];
 
-  for (unsigned int m = 0; m < _ncj; ++m)
+  for (unsigned int m = 0; m < _num_j; ++m)
     if (jvar == _eta_vars[m])
     {
       Real sum = 0.0;
 
-      for (unsigned int n = 0; n < _ncj; ++n)
+      for (unsigned int n = 0; n < _num_j; ++n)
         sum += (*_prop_dhjdetai[n][m])[_qp] * (*_cjs[n])[_qp];
 
       return _test[_i][_qp] * sum * _phi[_j][_qp];
