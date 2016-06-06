@@ -308,15 +308,36 @@ GrainTracker::trackGrains()
         mooseError("Error with ESBD Mapping (see above unused indices)");
       }
     }
-    else // Just assign IDs in order
+    else
     {
+      /**
+       * Here we want to assign the grains in some partitioning invariant way. We'll sort first by
+       * _var_idx (already partitioned in that manner) then sort on the _min_entity_id
+       * to order the grains.
+       */
       unsigned int counter = 0;
       for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-        for (unsigned int feature_num = 0; feature_num < _feature_sets[map_num].size(); ++feature_num)
-        {
-          _feature_sets[map_num][feature_num]->_status = MARKED;
-          _unique_grains[counter++] = std::move(_feature_sets[map_num][feature_num]);
-        }
+      {
+        // Sort the grains represented by this variable by _min_entity_id
+        std::sort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(),
+                  [](const std::unique_ptr<FeatureData> & lhs, const std::unique_ptr<FeatureData> & rhs)
+                  {
+                    return lhs->_min_entity_id < rhs->_min_entity_id;
+                  });
+
+        // Transfer the grains to the _unique_grains structure and assign ids
+        std::transform(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), std::inserter(_unique_grains, _unique_grains.end()),
+                       [&counter](std::unique_ptr<FeatureData> & item)
+                       {
+                         return std::move(std::pair<unsigned int, std::unique_ptr<FeatureData> >(counter++, std::move(item)));
+                       });
+      }
+
+
+      for (auto & grain_pair : _unique_grains)
+        std::cout << grain_pair.first << " " << grain_pair.second->_var_idx << std::endl;
+
+
     }
     return;  // Return early - no matching or tracking to do
   }

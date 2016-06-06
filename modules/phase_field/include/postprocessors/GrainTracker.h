@@ -188,6 +188,14 @@ struct GrainDistance
   GrainDistance();
   GrainDistance(Real distance, unsigned int grain_id, unsigned int var_index);
 
+  // Copy constructors
+  GrainDistance(const GrainDistance & f) = default;
+  GrainDistance & operator=(const GrainDistance & f) = default;
+
+  // Move constructors
+  GrainDistance(GrainDistance && f) = default;
+  GrainDistance & operator=(GrainDistance && f) = default;
+
   bool operator<(const GrainDistance & rhs) const;
 
   Real _distance;
