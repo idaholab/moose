@@ -450,6 +450,11 @@ public:
    */
   bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
 
+  /**
+   * The relative L2 norm of the difference between solution and old solution vector.
+   */
+  virtual Real relativeSolutionDifferenceNorm();
+
 public:
   FEProblem & _fe_problem;
   // FIXME: make these protected and create getters/setters
@@ -550,6 +555,8 @@ protected:
 protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
+  /// The difference of current and old solutions
+  NumericVector<Number> & _sln_diff;
   /// Preconditioner
   MooseSharedPointer<MoosePreconditioner> _preconditioner;
   /// Preconditioning side

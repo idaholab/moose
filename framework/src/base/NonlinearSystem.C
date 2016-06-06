@@ -163,6 +163,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _preset_nodal_bcs(/*threaded=*/false),
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
+    _sln_diff(addVector("sln_diff", false, PARALLEL)),
     _pc_side(Moose::PCS_RIGHT),
     _use_finite_differenced_preconditioner(false),
     _have_decomposition(false),
@@ -2551,4 +2552,16 @@ bool
 NonlinearSystem::doingDG() const
 {
   return _doing_dg;
+}
+
+Real
+NonlinearSystem::relativeSolutionDifferenceNorm()
+{
+  const NumericVector<Number> & current_solution  = *currentSolution();
+  const NumericVector<Number> & old_solution = solutionOld();
+
+  _sln_diff = current_solution;
+  _sln_diff -= old_solution;
+
+  return (_sln_diff.l2_norm() / current_solution.l2_norm());
 }
