@@ -420,13 +420,13 @@ GrainTracker::trackGrains()
     for (unsigned int i = 0; i < _feature_sets[map_num].size(); ++i)
       if (_feature_sets[map_num][i] && _feature_sets[map_num][i]->_status == NOT_MARKED)
       {
-        _console << COLOR_YELLOW
-                 << "*****************************************************************************\n"
-                 << "Couldn't find a matching grain while working on variable index: " << _feature_sets[map_num][i]->_var_idx
-                 << "\nCreating new unique grain: " << _unique_grains.size() << '\n' <<  *_feature_sets[map_num][i]
-                 << "\n*****************************************************************************\n" << COLOR_DEFAULT;
+        auto new_idx = _unique_grains.size();
+
         _feature_sets[map_num][i]->_status = MARKED;
-        _unique_grains[_unique_grains.size()] = std::move(_feature_sets[map_num][i]);   // transfer ownership
+        _unique_grains[new_idx] = std::move(_feature_sets[map_num][i]);   // transfer ownership
+
+        // Trigger the callback
+        newGrainCreated(new_idx);
       }
 
   /**
@@ -442,6 +442,16 @@ GrainTracker::trackGrains()
                << *grain_pair.second;
       grain_pair.second->_status = INACTIVE;
     }
+}
+
+void
+GrainTracker::newGrainCreated(unsigned int new_grain_idx)
+{
+  _console << COLOR_YELLOW
+           << "*****************************************************************************\n"
+           << "Couldn't find a matching grain while working on variable index: " << _unique_grains[new_grain_idx]->_var_idx
+           << "\nCreating new unique grain: " << new_grain_idx << '\n' <<  *(_unique_grains[new_grain_idx])
+           << "\n*****************************************************************************\n" << COLOR_DEFAULT;
 }
 
 void

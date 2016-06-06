@@ -66,6 +66,12 @@ protected:
   virtual void updateFieldInfo() override;
 
   /**
+   * This method is called when a new grain is detected. It can be overridden by a derived class to handle
+   * setting new properties on the newly created grain.
+   */
+  virtual void newGrainCreated(unsigned int new_grain_idx);
+
+  /**
    * This method serves two purposes:
    * 1) When the tracking phase starts (_t_step == _tracking_step) it assigns a unique id to every FeatureData object
    *    found by the FeatureFloodCount object. If an EBSDReader is linked into the GrainTracker the information from the
