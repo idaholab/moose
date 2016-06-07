@@ -204,8 +204,9 @@ MooseApp::setupOptions()
     mooseWarning("The --parallel-mesh command line option is deprecated, use --distributed-mesh instead.");
     _distributed_mesh_on_command_line = getParam<bool>("parallel_mesh");
   }
+  else
+    _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
 
-  _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
   _half_transient = getParam<bool>("half_transient");
   _pars.set<bool>("timing") = getParam<bool>("timing");
 
