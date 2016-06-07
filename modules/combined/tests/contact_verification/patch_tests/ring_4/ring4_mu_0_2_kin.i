@@ -294,7 +294,7 @@
   dt = 1.0
   end_time = 1.0
   num_steps = 10
-  dtmin = 0.1
+  dtmin = 1.0
   l_tol = 1e-5
 
 []
