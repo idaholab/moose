@@ -87,7 +87,8 @@ if [ -z "$go_fast" ]; then
   mkdir build
   cd build
 
-  ../configure --with-methods="${METHODS}" \
+  ../configure INSTALL="`which install` -C" \
+               --with-methods="${METHODS}" \
                --prefix=$LIBMESH_DIR \
                --enable-silent-rules \
                --enable-unique-id \
