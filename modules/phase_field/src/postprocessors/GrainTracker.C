@@ -332,12 +332,6 @@ GrainTracker::trackGrains()
                          return std::move(std::pair<unsigned int, std::unique_ptr<FeatureData> >(counter++, std::move(item)));
                        });
       }
-
-
-      for (auto & grain_pair : _unique_grains)
-        std::cout << grain_pair.first << " " << grain_pair.second->_var_idx << std::endl;
-
-
     }
     return;  // Return early - no matching or tracking to do
   }
@@ -640,6 +634,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
                 return lhs.begin()->_distance > rhs.begin()->_distance;
             });
 
+#ifndef NDEBUG
   _console << "\n********************************************\nDistances list for grain " << grain_id << '\n';
   for (unsigned int i = 0; i < min_distances.size(); ++i)
   {
@@ -647,6 +642,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
       _console << grain_distance._distance << ": " << grain_distance._grain_id << ": " <<  grain_distance._var_index << '\n';
     _console << '\n';
   }
+#endif
 
   for (unsigned int i = 0; i < min_distances.size(); ++i)
   {
