@@ -342,6 +342,11 @@ public:
   virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
 
   /**
+   * Returns true if we are in or beyond the initialSetup stage
+   */
+  virtual bool startedInitialSetup() { return _started_initial_setup; }
+
+  /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */
   virtual Real relativeSolutionDifferenceNorm();
@@ -1233,6 +1238,9 @@ private:
 
   /// Whether or not the system is currently computing the Jacobian matrix
   bool _currently_computing_jacobian;
+
+  /// At or beyond initialSteup stage
+  bool _started_initial_setup;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;

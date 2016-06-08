@@ -151,7 +151,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _force_restart(getParam<bool>("force_restart")),
     _fail_next_linear_convergence_check(false),
-    _currently_computing_jacobian(false)
+    _currently_computing_jacobian(false),
+    _started_initial_setup(false)
 {
 
   _time = 0.0;
@@ -323,6 +324,10 @@ void FEProblem::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 void FEProblem::initialSetup()
 {
   Moose::perf_log.push("initialSetup()", "Setup");
+
+  // set state flag indicating that we are in or beyond initialSetup.
+  // This can be used to throw errors in methods that _must_ be called at construction time.
+  _started_initial_setup = true;
 
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
