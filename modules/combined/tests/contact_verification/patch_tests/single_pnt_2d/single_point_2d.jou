@@ -1,0 +1,48 @@
+## /Applications/Cubit-13.1/Cubit.app/Contents/MacOS/cubitclx
+## Cubit Version 13.1
+## Cubit Build 47305
+## Revised 2011-12-16 15:55:34 -0700 (Fri, 16 Dec 2011)
+## Running 08/28/2012 02:16:50 PM
+## Command Options:
+## -warning = On
+## -information = On
+reset
+brick x 1 y 0.1
+list volume 1
+volume 1 move 0 0 -0.5
+volume 1 move 0 -0.05 0
+create vertex 0 0 0
+create vertex 0.1 0.1 0
+create vertex -0.1 0.1 0
+#create vertex 0 0.5 0
+create curve vertex 9 10
+create curve vertex 10 11
+create curve vertex 11 9
+create surface curve 13 14 15
+
+surface 7 move 0.5 0.002 0
+
+curve 13 14 15 interval 2
+mesh surface 7
+
+#surface 7 size 0.08
+#surface 7 scheme pave
+#mesh surface 7
+
+surface 1 size 1
+mesh surface 1
+
+block 1 surface 1
+block 2 surface 7
+
+sideset 1 curve 4
+sideset 2 curve 2
+sideset 3 curve 15 13
+sideset 4 curve 14
+nodeset 100 vertex 9
+
+block all element type quad4
+
+export mesh "~/gitlab/moose/modules/combined/tests/frictional_contact/single_point_2d/single_point_2d.e" overwrite
+
+
