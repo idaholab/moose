@@ -191,3 +191,10 @@ Material::computePropertiesAtQp(unsigned int qp)
   _qp = qp;
   computeQpProperties();
 }
+
+void
+Material::checkExecutionStage()
+{
+  if (_fe_problem.startedInitialSetup())
+    mooseError("Material properties must be retrieved during material object construction to ensure correct dependency resolution.");
+}
