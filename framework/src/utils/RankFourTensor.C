@@ -717,11 +717,7 @@ RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real
 {
   if (input.size() != 1)
     mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. Yours has size " << input.size());
-  std::vector<Real> input3(3);
-  input3[0] = 0.0;
-  input3[1] = 0.0;
-  input3[2] = input[0];
-  fillGeneralIsotropicFromInputVector(input3);
+  fillGeneralIsotropicFromInputVector({0.0, 0.0, input[0]});
 }
 
 void
@@ -729,11 +725,7 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & 
 {
   if (input.size() != 2)
     mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours has size " << input.size());
-  std::vector<Real> input3(3);
-  input3[0] = input[0];
-  input3[1] = input[1];
-  input3[2] = 0.0;
-  fillGeneralIsotropicFromInputVector(input3);
+  fillGeneralIsotropicFromInputVector({input[0], input[1], 0.0});
 }
 
 void
@@ -741,17 +733,8 @@ RankFourTensor::fillAxisymmetricRZFromInputVector(const std::vector<Real> & inpu
 {
   if (input.size() != 5)
     mooseError("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your vector has size " << input.size());
-  std::vector<Real> input9(9);
-  input9[0] = input[0];  // C1111
-  input9[1] = input[1];  // C1122
-  input9[2] = input[2];  // C1133
-  input9[3] = input[0];  // C2222
-  input9[4] = input[2];  // C2233 = C1133
-  input9[5] = input[3];  // C3333
-  input9[6] = input[4];  // C2323
-  input9[7] = input[4];  // C3131 = C2323
-  input9[8] = (input[0]-input[1])*0.5;  // C1212
-  fillSymmetricFromInputVector(input9, false);
+  fillSymmetricFromInputVector({input[0], input[1], input[2], input[0], input[2], input[3],
+                                input[4], input[4], (input[0]-input[1])*0.5}, false);
 }
 
 void
