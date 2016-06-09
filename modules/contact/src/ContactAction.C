@@ -75,11 +75,7 @@ ContactAction::act()
     ++numdims;
 
   std::string action_name = MooseUtils::shortName(name());
-
-  std::vector<NonlinearVariableName> vars;
-  vars.push_back(_disp_x);
-  vars.push_back(_disp_y);
-  vars.push_back(_disp_z);
+  std::vector<NonlinearVariableName> vars = {_disp_x, _disp_y, _disp_z};
 
   if ( _current_task == "add_dirac_kernel" )
   {

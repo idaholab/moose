@@ -51,18 +51,11 @@ DerivativeMaterialPropertyNameInterface::propertyNameFirst(const MaterialPropert
 const MaterialPropertyName
 DerivativeMaterialPropertyNameInterface::propertyNameSecond(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2) const
 {
-  std::vector<VariableName> c(2);
-  c[0] = c1;
-  c[1] = c2;
-  return propertyName(base, c);
+  return propertyName(base, {c1, c2});
 }
 
 const MaterialPropertyName
 DerivativeMaterialPropertyNameInterface::propertyNameThird(const MaterialPropertyName &base, const VariableName &c1, const VariableName &c2, const VariableName &c3) const
 {
-  std::vector<VariableName> c(3);
-  c[0] = c1;
-  c[1] = c2;
-  c[2] = c3;
-  return propertyName(base, c);
+  return propertyName(base, {c1, c2, c3});
 }

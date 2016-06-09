@@ -124,18 +124,15 @@ AddCoupledEqSpeciesKernelsAction::act()
         coeff *= sign;
 
         if (secondary)
-        {
           eq_species.push_back(species);
-        }
         else
         {
           local_stos.push_back(coeff);
           local_species_list.push_back(species);
           oss << "\nSpecies: " << species << "\n"
-                    << "Coeff: " << coeff << std::endl;
+              << "Coeff: " << coeff << std::endl;
         }
-
-        }
+      }
       // Finding the operators and assign value of -1.0 to "-" sign
       else if (term == "+" || term == "=" || term == "-")
       {
@@ -258,8 +255,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         {
           std::string p;
           p = getParam<std::string>("pressure");
-          std::vector<VariableName> press(1);
-          press[0] = p;
+          std::vector<VariableName> press = {p};
           oss << "coupled gradient of p" << press[0] << "\n";
 
           InputParameters params_conv = _factory.getValidParams("CoupledConvectionReactionSub");
@@ -282,4 +278,3 @@ AddCoupledEqSpeciesKernelsAction::act()
   oss << "\n";
   _console << oss.str();
 }
-

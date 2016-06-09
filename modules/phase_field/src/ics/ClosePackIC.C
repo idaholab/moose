@@ -44,18 +44,18 @@ ClosePackIC::computeCircleCenters()
 
   // Create the x,y,z limits for the while loops
   Real x_min = min(0);
-  Real x_max = max(0) + 2*_radius;
+  Real x_max = max(0) + 2.0 * _radius;
 
-  Real y_min = min(1) - 2*std::sqrt(3.0)*_radius + _radius;
-  Real y_max = max(1) + 2*_radius;
+  Real y_min = min(1) - 2.0 * std::sqrt(3.0) * _radius + _radius;
+  Real y_max = max(1) + 2.0 * _radius;
 
   // Real z_min = min(2) - 2*std::sqrt(3.0)*_radius + _radius;
-  Real z_max = 0;
+  Real z_max = 0.0;
 
   // Initialize the coordinates that will be used in looping
   Real x = x_min;
   Real y = y_min;
-  Real z = 0;
+  Real z = 0.0;
 
   // Adjust the 3D z-dimension maximum
   if (_fe_problem.mesh().dimension() == 3)
@@ -84,18 +84,18 @@ ClosePackIC::computeCircleCenters()
         Point p(x, y, z);
         _centers.push_back(p);
         _radii.push_back(_radius);
-        x += 2*_radius;
+        x += 2.0 * _radius;
       }
 
       // Reset x-coord and increment y-coord
       x = x_min;
-      y += std::sqrt(3.)*_radius;
+      y += std::sqrt(3.0) * _radius;
       i++;
     }
 
     // Reset y-coord and increment z-coord
     y = y_min;
-    z += std::sqrt(3.) * _radius;
+    z += std::sqrt(3.0) * _radius;
     j++;
   }
 }

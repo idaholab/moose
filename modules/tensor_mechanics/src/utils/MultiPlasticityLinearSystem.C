@@ -153,9 +153,10 @@ MultiPlasticityLinearSystem::eliminateLinearDependence(const RankTwoTensor & str
   // recently added flow direction for deactivation, and pop it
   // back off r_tmp
   unsigned current_yf;
-  std::vector<RankTwoTensor> r_tmp(1);
   current_yf = dist[num_active - 1].second;
-  r_tmp[0] = r[current_yf]; // the one with largest dist
+  // the one with largest dist
+  std::vector<RankTwoTensor> r_tmp = {r[current_yf]};
+
   unsigned num_kept_active = 1;
   for (unsigned yf_to_try = 2; yf_to_try <= num_active; ++yf_to_try)
   {

@@ -167,9 +167,7 @@ BoundaryRestrictable::hasBoundary(BoundaryName name) const
 {
   // Create a vector and utilize the getBoundaryIDs function, which
   // handles the ANY_BOUNDARY_ID (getBoundaryID does not)
-  std::vector<BoundaryName> names(1);
-  names[0] = name;
-  return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
+  return hasBoundary(_bnd_mesh->getBoundaryIDs({name}));
 }
 
 bool

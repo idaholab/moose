@@ -31,15 +31,12 @@ SmoothCircleIC::SmoothCircleIC(const InputParameters & parameters) :
 void
 SmoothCircleIC::computeCircleRadii()
 {
-  _radii.resize(1);
-  _radii[0] = _radius;
+  _radii = {_radius};
 }
 
 
 void
 SmoothCircleIC::computeCircleCenters()
 {
-  _centers.resize(1);
-  _centers[0] = _center;
+  _centers = {_center};
 }
-

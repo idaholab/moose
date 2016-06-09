@@ -112,10 +112,5 @@ PorousFlowMethane::dViscosity_dT(Real temperature) const
 std::vector<Real>
 PorousFlowMethane::henryConstants() const
 {
-  std::vector<Real> ch4henry;
-  ch4henry.push_back(-10.44708);
-  ch4henry.push_back(4.66491);
-  ch4henry.push_back(12.12986);
-
-  return ch4henry;
+  return {-10.44708, 4.66491, 12.12986};
 }

@@ -65,16 +65,12 @@ ThermalContactMaterialsAction::act()
   if (!quadrature)
   {
     params.set<std::vector<VariableName> >("gap_temp") = {ThermalContactAuxVarsAction::getGapValueName(_pars)};
-    std::vector<VariableName> vars(1);
-    vars[0] = "penetration";
-    params.set<std::vector<VariableName> >("gap_distance") = vars;
+    params.set<std::vector<VariableName> >("gap_distance") = {"penetration"};
   }
   else
   {
     params.set<bool>("quadrature") = true;
-
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
-
     params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
   }
 
@@ -100,10 +96,7 @@ ThermalContactMaterialsAction::act()
   if (quadrature)
   {
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
-
-    std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("master"));
-    params.set<std::vector<BoundaryName> >("boundary") = bnds;
-
+    params.set<std::vector<BoundaryName> >("boundary") = {getParam<BoundaryName>("master")};
     params.set<std::string>("conductivity_name") = getParam<std::string>("conductivity_master_name");
 
     std::string master_name;

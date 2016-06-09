@@ -62,7 +62,7 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
 
     // Energy equation inviscid flux matrices, "cal E_{kl}" in the notes.
     _calE(declareProperty<std::vector<std::vector<RealTensorValue> > >("calE")),
-    _vel_grads(3),
+    _vel_grads({&_grad_u, &_grad_v, &_grad_w}),
 
     // Parameter values read in from input file
     _R(getParam<Real>("R")),
@@ -105,9 +105,6 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     _taue(declareProperty<Real>("taue")),
     _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals"))
 {
-  _vel_grads[0] = &_grad_u;
-  _vel_grads[1] = &_grad_v;
-  _vel_grads[2] = &_grad_w;
 }
 
 /**
