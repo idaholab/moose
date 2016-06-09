@@ -36,7 +36,7 @@ InputParameters validParams<Material>()
 
   // Outputs
   params += validParams<OutputInterface>();
-  params.set<std::vector<OutputName> >("outputs") =  std::vector<OutputName>(1, "none");
+  params.set<std::vector<OutputName> >("outputs") =  {"none"};
   params.addParam<std::vector<std::string> >("output_properties", "List of material properties, from this material, to output (outputs must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");

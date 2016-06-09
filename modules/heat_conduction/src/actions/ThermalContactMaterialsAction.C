@@ -60,11 +60,11 @@ ThermalContactMaterialsAction::act()
   if (isParamValid("parser_syntax"))
     _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
-  params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, getParam<NonlinearVariableName>("variable"));
+  params.set<std::vector<VariableName> >("variable") = {getParam<NonlinearVariableName>("variable")};
 
   if (!quadrature)
   {
-    params.set<std::vector<VariableName> >("gap_temp") = std::vector<VariableName>(1, ThermalContactAuxVarsAction::getGapValueName(_pars));
+    params.set<std::vector<VariableName> >("gap_temp") = {ThermalContactAuxVarsAction::getGapValueName(_pars)};
     std::vector<VariableName> vars(1);
     vars[0] = "penetration";
     params.set<std::vector<VariableName> >("gap_distance") = vars;
@@ -85,7 +85,7 @@ ThermalContactMaterialsAction::act()
     params.set<FunctionName>("gap_conductivity_function") = getParam<FunctionName>("gap_conductivity_function");
 
   if (isParamValid("gap_conductivity_function_variable"))
-    params.set<std::vector<VariableName> >("gap_conductivity_function_variable") = std::vector<VariableName>(1, getParam<VariableName>("gap_conductivity_function_variable"));
+    params.set<std::vector<VariableName> >("gap_conductivity_function_variable") = {getParam<VariableName>("gap_conductivity_function_variable")};
 
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   params.set<std::vector<BoundaryName> >("boundary") = bnds;

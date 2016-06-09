@@ -50,7 +50,7 @@ DisplacementGradientsAction::act()
   {
     InputParameters params = _factory.getValidParams("StrainGradDispDerivatives");
     params.set<std::vector<VariableName> >("displacement_gradients") = _displacement_gradients;
-    params.set<std::vector<SubdomainName> >("block") = std::vector<SubdomainName>(1, "0");
+    params.set<std::vector<SubdomainName> >("block") = {"0"}; // TODO: add parameter for this
     _problem->addMaterial("StrainGradDispDerivatives", "strain_grad_disp_derivatives", params);
   }
   else if (_current_task == "add_kernel")
@@ -66,7 +66,7 @@ DisplacementGradientsAction::act()
       {
         InputParameters params = _factory.getValidParams("GradientComponent");
         params.set<NonlinearVariableName>("variable") = _displacement_gradients[i];
-        params.set<std::vector<VariableName> >("v") = std::vector<VariableName>(1, _displacements[j]);
+        params.set<std::vector<VariableName> >("v") = {_displacements[j]};
         params.set<unsigned int>("component") = k;
         _problem->addKernel("GradientComponent", _displacement_gradients[i] + "_grad_kernel", params);
         ++i;

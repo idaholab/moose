@@ -22,9 +22,9 @@ InputParameters validParams<NodalNormalBC>()
   params.addCoupledVar("ny", "y-component of the normal");
   params.addCoupledVar("nz", "z-component of the normal");
 
-  params.set<std::vector<VariableName> >("nx") = std::vector<VariableName>(1, "nodal_normal_x");
-  params.set<std::vector<VariableName> >("ny") = std::vector<VariableName>(1, "nodal_normal_y");
-  params.set<std::vector<VariableName> >("nz") = std::vector<VariableName>(1, "nodal_normal_z");
+  params.set<std::vector<VariableName> >("nx") = {"nodal_normal_x"};
+  params.set<std::vector<VariableName> >("ny") = {"nodal_normal_y"};
+  params.set<std::vector<VariableName> >("nz") = {"nodal_normal_z"};
 
   return params;
 }

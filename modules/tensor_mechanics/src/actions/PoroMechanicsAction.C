@@ -39,7 +39,7 @@ PoroMechanicsAction::act()
   InputParameters params = _factory.getValidParams(type);
   VariableName pp_var(getParam<NonlinearVariableName>("porepressure"));
   params.addCoupledVar("porepressure", "");
-  params.set<std::vector<VariableName> >("porepressure") = std::vector<VariableName>(1, pp_var);
+  params.set<std::vector<VariableName> >("porepressure") = {pp_var};
 
   // now add the kernels
   for (unsigned int i = 0; i < dim; ++i)
