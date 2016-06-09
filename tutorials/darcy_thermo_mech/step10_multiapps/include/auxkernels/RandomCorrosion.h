@@ -49,7 +49,7 @@ public:
   /**
    * At each timestep randomly create a vector of points to apply "corrosion".
    */
-  void timestepSetup();
+  void timestepSetup() override;
 
 protected:
 
@@ -57,7 +57,7 @@ protected:
    * Computes the "corrosion" for the supplied phase variable.
    * @return The compute "phase" variable
    */
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /**
    * A helper method for getting random points in the domiain.
