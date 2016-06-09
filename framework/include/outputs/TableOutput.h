@@ -86,6 +86,8 @@ protected:
   /// Enable/disable VecptorPostprocessor time data file.
   bool _time_data;
 
+  /// Enable/disable output of time column for Postprocessors
+  bool _time_column;
 };
 
 #endif /* TABLEOUTPUT_H */

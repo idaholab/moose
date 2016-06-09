@@ -40,6 +40,8 @@ InputParameters validParams<TableOutput>()
   // Add option for appending file on restart
   params.addParam<bool>("append_restart", false, "Append existing file on restart");
 
+  params.addParam<bool>("time_column", true, "Whether or not the 'time' column should be written for Postprocessor CSV files");
+
   return params;
 }
 
@@ -50,7 +52,8 @@ TableOutput::TableOutput(const InputParameters & parameters) :
     _vector_postprocessor_time_tables(_tables_restartable ? declareRestartableData<std::map<std::string, FormattedTable> >("vector_postprocessor_time_table") : declareRecoverableData<std::map<std::string, FormattedTable> >("vector_postprocessor_time_table")),
     _scalar_table(_tables_restartable ? declareRestartableData<FormattedTable>("scalar_table") : declareRecoverableData<FormattedTable>("scalar_table")),
     _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table") : declareRecoverableData<FormattedTable>("all_data_table")),
-    _time_data(getParam<bool>("time_data"))
+    _time_data(getParam<bool>("time_data")),
+    _time_column(getParam<bool>("time_column"))
 {
 }
 
@@ -64,7 +67,11 @@ TableOutput::outputPostprocessors()
   for (const auto & out_name : out)
   {
     PostprocessorValue value = _problem_ptr->getPostprocessorValue(out_name);
+
+    _postprocessor_table.outputTimeColumn(_time_column);
     _postprocessor_table.addData(out_name, value, time());
+
+    _all_data_table.outputTimeColumn(_time_column);
     _all_data_table.addData(out_name, value, time());
   }
 }
