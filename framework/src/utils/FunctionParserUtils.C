@@ -49,7 +49,7 @@ FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters) :
                 parameters.get<bool>("enable_jit")),
     _enable_ad_cache(parameters.get<bool>("enable_ad_cache")),
     _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
-    _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize") && !_disable_fpoptimizer),
+    _enable_auto_optimize(false && parameters.get<bool>("enable_auto_optimize") && !_disable_fpoptimizer), // disabled due to #7160
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {
