@@ -325,7 +325,11 @@ GrainTracker::trackGrains()
                     return lhs->_min_entity_id < rhs->_min_entity_id;
                   });
 
-        // Transfer the grains to the _unique_grains structure and assign ids
+        /**
+         * Transfer the grains to the _unique_grains structure and assign ids
+         * Transform a vector that looks like this { A, D, C, B, F, E}
+         * into a map like this { {1,A}, {2,D}, {3,D}, {4, B}, {5, F}, {6, E} }
+         */
         std::transform(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), std::inserter(_unique_grains, _unique_grains.end()),
                        [&counter](std::unique_ptr<FeatureData> & item)
                        {
