@@ -1,0 +1,7 @@
+[Tests]
+  [./SimpleACInterface]
+    type = 'Exodiff'
+    input = 'SimpleACInterface.i'
+    exodiff = 'SimpleACInterface_out.e'
+  [../]
+[]
