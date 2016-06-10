@@ -38,12 +38,6 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
 }
 
 template<>
-void dataStore(std::ostream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context)
-{
-  dataStore(stream, *feature, context);
-}
-
-template<>
 void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context)
 {
   storeHelper(stream, bbox.min(), context);
@@ -62,14 +56,6 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._status, context);
   loadHelper(stream, feature._merged, context);
   loadHelper(stream, feature._intersects_boundary, context);
-}
-
-template<>
-void dataLoad(std::istream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context)
-{
-  feature = std::unique_ptr<FeatureFloodCount::FeatureData>(new FeatureFloodCount::FeatureData());
-
-  dataLoad(stream, *feature, context);
 }
 
 template<>
@@ -596,7 +582,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       {
         if (!feature._merged)
         {
-          _feature_sets[map_num].emplace_back(std::unique_ptr<FeatureData>(new FeatureData(feature)));
+          _feature_sets[map_num].emplace_back(std::move(feature));
           ++_feature_count;
         }
       }
@@ -624,11 +610,7 @@ FeatureFloodCount::updateFieldInfo()
      * We use the "min_entity_id" inside each feature to assign it's position in the
      * sorted indices vector.
      */
-    Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector,
-                        [](const std::unique_ptr<FeatureData> & lhs, const std::unique_ptr<FeatureData> & rhs)
-                        {
-                          return *lhs < *rhs;
-                        });
+    Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector);
 
     // Clear out the original markings since they aren't unique globally
     _feature_maps[map_num].clear();
@@ -637,7 +619,7 @@ FeatureFloodCount::updateFieldInfo()
     auto map_idx = (_single_map_mode || _condense_map_info) ? decltype(map_num)(0) : map_num;
     for (auto idx : index_vector)
     {
-      const auto & feature = *_feature_sets[map_num][idx];
+      const auto & feature = _feature_sets[map_num][idx];
 
       // Loop over the entitiy ids of this feature and update our local map
       for (auto entity : feature._local_ids)
@@ -869,9 +851,9 @@ FeatureFloodCount::calculateBubbleVolumes()
     // of nodes includes any boundary nodes.
     for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
       // Determine boundary intersection for each FeatureData object
-      for (const auto & feature_ptr : _feature_sets[map_num])
-        feature_ptr->_intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
-                                                          feature_ptr->_local_ids.begin(), feature_ptr->_local_ids.end());
+      for (auto & feature : _feature_sets[map_num])
+        feature._intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
+                                                     feature._local_ids.begin(), feature._local_ids.end());
   }
 
   // Size our temporary data structure
@@ -907,7 +889,7 @@ FeatureFloodCount::calculateBubbleVolumes()
         for (auto node = decltype(elem_n_nodes)(0); node < elem_n_nodes; ++node)
         {
           auto node_id = elem->node(node);
-          if ((*bubble_it)->_local_ids.find(node_id) != (*bubble_it)->_local_ids.end())
+          if ((*bubble_it)._local_ids.find(node_id) != (*bubble_it)._local_ids.end())
             ++flooded_nodes;
         }
 
@@ -920,7 +902,7 @@ FeatureFloodCount::calculateBubbleVolumes()
           // If the current bubble also intersects the boundary, also
           // accumlate the volume into the total volume of bubbles
           // which intersect the boundary.
-          if ((*bubble_it)->_intersects_boundary)
+          if ((*bubble_it)._intersects_boundary)
             _total_volume_intersecting_boundary[map_num] += curr_volume;
         }
       }

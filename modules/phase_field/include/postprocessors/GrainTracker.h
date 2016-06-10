@@ -157,7 +157,7 @@ protected:
   NonlinearSystem & _nl;
 
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-  std::map<unsigned int, std::unique_ptr<FeatureData> > & _unique_grains;
+  std::map<unsigned int, FeatureData> & _unique_grains;
 
   /**
    * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
