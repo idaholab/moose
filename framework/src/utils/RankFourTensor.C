@@ -733,8 +733,11 @@ RankFourTensor::fillAxisymmetricRZFromInputVector(const std::vector<Real> & inpu
 {
   if (input.size() != 5)
     mooseError("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your vector has size " << input.size());
-  fillSymmetricFromInputVector({input[0], input[1], input[2], input[0], input[2], input[3],
-                                input[4], input[4], (input[0]-input[1])*0.5}, false);
+
+                             // C1111     C1122     C1133     C2222     C2233=C1133
+  fillSymmetricFromInputVector({input[0], input[1], input[2], input[0], input[2],
+                             // C3333     C2323     C3131=C2323   C1212
+                                input[3], input[4], input[4],     (input[0]-input[1])*0.5}, false);
 }
 
 void
