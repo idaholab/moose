@@ -122,8 +122,12 @@ GrainTracker::finalize()
       {
         for (auto elem_id : grain_pair.second._local_ids)
         {
-          mooseAssert(!_ebsd_reader || _unique_grain_to_ebsd_num.find(grain_pair.first) != _unique_grain_to_ebsd_num.end(), "Bad mapping in unique_grain_to_ebsd_num");
-          _elemental_data[elem_id].push_back(std::make_pair(_ebsd_reader ? _unique_grain_to_ebsd_num[grain_pair.first] : grain_pair.first, grain_pair.second._var_idx));
+          mooseAssert(!_ebsd_reader || _unique_grain_to_ebsd_num.find(grain_pair.first) !=
+                      _unique_grain_to_ebsd_num.end(), "Bad mapping in unique_grain_to_ebsd_num");
+          _elemental_data[elem_id].emplace_back(_ebsd_reader ?
+                                                _unique_grain_to_ebsd_num[grain_pair.first] :
+                                                grain_pair.first,
+                                                grain_pair.second._var_idx);
         }
       }
     }
@@ -437,7 +441,7 @@ GrainTracker::trackGrains()
       // If it's not in the index list, it hasn't been transferred
       if (new_grain_idx_to_existing_grain_idx.find(std::make_pair(map_num, feature_num)) == new_grain_idx_to_existing_grain_idx.end())
       {
-        mooseAssert(_feature_sets[map_num][i]._status == NOT_MARKED, "Feature in wrong state, logic error");
+        mooseAssert(_feature_sets[map_num][feature_num]._status == NOT_MARKED, "Feature in wrong state, logic error");
 
         auto new_idx = _unique_grains.size();
 
