@@ -1,0 +1,12 @@
+[Tests]
+  [./rank_two_sampler]
+    type = 'CSVDiff'
+    input = 'rank_two_sampler.i'
+    csvdiff = 'rank_two_sampler_out_stress_xx_0010.csv'
+  [../]
+  [./rank_two_scalar_sampler]
+    type = 'CSVDiff'
+    input = 'rank_two_scalar_sampler.i'
+    csvdiff = 'rank_two_scalar_sampler_out_vonmises_0010.csv'
+  [../]
+[]

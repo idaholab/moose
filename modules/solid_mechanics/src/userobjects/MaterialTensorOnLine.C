@@ -102,7 +102,7 @@ MaterialTensorOnLine::execute()
 //      _value[_current_elem->id()] = tensor.component(_index);
       _dist[std::make_pair(_current_elem->id(),qp)] = distance;
 //      _value[std::make_pair(_current_elem->id(),qp)] = tensor.component(_index);
-      _value[std::make_pair(_current_elem->id(),qp)] = _material_tensor_calculator.getTensorQuantity(tensor,&_q_point[qp],direction);
+      _value[std::make_pair(_current_elem->id(),qp)] = _material_tensor_calculator.getTensorQuantity(tensor,_q_point[qp],direction);
 
     }
   }
@@ -160,3 +160,4 @@ MaterialTensorOnLine::finalize()
    }
 
 }
+

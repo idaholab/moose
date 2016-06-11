@@ -111,6 +111,7 @@
 #include "RankTwoAux.h"
 #include "RankFourAux.h"
 #include "ElasticEnergyAux.h"
+#include "AccumulateAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "RankTwoScalarAux.h"
 #include "StressDivergencePFFracTensors.h"
@@ -136,6 +137,9 @@
 #include "Mass.h"
 #include "TorqueReaction.h"
 #include "MaterialTensorIntegral.h"
+
+#include "LineMaterialRankTwoSampler.h"
+#include "LineMaterialRankTwoScalarSampler.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -274,6 +278,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(RankTwoAux);
   registerAux(RankFourAux);
   registerAux(ElasticEnergyAux);
+  registerAux(AccumulateAux);
   registerAux(CrystalPlasticityRotationOutAux);
   registerAux(RankTwoScalarAux);
   registerAux(NewmarkAccelAux);
@@ -288,6 +293,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(Mass);
   registerPostprocessor(TorqueReaction);
   registerPostprocessor(MaterialTensorIntegral);
+
+  registerVectorPostprocessor(LineMaterialRankTwoSampler);
+  registerVectorPostprocessor(LineMaterialRankTwoScalarSampler);
 }
 
 // External entry point for dynamic syntax association

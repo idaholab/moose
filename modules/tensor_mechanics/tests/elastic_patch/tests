@@ -1,19 +1,19 @@
 [Tests]
-  [./test_elastic_patch]
+  [./elastic_patch]
     type = 'Exodiff'
     input = 'elastic_patch.i'
     exodiff = 'elastic_patch_out.e'
   [../]
 
-  [./test_elastic_patch_2Procs]
+  [./elastic_patch_2Procs]
     type = Exodiff
     input = 'elastic_patch.i'
     exodiff = 'elastic_patch_out.e'
     min_parallel = '2'
-    prereq = 'test_elastic_patch'
+    prereq = 'elastic_patch'
   [../]
 
-  [./test_elastic_patch_quadratic]
+  [./elastic_patch_quadratic]
     type = Exodiff
     input = 'elastic_patch_quadratic.i'
     exodiff = 'elastic_patch_quadratic_out.e'

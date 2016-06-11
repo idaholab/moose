@@ -48,7 +48,7 @@ XFEMMaterialTensorMarkerUserObject::doesElementCrack(RealVectorValue &direction)
       average_tensor += _tensor[qp];
     }
     average_tensor *= 1.0/(Real)numqp;
-    Real tensor_quantity = _material_tensor_calculator.getTensorQuantity(average_tensor,&_q_point[0],direction);
+    Real tensor_quantity = _material_tensor_calculator.getTensorQuantity(average_tensor,_q_point[0],direction);
     if (tensor_quantity > _threshold*rnd_mult)
       does_it_crack = true;
   }
@@ -62,7 +62,7 @@ XFEMMaterialTensorMarkerUserObject::doesElementCrack(RealVectorValue &direction)
     directions.resize(numqp);
     for ( unsigned int qp = 0; qp < numqp; ++qp )
     {
-      tensor_quantities[qp] = _material_tensor_calculator.getTensorQuantity(_tensor[qp],&_q_point[qp],directions[qp]);
+      tensor_quantities[qp] = _material_tensor_calculator.getTensorQuantity(_tensor[qp],_q_point[qp],directions[qp]);
       if (directions[qp](0) == 0 &&
           directions[qp](1) == 0 &&
           directions[qp](2) == 0)

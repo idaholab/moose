@@ -4,13 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
-
 #ifndef ACCUMULATEAUX_H
 #define ACCUMULATEAUX_H
 
 #include "AuxKernel.h"
-
 
 //Forward Declarations
 class AccumulateAux;

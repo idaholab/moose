@@ -161,7 +161,7 @@ axialStress(const SymmTensor & symm_stress, const Point & point1, const Point & 
 }
 
 Real
-hoopStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point * curr_point, RealVectorValue & direction)
+hoopStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point & curr_point, RealVectorValue & direction)
 {
   // Calculate the cross of the normal to the axis of rotation from the current
   // location and the axis of rotation
@@ -184,7 +184,7 @@ hoopStress(const SymmTensor & symm_stress, const Point & point1, const Point & p
 }
 
 Real
-radialStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point * curr_point, RealVectorValue & direction)
+radialStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point & curr_point, RealVectorValue & direction)
 {
   Point radial_norm;
   normalPositionVector(point1, point2, curr_point, radial_norm);
@@ -202,22 +202,19 @@ radialStress(const SymmTensor & symm_stress, const Point & point1, const Point &
 }
 
 void
-normalPositionVector(const Point & point1, const Point & point2, const Point * curr_point, Point & normalPosition)
+normalPositionVector(const Point & point1, const Point & point2, const Point & curr_point, Point & normalPosition)
 {
-  // Find the current location
-  Point position = (* curr_point);
-
   // Find the nearest point on the axis of rotation (defined by point2 - point1)
   // to the current position, e.g. the normal to the axis of rotation at the
   // current position
   Point axis_rotation = point2 - point1;
-  Point positionWRTpoint1 = point1 - position;
+  Point positionWRTpoint1 = point1 - curr_point;
   Real projection =  (axis_rotation * positionWRTpoint1) / axis_rotation.norm_sq();
   Point normal = point1 - projection * axis_rotation;
 
   // Calculate the direction normal to the plane formed by the axis of rotation
   // and the normal to the axis of rotation from the current position.
-  normalPosition = position - normal;
+  normalPosition = curr_point - normal;
   normalPosition /= normalPosition.norm();
 }
 
