@@ -55,7 +55,7 @@ MaterialTensorCalculator::MaterialTensorCalculator(const InputParameters & param
 
 Real
 MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
-                                            const Point * curr_point,
+                                            const Point & curr_point,
                                             RealVectorValue &direction)
 {
   direction.zero();

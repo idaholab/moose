@@ -37,7 +37,6 @@
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
 #include "MaterialTensorOnLine.h"
-#include "AccumulateAux.h"
 #include "DomainIntegralQFunction.h"
 #include "DomainIntegralTopologicalQFunction.h"
 #include "PLC_LSH.h"
@@ -99,10 +98,9 @@ SolidMechanicsApp::registerObjects(Factory & factory)
 {
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
-  registerAux(AccumulateAux);
   registerAux(DomainIntegralQFunction);
   registerAux(DomainIntegralTopologicalQFunction);
-  registerAux(ElementsOnLineAux);
+  registerDeprecatedObject(ElementsOnLineAux, "06/01/2016 00:00");
 
   registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
@@ -144,9 +142,9 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(MixedModeEquivalentK);
 
   registerVectorPostprocessor(CrackDataSampler);
-  registerVectorPostprocessor(LineMaterialSymmTensorSampler);
+  registerDeprecatedObject(LineMaterialSymmTensorSampler, "06/01/2016 00:00");
 
-  registerUserObject(MaterialTensorOnLine);
+  registerDeprecatedObject(MaterialTensorOnLine, "06/01/2016 00:00");
   registerUserObject(CrackFrontDefinition);
 }
 

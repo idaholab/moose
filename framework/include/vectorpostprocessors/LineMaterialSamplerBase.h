@@ -57,11 +57,6 @@ public:
   LineMaterialSamplerBase(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~LineMaterialSamplerBase() {}
-
-  /**
    * Initialize
    * Calls through to base class's initialize()
    */
@@ -85,7 +80,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(const T & property, const Point * curr_point) = 0;
+  virtual Real getScalarFromProperty(const T & property, const Point & curr_point) = 0;
 
 protected:
   /// The beginning of the line
@@ -119,7 +114,7 @@ LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & para
     _q_point(_subproblem.assembly(_tid).qPoints())
 {
   std::vector<std::string> material_property_names = getParam<std::vector<std::string> >("property");
-  for (unsigned int i=0; i<material_property_names.size(); ++i)
+  for (unsigned int i = 0; i < material_property_names.size(); ++i)
   {
     if (!hasMaterialProperty<T>(material_property_names[i]))
       mooseError("In LineMaterialSamplerBase material property: " + material_property_names[i] + " does not exist.");
@@ -152,7 +147,7 @@ LineMaterialSamplerBase<T>::execute()
   const RealVectorValue line_unit_vec = line_vec / line_length;
   std::vector<Real> values(_material_properties.size());
 
-  for (unsigned int i=0; i<intersected_elems.size(); ++i)
+  for (unsigned int i = 0; i < intersected_elems.size(); ++i)
   {
     const Elem * elem = intersected_elems[i];
 
@@ -166,7 +161,7 @@ LineMaterialSamplerBase<T>::execute()
     _subproblem.reinitElem(elem, _tid);
     _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (unsigned int qp=0; qp<_qrule->n_points(); ++qp)
+    for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
       const RealVectorValue qp_pos(_q_point[qp]);
 
@@ -176,8 +171,8 @@ LineMaterialSamplerBase<T>::execute()
       if (qp_proj_dist_along_line < 0 || qp_proj_dist_along_line > line_length)
         continue;
 
-      for (unsigned int j=0; j<_material_properties.size(); ++j)
-        values[j] = getScalarFromProperty((*_material_properties[j])[qp], &_q_point[qp]);
+      for (unsigned int j = 0; j < _material_properties.size(); ++j)
+        values[j] = getScalarFromProperty((*_material_properties[j])[qp], _q_point[qp]);
 
       addSample(_q_point[qp], qp_proj_dist_along_line, values);
     }

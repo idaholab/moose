@@ -39,8 +39,6 @@ public:
    */
   LineMaterialRealSampler(const InputParameters & parameters);
 
-  virtual ~LineMaterialRealSampler() {}
-
   /**
    * Reduce the material property to a scalar for output
    * In this case, the material property is a Real already, so just return it.
@@ -48,7 +46,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(const Real & property, const Point * curr_point);
+  virtual Real getScalarFromProperty(const Real & property, const Point & curr_point);
 };
 
 #endif
