@@ -1,4 +1,4 @@
-/****************************************************************/
+ /****************************************************************/
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
 /*          All contents are licensed under LGPL V2.1           */
@@ -27,6 +27,7 @@ template<>
 InputParameters validParams<SolidModel>()
 {
   MooseEnum formulation("Nonlinear3D NonlinearRZ AxisymmetricRZ SphericalR Linear PlaneStrain NonlinearPlaneStrain");
+  MooseEnum compute_method("NoShearRetention ShearRetention");
 
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
@@ -48,6 +49,8 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<Real>("cracking_residual_stress", 0.0, "The fraction of the cracking stress allowed to be maintained following a crack.");
+  params.addParam<Real>("cracking_beta", 1.0, "The coefficient used in the exponetional model.");
+  params.addParam<MooseEnum>("compute_method", compute_method, "The method  used in the stress calculation.");
   params.addParam<FunctionName>("cracking_stress_function", "", "The cracking stress as a function of time and location" );
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
@@ -107,6 +110,8 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _cracking_stress( parameters.isParamValid("cracking_stress") ?
                     (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
   _cracking_residual_stress( getParam<Real>("cracking_residual_stress") ),
+  _cracking_beta(getParam<Real>("cracking_beta")),
+  _compute_method(getParam<MooseEnum>("compute_method")),
   _cracking_stress_function( getParam<FunctionName>("cracking_stress_function") != "" ? &getFunction("cracking_stress_function") : NULL),
   _cracking_alpha( 0 ),
   _active_crack_planes(3,1),
@@ -144,6 +149,7 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _crack_max_strain_old(NULL),
   _principal_strain(3,1),
   _elasticity_tensor(createProperty<SymmElasticityTensor>("elasticity_tensor")),
+  _elasticity_tensor_old(createPropertyOld<SymmElasticityTensor>("elasticity_tensor")),
   _Jacobian_mult(createProperty<SymmElasticityTensor>("Jacobian_mult")),
   _d_strain_dT(),
   _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
@@ -755,7 +761,6 @@ SolidModel::computeConstitutiveModelStress()
 }
 
 ////////////////////////////////////////////////////////////////////////
-
 void
 SolidModel::computeElasticityTensor()
 {
@@ -989,7 +994,10 @@ SolidModel::crackingStrainDirections()
   {
     // Adjust the elasticity matrix for cracking.  This must be used by the
     // constitutive law.
-    _local_elasticity_tensor->adjustForCracking( _crack_flags_local );
+    if (_compute_method == "ShearRetention")
+      _local_elasticity_tensor->adjustForCracking(_crack_flags_local);
+    else
+      _local_elasticity_tensor->adjustForCrackingWithShearRetention(_crack_flags_local);
 
     ColumnMajorMatrix R_9x9(9,9);
     const ColumnMajorMatrix & R( (*_crack_rotation)[_qp] );
@@ -1123,10 +1131,9 @@ void
 SolidModel::crackingStressRotation()
 {
   if (_cracking_stress_function != NULL)
-   {
+  {
      _cracking_stress = _cracking_stress_function->value(_t, _q_point[_qp]);
-   }
-
+  }
 
   if (_cracking_stress > 0)
   {
@@ -1145,6 +1152,7 @@ SolidModel::crackingStressRotation()
     // This must be done in the crack-local coordinate frame.
 
     // Rotate stress to cracked orientation.
+    ColumnMajorMatrix R( (*_crack_rotation)[_qp]);
     ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
     SymmTensor sigmaPrime;
     rotateSymmetricTensor( RT, _stress[_qp], sigmaPrime );
@@ -1287,6 +1295,7 @@ SolidModel::crackingStressRotation()
     {
       applyCracksToTensor( _stress[_qp], sigma );
     }
+
   }
 }
 
@@ -1310,8 +1319,8 @@ SolidModel::computeCrackFactor( int i, Real & sigma, Real & flagVal )
     const Real crackMaxStrain( (*_crack_max_strain)[_qp](i) );
     // Compute stress that follows exponental curve
     sigma = _cracking_stress*
-           (_cracking_residual_stress + (1-_cracking_residual_stress)*
-            std::exp(_cracking_alpha/_cracking_stress*(crackMaxStrain-(*_crack_strain)[_qp](i))));
+           (_cracking_residual_stress + (1 - _cracking_residual_stress) *
+            std::exp(_cracking_alpha * _cracking_beta /_cracking_stress * (crackMaxStrain - (*_crack_strain)[_qp](i))));
     // Compute ratio of current stiffness to original stiffness
     flagVal = sigma * (*_crack_strain)[_qp](i) /
         (crackMaxStrain * _cracking_stress);

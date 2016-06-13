@@ -86,6 +86,8 @@ protected:
   const CRACKING_RELEASE _cracking_release;
   Real _cracking_stress;
   const Real _cracking_residual_stress;
+  const Real _cracking_beta;
+  const std::string _compute_method;
   Function * const _cracking_stress_function;
 
   Real _cracking_alpha;
@@ -136,6 +138,7 @@ protected:
   ColumnMajorMatrix _principal_strain;
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
+  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor_old;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
   // Accumulate derivatives of strain tensors with respect to Temperature into this

@@ -55,4 +55,13 @@
     max_parallel = 1
   [../]
 
+  [./plane_stress]
+    type = Exodiff
+    input = cracking_plane_stress.i
+    exodiff = cracking_plane_stress_out.e
+    abs_zero = 1e-4
+    scale_refine = 0
+    max_parallel = 1
+  [../]
+
 []
