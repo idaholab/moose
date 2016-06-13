@@ -63,7 +63,7 @@ void
 KKSMultiACBulkBase::initialSetup()
 {
   ACBulk<Real>::initialSetup();
-  //TODO: validate couplings for Fj and hj
-  // validateNonlinearCoupling<Real>("fa_name");
-  // validateNonlinearCoupling<Real>("fb_name");
+
+  for (unsigned int n = 0; n < _num_Fj; ++n)
+    validateNonlinearCoupling<Real>(_Fj_names[n]);
 }

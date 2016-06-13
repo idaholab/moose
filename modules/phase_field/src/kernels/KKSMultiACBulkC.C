@@ -18,25 +18,15 @@ InputParameters validParams<KKSMultiACBulkC>()
 KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters) :
     KKSMultiACBulkBase(parameters),
     _ncj(coupledComponents("cj")),
-    //_cj_names(_ncj),
     _c1_name(getVar("cj", 0)->name()),
     _cjs(_ncj),
     _cjs_var(_ncj),
-    // _ca_name(getVar("ca", 0)->name()),
-    // _ca_var(coupled("ca")),
-    // _ca(coupledValue("ca")),
-    // _cb_name(getVar("cb", 0)->name()),
-    // _cb_var(coupled("cb")),
-    // _cb(coupledValue("cb")),
-    // _prop_h(getMaterialProperty<Real>("h")),
     _prop_dF1dc1(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name)),
     _prop_d2F1dc12(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, _c1_name))
-    // _prop_d2Fbdcb2(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _cb_name))
 {
   // Load concentration variables into the arrays
   for (unsigned int i = 0; i < _ncj; ++i)
   {
-    //_cj_names[i] = getVar("cj", i)->name();
     _cjs[i] = &coupledValue("cj", i);
     _cjs_var[i] = coupled("cj", i);
   }
@@ -58,7 +48,6 @@ Real
 KKSMultiACBulkC::computeDFDOP(PFFunctionType type)
 {
   Real sum = 0.0;
-  // Real A1 = _prop_dFadca[_qp] * (_ca[_qp] - _cb[_qp]);
 
   switch (type)
   {

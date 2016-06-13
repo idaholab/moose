@@ -12,7 +12,7 @@ InputParameters validParams<KKSMultiACBulkF>()
   InputParameters params = validParams<KKSMultiACBulkBase>();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This includes all terms NOT dependent on chemical potential.");
   params.addRequiredParam<Real>("wi", "Double well height parameter");
-  params.addRequiredParam<MaterialPropertyName>("gi_name", "Base name for the double well function g_i(eta)");
+  params.addRequiredParam<MaterialPropertyName>("gi_name", "Base name for the double well function g_i(eta_i)");
   return params;
 }
 

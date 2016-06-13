@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<KKSMultiACBulkF>();
 
 /**
- * KKSMultiACBulkBase child class for the free energy difference term
+ * KKSMultiACBulkBase child class for the free energy term
  * \f$ \sum_j \frac{\partial h_j}{\partial \eta_i} F_j + w_i \frac{dg}{d\eta_i} \f$
  * in the the Allen-Cahn bulk residual.
  *

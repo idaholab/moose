@@ -16,8 +16,8 @@ template<>
 InputParameters validParams<KKSMultiACBulkC>();
 
 /**
- * KKSACBulkBase child class for the phase concentration difference term
- * \f$ \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \f$
+ * KKSACBulkBase child class for the phase concentration term
+ * \f$ - \sum_j \frac{dF_1}{dc_1} \frac{dh_j}{d\eta_i} (c_j) \f$
  * in the the Allen-Cahn bulk residual.
  *
  * The non-linear variable for this Kernel is the order parameter 'eta_i'.
@@ -33,19 +33,10 @@ protected:
 
   const unsigned int _ncj;
   /// Names of phase concentration variables
-  //std::vector<MaterialPropertyName> _cj_names;
   MaterialPropertyName _c1_name;
   std::vector<const VariableValue *> _cjs;
   std::vector<unsigned int> _cjs_var;
 
-  // /// phase b concentration
-  // std::string _cb_name;
-  // unsigned int _cb_var;
-  // const VariableValue & _cb;
-  //
-  // /// Value of the switching function \f$ h(\eta) \f$
-  // const MaterialProperty<Real> & _prop_h;
-  //
   /// Derivative of the free energy function \f$ \frac d{dc_1} F_1 \f$
   const MaterialProperty<Real> & _prop_dF1dc1;
   /// Second derivative of the free energy function \f$ \frac {d^2}{dc_1^2} F_1 \f$
