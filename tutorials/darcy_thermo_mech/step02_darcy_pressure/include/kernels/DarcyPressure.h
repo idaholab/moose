@@ -40,12 +40,12 @@ protected:
   /**
    * Kernels _must_ override computeQpResidual()
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /**
    * This is optional (but recommended!)
    */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   /// Will be set from the input file
   Real _permeability;

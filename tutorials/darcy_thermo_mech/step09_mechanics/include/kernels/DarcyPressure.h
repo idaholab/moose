@@ -41,7 +41,7 @@ protected:
   /**
    * Kernels _must_ override computeQpResidual()
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /**
    * This is optional (but recommended!)
