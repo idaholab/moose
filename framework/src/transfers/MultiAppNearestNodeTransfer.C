@@ -545,9 +545,7 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p, Real & distance, Mo
 Real
 MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, MeshTools::BoundingBox bbox)
 {
-  std::vector<Point> source_points(2);
-  source_points[0] = bbox.first;
-  source_points[1] = bbox.second;
+  std::vector<Point> source_points = {bbox.first, bbox.second};
 
   std::vector<Point> all_points(8);
   for (unsigned int x = 0; x < 2; x++)
@@ -569,9 +567,7 @@ MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, MeshTools::BoundingBox bbo
 Real
 MultiAppNearestNodeTransfer::bboxMinDistance(Point p, MeshTools::BoundingBox bbox)
 {
-  std::vector<Point> source_points(2);
-  source_points[0] = bbox.first;
-  source_points[1] = bbox.second;
+  std::vector<Point> source_points = {bbox.first, bbox.second};
 
   std::vector<Point> all_points(8);
   for (unsigned int x = 0; x < 2; x++)

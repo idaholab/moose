@@ -108,7 +108,7 @@ RigidBodyMultiKernelAction::act()
       InputParameters parameters = _factory.getValidParams("SingleGrainRigidBodyMotion");
       parameters.set<NonlinearVariableName>("variable") = var_name;
       parameters.set<std::vector<VariableName> >("v") = v;
-      parameters.set<std::vector<VariableName> >("c") = std::vector<VariableName>(1, getParam<VariableName>("c"));
+      parameters.set<std::vector<VariableName> >("c") = {getParam<VariableName>("c")};
       parameters.set<bool>("implicit") = _implicit;
       parameters.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 

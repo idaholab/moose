@@ -19,14 +19,12 @@ class NodalVolumeFraction : public FeatureFloodCount
 {
 public:
   NodalVolumeFraction(const InputParameters & parameters);
-  ~NodalVolumeFraction();
 
   virtual void finalize();
 
   Real getValue();
 
   void calculateBubbleFraction();
-
   Real calculateAvramiValue();
 
 protected:

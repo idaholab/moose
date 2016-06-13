@@ -146,8 +146,7 @@ Parser::parse(const std::string &input_filename)
   _input_filename = input_filename;
 
   // vector for initializing active blocks
-  std::vector<std::string> all(1);
-  all[0] = "__all__";
+  std::vector<std::string> all = {"__all__"};
 
   MooseUtils::checkFileReadable(input_filename, true);
 

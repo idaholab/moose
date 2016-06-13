@@ -235,7 +235,7 @@ MultiApp::fillPositions()
   }
   else
   {
-    _positions = std::vector<Point>(1, Point());
+    _positions = {Point()};
 
     if (_positions.size() < _input_files.size())
       mooseError("Not enough positions for the number of input files provided in MultiApp " << name());

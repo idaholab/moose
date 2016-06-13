@@ -48,7 +48,7 @@ ContactPenetrationAuxAction::act()
     if (isParamValid("parser_syntax"))
       _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
-    params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
+    params.set<std::vector<BoundaryName> >("boundary") = {_slave};
     params.set<BoundaryName>("paired_boundary") = _master;
     params.set<AuxVariableName>("variable") = "penetration";
     params.set<MooseEnum>("order") = _order;
