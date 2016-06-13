@@ -38,10 +38,10 @@ public:
 
 protected:
   /// This is called to integrate the residual across the boundary
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// Optional (but recommended!) to compute the derivative of the residual with respect to _this_ variable
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   /// Thermal conductivity of the material
   const MaterialProperty<Real> & _thermal_conductivity;

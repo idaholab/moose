@@ -24,7 +24,6 @@ InputParameters validParams<PackedColumn>()
   return params;
 }
 
-
 PackedColumn::PackedColumn(const InputParameters & parameters) :
     Material(parameters),
 
@@ -36,15 +35,10 @@ PackedColumn::PackedColumn(const InputParameters & parameters) :
     _permeability(declareProperty<Real>("permeability")),
     _viscosity(declareProperty<Real>("viscosity"))
 {
-  // Sigh: Still can't depend on C++11....
-  std::vector<Real> ball_sizes(2);
-  ball_sizes[0] = 1;
-  ball_sizes[1] = 3;
+  std::vector<Real> ball_sizes = {1, 3};
 
   // From the paper: Table 1
-  std::vector<Real> permeability(2);
-  permeability[0] = 0.8451e-9;
-  permeability[1] = 8.968e-9;
+  std::vector<Real> permeability = {0.8451e-9, 8.968e-9};
 
   // Set the x,y data on the LinearInterpolation object.
   _permeability_interpolation.setData(ball_sizes, permeability);
