@@ -91,18 +91,18 @@ public:
     {
     }
 
-    FeatureData(const FeatureData & f) :
-        _ghosted_ids(f._ghosted_ids),
-        _local_ids(f._local_ids),
-        _halo_ids(f._halo_ids),
-        _periodic_nodes(f._periodic_nodes),
-        _var_idx(f._var_idx),
-        _bboxes(f._bboxes),
-        _min_entity_id(f._min_entity_id),
-        _status(NOT_MARKED),
-        _merged(f._merged),
-        _intersects_boundary(f._intersects_boundary)
-    {}
+    /**
+     * We do not expect these objects to ever be copied. This is important
+     * since they are stored in standard containers directly. To enforce
+     * this, we are explicitly deleting the copy constructor, and copy
+     * assignment operator.
+     */
+    FeatureData(const FeatureData & f) = delete;
+    FeatureData & operator=(const FeatureData & f) = delete;
+
+    // Move constructors
+    FeatureData(FeatureData && f) = default;
+    FeatureData & operator=(FeatureData && f) = default;
 
     void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
     void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
@@ -318,7 +318,7 @@ protected:
    * The data structure used to hold the globally unique features. The outer vector
    * is indexed by variable number, the inner vector is indexed by feature number
    */
-  std::vector<std::vector<std::unique_ptr<FeatureData> > > _feature_sets;
+  std::vector<std::vector<FeatureData> > _feature_sets;
 
   /**
    * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
@@ -423,11 +423,9 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
 }
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
-template<> void dataStore(std::ostream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context);
 template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);
 
 template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
-template<> void dataLoad(std::istream & stream, std::unique_ptr<FeatureFloodCount::FeatureData> & feature, void * context);
 template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
 
 

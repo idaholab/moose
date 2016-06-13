@@ -157,7 +157,7 @@ protected:
   NonlinearSystem & _nl;
 
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-  std::map<unsigned int, std::unique_ptr<FeatureData> > & _unique_grains;
+  std::map<unsigned int, FeatureData> & _unique_grains;
 
   /**
    * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
@@ -187,6 +187,14 @@ struct GrainDistance
 {
   GrainDistance();
   GrainDistance(Real distance, unsigned int grain_id, unsigned int var_index);
+
+  // Copy constructors
+  GrainDistance(const GrainDistance & f) = default;
+  GrainDistance & operator=(const GrainDistance & f) = default;
+
+  // Move constructors
+  GrainDistance(GrainDistance && f) = default;
+  GrainDistance & operator=(GrainDistance && f) = default;
 
   bool operator<(const GrainDistance & rhs) const;
 
