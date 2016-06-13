@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<BimodalInverseSuperellipsoidsIC>()
 {
   InputParameters params = validParams<BimodalSuperellipsoidsIC>();
-  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly inside the larger particles)");
+  params.addClassDescription("Bimodal size distribution of large particles (specified in input file, value invalue) and small particles (placed randomly inside the larger particles, value outvalue)");
   return params;
 }
 
