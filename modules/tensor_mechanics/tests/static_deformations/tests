@@ -11,6 +11,11 @@
     exodiff = 'cosserat_tension_out.e'
     abs_zero = 1e-9
   [../]
+  [./glide]
+    type = 'CSVDiff'
+    input = 'cosserat_glide.i'
+    csvdiff = 'cosserat_glide_out_soln_0001.csv'
+  [../]
 
   [./except01]
     type = RunException
