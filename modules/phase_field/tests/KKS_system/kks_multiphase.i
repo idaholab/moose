@@ -102,7 +102,7 @@
 
   # Switching functions for each phase
   # h1(eta1, eta2, eta3)
-  [./h1_eta]
+  [./h1]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta1
     eta_j = eta2
@@ -110,7 +110,7 @@
     f_name = h1
   [../]
   # h2(eta1, eta2, eta3)
-  [./h2_eta]
+  [./h2]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta3
     eta_j = eta1
@@ -118,12 +118,35 @@
     f_name = h2
   [../]
   # h3(eta1, eta2, eta3)
-  [./h3_eta]
+  [./h3]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta2
     eta_j = eta3
     eta_k = eta1
     f_name = h3
+  [../]
+
+  # Barrier functions for each phase
+  [./g1]
+    type = BarrierFunctionMaterial
+    block = 0
+    g_order = SIMPLE
+    eta = eta1
+    function_name = g1
+  [../]
+  [./g2]
+    type = BarrierFunctionMaterial
+    block = 0
+    g_order = SIMPLE
+    eta = eta2
+    function_name = g2
+  [../]
+  [./g3]
+    type = BarrierFunctionMaterial
+    block = 0
+    g_order = SIMPLE
+    eta = eta3
+    function_name = g3
   [../]
 []
 
@@ -133,9 +156,31 @@
     variable = c
   [../]
 
-  [./eta1diff]
-    type = Diffusion
+  # Kernels for Allen-Cahn equation
+  [./deta1dt]
+    type = TimeDerivative
     variable = eta1
+  [../]
+  [./ACBulkF1]
+    type = KKSMultiACBulkF
+    variable  = eta1
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g1
+    wi        = 0.4
+  [../]
+  [./ACBulkC]
+    type = KKSACBulkC
+    variable = eta
+    ca       = cm
+    cb       = cd
+    fa_name  = fm
+    fb_name  = fd
+  [../]
+  [./ACInterface]
+    type = ACInterface
+    variable = eta
+    kappa_name = kappa
   [../]
 
   [./eta2diff]
