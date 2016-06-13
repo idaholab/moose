@@ -92,6 +92,7 @@
 #include "FluxAverageAux.h"
 #include "OldMaterialAux.h"
 #include "DotCouplingAux.h"
+#include "BadEnumAux.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -352,6 +353,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(FluxAverageAux);
   registerAux(OldMaterialAux);
   registerAux(DotCouplingAux);
+  registerAux(BadEnumAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);

@@ -535,4 +535,10 @@
     input = wrong_displacement_order.i
     expect_err = "Error: mesh has SECOND order elements, so all displacement variables must be SECOND order."
   [../]
+
+  [./bad_enum_comparison_test]
+    type = 'RunException'
+    input = 'bad_enum_comparison_test.i'
+    expect_err = 'Invalid string comparison "\w+" in MooseEnum.'
+  [../]
 []
