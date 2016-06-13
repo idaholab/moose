@@ -133,7 +133,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
   if (_blk_ids.empty())
   {
     _blk_ids.insert(Moose::ANY_BLOCK_ID);
-    _blocks = std::vector<SubdomainName>(1, "ANY_BLOCK_ID");
+    _blocks = {"ANY_BLOCK_ID"};
   }
 
   // If this object is block restricted, check that defined blocks exist on the mesh

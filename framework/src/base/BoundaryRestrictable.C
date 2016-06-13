@@ -104,7 +104,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
   if (_bnd_ids.empty())
   {
     _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
-    _boundary_names = std::vector<BoundaryName>(1, "ANY_BOUNDARY_ID");
+    _boundary_names = {"ANY_BOUNDARY_ID"};
   }
 
   // If this object is block restricted, check that defined blocks exist on the mesh
@@ -167,9 +167,7 @@ BoundaryRestrictable::hasBoundary(BoundaryName name) const
 {
   // Create a vector and utilize the getBoundaryIDs function, which
   // handles the ANY_BOUNDARY_ID (getBoundaryID does not)
-  std::vector<BoundaryName> names(1);
-  names[0] = name;
-  return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
+  return hasBoundary(_bnd_mesh->getBoundaryIDs({name}));
 }
 
 bool

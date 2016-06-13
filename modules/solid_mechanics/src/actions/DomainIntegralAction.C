@@ -384,10 +384,10 @@ DomainIntegralAction::act()
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
       params.set<Real>("youngs_modulus") = _youngs_modulus;
-      params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1,_disp_x);
-      params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
+      params.set<std::vector<VariableName> >("disp_x") = {_disp_x};
+      params.set<std::vector<VariableName> >("disp_y") = {_disp_y};
       if (_disp_z !="")
-        params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
+        params.set<std::vector<VariableName> >("disp_z") = {_disp_z};
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
 

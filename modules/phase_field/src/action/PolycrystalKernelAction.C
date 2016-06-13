@@ -61,7 +61,7 @@ PolycrystalKernelAction::act()
       params.set<bool>("implicit") = _implicit;
       params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
       if (isParamValid("T"))
-        params.set<std::vector<VariableName> >("T") = std::vector<VariableName>(1, getParam<VariableName>("T"));
+        params.set<std::vector<VariableName> >("T") = {getParam<VariableName>("T")};
 
       std::string kernel_name = "ACBulk_" + var_name;
       _problem->addKernel("ACGrGrPoly", kernel_name, params);
@@ -103,7 +103,7 @@ PolycrystalKernelAction::act()
     {
       InputParameters params = _factory.getValidParams("ACGBPoly");
       params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<std::vector<VariableName> >("c") = std::vector<VariableName>(1, getParam<VariableName>("c"));
+      params.set<std::vector<VariableName> >("c") = {getParam<VariableName>("c")};
       params.set<Real>("en_ratio") = getParam<Real>("en_ratio");
       params.set<bool>("implicit") = getParam<bool>("implicit");
       params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");

@@ -198,7 +198,7 @@ SolidMechanicsAction::act()
     for (unsigned j(0); j < num_coupled; ++j)
     {
       params.addCoupledVar(keys[j], "");
-      params.set<std::vector<VariableName> >(keys[j]) = std::vector<VariableName>(1, vars[j]);
+      params.set<std::vector<VariableName> >(keys[j]) = {vars[j]};
     }
 
     params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");

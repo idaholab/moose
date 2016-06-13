@@ -70,9 +70,9 @@ TensorMechanicsAxisymmetricRZAction::act()
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
   if (isParamValid("save_in"))
-    params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, save_in[i]);
+    params.set<std::vector<AuxVariableName> >("save_in") = {save_in[i]};
   if (isParamValid("diag_save_in"))
-    params.set<std::vector<AuxVariableName> >("diag_save_in") = std::vector<AuxVariableName>(1, diag_save_in[i]);
+    params.set<std::vector<AuxVariableName> >("diag_save_in") = {diag_save_in[i]};
 
     _problem->addKernel("StressDivergenceRZTensors", kernel_name, params);
   }

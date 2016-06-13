@@ -35,8 +35,8 @@ NodalAreaAction::NodalAreaAction(const InputParameters & params) :
 void
 NodalAreaAction::act()
 {
-  _moose_object_pars.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1, getParam<BoundaryName>("slave"));
-  _moose_object_pars.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, "nodal_area_" + _name);
+  _moose_object_pars.set<std::vector<BoundaryName> >("boundary") = {getParam<BoundaryName>("slave")};
+  _moose_object_pars.set<std::vector<VariableName> >("variable") = {"nodal_area_" + _name};
 
   mooseAssert(_problem, "Problem pointer is NULL");
   if (_problem->legacyUoInitialization())

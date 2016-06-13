@@ -162,8 +162,7 @@ DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::Mpi
                           elements, connectivity, permutation_list) );
 
   // We only have 1 element topology in this grid so we make just one mesh block
-  Teuchos::ArrayRCP<Teuchos::RCP<MeshContainerType> > mesh_blocks(1);
-  mesh_blocks[0] = mesh_container;
+  Teuchos::ArrayRCP<Teuchos::RCP<MeshContainerType> > mesh_blocks = {mesh_container};
 
   // Create the MeshManager
   mesh_manager = Teuchos::rcp(new DataTransferKit::MeshManager<MeshContainerType>(mesh_blocks, comm, dim) );

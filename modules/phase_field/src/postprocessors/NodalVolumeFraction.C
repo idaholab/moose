@@ -27,9 +27,6 @@ NodalVolumeFraction::NodalVolumeFraction(const InputParameters & parameters) :
     mooseError("please supply an equilibrium fraction of 2nd phase for Avrami analysis (NodalVolumeFraction).");
 }
 
-NodalVolumeFraction::~NodalVolumeFraction()
-{
-}
 
 void
 NodalVolumeFraction::finalize()
@@ -47,20 +44,12 @@ NodalVolumeFraction::finalize()
     // Output the headers during the first timestep
     if (_fe_problem.timeStep() == 0)
     {
-      std::vector<std::string> data; data.reserve(4);
-      data.push_back("timestep");
-      data.push_back("time");
-      data.push_back("log_time");
-      data.push_back("Avrami");
+      std::vector<std::string> data = {"timestep", "time", "log_time", "Avrami"};
       writeCSVFile(getParam<FileName>("Avrami_file"), data);
     }
     else
     {
-      std::vector<Real> data; data.reserve(4);
-      data.push_back(_fe_problem.timeStep());
-      data.push_back(_fe_problem.time());
-      data.push_back(std::log(_fe_problem.time()));
-      data.push_back(calculateAvramiValue());
+      std::vector<Real> data = {Real(_fe_problem.timeStep()), _fe_problem.time(), std::log(_fe_problem.time()), calculateAvramiValue()};
       writeCSVFile(getParam<FileName>("Avrami_file"), data);
     }
   }
@@ -75,19 +64,17 @@ NodalVolumeFraction::getValue()
 void
 NodalVolumeFraction::calculateBubbleFraction()
 {
-  Real volume(0.0);
+  Real volume = 0.0;
 
   //sum the values in the vector to get total volume
   for (std::vector<Real>::const_iterator it = _all_feature_volumes.begin(); it != _all_feature_volumes.end(); ++it)
-  {
     volume += *it;
-  }
 
-  _volume_fraction = volume/_mesh_volume;
+  _volume_fraction = volume / _mesh_volume;
 }
 
 Real
 NodalVolumeFraction::calculateAvramiValue()
 {
-  return std::log(std::log(1.0/(1.0 - (_volume_fraction/_equil_fraction) ) ) );
+  return std::log(std::log(1.0 / (1.0 - (_volume_fraction/_equil_fraction))));
 }

@@ -49,11 +49,11 @@ ContactPressureAuxAction::act()
     if (isParamValid("parser_syntax"))
       _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
 
-    params.set<std::vector<BoundaryName> >("boundary") = std::vector<BoundaryName>(1,_slave);
+    params.set<std::vector<BoundaryName> >("boundary") = {_slave};
     params.set<BoundaryName>("paired_boundary") = _master;
     params.set<AuxVariableName>("variable") = "contact_pressure";
     params.addRequiredCoupledVar("nodal_area", "The nodal area");
-    params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_"+_name);
+    params.set<std::vector<VariableName> >("nodal_area") = {"nodal_area_" + _name};
     params.set<MooseEnum>("order") = _order;
 
     params.set<bool>("use_displaced_mesh") = true;

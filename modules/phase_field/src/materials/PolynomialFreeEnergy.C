@@ -50,13 +50,6 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const InputParameters & parameters) :
       mooseError("Error in PolynomialFreeEnergy: incorrect polynomial order");
   }
 
-  std::vector<std::string> nil_str(0);
-  std::vector<Real> nil_real(0);
-  std::vector<std::string> mat_prop_names(2);
-  mat_prop_names[0] = "W_name";
-  mat_prop_names[1] = "c_eq_name";
-
   //Parse function
-  functionParse(free_energy, nil_str, nil_str, mat_prop_names, nil_str, nil_real);
+  functionParse(free_energy, {}, {}, {"W_name", "c_eq_name"}, {}, {});
 }
-

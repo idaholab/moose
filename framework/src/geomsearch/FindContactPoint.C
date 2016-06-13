@@ -116,8 +116,7 @@ findContactPoint(PenetrationInfo & p_info,
   else
     ref_point = p_info._closest_point_ref;
 
-  std::vector<Point> points(1);
-  points[0] = ref_point;
+  std::vector<Point> points = {ref_point};
   _fe->reinit(side, &points);
   RealGradient d = slave_point - phys_point[0];
 
