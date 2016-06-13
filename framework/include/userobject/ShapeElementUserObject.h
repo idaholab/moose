@@ -75,7 +75,7 @@ protected:
   dof_id_type _j_global;
 
   /// set to true iff the current call of the user object is for the purpose of calculating Jacobians
-  const bool & _currently_computing_jacobian;
+  // const bool _currently_computing_jacobian;
 
 private:
   const bool _compute_jacobians;

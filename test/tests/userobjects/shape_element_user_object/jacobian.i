@@ -1,8 +1,12 @@
+[GlobalParams]
+  use_displaced_mesh = true
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
   nx = 2
-  # ny = 3
+  #ny = 2
 []
 
 [Variables]
@@ -22,10 +26,6 @@
       function = (x-0.5)^2
     [../]
   [../]
-  [./w]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
 [Kernels]
@@ -40,9 +40,8 @@
   [./shape_w]
     type = ExampleShapeElementKernel
     user_object = example_uo
-    u = u
     v = v
-    variable = w
+    variable = u
   [../]
   [./time_u]
     type = TimeDerivative
@@ -52,10 +51,6 @@
     type = TimeDerivative
     variable = v
   [../]
-  # [./time_w]
-  #   type = TimeDerivative
-  #   variable = w
-  # [../]
 []
 
 [UserObjects]
@@ -72,16 +67,23 @@
 [Preconditioning]
   [./smp]
     type = SMP
-    full = true
+    #full = true
+    off_diag_row =    'u'
+    off_diag_column = 'v'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options = '-snes_test_display'
-  petsc_options_iname = '-snes_type'
-  petsc_options_value = 'test'
+  #petsc_options = '-snes_test_display'
+  #petsc_options_iname = '-snes_type'
+  #petsc_options_value = 'test'
   dt = 0.1
   num_steps = 2
+[]
+
+[Outputs]
+  exodus = true
+  print_perf_log = true
 []

@@ -12,35 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EXAMPLESHAPEELEMENTKERNEL_H
-#define EXAMPLESHAPEELEMENTKERNEL_H
+#ifndef NONLOCALKERNEL_H
+#define NONLOCALKERNEL_H
 
-#include "NonlocalKernel.h"
-#include "ExampleShapeElementUserObject.h"
+#include "Kernel.h"
 
-class ExampleShapeElementKernel : public NonlocalKernel
-{
-public:
-  ExampleShapeElementKernel(const InputParameters & parameters);
-
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  /// new method for on-diagonal jacobian contributions corresponding to non-local dofs
-  virtual Real computeQpNonlocalJacobian(dof_id_type dof_index);
-  /// new method for off-diagonal jacobian contributions corresponding to non-local dofs
-  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index);
-
-  const ExampleShapeElementUserObject & _shp;
-  const Real & _shp_integral;
-  const std::vector<Real> & _shp_jacobian;
-
-  unsigned int _v_var;
-  const std::vector<dof_id_type> & _v_dofs;
-};
+class NonlocalKernel;
 
 template<>
-InputParameters validParams<ExampleShapeElementKernel>();
+InputParameters validParams<NonlocalKernel>();
 
-#endif //EXAMPLESHAPEELEMENTKERNEL_H
+class NonlocalKernel :
+  public Kernel
+{
+public:
+  NonlocalKernel(const InputParameters & parameters);
+
+  virtual void computeJacobian();
+  virtual void computeOffDiagJacobian(unsigned int jvar);
+
+protected:
+  /// Compute this Kernel's contribution to the Jacobian corresponding to nolocal dof at the current quadrature point
+  virtual Real computeQpNonlocalJacobian(dof_id_type dof_index);
+  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index);
+
+  DenseMatrix<Number> _nonlocal_ke;
+  unsigned int _k;
+};
+
+#endif /* NONLOCALKERNEL_H */

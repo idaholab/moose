@@ -72,6 +72,7 @@
 #include "Control.h"
 #include "XFEMInterface.h"
 #include "ConsoleUtils.h"
+#include "NonlocalKernel.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -138,6 +139,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
+    _requires_nonlocal_coupling(false),
+    _has_nonlocal_coupling(false),
     _kernel_coverage_check(false),
     _material_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
@@ -328,6 +331,9 @@ void FEProblem::initialSetup()
   // set state flag indicating that we are in or beyond initialSetup.
   // This can be used to throw errors in methods that _must_ be called at construction time.
   _started_initial_setup = true;
+
+  // Check whether nonlocal couling is required or not
+  checkNonlocalCoupling();
 
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
@@ -668,6 +674,10 @@ void FEProblem::timestepSetup()
 
    // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
+
+  if (_requires_nonlocal_coupling)
+    if (_nonlocal_kernels.hasActiveObjects())
+      _has_nonlocal_coupling = true;
 }
 
 unsigned int
@@ -693,6 +703,25 @@ FEProblem::getMaxScalarOrder() const
 }
 
 void
+FEProblem::checkNonlocalCoupling()
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    const KernelWarehouse & all_kernels = _nl.getKernelWarehouse();
+    const std::vector<MooseSharedPointer<KernelBase> > & kernels = all_kernels.getObjects(tid);
+    for (const auto & kernel : kernels)
+    {
+      MooseSharedPointer<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
+      if (nonlocal_kernel)
+      {
+        _requires_nonlocal_coupling = true;
+        _nonlocal_kernels.addObject(kernel, tid);
+      }
+    }
+  }
+}
+
+void
 FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem);
@@ -700,9 +729,15 @@ FEProblem::prepare(const Elem * elem, THREAD_ID tid)
   _nl.prepare(tid);
   _aux.prepare(tid);
   _assembly[tid]->prepare();
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->prepareNonlocal();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+  {
     _displaced_problem->prepare(_displaced_mesh->elemPtr(elem->id()), tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->prepareNonlocal(tid);
+  }
 }
 
 void
@@ -723,18 +758,30 @@ FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, cons
   _nl.prepare(tid);
   _aux.prepare(tid);
   _assembly[tid]->prepareBlock(ivar, jvar, dof_indices);
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->prepareBlockNonlocal(ivar, jvar, dof_indices);
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+  {
     _displaced_problem->prepare(_displaced_mesh->elemPtr(elem->id()), ivar, jvar, dof_indices, tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->prepareBlockNonlocal(ivar, jvar, dof_indices, tid);
+  }
 }
 
 void
 FEProblem::prepareAssembly(THREAD_ID tid)
 {
   _assembly[tid]->prepare();
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->prepareNonlocal();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
+  {
     _displaced_problem->prepareAssembly(tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->prepareNonlocal(tid);
+  }
 }
 
 NumericVector<Number> &
@@ -825,8 +872,14 @@ void
 FEProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _assembly[tid]->addJacobian(jacobian);
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->addJacobianNonlocal(jacobian);
   if (_displaced_problem)
+  {
     _displaced_problem->addJacobian(jacobian, tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->addJacobianNonlocal(jacobian, tid);
+  }
 }
 
 void
@@ -853,8 +906,14 @@ void
 FEProblem::cacheJacobian(THREAD_ID tid)
 {
   _assembly[tid]->cacheJacobian();
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->cacheJacobianNonlocal();
   if (_displaced_problem)
+  {
     _displaced_problem->cacheJacobian(tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->cacheJacobianNonlocal(tid);
+  }
 }
 
 void
@@ -877,8 +936,15 @@ void
 FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices);
+
   if (_displaced_problem)
+  {
     _displaced_problem->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices, tid);
+  }
 }
 
 void
@@ -972,10 +1038,16 @@ FEProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
   }
 
   _assembly[tid]->prepare();
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->prepareNonlocal();
 
   bool have_points = n_points > 0;
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
+  {
     have_points |= _displaced_problem->reinitDirac(_displaced_mesh->elemPtr(elem->id()), tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->prepareNonlocal(tid);
+  }
 
   return have_points;
 }
@@ -1000,9 +1072,15 @@ FEProblem::reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_e
 
   reinitElem(elem, tid);
   _assembly[tid]->prepare();
+  if (_has_nonlocal_coupling)
+    _assembly[tid]->prepareNonlocal();
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem))
+  {
     _displaced_problem->reinitElemPhys(_displaced_mesh->elemPtr(elem->id()), phys_points_in_elem, tid);
+    if (_has_nonlocal_coupling)
+      _displaced_problem->prepareNonlocal(tid);
+  }
 }
 
 void

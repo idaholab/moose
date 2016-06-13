@@ -285,6 +285,12 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::prepareNonlocal(THREAD_ID tid)
+{
+  _assembly[tid]->prepareNonlocal();
+}
+
+void
 DisplacedProblem::prepareFace(const Elem * /*elem*/, THREAD_ID tid)
 {
   _displaced_nl.prepareFace(tid, true);
@@ -299,6 +305,12 @@ DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jva
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
   _assembly[tid]->prepareBlock(ivar, jvar, dof_indices);
+}
+
+void
+DisplacedProblem::prepareBlockNonlocal(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
+{
+  _assembly[tid]->prepareBlockNonlocal(ivar, jvar, dof_indices);
 }
 
 void
@@ -538,6 +550,13 @@ DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::addJacobianNonlocal(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianNonlocal(jacobian);
+}
+
+
+void
 DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianNeighbor(jacobian);
@@ -547,6 +566,12 @@ void
 DisplacedProblem::cacheJacobian(THREAD_ID tid)
 {
   _assembly[tid]->cacheJacobian();
+}
+
+void
+DisplacedProblem::cacheJacobianNonlocal(THREAD_ID tid)
+{
+  _assembly[tid]->cacheJacobianNonlocal();
 }
 
 void
@@ -565,6 +590,12 @@ void
 DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
+}
+
+void
+DisplacedProblem::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices);
 }
 
 void

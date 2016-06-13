@@ -5,8 +5,14 @@
     recover = false
   [../]
 
-  [./jacobian]
+  [./simple_shape_element_uo]
     type = PetscJacobianTester
+    input = 'simple_shape_element_uo_test.i'
+    recover = false
+  [../]
+
+  [./jacobian]
+    type = RunApp
     input = 'jacobian.i'
     recover = false
   [../]

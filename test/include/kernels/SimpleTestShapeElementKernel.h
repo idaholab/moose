@@ -12,35 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EXAMPLESHAPEELEMENTKERNEL_H
-#define EXAMPLESHAPEELEMENTKERNEL_H
+#ifndef SIMPLETESTSHAPEELEMENTKERNEL_H
+#define SIMPLETESTSHAPEELEMENTKERNEL_H
 
 #include "NonlocalKernel.h"
-#include "ExampleShapeElementUserObject.h"
+#include "Assembly.h"
+#include "SimpleTestShapeElementUserObject.h"
 
-class ExampleShapeElementKernel : public NonlocalKernel
+#include "libmesh/quadrature.h"
+
+class SimpleTestShapeElementKernel : public NonlocalKernel
 {
 public:
-  ExampleShapeElementKernel(const InputParameters & parameters);
+  SimpleTestShapeElementKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  /// new method for on-diagonal jacobian contributions corresponding to non-local dofs
+  /// new method for jacobian contributions corresponding to non-local dofs
   virtual Real computeQpNonlocalJacobian(dof_id_type dof_index);
-  /// new method for off-diagonal jacobian contributions corresponding to non-local dofs
-  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index);
 
-  const ExampleShapeElementUserObject & _shp;
+  const SimpleTestShapeElementUserObject & _shp;
   const Real & _shp_integral;
   const std::vector<Real> & _shp_jacobian;
-
-  unsigned int _v_var;
-  const std::vector<dof_id_type> & _v_dofs;
 };
 
 template<>
-InputParameters validParams<ExampleShapeElementKernel>();
+InputParameters validParams<SimpleTestShapeElementKernel>();
 
-#endif //EXAMPLESHAPEELEMENTKERNEL_H
+#endif //SIMPLETESTSHAPEELEMENTKERNEL_H
