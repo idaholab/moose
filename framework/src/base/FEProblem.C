@@ -118,6 +118,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _scalar_ics(/*threaded=*/false),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
+    _dirac_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("dirac_material_props", &_mesh)),
     _pps_data(*this),
     _vpps_data(*this),
     _general_user_objects(/*threaded=*/false),
@@ -195,11 +196,14 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _material_data.resize(n_threads);
   _bnd_material_data.resize(n_threads);
   _neighbor_material_data.resize(n_threads);
+  _dirac_material_data.resize(n_threads);
+
   for (unsigned int i = 0; i < n_threads; i++)
   {
     _material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_material_props));
     _bnd_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_bnd_material_props));
     _neighbor_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_bnd_material_props));
+    _dirac_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_dirac_material_props));
   }
 
   _active_elemental_moose_variables.resize(n_threads);
@@ -476,10 +480,9 @@ void FEProblem::initialSetup()
       _all_materials.initialSetup(tid);
     }
 
-
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                     _material_props, _bnd_material_props, _assembly);
+    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data, _dirac_material_data,
+                                     _material_props, _bnd_material_props, _dirac_material_props, _assembly);
     /**
      * The ComputeMaterialObjectThread object now allocates memory as needed for the material storage system.
      * This cannot be done with threads. The first call to this object bypasses threading by calling the object
@@ -625,8 +628,8 @@ void FEProblem::initialSetup()
   if (!_app.isRecovering() && !_app.isRestarting() && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                     _material_props, _bnd_material_props, _assembly);
+    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data, _dirac_material_data,
+                                     _material_props, _bnd_material_props, _dirac_material_props, _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
 
@@ -1727,12 +1730,14 @@ FEProblem::getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID
   case Moose::FACE_MATERIAL_DATA:
     name += "_face";
     break;
+  case Moose::DIRAC_MATERIAL_DATA:
+    name += "_dirac";
   default:
     break;
   }
 
   MooseSharedPointer<Material> material = _all_materials[type].getActiveObject(name, tid);
-  if (material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+  if (material->getParam<bool>("compute") && (type == Moose::BLOCK_MATERIAL_DATA || type == Moose::DIRAC_MATERIAL_DATA) )
     mooseWarning("You are retrieving a Material object (" << material->name() << "), but its compute flag is not set to true. This indicates that MOOSE is computing this property which may not be desired and produce un-expected results.");
 
   return material;
@@ -1754,6 +1759,9 @@ FEProblem::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
   case Moose::BOUNDARY_MATERIAL_DATA:
   case Moose::FACE_MATERIAL_DATA:
     output = _bnd_material_data[tid];
+    break;
+  case Moose::DIRAC_MATERIAL_DATA:
+    output = _dirac_material_data[tid];
     break;
   }
   return output;
@@ -1820,20 +1828,28 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
       object_name = name + "_neighbor";
       MooseSharedPointer<Material> neighbor_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
 
+      // dirac material
+      current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::DIRAC_MATERIAL_DATA;
+      current_parameters.set<bool>("_dirac") = true;
+      object_name = name + "_dirac";
+      MooseSharedPointer<Material> dirac_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
+
       // Store the material objects
-      _all_materials.addObjects(material, neighbor_material, face_material, tid);
+      _all_materials.addObjects(material, neighbor_material, face_material, dirac_material, tid);
 
       if (discrete)
-        _discrete_materials.addObjects(material, neighbor_material, face_material, tid);
+        _discrete_materials.addObjects(material, neighbor_material, face_material, dirac_material, tid);
       else
-        _materials.addObjects(material, neighbor_material, face_material, tid);
+        _materials.addObjects(material, neighbor_material, face_material, dirac_material, tid);
 
         // link enabled parameter of face and neighbor materials
       MooseObjectParameterName name(MooseObjectName("Material", material->name()), "enabled");
       MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()), "enabled");
       MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()), "enabled");
+      MooseObjectParameterName dirac_name(MooseObjectName("Material", dirac_material->name()), "enabled");
       _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name);
       _app.getInputParameterWarehouse().addControllableParameterConnection(name, neighbor_name);
+      _app.getInputParameterWarehouse().addControllableParameterConnection(name, dirac_name);
 
     }
   }
@@ -1878,6 +1894,31 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful
 
     if (_materials.hasActiveBlockObjects(blk_id, tid))
       _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
+  }
+}
+
+void
+FEProblem::reinitMaterialsDirac(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
+{
+  if (_all_materials[Moose::DIRAC_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+  {
+    const Elem * & elem = _assembly[tid]->elem();
+    unsigned int n_points = _assembly[tid]->qRule()->n_points();
+
+    if (_dirac_material_data[tid]->nQPoints() != n_points)
+      _dirac_material_data[tid]->size(n_points);
+
+    if (_dirac_material_props.needInitialized(n_points, *elem))
+      _dirac_material_props.initStatefulProps(*_dirac_material_data[tid], _all_materials[Moose::DIRAC_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid), n_points, *elem);
+
+    if (swap_stateful && !_dirac_material_data[tid]->isSwapped())
+      _dirac_material_data[tid]->swap(*elem);
+
+    if (_discrete_materials[Moose::DIRAC_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _dirac_material_data[tid]->reset(_discrete_materials[Moose::DIRAC_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_materials[Moose::DIRAC_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _dirac_material_data[tid]->reinit(_materials[Moose::DIRAC_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -1972,6 +2013,13 @@ FEProblem::swapBackMaterialsNeighbor(THREAD_ID tid)
   const Elem * & neighbor = _assembly[tid]->neighbor();
   unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
   _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
+}
+
+void
+FEProblem::swapBackMaterialsDirac(THREAD_ID tid)
+{
+  const Elem * & elem = _assembly[tid]->elem();
+  _dirac_material_data[tid]->swapBack(*elem);
 }
 
 /**
@@ -3182,6 +3230,9 @@ FEProblem::advanceState()
 
   if (_bnd_material_props.hasStatefulProperties())
     _bnd_material_props.shift();
+
+  if (_dirac_material_props.hasStatefulProperties())
+    _dirac_material_props.shift();
 }
 
 void

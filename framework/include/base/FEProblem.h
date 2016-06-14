@@ -478,10 +478,12 @@ public:
   virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   virtual void reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
+  virtual void reinitMaterialsDirac(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
   /*
    * Swap back underlying data storing stateful material properties
    */
   virtual void swapBackMaterials(THREAD_ID tid);
+  virtual void swapBackMaterialsDirac(THREAD_ID tid);
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
 
@@ -805,6 +807,7 @@ public:
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() { return _material_props; }
   const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
+  const MaterialPropertyStorage & getDiracMaterialPropertyStorage() {return _dirac_material_props; }
   ///@}
 
   ///@{
@@ -1071,10 +1074,12 @@ protected:
   // material properties
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
+  MaterialPropertyStorage & _dirac_material_props;
 
   std::vector<MooseSharedPointer<MaterialData> > _material_data;
   std::vector<MooseSharedPointer<MaterialData> > _bnd_material_data;
   std::vector<MooseSharedPointer<MaterialData> > _neighbor_material_data;
+  std::vector<MooseSharedPointer<MaterialData> > _dirac_material_data;
 
   ///@{
   // Material Warehouses

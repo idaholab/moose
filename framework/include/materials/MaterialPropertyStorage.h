@@ -156,6 +156,11 @@ public:
    */
   bool hasOlderProperties() const { return _has_older_prop; }
 
+  /**
+   * @return a Boolean indicating whether or not this material needs to be initialized on the element
+   */
+  bool needInitialized(unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
+
   ///@{
   /**
    * Access methods to the stored material property data

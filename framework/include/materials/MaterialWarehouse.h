@@ -47,7 +47,7 @@ public:
   /**
    * A special method unique to this class for adding Block, Neighbor, and Face material objects.
    */
-  void addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, THREAD_ID tid = 0);
+  void addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, MooseSharedPointer<T> point, THREAD_ID tid = 0);
 
 protected:
   /// Stroage for neighbor material objects (Block are stored in the base class)
@@ -55,16 +55,20 @@ protected:
 
   /// Stroage for face material objects (Block are stored in the base class)
   ExecuteMooseObjectWarehouse<T> _face_materials;
+
+  /// Stroage for dirac material objects (Block are stored in the base class)
+  ExecuteMooseObjectWarehouse<T> _dirac_materials;
 };
 
 
 template<typename T>
 void
-MaterialWarehouse<T>::addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, THREAD_ID tid /*=0*/)
+MaterialWarehouse<T>::addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, MooseSharedPointer<T> dirac, THREAD_ID tid /*=0*/)
 {
   ExecuteMooseObjectWarehouse<T>::addObject(block, tid);
   _neighbor_materials.addObject(neighbor, tid);
   _face_materials.addObject(face, tid);
+  _dirac_materials.addObject(dirac,tid);
 }
 
 
@@ -79,6 +83,9 @@ MaterialWarehouse<T>::operator[](Moose::MaterialDataType data_type) const
     break;
   case Moose::FACE_MATERIAL_DATA:
     return _face_materials;
+    break;
+  case Moose::DIRAC_MATERIAL_DATA:
+    return _dirac_materials;
     break;
   default:
     return *this;

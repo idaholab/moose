@@ -93,7 +93,7 @@ ComputeDiracThread::onElement(const Elem * elem)
   }
 
   if (need_reinit_materials)
-    _fe_problem.reinitMaterials(_subdomain, _tid, /*swap_stateful=*/false);
+    _fe_problem.reinitMaterialsDirac(_subdomain, _tid);
 
   for (const auto & dirac_kernel : dkernels)
   {
@@ -136,6 +136,9 @@ ComputeDiracThread::onElement(const Elem * elem)
       }
     }
   }
+
+  if (need_reinit_materials)
+    _fe_problem.swapBackMaterialsDirac(_tid);
 
   // Note that we do not call swapBackMaterials() here as they were
   // never swapped in the first place.  This avoids messing up

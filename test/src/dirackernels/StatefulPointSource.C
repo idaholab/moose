@@ -33,6 +33,12 @@ void
 StatefulPointSource::addPoints()
 {
   addPoint(_p);
+
+  if (_t > 1.5)
+    addPoint(Point(0.6, 0.8, 0));
+
+  if (_t > 2.5)
+    addPoint(Point(0.7, 0.8, 0));
 }
 
 Real

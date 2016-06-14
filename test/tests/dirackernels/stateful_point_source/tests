@@ -1,7 +1,8 @@
 [Tests]
   [./stateful_point_source_test]
-    type = 'RunException'
+    type = 'Exodiff'
     input = 'stateful_point_source.i'
-    expect_err = "Error: Stateful material properties not allowed"
+    exodiff = "out.e"
+    recover = false
   [../]
 []

@@ -8,7 +8,6 @@
   nx = 2
   ny = 2
   elem_type = QUAD4
-  uniform_refine = 4
 []
 
 [Variables]
@@ -64,7 +63,10 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+
+  dt = 1.0
+  num_steps = 5
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
