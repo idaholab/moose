@@ -26,7 +26,7 @@ LineMaterialRankTwoSampler::LineMaterialRankTwoSampler(const InputParameters & p
 }
 
 Real
-LineMaterialRankTwoSampler::getScalarFromProperty(const RankTwoTensor & property, const Point & curr_point)
+LineMaterialRankTwoSampler::getScalarFromProperty(const RankTwoTensor & property, const Point & /*curr_point*/)
 {
   return RankTwoScalarTools::component(property, _i, _j);
 }

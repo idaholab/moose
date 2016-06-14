@@ -43,7 +43,7 @@ void
 inverse(std::vector<PetscScalar> & A, unsigned int n)
 {
   mooseAssert(n >= 1, "MatrixTools::inverse - n (leading dimension) needs to be positive");
-  mooseAssert(n == static_cast<int>(n), "MatrixTools::inverse - n (leading dimension) too large");
+  mooseAssert(n <= std::numeric_limits<int>::max(), "MatrixTools::inverse - n (leading dimension) too large");
 
   std::vector<PetscBLASInt> ipiv(n);
   std::vector<PetscScalar> buffer(n * 64);
