@@ -22,7 +22,7 @@ EFAElement3D::EFAElement3D(unsigned int eid, unsigned int n_nodes, unsigned int 
     EFAElement(eid, n_nodes),
     _num_faces(n_faces),
     _faces(_num_faces, NULL),
-    _face_neighbors(_num_faces, {NULL})
+    _face_neighbors(_num_faces, {nullptr})
 {
 }
 
@@ -30,7 +30,7 @@ EFAElement3D::EFAElement3D(const EFAElement3D* from_elem, bool convert_to_local)
   EFAElement(from_elem->_id, from_elem->_num_nodes),
   _num_faces(from_elem->_num_faces),
   _faces(_num_faces, NULL),
-  _face_neighbors(_num_faces, {NULL})
+  _face_neighbors(_num_faces, {nullptr})
 {
   if (convert_to_local)
   {
@@ -306,7 +306,7 @@ EFAElement3D::clearNeighbors()
 {
   _general_neighbors.clear();
   for (unsigned int face_iter = 0; face_iter < _num_faces; ++face_iter)
-    _face_neighbors[face_iter] = {NULL};
+    _face_neighbors[face_iter] = {nullptr};
 }
 
 void
