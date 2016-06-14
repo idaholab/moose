@@ -345,7 +345,7 @@ GrainTracker::trackGrains()
    * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
    * index whose centroid is closest to this unique grain.
    */
-  std::map<std::pair<unsigned int, unsigned int>, std::vector<unsigned int> > new_grain_idx_to_existing_grain_idx;
+  std::map<std::pair<unsigned int, unsigned int>, unsigned int> new_grain_idx_to_existing_grain_idx;
 
   for (auto & grain_pair : _unique_grains)
   {
@@ -373,68 +373,55 @@ GrainTracker::trackGrains()
     }
 
     if (found_one)
+    {
       // Keep track of which new grains the existing ones want to map to
-      new_grain_idx_to_existing_grain_idx[std::make_pair(map_idx, closest_match_idx)].push_back(grain_pair.first);
+      const auto match_pair = std::make_pair(map_idx, closest_match_idx);
+
+     /**
+      * It's possible that multiple existing grains will map to a single new grain (indicated by finding multiple
+      * matches when we are building this map). This will happen any time a grain disappears during
+      * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
+      */
+      const auto map_it = new_grain_idx_to_existing_grain_idx.find(match_pair);
+
+      if (map_it != new_grain_idx_to_existing_grain_idx.end())
+      {
+        // The new feature being competed for
+        auto & feature = _feature_sets[map_idx][closest_match_idx];
+
+        // The two older grains competing (iterators into the map)
+        const auto & grain_it1 = _unique_grains.find(map_it->second);
+        const auto & grain_it2 = _unique_grains.find(grain_pair.first);
+
+        auto centroid_diff1 = centroidRegionDistance(feature._bboxes, grain_it1->second._bboxes);
+        auto centroid_diff2 = centroidRegionDistance(feature._bboxes, grain_it2->second._bboxes);
+
+        auto & inactive_it = (centroid_diff1 < centroid_diff2) ? grain_it2 : grain_it1;
+
+        _console << "Marking Grain " << inactive_it->first << " as INACTIVE (variable index: "
+                 << inactive_it->second._var_idx << ")\n"
+                 << inactive_it->second;
+        inactive_it->second._status = INACTIVE;
+
+        // Make sure we update the new to existing map if necessary
+        if (grain_it1->first == inactive_it->first)
+          new_grain_idx_to_existing_grain_idx[match_pair] = grain_pair.first;
+      }
+      else
+        new_grain_idx_to_existing_grain_idx[std::make_pair(map_idx, closest_match_idx)] = grain_pair.first;
+    }
   }
 
-  /**
-   * It's possible that multiple existing grains will map to a single new grain (indicated by multiplicity in the
-   * new_grain_idx_to_existing_grain_idx data structure).  This will happen any time a grain disappears during
-   * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
-   */
+  // Transfer ownership of all grains where we found a match
   for (const auto & new_to_exist_kv : new_grain_idx_to_existing_grain_idx)
-  {                                                             // map index     feature index
-    FeatureData feature = std::move(_feature_sets[new_to_exist_kv.first.first][new_to_exist_kv.first.second]);
-
-    // If there is only a single mapping - we've found the correct grain
-    if (new_to_exist_kv.second.size() == 1)
-    {
-      unsigned int curr_idx = (new_to_exist_kv.second)[0];
-      feature._status = MARKED;                             // Mark it
-      _unique_grains[curr_idx] = std::move(feature);        // transfer ownership of new grain
-    }
-
-    // More than one existing grain is mapping to a new one (i.e. multiple values exist for a single key)
-    else
-    {
-      Real min_centroid_diff = std::numeric_limits<Real>::max();
-      unsigned int min_idx = 0;
-
-      for (unsigned int i = 0; i < new_to_exist_kv.second.size(); ++i)
-      {
-        unsigned int curr_idx = (new_to_exist_kv.second)[i];
-
-        Real curr_centroid_diff = centroidRegionDistance(feature._bboxes, _unique_grains[curr_idx]._bboxes);
-        if (curr_centroid_diff <= min_centroid_diff)
-        {
-          min_idx = i;
-          min_centroid_diff = curr_centroid_diff;
-        }
-      }
-
-      // One more time over the competing indices.  We will mark the non-winners as inactive and transfer ownership to the winner (the closest centroid).
-      for (unsigned int i = 0; i < new_to_exist_kv.second.size(); ++i)
-      {
-        unsigned int curr_idx = (new_to_exist_kv.second)[i];
-        if (i == min_idx)
-        {
-          feature._status = MARKED;                          // Mark it
-          _unique_grains[curr_idx] = std::move(feature);     // transfer ownership of new grain
-        }
-        else
-        {
-          _console << "Marking Grain " << curr_idx << " as INACTIVE (variable index: "
-                   << _unique_grains[curr_idx]._var_idx << ")\n"
-                   << _unique_grains[curr_idx];
-          _unique_grains[curr_idx]._status = INACTIVE;
-        }
-      }
-    }
+  {
+    auto curr_idx = new_to_exist_kv.second;
+                                                       // map index                 // feature index
+    _unique_grains[curr_idx] = std::move(_feature_sets[new_to_exist_kv.first.first][new_to_exist_kv.first.second]);
+    _unique_grains[curr_idx]._status = MARKED;
   }
 
-  /**
-   * Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
-   */
+  //  Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     for (auto feature_num = decltype(_feature_sets[map_num].size())(0);
          feature_num < _feature_sets[map_num].size(); ++feature_num)
