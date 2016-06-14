@@ -13,16 +13,18 @@ InputParameters validParams<KKSMultiACBulkBase>()
   params.addClassDescription("Multi-order parameter KKS model kernel for the Bulk Allen-Cahn. This operates on one of the order parameters 'eta_i' as the non-linear variable");
   params.addRequiredParam<std::vector<MaterialPropertyName> >("Fj_names", "List of free energies for each phase. Place in same order as hj_names!");
   params.addRequiredParam<std::vector<MaterialPropertyName> >("hj_names", "Switching Function Materials that provide h. Place in same order as Fj_names!");
+  params.addRequiredCoupledVar("eta_i", "Order parameter that derivatives are taken with respect to");
   return params;
 }
 
 KKSMultiACBulkBase::KKSMultiACBulkBase(const InputParameters & parameters) :
     ACBulk<Real>(parameters),
     _nvar(_coupled_moose_vars.size()), // number of coupled variables
-    _etai_name(_var.name()),
+    _etai_name(getVar("eta_i", 0)->name()),
     _Fj_names(getParam<std::vector<MaterialPropertyName> >("Fj_names")),
     _num_Fj(_Fj_names.size()),
     _prop_Fj(_num_Fj),
+    _prop_dFjdarg(_num_Fj),
     _hj_names(getParam<std::vector<MaterialPropertyName> >("hj_names")),
     _num_hj(_hj_names.size()),
     _prop_hj(_num_hj),

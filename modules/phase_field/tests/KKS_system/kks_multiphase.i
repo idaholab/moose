@@ -74,6 +74,13 @@
     family = LAGRANGE
     initial_condition = 0.8
   [../]
+
+  # Lagrange multiplier
+  [./lambda]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 0.0
+  [../]
 []
 
 [Materials]
@@ -148,6 +155,14 @@
     eta = eta3
     function_name = g3
   [../]
+
+  # constant properties
+  [./constants]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names  = 'L   kappa'
+    prop_values = '0.7 0.4  '
+  [../]
 []
 
 [Kernels]
@@ -156,7 +171,7 @@
     variable = c
   [../]
 
-  # Kernels for Allen-Cahn equation
+  # Kernels for Allen-Cahn equation for eta1
   [./deta1dt]
     type = TimeDerivative
     variable = eta1
@@ -167,26 +182,132 @@
     Fj_names  = 'F1 F2 F3'
     hj_names  = 'h1 h2 h3'
     gi_name   = g1
+    eta_i     = eta1
     wi        = 0.4
+    args      = 'c1 c2 c3'
   [../]
-  [./ACBulkC]
-    type = KKSACBulkC
-    variable = eta
-    ca       = cm
-    cb       = cd
-    fa_name  = fm
-    fb_name  = fd
+  [./ACBulkC1]
+    type = KKSMultiACBulkC
+    variable  = eta1
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj        = 'c1 c2 c3'
+    eta_i     = eta1
   [../]
-  [./ACInterface]
+  [./ACInterface1]
     type = ACInterface
-    variable = eta
+    variable = eta1
     kappa_name = kappa
   [../]
+  [./multipler1]
+    type = MatReaction
+    variable = eta1
+    v = lambda
+    mob_name = L
+  [../]
 
-  [./eta2diff]
-    type = Diffusion
+  # Kernels for Allen-Cahn equation for eta2
+  [./deta2dt]
+    type = TimeDerivative
     variable = eta2
   [../]
+  [./ACBulkF2]
+    type = KKSMultiACBulkF
+    variable  = eta2
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g2
+    eta_i     = eta2
+    wi        = 0.4
+    args      = 'c1 c2 c3'
+  [../]
+  [./ACBulkC2]
+    type = KKSMultiACBulkC
+    variable  = eta2
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj        = 'c1 c2 c3'
+    eta_i     = eta2
+  [../]
+  [./ACInterface2]
+    type = ACInterface
+    variable = eta2
+    kappa_name = kappa
+  [../]
+  [./multipler2]
+    type = MatReaction
+    variable = eta2
+    v = lambda
+    mob_name = L
+  [../]
+
+  # Kernels for the Lagrange multiplier equation
+  [./mult_lambda]
+    type = MatReaction
+    variable = lambda
+    mob_name = 3
+  [../]
+  [./mult_ACBulkF_1]
+    type = KKSMultiACBulkF
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g1
+    eta_i     = eta1
+    wi        = 0.4
+    mob_name  = 1
+    args      = 'c1 c2 c3'
+  [../]
+  [./mult_ACBulkC_1]
+    type = KKSMultiACBulkC
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj        = 'c1 c2 c3'
+    eta_i     = eta1
+    mob_name  = 1
+  [../]
+  [./mult_ACBulkF_2]
+    type = KKSMultiACBulkF
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g2
+    eta_i     = eta2
+    wi        = 0.4
+    mob_name  = 1
+    args      = 'c1 c2 c3'
+  [../]
+  [./mult_ACBulkC_2]
+    type = KKSMultiACBulkC
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj        = 'c1 c2 c3'
+    eta_i     = eta2
+    mob_name  = 1
+  [../]
+  [./mult_ACBulkF_3]
+    type = KKSMultiACBulkF
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g3
+    eta_i     = eta3
+    wi        = 0.4
+    mob_name  = 1
+    args      = 'c1 c2 c3'
+  [../]
+  [./mult_ACBulkC_3]
+    type = KKSMultiACBulkC
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj        = 'c1 c2 c3'
+    eta_i     = eta3
+    mob_name  = 1
+  [../]
+
 
   # Kernels for constraint equation eta1 + eta2 + eta3 = 1
   # eta3 is the nonlinear variable for the constraint equation
@@ -239,9 +360,18 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'PJFNK'
-  #solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -sub_pc_type   -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm       lu            nonzero'
+  l_max_its = 30
+  nl_max_its = 10
+  l_tol = 1.0e-4
+  nl_rel_tol = 1.0e-8
+  nl_abs_tol = 1.0e-10
+
+  num_steps = 2
+  dt = 0.5
 []
 
 [Preconditioning]
