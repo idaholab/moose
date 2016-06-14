@@ -333,7 +333,7 @@ GrainTracker::trackGrains()
         std::transform(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), std::inserter(_unique_grains, _unique_grains.end()),
                        [&counter](FeatureData & item)
                        {
-                         return std::move(std::pair<unsigned int, FeatureData>(counter++, std::move(item)));
+                         return std::pair<unsigned int, FeatureData>(counter++, std::move(item));
                        });
       }
     }
