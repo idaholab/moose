@@ -16,6 +16,21 @@
     input = 'cosserat_glide.i'
     csvdiff = 'cosserat_glide_out_soln_0001.csv'
   [../]
+  [./layered_cosserat_01]
+    type = 'CSVDiff'
+    input = 'layered_cosserat_01.i'
+    csvdiff = 'layered_cosserat_01.csv'
+  [../]
+  [./layered_cosserat_02]
+    type = 'CSVDiff'
+    input = 'layered_cosserat_02.i'
+    csvdiff = 'layered_cosserat_02.csv'
+  [../]
+  [./layered_cosserat_03]
+    type = 'CSVDiff'
+    input = 'layered_cosserat_03.i'
+    csvdiff = 'layered_cosserat_03.csv'
+  [../]
 
   [./except01]
     type = RunException
