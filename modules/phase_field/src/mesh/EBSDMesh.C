@@ -18,9 +18,9 @@ InputParameters validParams<EBSDMesh>()
   // suppress parameters
   params.suppressParameter<MooseEnum>("dim");
   params.set<MooseEnum>("dim") = MooseEnum("1=1 2 3", "1");
-  params.suppressParameter<int>("nx");
-  params.suppressParameter<int>("ny");
-  params.suppressParameter<int>("nz");
+  params.suppressParameter<unsigned int>("nx");
+  params.suppressParameter<unsigned int>("ny");
+  params.suppressParameter<unsigned int>("nz");
   params.suppressParameter<Real>("xmin");
   params.suppressParameter<Real>("ymin");
   params.suppressParameter<Real>("zmin");

@@ -1027,7 +1027,7 @@ MooseApp::createMinimalApp()
     // Set the object parameters
     InputParameters & params = action->getObjectParams();
     params.set<MooseEnum>("dim") = "1";
-    params.set<int>("nx") = 1;
+    params.set<unsigned int>("nx") = 1;
 
     // Add Action to the warehouse
     _action_warehouse.addActionBlock(action);

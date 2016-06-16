@@ -41,7 +41,7 @@ protected:
   MooseEnum _dim;
 
   /// Number of elements in x, y, z direction
-  int _nx, _ny, _nz;
+  unsigned int _nx, _ny, _nz;
 
   /// The min/max values for x,y,z component
   Real _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
