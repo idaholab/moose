@@ -55,6 +55,7 @@
 #include "PFFracCoupledInterface.h"
 #include "PFFracIntVar.h"
 #include "SimpleACInterface.h"
+#include "SimpleSplitCHWRes.h"
 #include "SingleGrainRigidBodyMotion.h"
 #include "SoretDiffusion.h"
 #include "SplitCHMath.h"
@@ -301,6 +302,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(PFFracCoupledInterface);
   registerKernel(PFFracIntVar);
   registerKernel(SimpleACInterface);
+  registerKernel(SimpleSplitCHWRes);
   registerKernel(SingleGrainRigidBodyMotion);
   registerKernel(SoretDiffusion);
   registerKernel(SplitCHMath);

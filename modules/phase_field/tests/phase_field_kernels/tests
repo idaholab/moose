@@ -60,4 +60,10 @@
     input = 'ConstructionOrder.i'
     exodiff = 'ConstructionOrder_out.e'
   [../]
+
+  [./SimpleSplitCHWRes]
+    type = 'Exodiff'
+    input = 'SimpleSplitCHWRes.i'
+    exodiff = 'SimpleSplitCHWRes_out.e'            
+  [../]
 []
