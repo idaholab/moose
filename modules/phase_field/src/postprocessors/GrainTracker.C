@@ -887,7 +887,7 @@ GrainTracker::updateFieldInfo()
       _halo_ids[entity] = grain_pair.second._var_idx;
 
     for (auto entity : grain_pair.second._ghosted_ids)
-      _ghosted_entity_ids[entity] = grain_pair.first;
+      _ghosted_entity_ids[entity] = 1;
   }
 }
 

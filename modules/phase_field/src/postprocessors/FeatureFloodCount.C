@@ -112,8 +112,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
-    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false),
-    _semilocal_elem_list_built(false)
+    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
 {
   // Size the data structures to hold the correct number of maps
   for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
@@ -164,21 +163,6 @@ FeatureFloodCount::initialize()
 
   // Reset the feature count
   _feature_count = 0;
-
-  // build semilocal element list
-  if (_is_elemental && !_semilocal_elem_list_built)
-  {
-    MeshBase::const_element_iterator       el  = _mesh.getMesh().active_elements_begin();
-    const MeshBase::const_element_iterator end = _mesh.getMesh().active_elements_end();
-    const processor_id_type my_pid = processor_id();
-
-    _semilocal_elem_list.clear();
-    for (; el != end; ++el)
-      if ((*el)->is_semilocal(my_pid))
-        _semilocal_elem_list.insert(*el);
-
-    _semilocal_elem_list_built = true;
-  }
 }
 
 void
@@ -306,12 +290,6 @@ FeatureFloodCount::getValue()
   return _feature_count;
 }
 
-void
-FeatureFloodCount::meshChanged()
-{
-  _semilocal_elem_list_built = false;
-}
-
 Real
 FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx) const
 {
@@ -398,13 +376,6 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
           // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
           feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
         }
-
-        // Adjust the halo marking region
-        std::set<dof_id_type> set_difference;
-
-        std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
-                            std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
-        feature._halo_ids.swap(set_difference);
 
         // Periodic node ids
         appendPeriodicNeighborNodes(feature);
@@ -582,6 +553,9 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       {
         if (!feature._merged)
         {
+          // Adjust the halo marking region
+          cleanupHalo(feature);
+
           _feature_sets[map_num].emplace_back(std::move(feature));
           ++_feature_count;
         }
@@ -636,7 +610,7 @@ FeatureFloodCount::updateFieldInfo()
 
       // Loop over the ghosted ids to update cells with ghost information
       for (auto entity : feature._ghosted_ids)
-        _ghosted_entity_ids[entity] = feature_number;
+        _ghosted_entity_ids[entity] = 1;
 
       ++feature_number;
     }
@@ -705,10 +679,17 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
   // Insert the current entity into the local ids map
   feature->_local_ids.insert(entity_id);
 
-  if (_is_elemental)
-    visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*recurse =*/true);
-  else
-    visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*recurse =*/true);
+  /**
+   * Only recurse if we own this entity. We'll still pick up ghosted entities since
+   * neighbors of active local elements may be non-local.
+   */
+  if (dof_object->processor_id() == processor_id())
+  {
+    if (_is_elemental)
+      visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*recurse =*/true);
+    else
+      visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*recurse =*/true);
+  }
 }
 
 void
@@ -732,8 +713,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
   {
     auto my_proc_id = processor_id();
 
-    // Only recurse on elems this processor can see
-    if (neighbor_ptr && _semilocal_elem_list.find(neighbor_ptr) != _semilocal_elem_list.end())
+    if (neighbor_ptr)
     {
       if (neighbor_ptr->processor_id() != my_proc_id)
         feature->_ghosted_ids.insert(elem->id());
@@ -766,18 +746,14 @@ FeatureFloodCount::visitNodalNeighbors(const Node * node, unsigned long current_
     const Node * neighbor_node = neighbors[i];
     auto my_proc_id = processor_id();
 
-    // Only recurse on nodes this processor can see
-    if (_mesh.isSemiLocal(const_cast<Node *>(neighbor_node)))
-    {
-      if (neighbor_node->processor_id() != my_proc_id)
-        feature->_ghosted_ids.insert(neighbor_node->id());
+    if (neighbor_node->processor_id() != my_proc_id)
+      feature->_ghosted_ids.insert(neighbor_node->id());
 
-      // Premark Halo values
-      feature->_halo_ids.insert(neighbor_node->id());
+    // Premark Halo values
+    feature->_halo_ids.insert(neighbor_node->id());
 
-      if (recurse)
-        flood(neighbors[i], current_idx, feature);
-    }
+    if (recurse)
+      flood(neighbors[i], current_idx, feature);
   }
 }
 
@@ -937,6 +913,25 @@ FeatureFloodCount::calculateBubbleVolumes()
   std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
 
   Moose::perf_log.pop("calculateBubbleVolume()", "FeatureFloodCount");
+}
+
+void
+FeatureFloodCount::cleanupHalo(FeatureData & feature)
+{
+  {
+    std::set<dof_id_type> set_difference;
+    // First remove the local ids from the halo set
+    std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
+                        std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
+    feature._halo_ids.swap(set_difference);
+  }
+  {
+    std::set<dof_id_type> set_difference;
+    // Then remove the ghost ids from the halo set
+    std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._ghosted_ids.begin(), feature._ghosted_ids.end(),
+                        std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
+    feature._halo_ids.swap(set_difference);
+  }
 }
 
 void

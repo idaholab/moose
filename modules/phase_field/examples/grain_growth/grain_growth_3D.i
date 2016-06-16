@@ -6,15 +6,17 @@
 [Mesh]
   # Mesh block.  Meshes can be read in or automatically generated
   type = GeneratedMesh
-  dim = 2 # Problem dimension
-  nx = 11 # Number of elements in the x-direction
-  ny = 11 # Number of elements in the y-direction
+  dim = 3 # Problem dimension
+  nx = 10 # Number of elements in the x-direction
+  ny = 10 # Number of elements in the y-direction
+  nz = 3
   xmin = 0    # minimum x-coordinate of the mesh
   xmax = 1000 # maximum x-coordinate of the mesh
   ymin = 0    # minimum y-coordinate of the mesh
   ymax = 1000 # maximum y-coordinate of the mesh
-  elem_type = QUAD4  # Type of elements used in the mesh
-  uniform_refine = 3 # Initial uniform refinement of the mesh
+  zmin = 0
+  zmax = 300
+  uniform_refine = 2 # Initial uniform refinement of the mesh
 []
 
 [GlobalParams]
@@ -32,7 +34,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 100 #Number of grains
+      grain_num = 20 #Number of grains
       advanced_op_assignment = true
       rand_seed = 10
     [../]
@@ -122,7 +124,7 @@
     type = GBEvolution
     block = 0 # Block ID (only one block in this problem)
     T = 450 # Constant temperature of the simulation (for mobility calculation)
-    wGB = 14 # Width of the diffuse GB
+    wGB = 40 # Width of the diffuse GB
     GBmob0 = 2.5e-6 #m^4(Js) for copper from Schoenfelder1997
     Q = 0.23 #eV for copper from Schoenfelder1997
     GBenergy = 0.708 #J/m^2 from Schoenfelder1997
@@ -170,10 +172,10 @@
 
   [./Adaptivity]
     # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-    initial_adaptivity = 2 # Number of times mesh is adapted to initial condition
-    refine_fraction = 0.7 # Fraction of high error that will be refined
+#    initial_adaptivity = 2 # Number of times mesh is adapted to initial condition
+    refine_fraction = 0.6 # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-    max_h_level = 4 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+    max_h_level = 3 # Max number of refinements used, starting from initial mesh (before uniform refinement)
   [../]
 []
 

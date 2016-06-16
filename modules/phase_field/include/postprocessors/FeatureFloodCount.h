@@ -52,8 +52,6 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
-  virtual void meshChanged() override;
-
   enum FIELD_TYPE
   {
     UNIQUE_REGION,
@@ -207,6 +205,12 @@ protected:
    * This routine uses the bubble_sets data structure to calculate the volume of each stored bubble.
    */
   virtual void calculateBubbleVolumes();
+
+  /**
+   * This routine takes the set of halo ids and removes any extraneous entries caused from bumping
+   * up against processor boundaries or flooding into the interior of the grain.
+   */
+  void cleanupHalo(FeatureData & feature);
 
   /**
    * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
@@ -377,12 +381,6 @@ protected:
    * Determines if the flood counter is elements or not (nodes)
    */
   bool _is_elemental;
-
-  /// used for testing if a neighbor element is semilocal
-  std::set<const Elem *> _semilocal_elem_list;
-
-  /// flag that indicates if an up to date list of semilocal (active) elements has been built
-  bool _semilocal_elem_list_built;
 };
 
 template <class T>
