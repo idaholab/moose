@@ -139,5 +139,11 @@
     type = Exodiff
     input = 'MultiSmoothSuperellipsoidIC_2D.i'
     exodiff = 'MultiSmoothSuperellipsoidIC_2D_out.e'
+  [..]
+
+  [./TricrystalTripleJunctionIC]
+    type = Exodiff
+    input = TricrystalTripleJunctionIC.i
+    exodiff = TricrystalTripleJunctionIC_out.e
   [../]
 []

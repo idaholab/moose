@@ -94,6 +94,7 @@
 #include "SpecifiedSmoothSuperellipsoidIC.h"
 #include "ThumbIC.h"
 #include "Tricrystal2CircleGrainsIC.h"
+#include "TricrystalTripleJunctionIC.h"
 
 /*
  * Boundary Conditions
@@ -342,6 +343,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(SpecifiedSmoothSuperellipsoidIC);
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
+  registerInitialCondition(TricrystalTripleJunctionIC);
 
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);

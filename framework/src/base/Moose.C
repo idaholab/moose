@@ -127,7 +127,6 @@
 #include "ScalarConstantIC.h"
 #include "ScalarComponentIC.h"
 #include "FunctionScalarIC.h"
-#include "TricrystalTripleJunctionIC.h"
 
 // executioners
 #include "Steady.h"
@@ -542,7 +541,6 @@ registerObjects(Factory & factory)
   registerInitialCondition(ScalarConstantIC);
   registerInitialCondition(ScalarComponentIC);
   registerInitialCondition(FunctionScalarIC);
-  registerInitialCondition(TricrystalTripleJunctionIC);
 
   // executioners
   registerExecutioner(Steady);
