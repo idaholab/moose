@@ -58,9 +58,9 @@ InputParameters validParams<GeneratedMesh>()
 GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
     MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim")),
-    _nx(getParam<int>("nx")),
-    _ny(getParam<int>("ny")),
-    _nz(getParam<int>("nz")),
+    _nx(getParam<unsigned int>("nx")),
+    _ny(getParam<unsigned int>("ny")),
+    _nz(getParam<unsigned int>("nz")),
     _xmin(getParam<Real>("xmin")),
     _xmax(getParam<Real>("xmax")),
     _ymin(getParam<Real>("ymin")),
@@ -70,28 +70,6 @@ GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z"))
-{
-}
-
-GeneratedMesh::GeneratedMesh(const GeneratedMesh & other_mesh) :
-    MooseMesh(other_mesh),
-    _dim(other_mesh._dim),
-    _nx(other_mesh._nx),
-    _ny(other_mesh._ny),
-    _nz(other_mesh._nz),
-    _xmin(getParam<Real>("xmin")),
-    _xmax(getParam<Real>("xmax")),
-    _ymin(getParam<Real>("ymin")),
-    _ymax(getParam<Real>("ymax")),
-    _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax")),
-    _bias_x(getParam<Real>("bias_x")),
-    _bias_y(getParam<Real>("bias_y")),
-    _bias_z(getParam<Real>("bias_z"))
-{
-}
-
-GeneratedMesh::~GeneratedMesh()
 {
 }
 
