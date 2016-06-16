@@ -157,6 +157,7 @@ if __name__ == '__main__':
   parser.add_argument('--disable-legend', action='store_true', help='Disable display of legend')
   parser.add_argument('--stack', '-s', action='store_true', help='Show graph as stacked area instead of line plot')
   parser.add_argument('--unique', '-u', action='store_true', help='Show unique contributor on secondary axis')
+  parser.add_argument('--unique-label', default='legend', choices=['none', 'arrow', 'legend'], help='Control how the unique contributor line is labeled.')
   parser.add_argument('--open-source', '-r', action='store_true', help='Show shaded region for open sourcing of MOOSE')
   parser.add_argument('--pdf', '--file', '-f', action='store_true', help='Write the plot to a pdf file (see --output)')
   parser.add_argument('--output', '-o', type=str, default='commit_history.pdf', help='The filename for writting the plot to a file')
@@ -196,17 +197,18 @@ if __name__ == '__main__':
   # Show unique contributors
   if options.unique:
     ax2 = ax1.twinx()
-    ax2.plot(dates, contrib, linewidth=4, linestyle='-', color='k')
+    ax2.plot(dates, contrib, linewidth=4, linestyle='-', color='k', label='Unique Contributors')
     ax2.set_ylabel('Unique Contributors', color='k', fontsize=options.font)
     for tick in ax2.yaxis.get_ticklabels():
       tick.set_fontsize(options.font)
     for tick in ax2.xaxis.get_ticklabels():
       tick.set_fontsize(options.font)
 
-    arrow = dict(arrowstyle="-|>", connectionstyle="arc3,rad=0.3", fc="w")
-    i = int(len(dates)*0.75)
-    c = int(contrib[-1]*0.75)
-    ax2.annotate('Unique Contributors', xy=(dates[i], contrib[i]), xytext=(datetime.date(2014,1,1), c), ha='right', size=options.font, arrowprops=arrow)
+    if options.unique_label == 'arrow':
+      arrow = dict(arrowstyle="-|>", connectionstyle="arc3,rad=0.3", fc="w")
+      i = int(len(dates)*0.75)
+      c = int(contrib[-1]*0.75)
+      ax2.annotate('Unique Contributors', xy=(dates[i], contrib[i]), xytext=(datetime.date(2014,1,1), c), ha='right', size=options.font, arrowprops=arrow)
 
   # labels
   y_label = 'Commits'
@@ -218,22 +220,38 @@ if __name__ == '__main__':
       handles[i].set_label(contributors[i])
 
   elif options.additions: #additions/deletions plot
-    y_label = 'Additions / Deletions'
-    for i in range(len(contributors)):
+    factor = 1000.
+    y_label = 'Additions / Deletions (x1000)'
+    n = len(contributors)
+    for i in range(n):
       x = numpy.array(dates)
-      y = data['in'][i,:]
-      label = contributors[i] + '(Additions)'
+      y = numpy.array(data['in'][i,:])/factor
+
+      if n == 1:
+        label = 'Additions'
+      else:
+        label = contributors[i] + '(Additions)'
+
       clr = color.next()
-      ax1.fill_between(x, 0, y, label=label, linewidth=2, edgecolor=clr, facecolor=clr, alpha=0.5)
-      ax1.plot([], [], color=clr, label=label) # legend proxy
-      y = -data['out'][i,:]
-      label = contributors[i] + '(Deletions)'
+      ax1.fill_between(x, 0, y, label=label, linewidth=2, edgecolor=clr, facecolor=clr, alpha=1.0)
+
+      y = -numpy.array(data['out'][i,:])/factor
+
+      if n == 1:
+        label = 'Deletions'
+      else:
+        label = contributors[i] + '(Deletions)'
       clr = color.next()
-      ax1.fill_between(x, 0, y, label=label, linewidth=2, edgecolor=clr, facecolor=clr, alpha=0.5)
-      ax1.plot([], [], color=clr, label=label) # legend proxy
+      ax1.fill_between(x, 0, y, label=label, linewidth=2, edgecolor=clr, facecolor=clr, alpha=1.0)
 
     if not options.disable_legend:
       handles, labels = ax1.get_legend_handles_labels()
+
+      if options.unique and options.unique_label== 'legend':
+        h, l = ax2.get_legend_handles_labels()
+        handles.append(h[0])
+        labels.append(l[0])
+
       lgnd = plt.legend(handles, labels, loc='upper left', fontsize=options.font)
       lgnd.draw_frame(False)
 
@@ -247,6 +265,11 @@ if __name__ == '__main__':
       handles.append(h[0])
 
     if not options.disable_legend:
+      if options.unique and options.unique_label== 'legend':
+        h, l = ax2.get_legend_handles_labels()
+        handles.append(h[0])
+        contributors.append(l[0])
+
       lgnd = plt.legend(handles, contributors, loc='upper left', fontsize=options.font)
       lgnd.draw_frame(False)
 
@@ -257,9 +280,11 @@ if __name__ == '__main__':
   # Show open-source region
   if options.open_source:
     os = datetime.date(2014,3,10)
-    y_lim = plt.ylim()
-    delta = plt.xlim()[1] - os.toordinal()
+    x_lim = ax2.get_xlim()
+    y_lim = ax1.get_ylim()
+    delta = x_lim[1] - os.toordinal()
     plt.gca().add_patch(plt.Rectangle((os.toordinal(), y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.2))
+    ax1.annotate('Open-source ', xy=(x_lim[1] - (delta/2.), y_lim[0]), ha='center', va='bottom', size=options.font)
 
 
   # Write to a file
