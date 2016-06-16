@@ -51,7 +51,7 @@ def getContributors(options, **kwargs):
   # Limit to the supplied number of authors
   n = len(contributors)
   if num_authors == 'moose':
-    contributors = ['Derek Gaston', 'Cody Permann', 'David Andrs', 'John W. Peterson', 'Andrew E. Slaughter']
+    contributors = ['Derek Gaston', 'Cody Permann', 'David Andrs', 'John W. Peterson', 'Andrew E. Slaughter', 'Brain Alger', 'Fande Kong']
     contributors += ['Other (' + str(n-len(contributors)) + ')']
 
   elif num_authors:
@@ -187,6 +187,7 @@ if __name__ == '__main__':
 
   # Create the figure
   fig, ax1 = plt.subplots()
+  fig.set_facecolor([1,1,1])
   for tick in ax1.yaxis.get_ticklabels():
     tick.set_fontsize(options.font)
   for tick in ax1.xaxis.get_ticklabels():
@@ -258,7 +259,7 @@ if __name__ == '__main__':
     os = datetime.date(2014,3,10)
     y_lim = plt.ylim()
     delta = plt.xlim()[1] - os.toordinal()
-    plt.gca().add_patch(plt.Rectangle((os, y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.2))
+    plt.gca().add_patch(plt.Rectangle((os.toordinal(), y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.2))
 
 
   # Write to a file
