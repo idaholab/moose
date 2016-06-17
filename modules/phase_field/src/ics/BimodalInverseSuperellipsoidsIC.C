@@ -24,13 +24,8 @@ BimodalInverseSuperellipsoidsIC::BimodalInverseSuperellipsoidsIC(const InputPara
 void
 BimodalInverseSuperellipsoidsIC::initialSetup()
 {
-  switch (_size_variation_type)
-  {
-    case 2: //No variation
-      if (_size_variation > 0.0)
-        mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalInverseSuperellipsoidsIC");
-      break;
-  }
+  if (_size_variation_type == 2 && _size_variation > 0.0)
+    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalInverseSuperellipsoidsIC");
 
   BimodalSuperellipsoidsIC::initialSetup();
 }

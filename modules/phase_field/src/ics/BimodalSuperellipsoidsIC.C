@@ -54,13 +54,8 @@ BimodalSuperellipsoidsIC::initialSetup()
   }
   _range = _top_right - _bottom_left;
 
-  switch (_size_variation_type)
-  {
-    case 2: //No variation
-      if (_size_variation > 0.0)
-        mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
-      break;
-  }
+  if (_size_variation_type == 2 && _size_variation > 0.0)
+    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
 
   SmoothSuperellipsoidBaseIC::initialSetup();
 }

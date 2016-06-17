@@ -7,11 +7,7 @@
 #ifndef BIMODALINVERSESUPERELLIPSOIDSIC_H
 #define BIMODALINVERSESUPERELLIPSOIDSIC_H
 
-#include "Kernel.h"
 #include "BimodalSuperellipsoidsIC.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class BimodalInverseSuperellipsoidsIC;
