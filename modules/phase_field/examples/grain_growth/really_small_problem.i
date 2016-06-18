@@ -17,7 +17,7 @@
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 4 # Number of order parameters used
+  op_num = 6 # Number of order parameters used
   var_name_base = gr # Base name of grains
 []
 
@@ -30,7 +30,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 6 # Number of grains
+      grain_num = 10 # Number of grains
       advanced_op_assignment = true
       rand_seed = 10
     [../]
@@ -59,6 +59,22 @@
     family = MONOMIAL
   [../]
   [./proc_id]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo0]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo3]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -111,6 +127,34 @@
     type = ProcessorIDAux
     variable = proc_id
   [../]
+  [./halo0]
+    type = FeatureFloodCountAux
+    variable = halo0
+    map_index = 0
+    field_display = HALOS
+    bubble_object = grain_tracker
+  [../]
+  [./halo1]
+    type = FeatureFloodCountAux
+    variable = halo1
+    map_index = 1
+    field_display = HALOS
+    bubble_object = grain_tracker
+  [../]
+  [./halo2]
+    type = FeatureFloodCountAux
+    variable = halo2
+    map_index = 2
+    field_display = HALOS
+    bubble_object = grain_tracker
+  [../]
+  [./halo3]
+    type = FeatureFloodCountAux
+    variable = halo3
+    map_index = 3
+    field_display = HALOS
+    bubble_object = grain_tracker
+  [../]
 []
 
 [BCs]
@@ -137,6 +181,7 @@
     threshold = 0.2
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
+    halo_level = 1
   [../]
   [./dt]
     # Outputs the current time step

@@ -156,8 +156,12 @@ protected:
   void flood(const DofObject * dof_object, unsigned long current_idx, FeatureData * feature);
 
   // TODO: doco
-  void visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool recurse);
-  void visitNodalNeighbors(const Node * elem, unsigned long current_idx, FeatureData * feature, bool recurse);
+  void visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool expand_halos_only);
+  void visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool expand_halos_only);
+
+  template<typename T>
+  void visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, unsigned long current_idx,
+                            FeatureData * feature, bool expand_halos_only);
 
   /**
    * This routine uses the local flooded data to build up the local feature data structures (_feature_sets).
@@ -205,12 +209,6 @@ protected:
    * This routine uses the bubble_sets data structure to calculate the volume of each stored bubble.
    */
   virtual void calculateBubbleVolumes();
-
-  /**
-   * This routine takes the set of halo ids and removes any extraneous entries caused from bumping
-   * up against processor boundaries or flooding into the interior of the grain.
-   */
-  void cleanupHalo(FeatureData & feature);
 
   /**
    * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
@@ -339,7 +337,7 @@ protected:
 
   // TODO: Doco
   std::map<dof_id_type, int> _ghosted_entity_ids;
-  std::map<dof_id_type, int> _halo_ids;
+  std::vector<std::map<dof_id_type, int> > _halo_ids;
 
   /**
    * The data structure which is a list of nodes that are constrained to other nodes

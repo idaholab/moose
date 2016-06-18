@@ -111,6 +111,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _feature_maps(_maps_size),
     _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
+    _halo_ids(_maps_size),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
 {
@@ -141,6 +142,8 @@ FeatureFloodCount::initialize()
 
     if (_var_index_mode)
       _var_index_maps[map_num].clear();
+
+    _halo_ids[map_num].clear();
   }
 
   for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
@@ -293,6 +296,13 @@ FeatureFloodCount::getValue()
 Real
 FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx) const
 {
+  bool use_default = false;
+  if (var_idx == std::numeric_limits<unsigned int>::max())
+  {
+    use_default = true;
+    var_idx = 0;
+  }
+
   mooseAssert(var_idx < _maps_size, "Index out of range");
 
   switch (field_type)
@@ -329,12 +339,24 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
 
     case HALOS:
     {
-      std::map<dof_id_type, int>::const_iterator entity_it = _halo_ids.find(entity_id);
-
-      if (entity_it != _halo_ids.end())
-        return entity_it->second;
+      if (!use_default)
+      {
+        std::map<dof_id_type, int>::const_iterator entity_it = _halo_ids[var_idx].find(entity_id);
+        if (entity_it != _halo_ids[var_idx].end())
+          return entity_it->second;
+      }
       else
-        return -1;
+      {
+        // Showing halos in reverse order for backwards compatibility
+        for (auto map_num = _maps_size; map_num-- /* don't compare greater than zero for unsigned */; )
+        {
+          std::map<dof_id_type, int>::const_iterator entity_it = _halo_ids[map_num].find(entity_id);
+
+          if (entity_it != _halo_ids[map_num].end())
+            return entity_it->second;
+        }
+      }
+      return -1;
     }
 
     default:
@@ -554,7 +576,10 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
         if (!feature._merged)
         {
           // Adjust the halo marking region
-          cleanupHalo(feature);
+          std::set<dof_id_type> set_difference;
+          std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
+                              std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
+          feature._halo_ids.swap(set_difference);
 
           _feature_sets[map_num].emplace_back(std::move(feature));
           ++_feature_count;
@@ -572,7 +597,6 @@ FeatureFloodCount::updateFieldInfo()
 {
   // This variable is only relevant in single map mode
 //  _region_to_var_idx.resize(_feature_sets[0].size());
-  _halo_ids.clear();
 
   std::vector<size_t> index_vector;
 
@@ -606,7 +630,7 @@ FeatureFloodCount::updateFieldInfo()
 
       // Loop over the halo ids to update cells with halo information
       for (auto entity : feature._halo_ids)
-        _halo_ids[entity] = feature_number;
+        _halo_ids[map_idx][entity] = feature_number;
 
       // Loop over the ghosted ids to update cells with ghost information
       for (auto entity : feature._ghosted_ids)
@@ -679,21 +703,14 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
   // Insert the current entity into the local ids map
   feature->_local_ids.insert(entity_id);
 
-  /**
-   * Only recurse if we own this entity. We'll still pick up ghosted entities since
-   * neighbors of active local elements may be non-local.
-   */
-  if (dof_object->processor_id() == processor_id())
-  {
-    if (_is_elemental)
-      visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*recurse =*/true);
-    else
-      visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*recurse =*/true);
-  }
+  if (_is_elemental)
+    visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
+  else
+    visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
 }
 
 void
-FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool recurse)
+FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool expand_halos_only)
 {
   mooseAssert(elem, "Elem is NULL");
 
@@ -708,52 +725,58 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
       neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
   }
 
-  // Loop over all active element neighbors
-  for (const auto neighbor_ptr : all_active_neighbors)
-  {
-    auto my_proc_id = processor_id();
-
-    if (neighbor_ptr)
-    {
-      if (neighbor_ptr->processor_id() != my_proc_id)
-        feature->_ghosted_ids.insert(elem->id());
-
-      /**
-       * Premark neighboring entities with a halo mark. These
-       * entities may or may not end up being part of the feature.
-       * We will not update the _entities_visited data structure
-       * here.
-       */
-      feature->_halo_ids.insert(neighbor_ptr->id());
-
-      if (recurse)
-        flood(neighbor_ptr, current_idx, feature);
-    }
-  }
+  visitNeighborsHelper(elem, all_active_neighbors, current_idx, feature, expand_halos_only);
 }
 
 void
-FeatureFloodCount::visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool recurse)
+FeatureFloodCount::visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool expand_halos_only)
 {
   mooseAssert(node, "Node is NULL");
 
-  std::vector<const Node *> neighbors;
-  MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, neighbors);
+  std::vector<const Node *> all_active_neighbors;
+  MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, all_active_neighbors);
 
-  // Loop over all nodal neighbors
-  for (unsigned int i = 0; i < neighbors.size(); ++i)
+  visitNeighborsHelper(node, all_active_neighbors, current_idx, feature, expand_halos_only);
+}
+
+template<typename T>
+void
+FeatureFloodCount::visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, unsigned long current_idx,
+                                        FeatureData * feature, bool expand_halos_only)
+{
+  // Loop over all active element neighbors
+  for (const auto neighbor : neighbor_entities)
   {
-    const Node * neighbor_node = neighbors[i];
-    auto my_proc_id = processor_id();
+    if (neighbor)
+    {
+      if (expand_halos_only)
+        feature->_halo_ids.insert(neighbor->id());
 
-    if (neighbor_node->processor_id() != my_proc_id)
-      feature->_ghosted_ids.insert(neighbor_node->id());
+      else
+      {
+        auto my_processor_id = processor_id();
 
-    // Premark Halo values
-    feature->_halo_ids.insert(neighbor_node->id());
+        if (neighbor->processor_id() != my_processor_id)
+          feature->_ghosted_ids.insert(curr_entity->id());
 
-    if (recurse)
-      flood(neighbors[i], current_idx, feature);
+        /**
+         * Only recurse where we own this entity. We might step outside of the
+         * ghosted region if we recurse where we don't own the current entity.
+         */
+        if (curr_entity->processor_id() == my_processor_id)
+        {
+          /**
+           * Premark neighboring entities with a halo mark. These
+           * entities may or may not end up being part of the feature.
+           * We will not update the _entities_visited data structure
+           * here.
+           */
+          feature->_halo_ids.insert(neighbor->id());
+
+          flood(neighbor, current_idx, feature);
+        }
+      }
+    }
   }
 }
 
@@ -913,25 +936,6 @@ FeatureFloodCount::calculateBubbleVolumes()
   std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
 
   Moose::perf_log.pop("calculateBubbleVolume()", "FeatureFloodCount");
-}
-
-void
-FeatureFloodCount::cleanupHalo(FeatureData & feature)
-{
-  {
-    std::set<dof_id_type> set_difference;
-    // First remove the local ids from the halo set
-    std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
-                        std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
-    feature._halo_ids.swap(set_difference);
-  }
-  {
-    std::set<dof_id_type> set_difference;
-    // Then remove the ghost ids from the halo set
-    std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._ghosted_ids.begin(), feature._ghosted_ids.end(),
-                        std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
-    feature._halo_ids.swap(set_difference);
-  }
 }
 
 void

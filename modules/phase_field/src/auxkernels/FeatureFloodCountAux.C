@@ -14,7 +14,7 @@ InputParameters validParams<FeatureFloodCountAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("Feature detection by connectivity analysis");
   params.addRequiredParam<UserObjectName>("bubble_object", "The FeatureFloodCount UserObject to get values from.");
-  params.addParam<unsigned int>("map_index", 0, "The index of which map to retrieve values from when using FeatureFloodCount with multiple maps.");
+  params.addParam<unsigned int>("map_index", "The index of which map to retrieve values from when using FeatureFloodCount with multiple maps.");
   MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING GHOSTED_ENTITIES HALOS ACTIVE_BOUNDS", "UNIQUE_REGION");
   params.addParam<MooseEnum>("field_display", field_display, "Determines how the auxilary field should be colored. (UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is elemental, default: UNIQUE_REGION)");
 
@@ -28,7 +28,7 @@ InputParameters validParams<FeatureFloodCountAux>()
 FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _flood_counter(getUserObject<FeatureFloodCount>("bubble_object")),
-    _var_idx(getParam<unsigned int>("map_index")),
+    _var_idx(isParamValid("map_index") ? getParam<unsigned int>("map_index") : std::numeric_limits<unsigned int>::max()),
     _field_display(getParam<MooseEnum>("field_display")),
     _var_coloring(_field_display == "VARIABLE_COLORING"),
     _field_type(static_cast<FeatureFloodCount::FIELD_TYPE>(static_cast<int>(_field_display)))

@@ -170,9 +170,9 @@ GrainTracker::expandHalos()
           for (auto entity : orig_halo_ids)
           {
             if (_is_elemental)
-              visitElementalNeighbors(_mesh.elemPtr(entity), feature._var_idx, &feature, /*recurse =*/false);
+              visitElementalNeighbors(_mesh.elemPtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
             else
-              visitNodalNeighbors(_mesh.nodePtr(entity), feature._var_idx, &feature, /*recurse =*/false);
+              visitNodalNeighbors(_mesh.nodePtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
           }
         }
       }
@@ -843,8 +843,6 @@ GrainTracker::updateFieldInfo()
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     _feature_maps[map_num].clear();
 
-  _halo_ids.clear();
-
   std::map<unsigned int, Real> tmp_map;
   MeshBase & mesh = _mesh.getMesh();
 
@@ -884,7 +882,7 @@ GrainTracker::updateFieldInfo()
       }
     }
     for (auto entity : grain_pair.second._halo_ids)
-      _halo_ids[entity] = grain_pair.second._var_idx;
+      _halo_ids[grain_pair.second._var_idx][entity] = grain_pair.second._var_idx;
 
     for (auto entity : grain_pair.second._ghosted_ids)
       _ghosted_entity_ids[entity] = 1;
