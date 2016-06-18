@@ -78,6 +78,14 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./halo4]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo5]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -155,6 +163,20 @@
     field_display = HALOS
     bubble_object = grain_tracker
   [../]
+  [./halo4]
+    type = FeatureFloodCountAux
+    variable = halo4
+    map_index = 4
+    field_display = HALOS
+    bubble_object = grain_tracker
+  [../]
+  [./halo5]
+    type = FeatureFloodCountAux
+    variable = halo5
+    map_index = 5
+    field_display = HALOS
+    bubble_object = grain_tracker
+  [../]
 []
 
 [BCs]
@@ -181,7 +203,6 @@
     threshold = 0.2
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
-    halo_level = 1
   [../]
   [./dt]
     # Outputs the current time step

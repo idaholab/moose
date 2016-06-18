@@ -314,7 +314,7 @@ protected:
    * The data structure mirrors that found in _feature_sets, but contains
    * one additional vector indexed by processor id
    */
-  std::vector<std::vector<std::vector<FeatureData> > > _partial_feature_sets;
+  std::vector<std::list<FeatureData> > _partial_feature_sets;
 
   /**
    * The data structure used to hold the globally unique features. The outer vector

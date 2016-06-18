@@ -156,26 +156,25 @@ void
 GrainTracker::expandHalos()
 {
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
-      for (auto & feature : _partial_feature_sets[rank][map_num])
+    for (auto & feature : _partial_feature_sets[map_num])
+    {
+      for (auto halo_level = decltype(_halo_level)(1); halo_level < _halo_level; ++halo_level)
       {
-        for (auto halo_level = decltype(_halo_level)(1); halo_level < _halo_level; ++halo_level)
-        {
-          /**
-           * Create a copy of the halo set so that as we insert new ids into the
-           * set we don't continue to iterate on those new ids.
-           */
-          std::set<dof_id_type> orig_halo_ids(feature._halo_ids);
+        /**
+         * Create a copy of the halo set so that as we insert new ids into the
+         * set we don't continue to iterate on those new ids.
+         */
+        std::set<dof_id_type> orig_halo_ids(feature._halo_ids);
 
-          for (auto entity : orig_halo_ids)
-          {
-            if (_is_elemental)
-              visitElementalNeighbors(_mesh.elemPtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
-            else
-              visitNodalNeighbors(_mesh.nodePtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
-          }
+        for (auto entity : orig_halo_ids)
+        {
+          if (_is_elemental)
+            visitElementalNeighbors(_mesh.elemPtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
+          else
+            visitNodalNeighbors(_mesh.nodePtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
         }
       }
+    }
 }
 
 void
@@ -882,7 +881,7 @@ GrainTracker::updateFieldInfo()
       }
     }
     for (auto entity : grain_pair.second._halo_ids)
-      _halo_ids[grain_pair.second._var_idx][entity] = grain_pair.second._var_idx;
+      _halo_ids[grain_pair.second._var_idx][entity] += grain_pair.second._var_idx;
 
     for (auto entity : grain_pair.second._ghosted_ids)
       _ghosted_entity_ids[entity] = 1;
