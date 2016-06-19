@@ -33,7 +33,7 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the entity value
    */
-  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE, unsigned int var_idx=0) const = 0;
+  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType, unsigned int var_idx=0) const = 0;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector

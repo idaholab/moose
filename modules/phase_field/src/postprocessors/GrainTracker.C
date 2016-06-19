@@ -49,7 +49,7 @@ GrainTracker::~GrainTracker()
 }
 
 Real
-GrainTracker::getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx) const
+GrainTracker::getEntityValue(dof_id_type node_id, FieldType field_type, unsigned int var_idx) const
 {
   if (_t_step < _tracking_step)
     return 0;
@@ -118,7 +118,7 @@ GrainTracker::finalize()
   {
     for (const auto & grain_pair : _unique_grains)
     {
-      if (grain_pair.second._status != INACTIVE)
+      if (grain_pair.second._status != Status::INACTIVE)
       {
         for (auto elem_id : grain_pair.second._local_ids)
         {
@@ -188,9 +188,9 @@ GrainTracker::trackGrains()
   std::vector<unsigned int> map_sizes(_maps_size);
   for (auto & grain_pair : _unique_grains)
   {
-    if (grain_pair.second._status != INACTIVE)
+    if (grain_pair.second._status != Status::INACTIVE)
     {
-      grain_pair.second._status = NOT_MARKED;
+      grain_pair.second._status = Status::NOT_MARKED;
       map_sizes[grain_pair.second._var_idx]++;
     }
   }
@@ -348,7 +348,7 @@ GrainTracker::trackGrains()
 
   for (auto & grain_pair : _unique_grains)
   {
-    if (grain_pair.second._status == INACTIVE)                         // Don't try to find matches for inactive grains
+    if (grain_pair.second._status == Status::INACTIVE)      // Don't try to find matches for inactive grains
       continue;
 
     unsigned int closest_match_idx;
@@ -400,7 +400,7 @@ GrainTracker::trackGrains()
         _console << "Marking Grain " << inactive_it->first << " as INACTIVE (variable index: "
                  << inactive_it->second._var_idx << ")\n"
                  << inactive_it->second;
-        inactive_it->second._status = INACTIVE;
+        inactive_it->second._status = Status::INACTIVE;
 
         // Make sure we update the new to existing map if necessary
         if (grain_it1->first == inactive_it->first)
@@ -417,7 +417,7 @@ GrainTracker::trackGrains()
     auto curr_idx = new_to_exist_kv.second;
                                                        // map index                 // feature index
     _unique_grains[curr_idx] = std::move(_feature_sets[new_to_exist_kv.first.first][new_to_exist_kv.first.second]);
-    _unique_grains[curr_idx]._status = MARKED;
+    _unique_grains[curr_idx]._status = Status::MARKED;
   }
 
   //  Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
@@ -427,11 +427,11 @@ GrainTracker::trackGrains()
       // If it's not in the index list, it hasn't been transferred
       if (new_grain_idx_to_existing_grain_idx.find(std::make_pair(map_num, feature_num)) == new_grain_idx_to_existing_grain_idx.end())
       {
-        mooseAssert(_feature_sets[map_num][feature_num]._status == NOT_MARKED, "Feature in wrong state, logic error");
+        mooseAssert(_feature_sets[map_num][feature_num]._status == Status::NOT_MARKED, "Feature in wrong state, logic error");
 
         auto new_idx = _unique_grains.size();
 
-        _feature_sets[map_num][feature_num]._status = MARKED;                       // Mark it
+        _feature_sets[map_num][feature_num]._status = Status::MARKED;               // Mark it
         _unique_grains[new_idx] = std::move(_feature_sets[map_num][feature_num]);   // transfer ownership
 
         // Trigger the callback
@@ -444,12 +444,12 @@ GrainTracker::trackGrains()
    * this particular variable.
    */
   for (auto & grain_pair : _unique_grains)
-    if (grain_pair.second._status == NOT_MARKED)
+    if (grain_pair.second._status == Status::NOT_MARKED)
     {
       _console << "Marking Grain " << grain_pair.first << " as INACTIVE (variable index: "
                << grain_pair.second._var_idx <<  ")\n"
                << grain_pair.second;
-      grain_pair.second._status = INACTIVE;
+      grain_pair.second._status = Status::INACTIVE;
     }
 }
 
@@ -473,12 +473,16 @@ GrainTracker::remapGrains()
   _console << "Running remap Grains" << std::endl;
 
   /**
-   * The remapping algorithm is recursive. We will reuse the "merged" flag in the FeatureData
+   * The remapping algorithm is recursive. We will use the status variable in each FeatureData
    * to track which grains are currently being remapped so we don't have runaway recursion.
-   * TODO: Possibly rename this variable?
+   * To begin we need to reset all of the flags to NOT_MARKED.
    */
-  for (auto & grain_pair : _unique_grains)
-    grain_pair.second._merged = false;
+  std::for_each(_unique_grains.begin(), _unique_grains.end(),
+                [](std::pair<const unsigned int, FeatureData> & grain_pair)
+                {
+                  if (grain_pair.second._status == Status::MARKED)
+                    grain_pair.second._status = Status::NOT_MARKED;
+                });
 
   /**
    * Loop over each grain and see if any grains represented by the same variable are "touching"
@@ -489,13 +493,13 @@ GrainTracker::remapGrains()
     grains_remapped = false;
     for (auto grain_it1 = _unique_grains.begin(); grain_it1 != _unique_grains.end(); ++grain_it1)
     {
-      if (grain_it1->second._status == INACTIVE)
+      if (grain_it1->second._status == Status::INACTIVE)
         continue;
 
       for (auto grain_it2 = _unique_grains.begin(); grain_it2 != _unique_grains.end(); ++grain_it2)
       {
         // Don't compare a grain with itself and don't try to remap inactive grains
-        if (grain_it1 == grain_it2 || grain_it2->second._status == INACTIVE)
+        if (grain_it1 == grain_it2 || grain_it2->second._status == Status::INACTIVE)
           continue;
 
         if (grain_it1->second._var_idx == grain_it2->second._var_idx &&   // Are the grains represented by the same variable?
@@ -533,9 +537,6 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
                                            std::vector<std::list<GrainDistance> > & min_distances)
 {
   /**
-   * TODO: I should be able to sort these even better. Negative distances could represent the number
-   * of grains overlapping the current grain with the same index.
-   *
    *  In the diagram below assume we have 4 order parameters. The grain with the asterisk needs to be
    *  remapped. All order parameters are used in neighboring grains. For all "touching" grains, the value
    *  of the corresponding entry in min_distances will be a negative integer representing the number of
@@ -560,7 +561,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
    */
   for (auto & grain_pair : _unique_grains)
   {
-    if (grain_pair.second._status == INACTIVE || grain_pair.second._var_idx == grain._var_idx)
+    if (grain_pair.second._status == Status::INACTIVE || grain_pair.second._var_idx == grain._var_idx)
       continue;
 
     unsigned int target_var_index = grain_pair.second._var_idx;
@@ -644,7 +645,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
         << ") is at a distance of " << target_it->_distance << "\n"
         << COLOR_DEFAULT;
 
-      swapSolutionValues(grain, target_it->_var_index, cache, BYPASS, depth);
+      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::BYPASS, depth);
       return true;
     }
 
@@ -680,7 +681,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
         << " are inside our bounding sphere but whose halo(s) are not touching.\n"
         << COLOR_DEFAULT;
 
-      swapSolutionValues(grain, target_it->_var_index, cache, BYPASS, depth);
+      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::BYPASS, depth);
       return true;
     }
 
@@ -689,16 +690,16 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     FeatureData & target_grain = _unique_grains[target_it->_grain_id];
 
     // Make sure this grain isn't marked. If it is, we can't recurse here
-    if (target_grain._merged)
+    if (target_grain._status == Status::MARKED)
       return false;
 
     // Save the solution values in case we overright them during recursion
-    swapSolutionValues(grain, target_it->_var_index, cache, FILL, depth);
+    swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::FILL, depth);
 
     // TODO: Make sure this distance is -1 or higher or fine intersections only exist for a single variable
     // Propose a new variable index for the current grain and recurse
     grain._var_idx = target_it->_var_index;
-    grain._merged = true;
+    grain._status = Status::MARKED;
     if (attemptGrainRenumber(target_grain, target_it->_grain_id, depth+1, max))
     {
       // SUCCESS!
@@ -711,7 +712,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
       // NOTE: swapSolutionValues currently reads the current variable index off the grain. We need to set
       //       back here before calling this method.
       grain._var_idx = curr_var_idx;
-      swapSolutionValues(grain, target_it->_var_index, cache, USE, depth);
+      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::USE, depth);
 
       return true;
     }
@@ -720,7 +721,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
       grain._var_idx = curr_var_idx;
 
     // Always "unmark" the grain after the recursion so it can be used by other remap operations
-    grain._merged = false;
+    grain._status = Status::NOT_MARKED;
   }
 
   return false;
@@ -728,7 +729,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
 
 void
 GrainTracker::swapSolutionValues(FeatureData & grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
-                                 REMAP_CACHE_MODE cache_mode, unsigned int depth)
+                                 RemapCacheMode cache_mode, unsigned int depth)
 {
   MeshBase & mesh = _mesh.getMesh();
 
@@ -772,7 +773,7 @@ GrainTracker::swapSolutionValues(FeatureData & grain, unsigned int var_idx, std:
 
 void
 GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
-                                       REMAP_CACHE_MODE cache_mode)
+                                       RemapCacheMode cache_mode)
 {
   if (curr_node && curr_node->processor_id() == processor_id())
   {
@@ -782,7 +783,7 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
     // Get the value out of the solution vector or the cache
     Real current, old, older;
 
-    if (cache_mode == FILL || cache_mode == BYPASS)
+    if (cache_mode == RemapCacheMode::FILL || cache_mode == RemapCacheMode::BYPASS)
     {
       current = _vars[curr_var_idx]->nodalSln()[0];
       old = _vars[curr_var_idx]->nodalSlnOld()[0];
@@ -798,7 +799,7 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
     }
 
     // Cache the value or use it!
-    if (cache_mode == FILL)
+    if (cache_mode == RemapCacheMode::FILL)
     {
       cache[curr_node].current = current;
       cache[curr_node].old = old;
@@ -840,7 +841,7 @@ GrainTracker::updateFieldInfo()
     unsigned int curr_var = grain_pair.second._var_idx;
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
 
-    if (grain_pair.second._status == INACTIVE)
+    if (grain_pair.second._status == Status::INACTIVE)
       continue;
 
     for (auto entity : grain_pair.second._local_ids)
@@ -971,7 +972,7 @@ GrainTracker::calculateBubbleVolumes()
 
     for (auto & grain_pair : _unique_grains)
     {
-      if (grain_pair.second._status == INACTIVE)
+      if (grain_pair.second._status == Status::INACTIVE)
         continue;
 
       if (_is_elemental)

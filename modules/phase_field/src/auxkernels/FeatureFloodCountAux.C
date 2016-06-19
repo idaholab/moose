@@ -31,7 +31,7 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
     _var_idx(isParamValid("map_index") ? getParam<unsigned int>("map_index") : std::numeric_limits<unsigned int>::max()),
     _field_display(getParam<MooseEnum>("field_display")),
     _var_coloring(_field_display == "VARIABLE_COLORING"),
-    _field_type(static_cast<FeatureFloodCount::FIELD_TYPE>(static_cast<int>(_field_display)))
+    _field_type(static_cast<FeatureFloodCount::FieldType>(static_cast<int>(_field_display)))
 {
   if (_flood_counter.isElemental() == isNodal() &&
       (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING" || _field_display == "GHOSTED_ENTITIES" || _field_display == "HALOS"))

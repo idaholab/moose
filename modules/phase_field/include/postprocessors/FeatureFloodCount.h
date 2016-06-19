@@ -55,7 +55,7 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
-  enum FIELD_TYPE
+  enum class FieldType
   {
     UNIQUE_REGION,
     VARIABLE_COLORING,
@@ -66,14 +66,14 @@ public:
   };
 
   // Retrieve field information
-  virtual Real getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx=0) const;
+  virtual Real getEntityValue(dof_id_type entity_id, FieldType field_type, unsigned int var_idx=0) const;
 
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
 
   /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
-  enum STATUS
+  enum class Status
   {
     NOT_MARKED,
     MARKED,
@@ -86,12 +86,12 @@ public:
         _var_idx(var_idx),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
-        _status(NOT_MARKED),
-        _merged(false),
+        _status(Status::NOT_MARKED),
         _intersects_boundary(false)
     {
     }
 
+    ///@{
     /**
      * We do not expect these objects to ever be copied. This is important
      * since they are stored in standard containers directly. To enforce
@@ -100,34 +100,75 @@ public:
      */
     FeatureData(const FeatureData & f) = delete;
     FeatureData & operator=(const FeatureData & f) = delete;
+    ///@}
 
-    // Move constructors
+    ///@{
+    // Default Move constructors
     FeatureData(FeatureData && f) = default;
     FeatureData & operator=(FeatureData && f) = default;
+    ///@}
 
+    ///@{
+    /**
+     * Update the minimum and maximum coordinates of a bounding box
+     * given a Point parameter.
+     */
     void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
     void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
+    ///@}
 
+    /**
+     * Determines if any of this FeatureData's bounding boxes overlap with
+     * the other FeatureData's bounding boxes.
+     */
     bool isStichable(const FeatureData & rhs) const;
 
+    /**
+     * Located the overlapping bounding box between this Feature and the
+     * other Feature and expands that overlapping box accordingly.
+     */
     void expandBBox(const FeatureData & rhs);
 
+    /**
+     * Merges another Feature Data into this one. This method leaves rhs
+     * in an inconsistent state.
+     */
+    void merge(FeatureData && rhs);
+
+    /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
       return _min_entity_id < rhs._min_entity_id;
     }
 
+    /// stream output operator
     friend std::ostream & operator<< (std::ostream & out, const FeatureData & feature);
 
+    /// Holds the ghosted ids for a feature (the ids which will be used for stitching
     std::set<dof_id_type> _ghosted_ids;
+
+    /// Holds the local ids in the interior of a feature. This data structure is only maintained on the local processor
     std::set<dof_id_type> _local_ids;
+
+    /// Holds the ids surrounding the feature
     std::set<dof_id_type> _halo_ids;
+
+    /// Holds the nodes that belong to the feature on a periodic boundary
     std::set<dof_id_type> _periodic_nodes;
+
+    /// The Moose variable where this feature was found (often the "order parameter")
     unsigned int _var_idx;
+
+    /// The vector of bounding boxes completely enclosing this feature (multiple used with periodic constraints)
     std::vector<MeshTools::BoundingBox> _bboxes;
+
+    /// The minimum entity seen in the _local_ids, used for sorting features
     dof_id_type _min_entity_id;
-    STATUS _status;
-    bool _merged;
+
+    /// The status of a feature (used mostly in derived classes like the GrainTracker)
+    Status _status;
+
+    /// Flag indicating whether this feature intersects a boundary
     bool _intersects_boundary;
   };
 
@@ -139,8 +180,6 @@ protected:
    */
   virtual void updateFieldInfo();
 
-  void inflateBoundingBoxes(RealVectorValue inflation_amount);
-
   /**
    * This method will "mark" all entities on neighboring elements that
    * are above the supplied threshold. If feature is NULL, we are exploring
@@ -149,10 +188,19 @@ protected:
    */
   void flood(const DofObject * dof_object, unsigned long current_idx, FeatureData * feature);
 
-  // TODO: doco
+  ///@{
+  /**
+   * These two routines are utility routines used by the flood routine and by derived classes for visiting neighbors.
+   * Since the logic is different for the elemental versus nodal case it's easier to split them up.
+   */
   void visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool expand_halos_only);
   void visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool expand_halos_only);
+  ///@}
 
+  /**
+   * The actual logic for visiting neighbors is abstracted out here. This method is templated to handle the Nodal
+   * and Elemental cases together.
+   */
   template<typename T>
   void visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, unsigned long current_idx,
                             FeatureData * feature, bool expand_halos_only);
@@ -171,6 +219,7 @@ protected:
    */
   void prepareDataForTransfer();
 
+  ///@{
   /**
    * These routines packs/unpack the _feature_map data into a structure suitable for parallel
    * communication operations. See the comments in these routines for the exact
@@ -178,6 +227,7 @@ protected:
    */
   void serialize(std::string & serialized_buffer);
   void deserialize(std::vector<std::string> & serialized_buffers);
+  ///@}
 
   /**
    * This routine merges the data in _feature_sets from separate threads/processes to resolve
@@ -185,6 +235,10 @@ protected:
    */
   void mergeSets(bool use_periodic_boundary_info);
 
+  /**
+   * This routine handles all of the serialization, communication and deserialization of the data structures
+   * containing FeatureData objects.
+   */
   void communicateAndMerge();
 
   /**
@@ -329,8 +383,13 @@ protected:
   /// Average value of the domain which can optionally be used to find bubbles in a field
   const PostprocessorValue & _element_average_value;
 
-  // TODO: Doco
+  /// The map for holding reconstructed ghosted element information
   std::map<dof_id_type, int> _ghosted_entity_ids;
+
+  /**
+   * The data structure for looking up halos around features. The outer vector is for splitting out the
+   * information per variable. The inner map holds the actual halo information
+   */
   std::vector<std::map<dof_id_type, int> > _halo_ids;
 
   /**
@@ -351,7 +410,7 @@ protected:
    */
   std::vector<Real> _all_feature_volumes;
 
-  // Dummy value for unimplemented method
+  /// Dummy value for unimplemented method "getElementalValues()"
   static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
 
   /**
@@ -369,9 +428,7 @@ protected:
    */
   bool _compute_boundary_intersecting_volume;
 
-  /**
-   * Determines if the flood counter is elements or not (nodes)
-   */
+  /// Determines if the flood counter is elements or not (nodes)
   bool _is_elemental;
 };
 

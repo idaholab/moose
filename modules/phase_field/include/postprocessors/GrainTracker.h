@@ -39,7 +39,7 @@ public:
     Real older;
   };
 
-  enum REMAP_CACHE_MODE
+  enum class RemapCacheMode
   {
     FILL,
     USE,
@@ -53,7 +53,7 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the nodal value
    */
-  virtual Real getEntityValue(dof_id_type node_id, FIELD_TYPE field_type, unsigned int var_idx=0) const override;
+  virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, unsigned int var_idx=0) const override;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
@@ -108,13 +108,13 @@ protected:
    * with different modes to only cache, or actually do the work, or bypass the cache altogether.
    */
   void swapSolutionValues(FeatureData &  grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
-                          REMAP_CACHE_MODE cache_mode, unsigned int depth);
+                          RemapCacheMode cache_mode, unsigned int depth);
 
   /**
    * Helper method for actually performing the swaps.
    */
   void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
-                                REMAP_CACHE_MODE cache_mode);
+                                RemapCacheMode cache_mode);
 
   /**
    * This method returns the minimum periodic distance between two vectors of bounding boxes. If the bounding boxes overlap
