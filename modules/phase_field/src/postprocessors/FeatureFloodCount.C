@@ -124,12 +124,17 @@ FeatureFloodCount::~FeatureFloodCount()
 }
 
 void
-FeatureFloodCount::initialize()
+FeatureFloodCount::initialSetup()
 {
   // Get a pointer to the PeriodicBoundaries buried in libMesh
-  // TODO: Can we do this in the constructor (i.e. are all objects necessary for this call in existance during ctor?)
   _pbs = _fe_problem.getNonlinearSystem().dofMap().get_periodic_boundaries();
 
+  meshChanged();
+}
+
+void
+FeatureFloodCount::initialize()
+{
   // Clear the bubble marking maps and region counters and other data structures
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
@@ -146,13 +151,6 @@ FeatureFloodCount::initialize()
   for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
     _entities_visited[var_num].clear();
 
-  // Build a new node to element map
-  _nodes_to_elem_map.clear();
-  MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
-
-  // TODO: We might only need to build this once if adaptivity is turned off
-  _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
-
   // Calculate the thresholds for this iteration
   _step_threshold = _element_average_value + _threshold;
   _step_connecting_threshold = _element_average_value + _connecting_threshold;
@@ -163,6 +161,15 @@ FeatureFloodCount::initialize()
 
   // Reset the feature count
   _feature_count = 0;
+}
+
+void
+FeatureFloodCount::meshChanged()
+{
+  _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
+  // Build a new node to element map
+  _nodes_to_elem_map.clear();
+  MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
 }
 
 void
@@ -196,7 +203,7 @@ FeatureFloodCount::execute()
 void FeatureFloodCount::communicateAndMerge()
 {
   // First we need to transform the raw data into a usable data structure
-  populateDataStructuresFromFloodData();
+  prepareDataForTransfer();
 
   /*********************************************************************************
    *********************************************************************************
@@ -359,9 +366,8 @@ FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
   return _empty;
 }
 
-// TODO: Possibly rename this routine
 void
-FeatureFloodCount::populateDataStructuresFromFloodData()
+FeatureFloodCount::prepareDataForTransfer()
 {
   MeshBase & mesh = _mesh.getMesh();
 

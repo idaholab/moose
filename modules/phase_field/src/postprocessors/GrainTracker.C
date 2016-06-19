@@ -628,16 +628,6 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
                 return lhs.begin()->_distance > rhs.begin()->_distance;
             });
 
-#ifndef NDEBUG
-  _console << "\n********************************************\nDistances list for grain " << grain_id << '\n';
-  for (unsigned int i = 0; i < min_distances.size(); ++i)
-  {
-    for (const auto & grain_distance : min_distances[i])
-      _console << grain_distance._distance << ": " << grain_distance._grain_id << ": " <<  grain_distance._var_index << '\n';
-    _console << '\n';
-  }
-#endif
-
   for (unsigned int i = 0; i < min_distances.size(); ++i)
   {
     const auto target_it = min_distances[i].begin();

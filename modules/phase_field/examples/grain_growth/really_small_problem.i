@@ -30,7 +30,7 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      grain_num = 10 # Number of grains
+      grain_num = 12 # Number of grains
       advanced_op_assignment = true
       rand_seed = 10
     [../]

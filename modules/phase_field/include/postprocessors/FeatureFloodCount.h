@@ -47,6 +47,9 @@ public:
   FeatureFloodCount(const InputParameters & parameters);
   ~FeatureFloodCount();
 
+  virtual void initialSetup() override;
+  virtual void meshChanged() override;
+
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
@@ -166,7 +169,7 @@ protected:
    * of coupled variables. The inner list represents the flooded regions (local only after this call
    * but fully populated after parallel communication and stitching).
    */
-  void populateDataStructuresFromFloodData();
+  void prepareDataForTransfer();
 
   /**
    * These routines packs/unpack the _feature_map data into a structure suitable for parallel
