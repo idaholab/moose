@@ -239,15 +239,6 @@ void FeatureFloodCount::communicateAndMerge()
    *********************************************************************************
    *********************************************************************************/
 
-  // We'll inflate the bounding boxes by a percentage of the domain
-  RealVectorValue inflation;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    inflation(i) = _mesh.dimensionWidth(i);
-
-  // Let's try 1%
-  inflation *= 0.05;
-  inflateBoundingBoxes(inflation);
-
   mergeSets(true);
 }
 
@@ -379,7 +370,6 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
     {
       for (auto & entity_id : feature._local_ids)
       {
-        // TODO: This may not be good enough for the elemental case
         const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
 
         /**
@@ -393,6 +383,14 @@ FeatureFloodCount::populateDataStructuresFromFloodData()
 
         // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
         feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
+      }
+
+      // Now extend the bounding box by the first level halos
+      for (auto & halo_id : feature._halo_ids)
+      {
+        const Point & halo_point = _is_elemental ? mesh.elem(halo_id)->centroid() : mesh.node(halo_id);
+        feature.updateBBoxMin(feature._bboxes[0], halo_point);
+        feature.updateBBoxMax(feature._bboxes[0], halo_point);
       }
 
       // Periodic node ids
@@ -801,14 +799,6 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
       }
     }
   }
-}
-
-void
-FeatureFloodCount::inflateBoundingBoxes(RealVectorValue inflation_amount)
-{
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto & feature : _partial_feature_sets[map_num])
-      feature.inflateBoundingBoxes(inflation_amount);
 }
 
 void

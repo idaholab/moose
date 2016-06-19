@@ -105,15 +105,6 @@ public:
     void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
     void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
 
-    void inflateBoundingBoxes(RealVectorValue inflation_amount)
-    {
-      for (unsigned int i = 0; i < _bboxes.size(); ++i)
-      {
-        _bboxes[i].max() += inflation_amount;
-        _bboxes[i].min() -= inflation_amount;
-      }
-    }
-
     bool isStichable(const FeatureData & rhs) const;
 
     void expandBBox(const FeatureData & rhs);
