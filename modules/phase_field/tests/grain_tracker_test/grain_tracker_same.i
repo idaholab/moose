@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  op_num = 12
+  op_num = 10
   var_name_base = gr
 []
 
@@ -23,8 +23,9 @@
 [ICs]
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
-      rand_seed = 8675
-      grain_num = 12
+      rand_seed = 1
+      grain_num = 10
+      advanced_op_assignment = true
     [../]
   [../]
 []
@@ -69,11 +70,6 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
-      auto_direction = 'x y'
-    [../]
-  [../]
 []
 
 [Materials]
@@ -82,7 +78,6 @@
     block = 0
     T = 500 # K
     wGB = 100 # nm
-
     GBmob0 = 2.5e-6
     Q = 0.23
     GBenergy = 0.708
@@ -93,6 +88,8 @@
 [Postprocessors]
   [./grain_tracker]
     type = GrainTracker
+    threshold = 0.5
+    connecting_threshold = 0.2
   [../]
   [./DOFs]
     type = NumDOFs
@@ -101,12 +98,10 @@
 []
 
 [Executioner]
+  # Preconditioned JFNK (default)
   type = Transient
   scheme = bdf2
-
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
   l_tol = 1.0e-4
