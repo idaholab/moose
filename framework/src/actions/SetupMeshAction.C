@@ -138,15 +138,18 @@ SetupMeshAction::act()
 {
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
+  {
     _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
+    if (isParamValid("displacements"))
+      _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);
+  }
   else if (_current_task == "init_mesh")
   {
     _mesh->init();
 
     if (isParamValid("displacements"))
     {
-      // Create the displaced mesh
-      _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);
+      // Initialize the displaced mesh
       _displaced_mesh->init();
 
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
