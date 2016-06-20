@@ -37,4 +37,9 @@ PartitionerAction::act()
   _mesh->setIsCustomPartitionerRequested(true);
   MooseSharedPointer<MoosePartitioner> mp = _factory.create<MoosePartitioner>(_type, _name, _moose_object_pars);
   _mesh->setCustomPartitioner(mp.get());
+  if (_displaced_mesh)
+  {
+    _displaced_mesh->setIsCustomPartitionerRequested(true);
+    _displaced_mesh->setCustomPartitioner(mp.get());
+  }
 }
