@@ -383,27 +383,28 @@ FeatureFloodCount::prepareDataForTransfer()
     {
       for (auto & entity_id : feature._local_ids)
       {
-        const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
-
         /**
          * Update the bounding box.
          *
          * Note: There will always be one and only one bbox while we are building up our
          * data structures because we haven't started to stitch together any regions yet.
          */
-        feature.updateBBoxMin(feature._bboxes[0], entity_point);
-        feature.updateBBoxMax(feature._bboxes[0], entity_point);
+        if (_is_elemental)
+          feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(entity_id));
+        else
+          feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(entity_id));
 
         // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
         feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
       }
 
-      // Now extend the bounding box by the first level halos
+      // Now extend the bounding box by the halo region
       for (auto & halo_id : feature._halo_ids)
       {
-        const Point & halo_point = _is_elemental ? mesh.elem(halo_id)->centroid() : mesh.node(halo_id);
-        feature.updateBBoxMin(feature._bboxes[0], halo_point);
-        feature.updateBBoxMax(feature._bboxes[0], halo_point);
+        if (_is_elemental)
+          feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(halo_id));
+        else
+          feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(halo_id));
       }
 
       // Periodic node ids
@@ -475,17 +476,11 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
         bool pb_intersect = false;
         if (it1 != it2 &&                                                    // Make sure that these iterators aren't pointing at the same set
             it1->_var_idx == it2->_var_idx &&                                // and that the sets have matching variable indices
-            ((use_periodic_boundary_info &&                                  // and (if merging across periodic nodes
-               (pb_intersect = setsIntersect(it1->_periodic_nodes.begin(),   //      do those periodic nodes intersect?
-                                             it1->_periodic_nodes.end(),
-                                             it2->_periodic_nodes.begin(),
-                                             it2->_periodic_nodes.end())))
+             ((use_periodic_boundary_info &&                                 // and (if merging across periodic nodes
+               (pb_intersect = it1->periodicBoundariesIntersect(*it2)))      //      do those periodic nodes intersect?
                  ||                                                          //      or
-               (it1->isStichable(*it2) &&                                    //      if the region bboxes intersect
-                 (setsIntersect(it1->_ghosted_ids.begin(),                   //      do those ghosted nodes intersect?)
-                                it1->_ghosted_ids.end(),
-                                it2->_ghosted_ids.begin(),
-                                it2->_ghosted_ids.end()))
+               (it1->boundingBoxesIntersect(*it2) &&                         //      if the region bboxes intersect
+                it1->ghostedIntersect(*it2)                                  //      do the ghosted entities also intersect)
                )
              )
            )
@@ -883,21 +878,35 @@ FeatureFloodCount::calculateBubbleVolumes()
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Point & node)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    bbox.min()(i) = std::min(bbox.min()(i), min(i));
+  {
+    bbox.min()(i) = std::min(bbox.min()(i), node(i));
+    bbox.max()(i) = std::max(bbox.max()(i), node(i));
+  }
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Elem & elem)
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    bbox.max()(i) = std::max(bbox.max()(i), max(i));
+  for (unsigned int node_n = 0; node_n < elem.n_nodes(); ++node_n)
+    updateBBoxExtremes(bbox, *(elem.get_node(node_n)));
 }
 
+void
+FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const MeshTools::BoundingBox & rhs_bbox)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    bbox.min()(i) = std::min(bbox.min()(i), rhs_bbox.min()(i));
+    bbox.max()(i) = std::max(bbox.max()(i), rhs_bbox.max()(i));
+  }
+}
+
+
 bool
-FeatureFloodCount::FeatureData::isStichable(const FeatureData & rhs) const
+FeatureFloodCount::FeatureData::boundingBoxesIntersect(const FeatureData & rhs) const
 {
   // See if any of the bounding boxes in either FeatureData object intersect
   for (const auto & bbox_lhs : _bboxes)
@@ -906,6 +915,28 @@ FeatureFloodCount::FeatureData::isStichable(const FeatureData & rhs) const
         return true;
 
   return false;
+}
+
+
+bool
+FeatureFloodCount::FeatureData::halosIntersect(const FeatureData & rhs) const
+{
+  return setsIntersect(_halo_ids.begin(), _halo_ids.end(),
+                       rhs._halo_ids.begin(), rhs._halo_ids.end());
+}
+
+bool
+FeatureFloodCount::FeatureData::periodicBoundariesIntersect(const FeatureData & rhs) const
+{
+  return setsIntersect(_periodic_nodes.begin(), _periodic_nodes.end(),
+                       rhs._periodic_nodes.begin(), rhs._periodic_nodes.end());
+}
+
+bool
+FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
+{
+  return setsIntersect(_ghosted_ids.begin(), _ghosted_ids.end(),
+                       rhs._ghosted_ids.begin(), rhs._ghosted_ids.end());
 }
 
 void
@@ -963,8 +994,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
     for (unsigned int j = 0; j < rhs._bboxes.size(); ++j)
       if (_bboxes[i].intersect(rhs._bboxes[j]))
       {
-        updateBBoxMin(_bboxes[i], rhs._bboxes[j].min());
-        updateBBoxMax(_bboxes[i], rhs._bboxes[j].max());
+        updateBBoxExtremes(_bboxes[i], rhs._bboxes[j]);
         intersected_boxes[j] = true;
         box_expanded = true;
       }

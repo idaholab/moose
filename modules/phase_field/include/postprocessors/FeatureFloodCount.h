@@ -111,17 +111,28 @@ public:
     ///@{
     /**
      * Update the minimum and maximum coordinates of a bounding box
-     * given a Point parameter.
+     * given a Point, Elem or BBox parameter.
      */
-    void updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min);
-    void updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max);
+    void updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Point & node);
+    void updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Elem & elem);
+    void updateBBoxExtremes(MeshTools::BoundingBox & bbox, const MeshTools::BoundingBox & rhs_bbox);
     ///@}
 
     /**
      * Determines if any of this FeatureData's bounding boxes overlap with
      * the other FeatureData's bounding boxes.
      */
-    bool isStichable(const FeatureData & rhs) const;
+    bool boundingBoxesIntersect(const FeatureData & rhs) const;
+
+    ///@{
+    /**
+     * Determine if one of this FeaturesData's member sets intersects
+     * the other FeatureData's corresponding set.
+     */
+    bool halosIntersect(const FeatureData & rhs) const;
+    bool periodicBoundariesIntersect(const FeatureData & rhs) const;
+    bool ghostedIntersect(const FeatureData & rhs) const;
+    ///@}
 
     /**
      * Located the overlapping bounding box between this Feature and the
@@ -270,20 +281,20 @@ protected:
    * any intersection is detected.
    */
   template<class InputIterator>
-  inline bool setsIntersect(InputIterator first1, InputIterator last1, InputIterator first2, InputIterator last2) const
+  static inline bool setsIntersect(InputIterator first1, InputIterator last1, InputIterator first2, InputIterator last2)
+  {
+    while (first1 != last1 && first2 != last2)
     {
-      while (first1 != last1 && first2 != last2)
-      {
-        if (*first1 == *first2)
-          return true;
+      if (*first1 == *first2)
+        return true;
 
-        if (*first1 < *first2)
-          ++first1;
-        else if (*first1 > *first2)
-          ++first2;
-      }
-      return false;
+      if (*first1 < *first2)
+        ++first1;
+      else if (*first1 > *first2)
+        ++first2;
     }
+    return false;
+  }
 
   /*************************************************
    *************** Data Structures *****************

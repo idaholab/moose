@@ -502,12 +502,9 @@ GrainTracker::remapGrains()
         if (grain_it1 == grain_it2 || grain_it2->second._status == Status::INACTIVE)
           continue;
 
-        if (grain_it1->second._var_idx == grain_it2->second._var_idx &&   // Are the grains represented by the same variable?
-            grain_it1->second.isStichable(grain_it2->second) &&           // If so, do their bboxes intersect (coarse level check)?
-            setsIntersect(grain_it1->second._halo_ids.begin(),            // If so, do they actually overlap (tight "hull" check)?
-                          grain_it1->second._halo_ids.end(),
-                          grain_it2->second._halo_ids.begin(),
-                          grain_it2->second._halo_ids.end()))
+        if (grain_it1->second._var_idx == grain_it2->second._var_idx &&     // Are the grains represented by the same variable?
+            grain_it1->second.boundingBoxesIntersect(grain_it2->second) &&  // If so, do their bboxes intersect (coarse level check)?
+            grain_it1->second.halosIntersect(grain_it2->second))            // If so, do they actually overlap (tight "hull" check)?
         {
           Moose::out
             << COLOR_YELLOW
@@ -663,8 +660,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
       FeatureData & next_target_grain = _unique_grains[next_target_it->_grain_id];
 
       // If any grains touch we're done here
-      if (setsIntersect(grain._halo_ids.begin(), grain._halo_ids.end(),
-                        next_target_grain._halo_ids.begin(), next_target_grain._halo_ids.end()))
+      if (grain.halosIntersect(next_target_grain))
         intersection_hit = true;
       else
         oss << " #" << next_target_it->_grain_id;
