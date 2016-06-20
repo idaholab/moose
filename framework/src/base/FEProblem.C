@@ -572,8 +572,9 @@ void FEProblem::initialSetup()
     Moose::perf_log.pop("execTransfers()", "Setup");
 
     Moose::perf_log.push("execMultiApps()", "Setup");
-    //TODO: we did not check the convergence of the multiapps on initial
-    execMultiApps(EXEC_INITIAL);
+    bool converged = execMultiApps(EXEC_INITIAL);
+    if (!converged)
+      mooseError("failed to converge initial MultiApp");
 
     // We'll backup the Multiapp here
     backupMultiApps(EXEC_INITIAL);
