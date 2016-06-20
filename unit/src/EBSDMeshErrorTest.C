@@ -126,7 +126,7 @@ EBSDMeshErrorTest::geometrySpecifiedError()
   // test all these int parameters
   const unsigned int nint = 3;
   const char * int_params[nint] = {"nx", "ny", "nz"};
-  testParam<int>(nint, int_params, "TestB");
+  testParam<unsigned int>(nint, int_params, "TestB");
 }
 
 template<typename T>

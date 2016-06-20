@@ -29,8 +29,11 @@ class GeneratedMesh : public MooseMesh
 {
 public:
   GeneratedMesh(const InputParameters & parameters);
-  GeneratedMesh(const GeneratedMesh & other_mesh);
-  virtual ~GeneratedMesh();
+  GeneratedMesh(const GeneratedMesh & other_mesh) = default;
+  virtual ~GeneratedMesh() = default;
+
+  // No copy
+  GeneratedMesh & operator=(const GeneratedMesh & other_mesh) = delete;
 
   virtual MooseMesh & clone() const;
 
@@ -41,7 +44,7 @@ protected:
   MooseEnum _dim;
 
   /// Number of elements in x, y, z direction
-  int _nx, _ny, _nz;
+  unsigned int _nx, _ny, _nz;
 
   /// The min/max values for x,y,z component
   Real _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
