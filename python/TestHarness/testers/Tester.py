@@ -47,6 +47,7 @@ class Tester(MooseObject):
     params.addParam('asio',          ['ALL'], "A test that runs only if ASIO is available ('ALL', 'TRUE', 'FALSE')")
     params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
     params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
+    params.addParam('should_execute', True, 'Whether or not the executeable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
 
     return params
 
@@ -74,6 +75,11 @@ class Tester(MooseObject):
   def checkRunnable(self, options):
     return (True, '')
 
+
+  # Whether or not the executeable should be run
+  # Don't override this
+  def shouldExecute(self):
+    return self.specs['should_execute']
 
   # This method is called prior to running the test.  It can be used to cleanup files
   # or do other preparations before the tester is run

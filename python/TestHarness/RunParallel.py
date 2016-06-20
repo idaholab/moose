@@ -112,7 +112,7 @@ class RunParallel:
     # It deadlocks rather easy.  Instead we will use temporary files
     # to hold the output as it is produced
     try:
-      if self.options.dry_run:
+      if self.options.dry_run or not tester.shouldExecute():
         tmp_command = command
         command = "echo"
 
@@ -122,7 +122,7 @@ class RunParallel:
       # as a list.
       p = Popen(command,stdout=f,stderr=f,close_fds=False, shell=True)
 
-      if self.options.dry_run:
+      if self.options.dry_run or not tester.shouldExecute():
         command = tmp_command
     except:
       print "Error in launching a new task"
