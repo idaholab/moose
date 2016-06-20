@@ -358,7 +358,7 @@ dataLoad(std::istream & stream, std::set<T> & s, void * context)
   {
     T data;
     loadHelper(stream, data, context);
-    s.insert(data);
+    s.insert(std::move(data));
   }
 }
 
@@ -374,7 +374,7 @@ dataLoad(std::istream & stream, std::list<T> & l, void * context)
   {
     T data;
     loadHelper(stream, data, context);
-    l.push_back(data);
+    l.push_back(std::move(data));
   }
 }
 
