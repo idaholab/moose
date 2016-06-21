@@ -236,7 +236,9 @@ EigenSystem::buildSystemDoFIndices(SYSTEMTAG tag)
            it!=getEigenVariableNames().end(); it++)
       {
         unsigned int i = sys().variable_number(*it);
-        sys().local_dof_indices(i, _eigen_var_indices);
+        std::set<dof_id_type> var_indices;
+        sys().local_dof_indices(i, var_indices);
+        _eigen_var_indices.insert(var_indices.begin(), var_indices.end());
       }
     }
   }
