@@ -685,14 +685,22 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     mooseAssert(_unique_grains.find(target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
     FeatureData & target_grain = _unique_grains[target_it->_grain_id];
 
+    /**
+     * If we get to this case and the best distance is less than -1, we are in big trouble. This means that grains represented by all of
+     * the remaining order parameters are overlapping this one in at least two places. We'd have to maintain multiple recursive chains,
+     * or just start over from scratch...
+     * Let's just return false and see if there is another remapping option.
+     */
+    if (target_it->_distance < -1)
+      return false;
+
     // Make sure this grain isn't marked. If it is, we can't recurse here
     if (target_grain._status == Status::MARKED)
       return false;
 
-    // Save the solution values in case we overright them during recursion
+    // Save the solution values in case we overwrite them during recursion
     swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::FILL, depth);
 
-    // TODO: Make sure this distance is -1 or higher or fine intersections only exist for a single variable
     // Propose a new variable index for the current grain and recurse
     grain._var_idx = target_it->_var_index;
     grain._status = Status::MARKED;
