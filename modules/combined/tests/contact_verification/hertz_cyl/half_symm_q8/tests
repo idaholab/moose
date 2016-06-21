@@ -35,7 +35,7 @@
     cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=kinematic
     Outputs/file_base=hertz_cyl_half_1deg_frictionless_kin_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_kin_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_kin_check2
-    Outputs/chkfile/start_time=1.99'
+    Outputs/chkfile/start_time=3.49'
     rel_err = 1e-5
     abs_zero = 1e-6
     max_parallel = 1
@@ -52,7 +52,7 @@
     cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=penalty
     Outputs/file_base=hertz_cyl_half_1deg_frictionless_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_pen_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_pen_check2
-    Outputs/chkfile/start_time=1.99'
+    Outputs/chkfile/start_time=3.49'
     rel_err = 1e-5
     abs_zero = 1e-6
     max_parallel = 1
@@ -69,7 +69,7 @@
     cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=augmented_lagrange
     Outputs/file_base=hertz_cyl_half_1deg_frictionless_aug_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_aug_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_aug_check2
-    Outputs/chkfile/start_time=1.99'
+    Outputs/chkfile/start_time=3.49'
     rel_err = 1e-5
     abs_zero = 1e-6
     max_parallel = 1
@@ -109,17 +109,16 @@
   [./mu_1_0_kin]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template2.i'
-    csvdiff = 'hertz_cyl_half_1deg_mu_1_0_kin_check2.csv hertz_cyl_half_1deg_mu_1_0_kin_check_cont_press_0011.csv hertz_cyl_half_1deg_mu_1_0_kin_check_x_disp_0011.csv hertz_cyl_half_1deg_mu_1_0_kin_check_y_disp_0011.csv'
+    csvdiff = 'hertz_cyl_half_1deg_mu_1_0_kin_check2.csv hertz_cyl_half_1deg_mu_1_0_kin_check_cont_press_0010.csv hertz_cyl_half_1deg_mu_1_0_kin_check_x_disp_0010.csv hertz_cyl_half_1deg_mu_1_0_kin_check_y_disp_0010.csv'
     cli_args = 'Executioner/end_time=1.0 Problem/friction_coefficient=1.0
     Outputs/file_base=hertz_cyl_half_1deg_mu_1_0_kin_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_1_0_kin_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_1_0_kin_check2
     Outputs/chkfile/start_time=0.99'
     max_time = 600
-    rel_err = 1e-5
+    rel_err = 3e-5
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
-    deleted = '#6139'
     superlu = true
   [../]
   [./mu_0_pen]
@@ -129,9 +128,9 @@
     cli_args = 'Contact/interface/friction_coefficient=0.0
     Outputs/file_base=hertz_cyl_half_1deg_mu_0_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_pen_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_pen_check2
-    Outputs/chkfile/start_time=1.099'
+    Outputs/chkfile/start_time=1.99'
     rel_err = 1e-5
-    abs_zero = 1e-6
+    abs_zero = 2e-6
     max_parallel = 1
     heavy = true
     superlu = true
@@ -140,17 +139,16 @@
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template3.i'
     csvdiff = 'hertz_cyl_half_1deg_mu_0_2_pen_check2.csv hertz_cyl_half_1deg_mu_0_2_pen_check_cont_press_0060.csv hertz_cyl_half_1deg_mu_0_2_pen_check_x_disp_0060.csv hertz_cyl_half_1deg_mu_0_2_pen_check_y_disp_0060.csv'
-    cli_args = 'Executioner/end_time=1.5 Contact/interface/friction_coefficient=0.2
+    cli_args = 'Executioner/end_time=6.0 Contact/interface/friction_coefficient=0.2
     Outputs/file_base=hertz_cyl_half_1deg_mu_0_2_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_2_pen_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_2_pen_check2
-    Outputs/chkfile/start_time=1.499'
+    Outputs/chkfile/start_time=5.99'
     max_time = 1000
     rel_err = 1e-5
     abs_zero = 1e-5
     max_parallel = 1
     heavy = true
     superlu = true
-    skip = 'Waiting for damper changes.'
   [../]
   [./mu_1_0_pen]
     type = 'CSVDiff'

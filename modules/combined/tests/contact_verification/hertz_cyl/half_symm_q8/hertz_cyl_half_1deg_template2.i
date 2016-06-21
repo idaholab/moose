@@ -87,12 +87,12 @@
 [Functions]
   [./disp_ramp_vert]
     type = PiecewiseLinear
-    x = '0. 1. 2.'
+    x = '0. 1. 11.'
     y = '0. -0.0020 -0.0020'
   [../]
   [./disp_ramp_horz]
     type = PiecewiseLinear
-    x = '0. 1. 2.'
+    x = '0. 1. 11.'
     y = '0. 0.0 0.0014'
   [../]
 []
@@ -328,18 +328,14 @@
 
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-5
-  l_max_its = 50
-  nl_max_its = 50
+  l_max_its = 100
+  nl_max_its = 200
 
   start_time = 0.0
-  end_time = 1.1
+  end_time = 2.0
   l_tol = 1e-4
-  [./TimeStepper]
-    type = FunctionDT
-    time_t = ' 0.0 0.9 1.0 2.0'
-    time_dt = '0.1 0.1 0.01 0.01'
-    min_dt = 0.001
-  [../]
+  dt = 0.1
+  dtmin = 0.1
 
   [./Predictor]
     type = SimplePredictor
