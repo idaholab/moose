@@ -276,7 +276,7 @@ class RunApp(Tester):
       elif retcode != 0 and specs['should_crash'] == False:
         reason = 'CRASH'
       # Valgrind runs
-      elif retcode == 0 and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+      elif retcode == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
         reason = 'MEMORY ERROR'
       # PBS runs
       elif retcode == 0 and options.pbs and 'command not found' in output:
