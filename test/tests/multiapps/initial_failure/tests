@@ -1,0 +1,7 @@
+[Tests]
+  [./initial_multiapp_failure]
+    type = 'RunException'
+    input = 'master.i'
+    expect_err = 'failed to converge initial MultiApp'
+  [../]
+[]
