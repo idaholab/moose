@@ -663,8 +663,8 @@ public:
       {
         std::istringstream ss(vci._timestep);
         if (!(ss >> timestep) || timestep > n_steps)
-          mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer less than "
-                     << n_steps << ", received " << vci._timestep);
+          mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer between 1 and "
+                     << n_steps << " inclusive, received " << vci._timestep);
       }
 
       did_copy = true;
