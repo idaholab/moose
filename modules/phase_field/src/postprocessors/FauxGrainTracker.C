@@ -34,16 +34,23 @@ FauxGrainTracker::~FauxGrainTracker()
 }
 
 Real
-FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE field_type, unsigned int var_idx) const
+FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, unsigned int var_idx) const
 {
+  auto use_default = false;
+  if (var_idx == std::numeric_limits<unsigned int>::max())
+  {
+    use_default = true;
+    var_idx = 0;
+  }
+
   mooseAssert(var_idx < _vars.size(), "Index out of range");
 
   switch (field_type)
   {
-    case UNIQUE_REGION:
-    case VARIABLE_COLORING:
+    case FieldType::UNIQUE_REGION:
+    case FieldType::VARIABLE_COLORING:
     {
-      std::map<dof_id_type, unsigned int>::const_iterator entity_it = _entity_id_to_var_num.find(entity_id);
+      auto entity_it = _entity_id_to_var_num.find(entity_id);
 
       if (entity_it != _entity_id_to_var_num.end())
         return entity_it->second;

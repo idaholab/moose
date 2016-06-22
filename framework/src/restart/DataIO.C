@@ -36,8 +36,8 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
   unsigned int size = v.size();
   stream.write((char *) &size, sizeof(size));
 
-  // Write the string
-  stream.write(v.c_str(), sizeof(char)*(size+1));
+  // Write the string (Do not store the null byte)
+  stream.write(v.c_str(), sizeof(char) * size);
 }
 
 template<>
@@ -218,13 +218,11 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
   unsigned int size = 0;
   stream.read((char *) &size, sizeof(size));
 
-  // Read the string
-  char* s = new char[size+1];
-  stream.read(s, sizeof(char)*(size+1));
+  // Resize the string data
+  v.resize(size);
 
-  // Store the string and clean up
-  v = s;
-  delete[] s;
+  // Read the string
+  stream.read(&v[0], sizeof(char) * size);
 }
 
 

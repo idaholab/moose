@@ -40,7 +40,7 @@ protected:
   const MooseEnum _field_display;
   bool _var_coloring;
 
-  const FeatureFloodCount::FIELD_TYPE _field_type;
+  const FeatureFloodCount::FieldType _field_type;
 };
 
 #endif //FEATUREFLOODCOUNTAUX_H

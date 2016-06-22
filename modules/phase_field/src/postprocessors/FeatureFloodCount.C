@@ -26,6 +26,10 @@
 template<>
 void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
+  /**
+   * Not that _local_ids is not stored here. It's not needed for restart, and not needed
+   * during the parallel merge operation
+   */
   storeHelper(stream, feature._ghosted_ids, context);
   storeHelper(stream, feature._halo_ids, context);
   storeHelper(stream, feature._periodic_nodes, context);
@@ -33,7 +37,6 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
   storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._min_entity_id, context);
   storeHelper(stream, feature._status, context);
-  storeHelper(stream, feature._merged, context);
   storeHelper(stream, feature._intersects_boundary, context);
 }
 
@@ -47,6 +50,10 @@ void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * cont
 template<>
 void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
+  /**
+   * Not that _local_ids is not loaded here. It's not needed for restart, and not needed
+   * during the parallel merge operation
+   */
   loadHelper(stream, feature._ghosted_ids, context);
   loadHelper(stream, feature._halo_ids, context);
   loadHelper(stream, feature._periodic_nodes, context);
@@ -54,7 +61,6 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._min_entity_id, context);
   loadHelper(stream, feature._status, context);
-  loadHelper(stream, feature._merged, context);
   loadHelper(stream, feature._intersects_boundary, context);
 }
 
@@ -106,19 +112,15 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _n_procs(_app.n_processors()),
     _entities_visited(_vars.size()), // This map is always sized to the number of variables
     _feature_count(0),
-    _partial_feature_sets(_app.n_processors()),
+    _partial_feature_sets(_maps_size),
     _feature_sets(_maps_size),
     _feature_maps(_maps_size),
     _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
+    _halo_ids(_maps_size),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
-    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false),
-    _semilocal_elem_list_built(false)
+    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
 {
-  // Size the data structures to hold the correct number of maps
-  for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
-    _partial_feature_sets[rank].resize(_maps_size);
-
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
 }
@@ -128,31 +130,32 @@ FeatureFloodCount::~FeatureFloodCount()
 }
 
 void
-FeatureFloodCount::initialize()
+FeatureFloodCount::initialSetup()
 {
   // Get a pointer to the PeriodicBoundaries buried in libMesh
-  // TODO: Can we do this in the constructor (i.e. are all objects necessary for this call in existance during ctor?)
   _pbs = _fe_problem.getNonlinearSystem().dofMap().get_periodic_boundaries();
 
+  meshChanged();
+}
+
+void
+FeatureFloodCount::initialize()
+{
   // Clear the bubble marking maps and region counters and other data structures
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
     _feature_maps[map_num].clear();
     _feature_sets[map_num].clear();
+    _partial_feature_sets[map_num].clear();
 
     if (_var_index_mode)
       _var_index_maps[map_num].clear();
+
+    _halo_ids[map_num].clear();
   }
 
   for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
     _entities_visited[var_num].clear();
-
-  // Build a new node to element map
-  _nodes_to_elem_map.clear();
-  MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
-
-  // TODO: We might only need to build this once if adaptivity is turned off
-  _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
 
   // Calculate the thresholds for this iteration
   _step_threshold = _element_average_value + _threshold;
@@ -164,21 +167,16 @@ FeatureFloodCount::initialize()
 
   // Reset the feature count
   _feature_count = 0;
+}
 
-  // build semilocal element list
-  if (_is_elemental && !_semilocal_elem_list_built)
-  {
-    MeshBase::const_element_iterator       el  = _mesh.getMesh().active_elements_begin();
-    const MeshBase::const_element_iterator end = _mesh.getMesh().active_elements_end();
-    const processor_id_type my_pid = processor_id();
+void
+FeatureFloodCount::meshChanged()
+{
+  _mesh.buildPeriodicNodeMap(_periodic_node_map, _var_number, _pbs);
 
-    _semilocal_elem_list.clear();
-    for (; el != end; ++el)
-      if ((*el)->is_semilocal(my_pid))
-        _semilocal_elem_list.insert(*el);
-
-    _semilocal_elem_list_built = true;
-  }
+  // Build a new node to element map
+  _nodes_to_elem_map.clear();
+  MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
 }
 
 void
@@ -212,7 +210,7 @@ FeatureFloodCount::execute()
 void FeatureFloodCount::communicateAndMerge()
 {
   // First we need to transform the raw data into a usable data structure
-  populateDataStructuresFromFloodData();
+  prepareDataForTransfer();
 
   /*********************************************************************************
    *********************************************************************************
@@ -254,15 +252,6 @@ void FeatureFloodCount::communicateAndMerge()
    * End Parallel Communication Section
    *********************************************************************************
    *********************************************************************************/
-
-  // We'll inflate the bounding boxes by a percentage of the domain
-  RealVectorValue inflation;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    inflation(i) = _mesh.dimensionWidth(i);
-
-  // Let's try 1%
-  inflation *= 0.01;
-  inflateBoundingBoxes(inflation);
 
   mergeSets(true);
 }
@@ -306,22 +295,23 @@ FeatureFloodCount::getValue()
   return _feature_count;
 }
 
-void
-FeatureFloodCount::meshChanged()
-{
-  _semilocal_elem_list_built = false;
-}
-
 Real
-FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, unsigned int var_idx) const
+FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, unsigned int var_idx) const
 {
+  auto use_default = false;
+  if (var_idx == std::numeric_limits<unsigned int>::max())
+  {
+    use_default = true;
+    var_idx = 0;
+  }
+
   mooseAssert(var_idx < _maps_size, "Index out of range");
 
   switch (field_type)
   {
-    case UNIQUE_REGION:
+    case FieldType::UNIQUE_REGION:
     {
-      std::map<dof_id_type, int>::const_iterator entity_it = _feature_maps[var_idx].find(entity_id);
+      const auto entity_it = _feature_maps[var_idx].find(entity_id);
 
       if (entity_it != _feature_maps[var_idx].end())
         return entity_it->second; // + _region_offsets[var_idx];
@@ -329,9 +319,9 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
         return -1;
     }
 
-    case VARIABLE_COLORING:
+    case FieldType::VARIABLE_COLORING:
     {
-      std::map<dof_id_type, int>::const_iterator entity_it = _var_index_maps[var_idx].find(entity_id);
+      const auto entity_it = _var_index_maps[var_idx].find(entity_id);
 
       if (entity_it != _var_index_maps[var_idx].end())
         return entity_it->second;
@@ -339,9 +329,9 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
         return -1;
     }
 
-    case GHOSTED_ENTITIES:
+    case FieldType::GHOSTED_ENTITIES:
     {
-      std::map<dof_id_type, int>::const_iterator entity_it = _ghosted_entity_ids.find(entity_id);
+      const auto entity_it = _ghosted_entity_ids.find(entity_id);
 
       if (entity_it != _ghosted_entity_ids.end())
         return entity_it->second;
@@ -349,14 +339,26 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FIELD_TYPE field_type, 
         return -1;
     }
 
-    case HALOS:
+    case FieldType::HALOS:
     {
-      std::map<dof_id_type, int>::const_iterator entity_it = _halo_ids.find(entity_id);
-
-      if (entity_it != _halo_ids.end())
-        return entity_it->second;
+      if (!use_default)
+      {
+        const auto entity_it = _halo_ids[var_idx].find(entity_id);
+        if (entity_it != _halo_ids[var_idx].end())
+          return entity_it->second;
+      }
       else
-        return -1;
+      {
+        // Showing halos in reverse order for backwards compatibility
+        for (auto map_num = _maps_size; map_num-- /* don't compare greater than zero for unsigned */; )
+        {
+          const auto entity_it = _halo_ids[map_num].find(entity_id);
+
+          if (entity_it != _halo_ids[map_num].end())
+            return entity_it->second;
+        }
+      }
+      return -1;
     }
 
     default:
@@ -371,44 +373,43 @@ FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
   return _empty;
 }
 
-// TODO: Possibly rename this routine
 void
-FeatureFloodCount::populateDataStructuresFromFloodData()
+FeatureFloodCount::prepareDataForTransfer()
 {
   MeshBase & mesh = _mesh.getMesh();
 
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
-      for (auto & feature : _partial_feature_sets[rank][map_num])
+    for (auto & feature : _partial_feature_sets[map_num])
+    {
+      for (auto & entity_id : feature._local_ids)
       {
-        for (auto & entity_id : feature._local_ids)
-        {
-          // TODO: This may not be good enough for the elemental case
-          const Point & entity_point = _is_elemental ? mesh.elem(entity_id)->centroid() : mesh.node(entity_id);
+        /**
+         * Update the bounding box.
+         *
+         * Note: There will always be one and only one bbox while we are building up our
+         * data structures because we haven't started to stitch together any regions yet.
+         */
+        if (_is_elemental)
+          feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(entity_id));
+        else
+          feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(entity_id));
 
-          /**
-           * Update the bounding box.
-           *
-           * Note: There will always be one and only one bbox while we are building up our
-           * data structures because we haven't started to stitch together any regions yet.
-           */
-          feature.updateBBoxMin(feature._bboxes[0], entity_point);
-          feature.updateBBoxMax(feature._bboxes[0], entity_point);
-
-          // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
-          feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
-        }
-
-        // Adjust the halo marking region
-        std::set<dof_id_type> set_difference;
-
-        std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
-                            std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
-        feature._halo_ids.swap(set_difference);
-
-        // Periodic node ids
-        appendPeriodicNeighborNodes(feature);
+        // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
+        feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
       }
+
+      // Now extend the bounding box by the halo region
+      for (auto & halo_id : feature._halo_ids)
+      {
+        if (_is_elemental)
+          feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(halo_id));
+        else
+          feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(halo_id));
+      }
+
+      // Periodic node ids
+      appendPeriodicNeighborNodes(feature);
+    }
 }
 
 void
@@ -421,7 +422,7 @@ FeatureFloodCount::serialize(std::string & serialized_buffer)
    * Call the MOOSE serialization routines to serialize this processor's data.
    * Note: The _partial_feature_sets data structure will be empty for all other processors
    */
-  dataStore(oss, _partial_feature_sets[processor_id()], this);
+  dataStore(oss, _partial_feature_sets, this);
 
   // Populate the passed in string pointer with the string stream's buffer contents
   serialized_buffer.assign(oss.str());
@@ -455,7 +456,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
     iss.clear();                          // reset the string stream state
 
     // Load the communicated data into all of the other processors' slots
-    dataLoad(iss, _partial_feature_sets[rank], this);
+    dataLoad(iss, _partial_feature_sets, this);
   }
 }
 
@@ -467,128 +468,75 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
-    for (auto rank1 = decltype(_n_procs)(0); rank1 < _n_procs; ++rank1)
+    for (auto it1 = _partial_feature_sets[map_num].begin(); it1 != _partial_feature_sets[map_num].end(); /* No increment on it1 */)
     {
-    REPEAT_MERGE_LOOPS:
-
-      for (auto rank2 = decltype(_n_procs)(0); rank2 < _n_procs; ++rank2)
+      bool merge_occured = false;
+      for (auto it2 = _partial_feature_sets[map_num].begin(); it2 != _partial_feature_sets[map_num].end(); ++it2)
       {
-        for (std::vector<FeatureData>::iterator it1 = _partial_feature_sets[rank1][map_num].begin();
-             it1 != _partial_feature_sets[rank1][map_num].end(); /* no increment ++it1 */)
-        {
-          if (it1->_merged)
-          {
-            ++it1;
-            continue;
-          }
-
-          bool region_merged = false;
-          for (std::vector<FeatureData>::iterator it2 = _partial_feature_sets[rank2][map_num].begin(); it2 != _partial_feature_sets[rank2][map_num].end(); ++it2)
-          {
-            bool pb_intersect = false;
-            if (it1 != it2 &&                                                                // Make sure that these iterators aren't pointing at the same set
-                !it2->_merged &&                                                             // and that it2 is not merged (it1 was already checked)
-                it1->_var_idx == it2->_var_idx &&                                            // and that the sets have matching variable indices
-                ((use_periodic_boundary_info &&                                              // and (if merging across periodic nodes
-                   (pb_intersect = setsIntersect(it1->_periodic_nodes.begin(),               //      do those periodic nodes intersect?
-                                                 it1->_periodic_nodes.end(),
-                                                 it2->_periodic_nodes.begin(),
-                                                 it2->_periodic_nodes.end())))
-                     ||                                                                      //      or
-                   (it1->isStichable(*it2) &&                                                //      if the region bboxes intersect
-                     (setsIntersect(it1->_ghosted_ids.begin(),                               //      do those ghosted nodes intersect?)
-                                    it1->_ghosted_ids.end(),
-                                    it2->_ghosted_ids.begin(),
-                                    it2->_ghosted_ids.end()))
-                   )
-                 )
+        bool pb_intersect = false;
+        if (it1 != it2 &&                                                    // Make sure that these iterators aren't pointing at the same set
+            it1->_var_idx == it2->_var_idx &&                                // and that the sets have matching variable indices
+             ((use_periodic_boundary_info &&                                 // and (if merging across periodic nodes
+               (pb_intersect = it1->periodicBoundariesIntersect(*it2)))      //      do those periodic nodes intersect?
+                 ||                                                          //      or
+               (it1->boundingBoxesIntersect(*it2) &&                         //      if the region bboxes intersect
+                it1->ghostedIntersect(*it2)                                  //      do the ghosted entities also intersect)
                )
-            {
-              /**
-               * Even though we've determined that these two partial regions need to be merged, we don't necessarily know if the _ghost_ids intersect.
-               * We could be in this branch because the periodic boundaries intersect but that doesn't tell us anything about whether or not the ghost_region
-               * also intersects. If the _ghost_ids intersect, that means that we are merging along a periodic boundary, not across one. In this case the
-               * bounding box(s) need to be expanded.
-               */
-              set_union.clear();
-              std::set_union(it1->_ghosted_ids.begin(), it1->_ghosted_ids.end(), it2->_ghosted_ids.begin(), it2->_ghosted_ids.end(),
-                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
+             )
+           )
+        {
+          it2->merge(std::move(*it1));
 
-              // Was there overlap in the physical region?
-              bool physical_intersection = (it1->_ghosted_ids.size() + it2->_ghosted_ids.size() > set_union.size());
+          // Insert the new entity at the end of the list so that it may be checked against all other partial features again
+          _partial_feature_sets[map_num].emplace_back(std::move(*it2));
 
-              it1->_ghosted_ids.swap(set_union);
-              it2->_ghosted_ids.clear();
+          /**
+           * Now remove both halves the merged features: it2 contains the "moved" feature cell just inserted
+           * at the back of the list, it1 contains the mostly empty other half. We have to be careful about the
+           * order in which these two elements are deleted. We delete it2 first since we don't care where its
+           * iterator points after the deletion. We are going to break out of this loop anyway. If we delete
+           * it1 first, it may end up pointing at the same location as it2 which after the second deletion would
+           * cause both of the iterators to be invalidated.
+           */
+          _partial_feature_sets[map_num].erase(it2);
+          it1 = _partial_feature_sets[map_num].erase(it1); // it1 is incremented here!
 
-              set_union.clear();
-              std::set_union(it1->_periodic_nodes.begin(), it1->_periodic_nodes.end(), it2->_periodic_nodes.begin(), it2->_periodic_nodes.end(),
-                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
-              it1->_periodic_nodes.swap(set_union);
-              it2->_periodic_nodes.clear();
+          // A merge occurred, this is used to determine whether or not we increment the outer iterator
+          merge_occured = true;
 
-              set_union.clear();
-              std::set_union(it1->_local_ids.begin(), it1->_local_ids.end(), it2->_local_ids.begin(), it2->_local_ids.end(),
-                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
-              it1->_local_ids.swap(set_union);
-              it2->_local_ids.clear();
+          // We need to start the list comparison over for the new it1 so break here
+          break;
+        }
+      } // it2 loop
 
-              set_union.clear();
-              std::set_union(it1->_halo_ids.begin(), it1->_halo_ids.end(), it2->_halo_ids.begin(), it2->_halo_ids.end(),
-                             std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
-              it1->_halo_ids.swap(set_union);
-              it2->_halo_ids.clear();
+      if (!merge_occured) // No merges so we need to manually increment the outer iterator
+        ++it1;
 
-              /**
-               * If we had a physical intersection, we need to expand boxes. If we had a virtual (periodic) intersection we need to preserve
-               * all of the boxes from each of the regions' sets.
-               */
-              if (physical_intersection)
-                it1->expandBBox(*it2);
-              else
-                std::copy(it2->_bboxes.begin(), it2->_bboxes.end(), std::back_inserter(it1->_bboxes));
-
-              // Update the min feature id
-              it1->_min_entity_id = std::min(it1->_min_entity_id, it2->_min_entity_id);
-
-              // Set the flag on the merged set so we don't revisit it again
-              it2->_merged = true;
-
-              // Something was merged so we'll need to repeat this loop
-              region_merged = true;
-            }
-          } // it2 loop
-
-          // Don't increment if we had a merge, we need to retry earlier candidates again
-          if (!region_merged)
-            ++it1;
-          else
-            goto REPEAT_MERGE_LOOPS;
-
-        } // it1 loop
-      } // rank2 loop
-    } // rank1 loop
+    } // it1 loop
   } // map loop
 
-
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    _feature_sets[map_num].clear();
-
-  // Now consolidate the data structure
+  /**
+   * All of the merges are complete and stored in a vector of lists. To make several
+   * of the sorting and tracking algorithms more straightforward, we will move these
+   * items into a vector of vectors instead.
+   */
   _feature_count = 0;
-  for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
-    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+  {
+    for (auto & feature : _partial_feature_sets[map_num])
     {
-      for (auto & feature : _partial_feature_sets[rank][map_num])
-      {
-        if (!feature._merged)
-        {
-          _feature_sets[map_num].emplace_back(std::move(feature));
-          ++_feature_count;
-        }
-      }
+      // Adjust the halo marking region
+      std::set<dof_id_type> set_difference;
+      std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
+                          std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
+      feature._halo_ids.swap(set_difference);
 
-      _partial_feature_sets[rank][map_num].clear();
+      _feature_sets[map_num].emplace_back(std::move(feature));
+      ++_feature_count;
     }
+
+    _partial_feature_sets[map_num].clear();
+  }
 
   Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
@@ -598,7 +546,6 @@ FeatureFloodCount::updateFieldInfo()
 {
   // This variable is only relevant in single map mode
 //  _region_to_var_idx.resize(_feature_sets[0].size());
-  _halo_ids.clear();
 
   std::vector<size_t> index_vector;
 
@@ -632,11 +579,11 @@ FeatureFloodCount::updateFieldInfo()
 
       // Loop over the halo ids to update cells with halo information
       for (auto entity : feature._halo_ids)
-        _halo_ids[entity] = feature_number;
+        _halo_ids[map_idx][entity] = feature_number;
 
       // Loop over the ghosted ids to update cells with ghost information
       for (auto entity : feature._ghosted_ids)
-        _ghosted_entity_ids[entity] = feature_number;
+        _ghosted_entity_ids[entity] = 1;
 
       ++feature_number;
     }
@@ -693,26 +640,25 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
    * we've found a new mesh entity that's part of a feature.
    */
   auto map_num = _single_map_mode ? decltype(current_idx)(0) : current_idx;
-  auto rank = processor_id();
 
   // New Feature (we need to create it and add it to our data structure)
   if (!feature)
-    _partial_feature_sets[rank][map_num].emplace_back(current_idx);
+    _partial_feature_sets[map_num].emplace_back(current_idx);
 
   // Get a handle to the feature we will update (always the last feature in the data structure)
-  feature = &_partial_feature_sets[rank][map_num].back();
+  feature = &_partial_feature_sets[map_num].back();
 
   // Insert the current entity into the local ids map
   feature->_local_ids.insert(entity_id);
 
   if (_is_elemental)
-    visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*recurse =*/true);
+    visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
   else
-    visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*recurse =*/true);
+    visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
 }
 
 void
-FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool recurse)
+FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool expand_halos_only)
 {
   mooseAssert(elem, "Elem is NULL");
 
@@ -727,56 +673,57 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
       neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
   }
 
-  // Loop over all active element neighbors
-  for (const auto neighbor_ptr : all_active_neighbors)
-  {
-    auto my_proc_id = processor_id();
-
-    // Only recurse on elems this processor can see
-    if (neighbor_ptr && _semilocal_elem_list.find(neighbor_ptr) != _semilocal_elem_list.end())
-    {
-      if (neighbor_ptr->processor_id() != my_proc_id)
-        feature->_ghosted_ids.insert(elem->id());
-
-      /**
-       * Premark neighboring entities with a halo mark. These
-       * entities may or may not end up being part of the feature.
-       * We will not update the _entities_visited data structure
-       * here.
-       */
-      feature->_halo_ids.insert(neighbor_ptr->id());
-
-      if (recurse)
-        flood(neighbor_ptr, current_idx, feature);
-    }
-  }
+  visitNeighborsHelper(elem, all_active_neighbors, current_idx, feature, expand_halos_only);
 }
 
 void
-FeatureFloodCount::visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool recurse)
+FeatureFloodCount::visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool expand_halos_only)
 {
   mooseAssert(node, "Node is NULL");
 
-  std::vector<const Node *> neighbors;
-  MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, neighbors);
+  std::vector<const Node *> all_active_neighbors;
+  MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, all_active_neighbors);
 
-  // Loop over all nodal neighbors
-  for (unsigned int i = 0; i < neighbors.size(); ++i)
+  visitNeighborsHelper(node, all_active_neighbors, current_idx, feature, expand_halos_only);
+}
+
+template<typename T>
+void
+FeatureFloodCount::visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, unsigned long current_idx,
+                                        FeatureData * feature, bool expand_halos_only)
+{
+  // Loop over all active element neighbors
+  for (const auto neighbor : neighbor_entities)
   {
-    const Node * neighbor_node = neighbors[i];
-    auto my_proc_id = processor_id();
-
-    // Only recurse on nodes this processor can see
-    if (_mesh.isSemiLocal(const_cast<Node *>(neighbor_node)))
+    if (neighbor)
     {
-      if (neighbor_node->processor_id() != my_proc_id)
-        feature->_ghosted_ids.insert(neighbor_node->id());
+      if (expand_halos_only)
+        feature->_halo_ids.insert(neighbor->id());
 
-      // Premark Halo values
-      feature->_halo_ids.insert(neighbor_node->id());
+      else
+      {
+        auto my_processor_id = processor_id();
 
-      if (recurse)
-        flood(neighbors[i], current_idx, feature);
+        if (neighbor->processor_id() != my_processor_id)
+          feature->_ghosted_ids.insert(curr_entity->id());
+
+        /**
+         * Only recurse where we own this entity. We might step outside of the
+         * ghosted region if we recurse where we don't own the current entity.
+         */
+        if (curr_entity->processor_id() == my_processor_id)
+        {
+          /**
+           * Premark neighboring entities with a halo mark. These
+           * entities may or may not end up being part of the feature.
+           * We will not update the _entities_visited data structure
+           * here.
+           */
+          feature->_halo_ids.insert(neighbor->id());
+
+          flood(neighbor, current_idx, feature);
+        }
+      }
     }
   }
 }
@@ -815,15 +762,6 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
       }
     }
   }
-}
-
-void
-FeatureFloodCount::inflateBoundingBoxes(RealVectorValue inflation_amount)
-{
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto rank = decltype(_n_procs)(0); rank < _n_procs; ++rank)
-      for (auto & feature : _partial_feature_sets[rank][map_num])
-        feature.inflateBoundingBoxes(inflation_amount);
 }
 
 void
@@ -940,21 +878,35 @@ FeatureFloodCount::calculateBubbleVolumes()
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxMin(MeshTools::BoundingBox & bbox, const Point & min)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Point & node)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    bbox.min()(i) = std::min(bbox.min()(i), min(i));
+  {
+    bbox.min()(i) = std::min(bbox.min()(i), node(i));
+    bbox.max()(i) = std::max(bbox.max()(i), node(i));
+  }
 }
 
 void
-FeatureFloodCount::FeatureData::updateBBoxMax(MeshTools::BoundingBox & bbox, const Point & max)
+FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Elem & elem)
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    bbox.max()(i) = std::max(bbox.max()(i), max(i));
+  for (unsigned int node_n = 0; node_n < elem.n_nodes(); ++node_n)
+    updateBBoxExtremes(bbox, *(elem.get_node(node_n)));
 }
 
+void
+FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const MeshTools::BoundingBox & rhs_bbox)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    bbox.min()(i) = std::min(bbox.min()(i), rhs_bbox.min()(i));
+    bbox.max()(i) = std::max(bbox.max()(i), rhs_bbox.max()(i));
+  }
+}
+
+
 bool
-FeatureFloodCount::FeatureData::isStichable(const FeatureData & rhs) const
+FeatureFloodCount::FeatureData::boundingBoxesIntersect(const FeatureData & rhs) const
 {
   // See if any of the bounding boxes in either FeatureData object intersect
   for (const auto & bbox_lhs : _bboxes)
@@ -965,18 +917,84 @@ FeatureFloodCount::FeatureData::isStichable(const FeatureData & rhs) const
   return false;
 }
 
+
+bool
+FeatureFloodCount::FeatureData::halosIntersect(const FeatureData & rhs) const
+{
+  return setsIntersect(_halo_ids.begin(), _halo_ids.end(),
+                       rhs._halo_ids.begin(), rhs._halo_ids.end());
+}
+
+bool
+FeatureFloodCount::FeatureData::periodicBoundariesIntersect(const FeatureData & rhs) const
+{
+  return setsIntersect(_periodic_nodes.begin(), _periodic_nodes.end(),
+                       rhs._periodic_nodes.begin(), rhs._periodic_nodes.end());
+}
+
+bool
+FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
+{
+  return setsIntersect(_ghosted_ids.begin(), _ghosted_ids.end(),
+                       rhs._ghosted_ids.begin(), rhs._ghosted_ids.end());
+}
+
+void
+FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
+{
+  std::set<dof_id_type> set_union;
+
+  /**
+   * Even though we've determined that these two partial regions need to be merged, we don't necessarily know if the _ghost_ids intersect.
+   * We could be in this branch because the periodic boundaries intersect but that doesn't tell us anything about whether or not the ghost_region
+   * also intersects. If the _ghost_ids intersect, that means that we are merging along a periodic boundary, not across one. In this case the
+   * bounding box(s) need to be expanded.
+   */
+  std::set_union(_periodic_nodes.begin(), _periodic_nodes.end(), rhs._periodic_nodes.begin(), rhs._periodic_nodes.end(),
+                 std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
+  _periodic_nodes.swap(set_union);
+
+  set_union.clear();
+  std::set_union(_local_ids.begin(), _local_ids.end(), rhs._local_ids.begin(), rhs._local_ids.end(),
+                 std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
+  _local_ids.swap(set_union);
+
+  set_union.clear();
+  std::set_union(_halo_ids.begin(), _halo_ids.end(), rhs._halo_ids.begin(), rhs._halo_ids.end(),
+                 std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
+  _halo_ids.swap(set_union);
+
+  set_union.clear();
+  std::set_union(_ghosted_ids.begin(), _ghosted_ids.end(), rhs._ghosted_ids.begin(), rhs._ghosted_ids.end(),
+                 std::insert_iterator<std::set<dof_id_type> >(set_union, set_union.begin()));
+  // Was there overlap in the physical region?
+  bool physical_intersection = (_ghosted_ids.size() + rhs._ghosted_ids.size() > set_union.size());
+  _ghosted_ids.swap(set_union);
+
+  /**
+   * If we had a physical intersection, we need to expand boxes. If we had a virtual (periodic) intersection we need to preserve
+   * all of the boxes from each of the regions' sets.
+   */
+  if (physical_intersection)
+    expandBBox(rhs);
+  else
+    std::move(rhs._bboxes.begin(), rhs._bboxes.end(), std::back_inserter(_bboxes));
+
+  // Update the min feature id
+  _min_entity_id = std::min(_min_entity_id, rhs._min_entity_id);
+}
+
 void
 FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 {
   std::vector<bool> intersected_boxes(rhs._bboxes.size(), false);
 
-  bool box_expanded = false;
+  auto box_expanded = false;
   for (unsigned int i = 0; i < _bboxes.size(); ++i)
     for (unsigned int j = 0; j < rhs._bboxes.size(); ++j)
       if (_bboxes[i].intersect(rhs._bboxes[j]))
       {
-        updateBBoxMin(_bboxes[i], rhs._bboxes[j].min());
-        updateBBoxMax(_bboxes[i], rhs._bboxes[j].max());
+        updateBBoxExtremes(_bboxes[i], rhs._bboxes[j]);
         intersected_boxes[j] = true;
         box_expanded = true;
       }
@@ -999,7 +1017,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
     for (unsigned int i = 0; i < rhs._bboxes.size(); ++i)
       oss << "Max: " << rhs._bboxes[i].max() << " Min: " << rhs._bboxes[i].min() << '\n';
 
-    mooseError("Now Boundaing Boxes Expanded - This is a catastrophic error!\n" << oss.str());
+    mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n" << oss.str());
   }
 }
 
@@ -1041,7 +1059,6 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
     out << "\nVolume: " << volume;
     out << "\nVar_idx: " << feature._var_idx;
     out << "\nMin Entity ID: " << feature._min_entity_id;
-    out << "\nMerge Flag: " << feature._merged;
   }
   out << "\n\n";
 
