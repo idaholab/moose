@@ -91,7 +91,7 @@ enum EWallBoilingModelType
   WBM_ORIGINAL = 1
 };
 
-enum EFlowRegimeNames
+enum EFlowRegimeNamesType
 {
   FR_DISPERSEDBUBBLE,   ///< Weight of DispersedBubble Correlations  PreCHF
   FR_CAPSLUG,           ///< Weight of TaylorCap / Slug Flow
@@ -103,7 +103,7 @@ enum EFlowRegimeNames
   FR_LEFTOVER           ///< Weight of original Pre Map correlations to be applied
 };
 
-enum EWallDragFlowRegimeNames
+enum EWallDragFlowRegimeNamesType
 {
   WDFR_BUBBLYSLUG,      ///< Weight of Bubbly/Slug Correlations PreCHF
   WDFR_ANNULARMIST,     ///< Weight of Annular/Mist Correlations PreCHF
@@ -121,6 +121,17 @@ enum EInterfacialHeatTransferModelType
 {
   IHTM_SIMPLE = 0,
   IHTM_TRACE = 1
+};
+
+enum EWallHeatTransferRegimeNamesType
+{
+  WHTR_CONVECTION,      ///< Weight of Forced Convection PreCHF
+  WHTR_SUBCOOLED,       ///< Weight of Subcooled Nucleate boiling PreCHF
+  WHTR_NUCLEATE,        ///< Weight of Stable Nucleate boiling PreCHF
+  WHTR_TRANSITION,      ///< Weight of Transition Boiling PreCHF
+  WHTR_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
+  WHTR_DISPERSED,       ///< Weight of Dispersed Flow Correlations PostCHF
+  WHTR_LEFTOVER         ///< Weight of original Pre Map correlations to be applied
 };
 
 /**
