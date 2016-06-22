@@ -179,18 +179,6 @@ petscSetOptions(FEProblem & problem)
   PetscOptionsClear(PETSC_NULL);
 #endif
 
-  { // Get any options specified on the command-line
-    int argc;
-    char ** args;
-
-    PetscGetArgs(&argc, &args);
-#if PETSC_VERSION_LESS_THAN(3,7,0)
-    PetscOptionsInsert(&argc, &args, NULL);
-#else
-    PetscOptionsInsert(PETSC_NULL, &argc, &args, NULL);
-#endif
-  }
-
   setSolverOptions(problem.solverParams());
 
   // Add any additional options specified in the input file
@@ -219,6 +207,19 @@ petscSetOptions(FEProblem & problem)
     problem.getNonlinearSystem().setDecomposition(nosplits);
   }
 
+  // commandline options always win
+  // the options from a user commandline will overwrite the existing ones if any conflicts
+  { // Get any options specified on the command-line
+    int argc;
+    char ** args;
+
+    PetscGetArgs(&argc, &args);
+#if PETSC_VERSION_LESS_THAN(3,7,0)
+    PetscOptionsInsert(&argc, &args, NULL);
+#else
+    PetscOptionsInsert(PETSC_NULL, &argc, &args, NULL);
+#endif
+  }
 }
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
