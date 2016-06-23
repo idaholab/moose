@@ -34,7 +34,7 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(c
   // shear modulus of solid
   const Real G = 0.5 * E / (1.0 + nu);
   // shear modulus of jointed material
-  const Real Gprime = (b * ks > 0.0) ? 1.0 / (1.0 / G + 1.0 / b / ks) : 0.0;
+  const Real Gprime = G * b * ks / (b * ks + G);
 
   const Real a0000 = (b * kn > 0.0) ? E / (1.0 - nu * nu - std::pow(nu * (1.0 + nu), 2) / (1.0 - nu * nu + E / b / kn)) : E / (1.0 - nu * nu);
   const Real a0011 = nu * a0000 / (1.0 - nu);
@@ -42,7 +42,7 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(c
   const Real a0022 = nu * a2222 / (1.0 - nu);
   const Real a0101 = G;
   const Real a66 = Gprime;
-  const Real a77 = G + Gprime;
+  const Real a77 = 0.5*(G + Gprime);
 
   // Eijkl does not obey the usual symmetries, viz Eijkl != Ejikl, so must fill manually
   _Eijkl(0, 0, 0, 0) = _Eijkl(1, 1, 1, 1) = a0000;
@@ -56,10 +56,10 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(c
   // most of Bijkl is zero since the only nonzero moment stresses are m01 and m10.
   // It also does not have the usual symmetries.
   const Real D0 = E * std::pow(b, 3) / 12.0 / (1.0 - nu * nu);   // bending rigidity of a layer
-  const Real b0110 = D0 / b * ((G - Gprime) / (G + Gprime));
-  const Real b0101 = nu * b0110;
-  _Bijkl(0, 1, 1, 0) = _Bijkl(1, 0, 0, 1) = b0110;
+  const Real b0101 = D0 / b * G / (2.0 * b * ks + G);
+  const Real b0110 = - nu * b0101;
   _Bijkl(0, 1, 0, 1) = _Bijkl(1, 0, 1, 0) = b0101;
+  _Bijkl(0, 1, 1, 0) = _Bijkl(1, 0, 0, 1) = b0110;
 }
 
 void

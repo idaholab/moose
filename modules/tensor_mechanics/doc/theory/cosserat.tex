@@ -43,7 +43,7 @@
 
 
 \title{Cosserat Mechanics Theory Manual}
-\author{Andy and Ioannis}
+\author{CSIRO}
 \maketitle
 
 \tableofcontents
@@ -197,6 +197,9 @@ more natural than $\pl_{y}u_{x}+\thetarel$.
 \chapter{Cosserat elasticity in 3D}
 \label{3d.coss.elas.gen.sec}
 
+The author would like to thank Ioannis Stefanou (ENPC, France) for his
+help in writing parts of this Chapter.
+
 Consider an infinitesimal 3D volume element with body force per unit
 volume $\mathbf{F}$ and moment per unit volume $\mathbf{M}$.  Denote
 the stress tensor by $\si_{ij}$ and the couple-stress pseudo tensor by
@@ -312,6 +315,136 @@ The static equations in terms of $u$ and $\thetac$ are
 (\ga+\ep)\nabla\times(\nabla\times\thetac) + 2\al\nabla\times u -
 4\al\thetac + M \ .
 \end{eqnarray*}
+
+
+%%%
+\chapter{3D layered Cosserat elasticity}
+%%%
+
+Layered Cosserat elasticity is a generalisation of standard
+(non-Cosserat) transversely-isotropic elasticity.  The theory
+considers the situation where the medium is comprised of a stack of
+flat layers perpendicular to the $z$ direction.  The layers have
+thickness $h$ and are separated from each other by an interface
+material.  The interface material has thickness $h_{\mathrm{i}}$,
+Young's modulus $E_{\mathrm{i}}$ and shear modulus $G_{\mathrm{i}}$.
+The theory describes the limit 
+\begin{equation}
+h_{\mathrm{i}} \rightarrow 0 \ , \ \ \ 
+E_{\mathrm{i}} \rightarrow 0 \ , \ \ \ 
+E_{\mathrm{i}}/h_{\mathrm{i}} \rightarrow hk_{n} \ \ \ \mbox{and}
+\ \ \ 
+G_{\mathrm{i}}/h_{\mathrm{i}} \rightarrow hk_{s} \ .
+\label{thin.layer.limits.eqn}
+\end{equation}
+Here $k_{n}$ is called the normal stiffness, and $k_{s}$ is the shear
+stiffness.  As will become more obvious below, the fact that
+$E_{\mathrm{i}}/h_{\mathrm{i}}$ depends on $h$ is natural, since the
+thicker the layers, the less important the macroscopic effect on the
+thin interface.  The Cosserat rotation around $z$, $\thetac_{z}=0$ by
+definition.
+
+In this situation, the equations
+are Eqs.~(\ref{eqns.equjilb}), (\ref{ga.and.om.defns}), the a-priori
+definition $\thetac_{z}=0$, and the
+consitutive relationships
+\begin{eqnarray}
+\sigma_{ij} & = & E_{ijkl}\gamma_{ij} \ , \\
+m_{ij} & = & B_{ijkl}\kappa_{ij} \ .
+\end{eqnarray}
+$E$ is called the elasticity tensor, and $B$ is the bending rigidity
+tensor, and are written below in terms of the layer Young's modulus
+$E$, Poisson ratio $\nu$, and the parameters $h$, $k_{n}$ and $k_{s}$.
+
+$E$ and $B$ may be derived by taking the
+Equation~(\ref{thin.layer.limits.eqn}) limits of standard equations.
+For instance, a layered material consisting of homogeneous, isotropic
+layers in volume ratios $\alpha$ (for the ``main'', ``thick'' layers),
+and $\alpha_{\mathrm{i}}$ (for the interface layers)
+\begin{eqnarray}
+E_{xxxx} & = & \alpha E_{xxxx}^{\mathrm{main}} + \alpha_{\mathrm{i}}E_{xxxx}^{\mathrm{i}} -
+\alpha\alpha_{\mathrm{i}} \frac{ \left(
+  \frac{\nu}{1-\nu}E_{xxxx}^{\mathrm{main}} - \frac{\nu_{\mathrm{i}}}{1 -
+    \nu_{\mathrm{i}}}E_{xxxx}^{\mathrm{i}} \right)^{2}
+}{E_{xxxx}^{\mathrm{main}}E_{xxxx}^{\mathrm{i}}} E_{zzzz} \ , \\
+E_{xxzz} & = & \left( \alpha \frac{\nu}{1-\nu} +
+\alpha^{\mathrm{i}}\frac{\nu^{\mathrm{i}}}{1-\nu^{\mathrm{i}}} \right) E_{zzzz} \ , \\
+E_{zzzz} & = & \left( \frac{\alpha}{E_{xxxx}^{\mathrm{main}}} +
+\frac{\alpha^{\mathrm{i}}}{E_{xxxx}^{\mathrm{i}}} \right)^{-1} \ .
+\end{eqnarray}
+Here
+\begin{equation}
+E_{xxxx}^{\mathrm{main}} = E\frac{1-\nu}{(1 + \nu)(1 - 2\nu)} \ ,
+\end{equation}
+which is a standard equation from non-Cosserat elasticity written in
+terms of the ``main'' layers' Young's modulus $E$ and Poisson's
+ratio $\nu$.  Substituting $\alpha = 1$, $\alpha_{\mathrm{i}} =
+h_{\mathrm{i}}/(h + h_{\mathrm{i}})$, and taking the limits of
+Equation~(\ref{thin.layer.limits.eqn}), yields
+\begin{eqnarray}
+E_{0000} = E_{1111} & = & \frac{E}{1 - \nu^{2} -
+  \frac{\nu^{2}(1+\nu)^{2}}{1 - \nu^{2} + E/(hk_{n})}} \ , \nonumber
+\\
+E_{0011} = E_{1100} & = & \frac{\nu}{1-\nu}E_{0000} \ , \nonumber \\
+E_{2222} & = & \left( \frac{(1+\nu)(1-2\nu)}{(1-\nu)E} +
+\frac{1}{hk_{n}} \right)^{-1} \ , \nonumber \\
+E_{0022} = E_{1122} = E_{2200} = E_{2211} & = &
+\frac{\nu}{1-\nu}E_{2222} \ .
+\end{eqnarray}
+The shear terms may be motivated in a similar way, and are defined in
+terms of the shear modulus of the ``main'' layers, $G$, and the
+modified shear, $\tilde{G}$:
+\begin{equation}
+G = \frac{E}{2(1+\nu)} \ \ \ \mbox{and}\ \ \ \tilde{G} = \left(
+\frac{1}{G} + \frac{1}{hk_{s}} \right)^{-1}
+\end{equation}
+They
+are\footnote{Some references are the following.  DP Adhikary, HB Muhlhaus, AV
+  Dyskin ``A numerical study of flexural buckling of foliated rock
+  slopes'' International Journal for Numerical and Analytical Methods
+  in Geomechanics 25 (2001) 871--884.  DP Adhikary, HB Muhlhaus, AV
+  Dyskin ``Modelling the large deformations in stratified media ---
+  the Cosserat continuum approach'' Mechanics of Cohesive-Frictional
+  Materials 4 (1999) 195--213.}
+\begin{eqnarray}
+E_{0101} = E_{0110} = E_{1001} = E_{1010} & = & G \ , \nonumber
+\\ E_{0202} = E_{0220} = E_{2020} = E_{1212} = E_{1221} = E_{2121} & =
+& \tilde{G} \ , \nonumber \\
+E_{2002} = E_{2112} & = & \mbox{$\frac{1}{2}$}(G + \tilde{G})\ .
+\label{eqn.shearE.layered}
+\end{eqnarray}
+These are the only nonzero components of $E$.
+
+Notice that the last equality of Equation~(\ref{eqn.shearE.layered})
+implies that $E$ does not obey the usual symmetries, ie $E_{ijkl}\neq
+E_{jikl}$, as should be expected in the Cosserat situation.  This is
+easy to understand.  Consider the case $k_{s}=0$: that is, the
+Cosserat layers may slide freely over one another.  Then any shear
+stress $\sigma_{02}$ (a tangential force applied to the top of the
+stack of layers) will result in an infinite shear strain, since
+the layers will simply slide ad infinitum.  This is encoded in
+$E_{0202}=0$.  However, any shear stress $\sigma_{20}$ (a tangential
+force applied to the side of the stack of layers) will result in a
+finite shear strain.  This is encoded in $E_{2002}\neq 0$.
+
+Finally, the only nonzero components of $B$ are defined in terms of
+the bending rigidity of a layer
+\begin{equation}
+D = \frac{Eh^{3}}{12(1-\nu^{2})} \ ,
+\end{equation}
+and are
+\begin{eqnarray}
+B_{0101} = B_{1010} & = & \frac{D}{h} \left(\frac{G - \tilde{G}}{G +
+  \tilde{G}}\right) \ , \nonumber \\
+B_{0110} = B_{1001} & = & -\nu B_{0101} \ .
+\end{eqnarray}
+The negative sign in the last equation is not a typo~\footnote{See, for
+  instance the following.  R Lakes ``Experimental methods for study of
+  Cosserat elasticity solids and other generalised elastic continua'',
+  Equation (4) and discussion following Equation (18).  S Forest
+  ``Mechanics of Cosserat media: An introduction'' Equation (A50) and
+  discussion of (B65)}.
+
 
 
 
