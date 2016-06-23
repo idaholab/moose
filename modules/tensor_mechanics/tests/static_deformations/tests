@@ -31,6 +31,22 @@
     input = 'layered_cosserat_03.i'
     csvdiff = 'layered_cosserat_03.csv'
   [../]
+  [./beam_cosserat_01]
+    type = 'CSVDiff'
+    input = 'beam_cosserat_01.i'
+    csvdiff = 'beam_cosserat_01_soln_0001.csv'
+  [../]
+  [./beam_cosserat_02_apply_disps]
+    type = 'Exodiff'
+    input = 'beam_cosserat_02_apply_disps.i'
+    exodiff = 'beam_cosserat_02_apply_disps.e'
+    abs_zero = 1e-9
+  [../]
+  [./beam_cosserat_02_apply_stress]
+    type = 'CSVDiff'
+    input = 'beam_cosserat_02_apply_stress.i'
+    csvdiff = 'beam_cosserat_02_apply_stress_soln_0001.csv'
+  [../]
 
   [./except01]
     type = RunException
