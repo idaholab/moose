@@ -22,6 +22,7 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "ParallelUniqueId.h"
+#include "ScalarCoupleable.h"
 
 // libMesh includes
 #include "libmesh/parallel.h"
@@ -43,7 +44,8 @@ class UserObject :
   public SetupInterface,
   public FunctionInterface,
   public Restartable,
-  public MeshChangedInterface
+  public MeshChangedInterface,
+  public ScalarCoupleable
 {
 public:
   UserObject(const InputParameters & params);
