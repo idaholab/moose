@@ -77,6 +77,7 @@
 #include "LatticeSmoothCircleIC.h"
 #include "MultiBoundingBoxIC.h"
 #include "MultiSmoothCircleIC.h"
+#include "MultiSmoothSuperellipsoidIC.h"
 #include "PFCFreezingIC.h"
 #include "PolycrystalRandomIC.h"
 #include "PolycrystalReducedIC.h"
@@ -323,6 +324,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(LatticeSmoothCircleIC);
   registerInitialCondition(MultiBoundingBoxIC);
   registerInitialCondition(MultiSmoothCircleIC);
+  registerInitialCondition(MultiSmoothSuperellipsoidIC);
   registerInitialCondition(PFCFreezingIC);
   registerInitialCondition(PolycrystalRandomIC);
   registerInitialCondition(PolycrystalReducedIC);
