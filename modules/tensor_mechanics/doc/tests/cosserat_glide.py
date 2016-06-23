@@ -16,10 +16,6 @@ def expected(y):
     m32 = 2 * bbb * be * we * np.cosh(we * y)
     si21 = -4 * mu * mu_c / (mu + mu_c) * bbb * np.sinh(we * y)
     return (phi, u, m32, si21)
-    return -bulk * np.log(np.exp(-p0 / bulk) + grav * dens0 * x / bulk)
-
-def equal_to_tol(a, b):
-    return (np.abs(a) < 1.0E-10 and np.abs(b) < 1.0E-10) or ((a - b)/(a + b) < 1.0E-5)
 
 def glide():
     f = open("../../tests/static_deformations/gold/cosserat_glide_out_soln_0001.csv")
