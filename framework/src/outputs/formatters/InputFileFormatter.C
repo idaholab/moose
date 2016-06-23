@@ -26,7 +26,7 @@ InputFileFormatter::InputFileFormatter(bool dump_mode) :
 }
 
 std::string
-InputFileFormatter::printBlockOpen(const std::string &name, short depth, const std::string & /*doc*/) const
+InputFileFormatter::printBlockOpen(const std::string &name, short depth, const std::string & /*doc*/, const std::string & /*base*/) const
 {
   std::string indent(depth*2, ' ');
   std::string opening_string;

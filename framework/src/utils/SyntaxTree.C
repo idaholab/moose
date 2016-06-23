@@ -134,7 +134,8 @@ SyntaxTree::TreeNode::insertParams(const std::string &action, bool is_action_par
 std::string
 SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool &found)
 {
-  std::string doc;
+  std::string doc = "";
+  std::string moose_base;
   std::string long_name(getLongName());
   std::string name(_syntax_tree.isLongNames() ? long_name : _name);
   std::string out;
@@ -173,11 +174,12 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
       local_search_string = search_string;
 
     if (it != _moose_object_params.end())
+    {
       doc = it->second->getClassDescription();
-    else
-      doc = "";
-
-    local_out += _syntax_tree.printBlockOpen(name, depth, doc);
+      if (it->second->isParamValid("_moose_base"))
+        moose_base = it->second->get<std::string>("_moose_base");
+    }
+    local_out += _syntax_tree.printBlockOpen(name, depth, doc, moose_base);
 
     for (const auto & a_it : _action_params)
       if (a_it.first != "EmptyAction")

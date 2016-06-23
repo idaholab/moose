@@ -18,13 +18,16 @@
 template<>
 InputParameters validParams<Diffusion>()
 {
-  InputParameters p = validParams<Kernel>();
-  return p;
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription("The Laplacian operator.");
+  return params;
 }
 
 Diffusion::Diffusion(const InputParameters & parameters) :
     Kernel(parameters)
 {
+  parameters.print();
+
 }
 
 Diffusion::~Diffusion()
@@ -42,4 +45,3 @@ Diffusion::computeQpJacobian()
 {
   return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
-
