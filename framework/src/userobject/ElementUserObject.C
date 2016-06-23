@@ -36,7 +36,6 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
     MaterialPropertyInterface(this, blockIDs()),
     UserObjectInterface(this),
     Coupleable(this, false),
-    ScalarCoupleable(this),
     MooseVariableDependencyInterface(),
     TransientInterface(this),
     PostprocessorInterface(this),

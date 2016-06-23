@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'scalar_coupled_postprocessor_test.i’
+    exodiff = 'out.e'
+  [../]
+[]
