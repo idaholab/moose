@@ -1,54 +1,53 @@
-# apply shears and Cosserat rotations and observe the stresses and moment-stresses
-# with
-# young = 0.7
-# poisson = 0.2
-# layer_thickness = 0.1
-# joint_normal_stiffness = 0.25
-# joint_shear_stiffness = 0.2
-# then
-# a0000 = 0.730681
-# a0011 = 0.18267
-# a2222 = 0.0244221
-# a0022 = 0.006055
-# a0101 = 0.291667
-# a66 = 0.018717
-# a77 = 0.155192
-# b0110 = 0.000534
-# b0101 = 0.000107
-# and with
-# u_x = y + 2*z
-# u_y = x -1.5*z
-# u_z = 1.1*x - 2.2*y
-# wc_x = 0.5
-# wc_y = 0.8
-# then
-# strain_xx = 0
-# strain_xy = 1
-# strain_xz = 2 - 0.8 = 1.2
-# strain_yx = 1
-# strain_yy = 0
-# strain_yz = -1.5 + 0.5 = -1
-# strain_zx = 1.1 + 0.8 = 1.9
-# strain_zy = -2.2 - 0.5 = -2.7
-# strain_zz = 0
-# so that
-# stress_xy = a0101*(1+1) = 0.583333
-# stress_xz = a66*1.2 + a66*1.9 = 0.058021
-# stress_yx = a0101*(1+1) = 0.583333
-# stress_yz = a66*(-1) + a66*(-2.7) = -0.06925
-# stress_zx = a77*1.2 + a66*1.9 = 0.221793
-# stress_zy = a77*(-1) + a66*(-2.7) = -0.205728
-# and all others zero
+# Beam bending.
+# One end is clamped and the other end is subjected to a stress
+# and micromechanical moment that will induce bending.
+# The stress that will induce bending around the y axis is
+# stress_xx = EAz
+# This implies a micromechanical moment-stress of
+# m_yx = (1/12)EAh^2 for joint_shear_stiffness=0.
+# For joint_shear_stiffness!=0, the micromechanical moment-stress
+# is
+# m_yx = (1/12)EAa^2 G/(ak_s + G)
+# All other stresses and moment stresses are assumed to be zero.
+# With joint_shear_stiffness=0, and introducing D=-poisson*A, the
+# nonzero strains are
+# ep_xx = Az
+# ep_yy = Dz
+# ep_zz = Dz
+# kappa_xy = -D
+# kappa_yx = A
+# This means the displacements are:
+# u_x = Axz
+# u_y = Dzy
+# u_z = -(A/2)x^2 + (D/2)(z^2-y^2)
+# wc_x = -Dy
+# wc_y = Ax
+# wc_z = 0
+# This is bending of a bar around the y axis, in plane stress
+# (stress_yy=0).  Displacements at the left-hand (x=0) are applied
+# according to the above formulae; wc_x and wc_y are applied throughout
+# the bar; and stress_xx is applied at the right-hand end (x=10).
+# The displacements are measured and
+# compared with the above formulae.
+# The test uses: E=1.2, poisson=0.3, A=1.11E-2, h=2, ks=0.1, so
+# stress_xx = 1.332E-2*z
+# m_yx = 0.2379E-2
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1
-  ny = 1
+  nx = 10
+  ny = 1 # NEED THIS, otherwise get extra 3D effects - twisting and wavy behaviour - as moments are transferred between Cosserat and the antisymmetric part of stress.
+  nz = 10
+  xmin = 0
+  xmax = 10
+  ymin = -1
   ymax = 1
-  nz = 1
+  zmin = -0.5
+  zmax = 0.5
 []
 
 [GlobalParams]
+  use_displaced_mesh = false
   displacements = 'disp_x disp_y disp_z'
   Cosserat_rotations = 'wc_x wc_y wc_z'
 []
@@ -115,40 +114,89 @@
   # ymax is called top
   # xmin is called left
   # xmax is called right
-  [./strain_xx]
-    type = FunctionPresetBC
-    variable = disp_x
-    boundary = 'left right'
-    function = 'y+2*z'
-  [../]
-  [./strain_yy]
-    type = FunctionPresetBC
-    variable = disp_y
-    boundary = 'bottom top'
-    function = 'x-1.5*z'
-  [../]
-  [./strain_zz]
+  [./clamp_z]
     type = FunctionPresetBC
     variable = disp_z
-    boundary = 'back front'
-    function = '1.1*x-2.2*y'
+    boundary = left
+    function = '-0.3*(z*z-y*y)/2.0*1.11E-2'
   [../]
-  [./wc_x]
+  [./clamp_y]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = left
+    function = '-0.3*z*y*1.11E-2'
+  [../]
+  [./clamp_x]
+    type = PresetBC
+    variable = disp_x
+    boundary = left
+    value = 0.0
+  [../]
+  [./end_stress]
+    type = FunctionNeumannBC
+    boundary = right
+    function = z*1.2*1.11E-2
+    variable = disp_x
+  [../]
+  [./fix_wc_x]
     type = FunctionPresetBC
     variable = wc_x
-    boundary = 'left right'
-    function = 0.5
+    boundary = 'left' # right top bottom front back'
+    function = '0.3*y*1.11E-2'
   [../]
-  [./wc_y]
+  [./fix_wc_y]
     type = FunctionPresetBC
     variable = wc_y
-    boundary = 'left right'
-    function = 0.8
+    boundary = 'left' # right top bottom front back'
+    function = '1.11E-2*x'
+  [../]
+  [./end_moment]
+    type = VectorNeumannBC
+    boundary = right
+    variable = wc_y
+    vector_value = '2.3785714286E-3 0 0'
   [../]
 []
 
+
 [AuxVariables]
   [./wc_z]
+  [../]
+  [./strain_xx]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_xy]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_xz]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_yx]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_yy]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_yz]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_zx]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_zy]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./strain_zz]
+    family = MONOMIAL
+    order = CONSTANT
   [../]
   [./stress_xx]
     family = MONOMIAL
@@ -225,6 +273,69 @@
 []
 
 [AuxKernels]
+  [./strain_xx]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_xx
+    index_i = 0
+    index_j = 0
+  [../]
+  [./strain_xy]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_xy
+    index_i = 0
+    index_j = 1
+  [../]
+  [./strain_xz]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_xz
+    index_i = 0
+    index_j = 2
+  [../]
+  [./strain_yx]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_yx
+    index_i = 1
+    index_j = 0
+  [../]
+  [./strain_yy]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_yy
+    index_i = 1
+    index_j = 1
+  [../]
+  [./strain_yz]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_yz
+    index_i = 1
+    index_j = 2
+  [../]
+  [./strain_zx]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_zx
+    index_i = 2
+    index_j = 0
+  [../]
+  [./strain_zy]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_zy
+    index_i = 2
+    index_j = 1
+  [../]
+  [./strain_zz]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_zz
+    index_i = 2
+    index_j = 2
+  [../]
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -353,107 +464,25 @@
   [../]
 []
 
-[Postprocessors]
-  [./s_xx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xx
-  [../]
-  [./s_xy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xy
-  [../]
-  [./s_xz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xz
-  [../]
-  [./s_yx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yx
-  [../]
-  [./s_yy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yy
-  [../]
-  [./s_yz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yz
-  [../]
-  [./s_zx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_zx
-  [../]
-  [./s_zy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_zy
-  [../]
-  [./s_zz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_zz
-  [../]
-  [./c_s_xx]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_xx
-  [../]
-  [./c_s_xy]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_xy
-  [../]
-  [./c_s_xz]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_xz
-  [../]
-  [./c_s_yx]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_yx
-  [../]
-  [./c_s_yy]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_yy
-  [../]
-  [./c_s_yz]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_yz
-  [../]
-  [./c_s_zx]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_zx
-  [../]
-  [./c_s_zy]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_zy
-  [../]
-  [./c_s_zz]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_zz
+[VectorPostprocessors]
+  [./soln]
+    type = LineValueSampler
+    sort_by = x
+    variable = 'disp_x disp_y disp_z stress_xx stress_xy stress_xz stress_yx stress_yy stress_yz stress_zx stress_zx stress_zz wc_x wc_y wc_z couple_stress_xx couple_stress_xy couple_stress_xz couple_stress_yx couple_stress_yy couple_stress_yz couple_stress_zx couple_stress_zy couple_stress_zz'
+    start_point = '0 0 0.5'
+    end_point = '10 0 0.5'
+    num_points = 11
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
-    young = 0.7
-    poisson = 0.2
-    layer_thickness = 0.1
-    joint_normal_stiffness = 0.25
-    joint_shear_stiffness = 0.2
+    young = 1.2
+    poisson = 0.3
+    layer_thickness = 2.0
+    joint_normal_stiffness = 1E16
+    joint_shear_stiffness = 0.1
   [../]
   [./strain]
     type = ComputeCosseratSmallStrain
@@ -467,8 +496,8 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres asm lu 1E-10 1E-14 10 1E-15 1E-10'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol -ksp_max_it -sub_pc_factor_shift_type -pc_asm_overlap -ksp_gmres_restart'
+    petsc_options_value = 'gmres asm lu 1E-11 1E-11 10 1E-15 1E-10 100 NONZERO 2 100'
   [../]
 []
 
@@ -480,6 +509,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = layered_cosserat_02
+  file_base = beam_cosserat_02_apply_stress
   csv = true
 []

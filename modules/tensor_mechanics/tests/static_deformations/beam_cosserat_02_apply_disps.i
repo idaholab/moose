@@ -1,51 +1,43 @@
-# apply shears and Cosserat rotations and observe the stresses and moment-stresses
-# with
-# young = 0.7
-# poisson = 0.2
-# layer_thickness = 0.1
-# joint_normal_stiffness = 0.25
-# joint_shear_stiffness = 0.2
-# then
-# a0000 = 0.730681
-# a0011 = 0.18267
-# a2222 = 0.0244221
-# a0022 = 0.006055
-# a0101 = 0.291667
-# a66 = 0.018717
-# a77 = 0.155192
-# b0110 = 0.000534
-# b0101 = 0.000107
-# and with
-# u_x = y + 2*z
-# u_y = x -1.5*z
-# u_z = 1.1*x - 2.2*y
-# wc_x = 0.5
-# wc_y = 0.8
-# then
-# strain_xx = 0
-# strain_xy = 1
-# strain_xz = 2 - 0.8 = 1.2
-# strain_yx = 1
-# strain_yy = 0
-# strain_yz = -1.5 + 0.5 = -1
-# strain_zx = 1.1 + 0.8 = 1.9
-# strain_zy = -2.2 - 0.5 = -2.7
-# strain_zz = 0
-# so that
-# stress_xy = a0101*(1+1) = 0.583333
-# stress_xz = a66*1.2 + a66*1.9 = 0.058021
-# stress_yx = a0101*(1+1) = 0.583333
-# stress_yz = a66*(-1) + a66*(-2.7) = -0.06925
-# stress_zx = a77*1.2 + a66*1.9 = 0.221793
-# stress_zy = a77*(-1) + a66*(-2.7) = -0.205728
-# and all others zero
+# Beam bending.
+# Displacements are applied to a beam and stresses and moment-stresses
+# are measured.  Note that since these quantities are averaged over
+# elements, to get a good agreement with the analytical solution the
+# number of elements (nz) should be increased.  Using nx=10
+# and nz=10 yields roughly 1% error.
+# The displacements applied are a pure-bend around the y axis
+# with an additional displacement in the y direction so that
+# the result (below) will end up being plane stress (stress_yy=0):
+# u_x = Axz
+# u_y = Dzy
+# u_z = -(A/2)x^2 + (D/2)(z^2-y^2)
+# wc_x = -Dy
+# wc_y = Ax
+# wc_z = 0
+# Here A and D are arbitrary constants.
+# This results in strains being symmetric, and the only
+# nonzero ones are
+# ep_xx = Az
+# ep_yy = Dz
+# ep_zz = Dz
+# kappa_xy = -D
+# kappa_yx = A
+# Then choosing D = -poisson*A gives, for layered Cosserat:
+# stress_xx = EAz
+# m_yx = (1-poisson^2)*A*B = (1/12)EAh^2 (last equality for joint_shear_stiffness=0)
+# where h is the layer thickness.  All other stress and moment-stress
+# components are zero.
+# The test uses: E=1.2, poisson=0.3, A=1.11E-2, h=2
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1
+  nx = 10
+  xmax = 10
   ny = 1
-  ymax = 1
-  nz = 1
+  nz = 10
+  ymin = -0.5
+  ymax = 0.5
+  zmin = -0.5
+  zmax = 0.5
 []
 
 [GlobalParams]
@@ -115,37 +107,38 @@
   # ymax is called top
   # xmin is called left
   # xmax is called right
-  [./strain_xx]
-    type = FunctionPresetBC
-    variable = disp_x
-    boundary = 'left right'
-    function = 'y+2*z'
-  [../]
-  [./strain_yy]
-    type = FunctionPresetBC
-    variable = disp_y
-    boundary = 'bottom top'
-    function = 'x-1.5*z'
-  [../]
-  [./strain_zz]
+  [./clamp_z]
     type = FunctionPresetBC
     variable = disp_z
-    boundary = 'back front'
-    function = '1.1*x-2.2*y'
+    boundary = 'left right top bottom front back'
+    function = '-1.11E-2*x*x/2-0.3*(z*z-y*y)/2.0*1.11E-2'
   [../]
-  [./wc_x]
+  [./clamp_y]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = 'left right top bottom front back'
+    function = '-0.3*z*y*1.11E-2'
+  [../]
+  [./clamp_x]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 'left right top bottom front back'
+    function = '1.11E-2*x*z'
+  [../]
+  [./clamp_wc_x]
     type = FunctionPresetBC
     variable = wc_x
-    boundary = 'left right'
-    function = 0.5
+    boundary = 'left right top bottom front back'
+    function = '0.3*y*1.11E-2'
   [../]
-  [./wc_y]
+  [./clamp_wc_y]
     type = FunctionPresetBC
     variable = wc_y
-    boundary = 'left right'
-    function = 0.8
+    boundary = 'left right top bottom front back'
+    function = '1.11E-2*x'
   [../]
 []
+
 
 [AuxVariables]
   [./wc_z]
@@ -353,107 +346,14 @@
   [../]
 []
 
-[Postprocessors]
-  [./s_xx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xx
-  [../]
-  [./s_xy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xy
-  [../]
-  [./s_xz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xz
-  [../]
-  [./s_yx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yx
-  [../]
-  [./s_yy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yy
-  [../]
-  [./s_yz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yz
-  [../]
-  [./s_zx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_zx
-  [../]
-  [./s_zy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_zy
-  [../]
-  [./s_zz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_zz
-  [../]
-  [./c_s_xx]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_xx
-  [../]
-  [./c_s_xy]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_xy
-  [../]
-  [./c_s_xz]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_xz
-  [../]
-  [./c_s_yx]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_yx
-  [../]
-  [./c_s_yy]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_yy
-  [../]
-  [./c_s_yz]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_yz
-  [../]
-  [./c_s_zx]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_zx
-  [../]
-  [./c_s_zy]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_zy
-  [../]
-  [./c_s_zz]
-    type = PointValue
-    point = '0 0 0'
-    variable = couple_stress_zz
-  [../]
-[]
-
 [Materials]
   [./elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
-    young = 0.7
-    poisson = 0.2
-    layer_thickness = 0.1
-    joint_normal_stiffness = 0.25
-    joint_shear_stiffness = 0.2
+    young = 1.2
+    poisson = 0.3
+    layer_thickness = 2.0
+    joint_normal_stiffness = 1E16
+    joint_shear_stiffness = 1E-15
   [../]
   [./strain]
     type = ComputeCosseratSmallStrain
@@ -467,8 +367,8 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres asm lu 1E-10 1E-14 10 1E-15 1E-10'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm lu 1E-10 1E-14 10 1E-15 1E-10 NONZERO'
   [../]
 []
 
@@ -480,6 +380,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = layered_cosserat_02
-  csv = true
+  file_base = beam_cosserat_02_apply_disps
+  exodus = true
 []

@@ -13,18 +13,18 @@
 # a0101 = 0.291667
 # a66 = 0.018717
 # a77 = 0.310383
-# b0110 = 0.000534
-# b0101 = 0.000107
+# b0101 = 0.000534
+# b0110 = -0.000107
 # and with
 # wc_x = x + 2*y + 3*z
 # wc_y = -1.1*x - 2.2*y - 3.3*z
 # then
-# curvature_yx = 2
-# curvature_xy = -1.1
+# curvature_xy = 2
+# curvature_yx = -1.1
 # and all others are either zero at (x,y,z)=(0,0,0) or unimportant for layered Cosserat
 # so that
-# m_xy = b0110*(-1.1) + b0101*2 = -0.000374049
-# m_yx = b0101*(-1.1) + b0110*2 = 0.0009511533
+# m_xy = b0101*(2) + b0110*(-1.1) = 0.00118
+# m_yx = b0110*2 + b0101*(-1.1) = -0.000801
 # and all others zero (at (x,y,z)=(0,0,0))
 [Mesh]
   type = GeneratedMesh
