@@ -31,12 +31,18 @@ public:
   virtual std::string postscript() const;
 
   virtual std::string preTraverse(short depth) const;
-  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string & doc) const;
+  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string & doc, const std::string & base) const;
   virtual std::string printBlockClose(const std::string &name, short depth) const;
   virtual std::string printParams(const std::string &prefix, const std::string &fully_qualified_name, InputParameters &params, short depth, const std::string &search_string, bool &found);
 
+
+  void setMooseBase(const std::string & moose_base) { _moose_base = moose_base; }
+
 protected:
   bool _dump_mode;
+
+  std::string _moose_base;
+
 
   /**
    * Method for building an output string that accounts for specific types (e.g., Point)

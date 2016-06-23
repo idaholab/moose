@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+import os
+import logging
+import sys
+
+import utils
+import argparse
+
+# Check for the necessary packages, this does a load so they should all get loaded.
+if utils.check_configuration(['yaml', 'livereload', 'click', 'jinja2', 'markdown', 'markdown_include', 'mdx_math', 'mkdocs_bootswatch', 'mkdocs_bootstrap']):
+    sys.exit(1)
+
+if __name__ == '__main__':
+
+    # Command-line options
+    parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
+    parser.add_argument('--config-file', '-c', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation. (Default: %(default)s)")
+    parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
+
+    subparser = parser.add_subparsers(title='Commands', description="Documenation creation command to execute.", dest='command')
+
+    setup_parser = subparser.add_parser('setup', help="Install mkmoosedocs package.")
+    setup_parser.add_argument('path', help="Specifiy the location of the mkdocs package.")
+
+    generate_parser = subparser.add_parser('generate', help="Generate the markdown documentation from MOOSE application executable.")
+
+    serve_parser = subparser.add_parser('serve', help='Sever the documentation using a local server.')
+    serve_parser.add_argument('--no-livereload', action='store_true', help="Disable the live reloading of the served site.")
+    serve_parser.add_argument('--strict', action='store_true', help='Enable strict mode and abort on warnings.')
+
+    build_parser = subparser.add_parser('build', help='Build the documentation for serving.')
+
+    options = parser.parse_args()
+
+    # Setup
+    if options.command == 'setup':
+        try:
+            import subprocess
+            subprocess.check_output(['python', 'setup.py', 'install'], cwd=options.path)
+            print 'Successfully installed mkdocs package.'
+            sys.exit()
+        except Exception, e:
+            print 'Failed to install mkdocs package, please contact the moose-users list for assistance.'
+            raise e
+    # See if custom mkdocs (mkmoosedocs) is installed
+    try:
+        from mkdocs.commands import serve, build
+        from mkdocs.config import load_config
+
+    except ImportError, e:
+        raise ImportError("The MOOSE mkdocs (https://github.com/aeslaughter/mkdocs) must be installed, run the following command:\n    moosedocs setup /path/to/mkdocs/fork")
+
+    # Configuration file
+    if not os.path.exists(options.config_file):
+        raise IOError("The supplied configuation file was not found: {}".format(options.config_file))
+
+    # Load the MooseDocs markdown generation package
+    import MooseDocs
+
+    # Initialize logging
+    MooseDocs.init_logging(options.verbose)
+
+    # GENERATE:
+    if options.command == 'generate':
+        gen = MooseDocs.MooseApplicationDocGenerator(options.config_file)
+        gen()
+
+    # SERVE:
+    elif options.command == 'serve':
+        serve.serve(config_file=options.config_file, strict=options.strict, livereload=(not options.no_livereload))
+
+    # BUILD:
+    elif options.command == 'build':
+        config = load_config(options.config_file)
+        build.build(config, clean_site_dir=True)
