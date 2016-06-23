@@ -128,4 +128,16 @@
     input = MultiBoundingBoxIC3D.i
     exodiff = MultiBoundingBoxIC3D_out.e
   [../]
+
+  [./MultiSmoothSuperellipsoidIC_3D]
+    type = Exodiff
+    input = 'MultiSmoothSuperellipsoidIC_3D.i'
+    exodiff = 'MultiSmoothSuperellipsoidIC_3D_out.e'
+  [../]
+
+  [./MultiSmoothSuperellipsoidIC_2D]
+    type = Exodiff
+    input = 'MultiSmoothSuperellipsoidIC_2D.i'
+    exodiff = 'MultiSmoothSuperellipsoidIC_2D_out.e'
+  [../]
 []
