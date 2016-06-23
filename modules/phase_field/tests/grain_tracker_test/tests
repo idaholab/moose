@@ -38,6 +38,14 @@
     max_time = 500
   [../]
 
+  [./test_remapping_parallel]
+    type = 'CSVDiff'
+    input = 'grain_tracker_remapping_test.i'
+    csvdiff = 'grain_tracker_remapping_test_out.csv'
+    method = 'OPT OPROF' # slow test
+    valgrind = 'HEAVY'
+  [../]
+
   [./test_recover]
     type = 'Exodiff'
     input = 'grain_tracker_recover.i'
