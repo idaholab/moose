@@ -18,6 +18,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    deleted = 'Ticket #7073'
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
