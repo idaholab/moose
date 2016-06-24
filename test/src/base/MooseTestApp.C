@@ -100,6 +100,7 @@
 #include "LateDeclarationVectorPostprocessor.h"
 #include "PotentialAdvection.h"
 #include "GhostAux.h"
+#include "FunctionGradAux.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -385,6 +386,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(DotCouplingAux);
   registerAux(VectorPostprocessorAux);
   registerAux(GhostAux);
+  registerAux(FunctionGradAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);

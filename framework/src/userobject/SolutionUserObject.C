@@ -573,25 +573,22 @@ SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_
 Real
 SolutionUserObject::pointValue(Real libmesh_dbg_var(t), const Point & p, const unsigned int local_var_index) const
 {
-  // Create copy of point
-  Point pt(p);
-
   // do the transformations
-  for (unsigned int trans_num = 0 ; trans_num < _transformation_order.size() ; ++trans_num)
+  for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
   {
     if (_transformation_order[trans_num] == "rotation0")
-      pt = _r0*pt;
+      pt = _r0 * pt;
     else if (_transformation_order[trans_num] == "translation")
       for (unsigned int i=0; i<LIBMESH_DIM; ++i)
         pt(i) -= _translation[i];
     else if (_transformation_order[trans_num] == "scale")
-      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         pt(i) /= _scale[i];
     else if (_transformation_order[trans_num] == "scale_multiplier")
-      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         pt(i) *= _scale_multiplier[i];
     else if (_transformation_order[trans_num] == "rotation1")
-      pt = _r1*pt;
+      pt = _r1 * pt;
   }
 
   // Extract the value at the current point
@@ -602,7 +599,49 @@ SolutionUserObject::pointValue(Real libmesh_dbg_var(t), const Point & p, const u
   {
     mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
     Real val2 = evalMeshFunction(pt, local_var_index, 2);
-    val = val + (val2 - val)*_interpolation_factor;
+    val = val + (val2 - val) * _interpolation_factor;
+  }
+
+  return val;
+}
+
+RealGradient
+SolutionUserObject::pointValueGradient(Real t, const Point & p, const std::string & var_name) const
+{
+  const unsigned int local_var_index = getLocalVarIndex(var_name);
+  return pointValueGradient(t, p, local_var_index);
+}
+
+RealGradient
+SolutionUserObject::pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const
+{
+  // do the transformations
+  for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
+  {
+    if (_transformation_order[trans_num] == "rotation0")
+      pt = _r0 * pt;
+    else if (_transformation_order[trans_num] == "translation")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) -= _translation[i];
+    else if (_transformation_order[trans_num] == "scale")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) /= _scale[i];
+    else if (_transformation_order[trans_num] == "scale_multiplier")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) *= _scale_multiplier[i];
+    else if (_transformation_order[trans_num] == "rotation1")
+      pt = _r1 * pt;
+  }
+
+  // Extract the value at the current point
+  RealGradient val = evalMeshFunctionGradient(pt, local_var_index, 1);
+
+  // Interpolate
+  if (_file_type == 1 && _interpolate_times)
+  {
+    mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
+    RealGradient val2 = evalMeshFunctionGradient(pt, local_var_index, 2);
+    val = val + (val2 - val) * _interpolation_factor;
   }
 
   return val;
@@ -615,7 +654,7 @@ SolutionUserObject::directValue(dof_id_type dof_index) const
   if (_file_type==1 && _interpolate_times)
   {
     Real val2 = (*_serialized_solution2)(dof_index);
-    val = val + (val2 - val)*_interpolation_factor;
+    val = val + (val2 - val) * _interpolation_factor;
   }
   return val;
 }
@@ -648,6 +687,36 @@ SolutionUserObject::evalMeshFunction(const Point & p, const unsigned int local_v
     mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
   }
   return output(local_var_index);
+}
+
+RealGradient
+SolutionUserObject::evalMeshFunctionGradient(const Point & p, const unsigned int local_var_index, unsigned int func_num) const
+{
+  // Storage for mesh function output
+  std::vector<Gradient> output;
+
+  // Extract a value from the _mesh_function
+  {
+    Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
+    if (func_num == 1)
+      _mesh_function->gradient(p, 0.0, output, libmesh_nullptr);
+
+    // Extract a value from _mesh_function2
+    else if (func_num == 2)
+      _mesh_function2->gradient(p, 0.0, output, libmesh_nullptr);
+
+    else
+      mooseError("The func_num must be 1 or 2");
+  }
+
+  // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
+  if (output.size() == 0)
+  {
+    std::ostringstream oss;
+    p.print(oss);
+    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+  }
+  return output[local_var_index];
 }
 
 const std::vector<std::string> &

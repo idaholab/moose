@@ -45,7 +45,12 @@ public:
    */
   virtual Real value(Real t, const Point & p) override;
 
-  // virtual RealGradient gradient(Real t, const Point & p);
+  /** Extract a gradient from the solution
+   * @param t Time at which to extract
+   * @param p Spatial location of desired data
+   * @return The value at t and p
+   */
+  virtual RealGradient gradient(Real t, const Point & p);
 
   /** Setup the function for use
    * Gathers a pointer to the SolutionUserObject containing the solution that
@@ -68,6 +73,8 @@ protected:
   /// Factor to add to the solution (default = 0)
   const Real _add_factor;
 
+  /// Factor to add to the solution if gradient is requested (default = \vec{0})
+  RealGradient _add_grad;
 };
 
 #endif //SOLUTIONFUNCTION_H
