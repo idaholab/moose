@@ -44,7 +44,6 @@
 
 [Kernels]
   [./StressDivergence2DAxisymmetricRZ]
-    use_displaced_mesh = true
     save_in = 'force_r force_z'
   [../]
 []

@@ -19,7 +19,7 @@ InputParameters validParams<StressDivergenceTensors>()
   params.addRequiredCoupledVar("displacements", "The string of displacements suitable for the problem statement");
   params.addCoupledVar("temp", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.set<bool>("use_displaced_mesh") = false;
+  params.set<bool>("use_displaced_mesh") = true;
 
   return params;
 }

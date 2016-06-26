@@ -19,7 +19,6 @@
 [Kernels]
   [./TensorMechanics]
     displacements = 'disp_x disp_y'
-    use_displaced_mesh = true
 #    save_in_disp_x = force_x
     save_in_disp_y = force_y
   [../]

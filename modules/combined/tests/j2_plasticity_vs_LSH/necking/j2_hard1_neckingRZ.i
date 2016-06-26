@@ -25,7 +25,6 @@
 
 [Kernels]
   [./AxisymmetricRZ]
-    use_displaced_mesh = true
 #    save_in_disp_r = force_r
     save_in_disp_z = force_z
   [../]

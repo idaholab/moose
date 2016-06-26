@@ -117,7 +117,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    use_displaced_mesh = true
   [../]
   [./heat]
     type = HeatConduction

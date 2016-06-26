@@ -53,18 +53,21 @@
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
+    use_displaced_mesh = false
   [../]
   [./cy_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
+    use_displaced_mesh = false
   [../]
   [./cz_elastic]
     type = CosseratStressDivergenceTensors
     variable = disp_z
     component = 2
     displacements = 'disp_x disp_y disp_z'
+    use_displaced_mesh = false
   [../]
   [./x_couple]
     type = StressDivergenceTensors
@@ -72,6 +75,7 @@
     displacements = 'wc_x wc_y wc_z'
     component = 0
     base_name = couple
+    use_displaced_mesh = false
   [../]
   [./y_couple]
     type = StressDivergenceTensors
@@ -79,6 +83,7 @@
     component = 1
     displacements = 'wc_x wc_y wc_z'
     base_name = couple
+    use_displaced_mesh = false
   [../]
   [./z_couple]
     type = StressDivergenceTensors
@@ -86,6 +91,7 @@
     component = 2
     displacements = 'wc_x wc_y wc_z'
     base_name = couple
+    use_displaced_mesh = false
   [../]
   [./x_moment]
     type = MomentBalancing

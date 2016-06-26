@@ -241,7 +241,6 @@
 [Kernels]
   [./TensorMechanics]
     displacements = 'disp_x disp_y'
-    use_displaced_mesh = true
   [../]
 []
 

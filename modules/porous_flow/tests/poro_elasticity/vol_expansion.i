@@ -74,6 +74,7 @@
     variable = p
   [../]
   [./TensorMechanics]
+    use_displaced_mesh = false
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./poro_x]

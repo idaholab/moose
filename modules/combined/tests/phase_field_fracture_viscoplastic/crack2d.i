@@ -60,7 +60,6 @@
     block = 1
     save_in = resid_x
     c = c
-    use_displaced_mesh = true
   [../]
   [./solid_y]
     type = StressDivergencePFFracTensors
@@ -70,7 +69,6 @@
     block = 1
     save_in = resid_y
     c = c
-    use_displaced_mesh = true
   [../]
   [./dcdt]
     type = TimeDerivative

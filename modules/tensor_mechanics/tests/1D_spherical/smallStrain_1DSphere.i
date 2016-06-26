@@ -42,7 +42,6 @@
 
 [Kernels]
   [./StressDivergence1DRSpherical]
-    use_displaced_mesh = true
     save_in = residual_r
   [../]
 []

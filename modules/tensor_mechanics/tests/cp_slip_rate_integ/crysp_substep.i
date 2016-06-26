@@ -50,7 +50,6 @@
 [Kernels]
   [./TensorMechanics]
     displacements = 'ux uy uz'
-    use_displaced_mesh = true
   [../]
 []
 
