@@ -4,8 +4,6 @@
 []
 
 [Variables]
-  active = 'convected diffused'
-
   [./convected]
     order = FIRST
     family = LAGRANGE
@@ -27,8 +25,6 @@
 []
 
 [BCs]
-  active = 'left_convected right_convected left_diffused right_diffused'
-
   [./left_convected]
     type = DirichletBC
     variable = convected
@@ -58,7 +54,6 @@
     boundary = 'right'
     value = 1
   [../]
-
 []
 
 [Executioner]

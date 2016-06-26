@@ -4,8 +4,6 @@
 []
 
 [Variables]
-  active = 'convected diffused'
-
   [./convected]
     order = FIRST
     family = LAGRANGE
@@ -18,8 +16,6 @@
 []
 
 [Kernels]
-  active = 'diff_convected conv diff_diffused'
-
   [./diff_convected]
     type = Diffusion
     variable = convected
