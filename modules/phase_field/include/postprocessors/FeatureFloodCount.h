@@ -458,7 +458,7 @@ FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T
       MooseUtils::checkFileWriteable(file_name);
 
       // Store the new filename in the map
-      auto result = _file_handles.insert(std::make_pair(file_name, std::unique_ptr<std::ofstream>(new std::ofstream(file_name.c_str()))));
+      auto result = _file_handles.insert(std::make_pair(file_name, libmesh_make_unique<std::ofstream>(file_name.c_str())));
 
       // Be sure that the insert worked!
       mooseAssert(result.second, "Insertion into _file_handles map failed!");
