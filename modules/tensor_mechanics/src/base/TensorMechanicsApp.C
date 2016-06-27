@@ -38,6 +38,7 @@
 #include "ComputeMultiPlasticityStress.h"
 #include "ComputeCosseratLinearElasticStress.h"
 #include "ComputeCosseratSmallStrain.h"
+#include "ComputeIncrementalCosseratSmallStrain.h"
 #include "ComputeCosseratElasticityTensor.h"
 #include "ComputeLayeredCosseratElasticityTensor.h"
 #include "TwoPhaseStressMaterial.h"
@@ -201,6 +202,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeMultiPlasticityStress);
   registerMaterial(ComputeCosseratLinearElasticStress);
   registerMaterial(ComputeCosseratSmallStrain);
+  registerMaterial(ComputeIncrementalCosseratSmallStrain);
   registerMaterial(ComputeCosseratElasticityTensor);
   registerMaterial(ComputeLayeredCosseratElasticityTensor);
   registerMaterial(TwoPhaseStressMaterial);
