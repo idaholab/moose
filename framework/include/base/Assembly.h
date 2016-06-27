@@ -510,6 +510,12 @@ protected:
 
   void reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
+  void setCoordinateTransformation(const QBase * qrule, const MooseArray<Point> & q_points);
+
+  void computeCurrentElemVolume();
+
+  void computeCurrentFaceVolume();
+
   void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor);
   void cacheResidualBlock(std::vector<Real> & cached_residual_values,
                           std::vector<dof_id_type> & cached_residual_rows,
@@ -663,6 +669,10 @@ protected:
   const Node * _current_node;
   /// The current neighboring node we are working with
   const Node * _current_neighbor_node;
+  /// Boolean to indicate whether current element volumes has been computed
+  bool _current_elem_volume_computed;
+  /// Boolean to indicate whether current element side volumes has been computed
+  bool _current_side_volume_computed;
 
   /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
   MooseArray<Point> _current_physical_points;
