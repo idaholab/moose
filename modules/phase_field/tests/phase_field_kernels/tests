@@ -64,6 +64,12 @@
   [./SimpleSplitCHWRes]
     type = 'Exodiff'
     input = 'SimpleSplitCHWRes.i'
-    exodiff = 'SimpleSplitCHWRes_out.e'            
+    exodiff = 'SimpleSplitCHWRes_out.e'
+  [../]
+
+  [./SimpleCHInterface]
+    type = 'Exodiff'
+    input = 'SimpleCHInterface.i'
+    exodiff = 'SimpleCHInterface_out.e'            
   [../]
 []
