@@ -18,6 +18,7 @@ InputParameters validParams<ComputeStrainBase>()
   params.addParam<Real>("temperature_ref", 273, "Deprecated: Reference temperature for thermal expansion in K");
   params.addCoupledVar("temperature", 273, "Decprecated: Temperature in Kelvin");
   params.addParam<Real>("thermal_expansion_coeff", 0, "Deprecated: Thermal expansion coefficient in 1/K");
+  params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
   return params;
 }
 
@@ -34,7 +35,8 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
-    _stateful_displacements(getParam<bool>("stateful_displacements") && _fe_problem.isTransient())
+    _stateful_displacements(getParam<bool>("stateful_displacements") && _fe_problem.isTransient()),
+    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())

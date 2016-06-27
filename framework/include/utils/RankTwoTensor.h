@@ -205,6 +205,9 @@ public:
   /// returns C_ijkl = a_ik * b_jl
   RankFourTensor mixedProductIkJl(const RankTwoTensor & a) const;
 
+  /// returns C_ijkl = a_jk * b_il
+  RankFourTensor mixedProductJkIl(const RankTwoTensor & a) const;
+
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   RankTwoTensor deviatoric() const;
 
