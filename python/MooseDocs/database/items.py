@@ -46,7 +46,7 @@ class MarkdownIncludeItem(DatabaseItem):
     """
 
     def keys(self):
-        yield os.path.basename(self._filename)[0:-3]
+        yield self._filename
 
     def markdown(self):
         return '{{!{}!}}'.format(self._filename)

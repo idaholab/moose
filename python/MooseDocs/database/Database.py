@@ -57,6 +57,13 @@ class Database(object):
                     self._database[key] = []
                 self._database[key].append(item)
 
+    def findall(self, key):
+        output = []
+        for k, v in self._database.iteritems():
+            if k.endswith(key):
+                output.append(v)
+        return output
+
     def __getitem__(self, key):
         """
         Operator[] access to the database entry for the given key.

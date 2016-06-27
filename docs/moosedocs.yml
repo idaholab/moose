@@ -12,9 +12,10 @@ extra_javascript:
     - mathjaxconfig.js
 
 markdown_extensions:
+    - smarty
+    - admonition
     - markdown_include.include           # pip install markdown-include
     - mdx_math                           # pip install python-markdown-math
-    - smarty
     - MooseDocs.extensions.MooseMarkdown:
           make: ../modules
           repo: https://github.com/idaholab/moose/blob/master
