@@ -48,13 +48,18 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_qrule_neighbor(NULL),
 
     _current_elem(NULL),
+    _current_elem_volume(0),
     _current_side(0),
     _current_side_elem(NULL),
+    _current_side_volume(0),
     _current_neighbor_elem(NULL),
     _current_neighbor_side(0),
     _current_neighbor_side_elem(NULL),
+    _current_neighbor_volume(0),
     _current_node(NULL),
     _current_neighbor_node(NULL),
+    _current_elem_volume_computed(false),
+    _current_side_volume_computed(false),
 
     _should_use_fe_cache(false),
     _currently_fe_caching(true),
@@ -615,6 +620,7 @@ Assembly::reinit(const Elem * elem)
 {
   _current_elem = elem;
   _current_neighbor_elem = NULL;
+  _current_elem_volume_computed = false;
 
   unsigned int elem_dimension = elem->dim();
 
@@ -628,36 +634,67 @@ Assembly::reinit(const Elem * elem)
 
   reinitFE(elem);
 
-  // set the coord transformation
-  _coord.resize(_current_qrule->n_points());
-  _coord_type = _sys.subproblem().getCoordSystem(elem->subdomain_id());
+  computeCurrentElemVolume();
+}
+
+void
+Assembly::setCoordinateTransformation(const QBase * qrule, const MooseArray<Point> & q_points)
+{
+  _coord.resize(qrule->n_points());
+  _coord_type = _sys.subproblem().getCoordSystem(_current_elem->subdomain_id());
   unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
+
   switch (_coord_type)
   {
   case Moose::COORD_XYZ:
-    for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
+    for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
       _coord[qp] = 1.;
     break;
 
   case Moose::COORD_RZ:
-    for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
-      _coord[qp] = 2 * M_PI * _current_q_points[qp](rz_radial_coord);
+    for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      _coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
     break;
 
   case Moose::COORD_RSPHERICAL:
-    for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
-      _coord[qp] = 4 * M_PI * _current_q_points[qp](0) * _current_q_points[qp](0);
+    for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      _coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
     break;
 
   default:
     mooseError("Unknown coordinate system");
     break;
   }
+}
 
-  //Compute the area of the element
+void
+Assembly::computeCurrentElemVolume()
+{
+  if (_current_elem_volume_computed)
+    return;
+
+  setCoordinateTransformation(_current_qrule, _current_q_points);
+
   _current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
     _current_elem_volume += _current_JxW[qp] * _coord[qp];
+
+  _current_elem_volume_computed = true;
+}
+
+void
+Assembly::computeCurrentFaceVolume()
+{
+  if (_current_side_volume_computed)
+    return;
+
+  setCoordinateTransformation(_current_qrule_face, _current_q_points_face);
+
+  _current_side_volume = 0.;
+  for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
+    _current_side_volume += _current_JxW_face[qp] * _coord[qp];
+
+  _current_side_volume_computed = true;
 }
 
 void
@@ -665,6 +702,7 @@ Assembly::reinitAtPhysical(const Elem * elem, const std::vector<Point> & physica
 {
   _current_elem = elem;
   _current_neighbor_elem = NULL;
+  _current_elem_volume_computed = false;
 
   FEInterface::inverse_map(elem->dim(),
                            (*_holder_fe_helper[elem->dim()])->get_fe_type(),
@@ -685,6 +723,7 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 {
   _current_elem = elem;
   _current_neighbor_elem = NULL;
+  _current_elem_volume_computed = false;
 
   unsigned int elem_dimension = _current_elem->dim();
 
@@ -699,6 +738,8 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
   _currently_fe_caching = false;
 
   reinitFE(elem);
+
+  computeCurrentElemVolume();
 }
 
 void
@@ -707,6 +748,8 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   _current_elem = elem;
   _current_side = side;
   _current_neighbor_elem = NULL;
+  _current_elem_volume_computed = false;
+  _current_side_volume_computed = false;
 
   unsigned int elem_dimension = _current_elem->dim();
 
@@ -722,36 +765,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   reinitFEFace(elem, side);
 
-  // set the coord transformation
-  _coord.resize(_current_qrule_face->n_points());
-  _coord_type = _sys.subproblem().getCoordSystem(elem->subdomain_id());
-  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
-  switch (_coord_type)
-  {
-  case Moose::COORD_XYZ:
-    for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
-      _coord[qp] = 1.;
-    break;
-
-  case Moose::COORD_RZ:
-    for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
-      _coord[qp] = 2 * M_PI * _current_q_points_face[qp](rz_radial_coord);
-    break;
-
-  case Moose::COORD_RSPHERICAL:
-    for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
-      _coord[qp] = 4 * M_PI * _current_q_points_face[qp](0) * _current_q_points_face[qp](0);
-    break;
-
-  default:
-    mooseError("Unknown coordinate system");
-    break;
-  }
-
-  // Compute the area of the element
-  _current_side_volume = 0.;
-  for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
-    _current_side_volume += _current_JxW_face[qp] * _coord[qp];
+  computeCurrentFaceVolume();
 }
 
 void
