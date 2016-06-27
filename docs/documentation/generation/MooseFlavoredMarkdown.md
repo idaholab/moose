@@ -1,5 +1,14 @@
 # Moose Flavored Markdown
 
+## Automatic Links
+
+Moose Flavored Markdown is capable of automtically creating links based on Markdown filenames, which is
+especially useful when linking to generated pages.
+
+* `[/Kernels/Diffusion.md]`: [/Kernels/Diffusion.md]
+* `[framework/Kernels/Overview.md]`: [framework/Kernels/Overview.md]
+* `[Testing](/Kernels/Diffusion.md)`: [Testing](/Kernels/Diffusion.md)
+
 ## Including MOOSE Source Files
 It is possible to include complete or partial C++ or input files from the local MOOSE repository. The following sections detail the custom
 markdown syntax to needed, including the application of special settings in the form of key, value pairings that are supplied within
@@ -40,7 +49,9 @@ the following limits the included code to the `computeQpResidual` method.
 ![Diffusion.C::computeQpResidual](framework/src/kernels/Diffusion.C::computeQpResidual)
 ```
 
+<!---
 ![Diffusion.C::computeQpResidual](framework/src/kernels/Diffusion.C::computeQpResidual)
+--->
 
 This method uses the clang parser directly, which can be slow. Thus, in general source code should be
 included using the line and range match methods above and this method reserved for cases where those methods
