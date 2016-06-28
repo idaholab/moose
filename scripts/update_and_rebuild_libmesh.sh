@@ -87,7 +87,7 @@ if [ -z "$go_fast" ]; then
   mkdir build
   cd build
 
-  ../configure INSTALL="`which install` -C" \
+  ../configure INSTALL="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C" \
                --with-methods="${METHODS}" \
                --prefix=$LIBMESH_DIR \
                --enable-silent-rules \
