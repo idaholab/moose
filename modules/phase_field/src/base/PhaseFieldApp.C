@@ -164,6 +164,7 @@
 #include "EBSDReaderPointDataAux.h"
 #include "TotalFreeEnergy.h"
 #include "OutputEulerAngles.h"
+#include "OutputRGB.h"
 
 /*
  * Functions
@@ -399,6 +400,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(EBSDReaderPointDataAux);
   registerAux(TotalFreeEnergy);
   registerAux(OutputEulerAngles);
+  registerAux(OutputRGB);
 
   registerUserObject(ComputeGrainCenterUserObject);
   registerUserObject(ComputeGrainForceAndTorque);
