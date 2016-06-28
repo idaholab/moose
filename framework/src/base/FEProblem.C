@@ -465,28 +465,31 @@ void FEProblem::initialSetup()
   }
 
   // Materials
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+  if (_all_materials.hasActiveObjects(0))
   {
-    // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
-    _materials.sort(tid);
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+    {
+      // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
+      _materials.sort(tid);
 
-    // Call initialSetup on both Material and Material objects
-    _all_materials.initialSetup(tid);
+      // Call initialSetup on both Material and Material objects
+      _all_materials.initialSetup(tid);
+    }
+
+
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+                                     _material_props, _bnd_material_props, _assembly);
+    /**
+     * The ComputeMaterialObjectThread object now allocates memory as needed for the material storage system.
+     * This cannot be done with threads. The first call to this object bypasses threading by calling the object
+     * directly. The subsequent call can be called with threads.
+     */
+    cmt(elem_range, true);
+
+    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
+      _has_initialized_stateful = true;
   }
-
-
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
-                                   _material_props, _bnd_material_props, _assembly);
-  /**
-   * The ComputeMaterialObjectThread object now allocates memory as needed for the material storage system.
-   * This cannot be done with threads. The first call to this object bypasses threading by calling the object
-   * directly. The subsequent call can be called with threads.
-   */
-  cmt(elem_range, true);
-
-  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
-    _has_initialized_stateful = true;
 
   if (!_app.isRecovering())
   {
