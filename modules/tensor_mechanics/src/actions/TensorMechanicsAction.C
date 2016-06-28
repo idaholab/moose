@@ -18,6 +18,7 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variables for the problem");
   params.addParam<NonlinearVariableName>("temp", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");
+  params.addParam<bool>("use_finite_deform_jacobian", false, "Jacobian for corrotational finite strain");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernel will be applied to");
   params.addParam<std::vector<AuxVariableName> >("save_in", "The displacement residuals");
@@ -58,6 +59,9 @@ TensorMechanicsAction::act()
 
   if (isParamValid("base_name"))
     params.set<std::string>("base_name") = getParam<std::string>("base_name");
+
+  if (isParamValid("use_finite_deform_jacobian"))
+    params.set<bool>("use_finite_deform_jacobian") = getParam<bool>("use_finite_deform_jacobian");
 
 // Check whether this StressDivergenceTensor kernel is restricted to certain block?
   if (isParamValid("block"))
