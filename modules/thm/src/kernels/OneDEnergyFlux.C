@@ -1,5 +1,4 @@
 #include "OneDEnergyFlux.h"
-#include "SinglePhaseCommonFluidProperties.h"
 
 template<>
 InputParameters validParams<OneDEnergyFlux>()
