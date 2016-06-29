@@ -4,7 +4,7 @@
 #include "AuxKernel.h"
 
 class ReynoldsNumberAux;
-class IAPWS95FluidProperties;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<ReynoldsNumberAux>();
@@ -34,7 +34,7 @@ protected:
   /// Specific internal energy
   const VariableValue & _e;
 
-  const IAPWS95FluidProperties & _fp;
+  const SinglePhaseFluidProperties & _fp;
 };
 
 #endif /* REYNOLDSNUMBERAUX_H */

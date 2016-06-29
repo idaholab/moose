@@ -4,7 +4,7 @@
 #include "AuxKernel.h"
 
 class PrandtlNumberAux;
-class IAPWS95FluidProperties;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<PrandtlNumberAux>();
@@ -26,7 +26,7 @@ protected:
   /// Specific internal energy
   const VariableValue & _e;
 
-  const IAPWS95FluidProperties & _fp;
+  const SinglePhaseFluidProperties & _fp;
 };
 
 #endif /* PRANDTLNUMBERAUX_H */

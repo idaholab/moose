@@ -1,5 +1,5 @@
 #include "MachNumberAux.h"
-#include "IAPWS95FluidProperties.h"
+#include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
 template<>
@@ -18,7 +18,7 @@ MachNumberAux::MachNumberAux(const InputParameters & parameters) :
     _u_vel(coupledValue("u_vel")),
     _v(coupledValue("v")),
     _e(coupledValue("e")),
-    _fp(getUserObject<IAPWS95FluidProperties>("fp"))
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 

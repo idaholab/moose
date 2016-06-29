@@ -1,5 +1,5 @@
 #include "PrandtlNumberAux.h"
-#include "IAPWS95FluidProperties.h"
+#include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
 template<>
@@ -16,7 +16,7 @@ PrandtlNumberAux::PrandtlNumberAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _v(coupledValue("v")),
     _e(coupledValue("e")),
-    _fp(getUserObject<IAPWS95FluidProperties>("fp"))
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 

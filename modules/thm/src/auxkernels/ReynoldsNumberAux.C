@@ -1,5 +1,5 @@
 #include "ReynoldsNumberAux.h"
-#include "IAPWS95FluidProperties.h"
+#include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
 template<>
@@ -24,7 +24,7 @@ ReynoldsNumberAux::ReynoldsNumberAux(const InputParameters & parameters) :
     _Dh(coupledValue("Dh")),
     _v(coupledValue("v")),
     _e(coupledValue("e")),
-    _fp(getUserObject<IAPWS95FluidProperties>("fp"))
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 

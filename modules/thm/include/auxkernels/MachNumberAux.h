@@ -4,7 +4,7 @@
 #include "AuxKernel.h"
 
 class MachNumberAux;
-class IAPWS95FluidProperties;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<MachNumberAux>();
@@ -25,7 +25,7 @@ protected:
   const VariableValue & _v;
   const VariableValue & _e;
 
-  const IAPWS95FluidProperties & _fp;
+  const SinglePhaseFluidProperties & _fp;
 };
 
 #endif /* MACHNUMBERAUX_H */
