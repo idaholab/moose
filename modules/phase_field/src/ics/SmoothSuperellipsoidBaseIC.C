@@ -92,7 +92,7 @@ SmoothSuperellipsoidBaseIC::gradient(const Point & p)
 }
 
 Real
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n)
 {
   Point l_center = center;
   Point l_p = p;
@@ -131,7 +131,7 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Po
 
 //Following function does the same as computeSuperellipsoidValue but reverses invalue and outvalue
 Real
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidInverseValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidInverseValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n)
 {
   Point l_center = center;
   Point l_p = p;
@@ -170,7 +170,7 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidInverseValue(const Point & p, c
 
 
 RealGradient
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, Real a, Real b, Real c, Real n)
 {
   Point l_center = center;
   Point l_p = p;

@@ -36,9 +36,9 @@ public:
   virtual void initialSetup();
 
 protected:
-  virtual Real computeSuperellipsoidValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
-  virtual Real computeSuperellipsoidInverseValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
-  RealGradient computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n);
+  virtual Real computeSuperellipsoidValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n);
+  virtual Real computeSuperellipsoidInverseValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n);
+  RealGradient computeSuperellipsoidGradient(const Point & p, const Point & center, Real a, Real b, Real c, Real n);
 
   virtual void computeSuperellipsoidSemiaxes() = 0;
   virtual void computeSuperellipsoidExponents() = 0;
