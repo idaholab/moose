@@ -4,7 +4,7 @@
 #include "AuxKernel.h"
 
 class SoundSpeedAux;
-class SinglePhaseCommonFluidProperties;
+class SinglePhaseFluidProperties;
 
 template<>
 InputParameters validParams<SoundSpeedAux>();
@@ -21,11 +21,10 @@ public:
 protected:
   virtual Real computeValue();
 
-  const VariableValue & _rho;
-  const VariableValue & _rhou;
-  const VariableValue & _rhoE;
+  const VariableValue & _v;
+  const VariableValue & _e;
 
-  const SinglePhaseCommonFluidProperties & _spfp;
+  const SinglePhaseFluidProperties & _fp;
 };
 
 #endif /* SOUNDSPEEDAUX_H */
