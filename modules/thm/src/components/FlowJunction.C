@@ -78,9 +78,8 @@ FlowJunction::addMooseObjects()
   std::vector<VariableName> cv_rhoA(1, FlowModel::RHOA);
   std::vector<VariableName> cv_rhouA(1, FlowModel::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModel::RHOEA);
-  std::vector<VariableName> cv_rho(1, FlowModel::RHO);
-  std::vector<VariableName> cv_rhou(1, FlowModel::RHOU);
-  std::vector<VariableName> cv_rhoE(1, FlowModel::RHOE);
+  std::vector<VariableName> cv_v(1, FlowModel::SPECIFIC_VOLUME);
+  std::vector<VariableName> cv_e(1, FlowModel::SPECIFIC_INTERNAL_ENERGY);
   std::vector<VariableName> cv_lambda(1, _lm_name);
 
   MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
@@ -108,23 +107,17 @@ FlowJunction::addMooseObjects()
       InputParameters params = _factory.getValidParams("OneDFreeMassBC");
       params.set<NonlinearVariableName>("variable") = FlowModel::RHOA;
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
-      params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
-      params.set<std::vector<VariableName> >("rho") = cv_rho;
-      params.set<std::vector<VariableName> >("rhou") = cv_rhou;
       params.set<std::vector<VariableName> >("u") = cv_u;
       params.set<std::vector<VariableName> >("area") = cv_area;
       params.set<std::vector<VariableName> >("lambda") = cv_lambda;
 
       if (_model_type == FlowModel::EQ_MODEL_3)
-      {
-        params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
         params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
-      }
 
       _sim.addBoundaryCondition("OneDFreeMassBC", genName(name(), _bnd_id[i], "mass_bc"), params);
     }
@@ -133,13 +126,10 @@ FlowJunction::addMooseObjects()
       InputParameters params = _factory.getValidParams("OneDFreeMomentumBC");
       params.set<NonlinearVariableName>("variable") = FlowModel::RHOUA;
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
-      params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
       params.set<PostprocessorName>("c") = c_pps;
       params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
-      params.set<std::vector<VariableName> >("rho") = cv_rho;
-      params.set<std::vector<VariableName> >("rhou") = cv_rhou;
       params.set<std::vector<VariableName> >("u") = cv_u;
       params.set<std::vector<VariableName> >("pressure") = cv_pressure;
       params.set<std::vector<VariableName> >("area") = cv_area;
@@ -148,7 +138,6 @@ FlowJunction::addMooseObjects()
       if (_model_type == FlowModel::EQ_MODEL_3)
       {
         params.set<std::vector<VariableName> >("rhoEA") = cv_rhoEA;
-        params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
         params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       }
 
@@ -160,13 +149,9 @@ FlowJunction::addMooseObjects()
       InputParameters params = _factory.getValidParams("OneDFreeEnergyBC");
       params.set<NonlinearVariableName>("variable") = FlowModel::RHOEA;
       params.set<std::vector<unsigned int> >("r7:boundary") = bnd_id;
-      params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
-      params.set<std::vector<VariableName> >("rho") = cv_rho;
-      params.set<std::vector<VariableName> >("rhou") = cv_rhou;
-      params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
       params.set<std::vector<VariableName> >("u") = cv_u;
       params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       params.set<std::vector<VariableName> >("area") = cv_area;
@@ -191,15 +176,14 @@ FlowJunction::addMooseObjects()
     // coupling
     params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
     params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
+    params.set<std::vector<VariableName> >("e") = cv_e;
+    params.set<std::vector<VariableName> >("v") = cv_v;
     params.set<std::vector<VariableName> >("u") = cv_u;
     params.set<std::vector<VariableName> >("p") = cv_pressure;
-    params.set<std::vector<VariableName> >("rho") = cv_rho;
-    params.set<std::vector<VariableName> >("rhou") = cv_rhou;
     params.set<std::vector<VariableName> >("area") = cv_area;
     if (_model_type == FlowModel::EQ_MODEL_3)
     {
       params.set<std::vector<VariableName> >("rhoEA") = cv_rhoEA;
-      params.set<std::vector<VariableName> >("rhoE") = cv_rhoE;
       params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
     }
 
