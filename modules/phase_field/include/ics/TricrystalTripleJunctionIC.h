@@ -21,23 +21,12 @@ template<>
 InputParameters validParams<TricrystalTripleJunctionIC>();
 
 /**
-* TricrystalTripleJunctionIC creates a 3-grain structure with a triple junction in the center
-*/
+ * TricrystalTripleJunctionIC creates a 3-grain structure with a triple junction in the center
+ */
 class TricrystalTripleJunctionIC : public InitialCondition
 {
 public:
-  /**
-  * Constructor
-  *
-  * @param parameters The parameters object holding data for the class to use.
-  */
   TricrystalTripleJunctionIC(const InputParameters & parameters);
-
-  /**
-  * The value of the variable at a point.
-  *
-  * This must be overridden by derived classes.
-  */
   virtual Real value(const Point & p);
 
 protected:

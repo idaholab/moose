@@ -95,16 +95,7 @@
 [Postprocessors]
   # Scalar postprocessors
   [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.2
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.08
-    flood_entity_type = elemental
-    execute_on = 'initial timestep_end'
-    tracking_step = 0
-    compute_op_maps = true
+    type = FauxGrainTracker
   [../]
 []
 

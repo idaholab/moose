@@ -8,6 +8,7 @@
 #include "TricrystalTripleJunctionIC.h"
 #include "MooseRandom.h"
 #include "MooseMesh.h"
+#include "MathUtils.h"
 
 template<>
 InputParameters validParams<TricrystalTripleJunctionIC>()
@@ -36,7 +37,7 @@ TricrystalTripleJunctionIC::TricrystalTripleJunctionIC(const InputParameters & p
   if (_theta1 + _theta2 >= 360.0)
     mooseError("Sum of the angles must total less than 360 degrees");
 
-  //Convert the angles to radians
+  // Convert the angles to radians
   _theta1 = _theta1 * libMesh::pi / 180.0;
   _theta2 = _theta2 * libMesh::pi / 180.0;
 
@@ -63,8 +64,8 @@ Real
 TricrystalTripleJunctionIC::value(const Point & p)
 {
   /*
-  * This does all the work to create a triple junction that looks like the letter Y
-  */
+   * This does all the work to create a triple junction that looks like the letter Y
+   */
   Real dist_left; // The distance from the point to the line specified by _theta1
   Real dist_right; // The distance from the point to the line specified by _theta2
 
@@ -88,17 +89,17 @@ TricrystalTripleJunctionIC::value(const Point & p)
   if (_tan_theta1 > 0 && _theta1 <= libMesh::pi/2.0) // Case for large left grain
   {
     /*
-    * There's a lot going on here.  The first statement tells MOOSE to check and
-    * see if the current point is above the line defined by the first angle, only
-    * if it is past the center line.  All other points to the left of the center
-    * line are going to be part of the 1st grain (_op_index == 1)
-    * The second statement defines the second grain by the line defined by _theta2
-    * and marks everything below that line, and to the right of the center line.
-    * The third statement takes care of everything in between.
-    */
+     * There's a lot going on here.  The first statement tells MOOSE to check and
+     * see if the current point is above the line defined by the first angle, only
+     * if it is past the center line.  All other points to the left of the center
+     * line are going to be part of the 1st grain (_op_index == 1)
+     * The second statement defines the second grain by the line defined by _theta2
+     * and marks everything below that line, and to the right of the center line.
+     * The third statement takes care of everything in between.
+     */
     if ((((dist_left >= 0 && dist_center >= 0) || (dist_center < 0)) && _op_index == 1) ||
-         (dist_right <= 0 && dist_center > 0 && _op_index == 2) ||
-         (dist_left < 0 && dist_center > 0 && dist_right > 0 && _op_index == 3))
+        (dist_right <= 0 && dist_center > 0 && _op_index == 2) ||
+        (dist_left < 0 && dist_center > 0 && dist_right > 0 && _op_index == 3))
       return 1.0;
     else
       return 0.0;
