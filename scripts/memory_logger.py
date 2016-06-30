@@ -866,7 +866,7 @@ class MemoryPlotter:
     fig.canvas.mpl_connect('pick_event', self)
 
     # Create legend
-    legend = plt.legend(tmp_plot, tmp_legend, loc = 2)
+    legend = plt.legend(tmp_plot, tmp_legend, loc = self.arguments.legend)
     legend.get_frame().set_alpha(0.7)
 
     # More dork mode settings
@@ -1050,6 +1050,22 @@ def which(program):
   sys.exit(1)
 
 def verifyArgs(args):
+  possible_positions = [ 'center',
+                         'center left',
+                         'center right',
+                         'upper center',
+                         'lower center',
+                         'best',
+                         'right',
+                         'left',
+                         'upper right',
+                         'lower right',
+                         'upper left',
+                         'lower left']
+  if args.legend not in possible_positions:
+    print 'Invalid legend position requested. Possible values are:\n\t', '\n\t'.join([x for x in possible_positions])
+    sys.exit(1)
+
   option_count = 0
   if args.read:
     option_count += 1
@@ -1109,6 +1125,7 @@ def parseArguments(args=None):
   readgroup.add_argument('--read', nargs=1, metavar='file', help='Read a specified memory log file to stdout\n ')
   readgroup.add_argument('--separate', dest='separate', action='store_const', const=True, default=False, help='Display individual node memory usage (read mode only)\n ')
   readgroup.add_argument('--plot', nargs="+", metavar='file', help='Display a graphical representation of memory usage (Requires Matplotlib). Specify a single file or a list of files to plot\n ')
+  readgroup.add_argument('--legend', metavar='"lower left"', default='lower left', help='Place legend in one of the following locations (default --legend "lower left") "center", "center left", "center right", "upper center", "lower center", "best", "right", "left", "upper right", "lower right", "upper left", "lower left"\n ')
 
   commongroup = parser.add_argument_group('Common Options', 'The following options can be used when displaying the results')
   commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Display/Record stack trace information (if available)\n ')
