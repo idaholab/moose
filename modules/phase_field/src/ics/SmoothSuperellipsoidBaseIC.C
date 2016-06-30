@@ -101,7 +101,8 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Po
 
   //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
   //Handle this case independently because we cannot calculate polar angles at this point
-  if (dist == 0.0) return _invalue;
+  if (dist == 0.0)
+    return _invalue;
 
   //Compute the distance r from the center of the superellipsoid to its outside edge
   //along the vector from the center to the current point
@@ -140,7 +141,8 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidInverseValue(const Point & p, c
 
   //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
   //Handle this case independently because we cannot calculate polar angles at this point
-  if (dist == 0.0) return _outvalue;
+  if (dist == 0.0)
+    return _outvalue;
 
   //Compute the distance r from the center of the superellipsoid to its outside edge
   //along the vector from the center to the current point
@@ -179,7 +181,8 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const
 
   //When dist is 0 we are exactly at the center of the superellipsoid so return 0
   //Handle this case independently because we cannot calculate polar angles at this point
-  if (dist == 0.0) return 0.0;
+  if (dist == 0.0)
+    return 0.0;
 
   //Compute the distance r from the center of the superellipsoid to its outside edge
   //along the vector from the center to the current point

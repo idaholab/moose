@@ -94,7 +94,8 @@ BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
       //First check to make sure we are INSIDE a larger particle
       for (unsigned int j = 0; j < _x_positions.size(); j++)
       {
-        if (j == 0) dlarge_max = - _range.norm();
+        if (j == 0)
+          dlarge_max = - _range.norm();
 
         //Compute the distance r1 from the center of each specified superellipsoid to its outside edge
         //along the vector between the specified superellipsoid and the current randomly
@@ -121,13 +122,15 @@ BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
         //Calculate the distance between the edges for an interior particle
         Real tmp_dlarge_max = r1 - dist - r2;
 
-        if (tmp_dlarge_max > dlarge_max) dlarge_max = tmp_dlarge_max;
+        if (tmp_dlarge_max > dlarge_max)
+          dlarge_max = tmp_dlarge_max;
       }
 
       //Then check for collisions between the randomly placed particles
       for (unsigned int j = _x_positions.size(); j < i; j++)
       {
-        if (j == _x_positions.size()) dsmall_min = _range.norm();
+        if (j == _x_positions.size())
+          dsmall_min = _range.norm();
 
         Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[j], newcenter);
         Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[j], newcenter);
@@ -145,10 +148,12 @@ BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
         //Calculate the distance between the edges
         Real tmp_dsmall_min = dist - r1 - r2;
 
-        if (tmp_dsmall_min < dsmall_min) dsmall_min = tmp_dsmall_min;
+        if (tmp_dsmall_min < dsmall_min)
+          dsmall_min = tmp_dsmall_min;
       }
       //Cause while statement to exit for the first randomly placed particle
-      if (i == _x_positions.size()) dsmall_min = _range.norm();
+      if (i == _x_positions.size())
+        dsmall_min = _range.norm();
     }
 
     if (num_tries == _numtries)
