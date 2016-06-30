@@ -95,7 +95,7 @@ MultiSmoothCircleIC::computeCircleCenters()
     Real rr = 0.0;
     Point newcenter = 0.0;
 
-    while (rr < _bubspac && num_tries < _numtries)
+    while (rr <= _bubspac && num_tries < _numtries)
     {
       num_tries++;
       //Moose::out<<"num_tries: "<<num_tries<<std::endl;
