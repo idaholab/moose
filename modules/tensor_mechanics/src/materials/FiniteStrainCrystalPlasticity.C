@@ -10,7 +10,7 @@
 template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>()
 {
-  InputParameters params = validParams<FiniteStrainMaterial>();
+  InputParameters params = validParams<ComputeStressBase>();
   params.addClassDescription("Crystal Plasticity base class: FCC system with power law flow rule implemented");
   params.addRequiredParam<int >("nss", "Number of slip systems");
   params.addParam<std::vector<Real> >("gprops", "Initial values of slip system resistances");
@@ -33,7 +33,6 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
   MooseEnum intvar_read_options("slip_sys_file slip_sys_res_file none","none");
   params.addParam<MooseEnum>("intvar_read_type", intvar_read_options, "Read from options for initial value of internal variables: Default from .i file");
   params.addParam<unsigned int>("num_slip_sys_props", 0, "Number of slip system specific properties provided in the file containing slip system normals and directions");
-  params.addParam<bool>("save_euler_angle", false , "Saves the Euler angles as Material Property if true");
   params.addParam<bool>("gen_random_stress_flag", false, "Flag to generate random stress to perform time cutback on constitutive failure");
   params.addParam<bool>("input_random_scaling_var", false, "Flag to input scaling variable: _Cijkl(0,0,0,0) when false");
   params.addParam<Real>("random_scaling_var", 1e9, "Random scaling variable: Large value can cause non-positive definiteness");
@@ -50,7 +49,7 @@ InputParameters validParams<FiniteStrainCrystalPlasticity>()
 }
 
 FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParameters & parameters) :
-    FiniteStrainMaterial(parameters),
+    ComputeStressBase(parameters),
     _nss(getParam<int>("nss")),
     _gprops(getParam<std::vector<Real> >("gprops")),
     _hprops(getParam<std::vector<Real> >("hprops")),
@@ -66,11 +65,9 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _maxiter(getParam<unsigned int>("maxiter")),
     _maxiterg(getParam<unsigned int>("maxitergss")),
     _num_slip_sys_flowrate_props(getParam<unsigned int>("num_slip_sys_flowrate_props")),
-    _read_prop_user_object(isParamValid("read_prop_user_object") ? & getUserObject<ElementPropertyReadFile>("read_prop_user_object") : NULL),
     _tan_mod_type(getParam<MooseEnum>("tan_mod_type")),
     _intvar_read_type(getParam<MooseEnum>("intvar_read_type")),
     _num_slip_sys_props(getParam<unsigned int>("num_slip_sys_props")),
-    _save_euler_angle(getParam<bool>("save_euler_angle")),
     _gen_rndm_stress_flag(getParam<bool>("gen_random_stress_flag")),
     _input_rndm_scale_var(getParam<bool>("input_random_scaling_var")),
     _rndm_scale_var(getParam<Real>("random_scaling_var")),
@@ -92,8 +89,10 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _acc_slip(declareProperty<Real>("acc_slip")), // Accumulated slip
     _acc_slip_old(declarePropertyOld<Real>("acc_slip")), // Accumulated alip of previous increment
     _update_rot(declareProperty<RankTwoTensor>("update_rot")), // Rotation tensor considering material rotation and crystal orientation
-    _update_rot_old(declarePropertyOld<RankTwoTensor>("update_rot")),
-    _deformation_gradient_old(declarePropertyOld<RankTwoTensor>("deformation_gradient")),
+    _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
+    _deformation_gradient_old(getMaterialPropertyOld<RankTwoTensor>("deformation_gradient")),
+    _elasticity_tensor(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
+    _crysrot(getMaterialProperty<RankTwoTensor>("crysrot")),
     _mo(_nss*LIBMESH_DIM),
     _no(_nss*LIBMESH_DIM),
     _slip_incr(_nss),
@@ -104,15 +103,6 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _gss_tmp_old(_nss),
     _dgss_dsliprate(_nss,_nss)
 {
-  if (_save_euler_angle)
-  {
-    _euler_ang = &declareProperty< std::vector<Real> >("euler_ang");
-    _euler_ang_old = &declarePropertyOld< std::vector<Real> >("euler_ang");
-  }
-
-  if (!_input_rndm_scale_var)
-    _rndm_scale_var = _Cijkl(0,0,0,0);
-
   _err_tol = false;
 
   if (_num_slip_sys_props > 0)
@@ -152,12 +142,6 @@ void FiniteStrainCrystalPlasticity::initQpStatefulProperties()
 
   _update_rot[_qp].zero();
   _update_rot[_qp].addIa(1.0);
-
-  if (_save_euler_angle)
-  {
-    (*_euler_ang)[_qp].resize(LIBMESH_DIM);
-    (*_euler_ang_old)[_qp].resize(LIBMESH_DIM);
-  }
 
   initSlipSysProps(); // Initializes slip system related properties
   initAdditionalProps();
@@ -356,51 +340,6 @@ FiniteStrainCrystalPlasticity::getHardnessParams()
   _tau_sat = _hprops[3];
 }
 
-void
-FiniteStrainCrystalPlasticity::getEulerAngles()
-{
-  if (_read_prop_user_object)
-  {
-    _Euler_angles(0) = _read_prop_user_object->getData(_current_elem, 0);
-    _Euler_angles(1) = _read_prop_user_object->getData(_current_elem, 1);
-    _Euler_angles(2) = _read_prop_user_object->getData(_current_elem, 2);
-  }
-}
-
-// Calculate crystal rotation tensor from Euler Angles
-void
-FiniteStrainCrystalPlasticity::getEulerRotations()
-{
-  Real phi1, phi, phi2;
-  Real cp, cp1, cp2, sp, sp1, sp2;
-  RankTwoTensor RT;
-  Real pi = libMesh::pi;
-
-  phi1 = _Euler_angles(0) * (pi/180.0);
-  phi =  _Euler_angles(1) * (pi/180.0);
-  phi2 = _Euler_angles(2) * (pi/180.0);
-
-  cp1 = std::cos(phi1);
-  cp2 = std::cos(phi2);
-  cp = std::cos(phi);
-
-  sp1 = std::sin(phi1);
-  sp2 = std::sin(phi2);
-  sp = std::sin(phi);
-
-  RT(0,0) = cp1 * cp2 - sp1 * sp2 * cp;
-  RT(0,1) = sp1 * cp2 + cp1 * sp2 * cp;
-  RT(0,2) = sp2 * sp;
-  RT(1,0) = -cp1 * sp2 - sp1 * cp2 * cp;
-  RT(1,1) = -sp1 * sp2 + cp1 * cp2 * cp;
-  RT(1,2) = cp2 * sp;
-  RT(2,0) = sp1 * sp;
-  RT(2,1) = -cp1 * sp;
-  RT(2,2) = cp;
-
-  _crysrot = RT.transpose();
-}
-
 // Read slip systems from file
 void
 FiniteStrainCrystalPlasticity::getSlipSystems()
@@ -538,19 +477,7 @@ FiniteStrainCrystalPlasticity::preSolveQp()
   if (_first_substep)
   {
     _Jacobian_mult[_qp].zero();//Initializes jacobian for preconditioner
-    getEulerAngles();
-    getEulerRotations();
-
     calc_schmid_tensor();
-
-    RealTensorValue rot;
-
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-        rot(i,j) = _crysrot(i,j);
-
-    _elasticity_tensor[_qp] = _Cijkl;
-    _elasticity_tensor[_qp].rotate(rot);
   }
 
   if (_max_substep_iter == 1)
@@ -578,7 +505,12 @@ FiniteStrainCrystalPlasticity::postSolveQp()
   {
     _err_tol = false;
     if ( _gen_rndm_stress_flag )
+    {
+      if (!_input_rndm_scale_var)
+        _rndm_scale_var = _elasticity_tensor[_qp](0,0,0,0);
+
       _stress[_qp] = RankTwoTensor::genRandomSymmTensor( _rndm_scale_var, 1.0 );
+    }
     else
       mooseError("FiniteStrainCrystalPlasticity: Constitutive failure");
   }
@@ -596,11 +528,7 @@ FiniteStrainCrystalPlasticity::postSolveQp()
 
     RankTwoTensor rot;
     rot = get_current_rotation(_deformation_gradient[_qp]); // Calculate material rotation
-    _update_rot[_qp] = rot * _crysrot;
-
-    if (_save_euler_angle)
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-        (*_euler_ang)[_qp][i] = _Euler_angles(i);
+    _update_rot[_qp] = rot * _crysrot[_qp];
   }
 }
 
@@ -1036,14 +964,14 @@ FiniteStrainCrystalPlasticity::calc_schmid_tensor()
     {
       mo(i*LIBMESH_DIM+j) = 0.0;
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        mo(i*LIBMESH_DIM+j) = mo(i*LIBMESH_DIM+j) + _crysrot(j,k) * _mo(i*LIBMESH_DIM+k);
+        mo(i*LIBMESH_DIM+j) = mo(i*LIBMESH_DIM+j) + _crysrot[_qp](j,k) * _mo(i*LIBMESH_DIM+k);
     }
 
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     {
       no(i*LIBMESH_DIM+j) = 0.0;
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        no(i*LIBMESH_DIM+j) = no(i*LIBMESH_DIM+j) + _crysrot(j,k) * _no(i*LIBMESH_DIM+k);
+        no(i*LIBMESH_DIM+j) = no(i*LIBMESH_DIM+j) + _crysrot[_qp](j,k) * _no(i*LIBMESH_DIM+k);
     }
   }
 
