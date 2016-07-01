@@ -27,5 +27,6 @@
     type = 'Exodiff'
     input = 'kks_multiphase.i'
     exodiff = 'kks_multiphase_out.e'
+    max_parallel = 1                # b/c of -pc_type lu
   [../]
 []
