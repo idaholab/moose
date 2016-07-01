@@ -7,7 +7,8 @@
 #ifndef FINITESTRAINCRYSTALPLASTICITY_H
 #define FINITESTRAINCRYSTALPLASTICITY_H
 
-#include "ComputeStressBase.h"
+#include "FiniteStrainMaterial.h"
+#include "ElementPropertyReadFile.h"
 
 /**
  * FiniteStrainCrystalPlasticity uses the multiplicative decomposition of deformation gradient
@@ -20,7 +21,7 @@ class FiniteStrainCrystalPlasticity;
 template<>
 InputParameters validParams<FiniteStrainCrystalPlasticity>();
 
-class FiniteStrainCrystalPlasticity : public ComputeStressBase
+class FiniteStrainCrystalPlasticity : public FiniteStrainMaterial
 {
 public:
   FiniteStrainCrystalPlasticity(const InputParameters & parameters);
@@ -71,6 +72,10 @@ protected:
    * This function reads slip system from file - see test.
    */
   virtual void getSlipSystems();
+  /**
+   * This function read euler angles from user object (optional) - see test.
+   */
+  virtual void getEulerAngles();
 
   /**
    * This function assign initial values of slip system resistances/internal variables
@@ -176,6 +181,11 @@ protected:
   virtual void calcJacobian( RankFourTensor & );
 
   /**
+   * This function calculates rotation tensor from Euler angles.
+   */
+  virtual void getEulerRotations();
+
+  /**
    * This function calculate the tangent moduli for preconditioner.
    * Default is the elastic stiffness matrix.
    * Exact jacobian is currently implemented.
@@ -258,6 +268,10 @@ protected:
   ///Number of slip system flow rate parameters
   unsigned int _num_slip_sys_flowrate_props;
 
+  ///Element property read user object
+  ///Presently used to read Euler angles -  see test
+  const ElementPropertyReadFile * _read_prop_user_object;
+
   ///Type of tangent moduli calculation
   MooseEnum _tan_mod_type;
 
@@ -266,6 +280,9 @@ protected:
 
   ///Number of slip system specific properties provided in the file containing slip system normals and directions
   unsigned int _num_slip_sys_props;
+
+  ///Flag to save euler angle as Material Property
+  bool _save_euler_angle;
 
   bool _gen_rndm_stress_flag;
 
@@ -307,17 +324,20 @@ protected:
   MaterialProperty<Real> & _acc_slip;
   MaterialProperty<Real> & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
+  MaterialProperty<RankTwoTensor> & _update_rot_old;
+  MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
 
-  const MaterialProperty<RankTwoTensor> & _deformation_gradient;
-  const MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
-  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
-  const MaterialProperty<RankTwoTensor> & _crysrot;
+  ///Save Euler angles for output only when save_euler_angle = true in .i file
+  MaterialProperty< std::vector<Real> > * _euler_ang;
+  MaterialProperty< std::vector<Real> > * _euler_ang_old;
 
   DenseVector<Real> _mo;
   DenseVector<Real> _no;
 
   DenseVector<Real> _a0;
   DenseVector<Real> _xm;
+
+  RankTwoTensor _crysrot;
 
   Real _h0;
   Real _tau_sat;
