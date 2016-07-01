@@ -7,7 +7,6 @@
 #ifndef BIMODALSUPERELLIPSOIDSIC_H
 #define BIMODALSUPERELLIPSOIDSIC_H
 
-#include "Kernel.h"
 #include "SpecifiedSmoothSuperellipsoidIC.h"
 
 // System includes

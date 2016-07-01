@@ -26,15 +26,18 @@
     variable = c
     invalue = 1.0
     outvalue = 0.1
-    bubspac = 10
-    numbub = 5
-    semiaxis_b_variation = 0.25
+    bubspac = '10 5'
+    numbub = '5 5'
+    semiaxis_b_variation = '0.25 0.35'
     semiaxis_variation_type = uniform
-    semiaxis_a_variation = 0.2
-    semiaxis_a = 7
-    semiaxis_c_variation = 0.3
-    semiaxis_b = 10
-    semiaxis_c = 15
+    semiaxis_a_variation = '0.2 0.3'
+    semiaxis_a = '7 5'
+    semiaxis_c_variation = '0.3 0.5'
+    semiaxis_b = '10 8'
+    semiaxis_c = '15 5'
+    exponent = '2 3'
+    prevent_overlap = True
+    check_extremes = True
   [../]
 []
 

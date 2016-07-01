@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<BimodalSuperellipsoidsIC>()
 {
   InputParameters params = validParams<SpecifiedSmoothSuperellipsoidIC>();
-  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly)");
+  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly outside the larger particles)");
   params.addRequiredParam<unsigned int>("npart", "The number of random (small) particles to place");
   params.addRequiredParam<Real>("small_spac", "minimum spacing between small particles, measured from closest edge to closest edge");
   params.addRequiredParam<Real>("large_spac", "minimum spacing between large and small particles, measured from closest edge to closest edge");
@@ -54,13 +54,8 @@ BimodalSuperellipsoidsIC::initialSetup()
   }
   _range = _top_right - _bottom_left;
 
-  switch (_size_variation_type)
-  {
-    case 2: //No variation
-      if (_size_variation > 0.0)
-        mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
-      break;
-  }
+  if (_size_variation_type == 2 && _size_variation > 0.0)
+    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
 
   SmoothSuperellipsoidBaseIC::initialSetup();
 }
@@ -105,9 +100,12 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidSemiaxes()
         _cs[i] = _small_c;
     }
 
-    if (_as[i] < 0.0) _as[i] = 0.0;
-    if (_bs[i] < 0.0) _bs[i] = 0.0;
-    if (_cs[i] < 0.0) _cs[i] = 0.0;
+    if (_as[i] < 0.0)
+      _as[i] = 0.0;
+    if (_bs[i] < 0.0)
+      _bs[i] = 0.0;
+    if (_cs[i] < 0.0)
+      _cs[i] = 0.0;
   }
 }
 
@@ -165,7 +163,8 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
       //First check for collisions with the specified (large) particles
       for (unsigned int j = 0; j < _x_positions.size(); j++)
       {
-        if (j == 0) dlarge_min = _range.norm();
+        if (j == 0)
+          dlarge_min = _range.norm();
 
         //Compute the distance r1 from the center of each specified superellipsoid to its outside edge
         //along the vector between the specified superellipsoid and the current randomly
@@ -192,13 +191,15 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
         //Calculate the distance between the edges
         Real tmp_dlarge_min = dist - r1 - r2;
 
-        if (tmp_dlarge_min < dlarge_min) dlarge_min = tmp_dlarge_min;
+        if (tmp_dlarge_min < dlarge_min)
+          dlarge_min = tmp_dlarge_min;
       }
 
       //Then check for collisions between the randomly placed particles
       for (unsigned int j = _x_positions.size(); j < i; j++)
       {
-        if (j == _x_positions.size()) dsmall_min = _range.norm();
+        if (j == _x_positions.size())
+          dsmall_min = _range.norm();
 
         Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[j], newcenter);
         Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[j], newcenter);
@@ -216,9 +217,12 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
         //Calculate the distance between the edges
         Real tmp_dsmall_min = dist - r1 - r2;
 
-        if (tmp_dsmall_min < dsmall_min) dsmall_min = tmp_dsmall_min;
+        if (tmp_dsmall_min < dsmall_min)
+          dsmall_min = tmp_dsmall_min;
       }
-      if (i == _x_positions.size()) dsmall_min = _range.norm();
+      //Cause while statement to exit for the first randomly placed particle
+      if (i == _x_positions.size())
+        dsmall_min = _range.norm();
     }
 
     if (num_tries == _numtries)

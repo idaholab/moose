@@ -31,29 +31,32 @@ public:
 
   virtual void initialSetup();
 
-
 protected:
   virtual void computeSuperellipsoidSemiaxes();
   virtual void computeSuperellipsoidCenters();
   virtual void computeSuperellipsoidExponents();
+  virtual Real overlapCheck(const Point & newcenter, Real nc_as, Real nc_bs, Real nc_cs, Real nc_ns);
 
-  unsigned int _numbub;
-  Real _bubspac;
+  unsigned int _max_num_tries;
+  Real _gk;
 
-  unsigned int _numtries;
-  Real _exponent;
-  Real _semiaxis_a;
-  Real _semiaxis_b;
-  Real _semiaxis_c;
-  Real _semiaxis_a_variation;
-  Real _semiaxis_b_variation;
-  Real _semiaxis_c_variation;
   MooseEnum _semiaxis_variation_type;
+  MooseEnum _prevent_overlap;
+  MooseEnum _check_extremes;
 
   Point _bottom_left;
   Point _top_right;
   Point _range;
 
+  std::vector<unsigned int> _numbub;
+  std::vector<Real> _bubspac;
+  std::vector<Real> _exponent;
+  std::vector<Real> _semiaxis_a;
+  std::vector<Real> _semiaxis_b;
+  std::vector<Real> _semiaxis_c;
+  std::vector<Real> _semiaxis_a_variation;
+  std::vector<Real> _semiaxis_b_variation;
+  std::vector<Real> _semiaxis_c_variation;
 };
 
 #endif //MULTISMOOTHSUPERELLIPSOIDIC_H
