@@ -21,7 +21,6 @@
 #include "MaterialPropertyInterface.h"
 #include "UserObjectInterface.h"
 #include "Coupleable.h"
-#include "ScalarCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
@@ -46,7 +45,6 @@ class ElementUserObject :
   public MaterialPropertyInterface,
   public UserObjectInterface,
   public Coupleable,
-  public ScalarCoupleable,
   public MooseVariableDependencyInterface,
   public TransientInterface,
   protected PostprocessorInterface,
