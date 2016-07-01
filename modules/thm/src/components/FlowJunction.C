@@ -42,7 +42,7 @@ void
 FlowJunction::init()
 {
   const FluidPropertiesBase & fp = _sim.getUserObject<FluidPropertiesBase>(getParam<UserObjectName>("fp"));
-  _model_type = fp.modelType();
+  _model_type = FlowModel::getType(fp);
 }
 
 void
