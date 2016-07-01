@@ -4,7 +4,7 @@
 #include "Simulation.h"
 #include "FEProblem.h"
 #include "GeometricalComponent.h"
-#include "FluidPropertiesBase.h"
+#include "FluidProperties.h"
 #include <sstream>
 
 
@@ -41,7 +41,7 @@ FlowJunction::~FlowJunction()
 void
 FlowJunction::init()
 {
-  const FluidPropertiesBase & fp = _sim.getUserObject<FluidPropertiesBase>(getParam<UserObjectName>("fp"));
+  const FluidProperties & fp = _sim.getUserObject<FluidProperties>(getParam<UserObjectName>("fp"));
   _model_type = FlowModel::getType(fp);
 }
 
