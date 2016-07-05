@@ -1389,16 +1389,13 @@ MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q)
 std::pair<BoundaryID, BoundaryID> *
 MooseMesh::getPairedBoundaryMapping(unsigned int component)
 {
-  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
+  if (!_regular_orthogonal_mesh)
+    mooseError("Trying to retrieve automatic paired mapping for a mesh that is not regular and orthogonal");
+
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
   if (_paired_boundary.empty())
-  {
-    if (_regular_orthogonal_mesh)
-      detectPairedSidesets();
-    else
-      mooseError("Trying to retrieve automatic paired mapping for a mesh that is not regular and orthogonal");
-  }
+    detectPairedSidesets();
 
   if (component < _paired_boundary.size())
     return &_paired_boundary[component];
