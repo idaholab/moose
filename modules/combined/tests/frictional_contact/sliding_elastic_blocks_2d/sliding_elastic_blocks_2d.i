@@ -253,7 +253,7 @@
     disp_y = disp_y
     disp_x = disp_x
     master = 2
-    model = glued
+    model = coulomb
     system = constraint
     friction_coefficient = '0.25'
     penalty = 1e6
