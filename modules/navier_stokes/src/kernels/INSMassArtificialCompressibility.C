@@ -28,7 +28,7 @@ INSMassArtificialCompressibility::INSMassArtificialCompressibility(const InputPa
 Real INSMassArtificialCompressibility::computeQpResidual()
 {
   // penalty*p*q
-  return _penalty*_u[_qp]* _test[_i][_qp];
+  return _penalty * _u[_qp] * _test[_i][_qp];
 }
 
 Real INSMassArtificialCompressibility::computeQpOffDiagJacobian(unsigned /* jvar */)
@@ -40,5 +40,5 @@ Real INSMassArtificialCompressibility::computeQpOffDiagJacobian(unsigned /* jvar
 Real INSMassArtificialCompressibility::computeQpJacobian()
 {
   // Derivative wrt to p
-  return _penalty*_phi[_j][_qp]* _test[_i][_qp];
+  return _penalty * _phi[_j][_qp] * _test[_i][_qp];
 }
