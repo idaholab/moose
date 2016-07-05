@@ -32,20 +32,22 @@ KKSMultiACBulkF::computeDFDOP(PFFunctionType type)
   switch (type)
   {
     case Residual:
-    {
-      for (unsigned int n = 0; n < _num_Fj; ++n)
+      for (unsigned int n = 0; n < _num_j; ++n)
         sum += (*_prop_dhjdetai[n])[_qp] * (*_prop_Fj[n])[_qp];
 
       return sum + _wi * _prop_dgi[_qp];
-    }
 
     case Jacobian:
-    {
-      for (unsigned int n = 0; n < _num_Fj; ++n)
+      // For when this kernel is used in the Lagrange multiplier equation
+      // In that case the Lagrange multiplier is the nonlinear variable
+      if (_etai_var != _var.number())
+        return 0.0;
+
+      // For when eta_i is the nonlinear variable
+      for (unsigned int n = 0; n < _num_j; ++n)
         sum += (*_prop_d2hjdetai2[n])[_qp] * (*_prop_Fj[n])[_qp];
 
-      return _phi[_j][_qp] * sum + _wi * _prop_d2gi[_qp];
-    }
+      return _phi[_j][_qp] * (sum + _wi * _prop_d2gi[_qp]);
   }
 
   mooseError("Invalid type passed in");
@@ -65,9 +67,15 @@ KKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
 
   // Then add dependence of KKSMultiACBulkF on other variables
   Real sum = 0.0;
-  for (unsigned int n = 0; n < _num_Fj; ++n)
+  for (unsigned int n = 0; n < _num_j; ++n)
     sum += (*_prop_d2hjdetaidarg[n][cvar])[_qp] * (*_prop_Fj[n])[_qp]
             + (*_prop_dhjdetai[n])[_qp] * (*_prop_dFjdarg[n][cvar])[_qp];
+
+  // Handle the case when this kernel is used in the Lagrange multiplier equation
+  // In this case the second derivative of the barrier function contributes
+  // to the off-diagonal Jacobian
+  if (jvar == _etai_var)
+    sum += _wi * _prop_d2gi[_qp];
 
   res += _L[_qp] * sum * _phi[_j][_qp] * _test[_i][_qp];
 

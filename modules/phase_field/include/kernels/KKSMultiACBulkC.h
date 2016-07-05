@@ -31,7 +31,6 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const unsigned int _ncj;
   /// Names of phase concentration variables
   MaterialPropertyName _c1_name;
   std::vector<const VariableValue *> _cjs;

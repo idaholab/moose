@@ -21,23 +21,23 @@ KKSMultiACBulkBase::KKSMultiACBulkBase(const InputParameters & parameters) :
     ACBulk<Real>(parameters),
     _nvar(_coupled_moose_vars.size()), // number of coupled variables
     _etai_name(getVar("eta_i", 0)->name()),
+    _etai_var(coupled("eta_i", 0)),
     _Fj_names(getParam<std::vector<MaterialPropertyName> >("Fj_names")),
-    _num_Fj(_Fj_names.size()),
-    _prop_Fj(_num_Fj),
-    _prop_dFjdarg(_num_Fj),
+    _num_j(_Fj_names.size()),
+    _prop_Fj(_num_j),
+    _prop_dFjdarg(_num_j),
     _hj_names(getParam<std::vector<MaterialPropertyName> >("hj_names")),
-    _num_hj(_hj_names.size()),
-    _prop_hj(_num_hj),
-    _prop_dhjdetai(_num_hj),
-    _prop_d2hjdetai2(_num_hj),
-    _prop_d2hjdetaidarg(_num_hj)
+    _prop_hj(_num_j),
+    _prop_dhjdetai(_num_j),
+    _prop_d2hjdetai2(_num_j),
+    _prop_d2hjdetaidarg(_num_j)
 {
   // check passed in parameter vectors
-  if (_num_Fj != _num_hj)
+  if (_num_j != _hj_names.size())
     mooseError("Need to pass in as many hj_names as Fj_names in KKSMultiACBulkF and KKSMultiACBulkC " << name());
 
   // reserve space and set phase material properties
-  for (unsigned int n = 0; n < _num_Fj; ++n)
+  for (unsigned int n = 0; n < _num_j; ++n)
   {
     // get phase free energy
     _prop_Fj[n] = &getMaterialPropertyByName<Real>(_Fj_names[n]);
@@ -66,6 +66,9 @@ KKSMultiACBulkBase::initialSetup()
 {
   ACBulk<Real>::initialSetup();
 
-  for (unsigned int n = 0; n < _num_Fj; ++n)
+  for (unsigned int n = 0; n < _num_j; ++n)
+  {
     validateNonlinearCoupling<Real>(_Fj_names[n]);
+    validateNonlinearCoupling<Real>(_hj_names[n]);
+  }
 }

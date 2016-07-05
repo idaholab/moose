@@ -33,12 +33,15 @@ protected:
   /// Number of coupled variables
   unsigned int _nvar;
 
-  /// name of the order parameter (needed to retrieve the derivative material properties)
+  /// name of order parameter that derivatives are taken wrt (needed to retrieve the derivative material properties)
   VariableName _etai_name;
+
+  /// index of order parameter that derivatives are taken wrt
+  unsigned int _etai_var;
 
   /// Names of free energy functions for each phase \f$ F_j \f$
   std::vector<MaterialPropertyName> _Fj_names;
-  unsigned int _num_Fj;
+  unsigned int _num_j;
 
   /// Values of the free energy functions for each phase \f$ F_j \f$
   std::vector<const MaterialProperty<Real> *> _prop_Fj;
@@ -48,7 +51,6 @@ protected:
 
   /// switching function names
   std::vector<MaterialPropertyName> _hj_names;
-  unsigned int _num_hj;
 
   /// Values of the switching functions for each phase \f$ h_j \f$
   std::vector<const MaterialProperty<Real> *> _prop_hj;
