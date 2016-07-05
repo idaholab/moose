@@ -25,10 +25,7 @@ GrainForceAndTorqueSum::GrainForceAndTorqueSum(const InputParameters & parameter
     _ncrys(getParam<unsigned int>("op_num")),
     _sum_forces(_num_forces),
     _force_values(_ncrys),
-    _torque_values(_ncrys),
-    _force_derivatives(_ncrys),
-    _torque_derivatives(_ncrys)
-
+    _torque_values(_ncrys)
 {
   for (unsigned int i = 0; i < _num_forces; ++i)
     _sum_forces[i] = & getUserObjectByName<GrainForceAndTorqueInterface>(_sum_objects[i]);
@@ -37,20 +34,33 @@ GrainForceAndTorqueSum::GrainForceAndTorqueSum(const InputParameters & parameter
 void
 GrainForceAndTorqueSum::initialize()
 {
-
   for (unsigned int i = 0; i < _ncrys; ++i)
   {
     _force_values[i] = 0.0;
     _torque_values[i] = 0.0;
-    _force_derivatives[i] = 0.0;
-    _torque_derivatives[i] = 0.0;
-
     for (unsigned int j = 0; j < _num_forces; ++j)
     {
       _force_values[i] += (_sum_forces[j]->getForceValues())[i];
       _torque_values[i] += (_sum_forces[j]->getTorqueValues())[i];
-      _force_derivatives[i] += (_sum_forces[j]->getForceDerivatives())[i];
-      _torque_derivatives[i] += (_sum_forces[j]->getTorqueDerivatives())[i];
+    }
+  }
+
+  if (_fe_problem.currentlyComputingJacobian())
+  {
+    unsigned int total_dofs = _subproblem.es().n_dofs();
+    _c_jacobians.resize(6*_ncrys*total_dofs, 0.0);
+    _eta_jacobians.resize(_ncrys);
+
+    for (unsigned int i = 0; i < _c_jacobians.size(); ++i)
+      for (unsigned int j = 0; j < _num_forces; ++j)
+        _c_jacobians[i] += (_sum_forces[j]->getForceCJacobians())[i];
+
+    for (unsigned int i = 0; i < _ncrys; ++i)
+    {
+      _eta_jacobians[i].resize(6*_ncrys*total_dofs, 0.0);
+      for (unsigned int j = 0; j < _eta_jacobians[i].size(); ++j)
+        for (unsigned int k = 0; k < _num_forces; ++k)
+          _eta_jacobians[i][j] += (_sum_forces[k]->getForceEtaJacobians())[i][j];
     }
   }
 }
@@ -67,14 +77,14 @@ GrainForceAndTorqueSum::getTorqueValues() const
   return _torque_values;
 }
 
-const std::vector<RealGradient> &
-GrainForceAndTorqueSum::getForceDerivatives() const
+const std::vector<Real> &
+GrainForceAndTorqueSum::getForceCJacobians() const
 {
-  return _force_derivatives;
+  return _c_jacobians;
 }
 
-const std::vector<RealGradient> &
-GrainForceAndTorqueSum::getTorqueDerivatives() const
+const std::vector<std::vector<Real> > &
+GrainForceAndTorqueSum::getForceEtaJacobians() const
 {
-  return _torque_derivatives;
+  return _eta_jacobians;
 }

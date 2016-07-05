@@ -39,9 +39,10 @@ private:
   /// stiffness constant
   Real _k;
 
-  unsigned int _ncrys;
+  unsigned int _op_num;
   std::vector<const VariableValue *> _vals;
   std::vector<const VariableGradient *> _grad_vals;
+  std::vector<VariableName> _vals_name;
 
   std::vector<Real> _product_etas;
   std::vector<RealGradient> _sum_grad_etas;
@@ -53,6 +54,8 @@ private:
   MaterialProperty<std::vector<RealGradient> > & _dF;
   /// first order derivative of force density material w.r.t c
   MaterialProperty<std::vector<RealGradient> > & _dFdc;
+  /// first order derivative of force density material w.r.t etas
+  std::vector<MaterialProperty<std::vector<Real> > *> _dFdgradeta;
 };
 
 #endif //FORCEDENSITYMATERIAL_H

@@ -1,36 +1,34 @@
 # test file for showing reaction forces between particles
+#[GlobalParams]
+#  var_name_base = eta
+#  op_num = 2
+#[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 10
+  nx = 10
+  ny = 5
   nz = 0
   xmax = 50
   ymax = 25
   zmax = 0
   elem_type = QUAD4
+  uniform_refine = 1
 []
 
 [Variables]
   [./c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-      type = SpecifiedSmoothCircleIC
-      invalue = 1.0
-      outvalue = 0.1
-      int_width = 6.0
-      x_positions = '20.0 30.0 '
-      z_positions = '0.0 0.0 '
-      y_positions = '0.0 25.0 '
-      radii = '14.0 14.0'
-      3D_spheres = false
-      variable = c
-    [../]
   [../]
   [./w]
     order = FIRST
     family = LAGRANGE
+  [../]
+  [./eta0]
+  [../]
+  [./eta1]
   [../]
 []
 
@@ -40,6 +38,7 @@
     variable = c
     f_name = F
     kappa_name = kappa_c
+    args = 'eta0 eta1'
     w = w
   [../]
   [./w_res]
@@ -52,21 +51,84 @@
     variable = w
     v = c
   [../]
+  [./motion]
+    type = MultiGrainRigidBodyMotion
+    variable = w
+    c = c
+    v = 'eta0 eta1'
+    grain_force = grain_force
+    grain_data = grain_center
+  [../]
+  [./eta0_dot]
+    type = TimeDerivative
+    variable = eta0
+  [../]
+  [./vadv_eta]
+    type = SingleGrainRigidBodyMotion
+    variable = eta0
+    c = c
+    v = 'eta0 eta1'
+    grain_force = grain_force
+    grain_data = grain_center
+    op_index = 0
+  [../]
+  [./acint_eta0]
+    type = ACInterface
+    variable = eta0
+    mob_name = M
+    #args = c
+    kappa_name = kappa_eta
+  [../]
+  [./acbulk_eta0]
+    type = AllenCahn
+    variable = eta0
+    mob_name = M
+    f_name = F
+    args = 'c eta1'
+  [../]
+  [./eta1_dot]
+    type = TimeDerivative
+    variable = eta1
+  [../]
+  [./vadv_eta1]
+    type = SingleGrainRigidBodyMotion
+    variable = eta1
+    c = c
+    v = 'eta0 eta1'
+    op_index = 1
+    grain_force = grain_force
+    grain_data = grain_center
+  [../]
+  [./acint_eta1]
+    type = ACInterface
+    variable = eta1
+    mob_name = M
+    #args = c
+    kappa_name = kappa_eta
+  [../]
+  [./acbulk_eta1]
+    type = AllenCahn
+    variable = eta1
+    mob_name = M
+    f_name = F
+    args = 'c eta0'
+  [../]
 []
 
 [Materials]
   [./pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
-    prop_values = '1.0  2.0      0.1'
+    prop_values = '1.0  0.5      0.5'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
     f_name = F
-    args = c
+    args = 'c eta0 eta1'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
-    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
+    #function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
+    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+eta0*(1-eta0)*c+eta1*(1-eta1)*c
     derivative_order = 2
   [../]
   [./force_density]
@@ -74,20 +136,21 @@
     c = c
     etas ='eta0 eta1'
   [../]
-  [./advection_vel]
-    type = GrainAdvectionVelocity
-    grain_force = grain_force
-    etas = 'eta0 eta1'
-    c = c
-    grain_data = grain_center
-  [../]
+  #[./advection_vel]
+  #  type = GrainAdvectionVelocity
+  #  block = 0
+  #  grain_force = grain_force
+  #  etas = 'eta0 eta1'
+  #  c = c
+  #  grain_data = grain_center
+  #[../]
 []
 
 [AuxVariables]
-  [./eta0]
-  [../]
-  [./eta1]
-  [../]
+  #[./eta0]
+  #[../]
+  #[./eta1]
+  #[../]
   [./bnds]
   [../]
   [./df00]
@@ -106,30 +169,30 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vadv00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv01]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv10]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv0_div]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv1_div]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
+  #[./vadv00]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
+  #[./vadv01]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
+  #[./vadv10]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
+  #[./vadv11]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
+  #[./vadv0_div]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
+  #[./vadv1_div]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
 []
 
 [AuxKernels]
@@ -168,41 +231,41 @@
     component = 0
     property = force_density
   [../]
-  [./vadv00]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv00
-    property = advection_velocity
-  [../]
-  [./vadv01]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv01
-    property = advection_velocity
-    component = 1
-  [../]
-  [./vadv10]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv10
-    index = 1
-    property = advection_velocity
-  [../]
-  [./vadv11]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv11
-    property = advection_velocity
-    index = 1
-    component = 1
-  [../]
-  [./vadv0_div]
-    type = MaterialStdVectorAux
-    variable = vadv0_div
-    property = advection_velocity_divergence
-  [../]
-  [./vadv1_div]
-    type = MaterialStdVectorAux
-    variable = vadv1_div
-    property = advection_velocity_divergence
-    index = 1
-  [../]
+  #[./vadv00]
+  #  type = MaterialStdVectorRealGradientAux
+  #  variable = vadv00
+  #  property = advection_velocity
+  #[../]
+  #[./vadv01]
+  #  type = MaterialStdVectorRealGradientAux
+  #  variable = vadv01
+  #  property = advection_velocity
+  #  component = 1
+  #[../]
+  #[./vadv10]
+  #  type = MaterialStdVectorRealGradientAux
+  #  variable = vadv10
+  #  index = 1
+  #  property = advection_velocity
+  #[../]
+  #[./vadv11]
+  #  type = MaterialStdVectorRealGradientAux
+  #  variable = vadv11
+  #  property = advection_velocity
+  #  index = 1
+  #  component = 1
+  #[../]
+  #[./vadv0_div]
+  #  type = MaterialStdVectorAux
+  #  variable = vadv0_div
+  #  property = advection_velocity_divergence
+  #[../]
+  #[./vadv1_div]
+  #  type = MaterialStdVectorAux
+  #  variable = vadv1_div
+  #  property = advection_velocity_divergence
+  #  index = 1
+  #[../]
 []
 
 [ICs]
@@ -226,6 +289,19 @@
     invalue = 1.0
     type = SmoothCircleIC
   [../]
+  [./ic_c]
+    type = SpecifiedSmoothCircleIC
+    invalue = 1.0
+    outvalue = 0.1
+    int_width = 0.6
+    x_positions = '20.0 30.0 '
+    z_positions = '0.0 0.0 '
+    y_positions = '0.0 25.0 '
+    radii = '14.0 14.0'
+    3D_spheres = false
+    variable = c
+    block = 0
+  [../]
 []
 
 [VectorPostprocessors]
@@ -243,40 +319,47 @@
   [./grain_center]
     type = ComputeGrainCenterUserObject
     etas = 'eta0 eta1'
-    execute_on = 'initial linear'
+    execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
     type = ComputeGrainForceAndTorque
-    execute_on = 'initial linear'
+    execute_on = 'linear nonlinear'
     grain_data = grain_center
     force_density = force_density
     c = c
+    etas = 'eta0 eta1'
+    f_name = F
   [../]
 []
 
 [Preconditioning]
-  # active = ' '
   [./SMP]
     type = SMP
     full = true
+    #off_diag_row = '   c w eta0 eta1 w    w    eta0 eta1 eta1 eta0 c    c'
+    #off_diag_column = 'w c c    c    eta0 eta1  eta1 eta0 eta0 eta1 eta0 eta1'
   [../]
 []
 
 [Executioner]
   type = Transient
   scheme = bdf2
-  solve_type = PJFNK
+  solve_type = NEWTON
+  #petsc_options = '-snes_test_display'
+  #petsc_options_iname = '-snes_type'
+  #petsc_options_value = 'test'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
-  num_steps = 1
+  num_steps = 10
   dt = 1
 []
 
 [Outputs]
   exodus = true
   csv = true
+  print_perf_log = true
 []

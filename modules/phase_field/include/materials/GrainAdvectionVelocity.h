@@ -39,8 +39,8 @@ protected:
   const GrainForceAndTorqueInterface & _grain_force_torque;
   const std::vector<RealGradient> & _grain_forces;
   const std::vector<RealGradient> & _grain_torques;
-  const std::vector<RealGradient> & _grain_force_derivatives;
-  const std::vector<RealGradient> & _grain_torque_derivatives;
+  const std::vector<Real> & _grain_force_derivatives;
+  // const std::vector<std::vector<RealGradient> > & _grain_torque_derivatives;
 
 private:
   /// constant value corresponding to grain translation
@@ -49,7 +49,7 @@ private:
   /// constant value corresponding to grain rotation
   Real _mr;
 
-  unsigned int _ncrys;
+  unsigned int _op_num;
   std::vector<const VariableValue *> _vals;
   std::vector<const VariableGradient *> _grad_vals;
   VariableName _c_name;
@@ -63,9 +63,9 @@ private:
   MaterialProperty<std::vector<Real> > & _div_velocity_advection;
 
   /// Material storing derivative of advection velocities of grains w r. t. c
-  MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative_c;
+  MaterialProperty<std::vector<std::vector<RealGradient> > > & _velocity_advection_derivative_c;
   /// Material storing derivative of divergence of advection velocities of grains w r. t. c
-  MaterialProperty<std::vector<Real> > & _div_velocity_advection_derivative_c;
+  MaterialProperty<std::vector<std::vector<Real> > > & _div_velocity_advection_derivative_c;
   /// Material storing derivative of advection velocities of grains w r. t. eta
   MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative_eta;
 };

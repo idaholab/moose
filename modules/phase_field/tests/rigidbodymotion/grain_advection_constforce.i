@@ -81,38 +81,38 @@
 [AuxVariables]
   [./eta]
   [../]
-  [./vadv00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv01]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv0_div]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
+  #[./vadv00]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
+  #[./vadv01]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
+  #[./vadv0_div]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #[../]
 []
 
-[AuxKernels]
-  [./vadv00]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv00
-    property = advection_velocity
-  [../]
-  [./vadv01]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv01
-    property = advection_velocity
-    component = 1
-  [../]
-  [./vadv0_div]
-    type = MaterialStdVectorAux
-    variable = vadv0_div
-    property = advection_velocity_divergence
-  [../]
-[]
+#[AuxKernels]
+#  [./vadv00]
+#    type = MaterialStdVectorRealGradientAux
+#    variable = vadv00
+#    property = advection_velocity
+#  [../]
+#  [./vadv01]
+#    type = MaterialStdVectorRealGradientAux
+#    variable = vadv01
+#    property = advection_velocity
+#    component = 1
+#  [../]
+#  [./vadv0_div]
+#    type = MaterialStdVectorAux
+#    variable = vadv0_div
+#    property = advection_velocity_divergence
+#  [../]
+#[]
 
 
 [ICs]

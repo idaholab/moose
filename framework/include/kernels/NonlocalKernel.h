@@ -43,6 +43,7 @@ protected:
   virtual Real computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index);
 
   unsigned int _k;
+  dof_id_type _total_dofs;
 };
 
 #endif /* NONLOCALKERNEL_H */
