@@ -99,4 +99,11 @@
     max_parallel = 1
     group = 'periodic'
   [../]
+
+  [./auto_dir_repeated_id]
+    type = 'Exodiff'
+    input = 'auto_dir_repeated_id.i'
+    exodiff = 'auto_dir_repeated_id_out.e'
+    group = 'periodic'
+  [../]
 []
