@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef INSPENALTYTERM_H_
-#define INSPENALTYTERM_H_
+#ifndef INSMASSARTIFICIALCOMPRESSIBILITY_H
+#define INSMASSARTIFICIALCOMPRESSIBILITY_H
 
 #include "Kernel.h"
 
@@ -36,7 +36,4 @@ protected:
   Real _penalty;
 };
 
-
-
-
-#endif /* INSPENALTYTERM_H_ */
+#endif /* INSMASSARTIFICIALCOMPRESSIBILITY_H */
