@@ -126,4 +126,11 @@
     exodiff = image_mesh_2d_out.e
     vtk = true
   [../]
+  [./moose_logo]
+    # Tests ability to shift and scale separately
+    type = Exodiff
+    input = moose_logo_test_2D.i
+    exodiff = moose_logo_test_2D_out.e
+    vtk = true
+  [../]
 []
