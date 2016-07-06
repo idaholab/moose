@@ -9,7 +9,7 @@
 []
 
 [Variables]
-  #Use active lists to help debug problems. Switching on and off 
+  #Use active lists to help debug problems. Switching on and off
   #different Kernels or Variables is extremely useful!
   active = 'diffused convected'
   [./diffused]
