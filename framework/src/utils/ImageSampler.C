@@ -273,7 +273,7 @@ ImageSampler::vtkShiftAndScale()
   double scale = _is_pars.get<double>("scale");
 
   // Do nothing if shift and scale are not set
-  if (shift == 0 || scale == 1)
+  if (shift == 0 && scale == 1)
     return;
 
 
