@@ -3,11 +3,7 @@
 []
 
 [Variables]
-  active = 'diffused'
-
   [./diffused]
-    # Note that we do not have the 'active' parameter here.  Since it
-    # is missing we will automatically pickup all nested blocks
     order = FIRST
     family = LAGRANGE
 
@@ -21,8 +17,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = diffused
@@ -30,8 +24,6 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = diffused
@@ -52,8 +44,6 @@
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Outputs]

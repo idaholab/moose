@@ -3,8 +3,6 @@
 []
 
 [Variables]
-  active = 'diffused'
-
   [./diffused]
     order = FIRST
     family = LAGRANGE
@@ -12,8 +10,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = diffused
@@ -21,8 +17,6 @@
 []
 
 [BCs]
-  active = 'bottom top'
-
   [./bottom]
     type = DirichletBC
     variable = diffused
