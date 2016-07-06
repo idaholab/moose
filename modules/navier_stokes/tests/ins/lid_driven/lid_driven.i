@@ -122,7 +122,7 @@
   [../]
 
   [./penalty]
-    type = INSMassArtificialCompressibility
+    type = INSCompressibilityPenalty
     variable = p
     penalty  = 1e-5
   [../]
