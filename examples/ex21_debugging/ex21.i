@@ -9,6 +9,9 @@
 []
 
 [Variables]
+  #Use active lists to help debug problems. Switching on and off 
+  #different Kernels or Variables is extremely useful!
+  active = 'diffused convected'
   [./diffused]
     order = FIRST
     family = LAGRANGE
@@ -24,6 +27,7 @@
 
 [Kernels]
   #This Kernel consumes a real-gradient material property from the active material
+  active = 'convection diff_convected example_diff time_deriv_diffused time_deriv_convected'
   [./convection]
     type = ExampleConvection
     variable = convected

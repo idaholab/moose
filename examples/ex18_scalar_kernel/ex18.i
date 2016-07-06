@@ -99,6 +99,7 @@
     variable = x
     execute_on = timestep_end
   [../]
+
   [./y]
     type = ScalarVariable
     variable = y
@@ -143,8 +144,6 @@
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Outputs]

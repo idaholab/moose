@@ -17,7 +17,6 @@
 
 [Variables]
   active = 'diffused'   # Note the active list here
-
   [./diffused]
     order = FIRST
     family = LAGRANGE
@@ -32,8 +31,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = diffused
@@ -42,8 +39,6 @@
 
 # This example applies DirichletBCs to all four sides of our square domain
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = diffused
