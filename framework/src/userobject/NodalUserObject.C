@@ -37,7 +37,6 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     UserObjectInterface(this),
     Coupleable(this, true),
-    ScalarCoupleable(this),
     MooseVariableDependencyInterface(),
     TransientInterface(this),
     PostprocessorInterface(this),
