@@ -50,6 +50,7 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/periodic_boundaries.h"
+#include "libmesh/quadrature_gauss.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -1237,61 +1238,99 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 void
 MooseMesh::detectPairedSidesets()
 {
-  /**
-   * Autodetect sidesets:  We need to inspect all of the nodes on the bounding box of each dimension to find the common
-   * sideset.  This is rather tricky in higher dimensions.  We use the strides array below to help us index into the
-   * corner nodes vector with the proper pattern.  To find the common boundary we simply locate the
-   * boundary with the most unique hits (common to all of the nodes on that particular boundary).
-   */
-  unsigned int strides[3][3] = {{4, 2, 1}, {2, 4, 1}, {1, 4, 2}};
+  // Loop over level-0 elements (since boundary condition information
+  // is only directly stored for them) and find sidesets with normals
+  // that point in the -x, +x, -y, +y, and -z, +z direction.  If there
+  // is a unique sideset id for each direction, then the paired
+  // sidesets consist of (-x,+x), (-y,+y), (-z,+z).  If there are
+  // multiple sideset ids for a given direction, then we can't pick a
+  // single pair for that direction.  In that case, we'll just return
+  // as was done in the original algorithm.
+  std::set<BoundaryID>
+    minus_x_ids, plus_x_ids,
+    minus_y_ids, plus_y_ids,
+    minus_z_ids, plus_z_ids;
 
-  // Grab a reference to the BoundaryInfo object
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  // Points used for direction comparison
+  const Point
+    minus_x(-1,  0,  0),
+    plus_x ( 1,  0,  0),
+    minus_y( 0, -1,  0),
+    plus_y ( 0,  1,  0),
+    minus_z( 0,  0, -1),
+    plus_z ( 0,  0,  1);
 
-  buildNodeListFromSideList();
-
+  // A first-order Lagrange FE for the face.
   unsigned int dim = getMesh().mesh_dimension();
-  unsigned int z_dim = dim == 3 ? 2 : 1;  // Determine how many z loops there are, we always need to loop at least once!
+  UniquePtr<FEBase> fe_face (FEBase::build(dim,
+                                           FEType(FIRST, LAGRANGE)));
 
-  // Container to catch IDs passed back from the BoundaryInfo object
-  std::vector<BoundaryID> bounds_ids;
+  // Face is assumed to be flat, therefore normal is assumed to be
+  // constant over the face, therefore only compute it at 1 qp.
+  QGauss qface(dim-1, CONSTANT);
+  fe_face->attach_quadrature_rule (&qface);
+  const std::vector<Point> & normals = fe_face->get_normals();
 
-  for (unsigned int curr_dim = 0; curr_dim < dim; ++curr_dim)
+  // We need this to get boundary ids for each boundary face we encounter.
+  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  std::vector<boundary_id_type> face_ids;
+
+  MeshBase::const_element_iterator       el     = getMesh().level_elements_begin(0);
+  const MeshBase::const_element_iterator end_el = getMesh().level_elements_end(0);
+  for (; el != end_el ; ++el)
   {
-    std::pair<BoundaryID, BoundaryID> paired_boundary;
-    for (unsigned int i = 0; i < 2; ++i)
+    Elem * elem = *el;
+
+    // loop over element sides
+    for (unsigned int s = 0; s < elem->n_sides(); s++)
     {
-      std::map<BoundaryID, unsigned int> boundary_counts;
-      for (unsigned int j = 0; j < 2; ++j)
-        for (unsigned int k = 0; k < z_dim; ++k)
-        {
-          boundary_info.boundary_ids(_extreme_nodes[i*strides[curr_dim][0] + j*strides[curr_dim][1] + k*strides[curr_dim][2]], bounds_ids);
+      // If side is on the boundary
+      if (elem->neighbor(s) == NULL)
+      {
+        UniquePtr<Elem> side = elem->build_side(s);
 
-          for (unsigned int l = 0; l<bounds_ids.size(); ++l)
-            ++boundary_counts[bounds_ids[l]];
-        }
+        fe_face->reinit(elem, s);
 
-      BoundaryID common_boundary = std::numeric_limits<BoundaryID>::max();
-      unsigned int max_count = 0;
-      for (const auto & it : boundary_counts)
-        if (it.second > max_count)
-        {
-          common_boundary = it.first;
-          max_count = it.second;
-        }
+        // Get the boundary ID(s) for this side.  If there is more
+        // than 1 boundary id, then we already can't determine a
+        // unique pairing of sides in this direction, but we'll just
+        // keep going to keep the logic simple.
+        boundary_info.boundary_ids(elem, s, face_ids);
 
-      // If this test fails, it means that the autodetection failed.  We'll just exit gracefully from this routine.
-      // Note, this means that the _paired_boundary datastructure will not be populated
-      if (max_count < std::pow(2.0, static_cast<int>(dim) - 1))
-        return;
+        // x-direction faces
+        if (normals[0].absolute_fuzzy_equals(minus_x))
+          minus_x_ids.insert(face_ids.begin(), face_ids.end());
+        else if (normals[0].absolute_fuzzy_equals(plus_x))
+          plus_x_ids.insert(face_ids.begin(), face_ids.end());
 
-      if (i==0)
-        paired_boundary.first = common_boundary;
-      else
-        paired_boundary.second = common_boundary;
+        // y-direction faces
+        else if (normals[0].absolute_fuzzy_equals(minus_y))
+          minus_y_ids.insert(face_ids.begin(), face_ids.end());
+        else if (normals[0].absolute_fuzzy_equals(plus_y))
+          plus_y_ids.insert(face_ids.begin(), face_ids.end());
+
+        // z-direction faces
+        else if (normals[0].absolute_fuzzy_equals(minus_z))
+          minus_z_ids.insert(face_ids.begin(), face_ids.end());
+        else if (normals[0].absolute_fuzzy_equals(plus_z))
+          plus_z_ids.insert(face_ids.begin(), face_ids.end());
+      }
     }
-    _paired_boundary.push_back(paired_boundary);
   }
+
+  // If unique pairings were found, fill up the _paired_boundary data
+  // structure with that information.
+  if (minus_x_ids.size() == 1 && plus_x_ids.size() == 1)
+    _paired_boundary.push_back(std::make_pair(*(minus_x_ids.begin()),
+                                              *(plus_x_ids.begin())));
+
+  if (minus_y_ids.size() == 1 && plus_y_ids.size() == 1)
+    _paired_boundary.push_back(std::make_pair(*(minus_y_ids.begin()),
+                                              *(plus_y_ids.begin())));
+
+  if (minus_z_ids.size() == 1 && plus_z_ids.size() == 1)
+    _paired_boundary.push_back(std::make_pair(*(minus_z_ids.begin()),
+                                              *(plus_z_ids.begin())));
 }
 
 Real
