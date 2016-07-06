@@ -11,8 +11,8 @@ InputParameters validParams<ComputeThermalExpansionEigenStrain>()
 {
   InputParameters params = validParams<ComputeStressFreeStrainBase>();
   params.addClassDescription("Computes Eigenstrain due to thermal expansion");
-  params.addCoupledVar("Temperature", 273, "Coupled temperature in units of Kelvin");
-  params.addParam<Real>("thermal_expansion_coefficient", 0.0, "Thermal expansion coefficient in 1/K");
+  params.addCoupledVar("temperature", 273, "Coupled temperature in units of Kelvin");
+  params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient in 1/K");
   params.addParam<Real>("stress_free_reference_temperature", 273, "Reference temperature for thermal expansion in K; used in the first time step to calculate the temperature change");
 
   return params;
@@ -20,10 +20,10 @@ InputParameters validParams<ComputeThermalExpansionEigenStrain>()
 
 ComputeThermalExpansionEigenStrain::ComputeThermalExpansionEigenStrain(const InputParameters & parameters) :
     ComputeStressFreeStrainBase(parameters),
-    _temperature(coupledValue("Temperature")),
+    _temperature(coupledValue("temperature")),
     _has_incremental_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _temperature_old(_has_incremental_strain ? & coupledValueOld("Temperature") : NULL),
-    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coefficient")),
+    _temperature_old(_has_incremental_strain ? & coupledValueOld("temperature") : NULL),
+    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
     _stress_free_reference_temperature(getParam<Real>("stress_free_reference_temperature"))
 {
 }
