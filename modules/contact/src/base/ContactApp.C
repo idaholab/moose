@@ -66,8 +66,8 @@ extern "C" void ContactApp__registerObjects(Factory & factory) { ContactApp::reg
 void
 ContactApp::registerObjects(Factory & factory)
 {
-  registerDiracKernel(ContactMaster);
-  registerDiracKernel(SlaveConstraint);
+  registerDeprecatedObject(ContactMaster, "09/06/2016 00:00");
+  registerDeprecatedObject(SlaveConstraint, "09/06/2016 00:00");
   registerConstraint(OneDContactConstraint);
   registerConstraint(MultiDContactConstraint);
   registerConstraint(GluedContactConstraint);
