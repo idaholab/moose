@@ -3,8 +3,6 @@
 []
 
 [Variables]
-  active = 'diffused'
-
   [./diffused]
     order = FIRST
     family = LAGRANGE
@@ -15,8 +13,6 @@
 # will hold the AuxKernel calcuations.  The declaration syntax is very
 # similar to that of the regular variables section
 [AuxVariables]
-  active = 'nodal_aux element_aux'
-
   [./nodal_aux]
     order = FIRST
     family = LAGRANGE
@@ -29,8 +25,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = diffused
@@ -40,8 +34,6 @@
 # Here is the AuxKernels section where we enable the AuxKernels, link
 # them to our AuxVariables, set coupling parameters, and set input parameters
 [AuxKernels]
-  active = 'nodal_example element_example'
-
   [./nodal_example]
     type = ExampleAux
     variable = nodal_aux
@@ -58,8 +50,6 @@
 []
 
 [BCs]
-  active = 'bottom top'
-
   [./bottom]
     type = DirichletBC
     variable = diffused

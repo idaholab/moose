@@ -66,7 +66,7 @@
 #include "INSChorinPredictor.h"
 #include "INSChorinCorrector.h"
 #include "INSChorinPressurePoisson.h"
-#include "INSMassArtificialCompressibility.h"
+#include "INSCompressibilityPenalty.h"
 
 // BCs
 #include "INSMomentumNoBCBC.h"
@@ -173,7 +173,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSChorinPredictor);
   registerKernel(INSChorinCorrector);
   registerKernel(INSChorinPressurePoisson);
-  registerKernel(INSMassArtificialCompressibility);
+  registerKernel(INSCompressibilityPenalty);
 
   // BCs
   registerBoundaryCondition(INSMomentumNoBCBC);
