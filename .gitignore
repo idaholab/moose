@@ -160,6 +160,5 @@ framework/contrib/asio/
 # phase_field/tests/solution_rasterizer
 out.xyz
 
-#Jit output
-.jitdir/
+# JIT and automatic differentiation cache files
 .jitcache/
