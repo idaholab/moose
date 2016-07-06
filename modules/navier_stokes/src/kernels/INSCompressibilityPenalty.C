@@ -4,10 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "INSMassArtificialCompressibility.h"
+#include "INSCompressibilityPenalty.h"
 
 template<>
-InputParameters validParams<INSMassArtificialCompressibility>()
+InputParameters validParams<INSCompressibilityPenalty>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -17,7 +17,7 @@ InputParameters validParams<INSMassArtificialCompressibility>()
 }
 
 
-INSMassArtificialCompressibility::INSMassArtificialCompressibility(const InputParameters & parameters) :
+INSCompressibilityPenalty::INSCompressibilityPenalty(const InputParameters & parameters) :
   Kernel(parameters),
   // penalty value
   _penalty(getParam<Real>("penalty"))
@@ -25,19 +25,19 @@ INSMassArtificialCompressibility::INSMassArtificialCompressibility(const InputPa
 {
 }
 
-Real INSMassArtificialCompressibility::computeQpResidual()
+Real INSCompressibilityPenalty::computeQpResidual()
 {
   // penalty*p*q
   return _penalty * _u[_qp] * _test[_i][_qp];
 }
 
-Real INSMassArtificialCompressibility::computeQpOffDiagJacobian(unsigned /* jvar */)
+Real INSCompressibilityPenalty::computeQpOffDiagJacobian(unsigned /* jvar */)
 {
   // does not couple any variables
   return 0;
 }
 
-Real INSMassArtificialCompressibility::computeQpJacobian()
+Real INSCompressibilityPenalty::computeQpJacobian()
 {
   // Derivative wrt to p
   return _penalty * _phi[_j][_qp] * _test[_i][_qp];

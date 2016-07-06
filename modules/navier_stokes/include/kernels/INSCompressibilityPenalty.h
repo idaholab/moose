@@ -5,26 +5,26 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef INSMASSARTIFICIALCOMPRESSIBILITY_H
-#define INSMASSARTIFICIALCOMPRESSIBILITY_H
+#ifndef INSCOMPRESSIBILITYPENALTY_H
+#define INSCOMPRESSIBILITYPENALTY_H
 
 #include "Kernel.h"
 
 // Forward Declarations
-class INSMassArtificialCompressibility;
+class INSCompressibilityPenalty;
 
 template<>
-InputParameters validParams<INSMassArtificialCompressibility>();
+InputParameters validParams<INSCompressibilityPenalty>();
 
 /**
  * The penalty term may be used when Dirichlet boundary condition is applied to the entire boundary.
  */
-class INSMassArtificialCompressibility : public Kernel
+class INSCompressibilityPenalty : public Kernel
 {
 public:
-  INSMassArtificialCompressibility(const InputParameters & parameters);
+  INSCompressibilityPenalty(const InputParameters & parameters);
 
-  virtual ~INSMassArtificialCompressibility(){}
+  virtual ~INSCompressibilityPenalty(){}
 
 protected:
   virtual Real computeQpResidual();
