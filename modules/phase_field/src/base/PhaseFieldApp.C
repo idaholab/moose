@@ -318,8 +318,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
-  registerDeprecatedObjectName(AllenCahn, "ACParsed", "15/04/2016 00:00");
-  registerDeprecatedObjectName(CahnHilliard, "CHParsed", "11/01/2015 00:00");
 
   registerInitialCondition(BimodalInverseSuperellipsoidsIC);
   registerInitialCondition(BimodalSuperellipsoidsIC);
