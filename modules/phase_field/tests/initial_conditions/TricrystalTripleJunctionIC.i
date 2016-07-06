@@ -4,11 +4,11 @@
   # Mesh block. Meshes can be read in or automatically generated.
   type = GeneratedMesh
   dim = 2 # Problem dimension
-  nx = 12 # Number of elements in the x direction
-  ny = 12 # Number of elements in the y direction
-  xmax = 1000 # Maximum x-coordinate of mesh
+  nx = 11 # Number of elements in the x direction
+  ny = 11 # Number of elements in the y direction
+  xmax = 1001 # Maximum x-coordinate of mesh
   xmin = 0 # Minimum x-coordinate of mesh
-  ymax = 1000 # Maximum y-coordinate of mesh
+  ymax = 1001 # Maximum y-coordinate of mesh
   ymin = 0 # Minimum y-coordinate of mesh
   elem_type = QUAD4 # Type of elements used in the mesh
   uniform_refine = 3
@@ -20,7 +20,7 @@
   var_name_base = gr # base name of grains
   v = 'gr0 gr1 gr2' # Names of the grains
   theta1 = 135 # Angle the first grain makes at the triple junction
-  theta2 = 135 # Angle the second grain makes at the triple junction
+  theta2 = 100 # Angle the second grain makes at the triple junction
   length_scale = 1.0e-9 # Length scale in nm
   time_scale = 1.0e-9 # Time scale in ns
 []
@@ -101,13 +101,6 @@
 
 [Executioner]
   type = Transient
-  scheme = bdf2
-  solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
-  petsc_options_value = 'hypre boomeramg 31 ds'
-  l_tol = 1e-6 # Relative tolerance for linear solves
-  nl_rel_tol = 1e-10 # Relative tolerance for non-linear solves
   num_steps = 1
 []
 

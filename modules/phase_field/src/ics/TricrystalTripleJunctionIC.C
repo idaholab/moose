@@ -19,6 +19,7 @@ InputParameters validParams<TricrystalTripleJunctionIC>()
   params.addRequiredParam<unsigned int>("op_index", "Index for the current grain order parameter");
   params.addParam<Real>("theta1", 135.0, "Angle of first grain at triple junction in degrees");
   params.addParam<Real>("theta2", 135.0, "Angle of second grain at triple junction in degrees");
+  params.addParam<Point>("junction", "The point where the triple junction is located. Default is the center of the mesh");
   return params;
 }
 
@@ -37,6 +38,23 @@ TricrystalTripleJunctionIC::TricrystalTripleJunctionIC(const InputParameters & p
   if (_theta1 + _theta2 >= 360.0)
     mooseError("Sum of the angles must total less than 360 degrees");
 
+  // Make sure that _junction is in the domain
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    if ((_mesh.getMinInDimension(i) > _junction(i)) || (_mesh.getMaxInDimension(i) < _junction(i)))
+      mooseError("Triple junction out of bounds");
+  }
+
+  // Default junction point is the center
+  if (!parameters.isParamValid("junction"))
+  {
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      _junction(i) = (_mesh.getMaxInDimension(i) - _mesh.getMinInDimension(i)) / 2.0;
+  }
+  else
+    _junction = getParam<Point>("junction");
+
+
   // Convert the angles to radians
   _theta1 = _theta1 * libMesh::pi / 180.0;
   _theta2 = _theta2 * libMesh::pi / 180.0;
@@ -46,14 +64,6 @@ TricrystalTripleJunctionIC::TricrystalTripleJunctionIC(const InputParameters & p
 
   // Change the third angle to be measured from the +x axis
   _theta2 = _theta2 - libMesh::pi / 2.0;
-
-  // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-  {
-    _bottom_left(i) = _mesh.getMinInDimension(i);
-    _top_right(i) = _mesh.getMaxInDimension(i);
-  }
-  _range = _top_right - _bottom_left;
 
   // Only compute the tangent once for computational efficiency
   _tan_theta1 = std::tan(_theta1);
@@ -70,21 +80,21 @@ TricrystalTripleJunctionIC::value(const Point & p)
   Real dist_right; // The distance from the point to the line specified by _theta2
 
   // Check if the point is above or below the left-most line
-  // Function to use is y = max_y/2.0 + (x - max_x/2.0) * std::tan(libMesh::pi/2.0 - _theta1)
+  // Function to use is y = _junction(1) + (x - _junction(0)) * std::tan(libMesh::pi/2.0 - _theta1)
   if (_theta1 == 0) // Handle tan(0) case
-    dist_left = p(1) - _range(1) / 2.0;
+    dist_left = p(1) - _junction(1);
   else
-    dist_left = p(1) - (_range(1)/2.0 + (p(0) - _range(0)/2.0) * _tan_theta1);
+    dist_left = p(1) - (_junction(1) + (p(0) - _junction(0)) * _tan_theta1);
 
   // Check if the point is above or below the right-most line
-  // Function to use is y = max_y/2.0 + (x - max_x/2.0)*std::tan(-(libMesh::pi/2.0 - _theta2))
+  // Function to use is y = _junction(1) + (x - _junction(0))*std::tan(-(libMesh::pi/2.0 - _theta2))
   if (_theta2 == 0) // Handle tan(0) classes
-    dist_right = p(1) - _range(1) / 2.0;
+    dist_right = p(1) - _junction(1);
   else
-    dist_right = p(1) - (_range(1)/2.0  + (p(0) - _range(0)/2.0) * _tan_theta2);
+    dist_right = p(1) - (_junction(1)  + (p(0) - _junction(0)) * _tan_theta2);
 
   // Check if the point is to the left or right of the middle line
-  Real dist_center = p(0) - _range(0)/2.0; // Negative value if the point is to the left
+  Real dist_center = p(0) - _junction(0); // Negative value if the point is to the left
 
   if (_tan_theta1 > 0 && _theta1 <= libMesh::pi/2.0) // Case for large left grain
   {
