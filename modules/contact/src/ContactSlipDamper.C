@@ -196,9 +196,10 @@ ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
     _communicator.min(damping);
   }
 
-  _console << "   ContactSlipDamper:   Damping  #Cont    #Stick     #Slip #SlipFric #StickLock  #SlipRev\n";
+  _console << "   ContactSlipDamper: Damping     #Cont    #Stick     #Slip #SlipFric #StickLock  #SlipRev\n";
 
-  _console << std::setw(28) << damping
+  _console << std::right
+           << std::setw(29) << damping
            << std::setw(10) << _num_contact_nodes
            << std::setw(10) << _num_sticking
            << std::setw(10) << _num_slipping

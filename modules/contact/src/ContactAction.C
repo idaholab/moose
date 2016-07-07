@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<ContactAction>()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
-  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE", "DEFAULT");
+  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE TANGENTIAL_PENALTY", "DEFAULT");
   MooseEnum system("DiracKernel Constraint", "DiracKernel");
 
   InputParameters params = validParams<Action>();
@@ -37,7 +37,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
-  params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange");
+  params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange, tangential_penalty");
   params.addParam<MooseEnum>("system", system, "System to use for constraint enforcement.  Options are: " + system.getRawNames());
 
   return params;
@@ -58,6 +58,13 @@ ContactAction::ContactAction(const InputParameters & params) :
   _order(getParam<MooseEnum>("order")),
   _system(getParam<MooseEnum>("system"))
 {
+  if (_formulation == "tangential_penalty")
+  {
+    if (_system != "Constraint")
+      mooseError ("The 'tangential_penalty' formulation can only be used with the 'Constraint' system");
+    if (_model != "coulomb")
+      mooseError ("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+  }
 }
 
 void

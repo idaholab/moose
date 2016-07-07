@@ -26,7 +26,8 @@ enum ContactFormulation
   CF_DEFAULT,
   CF_KINEMATIC = CF_DEFAULT,
   CF_PENALTY,
-  CF_AUGMENTED_LAGRANGE
+  CF_AUGMENTED_LAGRANGE,
+  CF_TANGENTIAL_PENALTY
 };
 
 class ContactMaster : public DiracKernel
