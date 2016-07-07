@@ -31,8 +31,7 @@
     semiaxis_a = '7 5'
     semiaxis_b = '10 8'
     exponent = '2 3'
-    prevent_overlap = True
-    check_extremes = True
+    prevent_overlap = true
     semiaxis_c_variation = '0 0'
     semiaxis_c = '1 1'
   [../]
