@@ -417,6 +417,9 @@ contactFormulation(const std::string & the_name)
   else if ("augmented_lagrange" == name)
     formulation = CF_AUGMENTED_LAGRANGE;
 
+  else if ("tangential_penalty" == name)
+    formulation = CF_TANGENTIAL_PENALTY;
+
   if (formulation == CF_INVALID)
   {
     std::string err("Invalid formulation found: ");

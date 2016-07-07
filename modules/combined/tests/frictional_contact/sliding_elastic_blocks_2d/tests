@@ -5,6 +5,12 @@
     exodiff = 'sliding_elastic_blocks_2d_out.e'
     superlu = true
   [../]
+  [./tangential_penalty]
+    type = 'Exodiff'
+    input = 'sliding_elastic_blocks_2d_tp.i'
+    exodiff = 'sliding_elastic_blocks_2d_tp_out.e'
+    superlu = true
+  [../]
   [./fcp]
     type = 'Exodiff'
     input = 'sliding_elastic_blocks_2d_fcp.i'

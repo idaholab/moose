@@ -3,29 +3,6 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  type = FrictionalContactProblem
-  master = '2'
-  slave = '3'
-  friction_coefficient = '0.25'
-  slip_factor = '1.0'
-  slip_too_far_factor = '1.0'
-  disp_x = disp_x
-  disp_y = disp_y
-  residual_x = saved_x
-  residual_y = saved_y
-  diag_stiff_x = diag_saved_x
-  diag_stiff_y = diag_saved_y
-  inc_slip_x = inc_slip_x
-  inc_slip_y = inc_slip_y
-  contact_slip_tolerance_factor = 100
-  target_relative_contact_residual = 1.e-6
-  maximum_slip_iterations = 500
-  minimum_slip_iterations = 1
-  slip_updates_per_iteration = 5
-  solution_variables = 'disp_x disp_y'
-  reference_residual_variables = 'saved_x saved_y'
-[]
 
 [Variables]
   [./disp_x]
@@ -55,6 +32,12 @@
   [../]
   [./accum_slip_y]
   [../]
+  [./accum_slip]
+  [../]
+  [./tang_force_x]
+  [../]
+  [./tang_force_y]
+  [../]
 []
 
 [Functions]
@@ -76,19 +59,43 @@
 []
 
 [AuxKernels]
-  [./zeroslip_x]
-    type = ConstantAux
+  [./inc_slip_x]
+    type = PenetrationAux
     variable = inc_slip_x
+    quantity = incremental_slip_x
     boundary = 3
-    execute_on = timestep_begin
-    value = 0.0
+    paired_boundary = 2
   [../]
-  [./zeroslip_y]
-    type = ConstantAux
+  [./inc_slip_y]
+    type = PenetrationAux
     variable = inc_slip_y
+    quantity = incremental_slip_y
     boundary = 3
-    execute_on = timestep_begin
-    value = 0.0
+    paired_boundary = 2
+  [../]
+  [./accum_slip]
+    type = PenetrationAux
+    variable = accum_slip
+    execute_on = timestep_end
+    quantity = accumulated_slip
+    boundary = 3
+    paired_boundary = 2
+  [../]
+  [./tangential_force_x]
+    type = PenetrationAux
+    variable = tang_force_x
+    execute_on = timestep_end
+    quantity = tangential_force_x
+    boundary = 3
+    paired_boundary = 2
+  [../]
+  [./tangential_force_y]
+    type = PenetrationAux
+    variable = tang_force_y
+    execute_on = timestep_end
+    quantity = tangential_force_y
+    boundary = 3
+    paired_boundary = 2
   [../]
   [./accum_slip_x]
     type = AccumulateAux
@@ -111,6 +118,26 @@
 []
 
 [Postprocessors]
+  [./bot_react_x]
+    type = NodalSum
+    variable = saved_x
+    boundary = 1
+  [../]
+  [./bot_react_y]
+    type = NodalSum
+    variable = saved_y
+    boundary = 1
+  [../]
+  [./top_react_x]
+    type = NodalSum
+    variable = saved_x
+    boundary = 4
+  [../]
+  [./top_react_y]
+    type = NodalSum
+    variable = saved_y
+    boundary = 4
+  [../]
   [./ref_resid_x]
     type = NodalL2Norm
     execute_on = timestep_end
@@ -169,6 +196,13 @@
   [../]
 []
 
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   type = Transient
 
@@ -177,8 +211,8 @@
 
 
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre    boomeramg      101'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu     superlu_dist'
 
 
   line_search = 'none'
@@ -188,8 +222,8 @@
   dt = 0.01
   end_time = 0.05
   num_steps = 1000
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-7
+  nl_rel_tol = 1e-16
+  nl_abs_tol = 1e-10
   dtmin = 0.01
   l_tol = 1e-3
 
@@ -200,7 +234,9 @@
 []
 
 [Outputs]
-  file_base = sliding_elastic_blocks_2d_fcp_out
+  file_base = sliding_elastic_blocks_2d_tp_out
+  print_linear_residuals = true
+  print_perf_log = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
@@ -217,7 +253,18 @@
     disp_y = disp_y
     disp_x = disp_x
     master = 2
-    model = glued
-    penalty = 1e+6
+    model = coulomb
+    system = constraint
+    formulation = tangential_penalty
+    friction_coefficient = '0.25'
+    penalty = 1e6
+  [../]
+[]
+
+[Dampers]
+  [./contact_slip]
+    type = ContactSlipDamper
+    master = '2'
+    slave = '3'
   [../]
 []
