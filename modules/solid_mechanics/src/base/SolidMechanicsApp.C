@@ -17,7 +17,6 @@
 #include "CombinedCreepPlasticity.h"
 #include "Elastic.h"
 #include "ElasticModel.h"
-#include "ElementsOnLineAux.h"
 #include "HomogenizationKernel.h"
 #include "HomogenizedElasticConstants.h"
 #include "IsotropicPlasticity.h"
@@ -36,13 +35,11 @@
 #include "MixedModeEquivalentK.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
-#include "MaterialTensorOnLine.h"
 #include "DomainIntegralQFunction.h"
 #include "DomainIntegralTopologicalQFunction.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
-#include "LineMaterialSymmTensorSampler.h"
 #include "InteractionIntegralBenchmarkBC.h"
 #include "MaterialTensorIntegralSM.h"
 #include "CrackDataSampler.h"
@@ -100,7 +97,6 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerAux(MaterialTensorAux);
   registerAux(DomainIntegralQFunction);
   registerAux(DomainIntegralTopologicalQFunction);
-  registerDeprecatedObject(ElementsOnLineAux, "06/01/2016 00:00");
 
   registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
@@ -142,9 +138,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(MixedModeEquivalentK);
 
   registerVectorPostprocessor(CrackDataSampler);
-  registerDeprecatedObject(LineMaterialSymmTensorSampler, "06/01/2016 00:00");
 
-  registerDeprecatedObject(MaterialTensorOnLine, "06/01/2016 00:00");
   registerUserObject(CrackFrontDefinition);
 }
 

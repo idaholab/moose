@@ -85,8 +85,8 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerPostprocessor(ThermalConductivity);
   registerConstraint(GapConductanceConstraint);
 
-  registerDeprecatedObjectName(ThermalConductivity, "ThermalCond", "15/09/2016 00:00");
-  registerDeprecatedObjectName(HomogenizedHeatConduction, "HomogenizationHeatConduction", "15/09/2016 00:00");
+  registerDeprecatedObjectName(ThermalConductivity, "ThermalCond", "09/15/2016 00:00");
+  registerDeprecatedObjectName(HomogenizedHeatConduction, "HomogenizationHeatConduction", "09/15/2016 00:00");
 }
 
 // External entry point for dynamic syntax association
