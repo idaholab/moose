@@ -7,6 +7,7 @@ from tempfile import TemporaryFile
 from collections import deque
 from Tester import Tester
 from signal import SIGTERM
+import platform
 
 import os, sys
 
@@ -120,7 +121,10 @@ class RunParallel:
 
       # On Windows, there is an issue with path translation when the command is passed in
       # as a list.
-      p = Popen(command,stdout=f,stderr=f,close_fds=False, shell=True)
+      if platform.system() == "Windows":
+        p = Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=CREATE_NEW_PROCESS_GROUP)
+      else:
+        p = Popen(command,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid)
 
       if self.options.dry_run or not tester.shouldExecute():
         command = tmp_command
@@ -155,8 +159,11 @@ class RunParallel:
     if p.poll() == None: # process has not completed, it timed out
       output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
       f.close()
-      os.kill(p.pid, SIGTERM)        # Python 2.4 compatibility
-      #p.terminate()                 # Python 2.6+
+      if platform.system() == "Windows":
+        p.terminate()
+      else:
+        pgid = os.getpgid(p.pid)
+        os.killpg(pgid, SIGTERM)
 
       if not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
