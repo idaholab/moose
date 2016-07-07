@@ -35,14 +35,15 @@ protected:
   virtual void computeSuperellipsoidSemiaxes();
   virtual void computeSuperellipsoidCenters();
   virtual void computeSuperellipsoidExponents();
-  virtual Real overlapCheck(const Point & newcenter, Real nc_as, Real nc_bs, Real nc_cs, Real nc_ns);
+  virtual bool overlapCheck(const Point & newcenter, Real nc_as, Real nc_bs, Real nc_cs, Real nc_ns);
 
   unsigned int _max_num_tries;
   Real _gk;
 
   MooseEnum _semiaxis_variation_type;
-  MooseEnum _prevent_overlap;
-  MooseEnum _check_extremes;
+  const bool _prevent_overlap;
+  const bool _check_extremes;
+  const bool _vary_axes_independently;
 
   Point _bottom_left;
   Point _top_right;

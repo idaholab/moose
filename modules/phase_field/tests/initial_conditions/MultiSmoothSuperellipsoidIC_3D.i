@@ -36,8 +36,8 @@
     semiaxis_b = '10 8'
     semiaxis_c = '15 5'
     exponent = '2 3'
-    prevent_overlap = True
-    check_extremes = True
+    prevent_overlap = true
+    check_extremes = true
   [../]
 []
 
