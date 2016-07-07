@@ -22,32 +22,26 @@ InputParameters validParams<MultiSmoothCircleIC>();
 /**
  * MultismoothCircleIC creates multiple SmoothCircles (number = numbub) that are randomly
  * positioned around the domain, with a minimum spacing equal to bubspac
- **/
+ */
 class MultiSmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   MultiSmoothCircleIC(const InputParameters & parameters);
 
   virtual void initialSetup();
 
+protected:
   virtual void computeCircleRadii();
-
   virtual void computeCircleCenters();
 
-protected:
+  const unsigned int _numbub;
+  const Real _bubspac;
 
-  unsigned int _numbub;
-  Real _bubspac;
+  const unsigned int _max_num_tries;
 
-  unsigned int _numtries;
-  Real _radius;
-  Real _radius_variation;
-  MooseEnum _radius_variation_type;
+  const Real _radius;
+  const Real _radius_variation;
+  const MooseEnum _radius_variation_type;
 
   Point _bottom_left;
   Point _top_right;
