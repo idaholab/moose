@@ -12,22 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDSPLITACTION_H
-#define ADDSPLITACTION_H
+#ifndef ADDFIELDSPLITACTION_H_
+#define ADDFIELDSPLITACTION_H_
 
 #include "MooseObjectAction.h"
 
-class AddSplitAction;
+class AddFieldSplitAction;
 
 template<>
-InputParameters validParams<AddSplitAction>();
+InputParameters validParams<AddFieldSplitAction>();
 
 
-class AddSplitAction : public MooseObjectAction
+class AddFieldSplitAction : public MooseObjectAction
 {
 public:
-  AddSplitAction(InputParameters params);
-  virtual void act();
+  // constructor
+  AddFieldSplitAction(InputParameters params);
+  // prepare PETSc options
+  void act();
 };
 
-#endif // ADDSPLITACTION_H
+
+
+
+#endif /* ADDFIELDSPLITACTION_H_ */

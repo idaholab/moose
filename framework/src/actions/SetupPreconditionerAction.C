@@ -27,7 +27,7 @@ template<>
 InputParameters validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  params += Moose::PetscSupport::getPetscValidParams();
+
   return params;
 }
 
@@ -51,6 +51,8 @@ SetupPreconditionerAction::act()
      * Go ahead and set common precondition options here.  The child classes will still be called
      * through the action warehouse
      */
-    Moose::PetscSupport::storePetscOptions(*_problem, _pars);
+#if LIBMESH_HAVE_PETSC
+    Moose::PetscSupport::storePetscOptions(*_problem, _moose_object_pars);
+#endif
   }
 }

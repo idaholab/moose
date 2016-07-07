@@ -91,7 +91,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   // Note: Preconditioner Actions will be built by this setup action
   syntax.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
-  syntax.registerActionSyntax("AddSplitAction","Splits/*");
+  syntax.registerActionSyntax("AddFieldSplitAction", "Preconditioning/*/*");
 
   syntax.registerActionSyntax("DetermineSystemType", "Executioner");
   syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");

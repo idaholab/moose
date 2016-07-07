@@ -49,6 +49,7 @@
 #include <petsc.h>
 #include <petscsnes.h>
 #include <petscksp.h>
+#include <petsc/private/snesimpl.h>
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 // PETSc 3.2.x and lower
@@ -136,9 +137,11 @@ setSolverOptions(SolverParams & solver_params)
   }
 }
 
-void petscSetupDM (NonlinearSystem & nl) {
+void
+petscSetupDM (NonlinearSystem & nl) {
 #if !PETSC_VERSION_LESS_THAN(3,3,0)
   PetscErrorCode  ierr;
+  PetscBool       ismoose;
 
   // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this call would be in DMInitializePackage()
   ierr = DMMooseRegisterAll();
@@ -146,6 +149,17 @@ void petscSetupDM (NonlinearSystem & nl) {
   // Create and set up the DM that will consume the split options and deal with block matrices.
   PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
+  // if there exists a DMMoose object, not to recreate a new one
+  if (snes->dm)
+  {
+    ierr = PetscObjectTypeCompare((PetscObject)(snes->dm), DMMOOSE, &ismoose);
+    CHKERRABORT(nl.comm().get(),ierr);
+    if (ismoose)
+      return;
+    // if it is not a DMMoose object, just destroy it
+    ierr = DMDestroy(&(snes->dm));
+    CHKERRABORT(nl.comm().get(),ierr);
+  }
   /* FIXME: reset the DM, do not recreate it anew every time? */
   DM dm = PETSC_NULL;
   ierr = DMCreateMoose(nl.comm().get(), nl, &dm);
@@ -187,25 +201,9 @@ petscSetOptions(FEProblem & problem)
   for (unsigned int i=0; i<petsc.inames.size(); ++i)
     setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
-  SolverParams& solver_params = problem.solverParams();
-  if (solver_params._type != Moose::ST_JFNK  &&
-      solver_params._type != Moose::ST_FD &&
-      !problem.getNonlinearSystem().haveFiniteDifferencedPreconditioner() &&
-      problem.getNonlinearSystem().haveDecomposition())
-  {
-    // Set up DM only if have a decomposition. Additionally, turn DM OFF if not using FD-based solvers,
-    // (both -snes_mf and -snes_fd) and FDP. This is all rather crufty, but what's a good generic rule here?
-    // In principle at least, splits should be able to work with ST_FD (-snes_fd) and FDP (a coloring-based
-    // version of -snes_fd), but one has to be careful about the initialization order so as not to override
-    // SNESComputeJacobianDefaultColor() set up by FDP, for instance.  However, it's unlikely that splits
-    // will be used when running an FD solver (debugging).
-    problem.getNonlinearSystem().setupDecomposition();
+  // set up DM which is required if use a field split preconditioner
+  if (problem.getNonlinearSystem().haveFieldSplitPreconditioner())
     petscSetupDM(problem.getNonlinearSystem());
-  } else {
-    // Otherwise turn off the decomposition
-    std::vector<std::string> nosplits;
-    problem.getNonlinearSystem().setDecomposition(nosplits);
-  }
 
   // commandline options always win
   // the options from a user commandline will overwrite the existing ones if any conflicts

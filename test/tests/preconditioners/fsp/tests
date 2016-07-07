@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'fsp_test.i'
+    exodiff = 'out.e'
+    max_parallel = 1
+  [../]
+[]

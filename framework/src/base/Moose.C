@@ -247,10 +247,10 @@
 #include "FiniteDifferencePreconditioner.h"
 #include "SingleMatrixPreconditioner.h"
 
-#include "SplitBasedPreconditioner.h"
+#include "FieldSplitPreconditioner.h"
 #include "Split.h"
 #include "ContactSplit.h"
-#include "AddSplitAction.h"
+#include "AddFieldSplitAction.h"
 
 // dampers
 #include "ConstantDamper.h"
@@ -661,7 +661,7 @@ registerObjects(Factory & factory)
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
   registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-  registerNamedPreconditioner(SplitBasedPreconditioner, "SBP");
+  registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
 #endif
   // dampers
   registerDamper(ConstantDamper);
@@ -854,7 +854,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,         false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
-  registerMooseObjectTask("add_split",                    Split,                  false);
+  registerMooseObjectTask("add_field_split",              Split,                  false);
 
   registerMooseObjectTask("add_user_object",              UserObject,             false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
@@ -965,7 +965,7 @@ addActionTypes(Syntax & syntax)
 "(setup_adaptivity)"
 "(set_adaptivity_options)"
 "(add_ic)"
-"(add_preconditioning, add_constraint, add_split)"
+"(add_preconditioning, add_constraint, add_field_split)"
 "(ready_to_init)"
 "(setup_dampers)"
 "(setup_residual_debug)"
@@ -1075,7 +1075,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddVectorPostprocessorAction, "add_vector_postprocessor");
   registerAction(AddDamperAction, "add_damper");
-  registerAction(AddSplitAction, "add_split");
+  registerAction(AddFieldSplitAction, "add_field_split");
   registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(DeprecatedBlockAction, "deprecated_block");
