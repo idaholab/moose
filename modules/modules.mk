@@ -5,6 +5,7 @@
 ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS        := yes
         CONTACT                   := yes
+        FLUID_PROPERTIES          := yes
         HEAT_CONDUCTION           := yes
         LINEAR_ELASTICITY         := yes
         MISC                      := yes
@@ -31,7 +32,7 @@ ifeq ($(POROUS_FLOW),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow"
+MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -46,6 +47,12 @@ endif
 ifeq ($(CONTACT),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/contact
   APPLICATION_NAME   := contact
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(FLUID_PROPERTIES),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_properties
+  APPLICATION_NAME   := fluid_properties
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
