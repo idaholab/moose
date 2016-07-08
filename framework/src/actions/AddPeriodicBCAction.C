@@ -78,7 +78,13 @@ AddPeriodicBCAction::autoTranslationBoundaries()
         _problem->addGhostedBoundary(bid);
 
       _problem->ghostGhostedBoundaries();
-      _mesh->detectOrthogonalDimRanges();
+
+      bool is_orthogonal_mesh = _mesh->detectOrthogonalDimRanges();
+
+      // If we can't detect the orthogonal dimension ranges for this
+      // Mesh, then auto_direction periodicity isn't going to work.
+      if (!is_orthogonal_mesh)
+        mooseError("Could not detect orthogonal dimension ranges for DistributedMesh.");
     }
 
     NonlinearSystem & nl = _problem->getNonlinearSystem();
