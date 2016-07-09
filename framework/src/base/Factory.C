@@ -154,7 +154,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
       msg << "Replaced " << obj_name << " with " <<  name_it->second;
 
     // Produce the error message
-    mooseDoOnce(mooseWarning(msg.str()));
+    mooseDeprecated(msg.str());
   }
 }
 
