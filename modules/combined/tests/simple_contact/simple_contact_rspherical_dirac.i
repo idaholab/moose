@@ -95,11 +95,11 @@
     master = 2
     slave = 3
     disp_x = disp_x
-    system = constraint
   [../]
 []
 
 [Materials]
+
   [./stiffStuff1]
     type = Elastic
     block = '1 2 3'
@@ -109,9 +109,11 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
   [../]
+
 []
 
 [Executioner]
+
   type = Transient
 
   solve_type = 'PJFNK'
@@ -133,6 +135,6 @@
 []
 
 [Outputs]
-  file_base = out_rspherical
+  file_base = out_rspherical_dirac
   exodus = true
 []

@@ -1,5 +1,14 @@
+#
+# The analytic solution is:
+#   disp_x = -7e-5 * x
+#   disp_y =  6e-5 * y
+#   stress_xx = stress_zz = -100
+#   stress_yy = stress_xy = 0
+#
+# Note: Run merged_rz.i to generate a solution to compare to that doesn't use contact.
+
 [Mesh]
-  file = merged_rz.e
+  file = contact_rz.e
   displacements = 'disp_x disp_y'
 []
 
@@ -67,6 +76,16 @@
   [../]
 []
 
+[Contact]
+  [./dummy_name]
+    master = 3
+    slave = 2
+    disp_x = disp_x
+    disp_y = disp_y
+    penalty = 1e5
+  [../]
+[]
+
 [AuxKernels]
   [./stress_xx]
     type = MaterialTensorAux
@@ -113,25 +132,26 @@
 
 [BCs]
   [./left_x]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
 
   [./bottom_y]
-    type = DirichletBC
+    type = PresetBC
     variable = disp_y
     boundary = 10
     value = 0.0
   [../]
 
-  [./right_pressure]
-    type = PressureRZ
-    variable = disp_x
-    component = 0
-    boundary = 4
-    function = pressure
+  [./Pressure]
+    [./right_pressure]
+      boundary = 4
+      function = pressure
+      disp_x = disp_x
+      disp_y = disp_y
+    [../]
   [../]
 []
 
@@ -170,7 +190,8 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-9
 
   l_max_its = 20
   dt = 1.0
@@ -178,10 +199,9 @@
 []
 
 [Outputs]
-  file_base = merged_rz_out
+  file_base = out_rz_dirac
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-    execute_on = 'initial timestep_end linear'
   [../]
 []
