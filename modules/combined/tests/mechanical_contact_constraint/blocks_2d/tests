@@ -10,6 +10,7 @@
     input = 'frictionless_kinematic_dirac.i'
     exodiff = 'frictionless_kinematic_dirac_out.e'
     max_parallel = 1                                    # -pc_type lu
+    allow_deprecated_until = 09/06/2016
   [../]
   [./constraint_blocks_2d_frictionless_penalty]
     type = 'Exodiff'
@@ -22,6 +23,7 @@
     input = 'frictionless_penalty_dirac.i'
     exodiff = 'frictionless_penalty_dirac_out.e'
     max_parallel = 1                                    # -pc_type lu
+    allow_deprecated_until = 09/06/2016
   [../]
   [./constraint_blocks_2d_glued_kinematic]
     type = 'Exodiff'
@@ -34,6 +36,7 @@
     input = 'glued_kinematic_dirac.i'
     exodiff = 'glued_kinematic_dirac_out.e'
     max_parallel = 1                                    # -pc_type lu
+    allow_deprecated_until = 09/06/2016
   [../]
   [./constraint_blocks_2d_glued_penalty]
     type = 'Exodiff'
@@ -46,5 +49,6 @@
     input = 'glued_penalty_dirac.i'
     exodiff = 'glued_penalty_dirac_out.e'
     max_parallel = 1                                    # -pc_type lu
+    allow_deprecated_until = 09/06/2016
   [../]
 []

@@ -21,6 +21,7 @@
     exodiff = 'normalized_penalty_kin_out.e'
     abs_zero = 1e-8
     max_parallel = 1                                    # -pc_type lu
+    allow_deprecated_until = '09/06/2016'
   [../]
   [./kin_Q8]
     type = Exodiff

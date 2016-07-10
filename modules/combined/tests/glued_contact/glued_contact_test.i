@@ -1,3 +1,4 @@
+# This is a mechanical constraint (contact formulation) version of glued_contact_mechanical_constraint.i
 [Mesh]
   file = glued_contact_test.e
   displacements = 'disp_x disp_y disp_z'
@@ -53,6 +54,7 @@
     penalty = 1e6
     model = glued
     formulation = kinematic
+    system = constraint
   [../]
 []
 

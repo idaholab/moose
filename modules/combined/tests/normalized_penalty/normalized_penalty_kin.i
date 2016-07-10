@@ -67,6 +67,10 @@
     penalty = 1e10
     normalize_penalty = true
     tangential_tolerance = 1e-3
+# This test doesn't run correctly with the Constraint system because
+# it converges in too few nonlinear iterations, so the contact solution
+# is not fully converged. See issue #7081.
+#    system = Constraint
   [../]
 []
 

@@ -1,15 +1,16 @@
 [Tests]
   [./test]
     type = 'Exodiff'
-    input = 'glued_contact_test.i'
-    exodiff = 'out.e'
+    input = 'glued_contact_dirac_test.i'
+    exodiff = 'dirac_out.e'
     abs_zero = 5e-05
     max_parallel = 1
+    allow_deprecated_until = 09/06/2016
   [../]
   [./test2]
     type = 'Exodiff'
-    input = 'glued_contact_mechanical_constraint_test.i'
-    exodiff = 'mechanical_constraint_out.e'
+    input = 'glued_contact_test.i'
+    exodiff = 'out.e'
     abs_zero = 5e-05
     max_parallel = 1
   [../]
