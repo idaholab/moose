@@ -97,6 +97,8 @@ app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
 
+ADDITIONAL_CPPFLAGS += -D$(APPLICATION_NAME)_ENABLED
+
 # dependencies
 -include $(app_deps)
 
