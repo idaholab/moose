@@ -171,7 +171,7 @@ public:
   /**
    * Returns true of the MaterialData type is not associated with volume data
    */
-  bool isBoundaryMaterial() { return _bnd; }
+  bool isBoundaryMaterial() const { return _bnd; }
 
 protected:
 
