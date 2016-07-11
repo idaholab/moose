@@ -12,43 +12,44 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SPLITBASEDPRECONDITIONER_H
-#define SPLITBASEDPRECONDITIONER_H
+#ifndef FIELDSPLITPRECONDITIONER_H
+#define FIELDSPLITPRECONDITIONER_H
 
 // MOOSE includes
 #include "MoosePreconditioner.h"
 
 // Forward declarations
 class NonlinearSystem;
-class SplitBasedPreconditioner;
+class FieldSplitPreconditioner;
 
 template<>
-InputParameters validParams<SplitBasedPreconditioner>();
+InputParameters validParams<FieldSplitPreconditioner>();
 
 /**
  * Implements a preconditioner designed to map onto PETSc's PCFieldSplit.
  */
-class SplitBasedPreconditioner :  public MoosePreconditioner
+class FieldSplitPreconditioner :  public MoosePreconditioner
 {
 public:
   /**
    *  Constructor. Initializes SplitBasedPreconditioner data structures
    */
-  SplitBasedPreconditioner(const InputParameters & parameters);
+  FieldSplitPreconditioner(const InputParameters & parameters);
 
   /**
    * Destructor.
    */
-  virtual ~SplitBasedPreconditioner(){};
+  virtual ~FieldSplitPreconditioner(){};
 
   /**
-   * Sets up internals.
+   * top split
    */
-  void setup();
+  std::vector<std::string> _top_split;
 
 protected:
   /// The nonlinear system this FSP is associated with (convenience reference)
   NonlinearSystem & _nl;
 };
 
-#endif //SPLITBASEDPRECONDITIONER_H
+#endif //FIELDSPLITPRECONDITIONER_H
+
