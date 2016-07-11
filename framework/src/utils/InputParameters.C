@@ -105,10 +105,7 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
       std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
       if (pos != _deprecated_params.end())
       {
-        if (Moose::_deprecated_is_error)
-          mooseError("The parameter " << name << " is deprecated.\n" << pos->second);
-        else
-          mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
+        mooseDeprecated("The parameter " << name << " is deprecated.\n" << pos->second);
       }
     }
   }
