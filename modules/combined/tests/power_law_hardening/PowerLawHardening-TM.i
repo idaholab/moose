@@ -5,9 +5,18 @@
 # The yield stress for this problem is 0.25 ( as strength coefficient is 0.5 and strain rate exponent is 0.5).
 # Therefore, the material should start yielding at t = 2.5 seconds and then follow stress = K *pow(strain,n) or
 # stress ~ 0.5*pow(0.1*t,0.5).
+#
+# This tensor mechanics version of the power law hardening plasticity model matches
+# the solid mechanics version for this toy problem under exodiff limits
+
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  block = 0
+[]
 
 [Mesh]
-  file = 1x1x1cube.e
+  type = GeneratedMesh
+  dim = 3
 []
 
 [Variables]
@@ -49,11 +58,9 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
@@ -61,17 +68,19 @@
 [AuxKernels]
 
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
   [../]
 
   [./total_strain_yy]
-    type = MaterialTensorAux
-    tensor = total_strain
+    type = RankTwoAux
+    rank_two_tensor = total_strain
     variable = total_strain_yy
-    index = 1
+    index_i = 1
+    index_j = 1
   [../]
  []
 
@@ -81,52 +90,59 @@
   [./y_pull_function]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = 5
+    boundary = top
     function = top_pull
   [../]
 
   [./x_bot]
     type = PresetBC
     variable = disp_x
-    boundary = 4
+    boundary = left
     value = 0.0
   [../]
 
   [./y_bot]
     type = PresetBC
     variable = disp_y
-    boundary = 3
+    boundary = bottom
     value = 0.0
   [../]
 
   [./z_bot]
     type = PresetBC
     variable = disp_z
-    boundary = 2
+    boundary = back
     value = 0.0
   [../]
-
 []
 
 [Materials]
-  [./vermont]
-    type = SolidModel
-    formulation = lINeaR
-    block = 1
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
-    poissons_ratio = 0.0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    constitutive_model = powerlaw
-  [../]
-  [./powerlaw]
-    type = IsotropicPowerLawHardening
-    block = 1
-    strength_coefficient = 0.5 #K
-    strain_hardening_exponent = 0.5 #n
+    poissons_ratio = 0.3
   [../]
 
+  [./strain]
+    type = ComputeIncrementalSmallStrain
+  [../]
+
+  [./power_law_hardening]
+    type = RecomputeRadialReturnIsotropicPowerLawHardening
+    strength_coefficient = 0.5 #K
+    strain_hardening_exponent = 0.5 #n
+    output_iteration_info_on_error = true
+    compute = false # make this material "discrete"
+    relative_tolerance = 1e-10
+    absolute_tolerance = 1e-12
+    max_iterations = 50
+#    output_iteration_info = true
+  [../]
+
+  [./radial_return_stress]
+    type = ComputeReturnMappingStress
+    return_mapping_models = 'power_law_hardening'
+  [../]
 []
 
 [Executioner]
@@ -151,19 +167,17 @@
   l_tol = 1e-9
 
   start_time = 0.0
-  end_time = 7.4
-  dt = 0.01
+  end_time = 5.0
+  dt = 0.25
 []
 
 [Postprocessors]
   [./stress_yy]
-    type = ElementalVariableValue
-    elementid = 0
+    type = ElementAverageValue
     variable = stress_yy
   [../]
   [./strain_yy]
-    type = ElementalVariableValue
-    elementid = 0
+    type = ElementAverageValue
     variable = total_strain_yy
   [../]
 []
@@ -174,4 +188,5 @@
     type = Exodus
     elemental_as_nodal = true
   [../]
+  file_base = PowerLawHardening_out
 []

@@ -249,7 +249,7 @@
     relative_tolerance = 1e-5
     absolute_tolerance = 1e-20
     max_iterations = 30
-    temp = temp
+    temperature =  temp
   [../]
 
   [./plas]
@@ -257,7 +257,7 @@
     block = 1
     hardening_constant = 100
     yield_stress = 20
-    temp = temp
+    temperature = temp
     max_iterations = 30
     relative_tolerance = 1e-5
     absolute_tolerance = 1e-20

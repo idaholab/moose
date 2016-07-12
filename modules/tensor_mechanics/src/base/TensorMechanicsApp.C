@@ -74,6 +74,7 @@
 #include "ComputeReturnMappingStress.h"
 #include "RecomputeRadialReturn.h"
 #include "RecomputeRadialReturnIsotropicPlasticity.h"
+#include "RecomputeRadialReturnIsotropicPowerLawHardening.h"
 #include "RecomputeRadialReturnPowerLawCreep.h"
 #include "RecomputeRadialReturnTempDepHardening.h"
 #include "StressBasedChemicalPotential.h"
@@ -236,6 +237,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeReturnMappingStress);
   registerMaterial(RecomputeRadialReturn);
   registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
+  registerMaterial(RecomputeRadialReturnIsotropicPowerLawHardening);
   registerMaterial(RecomputeRadialReturnPowerLawCreep);
   registerMaterial(RecomputeRadialReturnTempDepHardening);
   registerMaterial(StressBasedChemicalPotential);
