@@ -49,7 +49,6 @@
 #include <petsc.h>
 #include <petscsnes.h>
 #include <petscksp.h>
-#include <petsc/private/snesimpl.h>
 
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 // PETSc 3.2.x and lower
@@ -142,6 +141,7 @@ petscSetupDM (NonlinearSystem & nl) {
 #if !PETSC_VERSION_LESS_THAN(3,3,0)
   PetscErrorCode  ierr;
   PetscBool       ismoose;
+  DM              dm = PETSC_NULL;
 
   // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this call would be in DMInitializePackage()
   ierr = DMMooseRegisterAll();
@@ -150,18 +150,18 @@ petscSetupDM (NonlinearSystem & nl) {
   PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
   // if there exists a DMMoose object, not to recreate a new one
-  if (snes->dm)
+  ierr = SNESGetDM(snes, &dm);
+  CHKERRABORT(nl.comm().get(), ierr);
+  if (dm)
   {
-    ierr = PetscObjectTypeCompare((PetscObject)(snes->dm), DMMOOSE, &ismoose);
-    CHKERRABORT(nl.comm().get(),ierr);
+    ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+    CHKERRABORT(nl.comm().get(), ierr);
     if (ismoose)
       return;
     // if it is not a DMMoose object, just destroy it
-    ierr = DMDestroy(&(snes->dm));
-    CHKERRABORT(nl.comm().get(),ierr);
+    ierr = DMDestroy(&dm);
+    CHKERRABORT(nl.comm().get(), ierr);
   }
-  /* FIXME: reset the DM, do not recreate it anew every time? */
-  DM dm = PETSC_NULL;
   ierr = DMCreateMoose(nl.comm().get(), nl, &dm);
   CHKERRABORT(nl.comm().get(),ierr);
   ierr = DMSetFromOptions(dm);
