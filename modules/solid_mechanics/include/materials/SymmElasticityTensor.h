@@ -148,10 +148,11 @@ public:
 
   void form9x9Rotation( const ColumnMajorMatrix & R_3x3,
                         ColumnMajorMatrix & R_9x9 ) const;
-  void rotateFromGlobalToLocal( const ColumnMajorMatrix & R );
-  void rotateFromLocalToGlobal( const ColumnMajorMatrix & R );
+  void rotateFromGlobalToLocal(const ColumnMajorMatrix & R );
+  void rotateFromLocalToGlobal(const ColumnMajorMatrix & R );
 
-  virtual void adjustForCracking( const RealVectorValue & crack_flags );
+  virtual void adjustForCracking(const RealVectorValue & crack_flags);
+  virtual void adjustForCrackingWithShearRetention(const RealVectorValue & crack_flags);
 
   virtual SymmElasticityTensor calculateDerivative(unsigned int qp,unsigned int i);
 

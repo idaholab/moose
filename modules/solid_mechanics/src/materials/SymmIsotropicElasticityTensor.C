@@ -225,16 +225,25 @@ SymmIsotropicElasticityTensor::multiply( const SymmTensor & x, SymmTensor & b ) 
   const Real yz = x.yz();
   const Real zx = x.zx();
 
-  b.xx() = _val[ 0]*xx + _val[ 1]*yy + _val[ 2]*zz;
-  b.yy() = _val[ 1]*xx + _val[ 6]*yy + _val[ 7]*zz;
-  b.zz() = _val[ 2]*xx + _val[ 7]*yy + _val[11]*zz;
-  b.xy() = 2*_val[15]*xy;
-  b.yz() = 2*_val[18]*yz;
-  b.zx() = 2*_val[20]*zx;
+  b.xx() = _val[0] * xx + _val[1] * yy + _val[2] * zz;
+  b.yy() = _val[1] * xx + _val[6] * yy + _val[7] * zz;
+  b.zz() = _val[2] * xx + _val[7] * yy + _val[11] * zz;
+  b.xy() = 2 * _val[15] * xy;
+  b.yz() = 2 * _val[18] * yz;
+  b.zx() = 2 * _val[20] * zx;
+
+  b.xx() += 2 * (_val[3] * xy +  _val[4] * yz + _val[5] * zx);
+  b.yy() += 2 * (_val[8] * xy +  _val[9] * yz + _val[10] * zx);
+  b.zz() += 2 * (_val[12] * xy + _val[13] * yz + _val[14] * zx);
+  b.xy() += _val[3] * xx + _val[8] * yy + _val[12] * zz;
+  b.yz() += _val[4] * xx + _val[9] * yy + _val[13] * zz;
+  b.zx() += _val[5] * xx + _val[10] * yy + _val[14] * zz;
+  b.yz() += 2 * _val[16] * xy;
+  b.zx() += 2 * _val[17] * xy + 2 * _val[19] * yz;
 }
 
 void
-SymmIsotropicElasticityTensor::adjustForCracking( const RealVectorValue & crack_flags )
+SymmIsotropicElasticityTensor::adjustForCracking(const RealVectorValue & crack_flags)
 {
   const RealVectorValue & c( crack_flags );
   const Real c0(c(0));
@@ -271,13 +280,27 @@ SymmIsotropicElasticityTensor::adjustForCracking( const RealVectorValue & crack_
   _val[12] *= c012;
   _val[13] *= c12;
   _val[14] *= c02;
+}
 
+void
+SymmIsotropicElasticityTensor::adjustForCrackingWithShearRetention(const RealVectorValue & crack_flags)
+{
+  const RealVectorValue & c = crack_flags;
+  const Real c0 = c(0);
+  const Real c0_coupled = (c0 < 1 ? 0 : 1);
+  const Real c1 = c(1);
+  const Real c1_coupled = (c1 < 1 ? 0 : 1);
+  const Real c2 = c(2);
+  const Real c2_coupled = (c2 < 1 ? 0 : 1);
+  const Real c01 = c0_coupled * c1_coupled;
+  const Real c02 = c0_coupled * c2_coupled;
+  const Real c12 = c1_coupled * c2_coupled;
+  const Real c012 = c0_coupled * c12;
+  adjustForCracking(crack_flags);
   _val[15] *= c01;
   _val[16] *= c012;
   _val[17] *= c012;
-
   _val[18] *= c12;
   _val[19] *= c012;
-
   _val[20] *= c02;
 }
