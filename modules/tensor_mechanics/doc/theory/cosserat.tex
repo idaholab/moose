@@ -328,12 +328,12 @@ flat layers perpendicular to the $z$ direction.  The layers have
 thickness $h$ and are separated from each other by an interface
 material.  The interface material has thickness $h_{\mathrm{i}}$,
 Young's modulus $E_{\mathrm{i}}$ and shear modulus $G_{\mathrm{i}}$.
-The theory describes the limit 
+The theory describes the limit
 \begin{equation}
-h_{\mathrm{i}} \rightarrow 0 \ , \ \ \ 
-E_{\mathrm{i}} \rightarrow 0 \ , \ \ \ 
+h_{\mathrm{i}} \rightarrow 0 \ , \ \ \
+E_{\mathrm{i}} \rightarrow 0 \ , \ \ \
 E_{\mathrm{i}}/h_{\mathrm{i}} \rightarrow hk_{n} \ \ \ \mbox{and}
-\ \ \ 
+\ \ \
 G_{\mathrm{i}}/h_{\mathrm{i}} \rightarrow hk_{s} \ .
 \label{thin.layer.limits.eqn}
 \end{equation}
@@ -408,24 +408,28 @@ are\footnote{Some references are the following.  DP Adhikary, HB Muhlhaus, AV
   Materials 4 (1999) 195--213.}
 \begin{eqnarray}
 E_{0101} = E_{0110} = E_{1001} = E_{1010} & = & G \ , \nonumber
-\\ E_{0202} = E_{0220} = E_{2020} = E_{1212} = E_{1221} = E_{2121} & =
+\\
+E_{0202} = E_{0220} = E_{2002} = E_{1212} = E_{1221} = E_{2112} & =
 & \tilde{G} \ , \nonumber \\
-E_{2002} = E_{2112} & = & \mbox{$\frac{1}{2}$}(G + \tilde{G})\ .
+E_{2020} = E_{2121} & = & \mbox{$\frac{1}{2}$}(G + \tilde{G})\ .
 \label{eqn.shearE.layered}
 \end{eqnarray}
 These are the only nonzero components of $E$.
 
-Notice that the last equality of Equation~(\ref{eqn.shearE.layered})
-implies that $E$ does not obey the usual symmetries, ie $E_{ijkl}\neq
-E_{jikl}$, as should be expected in the Cosserat situation.  This is
-easy to understand.  Consider the case $k_{s}=0$: that is, the
-Cosserat layers may slide freely over one another.  Then any shear
-stress $\sigma_{02}$ (a tangential force applied to the top of the
-stack of layers) will result in an infinite shear strain, since
-the layers will simply slide ad infinitum.  This is encoded in
-$E_{0202}=0$.  However, any shear stress $\sigma_{20}$ (a tangential
-force applied to the side of the stack of layers) will result in a
-finite shear strain.  This is encoded in $E_{2002}\neq 0$.
+The last equality of Equation~(\ref{eqn.shearE.layered}) implies that
+$E$ does not obey the usual symmetries, ie $E_{ijkl}\neq E_{jikl}$, as
+should be expected in the Cosserat situation.
+Equations~(\ref{eqn.shearE.layered}) are easily motivated.  Firstly,
+any shear in the $(x,y)$ plane should behave independently of the
+layers, which motivates the first equation.  Now consider the case
+$k_{s}=0$: that is, the Cosserat layers may slide freely over one
+another ($\tilde{G}=0$).  Shear strains $\gamma_{02}$ or $\gamma_{12}$
+involves layers sliding over one another.  For instance, $u_{0} =
+x_{2}$ gives $\gamma_{02}=1$.  This should cost zero energy, which is
+encoded in $E_{ij02}=\tilde{G}=E_{ij01}$.  However, a nonzero shear
+strain $\gamma_{20}$ or $\gamma_{21}$ involves shearing the ``main''
+layers, resulting in the last equality of
+Equations~(\ref{eqn.shearE.layered}).
 
 Finally, the only nonzero components of $B$ are defined in terms of
 the bending rigidity of a layer
