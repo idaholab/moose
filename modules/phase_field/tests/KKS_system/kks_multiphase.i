@@ -74,6 +74,13 @@
     family = LAGRANGE
     initial_condition = 0.8
   [../]
+
+  # Lagrange multiplier
+  [./lambda]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 0.0
+  [../]
 []
 
 [Materials]
@@ -102,7 +109,7 @@
 
   # Switching functions for each phase
   # h1(eta1, eta2, eta3)
-  [./h1_eta]
+  [./h1]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta1
     eta_j = eta2
@@ -110,7 +117,7 @@
     f_name = h1
   [../]
   # h2(eta1, eta2, eta3)
-  [./h2_eta]
+  [./h2]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta3
     eta_j = eta1
@@ -118,12 +125,43 @@
     f_name = h2
   [../]
   # h3(eta1, eta2, eta3)
-  [./h3_eta]
+  [./h3]
     type = SwitchingFunction3PhaseMaterial
     eta_i = eta2
     eta_j = eta3
     eta_k = eta1
     f_name = h3
+  [../]
+
+  # Barrier functions for each phase
+  [./g1]
+    type = BarrierFunctionMaterial
+    block = 0
+    g_order = SIMPLE
+    eta = eta1
+    function_name = g1
+  [../]
+  [./g2]
+    type = BarrierFunctionMaterial
+    block = 0
+    g_order = SIMPLE
+    eta = eta2
+    function_name = g2
+  [../]
+  [./g3]
+    type = BarrierFunctionMaterial
+    block = 0
+    g_order = SIMPLE
+    eta = eta3
+    function_name = g3
+  [../]
+
+  # constant properties
+  [./constants]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names  = 'L   kappa'
+    prop_values = '0.7 0.4  '
   [../]
 []
 
@@ -133,15 +171,148 @@
     variable = c
   [../]
 
-  [./eta1diff]
-    type = Diffusion
+  # Kernels for Allen-Cahn equation for eta1
+  [./deta1dt]
+    type = TimeDerivative
     variable = eta1
   [../]
+  [./ACBulkF1]
+    type = KKSMultiACBulkF
+    variable  = eta1
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g1
+    eta_i     = eta1
+    wi        = 0.4
+    args      = 'c1 c2 c3 eta2 eta3'
+  [../]
+  [./ACBulkC1]
+    type = KKSMultiACBulkC
+    variable  = eta1
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj_names  = 'c1 c2 c3'
+    eta_i     = eta1
+    args      = 'eta2 eta3'
+  [../]
+  [./ACInterface1]
+    type = ACInterface
+    variable = eta1
+    kappa_name = kappa
+  [../]
+  [./multipler1]
+    type = MatReaction
+    variable = eta1
+    v = lambda
+    mob_name = L
+  [../]
 
-  [./eta2diff]
-    type = Diffusion
+  # Kernels for Allen-Cahn equation for eta2
+  [./deta2dt]
+    type = TimeDerivative
     variable = eta2
   [../]
+  [./ACBulkF2]
+    type = KKSMultiACBulkF
+    variable  = eta2
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g2
+    eta_i     = eta2
+    wi        = 0.4
+    args      = 'c1 c2 c3 eta1 eta3'
+  [../]
+  [./ACBulkC2]
+    type = KKSMultiACBulkC
+    variable  = eta2
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj_names  = 'c1 c2 c3'
+    eta_i     = eta2
+    args      = 'eta1 eta3'
+  [../]
+  [./ACInterface2]
+    type = ACInterface
+    variable = eta2
+    kappa_name = kappa
+  [../]
+  [./multipler2]
+    type = MatReaction
+    variable = eta2
+    v = lambda
+    mob_name = L
+  [../]
+
+  # Kernels for the Lagrange multiplier equation
+  [./mult_lambda]
+    type = MatReaction
+    variable = lambda
+    mob_name = 3
+  [../]
+  [./mult_ACBulkF_1]
+    type = KKSMultiACBulkF
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g1
+    eta_i     = eta1
+    wi        = 0.4
+    mob_name  = 1
+    args      = 'c1 c2 c3 eta2 eta3'
+  [../]
+  [./mult_ACBulkC_1]
+    type = KKSMultiACBulkC
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj_names  = 'c1 c2 c3'
+    eta_i     = eta1
+    args      = 'eta2 eta3'
+    mob_name  = 1
+  [../]
+  [./mult_ACBulkF_2]
+    type = KKSMultiACBulkF
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g2
+    eta_i     = eta2
+    wi        = 0.4
+    mob_name  = 1
+    args      = 'c1 c2 c3 eta1 eta3'
+  [../]
+  [./mult_ACBulkC_2]
+    type = KKSMultiACBulkC
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj_names  = 'c1 c2 c3'
+    eta_i     = eta2
+    args      = 'eta1 eta3'
+    mob_name  = 1
+  [../]
+  [./mult_ACBulkF_3]
+    type = KKSMultiACBulkF
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    gi_name   = g3
+    eta_i     = eta3
+    wi        = 0.4
+    mob_name  = 1
+    args      = 'c1 c2 c3 eta1 eta2'
+  [../]
+  [./mult_ACBulkC_3]
+    type = KKSMultiACBulkC
+    variable  = lambda
+    Fj_names  = 'F1 F2 F3'
+    hj_names  = 'h1 h2 h3'
+    cj_names  = 'c1 c2 c3'
+    eta_i     = eta3
+    args      = 'eta1 eta2'
+    mob_name  = 1
+  [../]
+
 
   # Kernels for constraint equation eta1 + eta2 + eta3 = 1
   # eta3 is the nonlinear variable for the constraint equation
@@ -194,9 +365,18 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'PJFNK'
-  #solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -sub_pc_type   -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm       lu            nonzero'
+  l_max_its = 30
+  nl_max_its = 10
+  l_tol = 1.0e-4
+  nl_rel_tol = 1.0e-9
+  nl_abs_tol = 1.0e-10
+
+  num_steps = 2
+  dt = 0.5
 []
 
 [Preconditioning]
