@@ -363,6 +363,12 @@ SymmElasticityTensor::adjustForCracking( const RealVectorValue & /*crack_flags*/
 }
 
 void
+SymmElasticityTensor::adjustForCrackingWithShearRetention( const RealVectorValue & /*crack_flags*/)
+{
+  mooseError("adjustForCrackingWithShearRetention method not defined");
+}
+
+void
 SymmElasticityTensor::fillFromInputVector(std::vector<Real> input, bool all)
 {
   if ((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
