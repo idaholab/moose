@@ -36,8 +36,10 @@
 # stress_xz = a66*1.2 + a66*1.9 = 0.058021
 # stress_yx = a0101*(1+1) = 0.583333
 # stress_yz = a66*(-1) + a66*(-2.7) = -0.06925
-# stress_zx = a77*1.2 + a66*1.9 = 0.221793
-# stress_zy = a77*(-1) + a66*(-2.7) = -0.205728
+# old stress_zx = a77*1.2 + a66*1.9 = 0.221793
+# old stress_zy = a77*(-1) + a66*(-2.7) = -0.205728
+# stress_zx = a66*1.2 + a77*1.9 = 0.317325
+# stress_zy = a66*(-1) + a77*(-2.7) = -0.437735
 # and all others zero
 [Mesh]
   type = GeneratedMesh

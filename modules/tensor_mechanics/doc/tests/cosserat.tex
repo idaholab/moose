@@ -190,11 +190,7 @@ MOOSE generates this solution exactly.
 A cantilever beam is held fixed at one end, and bent by a surface
 traction applied at its other end.  As shown in
 Figure~\ref{beam_cant.fig}, the beam has length $L$, width $2c$, and a
-surface traction of $\tau$ is applied to its free end.  In this
-section, the beam will be modelled using a layered Cosserat material,
-but with the Cosserat-joint normal and shear stiffnesses being very
-large.  This means that that Cosserat theory should be identical to
-standard (non-Cosserat) elasticity.
+surface traction of $\tau$ is applied to its free end.
 
 \begin{figure}[htb]
 \begin{center}
@@ -211,6 +207,13 @@ standard (non-Cosserat) elasticity.
 \end{center}
 \end{figure}
 
+\section{Stiff Cosserat joints}
+
+In this section, the beam will be modelled using a layered Cosserat
+material, but with the Cosserat-joint normal and shear stiffnesses
+being very large.  This means that that Cosserat theory should be
+identical to standard (non-Cosserat) elasticity.
+
 The beam lies in the $x$--$z$ plane.  Assumed that all displacements
 are independent of the $y$ direction and $u_{y}=0$.  The nonzero
 stress components in this situation are
@@ -222,7 +225,7 @@ as well as a nonzero $\sigma_{yy}$ to ensure the displacements are
 independent of $y$.  Note that:
 \begin{itemize}
 \item The shear stress $\sigma_{zx}$ is independent of $x$, and that
-  $\int_{-c/2}^{c/2}\mathrm{d}z\, \sigma_{zx} = -\tau$, as required.
+  $\int_{-c}^{c}\mathrm{d}z\, \sigma_{zx} = -\tau$, as required.
   (The negative sign indicates the downwards direction.)
 \item The shear stress $\sigma_{xz}$ is zero for $z=\pm c$.  This is
   the shear stress on the top and bottom surfaces ($z=\pm c$) of the
@@ -238,6 +241,7 @@ Use an ansatz solution of the form
 \begin{eqnarray}
 u_{x} & = & Az^{3} + Bxz(2L-x) \ , \\
 u_{z} & = & Cx + Dz^{2}(L-x) - Fx^{2}(3L-x) \ .
+\label{beam.defl.z.eqn}
 \end{eqnarray}
 Here $A$ to $F$ are unknown coefficients, and
 $u_{y}=0=\theta_{c}^{z}=\theta_{c}^{x}$.  The Cosserat rotation around
@@ -290,6 +294,109 @@ formulae and MOOSE's result.
 \label{cosserat_eam_disp.fig}
 \end{center}
 \end{figure}
+
+\section{Slippery Cosserat joints}
+
+In this section, the beam is modelled using a layered Cosserat
+material with large Cosserat-joint normal stiffness but very small
+Cosserat-joint shear stiffness.  This means that the beam deformation
+should be identical to a number of independent layers of thickness
+$h$.  Using the Cosserat theory means that we don't need to actually
+model each layer as a separate finite element!
+Equation~(\ref{beam.defl.z.eqn}) yields that the
+deflection at $z=0$ is
+\begin{equation}
+u_{z}(L,0) = \frac{3\sigma_{zx}}{2 G}x + \frac{2\sigma_{xz} (1 -
+  \nu^{2})}{Eh^{2}}x^{2}(3L - x) \ .
+\label{expected.slippery.eqn}
+\end{equation}
+In this equation a constant shear stress $\sigma_{zx}$ has been used in
+place of $-\tau/(2c)$, and since the layers are acting independently (like a
+ream of paper) $2c$ has been replaced by the layer thickness $h$.
+Let us derive this result using the layered Cosserat theory.
+
+We seek a solution that depends on $x$ only.  The deformation
+$u_{y}=0$ as in the previous section.  The only nonzero Cosserat
+rotation is assumed to be $\thetac_{y}\neq 0$.
+
+To the $x=L$ end of the beam apply a uniform shear stress
+$\sigma_{zx}$ (independent of $y$ and $z$).  Suppose
+that all the other stress components are zero, except perhaps for
+$\sigma_{yy}$ which ensures the displacements are independent of
+$y$.  Assume that $\sigma_{zx}$ is uniform throughout the entire
+bar.  The equations of equilibrium $\nabla_{j}\sigma_{ij}=0$ are
+clearly satisfied.
+
+Suppose that no external moment is applied to the surface of the
+bar, except perhaps at the clamped end at $x=0$.  Then the equation of
+equilibrium $\nabla_{j}m_{ij} = \epsilon_{ijk}\sigma_{jk}$ implies
+that $\nabla_{j}m_{yj} = \sigma_{zx}$, or
+\begin{equation}
+m_{yx} = \sigma_{zx}(x - L) \ ,
+\end{equation}
+which is zero at $x=L$ as desired.  Because $\thetac_{x}$ is assumed
+to be zero, $m_{xy}$ must also be nonzero:
+\begin{equation}
+m_{xy} = -\nu m_{yx} \ .
+\end{equation}
+All other components of the moment stress may be set to zero.
+
+The constitutive equation $m_{ij} = B_{ijkl}\nabla_{l}\thetac_{k}$
+implies that
+\begin{equation}
+\thetac_{y} = \mbox{$\frac{1}{2}$}\sigma_{xz} x (x - 2L)/B \ ,
+\label{eqn.slippery.thy}
+\end{equation}
+where $B = B_{yxyx} = Eh^{2}/12/(1-\nu^{2})$ (recall that
+$\tilde{G}=0$).  The other constitutive equations involving $m_{ij}$
+are also satisfied (all other moment-stresses and curvatures are zero).
+
+The constitutive equations involving $\sigma_{ij}$ are either
+trivially satisfied because the strains are zero or because
+$\tilde{G}=0$ (in particular $\sigma_{xz}=0$).  The only nontrivial
+constitutive equation remaining is $\sigma_{zx} =
+\mbox{$\frac{1}{2}$}G\gamma_{zx}$ (valid for $\tilde{G}=0$).  Along
+with the definition $\gamma_{zx} = \nabla_{x}u_{z} + \thetac_{y}$,
+this implies
+\begin{equation}
+u_{z} = \frac{2\sigma_{zx}}{G}x - \frac{\sigma_{zx}}{6B}x^{2}(x - 3L)
+= \frac{2\sigma_{xz}}{G}x + \frac{2\sigma_{xz}(1 - \nu^{2})}{Eh^{2}}x^{2}(3L - x)
+\ .
+\label{eqn.slippery.dispz}
+\end{equation}
+The second term agrees perfectly with the expected result of
+Equation~(\ref{expected.slippery.eqn}), however, the first term is not
+identical.  To make the match precise, the shear stiffness in the
+elasticity tensor would have to be $E_{zxzx} = \mbox{$\frac{2}{3}$}G +
+\mbox{$\frac{1}{3}$}\tilde{G}$ rather than
+$E_{xzxz}=\mbox{$\frac{1}{2}$}(G + \tilde{G})$, but this is not
+traditional.  Nevertheless, the second term is the leading term for
+$h/L \rightarrow 0$.
+
+Figure~\ref{cosserat_beam_disp_slippery.fig} shows agreement between
+the Equations~(\ref{eqn.slippery.thy}) and~(\ref{eqn.slippery.dispz})
+and MOOSE's result.  Figure~\ref{cosserat_beam_disp_slippery.fig} also
+shows the vertical displacement of the end-point of the bar (at $x=L$)
+as a function of $h$.  In the Cosserat case there is no need to model
+multiple layers with multiple finite elements: these results were
+obtained using 1 element in the $z$ direction.
+\begin{figure}[htb]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=8cm]{cosserat_beam_disp_slippery.pdf} &
+\includegraphics[width=8cm]{cosserat_beam_disp_slippery_h.pdf}
+\end{tabular}
+\caption{Left: displacement and Cosserat rotation of the bar in the
+  ``slippery'' Cosserat-joint case using $h=0.5$.  Right: vertical
+  displacement of the bar's endpoint (at $x=L$) as a function of
+  Cosserat layer thickness $h$.  In both $L=10$
+  $E=1.2$, $\nu=0.3$, $c=1$ and $\sigma_{xz}=-0.0002$.}
+\label{cosserat_beam_disp_slippery.fig}
+\end{center}
+\end{figure}
+
+
+
 
 
 \chapter{Beam bending 2}
@@ -403,14 +510,7 @@ tests use $L=10$, $c=0.5$, $E=1.2$, $\nu=0.3$, $A=0.0111$ and $h=2$.
 
 \item The $x=0$ end is held clamped, while $\sigma_{xx}$ and $m_{yz}$
   are applied to the right-hand end ($x=L$).  This test uses
-  $k_{s}=0.1$.  There is no gaurantee that the expected deformations
-  are indeed a minimum-energy configuration for the discretised
-  situation, since small numerical discrepancies may cause MOOSE to
-  fall into a different configuration.  This occurs if the number of
-  elements in the $y$ direction is greater than 1: extra 3D effects appear
-  --- twisting and wavy behaviour --- as moments are transferred
-  between the Cosserat tensor, $m$, and the antisymmetric part of
-  $\sigma$.  However, for one element in the $y$ direction, good
+  $k_{s}=0.1$: good
   agreement is obtained, as shown in Figure~\ref{beam2.fig}
 \begin{figure}[htb]
 \begin{center}
