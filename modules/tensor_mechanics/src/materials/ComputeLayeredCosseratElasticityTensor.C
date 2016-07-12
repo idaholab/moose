@@ -50,8 +50,8 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(c
   _Eijkl(2, 2, 2, 2) = a2222;
   _Eijkl(0, 0, 2, 2) = _Eijkl(1, 1, 2, 2) = _Eijkl(2, 2, 0, 0) = _Eijkl(2, 2, 1, 1) = a0022;
   _Eijkl(0, 1, 0, 1) = _Eijkl(0, 1, 1, 0) = _Eijkl(1, 0, 0, 1) = _Eijkl(1, 0, 1, 0) = a0101;
-  _Eijkl(0, 2, 0, 2) = _Eijkl(0, 2, 2, 0) = _Eijkl(2, 0, 2, 0) = _Eijkl(1, 2, 1, 2) = _Eijkl(1, 2, 2, 1) = _Eijkl(2, 1, 2, 1) = a66;
-  _Eijkl(2, 0, 0, 2) = _Eijkl(2, 1, 1, 2) = a77;
+  _Eijkl(0, 2, 0, 2) = _Eijkl(0, 2, 2, 0) = _Eijkl(2, 0, 0, 2) = _Eijkl(1, 2, 1, 2) = _Eijkl(1, 2, 2, 1) = _Eijkl(2, 1, 1, 2) = a66;
+  _Eijkl(2, 0, 2, 0) = _Eijkl(2, 1, 2, 1) = a77;
 
   // most of Bijkl is zero since the only nonzero moment stresses are m01 and m10.
   // It also does not have the usual symmetries.
