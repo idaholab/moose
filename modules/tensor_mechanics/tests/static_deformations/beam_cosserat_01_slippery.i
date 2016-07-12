@@ -1,53 +1,33 @@
-# Beam bending.
-# One end is clamped and the other end is subjected to a stress
-# and micromechanical moment that will induce bending.
-# The stress that will induce bending around the y axis is
-# stress_xx = EAz
-# This implies a micromechanical moment-stress of
-# m_yx = (1/12)EAh^2 for joint_shear_stiffness=0.
-# For joint_shear_stiffness!=0, the micromechanical moment-stress
-# is
-# m_yx = (1/12)EAa^2 G/(ak_s + G)
-# All other stresses and moment stresses are assumed to be zero.
-# With joint_shear_stiffness=0, and introducing D=-poisson*A, the
-# nonzero strains are
-# ep_xx = Az
-# ep_yy = Dz
-# ep_zz = Dz
-# kappa_xy = -D
-# kappa_yx = A
-# This means the displacements are:
-# u_x = Axz
-# u_y = Dzy
-# u_z = -(A/2)x^2 + (D/2)(z^2-y^2)
-# wc_x = -Dy
-# wc_y = Ax
-# wc_z = 0
-# This is bending of a bar around the y axis, in plane stress
-# (stress_yy=0).  Displacements at the left-hand (x=0) are applied
-# according to the above formulae; wc_x and wc_y are applied throughout
-# the bar; and stress_xx is applied at the right-hand end (x=10).
-# The displacements are measured and
-# compared with the above formulae.
-# The test uses: E=1.2, poisson=0.3, A=1.11E-2, h=2, ks=0.1, so
-# stress_xx = 1.332E-2*z
-# m_yx = 0.2379E-2
+# Beam bending.  One end is clamped and the other end is subjected to
+# a constant surface traction.
+# The beam thickness is 1, and the Cosserat layer thickness is 0.5,
+# so the beam contains 2 Cosserat layers.
+# The joint normal stiffness is set very large and the shear stiffness very small
+# so that the situation should be very close to a single beam of thickness
+# 0.5.
+# The deflection should be described by
+# u_z = 2sx/G + 2s(1-nu^2)x^2(3L-x)/(Eh^2)
+# wc_y = sx(x-2L)/(2B)
+# Here
+# s = applied shear stress = -2E-4
+# x = coordinate along bar (0<=x<=10)
+# G = shear modulus = E/2/(1+nu) = 0.4615
+# nu = Poisson = 0.3
+# L = length of bar = 10
+# E = Young = 1.2
+# h = Cosserat layer thickness = 0.5
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 10
-  ny = 1
-  nz = 10
-  xmin = 0
+  nx = 80
   xmax = 10
-  ymin = -1
-  ymax = 1
+  ny = 1
+  nz = 1
   zmin = -0.5
   zmax = 0.5
 []
 
 [GlobalParams]
-  use_displaced_mesh = false
   displacements = 'disp_x disp_y disp_z'
   Cosserat_rotations = 'wc_x wc_y wc_z'
 []
@@ -58,8 +38,6 @@
   [./disp_y]
   [../]
   [./disp_z]
-  [../]
-  [./wc_x]
   [../]
   [./wc_y]
   [../]
@@ -81,24 +59,12 @@
     variable = disp_z
     component = 2
   [../]
-  [./x_couple]
-    type = StressDivergenceTensors
-    variable = wc_x
-    displacements = 'wc_x wc_y wc_z'
-    component = 0
-    base_name = couple
-  [../]
   [./y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     displacements = 'wc_x wc_y wc_z'
     component = 1
     base_name = couple
-  [../]
-  [./x_moment]
-    type = MomentBalancing
-    variable = wc_x
-    component = 0
   [../]
   [./y_moment]
     type = MomentBalancing
@@ -114,17 +80,23 @@
   # ymax is called top
   # xmin is called left
   # xmax is called right
+  [./no_dispy]
+    type = PresetBC
+    variable = disp_y
+    boundary = 'bottom top'
+    value = 0.0
+  [../]
+  [./no_wc_y]
+    type = PresetBC
+    variable = wc_y
+    boundary = 'left'
+    value = 0.0
+  [../]
   [./clamp_z]
-    type = FunctionPresetBC
+    type = PresetBC
     variable = disp_z
     boundary = left
-    function = '-0.3*(z*z-y*y)/2.0*1.11E-2'
-  [../]
-  [./clamp_y]
-    type = FunctionPresetBC
-    variable = disp_y
-    boundary = left
-    function = '-0.3*z*y*1.11E-2'
+    value = 0.0
   [../]
   [./clamp_x]
     type = PresetBC
@@ -132,34 +104,17 @@
     boundary = left
     value = 0.0
   [../]
-  [./end_stress]
-    type = FunctionNeumannBC
-    boundary = right
-    function = z*1.2*1.11E-2
-    variable = disp_x
-  [../]
-  [./fix_wc_x]
-    type = FunctionPresetBC
-    variable = wc_x
-    boundary = 'left' # right top bottom front back'
-    function = '0.3*y*1.11E-2'
-  [../]
-  [./fix_wc_y]
-    type = FunctionPresetBC
-    variable = wc_y
-    boundary = 'left' # right top bottom front back'
-    function = '1.11E-2*x'
-  [../]
-  [./end_moment]
+  [./end_traction]
     type = VectorNeumannBC
+    variable = disp_z
+    vector_value = '-2E-4 0 0'
     boundary = right
-    variable = wc_y
-    vector_value = '2.3785714286E-3 0 0'
   [../]
 []
 
-
 [AuxVariables]
+  [./wc_x]
+  [../]
   [./wc_z]
   [../]
   [./strain_xx]
@@ -468,9 +423,9 @@
   [./soln]
     type = LineValueSampler
     sort_by = x
-    variable = 'disp_x disp_y disp_z stress_xx stress_xy stress_xz stress_yx stress_yy stress_yz stress_zx stress_zx stress_zz wc_x wc_y wc_z couple_stress_xx couple_stress_xy couple_stress_xz couple_stress_yx couple_stress_yy couple_stress_yz couple_stress_zx couple_stress_zy couple_stress_zz'
-    start_point = '0 0 0.5'
-    end_point = '10 0 0.5'
+    variable = 'disp_x disp_z stress_xx stress_xz stress_zx stress_zz wc_y couple_stress_xx couple_stress_xz couple_stress_zx couple_stress_zz'
+    start_point = '0 0 0'
+    end_point = '10 0 0'
     num_points = 11
   [../]
 []
@@ -480,9 +435,9 @@
     type = ComputeLayeredCosseratElasticityTensor
     young = 1.2
     poisson = 0.3
-    layer_thickness = 2.0
+    layer_thickness = 0.5
     joint_normal_stiffness = 1E16
-    joint_shear_stiffness = 0.1
+    joint_shear_stiffness = 1E-6
   [../]
   [./strain]
     type = ComputeCosseratSmallStrain
@@ -496,8 +451,8 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol -ksp_max_it -sub_pc_factor_shift_type -pc_asm_overlap -ksp_gmres_restart'
-    petsc_options_value = 'gmres asm lu 1E-11 1E-11 10 1E-15 1E-10 100 NONZERO 2 100'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm lu 1E-10 1E-14 10 1E-15 1E-10 NONZERO'
   [../]
 []
 
@@ -509,7 +464,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = beam_cosserat_02_apply_stress
-  exodus = true
+  file_base = beam_cosserat_01_slippery
   csv = true
+  exodus = true
 []

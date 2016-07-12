@@ -36,6 +36,11 @@
     input = 'beam_cosserat_01.i'
     csvdiff = 'beam_cosserat_01_soln_0001.csv'
   [../]
+  [./beam_cosserat_01_slippery]
+    type = 'CSVDiff'
+    input = 'beam_cosserat_01_slippery.i'
+    csvdiff = 'beam_cosserat_01_slippery_soln_0001.csv'
+  [../]
   [./beam_cosserat_02_apply_disps]
     type = 'Exodiff'
     input = 'beam_cosserat_02_apply_disps.i'
