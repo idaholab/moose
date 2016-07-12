@@ -35,7 +35,9 @@ IdealGasFluidProperties::pressure(Real v, Real u) const
   if (v == 0.0)
     mooseError(name() << ": Invalid value of specific volume detected (v = " << v << ").");
 
-  return (_gamma - 1.) * u / v;
+  // The std::max function serves as a hard limiter, which will guarantee non-negative pressure
+  // when resolving strongly nonlinear waves
+  return std::max(1e-8, (_gamma - 1.) * u / v);
 }
 
 Real
@@ -48,7 +50,9 @@ Real
 IdealGasFluidProperties::c(Real v, Real u) const
 {
   Real temp = temperature(v, u);
-  return std::sqrt(_gamma * _R * temp);
+  // The std::max function serves as a hard limiter, which will guarantee non-negative speed of sound
+  // when resolving strongly nonlinear waves
+  return std::sqrt(std::max(1e-8, _gamma * _R * temp));
 }
 
 Real
