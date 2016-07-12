@@ -158,9 +158,6 @@ petscSetupDM (NonlinearSystem & nl) {
     CHKERRABORT(nl.comm().get(), ierr);
     if (ismoose)
       return;
-    // if it is not a DMMoose object, just destroy it
-    ierr = DMDestroy(&dm);
-    CHKERRABORT(nl.comm().get(), ierr);
   }
   ierr = DMCreateMoose(nl.comm().get(), nl, &dm);
   CHKERRABORT(nl.comm().get(),ierr);
