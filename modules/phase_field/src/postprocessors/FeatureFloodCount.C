@@ -13,6 +13,7 @@
 
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "Assembly.h"
 
 //libMesh includes
 #include "libmesh/dof_map.h"
@@ -36,6 +37,7 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
   storeHelper(stream, feature._var_idx, context);
   storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._min_entity_id, context);
+  storeHelper(stream, feature._volume, context);
   storeHelper(stream, feature._status, context);
   storeHelper(stream, feature._intersects_boundary, context);
 }
@@ -60,6 +62,7 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._var_idx, context);
   loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._min_entity_id, context);
+  loadHelper(stream, feature._volume, context);
   loadHelper(stream, feature._status, context);
   loadHelper(stream, feature._intersects_boundary, context);
 }
@@ -78,11 +81,13 @@ InputParameters validParams<FeatureFloodCount>()
   params.addRequiredCoupledVar("variable", "The variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
   params.addParam<Real>("threshold", 0.5, "The threshold value for which a new bubble may be started");
   params.addParam<Real>("connecting_threshold", "The threshold for which an existing bubble may be extended (defaults to \"threshold\")");
+  params.addParam<Real>("volume_threshold", "The threshold used for calculating feature volumes (defaults to \"threshold\")");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", true, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: true)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
   params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether bubbles are defined to be less than or greater than the threshold value.");
+  params.addParam<bool>("calculate_feature_volumes", false, "Flag to calculate feature volumes (Automatically set to True if \"bubble_volume_file\" is set)");
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
   params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
   params.set<bool>("use_displaced_mesh") = true;
@@ -100,6 +105,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _vars(getCoupledMooseVars()),
     _threshold(getParam<Real>("threshold")),
     _connecting_threshold(isParamValid("connecting_threshold") ? getParam<Real>("connecting_threshold") : getParam<Real>("threshold")),
+    _volume_threshold(isParamValid("volume_threshold") ? getParam<Real>("volume_threshold") : getParam<Real>("threshold")),
     _mesh(_subproblem.mesh()),
     _var_number(_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
@@ -107,6 +113,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
+    _calculate_feature_volumes(getParam<bool>("calculate_feature_volumes") || isParamValid("bubble_volume_file")),
     _n_vars(_vars.size()),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _n_procs(_app.n_processors()),
@@ -162,6 +169,7 @@ FeatureFloodCount::initialize()
   _step_connecting_threshold = _element_average_value + _connecting_threshold;
 
   _all_feature_volumes.clear();
+  _total_volume_intersecting_boundary.clear();
 
   _ghosted_entity_ids.clear();
 
@@ -177,6 +185,21 @@ FeatureFloodCount::meshChanged()
   // Build a new node to element map
   _nodes_to_elem_map.clear();
   MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
+
+  /**
+   * If the user has requested that we compute boundary intersecting volumes
+   * then we need to build a set containing all of the necessary entities
+   * to compare against. This will be elements for elemental flooding and nodes
+   * for nodal flooding.
+   */
+  if (_compute_boundary_intersecting_volume)
+  {
+    _all_boundary_entity_ids.clear();
+    if (_is_elemental)
+      for (MooseMesh::bnd_elem_iterator elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd();
+           elem_it != elem_end; ++elem_it)
+        _all_boundary_entity_ids.insert((*elem_it)->_elem->id());
+  }
 }
 
 void
@@ -264,10 +287,17 @@ FeatureFloodCount::finalize()
   // Populate _feature_maps and _var_index_maps
   updateFieldInfo();
 
-  // Calculate and out output bubble volume data
+  writeFeatureVolumeFile();
+}
+
+void
+FeatureFloodCount::writeFeatureVolumeFile()
+{
   if (_pars.isParamValid("bubble_volume_file"))
   {
-    calculateBubbleVolumes();
+    // Pre-populated by updateFieldInfo
+    mooseAssert(_all_feature_volumes.size() == _feature_count, "Incorrect number of volume entries");
+
     std::vector<Real> data;
     data.reserve(_all_feature_volumes.size() + _total_volume_intersecting_boundary.size() + 2);
 
@@ -544,9 +574,17 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 void
 FeatureFloodCount::updateFieldInfo()
 {
-  // This variable is only relevant in single map mode
-//  _region_to_var_idx.resize(_feature_sets[0].size());
+  // Whether or not we should store and write out volume information
+  if (_calculate_feature_volumes)
+  {
+    // store volumes per feature
+    _all_feature_volumes.reserve(_feature_count);
 
+    // store totals per variable (or smaller)
+    _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 1 : _maps_size);
+  }
+
+  // Vector for indirect sort
   std::vector<size_t> index_vector;
 
   unsigned int feature_number = 0;
@@ -585,6 +623,14 @@ FeatureFloodCount::updateFieldInfo()
       for (auto entity : feature._ghosted_ids)
         _ghosted_entity_ids[entity] = 1;
 
+      // Save off volume information
+      if (_calculate_feature_volumes)
+      {
+        _all_feature_volumes.push_back(feature._volume);
+        if (feature._intersects_boundary)
+          _total_volume_intersecting_boundary[map_idx] += feature._volume;
+      }
+
       ++feature_number;
     }
 
@@ -592,6 +638,10 @@ FeatureFloodCount::updateFieldInfo()
     if (!_global_numbering)
       feature_number = 0;
   }
+
+  // Sort the feature volumes
+  if (_calculate_feature_volumes)
+    std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
 
   mooseAssert(_feature_count == feature_number, "feature_number does not agree with previously calculated _feature_count");
 }
@@ -650,6 +700,23 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
 
   // Insert the current entity into the local ids map
   feature->_local_ids.insert(entity_id);
+
+  /**
+   * See if this particular entity cell contributes to the feature volume
+   * 1) greater (or less) than the volume threshold which may be independent of the flooding threshold
+   * 2) owned by this processor so it's not double counted
+   */
+  if (_is_elemental &&
+      (entity_value >= _volume_threshold || (!_use_less_than_threshold_comparison && entity_value <= _volume_threshold)) &&
+      processor_id() == dof_object->processor_id())
+  {
+    // TODO: Cache element volumes?
+    feature->_volume += static_cast<const Elem *>(dof_object)->volume();
+
+    // Does the volume intersect the boundary?
+    if (_all_boundary_entity_ids.find(dof_object->id()) != _all_boundary_entity_ids.end())
+      feature->_intersects_boundary = true;
+  }
 
   if (_is_elemental)
     visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
@@ -765,119 +832,6 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
 }
 
 void
-FeatureFloodCount::calculateBubbleVolumes()
-{
-  Moose::perf_log.push("calculateBubbleVolume()", "FeatureFloodCount");
-
-  // Figure out which bubbles intersect the boundary if the user has enabled that capability.
-  if (_compute_boundary_intersecting_volume)
-  {
-    // Create a std::set of node IDs which are on the boundary called all_boundary_node_ids.
-    std::set<dof_id_type> all_boundary_node_ids;
-
-    // Iterate over the boundary nodes, putting them into the std::set data structure
-    MooseMesh::bnd_node_iterator
-      boundary_nodes_it  = _mesh.bndNodesBegin(),
-      boundary_nodes_end = _mesh.bndNodesEnd();
-    for (; boundary_nodes_it != boundary_nodes_end; ++boundary_nodes_it)
-    {
-      BndNode * boundary_node = *boundary_nodes_it;
-      all_boundary_node_ids.insert(boundary_node->_node->id());
-    }
-
-    // For each of the _maps_size FeatureData lists, determine if the set
-    // of nodes includes any boundary nodes.
-    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-      // Determine boundary intersection for each FeatureData object
-      for (auto & feature : _feature_sets[map_num])
-        feature._intersects_boundary = setsIntersect(all_boundary_node_ids.begin(), all_boundary_node_ids.end(),
-                                                     feature._local_ids.begin(), feature._local_ids.end());
-  }
-
-  // Size our temporary data structure
-  std::vector<std::vector<Real> > bubble_volumes(_maps_size);
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    bubble_volumes[map_num].resize(_feature_sets[map_num].size());
-
-  // Clear pre-existing values and allocate space to store the volume
-  // of the boundary-intersecting grains for each variable.
-  _total_volume_intersecting_boundary.clear();
-  _total_volume_intersecting_boundary.resize(_maps_size);
-
-  // Loop over the active local elements.  For each variable, and for
-  // each FeatureData object, check whether a majority of the element's
-  // nodes belong to that Bubble, and if so assign the element's full
-  // volume to that bubble.
-  const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
-  for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
-  {
-    Elem * elem = *el;
-    auto elem_n_nodes = elem->n_nodes();
-    auto curr_volume = elem->volume();
-
-    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    {
-      auto bubble_it = _feature_sets[map_num].cbegin();
-      auto bubble_end = _feature_sets[map_num].cend();
-
-      for (unsigned int bubble_counter = 0; bubble_it != bubble_end; ++bubble_it, ++bubble_counter)
-      {
-        // Count the number of nodes on this element which are flooded.
-        unsigned int flooded_nodes = 0;
-        for (auto node = decltype(elem_n_nodes)(0); node < elem_n_nodes; ++node)
-        {
-          auto node_id = elem->node(node);
-          if ((*bubble_it)._local_ids.find(node_id) != (*bubble_it)._local_ids.end())
-            ++flooded_nodes;
-        }
-
-        // If a majority of the nodes for this element are flooded,
-        // assign its volume to the current bubble_counter entry.
-        if (flooded_nodes >= elem_n_nodes / 2)
-        {
-          bubble_volumes[map_num][bubble_counter] += curr_volume;
-
-          // If the current bubble also intersects the boundary, also
-          // accumlate the volume into the total volume of bubbles
-          // which intersect the boundary.
-          if ((*bubble_it)._intersects_boundary)
-            _total_volume_intersecting_boundary[map_num] += curr_volume;
-        }
-      }
-    }
-  }
-
-  // If we're calculating boundary-intersecting volumes, we have to normalize it by the
-  // volume of the entire domain.
-  if (_compute_boundary_intersecting_volume)
-  {
-    // Compute the total area using a bounding box.  FIXME: this
-    // assumes the domain is rectangular and 2D, and is probably a
-    // little expensive so we should only do it once if possible.
-    auto bbox = MeshTools::bounding_box(_mesh);
-    auto total_volume = (bbox.max()(0)-bbox.min()(0))*(bbox.max()(1)-bbox.min()(1));
-
-    // Sum up the partial boundary grain volume contributions from all processors
-    _communicator.sum(_total_volume_intersecting_boundary);
-
-    // Scale the boundary intersecting grain volumes by the total domain volume
-    for (auto & total_volume_intersecting_boundary_item : _total_volume_intersecting_boundary)
-      total_volume_intersecting_boundary_item /= total_volume;
-  }
-
-  // Stick all the partial bubble volumes in one long single vector to be gathered on the root processor
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    _all_feature_volumes.insert(_all_feature_volumes.end(), bubble_volumes[map_num].begin(), bubble_volumes[map_num].end());
-
-  // do all the sums!
-  _communicator.sum(_all_feature_volumes);
-
-  std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
-
-  Moose::perf_log.pop("calculateBubbleVolume()", "FeatureFloodCount");
-}
-
-void
 FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Point & node)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
@@ -982,6 +936,8 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 
   // Update the min feature id
   _min_entity_id = std::min(_min_entity_id, rhs._min_entity_id);
+
+  _volume += rhs._volume;
 }
 
 void

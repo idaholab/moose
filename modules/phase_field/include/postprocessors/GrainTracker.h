@@ -132,11 +132,6 @@ protected:
    */
   void expandHalos();
 
-  /**
-   * Calculate the volume of each grain maintaining proper order and dumping results to CSV
-   */
-  virtual void calculateBubbleVolumes() override;
-
   /*************************************************
    *************** Data Structures *****************
    ************************************************/

@@ -201,6 +201,7 @@
     threshold = 0.2
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
+    volume_threshold = 0.5
   [../]
   [./dt]
     # Outputs the current time step

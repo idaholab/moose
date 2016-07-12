@@ -51,6 +51,7 @@
     Avrami_file = Avrami.csv
     mesh_volume = Volume
     equil_fraction = 0.5
+    flood_entity_type = ELEMENTAL
   [../]
 
   [./Volume]

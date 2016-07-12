@@ -50,6 +50,7 @@
     execute_on = timestep_end
   #  bubble_volume_file = nodal_flood_particle_distribution.csv
     mesh_volume = Volume
+    flood_entity_type = ELEMENTAL
   [../]
 
   [./Volume]
