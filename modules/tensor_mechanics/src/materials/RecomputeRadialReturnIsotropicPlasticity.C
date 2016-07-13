@@ -18,7 +18,7 @@ InputParameters validParams<RecomputeRadialReturnIsotropicPlasticity>()
   params.addParam<Real>("yield_stress", 0.0, "The point at which plastic strain begins accumulating");
   params.addParam<FunctionName>("hardening_function", "True stress as a function of plastic strain");
   params.addParam<Real>("hardening_constant", 0.0, "Hardening slope");
-  params.addCoupledVar("temp", 0.0, "Coupled Temperature");
+  params.addCoupledVar("temperature", 0.0, "Coupled Temperature");
 
   return params;
 }
@@ -40,7 +40,7 @@ RecomputeRadialReturnIsotropicPlasticity::RecomputeRadialReturnIsotropicPlastici
 
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
-    _temperature(coupledValue("temp"))
+    _temperature(coupledValue("temperature"))
 {
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)
     mooseError("Yield stress must be greater than zero");
@@ -81,6 +81,7 @@ RecomputeRadialReturnIsotropicPlasticity::computeStressInitialize(Real effective
 {
   _shear_modulus = getIsotropicShearModulus();
   computeYieldStress();
+
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];

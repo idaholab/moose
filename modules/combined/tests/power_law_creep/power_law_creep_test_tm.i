@@ -201,7 +201,7 @@
     max_iterations = 50
     # output_iteration_info_on_error = true
     compute = false # make this material "discrete"
-    temp = temp
+    temperature = temp
   [../]
 
   [./radial_return_stress]

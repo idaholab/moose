@@ -230,7 +230,7 @@
     temperatures = '300.0 800.0'
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
-    temp = temp
+    temperature = temp
   [../]
 
   [./radial_return_stress]

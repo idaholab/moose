@@ -20,7 +20,7 @@ InputParameters validParams<RecomputeRadialReturnPowerLawCreep>()
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");
-  params.addCoupledVar("temp", 0.0, "Coupled temperature");
+  params.addCoupledVar("temperature", 0.0, "Coupled temperature");
 
   return params;
 }
@@ -35,8 +35,8 @@ RecomputeRadialReturnPowerLawCreep::RecomputeRadialReturnPowerLawCreep(const Inp
     _gas_constant(parameters.get<Real>("gas_constant")),
     _start_time(getParam<Real>("start_time")),
     _shear_modulus(0.0),
-    _has_temp(isCoupled("temp")),
-    _temperature(_has_temp ? coupledValue("temp") : _zero),
+    _has_temp(isCoupled("temperature")),
+    _temperature(_has_temp ? coupledValue("temperature") : _zero),
     _creep_strain(declareProperty<RankTwoTensor>(_base_name + "creep_strain")),
     _creep_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "creep_strain"))
 {
