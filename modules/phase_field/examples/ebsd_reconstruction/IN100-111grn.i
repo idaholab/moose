@@ -1,5 +1,5 @@
 [Mesh]
-  # uniform_refine = 4
+  uniform_refine = 2
   type = EBSDMesh
   filename = IN100_128x128.txt
 []
@@ -36,6 +36,10 @@
     family = MONOMIAL
   [../]
   [./var_indices]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./RGB]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -88,6 +92,14 @@
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
+  [./RGB]
+    type = OutputRGB
+    variable = RGB
+    euler_angle_provider = ebsd
+    grain_tracker_object = grain_tracker
+    crystal_structure = cubic
+    execute_on = 'initial timestep_end'
+  [../]
 []
 
 [Materials]
@@ -123,17 +135,11 @@
   [../]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.1
-    convex_hull_buffer = 0.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.05
-    execute_on = 'initial timestep_end'
-    flood_entity_type = ELEMENTAL
-    halo_level = 2
-    bubble_volume_file = IN100-grn-vols.txt
+    threshold = 0.2
+    connecting_threshold = 0.2
+    execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd
+    flood_entity_type = ELEMENTAL
   [../]
 []
 
@@ -166,18 +172,11 @@
     refine_fraction = 0.7
     coarsen_fraction = 0.1
     max_h_level = 2
-    print_changed_info = true
   [../]
 []
 
 [Outputs]
   exodus = true
   checkpoint = true
-  csv = true
-  [./console]
-    type = Console
-    max_rows = 20
-    perf_log = true
-    perf_log_interval = 10
-  [../]
+  print_perf_log = true
 []
