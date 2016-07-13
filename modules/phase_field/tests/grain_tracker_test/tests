@@ -31,8 +31,13 @@
     type = 'CSVDiff'
     input = 'grain_tracker_test_elemental.i'
     csvdiff = 'grain_volumes.csv'
+
+    # Don't rerun this test
+    prereq = test_elemental
+    delete_output_before_running = false
+    should_execute = false
+
     method = 'OPT OPROF' # slow test
-    cli_args = 'Outputs/exodus=false'
     recover = false  # grain tracker CSV output isn't designed to work with recover
     valgrind = 'HEAVY'
     max_time = 500

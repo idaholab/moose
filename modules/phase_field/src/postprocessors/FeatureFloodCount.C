@@ -92,7 +92,7 @@ InputParameters validParams<FeatureFloodCount>()
   params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
   params.set<bool>("use_displaced_mesh") = true;
 
-  MooseEnum flood_type("NODAL ELEMENTAL", "NODAL");
+  MooseEnum flood_type("NODAL ELEMENTAL", "ELEMENTAL");
   params.addParam<MooseEnum>("flood_entity_type", flood_type, "Determines whether the flood algorithm runs on nodes or elements");
   return params;
 }

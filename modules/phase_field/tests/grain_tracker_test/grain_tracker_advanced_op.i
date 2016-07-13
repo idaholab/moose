@@ -36,12 +36,12 @@
     family = LAGRANGE
   [../]
   [./unique_grains]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./var_indices]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 

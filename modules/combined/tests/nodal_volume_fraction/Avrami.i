@@ -46,7 +46,7 @@
   [./volume_fraction]
     type = NodalVolumeFraction
     variable = u
-    threshold = 0.9
+    threshold = 0.5
     execute_on = 'initial timestep_end'
     Avrami_file = Avrami.csv
     mesh_volume = Volume
