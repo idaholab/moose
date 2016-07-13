@@ -38,6 +38,8 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
   storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._min_entity_id, context);
   storeHelper(stream, feature._volume, context);
+  storeHelper(stream, feature._vol_count, context);
+  storeHelper(stream, feature._centroid, context);
   storeHelper(stream, feature._status, context);
   storeHelper(stream, feature._intersects_boundary, context);
 }
@@ -63,6 +65,8 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._min_entity_id, context);
   loadHelper(stream, feature._volume, context);
+  loadHelper(stream, feature._vol_count, context);
+  loadHelper(stream, feature._centroid, context);
   loadHelper(stream, feature._status, context);
   loadHelper(stream, feature._intersects_boundary, context);
 }
@@ -391,6 +395,24 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, u
       return -1;
     }
 
+    case FieldType::CENTROID:
+    {
+      // If this element contains the centroid of one of features, return it's index
+      const auto * elem_ptr = _mesh.elemPtr(entity_id);
+
+      for (const auto & feature_vec : _feature_sets)
+        for (const auto & feature : feature_vec)
+        {
+          if (feature._status == Status::INACTIVE)
+            continue;
+
+          if (elem_ptr->contains_point(feature._centroid))
+            return 1;
+        }
+
+      return 0;
+    }
+
     default:
       return 0;
   }
@@ -555,6 +577,10 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   {
     for (auto & feature : _partial_feature_sets[map_num])
     {
+      // First we need to calculate the centroid now that we are doing merging all partial features
+      if (feature._vol_count != 0)
+        feature._centroid /= feature._vol_count;
+
       // Adjust the halo marking region
       std::set<dof_id_type> set_difference;
       std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
@@ -604,7 +630,7 @@ FeatureFloodCount::updateFieldInfo()
     auto map_idx = (_single_map_mode || _condense_map_info) ? decltype(map_num)(0) : map_num;
     for (auto idx : index_vector)
     {
-      const auto & feature = _feature_sets[map_num][idx];
+      auto & feature = _feature_sets[map_num][idx];
 
       // Loop over the entitiy ids of this feature and update our local map
       for (auto entity : feature._local_ids)
@@ -667,9 +693,10 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
 
   // Get the value of the current variable for the current entity
   Real entity_value;
+  const Elem * elem = nullptr;
   if (_is_elemental)
   {
-    const Elem * elem = static_cast<const Elem *>(dof_object);
+    elem = static_cast<const Elem *>(dof_object);
     std::vector<Point> centroid(1, elem->centroid());
     _subproblem.reinitElemPhys(elem, centroid, 0);
     entity_value = _vars[current_idx]->sln()[0];
@@ -711,7 +738,11 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
       processor_id() == dof_object->processor_id())
   {
     // TODO: Cache element volumes?
-    feature->_volume += static_cast<const Elem *>(dof_object)->volume();
+    feature->_volume += elem->volume();
+    feature->_vol_count++;
+
+    // Sum the centroid values for now, we'll average them later
+    feature->_centroid += elem->centroid();
 
     // Does the volume intersect the boundary?
     if (_all_boundary_entity_ids.find(dof_object->id()) != _all_boundary_entity_ids.end())
@@ -938,6 +969,8 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   _min_entity_id = std::min(_min_entity_id, rhs._min_entity_id);
 
   _volume += rhs._volume;
+  _vol_count += rhs._vol_count;
+  _centroid += rhs._centroid;
 }
 
 void

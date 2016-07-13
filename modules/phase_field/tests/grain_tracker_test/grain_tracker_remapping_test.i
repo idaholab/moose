@@ -81,6 +81,11 @@
 
   [./halo6]
   [../]
+
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -173,6 +178,13 @@
     variable = halo5
     map_index = 6
     field_display = HALOS
+    bubble_object = grain_tracker
+  [../]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    execute_on = timestep_end
+    field_display = CENTROID
     bubble_object = grain_tracker
   [../]
 []

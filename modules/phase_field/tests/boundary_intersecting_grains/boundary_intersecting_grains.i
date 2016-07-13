@@ -34,6 +34,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
@@ -44,6 +49,14 @@
     type = FeatureFloodCountAux
     bubble_object = flood_count_pp
     execute_on = timestep_end
+  [../]
+
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    bubble_object = flood_count_pp
+    execute_on = timestep_end
+    field_display = CENTROID
   [../]
 []
 

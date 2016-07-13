@@ -39,6 +39,23 @@
   [../]
 []
 
+[AuxVariables]
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    bubble_object = bubbles
+    execute_on = 'initial timestep_end'
+    field_display = CENTROID
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = Diffusion
