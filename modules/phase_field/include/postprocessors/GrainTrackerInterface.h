@@ -41,6 +41,21 @@ public:
    * (unique_grain_id, variable_idx)
    */
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const = 0;
+
+  /**
+   * Returns the number of grains stored in this object.
+   */
+  virtual unsigned int getNumberGrains() const = 0;
+
+  /**
+   * Returns the volume for the given grain number.
+   */
+  virtual Real getGrainVolume(unsigned int grain_id) const = 0;
+
+  /**
+   * Returns the centroid for the given grain number.
+   */
+  virtual Point getGrainCentroid(unsigned int grain_id) const = 0;
 };
 
 #endif

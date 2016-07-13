@@ -46,21 +46,12 @@ public:
     BYPASS
   };
 
-  /**
-   * Accessor for retrieving nodal field information (unique grains or variable indicies)
-   * @param node_id the node identifier for which to retrieve field data
-   * @param var_idx when using multi-map mode, the map number from which to retrieve data.
-   * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
-   * @return the nodal value
-   */
+  // GrainTrackerInterface methods
   virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, unsigned int var_idx=0) const override;
-
-  /**
-   * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
-   * holds the ith node with the inner vector holds the list of active unique grains.
-   * (unique_grain_id, variable_idx)
-   */
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
+  virtual unsigned int getNumberGrains() const override;
+  virtual Real getGrainVolume(unsigned int grain_id) const override;
+  virtual Point getGrainCentroid(unsigned int grain_id) const override;
 
 protected:
   virtual void updateFieldInfo() override;

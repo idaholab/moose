@@ -100,9 +100,9 @@
 
 [UserObjects]
   [./grain_center]
-    type = ComputeGrainCenterUserObject
-    etas = eta
-    execute_on = 'initial linear'
+    type = GrainTracker
+    variable = eta
+    outputs = none
   [../]
 []
 

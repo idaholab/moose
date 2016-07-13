@@ -34,21 +34,12 @@ public:
   virtual Real getValue() override;
   virtual void execute() override;
 
-  /**
-   * Accessor for retrieving either nodal or elemental information (unique grains or variable indicies)
-   * @param entity_id the node identifier for which to retrieve field data
-   * @param var_idx when using multi-map mode, the map number from which to retrieve data.
-   * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
-   * @return the entity value
-   */
+  // GrainTrackerInterface methods
   virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, unsigned int var_idx) const override;
-
-  /**
-   * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
-   * holds the ith node with the inner vector holds the list of active unique grains.
-   * (unique_grain_id, variable_idx)
-   */
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
+  virtual unsigned int getNumberGrains() const override;
+  virtual Real getGrainVolume(unsigned int grain_id) const override;
+  virtual Point getGrainCentroid(unsigned int grain_id) const override;
 
 private:
   /// The mapping of entities to grains, in this case always the order parameter
