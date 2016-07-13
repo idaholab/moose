@@ -60,19 +60,16 @@ RecomputeRadialReturn::computeStress(RankTwoTensor & strain_increment,
   {
     computeStressInitialize(effective_trial_stress);
 
-    // Use Newton sub-iteration to determine the scalar effective inelastic strain increment
+    // Use Newton iteration to determine the scalar effective inelastic strain increment
     Real scalar_effective_inelastic_strain = 0;
     unsigned int iteration = 0;
-    Real residual = 10;  // use a large number here to guarantee at least one loop through while
-    Real norm_residual = 10;
-    Real first_norm_residual = 10;
+
+    Real residual, norm_residual, first_norm_residual = 0;
 
     // create an output string with iteration information when errors occur
     std::string iteration_output;
 
-    while (iteration < _max_its &&
-          norm_residual > _absolute_tolerance &&
-          (norm_residual/first_norm_residual) > _relative_tolerance)
+    do
     {
       iterationInitialize(scalar_effective_inelastic_strain);
 
@@ -104,7 +101,9 @@ RecomputeRadialReturn::computeStress(RankTwoTensor & strain_increment,
 
       iterationFinalize(scalar_effective_inelastic_strain);
       ++iteration;
-    }
+    } while (iteration < _max_its &&
+            norm_residual > _absolute_tolerance &&
+            (norm_residual/first_norm_residual) > _relative_tolerance);
 
     if (_output_iteration_info)
       _console << iteration_output << std::endl;
@@ -135,8 +134,8 @@ RecomputeRadialReturn::computeStress(RankTwoTensor & strain_increment,
 Real
 RecomputeRadialReturn::getIsotropicShearModulus()
 {
-  Real shear_modulus = _elasticity_tensor[_qp](1,2,1,2);
-  if (_mesh.dimension() == 3 && shear_modulus != _elasticity_tensor[_qp](1,3,1,3))
+  Real shear_modulus = _elasticity_tensor[_qp](0,1,0,1);
+  if (_mesh.dimension() == 3 && shear_modulus != _elasticity_tensor[_qp](0,2,0,2))
     mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
   return shear_modulus;
 }

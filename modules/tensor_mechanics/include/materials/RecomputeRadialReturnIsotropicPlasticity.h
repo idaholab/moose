@@ -11,15 +11,14 @@
 
 /**
  * This class uses the Discrete material in a radial return isotropic plasticity
- * model.  This class is one of the basic
- * radial return constitutive models; more complex constitutive models combine
- * creep and plasticity.
+ * model.  This class is one of the basic radial return constitutive models;
+ * more complex constitutive models combine creep and plasticity.
  *
- * This class inherits from RecomputeRadialReturnStressIncrement and must be used
- * in conjunction with ComputeRadialReturnMappingStress.  This class calculates
+ * This class inherits from RecomputeRadialReturn and must be used
+ * in conjunction with ComputeReturnMappingStress.  This class calculates
  * an effective trial stress, an effective scalar plastic strain
  * increment, and the derivative of the scalar effective plastic strain increment;
- * these values are passed to the RecomputeRadialReturnStressIncrement to compute
+ * these values are passed to the RecomputeRadialReturn to compute
  * the radial return stress increment.  This isotropic plasticity class also
  * computes the plastic strain as a stateful material property.
  *
