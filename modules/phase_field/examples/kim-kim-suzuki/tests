@@ -1,0 +1,17 @@
+[Tests]
+  [./kks_example_dirichlet]
+    type = RunApp
+    input = 'kks_example_dirichlet.i'
+    cli_args = '--check-input'
+  [../]
+  [./kks_example_noflux]
+    type = RunApp
+    input = 'kks_example_noflux.i'
+    cli_args = '--check-input'
+  [../]
+  [./kks_example_ternary]
+    type = RunApp
+    input = 'kks_example_ternary.i'
+    cli_args = '--check-input'
+  [../]
+[]

@@ -1,0 +1,7 @@
+[Tests]
+  [./effective_th_cond]
+    type = RunApp
+    input = 'effective_th_cond.i'
+    cli_args = '--check-input'
+  [../]
+[]

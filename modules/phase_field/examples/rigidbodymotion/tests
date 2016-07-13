@@ -1,0 +1,17 @@
+[Tests]
+  [./AC_CH_Multigrain]
+    type = RunApp
+    input = 'AC_CH_Multigrain.i'
+    cli_args = '--check-input'
+  [../]
+  [./AC_CH_advection_constforce_rect]
+    type = RunApp
+    input = 'AC_CH_advection_constforce_rect.i'
+    cli_args = '--check-input'
+  [../]
+  [./grain_forcedensity_ext]
+    type = RunApp
+    input = 'grain_forcedensity_ext.i'
+    cli_args = '--check-input'
+  [../]
+[]
