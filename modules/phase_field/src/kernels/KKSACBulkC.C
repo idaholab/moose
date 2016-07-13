@@ -24,7 +24,7 @@ KKSACBulkC::KKSACBulkC(const InputParameters & parameters) :
     _cb_name(getVar("cb", 0)->name()),
     _cb_var(coupled("cb")),
     _cb(coupledValue("cb")),
-    _prop_h(getMaterialProperty<Real>("h")),
+    _prop_h(getMaterialProperty<Real>("h_name")),
     _prop_dFadca(getMaterialPropertyDerivative<Real>("fa_name", _ca_name)),
     _prop_d2Fadca2(getMaterialPropertyDerivative<Real>("fa_name", _ca_name, _ca_name)),
     _prop_d2Fbdcb2(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _cb_name))
