@@ -8,7 +8,7 @@
 []
 
 [GlobalParams]
-  op_num = 15
+  op_num = 8
   var_name_base = gr
   grain_num = 110
 []
@@ -54,6 +54,10 @@
     family = MONOMIAL
   [../]
   [./EBSD_grain]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./RGB]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -145,6 +149,14 @@
     data_name = 'grain'
     execute_on = 'initial'
   [../]
+  [./RGB]
+    type = OutputRGB
+    variable = RGB
+    euler_angle_provider = ebsd
+    grain_tracker_object = grain_tracker
+    crystal_structure = cubic
+    execute_on = 'initial timestep_end'
+  [../]
 []
 
 [BCs]
@@ -226,7 +238,6 @@
   [./grain_tracker]
     type = GrainTracker
     threshold = 0.2
-    connecting_threshold = 0.2
     compute_op_maps = true
     execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd

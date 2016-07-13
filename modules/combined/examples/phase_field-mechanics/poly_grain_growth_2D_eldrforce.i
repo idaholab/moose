@@ -12,7 +12,7 @@
 []
 
 [GlobalParams]
-  op_num = 15
+  op_num = 8
   var_name_base = gr
   grain_num = 36
   use_displaced_mesh = true
@@ -146,6 +146,7 @@
     variable = vonmises_stress
     rank_two_tensor = stress
     scalar_type = VonMisesStress
+    execute_on = timestep_end
   [../]
   [./euler_angle]
     type = OutputEulerAngles
@@ -153,6 +154,7 @@
     euler_angle_provider = euler_angle_file
     GrainTracker_object = grain_tracker
     output_euler_angle = 'phi1'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -160,7 +162,7 @@
   [./Periodic]
     [./All]
       auto_direction = 'x'
-      variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11 gr12 gr13 gr14'
+      variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7'
     [../]
   [../]
   [./top_displacement]
@@ -235,14 +237,9 @@
   [./grain_tracker]
     type = GrainTracker
     threshold = 0.2
-    convex_hull_buffer = 5.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.05
     compute_op_maps = true
     execute_on = 'initial timestep_begin'
-    flood_entity_type = elemental
+    flood_entity_type = ELEMENTAL
   [../]
   [./euler_angle_file]
     type = EulerAngleFileReader
