@@ -1,7 +1,0 @@
-[Tests]
-  [./bicrystal]
-    type = 'Exodiff'
-    input = 'OutputRGB_bicrystal.i'
-    exodiff = 'OutputRGB_bicrystal_out.e'
-  [../]
-[]
