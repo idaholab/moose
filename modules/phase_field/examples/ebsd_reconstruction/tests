@@ -1,0 +1,7 @@
+[Tests]
+  [./IN100-111grn]
+    type = RunApp
+    input = 'IN100-111grn.i'
+    cli_args = '--check-input'
+  [../]
+[]

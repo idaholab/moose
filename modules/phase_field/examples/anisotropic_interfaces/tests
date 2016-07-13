@@ -1,0 +1,7 @@
+[Tests]
+  [./snow]
+    type = RunApp
+    input = 'snow.i'
+    cli_args = '--check-input'
+  [../]
+[]

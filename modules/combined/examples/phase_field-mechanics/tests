@@ -1,0 +1,37 @@
+[Tests]
+  [./Conserved]
+    type = RunApp
+    input = 'Conserved.i'
+    cli_args = '--check-input'
+  [../]
+  [./EBSD_reconstruction_grain_growth_mech]
+    type = RunApp
+    input = 'EBSD_reconstruction_grain_growth_mech.i'
+    cli_args = '--check-input'
+  [../]
+  [./Nonconserved]
+    type = RunApp
+    input = 'Nonconserved.i'
+    cli_args = '--check-input'
+  [../]
+  [./Pattern1]
+    type = RunApp
+    input = 'Pattern1.i'
+    cli_args = '--check-input'
+  [../]
+  [./grain_texture]
+    type = RunApp
+    input = 'grain_texture.i'
+    cli_args = '--check-input'
+  [../]
+  [./hex_grain_growth_2D_eldrforce]
+    type = RunApp
+    input = 'hex_grain_growth_2D_eldrforce.i'
+    cli_args = '--check-input'
+  [../]
+  [./poly_grain_growth_2D_eldrforce]
+    type = RunApp
+    input = 'poly_grain_growth_2D_eldrforce.i'
+    cli_args = '--check-input'
+  [../]
+[]
