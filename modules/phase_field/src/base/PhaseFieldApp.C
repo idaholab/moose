@@ -159,7 +159,7 @@
  */
 #include "BndsCalcAux.h"
 #include "CrossTermGradientFreeEnergy.h"
-#include "Euler2RGBAux.h"
+#include "EulerAngleVariables2RGBAux.h"
 #include "FeatureFloodCountAux.h"
 #include "KKSGlobalFreeEnergy.h"
 #include "PFCEnergyDensity.h"
@@ -168,7 +168,7 @@
 #include "EBSDReaderPointDataAux.h"
 #include "TotalFreeEnergy.h"
 #include "OutputEulerAngles.h"
-#include "OutputRGB.h"
+#include "EulerAngleProvider2RGBAux.h"
 
 /*
  * Functions
@@ -204,8 +204,9 @@
 #include "BicrystalBoundingBoxICAction.h"
 #include "BicrystalCircleGrainICAction.h"
 #include "CHPFCRFFSplitKernelAction.h"
-#include "DisplacementGradientsAction.h"
 #include "CHPFCRFFSplitVariablesAction.h"
+#include "DisplacementGradientsAction.h"
+#include "EulerAngle2RGBAction.h"
 #include "HHPFCRFFSplitKernelAction.h"
 #include "HHPFCRFFSplitVariablesAction.h"
 #include "MatVecRealGradAuxKernelAction.h"
@@ -397,7 +398,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
-  registerAux(Euler2RGBAux);
+  registerAux(EulerAngleVariables2RGBAux);
   registerAux(FeatureFloodCountAux);
   registerAux(KKSGlobalFreeEnergy);
   registerAux(PFCEnergyDensity);
@@ -406,7 +407,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(EBSDReaderPointDataAux);
   registerAux(TotalFreeEnergy);
   registerAux(OutputEulerAngles);
-  registerAux(OutputRGB);
+  registerAux(EulerAngleProvider2RGBAux);
 
   registerUserObject(ComputeGrainCenterUserObject);
   registerUserObject(ComputeGrainForceAndTorque);
@@ -442,6 +443,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("CHPFCRFFSplitVariablesAction", "Variables/CHPFCRFFSplitVariables");
   syntax.registerActionSyntax("DisplacementGradientsAction", "Modules/PhaseField/DisplacementGradients");
   syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs");  // placeholder
+  syntax.registerActionSyntax("EulerAngle2RGBAction", "Modules/PhaseField/EulerAngles2RGB");
   syntax.registerActionSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
   syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
   syntax.registerActionSyntax("MatVecRealGradAuxKernelAction", "AuxKernels/MatVecRealGradAuxKernel");
@@ -465,6 +467,8 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(DisplacementGradientsAction, "add_variable");
   registerAction(DisplacementGradientsAction, "add_material");
   registerAction(DisplacementGradientsAction, "add_kernel");
+  registerAction(EulerAngle2RGBAction, "add_aux_variable");
+  registerAction(EulerAngle2RGBAction, "add_aux_kernel");
   registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
   registerAction(MatVecRealGradAuxKernelAction, "add_aux_kernel");

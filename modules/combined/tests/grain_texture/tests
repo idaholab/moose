@@ -5,10 +5,23 @@
     csvdiff = 'grain_texture_test_1_out_textureInfo_0001.csv'
     recover = false
   [../]
+
   [./3D]
     type = 'CSVDiff'
     input = 'grain_texture_test_2.i'
     csvdiff = 'grain_texture_test_2_out_textureInfo_0001.csv'
     recover = false
+  [../]
+
+  [./EulerAngleProvider2RGBAux]
+    type = 'Exodiff'
+    input = 'EulerAngleProvider2RGBAux_bicrystal.i'
+    exodiff = 'EulerAngleProvider2RGBAux_bicrystal_out.e'
+  [../]
+
+  [./EulerAngle2RGBAction]
+    type = 'Exodiff'
+    input = 'EulerAngle2RGBAction.i'
+    exodiff = 'EulerAngle2RGBAction_out.e'
   [../]
 []

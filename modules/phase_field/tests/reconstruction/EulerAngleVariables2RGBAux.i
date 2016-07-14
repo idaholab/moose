@@ -68,6 +68,7 @@
     data_name = phase
     execute_on = initial
   [../]
+
   [./symmetry_aux]
     type = EBSDReaderPointDataAux
     variable = symmetry
@@ -77,7 +78,7 @@
   [../]
 
   [./rgb]
-    type = Euler2RGBAux
+    type = EulerAngleVariables2RGBAux
     variable = rgb
     phi1 = phi1
     phi = phi

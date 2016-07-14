@@ -4,28 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef OUTPUTRGB_H
-#define OUTPUTRGB_H
+#ifndef EULERANGLEPROVIDER2RGBAUX_H
+#define EULERANGLEPROVIDER2RGBAUX_H
 
 #include "AuxKernel.h"
 #include "EulerAngleProvider.h"
 #include "GrainTracker.h"
 
 //Forward Declarations
-class OutputRGB;
+class EulerAngleProvider2RGBAux;
 class GrainTracker;
 class EulerAngleProvider;
 
 template<>
-InputParameters validParams<OutputRGB>();
+InputParameters validParams<EulerAngleProvider2RGBAux>();
 
 /**
  * Output euler angles from user object to an AuxVariable.
  */
-class OutputRGB : public AuxKernel
+class EulerAngleProvider2RGBAux : public AuxKernel
 {
 public:
-  OutputRGB(const InputParameters & parameters);
+  EulerAngleProvider2RGBAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
@@ -36,6 +36,9 @@ protected:
   /// Crystal structure of the sample
   const unsigned int _xtal_class;
 
+  /// Type of value to be outputted
+  const unsigned int _output_type;
+
   /// Object providing the Euler angles
   const EulerAngleProvider & _euler;
 
@@ -43,4 +46,4 @@ protected:
   const GrainTracker & _grain_tracker;
 };
 
-#endif //OUTPUTRGB_H
+#endif //EULERANGLEPROVIDER2RGBAUX_H

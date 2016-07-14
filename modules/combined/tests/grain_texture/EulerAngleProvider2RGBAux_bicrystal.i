@@ -85,7 +85,7 @@
     bubble_object = grain_tracker
   [../]
   [./rgb]
-    type = OutputRGB
+    type = EulerAngleProvider2RGBAux
     variable = rgb
     euler_angle_provider = euler_angle_file
     grain_tracker_object = grain_tracker
