@@ -76,11 +76,11 @@ GrainTracker::execute()
 void
 GrainTracker::finalize()
 {
-  Moose::perf_log.push("finalize()", "GrainTracker");
-
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
+
+  Moose::perf_log.push("finalize()", "GrainTracker");
 
   expandHalos();
 
@@ -103,16 +103,7 @@ GrainTracker::finalize()
 
   _console << "Finished inside of updateFieldInfo" << std::endl;
 
-  // Calculate and out output bubble volume data
-  if (_pars.isParamValid("bubble_volume_file"))
-  {
-    calculateBubbleVolumes();
-    std::vector<Real> data; data.reserve(_all_feature_volumes.size() + 2);
-    data.push_back(_fe_problem.timeStep());
-    data.push_back(_fe_problem.time());
-    data.insert(data.end(), _all_feature_volumes.begin(), _all_feature_volumes.end());
-    writeCSVFile(getParam<FileName>("bubble_volume_file"), data);
-  }
+  writeFeatureVolumeFile();
 
   if (_compute_op_maps)
   {
@@ -834,6 +825,17 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
 void
 GrainTracker::updateFieldInfo()
 {
+  // Whether or not we should store and write out volume information
+  bool gather_volumes = _pars.isParamValid("bubble_volume_file");
+  if (gather_volumes)
+  {
+    // store volumes per feature
+    _all_feature_volumes.reserve(_unique_grains.size());
+
+    // store totals per variable (or smaller)
+    _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 0 : _maps_size);
+  }
+
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     _feature_maps[map_num].clear();
 
@@ -880,6 +882,14 @@ GrainTracker::updateFieldInfo()
 
     for (auto entity : grain_pair.second._ghosted_ids)
       _ghosted_entity_ids[entity] = 1;
+
+    // Save off volume information (no sort required)
+    if (gather_volumes)
+    {
+      _all_feature_volumes.push_back(grain_pair.second._volume);
+      if (grain_pair.second._intersects_boundary)
+        _total_volume_intersecting_boundary[map_idx] += grain_pair.second._volume;
+    }
   }
 }
 
@@ -957,64 +967,6 @@ GrainTracker::boundingRegionDistance(std::vector<MeshTools::BoundingBox> & bboxe
 
   return min_distance;
 }
-
-void
-GrainTracker::calculateBubbleVolumes()
-{
-  Moose::perf_log.push("calculateBubbleVolumes()", "GrainTracker");
-
-  // The size of the bubble array will be sized to the max index of the unique grains map
-  unsigned int max_id = _unique_grains.size() ? _unique_grains.rbegin()->first + 1: 0;
-  _all_feature_volumes.resize(max_id, 0);
-
-  const MeshBase::const_element_iterator el_end = _mesh.getMesh().active_local_elements_end();
-  for (MeshBase::const_element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != el_end; ++el)
-  {
-    Elem * elem = *el;
-    auto elem_n_nodes = elem->n_nodes();
-    auto curr_volume = elem->volume();
-
-    for (auto & grain_pair : _unique_grains)
-    {
-      if (grain_pair.second._status == Status::INACTIVE)
-        continue;
-
-      if (_is_elemental)
-      {
-        auto elem_id = elem->id();
-        if (grain_pair.second._local_ids.find(elem_id) != grain_pair.second._local_ids.end())
-        {
-          mooseAssert(grain_pair.first < _all_feature_volumes.size(), "_all_feature_volumes access out of bounds");
-          _all_feature_volumes[grain_pair.first] += curr_volume;
-          break;
-        }
-      }
-      else
-      {
-        // Count the number of nodes on this element which are flooded.
-        unsigned int flooded_nodes = 0;
-        for (unsigned int node = 0; node < elem_n_nodes; ++node)
-        {
-          auto node_id = elem->node(node);
-          if (grain_pair.second._local_ids.find(node_id) != grain_pair.second._local_ids.end())
-            ++flooded_nodes;
-        }
-
-        // If a majority of the nodes for this element are flooded,
-        // assign its volume to the current bubble_counter entry.
-        if (flooded_nodes >= elem_n_nodes / 2)
-          _all_feature_volumes[grain_pair.first] += curr_volume;
-      }
-    }
-  }
-
-  // do all the sums!
-  _communicator.sum(_all_feature_volumes);
-
-  Moose::perf_log.pop("calculateBubbleVolumes()", "GrainTracker");
-}
-
-
 
 /*************************************************
  ************** Helper Structures ****************

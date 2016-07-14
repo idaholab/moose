@@ -61,8 +61,8 @@ public:
     VARIABLE_COLORING,
     GHOSTED_ENTITIES,
     HALOS,
+    CENTROID,
     ACTIVE_BOUNDS,
-    CENTROID
   };
 
   // Retrieve field information
@@ -86,6 +86,8 @@ public:
         _var_idx(var_idx),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
+        _volume(0.0),
+        _vol_count(0),
         _status(Status::NOT_MARKED),
         _intersects_boundary(false)
     {
@@ -98,8 +100,26 @@ public:
      * this, we are explicitly deleting the copy constructor, and copy
      * assignment operator.
      */
+#ifdef __INTEL_COMPILER
+    /**
+     * 2016-07-14
+     * The INTEL compiler we are currently using (2013 with GCC 4.8) appears to have a bug
+     * introduced by the addition of the Point member in this structure. Even though
+     * it supports move semantics on other non-POD types like libMesh::BoundingBox,
+     * it fails to compile this class with the "centroid" member. Specifically, it
+     * supports the move operation into the vector type but fails to work with the
+     * bracket operator on std::map and the std::sort algorithm used in this class.
+     * It does work with std::map::emplace() but that syntax is much less appealing
+     * and still doesn't work around the issue. For now, I'm allowing the copy
+     * constructor so that this class works under the Intel compiler but there
+     * may be a degradation in performance in that case.
+     */
+    FeatureData(const FeatureData & f) = default;
+    FeatureData & operator=(const FeatureData & f) = default;
+#else // GCC CLANG
     FeatureData(const FeatureData & f) = delete;
     FeatureData & operator=(const FeatureData & f) = delete;
+#endif
     ///@}
 
     ///@{
@@ -175,6 +195,15 @@ public:
 
     /// The minimum entity seen in the _local_ids, used for sorting features
     dof_id_type _min_entity_id;
+
+    /// The volume of the feature
+    Real _volume;
+
+    /// The count of entities contributing to the volume calculation
+    unsigned int _vol_count;
+
+    /// The centroid of the feature (average of coordinates from entities participating in the volume calculation)
+    Point _centroid;
 
     /// The status of a feature (used mostly in derived classes like the GrainTracker)
     Status _status;
@@ -265,9 +294,9 @@ protected:
   void updateRegionOffsets();
 
   /**
-   * This routine uses the bubble_sets data structure to calculate the volume of each stored bubble.
+   * This routine writes a CSV file of volume information for each feature.
    */
-  virtual void calculateBubbleVolumes();
+  virtual void writeFeatureVolumeFile();
 
   /**
    * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
@@ -303,13 +332,16 @@ protected:
   /// The vector of coupled in variables
   std::vector<MooseVariable *> _vars;
 
-  /// The threshold above where a node may begin a new region (bubble)
+  /// The threshold above (or below) where a node may begin a new region (bubble)
   const Real _threshold;
   Real _step_threshold;
 
-  /// The threshold above which neighboring nodes are flooded (where regions can be extended but not started)
+  /// The threshold above (or below) which neighboring nodes are flooded (where regions can be extended but not started)
   const Real _connecting_threshold;
   Real _step_connecting_threshold;
+
+  /// The threshold above which the entity contributes to the volume of the feature.
+  const Real _volume_threshold;
 
   /// A reference to the mesh
   MooseMesh & _mesh;
@@ -338,6 +370,9 @@ protected:
    * instead.
    */
   const bool _use_less_than_threshold_comparison;
+
+  /// Boolean indicating whether or not feature volumes are calculated and stored
+  const bool _calculate_feature_volumes;
 
   // Convenience variable holding the number of variables coupled into this object
   const unsigned long _n_vars;
@@ -438,6 +473,9 @@ protected:
    * false.
    */
   bool _compute_boundary_intersecting_volume;
+
+  /// The set of entities on the boundary of the domain used for calculating boundary intersecting volumes
+  std::set<dof_id_type> _all_boundary_entity_ids;
 
   /// Determines if the flood counter is elements or not (nodes)
   bool _is_elemental;
