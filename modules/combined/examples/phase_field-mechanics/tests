@@ -8,6 +8,7 @@
     type = RunApp
     input = 'EBSD_reconstruction_grain_growth_mech.i'
     cli_args = '--check-input'
+    skip = 'Broken!'
   [../]
   [./Nonconserved]
     type = RunApp

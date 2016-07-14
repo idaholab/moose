@@ -109,12 +109,18 @@
   [./srain] #We use small deformation mechanics
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y'
-    thermal_expansion_coeff = 1e-6
     temperature = T
     block = 1
   [../]
   [./stress] #We use linear elasticity
     type = ComputeLinearElasticStress
+    block = 1
+  [../]
+  [./thermal_strain]
+    type= ComputeThermalExpansionEigenStrain
+    thermal_expansion_coeff = 1e-6
+    temperature = T
+    stress_free_reference_temperature = 273
     block = 1
   [../]
 []
