@@ -170,85 +170,85 @@ NavierStokesMaterial::computeProperties()
 void
 NavierStokesMaterial::computeHSUPG(unsigned int qp)
 {
-  // Grab reference to linear Lagrange finite element object pointer,
-  // currently this is always a linear Lagrange element, so this might need to
-  // be generalized if we start working with higher-order elements...
-  FEBase*& fe(_assembly.getFE(FEType(), _current_elem->dim()));
+  // // Grab reference to linear Lagrange finite element object pointer,
+  // // currently this is always a linear Lagrange element, so this might need to
+  // // be generalized if we start working with higher-order elements...
+  // FEBase*& fe(_assembly.getFE(FEType(), _current_elem->dim()));
+  //
+  // // Grab references to FE object's mapping data from the _subproblem's FE object
+  // const std::vector<Real> & dxidx(fe->get_dxidx());
+  // const std::vector<Real> & dxidy(fe->get_dxidy());
+  // const std::vector<Real> & dxidz(fe->get_dxidz());
+  // const std::vector<Real> & detadx(fe->get_detadx());
+  // const std::vector<Real> & detady(fe->get_detady());
+  // const std::vector<Real> & detadz(fe->get_detadz());
+  // const std::vector<Real> & dzetadx(fe->get_dzetadx()); // Empty in 2D
+  // const std::vector<Real> & dzetady(fe->get_dzetady()); // Empty in 2D
+  // const std::vector<Real> & dzetadz(fe->get_dzetadz()); // Empty in 2D
+  //
+  // // Bounds checking on element data
+  // mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
+  // mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");
+  // mooseAssert(qp < dxidz.size(), "Insufficient data in dxidz array!");
+  //
+  // mooseAssert(qp < detadx.size(), "Insufficient data in detadx array!");
+  // mooseAssert(qp < detady.size(), "Insufficient data in detady array!");
+  // mooseAssert(qp < detadz.size(), "Insufficient data in detadz array!");
+  //
+  // if (_mesh_dimension == 3)
+  // {
+  //   mooseAssert(qp < dzetadx.size(), "Insufficient data in dzetadx array!");
+  //   mooseAssert(qp < dzetady.size(), "Insufficient data in dzetady array!");
+  //   mooseAssert(qp < dzetadz.size(), "Insufficient data in dzetadz array!");
+  // }
+  //
+  // // The velocity vector at this quadrature point.
+  // RealVectorValue U(_u_vel[qp],_v_vel[qp],_w_vel[qp]);
+  //
+  // // Pull out element inverse map values at the current qp into a little dense matrix
+  // Real dxi_dx[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
+  //
+  // dxi_dx[0][0] = dxidx[qp];  dxi_dx[0][1] = dxidy[qp];
+  // dxi_dx[1][0] = detadx[qp]; dxi_dx[1][1] = detady[qp];
+  //
+  // // OK to access third entries on 2D elements if LIBMESH_DIM==3, though they
+  // // may be zero...
+  // if (LIBMESH_DIM == 3)
+  // {
+  //   /**/             /**/               dxi_dx[0][2] = dxidz[qp];
+  //   /**/             /**/               dxi_dx[1][2] = detadz[qp];
+  // }
+  //
+  // // The last row of entries available only for 3D elements.
+  // if (_mesh_dimension == 3)
+  // {
+  //   dxi_dx[2][0] = dzetadx[qp];   dxi_dx[2][1] = dzetady[qp];   dxi_dx[2][2] = dzetadz[qp];
+  // }
+  //
+  // // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix
+  // // from Ben and Bova's paper by summing over k...
+  // Real g[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
+  // for (unsigned int i = 0; i < 3; ++i)
+  //   for (unsigned int j = 0; j < 3; ++j)
+  //     for (unsigned int k = 0; k < 3; ++k)
+  //       g[i][j] += dxi_dx[k][j] * dxi_dx[k][i];
+  //
+  // // Compute the denominator of the h_supg term: U * (g) * U
+  // Real denom = 0.;
+  // for (unsigned int i = 0; i < 3; ++i)
+  //   for (unsigned int j = 0; j < 3; ++j)
+  //     denom += U(j) * g[i][j] * U(i);
+  //
+  // // Compute h_supg.  Some notes:
+  // // .) The 2 coefficient in this term should be a 1 if we are using tets/triangles.
+  // // .) The denominator will be identically zero only if the velocity
+  // //    is identically zero, in which case we can't divide by it.
+  // if (denom != 0.0)
+  //   _hsupg[qp] = 2.* sqrt( U.norm_sq() / denom );
+  // else
+  //   _hsupg[qp] = 0.;
 
-  // Grab references to FE object's mapping data from the _subproblem's FE object
-  const std::vector<Real> & dxidx(fe->get_dxidx());
-  const std::vector<Real> & dxidy(fe->get_dxidy());
-  const std::vector<Real> & dxidz(fe->get_dxidz());
-  const std::vector<Real> & detadx(fe->get_detadx());
-  const std::vector<Real> & detady(fe->get_detady());
-  const std::vector<Real> & detadz(fe->get_detadz());
-  const std::vector<Real> & dzetadx(fe->get_dzetadx()); // Empty in 2D
-  const std::vector<Real> & dzetady(fe->get_dzetady()); // Empty in 2D
-  const std::vector<Real> & dzetadz(fe->get_dzetadz()); // Empty in 2D
-
-  // Bounds checking on element data
-  mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
-  mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");
-  mooseAssert(qp < dxidz.size(), "Insufficient data in dxidz array!");
-
-  mooseAssert(qp < detadx.size(), "Insufficient data in detadx array!");
-  mooseAssert(qp < detady.size(), "Insufficient data in detady array!");
-  mooseAssert(qp < detadz.size(), "Insufficient data in detadz array!");
-
-  if (_mesh_dimension == 3)
-  {
-    mooseAssert(qp < dzetadx.size(), "Insufficient data in dzetadx array!");
-    mooseAssert(qp < dzetady.size(), "Insufficient data in dzetady array!");
-    mooseAssert(qp < dzetadz.size(), "Insufficient data in dzetadz array!");
-  }
-
-  // The velocity vector at this quadrature point.
-  RealVectorValue U(_u_vel[qp],_v_vel[qp],_w_vel[qp]);
-
-  // Pull out element inverse map values at the current qp into a little dense matrix
-  Real dxi_dx[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
-
-  dxi_dx[0][0] = dxidx[qp];  dxi_dx[0][1] = dxidy[qp];
-  dxi_dx[1][0] = detadx[qp]; dxi_dx[1][1] = detady[qp];
-
-  // OK to access third entries on 2D elements if LIBMESH_DIM==3, though they
-  // may be zero...
-  if (LIBMESH_DIM == 3)
-  {
-    /**/             /**/               dxi_dx[0][2] = dxidz[qp];
-    /**/             /**/               dxi_dx[1][2] = detadz[qp];
-  }
-
-  // The last row of entries available only for 3D elements.
-  if (_mesh_dimension == 3)
-  {
-    dxi_dx[2][0] = dzetadx[qp];   dxi_dx[2][1] = dzetady[qp];   dxi_dx[2][2] = dzetadz[qp];
-  }
-
-  // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix
-  // from Ben and Bova's paper by summing over k...
-  Real g[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      for (unsigned int k = 0; k < 3; ++k)
-        g[i][j] += dxi_dx[k][j] * dxi_dx[k][i];
-
-  // Compute the denominator of the h_supg term: U * (g) * U
-  Real denom = 0.;
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      denom += U(j) * g[i][j] * U(i);
-
-  // Compute h_supg.  Some notes:
-  // .) The 2 coefficient in this term should be a 1 if we are using tets/triangles.
-  // .) The denominator will be identically zero only if the velocity
-  //    is identically zero, in which case we can't divide by it.
-  if (denom != 0.0)
-    _hsupg[qp] = 2.* sqrt( U.norm_sq() / denom );
-  else
-    _hsupg[qp] = 0.;
-
-  // Debugging: Just use hmin for the element!
+  // Simple (and fast) implementation: Just use hmin for the element!
   _hsupg[qp] = _current_elem->hmin();
 }
 
