@@ -57,10 +57,6 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./RGB]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
 []
 
 [ICs]
@@ -149,14 +145,6 @@
     data_name = 'grain'
     execute_on = 'initial'
   [../]
-  [./RGB]
-    type = OutputRGB
-    variable = RGB
-    euler_angle_provider = ebsd
-    grain_tracker_object = grain_tracker
-    crystal_structure = cubic
-    execute_on = 'initial timestep_end'
-  [../]
 []
 
 [BCs]
@@ -177,6 +165,16 @@
     variable = disp_y
     boundary = bottom
     value = 0.0
+  [../]
+[]
+
+[Modules]
+  [./PhaseField]
+    [./EulerAngles2RGB]
+      crystal_structure = cubic
+      euler_angle_provider = ebsd
+      grain_tracker_object = grain_tracker
+    [../]
   [../]
 []
 
