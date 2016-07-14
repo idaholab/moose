@@ -90,6 +90,9 @@
     type = GrainTracker
     threshold = 0.5
     connecting_threshold = 0.2
+    # Note: This is here for demonstration purposes
+    # use elemental for most simulations
+    flood_entity_type = NODAL
   [../]
   [./DOFs]
     type = NumDOFs

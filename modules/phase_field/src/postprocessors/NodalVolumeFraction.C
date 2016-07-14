@@ -15,6 +15,7 @@ InputParameters validParams<NodalVolumeFraction>()
   params.addParam<FileName>("Avrami_file", "filename for Avrami analysis info (ln time and Avrami)");
   params.addParam<Real>("equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
 
+  params.set<bool>("calculate_feature_volumes") = true;
   return params;
 }
 
@@ -25,6 +26,9 @@ NodalVolumeFraction::NodalVolumeFraction(const InputParameters & parameters) :
 {
   if (parameters.isParamValid("Avrami_file") && _equil_fraction < 0.0)
     mooseError("please supply an equilibrium fraction of 2nd phase for Avrami analysis (NodalVolumeFraction).");
+
+  if (!_is_elemental)
+    mooseError("NodalVolumeFraction only calculates volumes when flood_entity_type = ELEMENTAL.");
 }
 
 
@@ -33,9 +37,8 @@ NodalVolumeFraction::finalize()
 {
   FeatureFloodCount::finalize();
 
-  // If the bubble volume calculation wasn't done yet, do now.
-  if (_all_feature_volumes.empty())
-    FeatureFloodCount::calculateBubbleVolumes();
+  mooseAssert(!_all_feature_volumes.empty(), "All feature volumes should not be empty()");
+
   calculateBubbleFraction();
 
   // Now calculate the Avrami data if requested

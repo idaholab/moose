@@ -81,6 +81,11 @@
 
   [./halo6]
   [../]
+
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -175,6 +180,13 @@
     field_display = HALOS
     bubble_object = grain_tracker
   [../]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    execute_on = timestep_end
+    field_display = CENTROID
+    bubble_object = grain_tracker
+  [../]
 []
 
 [BCs]
@@ -201,6 +213,7 @@
     threshold = 0.2
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
+    volume_threshold = 0.5
   [../]
   [./dt]
     # Outputs the current time step

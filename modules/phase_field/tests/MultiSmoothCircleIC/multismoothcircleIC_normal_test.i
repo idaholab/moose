@@ -70,6 +70,7 @@
     type = FeatureFloodCount
     variable = c
     execute_on = 'initial timestep_end'
+    flood_entity_type = NODAL
   [../]
 []
 

@@ -165,6 +165,7 @@
     use_single_map = false
     use_global_numbering = true
     outputs = none
+    flood_entity_type = NODAL
   [../]
 []
 

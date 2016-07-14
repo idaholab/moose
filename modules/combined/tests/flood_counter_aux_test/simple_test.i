@@ -102,6 +102,7 @@
     threshold = 0.3
     execute_on = timestep_end
     outputs = none
+    flood_entity_type = NODAL
   [../]
 []
 
