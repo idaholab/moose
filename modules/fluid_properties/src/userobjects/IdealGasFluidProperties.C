@@ -7,6 +7,7 @@ InputParameters validParams<IdealGasFluidProperties>()
   params.addRequiredParam<Real>("gamma", "gamma value (cp/cv)");
   params.addRequiredParam<Real>("R", "Gas constant");
 
+  params.addParam<Real>("beta", 0, "Coefficient of thermal expansion");
   params.addParam<Real>("mu", 0, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 0, "Thermal conductivity, W/(m-K)");
 
@@ -18,6 +19,7 @@ IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & paramet
     _gamma(getParam<Real>("gamma")),
     _R(getParam<Real>("R")),
 
+    _beta(getParam<Real>("beta")),
     _mu(getParam<Real>("mu")),
     _k(getParam<Real>("k"))
 {
@@ -110,8 +112,7 @@ IdealGasFluidProperties::rho_e_dps(Real, Real, Real &, Real &, Real &, Real &, R
 Real
 IdealGasFluidProperties::beta(Real, Real) const
 {
-  mooseError(name() << ": beta() not implemented");
-  return 0;
+  return _beta;
 }
 
 void
