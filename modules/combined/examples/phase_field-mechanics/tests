@@ -27,11 +27,11 @@
   [./hex_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'hex_grain_growth_2D_eldrforce.i'
-    cli_args = '--check-input'
+    cli_args = '--check-input Executioner/Adaptivity/initial_adaptivity=0'
   [../]
   [./poly_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'poly_grain_growth_2D_eldrforce.i'
-    cli_args = '--check-input'
+    cli_args = '--check-input Executioner/Adaptivity/initial_adaptivity=0'
   [../]
 []

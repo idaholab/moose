@@ -2,7 +2,7 @@
   [./grain_growth_2D_graintracker]
     type = RunApp
     input = 'grain_growth_2D_graintracker.i'
-    cli_args = '--check-input'
+    cli_args = '--check-input Executioner/Adaptivity/initial_adaptivity=0'
   [../]
   [./grain_growth_2D_random]
     type = RunApp
@@ -12,12 +12,12 @@
   [./grain_growth_2D_voronoi]
     type = RunApp
     input = 'grain_growth_2D_voronoi.i'
-    cli_args = '--check-input'
+    cli_args = '--check-input Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
   [../]
   [./grain_growth_2D_voronoi_newadapt]
     type = RunApp
     input = 'grain_growth_2D_voronoi_newadapt.i'
-    cli_args = '--check-input'
+    cli_args = '--check-input Adaptivity/max_h_level=0'
   [../]
   [./grain_growth_3D]
     type = RunApp
@@ -32,6 +32,6 @@
   [./test_problem]
     type = RunApp
     input = 'test_problem.i'
-    cli_args = '--check-input'
+    cli_args = '--check-input Executioner/Adaptivity/initial_adaptivity=0'
   [../]
 []
