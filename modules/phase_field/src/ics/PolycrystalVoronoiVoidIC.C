@@ -50,9 +50,10 @@ PolycrystalVoronoiVoidIC::initialSetup()
   }
   _range = _top_right - _bottom_left;
 
-  //Create _centerpoints and _assigned_op vectors
+  // Create _centerpoints and _assigned_op vectors
   computeGrainCenters();
-  //Call initial setup from MultiSmoothCircleIC to create _centers and _radii for voids
+
+  // Call initial setup from MultiSmoothCircleIC to create _centers and _radii for voids
   MultiSmoothCircleIC::initialSetup();
 }
 
@@ -72,7 +73,7 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
       try_again = false;
       num_tries++;
 
-      if (num_tries > _numtries)
+      if (num_tries > _max_num_tries)
         mooseError("Too many tries of assigning void centers in PolycrystalVoronoiVoidIC");
 
       Point rand_point;
@@ -157,7 +158,6 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
       }
 
     } while (try_again == true);
-
   }
 }
 
@@ -167,11 +167,11 @@ PolycrystalVoronoiVoidIC::computeGrainCenters()
   if (_op_num > _grain_num)
     mooseError("ERROR in PolycrystalVoronoiVoidIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
-  //Initialize vectors
+  // Initialize vectors
   _centerpoints.resize(_grain_num);
   _assigned_op.resize(_grain_num);
 
-  //Randomly generate the centers of the individual grains represented by the Voronoi tesselation
+  // Randomly generate the centers of the individual grains represented by the Voronoi tesselation
   for (unsigned int grain = 0; grain < _grain_num; grain++)
   {
     for (unsigned int i = 0; i < LIBMESH_DIM; i++)
@@ -181,7 +181,7 @@ PolycrystalVoronoiVoidIC::computeGrainCenters()
       _centerpoints[grain](2) = _bottom_left(2) + _range(2)*0.5;
   }
 
-  //Assign grains to specific order parameters in a way that maximizes the distance
+  // Assign grains to specific order parameters in a way that maximizes the distance
   _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints,_op_num, _mesh, _var);
 }
 
@@ -190,18 +190,18 @@ PolycrystalVoronoiVoidIC::value(const Point & p)
 {
   Real value = 0.0;
 
-  //Determine value for voids
+  // Determine value for voids
   Real void_value = MultiSmoothCircleIC::value(p);
 
-  //Determine value for grains
+  // Determine value for grains
   Real grain_value = grain_value_calc(p);
 
   switch (_structure_type)
   {
-    case 0: //assigning values for grains (order parameters)
+    case 0: // assigning values for grains (order parameters)
       if (grain_value == 0) //Not in this grain
         value = grain_value;
-      else //In this grain, but might be in a void
+      else // in this grain, but might be in a void
         if (void_value == _outvalue) //Not in a void
           value = grain_value;
         else if (void_value > _outvalue && void_value < _invalue)  //On void interface
@@ -210,7 +210,7 @@ PolycrystalVoronoiVoidIC::value(const Point & p)
           value = 0.0;
       break;
 
-    case 1: //assigning values for voids (concentration)
+    case 1: // assigning values for voids (concentration)
       value = void_value;
       break;
   }
@@ -225,7 +225,7 @@ PolycrystalVoronoiVoidIC::grain_value_calc(const Point & p)
 
   unsigned int min_index = PolycrystalICTools::assignPointToGrain(p, _centerpoints, _mesh, _var, _range.norm());
 
-  //If the current order parameter index (_op_index) is equal to the min_index, set the value to 1.0
+  // If the current order parameter index (_op_index) is equal to the min_index, set the value to 1.0
   if (_assigned_op[min_index] == _op_index)
     val = 1.0;
 
@@ -241,13 +241,13 @@ PolycrystalVoronoiVoidIC::grain_value_calc(const Point & p)
 RealGradient
 PolycrystalVoronoiVoidIC::gradient(const Point & p)
 {
-  RealGradient gradient = Gradient(0.0, 0.0, 0.0);
+  RealGradient gradient;
   RealGradient void_gradient = MultiSmoothCircleIC::gradient(p);
 
   //Order parameter assignment assumes zero gradient (sharp interface)
   switch (_structure_type)
   {
-    case 1: //assigning gradient for voids
+    case 1: // assigning gradient for voids
       gradient = void_gradient;
       break;
   }
