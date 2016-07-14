@@ -50,6 +50,7 @@ protected:
   Real _cv;
   Real _cp;
 
+  Real _beta;
   Real _mu;
   Real _k;
 };

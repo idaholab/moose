@@ -151,7 +151,7 @@ StiffenedGasFluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho
 }
 
 void
-StiffenedGasFluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
+StiffenedGasFluidProperties::e_dpT(Real, Real, Real &, Real &, Real &) const
 {
   mooseError(name() << ": e_dpT() not implemented.");
 }
@@ -179,7 +179,7 @@ StiffenedGasFluidProperties::h(Real, Real temperature) const
 }
 
 void
-StiffenedGasFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+StiffenedGasFluidProperties::h_dpT(Real, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   h = _gamma * _cv * temperature + _q;
   dh_dp = 0;
