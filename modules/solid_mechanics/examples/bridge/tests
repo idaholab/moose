@@ -1,0 +1,12 @@
+[Tests]
+  [./bridge]
+    type = RunApp
+    input = 'bridge.i'
+    cli_args = '--check-input'
+  [../]
+  [./bridge_large_strain]
+    type = RunApp
+    input = 'bridge_large_strain.i'
+    cli_args = '--check-input'
+  [../]
+[]

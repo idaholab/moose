@@ -1,0 +1,12 @@
+[Tests]
+  [./eigenstrain]
+    type = RunApp
+    input = 'eigenstrain.i'
+    cli_args = '--check-input'
+  [../]
+  [./mortar_gradient]
+    type = RunApp
+    input = 'mortar_gradient.i'
+    cli_args = '--check-input'
+  [../]
+[]

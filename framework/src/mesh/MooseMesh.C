@@ -1281,6 +1281,10 @@ MooseMesh::detectPairedSidesets()
   {
     Elem * elem = *el;
 
+    // skip mortar meshes etc.
+    if (elem->dim() != dim)
+      continue;
+
     // loop over element sides
     for (unsigned int s = 0; s < elem->n_sides(); s++)
     {
