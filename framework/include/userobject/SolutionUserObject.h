@@ -57,6 +57,16 @@ public:
   unsigned int getLocalVarIndex(const std::string & var_name) const;
 
   /**
+   * Returns a value at a specific location and variable checking for multiple values and weighting these values to
+   * obtain a single unique value (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  virtual Real pointValueWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
+
+  /**
    * Returns a value at a specific location and variable (see SolutionFunction)
    * @param t The time at which to extract (not used, it is handled automatically when reading the data)
    * @param p The location at which to return a value
@@ -97,6 +107,16 @@ public:
    * @return The desired value for the given variable at a location
    */
   virtual std::map<const Elem *, Real> discontinuousPointValue(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns the gradient at a specific location and variable checking for multiple values and weighting these values to
+   * obtain a single unique value (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  virtual RealGradient pointValueGradientWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
 
   /**
    * Returns the gradient at a specific location and variable (see SolutionFunction)
@@ -173,6 +193,7 @@ public:
 
   bool isVariableNodal(const std::string & var_name) const;
 
+  static MooseEnum weightingType() { return MooseEnum("found_first=1 average=2 smallest_element_id=4 largest_element_id=8", "found_first"); }
 
 protected:
   /**

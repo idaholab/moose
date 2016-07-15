@@ -564,6 +564,59 @@ SolutionUserObject::getLocalVarIndex(const std::string & var_name) const
 }
 
 Real
+SolutionUserObject::pointValueWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type) const
+{
+  // first check if the FE type is continuous because in that case the value is
+  // unique and we can take a short cut, the default weighting_type found_first also
+  // shortcuts out
+  if (weighting_type == 1 ||
+     (_fe_problem.getVariable(_tid, var_name).feType().family != L2_LAGRANGE &&
+      _fe_problem.getVariable(_tid, var_name).feType().family != MONOMIAL &&
+      _fe_problem.getVariable(_tid, var_name).feType().family != L2_HIERARCHIC))
+    return pointValue(t, p, var_name);
+
+  // the shape function is discontinuous so we need to compute a suitable unique value
+  std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name);
+  switch (weighting_type)
+  {
+    case 2:
+    {
+      Real average = 0.0;
+      for (auto & v : values)
+        average += v.second;
+      return average / Real(values.size());
+    }
+    case 4:
+    {
+      Real smallest_elem_id_value;
+      dof_id_type smallest_elem_id = _fe_problem.mesh().nElem();
+      for (auto & v : values)
+        if (v.first->id() < smallest_elem_id)
+        {
+          smallest_elem_id = v.first->id();
+          smallest_elem_id_value = v.second;
+        }
+      return smallest_elem_id_value;
+    }
+    case 8:
+    {
+      Real largest_elem_id_value;
+      dof_id_type largest_elem_id = 0;
+      for (auto & v : values)
+        if (v.first->id() > largest_elem_id)
+        {
+          largest_elem_id = v.first->id();
+          largest_elem_id_value = v.second;
+        }
+      return largest_elem_id_value;
+    }
+  }
+
+  mooseError("SolutionUserObject::pointValueWrapper reaches line that it should not be able to reach.");
+  return 0.0;
+}
+
+Real
 SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_name) const
 {
   const unsigned int local_var_index = getLocalVarIndex(var_name);
@@ -662,6 +715,53 @@ SolutionUserObject::discontinuousPointValue(Real t, Point pt, const unsigned int
   return map;
 }
 
+RealGradient
+SolutionUserObject::pointValueGradientWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type) const
+{
+  // the default weighting_type found_first shortcuts out
+  if (weighting_type == 1)
+    return pointValueGradient(t, p, var_name);
+
+  // the shape function is discontinuous so we need to compute a suitable unique value
+  std::map<const Elem *, RealGradient> values = discontinuousPointValueGradient(t, p, var_name);
+  switch (weighting_type)
+  {
+    case 2:
+    {
+      RealGradient average = RealGradient(0.0, 0.0, 0.0);
+      for (auto & v : values)
+        average += v.second;
+      return average / Real(values.size());
+    }
+    case 4:
+    {
+      RealGradient smallest_elem_id_value;
+      dof_id_type smallest_elem_id = _fe_problem.mesh().nElem();
+      for (auto & v : values)
+        if (v.first->id() < smallest_elem_id)
+        {
+          smallest_elem_id = v.first->id();
+          smallest_elem_id_value = v.second;
+        }
+      return smallest_elem_id_value;
+    }
+    case 8:
+    {
+      RealGradient largest_elem_id_value;
+      dof_id_type largest_elem_id = 0;
+      for (auto & v : values)
+        if (v.first->id() > largest_elem_id)
+        {
+          largest_elem_id = v.first->id();
+          largest_elem_id_value = v.second;
+        }
+      return largest_elem_id_value;
+    }
+  }
+
+  mooseError("SolutionUserObject::pointValueGradientWrapper reaches line that it should not be able to reach.");
+  return RealGradient(0.0, 0.0, 0.0);
+}
 
 RealGradient
 SolutionUserObject::pointValueGradient(Real t, const Point & p, const std::string & var_name) const
