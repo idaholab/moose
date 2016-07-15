@@ -50,6 +50,8 @@
 #include "NSEnergyWeakStagnationBC.h"
 #include "NSPenalizedNormalFlowBC.h"
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
+#include "NSPressureNeumannBC.h"
+#include "NSEntropyError.h"
 
 //
 // Incompressible
@@ -158,6 +160,8 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerBoundaryCondition(NSEnergyWeakStagnationBC);
   registerBoundaryCondition(NSPenalizedNormalFlowBC);
   registerBoundaryCondition(NSMomentumInviscidNoPressureImplicitFlowBC);
+  registerBoundaryCondition(NSPressureNeumannBC);
+  registerPostprocessor(NSEntropyError);
 
   //
   // Incompressible
