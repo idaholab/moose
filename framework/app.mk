@@ -2,10 +2,25 @@
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and its modules.
 #       This can be overridden by using the MOOSE_DIR environment variable
 
-# list of application-wise excluded source files
+# list of application-wide excluded source files
 excluded_srcfiles :=
 
+#
+# Save off parameters for possible app.mk recursion
+#
+STACK ?= stack
+STACK := $(STACK).X
+$APPLICATION_DIR$(STACK) := $(APPLICATION_DIR)
+$APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
+
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
+
+#
+# Restore parameters
+#
+APPLICATION_DIR := $($APPLICATION_DIR$(STACK))
+APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
+STACK := $(basename $(STACK))
 
 ##############################################################################
 ######################### Application Variables ##############################
@@ -97,7 +112,7 @@ app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
 
-ADDITIONAL_CPPFLAGS += -D$(APPLICATION_NAME)_ENABLED
+ADDITIONAL_CPPFLAGS += -D$(shell echo $(APPLICATION_NAME) | tr a-z A-Z)_ENABLED
 
 # dependencies
 -include $(app_deps)
