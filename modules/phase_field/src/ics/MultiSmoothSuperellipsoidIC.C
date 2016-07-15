@@ -11,6 +11,7 @@
 
 
 #include "MultiSmoothSuperellipsoidIC.h"
+#include "MooseUtils.h"
 #include "MooseMesh.h"
 
 template<>
@@ -58,20 +59,18 @@ MultiSmoothSuperellipsoidIC::MultiSmoothSuperellipsoidIC(const InputParameters &
 void
 MultiSmoothSuperellipsoidIC::initialSetup()
 {
-  Real nv = _numbub.size();
+  unsigned int nv = _numbub.size();
 
   if (nv != _bubspac.size() || nv != _exponent.size() || nv != _semiaxis_a.size() || nv != _semiaxis_b.size()|| nv != _semiaxis_c.size())
     mooseError("Vectors for numbub, bubspac, exponent, semiaxis_a, semiaxis_b, and semiaxis_c must be the same size.");
 
-  if (_semiaxis_variation_type != 2)
-  {
-    if (nv != _semiaxis_a_variation.size() || nv != _semiaxis_b_variation.size() || nv != _semiaxis_c_variation.size())
+  if (_semiaxis_variation_type != 2 &&
+      (nv != _semiaxis_a_variation.size() || nv != _semiaxis_b_variation.size() || nv != _semiaxis_c_variation.size()))
       mooseError("Vectors for numbub, semiaxis_a_variation, semiaxis_b_variation, and semiaxis_c_variation must be the same size.");
-  }
 
-  for (unsigned int k = 0; k < nv; k++)
-  {  //Set up domain bounds with mesh tools
-    _gk = k;
+  for (_gk = 0; _gk < nv; ++_gk)
+  {
+    //Set up domain bounds with mesh tools
     for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     {
       _bottom_left(i) = _mesh.getMinInDimension(i);
@@ -113,8 +112,8 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidSemiaxes()
       case 1: //Normal distribution
         randnum = _random.randNormal(_tid, 0, 1);
         _as[i] = _semiaxis_a[_gk] + (randnum * _semiaxis_a_variation[_gk]);
-        _bs[i] = _vary_axes_independently ? _random.randNormal(_tid, _semiaxis_b[_gk],_semiaxis_b_variation[_gk]) : _semiaxis_b[_gk] + (randnum * _semiaxis_b_variation[_gk]);
-        _cs[i] = _vary_axes_independently ? _random.randNormal(_tid, _semiaxis_c[_gk],_semiaxis_c_variation[_gk]) : _semiaxis_c[_gk] + (randnum * _semiaxis_c_variation[_gk]);
+        _bs[i] = _semiaxis_b[_gk] + ((_vary_axes_independently ? _random.randNormal(_tid, 0, 1) : randnum) * _semiaxis_b_variation[_gk]);
+        _cs[i] = _semiaxis_c[_gk] + ((_vary_axes_independently ? _random.randNormal(_tid, 0, 1) : randnum) * _semiaxis_c_variation[_gk]);
         break;
 
       case 2: //No variation
@@ -122,6 +121,7 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidSemiaxes()
         _bs[i] = _semiaxis_b[_gk];
         _cs[i] = _semiaxis_c[_gk];
     }
+
     _as[i] = _as[i] < 0.0 ? 0.0 : _as[i];
     _bs[i] = _bs[i] < 0.0 ? 0.0 : _bs[i];
     _cs[i] = _cs[i] < 0.0 ? 0.0 : _cs[i];
@@ -136,45 +136,34 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidCenters()
 
   for (unsigned int i = start; i < _centers.size(); i++)
   {
+    // Vary circle center positions
     unsigned int num_tries = 0;
-    Real rr = 0.0;
-    Point newcenter = 0.0;
-
-    //Vary Superellipsoid center positions
-    while (rr <= _bubspac[_gk] && num_tries < _max_num_tries)
+    while (num_tries < _max_num_tries)
     {
       num_tries++;
-      rr = _bubspac[_gk] + 1;
-      Real ran1 = _random.rand(_tid);
-      Real ran2 = _random.rand(_tid);
-      Real ran3 = _random.rand(_tid);
 
-      newcenter(0) = _bottom_left(0) + ran1 * _range(0);
-      newcenter(1) = _bottom_left(1) + ran2 * _range(1);
-      newcenter(2) = _bottom_left(2) + ran3 * _range(2);
+      RealTensorValue ran;
+      ran(0,0) = _random.rand(_tid);
+      ran(1,1) = _random.rand(_tid);
+      ran(2,2) = _random.rand(_tid);
 
-      for (unsigned int j = start; j < i; j++)
-      {
-        Real tmp_rr = _mesh.minPeriodicDistance(_var.number(), _centers[j], newcenter);
+      _centers[i] = _bottom_left + ran * _range;
 
-        if (tmp_rr < _bubspac[_gk])
-          rr = tmp_rr;
-      }
+      for (unsigned int j = 0; j < i; ++j)
+        if (_mesh.minPeriodicDistance(_var.number(), _centers[i], _centers[j]) < _bubspac[_gk] || ellipsoidsOverlap(i,j))
+          goto fail;
 
-      //Check each new center candidate against all accepted ellisoids
-      if (_prevent_overlap && rr > _bubspac[_gk])
-      {
-        Real status = overlapCheck(newcenter, _as[i], _bs[i], _cs[i], _ns[i]);
-        //If candidate center fails overlapCheck ensure that the loop continues
-        if (status)
-          rr = _bubspac[_gk];
-      }
+      // accept the position of the new center
+      goto accept;
+
+      // retry a new position until tries are exhausted
+      fail: continue;
     }
 
     if (num_tries == _max_num_tries)
-      mooseError("Too many tries in MultiSuperellipsoidEllipseIC");
+      mooseError("Too many tries in MultiSmoothCircleIC");
 
-    _centers[i] = newcenter;
+    accept: continue;
   }
 }
 
@@ -189,141 +178,84 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidExponents()
 }
 
 bool
-MultiSmoothSuperellipsoidIC::overlapCheck(const Point & newcenter, Real nc_as, Real nc_bs, Real nc_cs, Real nc_ns)
+MultiSmoothSuperellipsoidIC::ellipsoidsOverlap(unsigned int i, unsigned int j)
 {
-  Point l_p = newcenter;
-  const Real a = nc_as;
-  const Real b = nc_bs;
-  const Real c = nc_cs;
-  const Real n = nc_ns;
+  // Check for overlap between centers
+  const Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[i], _centers[j]);
+  const Real dist = dist_vec.norm();
 
-  //Check for overlap between candidate center and accepted centers
-  //Compute the distance between the current point and the center
-  for (unsigned int el = 0; el < _centers.size(); ++el)
-  {
-    Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[el], l_p);
-    //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
-    //Handle this case independently because we cannot calculate polar angles at this point
-    if (dist == 0.0)
-      return true;
+  // Handle this case independently because we cannot calculate polar angles at this point
+  if (MooseUtils::absoluteFuzzyEqual(dist, 0.0))
+    return true;
 
-    //Compute the distance r from the center of the superellipsoid to its outside edge
-    //along the vector from the center to the current point
-    //This uses the equation for a superellipse in polar coordinates and substitutes
-    //distances for sin, cos functions
-    Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[el], l_p);
+  // Compute the distance r from the center of the superellipsoid to its outside edge
+  // along the vector from the center to the current point
+  // This uses the equation for a superellipse in polar coordinates and substitutes
+  // distances for sin, cos functions
+  Real rmn;
 
-    //First calculate rmn = r^(-n), replacing sin, cos functions with distances
-    Real rmn = (std::pow(std::abs(dist_vec(0) / dist / a), n)
-              + std::pow(std::abs(dist_vec(1) / dist / b), n)
-              + std::pow(std::abs(dist_vec(2) / dist / c), n) );
-    //Then calculate r1 from rmn
-    Real r1 = std::pow(rmn, (-1.0/n));
+  // calculate rmn = r^(-n), replacing sin, cos functions with distances
+  rmn = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i])
+       + std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i])
+       + std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]));
+  // calculate r2 from rmn
+  const Real r1 = std::pow(rmn, (-1.0/_ns[i]));
 
-    dist_vec = _mesh.minPeriodicVector(_var.number(), l_p, _centers[el]);
+  // calculate rmn = r^(-n), replacing sin, cos functions with distances
+  rmn = (std::pow(std::abs(dist_vec(0) / dist / _as[j]), _ns[j])
+       + std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j])
+       + std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]));
+  const Real r2 = std::pow(rmn, (-1.0/_ns[j]));
 
-    //First calculate rmn = r^(-n), replacing sin, cos functions with distances
-    rmn = (std::pow(std::abs(dist_vec(0) / dist / _as[el]), _ns[el])
-        + std::pow(std::abs(dist_vec(1) / dist / _bs[el]), _ns[el])
-        + std::pow(std::abs(dist_vec(2) / dist / _cs[el]), _ns[el]) );
-    //Then calculate r2 from rmn
-    Real r2 = std::pow(rmn, (-1.0/_ns[el]));
+  if (dist < r1 + r2)
+    return true;
 
-    if (dist < r1 + r2)
-      return true;
-  }
-
-  //Check for overlap between extremes of new ellipsoid candidate and the center
-  //of accepted ellisoids if _check_extremes enabled
+  // Check for overlap between extremes of new ellipsoid candidate and the center
+  // of accepted ellisoids if _check_extremes enabled
   if (_check_extremes)
+    return checkExtremes(i,j) || checkExtremes(j,i);
+
+  // otherwise no overlap has been detected
+  return false;
+}
+
+bool
+MultiSmoothSuperellipsoidIC::checkExtremes(unsigned int i, unsigned int j)
+{
+  Point tmp_p;
+  for (unsigned int pc = 0; pc < 6; pc++)
   {
-    Point tmp_p;
-    for (unsigned int pc = 0; pc < 6; pc++)
-    {
-      tmp_p = l_p;
-      //Find extremes along semiaxis of candidate ellipsoids
-      if (pc == 0)
-        tmp_p(0) -= a;
-      else if (pc == 1)
-        tmp_p(0) += a;
-      else if (pc == 2)
-        tmp_p(1) -= b;
-      else if (pc == 3 )
-        tmp_p(1) += b;
-      else if (pc == 4 )
-        tmp_p(2) -= c;
-      else
-        tmp_p(2) += c;
+    tmp_p = _centers[j];
+    //Find extremes along semiaxis of candidate ellipsoids
+    if (pc == 0)
+      tmp_p(0) -= _as[j];
+    else if (pc == 1)
+      tmp_p(0) += _as[j];
+    else if (pc == 2)
+      tmp_p(1) -= _bs[j];
+    else if (pc == 3 )
+      tmp_p(1) += _bs[j];
+    else if (pc == 4 )
+      tmp_p(2) -= _cs[j];
+    else
+      tmp_p(2) += _cs[j];
 
-      for (unsigned int el = 0; el < _centers.size(); ++el)
-      {
-        Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[el], tmp_p);
-        //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
-        //Handle this case independently because we cannot calculate polar angles at this point
-        if (dist == 0.0)
-          return true;
+    const Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[i], tmp_p);
+    const Real dist = dist_vec.norm();
 
-        //Compute the distance r from the center of the superellipsoid to its outside edge
-        //along the vector from the center to the current point
-        //This uses the equation for a superellipse in polar coordinates and substitutes
-        //distances for sin, cos functions
-        Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[el], tmp_p);
+    // Handle this case independently because we cannot calculate polar angles at this point
+    if (MooseUtils::absoluteFuzzyEqual(dist, 0.0))
+      return true;
 
-        //First calculate rmn = r^(-n), replacing sin, cos functions with distances
-        Real rmn = (std::pow(std::abs(dist_vec(0) / dist / _as[el]), _ns[el])
-                  + std::pow(std::abs(dist_vec(1) / dist / _bs[el]), _ns[el])
-                  + std::pow(std::abs(dist_vec(2) / dist / _cs[el]), _ns[el]) );
-        //Then calculate r2 from rmn
-        Real r2 = std::pow(rmn, (-1.0/_ns[el]));
+    // calculate rmn = r^(-n), replacing sin, cos functions with distances
+    Real rmn = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i])
+              + std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i])
+              + std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]));
+    Real r = std::pow(rmn, (-1.0/_ns[i]));
 
-        if (dist < r2)
-          return true;
-      }
-    }
-
-    //Check for overlap between center of new ellipsoid candidate and the extremes of accepted ellisoids
-    for (unsigned int el = 0; el < _centers.size(); ++el)
-    {
-      for (unsigned int pc = 0; pc < 6; pc++)
-      {
-        tmp_p = _centers[el];
-        //Find extremes along semiaxis of accepted ellipsoids
-        if (pc == 0)
-          tmp_p(0) -= _as[el];
-        else if (pc == 1)
-          tmp_p(0) += _as[el];
-        else if (pc == 2)
-          tmp_p(1) -= _bs[el];
-        else if (pc == 3 )
-          tmp_p(1) += _bs[el];
-        else if (pc == 4 )
-          tmp_p(2) -= _cs[el];
-        else
-          tmp_p(2) += _cs[el];
-
-        Real dist = _mesh.minPeriodicDistance(_var.number(), tmp_p, l_p);
-        //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
-        //Handle this case independently because we cannot calculate polar angles at this point
-        if (dist == 0.0)
-          return true;
-
-        //Compute the distance r from the center of the superellipsoid to its outside edge
-        //along the vector from the center to the current point
-        //This uses the equation for a superellipse in polar coordinates and substitutes
-        //distances for sin, cos functions
-        Point dist_vec = _mesh.minPeriodicVector(_var.number(), l_p, tmp_p);
-
-        //First calculate rmn = r^(-n), replacing sin, cos functions with distances
-        Real rmn = (std::pow(std::abs(dist_vec(0) / dist / a), n)
-                  + std::pow(std::abs(dist_vec(1) / dist / b), n)
-                  + std::pow(std::abs(dist_vec(2) / dist / c), n) );
-        //Then calculate r2 from rmn
-        Real r2 = std::pow(rmn, (-1.0/n));
-
-        if (dist < r2)
-          return true;
-      }
-    }
+    if (dist < r)
+      return true;
   }
+
   return false;
 }

@@ -18,15 +18,10 @@ InputParameters validParams<MultiSmoothSuperellipsoidIC>();
 /**
  * MultismoothSuperellipsoidIC creates multiple SmoothSuperellipsoid (number = numbub) that are randomly
  * positioned around the domain, with a minimum spacing equal to bubspac
- **/
+ */
 class MultiSmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   MultiSmoothSuperellipsoidIC(const InputParameters & parameters);
 
   virtual void initialSetup();
@@ -35,12 +30,14 @@ protected:
   virtual void computeSuperellipsoidSemiaxes();
   virtual void computeSuperellipsoidCenters();
   virtual void computeSuperellipsoidExponents();
-  virtual bool overlapCheck(const Point & newcenter, Real nc_as, Real nc_bs, Real nc_cs, Real nc_ns);
 
-  unsigned int _max_num_tries;
-  Real _gk;
+  virtual bool ellipsoidsOverlap(unsigned int i, unsigned int j);
+  virtual bool checkExtremes(unsigned int i, unsigned int j);
 
-  MooseEnum _semiaxis_variation_type;
+  const unsigned int _max_num_tries;
+  unsigned int _gk;
+
+  const MooseEnum _semiaxis_variation_type;
   const bool _prevent_overlap;
   const bool _check_extremes;
   const bool _vary_axes_independently;
