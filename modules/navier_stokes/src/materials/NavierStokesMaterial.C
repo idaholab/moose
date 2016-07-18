@@ -262,19 +262,17 @@ NavierStokesMaterial::computeTau(unsigned int qp)
   // Moose::out << "velmag=" << velmag << std::endl;
 
   // Make sure temperature >= 0 before trying to take sqrt
-  // #ifdef DEBUG
-  if (_temperature[qp] < 0.)
-  {
-    Moose::err << "Negative temperature "
-              << _temperature[qp]
-              << " found at quadrature point "
-              << qp
-              << ", element "
-              << _current_elem->id()
-              << std::endl;
-    mooseError("Can't continue, would be nice to throw an exception here?");
-  }
-  // #endif
+  // if (_temperature[qp] < 0.)
+  // {
+  //   Moose::err << "Negative temperature "
+  //             << _temperature[qp]
+  //             << " found at quadrature point "
+  //             << qp
+  //             << ", element "
+  //             << _current_elem->id()
+  //             << std::endl;
+  //   mooseError("Can't continue, would be nice to throw an exception here?");
+  // }
 
   // The speed of sound for an ideal gas, sqrt(gamma * R * T).  Not needed unless
   // we want to use a form of Tau that requires it.

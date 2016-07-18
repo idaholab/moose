@@ -80,6 +80,9 @@
 #include "INSCourant.h"
 #include "INSDivergenceAux.h"
 
+// Materials - this will eventually be replaced by FluidProperties stuff...
+#include "Air.h"
+
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
 
@@ -192,6 +195,9 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);
+
+  // Materials
+  registerMaterial(Air);
 }
 
 // External entry point for dynamic syntax association
