@@ -180,10 +180,25 @@ class Tester(MooseObject):
                     'petsc_debug', 'curl', 'tbb', 'superlu', 'cxx11', 'asio', 'unique_id']
     for check in local_checks:
       test_platforms = set()
+      operator_display = '!='
+      inverse_set = False
       for x in self.specs[check]:
+        if x[0] == '!':
+          if inverse_set:
+            return (False, "(Multiple Negation Unsupported)")
+          inverse_set = True
+          operator_display = '=='
+          x = x[1:] # Strip off the !
+        x_upper = x.upper()
+        if x_upper in test_platforms:
+          return (False, "(Duplicate Entry or Negative of Existing Entry)")
         test_platforms.add(x.upper())
-      if not len(test_platforms.intersection(checks[check])):
-        reason = 'skipped (' + re.sub(r'\[|\]', '', check).upper() + '!=' + ', '.join(self.specs[check]) + ')'
+
+      match_found = len(test_platforms.intersection(checks[check])) > 0
+      # Either we didn't find the match when we were using normal "include" logic
+      # or we did find the match when we wanted to exclude it
+      if inverse_set == match_found:
+        reason = 'skipped (' + re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms) + ')'
         return (False, reason)
 
     # Check for heavy tests
