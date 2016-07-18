@@ -12,7 +12,7 @@ InputParameters validParams<NSStagnationBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
+  params.addCoupledVar("v", ""); // only required in >= 2D
   params.addCoupledVar("w", ""); // only required in 3D
   params.addRequiredCoupledVar("temperature", "");
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
@@ -23,7 +23,7 @@ InputParameters validParams<NSStagnationBC>()
 NSStagnationBC::NSStagnationBC(const InputParameters & parameters) :
     NodalBC(parameters),
     _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
     _temperature(coupledValue("temperature")),
     _gamma(getParam<Real>("gamma")),

@@ -12,25 +12,25 @@ template<>
 InputParameters validParams<NSTemperatureL2>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", ""); // only required in 3D
-  params.addRequiredCoupledVar("pe", "");
-  params.addRequiredCoupledVar("p", "");
+  params.addRequiredCoupledVar("u", "x-direction velocity component");
+  params.addCoupledVar("v", "y-direction velocity component"); // only reqiured in >= 2D
+  params.addCoupledVar("w", "z-direction velocity component"); // only required in 3D
+  params.addRequiredCoupledVar("rhoe", "Total energy");
+  params.addRequiredCoupledVar("rho", "Density");
   return params;
 }
 
 NSTemperatureL2::NSTemperatureL2(const InputParameters & parameters) :
     Kernel(parameters),
-    _p_var(coupled("p")),
-    _p(coupledValue("p")),
-    _pe_var(coupled("pe")),
-    _pe(coupledValue("pe")),
+    _rho_var(coupled("rho")),
+    _rho(coupledValue("rho")),
+    _rhoe_var(coupled("rhoe")),
+    _rhoe(coupledValue("rhoe")),
     _u_vel_var(coupled("u")),
     _u_vel(coupledValue("u")),
-    _v_vel_var(coupled("v")),
-    _v_vel(coupledValue("v")),
-    _w_vel_var(_mesh.dimension() == 3 ? coupled("w") : 0),
+    _v_vel_var(_mesh.dimension() >= 2 ? coupled("v") : libMesh::invalid_uint),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+    _w_vel_var(_mesh.dimension() == 3 ? coupled("w") : libMesh::invalid_uint),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
     _c_v(getMaterialProperty<Real>("c_v"))
 {
@@ -41,7 +41,7 @@ NSTemperatureL2::computeQpResidual()
 {
   Real value = 1.0 / _c_v[_qp];
 
-  const Real et = _pe[_qp] / _p[_qp];
+  const Real et = _rhoe[_qp] / _rho[_qp];
   const RealVectorValue vec(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   value *= et - ((vec * vec) / 2.0);
@@ -59,16 +59,16 @@ NSTemperatureL2::computeQpJacobian()
 Real
 NSTemperatureL2::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _p_var)
+  if (jvar == _rho_var)
   {
-    const Real et = (_pe[_qp]/(-_p[_qp]*_p[_qp]))*_phi[_j][_qp];
+    const Real et = (_rhoe[_qp] / (-_rho[_qp] * _rho[_qp])) * _phi[_j][_qp];
     Real value = et / _c_v[_qp];
 
     return -value * _test[_i][_qp];
   }
-  else if (jvar == _pe_var)
+  else if (jvar == _rhoe_var)
   {
-    const Real et = _phi[_j][_qp]/_p[_qp];
+    const Real et = _phi[_j][_qp] / _rho[_qp];
     Real value = et / _c_v[_qp];
 
     return -value * _test[_i][_qp];

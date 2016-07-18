@@ -13,12 +13,12 @@ InputParameters validParams<NSIntegratedBC>()
   InputParameters params = validParams<IntegratedBC>();
 
   params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
+  params.addCoupledVar("v", ""); // only required in >= 2D
   params.addCoupledVar("w", ""); // only required in 3D
 
   params.addRequiredCoupledVar("rho", "density");
   params.addRequiredCoupledVar("rhou", "x-momentum");
-  params.addRequiredCoupledVar("rhov", "y-momentum");
+  params.addCoupledVar("rhov", "y-momentum"); // only required in >= 2D
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
   params.addRequiredCoupledVar("rhoe", "energy");
 
@@ -31,25 +31,25 @@ InputParameters validParams<NSIntegratedBC>()
 NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters) :
     IntegratedBC(parameters),
     _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
     _rho(coupledValue("rho")),
     _rho_u(coupledValue("rhou")),
-    _rho_v(coupledValue("rhov")),
+    _rho_v(_mesh.dimension() >= 2 ? coupledValue("rhov") : _zero),
     _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
     _rho_e(coupledValue("rhoe")),
 
     _grad_rho(coupledGradient("rho")),
     _grad_rho_u(coupledGradient("rhou")),
-    _grad_rho_v(coupledGradient("rhov")),
+    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient("rhov") : _grad_zero),
     _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
     _grad_rho_e(coupledGradient("rhoe")),
 
     // Variable numberings
     _rho_var_number( coupled("rho") ),
     _rhou_var_number( coupled("rhou") ),
-    _rhov_var_number( coupled("rhov") ),
+    _rhov_var_number(_mesh.dimension() >= 2 ? coupled("rhov") : libMesh::invalid_uint),
     _rhow_var_number(_mesh.dimension() == 3 ? coupled("rhow") : libMesh::invalid_uint),
     _rhoe_var_number( coupled("rhoe") ),
 
