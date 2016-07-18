@@ -13,13 +13,10 @@ InputParameters validParams<NSMachAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  // Mark variables as required
   params.addRequiredCoupledVar("u", "x-velocity");
-  params.addRequiredCoupledVar("v", "y-velocity");
+  params.addCoupledVar("v", "y-velocity"); // Only required in >= 2D
   params.addCoupledVar("w", "z-velocity"); // Only required in 3D...
   params.addRequiredCoupledVar("temperature", "");
-
-  // Parameters with default values
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
   params.addRequiredParam<Real>("R", "Gas constant.");
 
@@ -29,7 +26,7 @@ InputParameters validParams<NSMachAux>()
 NSMachAux::NSMachAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
     _temperature(coupledValue("temperature")),
     _gamma(getParam<Real>("gamma")),

@@ -12,10 +12,7 @@ InputParameters validParams<NSPressureNeumannBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
 
-  // Required vars
   params.addRequiredCoupledVar("pressure", "The current value of the pressure");
-
-  // Required parameters
   params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
 
@@ -26,33 +23,33 @@ InputParameters validParams<NSPressureNeumannBC>()
 
 NSPressureNeumannBC::NSPressureNeumannBC(const InputParameters & parameters) :
     NSIntegratedBC(parameters),
-    // Coupled variables
     _pressure(coupledValue("pressure")),
-    // Required parameters
     _component(getParam<unsigned>("component")),
     _gamma(getParam<Real>("gamma")),
-    // Pressure derivative computation object
     _pressure_derivs(*this)
 {
 }
 
 
 
-Real NSPressureNeumannBC::computeQpResidual()
+Real
+NSPressureNeumannBC::computeQpResidual()
 {
   return _pressure[_qp] * _normals[_qp](_component) * _test[_i][_qp];
 }
 
 
 
-Real NSPressureNeumannBC::computeQpJacobian()
+Real
+NSPressureNeumannBC::computeQpJacobian()
 {
-  return computeJacobianHelper(_component+1);  // <-- the on-diagonal variable number is _component+1
+  return computeJacobianHelper(_component + 1);  // <-- the on-diagonal variable number is _component+1
 }
 
 
 
-Real NSPressureNeumannBC::computeQpOffDiagJacobian(unsigned jvar)
+Real
+NSPressureNeumannBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   unsigned m = mapVarNumber(jvar);
   return computeJacobianHelper(m);
@@ -60,7 +57,8 @@ Real NSPressureNeumannBC::computeQpOffDiagJacobian(unsigned jvar)
 
 
 
-Real NSPressureNeumannBC::computeJacobianHelper(unsigned m)
+Real
+NSPressureNeumannBC::computeJacobianHelper(unsigned m)
 {
   return _normals[_qp](_component) * _pressure_derivs.get_grad(m) * _phi[_j][_qp] * _test[_i][_qp];
 }

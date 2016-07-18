@@ -21,9 +21,6 @@ InputParameters validParams<NSMachAux>();
 class NSMachAux : public AuxKernel
 {
 public:
-  /**
-   * Constructor.
-   */
   NSMachAux(const InputParameters & parameters);
 
   virtual ~NSMachAux() {}
