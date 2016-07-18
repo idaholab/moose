@@ -37,7 +37,7 @@
     delete_output_before_running = false
     should_execute = false
 
-    method = 'OPT OPROF' # slow test
+    method = '!DBG' # slow test
     recover = false  # grain tracker CSV output isn't designed to work with recover
     valgrind = 'HEAVY'
     max_time = 500
@@ -47,7 +47,7 @@
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
-    method = 'OPT OPROF' # slow test
+    method = '!DBG' # slow test
     valgrind = 'HEAVY'
   [../]
 
@@ -90,7 +90,7 @@
     cli_args = 'Outputs/file_base=gt_faux_elemental_out Postprocessors/grain_tracker/type=FauxGrainTracker'
 
     exodiff = 'gt_faux_elemental_out.e-s002'
-    method = 'OPT OPROF' # slow test
+    method = '!DBG' # slow test
     valgrind = 'HEAVY'
     max_time = 500
   [../]
