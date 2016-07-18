@@ -115,7 +115,7 @@ app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
 
 # WARNING: the += operator does NOT work here!
-ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME) | tr a-z A-Z)_ENABLED
+ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME) | perl -pe 'y/a-z/A-Z/' | perl -pe 's/-//g')_ENABLED
 
 # dependencies
 -include $(app_deps)
