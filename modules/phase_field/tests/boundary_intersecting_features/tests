@@ -1,7 +1,7 @@
 [Tests]
-  [./boundary_intersecting_grains]
+  [./boundary_intersecting_features]
     type = CSVDiff
-    input = boundary_intersecting_grains.i
+    input = boundary_intersecting_features.i
     csvdiff = bubble_volumes.csv
     # This test requires VTK because it uses the ImageFunction class
     vtk = true

@@ -43,20 +43,18 @@
 
 [AuxKernels]
   [./nodal_flood_aux]
-    # This auxkernel is initialized *before* the variable u is set
-    # from FunctionIC, so it will always be zero initially...
     variable = grain_auxvar
     type = FeatureFloodCountAux
     bubble_object = flood_count_pp
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
 
   [./centroids]
     type = FeatureFloodCountAux
     variable = centroids
     bubble_object = flood_count_pp
-    execute_on = timestep_end
     field_display = CENTROID
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -66,6 +64,10 @@
     # when it is present.  This prevents duplicating information in
     # input files.
     type = ImageFunction
+
+    # In these sample images the features we want to analyze are RED (or close to pure red). The
+    # background is BLUE so we can easily distinguish between the two by selecting only the red channel.
+    component = 0
   [../]
 []
 
@@ -81,13 +83,7 @@
   [./flood_count_pp]
     type = FeatureFloodCount
     variable = u
-    # For some reason I don't understand yet, the ImageFunction thing
-    # returns either 0 or 62735 for the images we have... so a value
-    # of 1.0 is definitely between those two values :-P
     threshold = 1.0
-
-    # We define the "bubbles/grains" to be regions where u is greater-than the threshold.
-    use_less_than_threshold_comparison = false
 
     # File to write bubble volume data to
     bubble_volume_file = bubble_volumes.csv
@@ -95,8 +91,7 @@
     # Explicitly turn on the boundary-intersecting volume calculation
     compute_boundary_intersecting_volume = true
 
-    flood_entity_type = ELEMENTAL
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
 []
 
