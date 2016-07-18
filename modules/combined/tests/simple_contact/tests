@@ -1,19 +1,19 @@
 [Tests]
 
+  [./3D_dirac]
+    type = Exodiff
+    input = 'simple_contact_dirac_test.i'
+    exodiff = 'dirac_out.e'
+  [../]
   [./3D]
     type = Exodiff
     input = 'simple_contact_test.i'
     exodiff = 'out.e'
   [../]
-  [./3D_mech]
+  [./3D_2]
     type = Exodiff
-    input = 'simple_contact_mechanical_constraint_test.i'
-    exodiff = 'mechanical_constraint_out.e'
-  [../]
-  [./3D_mech2]
-    type = Exodiff
-    input = 'simple_contact_mechanical_constraint2.i'
-    exodiff = 'simple_contact_mechanical_constraint2_out.e'
+    input = 'simple_contact_test2.i'
+    exodiff = 'out2.e'
   [../]
   [./RZ]
     type = Exodiff
@@ -23,10 +23,24 @@
     scale_refine = 1
     max_parallel = 1
   [../]
+  [./RZ_dirac]
+    type = Exodiff
+    input = 'simple_contact_rz_dirac_test.i'
+    exodiff = 'out_rz_dirac.e'
+    abs_zero = 1e-7
+    scale_refine = 1
+    max_parallel = 1
+  [../]
   [./RSpherical]
     type = Exodiff
     input = 'simple_contact_rspherical.i'
-    exodiff = 'simple_contact_rspherical_out.e'
+    exodiff = 'out_rspherical.e'
+    max_parallel = 1
+  [../]
+  [./RSpherical_dirac]
+    type = Exodiff
+    input = 'simple_contact_rspherical_dirac.i'
+    exodiff = 'out_rspherical_dirac.e'
     max_parallel = 1
   [../]
 

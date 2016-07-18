@@ -11,6 +11,12 @@
     exodiff = 'isotropic_plasticity_finite_strain_out.e'
     compiler = 'CLANG GCC'
   [../]
+  [./uniaxial_viscoplasticity]
+    type = Exodiff
+    input = 'uniaxial_viscoplasticity_incrementalstrain.i'
+    exodiff = 'uniaxial_viscoplasticity_incrementalstrain_out.e'
+    compiler = 'CLANG GCC'
+  [../]
 
   [./isotropic_plasticity_error1]
     type = 'RunException'
