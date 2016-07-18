@@ -6,6 +6,14 @@
     exodiff = 'RampIC_out.e'
   [../]
 
+  [./BimodalInverseSuperellipsoidsIC]
+    type = Exodiff
+    input = 'BimodalInverseSuperellipsoidsIC.i'
+    exodiff = 'BimodalInverseSuperellipsoidsIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
   [./BimodalSuperellipsoidsIC]
     type = Exodiff
     input = 'BimodalSuperellipsoidsIC.i'
