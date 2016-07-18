@@ -3,16 +3,6 @@
 
 namespace RELAP7
 {
-/// Type of the stabilization
-enum EStabilizationType
-{
-  STABILIZATION_NONE,
-  STABILIZATION_SUPG,
-  STABILIZATION_LAPIDUS,
-  STABILIZATION_RUSANOV,
-  STABILIZATION_PRESSURE,
-  STABILIZATION_ENTROPY_VISCOSITY
-};
 
 /// Type of the stabilization
 enum EConvHeatTransGeom
