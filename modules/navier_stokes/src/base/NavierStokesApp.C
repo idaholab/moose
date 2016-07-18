@@ -16,6 +16,7 @@
 #include "NSGravityForce.h"
 #include "NSThermalBC.h"
 #include "NSVelocityAux.h"
+#include "NSMachAux.h"
 #include "NSImposedVelocityBC.h"
 #include "NSTemperatureAux.h"
 #include "NSTemperatureL2.h"
@@ -49,6 +50,8 @@
 #include "NSEnergyWeakStagnationBC.h"
 #include "NSPenalizedNormalFlowBC.h"
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
+#include "NSPressureNeumannBC.h"
+#include "NSEntropyError.h"
 
 //
 // Incompressible
@@ -76,6 +79,9 @@
 // AuxKernels
 #include "INSCourant.h"
 #include "INSDivergenceAux.h"
+
+// Materials - this will eventually be replaced by FluidProperties stuff...
+#include "Air.h"
 
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
@@ -124,6 +130,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(NSTemperatureL2);
   registerBoundaryCondition(NSThermalBC);
   registerAux(NSVelocityAux);
+  registerAux(NSMachAux);
   registerBoundaryCondition(NSImposedVelocityBC);
   registerAux(NSTemperatureAux);
   registerAux(NSPressureAux);
@@ -156,6 +163,8 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerBoundaryCondition(NSEnergyWeakStagnationBC);
   registerBoundaryCondition(NSPenalizedNormalFlowBC);
   registerBoundaryCondition(NSMomentumInviscidNoPressureImplicitFlowBC);
+  registerBoundaryCondition(NSPressureNeumannBC);
+  registerPostprocessor(NSEntropyError);
 
   //
   // Incompressible
@@ -186,6 +195,9 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);
+
+  // Materials
+  registerMaterial(Air);
 }
 
 // External entry point for dynamic syntax association
