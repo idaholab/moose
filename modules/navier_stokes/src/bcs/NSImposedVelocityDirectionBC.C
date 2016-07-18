@@ -17,7 +17,7 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
   // Coupled variables
   params.addRequiredCoupledVar("rho", "");
   params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
+  params.addCoupledVar("v", ""); // only required in >= 2D
   params.addCoupledVar("w", ""); // only required in 3D
 
   // Coupled parameters
@@ -30,7 +30,7 @@ NSImposedVelocityDirectionBC::NSImposedVelocityDirectionBC(const InputParameters
     NodalBC(parameters),
     _rho(coupledValue("rho")),
     _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
+    _v_vel(_mesh.dimension() == 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
     _desired_unit_velocity_component(getParam<Real>("desired_unit_velocity_component"))
 {

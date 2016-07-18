@@ -43,15 +43,15 @@ NSSUPGBase::NSSUPGBase(const InputParameters & parameters) :
     // Old coupled variable values
     // _rho_old(coupledValueOld("rho")),
     // _rho_u_old(coupledValueOld("rhou")),
-    // _rho_v_old(coupledValueOld("rhov")),
-    // _rho_w_old( _dim == 3 ? coupledValueOld("rhow") : _zero),
+    // _rho_v_old(_mesh.dimension() >= 2 ? coupledValueOld("rhov") : _zero),
+    // _rho_w_old(_mesh.dimension() == 3 ? coupledValueOld("rhow") : _zero),
     // _rho_e_old(coupledValueOld("rhoe")),
 
     // Time derivative derivatives (no, that's not a typo).  You can
     // just think of these as 1/dt for simplicity, they usually are...
     _d_rhodot_du(coupledDotDu("rho")),
     _d_rhoudot_du(coupledDotDu("rhou")),
-    _d_rhovdot_du(coupledDotDu("rhov")),
+    _d_rhovdot_du(_mesh.dimension() >= 2 ? coupledDotDu("rhov") : _zero),
     _d_rhowdot_du(_mesh.dimension() == 3 ? coupledDotDu("rhow") : _zero),
     _d_rhoedot_du(coupledDotDu("rhoe")),
 

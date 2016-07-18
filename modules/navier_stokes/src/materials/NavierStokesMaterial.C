@@ -23,15 +23,15 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addRequiredParam<Real>("Pr", "Prandtl number.");
 
   params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", ""); // not required in 2D
+  params.addCoupledVar("v", ""); // only required in >= 2D
+  params.addCoupledVar("w", ""); // only required in 3D
 
   params.addRequiredCoupledVar("temperature", "");
   params.addRequiredCoupledVar("enthalpy", "");
 
   params.addRequiredCoupledVar("rho", "density");
   params.addRequiredCoupledVar("rhou", "x-momentum");
-  params.addRequiredCoupledVar("rhov", "y-momentum");
+  params.addCoupledVar("rhov", "y-momentum"); // only required in >= 2D
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
   params.addRequiredCoupledVar("rhoe", "energy");
 
@@ -44,7 +44,7 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     Material(parameters),
     _mesh_dimension(_mesh.dimension()),
     _grad_u(coupledGradient("u")),
-    _grad_v(coupledGradient("v")),
+    _grad_v(_mesh_dimension >= 2 ? coupledGradient("v") : _grad_zero),
     _grad_w(_mesh_dimension == 3 ? coupledGradient("w") : _grad_zero),
 
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
@@ -71,7 +71,7 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
 
     // Coupled solution values needed for computing SUPG stabilization terms
     _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
     _temperature(coupledValue("temperature")),
@@ -80,22 +80,22 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     // Coupled solution values
     _rho(coupledValue("rho")),
     _rho_u(coupledValue("rhou")),
-    _rho_v(coupledValue("rhov")),
+    _rho_v(_mesh.dimension() >= 2 ? coupledValue("rhov") : _zero),
     _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
     _rho_e(coupledValue("rhoe")),
 
     // Time derivative values
     _drho_dt(coupledDot("rho")),
     _drhou_dt(coupledDot("rhou")),
-    _drhov_dt(coupledDot("rhov")),
-    _drhow_dt( _mesh.dimension() == 3 ? coupledDot("rhow") : _zero),
+    _drhov_dt(_mesh.dimension() >= 2 ? coupledDot("rhov") : _zero),
+    _drhow_dt(_mesh.dimension() == 3 ? coupledDot("rhow") : _zero),
     _drhoe_dt(coupledDot("rhoe")),
 
     // Gradients
     _grad_rho(coupledGradient("rho")),
     _grad_rho_u(coupledGradient("rhou")),
-    _grad_rho_v(coupledGradient("rhov")),
-    _grad_rho_w( _mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
+    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient("rhov") : _grad_zero),
+    _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
     _grad_rho_e(coupledGradient("rhoe")),
 
     // Material properties for stabilization

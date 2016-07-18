@@ -16,7 +16,7 @@ InputParameters validParams<NSPressureAux>()
   // Mark variables as required
   params.addRequiredCoupledVar("rho", "");
   params.addRequiredCoupledVar("u", "x-velocity");
-  params.addRequiredCoupledVar("v", "y-velocity");
+  params.addCoupledVar("v", "y-velocity"); // Only required in >= 2D
   params.addCoupledVar("w", "z-velocity"); // Only required in 3D...
   params.addRequiredCoupledVar("rhoe", "");
 
@@ -30,7 +30,7 @@ NSPressureAux::NSPressureAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _rho(coupledValue("rho")),
     _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
     _rhoe(coupledValue("rhoe")),
     _gamma(getParam<Real>("gamma")) // can't use Material properties in Nodal Aux...
