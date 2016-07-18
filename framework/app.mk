@@ -12,6 +12,7 @@ STACK ?= stack
 STACK := $(STACK).X
 $APPLICATION_DIR$(STACK) := $(APPLICATION_DIR)
 $APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
+$DEPEND_MODULES$(STACK) := $(DEPEND_MODULES)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
@@ -20,6 +21,7 @@ $APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
 #
 APPLICATION_DIR := $($APPLICATION_DIR$(STACK))
 APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
+DEPEND_MODULES := $($DEPEND_MODULES$(STACK))
 STACK := $(basename $(STACK))
 
 ##############################################################################
@@ -112,7 +114,8 @@ app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
 
-ADDITIONAL_CPPFLAGS += -D$(shell echo $(APPLICATION_NAME) | tr a-z A-Z)_ENABLED
+# WARNING: the += operator does NOT work here!
+ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME) | tr a-z A-Z)_ENABLED
 
 # dependencies
 -include $(app_deps)
