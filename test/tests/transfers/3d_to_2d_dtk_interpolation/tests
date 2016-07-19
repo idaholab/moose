@@ -4,7 +4,7 @@
     input = 'master.i'
     exodiff = 'master_out_sub0.e'
     dtk = True
-    method = 'OPT OPROF'
+    method = '!DBG'
     recover = false
     deleted = '#7123'
   [../]
