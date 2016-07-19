@@ -57,7 +57,7 @@ public:
    * when opening new blocks.
    * @return - The formatted block open string
    */
-  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &doc) const = 0;
+  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string &doc, const std::string & base) const = 0;
 
   /**
    * This method is called at the end of of each Node in the tree.  It is typically used to provide formatting necessary
