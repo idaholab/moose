@@ -26,8 +26,8 @@ InputParameters validParams<ImageSampler>()
 
   params.addParam<Point>("origin", "Origin of the image (defaults to mesh origin)");
   params.addParam<Point>("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
-  params.addParam<unsigned int>("component", "The image component to return, leaving this blank will result in a greyscale value "
-                                             "for the image to be created. The component number is zero based, i.e. 0 returns the first component of the image");
+  params.addParam<unsigned int>("component", "The image RGB-component to return, leaving this blank will result in a greyscale value "
+                                             "for the image to be created. The component number is zero based, i.e. 0 returns the first (RED) component of the image.");
 
   // Shift and Scale (application of these occurs prior to threshold)
   params.addParam<double>("shift", 0, "Value to add to all pixels; occurs prior to scaling");
