@@ -113,11 +113,11 @@
       # Splitting type is set as schur, because the pressure part of Stokes-like systems
       # is not diagonally dominant. CAN NOT use additive, multiplicative and etc.
       # Original system:
-      # | A B | | u | _ | f_u |
-      # | C 0 | | p | - | f_v |
+      # | A B | | u | = | f_u |
+      # | C 0 | | p |   | f_v |
       # is factorized into
-      # |I        0 | | A    0|  | I  A^{-1}B | | u | _ | f_u |
-      # |CA^{-1}  I | | 0   -S|  | 0    I     | | p | - | f_v |
+      # |I        0 | | A    0|  | I  A^{-1}B | | u | = | f_u |
+      # |CA^{-1}  I | | 0   -S|  | 0    I     | | p |   | f_v |
       # S = CA^{-1}B
       # The preconditioning is accomplished via the following steps
       # (1) p^{(0)} = f_v - CA^{-1}f_u,
@@ -137,7 +137,7 @@
       # | I  A^{-1}B |
       # | 0    -S    |
       # The preconditioning matrix is set as selfp, which means we explicitly form a
-      # matrix S^{-}= C(diag(A))^{-1}B. We do not compute the inverse of A, but instead, we compute
+      # matrix \hat{S} = C(diag(A))^{-1}B. We do not compute the inverse of A, but instead, we compute
       # the inverse of diag(A).
     [../]
     [./u]
