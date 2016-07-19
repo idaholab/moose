@@ -112,7 +112,7 @@ BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
 
         if (j < _x_positions.size())
         {
-          if (r1 - dist - r2 > _large_spac)
+          if (r1 - dist - r2 < _large_spac)
             goto fail;
         }
         else
