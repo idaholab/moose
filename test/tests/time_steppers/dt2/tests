@@ -4,7 +4,7 @@
     input = 'dt2_adapt.i'
     exodiff = 'dt2_out_adapt.e-s038'
     group = 'adaptive'
-    method = 'OPT OPROF'
+    method = '!DBG'
     valgrind = 'HEAVY'
     deleted = true
   [../]
