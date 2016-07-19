@@ -5,4 +5,10 @@
     exodiff = 'open_bc_out_pressure_BC.e'
     abs_zero = 1e-7
   [../]
+  [./open_bc_pressure_BC_fieldSplit]
+    type = 'Exodiff'
+    input = 'open_bc_pressure_BC_fieldSplit.i'
+    exodiff = 'open_bc_out_pressure_BC_fieldSplit.e'
+    abs_zero = 1e-7
+  [../]
 []
