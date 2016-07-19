@@ -24,7 +24,7 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Mobility
   const MaterialProperty<Real> & _L;
@@ -32,6 +32,8 @@ protected:
   const MaterialProperty<Real> & _kappa;
   /// Gradient of the coupled variable
   const VariableGradient & _grad_v;
+  /// Index of the coupled variable
+  unsigned int _v_var;
 };
 
 #endif //SIMPLECOUPLEDACINTERFACE_H

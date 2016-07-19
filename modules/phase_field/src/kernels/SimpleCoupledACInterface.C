@@ -21,7 +21,8 @@ SimpleCoupledACInterface::SimpleCoupledACInterface(const InputParameters & param
     Kernel(parameters),
     _L(getMaterialProperty<Real>("mob_name")),
     _kappa(getMaterialProperty<Real>("kappa_name")),
-    _grad_v(coupledGradient("v"))
+    _grad_v(coupledGradient("v")),
+    _v_var(coupled("v",0))
 {
 }
 
@@ -32,7 +33,10 @@ SimpleCoupledACInterface::computeQpResidual()
 }
 
 Real
-SimpleCoupledACInterface::computeQpJacobian()
+SimpleCoupledACInterface::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return _grad_phi[_j][_qp] * _kappa[_qp] * _L[_qp] * _grad_test[_i][_qp];
+  if (jvar == _v_var)
+    return _grad_phi[_j][_qp] * _kappa[_qp] * _L[_qp] * _grad_test[_i][_qp];
+
+  return 0.0;
 }
