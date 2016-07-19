@@ -226,6 +226,11 @@ public:
    * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
    * Note the explicit symmeterisation
    */
+  Real generalSecondInvariant() const;
+
+  /**
+   * Calculates the second invariant (I2) of a tensor
+   */
   Real secondInvariant() const;
 
   /**
