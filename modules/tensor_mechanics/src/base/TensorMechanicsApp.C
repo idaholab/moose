@@ -93,11 +93,14 @@
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 #include "TensorMechanicsPlasticJ2.h"
+#include "TensorMechanicsPlasticIsotropicSD.h"
+#include "TensorMechanicsPlasticOrthotropic.h"
 #include "TensorMechanicsPlasticMeanCap.h"
 #include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
 #include "TensorMechanicsHardeningConstant.h"
 #include "TensorMechanicsHardeningGaussian.h"
 #include "TensorMechanicsHardeningExponential.h"
+#include "TensorMechanicsHardeningPowerRule.h"
 #include "TensorMechanicsHardeningCutExponential.h"
 #include "TensorMechanicsHardeningCubic.h"
 #include "ElementPropertyReadFile.h"
@@ -256,11 +259,14 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
   registerUserObject(TensorMechanicsPlasticJ2);
+  registerUserObject(TensorMechanicsPlasticIsotropicSD);
+  registerUserObject(TensorMechanicsPlasticOrthotropic);
   registerUserObject(TensorMechanicsPlasticMeanCap);
   registerUserObject(TensorMechanicsPlasticDruckerPragerHyperbolic);
   registerUserObject(TensorMechanicsHardeningConstant);
   registerUserObject(TensorMechanicsHardeningGaussian);
   registerUserObject(TensorMechanicsHardeningExponential);
+  registerUserObject(TensorMechanicsHardeningPowerRule);
   registerUserObject(TensorMechanicsHardeningCutExponential);
   registerUserObject(TensorMechanicsHardeningCubic);
   registerUserObject(ElementPropertyReadFile);
