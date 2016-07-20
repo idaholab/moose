@@ -68,7 +68,6 @@
     type = 'Exodiff'
     input = 'grain_tracker_ebsd.i'
     exodiff = 'grain_tracker_ebsd_out.e'
-    skip = 'ReconVarIC not moved yet'
   [../]
 
   ###################################################
