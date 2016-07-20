@@ -34,11 +34,10 @@ class MooseSystemInformation(MooseInformationBase):
         md = []
 
         # The details
-        if os.path.exists(self._details):
-            md += ['{{!{}!}}'.format(self._details)]
-            md += ['']
-        else:
+        if not os.path.exists(self._details):
             log.error('Details file does not exist: {}'.format(self._details))
+        md += ['{{!{}!}}'.format(self._details)]
+        md += ['']
 
         # Generate table of action parameters
         if self._yaml['parameters']:

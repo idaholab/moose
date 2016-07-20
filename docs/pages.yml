@@ -1,0 +1,10 @@
+- Home: 'index.md'
+- Documentation:
+    - Generating Docs:
+        - Overview: 'content/generation/Overview.md'
+        - Moose Flavored Markdown: 'content/generation/MooseFlavoredMarkdown.md'
+    - Systems:
+        - Framework: !include content/systems/framework/pages.yml
+#        - Modules:
+#            - Phase Field: !include content/systems/modules/phase_field/pages.yml
+#            - Contact: !include content/systems/modules/contact/pages.yml

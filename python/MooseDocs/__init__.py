@@ -1,6 +1,9 @@
 import extensions
 import database
+import commands
+
 import utils
+import yaml
 
 from MarkdownTable import MarkdownTable
 from MooseObjectParameterTable import MooseObjectParameterTable
@@ -29,7 +32,7 @@ class MkMooseDocsFormatter(logging.Formatter):
 
     Call the init_logging function to initialize the use of this custom fomatter.
     """
-    COLOR = {'DEBUG':'GREEN', 'INFO':'RESET', 'WARNING':'YELLOW', 'ERROR':'RED', 'CRITICAL':'MAGENTA'}
+    COLOR = {'DEBUG':'CYAN', 'INFO':'RESET', 'WARNING':'YELLOW', 'ERROR':'RED', 'CRITICAL':'MAGENTA'}
 
     def format(self, record):
         msg = logging.Formatter.format(self, record)
@@ -38,14 +41,14 @@ class MkMooseDocsFormatter(logging.Formatter):
             level = 4
         elif record.name.endswith('Database'):
             level = 3
-        elif record.name.endswith('MooseObjectInformation') or record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseSystemInformation'):
+        elif record.name.endswith('MooseInformationBase') or record.name.endswith('MooseObjectInformation') or record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseSystemInformation'):
             level = 2
         elif record.name.endswith('MooseSubApplicationDocGenerator'):
             level = 1
         else:
             level = 0
 
-        if record.levelname in ['WARNING', 'ERROR', 'CRITICAL']:
+        if record.levelname in ['DEBUG', 'WARNING', 'ERROR', 'CRITICAL']:
             msg = '{}{}: {}'.format(' '*4*level, record.levelname, msg)
         else:
             msg = '{}{}'.format(' '*4*level, msg)
@@ -81,3 +84,38 @@ def init_logging(verbose=False):
     log = logging.getLogger('mkdocs')
     log.addHandler(handler)
     log.setLevel(level)
+
+def yaml_load(filename, loader=yaml.Loader):
+    """
+    """
+
+    def include(self, node):
+        """
+        Allow for the embedding of yaml files.
+        http://stackoverflow.com/questions/528281/how-can-i-include-an-yaml-file-inside-another
+        """
+        filename = os.path.join(self._root, self.construct_scalar(node))
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                return yaml.load(f, Loader)
+
+    class Loader(loader):
+        """
+        """
+
+        def __init__(self, stream):
+            """
+            Store the root directory for including other yaml files.
+            """
+            if isinstance(stream, file):
+                self._root = os.path.split(stream.name)[0]
+            else:
+                self._root = os.getcwd()
+            super(Loader, self).__init__(stream)
+
+    ## Attach the include constructor to our custom loader.
+    Loader.add_constructor('!include', include)
+
+    with open(filename, 'r') as fid:
+        yml = yaml.load(fid.read(), Loader)
+    return yml

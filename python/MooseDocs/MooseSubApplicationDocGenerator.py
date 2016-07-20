@@ -18,8 +18,6 @@ class MooseSubApplicationDocGenerator(object):
         config[dict]: A dictionary with configuration options (see MooseApplicationDocGenerator).
     """
 
-    log = logging.getLogger('MkMooseDocs.MooseApplicationDocGenerator')
-
     def __init__(self, yaml_data, config):
 
         # Configuration
@@ -38,16 +36,20 @@ class MooseSubApplicationDocGenerator(object):
             children[key] = database.Database('.h', path, database.items.ChildClassItem, **options)
 
         # Parse the syntax for the given source directory.
+        src = self._config.get('source')
+        log.info('Locating syntax for application: {}'.format(src))
         self._yaml_data = yaml_data
-        self._syntax = MooseApplicationSyntax(yaml_data, self._config.get('source'))
+        self._syntax = MooseApplicationSyntax(yaml_data, src)
 
         self._systems = []
+        log.info('Initializing MOOSE system information...')
         for system in self._syntax.systems():
             node = yaml_data.find(system)
-            if node['name'] not in hide:
+            if not any([node['name'].startswith(h) for h in hide]):
                 self._systems.append(MooseSystemInformation(node, self._syntax, **self._config))
 
         self._objects = []
+        log.info('Initializing MooseObject information...')
         for key, value in self._syntax.objects().iteritems():
             src = self._syntax.filenames(key)
             nodes = yaml_data[key]

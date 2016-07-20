@@ -25,8 +25,6 @@ class MooseObjectInformation(MooseInformationBase):
     def __init__(self, yaml, src, **kwargs):
         MooseInformationBase.__init__(self, yaml, **kwargs)
 
-        log.info('Initializing Documentation: {}'.format(yaml['name']))
-
         # Member variables
         self._src = src
         self._inputs = kwargs.pop('inputs', None)
@@ -88,7 +86,6 @@ class MooseObjectInformation(MooseInformationBase):
         if md:
             md.insert(0, '## Additional Developer Documentation')
 
-
         return md
 
 
@@ -105,15 +102,16 @@ class MooseObjectInformation(MooseInformationBase):
         md += ['']
 
         # The class description
+        if not self._description:
+            log.error('Class description does not exist: {}'.format(self._details))
         md += [self._description]
         md += ['']
 
         # The details
-        if os.path.exists(self._details):
-            md += ['{{!{}!}}'.format(self._details)]
-            md += ['']
-        else:
+        if not os.path.exists(self._details):
             log.error('Details file does not exist: {}'.format(self._details))
+        md += ['{{!{}!}}'.format(self._details)]
+        md += ['']
 
         # Print the InputParameter tables
         md += ['## Input Parameters']

@@ -47,8 +47,7 @@ class MooseSourcePatternBase(Pattern):
             if s:
                 k, v = s.strip().split('=')
                 if k not in output:
-                    #@TODO: Log this
-                    print 'Unknown setting', k
+                    log.warning('Unknown setting {}'.format(k))
                     continue
                 try:
                     output[k] = eval(v)

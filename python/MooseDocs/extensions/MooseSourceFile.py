@@ -42,6 +42,10 @@ class MooseSourceFile(MooseSourcePatternBase):
             with open(filename) as fid:
                 content = fid.read()
 
+        if content == None:
+            log.error("Failed to extract content from {}.".format(filename))
+            return self.createErrorElement(rel_filename)
+
         # Return the Element object
         el = self.createElement(match.group(2), content, filename, rel_filename, settings)
         return el

@@ -1,60 +1,59 @@
-# REQUIREMENTS:
-# pip install markdown-include python-markdown-math mkdocs-bootstrap mkdocs-bootswatch click Jinja2 livereload
+###############################################################
+# Configuration for creating MOOSE application documentation. #
+###############################################################
 
-site_name: MOOSE
+# Executable directory or executable
+app: ../modules/combined
 
-docs_dir: .
+# Complete YAML syntax to ignore (must include leading /). All "systems" in MOOSE matching
+# these values will be completly ignored and all objects within the associated system will
+# also be ignored. It is also possible to have a hide block in the local config.yml which will
+# be joined with these value.
+hide:
+    - /BCs/Periodic
+    - /Bounds
+    - /AuxVariables/*/InitialCondition
+    - /Variables/*/InitialCondition
 
-theme: flatly # pip install mkdocs-bootswatch
+# Install markdown directory
+install: content
 
-extra_javascript:
-    - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-    - mathjaxconfig.js
+# The default repository for linking
+repo: https://github.com/idaholab/moose/blob/master
 
-markdown_extensions:
-    - smarty
-    - admonition
-    - markdown_include.include           # pip install markdown-include
-    - mdx_math                           # pip install python-markdown-math
-    - MooseDocs.extensions.MooseMarkdown:
-          make: ../modules
-          repo: https://github.com/idaholab/moose/blob/master
+# Directories/applications to include
+include:
+    framework:
+        source: ../framework
+        doxygen: http://mooseframework.com/docs/doxygen/moose/
+        details: ../framework/docs/details
+        prefix: systems/framework
+        links:
+            Tests:
+                - ../framework/test/tests
+                - ../framework/modules/phase_field/tests
+            Examples:
+                - ../framework/examples
+                - ../framework/modules/phase_field/examples
+            Tutorials:
+                - ../framework/tutorials
 
-pages:
-    - Home: 'index.md'
-    - Documentation:
-        - Generating Docs:
-            - Overview: 'documentation/generation/Overview.md'
-            - Moose Flavored Markdown: 'documentation/generation/MooseFlavoredMarkdown.md'
-        - Systems:
-            - Framework: !include documentation/systems/framework/pages.yml
-            - Modules:
-                - Phase Field: !include documentation/systems/modules/phase_field/pages.yml
-                - Contact: !include documentation/systems/modules/contact/pages.yml
+    phase_field:
+        source: ../modules/phase_field
+        doxygen: http://mooseframework.com/docs/doxygen/modules/
+        details: ../modules/phase_field/docs/details
+        prefix: systems/modules/phase_field
+        links:
+            Tests:
+                - ../modules/phase_field/tests
+            Examples:
+                - ../modules/phase_field/examples
 
-extra:
-    ###############################################################
-    # Configuration for creating MOOSE application documentation. #
-    ###############################################################
-
-    # Executable directory or executable
-    app: ../modules/combined
-
-    # Complete YAML syntax to ignore (must include leading /). All "systems" in MOOSE matching
-    # these values will be completly ignored and all objects within the associated system will
-    # also be ignored. It is also possible to have a hide block in the local config.yml which will
-    # be joined with these value.
-    hide:
-      - /BCs/Periodic
-      - /Bounds
-      - /AuxVariables/*/InitialCondition
-      - /Variables/*/InitialCondition
-
-    # Directories to include, they must contain a config.yml
-    include:
-      - ../framework
-      - ../modules/phase_field
-      - ../modules/contact
-
-    # Install markdown directory
-    install: documentation
+    contact:
+        source: ../modules/contact
+        doxygen: http://mooseframework.com/docs/doxygen/modules/
+        details: ../modules/contact/docs/details
+        prefix: systems/modules/contact
+        links:
+            Tests:
+                - ../modules/contact/tests

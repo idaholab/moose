@@ -22,10 +22,11 @@ class MooseMarkdown(markdown.Extension):
         self.config['root'] = [root, "The root directory of the repository, if not provided the root is found using git."]
         self.config['make'] = [root, "The location of the Makefile responsible for building the application."]
         self.config['repo'] = ['', "The remote repository to create hyperlinks."]
+        self.config['docs_dir'] = [os.path.join('docs', 'content'), "The location of the markdown to be used for generating the site."]
 
         super(MooseMarkdown, self).__init__(*args, **kwargs)
 
-        path = os.path.join(self.config['root'][0], 'docs', 'documentation')
+        path = os.path.join(self.config['root'][0], self.config['docs_dir'][0])
         self._markdown_database = MooseDocs.database.Database('.md', path, MooseDocs.database.items.MarkdownIncludeItem)
 
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     md = markdown.Markdown(extensions=[makeExtension(repo='https://github.com/idaholab/moose/blob/master', make='/Users/slauae/projects/moose-doc/modules/')])
 
     #filename = '/Users/slauae/projects/moose-doc/docs/documentation/generation/Overview.md'
-    filename = '/Users/slauae/projects/moose-doc/docs/documentation/generation/MooseFlavoredMarkdown.md'
+    filename = '/Users/slauae/projects/moose-doc/docs/content/generation/MooseFlavoredMarkdown.md'
     with open(filename) as fid:
         content = fid.read()
 

@@ -18,6 +18,7 @@ class MooseInformationBase(object):
         self._yaml = node
         self._config = kwargs
         self._details = os.path.abspath(os.path.join(self._config['details'], self.filename(node['name'])))
+        log.debug(node['name'])
 
     def __str__(self):
         """
@@ -62,7 +63,7 @@ class MooseInformationBase(object):
                 return
 
         # Write the file
-        log.info('Writing: {}'.format(filename))
+        log.debug('Writing: {}'.format(filename))
         fid = open(filename, 'w')
         fid.write(md)
         fid.close()

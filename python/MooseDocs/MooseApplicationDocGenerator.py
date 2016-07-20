@@ -1,7 +1,8 @@
 import os
+import shutil
 import utils
-from mkdocs.utils import yaml_load
 import logging
+import MooseDocs
 log = logging.getLogger(__name__)
 
 from MooseSubApplicationDocGenerator import MooseSubApplicationDocGenerator
@@ -28,7 +29,7 @@ class MooseApplicationDocGenerator(object):
         self._modified = None
         self._develop = kwargs.get('develop', False)
 
-    def __call__(self):
+    def generate(self):
         """
         Operator(). Calling this function causes the documentation to generated.
 
@@ -55,30 +56,25 @@ class MooseApplicationDocGenerator(object):
         Build the configuration options for included sub-directories.
         """
 
-        # Read the general yml file (e.g. mkdocs.yml)
-        with open(self._config_file, 'r') as fid:
-            yml = yaml_load(fid.read())
+        # Read the moosedocs yml configuration file
+        yml = MooseDocs.yaml_load(self._config_file)
 
-        # Hide
+        # Global defaults
         hide = yml.get('hide', list())
-        install = yml.get('install', os.path.join(os.getcwd(), 'documentation'))
+        install = yml.get('install', os.path.join(os.getcwd(), 'content'))
+        repo = yml.get('repo', None)
 
-        def update_config(cname):
+        def update_config(config):
             """
             Helper for updating/creating local configuration dict.
             """
 
-            # Open the local config file
-            with open(cname) as fid:
-                config = yaml_load(fid.read())
-
             # Defaults
-            # Set the default source directory and sub-folder
-            config['source'] = os.path.dirname(cname)
+            config.setdefault('details', os.path.join(os.getcwd(), 'details'))
+            config.setdefault('source', None)
             config.setdefault('install', install)
-            config['details'] = os.path.join(config['source'], config.get('details', os.path.join('docs', 'details')))
             config.setdefault('prefix', '')
-            config.setdefault('repo', None)
+            config.setdefault('repo', repo)
             config.setdefault('doxygen', None)
             config.setdefault('hide', list())
             config.setdefault('links', dict())
@@ -86,29 +82,22 @@ class MooseApplicationDocGenerator(object):
             # Append the hide data
             config['hide'] = set(config['hide'] + hide)
 
-            # Re-define the links path relative to working directory
-            for key, value in config['links'].iteritems():
-                out = []
-                for path in value:
-                    out.append(os.path.abspath(os.path.join(config['source'], path)))
-                config['links'][key] = out
-
             return config
 
         # Extract executable
-        if 'app' not in yml['extra']:
+        if 'app' not in yml:
             self._exe = utils.find_moose_executable(self._root)
         else:
-            app = yml['extra']['app']
+            app = yml['app']
             if os.path.isdir(app):
                 self._exe = utils.find_moose_executable(app)
             else:
                 self._exe = app
 
         configs = []
-        for include in yml['extra']['include']:
-            path = os.path.join(self._root, include, 'config.yml')
-            configs.append(update_config(path))
+        for key, value in yml['include'].iteritems():
+            log.debug('Configuring settings for including {}'.format(key))
+            configs.append(update_config(value))
         return configs
 
 
@@ -130,3 +119,21 @@ class MooseApplicationDocGenerator(object):
         for config in configs:
             generator = MooseSubApplicationDocGenerator(ydata, config)
             generator.write()
+
+        # Create the mkdocs.yml file
+        def dumptree(node, level=0):
+            for item in node:
+                for key, value in item.iteritems():
+                    if isinstance(value, list):
+                        yield '{}- {}:'.format(' '*4*level, key)
+                        for f in dumptree(value, level+1):
+                            yield f
+                    else:
+                        yield '{}- {}: {}'.format(' '*4*(level), key, value)
+
+        pages = MooseDocs.yaml_load('pages.yml')
+        output = ['pages:']
+        output += dumptree(pages, 1)
+        shutil.copyfile('mkdocs.template.yml', 'mkdocs.yml')
+        with open('mkdocs.yml', 'a') as fid:
+            fid.write('\n'.join(output))

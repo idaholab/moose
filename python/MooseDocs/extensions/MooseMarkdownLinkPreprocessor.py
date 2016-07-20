@@ -26,11 +26,10 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
             log.warning("Unable to read markdown filename from injected comment.")
             return lines
 
-
         # Loop through each line and create autolinks
         for i in range(len(lines)):
-            lines[i] = re.sub(r'(?<!`)\[(.*?\.md)\]', lambda m: self.bracketSub(local, m), lines[i])
-            lines[i] = re.sub(r'(?<!`)\[(.*?)\]\((.*?\.md)\)', lambda m: self.linkSub(local, m), lines[i])
+            lines[i] = re.sub(r'(?<!`)\[auto::(.*?\.md)\]', lambda m: self.bracketSub(local, m), lines[i])
+            lines[i] = re.sub(r'(?<!`)\[auto::(.*?)\]\((.*?\.md)\)', lambda m: self.linkSub(local, m), lines[i])
         return lines
 
     def bracketSub(self, local, match):
@@ -44,6 +43,12 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
 
         # Locate database items given the key
         name = match.group(1)
+
+        # Check if the name exists, if it doesn then auto-link is not needed
+        if os.path.exists(os.path.join(os.path.dirname(local), name)):
+            return match.group(0)
+
+        # Locate the markdown files matching the supplied name
         items = self._database.findall(name)
         self.checkMultipleItems(items, name)
 
@@ -71,6 +76,12 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
 
         # Locate database items given the key
         name = match.group(2)
+
+        # Check if the name exists, if it doesn then auto-link is not needed
+        if os.path.exists(os.path.join(os.path.dirname(local), name)):
+            return match.group(0)
+
+        # Locate the markdown files matching the supplied name
         items = self._database.findall(name)
         self.checkMultipleItems(items, name)
 
@@ -95,3 +106,4 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
             for item in items:
                 msg += '\n    {}'.format(item[0].filename())
             log.warning(msg)
+            raise Exception('done')
