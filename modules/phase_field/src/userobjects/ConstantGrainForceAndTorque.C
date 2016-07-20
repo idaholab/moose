@@ -22,10 +22,10 @@ ConstantGrainForceAndTorque::ConstantGrainForceAndTorque(const InputParameters &
     GeneralUserObject(parameters),
     _F(getParam<std::vector<Real> >("force")),
     _M(getParam<std::vector<Real> >("torque")),
-    _ncrys(_F.size()/3),
-    _ncomp(6*_ncrys),
-    _force_values(_ncrys),
-    _torque_values(_ncrys)
+    _grain_num(_F.size()/3),
+    _ncomp(6*_grain_num),
+    _force_values(_grain_num),
+    _torque_values(_grain_num)
 {
 }
 
@@ -33,7 +33,7 @@ void
 ConstantGrainForceAndTorque::initialize()
 {
   unsigned int total_dofs = _subproblem.es().n_dofs();
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _grain_num; ++i)
   {
     _force_values[i](0) = _F[3*i+0];
     _force_values[i](1) = _F[3*i+1];
@@ -45,10 +45,10 @@ ConstantGrainForceAndTorque::initialize()
 
   if (_fe_problem.currentlyComputingJacobian())
   {
-    _c_jacobians.assign(6*_ncrys*total_dofs, 0.0);
-    _eta_jacobians.resize(_ncrys);
-    for (unsigned int i = 0; i < _ncrys; ++i)
-      _eta_jacobians[i].assign(6*_ncrys*total_dofs, 0.0);
+    _c_jacobians.assign(6*_grain_num*total_dofs, 0.0);
+    _eta_jacobians.resize(_grain_num);
+    for (unsigned int i = 0; i < _grain_num; ++i)
+      _eta_jacobians[i].assign(6*_grain_num*total_dofs, 0.0);
   }
 }
 

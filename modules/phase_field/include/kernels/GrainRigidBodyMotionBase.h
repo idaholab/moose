@@ -8,11 +8,12 @@
 #define GRAINRIGIDBODYMOTIONBASE_H
 
 #include "NonlocalKernel.h"
-#include "ComputeGrainCenterUserObject.h"
+// #include "ComputeGrainCenterUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
 
 //Forward Declarations
 class GrainRigidBodyMotionBase;
+class GrainTrackerInterface;
 
 template<>
 InputParameters validParams<GrainRigidBodyMotionBase>();
@@ -34,6 +35,12 @@ protected:
   virtual Real computeQpNonlocalJacobian(dof_id_type /* dof_index */) { return 0.0; }
   virtual Real computeQpNonlocalOffDiagJacobian(unsigned int /* jvar */, dof_id_type /* dof_index */) { return 0.0; }
 
+  void getUserObjectCJacobians(dof_id_type dof_index, unsigned int grain_index);
+  void getUserObjectEtaJacobians(dof_id_type dof_index, unsigned int jvar_index, unsigned int grain_index);
+
+  /// Variable's local dof indices
+  const std::vector<dof_id_type> & _var_dofs;
+
   /// int label for the Concentration
   unsigned int _c_var;
 
@@ -43,7 +50,8 @@ protected:
   /// Variable gradient for the concentration
   const VariableGradient & _grad_c;
 
-  VariableName _c_name;
+  /// local dof indices of variable c
+  const std::vector<dof_id_type> & _c_dofs;
   unsigned int _op_num;
   /// Variable value for the order parameters
   std::vector<const VariableValue *> _vals;
@@ -52,11 +60,6 @@ protected:
 
   /// type of force density material
   std::string _base_name;
-
-  /// getting userobject for calculating grain centers and volumes
-  const ComputeGrainCenterUserObject & _grain_data;
-  const std::vector<Real> & _grain_volumes;
-  const std::vector<Point> & _grain_centers;
 
   /// getting userobject for calculating grain forces and torques
   const GrainForceAndTorqueInterface & _grain_force_torque;
@@ -70,6 +73,13 @@ protected:
 
   /// constant value corresponding to grain rotation
   Real _mr;
+  const GrainTrackerInterface & _grain_tracker;
+  unsigned int _grain_num;
+
+  RealGradient _force_c_jacobian;
+  RealGradient _torque_c_jacobian;
+  RealGradient _force_eta_jacobian;
+  RealGradient _torque_eta_jacobian;
 };
 
 #endif //GRAINRIGIDBODYMOTIONBASE_H

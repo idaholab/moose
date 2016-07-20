@@ -13,7 +13,7 @@ InputParameters validParams<GrainForceAndTorqueSum>()
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("Userobject for summing forces and torques acting on a grain");
   params.addParam<std::vector<UserObjectName> >("grain_forces", "List of names of user objects that provides forces and torques applied to grains");
-  params.addParam<unsigned int>("op_num", "Number of grains");
+  params.addParam<unsigned int>("grain_num", "Number of grains");
   return params;
 }
 
@@ -22,10 +22,10 @@ GrainForceAndTorqueSum::GrainForceAndTorqueSum(const InputParameters & parameter
     GeneralUserObject(parameters),
     _sum_objects(getParam<std::vector<UserObjectName> >("grain_forces")),
     _num_forces(_sum_objects.size()),
-    _ncrys(getParam<unsigned int>("op_num")),
+    _grain_num(getParam<unsigned int>("grain_num")),
     _sum_forces(_num_forces),
-    _force_values(_ncrys),
-    _torque_values(_ncrys)
+    _force_values(_grain_num),
+    _torque_values(_grain_num)
 {
   for (unsigned int i = 0; i < _num_forces; ++i)
     _sum_forces[i] = & getUserObjectByName<GrainForceAndTorqueInterface>(_sum_objects[i]);
@@ -34,7 +34,7 @@ GrainForceAndTorqueSum::GrainForceAndTorqueSum(const InputParameters & parameter
 void
 GrainForceAndTorqueSum::initialize()
 {
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _grain_num; ++i)
   {
     _force_values[i] = 0.0;
     _torque_values[i] = 0.0;
@@ -48,16 +48,16 @@ GrainForceAndTorqueSum::initialize()
   if (_fe_problem.currentlyComputingJacobian())
   {
     unsigned int total_dofs = _subproblem.es().n_dofs();
-    _c_jacobians.resize(6*_ncrys*total_dofs, 0.0);
-    _eta_jacobians.resize(_ncrys);
+    _c_jacobians.resize(6*_grain_num*total_dofs, 0.0);
+    _eta_jacobians.resize(_grain_num);
 
     for (unsigned int i = 0; i < _c_jacobians.size(); ++i)
       for (unsigned int j = 0; j < _num_forces; ++j)
         _c_jacobians[i] += (_sum_forces[j]->getForceCJacobians())[i];
 
-    for (unsigned int i = 0; i < _ncrys; ++i)
+    for (unsigned int i = 0; i < _grain_num; ++i)
     {
-      _eta_jacobians[i].resize(6*_ncrys*total_dofs, 0.0);
+      _eta_jacobians[i].resize(6*_grain_num*total_dofs, 0.0);
       for (unsigned int j = 0; j < _eta_jacobians[i].size(); ++j)
         for (unsigned int k = 0; k < _num_forces; ++k)
           _eta_jacobians[i][j] += (_sum_forces[k]->getForceEtaJacobians())[i][j];

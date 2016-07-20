@@ -8,7 +8,7 @@
 #define GRAINADVECTIONVELOCITY_H
 
 #include "Material.h"
-#include "ComputeGrainCenterUserObject.h"
+#include "GrainTrackerInterface.h"
 #include "GrainForceAndTorqueInterface.h"
 #include "DerivativeMaterialInterface.h"
 
@@ -31,16 +31,12 @@ protected:
   virtual void computeQpProperties();
 
   /// getting userobject for calculating grain centers and volumes
-  const ComputeGrainCenterUserObject & _grain_data;
-  const std::vector<Real> & _grain_volumes;
-  const std::vector<Point> & _grain_centers;
+  const GrainTrackerInterface & _grain_tracker;
 
   /// getting userobject for calculating grain forces and torques
   const GrainForceAndTorqueInterface & _grain_force_torque;
   const std::vector<RealGradient> & _grain_forces;
   const std::vector<RealGradient> & _grain_torques;
-  const std::vector<Real> & _grain_force_derivatives;
-  // const std::vector<std::vector<RealGradient> > & _grain_torque_derivatives;
 
 private:
   /// constant value corresponding to grain translation
@@ -49,6 +45,7 @@ private:
   /// constant value corresponding to grain rotation
   Real _mr;
 
+  unsigned int _grain_num;
   unsigned int _op_num;
   std::vector<const VariableValue *> _vals;
   std::vector<const VariableGradient *> _grad_vals;
@@ -61,13 +58,6 @@ private:
 
   /// Material storing divergence of advection velocities of grains
   MaterialProperty<std::vector<Real> > & _div_velocity_advection;
-
-  /// Material storing derivative of advection velocities of grains w r. t. c
-  MaterialProperty<std::vector<std::vector<RealGradient> > > & _velocity_advection_derivative_c;
-  /// Material storing derivative of divergence of advection velocities of grains w r. t. c
-  MaterialProperty<std::vector<std::vector<Real> > > & _div_velocity_advection_derivative_c;
-  /// Material storing derivative of advection velocities of grains w r. t. eta
-  MaterialProperty<std::vector<RealGradient> > & _velocity_advection_derivative_eta;
 };
 
 #endif //GRAINADVECTIONVELOCITY_H

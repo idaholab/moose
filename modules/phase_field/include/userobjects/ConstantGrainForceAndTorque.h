@@ -41,7 +41,7 @@ protected:
   /// Applied torque on particles, size should be 3 times no. of grains
   std::vector<Real> _M;
 
-  unsigned int _ncrys;
+  unsigned int _grain_num;
   unsigned int _ncomp;
 
   ///@{ providing grain forces, torques and their jacobians w. r. t c

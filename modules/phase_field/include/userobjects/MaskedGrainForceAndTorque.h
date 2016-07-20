@@ -46,7 +46,7 @@ protected:
 
   std::vector<unsigned int> _pinned_grains;
   unsigned int _num_pinned_grains;
-  unsigned int _ncrys;
+  unsigned int _grain_num;
 
   ///@{ providing grain forces, torques and their jacobians w. r. t c
   std::vector<RealGradient> _force_values;

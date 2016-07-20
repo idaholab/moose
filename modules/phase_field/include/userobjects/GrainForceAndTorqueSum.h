@@ -41,7 +41,7 @@ protected:
   std::vector<UserObjectName> _sum_objects;
   /// Total no. of userobjects that provides forces and torques acting on grains
   unsigned int _num_forces;
-  unsigned int _ncrys;
+  unsigned int _grain_num;
 
   std::vector<const GrainForceAndTorqueInterface *> _sum_forces;
 

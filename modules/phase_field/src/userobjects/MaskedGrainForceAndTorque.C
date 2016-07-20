@@ -27,16 +27,16 @@ MaskedGrainForceAndTorque::MaskedGrainForceAndTorque(const InputParameters & par
     _grain_force_eta_jacobians_input(_grain_force_torque_input.getForceEtaJacobians()),
     _pinned_grains(getParam<std::vector<unsigned int> >("pinned_grains")),
     _num_pinned_grains(_pinned_grains.size()),
-    _ncrys(_grain_forces_input.size()),
-    _force_values(_ncrys),
-    _torque_values(_ncrys)
+    _grain_num(_grain_forces_input.size()),
+    _force_values(_grain_num),
+    _torque_values(_grain_num)
 {
 }
 
 void
 MaskedGrainForceAndTorque::initialize()
 {
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _grain_num; ++i)
   {
     _force_values[i] = _grain_forces_input [i];
     _torque_values[i] = _grain_torques_input[i];
@@ -57,9 +57,9 @@ MaskedGrainForceAndTorque::initialize()
   if (_fe_problem.currentlyComputingJacobian())
   {
     unsigned int total_dofs = _subproblem.es().n_dofs();
-    _c_jacobians.resize(6*_ncrys*total_dofs, 0.0);
-    _eta_jacobians.resize(_ncrys);
-    for (unsigned int i = 0; i < _ncrys; ++i)
+    _c_jacobians.resize(6*_grain_num*total_dofs, 0.0);
+    _eta_jacobians.resize(_grain_num);
+    for (unsigned int i = 0; i < _grain_num; ++i)
       for (unsigned int j = 0; j < total_dofs; ++j)
       {
         _c_jacobians[(6*i+0)*total_dofs+j] = _grain_force_c_jacobians_input[(6*i+0)*total_dofs+j];
@@ -82,10 +82,10 @@ MaskedGrainForceAndTorque::initialize()
             }
       }
 
-    for (unsigned int i = 0; i < _ncrys; ++i)
+    for (unsigned int i = 0; i < _grain_num; ++i)
     {
-      _eta_jacobians[i].resize(6*_ncrys*total_dofs);
-      for (unsigned int j = 0; j < _ncrys; ++j)
+      _eta_jacobians[i].resize(6*_grain_num*total_dofs);
+      for (unsigned int j = 0; j < _grain_num; ++j)
         for (unsigned int k = 0; k < total_dofs; ++k)
         {
           _eta_jacobians[i][(6*j+0)*total_dofs+k] = _grain_force_eta_jacobians_input[i][(6*j+0)*total_dofs+k];

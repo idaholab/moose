@@ -4,9 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #include "ComputeGrainForceAndTorque.h"
-#include "ComputeGrainCenterUserObject.h"
+#include "GrainTrackerInterface.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
@@ -31,16 +30,12 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
     _dF_name(getParam<MaterialPropertyName>("force_density")),
     _dF(getMaterialPropertyByName<std::vector<RealGradient> >(_dF_name)),
     _dFdc(getMaterialPropertyByName<std::vector<RealGradient> >(propertyNameFirst(_dF_name, _c_name))),
-    _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
-    _grain_volumes(_grain_data.getGrainVolumes()),
-    _grain_centers(_grain_data.getGrainCenters()),
     _op_num(coupledComponents("etas")),
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data")),
     _ncomp(6*_op_num),
     _vals_var(_op_num),
     _vals_name(_op_num),
-    _dFdgradeta(_op_num),
-    _force_values(_op_num),
-    _torque_values(_op_num)
+    _dFdgradeta(_op_num)
 {
   for (unsigned int i = 0; i < _op_num; ++i)
   {
@@ -53,6 +48,11 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
 void
 ComputeGrainForceAndTorque::initialize()
 {
+  _grain_num = _grain_tracker.getNumberGrains();
+  _ncomp = 6 * _grain_num;
+
+  _force_values.resize(_grain_num);
+  _torque_values.resize(_grain_num);
   _force_torque_store.assign(_ncomp, 0.0);
 
   if (_fe_problem.currentlyComputingJacobian())
@@ -69,17 +69,24 @@ ComputeGrainForceAndTorque::initialize()
 void
 ComputeGrainForceAndTorque::execute()
 {
-  for (unsigned int i = 0; i < _op_num; ++i)
-    for (_qp=0; _qp<_qrule->n_points(); ++_qp)
-      if (_dF[_qp][i](0) != 0.0 || _dF[_qp][i](1) != 0.0 || _dF[_qp][i](2) != 0.0)
+  std::vector<unsigned int> grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+
+  for (unsigned int i = 0; i < _grain_num; ++i)
+    for (unsigned int j = 0; j < _op_num; ++j)
+      if (i == _grain_tracker.getOpToGrainsVector(_current_elem->id())[j])
       {
-        const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dF[_qp][i]);
-        _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](0);
-        _force_torque_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](1);
-        _force_torque_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](2);
-        _force_torque_store[6*i+3] += compute_torque(0);
-        _force_torque_store[6*i+4] += compute_torque(1);
-        _force_torque_store[6*i+5] += compute_torque(2);
+        const auto centroid = _grain_tracker.getGrainCentroid(i);
+        for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+          if (_dF[_qp][j](0) != 0.0 || _dF[_qp][j](1) != 0.0 || _dF[_qp][j](2) != 0.0)
+          {
+            const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - centroid).cross(_dF[_qp][j]);
+            _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](0);
+            _force_torque_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](1);
+            _force_torque_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](2);
+            _force_torque_store[6*i+3] += compute_torque(0);
+            _force_torque_store[6*i+4] += compute_torque(1);
+            _force_torque_store[6*i+5] += compute_torque(2);
+          }
       }
 }
 
@@ -87,32 +94,42 @@ void
 ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
 {
   if (jvar == _c_var)
-    for (unsigned int i = 0; i < _op_num; ++i)
-      for (_qp=0; _qp<_qrule->n_points(); ++_qp)
-        if (_dFdc[_qp][i](0) != 0.0 || _dFdc[_qp][i](1) != 0.0 || _dFdc[_qp][i](2) != 0.0)
+    for (unsigned int i = 0; i < _grain_num; ++i)
+      for (unsigned int j = 0; j < _op_num; ++j)
+        if (i == _grain_tracker.getOpToGrainsVector(_current_elem->id())[j])
         {
-          const RealGradient compute_torque_jacobian_c =_JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dFdc[_qp][i]);
-          _force_torque_c_jacobian_store[(6*i+0)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * _dFdc[_qp][i](0);
-          _force_torque_c_jacobian_store[(6*i+1)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * _dFdc[_qp][i](1);
-          _force_torque_c_jacobian_store[(6*i+2)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * _dFdc[_qp][i](2);
-          _force_torque_c_jacobian_store[(6*i+3)*_total_dofs+_j_global] += compute_torque_jacobian_c(0);
-          _force_torque_c_jacobian_store[(6*i+4)*_total_dofs+_j_global] += compute_torque_jacobian_c(1);
-          _force_torque_c_jacobian_store[(6*i+5)*_total_dofs+_j_global] += compute_torque_jacobian_c(2);
+          const auto centroid = _grain_tracker.getGrainCentroid(i);
+          for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+            if (_dFdc[_qp][j](0) != 0.0 || _dFdc[_qp][j](1) != 0.0 || _dFdc[_qp][j](2) != 0.0)
+            {
+              const RealGradient compute_torque_jacobian_c =_JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * (_q_point[_qp] - centroid).cross(_dFdc[_qp][j]);
+              _force_torque_c_jacobian_store[(6*i+0)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * _dFdc[_qp][j](0);
+              _force_torque_c_jacobian_store[(6*i+1)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * _dFdc[_qp][j](1);
+              _force_torque_c_jacobian_store[(6*i+2)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _phi[_j][_qp] * _dFdc[_qp][j](2);
+              _force_torque_c_jacobian_store[(6*i+3)*_total_dofs+_j_global] += compute_torque_jacobian_c(0);
+              _force_torque_c_jacobian_store[(6*i+4)*_total_dofs+_j_global] += compute_torque_jacobian_c(1);
+              _force_torque_c_jacobian_store[(6*i+5)*_total_dofs+_j_global] += compute_torque_jacobian_c(2);
+            }
         }
 
   for (unsigned int i = 0; i < _op_num; ++i)
     if (jvar == _vals_var[i])
-      for (unsigned int j = 0; j < _op_num; ++j)
-        for (_qp=0; _qp<_qrule->n_points(); ++_qp)
-          if ((*_dFdgradeta[i])[_qp][j] != 0.0)
+      for (unsigned int j = 0; j < _grain_num; ++j)
+        for (unsigned int k = 0; k < _op_num; ++k)
+          if (j == _grain_tracker.getOpToGrainsVector(_current_elem->id())[k])
           {
-            const RealGradient compute_torque_jacobian_eta =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[j]).cross(_grad_phi[_j][_qp] * (*_dFdgradeta[i])[_qp][j]);
-            _force_torque_eta_jacobian_store[i][(6*j+0)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _grad_phi[_j][_qp](0) * (*_dFdgradeta[i])[_qp][j];
-            _force_torque_eta_jacobian_store[i][(6*j+1)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _grad_phi[_j][_qp](1) * (*_dFdgradeta[i])[_qp][j];
-            _force_torque_eta_jacobian_store[i][(6*j+2)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _grad_phi[_j][_qp](2) * (*_dFdgradeta[i])[_qp][j];
-            _force_torque_eta_jacobian_store[i][(6*j+3)*_total_dofs+_j_global] += compute_torque_jacobian_eta(0);
-            _force_torque_eta_jacobian_store[i][(6*j+4)*_total_dofs+_j_global] += compute_torque_jacobian_eta(1);
-            _force_torque_eta_jacobian_store[i][(6*j+5)*_total_dofs+_j_global] += compute_torque_jacobian_eta(2);
+            const auto centroid = _grain_tracker.getGrainCentroid(j);
+            for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+              if ((*_dFdgradeta[i])[_qp][j] != 0.0)
+              {
+                const RealGradient compute_torque_jacobian_eta =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - centroid).cross(_grad_phi[_j][_qp] * (*_dFdgradeta[i])[_qp][k]);
+                _force_torque_eta_jacobian_store[i][(6*j+0)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _grad_phi[_j][_qp](0) * (*_dFdgradeta[i])[_qp][k];
+                _force_torque_eta_jacobian_store[i][(6*j+1)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _grad_phi[_j][_qp](1) * (*_dFdgradeta[i])[_qp][k];
+                _force_torque_eta_jacobian_store[i][(6*j+2)*_total_dofs+_j_global] += _JxW[_qp] * _coord[_qp] * _grad_phi[_j][_qp](2) * (*_dFdgradeta[i])[_qp][k];
+                _force_torque_eta_jacobian_store[i][(6*j+3)*_total_dofs+_j_global] += compute_torque_jacobian_eta(0);
+                _force_torque_eta_jacobian_store[i][(6*j+4)*_total_dofs+_j_global] += compute_torque_jacobian_eta(1);
+                _force_torque_eta_jacobian_store[i][(6*j+5)*_total_dofs+_j_global] += compute_torque_jacobian_eta(2);
+              }
           }
 }
 
@@ -120,7 +137,7 @@ void
 ComputeGrainForceAndTorque::finalize()
 {
   gatherSum(_force_torque_store);
-  for (unsigned int i = 0; i < _op_num; ++i)
+  for (unsigned int i = 0; i < _grain_num; ++i)
   {
     _force_values[i](0) = _force_torque_store[6*i+0];
     _force_values[i](1) = _force_torque_store[6*i+1];
