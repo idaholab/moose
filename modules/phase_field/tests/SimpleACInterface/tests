@@ -4,4 +4,10 @@
     input = 'SimpleACInterface.i'
     exodiff = 'SimpleACInterface_out.e'
   [../]
+
+  [./SimpleCoupledACInterface]
+    type = 'Exodiff'
+    input = 'SimpleCoupledACInterface.i'
+    exodiff = 'SimpleCoupledACInterface_out.e'
+  [../]
 []
