@@ -129,7 +129,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return the yield function
    */
-  Real yieldFunction(const RankTwoTensor & stress, Real intnl) const;
+  virtual Real yieldFunction(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of yield function with respect to stress
@@ -137,7 +137,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return df_dstress(i, j) = dyieldFunction/dstress(i, j)
    */
-  RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const;
+  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of yield function with respect to the internal parameter
@@ -153,7 +153,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return the flow potential
    */
-  RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const;
+  virtual RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of the flow potential with respect to stress
@@ -161,7 +161,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return dr_dstress(i, j, k, l) = dr(i, j)/dstress(k, l)
    */
-  RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const;
+  virtual RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of the flow potential with respect to the internal parameter
