@@ -4,7 +4,7 @@
 []
 
 [GlobalParams]
-  op_num = 9
+  op_num = 7
   var_name_base = gr
 []
 
@@ -18,7 +18,6 @@
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
-      consider_phase = false
     [../]
   [../]
 []
@@ -32,12 +31,20 @@
   [./bnds]
   [../]
   [./unique_grains]
-    order = CONSTANT
     family = MONOMIAL
+    order = CONSTANT
   [../]
   [./var_indices]
-    order = CONSTANT
     family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./ebsd_grains]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./phi1]
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 
@@ -65,6 +72,30 @@
     execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = VARIABLE_COLORING
+  [../]
+  [./grain_aux]
+    type = EBSDReaderPointDataAux
+    variable = ebsd_grains
+    ebsd_reader = ebsd
+    data_name = 'grain'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./phi1]
+    type = OutputEulerAngles
+    euler_angle_provider = ebsd
+    output_euler_angle = phi1
+    GrainTracker_object = grain_tracker
+    variable = phi1
+  [../]
+[]
+
+[Modules]
+  [./PhaseField]
+    [./EulerAngles2RGB]
+      crystal_structure = cubic
+      euler_angle_provider = ebsd
+      grain_tracker_object = grain_tracker
+    [../]
   [../]
 []
 
@@ -96,16 +127,7 @@
 
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.2
-    convex_hull_buffer = 5.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.08
-    execute_on = 'initial timestep_end'
-    flood_entity_type = ELEMENTAL
     ebsd_reader = ebsd
-    tracking_step = 0
   [../]
 []
 
@@ -128,4 +150,5 @@
 
 [Outputs]
   exodus = true
+  print_perf_log = true
 []
