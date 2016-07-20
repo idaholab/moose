@@ -22,7 +22,7 @@
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
     exodiff = 'grain_tracker_test_elemental_out.e-s002'
-    method = 'OPT OPROF' # slow test
+    method = '!DBG' # slow test
     valgrind = 'HEAVY'
     max_time = 500
   [../]
