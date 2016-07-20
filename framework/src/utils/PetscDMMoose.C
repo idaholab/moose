@@ -99,7 +99,7 @@ DMMooseGetContacts(DM dm, std::vector<std::pair<std::string, std::string> > & co
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -122,7 +122,7 @@ DMMooseGetUnContacts(DM dm, std::vector<std::pair<std::string,std::string> > & u
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -145,7 +145,7 @@ DMMooseGetSides(DM dm, std::vector<std::string> & side_names)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -165,7 +165,7 @@ DMMooseGetUnSides(DM dm, std::vector<std::string> & side_names)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -185,7 +185,7 @@ DMMooseGetBlocks(DM dm, std::vector<std::string> & block_names)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -205,7 +205,7 @@ DMMooseGetVariables(DM dm, std::vector<std::string> & var_names)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -225,7 +225,7 @@ DMMooseSetNonlinearSystem(DM dm, NonlinearSystem & nl)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -247,7 +247,7 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -270,7 +270,7 @@ DMMooseSetBlocks(DM dm, const std::set<std::string> & blocks)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -293,7 +293,7 @@ DMMooseSetSides(DM dm, const std::set<std::string> & sides)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -316,7 +316,7 @@ DMMooseSetUnSides(DM dm, const std::set<std::string> & unsides)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -339,7 +339,7 @@ DMMooseSetContacts(DM dm, const std::vector<std::pair<std::string,std::string> >
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -370,7 +370,7 @@ DMMooseSetUnContacts(DM dm, const std::vector<std::pair<std::string,std::string>
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -401,7 +401,7 @@ DMMooseGetNonlinearSystem(DM dm, NonlinearSystem * & nl)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -421,7 +421,7 @@ DMMooseSetSplitNames(DM dm, const std::vector<std::string> & split_names)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -468,7 +468,7 @@ DMMooseGetSplitNames(DM dm, std::vector<std::string> & split_names)
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   if (!ismoose)
@@ -856,21 +856,21 @@ DMCreateDomainDecomposition_Moose(DM dm, PetscInt * len, char *** namelist, IS *
 #undef  __FUNCT__
 #define __FUNCT__ "DMCreateFieldDecompositionDM_Moose"
 PetscErrorCode
-DMCreateFieldDecompositionDM_Moose(DM _dm, const char*/*name*/,DM * ddm)
+DMCreateFieldDecompositionDM_Moose(DM dm, const char*/*name*/,DM * ddm)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm,DM_CLASSID,1);
-  ierr = PetscObjectTypeCompare((PetscObject)_dm, DMMOOSE, &ismoose);
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   /* Return self. */
   if (*ddm)
   {
-    ierr = PetscObjectReference((PetscObject)_dm);
+    ierr = PetscObjectReference((PetscObject)dm);
     CHKERRQ(ierr);
-    *ddm = _dm;
+    *ddm = dm;
   }
   PetscFunctionReturn(0);
 }
@@ -878,21 +878,21 @@ DMCreateFieldDecompositionDM_Moose(DM _dm, const char*/*name*/,DM * ddm)
 #undef  __FUNCT__
 #define __FUNCT__ "DMCreateDomainDecompositionDM_Moose"
 PetscErrorCode
-DMCreateDomainDecompositionDM_Moose(DM _dm, const char*/*name*/,DM * ddm)
+DMCreateDomainDecompositionDM_Moose(DM dm, const char*/*name*/,DM * ddm)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm,DM_CLASSID,1);
-  ierr = PetscObjectTypeCompare((PetscObject)_dm, DMMOOSE, &ismoose);
+  PetscValidHeaderSpecific(dm,DM_CLASSID,1);
+  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
   CHKERRQ(ierr);
   /* Return self. */
   if (*ddm)
   {
-    ierr = PetscObjectReference((PetscObject)_dm);
+    ierr = PetscObjectReference((PetscObject)dm);
     CHKERRQ(ierr);
-    *ddm = _dm;
+    *ddm = dm;
   }
   PetscFunctionReturn(0);
 }
@@ -987,7 +987,7 @@ SNESFunction_DMMoose(SNES, Vec x, Vec r, void * ctx)
 #define __FUNCT__ "DMMooseJacobian"
 #if PETSC_VERSION_LT(3,5,0)
 static PetscErrorCode
-DMMooseJacobian(DM _dm, Vec x, Mat jac, Mat pc, MatStructure * msflag)
+DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc, MatStructure * msflag)
 #else
 static PetscErrorCode
 DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
@@ -1077,7 +1077,7 @@ SNESJacobian_DMMoose(SNES,Vec x,Mat jac,Mat pc, void* ctx)
 
   PetscFunctionBegin;
 #if PETSC_VERSION_LT(3,5,0)
-  ierr = DMMooseJacobian(_dm, x, *jac, *pc, flag);
+  ierr = DMMooseJacobian(dm, x, *jac, *pc, flag);
   CHKERRQ(ierr);
 #else
   ierr = DMMooseJacobian(dm, x, jac, pc);
@@ -1177,10 +1177,10 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
 #define __FUNCT__ "DMCreateMatrix_Moose"
 #if PETSC_VERSION_LT(3,5,0)
 static PetscErrorCode
-DMCreateMatrix_Moose(DM _dm, const MatType type, Mat * A)
+DMCreateMatrix_Moose(DM dm, const MatType type, Mat * A)
 #else
-  static PetscErrorCode
-  DMCreateMatrix_Moose(DM dm, Mat * A)
+static PetscErrorCode
+DMCreateMatrix_Moose(DM dm, Mat * A)
 #endif
 {
   PetscErrorCode ierr;
@@ -1703,9 +1703,9 @@ DMSetUp_Moose(DM dm)
   if (dmm->_all_vars && dmm->_all_blocks && dmm->_nosides && dmm->_nounsides && dmm->_nocontacts && dmm->_nouncontacts)
   {
 #if PETSC_VERSION_LT(3,4,0)
-    ierr = DMSetFunction(_dm, DMMooseFunction);
+    ierr = DMSetFunction(dm, DMMooseFunction);
     CHKERRQ(ierr);
-    ierr = DMSetJacobian(_dm, DMMooseJacobian);
+    ierr = DMSetJacobian(dm, DMMooseJacobian);
     CHKERRQ(ierr);
 #else
     ierr = DMSNESSetFunction(dm, SNESFunction_DMMoose, (void*)dm);
@@ -2075,9 +2075,9 @@ DMCreate_Moose(DM dm)
   DM_Moose * dmm;
 
   PetscFunctionBegin;
-  PetscValidHeaderSpecific(_dm, DM_CLASSID, 1);
+  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
 #if PETSC_RELEASE_LESS_THAN(3,5,0)
-  ierr = PetscNewLog(_dm, DM_Moose, &dmm);
+  ierr = PetscNewLog(dm, DM_Moose, &dmm);
   CHKERRQ(ierr);
 #else
   ierr = PetscNewLog(dm, &dmm);
@@ -2114,8 +2114,8 @@ DMCreate_Moose(DM dm)
   dm->ops->getaggregates = 0; // DMGetAggregates_Moose;
 
 #if PETSC_VERSION_LT(3,4,0)
-  _dm->ops->createfielddecompositiondm = DMCreateFieldDecompositionDM_Moose;
-  _dm->ops->createdomaindecompositiondm = DMCreateDomainDecompositionDM_Moose;
+  dm->ops->createfielddecompositiondm = DMCreateFieldDecompositionDM_Moose;
+  dm->ops->createdomaindecompositiondm = DMCreateDomainDecompositionDM_Moose;
 #endif
   dm->ops->createfielddecomposition = DMCreateFieldDecomposition_Moose;
   dm->ops->createdomaindecomposition = DMCreateDomainDecomposition_Moose;
