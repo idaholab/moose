@@ -42,6 +42,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
 {
   if (!_is_elemental && _compute_op_maps)
     mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
+
+  _empty_2.resize(_n_vars, libMesh::invalid_uint);
 }
 
 GrainTracker::~GrainTracker()
@@ -63,6 +65,7 @@ GrainTracker::initialize()
   FeatureFloodCount::initialize();
 
   _elemental_data.clear();
+  _elemental_data_2.clear();
 }
 
 void
@@ -119,6 +122,14 @@ GrainTracker::finalize()
                                                 _unique_grain_to_ebsd_num[grain_pair.first] :
                                                 grain_pair.first,
                                                 grain_pair.second._var_idx);
+
+          auto data_pair = _elemental_data_2.find(elem_id);
+          if (data_pair == _elemental_data_2.end())
+          {
+            auto data_pair_pair = _elemental_data_2.emplace(elem_id, std::vector<unsigned int>(_n_vars, libMesh::invalid_uint));
+            data_pair = data_pair_pair.first;
+          }
+          data_pair->second[grain_pair.second._var_idx] = _ebsd_reader ? _unique_grain_to_ebsd_num[grain_pair.first] : grain_pair.first;
         }
       }
     }
@@ -141,6 +152,23 @@ GrainTracker::getElementalValues(dof_id_type elem_id) const
 #endif
     return _empty;
   }
+}
+
+const std::vector<unsigned int> &
+GrainTracker::getOpToGrainsVector(dof_id_type elem_id) const
+{
+  const auto pos = _elemental_data_2.find(elem_id);
+
+  if (pos != _elemental_data_2.end())
+    return pos->second;
+  else
+  {
+#if DEBUG
+    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
+#endif
+    return _empty_2;
+  }
+
 }
 
 void
@@ -990,3 +1018,5 @@ GrainDistance::operator<(const GrainDistance & rhs) const
 {
   return _distance < rhs._distance;
 }
+
+std::vector<unsigned int> GrainTracker::_empty_2;
