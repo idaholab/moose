@@ -148,6 +148,9 @@ protected:
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
 
+  /// Indicates whether to reserve the first couple op (no mapping TO that variable)
+  const bool _reserve_op;
+
   /// A reference to the nonlinear system (used for retrieving solution vectors)
   NonlinearSystem & _nl;
 

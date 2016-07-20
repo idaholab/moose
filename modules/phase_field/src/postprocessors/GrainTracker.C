@@ -35,6 +35,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _tracking_step(getParam<int>("tracking_step")),
     _halo_level(getParam<unsigned int>("halo_level")),
     _remap(getParam<bool>("remap_grains")),
+    _reserve_op(getParam<bool>("reserve_op")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, FeatureData> >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
@@ -487,6 +488,24 @@ GrainTracker::remapGrains()
       if (grain_it1->second._status == Status::INACTIVE)
         continue;
 
+      // If we have the reserve op flag set, see if we need to move any grains immediately
+      if (_reserve_op && grain_it1->second._var_idx == 0) // The zeroth variable is always the reserved variable
+      {
+        Moose::out
+          << COLOR_YELLOW
+          << "Grain #" << grain_it1->first << " detected on the reserved order parameter, remapping to another variable\n"
+          << COLOR_DEFAULT;
+
+        for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
+          if (max < _max_renumbering_recursion)
+          {
+            if (attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max))
+              break;
+          }
+          else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max))
+            mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+      }
+
       for (auto grain_it2 = _unique_grains.begin(); grain_it2 != _unique_grains.end(); ++grain_it2)
       {
         // Don't compare a grain with itself and don't try to remap inactive grains
@@ -510,7 +529,7 @@ GrainTracker::remapGrains()
                 break;
             }
             else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) && !attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
-              mooseError(COLOR_RED << "Unable to find any suitable grains for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+              mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
 
           grains_remapped = true;
         }
@@ -549,7 +568,8 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
    */
   for (auto & grain_pair : _unique_grains)
   {
-    if (grain_pair.second._status == Status::INACTIVE || grain_pair.second._var_idx == grain._var_idx)
+    if (grain_pair.second._status == Status::INACTIVE || grain_pair.second._var_idx == grain._var_idx ||
+        (_reserve_op && grain_pair.second._var_idx == 0)) // Reserve the first OP
       continue;
 
     unsigned int target_var_index = grain_pair.second._var_idx;
