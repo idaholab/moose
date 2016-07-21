@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef StressDivergenceRSphericalTensors_H
-#define StressDivergenceRSphericalTensors_H
+#ifndef STRESSDIVERGENCERSPHERICALTENSORS_H
+#define STRESSDIVERGENCERSPHERICALTENSORS_H
 
 #include "StressDivergenceTensors.h"
 
@@ -42,4 +42,4 @@ protected:
   Real calculateJacobian (unsigned int ivar, unsigned int jvar);
 };
 
-#endif //StressDivergenceRSphericalTensors_H
+#endif //STRESSDIVERGENCERSPHERICALTENSORS_H
