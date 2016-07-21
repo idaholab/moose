@@ -4,21 +4,21 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef NODALVOLUMEFRACTION_H
-#define NODALVOLUMEFRACTION_H
+#ifndef FEATUREVOLUMEFRACTION_H
+#define FEATUREVOLUMEFRACTION_H
 
 #include "FeatureFloodCount.h"
 
 //Forward Declarations
-class NodalVolumeFraction;
+class FeatureVolumeFraction;
 
 template<>
-InputParameters validParams<NodalVolumeFraction>();
+InputParameters validParams<FeatureVolumeFraction>();
 
-class NodalVolumeFraction : public FeatureFloodCount
+class FeatureVolumeFraction : public FeatureFloodCount
 {
 public:
-  NodalVolumeFraction(const InputParameters & parameters);
+  FeatureVolumeFraction(const InputParameters & parameters);
 
   virtual void finalize();
 
@@ -33,4 +33,4 @@ protected:
   Real _equil_fraction;
 };
 
-#endif //NODALVOLUMEFRACTION_H
+#endif //FEATUREVOLUMEFRACTION_H
