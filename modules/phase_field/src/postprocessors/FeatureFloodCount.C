@@ -397,6 +397,9 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, u
 
     case FieldType::CENTROID:
     {
+      if (_periodic_node_map.size())
+        mooseDoOnce(mooseWarning("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
+
       // If this element contains the centroid of one of features, return it's index
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
 

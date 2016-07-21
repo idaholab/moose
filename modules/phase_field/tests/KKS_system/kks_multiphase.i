@@ -270,6 +270,13 @@
     args      = 'eta2 eta3'
     mob_name  = 1
   [../]
+  [./mult_CoupledACint_1]
+    type = SimpleCoupledACInterface
+    variable = lambda
+    v = eta1
+    kappa_name = kappa
+    mob_name = 1
+  [../]
   [./mult_ACBulkF_2]
     type = KKSMultiACBulkF
     variable  = lambda
@@ -290,6 +297,13 @@
     eta_i     = eta2
     args      = 'eta1 eta3'
     mob_name  = 1
+  [../]
+  [./mult_CoupledACint_2]
+    type = SimpleCoupledACInterface
+    variable = lambda
+    v = eta2
+    kappa_name = kappa
+    mob_name = 1
   [../]
   [./mult_ACBulkF_3]
     type = KKSMultiACBulkF
@@ -312,7 +326,13 @@
     args      = 'eta1 eta2'
     mob_name  = 1
   [../]
-
+  [./mult_CoupledACint_3]
+    type = SimpleCoupledACInterface
+    variable = lambda
+    v = eta3
+    kappa_name = kappa
+    mob_name = 1
+  [../]
 
   # Kernels for constraint equation eta1 + eta2 + eta3 = 1
   # eta3 is the nonlinear variable for the constraint equation

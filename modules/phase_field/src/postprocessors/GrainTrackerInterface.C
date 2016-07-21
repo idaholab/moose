@@ -15,6 +15,7 @@ InputParameters validParams<GrainTrackerInterface>()
   params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
   params.addParam<unsigned int>("halo_level", 2, "The thickness of the halo surrounding each feature.");
   params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
+  params.addParam<bool>("reserve_op", false, "Indicates whether to reserve the first coupled op (no remapping TO that variable)");
   params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
                                                   "hold the active order parameter information"
                                                   "should be populated or not");
