@@ -33,6 +33,7 @@ void vectorToMatrix(unsigned int &rows, unsigned int & columns, std::vector<doub
 double getDeterminant(std::vector<std::vector<double> > matrix);
 
 // functions for singular value decomposition
+void getInverseTransformedMatrix(const std::vector<std::vector<double> > &leftSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &inverseTransformedMatrix);
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix);
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, unsigned int rank);
 void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted);
