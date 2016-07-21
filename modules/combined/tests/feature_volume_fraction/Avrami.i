@@ -1,4 +1,3 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -44,11 +43,13 @@
 
 [Postprocessors]
   [./volume_fraction]
-    type = NodalVolumeFraction
+    type = FeatureVolumeFraction
     variable = u
     threshold = 0.5
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
+    Avrami_file = Avrami.csv
     mesh_volume = Volume
+    equil_fraction = 0.5
     flood_entity_type = ELEMENTAL
   [../]
 
@@ -65,7 +66,6 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  file_base = nodal_volume_fraction
+  file_base = Avrami
   exodus = true
 []
