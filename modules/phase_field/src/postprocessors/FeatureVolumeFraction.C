@@ -4,11 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "NodalVolumeFraction.h"
+#include "FeatureVolumeFraction.h"
 #include <cmath>
 
 template<>
-InputParameters validParams<NodalVolumeFraction>()
+InputParameters validParams<FeatureVolumeFraction>()
 {
   InputParameters params = validParams<FeatureFloodCount>();
   params.addRequiredParam<PostprocessorName>("mesh_volume", "Postprocessor from which to get mesh volume");
@@ -19,21 +19,21 @@ InputParameters validParams<NodalVolumeFraction>()
   return params;
 }
 
-NodalVolumeFraction::NodalVolumeFraction(const InputParameters & parameters) :
+FeatureVolumeFraction::FeatureVolumeFraction(const InputParameters & parameters) :
     FeatureFloodCount(parameters),
     _mesh_volume(getPostprocessorValue("mesh_volume")),
     _equil_fraction(getParam<Real>("equil_fraction"))
 {
   if (parameters.isParamValid("Avrami_file") && _equil_fraction < 0.0)
-    mooseError("please supply an equilibrium fraction of 2nd phase for Avrami analysis (NodalVolumeFraction).");
+    mooseError("please supply an equilibrium fraction of 2nd phase for Avrami analysis (FeatureVolumeFraction).");
 
   if (!_is_elemental)
-    mooseError("NodalVolumeFraction only calculates volumes when flood_entity_type = ELEMENTAL.");
+    mooseError("FeatureVolumeFraction only calculates volumes when flood_entity_type = ELEMENTAL.");
 }
 
 
 void
-NodalVolumeFraction::finalize()
+FeatureVolumeFraction::finalize()
 {
   FeatureFloodCount::finalize();
 
@@ -59,13 +59,13 @@ NodalVolumeFraction::finalize()
 }
 
 Real
-NodalVolumeFraction::getValue()
+FeatureVolumeFraction::getValue()
 {
   return _volume_fraction;
 }
 
 void
-NodalVolumeFraction::calculateBubbleFraction()
+FeatureVolumeFraction::calculateBubbleFraction()
 {
   Real volume = 0.0;
 
@@ -77,7 +77,7 @@ NodalVolumeFraction::calculateBubbleFraction()
 }
 
 Real
-NodalVolumeFraction::calculateAvramiValue()
+FeatureVolumeFraction::calculateAvramiValue()
 {
   return std::log(std::log(1.0 / (1.0 - (_volume_fraction/_equil_fraction))));
 }
