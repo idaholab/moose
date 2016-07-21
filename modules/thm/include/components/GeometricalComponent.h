@@ -26,6 +26,9 @@ public:
   virtual RealVectorValue getDirection() { return _dir; }
   virtual Real getRotation() { return _rotation; }
 
+  virtual Real getNumElems() { return _n_elems; }
+  virtual Real getLength() { return _length; }
+
   virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
 
 protected:
@@ -43,7 +46,22 @@ protected:
   /// Rotation of the component around x-axis in non-displaced space
   Real _rotation;
 
+  /// True if simulation is using a second order mesh
+  bool _2nd_order_mesh;
+
+  /// Length of the geometric component along the main axis
+  Real _length;
+
+  /// Number of elements along the main axis
+  unsigned int _n_elems;
+
+  /// Node locations along the main axis
+  std::vector<Real> _node_locations;
+
   std::map<RELAP7::EEndType, std::vector<RELAP7::Connection> > _connections;
+
+private:
+  void processNodeLocations();
 };
 
 #endif /* GEOMETRICALCOMPONENT_H */

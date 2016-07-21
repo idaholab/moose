@@ -32,7 +32,6 @@ public:
   virtual const std::string & getType() { return _type; }
 
   // Pipe specific interface ----
-  virtual Real getLength() = 0;
   virtual UserObjectName getFluidPropertiesName() const;
 
 public:

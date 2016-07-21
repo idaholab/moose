@@ -12,6 +12,12 @@ InputParameters validParams<GeometricalComponent>()
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the pipe");
   params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
 
+  params.addRequiredParam<Real>("length", "The length of the geometric component along the main axis");
+
+  params.addParam<unsigned int>("n_elems", 0, "The number of elements along the main axis");
+  std::vector<Real> default_node_locations (1, 0.0);
+  params.addParam<std::vector<Real> >("node_locations", default_node_locations, "The node locations along the main axis");
+
   return params;
 }
 
@@ -20,8 +26,13 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters) :
     _position(getParam<Point>("position")),
     _offset(getParam<RealVectorValue>("offset")),
     _dir(getParam<RealVectorValue>("orientation")),
-    _rotation(getParam<Real>("rotation"))
+    _rotation(getParam<Real>("rotation")),
+    _2nd_order_mesh(_sim.getParam<bool>("2nd_order_mesh")),
+    _length(getParam<Real>("length")),
+    _n_elems(getParam<unsigned int>("n_elems")),
+    _node_locations(getParam<std::vector<Real> >("node_locations"))
 {
+  processNodeLocations();
 }
 
 GeometricalComponent::~GeometricalComponent()
@@ -81,6 +92,62 @@ GeometricalComponent::getConnections(RELAP7::EEndType id) const
     return it->second;
   else
     mooseError(name() << ": No end of this type available (" << id << ").");
+}
+
+void
+GeometricalComponent::processNodeLocations()
+{
+  bool specified_n_elems = _n_elems != 0;
+  unsigned int n_nodes = _node_locations.size();
+  bool specified_node_locations = ((n_nodes != 1) && (n_nodes != 0));
+  unsigned int expected_n_elems = _2nd_order_mesh ? (n_nodes - 1) / 2 : n_nodes - 1;
+
+  if (specified_n_elems)
+  {
+    if (specified_node_locations)
+    {
+      if (expected_n_elems != _n_elems) {
+        mooseError(name() << ": \"n_elems\" and \"node_locations\" do not match.");
+      }
+    }
+    else
+    {
+      _node_locations = std::vector<Real>(_n_elems + 1, 0.0);
+      Real dx = _length / _n_elems;
+      for (int i = 0; i < _n_elems; ++i)
+      {
+        _node_locations[i + 1] = _node_locations[i] + dx;
+      }
+      _node_locations[_n_elems] = _length;
+    }
+  }
+  else
+  {
+    if (specified_node_locations)
+    {
+      _n_elems = _node_locations.size() - 1;
+    }
+    else
+    {
+      mooseError(name() << ": \"n_elems\" or \"node_locations\" must be specified.");
+    }
+  }
+
+  if (_2nd_order_mesh)
+  {
+    unsigned int new_n_nodes = (2 * _n_elems) + 1;
+    std::vector<Real> new_nodes(new_n_nodes, 0.0);
+    unsigned int new_node_indx = 0;
+
+    for (int i = 0; i < _n_elems; ++i)
+    {
+      new_nodes[new_node_indx] = _node_locations[i];
+      ++new_node_indx;
+      new_nodes[new_node_indx] = 0.5 * (_node_locations[i] + _node_locations[i+1]);
+      ++new_node_indx;
+    }
+    new_nodes[new_node_indx] = _node_locations[_n_elems];
+  }
 }
 
 const FunctionName &
