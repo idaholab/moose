@@ -8,4 +8,4 @@ def build(config_file='mkdocs.yml'):
         config_file[str]: (Default: 'mkdocs.yml') The configure file to pass to mkdocs.
     """
     config = mkdocs.config.load_config(config_file)
-    mkdocs.commands.build.build(config, clean_site_dir=True)
+    mkdocs.commands.build.build(config)

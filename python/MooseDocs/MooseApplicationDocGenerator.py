@@ -59,28 +59,27 @@ class MooseApplicationDocGenerator(object):
         # Read the moosedocs yml configuration file
         yml = MooseDocs.yaml_load(self._config_file)
 
-        # Global defaults
-        hide = yml.get('hide', list())
-        install = yml.get('install', os.path.join(os.getcwd(), 'content'))
-        repo = yml.get('repo', None)
+        # Default settings
+        defaults = yml.get('defaults', dict())
+        defaults.setdefault('details', os.path.join(os.getcwd(), 'details'))
+        defaults.setdefault('source', None)
+        defaults.setdefault('install', os.path.join(os.getcwd(), 'content'))
+        defaults.setdefault('repo', None)
+        defaults.setdefault('doxygen', None)
+        defaults.setdefault('hide', list())
+        defaults.setdefault('links', dict())
 
         def update_config(config):
             """
             Helper for updating/creating local configuration dict.
             """
 
-            # Defaults
-            config.setdefault('details', os.path.join(os.getcwd(), 'details'))
-            config.setdefault('source', None)
-            config.setdefault('install', install)
-            config.setdefault('prefix', '')
-            config.setdefault('repo', repo)
-            config.setdefault('doxygen', None)
-            config.setdefault('hide', list())
-            config.setdefault('links', dict())
+            # Apply defaults
+            for key, value in defaults.iteritems():
+                config.setdefault(key, value)
 
             # Append the hide data
-            config['hide'] = set(config['hide'] + hide)
+            config['hide'] = set(config.get('hide', list()) + list(defaults['hide']))
 
             return config
 
@@ -121,6 +120,8 @@ class MooseApplicationDocGenerator(object):
             generator.write()
 
         # Create the mkdocs.yml file
+        # TODO: When mkdocs plugins API is up and running this should go away.
+
         def dumptree(node, level=0):
             for item in node:
                 for key, value in item.iteritems():

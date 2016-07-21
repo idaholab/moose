@@ -45,7 +45,7 @@ class MooseInformationBase(object):
         """
 
         # The complete name of the file to be created.
-        filename = os.path.abspath(os.path.join(self._config['install'], self._config['prefix'], self.filename(self._yaml['name'])))
+        filename = os.path.abspath(os.path.join(self._config['install'], self.filename(self._yaml['name'])))
 
         # Create the directories, if needed
         dirname = os.path.dirname(filename)

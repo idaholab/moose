@@ -1,6 +1,4 @@
-<!-- content/generation/MooseFlavoredMarkdown.md -->
-
-test
+<!-- content/doc_generation/MooseFlavoredMarkdown.md -->
 
 # Moose Flavored Markdown
 

@@ -93,8 +93,8 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload'):
         config = mkdocs.config.load_config(config_file=config_file, strict=strict)
         config['site_dir'] = tempdir
         live_server = livereload in ['dirtyreload', 'livereload']
-        clean = livereload != 'dirtyreload'
-        mkdocs.commands.build.build(config, live_server=live_server, clean_site_dir=clean)
+        dirty = livereload == 'dirtyreload'
+        mkdocs.commands.build.build(config, live_server=live_server, dirty=dirty)
         return config
 
     # Perform the initial build

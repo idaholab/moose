@@ -68,7 +68,7 @@ class MooseSubApplicationDocGenerator(object):
             obj.write()
 
         yml = self.generateYAML()
-        filename = os.path.abspath(os.path.join(self._config.get('install'), self._config['prefix'], 'pages.yml'))
+        filename = os.path.abspath(os.path.join(self._config.get('install'), 'pages.yml'))
         log.info('Creating YAML file: {}'.format(filename))
         with open(filename, 'w') as fid:
             fid.write(yml)
@@ -78,11 +78,11 @@ class MooseSubApplicationDocGenerator(object):
         Generates the System.yml file.
         """
 
-        prefix = os.path.join(self._config['install'], self._config['prefix'])
+        install = self._config['install']
 
         rec_dd = lambda: collections.defaultdict(rec_dd)
         tree = rec_dd()
-        for root, dirs, files in os.walk(prefix, topdown=True):
+        for root, dirs, files in os.walk(install, topdown=True):
 
             if 'Overview.md' in files:
                 files.insert(0, files.pop(files.index('Overview.md')))
@@ -93,7 +93,7 @@ class MooseSubApplicationDocGenerator(object):
                 if ext != '.md':
                     continue
 
-                relative = os.path.relpath(root, prefix).split(os.path.sep)
+                relative = os.path.relpath(root, install).split(os.path.sep)
                 level = len(relative)
                 cmd = "tree{}".format(("['{}']"*level).format(*relative))
 
@@ -101,7 +101,7 @@ class MooseSubApplicationDocGenerator(object):
                 if 'items' not in d:
                     d['items'] = []
 
-                base = os.path.join(os.path.relpath(prefix, os.getcwd()), *relative)
+                base = os.path.join(os.path.relpath(install, os.getcwd()), *relative)
                 d['items'].append( (name, os.path.join(base, filename) ) )
 
         def dumptree(node, level=0):
