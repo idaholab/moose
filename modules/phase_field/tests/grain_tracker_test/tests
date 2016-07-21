@@ -22,7 +22,7 @@
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
     exodiff = 'grain_tracker_test_elemental_out.e-s002'
-    method = 'OPT OPROF' # slow test
+    method = '!DBG' # slow test
     valgrind = 'HEAVY'
     max_time = 500
   [../]
@@ -47,6 +47,14 @@
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+  [../]
+
+  [./remapping_with_reserve]
+    type = 'CSVDiff'
+    input = 'grain_tracker_reserve.i'
+    csvdiff = 'grain_tracker_reserve_out.csv'
     method = '!DBG' # slow test
     valgrind = 'HEAVY'
   [../]
