@@ -13,6 +13,11 @@ namespace GraphColoring
 const unsigned int INVALID_COLOR = std::numeric_limits<unsigned int>::max();
 }
 
+namespace PolycrystalICTools
+{
+const unsigned int HALO_THICKNESS = 4;
+}
+
 // Forward declarations
 bool colorGraph(const std::vector<std::vector<bool> > & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int n_vertices, unsigned int n_ops, unsigned int vertex);
 bool isGraphValid(const std::vector<std::vector<bool> > & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int n_vertices,
@@ -36,14 +41,14 @@ PolycrystalICTools::assignPointsToVariables(const std::vector<Point> & centerpoi
     if (grain >= op_num)
     {
       // We can set the array to the distances to the grains 0..op_num-1 (see assignment in the else case)
-      for (unsigned int i=0; i<op_num; ++i)
+      for (unsigned int i = 0; i < op_num; ++i)
       {
         min_op_dist[i] = mesh.minPeriodicDistance(var.number(), centerpoints[grain], centerpoints[i]);
         min_op_ind[assigned_op[i]] = i;
       }
 
       // Now check if any of the extra grains are even closer
-      for (unsigned int i=op_num; i<grain; ++i)
+      for (unsigned int i = op_num; i < grain; ++i)
       {
         Real dist = mesh.minPeriodicDistance(var.number(), centerpoints[grain], centerpoints[i]);
         if (min_op_dist[assigned_op[i]] > dist)
@@ -61,7 +66,7 @@ PolycrystalICTools::assignPointsToVariables(const std::vector<Point> & centerpoi
 
     // Assign the current center point to the order parameter that is furthest away.
     unsigned int mx_ind = 0;
-    for (unsigned int i = 1; i < op_num; i++) // Find index of max
+    for (unsigned int i = 1; i < op_num; ++i) // Find index of max
       if (min_op_dist[mx_ind] < min_op_dist[i])
         mx_ind = i;
 
@@ -119,10 +124,8 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(const std::map<dof_id_type
   std::vector<std::set<dof_id_type> > local_ids(n_grains);
   std::vector<std::set<dof_id_type> > halo_ids(n_grains);
 
-
-  // TODO: Possibly parallelize this algorithm
-  const MeshBase::element_iterator end = mesh.getMesh().active_elements_end();
-  for (MeshBase::element_iterator el = mesh.getMesh().active_elements_begin(); el != end; ++el)
+  const auto end = mesh.getMesh().active_elements_end();
+  for (auto el = mesh.getMesh().active_elements_begin(); el != end; ++el)
   {
     const Elem * elem = *el;
     std::map<dof_id_type, unsigned int>::const_iterator grain_it = element_to_grain.find(elem->id());
@@ -177,7 +180,7 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(const std::map<dof_id_type
   {
     std::set<dof_id_type> orig_halo_ids(halo_ids[i]);
 
-    for (unsigned int halo_level = 0; halo_level < 2; ++halo_level)
+    for (unsigned int halo_level = 0; halo_level < PolycrystalICTools::HALO_THICKNESS; ++halo_level)
     {
       for (std::set<dof_id_type>::iterator entity_it = orig_halo_ids.begin();
            entity_it != orig_halo_ids.end(); ++entity_it)
@@ -199,7 +202,7 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(const std::map<dof_id_type
   // Finally look at the halo intersections to build the connectivity graph
   std::set<dof_id_type> set_intersection;
   for (unsigned int i = 0; i < n_grains; ++i)
-    for (unsigned int j = i+1; j < n_grains; ++j)
+    for (unsigned int j = i + 1; j < n_grains; ++j)
     {
       set_intersection.clear();
       std::set_intersection(halo_ids[i].begin(), halo_ids[i].end(), halo_ids[j].begin(), halo_ids[j].end(),
@@ -228,9 +231,8 @@ PolycrystalICTools::buildNodalGrainAdjacencyGraph(const std::map<dof_id_type, un
   for (unsigned int i = 0; i < n_grains; ++i)
     adjacency_matrix[i].resize(n_grains, false);
 
-  // TODO: Possibly parallelize this algorithm
-  const MeshBase::node_iterator end = mesh.getMesh().active_nodes_end();
-  for (MeshBase::node_iterator nl = mesh.getMesh().active_nodes_begin(); nl != end; ++nl)
+  const auto end = mesh.getMesh().active_nodes_end();
+  for (auto nl = mesh.getMesh().active_nodes_begin(); nl != end; ++nl)
   {
     const Node * node = *nl;
     std::map<dof_id_type, unsigned int>::const_iterator grain_it = node_to_grain.find(node->id());

@@ -39,12 +39,17 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./ebsd_grains]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [ICs]
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
+      advanced_op_assignment = true
     [../]
   [../]
 []
@@ -87,6 +92,13 @@
     execute_on = 'initial timestep_end'
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
+  [../]
+  [./grain_aux]
+    type = EBSDReaderPointDataAux
+    variable = ebsd_grains
+    ebsd_reader = ebsd
+    data_name = 'feature_id'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
