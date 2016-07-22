@@ -63,7 +63,6 @@
 [Materials]
   [./symmetriccrosstermbarrier_low]
     type = AsymmetricCrossTermBarrierFunctionMaterial
-    block = 0
     etas     = 'eta1 eta2 eta3'
     hi_names = 'h1   h2   h3'
     W_ij = '0   1   2.2
@@ -75,7 +74,6 @@
   [../]
   [./asymmetriccrosstermbarrier_low]
     type = AsymmetricCrossTermBarrierFunctionMaterial
-    block = 0
     etas     = 'eta1 eta2 eta3'
     hi_names = 'h1   h2   h3'
     W_ij = ' 0    1.2 5.2
@@ -88,7 +86,6 @@
 
   [./asymmetriccrosstermbarrie_simple]
     type = AsymmetricCrossTermBarrierFunctionMaterial
-    block = 0
     etas     = 'eta1 eta2 eta3'
     hi_names = 'h1   h2   h3'
     W_ij = '0   1.2   3.2
@@ -101,19 +98,16 @@
 
   [./switch1]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h1
     eta = eta1
   [../]
   [./switch2]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h2
     eta = eta2
   [../]
   [./switch3]
     type = SwitchingFunctionMaterial
-    block = 0
     function_name = h3
     eta = eta3
   [../]

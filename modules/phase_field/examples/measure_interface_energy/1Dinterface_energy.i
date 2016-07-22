@@ -80,7 +80,6 @@
 [Materials]
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'kappa_c M'
     prop_values = '25      150'
   [../]
@@ -90,7 +89,6 @@
     function = 'c^2*(c-1)^2'
     args = c
     derivative_order = 2
-    block = 0
   [../]
 []
 
@@ -110,7 +108,6 @@
   # Get simulation cell size (1D volume) from postprocessor
   [./volume]
     type = ElementIntegralMaterialProperty
-    block = 0
     mat_prop = 1
   [../]
   # Find concentration in each phase using SideAverageValue

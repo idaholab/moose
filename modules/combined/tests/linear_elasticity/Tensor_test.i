@@ -453,18 +453,15 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric21
     C_ijkl ='1111 1122 1133 1123 1113 1112 2222 2233 2223 2213 2212 3333 3323 3313 3312 2323 2313 2312 1313 1312 1212'
   [../]
   [./strain]
     type = ComputeSmallStrain
-    block = 0
     displacements = 'disp_x disp_y'
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
 []
 

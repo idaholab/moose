@@ -63,7 +63,6 @@
 [Materials]
   [./h_eta1]
     type = SwitchingFunctionMaterial
-    block = 0
     h_order = SIMPLE
     eta = eta1
     function_name = h1
@@ -72,7 +71,6 @@
 
   [./h_eta2]
     type = SwitchingFunctionMaterial
-    block = 0
     h_order = HIGH
     eta = eta2
     function_name = h2
@@ -81,7 +79,6 @@
 
   [./g_eta1]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta1
     function_name = g1
@@ -90,7 +87,6 @@
 
   [./g_eta2]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = LOW
     eta = eta2
     function_name = g2

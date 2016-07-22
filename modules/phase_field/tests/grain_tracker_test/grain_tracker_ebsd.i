@@ -102,7 +102,6 @@
 [Materials]
   [./CuGrGr]
     type = GBEvolution
-    block = 0
     T = 500 #K
     wGB = 0.75 #micron
     length_scale = 1.0e-6

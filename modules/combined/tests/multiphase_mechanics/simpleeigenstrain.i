@@ -91,22 +91,18 @@
 
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric9
     C_ijkl = '3 1 1 3 1 3 1 1 1 '
   [../]
   [./strain]
     type = ComputeSmallStrain
-    block = 0
     displacements = 'disp_x disp_y'
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
   [./prefactor]
     type = DerivativeParsedMaterial
-    block = 0
     args = c
     f_name = prefactor
     constant_names       = 'epsilon0 c0'

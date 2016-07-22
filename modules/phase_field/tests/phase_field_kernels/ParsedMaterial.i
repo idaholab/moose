@@ -36,7 +36,6 @@
 [Materials]
   [./consts]
     type = ParsedMaterial
-    block = 0
     args  = 'eta'
     function ='(eta-0.5)^2'
     outputs = exodus

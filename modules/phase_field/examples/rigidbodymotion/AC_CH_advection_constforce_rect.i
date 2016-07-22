@@ -126,13 +126,11 @@
 [Materials]
   [./pfmobility]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '1.0  2.0      0.1'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     args = 'c eta'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
@@ -142,7 +140,6 @@
   [./advection_vel]
     # advection velocity is being calculated
     type = GrainAdvectionVelocity
-    block = 0
     grain_force = grain_force
     etas = eta
     c = c

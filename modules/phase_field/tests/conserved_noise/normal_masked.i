@@ -51,7 +51,6 @@
 [Materials]
   [./mask_material]
     type = GenericFunctionMaterial
-    block = 0
     prop_names  = 'mask_prop'
     prop_values = 'mask_func'
   [../]

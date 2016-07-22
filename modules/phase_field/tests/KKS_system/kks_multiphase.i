@@ -87,21 +87,18 @@
   # simple toy free energies
   [./f1]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F1
     args = 'c1'
     function = '(c1-0.2)^2'
   [../]
   [./f2]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F2
     args = 'c2'
     function = '(c2-0.5)^2'
   [../]
   [./f3]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F3
     args = 'c3'
     function = '(c3-0.8)^2'
@@ -136,21 +133,18 @@
   # Barrier functions for each phase
   [./g1]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta1
     function_name = g1
   [../]
   [./g2]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta2
     function_name = g2
   [../]
   [./g3]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta3
     function_name = g3
@@ -159,7 +153,6 @@
   # constant properties
   [./constants]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'L   kappa'
     prop_values = '0.7 0.4  '
   [../]

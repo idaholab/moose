@@ -119,7 +119,6 @@
   [./CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
-    block = 0 # Block ID (only one block in this problem)
     GBmob0 = 2.5e-6 # Mobility prefactor for Cu from Schonfelder1997
     GBenergy = 0.708 # GB energy for Cu from Schonfelder1997
     Q = 0.23 # Activation energy for grain growth from Schonfelder 1997

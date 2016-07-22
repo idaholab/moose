@@ -59,11 +59,9 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1e-3 0.1'
-    block = 0
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = 'c eta'
     constant_names = 'barr_height  cv_eq'
@@ -73,7 +71,6 @@
   [../]
   [./advection_vel]
     type = GrainAdvectionVelocity
-    block = 0
     grain_force = grain_force
     etas = eta
     c = c
