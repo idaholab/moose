@@ -43,8 +43,7 @@ PorousFlowSink::PorousFlowSink(const InputParameters & parameters) :
     _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_dvar")),
     _mass_fractions(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
     _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
-    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number")),
-    _qp_map(0)
+    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number"))
 {
   if (_ph >= _dictator.numPhases())
     mooseError("PorousFlowSink: The Dictator declares that the number of fluid phases is " << _dictator.numPhases() << ", but you have set the fluid_phase to " << _ph << ".  You must try harder.");

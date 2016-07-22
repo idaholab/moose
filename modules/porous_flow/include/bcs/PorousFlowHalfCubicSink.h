@@ -20,7 +20,7 @@ InputParameters validParams<PorousFlowHalfCubicSink>();
 /**
  * Applies a flux sink to a boundary.  The base flux
  * defined by PorousFlowSink is multiplied by a cubic.
- * Denote x = porepressure - centre.  Then
+ * Denote x = porepressure - center.  Then
  * Then Flux out = (max/cutoff^3)*(2x + cutoff)(x - cutoff)^2 for cutoff < x < 0.
  * Flux out = max for x >= 0.
  * Flux out = 0 for x <= cutoff.
@@ -37,11 +37,11 @@ protected:
   /// maximum of the cubic sink
   const Real _maximum;
 
-  /// Denote x = porepressure - centre.  Then Flux out = (max/cutoff^3)*(2x + cutoff)(x - cutoff)^2 for cutoff < x < 0.  Flux out = max for x >= 0.  Flux out = 0 for x <= cutoff.
+  /// Denote x = porepressure - center.  Then Flux out = (max/cutoff^3)*(2x + cutoff)(x - cutoff)^2 for cutoff < x < 0.  Flux out = max for x >= 0.  Flux out = 0 for x <= cutoff.
   Function & _cutoff;
 
-  /// centre of the cubic sink
-  const Real _centre;
+  /// center of the cubic sink
+  const Real _center;
 
   /// Nodal pore pressure in each phase
   const MaterialProperty<std::vector<Real> > & _pp;

@@ -38,8 +38,8 @@ protected:
   /// standard deviation of the Gaussian sink
   const Real _sd;
 
-  /// centre of the Gaussian sink
-  const Real _centre;
+  /// center of the Gaussian sink
+  const Real _center;
 
   /// Nodal pore pressure in each phase
   const MaterialProperty<std::vector<Real> > & _pp;
