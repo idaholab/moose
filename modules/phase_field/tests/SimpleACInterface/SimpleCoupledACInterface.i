@@ -71,14 +71,12 @@
 [Materials]
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'L'
     prop_values = '1'
   [../]
 
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = 'eta'
     function = 'eta^2 * (1-eta)^2'

@@ -59,13 +59,11 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1 25'
-    block = 0
   [../]
 
   [./chemical_free_energy]
     # simple double well free energy
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fc
     args = 'c'
     constant_names       = 'barr_height  cv_eq'
@@ -78,7 +76,6 @@
     # This is a made up toy nucleation rate it should be replaced by
     # classical nucleation theory in a real simulation.
     type = ParsedMaterial
-    block = 0
     f_name = P
     args = c
     function = c*1e-7
@@ -89,7 +86,6 @@
     # tht force the concentration to go to 0.95, and holds this enforcement for 500
     # time units.
     type = DiscreteNucleation
-    block = 0
     f_name = Fn
     op_names  = c
     op_values = 0.90
@@ -103,7 +99,6 @@
     # add the chemical and nucleation free energy contributions together
     type = DerivativeSumMaterial
     derivative_order = 2
-    block = 0
     args = c
     sum_materials = 'Fc Fn'
   [../]

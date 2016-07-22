@@ -36,7 +36,6 @@
 [Materials]
   [./chemical_potential]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = mu_prop
     args = c
     function = 'c'
@@ -44,7 +43,6 @@
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
-    block = 0
     function = '0.1'
     args = c
     f_name = var_dep
@@ -52,13 +50,11 @@
   [../]
   [./mobility_tensor]
     type = ConstantAnisotropicMobility
-    block = 0
     M_name = mobility_tensor
     tensor = '1 0 0 0 1 0 0 0 1'
   [../]
   [./mobility]
     type = CompositeMobilityTensor
-    block = 0
     M_name = mobility_prop
     tensors = mobility_tensor
     weights = var_dep

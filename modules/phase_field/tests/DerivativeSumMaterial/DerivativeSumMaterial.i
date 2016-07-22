@@ -43,14 +43,12 @@
 [Materials]
   [./free_energy1]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fa
     args = 'c'
     function = (c-0.1)^4*(1-0.1-c)^4
   [../]
   [./free_energy2]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fb
     args = 'c'
     function = -0.25*(c-0.1)^4*(1-0.1-c)^4
@@ -59,7 +57,6 @@
   # Fa+Fb+Fb == Fc
   [./free_energy3]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Fc
     args = 'c'
     function = 0.5*(c-0.1)^4*(1-0.1-c)^4
@@ -67,7 +64,6 @@
 
   [./free_energy]
     type = DerivativeSumMaterial
-    block = 0
     f_name = F
     sum_materials = 'Fa Fb Fb'
     args = 'c'

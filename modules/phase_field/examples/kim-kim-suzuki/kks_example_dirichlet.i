@@ -73,13 +73,11 @@
     variable = eta
     type = FunctionIC
     function = ic_func_eta
-    block = 0
   [../]
   [./c]
     variable = c
     type = FunctionIC
     function = ic_func_c
-    block = 0
   [../]
 []
 
@@ -102,7 +100,6 @@
   # Free energy of the liquid
   [./fl]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = fl
     args = 'cl'
     function = '(0.1-cl)^2'
@@ -111,7 +108,6 @@
   # Free energy of the solid
   [./fs]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = fs
     args = 'cs'
     function = '(0.9-cs)^2'
@@ -120,7 +116,6 @@
   # h(eta)
   [./h_eta]
     type = SwitchingFunctionMaterial
-    block = 0
     h_order = HIGH
     eta = eta
   [../]
@@ -128,7 +123,6 @@
   # g(eta)
   [./g_eta]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta
   [../]
@@ -136,7 +130,6 @@
   # constant properties
   [./constants]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'M   L   eps_sq'
     prop_values = '0.7 0.7 1.0  '
   [../]

@@ -104,7 +104,6 @@
   [./Copper]
     # T = 500 # K
     type = GBEvolution
-    block = 0
     T = 500
     wGB = 0.6               # um
     GBmob0 = 2.5e-6         # m^4/(Js) from Schoenfelder 1997

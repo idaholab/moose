@@ -61,7 +61,6 @@
     type = GenericConstantMaterial
     prop_names = D_v
     prop_values = 0.074802
-    block = 0
   [../]
 []
 
