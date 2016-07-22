@@ -29,6 +29,8 @@ PorousFlowVariableBase::PorousFlowVariableBase(const InputParameters & parameter
     _temperature_qp_var(coupledValue("temperature")),
     _temperature_varnum(coupled("temperature")),
 
+    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number")),
+
     _porepressure_nodal(declareProperty<std::vector<Real> >("PorousFlow_porepressure_nodal")),
     _porepressure_nodal_old(declarePropertyOld<std::vector<Real> >("PorousFlow_porepressure_nodal")),
     _porepressure_qp(declareProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
