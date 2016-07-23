@@ -77,7 +77,7 @@
     type = EBSDReaderPointDataAux
     variable = ebsd_grains
     ebsd_reader = ebsd
-    data_name = 'grain'
+    data_name = 'feature_id'
     execute_on = 'initial timestep_end'
   [../]
   [./phi1]
