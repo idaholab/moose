@@ -22,6 +22,7 @@ InputParameters validParams<EulerAngle2RGBAction>()
   params.addRequiredParam<MooseEnum>("crystal_structure",structure_enum,"Crystal structure of the material");
   params.addRequiredParam<UserObjectName>("euler_angle_provider", "Name of Euler angle provider user object");
   params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject to get values from.");
+  params.addParam<Point>("no_grain_color", Point(0, 0, 0), "RGB value of color used to represent area with no grains, defaults to black");
   return params;
 }
 
@@ -34,8 +35,10 @@ EulerAngle2RGBAction::EulerAngle2RGBAction(const InputParameters & params) :
 void
 EulerAngle2RGBAction::act()
 {
+  // Auxvariable suffix names that will automatically become a vector in Paraview
   std::vector<std::string> suffixes = {"_x","_y","_z"};
 
+  // Three color types that will be outputted
   std::vector<std::string> colors = {"red", "green", "blue"};
 
   for (unsigned int i = 0; i < 3; ++i)
@@ -61,6 +64,7 @@ EulerAngle2RGBAction::act()
       params.set<UserObjectName>("euler_angle_provider") = getParam<UserObjectName>("euler_angle_provider");
       params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
       params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
+      params.set<Point>("no_grain_color") = getParam<Point>("no_grain_color");
       _problem->addAuxKernel("EulerAngleProvider2RGBAux", var_name, params);
     }
     else
