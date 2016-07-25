@@ -11,6 +11,7 @@
 
 // Forward Declarations
 class NSKernel;
+class IdealGasFluidProperties;
 
 template<>
 InputParameters validParams<NSKernel>();
@@ -54,13 +55,12 @@ protected:
   unsigned _rhow_var_number;
   unsigned _rhoE_var_number;
 
-  // Required parameters
-  Real _gamma;
-  Real _R;
-
   // Integrated BC can use Mat. properties...
   const MaterialProperty<Real> & _dynamic_viscosity;
   const MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
+
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 
   /**
    * Helper function for mapping Moose variable numberings into

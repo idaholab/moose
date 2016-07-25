@@ -7,6 +7,9 @@
 #ifndef NSTEMPERATUREDERIVS_H
 #define NSTEMPERATUREDERIVS_H
 
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
 /**
  * Class outside the Moose hierarchy that contains common
  * functionality for computing derivatives of the temperature
@@ -53,9 +56,7 @@ Real NSTemperatureDerivs<T>::get_grad(unsigned i)
 
   const Real rho2 = U0 * U0;
   const Real mom2 = U1*U1 + U2*U2 + U3*U3;
-
-  const Real cv = _data._R / (_data._gamma-1.);
-  const Real tmp = -1.0 / rho2 / cv;
+  const Real tmp = -1.0 / rho2 / _data._fp.cv();
 
   switch (i)
   {
@@ -95,7 +96,7 @@ Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
   const Real rho4 = rho3 * U0;
   const Real mom2 = U1*U1 + U2*U2 + U3*U3;
 
-  const Real cv = _data._R / (_data._gamma - 1.0);
+  const Real cv = _data._fp.cv();
   const Real tmp = -1.0 / rho2 / cv;
 
   // Only lower-triangle of matrix is defined, it is symmetric

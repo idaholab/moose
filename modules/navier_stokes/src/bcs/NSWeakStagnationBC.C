@@ -6,6 +6,9 @@
 /****************************************************************/
 #include "NSWeakStagnationBC.h"
 
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
 // Full specialization of the validParams function for this object
 template<>
 InputParameters validParams<NSWeakStagnationBC>()
@@ -33,17 +36,16 @@ void
 NSWeakStagnationBC::staticValues(Real & T_s, Real & p_s, Real & rho_s)
 {
   // T_s = T_0 - |u|^2/2/cp
-  Real cv = _R / (_gamma-1.);
-  T_s = _stagnation_temperature - 0.5 * this->velmag2() / (_gamma * cv);
+  T_s = _stagnation_temperature - 0.5 * this->velmag2() / _fp.cp();
 
   if (T_s < 0.)
     mooseError("Negative temperature detected in NSWeakStagnationBC!");
 
   // p_s = p_0 * (T_0/T)^(-gam/(gam-1))
-  p_s = _stagnation_pressure * std::pow(_stagnation_temperature/T_s, -_gamma / (_gamma-1.));
+  p_s = _stagnation_pressure * std::pow(_stagnation_temperature/T_s, -_fp.gamma() / (_fp.gamma() - 1.));
 
-  // rho_s = p_s / R / T_s
-  rho_s = p_s / _R / T_s;
+  // Compute static rho from static pressure and temperature using equation of state.
+  rho_s = _fp.rho(p_s, T_s);
 }
 
 Real

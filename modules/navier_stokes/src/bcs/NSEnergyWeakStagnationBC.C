@@ -6,6 +6,9 @@
 /****************************************************************/
 #include "NSEnergyWeakStagnationBC.h"
 
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
 template<>
 InputParameters validParams<NSEnergyWeakStagnationBC>()
 {
@@ -20,6 +23,9 @@ NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & param
 
 Real NSEnergyWeakStagnationBC::computeQpResidual()
 {
+  // Ratio of specific heats
+  const Real gam = _fp.gamma();
+
   // Compute stagnation values
   Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
   staticValues(T_s, p_s, rho_s);
@@ -28,8 +34,7 @@ Real NSEnergyWeakStagnationBC::computeQpResidual()
   Real velmag2 = this->velmag2();
 
   // Compute static total energy, E_s
-  Real cv = _R / (_gamma - 1.0);
-  Real E_s = cv*T_s + 0.5 * velmag2;
+  Real E_s = _fp.cv()*T_s + 0.5 * velmag2;
 
   // Compute the product rho_s * H_s (H_s = static enthalpy)
   Real rhoH_s = rho_s * E_s + p_s;

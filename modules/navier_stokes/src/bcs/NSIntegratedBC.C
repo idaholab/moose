@@ -5,6 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "NSIntegratedBC.h"
+
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
 
 template<>
@@ -21,9 +26,7 @@ InputParameters validParams<NSIntegratedBC>()
   params.addCoupledVar("rhov", "y-momentum"); // only required in >= 2D
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
   params.addRequiredCoupledVar("rhoE", "energy");
-
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
-  params.addRequiredParam<Real>("R", "Gas constant.");
+  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
 
   return params;
 }
@@ -56,9 +59,8 @@ NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters) :
     _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")),
     _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
 
-    // Required parameters
-    _gamma(getParam<Real>("gamma")),
-    _R(getParam<Real>("R"))
+    // FluidProperties UserObject
+    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }
 

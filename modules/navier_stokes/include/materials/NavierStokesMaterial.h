@@ -9,8 +9,9 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class NavierStokesMaterial;
+class IdealGasFluidProperties;
 
 template<>
 InputParameters validParams<NavierStokesMaterial>();
@@ -70,10 +71,7 @@ protected:
   // we can refer to them in a loop.
   std::vector<const VariableGradient *> _vel_grads;
 
-  // Specific heat at constant volume, treated as single
-  // constant values.
-  Real _R;
-  Real _gamma;
+  // Prandtl number
   Real _Pr;
 
   // Coupled values needed to compute strong form residuals
@@ -119,6 +117,9 @@ protected:
   // The (vector-valued) material property which is the strong-form
   // residual at each quadrature point.
   MaterialProperty<std::vector<Real> > & _strong_residuals;
+
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 
 private:
   // To be called from computeProperties() function to compute _hsupg

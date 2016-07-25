@@ -6,6 +6,9 @@
 /****************************************************************/
 #include "NSSUPGMomentum.h"
 
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
 template<>
 InputParameters validParams<NSSUPGMomentum>()
 {
@@ -37,6 +40,9 @@ NSSUPGMomentum::computeQpResidual()
   // Velocity vector magnitude squared
   Real velmag2 = vel.norm_sq();
 
+  // Ratio of specific heats
+  const Real gam = _fp.gamma();
+
   // Velocity vector, dotted with the test function gradient
   Real U_grad_phi = vel*_grad_test[_i][_qp];
 
@@ -50,7 +56,7 @@ NSSUPGMomentum::computeQpResidual()
 
   // 1.) The mass-residual term:
   Real mass_coeff =
-    0.5 * (_gamma - 1.0) * velmag2 * dphi_dxk -
+    0.5 * (gam - 1.0) * velmag2 * dphi_dxk -
     vel(_component) * U_grad_phi;
 
   mass_term = _tauc[_qp] * mass_coeff * _strong_residuals[_qp][0];
@@ -58,14 +64,14 @@ NSSUPGMomentum::computeQpResidual()
 
   // 2.) The momentum-residual term:
   Real mom_term1 = U_grad_phi * _strong_residuals[_qp][_component+1]; // <- momentum indices are 1,2,3, _component is 0,1,2
-  Real mom_term2 = (1.-_gamma)*dphi_dxk*(vel*Ru);
+  Real mom_term2 = (1.-gam)*dphi_dxk*(vel*Ru);
   Real mom_term3 = vel(_component) * (_grad_test[_i][_qp]*Ru);
 
   mom_term = _taum[_qp] * (mom_term1 + mom_term2 + mom_term3);
   //Moose::out << "mom_term[" << _qp << "]=" << mom_term << std::endl;
 
   // 3.) The energy-residual term:
-  energy_term = _taue[_qp] * (_gamma - 1.0) * dphi_dxk * _strong_residuals[_qp][4];
+  energy_term = _taue[_qp] * (gam - 1.0) * dphi_dxk * _strong_residuals[_qp][4];
 
   // For printing purposes only
   Real result = mass_term + mom_term + energy_term;
@@ -104,6 +110,9 @@ NSSUPGMomentum::computeJacobianHelper(unsigned int var)
   // Velocity vector magnitude squared
   Real velmag2 = vel.norm_sq();
 
+  // Ratio of specific heats
+  const Real gam = _fp.gamma();
+
   // Shortcuts for shape function gradients at current qp.
   RealVectorValue grad_test_i = _grad_test[_i][_qp];
   RealVectorValue grad_phi_j  = _grad_phi[_j][_qp];
@@ -113,19 +122,19 @@ NSSUPGMomentum::computeJacobianHelper(unsigned int var)
   // 1.) taum- and taue-proportional terms present for any variable:
 
   //
-  // Art. Diffusion matrix for taum-proportional term = ( C_k + (1-_gamma)*C_k^T + diag(u_k) ) * calA_{ell}
+  // Art. Diffusion matrix for taum-proportional term = ( C_k + (1-gam)*C_k^T + diag(u_k) ) * calA_{ell}
   //
   RealTensorValue mom_mat;
   mom_mat(0,0) = mom_mat(1,1) = mom_mat(2,2) = vel(_component); // (diag(u_k)
   mom_mat += _calC[_qp][_component];                            //  + C_k
-  mom_mat += (1.0 - _gamma) * _calC[_qp][_component].transpose();  //  + (1-_gamma)*C_k^T)
+  mom_mat += (1.0 - gam) * _calC[_qp][_component].transpose();  //  + (1-gam)*C_k^T)
   mom_mat = mom_mat * _calA[_qp][mapped_var_number];            // * calA_{ell}
   Real mom_term = _taum[_qp] * grad_test_i * (mom_mat * grad_phi_j); // taum * grad(phi_i) * (M*grad(phi_j))
 
   //
-  // Art. Diffusion matrix for taue-proportional term = (_gamma-1) * calE_km
+  // Art. Diffusion matrix for taue-proportional term = (gam-1) * calE_km
   //
-  RealTensorValue ene_mat = (_gamma-1) * _calE[_qp][_component][mapped_var_number];
+  RealTensorValue ene_mat = (gam-1) * _calE[_qp][_component][mapped_var_number];
   Real ene_term = _taue[_qp] * grad_test_i * (ene_mat * grad_phi_j); // taue * grad(phi_i) * (M*grad(phi_j))
 
   // 2.) Terms only present if the variable is one of the momentums
@@ -141,10 +150,10 @@ NSSUPGMomentum::computeJacobianHelper(unsigned int var)
       unsigned m_local = mapped_var_number - 1;
 
       //
-      // Art. Diffusion matrix for tauc-proportional term = 0.5*(_gamma - 1.0)*velmag2*D_km - vel(_component)*C_m
+      // Art. Diffusion matrix for tauc-proportional term = 0.5*(gam - 1.0)*velmag2*D_km - vel(_component)*C_m
       //
       RealTensorValue mass_mat;
-      mass_mat(_component, m_local) = 0.5 * (_gamma - 1.0) * velmag2;        // 0.5*(_gamma - 1.0)*velmag2*D_km
+      mass_mat(_component, m_local) = 0.5 * (gam - 1.0) * velmag2;    // 0.5*(gam - 1.0)*velmag2*D_km
       mass_mat -= vel(_component)*_calC[_qp][m_local];                // vel(_component)*C_m
       mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j); // tauc * grad(phi_i) * (M*grad(phi_j))
     }

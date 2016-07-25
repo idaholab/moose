@@ -6,6 +6,11 @@
 /****************************************************************/
 
 #include "NavierStokesMaterial.h"
+
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
+// MOOSE includes
 #include "Assembly.h"
 #include "MooseMesh.h"
 
@@ -17,9 +22,6 @@ InputParameters validParams<NavierStokesMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  // Default is Air
-  params.addRequiredParam<Real>("R", "Gas constant.");
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
   params.addRequiredParam<Real>("Pr", "Prandtl number.");
 
   params.addRequiredCoupledVar("u", "");
@@ -34,6 +36,7 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addCoupledVar("rhov", "y-momentum"); // only required in >= 2D
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
   params.addRequiredCoupledVar("rhoE", "energy");
+  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
 
   return params;
 }
@@ -65,8 +68,6 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     _vel_grads({&_grad_u, &_grad_v, &_grad_w}),
 
     // Parameter values read in from input file
-    _R(getParam<Real>("R")),
-    _gamma(getParam<Real>("gamma")),
     _Pr(getParam<Real>("Pr")),
 
     // Coupled solution values needed for computing SUPG stabilization terms
@@ -103,7 +104,8 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     _tauc(declareProperty<Real>("tauc")),
     _taum(declareProperty<Real>("taum")),
     _taue(declareProperty<Real>("taue")),
-    _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals"))
+    _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals")),
+    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }
 
@@ -143,8 +145,7 @@ NavierStokesMaterial::computeProperties()
     // 673      0.0515
 
     // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr = (mu * gamma * cv) / Pr
-    Real cv = _R / (_gamma - 1.0);
-    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _gamma * cv) / _Pr;
+    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _fp.cp()) / _Pr;
 
     // Compute stabilization parameters:
 
@@ -276,7 +277,7 @@ NavierStokesMaterial::computeTau(unsigned int qp)
 
   // The speed of sound for an ideal gas, sqrt(gamma * R * T).  Not needed unless
   // we want to use a form of Tau that requires it.
-  // Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
+  // Real soundspeed = _fp.c(_specific_volume[_qp], _internal_energy[_qp]);
 
   // If velmag == 0, then _hsupg should be zero as well.  Then tau
   // will have only the time-derivative contribution (or zero, if we
@@ -303,8 +304,7 @@ NavierStokesMaterial::computeTau(unsigned int qp)
     Real visc_term = _dynamic_viscosity[qp] / _rho[qp] / h2;
 
     // The thermal conductivity-based term, cp = gamma * cv
-    Real cv = _R / (_gamma - 1.0);
-    Real k_term = _thermal_conductivity[qp] / _rho[qp] / (_gamma*cv) / h2;
+    Real k_term = _thermal_conductivity[qp] / _rho[qp] / _fp.cp() / h2;
 
     // 1a.) Standard compressible flow tau.  Does not account for low Mach number
     // limit.
@@ -408,7 +408,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
   // 0.) _calA_0 = diag( (gam - 1)/2*|u|^2 ) - S
   _calA[qp][0].zero(); // zero this calA entry
-  _calA[qp][0](0,0) = _calA[qp][0](1,1) = _calA[qp][0](2,2) = 0.5*(_gamma - 1.0)*velmag2; // set diag. entries
+  _calA[qp][0](0,0) = _calA[qp][0](1,1) = _calA[qp][0](2,2) = 0.5*(_fp.gamma() - 1.0)*velmag2; // set diag. entries
   _calA[qp][0] -= calS;
 
   for (unsigned int m = 1; m <= 3; ++m)
@@ -418,14 +418,14 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
     // For m=1,2,3, calA_m = C_m + C_m^T + diag( (1.-gam)*u_m )
     _calA[qp][m].zero(); // zero this calA entry
-    _calA[qp][m](0,0) = _calA[qp][m](1,1) = _calA[qp][m](2,2) = (1.-_gamma)*vel(m_local); // set diag. entries
+    _calA[qp][m](0,0) = _calA[qp][m](1,1) = _calA[qp][m](2,2) = (1.-_fp.gamma())*vel(m_local); // set diag. entries
     _calA[qp][m] += _calC[qp][m_local];             // Note: use m_local for indexing into _calC!
     _calA[qp][m] += _calC[qp][m_local].transpose(); // Note: use m_local for indexing into _calC!
   }
 
   // 4.) calA_4 = diag(gam - 1)
   _calA[qp][4].zero(); // zero this calA entry
-  _calA[qp][4](0,0) = _calA[qp][4](1,1) = _calA[qp][4](2,2) = (_gamma - 1.0);
+  _calA[qp][4](0,0) = _calA[qp][4](1,1) = _calA[qp][4](2,2) = (_fp.gamma() - 1.0);
 
   // Enough space to hold the 3*5 "cal E" matrices which comprise the inviscid flux term
   // of the energy equation.  See notes for additional details
@@ -442,7 +442,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
     // E_{k0} (density gradient term)
     _calE[qp][k][0].zero();
-    _calE[qp][k][0] = (0.5 * (_gamma - 1.0) * velmag2 - _enthalpy[qp]) * Ck_T;
+    _calE[qp][k][0] = (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * Ck_T;
 
     for (unsigned int m = 1; m <= 3; ++m)
     {
@@ -452,12 +452,12 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
       // E_{km} (momentum gradient terms)
       _calE[qp][k][m].zero();
       _calE[qp][k][m](k,m_local) = _enthalpy[qp];           // H * D_{km}
-      _calE[qp][k][m] += (1.-_gamma) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
+      _calE[qp][k][m] += (1.-_fp.gamma()) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
 
     // E_{k4} (energy gradient term)
     _calE[qp][k][4].zero();
-    _calE[qp][k][4] = _gamma * Ck_T;
+    _calE[qp][k][4] = _fp.gamma() * Ck_T;
   }
 
   // Compute the sum over ell of: A_ell grad(U_ell), store in DenseVector or Gradient object?
@@ -474,12 +474,12 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
   // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual"
   // section of the notes.
   Real energy_resid =
-    (0.5*(_gamma - 1.0)*velmag2 - _enthalpy[qp])*(vel * _grad_rho[qp]) +
+    (0.5*(_fp.gamma() - 1.0)*velmag2 - _enthalpy[qp])*(vel * _grad_rho[qp]) +
     _enthalpy[qp]*divU +
-    (1.-_gamma)*(vel(0)*(vel*_grad_rho_u[qp]) +
+    (1.-_fp.gamma())*(vel(0)*(vel*_grad_rho_u[qp]) +
                  vel(1)*(vel*_grad_rho_v[qp]) +
                  vel(2)*(vel*_grad_rho_w[qp])) +
-    _gamma*(vel*_grad_rho_E[qp])
+    _fp.gamma()*(vel*_grad_rho_E[qp])
     ;
 
   // Now for the actual residual values...

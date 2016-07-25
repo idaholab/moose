@@ -7,6 +7,7 @@
 #ifndef NSENTHALPYAUX_H
 #define NSENTHALPYAUX_H
 
+// MOOSE includes
 #include "AuxKernel.h"
 
 //Forward Declarations
@@ -36,8 +37,6 @@ protected:
   const VariableValue & _rho;
   const VariableValue & _rhoE;
   const VariableValue & _pressure;
-
-  const Real _gamma;
 };
 
 #endif // NSENTHALPYAUX_H

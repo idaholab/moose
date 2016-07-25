@@ -6,6 +6,9 @@
 /****************************************************************/
 #include "NSMomentumInviscidFlux.h"
 
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
 template<>
 InputParameters validParams<NSMomentumInviscidFlux>()
 {
@@ -61,12 +64,15 @@ NSMomentumInviscidFlux::computeJacobianHelper(unsigned int m)
 {
   const RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
+  // Ratio of specific heats
+  const Real gam = _fp.gamma();
+
   switch (m)
   {
     case 0: // density
     {
       const Real V2 = vel.norm_sq();
-      return vel(_component) * (vel * _grad_test[_i][_qp]) - 0.5 * (_gamma - 1.0) * V2 * _grad_test[_i][_qp](_component);
+      return vel(_component) * (vel * _grad_test[_i][_qp]) - 0.5 * (gam - 1.0) * V2 * _grad_test[_i][_qp](_component);
     }
 
     case 1:
@@ -81,11 +87,11 @@ NSMomentumInviscidFlux::computeJacobianHelper(unsigned int m)
 
       return -1.0 * (vel(_component) * _grad_test[_i][_qp](m_local)
                     + delta_kl * (vel * _grad_test[_i][_qp])
-                    + (1.-_gamma) * vel(m_local) * _grad_test[_i][_qp](_component)) * _phi[_j][_qp];
+                    + (1.-gam) * vel(m_local) * _grad_test[_i][_qp](_component)) * _phi[_j][_qp];
     }
 
     case 4: // energy
-      return -1.0 * (_gamma - 1.0) * _phi[_j][_qp] * _grad_test[_i][_qp](_component);
+      return -1.0 * (gam - 1.0) * _phi[_j][_qp] * _grad_test[_i][_qp](_component);
   }
 
   mooseError("Shouldn't get here!");

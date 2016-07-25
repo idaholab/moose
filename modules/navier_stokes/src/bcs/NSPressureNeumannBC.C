@@ -14,7 +14,6 @@ InputParameters validParams<NSPressureNeumannBC>()
 
   params.addRequiredCoupledVar("pressure", "The current value of the pressure");
   params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
 
   return params;
 }
@@ -25,7 +24,6 @@ NSPressureNeumannBC::NSPressureNeumannBC(const InputParameters & parameters) :
     NSIntegratedBC(parameters),
     _pressure(coupledValue("pressure")),
     _component(getParam<unsigned>("component")),
-    _gamma(getParam<Real>("gamma")),
     _pressure_derivs(*this)
 {
 }

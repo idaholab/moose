@@ -16,9 +16,6 @@ InputParameters validParams<NSEnthalpyAux>()
   params.addRequiredCoupledVar("rhoE", "total energy");
   params.addRequiredCoupledVar("pressure", "pressure");
 
-  // Parameters with default values
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
-
   return params;
 }
 
@@ -26,8 +23,7 @@ NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _rho(coupledValue("rho")),
     _rhoE(coupledValue("rhoE")),
-    _pressure(coupledValue("pressure")),
-    _gamma(getParam<Real>("gamma"))
+    _pressure(coupledValue("pressure"))
 {
 }
 

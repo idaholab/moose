@@ -20,9 +20,7 @@
 # second-order in this norm.
 [GlobalParams]
   # Ratio of specific heats
-  gamma = 1.4
   Pr = 0.71
-  R = 287
 []
 
 
@@ -211,6 +209,7 @@
     rhoE = rhoE
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   ################################################################################
@@ -235,6 +234,7 @@
     rhoE = rhoE
     pressure = pressure
     component = 0
+    fluid_properties = ideal_gas
   [../]
 
   ################################################################################
@@ -259,6 +259,7 @@
     rhoE = rhoE
     pressure = pressure
     component = 1
+    fluid_properties = ideal_gas
   [../]
 
 
@@ -283,6 +284,7 @@
     u = vel_x
     v = vel_y
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
 
@@ -302,6 +304,7 @@
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
   # The SUPG stabilization terms for the x-momentum equation
@@ -317,6 +320,7 @@
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
   # The SUPG stabilization terms for the y-momentum equation
@@ -332,6 +336,7 @@
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
   # The SUPG stabilization terms for the energy equation
@@ -346,6 +351,7 @@
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 []
 
@@ -369,19 +375,17 @@
   [./temperature_auxkernel]
     type = NSTemperatureAux
     variable = temperature
-    rho = rho
-    u = vel_x
-    v = vel_y
-    rhoE = rhoE
+    internal_energy = internal_energy
+    specific_volume = specific_volume
+    fluid_properties = ideal_gas
   [../]
 
   [./pressure_auxkernel]
     type = NSPressureAux
     variable = pressure
-    rho = rho
-    u = vel_x
-    v = vel_y
-    rhoE = rhoE
+    internal_energy = internal_energy
+    specific_volume = specific_volume
+    fluid_properties = ideal_gas
   [../]
 
   [./enthalpy_auxkernel]
@@ -397,7 +401,9 @@
     variable = Mach
     u = vel_x
     v = vel_y
-    temperature = temperature
+    internal_energy = internal_energy
+    specific_volume = specific_volume
+    fluid_properties = ideal_gas
   [../]
 
   [./internal_energy_auxkernel]
@@ -430,6 +436,7 @@
     u = vel_x
     v = vel_y
     boundary = '2' # 'Outflow'
+    fluid_properties = ideal_gas
   [../]
 
   # Specified pressure x-momentum equation invsicid outflow BC
@@ -445,6 +452,7 @@
     component = 0
     boundary = '2' # 'Outflow'
     specified_pressure = 101325 # Pa
+    fluid_properties = ideal_gas
   [../]
 
   # Specified pressure y-momentum equation inviscid outflow BC
@@ -460,6 +468,7 @@
     component = 1
     boundary = '2' # 'Outflow'
     specified_pressure = 101325 # Pa
+    fluid_properties = ideal_gas
   [../]
 
   # Specified pressure energy equation outflow BC
@@ -475,6 +484,7 @@
     temperature = temperature
     boundary = '2' # 'Outflow'
     specified_pressure = 101325 # Pa
+    fluid_properties = ideal_gas
   [../]
 
   # The no penentration BC (u.n=0) applies on all the solid surfaces.
@@ -491,6 +501,7 @@
     rhov = rhov
     rhoE = rhoE
     pressure = pressure
+    fluid_properties = ideal_gas
   [../]
 
   # The no penentration BC (u.n=0) applies on all the solid surfaces.
@@ -507,6 +518,7 @@
     rhov = rhov
     rhoE = rhoE
     pressure = pressure
+    fluid_properties = ideal_gas
   [../]
 
   #
@@ -526,6 +538,7 @@
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhou_convective_inflow]
@@ -543,6 +556,7 @@
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhou_pressure_inflow]
@@ -560,6 +574,7 @@
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhov_convective_inflow]
@@ -577,6 +592,7 @@
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhov_pressure_inflow]
@@ -594,6 +610,7 @@
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_energy_inflow]
@@ -610,6 +627,7 @@
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 []
 
@@ -633,18 +651,19 @@
     # the amount of artificial viscosity added, so it's best to use a
     # realistic value.
     dynamic_viscosity = 0.0
+    fluid_properties = ideal_gas
   [../]
 
   # A Material is the most efficient way to use the FluidProperties
   # stuff, as the values will be computed once and then used by all
   # the Kernels, rather than calling getUserObject from individual
   # Kernels and computing properties repeatedly.
-  # [./fp_mat]
-  #   type = FluidPropertiesMaterial
-  #   e = e # internal energy
-  #   v = v # specific volume
-  #   fp = ideal_gas
-  # [../]
+  [./fp_mat]
+    type = FluidPropertiesMaterial
+    e = internal_energy
+    v = specific_volume
+    fp = ideal_gas
+  [../]
 []
 
 
@@ -658,6 +677,7 @@
     p_infty = 101325
     rho = rho
     pressure = pressure
+    fluid_properties = ideal_gas
   [../]
 []
 

@@ -5,6 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "NSKernel.h"
+
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
 
 template<>
@@ -19,8 +24,7 @@ InputParameters validParams<NSKernel>()
   params.addCoupledVar("rhov", "y-momentum"); // only required in 2D and 3D
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
   params.addRequiredCoupledVar("rhoE", "total energy");
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
-  params.addRequiredParam<Real>("R", "Gas constant.");
+  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
   return params;
 }
 
@@ -51,13 +55,12 @@ NSKernel::NSKernel(const InputParameters & parameters) :
     _rhow_var_number( _mesh.dimension() == 3 ? coupled("rhow") : libMesh::invalid_uint),
     _rhoE_var_number( coupled("rhoE") ),
 
-    // Required parameters
-    _gamma(getParam<Real>("gamma")),
-    _R(getParam<Real>("R")),
-
     // Material properties
     _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")),
-    _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor"))
+    _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
+
+    // FluidProperties UserObject
+    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }
 

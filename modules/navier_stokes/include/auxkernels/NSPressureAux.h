@@ -9,8 +9,9 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSPressureAux;
+class IdealGasFluidProperties;
 
 template<>
 InputParameters validParams<NSPressureAux>();
@@ -21,11 +22,6 @@ InputParameters validParams<NSPressureAux>();
 class NSPressureAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   NSPressureAux(const InputParameters & parameters);
 
   virtual ~NSPressureAux() {}
@@ -33,13 +29,11 @@ public:
 protected:
   virtual Real computeValue();
 
-  const VariableValue & _rho;
-  const VariableValue & _u_vel;
-  const VariableValue & _v_vel;
-  const VariableValue & _w_vel;
-  const VariableValue & _rhoE;
+  const VariableValue & _specific_volume;
+  const VariableValue & _internal_energy;
 
-  Real _gamma;
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 };
 
 #endif //VELOCITYAUX_H
