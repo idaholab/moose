@@ -2,6 +2,12 @@
 # exactly that caused by gravity, and then
 # do a transient step to check that nothing
 # happens
+# TODO: currently this has no div(moment_stress)
+# contriution to the Kernels.  This is because
+# there is no way in MOOSE of calculating
+# moment stresses and applying initial stresses.
+# This will become possible after issue #7243 is
+# resolved.
 
 [Mesh]
   type = GeneratedMesh
@@ -19,6 +25,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+  Cosserat_rotations = 'wc_x wc_y wc_z'
 []
 
 
@@ -29,11 +36,44 @@
   [../]
   [./disp_z]
   [../]
+  [./wc_x]
+  [../]
+  [./wc_y]
+  [../]
+  [./wc_z]
+  [../]
 []
 
 [Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+  [./cx_elastic]
+    type = CosseratStressDivergenceTensors
+    variable = disp_x
+    component = 0
+  [../]
+  [./cy_elastic]
+    type = CosseratStressDivergenceTensors
+    variable = disp_y
+    component = 1
+  [../]
+  [./cz_elastic]
+    type = CosseratStressDivergenceTensors
+    variable = disp_z
+    component = 2
+  [../]
+  [./x_moment]
+    type = MomentBalancing
+    variable = wc_x
+    component = 0
+  [../]
+  [./y_moment]
+    type = MomentBalancing
+    variable = wc_y
+    component = 1
+  [../]
+  [./z_moment]
+    type = MomentBalancing
+    variable = wc_z
+    component = 2
   [../]
   [./weight]
     type = BodyForce
@@ -180,16 +220,17 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
+    type = ComputeCosseratElasticityTensor
+    B_ijkl = '1.1 0.6 0.6' # In Forest notation this is alpha=1.1 (this is unimportant), beta=gamma=0.6.
+    fill_method_bending = 'general_isotropic'
     fill_method = symmetric_isotropic
-    C_ijkl = '0.4 0.4' # young = 1, poisson = 0.25
+    E_ijkl = '0.4 0.4' # young = 1, poisson = 0.25
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeCosseratIncrementalSmallStrain
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress
-    block = 0
     initial_stress = 'kxx 0 0  0 kxx 0  0 0 weight'
 
     # the rest of this stuff is irrelevant for this test
@@ -227,6 +268,6 @@
 
 
 [Outputs]
-  file_base = gravity
+  file_base = gravity_cosserat
   exodus = true
 []

@@ -4,6 +4,11 @@
     input = 'gravity.i'
     exodiff = 'gravity.e'
   [../]
+  [./gravity_cosserat]
+    type = 'Exodiff'
+    input = 'gravity_cosserat.i'
+    exodiff = 'gravity_cosserat.e'
+  [../]
   [./mc_tensile]
     type = 'CSVDiff'
     input = 'mc_tensile.i'
