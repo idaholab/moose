@@ -37,7 +37,7 @@ protected:
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
-  const VariableValue & _rhoe;
+  const VariableValue & _rhoE;
 
   Real _gamma;
 };

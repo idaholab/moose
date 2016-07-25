@@ -33,7 +33,7 @@ InputParameters validParams<NavierStokesMaterial>()
   params.addRequiredCoupledVar("rhou", "x-momentum");
   params.addCoupledVar("rhov", "y-momentum"); // only required in >= 2D
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
-  params.addRequiredCoupledVar("rhoe", "energy");
+  params.addRequiredCoupledVar("rhoE", "energy");
 
   return params;
 }
@@ -82,21 +82,21 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     _rho_u(coupledValue("rhou")),
     _rho_v(_mesh.dimension() >= 2 ? coupledValue("rhov") : _zero),
     _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
-    _rho_e(coupledValue("rhoe")),
+    _rho_E(coupledValue("rhoE")),
 
     // Time derivative values
     _drho_dt(coupledDot("rho")),
     _drhou_dt(coupledDot("rhou")),
     _drhov_dt(_mesh.dimension() >= 2 ? coupledDot("rhov") : _zero),
     _drhow_dt(_mesh.dimension() == 3 ? coupledDot("rhow") : _zero),
-    _drhoe_dt(coupledDot("rhoe")),
+    _drhoE_dt(coupledDot("rhoE")),
 
     // Gradients
     _grad_rho(coupledGradient("rho")),
     _grad_rho_u(coupledGradient("rhou")),
     _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient("rhov") : _grad_zero),
     _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
-    _grad_rho_e(coupledGradient("rhoe")),
+    _grad_rho_E(coupledGradient("rhoE")),
 
     // Material properties for stabilization
     _hsupg(declareProperty<Real>("hsupg")),
@@ -371,7 +371,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 //            << ", drhou_dt=" << _drhou_dt
 //            << ", drhov_dt=" << _drhov_dt
 //            << ", drhow_dt=" << _drhow_dt
-//            << ", drhoe_dt=" << _drhoe_dt
+//            << ", drhoE_dt=" << _drhoE_dt
 //            << std::endl;
 
   // Momentum divergence
@@ -468,7 +468,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
     _calA[qp][1]*_grad_rho_u[qp] +
     _calA[qp][2]*_grad_rho_v[qp] +
     _calA[qp][3]*_grad_rho_w[qp] +
-    _calA[qp][4]*_grad_rho_e[qp];
+    _calA[qp][4]*_grad_rho_E[qp];
 
   // No matrices/vectors for the energy residual strong form... just write it out like
   // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual"
@@ -479,7 +479,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
     (1.-_gamma)*(vel(0)*(vel*_grad_rho_u[qp]) +
                  vel(1)*(vel*_grad_rho_v[qp]) +
                  vel(2)*(vel*_grad_rho_w[qp])) +
-    _gamma*(vel*_grad_rho_e[qp])
+    _gamma*(vel*_grad_rho_E[qp])
     ;
 
   // Now for the actual residual values...
@@ -503,5 +503,5 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
     _strong_residuals[qp][3] = 0.;
 
   // The energy equation strong residual
-  _strong_residuals[qp][4] = _drhoe_dt[qp] + energy_resid;
+  _strong_residuals[qp][4] = _drhoE_dt[qp] + energy_resid;
 }

@@ -68,7 +68,7 @@ Real
 NSSUPGEnergy::computeQpJacobian()
 {
   // This is the energy equation, so pass the on-diagonal variable number.
-  return computeJacobianHelper(_rhoe_var_number);
+  return computeJacobianHelper(_rhoE_var_number);
 }
 
 Real

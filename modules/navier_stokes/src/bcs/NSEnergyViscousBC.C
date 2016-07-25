@@ -29,7 +29,7 @@ NSEnergyViscousBC::NSEnergyViscousBC(const InputParameters & parameters) :
   _gradU[1] = &_grad_rho_u;
   _gradU[2] = &_grad_rho_v;
   _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_e;
+  _gradU[4] = &_grad_rho_E;
 }
 
 Real NSEnergyViscousBC::computeQpResidual()
@@ -66,7 +66,7 @@ Real NSEnergyViscousBC::computeQpJacobian()
     intermediate_result *= _phi[_j][_qp];
 
     // Add in the temperature gradient contribution
-    intermediate_result += _temp_derivs.get_grad(/*rhoe=*/4) * _grad_phi[_j][_qp](ell);
+    intermediate_result += _temp_derivs.get_grad(/*rhoE=*/4) * _grad_phi[_j][_qp](ell);
 
     // Hit the result with the normal component, accumulate in thermal_term
     thermal_term += intermediate_result * _normals[_qp](ell);

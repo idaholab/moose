@@ -18,7 +18,7 @@ InputParameters validParams<NSTemperatureAux>()
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // Only required in >= 2D
   params.addCoupledVar("w", "z-velocity"); // Only required in 3D...
-  params.addRequiredCoupledVar("rhoe", "");
+  params.addRequiredCoupledVar("rhoE", "total energy");
 
   // Parameters with default values
   params.addRequiredParam<Real>("R", "Gas constant.");
@@ -33,7 +33,7 @@ NSTemperatureAux::NSTemperatureAux(const InputParameters & parameters) :
     _u_vel(coupledValue("u")),
     _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-    _rhoe(coupledValue("rhoe")),
+    _rhoE(coupledValue("rhoE")),
     _R(getParam<Real>("R")),
     _gamma(getParam<Real>("gamma"))
 {
@@ -48,7 +48,7 @@ NSTemperatureAux::computeValue()
     _w_vel[_qp]*_w_vel[_qp];
 
   // Internal Energy = Total Energy - Kinetic
-  Real e_i = (_rhoe[_qp] / _rho[_qp]) - 0.5 * V2;
+  Real e_i = (_rhoE[_qp] / _rho[_qp]) - 0.5 * V2;
 
   // T = e_i / cv
   Real cv = _R / (_gamma-1.);

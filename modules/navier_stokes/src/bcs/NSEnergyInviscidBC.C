@@ -24,7 +24,7 @@ NSEnergyInviscidBC::NSEnergyInviscidBC(const InputParameters & parameters) :
 
 Real NSEnergyInviscidBC::qpResidualHelper(Real pressure, Real un)
 {
-  return (_rho_e[_qp] + pressure) * un * _test[_i][_qp];
+  return (_rho_E[_qp] + pressure) * un * _test[_i][_qp];
 }
 
 Real NSEnergyInviscidBC::qpResidualHelper(Real rho, RealVectorValue u, Real /*pressure*/)
@@ -69,7 +69,7 @@ Real NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
 
   // Notice the division by _rho[_qp] here.  This comes from taking the
   // derivative wrt to either density or momentum.
-  return (_rho_e[_qp] + pressure) / _rho[_qp] * result * _phi[_j][_qp] * _test[_i][_qp];
+  return (_rho_E[_qp] + pressure) / _rho[_qp] * result * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 // d(U4)/dX * (u.n)

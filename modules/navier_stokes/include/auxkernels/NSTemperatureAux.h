@@ -34,7 +34,7 @@ protected:
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
-  const VariableValue & _rhoe;
+  const VariableValue & _rhoE;
 
   // Specific heat at constant volume, treated as a single
   // constant value.

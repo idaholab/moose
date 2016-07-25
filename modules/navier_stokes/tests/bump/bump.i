@@ -72,7 +72,7 @@
     family = LAGRANGE
   [../]
 
-  [./rhoe]
+  [./rhoE]
     order = FIRST
     family = LAGRANGE
 
@@ -165,6 +165,17 @@
 
 
 
+[Modules]
+  [./FluidProperties]
+    [./ideal_gas]
+      type = IdealGasFluidProperties
+      gamma = 1.4
+      R = 287
+    [../]
+  [../]
+[]
+
+
 [Kernels]
   ################################################################################
   # Mass conservation Equation
@@ -183,7 +194,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
   [../]
@@ -207,7 +218,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
     component = 0
   [../]
@@ -231,7 +242,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
     component = 1
   [../]
@@ -242,19 +253,19 @@
   ################################################################################
 
   # Time derivative term
-  [./rhoe_ie]
+  [./rhoE_ie]
     type = TimeDerivative
-    variable = rhoe
+    variable = rhoE
   [../]
 
   # Energy equation inviscid flux term (integrated by parts)
-  [./rhoe_if]
+  [./rhoE_if]
     type = NSEnergyInviscidFlux
-    variable = rhoe
+    variable = rhoE
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     enthalpy = enthalpy
@@ -272,7 +283,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
@@ -287,7 +298,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
@@ -302,7 +313,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
@@ -310,13 +321,13 @@
   [../]
 
   # The SUPG stabilization terms for the energy equation
-  [./rhoe_supg]
+  [./rhoE_supg]
     type = NSSUPGEnergy
-    variable = rhoe
+    variable = rhoE
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
@@ -347,7 +358,7 @@
     rho = rho
     u = vel_x
     v = vel_y
-    rhoe = rhoe
+    rhoE = rhoE
   [../]
 
   [./pressure_auxkernel]
@@ -356,14 +367,14 @@
     rho = rho
     u = vel_x
     v = vel_y
-    rhoe = rhoe
+    rhoE = rhoE
   [../]
 
   [./enthalpy_auxkernel]
     type = NSEnthalpyAux
     variable = enthalpy
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
   [../]
 
@@ -386,7 +397,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     boundary = '2' # 'Outflow'
@@ -399,7 +410,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     component = 0
@@ -414,7 +425,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     component = 1
@@ -423,13 +434,13 @@
   [../]
 
   # Specified pressure energy equation outflow BC
-  [./rhoe_specified_pressure_outflow]
+  [./rhoE_specified_pressure_outflow]
     type = NSEnergyInviscidSpecifiedPressureBC
-    variable = rhoe
+    variable = rhoE
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
@@ -449,7 +460,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
   [../]
 
@@ -465,7 +476,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
   [../]
 
@@ -481,7 +492,7 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
@@ -498,7 +509,7 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
@@ -515,7 +526,7 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
@@ -532,7 +543,7 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
@@ -549,7 +560,7 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
@@ -558,14 +569,14 @@
 
   [./weak_stagnation_energy_inflow]
     type = NSEnergyWeakStagnationBC
-    variable = rhoe
+    variable = rhoE
     boundary = '1' # 'Inflow'
     stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
     stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
@@ -583,7 +594,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
@@ -594,6 +605,17 @@
     # realistic value.
     dynamic_viscosity = 0.0
   [../]
+
+  # A Material is the most efficient way to use the FluidProperties
+  # stuff, as the values will be computed once and then used by all
+  # the Kernels, rather than calling getUserObject from individual
+  # Kernels and computing properties repeatedly.
+  # [./fp_mat]
+  #   type = FluidPropertiesMaterial
+  #   e = e # internal energy
+  #   v = v # specific volume
+  #   fp = ideal_gas
+  # [../]
 []
 
 
