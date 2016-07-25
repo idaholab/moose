@@ -301,7 +301,11 @@ petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason
     *reason = KSP_DIVERGED_NANORINF;
 #endif
     break;
-
+#if !PETSC_VERSION_LESS_THAN(3,6,0) // A new convergence enum in PETSc 3.6
+  case MOOSE_DIVERGED_PCSETUP_FAILED:
+    *reason = KSP_DIVERGED_PCSETUP_FAILED;
+    break;
+#endif
   default:
   {
     // If it's not either of the two specific cases we handle, just go

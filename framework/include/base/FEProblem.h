@@ -112,8 +112,9 @@ enum MooseLinearConvergenceReason
   // MOOSE_DIVERGED_BREAKDOWN_BICG      = -6,
   // MOOSE_DIVERGED_NONSYMMETRIC        = -7,
   // MOOSE_DIVERGED_INDEFINITE_PC       = -8,
-  MOOSE_DIVERGED_NANORINF               = -9
+  MOOSE_DIVERGED_NANORINF               = -9,
   // MOOSE_DIVERGED_INDEFINITE_MAT      = -10
+  MOOSE_DIVERGED_PCSETUP_FAILED         = -11
 };
 
 /**
