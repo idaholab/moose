@@ -54,6 +54,8 @@ public:
 protected:
   virtual void updateFieldInfo() override;
 
+  virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
+
   /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to handle
    * setting new properties on the newly created grain.
@@ -134,11 +136,17 @@ protected:
   /// Depth of renumbing recursion (a depth of zero means no recursion)
   static const unsigned int _max_renumbering_recursion = 2;
 
+  /// The cutoff index where if variable index < this number, no remapping TO that variable will occur
+  const unsigned int _reserve_op;
+
+  /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
+  unsigned int _reserve_grain_first_idx;
+
+  /// The threshold above (or below) where a grain may be found on a reserve op field
+  const Real _reserve_op_threshold;
+
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
-
-  /// Indicates whether to reserve the first couple op (no mapping TO that variable)
-  const bool _reserve_op;
 
   /// A reference to the nonlinear system (used for retrieving solution vectors)
   NonlinearSystem & _nl;

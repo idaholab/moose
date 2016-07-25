@@ -52,9 +52,10 @@
   [../]
 
   [./remapping_with_reserve]
-    type = 'CSVDiff'
+    type = 'Exodiff'
     input = 'grain_tracker_reserve.i'
-    csvdiff = 'grain_tracker_reserve_out.csv'
+    exodiff = 'grain_tracker_reserve_out.e'
+    abs_zero = 1e-6 # Remapping can cause more significant diffs
     method = '!DBG' # slow test
     valgrind = 'HEAVY'
   [../]

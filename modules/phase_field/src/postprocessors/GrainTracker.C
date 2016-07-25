@@ -34,8 +34,10 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
     _halo_level(getParam<unsigned int>("halo_level")),
+    _reserve_op(getParam<unsigned int>("reserve_op")),
+    _reserve_grain_first_idx(0),
+    _reserve_op_threshold(getParam<Real>("reserve_op_threshold")),
     _remap(getParam<bool>("remap_grains")),
-    _reserve_op(getParam<bool>("reserve_op")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, FeatureData> >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
@@ -75,6 +77,18 @@ GrainTracker::execute()
   Moose::perf_log.push("execute()", "GrainTracker");
   FeatureFloodCount::execute();
   Moose::perf_log.pop("execute()", "GrainTracker");
+}
+
+Real
+GrainTracker::getThreshold(unsigned int current_idx, bool active_feature) const
+{
+  // If we are inspecting a reserve op parameter, we need to make sure
+  // that there is an entity above the reserve_op threshold before
+  // starting the flood of the feature.
+  if (!active_feature && current_idx < _reserve_op)
+    return _reserve_op_threshold;
+  else
+    return FeatureFloodCount::getThreshold(current_idx, active_feature);
 }
 
 void
@@ -129,6 +143,10 @@ GrainTracker::finalize()
           {
             auto data_pair_pair = _elemental_data_2.emplace(elem_id, std::vector<unsigned int>(_n_vars, libMesh::invalid_uint));
             data_pair = data_pair_pair.first;
+
+            // insert the reserve op numbers (if appropriate)
+            for (unsigned int reserve_idx = 0; reserve_idx < _reserve_op; ++reserve_idx)
+              data_pair->second[reserve_idx] = _reserve_grain_first_idx + reserve_idx;
           }
           data_pair->second[grain_pair.second._var_idx] = _ebsd_reader ? _unique_grain_to_ebsd_num[grain_pair.first] : grain_pair.first;
         }
@@ -356,6 +374,10 @@ GrainTracker::trackGrains()
                        });
       }
     }
+    // Reserve op grain ids if we are using reserve_op. We'll mark the first index of the reserved id.
+    // The remaining ids (if any) are sequential
+    _reserve_grain_first_idx = _unique_grains.size();
+
     return;  // Return early - no matching or tracking to do
   }
 
@@ -449,7 +471,7 @@ GrainTracker::trackGrains()
       {
         mooseAssert(_feature_sets[map_num][feature_num]._status == Status::NOT_MARKED, "Feature in wrong state, logic error");
 
-        auto new_idx = _unique_grains.size();
+        auto new_idx = _unique_grains.size() + _reserve_op;
 
         _feature_sets[map_num][feature_num]._status = Status::MARKED;               // Mark it
         _unique_grains[new_idx] = std::move(_feature_sets[map_num][feature_num]);   // transfer ownership
@@ -516,12 +538,12 @@ GrainTracker::remapGrains()
       if (grain_it1->second._status == Status::INACTIVE)
         continue;
 
-      // If we have the reserve op flag set, see if we need to move any grains immediately
-      if (_reserve_op && grain_it1->second._var_idx == 0) // The zeroth variable is always the reserved variable
+      // We need to remap any grains represented on any variable index above the cuttoff
+      if (grain_it1->second._var_idx < _reserve_op)
       {
         Moose::out
           << COLOR_YELLOW
-          << "Grain #" << grain_it1->first << " detected on the reserved order parameter, remapping to another variable\n"
+          << "Grain #" << grain_it1->first << " detected on a reserved order parameter #" << grain_it1->second._var_idx << ", remapping to another variable\n"
           << COLOR_DEFAULT;
 
         for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
@@ -597,7 +619,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
   for (auto & grain_pair : _unique_grains)
   {
     if (grain_pair.second._status == Status::INACTIVE || grain_pair.second._var_idx == grain._var_idx ||
-        (_reserve_op && grain_pair.second._var_idx == 0)) // Reserve the first OP
+        (grain_pair.second._var_idx < _reserve_op))
       continue;
 
     unsigned int target_var_index = grain_pair.second._var_idx;

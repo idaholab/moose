@@ -691,8 +691,9 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
   // Mark this entity as visited
   _entities_visited[current_idx][entity_id] = true;
 
-  // Determine which threshold to use based on whether this is an established region
-  auto threshold = feature ? _step_connecting_threshold : _step_threshold;
+  // Determine which threshold to use based on whether this is an established region or
+  // based on some derived class criteria.
+  auto threshold = getThreshold(current_idx, feature != nullptr);
 
   // Get the value of the current variable for the current entity
   Real entity_value;
@@ -756,6 +757,12 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
     visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
   else
     visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
+}
+
+Real
+FeatureFloodCount::getThreshold(unsigned int /*current_idx*/, bool active_feature) const
+{
+  return active_feature ? _step_connecting_threshold : _step_threshold;
 }
 
 void
