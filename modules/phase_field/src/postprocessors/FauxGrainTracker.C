@@ -27,6 +27,10 @@ FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
   _faux_data.resize(_vars.size());
   for (unsigned int var_num = 0; var_num < _faux_data.size(); ++var_num)
     _faux_data[var_num] = std::make_pair(var_num, var_num);
+
+  _faux_data_2.resize(_vars.size());
+  for (unsigned int var_num = 0; var_num < _faux_data_2.size(); ++var_num)
+    _faux_data_2[var_num] = var_num;
 }
 
 FauxGrainTracker::~FauxGrainTracker()
@@ -72,6 +76,12 @@ const std::vector<std::pair<unsigned int, unsigned int> > &
 FauxGrainTracker::getElementalValues(dof_id_type /*elem_id*/) const
 {
   return _faux_data;
+}
+
+const std::vector<unsigned int> &
+FauxGrainTracker::getOpToGrainsVector(dof_id_type /*elem_id*/) const
+{
+  return _faux_data_2;
 }
 
 void
