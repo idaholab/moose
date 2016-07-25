@@ -168,41 +168,42 @@
     component = 0
     property = force_density
   [../]
-  [./vadv00]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv00
-    property = advection_velocity
-  [../]
-  [./vadv01]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv01
-    property = advection_velocity
-    component = 1
-  [../]
-  [./vadv10]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv10
-    index = 1
-    property = advection_velocity
-  [../]
-  [./vadv11]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv11
-    property = advection_velocity
-    index = 1
-    component = 1
-  [../]
-  [./vadv0_div]
-    type = MaterialStdVectorAux
-    variable = vadv0_div
-    property = advection_velocity_divergence
-  [../]
-  [./vadv1_div]
-    type = MaterialStdVectorAux
-    variable = vadv1_div
-    property = advection_velocity_divergence
-    index = 1
-  [../]
+#  [./vadv00]
+#    type = MaterialStdVectorRealGradientAux
+#    variable = vadv00
+#    property = advection_velocity
+#    execute_on = timestep_end
+#  [../]
+#  [./vadv01]
+#    type = MaterialStdVectorRealGradientAux
+#    variable = vadv01
+#    property = advection_velocity
+#    component = 1
+#  [../]
+#  [./vadv10]
+#    type = MaterialStdVectorRealGradientAux
+#    variable = vadv10
+#    index = 1
+#    property = advection_velocity
+#  [../]
+#  [./vadv11]
+#    type = MaterialStdVectorRealGradientAux
+#    variable = vadv11
+#    property = advection_velocity
+#    index = 1
+#    component = 1
+#  [../]
+#  [./vadv0_div]
+#    type = MaterialStdVectorAux
+#    variable = vadv0_div
+#    property = advection_velocity_divergence
+#  [../]
+#  [./vadv1_div]
+#    type = MaterialStdVectorAux
+#    variable = vadv1_div
+#    property = advection_velocity_divergence
+#    index = 1
+#  [../]
 []
 
 [ICs]
@@ -241,9 +242,9 @@
 
 [UserObjects]
   [./grain_center]
-    type = ComputeGrainCenterUserObject
-    etas = 'eta0 eta1'
-    execute_on = 'initial linear'
+    type = GrainTracker
+    variable = 'eta0 eta1'
+    outputs = none
   [../]
   [./grain_force]
     type = ComputeGrainForceAndTorque

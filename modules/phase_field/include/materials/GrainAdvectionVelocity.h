@@ -8,11 +8,11 @@
 #define GRAINADVECTIONVELOCITY_H
 
 #include "Material.h"
-#include "ComputeGrainCenterUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
+class GrainTrackerInterface;
 class GrainAdvectionVelocity;
 
 template<>
@@ -31,9 +31,7 @@ protected:
   virtual void computeQpProperties();
 
   /// getting userobject for calculating grain centers and volumes
-  const ComputeGrainCenterUserObject & _grain_data;
-  const std::vector<Real> & _grain_volumes;
-  const std::vector<Point> & _grain_centers;
+  const GrainTrackerInterface & _grain_tracker;
 
   /// getting userobject for calculating grain forces and torques
   const GrainForceAndTorqueInterface & _grain_force_torque;

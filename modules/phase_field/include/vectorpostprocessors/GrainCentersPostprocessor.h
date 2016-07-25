@@ -11,7 +11,7 @@
 
 //Forward Declarations
 class GrainCentersPostprocessor;
-class ComputeGrainCenterUserObject;
+class GrainTrackerInterface;
 
 template<>
 InputParameters validParams<GrainCentersPostprocessor>();
@@ -27,21 +27,15 @@ public:
   GrainCentersPostprocessor(const InputParameters & parameters);
 
   virtual ~GrainCentersPostprocessor() {}
-  virtual void initialize() {};
-  virtual void execute();
+  virtual void initialize() override {}
+  virtual void execute() override;
 
 protected:
   /// The VectorPostprocessorValue object where the results are stored
   VectorPostprocessorValue & _grain_volume_center_vector;
 
   /// Userobject that calculates volumes and centers of grains
-  const ComputeGrainCenterUserObject & _grain_data;
-  /// Extracting grain volumes from Userobject
-  const std::vector<Real> & _grain_volumes;
-  /// Extracting grain centers from Userobject
-  const std::vector<Point> & _grain_centers;
-
-  unsigned int _total_grains;
+  const GrainTrackerInterface & _grain_tracker;
 };
 
 #endif //GRAINCENTERSPOSTPROCESSOR_H

@@ -6,7 +6,7 @@
 /****************************************************************/
 
 #include "ComputeGrainForceAndTorque.h"
-#include "ComputeGrainCenterUserObject.h"
+#include "GrainTrackerInterface.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
@@ -29,23 +29,24 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
     _dF(getMaterialProperty<std::vector<RealGradient> >("force_density")),
     _dF_name(getParam<MaterialPropertyName>("force_density")),
     _dFdc(getMaterialPropertyByName<std::vector<RealGradient> >(propertyNameFirst(_dF_name, _c_name))),
-    _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
-    _grain_volumes(_grain_data.getGrainVolumes()),
-    _grain_centers(_grain_data.getGrainCenters()),
-    _ncrys(_grain_volumes.size()),
-    _ncomp(6*_ncrys),
-    _force_values(_ncrys),
-    _torque_values(_ncrys),
-    _force_derivatives(_ncrys),
-    _torque_derivatives(_ncrys),
-    _force_torque_store(_ncomp),
-    _force_torque_derivative_store(_ncomp)
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data"))
 {
 }
 
 void
 ComputeGrainForceAndTorque::initialize()
 {
+  _ncrys = _grain_tracker.getNumberGrains();
+  _ncomp = 6 * _ncrys;
+
+  _force_values.resize(_ncrys);
+  _torque_values.resize(_ncrys);
+  _force_derivatives.resize(_ncrys);
+  _torque_derivatives.resize(_ncrys);
+
+  _force_torque_store.resize(_ncomp);
+  _force_torque_derivative_store.resize(_ncomp);
+
   for (unsigned int i = 0; i < _ncomp; ++i)
   {
     _force_torque_store[i] = 0;
@@ -57,9 +58,11 @@ void
 ComputeGrainForceAndTorque::execute()
 {
   for (unsigned int i = 0; i < _ncrys; ++i)
-    for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
-      const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dF[_qp][i]);
+      auto centroid = _grain_tracker.getGrainCentroid(i);
+
+      const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - centroid).cross(_dF[_qp][i]);
       _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](0);
       _force_torque_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](1);
       _force_torque_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](2);
@@ -67,7 +70,7 @@ ComputeGrainForceAndTorque::execute()
       _force_torque_store[6*i+4] += compute_torque(1);
       _force_torque_store[6*i+5] += compute_torque(2);
 
-      const RealGradient compute_torque_derivative_c =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dFdc[_qp][i]);
+      const RealGradient compute_torque_derivative_c =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - centroid).cross(_dFdc[_qp][i]);
       _force_torque_derivative_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](0);
       _force_torque_derivative_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](1);
       _force_torque_derivative_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](2);

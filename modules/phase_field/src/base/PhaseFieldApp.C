@@ -178,7 +178,6 @@
 /*
  * User Objects
  */
-#include "ComputeGrainCenterUserObject.h"
 #include "ComputeGrainForceAndTorque.h"
 #include "ConservedMaskedNormalNoise.h"
 #include "ConservedMaskedUniformNoise.h"
@@ -412,7 +411,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(OutputEulerAngles);
   registerAux(EulerAngleProvider2RGBAux);
 
-  registerUserObject(ComputeGrainCenterUserObject);
   registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);
