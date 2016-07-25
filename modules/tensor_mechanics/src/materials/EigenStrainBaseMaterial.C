@@ -30,6 +30,7 @@ EigenStrainBaseMaterial::EigenStrainBaseMaterial(const InputParameters & paramet
     _delasticity_tensor_dc(declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, _c_name)),
     _d2elasticity_tensor_dc2(declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, _c_name, _c_name))
 {
+  mooseDeprecated("EigenStrainBaseMaterial is deprecated.   Please use ComputeVariableEigenstrain instead.");
 }
 
 RankTwoTensor EigenStrainBaseMaterial::computeStressFreeStrain()
