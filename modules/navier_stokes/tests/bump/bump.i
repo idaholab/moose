@@ -161,6 +161,20 @@
       value = 316417.5
     [../]
   [../]
+
+  [./internal_energy]
+    [./InitialCondition]
+      type = ConstantIC
+      value = 215250. # J/kg, echo "271044.375/1.17682926829268 - 0.5*173.594354746921*173.594354746921" | bc -l
+    [../]
+  [../]
+
+  [./specific_volume]
+    [./InitialCondition]
+      type = ConstantIC
+      value = 0.84974093264248915997 # m^3/kg, echo "1/1.17682926829268" | bc -l
+    [../]
+  [../]
 []
 
 
@@ -384,6 +398,21 @@
     u = vel_x
     v = vel_y
     temperature = temperature
+  [../]
+
+  [./internal_energy_auxkernel]
+    type = NSInternalEnergyAux
+    variable = internal_energy
+    rho = rho
+    u = vel_x
+    v = vel_y
+    rhoE = rhoE
+  [../]
+
+  [./specific_volume_auxkernel]
+    type = NSSpecificVolumeAux
+    variable = specific_volume
+    rho = rho
   [../]
 []
 

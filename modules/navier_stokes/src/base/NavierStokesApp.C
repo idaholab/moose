@@ -17,6 +17,8 @@
 #include "NSThermalBC.h"
 #include "NSVelocityAux.h"
 #include "NSMachAux.h"
+#include "NSInternalEnergyAux.h"
+#include "NSSpecificVolumeAux.h"
 #include "NSImposedVelocityBC.h"
 #include "NSTemperatureAux.h"
 #include "NSTemperatureL2.h"
@@ -136,6 +138,8 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerBoundaryCondition(NSThermalBC);
   registerAux(NSVelocityAux);
   registerAux(NSMachAux);
+  registerAux(NSInternalEnergyAux);
+  registerAux(NSSpecificVolumeAux);
   registerBoundaryCondition(NSImposedVelocityBC);
   registerAux(NSTemperatureAux);
   registerAux(NSPressureAux);
