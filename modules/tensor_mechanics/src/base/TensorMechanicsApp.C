@@ -28,7 +28,6 @@
 #include "DynamicStressDivergenceTensors.h"
 #include "OutOfPlanePressure.h"
 
-#include "LinearElasticMaterial.h"
 #include "LinearElasticTruss.h"
 #include "FiniteStrainPlasticMaterial.h"
 #include "FiniteStrainCrystalPlasticity.h"
@@ -42,7 +41,6 @@
 #include "ComputeLayeredCosseratElasticityTensor.h"
 #include "TwoPhaseStressMaterial.h"
 #include "MultiPhaseStressMaterial.h"
-#include "SimpleEigenStrainMaterial.h"
 #include "CompositeEigenstrain.h"
 #include "CompositeElasticityTensor.h"
 #include "ComputeElasticityTensor.h"
@@ -195,7 +193,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(DynamicStressDivergenceTensors);
   registerKernel(OutOfPlanePressure);
 
-  registerMaterial(LinearElasticMaterial);
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainPlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
@@ -209,7 +206,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeLayeredCosseratElasticityTensor);
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(MultiPhaseStressMaterial);
-  registerMaterial(SimpleEigenStrainMaterial);
   registerMaterial(CompositeEigenstrain);
   registerMaterial(CompositeElasticityTensor);
   registerMaterial(ComputeElasticityTensor);
