@@ -53,6 +53,9 @@
 #include "NSPressureNeumannBC.h"
 #include "NSEntropyError.h"
 
+// So we can register objects from the fluid_properties module.
+#include "FluidPropertiesApp.h"
+
 //
 // Incompressible
 //
@@ -99,9 +102,11 @@ NavierStokesApp::NavierStokesApp(InputParameters parameters) :
     MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
+  FluidPropertiesApp::registerObjects(_factory);
   NavierStokesApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
 }
 
