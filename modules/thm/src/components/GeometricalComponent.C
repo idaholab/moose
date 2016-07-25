@@ -16,7 +16,7 @@ InputParameters validParams<GeometricalComponent>()
 
   params.addParam<unsigned int>("n_elems", 0, "The number of elements along the main axis");
   std::vector<Real> default_node_locations (1, 0.0);
-  params.addParam<std::vector<Real> >("node_locations", default_node_locations, "The node locations along the main axis");
+  params.addParam<std::vector<Real> >("node_locations", default_node_locations, "Node locations along the main axis.");
 
   return params;
 }
@@ -32,7 +32,6 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters) :
     _n_elems(getParam<unsigned int>("n_elems")),
     _node_locations(getParam<std::vector<Real> >("node_locations"))
 {
-  processNodeLocations();
 }
 
 GeometricalComponent::~GeometricalComponent()
@@ -42,6 +41,7 @@ GeometricalComponent::~GeometricalComponent()
 void
 GeometricalComponent::doBuildMesh()
 {
+  processNodeLocations();
   _first_node_id = _mesh.nNodes();
   Component::doBuildMesh();
   _last_node_id = _mesh.nNodes();
@@ -99,13 +99,13 @@ GeometricalComponent::processNodeLocations()
 {
   bool specified_n_elems = _n_elems != 0;
   unsigned int n_nodes = _node_locations.size();
-  bool specified_node_locations = ((n_nodes != 1) && (n_nodes != 0));
-  unsigned int expected_n_elems = _2nd_order_mesh ? (n_nodes - 1) / 2 : n_nodes - 1;
+  bool specified_node_locations = n_nodes > 1;
 
   if (specified_n_elems)
   {
     if (specified_node_locations)
     {
+      unsigned int expected_n_elems = _2nd_order_mesh ? (n_nodes - 1) / 2 : n_nodes - 1;
       if (expected_n_elems != _n_elems) {
         mooseError(name() << ": \"n_elems\" and \"node_locations\" do not match.");
       }
@@ -114,7 +114,7 @@ GeometricalComponent::processNodeLocations()
     {
       _node_locations = std::vector<Real>(_n_elems + 1, 0.0);
       Real dx = _length / _n_elems;
-      for (int i = 0; i < _n_elems; ++i)
+      for (int i = 0; i < _n_elems - 1; ++i)
       {
         _node_locations[i + 1] = _node_locations[i] + dx;
       }
@@ -125,7 +125,38 @@ GeometricalComponent::processNodeLocations()
   {
     if (specified_node_locations)
     {
-      _n_elems = _node_locations.size() - 1;
+      // remove duplicates and order in an increassing manner
+      std::set<Real> unq_ord_node_lcns( _node_locations.begin(), _node_locations.end());
+      _node_locations.assign(unq_ord_node_lcns.begin(), unq_ord_node_lcns.end());
+
+      // removes locations not in the component
+      std::vector<Real> new_nodes;
+      new_nodes.reserve(_node_locations.size() + 2);
+      for (auto node_location : _node_locations)
+      {
+        if ((node_location >= 0.0) && (node_location <= _length))
+        {
+          new_nodes.push_back(node_location);
+        }
+      }
+
+      // add entry boundary node if not explicitly specified
+      if (new_nodes[0] != 0.0)
+      {
+        new_nodes.insert(new_nodes.begin(), 0.0);
+      }
+
+      // add exit boundary node if not explicitly specified
+      if (new_nodes[new_nodes.size() - 1] != _length)
+      {
+        new_nodes.push_back(_length);
+      }
+
+      _node_locations = new_nodes;
+
+      // determine number of elements
+      n_nodes = _node_locations.size();
+      _n_elems = _2nd_order_mesh ? (n_nodes - 1) / 2 : n_nodes - 1;
     }
     else
     {
@@ -147,6 +178,7 @@ GeometricalComponent::processNodeLocations()
       ++new_node_indx;
     }
     new_nodes[new_node_indx] = _node_locations[_n_elems];
+    _node_locations = new_nodes;
   }
 }
 
