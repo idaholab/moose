@@ -41,6 +41,12 @@ public:
    * (unique_grain_id, variable_idx)
    */
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const = 0;
+
+  /**
+   * Returns a list of active unique grains for a particular element. The vector is indexed by order parameter
+   * with each entry containing an invalid uint (no grain active at that location) or a grain id if it's active at that location.
+   */
+  virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const = 0;
 };
 
 #endif
