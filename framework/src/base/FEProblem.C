@@ -3066,6 +3066,11 @@ FEProblem::solve()
 
   possiblyRebuildGeomSearchPatches();
 
+  // reset flag so that linear solver does not use
+  // the old converged reason "DIVERGED_NANORINF", when
+  // we throw  an exception and stop solve
+  _fail_next_linear_convergence_check = false;
+
   if (_solve)
     _nl.solve();
 
