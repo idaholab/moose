@@ -45,4 +45,11 @@
     max_time = 1000
     recover = false # issue #5188
   [../]
+
+  [./regions_without_grains]
+    type = 'Exodiff'
+    input = 'euler2rgb_no_grain_region.i'
+    exodiff = 'euler2rgb_no_grain_region_out.e'
+    max_time = 1000
+  [../]
 []
