@@ -28,11 +28,19 @@
 
 
 [Mesh]
+  # Bi-Linear elements
   # file = SmoothBump_quad_ref1_Q1.msh # 84 elems, 65 nodes
-  file = SmoothBump_quad_ref2_Q1.msh # 192 elems, 225 nodes
+  # file = SmoothBump_quad_ref2_Q1.msh # 192 elems, 225 nodes
   # file = SmoothBump_quad_ref3_Q1.msh # 768 elems, 833 nodes
   # file = SmoothBump_quad_ref4_Q1.msh # 3072 elems, 3201 nodes
   # file = SmoothBump_quad_ref5_Q1.msh # 12288 elems, 12545 nodes
+  # Bi-Quadratic elements
+  # file = SmoothBump_quad_ref0_Q2.msh # 32 elems, 65 nodes
+  # file = SmoothBump_quad_ref1_Q2.msh # 84 elems, 225 nodes
+  file = SmoothBump_quad_ref2_Q2.msh # 260 elems, 833 nodes
+  # file = SmoothBump_quad_ref3_Q2.msh # 900 elems, 3201 nodes
+  # file = SmoothBump_quad_ref4_Q2.msh # 3332 elems, 12545 nodes
+  # file = SmoothBump_quad_ref5_Q2.msh # 12804 elems, 49665 nodes
 []
 
 
