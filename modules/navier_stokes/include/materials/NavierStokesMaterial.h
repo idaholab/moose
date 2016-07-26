@@ -71,9 +71,6 @@ protected:
   // we can refer to them in a loop.
   std::vector<const VariableGradient *> _vel_grads;
 
-  // Prandtl number
-  Real _Pr;
-
   // Coupled values needed to compute strong form residuals
   // for SUPG stabilization...
   const VariableValue & _u_vel;

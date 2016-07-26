@@ -22,8 +22,6 @@ InputParameters validParams<NavierStokesMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredParam<Real>("Pr", "Prandtl number.");
-
   params.addRequiredCoupledVar("u", "");
   params.addCoupledVar("v", ""); // only required in >= 2D
   params.addCoupledVar("w", ""); // only required in 3D
@@ -66,9 +64,6 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     // Energy equation inviscid flux matrices, "cal E_{kl}" in the notes.
     _calE(declareProperty<std::vector<std::vector<RealTensorValue> > >("calE")),
     _vel_grads({&_grad_u, &_grad_v, &_grad_w}),
-
-    // Parameter values read in from input file
-    _Pr(getParam<Real>("Pr")),
 
     // Coupled solution values needed for computing SUPG stabilization terms
     _u_vel(coupledValue("u")),
@@ -144,8 +139,13 @@ NavierStokesMaterial::computeProperties()
     // 573      0.0454
     // 673      0.0515
 
-    // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr = (mu * gamma * cv) / Pr
-    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _fp.cp()) / _Pr;
+    // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr = (mu * gamma * cv) / Pr.
+    // TODO: We are using a fixed value of the Prandtl number which is
+    // valid for air, it may or may not depend on temperature?  Since
+    // this is a property of the fluid, it could possibly be moved to
+    // the FluidProperties module...
+    const Real Pr = 0.71;
+    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _fp.cp()) / Pr;
 
     // Compute stabilization parameters:
 

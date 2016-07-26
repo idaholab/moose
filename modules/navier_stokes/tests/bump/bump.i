@@ -18,13 +18,6 @@
 # demonstrate convergence of the numerical solution (since the true
 # solution should produce zero entropy).  The error should converge at
 # second-order in this norm.
-[GlobalParams]
-  # Ratio of specific heats
-  Pr = 0.71
-[]
-
-
-
 [Mesh]
   # Bi-Linear elements
   # file = SmoothBump_quad_ref1_Q1.msh # 84 elems, 65 nodes
@@ -194,7 +187,7 @@
   ################################################################################
 
   # Time derivative term
-  [./rho_ie]
+  [./rho_time_deriv]
     type = TimeDerivative
     variable = rho
   [../]
@@ -217,7 +210,7 @@
   ################################################################################
 
   # Time derivative term
-  [./rhou_ie]
+  [./rhou_time_deriv]
     type = TimeDerivative
     variable = rhou
   [../]
@@ -242,7 +235,7 @@
   ################################################################################
 
   # Time derivative term
-  [./rhov_ie]
+  [./rhov_time_deriv]
     type = TimeDerivative
     variable = rhov
   [../]
@@ -268,7 +261,7 @@
   ################################################################################
 
   # Time derivative term
-  [./rhoE_ie]
+  [./rhoE_time_deriv]
     type = TimeDerivative
     variable = rhoE
   [../]
@@ -654,16 +647,17 @@
     fluid_properties = ideal_gas
   [../]
 
-  # A Material is the most efficient way to use the FluidProperties
-  # stuff, as the values will be computed once and then used by all
-  # the Kernels, rather than calling getUserObject from individual
-  # Kernels and computing properties repeatedly.
-  [./fp_mat]
-    type = FluidPropertiesMaterial
-    e = internal_energy
-    v = specific_volume
-    fp = ideal_gas
-  [../]
+  # A Material is probably the most efficient way to use the
+  # FluidProperties stuff, as the values will be computed once and
+  # then used by all the Kernels, rather than calling getUserObject
+  # from individual Kernels and computing properties repeatedly.
+  # This could possibly be refactored in the future...
+  # [./fp_mat]
+  #   type = FluidPropertiesMaterial
+  #   e = internal_energy
+  #   v = specific_volume
+  #   fp = ideal_gas
+  # [../]
 []
 
 
