@@ -29,6 +29,9 @@ protected:
 
   /// kernels are implicit?
   bool _implicit;
+
+  /// number of deformed grains
+  unsigned int _ndef;
 };
 
 template<>

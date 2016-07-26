@@ -19,6 +19,7 @@
 #include "ACMultiInterface.h"
 #include "ACInterfaceKobayashi1.h"
 #include "ACInterfaceKobayashi2.h"
+#include "ACSEDGPoly.h"
 #include "AllenCahn.h"
 #include "CahnHilliard.h"
 #include "CahnHilliardAniso.h"
@@ -114,6 +115,7 @@
 #include "ComputePolycrystalElasticityTensor.h"
 #include "ConstantAnisotropicMobility.h"
 #include "CrossTermBarrierFunctionMaterial.h"
+#include "DeformedGrainMaterial.h"
 #include "DerivativeMultiPhaseMaterial.h"
 #include "DerivativeParsedMaterial.h"
 #include "DerivativeSumMaterial.h"
@@ -275,6 +277,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACMultiInterface);
   registerKernel(ACInterfaceKobayashi1);
   registerKernel(ACInterfaceKobayashi2);
+  registerKernel(ACSEDGPoly);
   registerKernel(AllenCahn);
   registerKernel(CahnHilliard);
   registerKernel(CahnHilliardAniso);
@@ -361,6 +364,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(ComputePolycrystalElasticityTensor);
   registerMaterial(ConstantAnisotropicMobility);
   registerMaterial(CrossTermBarrierFunctionMaterial);
+  registerMaterial(DeformedGrainMaterial);
   registerMaterial(DerivativeMultiPhaseMaterial);
   registerMaterial(DerivativeParsedMaterial);
   registerMaterial(DerivativeSumMaterial);
