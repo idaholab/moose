@@ -7,10 +7,12 @@
 #ifndef NSMACHAUX_H
 #define NSMACHAUX_H
 
+// MOOSE includes
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSMachAux;
+class IdealGasFluidProperties;
 
 template<>
 InputParameters validParams<NSMachAux>();
@@ -31,10 +33,11 @@ protected:
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
   const VariableValue & _w_vel;
-  const VariableValue & _temperature;
+  const VariableValue & _specific_volume;
+  const VariableValue & _internal_energy;
 
-  Real _gamma;
-  Real _R;
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 };
 
 #endif

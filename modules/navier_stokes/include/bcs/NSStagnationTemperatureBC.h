@@ -31,6 +31,8 @@ protected:
   // diagonal for this DoF.
   virtual Real computeQpResidual();
 
+  const VariableValue & _temperature;
+
   // Required paramters
   const Real _desired_stagnation_temperature;
 };

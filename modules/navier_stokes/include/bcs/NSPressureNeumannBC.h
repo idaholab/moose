@@ -48,7 +48,6 @@ protected:
 
   // Required parameters
   unsigned _component;
-  Real _gamma;
 
   // An object for computing pressure derivatives.
   // Constructed via a reference to ourself

@@ -18,15 +18,6 @@
 # demonstrate convergence of the numerical solution (since the true
 # solution should produce zero entropy).  The error should converge at
 # second-order in this norm.
-[GlobalParams]
-  # Ratio of specific heats
-  gamma = 1.4
-  Pr = 0.71
-  R = 287
-[]
-
-
-
 [Mesh]
   # Bi-Linear elements
   # file = SmoothBump_quad_ref1_Q1.msh # 84 elems, 65 nodes
@@ -72,7 +63,7 @@
     family = LAGRANGE
   [../]
 
-  [./rhoe]
+  [./rhoE]
     order = FIRST
     family = LAGRANGE
 
@@ -161,8 +152,33 @@
       value = 316417.5
     [../]
   [../]
+
+  [./internal_energy]
+    [./InitialCondition]
+      type = ConstantIC
+      value = 215250. # J/kg, echo "271044.375/1.17682926829268 - 0.5*173.594354746921*173.594354746921" | bc -l
+    [../]
+  [../]
+
+  [./specific_volume]
+    [./InitialCondition]
+      type = ConstantIC
+      value = 0.84974093264248915997 # m^3/kg, echo "1/1.17682926829268" | bc -l
+    [../]
+  [../]
 []
 
+
+
+[Modules]
+  [./FluidProperties]
+    [./ideal_gas]
+      type = IdealGasFluidProperties
+      gamma = 1.4
+      R = 287
+    [../]
+  [../]
+[]
 
 
 [Kernels]
@@ -171,7 +187,7 @@
   ################################################################################
 
   # Time derivative term
-  [./rho_ie]
+  [./rho_time_deriv]
     type = TimeDerivative
     variable = rho
   [../]
@@ -183,9 +199,10 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   ################################################################################
@@ -193,7 +210,7 @@
   ################################################################################
 
   # Time derivative term
-  [./rhou_ie]
+  [./rhou_time_deriv]
     type = TimeDerivative
     variable = rhou
   [../]
@@ -207,9 +224,10 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
     component = 0
+    fluid_properties = ideal_gas
   [../]
 
   ################################################################################
@@ -217,7 +235,7 @@
   ################################################################################
 
   # Time derivative term
-  [./rhov_ie]
+  [./rhov_time_deriv]
     type = TimeDerivative
     variable = rhov
   [../]
@@ -231,9 +249,10 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
     component = 1
+    fluid_properties = ideal_gas
   [../]
 
 
@@ -242,22 +261,23 @@
   ################################################################################
 
   # Time derivative term
-  [./rhoe_ie]
+  [./rhoE_time_deriv]
     type = TimeDerivative
-    variable = rhoe
+    variable = rhoE
   [../]
 
   # Energy equation inviscid flux term (integrated by parts)
-  [./rhoe_if]
+  [./rhoE_if]
     type = NSEnergyInviscidFlux
-    variable = rhoe
+    variable = rhoE
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
 
@@ -272,11 +292,12 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
   # The SUPG stabilization terms for the x-momentum equation
@@ -287,11 +308,12 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
   # The SUPG stabilization terms for the y-momentum equation
@@ -302,25 +324,27 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 
   # The SUPG stabilization terms for the energy equation
-  [./rhoe_supg]
+  [./rhoE_supg]
     type = NSSUPGEnergy
-    variable = rhoe
+    variable = rhoE
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
     enthalpy = enthalpy
+    fluid_properties = ideal_gas
   [../]
 []
 
@@ -344,26 +368,24 @@
   [./temperature_auxkernel]
     type = NSTemperatureAux
     variable = temperature
-    rho = rho
-    u = vel_x
-    v = vel_y
-    rhoe = rhoe
+    internal_energy = internal_energy
+    specific_volume = specific_volume
+    fluid_properties = ideal_gas
   [../]
 
   [./pressure_auxkernel]
     type = NSPressureAux
     variable = pressure
-    rho = rho
-    u = vel_x
-    v = vel_y
-    rhoe = rhoe
+    internal_energy = internal_energy
+    specific_volume = specific_volume
+    fluid_properties = ideal_gas
   [../]
 
   [./enthalpy_auxkernel]
     type = NSEnthalpyAux
     variable = enthalpy
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
   [../]
 
@@ -372,7 +394,24 @@
     variable = Mach
     u = vel_x
     v = vel_y
-    temperature = temperature
+    internal_energy = internal_energy
+    specific_volume = specific_volume
+    fluid_properties = ideal_gas
+  [../]
+
+  [./internal_energy_auxkernel]
+    type = NSInternalEnergyAux
+    variable = internal_energy
+    rho = rho
+    u = vel_x
+    v = vel_y
+    rhoE = rhoE
+  [../]
+
+  [./specific_volume_auxkernel]
+    type = NSSpecificVolumeAux
+    variable = specific_volume
+    rho = rho
   [../]
 []
 
@@ -386,10 +425,11 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     boundary = '2' # 'Outflow'
+    fluid_properties = ideal_gas
   [../]
 
   # Specified pressure x-momentum equation invsicid outflow BC
@@ -399,12 +439,13 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     component = 0
     boundary = '2' # 'Outflow'
     specified_pressure = 101325 # Pa
+    fluid_properties = ideal_gas
   [../]
 
   # Specified pressure y-momentum equation inviscid outflow BC
@@ -414,27 +455,29 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     component = 1
     boundary = '2' # 'Outflow'
     specified_pressure = 101325 # Pa
+    fluid_properties = ideal_gas
   [../]
 
   # Specified pressure energy equation outflow BC
-  [./rhoe_specified_pressure_outflow]
+  [./rhoE_specified_pressure_outflow]
     type = NSEnergyInviscidSpecifiedPressureBC
-    variable = rhoe
+    variable = rhoE
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
     boundary = '2' # 'Outflow'
     specified_pressure = 101325 # Pa
+    fluid_properties = ideal_gas
   [../]
 
   # The no penentration BC (u.n=0) applies on all the solid surfaces.
@@ -449,8 +492,9 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
+    fluid_properties = ideal_gas
   [../]
 
   # The no penentration BC (u.n=0) applies on all the solid surfaces.
@@ -465,8 +509,9 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     pressure = pressure
+    fluid_properties = ideal_gas
   [../]
 
   #
@@ -481,11 +526,12 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhou_convective_inflow]
@@ -498,11 +544,12 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhou_pressure_inflow]
@@ -515,11 +562,12 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhov_convective_inflow]
@@ -532,11 +580,12 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_rhov_pressure_inflow]
@@ -549,27 +598,29 @@
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 
   [./weak_stagnation_energy_inflow]
     type = NSEnergyWeakStagnationBC
-    variable = rhoe
+    variable = rhoE
     boundary = '1' # 'Inflow'
     stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
     stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
     sx = 1.
     sy = 0.
     rho = rho
-    rhoe = rhoe
+    rhoE = rhoE
     rhou = rhou
     rhov = rhov
     u = vel_x
     v = vel_y
+    fluid_properties = ideal_gas
   [../]
 []
 
@@ -583,7 +634,7 @@
     rho = rho
     rhou = rhou
     rhov = rhov
-    rhoe = rhoe
+    rhoE = rhoE
     u = vel_x
     v = vel_y
     temperature = temperature
@@ -593,7 +644,20 @@
     # the amount of artificial viscosity added, so it's best to use a
     # realistic value.
     dynamic_viscosity = 0.0
+    fluid_properties = ideal_gas
   [../]
+
+  # A Material is probably the most efficient way to use the
+  # FluidProperties stuff, as the values will be computed once and
+  # then used by all the Kernels, rather than calling getUserObject
+  # from individual Kernels and computing properties repeatedly.
+  # This could possibly be refactored in the future...
+  # [./fp_mat]
+  #   type = FluidPropertiesMaterial
+  #   e = internal_energy
+  #   v = specific_volume
+  #   fp = ideal_gas
+  # [../]
 []
 
 
@@ -607,6 +671,7 @@
     p_infty = 101325
     rho = rho
     pressure = pressure
+    fluid_properties = ideal_gas
   [../]
 []
 

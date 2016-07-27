@@ -4,32 +4,32 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "NSEnthalpyAux.h"
+
+#include "NSSpecificVolumeAux.h"
+#include "MooseMesh.h"
 
 template<>
-InputParameters validParams<NSEnthalpyAux>()
+InputParameters validParams<NSSpecificVolumeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  // Mark variables as required
   params.addRequiredCoupledVar("rho", "density");
-  params.addRequiredCoupledVar("rhoE", "total energy");
-  params.addRequiredCoupledVar("pressure", "pressure");
 
   return params;
 }
 
-NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters) :
+NSSpecificVolumeAux::NSSpecificVolumeAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _rho(coupledValue("rho")),
-    _rhoE(coupledValue("rhoE")),
-    _pressure(coupledValue("pressure"))
+    _rho(coupledValue("rho"))
 {
 }
 
 Real
-NSEnthalpyAux::computeValue()
+NSSpecificVolumeAux::computeValue()
 {
-  // H = (rho*E + P) / rho
-  return (_rhoE[_qp] + _pressure[_qp]) / _rho[_qp];
+  // Return a "big" value rather than dividing by zero.
+  if (_rho[_qp] == 0.)
+    return 1.e10;
+
+  return 1. / _rho[_qp];
 }
