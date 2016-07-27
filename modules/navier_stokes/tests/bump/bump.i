@@ -36,135 +36,67 @@
 
 
 
-[Variables]
-  [./rho]
-    order = FIRST
+[NavierStokes]
+  [./Variables]
+    #         'rho rhou rhov   rhoE'
+    scaling = '1.  1.    1.    9.869232667160121e-6'
     family = LAGRANGE
-
-    [./InitialCondition]
-      type = ConstantIC
-      value = 1.17682926829268 # rho = P/RT = 101325.0 / 287 / 300, kg/m^3
-    [../]
-  [../]
-
-  [./rhou]
     order = FIRST
-    family = LAGRANGE
-
-    # Comment out this section to start with zero initial flow
-    [./InitialCondition]
-      type = ConstantIC
-      value = 204.290917476559 # Mach 0.5: rho * 0.5 * sqrt(gamma*R*T)
-    [../]
-  [../]
-
-  [./rhov]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./rhoE]
-    order = FIRST
-    family = LAGRANGE
-
-    # The magnitude of this equation is much larger than the others,
-    # so we can scale it by the atmospheric value to get things closer
-    # to the same size in the residual vector.
-    scaling = ${/ 1. 101325.}
-
-    # p=1 atm everywhere
-    [./InitialCondition]
-      # rho*E = rho*(e + (1/2)*u^2)
-      #       = rho*(cv*T + (1/2)*u^2)
-      #       = rho*((R/(gamma-1)*T + (1/2)*u^2)
-      type = ConstantIC
-      # Zero flow everywhere: 1.17682926829268*(287/.4*300)
-      # value = 253312.5
-      # Initial flow everywhere: 1.17682926829268*(287/.4*300 + 0.5*173.59435474692143**2)
-      value = 271044.375
-    [../]
   [../]
 []
 
 
 
-[AuxVariables]
-  [./vel_x]
-    order = FIRST
-    family = LAGRANGE
-
-    # Comment out this section to start with zero initial flow
-    [./InitialCondition]
-      type = ConstantIC
-      value = 173.594354746921 # Mach 0.5: = 0.5*sqrt(gamma*R*T)
-    [../]
+[ICs]
+  [./rho_ic]
+    type = ConstantIC
+    variable = rho
+    value = 1.17682926829268 # rho = P/RT = 101325.0 / 287 / 300, kg/m^3
   [../]
-
-  [./vel_y]
-    order = FIRST
-    family = LAGRANGE
+  [./rhou_ic]
+    type = ConstantIC
+    variable = rhou
+    value = 204.290917476559 # Mach 0.5: rho * 0.5 * sqrt(gamma*R*T)
   [../]
-
-  [./Mach]
-    order = FIRST
-    family = LAGRANGE
+  [./rhoE_ic]
+    type = ConstantIC
+    variable = rhoE
+    value = 271044.375 # Mach 0.5: 1.17682926829268*(287/.4*300 + 0.5*173.59435474692143**2)
   [../]
-
-  [./temperature]
-    order = FIRST
-    family = LAGRANGE
-
-    # Set constant temperature initial condition
-    [./InitialCondition]
-      type = ConstantIC
-
-      # T = e_i / c_v
-      #   = (e_t - 1/2*V^2) / c_v
-      #   = (e_t) / c_v
-      #   = rho*e_t / rho / c_v
-      #   = P / (gamma-1) / rho / c_v
-      value = 300 # K
-    [../]
+  [./vel_x_ic]
+    type = ConstantIC
+    variable = vel_x
+    value = 173.594354746921 # Mach 0.5: = 0.5*sqrt(gamma*R*T)
   [../]
-
-  [./pressure]
-    order = FIRST
-    family = LAGRANGE
-
-    [./InitialCondition]
-      type = ConstantIC
-      value = 101325 # Pa, 1 atm
-    [../]
+  [./Mach_ic]
+    type = ConstantIC
+    variable = Mach
+    value = 0.5
   [../]
-
-  [./enthalpy]
-    order = FIRST
-    family = LAGRANGE
-    # H = E + p/rho
-    #   = (e + 1/2*|u|^2    ) + p/rho
-    #   = (c_v*T + 1/2*|u|^2) + p/rho
-    #   = (R/(gamma-1)*T + 1/2*|u|^2) + p/rho
-    [./InitialCondition]
-      type = ConstantIC
-      # Zero flow everywhere: 287/.4*300 + 101325/1.17682926829268
-      # value = 301350.0
-      # Initial flow everywhere: 287/.4*300 + 0.5*173.59435474692143**2 + 101325/1.17682926829268
-      value = 316417.5
-    [../]
+  [./temperature_ic]
+    type = ConstantIC
+    variable = temperature
+    value = 300
   [../]
-
-  [./internal_energy]
-    [./InitialCondition]
-      type = ConstantIC
-      value = 215250. # J/kg, echo "271044.375/1.17682926829268 - 0.5*173.594354746921*173.594354746921" | bc -l
-    [../]
+  [./pressure_ic]
+    type = ConstantIC
+    variable = pressure
+    value =  101325 # Pa, 1 atm
   [../]
-
-  [./specific_volume]
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.84974093264248915997 # m^3/kg, echo "1/1.17682926829268" | bc -l
-    [../]
+  [./enthalpy_ic]
+    type = ConstantIC
+    variable = enthalpy
+    value = 316417.5 # Mach 0.5: 287/.4*300 + 0.5*173.59435474692143**2 + 101325/1.17682926829268
+  [../]
+  [./internal_energy_ic]
+    type = ConstantIC
+    variable = internal_energy
+    value = 215250. # Mach 0.5: J/kg, echo "271044.375/1.17682926829268 - 0.5*173.594354746921*173.594354746921" | bc -l
+  [../]
+  [./specific_volume_ic]
+    type = ConstantIC
+    variable = specific_volume
+    value = 0.84974093264248915997 # m^3/kg, echo "1/1.17682926829268" | bc -l
   [../]
 []
 

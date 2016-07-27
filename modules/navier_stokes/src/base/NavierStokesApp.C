@@ -54,6 +54,7 @@
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
 #include "NSPressureNeumannBC.h"
 #include "NSEntropyError.h"
+#include "AddNavierStokesVariablesAction.h"
 
 // So we can register objects from the fluid_properties module.
 #include "FluidPropertiesApp.h"
@@ -211,7 +212,20 @@ NavierStokesApp::registerObjects(Factory & factory)
 
 // External entry point for dynamic syntax association
 extern "C" void NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { NavierStokesApp::associateSyntax(syntax, action_factory); }
+
 void
-NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+#undef registerAction
+#define registerAction(type, action) action_factory.reg<type>(stringifyName(type), action)
+
+  syntax.registerActionSyntax("AddNavierStokesVariablesAction", "NavierStokes/Variables");
+
+  // add variables action
+  registerTask("add_navier_stokes_variables", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_variables", "add_variable");
+  registerAction(AddNavierStokesVariablesAction, "add_navier_stokes_variables");
+
+#undef registerAction
+#define registerAction(type, action) action_factory.regLegacy<type>(stringifyName(type), action)
 }
