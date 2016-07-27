@@ -35,6 +35,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpCJacobian();
 
   /// diffusion coefficient
   const MaterialProperty<T> & _D;
@@ -44,6 +45,15 @@ protected:
 
   /// diffusion coefficient derivatives w.r.t. coupled variables
   std::vector<const MaterialProperty<T> *> _dDdarg;
+
+  /// is the kernel used in a coupled form?
+  const bool _is_coupled;
+
+  /// int label for the Concentration
+  unsigned int _conc_var;
+
+  /// Gradient of the concentration
+  const VariableGradient & _grad_conc;
 };
 
 template<typename T>
@@ -53,6 +63,7 @@ MatDiffusionBase<T>::validParams()
   InputParameters params = ::validParams<Kernel>();
   params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
   params.addCoupledVar("args", "Vector of arguments of the diffusivity");
+  params.addCoupledVar("conc", "Coupled concentration variable for kernel to operate on; if this is not specified, the kernel's nonlinear variable will be used as usual");
   return params;
 }
 
@@ -61,7 +72,10 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
     _D(getMaterialProperty<T>("D_name")),
     _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name())),
-    _dDdarg(_coupled_moose_vars.size())
+    _dDdarg(_coupled_moose_vars.size()),
+    _is_coupled(isCoupled("conc")),
+    _conc_var(_is_coupled ? coupled("conc") : _var.number()),
+    _grad_conc(_is_coupled ? coupledGradient("conc") : _grad_u)
 {
   // fetch derivatives
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
@@ -79,14 +93,18 @@ template<typename T>
 Real
 MatDiffusionBase<T>::computeQpResidual()
 {
-  return _D[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
+  return _D[_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
 }
 
 template<typename T>
 Real
 MatDiffusionBase<T>::computeQpJacobian()
 {
-  return (_D[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dDdc[_qp] * _grad_u[_qp]) * _grad_test[_i][_qp];
+  Real sum = _phi[_j][_qp] * _dDdc[_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
+  if (!_is_coupled)
+    sum += computeQpCJacobian();
+
+  return sum;
 }
 
 template<typename T>
@@ -98,7 +116,17 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   if (!mapJvarToCvar(jvar, cvar))
     return 0.0;
 
-  return (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
+  Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
+  if (_conc_var == jvar)
+    sum += computeQpCJacobian();
+
+  return sum;
 }
 
+template<typename T>
+Real
+MatDiffusionBase<T>::computeQpCJacobian()
+{
+  return _D[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+}
 #endif //MATDIFFUSIONBASE_H
