@@ -27,10 +27,8 @@ EBSDAccessFunctorsTest::setUp()
   _point._Phi = 2.0;
   _point._phi2 = 3.0;
   _point._symmetry = 4;
-  _point._grain = 5;
+  _point._feature_id = 5;
   _point._phase = 6;
-  _point._op = 7;
-  _point._global = 8;
   _point._p = Point(9.0, 10.0, 11.0);
   _point._custom.resize(3);
   for (unsigned int i = 0; i < 3; ++i)
@@ -39,9 +37,9 @@ EBSDAccessFunctorsTest::setUp()
   // Averaged EBSD data
   _avg._angles = &_angles;
   _avg._phase = 1;
-  _avg._local = 2;
+  _avg._local_id = 2;
   _avg._symmetry = 3;
-  _avg._grain = 4;
+  _avg._feature_id = 4;
   _avg._n = 5;
   _avg._p = Point(6.0, 7.0, 8.0);
   _avg._custom.resize(3);
@@ -79,10 +77,8 @@ EBSDAccessFunctorsTest::test()
     CPPUNIT_ASSERT( phase(_point) == _point._phase );
     EBSDPointDataSymmetry symmetry;
     CPPUNIT_ASSERT( symmetry(_point) == _point._symmetry );
-    EBSDPointDataGrain grain;
-    CPPUNIT_ASSERT( grain(_point) == _point._grain );
-    EBSDPointDataOp op;
-    CPPUNIT_ASSERT( op(_point) == _point._op );
+    EBSDPointDataFeatureID feature_id;
+    CPPUNIT_ASSERT( feature_id(_point) == _point._feature_id );
 
     for (unsigned int i = 0; i < 3; ++i)
     {
@@ -107,10 +103,10 @@ EBSDAccessFunctorsTest::test()
     CPPUNIT_ASSERT( phase(_avg) == _avg._phase );
     EBSDAvgDataSymmetry symmetry;
     CPPUNIT_ASSERT( symmetry(_avg) == _avg._symmetry );
-    EBSDAvgDataGrain grain;
-    CPPUNIT_ASSERT( grain(_avg) == _avg._grain );
+    EBSDAvgDataFeatureID feature_id;
+    CPPUNIT_ASSERT( feature_id(_avg) == _avg._feature_id );
     EBSDAvgDataLocalID local;
-    CPPUNIT_ASSERT( local(_avg) == _avg._local );
+    CPPUNIT_ASSERT( local(_avg) == _avg._local_id );
 
     for (unsigned int i = 0; i < 3; ++i)
     {

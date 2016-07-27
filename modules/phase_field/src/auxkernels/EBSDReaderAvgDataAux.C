@@ -30,7 +30,13 @@ EBSDReaderAvgDataAux::computeValue()
   // EBSD data is defined at element centroids, so this only makes
   // sense as an Element AuxKernel
   Point p = _current_elem->centroid();
+
+  // get the EBSD Point data for the current element
   const EBSDPointData & d = _ebsd_reader.getData(p);
 
-  return (*_val)(_ebsd_reader.getAvgData(d._global));
+  // get the (global) grain ID for the EBSD feature ID
+  const unsigned int global_id = _ebsd_reader.getGlobalID(d._feature_id);
+
+  // look up average data for the given (global) grain ID
+  return (*_val)(_ebsd_reader.getAvgData(global_id));
 }

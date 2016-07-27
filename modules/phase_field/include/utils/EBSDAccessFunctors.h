@@ -31,17 +31,11 @@ public:
     /// Element centroid position
     Point _p;
 
-    ///@{ EBSD grain, symmetry, and phase data
-    unsigned int _grain;
+    ///@{ EBSD feature id, (gklobal) grain number, symmetry, and phase data
+    unsigned int _feature_id;
     unsigned int _phase;
     unsigned int _symmetry;
     ///@}
-
-    /// Initial active order parameter
-    unsigned int _op;
-
-    /// Global id for the grain/phase combination
-    unsigned int _global;
 
     /// Custom data columns
     std::vector<Real> _custom;
@@ -54,13 +48,13 @@ public:
     EulerAngles * _angles;
 
     ///@{ EBSD grain, symmetry, and phase data
-    unsigned int _grain;
+    unsigned int _feature_id;
     unsigned int _phase;
     unsigned int _symmetry;
     ///@}
 
     /// Index in the per-phase list of global IDs
-    unsigned int _local;
+    unsigned int _local_id;
 
     /// Number of EBSD data points in the global grain
     unsigned int _n;
@@ -96,17 +90,14 @@ public:
   struct EBSDPointDataPhi2 : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d._phi2; };
   };
+  struct EBSDPointDataFeatureID : EBSDPointDataFunctor {
+    virtual Real operator () (const EBSDPointData & d) { return d._feature_id; };
+  };
   struct EBSDPointDataPhase : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d._phase; };
   };
   struct EBSDPointDataSymmetry : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d._symmetry; };
-  };
-  struct EBSDPointDataGrain : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._grain; };
-  };
-  struct EBSDPointDataOp : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._op; };
   };
   struct EBSDPointDataCustom : EBSDPointDataFunctor {
     EBSDPointDataCustom(unsigned int index) : _index(index) {}
@@ -127,14 +118,14 @@ public:
   struct EBSDAvgDataPhase : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a._phase; };
   };
-  struct EBSDAvgDataLocalID : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._local; };
-  };
-  struct EBSDAvgDataGrain : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._grain; };
-  };
   struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a._symmetry; };
+  };
+  struct EBSDAvgDataLocalID : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a._local_id; };
+  };
+  struct EBSDAvgDataFeatureID : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a._feature_id; };
   };
   struct EBSDAvgDataCustom : EBSDAvgDataFunctor {
     EBSDAvgDataCustom(unsigned int index) : _index(index) {}

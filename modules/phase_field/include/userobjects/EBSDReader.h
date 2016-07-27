@@ -21,8 +21,11 @@ InputParameters validParams<EBSDReader>();
  *
  * Grains are indexed through multiple schemes:
  *  * feature_id   The grain number in the EBSD data file
- *  * global_id    The index into the global average data (this is feature_id shifted back by feature_id_origin)
- *  * local_id     The index into the per-phase grain list. This is only unique when combined with phase number
+ *  * global_id    The index into the global average data (contiguously numbered)
+ *                 This is also called "(global) grain ID"
+ *  * local_id     The index into the per-phase grain list. (contiguously numbered and only
+ *                 unique when combined with phase number)
+ *                 This is also called "(local) grain ID"
  *
  * Phases are referred to using the numbers in the EBSD data file. In case the phase number in the data file
  * starts at 1 the phase 0 will simply contain no grains.
@@ -35,19 +38,8 @@ public:
 
   virtual void readFile();
 
-  /**
-   * Called before execute() is ever called so that data can be cleared.
-   */
   virtual void initialize() {}
-
-  /**
-   * Called when this object needs to compute something.
-   */
   virtual void execute() {}
-
-  /**
-   * Called _after_ execute(), could be used to do MPI communictaion.
-   */
   virtual void finalize() {}
 
   /**
@@ -56,14 +48,14 @@ public:
   const EBSDPointData & getData(const Point & p) const;
 
   /**
-   * Get the requested type of average data for feature number i.
+   * Get the requested type of average data for (global) grain number i.
    */
-  const EBSDAvgData &  getAvgData(unsigned int i) const;
+  const EBSDAvgData & getAvgData(unsigned int i) const;
 
   /**
-   * Get the requested type of average data for a given phase and grain.
+   * Get the requested type of average data for a given phase and (local) grain.
    */
-  const EBSDAvgData &  getAvgData(unsigned int phase, unsigned int local_id) const;
+  const EBSDAvgData & getAvgData(unsigned int phase, unsigned int local_id) const;
 
   /**
    * EulerAngleProvider interface implementation to fetch a triplet of Euler angles
@@ -85,15 +77,15 @@ public:
    */
   unsigned int getGrainNum(unsigned int phase) const;
 
-  /**
-   * Return the feature id (global grain number) for a given phase and phase grain number
-   */
-  unsigned int getFeatureID(unsigned int phase, unsigned int local_id) const { return _avg_data[_global_id[phase][local_id]]._grain; }
+  /// Return the EBSD feature id for a given phase and phase (local) grain number
+  unsigned int getFeatureID(unsigned int phase, unsigned int local_id) const { return _avg_data[_global_id[phase][local_id]]._feature_id; }
+  /// Return the EBSD feature id for a given (global) grain number
+  unsigned int getFeatureID(unsigned int global_id) const { return _avg_data[global_id]._feature_id; }
 
-  /**
-   * Return the feature id (global grain number) for a given phase and phase grain number
-   */
+  /// Return the (global) grain id for a given phase and (local) grain number
   unsigned int getGlobalID(unsigned int phase, unsigned int local_id) const { return _global_id[phase][local_id]; }
+  /// Return the (global) grain id for a given phase and (local) grain number
+  unsigned int getGlobalID(unsigned int feature_id) const;
 
   /// Factory function to return a point functor specified by name
   MooseSharedPointer<EBSDPointDataFunctor> getPointDataAccessFunctor(const MooseEnum & field_name) const;
@@ -116,15 +108,17 @@ public:
   void meshChanged();
 
 protected:
-  // MooseMesh Variables
+  ///@{ MooseMesh Variables
   MooseMesh & _mesh;
   NonlinearSystem & _nl;
+  ///@}
 
-  /// Variables needed to determine reduced order parameter values
-  unsigned int _feature_num;
+  ///@{ Variables needed to determine reduced order parameter values
+  unsigned int _grain_num;
   Point _bottom_left;
   Point _top_right;
   Point _range;
+  ///@}
 
   /// number of additional custom data columns
   unsigned int _custom_columns;
@@ -132,10 +126,10 @@ protected:
   /// Logically three-dimensional data indexed by geometric points in a 1D vector
   std::vector<EBSDPointData> _data;
 
-  /// Averages by feature ID
+  /// Averages by (global) grain ID
   std::vector<EBSDAvgData> _avg_data;
 
-  /// Euler Angles by feature ID
+  /// Euler Angles by (global) grain ID
   std::vector<EulerAngles> _avg_angles;
 
   /// map from feature_id to global_id
