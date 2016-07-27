@@ -4,36 +4,31 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef NSPRESSUREAUX_H
-#define NSPRESSUREAUX_H
+#ifndef NSSPECIFICVOLUMEAUX_H
+#define NSSPECIFICVOLUMEAUX_H
 
 #include "AuxKernel.h"
 
 // Forward Declarations
-class NSPressureAux;
-class IdealGasFluidProperties;
+class NSSpecificVolumeAux;
 
 template<>
-InputParameters validParams<NSPressureAux>();
+InputParameters validParams<NSSpecificVolumeAux>();
 
 /**
- * Nodal auxiliary variable, for computing pressure at the nodes
+ * Auxiliary kernel for computing the specific volume (1/rho) of the fluid.
  */
-class NSPressureAux : public AuxKernel
+class NSSpecificVolumeAux : public AuxKernel
 {
 public:
-  NSPressureAux(const InputParameters & parameters);
+  NSSpecificVolumeAux(const InputParameters & parameters);
 
-  virtual ~NSPressureAux() {}
+  virtual ~NSSpecificVolumeAux() {}
 
 protected:
   virtual Real computeValue();
 
-  const VariableValue & _specific_volume;
-  const VariableValue & _internal_energy;
-
-  // Fluid properties
-  const IdealGasFluidProperties & _fp;
+  const VariableValue & _rho;
 };
 
-#endif //VELOCITYAUX_H
+#endif

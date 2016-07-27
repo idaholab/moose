@@ -70,6 +70,12 @@ IdealGasFluidProperties::cv(Real, Real) const
 }
 
 Real
+IdealGasFluidProperties::gamma(Real, Real) const
+{
+  return _gamma;
+}
+
+Real
 IdealGasFluidProperties::mu(Real, Real) const
 {
   return _mu;

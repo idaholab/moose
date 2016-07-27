@@ -12,6 +12,7 @@
 
 // Forward Declarations
 class NSEntropyError;
+class IdealGasFluidProperties;
 
 template<>
 InputParameters validParams<NSEntropyError>();
@@ -27,10 +28,12 @@ protected:
 
   Real _rho_infty;
   Real _p_infty;
-  Real _gamma;
 
   const VariableValue & _rho;
   const VariableValue & _pressure;
+
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 };
 
 #endif

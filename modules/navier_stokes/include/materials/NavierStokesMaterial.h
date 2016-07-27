@@ -9,8 +9,9 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class NavierStokesMaterial;
+class IdealGasFluidProperties;
 
 template<>
 InputParameters validParams<NavierStokesMaterial>();
@@ -70,12 +71,6 @@ protected:
   // we can refer to them in a loop.
   std::vector<const VariableGradient *> _vel_grads;
 
-  // Specific heat at constant volume, treated as single
-  // constant values.
-  Real _R;
-  Real _gamma;
-  Real _Pr;
-
   // Coupled values needed to compute strong form residuals
   // for SUPG stabilization...
   const VariableValue & _u_vel;
@@ -93,21 +88,21 @@ protected:
   const VariableValue & _rho_u;
   const VariableValue & _rho_v;
   const VariableValue & _rho_w;
-  const VariableValue & _rho_e;
+  const VariableValue & _rho_E;
 
   // Time derivative values for dependent variables
   const VariableValue & _drho_dt;
   const VariableValue & _drhou_dt;
   const VariableValue & _drhov_dt;
   const VariableValue & _drhow_dt;
-  const VariableValue & _drhoe_dt;
+  const VariableValue & _drhoE_dt;
 
   // Gradients
   const VariableGradient & _grad_rho;
   const VariableGradient & _grad_rho_u;
   const VariableGradient & _grad_rho_v;
   const VariableGradient & _grad_rho_w;
-  const VariableGradient & _grad_rho_e;
+  const VariableGradient & _grad_rho_E;
 
   // The real-valued material properties representing the element stabilization
   // parameters for each of the equations.
@@ -119,6 +114,9 @@ protected:
   // The (vector-valued) material property which is the strong-form
   // residual at each quadrature point.
   MaterialProperty<std::vector<Real> > & _strong_residuals;
+
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 
 private:
   // To be called from computeProperties() function to compute _hsupg

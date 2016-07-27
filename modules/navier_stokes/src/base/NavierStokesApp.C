@@ -17,6 +17,8 @@
 #include "NSThermalBC.h"
 #include "NSVelocityAux.h"
 #include "NSMachAux.h"
+#include "NSInternalEnergyAux.h"
+#include "NSSpecificVolumeAux.h"
 #include "NSImposedVelocityBC.h"
 #include "NSTemperatureAux.h"
 #include "NSTemperatureL2.h"
@@ -52,6 +54,9 @@
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
 #include "NSPressureNeumannBC.h"
 #include "NSEntropyError.h"
+
+// So we can register objects from the fluid_properties module.
+#include "FluidPropertiesApp.h"
 
 //
 // Incompressible
@@ -99,9 +104,11 @@ NavierStokesApp::NavierStokesApp(InputParameters parameters) :
     MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
+  FluidPropertiesApp::registerObjects(_factory);
   NavierStokesApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -131,6 +138,8 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerBoundaryCondition(NSThermalBC);
   registerAux(NSVelocityAux);
   registerAux(NSMachAux);
+  registerAux(NSInternalEnergyAux);
+  registerAux(NSSpecificVolumeAux);
   registerBoundaryCondition(NSImposedVelocityBC);
   registerAux(NSTemperatureAux);
   registerAux(NSPressureAux);

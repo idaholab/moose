@@ -7,6 +7,9 @@
 #ifndef NSPRESSUREDERIVS_H
 #define NSPRESSUREDERIVS_H
 
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
 /**
  * Class outside the Moose hierarchy that contains common
  * functionality for computing derivatives of the pressure
@@ -50,7 +53,7 @@ Real NSPressureDerivs<T>::get_grad(unsigned i)
   const Real w = _data._w_vel[_data._qp];
 
   const Real vel2 = (u*u + v*v + w*w);
-  const Real gam = _data._gamma;
+  const Real gam = _data._fp.gamma();
 
   switch (i)
   {
@@ -87,7 +90,7 @@ Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
   const Real vel2 = (u*u + v*v + w*w);
 
   // Save some typing...
-  const Real gam = _data._gamma;
+  const Real gam = _data._fp.gamma();
 
   // A frequently-used variable
   const Real tmp = (1.0 - gam) / U0;
