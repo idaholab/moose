@@ -73,7 +73,7 @@ PorousFlow1PhaseP::computeQpProperties()
   if (_dictator.isPorousFlowVariable(_porepressure_varnum))
   {
     // _porepressure is a porflow variable
-    _dsaturation_nodal_dvar[_qp][0][_p_var_num] = dEffectiveSaturation_dP(_porepressure_nodal_var[_qp]);
+    _dsaturation_nodal_dvar[_qp][0][_p_var_num] = dEffectiveSaturation_dP(_porepressure_nodal_var[_node_number[_qp]]);
     _dsaturation_qp_dvar[_qp][0][_p_var_num] = dEffectiveSaturation_dP(_porepressure_qp_var[_qp]);
     _dgrads_qp_dgradv[_qp][0][_p_var_num] = dEffectiveSaturation_dP(_porepressure_qp_var[_qp]);
     _dgrads_qp_dv[_qp][0][_p_var_num] = d2EffectiveSaturation_dP2(_porepressure_qp_var[_qp]) * _gradp_qp_var[_qp];
@@ -98,16 +98,16 @@ PorousFlow1PhaseP::computeQpProperties()
 void
 PorousFlow1PhaseP::buildQpPPSS()
 {
-  _porepressure_nodal[_qp][0] = _porepressure_nodal_var[_qp];
+  _porepressure_nodal[_qp][0] = _porepressure_nodal_var[_node_number[_qp]];
   _porepressure_qp[_qp][0] = _porepressure_qp_var[_qp];
   _gradp_qp[_qp][0] = _gradp_qp_var[_qp];
 
-  _saturation_nodal[_qp][0] = effectiveSaturation(_porepressure_nodal_var[_qp]);
+  _saturation_nodal[_qp][0] = effectiveSaturation(_porepressure_nodal_var[_node_number[_qp]]);
   _saturation_qp[_qp][0] = effectiveSaturation(_porepressure_qp_var[_qp]);
   _grads_qp[_qp][0] = dEffectiveSaturation_dP(_porepressure_qp_var[_qp]) * _gradp_qp_var[_qp];
 
   /// Temperature is the same in each phase presently
-  _temperature_nodal[_qp][0] = _temperature_nodal_var[_qp];
+  _temperature_nodal[_qp][0] = _temperature_nodal_var[_node_number[_qp]];
   _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
 }
 

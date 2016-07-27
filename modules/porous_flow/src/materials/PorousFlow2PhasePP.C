@@ -107,7 +107,7 @@ PorousFlow2PhasePP::computeQpProperties()
     _dgrads_qp_dv[_qp][phase].assign(_num_pf_vars, RealGradient());
   }
 
-  const Real pc_nodal = _phase0_porepressure_nodal[_qp] - _phase1_porepressure_nodal[_qp]; // this is <= 0
+  const Real pc_nodal = _phase0_porepressure_nodal[_node_number[_qp]] - _phase1_porepressure_nodal[_node_number[_qp]]; // this is <= 0
   const Real dseff_nodal = dEffectiveSaturation_dP(pc_nodal); // d(seff)/d(pc)
   const Real pc_qp = _phase0_porepressure_qp[_qp] - _phase1_porepressure_qp[_qp]; // this is <= 0
   const Real dseff_qp = dEffectiveSaturation_dP(pc_qp); // d(seff_qp)/d(pc_qp)
@@ -143,14 +143,14 @@ PorousFlow2PhasePP::computeQpProperties()
 void
 PorousFlow2PhasePP::buildQpPPSS()
 {
-  _porepressure_nodal[_qp][0] = _phase0_porepressure_nodal[_qp];
-  _porepressure_nodal[_qp][1] = _phase1_porepressure_nodal[_qp];
+  _porepressure_nodal[_qp][0] = _phase0_porepressure_nodal[_node_number[_qp]];
+  _porepressure_nodal[_qp][1] = _phase1_porepressure_nodal[_node_number[_qp]];
   _porepressure_qp[_qp][0] = _phase0_porepressure_qp[_qp];
   _porepressure_qp[_qp][1] = _phase1_porepressure_qp[_qp];
   _gradp_qp[_qp][0] = _phase0_gradp_qp[_qp];
   _gradp_qp[_qp][1] = _phase1_gradp_qp[_qp];
 
-  const Real pc_nodal = _phase0_porepressure_nodal[_qp] - _phase1_porepressure_nodal[_qp]; // this is <= 0
+  const Real pc_nodal = _phase0_porepressure_nodal[_node_number[_qp]] - _phase1_porepressure_nodal[_node_number[_qp]]; // this is <= 0
   const Real seff_nodal = effectiveSaturation(pc_nodal);
 
   const Real pc_qp = _phase0_porepressure_qp[_qp] - _phase1_porepressure_qp[_qp]; // this is <= 0
@@ -165,8 +165,8 @@ PorousFlow2PhasePP::buildQpPPSS()
   _grads_qp[_qp][1] = - _grads_qp[_qp][0];
 
   /// Temperature is the same in each phase presently
-  _temperature_nodal[_qp][0] = _temperature_nodal_var[_qp];
-  _temperature_nodal[_qp][1] = _temperature_nodal_var[_qp];
+  _temperature_nodal[_qp][0] = _temperature_nodal_var[_node_number[_qp]];
+  _temperature_nodal[_qp][1] = _temperature_nodal_var[_node_number[_qp]];
   _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
   _temperature_qp[_qp][1] = _temperature_qp_var[_qp];
 }

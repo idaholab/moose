@@ -44,6 +44,10 @@
 []
 
 [Materials]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./ppss]
     type = PorousFlow1PhaseMD_Gaussian
     mass_density = md

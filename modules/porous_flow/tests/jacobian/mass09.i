@@ -76,6 +76,10 @@
 []
 
 [Materials]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./ppss]
     type = PorousFlow2PhasePS_VG
     phase0_porepressure = ppwater
@@ -118,7 +122,6 @@
   [./check]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
   [../]

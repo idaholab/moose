@@ -18,10 +18,7 @@ template<>
 InputParameters validParams<PorousFlowMaterialVectorBase>();
 
 /**
- * Base class for all PorousFlow materials that combine phase-dependent properties
- * such as fluid properties, relative permeability etc. This base class provides the
- * number of phases and number of fluid components (amongst other things) to all
- * PorousFlow materials that provide the vectors of properties expected by the kernels.
+ * Base class for all PorousFlow vector materials
  */
 class PorousFlowMaterialVectorBase : public DerivativeMaterialInterface<Material>
 {
@@ -31,6 +28,9 @@ public:
 protected:
   /// The PorousFlow Dictator UserObject
   const PorousFlowDictator & _dictator;
+
+  /// Nearest node number for each quadpoint
+  const MaterialProperty<unsigned int> & _node_number;
 
   /// Number of phases
   const unsigned int _num_phases;

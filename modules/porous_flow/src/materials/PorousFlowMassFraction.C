@@ -106,8 +106,8 @@ PorousFlowMassFraction::build_mass_frac(unsigned int qp)
     _grad_mass_frac[_qp][ph][_num_components - 1] = 0.0;
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
-      _mass_frac[qp][ph][comp] = (*_mf_vars[i])[qp];
-      total_mass_frac += (*_mf_vars[i])[qp];
+      _mass_frac[qp][ph][comp] = (*_mf_vars[i])[_node_number[qp]];
+      total_mass_frac += (*_mf_vars[i])[_node_number[qp]];
       _grad_mass_frac[qp][ph][comp] = (*_grad_mf_vars[i])[qp];
       _grad_mass_frac[_qp][ph][_num_components - 1] -= (*_grad_mf_vars[i])[qp];
       i++;

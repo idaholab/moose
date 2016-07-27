@@ -57,7 +57,7 @@ PorousFlow1PhaseMD_Gaussian::computeQpProperties()
   if (_dictator.notPorousFlowVariable(_md_varnum))
     return;
 
-  if (_md_nodal_var[_qp] >= _logdens0)
+  if (_md_nodal_var[_node_number[_qp]] >= _logdens0)
   {
     // fully saturated at the node
     _dporepressure_nodal_dvar[_qp][0][_pvar] = _bulk;
@@ -107,10 +107,10 @@ PorousFlow1PhaseMD_Gaussian::computeQpProperties()
 void
 PorousFlow1PhaseMD_Gaussian::buildPS()
 {
-  if (_md_nodal_var[_qp] >= _logdens0)
+  if (_md_nodal_var[_node_number[_qp]] >= _logdens0)
   {
     // full saturation
-    _porepressure_nodal[_qp][0] = (_md_nodal_var[_qp] - _logdens0) * _bulk;
+    _porepressure_nodal[_qp][0] = (_md_nodal_var[_node_number[_qp]] - _logdens0) * _bulk;
     _saturation_nodal[_qp][0] = 1.0;
   }
   else
@@ -119,7 +119,7 @@ PorousFlow1PhaseMD_Gaussian::buildPS()
     // 0 = (v-logdens0) - p/bulk + (al p)^2
     // 2 al p = (1/al/bulk) +/- sqrt((1/al/bulk)^2 - 4(v-logdens0))  (the "minus" sign is chosen)
     // s = exp(-(al*p)^2)
-    _porepressure_nodal[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4.0 * (_logdens0 - _md_nodal_var[_qp]))) / (2.0 * _al);
+    _porepressure_nodal[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4.0 * (_logdens0 - _md_nodal_var[_node_number[_qp]]))) / (2.0 * _al);
     _saturation_nodal[_qp][0] = std::exp(-std::pow(_al * _porepressure_nodal[_qp][0], 2.0));
 }
 
@@ -139,6 +139,6 @@ PorousFlow1PhaseMD_Gaussian::buildPS()
   }
 
   /// Temperature is the same in each phase presently
-  _temperature_nodal[_qp][0] = _temperature_nodal_var[_qp];
+  _temperature_nodal[_qp][0] = _temperature_nodal_var[_node_number[_qp]];
   _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
 }
