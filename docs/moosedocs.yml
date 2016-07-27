@@ -44,6 +44,8 @@ include:
         doxygen: http://mooseframework.com/docs/doxygen/modules/
         details: ../modules/phase_field/docs/details
         install: content/systems/modules/phase_field
+        hide:
+            - /XFEM
         links:
             Tests:
                 - ../modules/phase_field/tests

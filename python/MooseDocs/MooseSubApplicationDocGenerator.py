@@ -1,7 +1,8 @@
 import os
+import collections
+import shutil
 import logging
 log = logging.getLogger(__name__)
-import collections
 
 from MooseSystemInformation import MooseSystemInformation
 from MooseObjectInformation import MooseObjectInformation
@@ -57,10 +58,16 @@ class MooseSubApplicationDocGenerator(object):
                 if not any([node['name'].startswith(h) for h in hide]):
                     self._objects.append(MooseObjectInformation(node, src, inputs=inputs, children=children, **self._config))
 
-    def write(self):
+    def write(self, purge=False):
         """
         Write the system and object markdown as well as the associated yaml files for mkdocs.
         """
+
+        # Purge all files in the install directory
+        install_dir = self._config.get('install')
+        if purge:
+            log.info("Purging install directory: {}".format(install_dir))
+            shutil.rmtree(install_dir)
 
         for system in self._systems:
             system.write()
@@ -68,7 +75,7 @@ class MooseSubApplicationDocGenerator(object):
             obj.write()
 
         yml = self.generateYAML()
-        filename = os.path.abspath(os.path.join(self._config.get('install'), 'pages.yml'))
+        filename = os.path.abspath(os.path.join(install_dir, 'pages.yml'))
         log.info('Creating YAML file: {}'.format(filename))
         with open(filename, 'w') as fid:
             fid.write(yml)

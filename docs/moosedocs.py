@@ -27,6 +27,7 @@ def command_line_options():
     # Generate options
     generate_parser = subparser.add_parser('generate', help="Generate the markdown documentation from MOOSE application executable. This is done by the serve and build command automatically.")
     generate_parser.add_argument('--moosedocs-config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
+    generate_parser.add_argument('--purge', action='store_true', help="Remove all content from the install directories.")
 
     # Serve options
     serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 
     # Execute command
     if options.command == 'generate':
-        MooseDocs.commands.generate(config_file=options.moosedocs_config_file)
+        MooseDocs.commands.generate(config_file=options.moosedocs_config_file, purge=options.purge)
     elif options.command == 'serve':
         MooseDocs.commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload)
     elif options.command == 'build':

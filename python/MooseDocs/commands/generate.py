@@ -2,7 +2,7 @@ import os
 import re
 import MooseDocs
 
-def generate(config_file='moosedocs.yml'):
+def generate(config_file='moosedocs.yml', purge=False):
     """
     Generates MOOSE system and object markdown files from the source code and detail markdown files.
 
@@ -16,7 +16,7 @@ def generate(config_file='moosedocs.yml'):
 
     # Generate the Markdown
     gen = MooseDocs.MooseApplicationDocGenerator(config_file)
-    gen.generate()
+    gen.generate(purge=purge)
 
     # To enable the use of easier markdown link creation (see extensions.MooseMarkdownLinkPreprocessor) the
     # relative path of the markdown file must be embeded in Markdown file.

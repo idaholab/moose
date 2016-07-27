@@ -27,11 +27,14 @@ class MooseApplicationDocGenerator(object):
         self._config_file = config_file
         self._exe = None
         self._modified = None
-        self._develop = kwargs.get('develop', False)
+        self._develop = kwargs.pop('develop', False)
 
-    def generate(self):
+    def generate(self, purge=False):
         """
         Operator(). Calling this function causes the documentation to generated.
+
+        Args:
+            purge[bool]: When True the install directory is cleaned.
 
         NOTE: Documentation will only generated if the executable has been modified since that last time
               the function has been called, unless the develop flag was set to True upon construction
@@ -42,13 +45,13 @@ class MooseApplicationDocGenerator(object):
         spawns a rebuild.
         """
         if self._develop or self._exe == None:
-            self._generate()
+            self._generate(purge=purge)
             self._modified = os.path.getmtime(self._exe)
 
         else:
             modified = os.path.getmtime(self._exe)
             if self._modified != os.path.getmtime(self._exe):
-                self._generate()
+                self._generate(purge=purge)
                 self._modified = modified
 
     def _configure(self):
@@ -100,7 +103,7 @@ class MooseApplicationDocGenerator(object):
         return configs
 
 
-    def _generate(self):
+    def _generate(self, purge=False):
         """
         Generate the documentation.
         """
@@ -117,7 +120,7 @@ class MooseApplicationDocGenerator(object):
 
         for config in configs:
             generator = MooseSubApplicationDocGenerator(ydata, config)
-            generator.write()
+            generator.write(purge=purge)
 
         # Create the mkdocs.yml file
         # TODO: When mkdocs plugins API is up and running this should go away.
