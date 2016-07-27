@@ -43,64 +43,13 @@
     family = LAGRANGE
     order = FIRST
   [../]
-[]
-
-
-
-[ICs]
-  [./rho_ic]
-    type = ConstantIC
-    variable = rho
-    value = 1.17682926829268 # rho = P/RT = 101325.0 / 287 / 300, kg/m^3
-  [../]
-  [./rhou_ic]
-    type = ConstantIC
-    variable = rhou
-    value = 204.290917476559 # Mach 0.5: rho * 0.5 * sqrt(gamma*R*T)
-  [../]
-  [./rhoE_ic]
-    type = ConstantIC
-    variable = rhoE
-    value = 271044.375 # Mach 0.5: 1.17682926829268*(287/.4*300 + 0.5*173.59435474692143**2)
-  [../]
-  [./vel_x_ic]
-    type = ConstantIC
-    variable = vel_x
-    value = 173.594354746921 # Mach 0.5: = 0.5*sqrt(gamma*R*T)
-  [../]
-  [./Mach_ic]
-    type = ConstantIC
-    variable = Mach
-    value = 0.5
-  [../]
-  [./temperature_ic]
-    type = ConstantIC
-    variable = temperature
-    value = 300
-  [../]
-  [./pressure_ic]
-    type = ConstantIC
-    variable = pressure
-    value =  101325 # Pa, 1 atm
-  [../]
-  [./enthalpy_ic]
-    type = ConstantIC
-    variable = enthalpy
-    value = 316417.5 # Mach 0.5: 287/.4*300 + 0.5*173.59435474692143**2 + 101325/1.17682926829268
-  [../]
-  [./internal_energy_ic]
-    type = ConstantIC
-    variable = internal_energy
-    value = 215250. # Mach 0.5: J/kg, echo "271044.375/1.17682926829268 - 0.5*173.594354746921*173.594354746921" | bc -l
-  [../]
-  [./specific_volume_ic]
-    type = ConstantIC
-    variable = specific_volume
-    value = 0.84974093264248915997 # m^3/kg, echo "1/1.17682926829268" | bc -l
+  [./ICs]
+    initial_pressure = 101325.
+    initial_temperature = 300.
+    initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
+    fluid_properties = ideal_gas
   [../]
 []
-
-
 
 [Modules]
   [./FluidProperties]

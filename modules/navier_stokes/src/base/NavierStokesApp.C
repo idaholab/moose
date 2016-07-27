@@ -55,6 +55,8 @@
 #include "NSPressureNeumannBC.h"
 #include "NSEntropyError.h"
 #include "AddNavierStokesVariablesAction.h"
+#include "AddNavierStokesICsAction.h"
+#include "NSInitialCondition.h"
 
 // So we can register objects from the fluid_properties module.
 #include "FluidPropertiesApp.h"
@@ -175,6 +177,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerBoundaryCondition(NSMomentumInviscidNoPressureImplicitFlowBC);
   registerBoundaryCondition(NSPressureNeumannBC);
   registerPostprocessor(NSEntropyError);
+  registerInitialCondition(NSInitialCondition);
 
   //
   // Incompressible
@@ -219,12 +222,19 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 #undef registerAction
 #define registerAction(type, action) action_factory.reg<type>(stringifyName(type), action)
 
+  // Create the syntax
   syntax.registerActionSyntax("AddNavierStokesVariablesAction", "NavierStokes/Variables");
+  syntax.registerActionSyntax("AddNavierStokesICsAction", "NavierStokes/ICs");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_variables", "add_variable");
   registerAction(AddNavierStokesVariablesAction, "add_navier_stokes_variables");
+
+  // add ICs action
+  registerTask("add_navier_stokes_ics", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_ics", "add_ic");
+  registerAction(AddNavierStokesICsAction, "add_navier_stokes_ics");
 
 #undef registerAction
 #define registerAction(type, action) action_factory.regLegacy<type>(stringifyName(type), action)
