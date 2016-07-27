@@ -37,9 +37,6 @@ public:
     unsigned int _symmetry;
     ///@}
 
-    /// Initial active order parameter
-    unsigned int _op;
-
     /// Custom data columns
     std::vector<Real> _custom;
   };
@@ -93,17 +90,14 @@ public:
   struct EBSDPointDataPhi2 : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d._phi2; };
   };
+  struct EBSDPointDataFeatureID : EBSDPointDataFunctor {
+    virtual Real operator () (const EBSDPointData & d) { return d._feature_id; };
+  };
   struct EBSDPointDataPhase : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d._phase; };
   };
   struct EBSDPointDataSymmetry : EBSDPointDataFunctor {
     virtual Real operator () (const EBSDPointData & d) { return d._symmetry; };
-  };
-  struct EBSDPointDataFeatureID : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._feature_id; };
-  };
-  struct EBSDPointDataOp : EBSDPointDataFunctor {
-    virtual Real operator () (const EBSDPointData & d) { return d._op; };
   };
   struct EBSDPointDataCustom : EBSDPointDataFunctor {
     EBSDPointDataCustom(unsigned int index) : _index(index) {}
@@ -124,14 +118,14 @@ public:
   struct EBSDAvgDataPhase : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a._phase; };
   };
+  struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor {
+    virtual Real operator () (const EBSDAvgData & a) { return a._symmetry; };
+  };
   struct EBSDAvgDataLocalID : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a._local_id; };
   };
   struct EBSDAvgDataFeatureID : EBSDAvgDataFunctor {
     virtual Real operator () (const EBSDAvgData & a) { return a._feature_id; };
-  };
-  struct EBSDAvgDataSymmetry : EBSDAvgDataFunctor {
-    virtual Real operator () (const EBSDAvgData & a) { return a._symmetry; };
   };
   struct EBSDAvgDataCustom : EBSDAvgDataFunctor {
     EBSDAvgDataCustom(unsigned int index) : _index(index) {}

@@ -105,10 +105,6 @@ EBSDReader::readFile()
       if (_global_id_map.find(d._feature_id) == _global_id_map.end())
         _global_id_map[d._feature_id] = _grain_num++;
 
-      // The Order parameter is not yet assigned.
-      // We initialize it to zero in order not to have undefined values that break the testing.
-      d._op = 0;
-
       unsigned int global_index = indexFromPoint(Point(x, y, z));
       _data[global_index] = d;
     }
@@ -376,9 +372,6 @@ EBSDReader::getPointDataAccessFunctor(const MooseEnum & field_name) const
     case 5: // symmetry
       ret_val = new EBSDPointDataSymmetry();
       break;
-    case 6: // op
-      ret_val = new EBSDPointDataOp();
-      break;
     default:
     {
       // check for custom columns
@@ -421,6 +414,12 @@ EBSDReader::getAvgDataAccessFunctor(const MooseEnum & field_name) const
       break;
     case 4: // symmetry
       ret_val = new EBSDAvgDataSymmetry();
+      break;
+    case 5: // local_id
+      ret_val = new EBSDAvgDataLocalID();
+      break;
+    case 6: // feature_id
+      ret_val = new EBSDAvgDataFeatureID();
       break;
     default:
     {

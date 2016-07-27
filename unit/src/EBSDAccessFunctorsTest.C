@@ -29,7 +29,6 @@ EBSDAccessFunctorsTest::setUp()
   _point._symmetry = 4;
   _point._feature_id = 5;
   _point._phase = 6;
-  _point._op = 7;
   _point._p = Point(9.0, 10.0, 11.0);
   _point._custom.resize(3);
   for (unsigned int i = 0; i < 3; ++i)
@@ -80,8 +79,6 @@ EBSDAccessFunctorsTest::test()
     CPPUNIT_ASSERT( symmetry(_point) == _point._symmetry );
     EBSDPointDataFeatureID feature_id;
     CPPUNIT_ASSERT( feature_id(_point) == _point._feature_id );
-    EBSDPointDataOp op;
-    CPPUNIT_ASSERT( op(_point) == _point._op );
 
     for (unsigned int i = 0; i < 3; ++i)
     {
