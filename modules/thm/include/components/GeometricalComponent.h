@@ -4,6 +4,7 @@
 #include "Component.h"
 #include "RELAP7App.h"
 #include <map>
+#include <unordered_set>
 
 class GeometricalComponent;
 

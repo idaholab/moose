@@ -1,6 +1,7 @@
 #include "GeometricalComponent.h"
 #include "Conversion.h"
 #include "ConstantFunction.h"
+#include "R7Conversion.h"
 
 template<>
 InputParameters validParams<GeometricalComponent>()
@@ -126,33 +127,63 @@ GeometricalComponent::processNodeLocations()
     if (specified_node_locations)
     {
       // remove duplicates and order in an increassing manner
-      std::set<Real> unq_ord_node_lcns( _node_locations.begin(), _node_locations.end());
-      _node_locations.assign(unq_ord_node_lcns.begin(), unq_ord_node_lcns.end());
-
-      // removes locations not in the component
-      std::vector<Real> new_nodes;
-      new_nodes.reserve(_node_locations.size() + 2);
+      std::set<Real> unique_nodes;
+      std::unordered_set<Real> duplicate_nodes;
       for (auto node_location : _node_locations)
       {
-        if ((node_location >= 0.0) && (node_location <= _length))
+        if (unique_nodes.find(node_location) != unique_nodes.end())
         {
-          new_nodes.push_back(node_location);
+          duplicate_nodes.emplace(node_location);
+        }
+        else
+        {
+          unique_nodes.emplace(node_location);
         }
       }
 
-      // add entry boundary node if not explicitly specified
-      if (new_nodes[0] != 0.0)
+      // warn user if duplicate nodes were found
+      if (duplicate_nodes.size() > 0)
       {
-        new_nodes.insert(new_nodes.begin(), 0.0);
+        std::string dup_node_str = RELAP7::containerToString(duplicate_nodes);
+        mooseWarning(name() << ": Duplicate nodes being ignored (" << dup_node_str << ").");
+      }
+
+      // removes locations not in the component
+      std::vector<Real> actual_nodes;
+      actual_nodes.reserve(_node_locations.size() + 2);
+      std::vector<Real> invalid_nodes;
+      for (auto node_location : unique_nodes)
+      {
+        if ((node_location >= 0.0) && (node_location <= _length))
+        {
+          actual_nodes.push_back(node_location);
+        }
+        else
+        {
+          invalid_nodes.push_back(node_location);
+        }
+      }
+
+      // warn user if invalid nodes were found
+      if (invalid_nodes.size() > 0)
+      {
+        std::string inv_node_str = RELAP7::containerToString(invalid_nodes);
+        mooseWarning(name() << ": Invalid nodes being ignored (" << inv_node_str << ").");
+      }
+
+      // add entry boundary node if not explicitly specified
+      if (actual_nodes[0] != 0.0)
+      {
+        actual_nodes.insert(actual_nodes.begin(), 0.0);
       }
 
       // add exit boundary node if not explicitly specified
-      if (new_nodes[new_nodes.size() - 1] != _length)
+      if (actual_nodes[actual_nodes.size() - 1] != _length)
       {
-        new_nodes.push_back(_length);
+        actual_nodes.push_back(_length);
       }
 
-      _node_locations = new_nodes;
+      _node_locations = actual_nodes;
 
       // determine number of elements
       n_nodes = _node_locations.size();
@@ -166,19 +197,19 @@ GeometricalComponent::processNodeLocations()
 
   if (_2nd_order_mesh)
   {
-    unsigned int new_n_nodes = (2 * _n_elems) + 1;
-    std::vector<Real> new_nodes(new_n_nodes, 0.0);
+    unsigned int actual_n_nodes = (2 * _n_elems) + 1;
+    std::vector<Real> actual_nodes(actual_n_nodes, 0.0);
     unsigned int new_node_indx = 0;
 
     for (int i = 0; i < _n_elems; ++i)
     {
-      new_nodes[new_node_indx] = _node_locations[i];
+      actual_nodes[new_node_indx] = _node_locations[i];
       ++new_node_indx;
-      new_nodes[new_node_indx] = 0.5 * (_node_locations[i] + _node_locations[i+1]);
+      actual_nodes[new_node_indx] = 0.5 * (_node_locations[i] + _node_locations[i+1]);
       ++new_node_indx;
     }
-    new_nodes[new_node_indx] = _node_locations[_n_elems];
-    _node_locations = new_nodes;
+    actual_nodes[new_node_indx] = _node_locations[_n_elems];
+    _node_locations = actual_nodes;
   }
 }
 
