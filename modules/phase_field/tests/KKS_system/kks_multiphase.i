@@ -130,6 +130,26 @@
     f_name = h3
   [../]
 
+  # Coefficients for diffusion equation
+  [./Dh1]
+    type = DerivativeParsedMaterial
+    material_property_names = 'D h1'
+    function = D*h1
+    f_name = Dh1
+  [../]
+  [./Dh2]
+    type = DerivativeParsedMaterial
+    material_property_names = 'D h2'
+    function = D*h2
+    f_name = Dh2
+  [../]
+  [./Dh3]
+    type = DerivativeParsedMaterial
+    material_property_names = 'D h3'
+    function = D*h3
+    f_name = Dh3
+  [../]
+
   # Barrier functions for each phase
   [./g1]
     type = BarrierFunctionMaterial
@@ -153,15 +173,34 @@
   # constant properties
   [./constants]
     type = GenericConstantMaterial
-    prop_names  = 'L   kappa'
-    prop_values = '0.7 0.4  '
+    prop_names  = 'L   kappa  D'
+    prop_values = '0.7 0.4    1'
   [../]
 []
 
 [Kernels]
-  [./cdiff]
-    type = Diffusion
+  #Kernels for diffusion equation
+  [./diff_time]
+    type = TimeDerivative
     variable = c
+  [../]
+  [./diff_c1]
+    type = MatDiffusion
+    variable = c
+    D_name = Dh1
+    conc = c1
+  [../]
+  [./diff_c2]
+    type = MatDiffusion
+    variable = c
+    D_name = Dh2
+    conc = c2
+  [../]
+  [./diff_c3]
+    type = MatDiffusion
+    variable = c
+    D_name = Dh3
+    conc = c3
   [../]
 
   # Kernels for Allen-Cahn equation for eta1
@@ -407,6 +446,5 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
   exodus = true
 []

@@ -1,4 +1,9 @@
 [Tests]
+  [./coupledmatdiffusion]
+    type = 'Exodiff'
+    input = 'coupledmatdiffusion.i'
+    exodiff = 'coupledmatdiffusion_out.e'
+  [../]
   [./matdiffusion]
     type = 'Exodiff'
     input = 'matdiffusion.i'
