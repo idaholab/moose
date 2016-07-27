@@ -65,7 +65,7 @@ class MooseSubApplicationDocGenerator(object):
 
         # Purge all files in the install directory
         install_dir = self._config.get('install')
-        if purge:
+        if purge and os.path.exists(install_dir):
             log.info("Purging install directory: {}".format(install_dir))
             shutil.rmtree(install_dir)
 

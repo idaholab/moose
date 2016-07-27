@@ -33,6 +33,7 @@ class MkMooseDocsFormatter(logging.Formatter):
     Call the init_logging function to initialize the use of this custom fomatter.
     """
     COLOR = {'DEBUG':'CYAN', 'INFO':'RESET', 'WARNING':'YELLOW', 'ERROR':'RED', 'CRITICAL':'MAGENTA'}
+    COUNTS = {'DEBUG':0, 'INFO':0, 'WARNING':0, 'ERROR':0, 'CRITICAL':0}
 
     def format(self, record):
         msg = logging.Formatter.format(self, record)
@@ -55,6 +56,9 @@ class MkMooseDocsFormatter(logging.Formatter):
 
         if record.levelname in self.COLOR:
             msg = utils.colorText(msg, self.COLOR[record.levelname])
+
+        # Increment counts
+        self.COUNTS[record.levelname] += 1
 
         return msg
 
@@ -84,6 +88,8 @@ def init_logging(verbose=False):
     log = logging.getLogger('mkdocs')
     log.addHandler(handler)
     log.setLevel(level)
+
+    return formatter
 
 def yaml_load(filename, loader=yaml.Loader):
     """

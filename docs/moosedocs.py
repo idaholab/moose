@@ -59,7 +59,7 @@ if __name__ == '__main__':
     options = command_line_options()
 
     # Initialize logging
-    MooseDocs.init_logging(options.verbose)
+    formatter = MooseDocs.init_logging(options.verbose)
 
     # Execute command
     if options.command == 'generate':
@@ -68,3 +68,8 @@ if __name__ == '__main__':
         MooseDocs.commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload)
     elif options.command == 'build':
         MooseDocs.commands.build(config_file=options.mkdocs_config_file)
+
+    # Display logging results
+    print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])
+    if formatter.COUNTS['ERROR'] > 0:
+        sys.exit(1)
