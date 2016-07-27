@@ -115,9 +115,9 @@ NavierStokesMaterial::computeProperties()
     /******* Viscous Stress Tensor *******/
     //Technically... this _is_ the transpose (since we are loading these by rows)
     //But it doesn't matter....
-    RealTensorValue grad_outter_u(_grad_u[qp], _grad_v[qp], _grad_w[qp]);
+    RealTensorValue grad_outer_u(_grad_u[qp], _grad_v[qp], _grad_w[qp]);
 
-    grad_outter_u += grad_outter_u.transpose();
+    grad_outer_u += grad_outer_u.transpose();
 
     Real div_vel = 0.0;
     for (unsigned int i = 0; i < 3; ++i)
@@ -125,11 +125,11 @@ NavierStokesMaterial::computeProperties()
 
     //Add diagonal terms
     for (unsigned int i = 0; i < 3; ++i)
-      grad_outter_u(i,i) -= 2.0 / 3.0 * div_vel;
+      grad_outer_u(i, i) -= 2.0 / 3.0 * div_vel;
 
-    grad_outter_u *= _dynamic_viscosity[qp];
+    grad_outer_u *= _dynamic_viscosity[qp];
 
-    _viscous_stress_tensor[qp] = grad_outter_u;
+    _viscous_stress_tensor[qp] = grad_outer_u;
 
     // Tabulated values of thermal conductivity vs. Temperature for air (k increases slightly with T):
     // T (K)    k (W/m-K)
@@ -256,9 +256,9 @@ NavierStokesMaterial::computeHSUPG(unsigned int qp)
 void
 NavierStokesMaterial::computeTau(unsigned int qp)
 {
-  Real velmag = std::sqrt(_u_vel[qp]*_u_vel[qp] +
-                          _v_vel[qp]*_v_vel[qp] +
-                          _w_vel[qp]*_w_vel[qp]);
+  Real velmag = std::sqrt(_u_vel[qp] * _u_vel[qp] +
+                          _v_vel[qp] * _v_vel[qp] +
+                          _w_vel[qp] * _w_vel[qp]);
 
   // Moose::out << "velmag=" << velmag << std::endl;
 
@@ -298,7 +298,7 @@ NavierStokesMaterial::computeTau(unsigned int qp)
   else
   {
     // The element length parameter, squared
-    Real h2 = _hsupg[qp]*_hsupg[qp];
+    Real h2 = _hsupg[qp] * _hsupg[qp];
 
     // The viscosity-based term
     Real visc_term = _dynamic_viscosity[qp] / _rho[qp] / h2;
@@ -330,12 +330,12 @@ NavierStokesMaterial::computeTau(unsigned int qp)
     // 2.) Tau with timestep dependence (guarantees stabilization even
     // in zero-velocity limit) incorporated via the "r-switch" method,
     // with r=2.
-    Real sqrt_term = 4./_dt/_dt + velmag*velmag/h2;
+    Real sqrt_term = 4. / _dt / _dt + velmag * velmag / h2;
 
     // For use with option "2", i.e. the option that uses dt in the definition of tau
     _tauc[qp] = 1. / std::sqrt(sqrt_term);
-    _taum[qp] = 1. / std::sqrt(sqrt_term + visc_term*visc_term);
-    _taue[qp] = 1. / std::sqrt(sqrt_term + k_term*k_term);
+    _taum[qp] = 1. / std::sqrt(sqrt_term + visc_term * visc_term);
+    _taue[qp] = 1. / std::sqrt(sqrt_term + k_term * k_term);
   }
 
   // Debugging
@@ -386,19 +386,19 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
     _calC[qp][i].zero();
 
   // x-column matrix
-  _calC[qp][0](0,0) = _u_vel[qp];
-  _calC[qp][0](1,0) = _v_vel[qp];
-  _calC[qp][0](2,0) = _w_vel[qp];
+  _calC[qp][0](0, 0) = _u_vel[qp];
+  _calC[qp][0](1, 0) = _v_vel[qp];
+  _calC[qp][0](2, 0) = _w_vel[qp];
 
   // y-column matrix
-  _calC[qp][1](0,1) = _u_vel[qp];
-  _calC[qp][1](1,1) = _v_vel[qp];
-  _calC[qp][1](2,1) = _w_vel[qp];
+  _calC[qp][1](0, 1) = _u_vel[qp];
+  _calC[qp][1](1, 1) = _v_vel[qp];
+  _calC[qp][1](2, 1) = _w_vel[qp];
 
   // z-column matrix (this assumes LIBMESH_DIM==3!)
-  _calC[qp][2](0,2) = _u_vel[qp];
-  _calC[qp][2](1,2) = _v_vel[qp];
-  _calC[qp][2](2,2) = _w_vel[qp];
+  _calC[qp][2](0, 2) = _u_vel[qp];
+  _calC[qp][2](1, 2) = _v_vel[qp];
+  _calC[qp][2](2, 2) = _w_vel[qp];
 
   // The matrix S can be computed from any of the calC via calC_1*calC_1^T
   RealTensorValue calS = _calC[qp][0] * _calC[qp][0].transpose();
@@ -408,7 +408,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
   // 0.) _calA_0 = diag( (gam - 1)/2*|u|^2 ) - S
   _calA[qp][0].zero(); // zero this calA entry
-  _calA[qp][0](0,0) = _calA[qp][0](1,1) = _calA[qp][0](2,2) = 0.5*(_fp.gamma() - 1.0)*velmag2; // set diag. entries
+  _calA[qp][0](0, 0) = _calA[qp][0](1, 1) = _calA[qp][0](2, 2) = 0.5 * (_fp.gamma() - 1.0) * velmag2; // set diag. entries
   _calA[qp][0] -= calS;
 
   for (unsigned int m = 1; m <= 3; ++m)
@@ -418,14 +418,14 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
     // For m=1,2,3, calA_m = C_m + C_m^T + diag( (1.-gam)*u_m )
     _calA[qp][m].zero(); // zero this calA entry
-    _calA[qp][m](0,0) = _calA[qp][m](1,1) = _calA[qp][m](2,2) = (1.-_fp.gamma())*vel(m_local); // set diag. entries
+    _calA[qp][m](0, 0) = _calA[qp][m](1, 1) = _calA[qp][m](2, 2) = (1. - _fp.gamma()) * vel(m_local); // set diag. entries
     _calA[qp][m] += _calC[qp][m_local];             // Note: use m_local for indexing into _calC!
     _calA[qp][m] += _calC[qp][m_local].transpose(); // Note: use m_local for indexing into _calC!
   }
 
   // 4.) calA_4 = diag(gam - 1)
   _calA[qp][4].zero(); // zero this calA entry
-  _calA[qp][4](0,0) = _calA[qp][4](1,1) = _calA[qp][4](2,2) = (_fp.gamma() - 1.0);
+  _calA[qp][4](0, 0) = _calA[qp][4](1, 1) = _calA[qp][4](2, 2) = (_fp.gamma() - 1.0);
 
   // Enough space to hold the 3*5 "cal E" matrices which comprise the inviscid flux term
   // of the energy equation.  See notes for additional details
@@ -451,8 +451,8 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
       // E_{km} (momentum gradient terms)
       _calE[qp][k][m].zero();
-      _calE[qp][k][m](k,m_local) = _enthalpy[qp];           // H * D_{km}
-      _calE[qp][k][m] += (1.-_fp.gamma()) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
+      _calE[qp][k][m](k, m_local) = _enthalpy[qp];          // H * D_{km}
+      _calE[qp][k][m] += (1. - _fp.gamma()) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
 
     // E_{k4} (energy gradient term)
@@ -464,22 +464,22 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
   // The gradient object might be more useful, since we are multiplying by VariableGradient
   // (which is a MooseArray of RealGradients) objects?
   RealVectorValue mom_resid =
-    _calA[qp][0]*_grad_rho[qp] +
-    _calA[qp][1]*_grad_rho_u[qp] +
-    _calA[qp][2]*_grad_rho_v[qp] +
-    _calA[qp][3]*_grad_rho_w[qp] +
-    _calA[qp][4]*_grad_rho_E[qp];
+    _calA[qp][0] * _grad_rho[qp] +
+    _calA[qp][1] * _grad_rho_u[qp] +
+    _calA[qp][2] * _grad_rho_v[qp] +
+    _calA[qp][3] * _grad_rho_w[qp] +
+    _calA[qp][4] * _grad_rho_E[qp];
 
   // No matrices/vectors for the energy residual strong form... just write it out like
   // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual"
   // section of the notes.
   Real energy_resid =
-    (0.5*(_fp.gamma() - 1.0)*velmag2 - _enthalpy[qp])*(vel * _grad_rho[qp]) +
-    _enthalpy[qp]*divU +
-    (1.-_fp.gamma())*(vel(0)*(vel*_grad_rho_u[qp]) +
-                 vel(1)*(vel*_grad_rho_v[qp]) +
-                 vel(2)*(vel*_grad_rho_w[qp])) +
-    _fp.gamma()*(vel*_grad_rho_E[qp])
+    (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * (vel * _grad_rho[qp]) +
+    _enthalpy[qp] * divU +
+    (1. - _fp.gamma()) * (vel(0) * (vel * _grad_rho_u[qp]) +
+                          vel(1) * (vel * _grad_rho_v[qp]) +
+                          vel(2) * (vel * _grad_rho_w[qp])) +
+    _fp.gamma() * (vel * _grad_rho_E[qp])
     ;
 
   // Now for the actual residual values...

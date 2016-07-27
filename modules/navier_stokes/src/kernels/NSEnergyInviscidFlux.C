@@ -40,7 +40,7 @@ NSEnergyInviscidFlux::computeQpResidual()
   vel *= (_rho[_qp] * _enthalpy[_qp]);
 
   // Return -1 * vel * grad(phi_i)
-  return -(vel*_grad_test[_i][_qp]);
+  return -(vel * _grad_test[_i][_qp]);
 }
 
 Real
@@ -53,7 +53,7 @@ NSEnergyInviscidFlux::computeQpJacobian()
   const Real gam = _fp.gamma();
 
   // -gamma * phi_j * (U*grad(phi_i))
-  return -gam * _phi[_j][_qp] * (vel*_grad_test[_i][_qp]);
+  return -gam * _phi[_j][_qp] * (vel * _grad_test[_i][_qp]);
 }
 
 Real
@@ -67,7 +67,7 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
   // Derivative wrt density
   if (jvar == _rho_var_number)
-    return -((0.5*(gam-1)*V2 - _enthalpy[_qp]) * _phi[_j][_qp] * (vel * _grad_test[_i][_qp]));
+    return -((0.5 * (gam - 1) * V2 - _enthalpy[_qp]) * _phi[_j][_qp] * (vel * _grad_test[_i][_qp]));
 
   // Derivatives wrt momentums
   else if ((jvar == _rhou_var_number) || (jvar == _rhov_var_number) || (jvar == _rhow_var_number))

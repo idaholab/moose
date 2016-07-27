@@ -42,7 +42,7 @@ NSWeakStagnationBC::staticValues(Real & T_s, Real & p_s, Real & rho_s)
     mooseError("Negative temperature detected in NSWeakStagnationBC!");
 
   // p_s = p_0 * (T_0/T)^(-gam/(gam-1))
-  p_s = _stagnation_pressure * std::pow(_stagnation_temperature/T_s, -_fp.gamma() / (_fp.gamma() - 1.));
+  p_s = _stagnation_pressure * std::pow(_stagnation_temperature / T_s, -_fp.gamma() / (_fp.gamma() - 1.));
 
   // Compute static rho from static pressure and temperature using equation of state.
   rho_s = _fp.rho(p_s, T_s);

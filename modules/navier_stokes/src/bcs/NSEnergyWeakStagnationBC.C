@@ -34,7 +34,7 @@ Real NSEnergyWeakStagnationBC::computeQpResidual()
   Real velmag2 = this->velmag2();
 
   // Compute static total energy, E_s
-  Real E_s = _fp.cv()*T_s + 0.5 * velmag2;
+  Real E_s = _fp.cv() * T_s + 0.5 * velmag2;
 
   // Compute the product rho_s * H_s (H_s = static enthalpy)
   Real rhoH_s = rho_s * E_s + p_s;

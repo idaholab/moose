@@ -31,7 +31,7 @@ Real
 NSStagnationPressureBC::computeQpResidual()
 {
   // p_0 = p*(1 + 0.5*(gam-1)*M^2)^(gam/(gam-1))
-  const Real computed_stagnation_pressure = _pressure[_qp] * std::pow(1. + 0.5*(_fp.gamma() - 1.) * _mach[_qp] * _mach[_qp], _fp.gamma()/(_fp.gamma() - 1.));
+  const Real computed_stagnation_pressure = _pressure[_qp] * std::pow(1. + 0.5 * (_fp.gamma() - 1.) * _mach[_qp] * _mach[_qp], _fp.gamma() / (_fp.gamma() - 1.));
 
   // Return the difference between the current solution's stagnation pressure
   // and the desired.  The Dirichlet condition asserts that these should be equal.

@@ -37,5 +37,5 @@ NSInternalEnergyAux::computeValue()
 {
   const RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
-  return _rhoE[_qp]/_rho[_qp] - 0.5 * vel.norm_sq();
+  return _rhoE[_qp] / _rho[_qp] - 0.5 * vel.norm_sq();
 }

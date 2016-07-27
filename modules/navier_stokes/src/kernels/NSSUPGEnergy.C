@@ -41,7 +41,7 @@ NSSUPGEnergy::computeQpResidual()
   Real velmag2 = vel.norm_sq();
 
   // Velocity vector, dotted with the test function gradient
-  Real U_grad_phi = vel*_grad_test[_i][_qp];
+  Real U_grad_phi = vel * _grad_test[_i][_qp];
 
   // Vector object of momentum equation strong residuals
   RealVectorValue Ru (_strong_residuals[_qp][1],
@@ -112,8 +112,8 @@ NSSUPGEnergy::computeJacobianHelper(unsigned var)
   // Art. Diffusion matrix for taum-proportional term = (diag(H) + (1-gam)*S) * A_{ell}
   //
   RealTensorValue mom_mat;
-  mom_mat(0,0) = mom_mat(1,1) = mom_mat(2,2) = _enthalpy[_qp];        // (diag(H)
-  mom_mat += (1.-gam) * _calC[_qp][0] * _calC[_qp][0].transpose(); //  + (1-gam)*S)
+  mom_mat(0, 0) = mom_mat(1, 1) = mom_mat(2, 2) = _enthalpy[_qp];     // (diag(H)
+  mom_mat += (1. - gam) * _calC[_qp][0] * _calC[_qp][0].transpose(); //  + (1-gam)*S)
   mom_mat = mom_mat * _calA[_qp][mapped_var_number];                  // * A_{ell}
   Real mom_term = _taum[_qp] * grad_test_i * (mom_mat * grad_phi_j);
 
@@ -129,22 +129,22 @@ NSSUPGEnergy::computeJacobianHelper(unsigned var)
 
   switch (mapped_var_number)
   {
-    case 1:
-    case 2:
-    case 3:
-    {
-      // Variable for zero-based indexing into local matrices and vectors.
-      unsigned m_local = mapped_var_number-1;
+  case 1:
+  case 2:
+  case 3:
+  {
+    // Variable for zero-based indexing into local matrices and vectors.
+    unsigned m_local = mapped_var_number - 1;
 
-      //
-      // Art. Diffusion matrix for tauc-proportional term = (0.5*(gam-1.)*velmag2 - H)*C_m
-      //
-      RealTensorValue mass_mat = (0.5*(gam-1.)*velmag2 - _enthalpy[_qp]) * _calC[_qp][m_local];
-      mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j);
+    //
+    // Art. Diffusion matrix for tauc-proportional term = (0.5*(gam-1.)*velmag2 - H)*C_m
+    //
+    RealTensorValue mass_mat = (0.5 * (gam - 1.) * velmag2 - _enthalpy[_qp]) * _calC[_qp][m_local];
+    mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j);
 
-      // Don't even need to break, no other cases to fall through to...
-      break;
-    }
+    // Don't even need to break, no other cases to fall through to...
+    break;
+  }
   }
 
   // Sum up values and return

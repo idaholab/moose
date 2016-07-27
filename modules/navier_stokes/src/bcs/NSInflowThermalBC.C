@@ -44,5 +44,5 @@ NSInflowThermalBC::computeQpResidual()
   //
   // ***at a no-slip wall*** this further reduces to (no coupling to velocity variables):
   // rho*E - rho*cv*T = 0
-  return _u[_qp] - _specified_rho * (_fp.cv() * _specified_temperature + 0.5*_specified_velocity_magnitude*_specified_velocity_magnitude);
+  return _u[_qp] - _specified_rho * (_fp.cv() * _specified_temperature + 0.5 * _specified_velocity_magnitude * _specified_velocity_magnitude);
 }

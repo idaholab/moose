@@ -39,7 +39,7 @@ NSMomentumInviscidFlux::computeQpResidual()
   vec(_component) += _pressure[_qp];
 
   // -((rho*u_k) * u + e_k * P) * grad(phi)
-  return -(vec*_grad_test[_i][_qp]);
+  return -(vec * _grad_test[_i][_qp]);
 }
 
 Real
@@ -69,29 +69,29 @@ NSMomentumInviscidFlux::computeJacobianHelper(unsigned int m)
 
   switch (m)
   {
-    case 0: // density
-    {
-      const Real V2 = vel.norm_sq();
-      return vel(_component) * (vel * _grad_test[_i][_qp]) - 0.5 * (gam - 1.0) * V2 * _grad_test[_i][_qp](_component);
-    }
+  case 0: // density
+  {
+    const Real V2 = vel.norm_sq();
+    return vel(_component) * (vel * _grad_test[_i][_qp]) - 0.5 * (gam - 1.0) * V2 * _grad_test[_i][_qp](_component);
+  }
 
-    case 1:
-    case 2:
-    case 3: // momentums
-    {
-      // Map m into m_local = {0,1,2}
-      unsigned int m_local = m - 1;
+  case 1:
+  case 2:
+  case 3: // momentums
+  {
+    // Map m into m_local = {0,1,2}
+    unsigned int m_local = m - 1;
 
-      // Kronecker delta
-      const Real delta_kl = (_component == m_local ? 1. : 0.);
+    // Kronecker delta
+    const Real delta_kl = (_component == m_local ? 1. : 0.);
 
-      return -1.0 * (vel(_component) * _grad_test[_i][_qp](m_local)
-                    + delta_kl * (vel * _grad_test[_i][_qp])
-                    + (1.-gam) * vel(m_local) * _grad_test[_i][_qp](_component)) * _phi[_j][_qp];
-    }
+    return -1.0 * (vel(_component) * _grad_test[_i][_qp](m_local)
+                   + delta_kl * (vel * _grad_test[_i][_qp])
+                   + (1. - gam) * vel(m_local) * _grad_test[_i][_qp](_component)) * _phi[_j][_qp];
+  }
 
-    case 4: // energy
-      return -1.0 * (gam - 1.0) * _phi[_j][_qp] * _grad_test[_i][_qp](_component);
+  case 4: // energy
+    return -1.0 * (gam - 1.0) * _phi[_j][_qp] * _grad_test[_i][_qp](_component);
   }
 
   mooseError("Shouldn't get here!");

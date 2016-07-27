@@ -30,7 +30,7 @@ Real
 NSStagnationTemperatureBC::computeQpResidual()
 {
   // T_0 = T*(1 + 0.5*(gam-1)*M^2)
-  Real computed_stagnation_temperature = _temperature[_qp] * (1. + 0.5*(_fp.gamma() - 1.) * _mach[_qp] * _mach[_qp]);
+  Real computed_stagnation_temperature = _temperature[_qp] * (1. + 0.5 * (_fp.gamma() - 1.) * _mach[_qp] * _mach[_qp]);
 
   // Return the difference between the current solution's stagnation temperature
   // and the desired.  The Dirichlet condition asserts that these should be equal.
