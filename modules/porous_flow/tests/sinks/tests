@@ -1,0 +1,52 @@
+[Tests]
+  [./s01]
+    type = 'CSVDiff'
+    input = 's01.i'
+    csvdiff = 's01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s02]
+    type = 'CSVDiff'
+    input = 's02.i'
+    csvdiff = 's02.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s03]
+    type = 'CSVDiff'
+    input = 's03.i'
+    csvdiff = 's03.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s04]
+    type = 'CSVDiff'
+    input = 's04.i'
+    csvdiff = 's04.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s05]
+    type = 'CSVDiff'
+    input = 's05.i'
+    csvdiff = 's05.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s06]
+    type = 'CSVDiff'
+    input = 's06.i'
+    csvdiff = 's06.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s07]
+    type = 'CSVDiff'
+    input = 's07.i'
+    csvdiff = 's07.csv'
+    rel_err = 1.0E-5
+    skip = 'opts runs fine, but must skip because of YaqiHack (Issue #6774)'
+  [../]
+  [./s08]
+    type = 'CSVDiff'
+    input = 's08.i'
+    csvdiff = 's08.csv'
+    rel_err = 1.0E-5
+    skip = 'opts runs fine, but must skip because of YaqiHack (Issue #6774)'
+  [../]
+[]

@@ -52,6 +52,9 @@ protected:
   /// Moose variable number of the phase0 temperature
   const unsigned int _temperature_varnum;
 
+  /// Nearest node number for each quadpoint
+  const MaterialProperty<unsigned int> & _node_number;
+
   /// Nodal values of porepressure of the phases
   MaterialProperty<std::vector<Real> > & _porepressure_nodal;
 
