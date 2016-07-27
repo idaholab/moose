@@ -7,7 +7,7 @@
 #ifndef ADDNAVIERSTOKESVARIABLESACTION_H
 #define ADDNAVIERSTOKESVARIABLESACTION_H
 
-#include "Action.h"
+#include "NSAction.h"
 
 class AddNavierStokesVariablesAction;
 
@@ -28,7 +28,7 @@ InputParameters validParams<AddNavierStokesVariablesAction>();
  *   [../]
  * []
  */
-class AddNavierStokesVariablesAction : public Action
+class AddNavierStokesVariablesAction : public NSAction
 {
 public:
   AddNavierStokesVariablesAction(InputParameters parameters);

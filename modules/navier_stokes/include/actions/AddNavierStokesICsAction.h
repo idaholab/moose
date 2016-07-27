@@ -7,7 +7,7 @@
 #ifndef ADDNAVIERSTOKESICSACTION_H
 #define ADDNAVIERSTOKESICSACTION_H
 
-#include "Action.h"
+#include "NSAction.h"
 
 class AddNavierStokesICsAction;
 
@@ -28,7 +28,7 @@ InputParameters validParams<AddNavierStokesICsAction>();
  *   [../]
  * []
  */
-class AddNavierStokesICsAction : public Action
+class AddNavierStokesICsAction : public NSAction
 {
 public:
   AddNavierStokesICsAction(InputParameters parameters);
@@ -37,6 +37,9 @@ public:
   virtual void act();
 
 protected:
+  // Helper function that actually adds the ICs.
+  void addICs (std::vector<std::string> & names);
+
   Real _initial_pressure;
   Real _initial_temperature;
   RealVectorValue _initial_velocity;

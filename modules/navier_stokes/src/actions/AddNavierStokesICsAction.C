@@ -7,9 +7,9 @@
 #include "AddNavierStokesICsAction.h"
 #include "NavierStokesApp.h"
 #include "NSInitialCondition.h"
+#include "NSAction.h"
 
 // MOOSE includes
-#include "AddVariableAction.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
@@ -20,7 +20,7 @@
 template<>
 InputParameters validParams<AddNavierStokesICsAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<NSAction>();
 
   params.addRequiredParam<Real>("initial_pressure", "The initial pressure, assumed constant everywhere");
   params.addRequiredParam<Real>("initial_temperature", "The initial temperature, assumed constant everywhere");
@@ -31,7 +31,7 @@ InputParameters validParams<AddNavierStokesICsAction>()
 }
 
 AddNavierStokesICsAction::AddNavierStokesICsAction(InputParameters parameters) :
-    Action(parameters),
+    NSAction(parameters),
     _initial_pressure(getParam<Real>("initial_pressure")),
     _initial_temperature(getParam<Real>("initial_temperature")),
     _initial_velocity(getParam<RealVectorValue>("initial_velocity")),
@@ -46,32 +46,17 @@ AddNavierStokesICsAction::~AddNavierStokesICsAction()
 void
 AddNavierStokesICsAction::act()
 {
-  // TODO: this list of names shares code with
-  // AddNavierStokesVariablesAction, so they should probably inherit
-  // from an intermediate base class.
-  unsigned int dim = _mesh->dimension();
-  std::vector<NonlinearVariableName> names;
-  names.push_back("rho");
-  names.push_back("rhou");
-  if (dim >= 2)
-    names.push_back("rhov");
-  if (dim >= 3)
-    names.push_back("rhow");
-  names.push_back("rhoE");
+  // Call the base class's act() function to initialize the _vars and _auxs names.
+  NSAction::act();
 
-  names.push_back("vel_x");
-  if (dim >= 2)
-    names.push_back("vel_y");
-  if (dim >= 3)
-    names.push_back("vel_z");
+  // Now add the ICs for the nonlinear and auxiliary variables
+  addICs(_vars);
+  addICs(_auxs);
+}
 
-  names.push_back("pressure");
-  names.push_back("temperature");
-  names.push_back("enthalpy");
-  names.push_back("Mach");
-  names.push_back("internal_energy");
-  names.push_back("specific_volume");
-
+void
+AddNavierStokesICsAction::addICs (std::vector<std::string> & names)
+{
   for (const auto & name : names)
   {
     InputParameters params = _factory.getValidParams("NSInitialCondition");

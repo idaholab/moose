@@ -5,12 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "AddNavierStokesVariablesAction.h"
-#include "NavierStokesApp.h"
 
 // MOOSE includes
 #include "AddVariableAction.h"
 #include "FEProblem.h"
-#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
@@ -19,7 +17,7 @@
 template<>
 InputParameters validParams<AddNavierStokesVariablesAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<NSAction>();
 
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies(), "LAGRANGE");
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders(), "FIRST");
@@ -31,7 +29,7 @@ InputParameters validParams<AddNavierStokesVariablesAction>()
 }
 
 AddNavierStokesVariablesAction::AddNavierStokesVariablesAction(InputParameters parameters) :
-    Action(parameters),
+    NSAction(parameters),
     _scaling(getParam<std::vector<Real> >("scaling"))
 {
 }
@@ -43,52 +41,24 @@ AddNavierStokesVariablesAction::~AddNavierStokesVariablesAction()
 void
 AddNavierStokesVariablesAction::act()
 {
-  unsigned int dim = _mesh->dimension();
-
-  // Build up the vector of variable names for the user, depending on
-  // the mesh dimension.
-  std::vector<NonlinearVariableName> names;
-  names.push_back("rho");
-  names.push_back("rhou");
-  if (dim >= 2)
-    names.push_back("rhov");
-  if (dim >= 3)
-    names.push_back("rhow");
-  names.push_back("rhoE");
+  // Call the base class's act() function to initialize the _vars and _auxs names.
+  NSAction::act();
 
   // Make sure the number of scaling parameters matches the number of variables
-  if (_scaling.size() != names.size())
+  if (_scaling.size() != _vars.size())
     mooseError("Must provide a scaling parameter for each variable.");
 
   // All variables have the same type
   FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                  Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
 
-
   // Add the variables to the FEProblem
-  for (unsigned int i = 0; i < names.size(); ++i)
-    _problem->addVariable(names[i], fe_type, _scaling[i]);
+  for (unsigned int i = 0; i < _vars.size(); ++i)
+    _problem->addVariable(_vars[i], fe_type, _scaling[i]);
 
   // Add Aux variables.  These are all required in order for the code
   // to run, so they should not be independently selectable by the
   // user.
-
-  std::vector<AuxVariableName> aux_names;
-  aux_names.push_back("vel_x");
-  if (dim >= 2)
-    aux_names.push_back("vel_y");
-  if (dim >= 3)
-    aux_names.push_back("vel_z");
-
-  aux_names.push_back("pressure");
-  aux_names.push_back("temperature");
-  aux_names.push_back("enthalpy");
-  aux_names.push_back("Mach");
-
-  // Needed for FluidProperties calculations
-  aux_names.push_back("internal_energy");
-  aux_names.push_back("specific_volume");
-
- for (unsigned int i = 0; i < aux_names.size(); ++i)
-   _problem->addAuxVariable(aux_names[i], fe_type);
+  for (const auto & aux_name : _auxs)
+    _problem->addAuxVariable(aux_name, fe_type);
 }
