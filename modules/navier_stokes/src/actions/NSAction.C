@@ -18,7 +18,8 @@ InputParameters validParams<NSAction>()
 }
 
 NSAction::NSAction(InputParameters parameters) :
-    Action(parameters)
+    Action(parameters),
+    _dim(0)
 {
 }
 
@@ -32,15 +33,15 @@ NSAction::act()
   _vars.clear();
   _auxs.clear();
 
-  unsigned int dim = _mesh->dimension();
+  _dim = _mesh->dimension();
 
   // Build up the vector of variable names for the user, depending on
   // the mesh dimension.
   _vars.push_back("rho");
   _vars.push_back("rhou");
-  if (dim >= 2)
+  if (_dim >= 2)
     _vars.push_back("rhov");
-  if (dim >= 3)
+  if (_dim >= 3)
     _vars.push_back("rhow");
   _vars.push_back("rhoE");
 
@@ -48,9 +49,9 @@ NSAction::act()
   // to run, so they should not be independently selectable by the
   // user.
   _auxs.push_back("vel_x");
-  if (dim >= 2)
+  if (_dim >= 2)
     _auxs.push_back("vel_y");
-  if (dim >= 3)
+  if (_dim >= 3)
     _auxs.push_back("vel_z");
 
   _auxs.push_back("pressure");
