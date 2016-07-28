@@ -38,16 +38,12 @@ public:
    */
   SolutionFunction(const InputParameters & parameters);
 
-  /** Empty destructor
-   */
-  virtual ~SolutionFunction();
-
   /** Extract a value from the solution
    * @param t Time at which to extract
    * @param p Spatial location of desired data
    * @return The value at t and p
    */
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
 
   // virtual RealGradient gradient(Real t, const Point & p);
 
@@ -56,7 +52,7 @@ public:
    * was read. A pointer is required because Functions are created prior to UserObjects,
    * see Moose.C.
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
 

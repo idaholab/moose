@@ -48,14 +48,14 @@ public:
   /**
    * Initialize the ImageSampler
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Return the pixel value for the given point
    * @param t Time (unused)
    * @param p The point at which to extract pixel data
    */
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
 
 };
 

@@ -50,10 +50,6 @@ public:
    * @param parameters The input parameters
    */
   MooseParsedFunction(const InputParameters & parameters);
-
-  /**
-   * Destructor, it cleans up the libMesh::ParsedFunction object
-   */
   virtual ~MooseParsedFunction();
 
   /**
@@ -63,13 +59,13 @@ public:
    * @param pt The current point (x,y,z)
    * @return The result of evaluating the function
    */
-  virtual Real value(Real t, const Point & pt);
+  virtual Real value(Real t, const Point & pt) override;
 
   /**
    * Evaluate the gradient of the function. This is computed in libMesh
    * through automatic symbolic differentiation.
    */
-  virtual RealGradient gradient(Real t, const Point & p);
+  virtual RealGradient gradient(Real t, const Point & p) override;
 
   /**
    * Evaluate the time derivative of the function. This is computed in libMesh
@@ -78,18 +74,18 @@ public:
    * \param p The point in space (x,y,z)
    * \return The time derivative of the function at the specified time and location
    */
-  virtual Real timeDerivative(Real t, const Point & p);
+  virtual Real timeDerivative(Real t, const Point & p) override;
 
   /**
    * Method invalid for ParsedGradFunction
    * @see ParsedVectorFunction
    */
-  virtual RealVectorValue vectorValue(Real t, const Point & p);
+  virtual RealVectorValue vectorValue(Real t, const Point & p) override;
 
   /**
    * Creates the parsed function.
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
 

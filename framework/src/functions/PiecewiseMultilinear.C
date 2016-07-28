@@ -47,12 +47,6 @@ PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
 
 }
 
-
-PiecewiseMultilinear::~PiecewiseMultilinear()
-{
-}
-
-
 Real
 PiecewiseMultilinear::value(Real t, const Point & p)
 {
@@ -67,7 +61,6 @@ PiecewiseMultilinear::value(Real t, const Point & p)
   }
   return sample(pt_in_grid);
 }
-
 
 Real
 PiecewiseMultilinear::sample(const std::vector<Real> & pt)

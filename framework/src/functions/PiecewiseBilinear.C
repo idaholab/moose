@@ -94,10 +94,6 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
   _bilinear_interp.reset(new BilinearInterpolation(x, y, z));
 }
 
-PiecewiseBilinear::~PiecewiseBilinear()
-{
-}
-
 Real
 PiecewiseBilinear::value(Real t, const Point & p)
 {

@@ -54,14 +54,11 @@ class PiecewiseBilinear : public Function
 {
 public:
   PiecewiseBilinear(const InputParameters & parameters);
-  virtual ~PiecewiseBilinear();
 
   /**
    * This function will return a value based on the first input argument only.
    */
-  virtual Real value(Real t, const Point & pt);
-
-
+  virtual Real value(Real t, const Point & pt) override;
 
 private:
   MooseSharedPointer<BilinearInterpolation> _bilinear_interp;

@@ -122,10 +122,6 @@ Piecewise::Piecewise(const InputParameters & parameters) :
   }
 }
 
-Piecewise::~Piecewise()
-{
-}
-
 Real
 Piecewise::functionSize()
 {

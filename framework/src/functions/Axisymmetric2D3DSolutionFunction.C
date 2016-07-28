@@ -81,10 +81,6 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(const InputPa
     mooseError("2d_axis_point1 and 2d_axis_point2 must be different points");
 }
 
-Axisymmetric2D3DSolutionFunction::~Axisymmetric2D3DSolutionFunction()
-{
-}
-
 void
 Axisymmetric2D3DSolutionFunction::initialSetup()
 {

@@ -31,7 +31,6 @@ class PiecewiseLinear : public Piecewise
 {
 public:
   PiecewiseLinear(const InputParameters & parameters);
-  virtual ~PiecewiseLinear();
 
   /**
    * Get the value of the function (based on time only)
@@ -39,7 +38,7 @@ public:
    * \param pt The point in space (x,y,z) (unused)
    * \return The value of the function at the specified time
    */
-  virtual Real value(Real t, const Point & pt);
+  virtual Real value(Real t, const Point & pt) override;
 
   /**
    * Get the time derivative of the function (based on time only)
@@ -47,11 +46,11 @@ public:
    * \param pt The point in space (x,y,z) (unused)
    * \return The time derivative of the function at the specified time
    */
-  virtual Real timeDerivative(Real t, const Point & pt);
+  virtual Real timeDerivative(Real t, const Point & pt) override;
 
-  virtual Real integral();
+  virtual Real integral() override;
 
-  virtual Real average();
+  virtual Real average() override;
 };
 
 #endif
