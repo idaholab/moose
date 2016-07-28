@@ -165,7 +165,8 @@ out.xyz
 .jitdir/
 
 # Documentation Generation
-docs/content/systems/**/*.md
-docs/content/systems/**/*.yml
+*.moose.md
+*.moose.yml
+docs/.moosedocs
 docs/mkdocs.yml
 site

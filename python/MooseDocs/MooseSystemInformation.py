@@ -24,7 +24,7 @@ class MooseSystemInformation(MooseInformationBase):
         """
         The filename for the system documentation.
         """
-        return '{}/Overview.md'.format(name.strip('/').replace('/*', '').replace('/<type>', ''))
+        return '{}/Overview.moose.md'.format(name.strip('/').replace('/*', '').replace('/<type>', ''))
 
     def markdown(self):
         """
@@ -51,22 +51,54 @@ class MooseSystemInformation(MooseInformationBase):
 
         # Generate table of object within the system
         if self._yaml['subblocks']:
-            table = MarkdownTable('Name', 'Description')
-            for child in self._yaml['subblocks']:
 
-                name = child['name']
-                if name.endswith('*') or name.endswith('<type>'):
-                    continue
+            # Create table for sub-blocks (i.e., '*' syntax)
+            if any( [child['name'].endswith('*') for child in self._yaml['subblocks'] ]):
+                table = self._genTable(self._yaml['subblocks'])
+                if table.size() > 0:
+                    md += ['## Available Sub-Objects']
+                    md += [table.markdown()]
+                    md += ['']
 
-                name = name.split('/')[-1].strip()
-                if self._syntax.hasObject(name):
-                    name = '[{0}]({0}.md)'.format(name)
-                    desc = child['description'].strip()
-                    table.addRow(name, desc)
+            # If the '*' syntax is not used it is possible to have type and sub-systems (e.g., Executioner block)
+            else:
+                sub_system_table = MarkdownTable('Name', 'Description')
+                for child in self._yaml['subblocks']:
 
-            if table.size() > 0:
-                md += ['## Available Objects']
-                md += [table.markdown()]
-                md += ['']
+                    # Create table for single-block (i.e., <type>)
+                    if child['name'].endswith('<type>'):
+                        table = self._genTable(child['subblocks'])
+                        if table.size() > 0:
+                            md += ['## Available Types']
+                            md += [table.markdown()]
+                            md += ['']
+                    else:
+                        name = child['name'].split('/')[-1].strip()
+                        name = '[{0}]({0}/Overview.moose.md)'.format(name)
+                        desc = child['description'].strip()
+                        sub_system_table.addRow(name, desc)
+
+                if sub_system_table.size() > 0:
+                    md += ['## Available Sub-systems']
+                    md += [sub_system_table.markdown()]
+                    md += ['']
 
         return '\n'.join(md)
+
+    def _genTable(self, node):
+        """
+        Helper method for creating a system summary markdown tables
+        """
+        table = MarkdownTable('Name', 'Description')
+        for child in node:
+            name = child['name']
+            if name.endswith('*'):
+                continue
+
+            name = name.split('/')[-1].strip()
+            if self._syntax.hasObject(name):
+                name = '[{0}]({0}.moose.md)'.format(name)
+                desc = child['description'].strip()
+                table.addRow(name, desc)
+
+        return table

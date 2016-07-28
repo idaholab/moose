@@ -35,24 +35,24 @@ class MooseApplicationDocGenerator(object):
 
         Args:
             purge[bool]: When True the install directory is cleaned.
+        """
 
-        NOTE: Documentation will only generated if the executable has been modified since that last time
-              the function has been called, unless the develop flag was set to True upon construction
-              of this object.
+        # Remove all '.moose.md/.moose.yml' files from the current directory
+        if purge:
+            for root, dirs, files in os.walk(os.getcwd(), topdown=False):
+                for name in files:
+                    if name.endswith('.moose.md') or name.endswith('.moose.yml'):
+                        full_file = os.path.join(root, name)
+                        log.debug('Removing: {}'.format(full_file))
+                        os.remove(full_file)
 
+        """
         TODO: Tie this into the mkdocs livereload. To do this the mkdocs watching should be paused while
         the files are generated and then mkdocs livereload restarted. Otherwise, each file that changes
         spawns a rebuild.
         """
-        if self._develop or self._exe == None:
-            self._generate(purge=purge)
-            self._modified = os.path.getmtime(self._exe)
-
-        else:
-            modified = os.path.getmtime(self._exe)
-            if self._modified != os.path.getmtime(self._exe):
-                self._generate(purge=purge)
-                self._modified = modified
+        self._generate()
+        self._modified = os.path.getmtime(self._exe)
 
     def _configure(self):
         """
@@ -103,7 +103,7 @@ class MooseApplicationDocGenerator(object):
         return configs
 
 
-    def _generate(self, purge=False):
+    def _generate(self):
         """
         Generate the documentation.
         """
@@ -120,7 +120,7 @@ class MooseApplicationDocGenerator(object):
 
         for config in configs:
             generator = MooseSubApplicationDocGenerator(ydata, config)
-            generator.write(purge=purge)
+            generator.write()
 
         # Create the mkdocs.yml file
         # TODO: When mkdocs plugins API is up and running this should go away.

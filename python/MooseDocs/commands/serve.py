@@ -3,7 +3,6 @@ import sys
 import glob
 import re
 import mkdocs
-import tempfile
 import livereload# import Server
 import logging
 import shutil
@@ -79,15 +78,25 @@ def _livereload(host, port, config, builder, site_dir):
     server.serve(root=site_dir, host=host, port=int(port), restart_delay=0)
 
 
-def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload'):
+def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True):
     """
     Mimics mkdocs serve command.
 
     @TODO: When the mkdocs plugin system allows for custom Watcher this should be removed.
     """
 
-    # Create a temporary build directory, and set some options to serve it
-    tempdir = tempfile.mkdtemp()
+    # Location of serve site
+    import tempfile
+    tempdir = os.path.abspath('.moosedocs')
+
+    # Clean the "temp" directory (if desired)
+    if clean and os.path.exists(tempdir):
+        log.info('Cleaning build directory: {}'.format(tempdir))
+        shutil.rmtree(tempdir)
+
+    # Create the "temp" directory
+    if not os.path.exists(tempdir):
+        os.mkdir(tempdir)
 
     def builder():
         config = mkdocs.config.load_config(config_file=config_file, strict=strict)
@@ -108,4 +117,4 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload'):
         else:
             mkdocs.commands.serve._static_server(host, port, tempdir)
     finally:
-        shutil.rmtree(tempdir)
+        log.info("Finished serving local site.")

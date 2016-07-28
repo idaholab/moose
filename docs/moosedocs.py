@@ -35,6 +35,7 @@ def command_line_options():
     serve_parser.add_argument('--dirtyreload', dest='livereload', action='store_const', const='dirtyreload', help="Enable the live reloading server without rebuilding entire site with single file change (default).")
     serve_parser.add_argument('--no-livereload', dest='livereload', action='store_const', const='no-livereload', help="Disable the live reloading of the served site.")
     serve_parser.add_argument('--strict', action='store_true', help='Enable strict mode and abort on warnings.')
+    serve_parser.add_argument('--dirty', action='store_false', dest='clean', help='Do not clean the temporary build prior to building site.')
 
     # Build options
     build_parser = subparser.add_parser('build', help='Generate and Build the documentation for serving.')
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     if options.command == 'generate':
         MooseDocs.commands.generate(config_file=options.moosedocs_config_file, purge=options.purge)
     elif options.command == 'serve':
-        MooseDocs.commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload)
+        MooseDocs.commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload, clean=options.clean)
     elif options.command == 'build':
         MooseDocs.commands.build(config_file=options.mkdocs_config_file)
 

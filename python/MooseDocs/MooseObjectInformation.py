@@ -59,7 +59,7 @@ class MooseObjectInformation(MooseInformationBase):
         """
         The object markdown to create.
         """
-        return '{}.md'.format(name.strip('/').replace('/*', '').replace('/<type>', ''))
+        return '{}.moose.md'.format(name.strip('/').replace('/*', '').replace('/<type>', ''))
 
     def develDocs(self):
         """

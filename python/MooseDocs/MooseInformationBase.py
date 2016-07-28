@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 log = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class MooseInformationBase(object):
 
         self._yaml = node
         self._config = kwargs
-        self._details = os.path.abspath(os.path.join(self._config['details'], self.filename(node['name'])))
+        self._details = os.path.abspath(os.path.join(self._config['details'], self.filename(node['name']).replace('.moose.md', '.md')))
         log.debug(node['name'])
 
     def __str__(self):
@@ -55,11 +56,23 @@ class MooseInformationBase(object):
         # Generate the markdown
         md = self.markdown()
 
+        """
+        To enable the use of easier markdown link creation (see extensions.MooseMarkdownLinkPreprocessor) the
+        relative path of the markdown file must be embedded in Markdown file.
+
+        TODO: When (if?) the mkdocs plugin system is realized a plugin could be create to embedded this just prior to
+        conversion to html rather than hard-code it in here.
+        """
+        md = '<!-- {} -->\n\n{}'.format(os.path.relpath(filename, os.getcwd()), md)
+
         # Do not re-write file if it exists (saves mkdocs from re-loading the world)
         if os.path.exists(filename):
+
             with open(filename, 'r') as fid:
                 content = fid.read()
+
             if content == md:
+                log.debug('No Change: {}'.format(filename))
                 return
 
         # Write the file

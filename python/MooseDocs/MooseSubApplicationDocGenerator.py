@@ -58,31 +58,27 @@ class MooseSubApplicationDocGenerator(object):
                 if not any([node['name'].startswith(h) for h in hide]):
                     self._objects.append(MooseObjectInformation(node, src, inputs=inputs, children=children, **self._config))
 
-    def write(self, purge=False):
+    def write(self):
         """
         Write the system and object markdown as well as the associated yaml files for mkdocs.
         """
 
-        # Purge all files in the install directory
-        install_dir = self._config.get('install')
-        if purge and os.path.exists(install_dir):
-            log.info("Purging install directory: {}".format(install_dir))
-            shutil.rmtree(install_dir)
-
         for system in self._systems:
             system.write()
+
         for obj in self._objects:
             obj.write()
 
         yml = self.generateYAML()
-        filename = os.path.abspath(os.path.join(install_dir, 'pages.yml'))
+        install_dir = self._config.get('install')
+        filename = os.path.abspath(os.path.join(install_dir, 'pages.moose.yml'))
         log.info('Creating YAML file: {}'.format(filename))
         with open(filename, 'w') as fid:
             fid.write(yml)
 
     def generateYAML(self):
         """
-        Generates the System.yml file.
+        Generates the pages.moose.yml file.
         """
 
         install = self._config['install']
@@ -91,15 +87,15 @@ class MooseSubApplicationDocGenerator(object):
         tree = rec_dd()
         for root, dirs, files in os.walk(install, topdown=True):
 
-            if 'Overview.md' in files:
-                files.insert(0, files.pop(files.index('Overview.md')))
+            if 'Overview.moose.md' in files:
+                files.insert(0, files.pop(files.index('Overview.moose.md')))
 
             for filename in files:
-                name, ext = os.path.splitext(filename)
 
-                if ext != '.md':
+                if not filename.endswith('.moose.md'):
                     continue
 
+                name = filename[:-9]
                 relative = os.path.relpath(root, install).split(os.path.sep)
                 level = len(relative)
                 cmd = "tree{}".format(("['{}']"*level).format(*relative))
@@ -123,5 +119,10 @@ class MooseSubApplicationDocGenerator(object):
                 for f in dumptree(value, level+1):
                     yield f
 
-        output = dumptree(tree)
+        # Sort
+        sorted_tree = collections.OrderedDict()
+        for key in sorted(tree.keys()):
+            sorted_tree[key] = tree[key]
+
+        output = dumptree(sorted_tree)
         return '\n'.join(output)
