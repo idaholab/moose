@@ -4,18 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef NSWEAKSTAGNATIONBC_H
-#define NSWEAKSTAGNATIONBC_H
+#ifndef NSWEAKSTAGNATIONBASEBC_H
+#define NSWEAKSTAGNATIONBASEBC_H
 
 #include "NSIntegratedBC.h"
 
 // Forward Declarations
-class NSWeakStagnationBC;
+class NSWeakStagnationBaseBC;
 
 
 // Specialization required of all user-level Moose objects
 template<>
-InputParameters validParams<NSWeakStagnationBC>();
+InputParameters validParams<NSWeakStagnationBaseBC>();
 
 
 /**
@@ -24,14 +24,14 @@ InputParameters validParams<NSWeakStagnationBC>();
  * based on valued implied by fixed stagnation temperature and pressure
  * values and specified flow direction (but not magnitude).
  */
-class NSWeakStagnationBC : public NSIntegratedBC
+class NSWeakStagnationBaseBC : public NSIntegratedBC
 {
 public:
   // Constructor
-  NSWeakStagnationBC(const InputParameters & parameters);
+  NSWeakStagnationBaseBC(const InputParameters & parameters);
 
   // Destructor, better be virtual
-  virtual ~NSWeakStagnationBC(){}
+  virtual ~NSWeakStagnationBaseBC(){}
 
 protected:
   /**
@@ -74,4 +74,4 @@ protected:
 };
 
 
-#endif // NSSTAGNATIONBC_H
+#endif

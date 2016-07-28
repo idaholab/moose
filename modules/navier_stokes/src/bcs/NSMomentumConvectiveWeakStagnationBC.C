@@ -9,13 +9,13 @@
 template<>
 InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>()
 {
-  InputParameters params = validParams<NSWeakStagnationBC>();
+  InputParameters params = validParams<NSWeakStagnationBaseBC>();
   params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }
 
 NSMomentumConvectiveWeakStagnationBC::NSMomentumConvectiveWeakStagnationBC(const InputParameters & parameters) :
-    NSWeakStagnationBC(parameters),
+    NSWeakStagnationBaseBC(parameters),
     _component(getParam<unsigned>("component"))
 {
 }
