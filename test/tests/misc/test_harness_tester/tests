@@ -1,4 +1,8 @@
 [Tests]
+  [./test_runcommand]
+    type = 'RunCommand'
+    command = 'echo Hello World'
+  [../]
 
 # All tests are disabled so that we don't see unecessary TestHarness tester
 # during normal operation.  Feel free to uncomment these tests and run them
