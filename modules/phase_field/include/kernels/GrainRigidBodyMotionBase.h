@@ -38,7 +38,7 @@ protected:
   const VariableGradient & _grad_c;
 
   VariableName _c_name;
-  unsigned int _ncrys;
+  unsigned int _op_num;
   /// Variable value for the order parameters
   std::vector<const VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;

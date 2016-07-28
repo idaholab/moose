@@ -36,8 +36,8 @@ public:
 protected:
   const EulerAngleProvider & _euler;
   const VariableValue & _unique_grains;
-  const unsigned int _ncrys;
-  std::vector<Real> _values;
+  const unsigned int _grain_num;
+  std::vector<Real> _sample;
 };
 
 #endif //GRAINTEXTUREVECTORPOSTPROCESSOR_H

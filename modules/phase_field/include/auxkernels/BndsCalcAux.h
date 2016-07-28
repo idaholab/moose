@@ -26,7 +26,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  unsigned int _ncrys;
+  const unsigned int _op_num;
   std::vector<const VariableValue *> _vals;
 };
 
