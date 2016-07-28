@@ -37,11 +37,7 @@ public:
 
 protected:
 
-  /**
-   * Adds to the "time residual" for any NodalKernel inheriting
-   * from this class
-   */
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 };
 
 #endif
