@@ -27,12 +27,12 @@ protected:
   const VariableValue & _u_vel;
   const VariableValue & _rhoA;
   const MaterialProperty<Real> & _Cw;
-  const MaterialProperty<Real> * const _dCw_daAL;
+  const MaterialProperty<Real> * const _dCw_dbeta;
   const MaterialProperty<Real> & _dCw_drhoA;
   const MaterialProperty<Real> & _dCw_drhouA;
   const MaterialProperty<Real> & _dCw_drhoEA;
 
-  unsigned int _alphaAL_var_number;
+  unsigned int _beta_var_number;
   unsigned int _rhoA_var_number;
   unsigned int _rhouA_var_number;
   unsigned int _rhoEA_var_number;

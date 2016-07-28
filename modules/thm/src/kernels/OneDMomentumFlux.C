@@ -5,7 +5,7 @@ InputParameters validParams<OneDMomentumFlux>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("alpha", 1.0, "Volume fraction");
-  params.addCoupledVar("alpha_A_liquid", "Volume fraction of liquid");
+  params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
   params.addCoupledVar("rhoEA", "total energy multiplied by area");
   params.addRequiredCoupledVar("u", "velocity");
@@ -15,8 +15,7 @@ InputParameters validParams<OneDMomentumFlux>()
   params.addRequiredParam<MaterialPropertyName>("dp_darhoA", "Derivative of pressure w.r.t. density");
   params.addRequiredParam<MaterialPropertyName>("dp_darhouA", "Derivative of pressure w.r.t. momentum");
   params.addRequiredParam<MaterialPropertyName>("dp_darhoEA", "Derivative of pressure w.r.t. total energy");
-  params.addParam<MaterialPropertyName>("dp_daAL", "Derivative of pressure w.r.t. alpha_A_liquid");
-
+  params.addParam<MaterialPropertyName>("dp_dbeta", "Derivative of pressure w.r.t. beta");
   return params;
 }
 
@@ -33,9 +32,11 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters) :
     _area(coupledValue("area")),
     _rhoA_var_number(coupled("rhoA")),
     _rhoEA_var_number(isCoupled("rhoEA") ? coupled("rhoEA") : libMesh::invalid_uint),
-    _has_alpha_A(isCoupled("alpha_A_liquid")),
-    _alpha_A_liquid_var_number(_has_alpha_A ? coupled("alpha_A_liquid") : libMesh::invalid_uint),
-    _dp_daAL(_has_alpha_A ? &getMaterialProperty<Real>("dp_daAL") : NULL)
+    _has_beta(isCoupled("beta")),
+    _beta(coupledValue("beta")),
+    _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
+    _dp_dbeta(_has_beta ? &getMaterialProperty<Real>("dp_dbeta") : NULL),
+    _daL_dbeta(_has_beta ? &getMaterialProperty<Real>("daL_dbeta") : NULL)
 {
 }
 
@@ -82,9 +83,9 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
     // Contribution due to convective flux.  Negative sign comes from integration by parts.
     return -A23 * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
-  else if (jvar == _alpha_A_liquid_var_number)
+  else if (jvar == _beta_var_number)
   {
-    return -(_sign * _pressure[_qp] + _alpha[_qp] * _area[_qp] * (*_dp_daAL)[_qp]) * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -(_sign * _pressure[_qp] * (*_daL_dbeta)[_qp] + _alpha[_qp] * (*_dp_dbeta)[_qp]) * _area[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
   }
   else
     return 0.;

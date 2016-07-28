@@ -9,9 +9,9 @@ InputParameters validParams<OneDMomentumFriction>()
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
   params.addCoupledVar("rhoEA", "Conserved total energy");
   params.addRequiredCoupledVar("u", "velocity");
-  params.addCoupledVar("alpha_A_liquid", "alphaA_liquid if using 7-eqn model");
+  params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>("Cw", "The name of the material property that stores the wall drag coefficient");
-  params.addParam<MaterialPropertyName>("dCw_daAL", "");
+  params.addParam<MaterialPropertyName>("dCw_dbeta", "");
   params.addRequiredParam<MaterialPropertyName>("dCw_drhoA", "");
   params.addRequiredParam<MaterialPropertyName>("dCw_drhouA", "");
   params.addRequiredParam<MaterialPropertyName>("dCw_drhoEA", "");
@@ -24,11 +24,11 @@ OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters) :
     _u_vel(coupledValue("u")),
     _rhoA(coupledValue("rhoA")),
     _Cw(getMaterialProperty<Real>("Cw")),
-    _dCw_daAL  (isCoupled("alpha_A_liquid") ? &getMaterialProperty<Real>("dCw_daAL") : NULL),
+    _dCw_dbeta (isCoupled("beta") ? &getMaterialProperty<Real>("dCw_dbeta") : NULL),
     _dCw_drhoA (getMaterialProperty<Real>("dCw_drhoA")),
     _dCw_drhouA(getMaterialProperty<Real>("dCw_drhouA")),
     _dCw_drhoEA(getMaterialProperty<Real>("dCw_drhoEA")),
-    _alphaAL_var_number(isCoupled("alpha_A_liquid") ? coupled("alpha_A_liquid") : libMesh::invalid_uint),
+    _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA")),
     _rhoEA_var_number(isCoupled("rhoEA") ? coupled("rhoEA") : libMesh::invalid_uint)
@@ -68,9 +68,9 @@ OneDMomentumFriction::computeQpOffDiagJacobian(unsigned int jvar)
   {
     return _dCw_drhoEA[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
-  else if (jvar == _alphaAL_var_number)
+  else if (jvar == _beta_var_number)
   {
-    return (*_dCw_daAL)[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return (*_dCw_dbeta)[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else
     return 0;

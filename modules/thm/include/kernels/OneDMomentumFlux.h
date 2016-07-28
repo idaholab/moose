@@ -35,9 +35,11 @@ protected:
   unsigned int _rhoA_var_number;
   unsigned int _rhoEA_var_number;
 
-  bool _has_alpha_A;
-  unsigned int _alpha_A_liquid_var_number;
-  const MaterialProperty<Real> * _dp_daAL;
+  bool _has_beta;
+  const VariableValue & _beta;
+  unsigned int _beta_var_number;
+  const MaterialProperty<Real> * _dp_dbeta;
+  const MaterialProperty<Real> * _daL_dbeta;
 };
 
 #endif /* ONEDMOMENTUMFLUX_H */
