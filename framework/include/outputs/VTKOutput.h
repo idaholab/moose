@@ -45,12 +45,12 @@ protected:
   /**
    * Perform the output of VTKOutput
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Return the file name with the *.vtk extension
    */
-  std::string filename();
+  virtual std::string filename() override;
 
 private:
 
