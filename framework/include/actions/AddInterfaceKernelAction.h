@@ -28,7 +28,7 @@ class AddInterfaceKernelAction : public MooseObjectAction
 public:
   AddInterfaceKernelAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDKERNELACTION_H

@@ -30,10 +30,6 @@ SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters) :
 {
 }
 
-SetupTimeStepperAction::~SetupTimeStepperAction()
-{
-}
-
 void
 SetupTimeStepperAction::act()
 {

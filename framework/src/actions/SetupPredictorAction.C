@@ -32,10 +32,6 @@ SetupPredictorAction::SetupPredictorAction(InputParameters parameters) :
 {
 }
 
-SetupPredictorAction::~SetupPredictorAction()
-{
-}
-
 void
 SetupPredictorAction::act()
 {

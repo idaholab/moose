@@ -26,7 +26,8 @@ class DynamicObjectRegistrationAction : public Action
 {
 public:
   DynamicObjectRegistrationAction(InputParameters parameters);
-  virtual void act();
+
+  virtual void act() override;
 };
 
 #endif /* DYNAMICOBJECTREGISTRATIONACTION_H */

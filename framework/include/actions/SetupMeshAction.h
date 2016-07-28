@@ -30,7 +30,7 @@ class SetupMeshAction : public MooseObjectAction
 public:
   SetupMeshAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 
 private:
 

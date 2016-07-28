@@ -27,7 +27,8 @@ class CreateExecutionerAction : public MooseObjectAction
 {
 public:
   CreateExecutionerAction(InputParameters params);
-  virtual void act();
+
+  virtual void act() override;
 };
 
 #endif // CREATEEXECUTIONERACTION_H

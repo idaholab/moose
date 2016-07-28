@@ -41,10 +41,7 @@ public:
    */
   MaterialOutputAction(InputParameters params);
 
-  /**
-   * Performs the task of adding a AuxVariable and AuxKernel for outputting material properties
-   */
-  virtual void act();
+  virtual void act() override;
 
   /**
    * Builds the objects necessary for material property output

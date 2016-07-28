@@ -28,13 +28,8 @@ DeprecatedBlockAction::DeprecatedBlockAction(InputParameters parameters) :
 {
 }
 
-DeprecatedBlockAction::~DeprecatedBlockAction()
-{
-}
-
 void
 DeprecatedBlockAction::act()
 {
   mooseError("Input file block '" + name()  + "' has been deprecated.");
 }
-

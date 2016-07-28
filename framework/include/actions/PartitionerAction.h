@@ -28,7 +28,7 @@ class PartitionerAction: public MooseObjectAction
 public:
   PartitionerAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //PartitionerAction_H

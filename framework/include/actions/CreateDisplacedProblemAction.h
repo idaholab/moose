@@ -29,12 +29,8 @@ class CreateDisplacedProblemAction : public Action
 {
 public:
   CreateDisplacedProblemAction(InputParameters parameters);
-  virtual ~CreateDisplacedProblemAction();
 
-  virtual void act();
-
-protected:
-
+  virtual void act() override;
 };
 
 #endif /* CREATEDISPLACEDPROBLEMACTION_H */
