@@ -65,6 +65,12 @@
       sy = 0.
       fluid_properties = ideal_gas
     [../]
+
+    [./solid_walls]
+      type = NSNoPenetrationBC
+      boundary = '3 4' # 'Lower Wall, Upper Wall'
+      fluid_properties = ideal_gas
+    [../]
   [../]
 []
 
@@ -140,40 +146,6 @@
     temperature = temperature
     boundary = '2' # 'Outflow'
     specified_pressure = 101325 # Pa
-    fluid_properties = ideal_gas
-  [../]
-
-  # The no penentration BC (u.n=0) applies on all the solid surfaces.
-  # This is enforced weakly via the NSPressureNeumannBC.
-  [./rhou_no_penetration]
-    type = NSPressureNeumannBC
-    variable = rhou
-    component = 0
-    boundary = '3 4' # 'Lower Wall, Upper Wall'
-    u = vel_x
-    v = vel_y
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    pressure = pressure
-    fluid_properties = ideal_gas
-  [../]
-
-  # The no penentration BC (u.n=0) applies on all the solid surfaces.
-  # This is enforced weakly via the NSPressureNeumannBC.
-  [./rhov_no_penetration]
-    type = NSPressureNeumannBC
-    variable = rhov
-    component = 1
-    boundary = '3 4' # 'Lower Wall, Upper Wall'
-    u = vel_x
-    v = vel_y
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    pressure = pressure
     fluid_properties = ideal_gas
   [../]
 []

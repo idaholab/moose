@@ -29,6 +29,12 @@ InputParameters validParams<AddNavierStokesBCsAction>();
  *       sy = 0.
  *       fluid_properties = ideal_gas
  *     [../]
+ *
+ *     [./solid_walls]
+ *       type = NSNoPenetrationBC
+ *       boundary = '3 4'
+ *       fluid_properties = ideal_gas
+ *     [../]
  *   [../]
  * []
  */
@@ -47,6 +53,9 @@ protected:
   void addNSMassWeakStagnationBC();
   void addNSEnergyWeakStagnationBC();
   void addNSMomentumWeakStagnationBC(unsigned int component);
+
+  // Helper function that adds the no-penetration BCs
+  void addNoPenetrationBC(unsigned int component);
 
   // Helper function that sets the parameters which are common to all NSKernels.
   void setCommonParams(InputParameters & params);

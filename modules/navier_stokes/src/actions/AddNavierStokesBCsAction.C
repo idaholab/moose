@@ -40,6 +40,11 @@ AddNavierStokesBCsAction::act()
     for (unsigned int component = 0; component < _dim; ++component)
       addNSMomentumWeakStagnationBC(component);
   }
+  else if (_type == "NSNoPenetrationBC")
+  {
+    for (unsigned int component = 0; component < _dim; ++component)
+      addNoPenetrationBC(component);
+  }
 }
 
 
@@ -108,6 +113,25 @@ AddNavierStokesBCsAction::addNSMomentumWeakStagnationBC(unsigned int component)
 
     _problem->addBoundaryCondition(kernel_type, std::string("weak_stagnation_") + momentums[component] + std::string("_pressure_inflow"), params);
   }
+}
+
+
+
+void
+AddNavierStokesBCsAction::addNoPenetrationBC(unsigned int component)
+{
+  const static std::string momentums[3] = {"rhou", "rhov", "rhow"};
+  const std::string kernel_type = "NSPressureNeumannBC";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<NonlinearVariableName>("variable") = momentums[component];
+  setCommonParams(params);
+  params += _moose_object_pars;
+
+  // These BCs also need the component and couping to the pressure.
+  params.set<unsigned int>("component") = component;
+  params.set<std::vector<VariableName> >("pressure") = {"pressure"};
+
+  _problem->addBoundaryCondition(kernel_type, momentums[component] + std::string("_no_penetration"), params);
 }
 
 
