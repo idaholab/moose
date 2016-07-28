@@ -30,7 +30,7 @@ public:
   SinDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
 private:
   Real _initial;
