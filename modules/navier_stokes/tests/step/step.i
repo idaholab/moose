@@ -26,26 +26,6 @@
 []
 
 
-[NavierStokes]
-  [./Variables]
-    #         'rho rhou rhov   rhoE'
-    scaling = '1.  1.    1.    9.869232667160121e-6'
-    family = LAGRANGE
-    order = FIRST
-  [../]
-  [./ICs]
-    initial_pressure = 101325.
-    initial_temperature = 300.
-    initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
-    fluid_properties = ideal_gas
-  [../]
-  [./Kernels]
-    fluid_properties = ideal_gas
-  [../]
-[]
-
-
-
 [Modules]
   [./FluidProperties]
     [./ideal_gas]
@@ -54,217 +34,52 @@
       R = 287
     [../]
   [../]
-[]
 
+  [./NavierStokes]
+    [./Variables]
+      #         'rho rhou rhov   rhoE'
+      scaling = '1.  1.    1.    9.869232667160121e-6'
+      family = LAGRANGE
+      order = FIRST
+    [../]
 
+    [./ICs]
+      initial_pressure = 101325.
+      initial_temperature = 300.
+      initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
+      fluid_properties = ideal_gas
+    [../]
 
-[BCs]
-  # "Free outflow" mass equation BC
-  [./mass_outflow]
-    type = NSMassUnspecifiedNormalFlowBC
-    variable = rho
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    boundary = 'right'
-    fluid_properties = ideal_gas
-  [../]
+    [./Kernels]
+      fluid_properties = ideal_gas
+    [../]
 
-  # Specified pressure x-momentum equation invsicid outflow BC
-  [./rhou_specified_pressure_outflow]
-    type = NSMomentumInviscidSpecifiedPressureBC
-    variable = rhou
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    component = 0
-    boundary = 'right'
-    specified_pressure = 101325 # Pa
-    fluid_properties = ideal_gas
-  [../]
+    [./BCs]
+      [./inlet]
+        type = NSWeakStagnationInletBC
+        boundary = 'left'
+        stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
+        stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
+        sx = 1.
+        sy = 0.
+        fluid_properties = ideal_gas
+      [../]
 
-  # Specified pressure y-momentum equation inviscid outflow BC
-  [./rhov_specified_pressure_outflow]
-    type = NSMomentumInviscidSpecifiedPressureBC
-    variable = rhov
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    component = 1
-    boundary = 'right'
-    specified_pressure = 101325 # Pa
-    fluid_properties = ideal_gas
-  [../]
+      [./solid_walls]
+        type = NSNoPenetrationBC
+        boundary = 'top bottom step_top step_left step_right'
+        fluid_properties = ideal_gas
+      [../]
 
-  # Specified pressure energy equation outflow BC
-  [./rhoE_specified_pressure_outflow]
-    type = NSEnergyInviscidSpecifiedPressureBC
-    variable = rhoE
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    temperature = temperature
-    boundary = 'right'
-    specified_pressure = 101325 # Pa
-    fluid_properties = ideal_gas
-  [../]
-
-  # The no penentration BC (u.n=0) applies on all the solid surfaces.
-  # This is enforced weakly via the NSPressureNeumannBC.
-  [./rhou_no_penetration]
-    type = NSPressureNeumannBC
-    variable = rhou
-    component = 0
-    boundary = 'top bottom step_top step_left step_right'
-    u = vel_x
-    v = vel_y
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    pressure = pressure
-    fluid_properties = ideal_gas
-  [../]
-
-  # The no penentration BC (u.n=0) applies on all the solid surfaces.
-  # This is enforced weakly via the NSPressureNeumannBC.
-  [./rhov_no_penetration]
-    type = NSPressureNeumannBC
-    variable = rhov
-    component = 1
-    boundary = 'top bottom step_top step_left step_right'
-    u = vel_x
-    v = vel_y
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    pressure = pressure
-    fluid_properties = ideal_gas
-  [../]
-
-  #
-  # "Weak" stagnation and specified flow direction boundary conditions
-  #
-  [./weak_stagnation_mass_inflow]
-    type = NSMassWeakStagnationBC
-    variable = rho
-    boundary = 'left'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhou_convective_inflow]
-    type = NSMomentumConvectiveWeakStagnationBC
-    variable = rhou
-    component = 0
-    boundary = 'left'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhou_pressure_inflow]
-    type = NSMomentumPressureWeakStagnationBC
-    variable = rhou
-    component = 0
-    boundary = 'left'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhov_convective_inflow]
-    type = NSMomentumConvectiveWeakStagnationBC
-    variable = rhov
-    component = 1
-    boundary = 'left'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhov_pressure_inflow]
-    type = NSMomentumPressureWeakStagnationBC
-    variable = rhov
-    component = 1
-    boundary = 'left'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_energy_inflow]
-    type = NSEnergyWeakStagnationBC
-    variable = rhoE
-    boundary = 'left'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
+      [./outlet]
+        type = NSStaticPressureOutletBC
+        boundary = 'right'
+        specified_pressure = 101325 # Pa
+        fluid_properties = ideal_gas
+      [../]
+    [../]
   [../]
 []
-
 
 
 
@@ -281,7 +96,7 @@
     temperature = temperature
     enthalpy = enthalpy
     # This value is not used in the Euler equations, but it *is* used
-    # by the stabilization parameter computation, which it decrease
+    # by the stabilization parameter computation, which it decreases
     # the amount of artificial viscosity added, so it's best to use a
     # realistic value.
     dynamic_viscosity = 0.0

@@ -232,10 +232,10 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 #define registerAction(type, action) action_factory.reg<type>(stringifyName(type), action)
 
   // Create the syntax
-  syntax.registerActionSyntax("AddNavierStokesVariablesAction", "NavierStokes/Variables");
-  syntax.registerActionSyntax("AddNavierStokesICsAction", "NavierStokes/ICs");
-  syntax.registerActionSyntax("AddNavierStokesKernelsAction", "NavierStokes/Kernels");
-  syntax.registerActionSyntax("AddNavierStokesBCsAction", "NavierStokes/BCs/*");
+  syntax.registerActionSyntax("AddNavierStokesVariablesAction", "Modules/NavierStokes/Variables");
+  syntax.registerActionSyntax("AddNavierStokesICsAction", "Modules/NavierStokes/ICs");
+  syntax.registerActionSyntax("AddNavierStokesKernelsAction", "Modules/NavierStokes/Kernels");
+  syntax.registerActionSyntax("AddNavierStokesBCsAction", "Modules/NavierStokes/BCs/*");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);

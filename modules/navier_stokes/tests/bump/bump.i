@@ -36,51 +36,6 @@
 
 
 
-[NavierStokes]
-  [./Variables]
-    #         'rho rhou rhov   rhoE'
-    scaling = '1.  1.    1.    9.869232667160121e-6'
-    family = LAGRANGE
-    order = FIRST
-  [../]
-
-  [./ICs]
-    initial_pressure = 101325.
-    initial_temperature = 300.
-    initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
-    fluid_properties = ideal_gas
-  [../]
-
-  [./Kernels]
-    fluid_properties = ideal_gas
-  [../]
-
-  [./BCs]
-    [./inlet]
-      type = NSWeakStagnationInletBC
-      boundary = '1'
-      stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-      stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-      sx = 1.
-      sy = 0.
-      fluid_properties = ideal_gas
-    [../]
-
-    [./solid_walls]
-      type = NSNoPenetrationBC
-      boundary = '3 4' # 'Lower Wall, Upper Wall'
-      fluid_properties = ideal_gas
-    [../]
-
-    [./outlet]
-      type = NSStaticPressureOutletBC
-      boundary = '2' # 'Outflow'
-      specified_pressure = 101325 # Pa
-      fluid_properties = ideal_gas
-    [../]
-  [../]
-[]
-
 [Modules]
   [./FluidProperties]
     [./ideal_gas]
@@ -89,74 +44,52 @@
       R = 287
     [../]
   [../]
+
+  [./NavierStokes]
+    [./Variables]
+      #         'rho rhou rhov   rhoE'
+      scaling = '1.  1.    1.    9.869232667160121e-6'
+      family = LAGRANGE
+      order = FIRST
+    [../]
+
+    [./ICs]
+      initial_pressure = 101325.
+      initial_temperature = 300.
+      initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
+      fluid_properties = ideal_gas
+    [../]
+
+    [./Kernels]
+      fluid_properties = ideal_gas
+    [../]
+
+    [./BCs]
+      [./inlet]
+        type = NSWeakStagnationInletBC
+        boundary = '1'
+        stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
+        stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
+        sx = 1.
+        sy = 0.
+        fluid_properties = ideal_gas
+      [../]
+
+      [./solid_walls]
+        type = NSNoPenetrationBC
+        boundary = '3 4' # 'Lower Wall, Upper Wall'
+        fluid_properties = ideal_gas
+      [../]
+
+      [./outlet]
+        type = NSStaticPressureOutletBC
+        boundary = '2' # 'Outflow'
+        specified_pressure = 101325 # Pa
+        fluid_properties = ideal_gas
+      [../]
+    [../]
+  [../]
 []
-
-
-
-[BCs]
-  # "Free outflow" mass equation BC
-#   [./mass_outflow]
-#     type = NSMassUnspecifiedNormalFlowBC
-#     variable = rho
-#     rho = rho
-#     rhou = rhou
-#     rhov = rhov
-#     rhoE = rhoE
-#     u = vel_x
-#     v = vel_y
-#     boundary = '2' # 'Outflow'
-#     fluid_properties = ideal_gas
-#   [../]
-
-#   # Specified pressure x-momentum equation invsicid outflow BC
-#   [./rhou_specified_pressure_outflow]
-#     type = NSMomentumInviscidSpecifiedPressureBC
-#     variable = rhou
-#     rho = rho
-#     rhou = rhou
-#     rhov = rhov
-#     rhoE = rhoE
-#     u = vel_x
-#     v = vel_y
-#     component = 0
-#     boundary = '2' # 'Outflow'
-#     specified_pressure = 101325 # Pa
-#     fluid_properties = ideal_gas
-#   [../]
-#
-#   # Specified pressure y-momentum equation inviscid outflow BC
-#   [./rhov_specified_pressure_outflow]
-#     type = NSMomentumInviscidSpecifiedPressureBC
-#     variable = rhov
-#     rho = rho
-#     rhou = rhou
-#     rhov = rhov
-#     rhoE = rhoE
-#     u = vel_x
-#     v = vel_y
-#     component = 1
-#     boundary = '2' # 'Outflow'
-#     specified_pressure = 101325 # Pa
-#     fluid_properties = ideal_gas
-#   [../]
-
-  # Specified pressure energy equation outflow BC
-#  [./rhoE_specified_pressure_outflow]
-#    type = NSEnergyInviscidSpecifiedPressureBC
-#    variable = rhoE
-#    rho = rho
-#    rhou = rhou
-#    rhov = rhov
-#    rhoE = rhoE
-#    u = vel_x
-#    v = vel_y
-#    temperature = temperature
-#    boundary = '2' # 'Outflow'
-#    specified_pressure = 101325 # Pa
-#    fluid_properties = ideal_gas
-#  [../]
-[]
-
 
 
 
@@ -179,18 +112,6 @@
     dynamic_viscosity = 0.0
     fluid_properties = ideal_gas
   [../]
-
-  # A Material is probably the most efficient way to use the
-  # FluidProperties stuff, as the values will be computed once and
-  # then used by all the Kernels, rather than calling getUserObject
-  # from individual Kernels and computing properties repeatedly.
-  # This could possibly be refactored in the future...
-  # [./fp_mat]
-  #   type = FluidPropertiesMaterial
-  #   e = internal_energy
-  #   v = specific_volume
-  #   fp = ideal_gas
-  # [../]
 []
 
 
