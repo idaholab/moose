@@ -34,11 +34,9 @@ class AddAllSideSetsByNormals : public AddSideSetsBase
 public:
   AddAllSideSetsByNormals(const InputParameters & parameters);
 
-  virtual ~AddAllSideSetsByNormals();
-
-  virtual void modify();
-
 protected:
+  virtual void modify() override;
+
   BoundaryID getNextBoundaryID();
 
   /**

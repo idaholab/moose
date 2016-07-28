@@ -37,7 +37,8 @@ class BoundingBoxNodeSet :
 public:
   BoundingBoxNodeSet(const InputParameters & parameters);
 
-  virtual void modify();
+protected:
+  virtual void modify() override;
 
 private:
 

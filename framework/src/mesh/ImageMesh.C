@@ -52,10 +52,6 @@ ImageMesh::ImageMesh(const ImageMesh & other_mesh) :
 {
 }
 
-ImageMesh::~ImageMesh()
-{
-}
-
 MooseMesh &
 ImageMesh::clone() const
 {

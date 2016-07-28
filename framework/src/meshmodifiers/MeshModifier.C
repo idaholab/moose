@@ -38,10 +38,6 @@ MeshModifier::MeshModifier(const InputParameters & parameters) :
 {
 }
 
-MeshModifier::~MeshModifier()
-{
-}
-
 void
 MeshModifier::modifyMesh(MooseMesh * mesh, MooseMesh * displaced_mesh)
 {

@@ -29,10 +29,6 @@ AssignElementSubdomainID::AssignElementSubdomainID(const InputParameters & param
 {
 }
 
-AssignElementSubdomainID::~AssignElementSubdomainID()
-{
-}
-
 void
 AssignElementSubdomainID::modify()
 {

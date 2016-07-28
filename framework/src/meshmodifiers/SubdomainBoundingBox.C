@@ -39,10 +39,6 @@ SubdomainBoundingBox::SubdomainBoundingBox(const InputParameters & parameters) :
 {
 }
 
-SubdomainBoundingBox::~SubdomainBoundingBox()
-{
-}
-
 void
 SubdomainBoundingBox::modify()
 {

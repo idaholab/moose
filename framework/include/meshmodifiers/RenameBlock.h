@@ -30,22 +30,14 @@ InputParameters validParams<RenameBlock>();
 class RenameBlock : public MeshModifier
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters
    */
   RenameBlock(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~RenameBlock();
-
-  /// Perform the actual subdomain modification
-  virtual void modify();
-
 private:
+  virtual void modify() override;
 
   std::vector<SubdomainID> _old_block_id;
 

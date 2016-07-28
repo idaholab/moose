@@ -30,12 +30,12 @@ public:
   FileMesh(const FileMesh & other_mesh);
   virtual ~FileMesh();
 
-  virtual MooseMesh & clone() const;
+  virtual MooseMesh & clone() const override;
 
-  virtual void buildMesh();
+  virtual void buildMesh() override;
 
   void read(const std::string & file_name);
-  virtual ExodusII_IO * exReader() const { return _exreader; }
+  virtual ExodusII_IO * exReader() const override { return _exreader; }
 
   // Get/Set Filename (for meshes read from a file)
   void setFileName(const std::string & file_name) { _file_name = file_name; }

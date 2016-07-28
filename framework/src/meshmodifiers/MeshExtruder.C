@@ -52,10 +52,6 @@ MeshExtruder::MeshExtruder(const InputParameters & parameters) :
   }
 }
 
-MeshExtruder::~MeshExtruder()
-{
-}
-
 void
 MeshExtruder::modify()
 {

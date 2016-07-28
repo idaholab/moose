@@ -33,11 +33,10 @@ class ImageMesh :
 public:
   ImageMesh(const InputParameters & parameters);
   ImageMesh(const ImageMesh & other_mesh);
-  virtual ~ImageMesh();
 
-  virtual MooseMesh & clone() const;
+  virtual MooseMesh & clone() const override;
 
-  virtual void buildMesh();
+  virtual void buildMesh() override;
 
 protected:
   /**

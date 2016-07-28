@@ -46,10 +46,6 @@ RenameBlock::RenameBlock(const InputParameters & parameters) :
     mooseError("RenameBlock: You must supply exactly one of new_block_id or new_block_name\n");
 }
 
-RenameBlock::~RenameBlock()
-{
-}
-
 void
 RenameBlock::modify()
 {
@@ -86,4 +82,3 @@ RenameBlock::modify()
       _mesh_ptr->getMesh().subdomain_name(_old_block_id[i]) = _new_block_name[i];
   }
 }
-

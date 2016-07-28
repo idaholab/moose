@@ -32,10 +32,6 @@ SideSetsBetweenSubdomains::SideSetsBetweenSubdomains(const InputParameters & par
 {
 }
 
-SideSetsBetweenSubdomains::~SideSetsBetweenSubdomains()
-{
-}
-
 void
 SideSetsBetweenSubdomains::modify()
 {
