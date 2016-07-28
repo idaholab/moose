@@ -72,10 +72,6 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   }
 }
 
-LinearNodalConstraint::~LinearNodalConstraint()
-{
-}
-
 Real
 LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 {
@@ -114,4 +110,3 @@ LinearNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   }
   return 0.;
 }
-

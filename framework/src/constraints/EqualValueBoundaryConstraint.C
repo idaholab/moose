@@ -40,10 +40,6 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters
   updateConstrainedNodes();
 }
 
-EqualValueBoundaryConstraint::~EqualValueBoundaryConstraint()
-{
-}
-
 void
 EqualValueBoundaryConstraint::meshChanged()
 {

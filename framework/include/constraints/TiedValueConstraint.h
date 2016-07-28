@@ -32,17 +32,15 @@ class TiedValueConstraint :
 {
 public:
   TiedValueConstraint(const InputParameters & parameters);
-  virtual ~TiedValueConstraint(){}
 
-  virtual Real computeQpSlaveValue();
-
-  virtual Real computeQpResidual(Moose::ConstraintType type);
-
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 protected:
+  virtual Real computeQpSlaveValue() override;
+
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
+
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
   const Real _scaling;
   NumericVector<Number> & _residual_copy;
 };
 
 #endif
-

@@ -28,10 +28,6 @@ EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters) :
 {
 }
 
-EqualValueConstraint::~EqualValueConstraint()
-{
-}
-
 Real
 EqualValueConstraint::computeQpResidual()
 {
@@ -66,4 +62,3 @@ EqualValueConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_ty
     return 0;
   }
 }
-

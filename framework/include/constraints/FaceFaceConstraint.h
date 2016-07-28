@@ -48,7 +48,6 @@ class FaceFaceConstraint :
 {
 public:
   FaceFaceConstraint(const InputParameters & parameters);
-  virtual ~FaceFaceConstraint();
 
   /**
    * Evaluate variables, compute q-points, etc.
