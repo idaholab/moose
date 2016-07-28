@@ -144,7 +144,7 @@ RestartableData<T>::type ()
 
 template <typename T>
 inline void
-RestartableData<T>::swap (RestartableDataValue *rhs)
+RestartableData<T>::swap (RestartableDataValue * libmesh_dbg_var(rhs))
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
 //  _value.swap(cast_ptr<RestartableData<T>*>(rhs)->_value);
