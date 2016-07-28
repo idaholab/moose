@@ -36,10 +36,6 @@ NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters) :
     addMooseVariableDependency(var);
 }
 
-NodalScalarKernel::~NodalScalarKernel()
-{
-}
-
 void
 NodalScalarKernel::reinit()
 {

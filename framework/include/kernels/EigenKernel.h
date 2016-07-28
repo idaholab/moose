@@ -33,14 +33,13 @@ InputParameters validParams<EigenKernel>();
 class EigenKernel : public KernelBase
 {
 public:
-  // See KernelBase base for documentation of these overridden methods
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
-  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) override {}
+  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) override {}
 
   EigenKernel(const InputParameters & parameters);
-  virtual bool enabled();
+  virtual bool enabled() override;
 
 protected:
   virtual Real computeQpResidual() = 0;
