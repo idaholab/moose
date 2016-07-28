@@ -199,9 +199,9 @@ ireg_vu_SBTL95(double v, double u, double& vt, double& ps, double& ts, double& x
 
 
 Real
-dv_daAL(Real sign, Real U0)
+dv_dalphaL(Real area, Real U0)
 {
-  return (sign / U0);
+  return (area / U0);
 }
 
 Real

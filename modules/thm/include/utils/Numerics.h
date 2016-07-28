@@ -102,13 +102,13 @@ Real surfaceTension(Real temperature);
 int    ireg_vu_SBTL95(double v, double u, double & vt, double & ps, double & ts, double & x, double & v1, double & v2, double & v2t, double & u1, double & u2);
 
 /**
- * Derivative of specific volume wrt alpha_A_liquid (aAL)
+ * Derivative of specific volume wrt alpha_liquid
  *
  * Makes sense only when using 7-equation model
- * @param sign - The sign (given by the phase)
+ * @param area - The cross-sectional area
  * @param arhoA - conserved density of the phase, i.e. alpha_rho_A (liquid or vapor)
  */
-Real dv_daAL(Real sign, Real U0);
+Real dv_dalphaL(Real area, Real U0);
 
 /**
  * Derivative of specific volume wrt density of the phase (rho_A or alpha_rho_A)
