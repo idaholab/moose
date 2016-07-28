@@ -25,7 +25,7 @@ COORDINATES absolute 1.e-6    # min separation not calculated
 TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:          0.0005 @ t11
 
 GLOBAL VARIABLES relative 1.e-6 floor 0.0
-	entropy_error  # min:   5.1359785e-15 @ t1	max:    0.0004053014 @ t11
+	entropy_error absolute 1.e-12  # min:   5.1359785e-15 @ t1	max:    0.0004053014 @ t11
 
 NODAL VARIABLES relative 1.e-6 floor 0.0
 	Mach         # min:               0 @ t1,n1	max:      0.61264001 @ t11,n25
@@ -44,4 +44,3 @@ NODAL VARIABLES relative 1.e-6 floor 0.0
 # No NODESET VARIABLES
 
 # No SIDESET VARIABLES
-
