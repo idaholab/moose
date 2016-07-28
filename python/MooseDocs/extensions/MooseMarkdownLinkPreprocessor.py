@@ -3,15 +3,17 @@ import re
 from markdown.preprocessors import Preprocessor
 import logging
 log = logging.getLogger(__name__)
+import MooseDocs
 
 class MooseMarkdownLinkPreprocessor(Preprocessor):
     """
     A preprocessor for creating automatic linking between markdown files.
     """
 
-    def __init__(self, md, database, *args, **kwargs):
+    def __init__(self, md, database_dir, *args, **kwargs):
         super(MooseMarkdownLinkPreprocessor, self).__init__(md, *args, **kwargs)
-        self._database = database
+        self._database_dir = database_dir
+        self._database = None
 
     def run(self, lines):
         """
@@ -32,6 +34,9 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
             lines[i] = re.sub(r'(?<!`)\[auto::(.*?)\]\((.*?\.md)\)', lambda m: self.linkSub(local, m), lines[i])
         return lines
 
+    def buildDatabase(self):
+        self._database = MooseDocs.database.Database('.md', self._database_dir, MooseDocs.database.items.MarkdownIncludeItem)
+
     def bracketSub(self, local, match):
         """
         Substitution of bracket links: [Diffusion.md]
@@ -44,9 +49,13 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         # Locate database items given the key
         name = match.group(1)
 
-        # Check if the name exists, if it doesn then auto-link is not needed
+        # Check if the name exists, if it does then auto-link is not needed
         if os.path.exists(os.path.join(os.path.dirname(local), name)):
             return match.group(0)
+
+        # Build the database if needed
+        if not self._database:
+            self.buildDatabase()
 
         # Locate the markdown files matching the supplied name
         items = self._database.findall(name)
@@ -77,9 +86,13 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         # Locate database items given the key
         name = match.group(2)
 
-        # Check if the name exists, if it doesn then auto-link is not needed
+        # Check if the name exists, if it does then auto-link is not needed
         if os.path.exists(os.path.join(os.path.dirname(local), name)):
             return match.group(0)
+
+        # Build the database if needed
+        if not self._database:
+            self.buildDatabase()
 
         # Locate the markdown files matching the supplied name
         items = self._database.findall(name)

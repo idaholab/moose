@@ -24,11 +24,8 @@ class MooseMarkdown(markdown.Extension):
         self.config['repo'] = ['', "The remote repository to create hyperlinks."]
         self.config['docs_dir'] = [os.path.join('docs', 'content'), "The location of the markdown to be used for generating the site."]
 
+        self._markdown_database_dir = os.path.join(self.config['root'][0], self.config['docs_dir'][0])
         super(MooseMarkdown, self).__init__(*args, **kwargs)
-
-        path = os.path.join(self.config['root'][0], self.config['docs_dir'][0])
-        self._markdown_database = MooseDocs.database.Database('.md', path, MooseDocs.database.items.MarkdownIncludeItem)
-
 
     def extendMarkdown(self, md, md_globals):
 
@@ -39,7 +36,7 @@ class MooseMarkdown(markdown.Extension):
 
         # Preprocessors
         #md.treeprocessors.add('moose_slides', MooseSlideTreeprocessor(md), '_end')
-        md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(md, self._markdown_database), '_begin')
+        md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(md, self._markdown_database_dir), '_begin')
 
         # Inline Patterns
         md.inlinePatterns.add('moose_input_block', MooseInputBlock(config), '<image_link')

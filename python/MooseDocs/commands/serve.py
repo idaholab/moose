@@ -85,6 +85,12 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     @TODO: When the mkdocs plugin system allows for custom Watcher this should be removed.
     """
 
+    """
+    import cProfile, pstats, StringIO
+    pr = cProfile.Profile()
+    pr.enable()
+    """
+
     # Location of serve site
     import tempfile
     tempdir = os.path.abspath('.moosedocs')
@@ -98,17 +104,17 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     if not os.path.exists(tempdir):
         os.mkdir(tempdir)
 
-    def builder():
+    def builder(**kwargs):
         config = mkdocs.config.load_config(config_file=config_file, strict=strict)
         config['site_dir'] = tempdir
         live_server = livereload in ['dirtyreload', 'livereload']
-        dirty = livereload == 'dirtyreload'
+        dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
         mkdocs.commands.build.build(config, live_server=live_server, dirty=dirty)
         return config
 
     # Perform the initial build
     log.info("Building documentation...")
-    config = builder()
+    config = builder(dirty=False)
     host, port = config['dev_addr'].split(':', 1)
 
     try:
@@ -118,3 +124,12 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
             mkdocs.commands.serve._static_server(host, port, tempdir)
     finally:
         log.info("Finished serving local site.")
+
+    """
+    pr.disable()
+    s = StringIO.StringIO()
+    sortby = 'cumulative'
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print s.getvalue()
+    """
