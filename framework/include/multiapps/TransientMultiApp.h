@@ -36,52 +36,22 @@ public:
 
   virtual ~TransientMultiApp();
 
-  /**
-   * Get the vector to transfer to for this MultiApp.
-   * In general this is the Auxiliary system solution vector.
-   * But - in the case of doing transfer interpolation this might be different.
-   *
-   * @param app The global app number you want the transfer vector for.
-   * @param var_name The name of the variable you are going to be transferring to.
-   * @return The vector to fill.
-   */
-  virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name);
+  virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name) override;
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  /**
-   * Advance all of the apps one timestep.
-   */
-  bool solveStep(Real dt, Real target_time, bool auto_advance=true);
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true) override;
 
-  /**
-   * Actually advances time and causes output.
-   */
-  virtual void advanceStep();
+  virtual void advanceStep() override;
 
-  /**
-   * Whether or not this MultiApp should be restored at the beginning of
-   * each Picard iteration.
-   */
-  virtual bool needsRestoration();
+  virtual bool needsRestoration() override;
+
+  virtual void resetApp(unsigned int global_app, Real time) override;
 
   /**
    * Finds the smallest dt from among any of the apps.
    */
   Real computeDT();
-
-  /**
-   * "Reset" the App corresponding to the global App number
-   * passed in.  "Reset" means that the App will be deleted
-   * and recreated.  The time for the new App will be set
-   * to the current simulation time.  This might be handy
-   * if some sub-app in your simulation needs to get replaced
-   * by a "new" piece of material.
-   *
-   * @param global_app The global app number to reset.
-   * @param time - The time to reset the app to.
-   */
-  virtual void resetApp(unsigned int global_app, Real time);
 
 private:
   /**

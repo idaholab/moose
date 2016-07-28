@@ -37,10 +37,6 @@ AutoPositionsMultiApp::AutoPositionsMultiApp(const InputParameters & parameters)
 {
 }
 
-AutoPositionsMultiApp::~AutoPositionsMultiApp()
-{
-}
-
 void
 AutoPositionsMultiApp::fillPositions()
 {
