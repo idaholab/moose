@@ -34,9 +34,10 @@ protected:
   const MaterialProperty<Real> & _dp_darhoEA;
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
-  bool _has_alpha_A;
-  unsigned int _alpha_A_liquid_var_number;
-  const MaterialProperty<Real> * _dp_daAL;
+  bool _has_beta;
+  unsigned int _beta_var_number;
+  const MaterialProperty<Real> * _dp_dbeta;
+  const MaterialProperty<Real> * _daL_dbeta;
   const VariableValue & _alpha;
 };
 
