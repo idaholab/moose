@@ -29,10 +29,9 @@ class BoxMarker : public Marker
 {
 public:
   BoxMarker(const InputParameters & parameters);
-  virtual ~BoxMarker(){};
 
 protected:
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   MarkerValue _inside;
   MarkerValue _outside;
