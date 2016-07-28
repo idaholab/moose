@@ -34,7 +34,7 @@ public:
   VariableTimeIntegrationAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
   Real getIntegralValue();
 
   std::vector<const VariableValue *>  _coupled_vars;
@@ -44,4 +44,3 @@ protected:
 };
 
 #endif // VARIABLETIMEINTEGRATIONAUX_H
-

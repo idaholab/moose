@@ -26,10 +26,6 @@ ProcessorIDAux::ProcessorIDAux(const InputParameters & parameters) :
 {
 }
 
-ProcessorIDAux::~ProcessorIDAux()
-{
-}
-
 Real
 ProcessorIDAux::computeValue()
 {
@@ -38,4 +34,3 @@ ProcessorIDAux::computeValue()
   else
     return _current_elem->processor_id();
 }
-

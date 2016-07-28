@@ -76,10 +76,6 @@ PenetrationAux::PenetrationAux(const InputParameters & parameters) :
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
 }
 
-PenetrationAux::~PenetrationAux()
-{
-}
-
 Real
 PenetrationAux::computeValue()
 {
@@ -166,4 +162,3 @@ PenetrationAux::computeValue()
 
   return retVal;
 }
-

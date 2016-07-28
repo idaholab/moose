@@ -32,10 +32,6 @@ DebugResidualAux::DebugResidualAux(const InputParameters & parameters) :
     mooseError("Cannot use DebugResidualAux on elemental variables");
 }
 
-DebugResidualAux::~DebugResidualAux()
-{
-}
-
 Real
 DebugResidualAux::computeValue()
 {

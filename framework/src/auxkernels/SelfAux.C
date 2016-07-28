@@ -26,13 +26,8 @@ SelfAux::SelfAux(const InputParameters & parameters) :
 {
 }
 
-SelfAux::~SelfAux()
-{
-}
-
 Real
 SelfAux::computeValue()
 {
   return _u[_qp];
 }
-

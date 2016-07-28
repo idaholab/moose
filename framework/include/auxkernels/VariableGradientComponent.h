@@ -38,11 +38,7 @@ public:
   VariableGradientComponent(const InputParameters & parameters);
 
 protected:
-
-  /**
-   * Extracts the component from the gradient of a coupled variable
-   */
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
 private:
 

@@ -32,12 +32,8 @@ class MaterialStdVectorRealGradientAux : public MaterialStdVectorAuxBase<RealGra
 public:
   MaterialStdVectorRealGradientAux(const InputParameters & parameters);
 
-  virtual ~MaterialStdVectorRealGradientAux();
-
 protected:
-
-  /// Returns the value of the material property for the given index and component
-  virtual Real getRealValue();
+  virtual Real getRealValue() override;
 
   /// component of the real gradient to be extracted
   unsigned int _component;

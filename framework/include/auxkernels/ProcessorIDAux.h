@@ -38,10 +38,8 @@ public:
    */
   ProcessorIDAux(const InputParameters & parameters);
 
-  virtual ~ProcessorIDAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 };
 
 #endif //PROCESSORIDAUX_H

@@ -37,10 +37,8 @@ public:
    */
   NearestNodeValueAux(const InputParameters & parameters);
 
-  virtual ~NearestNodeValueAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   NearestNodeLocator & _nearest_node;
 

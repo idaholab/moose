@@ -32,10 +32,8 @@ class NormalizationAux : public AuxKernel
 public:
   NormalizationAux(const InputParameters & parameters);
 
-  virtual ~NormalizationAux() {}
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   const VariableValue & _src;
   const Real & _pp_on_source;

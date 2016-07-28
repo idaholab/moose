@@ -29,10 +29,9 @@ class VectorMagnitudeAux : public AuxKernel
 {
 public:
   VectorMagnitudeAux(const InputParameters & parameters);
-  virtual ~VectorMagnitudeAux();
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   const VariableValue & _x;
   const VariableValue & _y;

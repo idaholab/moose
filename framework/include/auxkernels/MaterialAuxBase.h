@@ -39,11 +39,8 @@ public:
    */
   MaterialAuxBase(const InputParameters & parameters);
 
-  virtual ~MaterialAuxBase(){}
-
-  virtual Real computeValue();
-
 protected:
+  virtual Real computeValue() override;
 
   /// Returns material property values at quadrature points
   virtual Real getRealValue() = 0;
@@ -52,7 +49,6 @@ protected:
   const MaterialProperty<T> & _prop;
 
 private:
-
   /// Multiplier for the material property
   const Real _factor;
 

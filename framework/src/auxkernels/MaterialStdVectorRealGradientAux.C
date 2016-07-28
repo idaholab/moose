@@ -31,10 +31,6 @@ MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const InputPa
     mooseError("The component " << _component << " does not exist for " << LIBMESH_DIM << " dimensional problems");
 }
 
-MaterialStdVectorRealGradientAux::~MaterialStdVectorRealGradientAux()
-{
-}
-
 Real
 MaterialStdVectorRealGradientAux::getRealValue()
 {
