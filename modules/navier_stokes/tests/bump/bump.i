@@ -43,14 +43,28 @@
     family = LAGRANGE
     order = FIRST
   [../]
+
   [./ICs]
     initial_pressure = 101325.
     initial_temperature = 300.
     initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
     fluid_properties = ideal_gas
   [../]
+
   [./Kernels]
     fluid_properties = ideal_gas
+  [../]
+
+  [./BCs]
+    [./inlet]
+      type = NSWeakStagnationInletBC
+      boundary = '1'
+      stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
+      stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
+      sx = 1.
+      sy = 0.
+      fluid_properties = ideal_gas
+    [../]
   [../]
 []
 
@@ -160,115 +174,6 @@
     rhov = rhov
     rhoE = rhoE
     pressure = pressure
-    fluid_properties = ideal_gas
-  [../]
-
-  #
-  # "Weak" stagnation and specified flow direction boundary conditions
-  #
-  [./weak_stagnation_mass_inflow]
-    type = NSMassWeakStagnationBC
-    variable = rho
-    boundary = '1' # 'Inflow'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhou_convective_inflow]
-    type = NSMomentumConvectiveWeakStagnationBC
-    variable = rhou
-    component = 0
-    boundary = '1' # 'Inflow'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhou_pressure_inflow]
-    type = NSMomentumPressureWeakStagnationBC
-    variable = rhou
-    component = 0
-    boundary = '1' # 'Inflow'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhov_convective_inflow]
-    type = NSMomentumConvectiveWeakStagnationBC
-    variable = rhov
-    component = 1
-    boundary = '1' # 'Inflow'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_rhov_pressure_inflow]
-    type = NSMomentumPressureWeakStagnationBC
-    variable = rhov
-    component = 1
-    boundary = '1' # 'Inflow'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
-    fluid_properties = ideal_gas
-  [../]
-
-  [./weak_stagnation_energy_inflow]
-    type = NSEnergyWeakStagnationBC
-    variable = rhoE
-    boundary = '1' # 'Inflow'
-    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-    sx = 1.
-    sy = 0.
-    rho = rho
-    rhoE = rhoE
-    rhou = rhou
-    rhov = rhov
-    u = vel_x
-    v = vel_y
     fluid_properties = ideal_gas
   [../]
 []

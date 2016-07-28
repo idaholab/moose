@@ -4,14 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "NSWeakStagnationBC.h"
+#include "NSWeakStagnationBaseBC.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
 // Full specialization of the validParams function for this object
 template<>
-InputParameters validParams<NSWeakStagnationBC>()
+InputParameters validParams<NSWeakStagnationBaseBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
   params.addRequiredParam<Real>("stagnation_pressure", "The specifed stagnation pressure");
@@ -22,7 +22,7 @@ InputParameters validParams<NSWeakStagnationBC>()
   return params;
 }
 
-NSWeakStagnationBC::NSWeakStagnationBC(const InputParameters & parameters) :
+NSWeakStagnationBaseBC::NSWeakStagnationBaseBC(const InputParameters & parameters) :
     NSIntegratedBC(parameters),
     _stagnation_pressure(getParam<Real>("stagnation_pressure")),
     _stagnation_temperature(getParam<Real>("stagnation_temperature")),
@@ -33,13 +33,13 @@ NSWeakStagnationBC::NSWeakStagnationBC(const InputParameters & parameters) :
 }
 
 void
-NSWeakStagnationBC::staticValues(Real & T_s, Real & p_s, Real & rho_s)
+NSWeakStagnationBaseBC::staticValues(Real & T_s, Real & p_s, Real & rho_s)
 {
   // T_s = T_0 - |u|^2/2/cp
   T_s = _stagnation_temperature - 0.5 * this->velmag2() / _fp.cp();
 
   if (T_s < 0.)
-    mooseError("Negative temperature detected in NSWeakStagnationBC!");
+    mooseError("Negative temperature detected in NSWeakStagnationBaseBC!");
 
   // p_s = p_0 * (T_0/T)^(-gam/(gam-1))
   p_s = _stagnation_pressure * std::pow(_stagnation_temperature / T_s, -_fp.gamma() / (_fp.gamma() - 1.));
@@ -49,7 +49,7 @@ NSWeakStagnationBC::staticValues(Real & T_s, Real & p_s, Real & rho_s)
 }
 
 Real
-NSWeakStagnationBC::rhoStatic()
+NSWeakStagnationBaseBC::rhoStatic()
 {
   Real T_s = 0., p_s = 0., rho_s = 0.;
   staticValues(T_s, p_s, rho_s);
@@ -57,7 +57,7 @@ NSWeakStagnationBC::rhoStatic()
 }
 
 Real
-NSWeakStagnationBC::velmag2()
+NSWeakStagnationBaseBC::velmag2()
 {
   return
     _u_vel[_qp] * _u_vel[_qp] +
@@ -66,7 +66,7 @@ NSWeakStagnationBC::velmag2()
 }
 
 Real
-NSWeakStagnationBC::sdotn()
+NSWeakStagnationBaseBC::sdotn()
 {
   return
     _sx * _normals[_qp](0) +

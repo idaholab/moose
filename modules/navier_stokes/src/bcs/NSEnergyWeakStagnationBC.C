@@ -12,12 +12,12 @@
 template<>
 InputParameters validParams<NSEnergyWeakStagnationBC>()
 {
-  InputParameters params = validParams<NSWeakStagnationBC>();
+  InputParameters params = validParams<NSWeakStagnationBaseBC>();
   return params;
 }
 
 NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters) :
-    NSWeakStagnationBC(parameters)
+    NSWeakStagnationBaseBC(parameters)
 {
 }
 

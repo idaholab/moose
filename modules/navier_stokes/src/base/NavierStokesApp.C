@@ -57,7 +57,9 @@
 #include "AddNavierStokesVariablesAction.h"
 #include "AddNavierStokesICsAction.h"
 #include "AddNavierStokesKernelsAction.h"
+#include "AddNavierStokesBCsAction.h"
 #include "NSInitialCondition.h"
+#include "NSWeakStagnationInletBC.h"
 
 // So we can register objects from the fluid_properties module.
 #include "FluidPropertiesApp.h"
@@ -179,6 +181,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerBoundaryCondition(NSPressureNeumannBC);
   registerPostprocessor(NSEntropyError);
   registerInitialCondition(NSInitialCondition);
+  registerObject(NSWeakStagnationInletBC);
 
   //
   // Incompressible
@@ -227,6 +230,7 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   syntax.registerActionSyntax("AddNavierStokesVariablesAction", "NavierStokes/Variables");
   syntax.registerActionSyntax("AddNavierStokesICsAction", "NavierStokes/ICs");
   syntax.registerActionSyntax("AddNavierStokesKernelsAction", "NavierStokes/Kernels");
+  syntax.registerActionSyntax("AddNavierStokesBCsAction", "NavierStokes/BCs/*");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
@@ -242,6 +246,12 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   registerTask("add_navier_stokes_kernels", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_kernels", "add_kernel");
   registerAction(AddNavierStokesKernelsAction, "add_navier_stokes_kernels");
+
+  // add BCs actions
+  registerMooseObjectTask("add_navier_stokes_bcs", NSWeakStagnationInletBC, /*is_required=*/false);
+  // appendMooseObjectTask  ("add_navier_stokes_bcs", StaticPressureOutlet);
+  addTaskDependency("add_navier_stokes_bcs", "add_bc");
+  registerAction(AddNavierStokesBCsAction, "add_navier_stokes_bcs");
 
 #undef registerAction
 #define registerAction(type, action) action_factory.regLegacy<type>(stringifyName(type), action)
