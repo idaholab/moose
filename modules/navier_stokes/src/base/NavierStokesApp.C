@@ -61,6 +61,7 @@
 #include "NSInitialCondition.h"
 #include "NSWeakStagnationInletBC.h"
 #include "NSNoPenetrationBC.h"
+#include "NSStaticPressureOutletBC.h"
 
 // So we can register objects from the fluid_properties module.
 #include "FluidPropertiesApp.h"
@@ -185,6 +186,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   // Boundary condition meta-objects
   registerObject(NSWeakStagnationInletBC);
   registerObject(NSNoPenetrationBC);
+  registerObject(NSStaticPressureOutletBC);
 
   //
   // Incompressible
@@ -253,7 +255,7 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   // add BCs actions
   registerMooseObjectTask("add_navier_stokes_bcs", NSWeakStagnationInletBC, /*is_required=*/false);
   appendMooseObjectTask  ("add_navier_stokes_bcs", NSNoPenetrationBC);
-  // appendMooseObjectTask  ("add_navier_stokes_bcs", StaticPressureOutlet);
+  appendMooseObjectTask  ("add_navier_stokes_bcs", NSStaticPressureOutletBC);
   addTaskDependency("add_navier_stokes_bcs", "add_bc");
   registerAction(AddNavierStokesBCsAction, "add_navier_stokes_bcs");
 

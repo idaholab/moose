@@ -35,6 +35,13 @@ InputParameters validParams<AddNavierStokesBCsAction>();
  *       boundary = '3 4'
  *       fluid_properties = ideal_gas
  *     [../]
+ *
+ *     [./outlet]
+ *       type = NSStaticPressureOutletBC
+ *       boundary = '2' # 'Outflow'
+ *       specified_pressure = 101325 # Pa
+ *       fluid_properties = ideal_gas
+ *     [../]
  *   [../]
  * []
  */
@@ -56,6 +63,11 @@ protected:
 
   // Helper function that adds the no-penetration BCs
   void addNoPenetrationBC(unsigned int component);
+
+  // Helper function that adds the static pressure outlet BCs
+  void addNSMassUnspecifiedNormalFlowBC();
+  void addNSEnergyInviscidSpecifiedPressureBC();
+  void addNSMomentumInviscidSpecifiedPressureBC(unsigned int component);
 
   // Helper function that sets the parameters which are common to all NSKernels.
   void setCommonParams(InputParameters & params);

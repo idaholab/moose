@@ -40,10 +40,19 @@ AddNavierStokesBCsAction::act()
     for (unsigned int component = 0; component < _dim; ++component)
       addNSMomentumWeakStagnationBC(component);
   }
+
   else if (_type == "NSNoPenetrationBC")
   {
     for (unsigned int component = 0; component < _dim; ++component)
       addNoPenetrationBC(component);
+  }
+
+  else if (_type == "NSStaticPressureOutletBC")
+  {
+    addNSMassUnspecifiedNormalFlowBC();
+    addNSEnergyInviscidSpecifiedPressureBC();
+    for (unsigned int component = 0; component < _dim; ++component)
+      addNSMomentumInviscidSpecifiedPressureBC(component);
   }
 }
 
@@ -132,6 +141,52 @@ AddNavierStokesBCsAction::addNoPenetrationBC(unsigned int component)
   params.set<std::vector<VariableName> >("pressure") = {"pressure"};
 
   _problem->addBoundaryCondition(kernel_type, momentums[component] + std::string("_no_penetration"), params);
+}
+
+
+
+void
+AddNavierStokesBCsAction::addNSMassUnspecifiedNormalFlowBC()
+{
+  const std::string kernel_type = "NSMassUnspecifiedNormalFlowBC";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<NonlinearVariableName>("variable") = "rho";
+  setCommonParams(params);
+  params += _moose_object_pars;
+  _problem->addBoundaryCondition(kernel_type, "mass_outflow", params);
+}
+
+
+
+void
+AddNavierStokesBCsAction::addNSMomentumInviscidSpecifiedPressureBC(unsigned int component)
+{
+  const static std::string momentums[3] = {"rhou", "rhov", "rhow"};
+  const std::string kernel_type = "NSMomentumInviscidSpecifiedPressureBC";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<NonlinearVariableName>("variable") = momentums[component];
+  setCommonParams(params);
+  params += _moose_object_pars;
+
+  // These BCs also need the component.
+  params.set<unsigned int>("component") = component;
+
+  _problem->addBoundaryCondition(kernel_type, momentums[component] + std::string("_specified_pressure_outflow"), params);
+}
+
+
+
+void
+AddNavierStokesBCsAction::addNSEnergyInviscidSpecifiedPressureBC()
+{
+  const std::string kernel_type = "NSEnergyInviscidSpecifiedPressureBC";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<NonlinearVariableName>("variable") = "rhoE";
+  setCommonParams(params);
+  params += _moose_object_pars;
+  // This BC also requires the current value of the temperature.
+  params.set<std::vector<VariableName> >("temperature") = {"temperature"};
+  _problem->addBoundaryCondition(kernel_type, "rhoE_specified_pressure_outflow", params);
 }
 
 

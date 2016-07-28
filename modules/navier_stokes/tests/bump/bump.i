@@ -71,6 +71,13 @@
       boundary = '3 4' # 'Lower Wall, Upper Wall'
       fluid_properties = ideal_gas
     [../]
+
+    [./outlet]
+      type = NSStaticPressureOutletBC
+      boundary = '2' # 'Outflow'
+      specified_pressure = 101325 # Pa
+      fluid_properties = ideal_gas
+    [../]
   [../]
 []
 
@@ -88,66 +95,66 @@
 
 [BCs]
   # "Free outflow" mass equation BC
-  [./mass_outflow]
-    type = NSMassUnspecifiedNormalFlowBC
-    variable = rho
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    boundary = '2' # 'Outflow'
-    fluid_properties = ideal_gas
-  [../]
+#   [./mass_outflow]
+#     type = NSMassUnspecifiedNormalFlowBC
+#     variable = rho
+#     rho = rho
+#     rhou = rhou
+#     rhov = rhov
+#     rhoE = rhoE
+#     u = vel_x
+#     v = vel_y
+#     boundary = '2' # 'Outflow'
+#     fluid_properties = ideal_gas
+#   [../]
 
-  # Specified pressure x-momentum equation invsicid outflow BC
-  [./rhou_specified_pressure_outflow]
-    type = NSMomentumInviscidSpecifiedPressureBC
-    variable = rhou
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    component = 0
-    boundary = '2' # 'Outflow'
-    specified_pressure = 101325 # Pa
-    fluid_properties = ideal_gas
-  [../]
-
-  # Specified pressure y-momentum equation inviscid outflow BC
-  [./rhov_specified_pressure_outflow]
-    type = NSMomentumInviscidSpecifiedPressureBC
-    variable = rhov
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    component = 1
-    boundary = '2' # 'Outflow'
-    specified_pressure = 101325 # Pa
-    fluid_properties = ideal_gas
-  [../]
+#   # Specified pressure x-momentum equation invsicid outflow BC
+#   [./rhou_specified_pressure_outflow]
+#     type = NSMomentumInviscidSpecifiedPressureBC
+#     variable = rhou
+#     rho = rho
+#     rhou = rhou
+#     rhov = rhov
+#     rhoE = rhoE
+#     u = vel_x
+#     v = vel_y
+#     component = 0
+#     boundary = '2' # 'Outflow'
+#     specified_pressure = 101325 # Pa
+#     fluid_properties = ideal_gas
+#   [../]
+#
+#   # Specified pressure y-momentum equation inviscid outflow BC
+#   [./rhov_specified_pressure_outflow]
+#     type = NSMomentumInviscidSpecifiedPressureBC
+#     variable = rhov
+#     rho = rho
+#     rhou = rhou
+#     rhov = rhov
+#     rhoE = rhoE
+#     u = vel_x
+#     v = vel_y
+#     component = 1
+#     boundary = '2' # 'Outflow'
+#     specified_pressure = 101325 # Pa
+#     fluid_properties = ideal_gas
+#   [../]
 
   # Specified pressure energy equation outflow BC
-  [./rhoE_specified_pressure_outflow]
-    type = NSEnergyInviscidSpecifiedPressureBC
-    variable = rhoE
-    rho = rho
-    rhou = rhou
-    rhov = rhov
-    rhoE = rhoE
-    u = vel_x
-    v = vel_y
-    temperature = temperature
-    boundary = '2' # 'Outflow'
-    specified_pressure = 101325 # Pa
-    fluid_properties = ideal_gas
-  [../]
+#  [./rhoE_specified_pressure_outflow]
+#    type = NSEnergyInviscidSpecifiedPressureBC
+#    variable = rhoE
+#    rho = rho
+#    rhou = rhou
+#    rhov = rhov
+#    rhoE = rhoE
+#    u = vel_x
+#    v = vel_y
+#    temperature = temperature
+#    boundary = '2' # 'Outflow'
+#    specified_pressure = 101325 # Pa
+#    fluid_properties = ideal_gas
+#  [../]
 []
 
 
@@ -166,7 +173,7 @@
     temperature = temperature
     enthalpy = enthalpy
     # This value is not used in the Euler equations, but it *is* used
-    # by the stabilization parameter computation, which it decrease
+    # by the stabilization parameter computation, which it decreases
     # the amount of artificial viscosity added, so it's best to use a
     # realistic value.
     dynamic_viscosity = 0.0
