@@ -95,13 +95,6 @@
     data_name = 'phase'
     execute_on = 'initial'
   [../]
-  [./avg_phi_aux]
-    type = EBSDReaderAvgDataAux
-    variable = APHI2
-    ebsd_reader = ebsd
-    data_name = 'phi2'
-    execute_on = 'initial'
-  [../]
 []
 
 [Executioner]

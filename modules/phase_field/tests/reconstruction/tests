@@ -15,6 +15,13 @@
     recover = false # issue #5188
   [../]
 
+  [./1phase_evolution]
+    type = 'Exodiff'
+    input = '1phase_evolution.i'
+    exodiff = '1phase_evolution_out.e'
+    max_time = 1000
+  [../]
+
   [./2phase_reconstruction]
     type = 'Exodiff'
     input = '2phase_reconstruction.i'
