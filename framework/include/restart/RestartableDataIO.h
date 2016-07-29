@@ -39,7 +39,7 @@ class RestartableDataIO
 public:
   RestartableDataIO(FEProblem & fe_problem);
 
-  virtual ~RestartableDataIO();
+  virtual ~RestartableDataIO() = default;
 
   /**
    * Write out the restartable data.

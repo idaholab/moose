@@ -67,10 +67,6 @@ AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters)
 
 }
 
-AB2PredictorCorrector::~AB2PredictorCorrector()
-{
-}
-
 void
 AB2PredictorCorrector::preExecute()
 {

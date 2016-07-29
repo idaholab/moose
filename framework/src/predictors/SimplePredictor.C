@@ -28,10 +28,6 @@ SimplePredictor::SimplePredictor(const InputParameters & parameters) :
 {
 }
 
-SimplePredictor::~SimplePredictor()
-{
-}
-
 bool
 SimplePredictor::shouldApply()
 {

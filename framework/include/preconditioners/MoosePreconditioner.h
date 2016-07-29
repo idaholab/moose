@@ -41,7 +41,7 @@ class MoosePreconditioner :
 {
 public:
   MoosePreconditioner(const InputParameters & params);
-  virtual ~MoosePreconditioner();
+  virtual ~MoosePreconditioner() = default;
 
   /**
    * Helper function for copying values associated with variables in

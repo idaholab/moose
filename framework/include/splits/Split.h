@@ -32,7 +32,7 @@ class Split :
 {
  public:
   Split(const InputParameters & parameters);
-  virtual ~Split() {}
+  virtual ~Split() = default;
 
   virtual void setup(const std::string& prefix = "-");
 

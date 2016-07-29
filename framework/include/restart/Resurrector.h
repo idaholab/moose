@@ -33,7 +33,7 @@ class Resurrector
 {
 public:
   Resurrector(FEProblem & fe_problem);
-  virtual ~Resurrector();
+  virtual ~Resurrector() = default;
 
   /**
    * Set the file base name from which we will restart

@@ -34,11 +34,6 @@ Restartable::Restartable(const std::string & name, std::string system_name, SubP
 
 }
 
-
-Restartable::~Restartable()
-{
-}
-
 void
 Restartable::registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid)
 {

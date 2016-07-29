@@ -31,10 +31,6 @@ Resurrector::Resurrector(FEProblem & fe_problem) :
 {
 }
 
-Resurrector::~Resurrector()
-{
-}
-
 void
 Resurrector::setRestartFile(const std::string & file_base)
 {

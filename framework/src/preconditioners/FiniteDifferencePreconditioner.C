@@ -79,8 +79,3 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
   // Set the jacobian to null so that libMesh won't override our finite differenced jacobian
   nl.useFiniteDifferencedPreconditioner(true);
 }
-
-FiniteDifferencePreconditioner::~FiniteDifferencePreconditioner()
-{
-}
-
