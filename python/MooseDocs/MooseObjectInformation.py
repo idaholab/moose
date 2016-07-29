@@ -104,13 +104,17 @@ class MooseObjectInformation(MooseInformationBase):
         # The class description
         if not self._description:
             log.error('Class description does not exist: {}'.format(self._details))
-        md += [self._description]
+            md += ['\n\n!!! danger "ERROR!"\n{}The class description for the {} object does not exist.\n\n'.format(4*' ', self._details)]
+        else:
+            md += [self._description]
         md += ['']
 
         # The details
         if not os.path.exists(self._details):
             log.error('Details file does not exist: {}'.format(self._details))
-        md += ['{{!{}!}}'.format(self._details)]
+            md += ['\n\n!!! danger "ERROR!"\n{}The details file does not exist: `{}`\n\n'.format(4*' ', self._details)]
+        else:
+            md += ['{{!{}!}}'.format(self._details)]
         md += ['']
 
         # Print the InputParameter tables
