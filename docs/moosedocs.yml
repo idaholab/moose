@@ -27,7 +27,7 @@ include:
     framework:
         source: ../framework
         doxygen: http://mooseframework.com/docs/doxygen/moose/
-        details: ../framework/docs/details
+        details: details/framework
         install: content/framework/systems
         links:
             Tests:
@@ -42,7 +42,7 @@ include:
     phase_field:
         source: ../modules/phase_field
         doxygen: http://mooseframework.com/docs/doxygen/modules/
-        details: ../modules/phase_field/docs/details
+        details: details/phase_field
         install: content/modules/phase_field/systems
         hide:
             - /XFEM
@@ -55,7 +55,7 @@ include:
     contact:
         source: ../modules/contact
         doxygen: http://mooseframework.com/docs/doxygen/modules/
-        details: ../modules/contact/docs/details
+        details: details/contact
         install: content/modules/contact/systems
         links:
             Tests:
