@@ -4,4 +4,18 @@
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
   [../]
+
+  [./jacobian_test]
+    type = AnalyzeJacobian
+    input = coupled_value_coupled_flux.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+  []
+
+  [./single_variable_jacobian_test]
+    type = AnalyzeJacobian
+    input = single_variable_coupled_flux.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+  []
 []
