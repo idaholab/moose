@@ -28,13 +28,13 @@ class TimestepSize : public GeneralPostprocessor
 public:
   TimestepSize(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
 
   /**
    * This will return the current time step size.
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
   FEProblem & _feproblem;

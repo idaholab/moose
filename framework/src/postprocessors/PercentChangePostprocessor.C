@@ -28,10 +28,6 @@ PercentChangePostprocessor::PercentChangePostprocessor(const InputParameters & p
 {
 }
 
-PercentChangePostprocessor::~PercentChangePostprocessor()
-{
-}
-
 void
 PercentChangePostprocessor::initialize()
 {
@@ -47,4 +43,3 @@ PercentChangePostprocessor::getValue()
 {
   return std::fabs((std::fabs(_postprocessor) - std::fabs(_postprocessor_old)) * std::pow(std::fabs(_postprocessor), -1));
 }
-

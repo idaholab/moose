@@ -45,10 +45,6 @@ NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & param
 {
 }
 
-NodalNormalsPreprocessor::~NodalNormalsPreprocessor()
-{
-}
-
 void
 NodalNormalsPreprocessor::initialize()
 {

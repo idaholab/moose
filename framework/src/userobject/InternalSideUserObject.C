@@ -52,7 +52,3 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }
-
-InternalSideUserObject::~InternalSideUserObject()
-{
-}

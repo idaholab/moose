@@ -54,7 +54,7 @@ class NodalUserObject :
 public:
   NodalUserObject(const InputParameters & parameters);
 
-  virtual void subdomainSetup() /*final*/;
+  virtual void subdomainSetup() override /*final*/;
 
   bool isUniqueNodeExecute() { return _unique_node_execute; }
 

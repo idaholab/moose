@@ -52,4 +52,3 @@ protected:
 };
 
 #endif //FIELDSPLITPRECONDITIONER_H
-

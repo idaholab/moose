@@ -38,7 +38,6 @@ class MoosePartitioner :
 {
 public:
   MoosePartitioner(const InputParameters & params);
-  virtual ~MoosePartitioner();
 };
 
 #endif /* MOOSEPARTITIONER_H */

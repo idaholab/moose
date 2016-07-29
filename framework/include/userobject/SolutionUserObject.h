@@ -42,16 +42,12 @@ class SolutionUserObject : public GeneralUserObject
 {
 public:
   SolutionUserObject(const InputParameters & parameters);
-
-  /**
-   * Empty desctructor
-   */
   virtual ~SolutionUserObject();
 
   /**
    * When reading ExodusII files, this will update the interpolation times
    */
-  virtual void timestepSetup();
+  virtual void timestepSetup() override;
 
   /**
    * Returns the local index for a given variable name
@@ -95,16 +91,16 @@ public:
   Real directValue(const Elem * elem, const std::string & var_name) const;
 
   // Required pure virtual function (not used)
-  virtual void initialize();
+  virtual void initialize() override;
 
   // Required pure virtual function (not used)
-  virtual void finalize();
+  virtual void finalize() override;
 
   // Required pure virtual function (not used)
-  virtual void execute();
+  virtual void execute() override;
 
   /// Initialize the System and Mesh objects for the solution being read
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 
   const std::vector<std::string> & variableNames() const;

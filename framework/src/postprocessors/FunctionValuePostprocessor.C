@@ -35,10 +35,6 @@ FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & p
 {
 }
 
-FunctionValuePostprocessor::~FunctionValuePostprocessor()
-{
-}
-
 void
 FunctionValuePostprocessor::initialize()
 {

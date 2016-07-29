@@ -45,10 +45,10 @@ class ElementW1pError :
 public:
   ElementW1pError(const InputParameters & parameters);
 
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   // The exponent used in the norm
   Real _p;

@@ -35,12 +35,13 @@ class SideIntegralUserObject : public SideUserObject
 public:
   SideIntegralUserObject(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override {}
 
-  virtual void finalize(){}
+  /// Returns the integral value
+  virtual Real getValue();
 
 protected:
   virtual Real computeQpIntegral() = 0;
