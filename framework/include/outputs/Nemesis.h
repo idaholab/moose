@@ -52,17 +52,17 @@ public:
    * Overload the Output::output method, this is required for Nemesis
    * output due to the method utilized for outputing single/global parameters
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Sets up the libMesh::NemesisII_IO object used for outputting to the Nemesis format
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Creates a new NemesisII_IO output object for outputing a new mesh
    */
-  virtual void meshChanged();
+  virtual void meshChanged() override;
 
 
 protected:
@@ -70,19 +70,19 @@ protected:
   /**
    * Writes postprocessor values to global output parameters
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Writes scalar AuxVariables to global output parameters
    */
-  virtual void outputScalarVariables();
+  virtual void outputScalarVariables() override;
 
   /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to NemesisII files.
    * @return A string containing the current filename to be written
    */
-  std::string filename();
+  virtual std::string filename() override;
 
   /// Pointer to the libMesh::NemesisII_IO object that performs the actual data output
   Nemesis_IO * _nemesis_io_ptr;

@@ -33,10 +33,6 @@ KernelGrad::KernelGrad(const InputParameters & parameters):
 {
 }
 
-KernelGrad::~KernelGrad()
-{
-}
-
 void
 KernelGrad::computeResidual()
 {
@@ -120,4 +116,3 @@ KernelGrad::precomputeQpJacobian()
 {
   return RealGradient(0.0);
 }
-

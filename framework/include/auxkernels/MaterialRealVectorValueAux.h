@@ -37,12 +37,8 @@ public:
    */
   MaterialRealVectorValueAux(const InputParameters & parameters);
 
-  virtual ~MaterialRealVectorValueAux();
-
 protected:
-
-  /// Returns the value of the material property for the given component
-  virtual Real getRealValue();
+  virtual Real getRealValue() override;
 
   /// The vector component to output
   unsigned int _component;

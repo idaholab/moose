@@ -39,11 +39,11 @@ class PatternedMesh : public MooseMesh
 public:
   PatternedMesh(const InputParameters & parameters);
   PatternedMesh(const PatternedMesh & other_mesh);
-  ~PatternedMesh();
+  virtual ~PatternedMesh();
 
-  virtual MooseMesh & clone() const;
+  virtual MooseMesh & clone() const override;
 
-  virtual void buildMesh();
+  virtual void buildMesh() override;
 
 protected:
   // The mesh files to read

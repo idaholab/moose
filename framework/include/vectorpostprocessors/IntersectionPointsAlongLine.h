@@ -31,17 +31,12 @@ class IntersectionPointsAlongLine : public GeneralVectorPostprocessor
 public:
   IntersectionPointsAlongLine(const InputParameters & parameters);
 
-  virtual ~IntersectionPointsAlongLine() {}
+  virtual void initialize() override;
 
   /**
-   * Clear it out.
+   * Find the elements
    */
-  virtual void initialize();
-
-  /**
-   * Find th elements
-   */
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   /// The beginning of the line

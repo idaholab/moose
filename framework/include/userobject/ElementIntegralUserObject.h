@@ -36,12 +36,13 @@ class ElementIntegralUserObject : public ElementUserObject
 public:
   ElementIntegralUserObject(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void threadJoin(const UserObject & y);
-  virtual Real getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override {}
 
-  virtual void finalize(){}
+  /// Returns the integral value
+  virtual Real getValue();
 
 protected:
   virtual Real computeQpIntegral() = 0;

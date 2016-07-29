@@ -35,13 +35,8 @@ FunctionScalarAux::FunctionScalarAux(const InputParameters & parameters) :
     _functions.push_back(&getFunctionByName(func));
 }
 
-FunctionScalarAux::~FunctionScalarAux()
-{
-}
-
 Real
 FunctionScalarAux::computeValue()
 {
   return _functions[_i]->value(_t, Point(0, 0, 0));
 }
-

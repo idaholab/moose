@@ -33,7 +33,7 @@ public:
   void computeValue(NumericVector<Number> & current_solution);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
   virtual Real computeQpValue() = 0;
 
 };

@@ -40,7 +40,8 @@ class Action : public ConsoleStreamInterface
 {
 public:
   Action(InputParameters parameters);
-  virtual ~Action() {}                  // empty virtual destructor for proper memory release
+
+  virtual ~Action() {}
 
   virtual void act() = 0;
 

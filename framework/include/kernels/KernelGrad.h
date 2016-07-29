@@ -40,22 +40,11 @@ public:
    */
   KernelGrad(const InputParameters & parameters);
 
-  virtual ~KernelGrad();
+  virtual void computeResidual() override;
 
-  /**
-   * Computes the residual for the current element.
-   */
-  virtual void computeResidual();
+  virtual void computeJacobian() override;
 
-  /**
-   * Computes the jacobian for the current element.
-   */
-  virtual void computeJacobian();
-
-  /**
-   * Computes d-residual / d-jvar...
-   */
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   /**
@@ -67,7 +56,8 @@ protected:
    * Called before forming the jacobian for an element
    */
   virtual RealGradient precomputeQpJacobian();
-  virtual Real computeQpResidual();
+
+  virtual Real computeQpResidual() override;
 };
 
 #endif //KERNELGRAD_H

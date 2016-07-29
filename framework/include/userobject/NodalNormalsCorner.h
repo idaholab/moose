@@ -30,12 +30,11 @@ class NodalNormalsCorner : public SideUserObject
 {
 public:
   NodalNormalsCorner(const InputParameters & parameters);
-  virtual ~NodalNormalsCorner();
 
-  virtual void initialize();
-  virtual void finalize();
-  virtual void execute();
-  virtual void threadJoin(const UserObject & uo);
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & uo) override;
 
 protected:
   AuxiliarySystem & _aux;

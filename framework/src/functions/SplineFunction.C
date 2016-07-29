@@ -35,10 +35,6 @@ SplineFunction::SplineFunction(const InputParameters & parameters) :
 {
 }
 
-SplineFunction::~SplineFunction()
-{
-}
-
 Real
 SplineFunction::value(Real /*t*/, const Point & p)
 {
@@ -64,4 +60,3 @@ SplineFunction::secondDerivative(const Point & p)
 {
   return _ipol.sample2ndDerivative(p(0));
 }
-

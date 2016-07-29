@@ -33,10 +33,6 @@ NodalNormalsCorner::NodalNormalsCorner(const InputParameters & parameters) :
 {
 }
 
-NodalNormalsCorner::~NodalNormalsCorner()
-{
-}
-
 void
 NodalNormalsCorner::execute()
 {

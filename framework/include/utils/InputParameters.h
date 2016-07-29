@@ -58,9 +58,9 @@ public:
   InputParameters(const InputParameters & rhs);
   InputParameters(const Parameters & rhs);
 
-  virtual ~InputParameters();
+  virtual ~InputParameters() = default;
 
-  virtual void clear();
+  virtual void clear() override;
 
   /**
    * This method adds a description of the class that will be displayed
@@ -76,7 +76,7 @@ public:
   /**
    * Override from libMesh to set user-defined attributes on our parameter
    */
-  virtual void set_attributes(const std::string &name, bool inserted_only);
+  virtual void set_attributes(const std::string &name, bool inserted_only) override;
 
   /**
    * Returns a writable reference to the named parameters.  Note: This is not a virtual

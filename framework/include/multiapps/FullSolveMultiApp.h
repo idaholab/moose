@@ -34,19 +34,11 @@ class FullSolveMultiApp :
 public:
   FullSolveMultiApp(const InputParameters & parameters);
 
-  virtual ~FullSolveMultiApp();
+  virtual void initialSetup() override;
 
-  virtual void initialSetup();
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true) override;
 
-  /**
-   * Completely solve all of the Apps
-   */
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true);
-
-  /**
-   * Actually advances time and causes output.
-   */
-  virtual void advanceStep(){}
+  virtual void advanceStep() override {}
 
 private:
   std::vector<Executioner *> _executioners;

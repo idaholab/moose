@@ -61,10 +61,6 @@ FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
 {
 }
 
-FaceFaceConstraint::~FaceFaceConstraint()
-{
-}
-
 void
 FaceFaceConstraint::reinit()
 {

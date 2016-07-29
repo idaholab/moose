@@ -31,13 +31,10 @@ class ElementL2Error :
 public:
   ElementL2Error(const InputParameters & parameters);
 
-  /**
-   * Get the L2 Error.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   Function & _func;
 };

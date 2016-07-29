@@ -30,10 +30,6 @@ NodalNormalsEvaluator::NodalNormalsEvaluator(const InputParameters & parameters)
 {
 }
 
-NodalNormalsEvaluator::~NodalNormalsEvaluator()
-{
-}
-
 void
 NodalNormalsEvaluator::execute()
 {

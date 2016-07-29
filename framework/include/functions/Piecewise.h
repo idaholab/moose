@@ -26,7 +26,6 @@ class Piecewise : public Function
 {
 public:
   Piecewise(const InputParameters & parameters);
-  virtual ~Piecewise();
 
   virtual Real functionSize();
   virtual Real domain(int i);
@@ -45,7 +44,6 @@ private:
   bool parseNextLineReals( std::ifstream & ifs, std::vector<Real> & myvec);
   void parseRows( std::vector<Real> & x, std::vector<Real> & y );
   void parseColumns( std::vector<Real> & x, std::vector<Real> & y);
-
 };
 
 template<>

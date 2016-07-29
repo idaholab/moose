@@ -32,10 +32,8 @@ class MaxIncrement : public ElementDamper
 public:
   MaxIncrement(const InputParameters & parameters);
 
-  virtual ~MaxIncrement();
-
 protected:
-  virtual Real computeQpDamping();
+  virtual Real computeQpDamping() override;
 
   ///The maximum Newton increment for the variable.
   Real _max_increment;

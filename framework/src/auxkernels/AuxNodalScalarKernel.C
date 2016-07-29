@@ -35,10 +35,6 @@ AuxNodalScalarKernel::AuxNodalScalarKernel(const InputParameters & parameters) :
     addMooseVariableDependency(var);
 }
 
-AuxNodalScalarKernel::~AuxNodalScalarKernel()
-{
-}
-
 void
 AuxNodalScalarKernel::compute()
 {

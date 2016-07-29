@@ -63,10 +63,6 @@ Exodus::Exodus(const InputParameters & parameters) :
 {
 }
 
-Exodus::~Exodus()
-{
-}
-
 void
 Exodus::initialSetup()
 {

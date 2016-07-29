@@ -37,11 +37,6 @@ public:
   FieldSplitPreconditioner(const InputParameters & parameters);
 
   /**
-   * Destructor.
-   */
-  virtual ~FieldSplitPreconditioner(){};
-
-  /**
    * top split
    */
   std::vector<std::string> _top_split;
@@ -52,4 +47,3 @@ protected:
 };
 
 #endif //FIELDSPLITPRECONDITIONER_H
-

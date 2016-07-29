@@ -29,13 +29,8 @@ ConstantScalarAux::ConstantScalarAux(const InputParameters & parameters) :
 {
 }
 
-ConstantScalarAux::~ConstantScalarAux()
-{
-}
-
 Real
 ConstantScalarAux::computeValue()
 {
   return _value;
 }
-

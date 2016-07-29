@@ -28,10 +28,6 @@ Diffusion::Diffusion(const InputParameters & parameters) :
 {
 }
 
-Diffusion::~Diffusion()
-{
-}
-
 Real
 Diffusion::computeQpResidual()
 {

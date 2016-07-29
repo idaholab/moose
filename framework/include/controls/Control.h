@@ -60,7 +60,7 @@ public:
   /**
    * Class destructor
    */
-  virtual ~Control(){}
+  virtual ~Control() {}
 
   /**
    * Execute the control. This must be overridden.

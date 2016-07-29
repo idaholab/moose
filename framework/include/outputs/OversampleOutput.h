@@ -73,7 +73,7 @@ public:
   /**
    * Executes when the mesh alterted and sets a flag used by oversampling
    */
-  virtual void meshChanged();
+  virtual void meshChanged() override;
 
 protected:
 

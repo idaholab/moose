@@ -34,10 +34,8 @@ class QuotientAux : public AuxKernel
 public:
   QuotientAux(const InputParameters & parameters);
 
-  virtual ~QuotientAux() {}
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   const VariableValue & _numerator;
   const VariableValue & _denominator;

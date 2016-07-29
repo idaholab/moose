@@ -40,12 +40,7 @@ public:
    */
   EigenExecutionerBase(const InputParameters & parameters);
 
-  virtual ~EigenExecutionerBase();
-
-  /**
-   * Initialization
-   */
-  virtual void init();
+  virtual void init() override;
 
   /**
    * The old eigenvalue used by inverse power iterations
@@ -93,7 +88,7 @@ public:
   /**
    * Override this for actions that should take place after the main solve
    */
-  virtual void postExecute();
+  virtual void postExecute() override;
 
   /**
    * Normalize the solution vector based on the postprocessor value for normalization

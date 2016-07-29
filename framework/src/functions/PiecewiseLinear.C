@@ -26,10 +26,6 @@ PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters) :
 {
 }
 
-PiecewiseLinear::~PiecewiseLinear()
-{
-}
-
 Real
 PiecewiseLinear::value(Real t, const Point & p)
 {
@@ -71,4 +67,3 @@ PiecewiseLinear::average()
 {
   return integral()/(_linear_interp->domain(_linear_interp->getSampleSize()-1)-_linear_interp->domain(0));
 }
-

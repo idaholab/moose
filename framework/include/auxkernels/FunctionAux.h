@@ -36,10 +36,8 @@ public:
    */
   FunctionAux(const InputParameters & parameters);
 
-  virtual ~FunctionAux() {}
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// Function being used to compute the value of this kernel
   Function & _func;

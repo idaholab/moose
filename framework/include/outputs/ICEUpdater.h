@@ -51,13 +51,13 @@ public:
   /**
    * Performs basic error checking and initial setup
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
   /**
    * Writes postprocessor values to global output parameters
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Reference to the ICE Updater object in charge of

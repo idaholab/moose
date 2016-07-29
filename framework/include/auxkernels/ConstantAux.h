@@ -37,10 +37,8 @@ public:
    */
   ConstantAux(const InputParameters & parameters);
 
-  virtual ~ConstantAux() {}
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// The value being set for the current node/element
   const Real & _value;

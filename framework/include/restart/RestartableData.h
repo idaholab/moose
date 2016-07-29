@@ -43,7 +43,7 @@ public:
   /**
    * Destructor.
    */
-  virtual ~RestartableDataValue() {};
+  virtual ~RestartableDataValue() = default;
 
   /**
    * String identifying the type of parameter stored.
@@ -109,22 +109,22 @@ public:
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type ();
+  virtual std::string type() override;
 
   /**
    * Swap
    */
-  virtual void swap (RestartableDataValue *rhs);
+  virtual void swap (RestartableDataValue *rhs) override;
 
   /**
    * Store the RestartableData into a binary stream
    */
-  virtual void store(std::ostream & stream);
+  virtual void store(std::ostream & stream) override;
 
   /**
    * Load the RestartableData from a binary stream
    */
-  virtual void load(std::istream & stream);
+  virtual void load(std::istream & stream) override;
 
 private:
 

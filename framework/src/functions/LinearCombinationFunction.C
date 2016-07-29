@@ -47,10 +47,6 @@ LinearCombinationFunction::LinearCombinationFunction(const InputParameters & par
   }
 }
 
-LinearCombinationFunction::~LinearCombinationFunction()
-{
-}
-
 Real
 LinearCombinationFunction::value(Real t, const Point & p)
 {

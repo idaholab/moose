@@ -38,17 +38,14 @@ public:
    */
   TimePeriod(const InputParameters & parameters);
 
-  /**
-   * Evaluate the function and set the parameter value
-   */
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
 
   /**
    * If enabled, this injects the start/end times into the TimeStepper sync times.
    */
-  void initialSetup();
+  void initialSetup() override;
 
 private:
 

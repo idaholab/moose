@@ -32,11 +32,10 @@ class SetupQuadratureAction : public Action
 {
 public:
   SetupQuadratureAction(InputParameters parameters);
-  virtual ~SetupQuadratureAction();
+
+  virtual void act() override;
 
 protected:
-  virtual void act();
-
   QuadratureType _type;
   Order _order;
   Order _element_order;

@@ -47,10 +47,6 @@ Steady::Steady(const InputParameters & parameters) :
   }
 }
 
-Steady::~Steady()
-{
-}
-
 void
 Steady::init()
 {

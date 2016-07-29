@@ -33,7 +33,7 @@ public:
   FunctionNeumannBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// The function being used for setting the value
   Function & _func;

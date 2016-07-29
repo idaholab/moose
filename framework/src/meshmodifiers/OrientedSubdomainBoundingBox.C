@@ -37,10 +37,6 @@ OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const InputParameters
 {
 }
 
-OrientedSubdomainBoundingBox::~OrientedSubdomainBoundingBox()
-{
-}
-
 void
 OrientedSubdomainBoundingBox::modify()
 {
@@ -61,4 +57,3 @@ OrientedSubdomainBoundingBox::modify()
       (*el)->subdomain_id() = _block_id;
   }
 }
-

@@ -32,13 +32,8 @@ ScalarComponentIC::ScalarComponentIC(const InputParameters & parameters) :
     mooseError("The initial vector values size given to the scalar variable '" << name() << "' has wrong size." );
 }
 
-ScalarComponentIC::~ScalarComponentIC()
-{
-}
-
 Real
 ScalarComponentIC::value()
 {
   return _initial_values[_i];
 }
-

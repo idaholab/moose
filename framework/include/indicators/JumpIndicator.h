@@ -27,10 +27,8 @@ class JumpIndicator :
 {
 public:
   JumpIndicator(const InputParameters & parameters);
-  virtual ~JumpIndicator(){};
 
 protected:
-
   virtual Real computeQpIndicator();
 };
 

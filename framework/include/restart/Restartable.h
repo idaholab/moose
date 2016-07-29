@@ -55,7 +55,7 @@ public:
   /**
    * Emtpy destructor
    */
-  virtual ~Restartable();
+  virtual ~Restartable() = default;
 
 protected:
 

@@ -34,10 +34,6 @@ NearestNodeDistanceAux::NearestNodeDistanceAux(const InputParameters & parameter
     mooseError("NearestNodeDistanceAux can only be used with one boundary at a time!");
 }
 
-NearestNodeDistanceAux::~NearestNodeDistanceAux()
-{
-}
-
 Real
 NearestNodeDistanceAux::computeValue()
 {
@@ -48,4 +44,3 @@ NearestNodeDistanceAux::computeValue()
 
   return _nearest_node.distance(qnode->id());
 }
-

@@ -28,10 +28,6 @@ SetupPostprocessorDataAction::SetupPostprocessorDataAction(InputParameters param
 {
 }
 
-SetupPostprocessorDataAction::~SetupPostprocessorDataAction()
-{
-}
-
 void
 SetupPostprocessorDataAction::act()
 {

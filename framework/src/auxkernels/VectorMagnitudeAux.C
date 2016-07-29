@@ -35,13 +35,8 @@ VectorMagnitudeAux::VectorMagnitudeAux(const InputParameters & parameters) :
 {
 }
 
-VectorMagnitudeAux::~VectorMagnitudeAux()
-{
-}
-
 Real
 VectorMagnitudeAux::computeValue()
 {
   return std::sqrt((_x[_qp] * _x[_qp]) + (_y[_qp] * _y[_qp]) + (_z[_qp] * _z[_qp]));
 }
-

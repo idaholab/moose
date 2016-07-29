@@ -49,10 +49,6 @@ PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters) :
 {
 }
 
-PiecewiseConstant::~PiecewiseConstant()
-{
-}
-
 Real
 PiecewiseConstant::value(Real t, const Point & p)
 {
@@ -127,4 +123,3 @@ PiecewiseConstant::average()
 {
   return integral()/(domain(functionSize()-1) - domain(0));
 }
-

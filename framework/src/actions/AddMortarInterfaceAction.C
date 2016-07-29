@@ -33,10 +33,6 @@ AddMortarInterfaceAction::AddMortarInterfaceAction(InputParameters parameters) :
 {
 }
 
-AddMortarInterfaceAction::~AddMortarInterfaceAction()
-{
-}
-
 void
 AddMortarInterfaceAction::act()
 {

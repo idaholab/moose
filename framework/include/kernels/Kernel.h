@@ -28,13 +28,10 @@ class Kernel :
 public:
   Kernel(const InputParameters & parameters);
 
-  virtual ~Kernel();
-
-  // See KernelBase base for documentation of these overridden methods
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar);
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point

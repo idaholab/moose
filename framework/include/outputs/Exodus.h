@@ -44,25 +44,20 @@ public:
   Exodus(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~Exodus();
-
-  /**
    * Overload the OutputBase::output method, this is required for ExodusII
    * output due to the method utilized for outputing single/global parameters
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Performs basic error checking and initial setup of ExodusII_IO output object
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Set flag indicating that the mesh has changed
    */
-  virtual void meshChanged();
+  virtual void meshChanged() override;
 
   /**
    * Performs the necessary deletion and re-creating of ExodusII_IO object
@@ -89,34 +84,34 @@ protected:
   /**
    * Outputs nodal, nonlinear variables
    */
-  virtual void outputNodalVariables();
+  virtual void outputNodalVariables() override;
 
   /**
    * Outputs elemental, nonlinear variables
    */
-  virtual void outputElementalVariables();
+  virtual void outputElementalVariables() override;
 
   /**
    * Writes postprocessor values to global output parameters
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Writes scalar AuxVariables to global output parameters
    */
-  virtual void outputScalarVariables();
+  virtual void outputScalarVariables() override;
 
   /**
    * Writes the input file to the ExodusII output
    */
-  virtual void outputInput();
+  virtual void outputInput() override;
 
   /**
    * Returns the current filename, this method handles the -s000 suffix
    * common to ExodusII files.
    * @return A string containing the current filename to be written
    */
-  std::string filename();
+  virtual std::string filename() override;
 
   /// Pointer to the libMesh::ExodusII_IO object that performs the actual data output
   MooseSharedPointer<ExodusII_IO> _exodus_io_ptr;

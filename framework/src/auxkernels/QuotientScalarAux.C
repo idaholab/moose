@@ -31,13 +31,8 @@ QuotientScalarAux::QuotientScalarAux(const InputParameters & parameters) :
 {
 }
 
-QuotientScalarAux::~QuotientScalarAux()
-{
-}
-
 Real
 QuotientScalarAux::computeValue()
 {
   return _a[0] / _b[0];
 }
-

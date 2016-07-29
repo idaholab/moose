@@ -57,10 +57,6 @@ MooseEnum::MooseEnum(const MooseEnumBase & other_enum) :
 {
 }
 
-MooseEnum::~MooseEnum()
-{
-}
-
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
 {

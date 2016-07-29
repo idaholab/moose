@@ -31,10 +31,6 @@ MaterialStdVectorAux::MaterialStdVectorAux(const InputParameters & parameters) :
 {
 }
 
-MaterialStdVectorAux::~MaterialStdVectorAux()
-{
-}
-
 Real
 MaterialStdVectorAux::getRealValue()
 {

@@ -33,7 +33,7 @@ public:
   PostprocessorDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// The value for this BC
   const PostprocessorValue & _postprocessor_value;

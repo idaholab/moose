@@ -30,10 +30,10 @@ InputParameters validParams<PercentChangePostprocessor>();
  {
  public:
    PercentChangePostprocessor(const InputParameters & parameters);
-   virtual ~PercentChangePostprocessor();
-   virtual void initialize();
-   virtual void execute();
-   virtual Real getValue();
+   virtual void initialize() override;
+   virtual void execute() override;
+   virtual Real getValue() override;
+
  protected:
    const PostprocessorValue & _postprocessor, & _postprocessor_old;
  };

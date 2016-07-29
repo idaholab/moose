@@ -29,7 +29,7 @@ class AddMeshModifierAction : public MooseObjectAction
 public:
   AddMeshModifierAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDMESHMODIFIERACTION_H

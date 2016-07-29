@@ -42,14 +42,9 @@ public:
    */
   Steady(const InputParameters & parameters);
 
-  virtual ~Steady();
+  virtual void init() override;
 
-  virtual void init();
-
-  /**
-   * This will call solve() on the NonlinearSystem.
-   */
-  virtual void execute();
+  virtual void execute() override;
 
   virtual void checkIntegrity();
 

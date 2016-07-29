@@ -36,10 +36,10 @@ class ElementH1SemiError :
 public:
   ElementH1SemiError(const InputParameters & parameters);
 
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
   Function & _func;
 };
 

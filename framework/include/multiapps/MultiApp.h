@@ -56,10 +56,9 @@ class MultiApp :
 {
 public:
   MultiApp(const InputParameters & parameters);
-
   virtual ~MultiApp();
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp

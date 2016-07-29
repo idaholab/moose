@@ -31,7 +31,6 @@ class SyntaxTree: public SyntaxFormatterInterface
 {
 public:
   SyntaxTree(bool use_long_names=false);
-
   virtual ~SyntaxTree();
 
   void insertNode(std::string syntax, const std::string &action, bool is_action_params=true,
@@ -50,7 +49,7 @@ protected:
   {
   public:
     TreeNode(const std::string &name, SyntaxTree &syntax_tree, const std::string *action=NULL, InputParameters *params=NULL, TreeNode *parent=NULL);
-    virtual ~TreeNode();
+    ~TreeNode();
 
     void insertNode(std::string &syntax, const std::string &action, bool is_action_params=true,
                     InputParameters *params=NULL);

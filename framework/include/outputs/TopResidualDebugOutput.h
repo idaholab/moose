@@ -70,17 +70,12 @@ public:
    */
   TopResidualDebugOutput(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~TopResidualDebugOutput();
-
 protected:
 
   /**
    * Perform the debugging output
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Prints the n top residuals for the variables in the system

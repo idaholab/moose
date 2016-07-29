@@ -30,7 +30,7 @@ public:
 
   bool completeSetup(MooseMesh *mesh);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // SETUPMESHCOMPLETEACTION_H

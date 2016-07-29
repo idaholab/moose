@@ -34,12 +34,8 @@ class AuxNodalScalarKernel :
 {
 public:
   AuxNodalScalarKernel(const InputParameters & parameters);
-  virtual ~AuxNodalScalarKernel();
 
-  /**
-   * Evaluate the kernel
-   */
-  virtual void compute();
+  virtual void compute() override;
 
 protected:
   /// List of node IDs

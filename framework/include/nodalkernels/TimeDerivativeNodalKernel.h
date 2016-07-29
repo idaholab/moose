@@ -35,15 +35,9 @@ public:
   TimeDerivativeNodalKernel(const InputParameters & parameters);
 
 protected:
-  /**
-   * Implement du/dt
-   */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  /**
-   * Jacobian with respect to the variable this NodalKernel is operating on.
-   */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 };
 
 #endif

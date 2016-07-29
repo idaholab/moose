@@ -36,18 +36,14 @@ class ImageSubdomain :
     public ImageSampler
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters
    */
   ImageSubdomain(const InputParameters & parameters);
 
-  /**
-   * Perform the actual subdomain modification based on the supplied image
-   */
-  virtual void modify();
-
+protected:
+  virtual void modify() override;
 };
 
 #endif // IMAGESUBDOMAIN_H

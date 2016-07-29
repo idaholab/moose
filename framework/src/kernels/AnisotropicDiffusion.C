@@ -30,10 +30,6 @@ AnisotropicDiffusion::AnisotropicDiffusion(const InputParameters & parameters) :
 {
 }
 
-AnisotropicDiffusion::~AnisotropicDiffusion()
-{
-}
-
 Real
 AnisotropicDiffusion::computeQpResidual()
 {
@@ -45,4 +41,3 @@ AnisotropicDiffusion::computeQpJacobian()
 {
   return (_k * _grad_phi[_j][_qp]) * _grad_test[_i][_qp];
 }
-

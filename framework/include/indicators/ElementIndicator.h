@@ -43,7 +43,6 @@ class ElementIndicator :
 {
 public:
   ElementIndicator(const InputParameters & parameters);
-  virtual ~ElementIndicator(){};
 
 protected:
   MooseVariable & _field_var;
