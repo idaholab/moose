@@ -596,7 +596,7 @@ SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_
 }
 
 Real
-SolutionUserObject::pointValue(Real t, const Point & p, const unsigned int local_var_index) const
+SolutionUserObject::pointValue(Real libmesh_dbg_var(t), const Point & p, const unsigned int local_var_index) const
 {
   // Create copy of point
   Point pt(p);
