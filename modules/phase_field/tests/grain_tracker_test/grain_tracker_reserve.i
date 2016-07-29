@@ -1,249 +1,113 @@
 [Mesh]
-  # Mesh block.  Meshes can be read in or automatically generated
   type = GeneratedMesh
-  dim = 2 # Problem dimension
-  nx = 11 # Number of elements in the x-direction
-  ny = 11 # Number of elements in the y-direction
-  xmax = 1000 # maximum x-coordinate of the mesh
-  ymax = 1000 # maximum y-coordinate of the mesh
-  elem_type = QUAD4 # Type of elements used in the mesh
-  uniform_refine = 1 # Initial uniform refinement of the mesh
+  dim = 2
+  nx = 40
+  ny = 40
+  xmin = 0
+  xmax = 100
+  ymin = 0
+  ymax = 100
+  elem_type = QUAD4
 []
 
-[GlobalParams]
-  # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 7 # Number of order parameters used
-  var_name_base = gr # Base name of grains
-  order = CONSTANT
-  family = MONOMIAL
+[AuxVariables]
+  [./c]
+  [../]
 []
 
 [Variables]
-  # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
-    order = FIRST
-    family = LAGRANGE
+  [./gr0]
+  [../]
+  [./gr1]
   [../]
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalVoronoiIC]
-      grain_num = 10 # Number of grains
-      advanced_op_assignment = true
-      rand_seed = 10
-    [../]
+  [./gr1]
+    type = MultiSmoothCircleIC
+    variable = gr0
+    invalue = 1.0
+    outvalue = 0.0001
+    bubspac = 20.0
+    numbub = 2
+    radius = 10.0
+    int_width = 12.0
+    radius_variation = 0.2
+    radius_variation_type = uniform
   [../]
-[]
-
-[AuxVariables]
-  # Dependent variables
-  [./bnds]
-    # Variable used to visualize the grain boundaries in the simulation
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./unique_grains]
-  [../]
-
-  [./var_indices]
-  [../]
-
-  [./ghost_regions]
-  [../]
-
-  [./halos]
-  [../]
-
-  [./halo0]
-  [../]
-
-  [./halo1]
-  [../]
-
-  [./halo2]
-  [../]
-
-  [./halo3]
-  [../]
-
-  [./halo4]
-  [../]
-
-  [./halo5]
-  [../]
-
-  [./halo6]
-  [../]
-
-  [./centroids]
-    order = CONSTANT
-    family = MONOMIAL
+  [./c_IC]
+    type = SmoothCircleIC
+    int_width = 12.0
+    x1 = 50
+    y1 = 50
+    radius = 10.0
+    outvalue = 0
+    variable = c
+    invalue = 1
   [../]
 []
 
 [Kernels]
-  # Kernel block, where the kernels defining the residual equations are set up.
-  [./PolycrystalKernel]
-    # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
+  [./ie_gr0]
+    type = TimeDerivative
+    variable = gr0
   [../]
-[]
-
-[AuxKernels]
-  # AuxKernel block, defining the equations used to calculate the auxvars
-  [./bnds_aux]
-    # AuxKernel that calculates the GB term
-    type = BndsCalcAux
-    variable = bnds
-    execute_on = 'initial timestep_end'
+  [./diff_gr0]
+    type = Diffusion
+    variable = gr0
   [../]
-  [./unique_grains]
-    type = FeatureFloodCountAux
-    variable = unique_grains
-    bubble_object = grain_tracker
-    field_display = UNIQUE_REGION
-    execute_on = 'initial timestep_end'
+  [./ie_gr1]
+    type = TimeDerivative
+    variable = gr1
   [../]
-  [./var_indices]
-    type = FeatureFloodCountAux
-    variable = var_indices
-    bubble_object = grain_tracker
-    field_display = VARIABLE_COLORING
-    execute_on = 'initial timestep_end'
+  [./diff_gr1]
+    type = Diffusion
+    variable = gr1
   [../]
-  [./ghosted_entities]
-    type = FeatureFloodCountAux
-    variable = ghost_regions
-    bubble_object = grain_tracker
-    field_display = GHOSTED_ENTITIES
-    execute_on = 'initial timestep_end'
+  [./source]
+    type = MaskedBodyForce
+    variable = gr1
+    function = t
+    mask = mask
   [../]
-  [./halos]
-    type = FeatureFloodCountAux
-    variable = halos
-    bubble_object = grain_tracker
-    field_display = HALOS
-    execute_on = 'initial timestep_end'
-  [../]
-  [./halo0]
-    type = FeatureFloodCountAux
-    variable = halo0
-    map_index = 0
-    field_display = HALOS
-    bubble_object = grain_tracker
-  [../]
-  [./halo1]
-    type = FeatureFloodCountAux
-    variable = halo1
-    map_index = 1
-    field_display = HALOS
-    bubble_object = grain_tracker
-  [../]
-  [./halo2]
-    type = FeatureFloodCountAux
-    variable = halo2
-    map_index = 2
-    field_display = HALOS
-    bubble_object = grain_tracker
-  [../]
-  [./halo3]
-    type = FeatureFloodCountAux
-    variable = halo3
-    map_index = 3
-    field_display = HALOS
-    bubble_object = grain_tracker
-  [../]
-  [./halo4]
-    type = FeatureFloodCountAux
-    variable = halo4
-    map_index = 4
-    field_display = HALOS
-    bubble_object = grain_tracker
-  [../]
-  [./halo5]
-    type = FeatureFloodCountAux
-    variable = halo5
-    map_index = 5
-    field_display = HALOS
-    bubble_object = grain_tracker
-  [../]
-  [./halo6]
-    type = FeatureFloodCountAux
-    variable = halo5
-    map_index = 6
-    field_display = HALOS
-    bubble_object = grain_tracker
-  [../]
-  [./centroids]
-    type = FeatureFloodCountAux
-    variable = centroids
-    execute_on = timestep_end
-    field_display = CENTROID
-    bubble_object = grain_tracker
-  [../]
-[]
-
-[BCs]
-  # Boundary Condition block
 []
 
 [Materials]
-  [./CuGrGr]
-    # Material properties
-    type = GBEvolution
-    T = 450 # Constant temperature of the simulation (for mobility calculation)
-    wGB = 125 # Width of the diffuse GB
-    GBmob0 = 2.5e-6 # m^4(Js) for copper from Schoenfelder1997
-    Q = 0.23 # eV for copper from Schoenfelder1997
-    GBenergy = 0.708 # J/m^2 from Schoenfelder1997
+  [./mask]
+    type = ParsedMaterial
+    function = 'c'
+    f_name = mask
+    args = 'c'
   [../]
 []
 
 [Postprocessors]
-  # Scalar postprocessors
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.2
-    connecting_threshold = 0.08
-    flood_entity_type = ELEMENTAL
-    volume_threshold = 0.5
-    reserve_op = true
-  [../]
 
-  # We are using the reserve_op option above. That should leave the first order parameter
-  # empty. We'll use the ElementAverageValue postprocessor to verify
-  [./reserve_op]
-    type = ElementAverageValue
-    variable = gr0
-  [../]
-  [./dt]
-    # Outputs the current time step
-    type = TimestepSize
+    # Reserve the first "op" variable
+    reserve_op = 1
+    threshold = 0.1
+    connecting_threshold = 0.001
+    variable = 'gr0 gr1'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
 [Executioner]
   # Preconditioned JFNK (default)
-  # Uses newton iteration to solve the problem.
-  type = Transient # Type of executioner, here it is transient with an adaptive time step
-  scheme = bdf2 # Type of time integration (2nd order backward euler), defaults to 1st order backward euler
+  type = Transient
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
-  petsc_options_value = 'hypre boomeramg 101 ds'
-  l_max_its = 30 # Max number of linear iterations
-  l_tol = 1e-4 # Relative tolerance for linear solves
-  nl_max_its = 40 # Max number of nonlinear iterations
-  nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
-  start_time = 0.0
-  num_steps = 5
-  dt = 300
-[]
-
-[Problem]
-  type = FEProblem
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  num_steps = 6
+  dt = 0.25
 []
 
 [Outputs]
-  csv = true
+  exodus = true
+[]
+
+[Problem]
+  kernel_coverage_check = false
 []
