@@ -29,8 +29,6 @@ class LineValueSampler : public PointSamplerBase
 public:
   LineValueSampler(const InputParameters & parameters);
 
-  virtual ~LineValueSampler() {}
-
   /**
    * Helper function to generate the list of points along a line and a unique ID for each point.
    * @param start_point The beginning of the line

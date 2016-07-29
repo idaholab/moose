@@ -56,10 +56,6 @@ MultiMooseEnum::MultiMooseEnum(const MooseEnumBase & other_enum) :
 {
 }
 
-MultiMooseEnum::~MultiMooseEnum()
-{
-}
-
 bool
 MultiMooseEnum::operator==(const MultiMooseEnum & value) const
 {

@@ -30,9 +30,9 @@ class MultiAppProjectionTransfer : public MultiAppTransfer
 public:
   MultiAppProjectionTransfer(const InputParameters & parameters);
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   void toMultiApp();

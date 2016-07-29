@@ -31,21 +31,12 @@ class MultiAppPostprocessorToAuxScalarTransfer :
   public MultiAppTransfer
 {
 public:
-
-  /**
-   * Class constructor.
-   */
   MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
-
-  /**
-   * Classs destructor.
-   */
-  virtual ~MultiAppPostprocessorToAuxScalarTransfer() {}
 
   /**
    * Execute the transfer
    */
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
 

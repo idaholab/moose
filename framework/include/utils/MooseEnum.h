@@ -59,7 +59,7 @@ public:
    */
   static MooseEnum withNamesFrom(const MooseEnumBase & other_enum);
 
-  virtual ~MooseEnum();
+  virtual ~MooseEnum() = default;
 
   /**
    * Cast operators to make this object behave as value_types and std::string
@@ -98,7 +98,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const { return _current_id > INVALID_ID; }
+  virtual bool isValid() const override { return _current_id > INVALID_ID; }
 
   // InputParameters is allowed to create an empty enum but is responsible for
   // filling it in after the fact
@@ -109,7 +109,7 @@ public:
 
 protected:
   /// Check whether the current value is deprecated when called
-  virtual void checkDeprecated() const;
+  virtual void checkDeprecated() const override;
 
 private:
 

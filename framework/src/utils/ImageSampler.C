@@ -65,10 +65,6 @@ ImageSampler::ImageSampler(const InputParameters & parameters) :
 #endif
 }
 
-ImageSampler::~ImageSampler()
-{
-}
-
 void
 ImageSampler::setupImageSampler(MooseMesh & mesh)
 {

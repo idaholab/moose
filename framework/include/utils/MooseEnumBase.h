@@ -44,7 +44,7 @@ public:
   /**
    * This class must have a virtual destructor since it has derived classes.
    */
-  virtual ~MooseEnumBase();
+  virtual ~MooseEnumBase() = default;
 
   /**
    * Deprecates various options in the MOOSE enum. For each deprecated option,

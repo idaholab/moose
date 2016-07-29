@@ -65,11 +65,10 @@ class MultiAppDTKUserObjectTransfer :
 {
 public:
   MultiAppDTKUserObjectTransfer(const InputParameters & parameters);
-  virtual ~MultiAppDTKUserObjectTransfer() {}
 
   typedef long unsigned int GlobalOrdinal;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   std::string _user_object_name;

@@ -53,10 +53,6 @@ MooseEnumBase::MooseEnumBase()
 {
 }
 
-MooseEnumBase::~MooseEnumBase()
-{
-}
-
 void
 MooseEnumBase::deprecate(const std::string & name, const std::string & new_name)
 {

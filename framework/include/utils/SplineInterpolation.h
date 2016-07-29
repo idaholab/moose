@@ -41,7 +41,7 @@ public:
    */
   SplineInterpolation(const std::vector<double> & x, const std::vector<double> & y, double yp1 = 1e30, double ypn = 1e30);
 
-  virtual ~SplineInterpolation() { }
+  virtual ~SplineInterpolation() = default;
 
   /**
    * Set the x-, y- values and first derivatives
@@ -91,7 +91,3 @@ protected:
 };
 
 #endif //LINEARINTERPOLATION_H
-
-
-
-
