@@ -85,12 +85,6 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     @TODO: When the mkdocs plugin system allows for custom Watcher this should be removed.
     """
 
-    """
-    import cProfile, pstats, StringIO
-    pr = cProfile.Profile()
-    pr.enable()
-    """
-
     # Location of serve site
     import tempfile
     tempdir = os.path.abspath('.moosedocs')
@@ -114,7 +108,7 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
 
     # Perform the initial build
     log.info("Building documentation...")
-    config = builder(dirty=False)
+    config = builder(dirty=not clean)
     host, port = config['dev_addr'].split(':', 1)
 
     try:
@@ -124,12 +118,3 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
             mkdocs.commands.serve._static_server(host, port, tempdir)
     finally:
         log.info("Finished serving local site.")
-
-    """
-    pr.disable()
-    s = StringIO.StringIO()
-    sortby = 'cumulative'
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    print s.getvalue()
-    """
