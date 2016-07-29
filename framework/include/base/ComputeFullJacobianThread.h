@@ -31,15 +31,13 @@ public:
 
   virtual ~ComputeFullJacobianThread();
 
-  void join(const ComputeJacobianThread & /*y*/)
-  {}
-
+  void join(const ComputeJacobianThread & /*y*/) {}
 
 protected:
-  virtual void computeJacobian();
-  virtual void computeFaceJacobian(BoundaryID bnd_id);
-  virtual void computeInternalFaceJacobian(const Elem * neighbor);
-  virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
+  virtual void computeJacobian() override;
+  virtual void computeFaceJacobian(BoundaryID bnd_id) override;
+  virtual void computeInternalFaceJacobian(const Elem * neighbor) override;
+  virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
 
   // Reference to BC storage structures
   const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;

@@ -32,12 +32,12 @@ class MeshChangedInterface
 {
 public:
   MeshChangedInterface(const InputParameters & params);
-  virtual ~MeshChangedInterface() {};
+  virtual ~MeshChangedInterface() = default;
 
   /**
    * Called on this object when the mesh changes
    */
-  virtual void meshChanged() {};
+  virtual void meshChanged() {}
 
 protected:
 

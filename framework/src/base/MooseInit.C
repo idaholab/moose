@@ -45,6 +45,3 @@ MooseInit::MooseInit(int argc, char *argv[], MPI_Comm COMM_WORLD_IN) :
   // Make sure that any calls to the global random number generator are consistent among processes
   MooseRandom::seed(0);
 }
-
-MooseInit::~MooseInit()
-{}

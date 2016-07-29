@@ -36,9 +36,9 @@ public:
 
   virtual ~ComputeElemAuxVarsThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void post();
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void post() override;
 
   void join(const ComputeElemAuxVarsThread & /*y*/);
 
