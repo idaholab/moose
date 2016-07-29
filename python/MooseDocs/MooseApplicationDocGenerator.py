@@ -97,9 +97,10 @@ class MooseApplicationDocGenerator(object):
                 self._exe = app
 
         configs = []
-        for key, value in yml['include'].iteritems():
-            log.debug('Configuring settings for including {}'.format(key))
-            configs.append(update_config(value))
+        if 'include' in yml:
+            for key, value in yml['include'].iteritems():
+                log.debug('Configuring settings for including {}'.format(key))
+                configs.append(update_config(value))
         return configs
 
 

@@ -20,24 +20,16 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         The raw markdown lines are processed to find and create links between pages.
         """
 
-        # Get current filename (this is must be injected as a comment on the first line of the input)
-        match = re.search(r'<!--\s*(.*?)\s*-->', lines[0])
-        if match:
-            local = os.path.dirname(match.group(1))
-        else:
-            log.warning("Unable to read markdown filename from injected comment.")
-            return lines
-
         # Loop through each line and create autolinks
         for i in range(len(lines)):
-            lines[i] = re.sub(r'(?<!`)\[auto::(.*?\.md)\]', lambda m: self.bracketSub(local, m), lines[i])
-            lines[i] = re.sub(r'(?<!`)\[auto::(.*?)\]\((.*?\.md)\)', lambda m: self.linkSub(local, m), lines[i])
+            lines[i] = re.sub(r'(?<!`)\[auto::(.*?)\]', lambda m: self.bracketSub(m), lines[i])
+            lines[i] = re.sub(r'(?<!`)\[(.*?)\]\(auto::(.*?)\)', lambda m: self.linkSub(m), lines[i])
         return lines
 
     def buildDatabase(self):
         self._database = MooseDocs.database.Database('.md', self._database_dir, MooseDocs.database.items.MarkdownIncludeItem)
 
-    def bracketSub(self, local, match):
+    def bracketSub(self, match):
         """
         Substitution of bracket links: [Diffusion.md]
 
@@ -49,10 +41,6 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         # Locate database items given the key
         name = match.group(1)
 
-        # Check if the name exists, if it does then auto-link is not needed
-        if os.path.exists(os.path.join(os.path.dirname(local), name)):
-            return match.group(0)
-
         # Build the database if needed
         if not self._database:
             self.buildDatabase()
@@ -61,20 +49,18 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         items = self._database.findall(name)
         self.checkMultipleItems(items, name)
 
-        # Make link subsitution
-        if items:
+        # Make link substitution
+        if len(items) > 0:
             fname = items[0][0].filename()
-            rel = os.path.relpath(fname, local)
+            rel, _ = os.path.splitext(os.path.relpath(fname, os.getcwd()))
             syntax, _ = os.path.splitext(name)
-            if not syntax.endswith('Overview'):
-                syntax = os.path.basename(syntax)
-            return '[{}]({})'.format(syntax, rel)
+            return '[{}](/{})'.format(syntax, rel)
 
         # Do nothing
         else:
-            return match.group(0)
+            return self.admonition(match.group(0))
 
-    def linkSub(self, local, match):
+    def linkSub(self, match):
         """
         Substitution of links: [Test](Diffusion.md)
 
@@ -86,10 +72,6 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         # Locate database items given the key
         name = match.group(2)
 
-        # Check if the name exists, if it does then auto-link is not needed
-        if os.path.exists(os.path.join(os.path.dirname(local), name)):
-            return match.group(0)
-
         # Build the database if needed
         if not self._database:
             self.buildDatabase()
@@ -101,13 +83,12 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         # Make link subsitution
         if items:
             fname = items[0][0].filename()
-            rel = os.path.relpath(fname, local)
-            return '[{}]({})'.format(match.group(1), rel)
+            rel = os.path.relpath(fname, os.getcwd())
+            return '[{}](/{})'.format(match.group(1), rel)
 
         # Do nothing
         else:
-            return match.group(0)
-
+            return self.admonition(match.group(0))
 
     @staticmethod
     def checkMultipleItems(items, name):
@@ -119,4 +100,8 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
             for item in items:
                 msg += '\n    {}'.format(item[0].filename())
             log.warning(msg)
-            raise Exception('done')
+
+    @staticmethod
+    def admonition(link):
+        log.error('A page failed to locate the auto-link: {}'.format(link))
+        return '\n\n!!! danger "Auto Link Failed!"\n    A MOOSE markdown automatic link failed: `{}`\n\n'.format(link)
