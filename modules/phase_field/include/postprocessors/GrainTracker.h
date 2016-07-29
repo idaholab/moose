@@ -136,8 +136,11 @@ protected:
   /// Depth of renumbing recursion (a depth of zero means no recursion)
   static const unsigned int _max_renumbering_recursion = 2;
 
-  /// The cutoff index where if variable index < this number, no remapping TO that variable will occur
-  const unsigned int _reserve_op;
+  /// The number of reserved order parameters
+  const unsigned int _n_reserve_ops;
+
+  /// The cutoff index where if variable index >= this number, no remapping TO that variable will occur
+  const unsigned int _reserve_op_idx;
 
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
   unsigned int _reserve_grain_first_idx;

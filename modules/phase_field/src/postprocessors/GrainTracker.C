@@ -34,7 +34,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
     _halo_level(getParam<unsigned int>("halo_level")),
-    _reserve_op(getParam<unsigned int>("reserve_op")),
+    _n_reserve_ops(getParam<unsigned int>("reserve_op")),
+    _reserve_op_idx(_n_reserve_ops <= _n_vars ? _n_vars - _n_reserve_ops : 0),
     _reserve_grain_first_idx(0),
     _reserve_op_threshold(getParam<Real>("reserve_op_threshold")),
     _remap(getParam<bool>("remap_grains")),
@@ -85,7 +86,7 @@ GrainTracker::getThreshold(unsigned int current_idx, bool active_feature) const
   // If we are inspecting a reserve op parameter, we need to make sure
   // that there is an entity above the reserve_op threshold before
   // starting the flood of the feature.
-  if (!active_feature && current_idx < _reserve_op)
+  if (!active_feature && current_idx >= _reserve_op_idx)
     return _reserve_op_threshold;
   else
     return FeatureFloodCount::getThreshold(current_idx, active_feature);
@@ -145,7 +146,7 @@ GrainTracker::finalize()
             data_pair = data_pair_pair.first;
 
             // insert the reserve op numbers (if appropriate)
-            for (unsigned int reserve_idx = 0; reserve_idx < _reserve_op; ++reserve_idx)
+            for (unsigned int reserve_idx = 0; reserve_idx < _n_reserve_ops; ++reserve_idx)
               data_pair->second[reserve_idx] = _reserve_grain_first_idx + reserve_idx;
           }
           data_pair->second[grain_pair.second._var_idx] = _ebsd_reader ? _unique_grain_to_ebsd_num[grain_pair.first] : grain_pair.first;
@@ -471,7 +472,7 @@ GrainTracker::trackGrains()
       {
         mooseAssert(_feature_sets[map_num][feature_num]._status == Status::NOT_MARKED, "Feature in wrong state, logic error");
 
-        auto new_idx = _unique_grains.size() + _reserve_op;
+        auto new_idx = _unique_grains.size() + _n_reserve_ops;
 
         _feature_sets[map_num][feature_num]._status = Status::MARKED;               // Mark it
         _unique_grains[new_idx] = std::move(_feature_sets[map_num][feature_num]);   // transfer ownership
@@ -539,7 +540,7 @@ GrainTracker::remapGrains()
         continue;
 
       // We need to remap any grains represented on any variable index above the cuttoff
-      if (grain_it1->second._var_idx < _reserve_op)
+      if (grain_it1->second._var_idx >= _reserve_op_idx)
       {
         Moose::out
           << COLOR_YELLOW
@@ -619,7 +620,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
   for (auto & grain_pair : _unique_grains)
   {
     if (grain_pair.second._status == Status::INACTIVE || grain_pair.second._var_idx == grain._var_idx ||
-        (grain_pair.second._var_idx < _reserve_op))
+        (grain_pair.second._var_idx >= _reserve_op_idx))
       continue;
 
     unsigned int target_var_index = grain_pair.second._var_idx;

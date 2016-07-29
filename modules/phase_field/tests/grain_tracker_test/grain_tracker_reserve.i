@@ -25,7 +25,7 @@
 [ICs]
   [./gr1]
     type = MultiSmoothCircleIC
-    variable = gr1
+    variable = gr0
     invalue = 1.0
     outvalue = 0.0001
     bubspac = 20.0
@@ -66,7 +66,7 @@
   [../]
   [./source]
     type = MaskedBodyForce
-    variable = gr0
+    variable = gr1
     function = t
     mask = mask
   [../]
