@@ -59,6 +59,9 @@
 #include "PorousFlowHalfGaussianSink.h"
 #include "PorousFlowHalfCubicSink.h"
 
+// AuxKernels
+#include "PorousFlowDarcyVelocityComponent.h"
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -154,6 +157,9 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PorousFlowPiecewiseLinearSink);
   registerBoundaryCondition(PorousFlowHalfGaussianSink);
   registerBoundaryCondition(PorousFlowHalfCubicSink);
+
+  // AuxKernels
+  registerAuxKernel(PorousFlowDarcyVelocityComponent);
 }
 
 // External entry point for dynamic syntax association
