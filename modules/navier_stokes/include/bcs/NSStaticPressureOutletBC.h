@@ -4,30 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef BNDSCALCAUX_H
-#define BNDSCALCAUX_H
+#ifndef NSSTATICPRESSUREOUTLETBC_H
+#define NSSTATICPRESSUREOUTLETBC_H
 
-#include "AuxKernel.h"
+#include "MooseObject.h"
 
-//Forward Declarations
-class BndsCalcAux;
+class NSStaticPressureOutletBC;
 
 template<>
-InputParameters validParams<BndsCalcAux>();
+InputParameters validParams<NSStaticPressureOutletBC>();
 
 /**
- * Visualize the location of grain boundaries in a polycrystalline simulation.
+ * This class facilitates adding specified static pressure outlet BCs for
+ * the Euler equations.
  */
-class BndsCalcAux : public AuxKernel
+class NSStaticPressureOutletBC : public MooseObject
 {
 public:
-  BndsCalcAux(const InputParameters & parameters);
+  NSStaticPressureOutletBC(const InputParameters & parameters);
+  virtual ~NSStaticPressureOutletBC();
 
 protected:
-  virtual Real computeValue();
 
-  const unsigned int _op_num;
-  std::vector<const VariableValue *> _vals;
 };
 
-#endif //BNDSCALCAUX_H
+#endif

@@ -7,7 +7,7 @@
 #ifndef NSMOMENTUMCONVECTIVEWEAKSTAGNATIONBC_H
 #define NSMOMENTUMCONVECTIVEWEAKSTAGNATIONBC_H
 
-#include "NSWeakStagnationBC.h"
+#include "NSWeakStagnationBaseBC.h"
 
 // Forward Declarations
 class NSMomentumConvectiveWeakStagnationBC;
@@ -20,7 +20,7 @@ InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>();
  * boundary integral evaluated at specified stagnation temperature,
  * stagnation pressure, and flow direction values.
  */
-class NSMomentumConvectiveWeakStagnationBC : public NSWeakStagnationBC
+class NSMomentumConvectiveWeakStagnationBC : public NSWeakStagnationBaseBC
 {
 public:
   NSMomentumConvectiveWeakStagnationBC(const InputParameters & parameters);

@@ -29,7 +29,7 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const unsigned int _ncrys;
+  const unsigned int _op_num;
 
   std::vector<const VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;

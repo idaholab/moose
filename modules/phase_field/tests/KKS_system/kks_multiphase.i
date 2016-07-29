@@ -116,17 +116,17 @@
   # h2(eta1, eta2, eta3)
   [./h2]
     type = SwitchingFunction3PhaseMaterial
-    eta_i = eta3
-    eta_j = eta1
-    eta_k = eta2
+    eta_i = eta2
+    eta_j = eta3
+    eta_k = eta1
     f_name = h2
   [../]
   # h3(eta1, eta2, eta3)
   [./h3]
     type = SwitchingFunction3PhaseMaterial
-    eta_i = eta2
-    eta_j = eta3
-    eta_k = eta1
+    eta_i = eta3
+    eta_j = eta1
+    eta_k = eta2
     f_name = h3
   [../]
 
@@ -433,8 +433,6 @@
 
 [Preconditioning]
   active = 'full'
-  #active = 'mydebug'
-  #active = ''
   [./full]
     type = SMP
     full = true

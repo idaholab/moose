@@ -4,30 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef BNDSCALCAUX_H
-#define BNDSCALCAUX_H
+#ifndef NSNOPENETRATIONBC_H
+#define NSNOPENETRATIONBC_H
 
-#include "AuxKernel.h"
+#include "MooseObject.h"
 
-//Forward Declarations
-class BndsCalcAux;
+class NSNoPenetrationBC;
 
 template<>
-InputParameters validParams<BndsCalcAux>();
+InputParameters validParams<NSNoPenetrationBC>();
 
 /**
- * Visualize the location of grain boundaries in a polycrystalline simulation.
+ * This class facilitates adding solid wall "no penetration" BCs for
+ * the Euler equations.
  */
-class BndsCalcAux : public AuxKernel
+class NSNoPenetrationBC : public MooseObject
 {
 public:
-  BndsCalcAux(const InputParameters & parameters);
+  NSNoPenetrationBC(const InputParameters & parameters);
+  virtual ~NSNoPenetrationBC();
 
 protected:
-  virtual Real computeValue();
 
-  const unsigned int _op_num;
-  std::vector<const VariableValue *> _vals;
 };
 
-#endif //BNDSCALCAUX_H
+#endif
