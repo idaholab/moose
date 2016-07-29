@@ -52,6 +52,7 @@ public:
     initIdentity
   };
 
+  std::shared_ptr<RankTwoTensor> cosserat;
   /// Default constructor; fills to zero
   RankTwoTensor();
 

@@ -46,6 +46,7 @@ class RankTwoTensorTest : public CppUnit::TestFixture
   CPPUNIT_TEST( detTest );
   CPPUNIT_TEST( ddetTest );
   CPPUNIT_TEST( inverseTest );
+  CPPUNIT_TEST( cosseratTest );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -73,6 +74,7 @@ public:
   void detTest();
   void ddetTest();
   void inverseTest();
+  void cosseratTest();
 
  private:
   RankTwoTensor _m0;
@@ -81,6 +83,8 @@ public:
   RankTwoTensor _m3;
   RankTwoTensor _unsymmetric0;
   RankTwoTensor _unsymmetric1;
+  RankTwoTensor _m4;
+  RankTwoTensor _m5;
 };
 
 #endif  // RANKTWOTENSORTEST_H

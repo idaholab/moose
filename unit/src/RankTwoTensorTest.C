@@ -23,6 +23,13 @@ RankTwoTensorTest::RankTwoTensorTest()
   _m3 = RankTwoTensor(1, 2, 3, 2, -5, -6, 3, -6, 9);
   _unsymmetric0 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 9);
   _unsymmetric1 = RankTwoTensor(1, 2, 3, -4, -5, -6, 7, 8, 10);
+  _m2.cosserat = std::make_shared<RankTwoTensor>(0, 2, 3, 2, -6, -6, 3, -6, 0); // construct Cosserat inside _m2
+  (*_m2.cosserat)(2, 2) = 8; // alter one component
+  (*_m2.cosserat) += _m1; // add _m1, so now *_m2.cosserat actually equals _m3
+  _m4 = _m2; // even though _m2 has a cosserat, _m4 won't
+  _m5 = _m2;
+  _m5.cosserat = std::make_shared<RankTwoTensor>(*_m2.cosserat); // now _m5 contains the same info as _m2, but _m5.cosserat doesn't point to the same address as _m2.cosserat
+  (*_m5.cosserat) -= _m3; // now *_m5.cosserat equals zero
 }
 
 RankTwoTensorTest::~RankTwoTensorTest()
@@ -36,6 +43,7 @@ RankTwoTensorTest::L2normTest()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(3.741657, _m2.L2norm(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(14.31782, _m3.L2norm(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(16.88194, _unsymmetric0.L2norm(), 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _m5.cosserat->L2norm(), 0.0001);
 }
 
 void
@@ -143,8 +151,10 @@ RankTwoTensorTest::detTest()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1, _m1.det(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(6, _m2.det(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-144, _m3.det(), 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-144, _m2.cosserat->det(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0, _unsymmetric0.det(), 0.0001);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(3, _unsymmetric1.det(), 0.0001);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(6, _m4.det(), 0.0001);
 }
 
 void
@@ -476,3 +486,11 @@ RankTwoTensorTest::ddetTest()
     }
 }
 
+void
+RankTwoTensorTest::cosseratTest()
+{
+  CPPUNIT_ASSERT(_m2.cosserat);
+  CPPUNIT_ASSERT(!_m1.cosserat);
+  CPPUNIT_ASSERT(!_m4.cosserat);
+  CPPUNIT_ASSERT(_m5.cosserat);
+}
