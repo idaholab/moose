@@ -25,7 +25,7 @@ class ContactSplit : public Split
 {
  public:
   ContactSplit(const InputParameters & params);
-  virtual void setup(const std::string& prefix = "-");
+  virtual void setup(const std::string& prefix = "-") override;
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
  protected:

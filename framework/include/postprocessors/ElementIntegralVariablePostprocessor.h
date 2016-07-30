@@ -38,7 +38,7 @@ public:
   ElementIntegralVariablePostprocessor(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;

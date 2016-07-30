@@ -40,8 +40,6 @@ public:
    */
   MeshModifier(const InputParameters & parameters);
 
-  virtual ~MeshModifier();
-
   /**
    * The base method called to trigger modification to the Mesh.
    * This method can trigger (re-)initialiation of the Mesh if

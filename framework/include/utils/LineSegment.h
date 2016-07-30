@@ -36,7 +36,7 @@ class LineSegment
 public:
   LineSegment (const Point & p0, const Point & p1);
 
-  virtual ~LineSegment();
+  virtual ~LineSegment() = default;
 
   /**
    * Returns the closest point on the LineSegment

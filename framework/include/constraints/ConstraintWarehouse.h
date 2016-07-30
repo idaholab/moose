@@ -38,7 +38,7 @@ public:
    * @param object A MooseSharedPointer of the object
    * @param tid Not used.
    */
-  virtual void addObject(MooseSharedPointer<Constraint> object, THREAD_ID tid = 0);
+  void addObject(MooseSharedPointer<Constraint> object, THREAD_ID tid = 0);
 
   ///@{
   /**

@@ -36,11 +36,8 @@ public:
    */
   MaterialStdVectorAux(const InputParameters & parameters);
 
-  virtual ~MaterialStdVectorAux();
-
 protected:
-  /// Returns the value of the material property for the given index
-  virtual Real getRealValue();
+  virtual Real getRealValue() override;
 
   /// whether or not selected_qp has been set
   const bool _has_selected_qp;

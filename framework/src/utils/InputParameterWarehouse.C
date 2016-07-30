@@ -21,12 +21,6 @@ InputParameterWarehouse::InputParameterWarehouse() :
 {
 }
 
-
-InputParameterWarehouse::~InputParameterWarehouse()
-{
-}
-
-
 InputParameters &
 InputParameterWarehouse::addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */)
 {

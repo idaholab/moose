@@ -43,11 +43,9 @@ public:
    */
   DGFunctionDiffusionDirichletBC(const InputParameters & parameters);
 
-  virtual ~DGFunctionDiffusionDirichletBC() {}
-
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
 private:
   Function & _func;

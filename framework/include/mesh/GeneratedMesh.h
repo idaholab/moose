@@ -30,14 +30,13 @@ class GeneratedMesh : public MooseMesh
 public:
   GeneratedMesh(const InputParameters & parameters);
   GeneratedMesh(const GeneratedMesh & other_mesh) = default;
-  virtual ~GeneratedMesh() = default;
 
   // No copy
   GeneratedMesh & operator=(const GeneratedMesh & other_mesh) = delete;
 
-  virtual MooseMesh & clone() const;
+  virtual MooseMesh & clone() const override;
 
-  virtual void buildMesh();
+  virtual void buildMesh() override;
 
 protected:
   /// The dimension of the mesh

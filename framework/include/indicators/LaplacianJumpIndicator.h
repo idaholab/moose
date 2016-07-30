@@ -27,11 +27,9 @@ class LaplacianJumpIndicator :
 {
 public:
   LaplacianJumpIndicator(const InputParameters & parameters);
-  virtual ~LaplacianJumpIndicator(){};
 
 protected:
-
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   const VariableSecond & _second_u;
   const VariableSecond & _second_u_neighbor;

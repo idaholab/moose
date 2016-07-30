@@ -46,7 +46,6 @@ class InternalSideUserObject :
 {
 public:
   InternalSideUserObject(const InputParameters & parameters);
-  virtual ~InternalSideUserObject();
 
 protected:
   MooseMesh & _mesh;

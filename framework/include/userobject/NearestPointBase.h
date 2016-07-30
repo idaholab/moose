@@ -58,10 +58,10 @@ public:
   NearestPointBase(const InputParameters & parameters);
   ~NearestPointBase();
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
   /**
    * Given a Point return the integral value associated with the layer
@@ -70,7 +70,7 @@ public:
    *
    * @param p The point to look for in the layers.
    */
-  virtual Real spatialValue(const Point & p) const;
+  virtual Real spatialValue(const Point & p) const override;
 
 protected:
   /**

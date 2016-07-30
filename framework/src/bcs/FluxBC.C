@@ -28,10 +28,6 @@ FluxBC::FluxBC(const InputParameters & params) :
 {
 }
 
-FluxBC::~FluxBC()
-{
-}
-
 Real
 FluxBC::computeQpResidual()
 {
@@ -43,4 +39,3 @@ FluxBC::computeQpJacobian()
 {
   return - computeQpFluxJacobian() * _normals[_qp] * _test[_i][_qp];
 }
-

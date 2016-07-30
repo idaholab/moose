@@ -54,7 +54,7 @@ public:
    * @param t Current time
    * @param p The current spatial location
    */
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
 
   /**
    * Compute the gradient of the function
@@ -62,19 +62,19 @@ public:
    * @param p The current point (x,y,z)
    * @return Gradient of the function
    */
-  virtual RealGradient gradient(Real t, const Point & p);
+  virtual RealGradient gradient(Real t, const Point & p) override;
 
   /**
    * Method invalid for ParsedGradFunction
    * @see ParsedVectorFunction
    */
-  virtual RealVectorValue vectorValue(Real t, const Point & p);
+  virtual RealVectorValue vectorValue(Real t, const Point & p) override;
 
   /**
    * Creates two libMesh::ParsedFunction objects for returning a vector via the 'gradient' method
    * and a scalar vis the 'value' method
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
 

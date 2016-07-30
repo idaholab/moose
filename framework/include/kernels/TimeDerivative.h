@@ -28,11 +28,11 @@ class TimeDerivative : public TimeKernel
 public:
   TimeDerivative(const InputParameters & parameters);
 
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
   bool _lumping;
 };

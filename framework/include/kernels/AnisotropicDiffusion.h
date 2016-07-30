@@ -33,12 +33,10 @@ class AnisotropicDiffusion : public Kernel
 public:
   AnisotropicDiffusion(const InputParameters & parameters);
 
-  virtual ~AnisotropicDiffusion();
-
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   RealTensorValue _k;
 };

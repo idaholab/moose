@@ -51,10 +51,6 @@ InputParameters::InputParameters(const Parameters &rhs) :
   _moose_object_syntax_visibility = true;
 }
 
-InputParameters::~InputParameters()
-{
-}
-
 void
 InputParameters::clear()
 {

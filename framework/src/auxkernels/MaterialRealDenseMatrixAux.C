@@ -30,10 +30,6 @@ MaterialRealDenseMatrixAux::MaterialRealDenseMatrixAux(const InputParameters & p
 {
 }
 
-MaterialRealDenseMatrixAux::~MaterialRealDenseMatrixAux()
-{
-}
-
 Real
 MaterialRealDenseMatrixAux::getRealValue()
 {

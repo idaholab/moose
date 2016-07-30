@@ -28,14 +28,10 @@ class NumElems : public GeneralPostprocessor
 public:
   NumElems(const InputParameters & parameters);
 
-  virtual void initialize() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
 
-  virtual void execute() {}
-
-  /**
-   * This will return the number of elements in the system
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 };
 
 #endif // NUMELEMS_H

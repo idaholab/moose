@@ -29,7 +29,6 @@ class ScalarComponentIC : public ScalarInitialCondition
 {
 public:
   ScalarComponentIC(const InputParameters & parameters);
-  virtual ~ScalarComponentIC();
 
 protected:
   virtual Real value();

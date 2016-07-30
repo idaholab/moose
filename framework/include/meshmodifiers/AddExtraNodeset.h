@@ -29,7 +29,8 @@ class AddExtraNodeset :
 public:
   AddExtraNodeset(const InputParameters & params);
 
-  virtual void modify();
+protected:
+  virtual void modify() override;
 };
 
 #endif // ADDEXTRANODESET_H

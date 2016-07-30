@@ -49,7 +49,7 @@ class Transfer :
 {
 public:
   Transfer(const InputParameters & parameters);
-  virtual ~Transfer() {}
+  virtual ~Transfer() = default;
 
   /**
    * Execute the transfer.

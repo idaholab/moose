@@ -19,11 +19,6 @@ ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) :
     QBase(d,o)
 {}
 
-
-ArbitraryQuadrature::~ArbitraryQuadrature()
-{}
-
-
 QuadratureType
 ArbitraryQuadrature::type() const
 {

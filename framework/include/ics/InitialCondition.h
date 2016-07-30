@@ -92,9 +92,9 @@ public:
    */
   virtual void initialSetup() {}
 
-  virtual const std::set<std::string> & getRequestedItems();
+  virtual const std::set<std::string> & getRequestedItems() override;
 
-  virtual const std::set<std::string> & getSuppliedItems();
+  virtual const std::set<std::string> & getSuppliedItems() override;
 
 protected:
   FEProblem & _fe_problem;

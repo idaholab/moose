@@ -38,7 +38,7 @@ public:
    * @param comm The communicator of the child
    */
   SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm);
-  virtual ~SamplerBase() {}
+  virtual ~SamplerBase() = default;
 
 protected:
 

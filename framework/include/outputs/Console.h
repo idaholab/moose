@@ -47,7 +47,7 @@ public:
    * Prints the system information, this is done here so that the system information
    * is printed prior to any PETSc solve information
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Customizes the order of output for the various components as well as adds additional
@@ -58,14 +58,14 @@ public:
    * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly added
    * as well.
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Creates the output file name
    * Appends the user-supplied 'file_base' input parameter with a '.txt' extension
    * @return A string containing the output filename
    */
-  virtual std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Output string for setting up PETSC output
@@ -75,7 +75,7 @@ public:
   /**
    * Performs console related printing when the mesh is changed
    */
-  void meshChanged();
+  void meshChanged() override;
 
   /**
    * Return system information flags
@@ -97,27 +97,27 @@ protected:
   /**
    * Print the input file at the beginning of the simulation
    */
-  virtual void outputInput();
+  virtual void outputInput() override;
 
   /**
    * Prints the aux scalar variables table to the screen
    */
-  virtual void outputScalarVariables();
+  virtual void outputScalarVariables() override;
 
   /**
    * Prints the postprocessor table to the screen
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Not implemented.
    */
-  virtual void outputVectorPostprocessors() { mooseError("Can't currently output VectorPostprocessors to the screen"); };
+  virtual void outputVectorPostprocessors() override { mooseError("Can't currently output VectorPostprocessors to the screen"); };
 
   /**
    * Print system information
    */
-  virtual void outputSystemInformation();
+  virtual void outputSystemInformation() override;
 
   /**
    * A helper function for outputting norms in color

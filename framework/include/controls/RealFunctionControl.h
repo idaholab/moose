@@ -38,10 +38,7 @@ public:
    */
   RealFunctionControl(const InputParameters & parameters);
 
-  /**
-   * Evaluate the function and set the parameter value
-   */
-  virtual void execute();
+  virtual void execute() override;
 
 private:
 

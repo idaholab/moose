@@ -76,11 +76,6 @@ public:
   ImageSampler(const InputParameters & parameters);
 
   /**
-   * Destructor.
-   */
-  virtual ~ImageSampler();
-
-  /**
    * Return the pixel value for the given point
    * @param p The point at which to extract pixel data
    */

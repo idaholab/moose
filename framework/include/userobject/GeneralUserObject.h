@@ -46,16 +46,16 @@ public:
   GeneralUserObject(const InputParameters & parameters);
 
 
-  const std::set<std::string> & getRequestedItems();
+  const std::set<std::string> & getRequestedItems() override;
 
-  const std::set<std::string> & getSuppliedItems();
+  const std::set<std::string> & getSuppliedItems() override;
 
   ///@{
   /**
    * This method is not used and should not be used in a custom GeneralUserObject.
    */
-  virtual void threadJoin(const UserObject &) /*final*/;
-  virtual void subdomainSetup() /*final*/;
+  virtual void threadJoin(const UserObject &) override; /*final*/
+  virtual void subdomainSetup() override; /*final*/
   ///@}
 
   ///@{
@@ -65,8 +65,8 @@ public:
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValueByName(const VectorPostprocessorName & name, const std::string & vector_name);
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) override;
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValueByName(const VectorPostprocessorName & name, const std::string & vector_name) override;
   ///@}
 
 protected:

@@ -28,7 +28,7 @@ class InitProblemAction : public Action
 public:
   InitProblemAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // INITPROBLEMACTION_H

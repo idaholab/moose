@@ -31,9 +31,8 @@ class SetupDebugAction : public Action
 {
 public:
   SetupDebugAction(InputParameters parameters);
-  virtual ~SetupDebugAction();
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
 

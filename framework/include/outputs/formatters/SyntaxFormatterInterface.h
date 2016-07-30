@@ -31,7 +31,7 @@ class SyntaxFormatterInterface
 {
 public:
   SyntaxFormatterInterface() {}
-  virtual ~SyntaxFormatterInterface() {}
+  virtual ~SyntaxFormatterInterface() = default;
 
   /**
    * This method is called once at the beginning of the tree traversal and can be used to build up header information

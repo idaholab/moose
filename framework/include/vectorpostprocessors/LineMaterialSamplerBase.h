@@ -60,19 +60,19 @@ public:
    * Initialize
    * Calls through to base class's initialize()
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Finds all elements along the user-defined line, loops through them, and samples their
    * material properties.
    */
-  virtual void execute();
+  virtual void execute() override;
 
   /**
    * Finalize
    * Calls through to base class's finalize()
    */
-  virtual void finalize();
+  virtual void finalize() override;
 
   /**
    * Reduce the material property to a scalar for output

@@ -29,10 +29,6 @@ SetupTimeIntegratorAction::SetupTimeIntegratorAction(const InputParameters & par
 {
 }
 
-SetupTimeIntegratorAction::~SetupTimeIntegratorAction()
-{
-}
-
 void
 SetupTimeIntegratorAction::act()
 {

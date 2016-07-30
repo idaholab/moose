@@ -38,8 +38,8 @@ public:
   GenericFunctionMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   std::vector<std::string> _prop_names;
   std::vector<FunctionName> _prop_values;

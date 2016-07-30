@@ -39,7 +39,7 @@ class VectorPostprocessor
 public:
   VectorPostprocessor(const InputParameters & parameters);
 
-  virtual ~VectorPostprocessor(){}
+  virtual ~VectorPostprocessor() = default;
 
   /**
    * This will get called to actually grab the final value the VectorPostprocessor has calculated.
@@ -50,7 +50,7 @@ public:
    * Get the list of output objects that this class is restricted
    * @return A vector of OutputNames
    */
-  std::set<OutputName> getOutputs(){ return std::set<OutputName>(_outputs.begin(), _outputs.end()); }
+  std::set<OutputName> getOutputs() { return std::set<OutputName>(_outputs.begin(), _outputs.end()); }
 
   /**
    * Returns the name of the VectorPostprocessor.

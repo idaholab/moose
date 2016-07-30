@@ -31,11 +31,10 @@ class QuadraturePointMarker :
 {
 public:
   QuadraturePointMarker(const InputParameters & parameters);
-  virtual ~QuadraturePointMarker(){};
 
 protected:
 
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   /**
    * Override this to compute a marker value at each quadrature point.

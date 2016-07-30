@@ -30,7 +30,3 @@ MoosePartitioner::MoosePartitioner(const InputParameters & params) :
     Restartable(params, "Partitioners")
 {
 }
-
-MoosePartitioner::~MoosePartitioner()
-{
-}

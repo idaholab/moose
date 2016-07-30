@@ -28,10 +28,6 @@ MaxIncrement::MaxIncrement(const InputParameters & parameters) :
 {
 }
 
-MaxIncrement::~MaxIncrement()
-{
-}
-
 Real
 MaxIncrement::computeQpDamping()
 {
@@ -43,4 +39,3 @@ MaxIncrement::computeQpDamping()
 
   return 1.0;
 }
-

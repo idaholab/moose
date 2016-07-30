@@ -28,7 +28,7 @@ class CopyNodalVarsAction: public Action
 public:
   CopyNodalVarsAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //COPYNODALVARSACTION_H

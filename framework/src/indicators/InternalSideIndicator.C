@@ -80,10 +80,6 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
   addMooseVariableDependency(mooseVariable());
 }
 
-InternalSideIndicator::~InternalSideIndicator()
-{
-}
-
 void
 InternalSideIndicator::computeIndicator()
 {

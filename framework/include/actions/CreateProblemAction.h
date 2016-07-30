@@ -27,7 +27,7 @@ class CreateProblemAction : public MooseObjectAction
 public:
   CreateProblemAction(InputParameters parameters);
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
   std::vector<SubdomainName> _blocks;

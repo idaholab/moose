@@ -28,7 +28,7 @@ class GlobalParamsAction: public Action
 public:
   GlobalParamsAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 
   /**
    * This function is here to remove parameters of a type so that global parameters

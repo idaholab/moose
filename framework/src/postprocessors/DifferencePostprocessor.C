@@ -30,10 +30,6 @@ DifferencePostprocessor::DifferencePostprocessor(const InputParameters & paramet
 {
 }
 
-DifferencePostprocessor::~DifferencePostprocessor()
-{
-}
-
 void
 DifferencePostprocessor::initialize()
 {
@@ -55,4 +51,3 @@ DifferencePostprocessor::threadJoin(const UserObject & /*uo*/)
 {
   // nothing to do here, general PPS do not run threaded
 }
-

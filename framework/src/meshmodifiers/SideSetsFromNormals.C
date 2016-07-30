@@ -53,10 +53,6 @@ SideSetsFromNormals::SideSetsFromNormals(const InputParameters & parameters) :
   }
 }
 
-SideSetsFromNormals::~SideSetsFromNormals()
-{
-}
-
 void
 SideSetsFromNormals::modify()
 {

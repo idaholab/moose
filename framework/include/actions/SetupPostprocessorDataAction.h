@@ -41,15 +41,7 @@ public:
    */
   SetupPostprocessorDataAction(InputParameters params);
 
-  /**
-   * Class destructor
-   */
-  virtual ~SetupPostprocessorDataAction();
-
-  /**
-   * Perform the initialization of the Post
-   */
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //SETUPPOSTPROCESSORDATAACTION_H

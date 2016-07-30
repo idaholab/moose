@@ -26,10 +26,9 @@ class ErrorToleranceMarker : public IndicatorMarker
 {
 public:
   ErrorToleranceMarker(const InputParameters & parameters);
-  virtual ~ErrorToleranceMarker(){};
 
 protected:
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   Real _coarsen;
   Real _refine;

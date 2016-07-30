@@ -36,9 +36,8 @@ class MultiAppDTKInterpolationTransfer :
 {
 public:
   MultiAppDTKInterpolationTransfer(const InputParameters & parameters);
-  virtual ~MultiAppDTKInterpolationTransfer() {}
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   VariableName _from_var_name;

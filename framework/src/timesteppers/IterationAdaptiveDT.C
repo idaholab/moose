@@ -90,10 +90,6 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
     mooseError("'timestep_limiting_function' must be used for 'max_function_change' to be used");
 }
 
-IterationAdaptiveDT::~IterationAdaptiveDT()
-{
-}
-
 void
 IterationAdaptiveDT::init()
 {

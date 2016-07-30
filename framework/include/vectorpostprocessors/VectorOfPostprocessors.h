@@ -39,27 +39,14 @@ public:
   VectorOfPostprocessors(const InputParameters & parameters);
 
   /**
-   * Destructor
-   */
-  virtual ~VectorOfPostprocessors() {}
-
-  /**
    * Initialize, clears the postprocessor vector
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Populates the postprocessor vector of values with the supplied postprocessors
    */
-  virtual void execute();
-
-  ///@{
-  /**
-   * no-op because the postprocessors are already parallel consistent
-   */
-  virtual void finalize() {}
-  virtual void threadJoin(const UserObject &) {}
-  ///@}
+  virtual void execute() override;
 
 protected:
   /// The VectorPostprocessorValue object where the results are stored

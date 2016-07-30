@@ -37,10 +37,6 @@ NodalNormalBC::NodalNormalBC(const InputParameters & parameters) :
 {
 }
 
-NodalNormalBC::~NodalNormalBC()
-{
-}
-
 void
 NodalNormalBC::computeResidual(NumericVector<Number> & residual)
 {

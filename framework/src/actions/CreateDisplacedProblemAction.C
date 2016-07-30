@@ -31,10 +31,6 @@ CreateDisplacedProblemAction::CreateDisplacedProblemAction(InputParameters param
 {
 }
 
-CreateDisplacedProblemAction::~CreateDisplacedProblemAction()
-{
-}
-
 void
 CreateDisplacedProblemAction::act()
 {

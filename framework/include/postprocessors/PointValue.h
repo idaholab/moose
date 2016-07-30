@@ -39,30 +39,25 @@ public:
   PointValue(const InputParameters & parameters);
 
   /**
-   * Destructor
-   */
-  virtual ~PointValue(){};
-
-  /**
    * Empty method, no initialization needed
    */
-  virtual void initialize(){};
+  virtual void initialize() override {}
 
   /**
    * Determines what element contains the specified point
    */
-  virtual void execute();
+  virtual void execute() override;
 
   /**
    * Returns the value of the variable at the specified location
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
   /**
    * Performs the necessary parallel communication as well as computes
    * the value to return in the getValue method.
    */
-  virtual void finalize();
+  virtual void finalize() override;
 
 protected:
 

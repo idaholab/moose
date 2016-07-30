@@ -40,16 +40,16 @@ class DT2 : public TimeStepper
 public:
   DT2(const InputParameters & parameters);
 
-  virtual void preExecute();
-  virtual void preSolve();
-  virtual void step();
+  virtual void preExecute() override;
+  virtual void preSolve() override;
+  virtual void step() override;
 
-  virtual void rejectStep();
-  virtual bool converged();
+  virtual void rejectStep() override;
+  virtual bool converged() override;
 
 protected:
-  virtual Real computeInitialDT();
-  virtual Real computeDT();
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
 
   ///
   NumericVector<Number> * _u_diff, * _u1, * _u2;

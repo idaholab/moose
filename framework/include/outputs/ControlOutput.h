@@ -42,7 +42,7 @@ protected:
   /**
    * Perform the output of control information
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
 private:
 

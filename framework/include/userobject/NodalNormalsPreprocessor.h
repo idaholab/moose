@@ -39,12 +39,11 @@ class NodalNormalsPreprocessor :
 {
 public:
   NodalNormalsPreprocessor(const InputParameters & parameters);
-  virtual ~NodalNormalsPreprocessor();
 
-  virtual void initialize();
-  virtual void finalize();
-  virtual void execute();
-  virtual void threadJoin(const UserObject & uo);
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & uo) override;
 
   /**
    * Forces object to be stored as a block object.
@@ -57,7 +56,7 @@ public:
    * the object should be stored as boundary or block. Since this object needs to execute on elements, it must
    * be stored as a block object, overloading this method to always return false has such effect.
    */
-  virtual bool boundaryRestricted() { return false; }
+  virtual bool boundaryRestricted() override { return false; }
 
 
 protected:

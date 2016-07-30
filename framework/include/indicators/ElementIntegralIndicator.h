@@ -27,9 +27,8 @@ class ElementIntegralIndicator :
 {
 public:
   ElementIntegralIndicator(const InputParameters & parameters);
-  virtual ~ElementIntegralIndicator(){};
 
-  virtual void computeIndicator();
+  virtual void computeIndicator() override;
 
 protected:
   virtual Real computeQpIntegral();

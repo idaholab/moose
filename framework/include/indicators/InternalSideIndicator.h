@@ -47,14 +47,12 @@ public:
    */
   InternalSideIndicator(const InputParameters & parameters);
 
-  virtual ~InternalSideIndicator();
-
   /**
    * Computes the indicator for the current side.
    */
-  virtual void computeIndicator();
+  virtual void computeIndicator() override;
 
-  virtual void finalize();
+  virtual void finalize() override;
 
 protected:
   MooseVariable & _field_var;

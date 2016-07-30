@@ -32,10 +32,11 @@ class ConstantPointSource : public DiracKernel
 public:
   ConstantPointSource(const InputParameters & parameters);
 
-  virtual void addPoints();
-  virtual Real computeQpResidual();
+  virtual void addPoints() override;
 
 protected:
+  virtual Real computeQpResidual() override;
+
   Real _value;
   std::vector<Real> _point_param;
   Point _p;

@@ -33,19 +33,18 @@ class LinearNodalConstraint : public NodalConstraint
 {
 public:
   LinearNodalConstraint(const InputParameters & parameters);
-  virtual ~LinearNodalConstraint();
 
 protected:
 
   /**
    * Computes the residual for the current slave node
    */
-  virtual Real computeQpResidual(Moose::ConstraintType type);
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
 
   /**
    * Computes the jacobian for the constraint
    */
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   // Holds the master node ids
   std::vector<unsigned int> _master_node_ids;

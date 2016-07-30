@@ -80,10 +80,6 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
   _problem.dt() = 1.0;
 }
 
-EigenExecutionerBase::~EigenExecutionerBase()
-{
-}
-
 void
 EigenExecutionerBase::init()
 {

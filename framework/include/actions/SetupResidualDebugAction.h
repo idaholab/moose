@@ -30,9 +30,8 @@ class SetupResidualDebugAction : public Action
 {
 public:
   SetupResidualDebugAction(InputParameters parameters);
-  virtual ~SetupResidualDebugAction();
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
   std::vector<NonlinearVariableName> _show_var_residual;

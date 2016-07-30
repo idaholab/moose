@@ -28,10 +28,6 @@ RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
   _in_file_handles.resize(libMesh::n_threads());
 }
 
-RestartableDataIO::~RestartableDataIO()
-{
-}
-
 void
 RestartableDataIO::writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & /*_recoverable_data*/)
 {

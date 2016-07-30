@@ -57,10 +57,6 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters) :
 {
 }
 
-ElemElemConstraint::~ElemElemConstraint()
-{
-}
-
 void
 ElemElemConstraint::reinit(const ElementPairInfo & element_pair_info)
 {

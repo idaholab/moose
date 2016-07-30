@@ -27,10 +27,6 @@ DiffusionFluxBC::DiffusionFluxBC(const InputParameters & parameters) :
 {
 }
 
-DiffusionFluxBC::~DiffusionFluxBC()
-{
-}
-
 RealGradient
 DiffusionFluxBC::computeQpFluxResidual()
 {
@@ -42,4 +38,3 @@ DiffusionFluxBC::computeQpFluxJacobian()
 {
   return _grad_phi[_j][_qp];
 }
-

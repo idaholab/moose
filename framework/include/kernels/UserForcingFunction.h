@@ -44,7 +44,7 @@ protected:
   /**
    * Computes test function * forcing function.
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   Function & _func;
 };

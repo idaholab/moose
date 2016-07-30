@@ -40,16 +40,7 @@ public:
    */
   AddControlAction(InputParameters parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~AddControlAction(){};
-
-  /**
-   * Create and store the Control object.
-   */
-  virtual void act();
-
+  virtual void act() override;
 };
 
 #endif // ADDCONTROLACTION_H

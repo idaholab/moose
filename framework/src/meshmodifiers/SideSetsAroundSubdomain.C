@@ -52,10 +52,6 @@ SideSetsAroundSubdomain::SideSetsAroundSubdomain(const InputParameters & paramet
   }
 }
 
-SideSetsAroundSubdomain::~SideSetsAroundSubdomain()
-{
-}
-
 void
 SideSetsAroundSubdomain::initialize()
 {
