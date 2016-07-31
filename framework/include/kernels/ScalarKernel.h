@@ -24,6 +24,7 @@
 #include "TransientInterface.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
+#include "VectorPostprocessorInterface.h"
 
 // Forward declarations
 class ScalarKernel;
@@ -46,7 +47,8 @@ class ScalarKernel :
   public PostprocessorInterface,
   public TransientInterface,
   public ZeroInterface,
-  public MeshChangedInterface
+  public MeshChangedInterface,
+  protected VectorPostprocessorInterface
 {
 public:
   ScalarKernel(const InputParameters & parameters);

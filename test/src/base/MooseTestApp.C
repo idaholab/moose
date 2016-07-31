@@ -155,6 +155,7 @@
 #include "ImplicitODEy.h"
 #include "AlphaCED.h"
 #include "PostprocessorCED.h"
+#include "VectorPostprocessorScalarKernel.h"
 
 #include "EqualValueNodalConstraint.h"
 
@@ -424,6 +425,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerScalarKernel(ImplicitODEy);
   registerScalarKernel(AlphaCED);
   registerScalarKernel(PostprocessorCED);
+  registerScalarKernel(VectorPostprocessorScalarKernel);
 
   // Functions
   registerFunction(TimestepSetupFunction);
