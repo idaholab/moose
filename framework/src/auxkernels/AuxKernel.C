@@ -70,6 +70,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
     Restartable(parameters, "AuxKernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
+    VectorPostprocessorInterface(this),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _nl_sys(*parameters.get<SystemBase *>("_nl_sys")),

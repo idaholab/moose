@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'vectorpostprocessor.i'
+    exodiff = 'vectorpostprocessor_out.e'
+  [../]
+[]
