@@ -76,7 +76,7 @@ public:
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
-  virtual bool isNodal() const;
+  virtual bool isNodal() const override;
 
   /**
    * Current element this variable is evaluated at

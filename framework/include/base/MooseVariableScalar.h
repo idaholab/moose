@@ -35,7 +35,7 @@ public:
 
   void reinit();
 
-  virtual bool isNodal() const;
+  virtual bool isNodal() const override;
 
   //
   VariableValue & sln() { return _u; }

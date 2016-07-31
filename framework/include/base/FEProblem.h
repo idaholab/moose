@@ -129,10 +129,10 @@ public:
   FEProblem(const InputParameters & parameters);
   virtual ~FEProblem();
 
-  virtual EquationSystems & es() { return _eq; }
-  virtual MooseMesh & mesh() { return _mesh; }
+  virtual EquationSystems & es() override { return _eq; }
+  virtual MooseMesh & mesh() override { return _mesh; }
 
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid);
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
 
@@ -203,10 +203,10 @@ public:
                                                               const PetscInt maxits);
 
 
-  virtual bool hasVariable(const std::string & var_name);
-  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
-  virtual bool hasScalarVariable(const std::string & var_name);
-  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name);
+  virtual bool hasVariable(const std::string & var_name) override;
+  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual bool hasScalarVariable(const std::string & var_name) override;
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) override;
 
   /**
    * Set the MOOSE variables to be reinited on each element.
@@ -214,21 +214,21 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid);
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid) override;
 
   /**
    * Get the MOOSE variables to be reinited on each element.
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid);
+  virtual const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid) override;
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
    *
    * @return True if there has been a list of active elemental moose variables set, False otherwise
    */
-  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid);
+  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) override;
 
   /**
    * Clear the active elemental MooseVariable.  If there are no active variables then they will all be reinited.
@@ -236,7 +236,7 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
+  virtual void clearActiveElementalMooseVariables(THREAD_ID tid) override;
 
   virtual void createQRules(QuadratureType type, Order order, Order volume_order=INVALID_ORDER, Order face_order=INVALID_ORDER);
 
@@ -255,7 +255,7 @@ public:
    */
   Order getMaxScalarOrder() const;
 
-  virtual Assembly & assembly(THREAD_ID tid) { return *_assembly[tid]; }
+  virtual Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -266,35 +266,35 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void prepare(const Elem * elem, THREAD_ID tid);
-  virtual void prepareFace(const Elem * elem, THREAD_ID tid);
-  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid);
+  virtual void prepare(const Elem * elem, THREAD_ID tid) override;
+  virtual void prepareFace(const Elem * elem, THREAD_ID tid) override;
+  virtual void prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid) override;
 
-  virtual void prepareAssembly(THREAD_ID tid);
+  virtual void prepareAssembly(THREAD_ID tid) override;
 
-  virtual void addGhostedElem(dof_id_type elem_id);
-  virtual void addGhostedBoundary(BoundaryID boundary_id);
-  virtual void ghostGhostedBoundaries();
+  virtual void addGhostedElem(dof_id_type elem_id) override;
+  virtual void addGhostedBoundary(BoundaryID boundary_id) override;
+  virtual void ghostGhostedBoundaries() override;
 
   virtual void sizeZeroes(unsigned int size, THREAD_ID tid);
-  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_elem, THREAD_ID tid);
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
-  virtual void reinitNode(const Node * node, THREAD_ID tid);
-  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid);
-  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid);
-  virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid);
-  virtual void reinitNeighborPhys(const Elem * neighbor, const std::vector<Point> & physical_points, THREAD_ID tid);
-  virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
-  virtual void reinitScalars(THREAD_ID tid);
+  virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) override;
+  virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
+  virtual void reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_elem, THREAD_ID tid) override;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
+  virtual void reinitNode(const Node * node, THREAD_ID tid) override;
+  virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) override;
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) override;
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid) override;
+  virtual void reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID tid) override;
+  virtual void reinitNeighborPhys(const Elem * neighbor, unsigned int neighbor_side, const std::vector<Point> & physical_points, THREAD_ID tid) override;
+  virtual void reinitNeighborPhys(const Elem * neighbor, const std::vector<Point> & physical_points, THREAD_ID tid) override;
+  virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid) override;
+  virtual void reinitScalars(THREAD_ID tid) override;
   virtual void reinitOffDiagScalars(THREAD_ID tid);
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
-  virtual void getDiracElements(std::set<const Elem *> & elems);
-  virtual void clearDiracInfo();
+  virtual void getDiracElements(std::set<const Elem *> & elems) override;
+  virtual void clearDiracInfo() override;
 
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
@@ -303,10 +303,10 @@ public:
    *
    * @param fe_cache True for using the cache false for not.
    */
-  virtual void useFECache(bool fe_cache);
+  virtual void useFECache(bool fe_cache) override;
 
-  virtual void init();
-  virtual void solve();
+  virtual void init() override;
+  virtual void solve() override;
 
   /**
    * Set an exception.  Usually this should not be directly called - but should be called through the mooseException() macro.
@@ -331,11 +331,11 @@ public:
    */
   virtual void checkExceptionAndStopSolve();
 
-  virtual bool converged();
-  virtual unsigned int nNonlinearIterations();
-  virtual unsigned int nLinearIterations();
-  virtual Real finalNonlinearResidual();
-  virtual bool computingInitialResidual();
+  virtual bool converged() override;
+  virtual unsigned int nNonlinearIterations() override;
+  virtual unsigned int nLinearIterations() override;
+  virtual Real finalNonlinearResidual() override;
+  virtual bool computingInitialResidual() override;
 
   /**
    * Returns true if we are currently computing Jacobian
@@ -352,8 +352,8 @@ public:
    */
   virtual Real relativeSolutionDifferenceNorm();
 
-  virtual void onTimestepBegin();
-  virtual void onTimestepEnd();
+  virtual void onTimestepBegin() override;
+  virtual void onTimestepEnd() override;
 
   virtual Real & time() const { return _time; }
   virtual Real & timeOld() const { return _time_old; }
@@ -362,7 +362,7 @@ public:
   virtual Real & dtOld() const { return _dt_old; }
 
   virtual void transient(bool trans) { _transient = trans; }
-  virtual bool isTransient() const { return _transient; }
+  virtual bool isTransient() const override { return _transient; }
 
   virtual void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
   virtual void addPredictor(const std::string & type, const std::string & name, InputParameters parameters);
@@ -749,13 +749,13 @@ public:
 
   virtual NumericVector<Number> & residualVector(Moose::KernelType type);
 
-  virtual void addResidual(THREAD_ID tid);
-  virtual void addResidualNeighbor(THREAD_ID tid);
+  virtual void addResidual(THREAD_ID tid) override;
+  virtual void addResidualNeighbor(THREAD_ID tid) override;
   virtual void addResidualScalar(THREAD_ID tid = 0);
 
-  virtual void cacheResidual(THREAD_ID tid);
-  virtual void cacheResidualNeighbor(THREAD_ID tid);
-  virtual void addCachedResidual(THREAD_ID tid);
+  virtual void cacheResidual(THREAD_ID tid) override;
+  virtual void cacheResidualNeighbor(THREAD_ID tid) override;
+  virtual void addCachedResidual(THREAD_ID tid) override;
 
   /**
    * Allows for all the residual contributions that are currently cached to be added directly into the vector passed in.
@@ -765,33 +765,33 @@ public:
    */
   virtual void addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid);
 
-  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid);
-  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid);
+  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) override;
 
-  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid);
-  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid);
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices, THREAD_ID tid);
+  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid) override;
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices, THREAD_ID tid) override;
   virtual void addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid = 0);
   virtual void addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian, unsigned int ivar, THREAD_ID tid = 0);
 
-  virtual void cacheJacobian(THREAD_ID tid);
-  virtual void cacheJacobianNeighbor(THREAD_ID tid);
-  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid);
+  virtual void cacheJacobian(THREAD_ID tid) override;
+  virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
+  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
 
-  virtual void prepareShapes(unsigned int var, THREAD_ID tid);
-  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid);
-  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid);
+  virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
+  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
+  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
   // Displaced problem /////
   virtual void addDisplacedProblem(MooseSharedPointer<DisplacedProblem> displaced_problem);
   virtual MooseSharedPointer<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
 
-  virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL);
+  virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
 
   virtual void possiblyRebuildGeomSearchPatches();
 
-  virtual GeometricSearchData & geomSearchData() { return _geometric_search_data; }
+  virtual GeometricSearchData & geomSearchData() override { return _geometric_search_data; }
 
   /**
    * Communicate to the Resurector the name of the restart filer
@@ -845,7 +845,7 @@ public:
   /// Update the mesh due to changing XFEM cuts
   virtual bool updateMeshXFEM();
 
-  virtual void meshChanged();
+  virtual void meshChanged() override;
 
   /**
    * Register an object that derives from MeshChangedInterface

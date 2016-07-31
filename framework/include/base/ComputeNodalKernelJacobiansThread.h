@@ -43,9 +43,9 @@ public:
   // Splitting Constructor
   ComputeNodalKernelJacobiansThread(ComputeNodalKernelJacobiansThread & x, Threads::split split);
 
-  virtual void pre();
+  virtual void pre() override;
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalKernelJacobiansThread & /*y*/);
 

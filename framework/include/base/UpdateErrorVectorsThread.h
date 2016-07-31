@@ -31,7 +31,7 @@ public:
   // Splitting Constructor
   UpdateErrorVectorsThread(UpdateErrorVectorsThread & x, Threads::split split);
 
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem * elem) override;
 
   void join(const UpdateErrorVectorsThread & /*y*/);
 

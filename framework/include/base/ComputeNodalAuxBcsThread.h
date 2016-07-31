@@ -26,7 +26,7 @@ public:
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalAuxBcsThread & /*y*/);
 
