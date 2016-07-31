@@ -31,27 +31,27 @@ public:
   DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name, Moose::VarKindType var_kind);
   virtual ~DisplacedSystem();
 
-  virtual void init();
+  virtual void init() override;
 
-  virtual NumericVector<Number> & getVector(const std::string & name);
+  virtual NumericVector<Number> & getVector(const std::string & name) override;
 
-  virtual NumericVector<Number> & serializedSolution() { return _undisplaced_system.serializedSolution(); }
+  virtual NumericVector<Number> & serializedSolution() override { return _undisplaced_system.serializedSolution(); }
 
-  virtual const NumericVector<Number> * & currentSolution() { return _undisplaced_system.currentSolution(); }
+  virtual const NumericVector<Number> * & currentSolution() override { return _undisplaced_system.currentSolution(); }
 
-  virtual NumericVector<Number> & solution() { return _undisplaced_system.solution(); }
+  virtual NumericVector<Number> & solution() override { return _undisplaced_system.solution(); }
 
-  virtual NumericVector<Number> & solutionUDot() { return _undisplaced_system.solutionUDot(); }
-  virtual Number & duDotDu() { return _undisplaced_system.duDotDu(); }
+  virtual NumericVector<Number> & solutionUDot() override { return _undisplaced_system.solutionUDot(); }
+  virtual Number & duDotDu() override { return _undisplaced_system.duDotDu(); }
 
   /**
    * Return the residual copy from the NonlinearSystem
    * @return Residual copy
    */
-  virtual NumericVector<Number> & residualCopy() { return _undisplaced_system.residualCopy(); }
-  virtual NumericVector<Number> & residualGhosted() { return _undisplaced_system.residualGhosted(); }
+  virtual NumericVector<Number> & residualCopy() override { return _undisplaced_system.residualCopy(); }
+  virtual NumericVector<Number> & residualGhosted() override { return _undisplaced_system.residualGhosted(); }
 
-  virtual void augmentSendList(std::vector<dof_id_type> & send_list){ _undisplaced_system.augmentSendList(send_list); }
+  virtual void augmentSendList(std::vector<dof_id_type> & send_list) override { _undisplaced_system.augmentSendList(send_list); }
 
   /**
    * This is an empty function since the displaced system doesn't have a matrix!
@@ -59,25 +59,24 @@ public:
    */
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
                                std::vector<dof_id_type> & /*n_nz*/,
-                               std::vector<dof_id_type> & /*n_oz*/)
-    {}
+                               std::vector<dof_id_type> & /*n_oz*/) override {}
 
   /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
    * @param var_name The name of the variable to be zeroed.
    */
-  virtual void addVariableToZeroOnResidual(std::string var_name) { _undisplaced_system.addVariableToZeroOnResidual(var_name); }
+  virtual void addVariableToZeroOnResidual(std::string var_name) override { _undisplaced_system.addVariableToZeroOnResidual(var_name); }
 
   /**
    * Adds this variable to the list of variables to be zeroed during each jacobian evaluation.
    * @param var_name The name of the variable to be zeroed.
    */
-  virtual void addVariableToZeroOnJacobian(std::string var_name) { _undisplaced_system.addVariableToZeroOnJacobian(var_name); }
+  virtual void addVariableToZeroOnJacobian(std::string var_name) override { _undisplaced_system.addVariableToZeroOnJacobian(var_name); }
 
   /**
    * Zero out the solution for the list of variables passed in.
    */
-  virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed) { _undisplaced_system.zeroVariables(vars_to_be_zeroed); }
+  virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed) override { _undisplaced_system.zeroVariables(vars_to_be_zeroed); }
 
 protected:
   SystemBase & _undisplaced_system;

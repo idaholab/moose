@@ -32,7 +32,7 @@ public:
   // Splitting Constructor
   FlagElementsThread(FlagElementsThread & x, Threads::split split);
 
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem * elem) override;
 
   void join(const FlagElementsThread & /*y*/);
 

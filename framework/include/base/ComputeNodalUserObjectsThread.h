@@ -32,7 +32,7 @@ public:
 
   virtual ~ComputeNodalUserObjectsThread();
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 

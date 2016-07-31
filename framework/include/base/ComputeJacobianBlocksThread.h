@@ -56,7 +56,7 @@ public:
   {}
 
 protected:
-  virtual void postElement(const Elem * elem);
+  virtual void postElement(const Elem * elem) override;
 
   std::vector<JacobianBlock*> _blocks;
 };

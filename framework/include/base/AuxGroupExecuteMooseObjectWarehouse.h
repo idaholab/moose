@@ -62,7 +62,7 @@ public:
   /**
    * Updates the various active lists of objects.
    */
-  virtual void updateActive(THREAD_ID tid = 0);
+  virtual void updateActive(THREAD_ID tid = 0) override;
 
 protected:
 

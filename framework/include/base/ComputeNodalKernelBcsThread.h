@@ -28,9 +28,9 @@ public:
   // Splitting Constructor
   ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split);
 
-  virtual void pre();
+  virtual void pre() override;
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalKernelBcsThread & /*y*/);
 

@@ -39,7 +39,7 @@ class MooseObject :
 public:
   MooseObject(const InputParameters & parameters);
 
-  virtual ~MooseObject() { }
+  virtual ~MooseObject() = default;
 
   /**
    * Get the name of the object
