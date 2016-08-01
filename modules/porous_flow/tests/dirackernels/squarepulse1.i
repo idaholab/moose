@@ -70,7 +70,6 @@
 [Postprocessors]
   [./total_mass]
     type = PorousFlowFluidMass
-    variable = pp
     execute_on = 'initial timestep_end'
   [../]
 []
