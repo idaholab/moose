@@ -240,6 +240,10 @@ private:
                     const Elem* new_elem,
                     Point p,
                     unsigned id);
+
+  /// A helper function for addPoint(Point, id) for when
+  /// id != invalid_uint.
+  const Elem * addPointWithValidId(Point p, unsigned id);
 };
 
 #endif
