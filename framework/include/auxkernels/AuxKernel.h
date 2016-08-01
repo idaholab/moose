@@ -31,6 +31,7 @@
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
+#include "VectorPostprocessorInterface.h"
 
 //forward declarations
 class SubProblem;
@@ -62,7 +63,8 @@ class AuxKernel :
   protected GeometricSearchInterface,
   public Restartable,
   public ZeroInterface,
-  public MeshChangedInterface
+  public MeshChangedInterface,
+  protected VectorPostprocessorInterface
 {
 public:
   AuxKernel(const InputParameters & parameters);
