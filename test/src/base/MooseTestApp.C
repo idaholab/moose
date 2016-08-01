@@ -92,6 +92,7 @@
 #include "FluxAverageAux.h"
 #include "OldMaterialAux.h"
 #include "DotCouplingAux.h"
+#include "VectorPostprocessorAux.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -154,6 +155,7 @@
 #include "ImplicitODEy.h"
 #include "AlphaCED.h"
 #include "PostprocessorCED.h"
+#include "VectorPostprocessorScalarKernel.h"
 
 #include "EqualValueNodalConstraint.h"
 
@@ -353,6 +355,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(FluxAverageAux);
   registerAux(OldMaterialAux);
   registerAux(DotCouplingAux);
+  registerAux(VectorPostprocessorAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
@@ -422,6 +425,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerScalarKernel(ImplicitODEy);
   registerScalarKernel(AlphaCED);
   registerScalarKernel(PostprocessorCED);
+  registerScalarKernel(VectorPostprocessorScalarKernel);
 
   // Functions
   registerFunction(TimestepSetupFunction);
