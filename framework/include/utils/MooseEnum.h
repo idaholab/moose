@@ -107,6 +107,10 @@ public:
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj) { out << obj._current_name_preserved; return out; }
 
+  /// get the current value cast to the enum type T
+  template <typename T>
+  T getEnum() const;
+
 protected:
   /// Check whether the current value is deprecated when called
   virtual void checkDeprecated() const override;
@@ -131,5 +135,16 @@ private:
   std::string _current_name;
   std::string _current_name_preserved;
 };
+
+template <typename T>
+T
+MooseEnum::getEnum() const
+{
+  #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
+    static_assert( std::is_enum<T>::value == true,
+      "The type requested from MooseEnum::getEnum must be an enum type!\n\n");
+  #endif
+  return static_cast<T>(_current_id);
+}
 
 #endif //MOOSEENUM_H
