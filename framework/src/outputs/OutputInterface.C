@@ -24,6 +24,9 @@ InputParameters validParams<OutputInterface>()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of variables(s) associated with this object");
+
+  params.addParamNamesToGroup("outputs", "Advanced");
+
   return params;
 }
 
