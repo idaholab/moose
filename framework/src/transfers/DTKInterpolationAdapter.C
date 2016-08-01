@@ -29,7 +29,9 @@
 #include "libmesh/equation_systems.h"
 
 // DTK includes
+#include "libmesh/ignore_warnings.h"
 #include <DTK_MeshTypes.hpp>
+#include "libmesh/restore_warnings.h"
 
 DTKInterpolationAdapter::DTKInterpolationAdapter(Teuchos::RCP<const Teuchos::MpiComm<int> > in_comm, EquationSystems & in_es, const Point & offset, unsigned int from_dim):
     comm(in_comm),
