@@ -193,8 +193,21 @@ DiracKernel::addPoint(const Elem * elem, Point p, unsigned /*id*/)
 const Elem *
 DiracKernel::addPoint(Point p, unsigned id)
 {
+  // Make sure that this method was called with the same id on all
+  // processors.  It's an extra communication, though, so let's only
+  // do it in DEBUG mode.
+  libmesh_assert(comm().verify(id));
+
   if (id != libMesh::invalid_uint)
   {
+    // The Elem we'll eventually return.  We can't return early on some
+    // processors, because we may need to call parallel_only() functions in
+    // the remainder of this scope.
+    const Elem * return_elem = NULL;
+
+    // May be set if the Elem is found in our cache, otherwise stays as NULL.
+    const Elem * cached_elem = NULL;
+
     // OK, the user gave us an ID, let's see if we already have it...
     point_cache_t::iterator it = _point_cache.find(id);
 
@@ -203,14 +216,47 @@ DiracKernel::addPoint(Point p, unsigned id)
     unsigned int we_found_it = i_found_it;
     comm().max(we_found_it);
 
-    // If the point was found in a cache, but not my cache, I'm not responsible for it.
+    // If nobody found it in their local caches, it means we need to
+    // do the PointLocator look-up and update the caches.  This is
+    // safe, because all processors have the same value of we_found_it.
+    if (!we_found_it)
+    {
+      const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+
+      // Only add the point to the cache on this processor if the Elem is local
+      if (elem && (elem->processor_id() == processor_id()))
+      {
+        // Add the point to the cache...
+        _point_cache[id] = std::make_pair(elem, p);
+
+        // ... and to the reverse cache.
+        std::vector<std::pair<Point, unsigned> > & points = _reverse_point_cache[elem];
+        points.push_back(std::make_pair(p, id));
+      }
+
+      // Call the other addPoint() method.  This method ignores non-local
+      // and NULL elements automatically.
+      addPoint(elem, p, id);
+      return_elem = elem;
+    }
+
+    // If the point was found in a cache, but not my cache, I'm not
+    // responsible for it.
+    //
+    // We can't return early here: then we aren't allowed to call any more
+    // parallel_only() functions in the remainder of this function!
     if (we_found_it && !i_found_it)
-      return NULL;
+      return_elem = NULL;
+
+    // This flag may be set by the processor that cached the Elem because it
+    // needs to call findPoint() (due to moving mesh, etc.). If so, we will
+    // call it at the end of the while loop below.
+    bool i_need_find_point = false;
 
     // Now that we only cache local data, some processors may enter
     // this if statement and some may not.  Therefore we can't call
     // any parallel_only() functions inside this if statement.
-    if (i_found_it)
+    while (i_found_it)
     {
       // We have something cached, now make sure it's actually the same Point.
       // TODO: we should probably use this same comparison in the DiracKernelInfo code!
@@ -219,7 +265,7 @@ DiracKernel::addPoint(Point p, unsigned id)
       if (cached_point.relative_fuzzy_equals(p))
       {
         // Find the cached element associated to this point
-        const Elem * cached_elem = (it->second).first;
+        cached_elem = (it->second).first;
 
         // If the cached element's processor ID doesn't match ours, we
         // are no longer responsible for caching it.  This can happen
@@ -230,7 +276,8 @@ DiracKernel::addPoint(Point p, unsigned id)
           // Analogously to the rest of the DiracKernel system, we
           // also return NULL because the Elem is non-local.
           updateCaches(cached_elem, NULL, p, id);
-          return NULL;
+          return_elem = NULL;
+          break; // out of while loop
         }
 
         bool active = cached_elem->active();
@@ -241,13 +288,9 @@ DiracKernel::addPoint(Point p, unsigned id)
         // return its result.
         if (active && contains_point)
         {
-          // FIXME/TODO:
-          // A given Point can be located in multiple elements if it
-          // is on an edge or a node in the grid.  How are we handling
-          // that case?  In other words, the same id would need to
-          // appear multiple times in the _point_cache object...
           addPoint(cached_elem, p, id);
-          return cached_elem;
+          return_elem = cached_elem;
+          break; // out of while loop
         }
 
         // Is the Elem not active (been refined) but still contains the point?
@@ -264,15 +307,19 @@ DiracKernel::addPoint(Point p, unsigned id)
             {
               updateCaches(cached_elem, active_children[c], p, id);
               addPoint(active_children[c], p, id);
-              return active_children[c];
+              return_elem = active_children[c];
+              break; // out of for loop
             }
 
-          // If we got here without returning, it means the Point was
+          // If we got here without setting return_elem, it means the Point was
           // found in the parent element, but not in any of the active
           // children... this is not possible under normal
           // circumstances, so something must have gone seriously
           // wrong!
-          mooseError("Error, Point not found in any of the active children!");
+          if (!return_elem)
+            mooseError("Error, Point not found in any of the active children!");
+
+          break; // out of while loop
         }
 
         else if (
@@ -291,20 +338,41 @@ DiracKernel::addPoint(Point p, unsigned id)
           // Update the caches.
           (!active && !contains_point))
         {
-          const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
-
-          updateCaches(cached_elem, elem, p, id);
-          addPoint(elem, p, id);
-          return elem;
+          i_need_find_point = true;
+          break; // out of while loop
         }
 
         else
           mooseError("We'll never get here!");
-      }
+      } // if (cached_point.relative_fuzzy_equals(p))
       else
-        mooseError("Cached Dirac point " << cached_point << " already exists with ID: " << id << " and does not match point " << p);
+        mooseError("Cached Dirac point " << cached_point
+                   << " already exists with ID: " << id
+                   << " and does not match point " << p);
+
+      // We only want one iteration of this while loop at maximum.
+      i_found_it = false;
+    } // while (i_found_it)
+
+    // We are back to all processors here because we do not return
+    // early in the code above...
+
+    // Does we need to call findPoint() on all processors.
+    unsigned int we_need_find_point = static_cast<unsigned int>(i_need_find_point);
+    comm().max(we_need_find_point);
+
+    if (we_need_find_point)
+    {
+      // findPoint() is a parallel-only function
+      const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh);
+
+      updateCaches(cached_elem, elem, p, id);
+      addPoint(elem, p, id);
+      return_elem = elem;
     }
-  }
+
+    return return_elem;
+  } // if (id != libMesh::invalid_uint)
 
   // If we made it here, we either didn't have the point already cached or
   // id == libMesh::invalid_uint.  So now do the more expensive PointLocator lookup,
