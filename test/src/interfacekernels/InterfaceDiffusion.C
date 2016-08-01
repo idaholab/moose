@@ -63,22 +63,31 @@ InterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType type)
   switch (type)
   {
 
-    case Moose::ElementElement:
-      jac -= 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp];
-      break;
+  case Moose::ElementElement:
+    jac -= 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp];
+    break;
 
-    case Moose::NeighborNeighbor:
-      jac += 0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
-      break;
+  case Moose::NeighborNeighbor:
+    jac += 0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+    break;
 
-    case Moose::NeighborElement:
-      jac += 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
-      break;
-
-    case Moose::ElementNeighbor:
-      jac -=  0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp];
-      break;
+  default:
+    mooseError("Unrecognized type = " << type << " in InterfaceDiffusion::computeQpJacobian().");
   }
 
   return jac;
+}
+
+Real
+InterfaceDiffusion::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
+{
+
+  if (jvar == _var.number() && type == Moose::NeighborElement)
+    return 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+
+  else if (jvar == _neighbor_var.number() && type == Moose::ElementNeighbor)
+    return  0.5 * (-_D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
+
+  else
+    return 0.;
 }

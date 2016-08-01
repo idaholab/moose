@@ -39,12 +39,6 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters) :
   }
 }
 
-const MooseVariable &
-InterfaceKernel::neighborVariable() const
-{
-  return _neighbor_var;
-}
-
 void
 InterfaceKernel::computeElemNeighResidual(Moose::DGResidualType type)
 {
@@ -76,17 +70,25 @@ InterfaceKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
                               type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _neighbor_var.number(), _var.number()) :
                               _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _neighbor_var.number(), _neighbor_var.number());
 
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_i = 0; _i < test_space.size(); _i++)
-      for (_j = 0; _j < loc_phi.size(); _j++)
-        Kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
+  if (type == Moose::ElementElement || type == Moose::NeighborNeighbor)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < test_space.size(); _i++)
+        for (_j = 0; _j < loc_phi.size(); _j++)
+          Kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
 }
 
 void
-InterfaceKernel::computeJacobian()
+InterfaceKernel::computeJacobian(unsigned int jvar)
 {
-  computeElemNeighJacobian(Moose::ElementElement);
-  computeElemNeighJacobian(Moose::NeighborNeighbor);
+
+  if (jvar == _var.number())
+    // Compute element-element Jacobian
+    computeElemNeighJacobian(Moose::ElementElement);
+
+  else if (jvar == _neighbor_var.number())
+    // Compute neighbor-neighbor Jacobian
+    computeElemNeighJacobian(Moose::NeighborNeighbor);
+
 }
 
 
@@ -111,45 +113,30 @@ InterfaceKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, uns
 }
 
 void
-InterfaceKernel::computeElementOffDiagJacobian(unsigned int jvar)
+InterfaceKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  bool is_jvar_not_interface_var = true;
   if (jvar == _var.number())
   {
-    computeElemNeighJacobian(Moose::ElementElement);
-    is_jvar_not_interface_var = false;
+    computeJacobian(jvar);
+    computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
   }
-  if (jvar == _neighbor_var.number())
+  else if (jvar == _neighbor_var.number())
   {
-    computeElemNeighJacobian(Moose::ElementNeighbor);
-    is_jvar_not_interface_var = false;
-  }
-
-  if (is_jvar_not_interface_var)
-  {
-    computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
+    computeJacobian(jvar);
     computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
   }
-}
+  else
+  {
+    // Compute element-element Jacobian
+    computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 
-void
-InterfaceKernel::computeNeighborOffDiagJacobian(unsigned int jvar)
-{
-  bool is_jvar_not_interface_var = true;
-  if (jvar == _var.number())
-  {
-    computeElemNeighJacobian(Moose::NeighborElement);
-    is_jvar_not_interface_var = false;
-  }
-  if (jvar == _neighbor_var.number())
-  {
-    computeElemNeighJacobian(Moose::NeighborNeighbor);
-    is_jvar_not_interface_var = false;
-  }
-
-  if (is_jvar_not_interface_var)
-  {
+    // Compute neighbor-element Jacobian
     computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
+
+    // Compute element-neighbor Jacobian
+    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
+
+    // Compute neighbor-neighbor Jacobian
     computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
   }
 }
