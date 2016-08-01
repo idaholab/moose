@@ -32,27 +32,19 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    block = '0'
-  [../]
-
-
-  [./v]
-    order = FIRST
-    family = LAGRANGE
-    block = '1'
   [../]
 []
 
 [Kernels]
-  [./diff_u]
+  [./diff0]
     type = CoeffParamDiffusion
     variable = u
     D = 4
     block = 0
   [../]
-  [./diff_v]
+  [./diff1]
     type = CoeffParamDiffusion
-    variable = v
+    variable = u
     D = 2
     block = 1
   [../]
@@ -62,7 +54,7 @@
   [./interface]
     type = InterfaceDiffusion
     variable = u
-    neighbor_var = v
+    neighbor_var = u
     boundary = master0_interface
     D = 4
     D_neighbor = 2
@@ -78,15 +70,9 @@
   [../]
   [./right]
     type = DirichletBC
-    variable = v
+    variable = u
     boundary = 'right'
     value = 0
-  [../]
-  [./middle]
-    type = MatchedValueBC
-    variable = v
-    boundary = 'master0_interface'
-    v = u
   [../]
 []
 
