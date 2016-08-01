@@ -1,0 +1,14 @@
+[Tests]
+  [./const_thermal_expansion]
+    type = 'Exodiff'
+    input = 'constant_expansion_coeff.i'
+    exodiff = 'constant_thermal_expan_only.e'
+  [../]
+
+  [./const_thermal_expansion_restart]
+    type = 'Exodiff'
+    input = 'constant_expansion_coeff_restart.i'
+    exodiff = 'constant_thermal_expan_restart.e'
+    prereq = 'const_thermal_expansion'
+  [../]
+[]

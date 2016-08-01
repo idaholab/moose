@@ -35,16 +35,16 @@ ComputeThermalExpansionEigenStrain::computeQpStressFreeStrain()
   thermal_strain.zero();
   Real old_temp = 0.0;
 
-    if (!_has_incremental_strain || _t_step == 1) // total strain form always uses the ref temp
-      old_temp = _stress_free_reference_temperature;
+  if ((!_has_incremental_strain || _t_step == 1) && !_app.isRestarting()) // total strain form always uses the ref temp
+    old_temp = _stress_free_reference_temperature;
 
-    if (_temperature_old)
-      old_temp = (* _temperature_old)[_qp];
+  if (_temperature_old)
+    old_temp = (* _temperature_old)[_qp];
 
-    thermal_strain.addIa(_thermal_expansion_coeff * (_temperature[_qp] - old_temp));
+  thermal_strain.addIa(_thermal_expansion_coeff * (_temperature[_qp] - old_temp));
 
   _stress_free_strain[_qp] = thermal_strain;
 
-  if (_incremental_form)  // Necessary to avoid zero values of incremental stress free strain with a linear temperature increase
+  if (_has_incremental_strain)  // Necessary to avoid zero values of incremental stress free strain with a linear temperature increase
     _stress_free_strain[_qp] += (*_stress_free_strain_old)[_qp];
 }
