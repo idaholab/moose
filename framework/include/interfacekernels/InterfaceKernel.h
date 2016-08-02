@@ -32,14 +32,17 @@ class InterfaceKernel : public DGKernel
 public:
   InterfaceKernel(const InputParameters & parameters);
 
+  /**
+   * The neighbor variable number that this kernel operates on
+   */
+  const MooseVariable & neighborVariable() const;
+
   virtual void computeElemNeighResidual(Moose::DGResidualType type);
   virtual void computeElemNeighJacobian(Moose::DGJacobianType type);
-  virtual void computeJacobian(unsigned int jvar);
+  virtual void computeJacobian();
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar);
-  virtual void computeOffDiagJacobian(unsigned int jvar);
-
-  // Don't let our computeJacobian(unsigned) hide DGKernel::computeJacobian(void)
-  using DGKernel::computeJacobian;
+  virtual void computeElementOffDiagJacobian(unsigned int jvar);
+  virtual void computeNeighborOffDiagJacobian(unsigned int jvar);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) = 0;
