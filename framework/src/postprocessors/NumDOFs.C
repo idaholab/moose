@@ -28,7 +28,7 @@ InputParameters validParams<NumDOFs>()
 
 NumDOFs::NumDOFs(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _system_enum(static_cast<SystemEnum>(static_cast<int>(parameters.get<MooseEnum>("system")))),
+    _system_enum(parameters.get<MooseEnum>("system").getEnum<SystemEnum>()),
     _system_pointer(NULL),
     _es_pointer(NULL)
 {

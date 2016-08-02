@@ -33,7 +33,7 @@ InputParameters validParams<PerformanceData>()
 
 PerformanceData::PerformanceData(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _column(static_cast<PerfLogCols>(static_cast<int>(getParam<MooseEnum>("column")))),
+    _column(getParam<MooseEnum>("column").getEnum<PerfLogCols>()),
     _category(getParam<std::string>("category")),
     _event(getParam<std::string>("event"))
 {}

@@ -40,4 +40,3 @@ ContactPressureVarAction::act()
                                   Utility::string_to_enum<FEFamily>("LAGRANGE")));
 
 }
-
