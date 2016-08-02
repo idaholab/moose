@@ -16,6 +16,11 @@
     input = 'cosserat_glide.i'
     csvdiff = 'cosserat_glide_out_soln_0001.csv'
   [../]
+  [./glide_fake_plastic]
+    type = 'CSVDiff'
+    input = 'cosserat_glide_fake_plastic.i'
+    csvdiff = 'cosserat_glide_fake_plastic_out_soln_0001.csv'
+  [../]
   [./layered_cosserat_01]
     type = 'CSVDiff'
     input = 'layered_cosserat_01.i'

@@ -75,8 +75,17 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
 
+    _cosserat(hasMaterialProperty<RankTwoTensor>("curvature") && hasMaterialProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
+    _curvature(_cosserat ? &getMaterialPropertyByName<RankTwoTensor>("curvature") : NULL),
+    _elastic_flexural_rigidity_tensor(_cosserat ? &getMaterialPropertyByName<RankFourTensor>("elastic_flexural_rigidity_tensor") : NULL),
+    _couple_stress(_cosserat ? &declareProperty<RankTwoTensor>("couple_stress") : NULL),
+    _couple_stress_old(_cosserat ? &declarePropertyOld<RankTwoTensor>("couple_stress") : NULL),
+    _Jacobian_mult_couple(_cosserat ? &declareProperty<RankFourTensor>("couple_Jacobian_mult") : NULL),
+
     _my_elasticity_tensor(RankFourTensor()),
-    _my_strain_increment(RankTwoTensor())
+    _my_strain_increment(RankTwoTensor()),
+    _my_flexural_rigidity_tensor(RankFourTensor()),
+    _my_curvature(RankTwoTensor())
 {
   if (_epp_tol <= 0)
     mooseError("ComputeMultiPlasticityStress: ep_plastic_tolerance must be positive");
@@ -121,6 +130,12 @@ ComputeMultiPlasticityStress::initQpStatefulProperties()
   _n[_qp] = _n_input;
   _n_old[_qp] = _n_input;
 
+  if (_cosserat)
+  {
+    (*_couple_stress)[_qp].zero();
+    (*_couple_stress_old)[_qp].zero();
+  }
+
   if (_fspb_debug == "jacobian")
   {
     checkDerivatives();
@@ -134,6 +149,11 @@ ComputeMultiPlasticityStress::computeQpStress()
   // the following "_my" variables can get rotated by preReturnMap and postReturnMap
   _my_elasticity_tensor = _elasticity_tensor[_qp];
   _my_strain_increment = _strain_increment[_qp];
+  if (_cosserat)
+  {
+    _my_flexural_rigidity_tensor = (*_elastic_flexural_rigidity_tensor)[_qp];
+    _my_curvature = (*_curvature)[_qp];
+  }
 
   if (_fspb_debug == "jacobian_and_linear_system")
   {
@@ -157,6 +177,12 @@ ComputeMultiPlasticityStress::computeQpStress()
   // if not purely elastic or the customised stuff failed, do some plastic return
   if (!found_solution)
     plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _my_elasticity_tensor, _my_strain_increment, _yf[_qp], number_iterations, linesearch_needed, ld_encountered, constraints_added, _Jacobian_mult[_qp]);
+
+  if (_cosserat)
+  {
+    (*_couple_stress)[_qp] =  (*_elastic_flexural_rigidity_tensor)[_qp] * _my_curvature;
+    (*_Jacobian_mult_couple)[_qp] = _my_flexural_rigidity_tensor;
+  }
 
   postReturnMap();  // rotate back from new frame if necessary
 
@@ -191,6 +217,12 @@ ComputeMultiPlasticityStress::preReturnMap()
     _stress_old[_qp].rotate(_rot);
     _plastic_strain_old[_qp].rotate(_rot);
     _my_strain_increment.rotate(_rot);
+    if (_cosserat)
+    {
+      _my_flexural_rigidity_tensor.rotate(_rot);
+      (*_couple_stress_old)[_qp].rotate(_rot);
+      _my_curvature.rotate(_rot);
+    }
   }
 }
 
@@ -210,6 +242,14 @@ ComputeMultiPlasticityStress::postReturnMap()
     _my_strain_increment.rotate(_rot);
     _stress[_qp].rotate(_rot);
     _plastic_strain[_qp].rotate(_rot);
+    if (_cosserat)
+    {
+      _my_flexural_rigidity_tensor.rotate(_rot);
+      (*_Jacobian_mult_couple)[_qp].rotate(_rot);
+      (*_couple_stress_old)[_qp].rotate(_rot);
+      _my_curvature.rotate(_rot);
+      (*_couple_stress)[_qp].rotate(_rot);
+    }
 
     // Rotate n by _rotation_increment
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)

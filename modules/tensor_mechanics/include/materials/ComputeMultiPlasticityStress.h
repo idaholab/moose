@@ -139,11 +139,37 @@ protected:
   /// Old value of elastic strain
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
+  /// whether Cosserat mechanics should be used
+  bool _cosserat;
+
+  /// The Cosserat curvature strain
+  const MaterialProperty<RankTwoTensor> * _curvature;
+
+  /// The Cosserat elastic flexural rigidity tensor
+  const MaterialProperty<RankFourTensor> * _elastic_flexural_rigidity_tensor;
+
+  /// the Cosserat couple-stress
+  MaterialProperty<RankTwoTensor> * _couple_stress;
+
+  /// the old value of Cosserat couple-stress
+  MaterialProperty<RankTwoTensor> * _couple_stress_old;
+
+  /// derivative of couple-stress w.r.t. curvature
+  MaterialProperty<RankFourTensor> * _Jacobian_mult_couple;
+
   /// Elasticity tensor that can be rotated by this class (ie, its not const)
   RankFourTensor _my_elasticity_tensor;
 
   /// Strain increment that can be rotated by this class, and split into multiple increments (ie, its not const)
   RankTwoTensor _my_strain_increment;
+
+  /// Flexual rigidity tensor that can be rotated by this class (ie, its not const)
+  RankFourTensor _my_flexural_rigidity_tensor;
+
+  /// Curvature that can be rotated by this class, and split into multiple increments (ie, its not const)
+  RankTwoTensor _my_curvature;
+
+
 
   /**
    * makes all deactivated_due_to_ld false, and if >0 of them were initially true, returns true
