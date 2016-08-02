@@ -7,7 +7,7 @@ import utils
 import argparse
 
 # Check for the necessary packages, this does a load so they should all get loaded.
-if utils.check_configuration(['yaml', 'mkdocs', 'markdown', 'markdown_include', 'mdx_math', 'mkdocs_bootswatch', 'mkdocs_bootstrap']):
+if utils.check_configuration(['yaml', 'mkdocs', 'markdown', 'markdown_include', 'mdx_math']):
     sys.exit(1)
 
 from mkdocs.commands import serve, build
