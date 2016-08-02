@@ -366,7 +366,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
   // Following is necessary because I want strain_increment to be "const"
   // but I also want to be able to subdivide an initial_stress
   RankTwoTensor this_strain_increment = strain_increment;
-  if (_t_step == 1 && isParamValid("initial_stress"))
+  if (_t_step == 1 && isParamValid("initial_stress") && !_app.isRestarting())
   {
     RankFourTensor E_inv = E_ijkl.invSymm();
     this_strain_increment += E_inv*stress_old;

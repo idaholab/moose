@@ -45,7 +45,8 @@ ReturnMappingModel::computeStress(const Elem & current_elem,
 {
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
-  if (_t_step == 0) return;
+  if (_t_step == 0 && !_app.isRestarting())
+    return;
 
   stress_new = elasticityTensor * strain_increment;
   stress_new += stress_old;
