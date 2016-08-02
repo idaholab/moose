@@ -6,5 +6,6 @@
    min_parallel = 2
    custom_cmp = 'generalized.exodiff'
    superlu = true
+   deleted = '#6924'
  [../]
 []
