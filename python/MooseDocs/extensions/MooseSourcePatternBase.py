@@ -92,15 +92,31 @@ class MooseSourcePatternBase(Pattern):
         return content.strip()
 
 
-    def createErrorElement(self, rel_filename):
+    def createErrorElement(self, rel_filename, message=None):
         """
         Returns a tree element containing error message.
-        """
-        el = etree.Element('p')
-        el.set('style', "color:red;font-size:120%")
-        el.text = 'ERROR: Invalid markdown for: ' + rel_filename
-        return el
 
+        Uses the html to match the python markdown admonition package.
+        https://pythonhosted.org/Markdown/extensions/admonition.html
+
+        <div class="admonition danger">
+        <p class="admonition-title">Don't try this at home</p>
+        <p>...</p>
+        </div>
+        """
+
+        el = etree.Element('div')
+        el.set('class', "admonition danger")
+
+        title = etree.SubElement(el, 'p')
+        title.set('class', "admonition-title")
+        title.text = "Markdown Parsing Error"
+
+        msg = etree.SubElement(el, 'p')
+        msg.text = 'Invalid markdown for ' + rel_filename
+        if message:
+            msg.text += '<br>{}'.format(message)
+        return el
 
     def checkFilename(self, rel_filename):
         """
