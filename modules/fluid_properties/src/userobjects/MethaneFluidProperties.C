@@ -1,3 +1,10 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "MethaneFluidProperties.h"
 
 template<>
@@ -114,7 +121,7 @@ MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
       -7.1345169e-15, 0.0};
 
   Real specific_heat = 0.0;
-  for (unsigned int i = 0; i < 7; ++i)
+  for (unsigned int i = 0; i < a.size(); ++i)
     specific_heat += a[i] * std::pow(temperature, i);
 
   return specific_heat;
@@ -133,11 +140,11 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
   if (temperature <= 200.0 || temperature >= 1000.0)
     mooseError("Temperatue " << temperature << "K out of range (200K, 1000K) in " << name() << ":mu()");
 
-  const Real a[6] = {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
+  const std::vector<Real> a {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
     -2.7237166e-14};
 
   Real viscosity = 0.0;
-  for (unsigned int i = 0; i < 6; ++i)
+  for (unsigned int i = 0; i < a.size(); ++i)
     viscosity += a[i] * std::pow(temperature, i);
 
   return viscosity * 1.e-6;
@@ -146,14 +153,14 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
 void
 MethaneFluidProperties::mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
 {
-  const Real a[6] = {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
+  const std::vector<Real> a {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
     -2.7237166e-14};
 
   mu = this->mu(density, temperature);
   dmu_drho = 0.0;
 
   Real dmudt = 0.0;
-  for (unsigned int i = 0; i < 6; ++i)
+  for (unsigned int i = 0; i < a.size(); ++i)
     dmudt += i * a[i] * std::pow(temperature, i - 1);
   dmu_dT = dmudt;
 }
@@ -165,11 +172,11 @@ MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
   if (temperature <= 200.0 || temperature >= 1000.0)
     mooseError("Temperatue " << temperature << "K out of range (200K, 1000K) in " << name() << ":k()");
 
-  const Real a[7] = {-1.3401499e-2, 3.663076e-4, -1.82248608e-6, 5.93987998e-9, -9.1405505e-12,
+  const std::vector<Real> a {-1.3401499e-2, 3.663076e-4, -1.82248608e-6, 5.93987998e-9, -9.1405505e-12,
     6.7896889e-15, -1.95048736e-18};
 
   Real kt = 0.0;
-  for (unsigned int i = 0; i < 7; ++i)
+  for (unsigned int i = 0; i < a.size(); ++i)
     kt += a[i] * std::pow(temperature, i);
 
   return kt;
@@ -190,7 +197,7 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
       -7.1345169e-15, 0.0};
 
   Real entropy = a[0] * std::log(temperature);
-  for (unsigned int i = 1; i < 7; ++i)
+  for (unsigned int i = 1; i < a.size(); ++i)
     entropy += a[i] * std::pow(temperature, i) / static_cast<Real>(i);
 
   return entropy;
@@ -211,7 +218,7 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
       -7.1345169e-15, 0.0};
 
   Real enthalpy = 0.0;
-  for (unsigned int i = 0; i < 7; ++i)
+  for (unsigned int i = 0; i < a.size(); ++i)
     enthalpy += a[i] * std::pow(temperature, i + 1) / (i + 1.0);
 
   return enthalpy;
@@ -232,7 +239,7 @@ MethaneFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
       -7.1345169e-15, 0.0};
 
   Real dhdt = 0.0;
-  for (unsigned int i = 0; i < 7; ++i)
+  for (unsigned int i = 0; i < a.size(); ++i)
     dhdt += a[i] * std::pow(temperature, i);
 
   dh_dT = dhdt;
