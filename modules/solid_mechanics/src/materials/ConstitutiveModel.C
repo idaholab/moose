@@ -99,7 +99,7 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
     Real d_thermal_strain_d_temp;
 
     Real old_temp;
-    if (_t_step == 1 && _has_stress_free_temp)
+    if (_t_step == 1 && _has_stress_free_temp && !_app.isRestarting())
       old_temp = _stress_free_temp;
     else
       old_temp = _temperature_old[qp];
