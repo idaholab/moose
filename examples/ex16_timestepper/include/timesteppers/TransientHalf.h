@@ -34,9 +34,9 @@ public:
   TransientHalf(const InputParameters & parameters);
 
 protected:
-  virtual Real computeInitialDT();
+  virtual Real computeInitialDT() override;
 
-  virtual Real computeDT();
+  virtual Real computeDT() override;
 
 private:
   Real _ratio;

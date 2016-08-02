@@ -41,7 +41,7 @@ public:
    *
    * This must be overriden by derived classes.
    */
-  virtual Real value(const Point & p);
+  virtual Real value(const Point & p) override;
 
 private:
   Real _coefficient;
