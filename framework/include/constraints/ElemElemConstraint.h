@@ -34,7 +34,6 @@ class ElemElemConstraint :
 {
 public:
   ElemElemConstraint(const InputParameters & parameters);
-  virtual ~ElemElemConstraint();
 
   /**
    * reinit element-element constraint

@@ -53,7 +53,6 @@
 [Materials]
   [./Copper]
     type = PFParamsPolyFreeEnergy
-    block = 0
     c = c
     T = 1000 # K
     int_width = 30.0
@@ -66,7 +65,6 @@
   [../]
   [./free_energy]
     type = PolynomialFreeEnergy
-    block = 0
     c = c
     derivative_order = 2
   [../]

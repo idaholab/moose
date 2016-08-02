@@ -171,7 +171,7 @@ public:
   /**
    * Register a deprecated object that expires
    * @param obj_name The name of the object to register
-   * @param t_str String contiaining the experiation date for the object
+   * @param t_str String containing the expiration date for the object
    */
   template<typename T>
   void regDeprecated(const std::string & obj_name, const std::string t_str)

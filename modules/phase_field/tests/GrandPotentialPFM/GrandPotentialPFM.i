@@ -14,9 +14,9 @@
   zmin = 0
   zmax = 0
 []
+
 [GlobalParams]
   int_width = 4.0
-  block = 0
 []
 
 [Variables]
@@ -139,7 +139,6 @@
   [../]
   [./total_free_en]
     type = DerivativeTwoPhaseMaterial
-    block = 0
     args = 'w'
     eta = eta
     fa_name = f1

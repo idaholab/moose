@@ -68,9 +68,9 @@ public:
 
   SubProblem & subProblem() { return _subproblem; }
 
-  virtual const std::set<std::string> & getRequestedItems();
+  virtual const std::set<std::string> & getRequestedItems() override;
 
-  virtual const std::set<std::string> & getSuppliedItems();
+  virtual const std::set<std::string> & getSuppliedItems() override;
 
   /**
    * Use this to enable/disable the constraint
@@ -87,7 +87,6 @@ protected:
   Assembly & _assembly;
   MooseVariableScalar & _var;
   MooseMesh & _mesh;
-//  unsigned int _dim;
 
   unsigned int _i;
 

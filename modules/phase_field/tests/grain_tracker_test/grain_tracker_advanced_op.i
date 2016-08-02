@@ -80,7 +80,6 @@
 [Materials]
   [./CuGrGr]
     type = GBEvolution
-    block = 0
     T = 500 # K
     wGB = 100 # nm
 

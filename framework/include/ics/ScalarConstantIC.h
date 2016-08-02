@@ -37,10 +37,7 @@ public:
    */
   ScalarConstantIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   */
-  virtual Real value();
+  virtual Real value() override;
 
 protected:
   Real _value;

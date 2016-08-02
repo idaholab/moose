@@ -36,10 +36,8 @@ public:
    */
   SpatialUserObjectAux(const InputParameters & parameters);
 
-  virtual ~SpatialUserObjectAux() {}
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// UserObject to be queried for a value
   const UserObject & _user_object;

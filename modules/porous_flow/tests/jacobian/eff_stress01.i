@@ -80,6 +80,10 @@
 []
 
 [Materials]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./ppss]
     type = PorousFlow2PhasePP_VG
     phase0_porepressure = ppwater

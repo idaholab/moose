@@ -28,8 +28,6 @@ class FDKernel :
 public:
   FDKernel(const InputParameters & parameters);
 
-  virtual ~FDKernel(){};
-
   virtual void computeJacobian();
   /**
    * Computes d-residual / d-jvar... storing the result in Ke.
@@ -40,7 +38,8 @@ public:
    * @param jvar The number of the scalar variable
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar);
- protected:
+
+protected:
   /**
    * Computes the residual when the current state of j-th variable
    * at element node i is perturbed by perturbation.

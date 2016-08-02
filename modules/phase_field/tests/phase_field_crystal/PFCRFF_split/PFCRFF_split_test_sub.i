@@ -41,7 +41,6 @@
 [Materials]
   [./PFC]
     type = PFCRFFMaterial
-    block = 0
   [../]
 []
 
@@ -96,4 +95,3 @@
     type = PFCFreezingIC
   [../]
 []
-

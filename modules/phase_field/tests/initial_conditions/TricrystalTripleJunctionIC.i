@@ -83,7 +83,6 @@
   [./material]
     # Material properties
     type = GBEvolution
-    block = 0 # Block ID (only one block in this problem)
     T = 450 # Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # Width of the diffuse GB
     GBmob0 = 2.5e-6 #m^4(Js) for copper from Schoenfelder1997

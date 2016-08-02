@@ -58,6 +58,7 @@
 #include "PFFracIntVar.h"
 #include "SimpleACInterface.h"
 #include "SimpleCHInterface.h"
+#include "SimpleCoupledACInterface.h"
 #include "SimpleSplitCHWRes.h"
 #include "SingleGrainRigidBodyMotion.h"
 #include "SoretDiffusion.h"
@@ -151,7 +152,7 @@
 #include "FeatureFloodCount.h"
 #include "GrainTracker.h"
 #include "FauxGrainTracker.h"
-#include "NodalVolumeFraction.h"
+#include "FeatureVolumeFraction.h"
 #include "PFCElementEnergyIntegral.h"
 
 /*
@@ -313,6 +314,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(PFFracIntVar);
   registerKernel(SimpleACInterface);
   registerKernel(SimpleCHInterface);
+  registerKernel(SimpleCoupledACInterface);
   registerKernel(SimpleSplitCHWRes);
   registerKernel(SingleGrainRigidBodyMotion);
   registerKernel(SoretDiffusion);
@@ -393,7 +395,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
   registerPostprocessor(FauxGrainTracker);
-  registerPostprocessor(NodalVolumeFraction);
+  registerPostprocessor(FeatureVolumeFraction);
+  registerDeprecatedObjectName(FeatureVolumeFraction, "NodalVolumeFraction", "09/01/2016 08:00");
   registerPostprocessor(PFCElementEnergyIntegral);
 
   registerAux(BndsCalcAux);

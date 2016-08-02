@@ -150,7 +150,7 @@ public:
    */
   virtual
   const std::set<std::string> &
-  getRequestedItems() { return _requested_props; }
+  getRequestedItems() override { return _requested_props; }
 
   /**
    * Return a set of properties accessed with declareProperty
@@ -158,7 +158,7 @@ public:
    */
   virtual
   const std::set<std::string> &
-  getSuppliedItems() { return _supplied_props; }
+  getSuppliedItems() override { return _supplied_props; }
 
   void checkStatefulSanity() const;
 

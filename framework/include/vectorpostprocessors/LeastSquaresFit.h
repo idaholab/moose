@@ -39,27 +39,14 @@ public:
   LeastSquaresFit(const InputParameters & parameters);
 
   /**
-   * Destructor
-   */
-  virtual ~LeastSquaresFit() {}
-
-  /**
    * Initialize, clears old results
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Perform the least squares fit
    */
-  virtual void execute();
-
-  ///@{
-  /**
-   * no-op because the other VectorPostprocessor is already parallel consistent
-   */
-  virtual void finalize() {}
-  virtual void threadJoin(const UserObject &) {}
-  ///@}
+  virtual void execute() override;
 
 protected:
   /// The name of the VectorPostprocessor on which to perform the fit

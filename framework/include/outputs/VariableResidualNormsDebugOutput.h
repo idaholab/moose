@@ -43,17 +43,12 @@ public:
    */
   VariableResidualNormsDebugOutput(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~VariableResidualNormsDebugOutput();
-
 protected:
 
   /**
    * Perform the debugging output
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /// Reference to libMesh system
   TransientNonlinearImplicitSystem & _sys;

@@ -24,8 +24,16 @@ protected:
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
+  /// undisplaced problem
   Assembly & _assembly_undisplaced;
+
+  /// Reference to this Kernel's undisplaced MooseVariable object
+  MooseVariable & _var_undisplaced;
+
+  ///@{ Shape and test functions on the undisplaced mesh
   const VariablePhiGradient & _grad_phi_undisplaced;
+  const VariableTestGradient & _grad_test_undisplaced;
+  ///@}
 };
 
-#endif //ALEKERNEL
+#endif //ALEKERNEL_H

@@ -28,7 +28,6 @@
 #include "DynamicStressDivergenceTensors.h"
 #include "OutOfPlanePressure.h"
 
-#include "LinearElasticMaterial.h"
 #include "LinearElasticTruss.h"
 #include "FiniteStrainPlasticMaterial.h"
 #include "FiniteStrainCrystalPlasticity.h"
@@ -37,11 +36,11 @@
 #include "ComputeMultiPlasticityStress.h"
 #include "ComputeCosseratLinearElasticStress.h"
 #include "ComputeCosseratSmallStrain.h"
+#include "ComputeCosseratIncrementalSmallStrain.h"
 #include "ComputeCosseratElasticityTensor.h"
 #include "ComputeLayeredCosseratElasticityTensor.h"
 #include "TwoPhaseStressMaterial.h"
 #include "MultiPhaseStressMaterial.h"
-#include "SimpleEigenStrainMaterial.h"
 #include "CompositeEigenstrain.h"
 #include "CompositeElasticityTensor.h"
 #include "ComputeElasticityTensor.h"
@@ -76,6 +75,7 @@
 #include "RecomputeRadialReturnIsotropicPlasticity.h"
 #include "RecomputeRadialReturnIsotropicPowerLawHardening.h"
 #include "RecomputeRadialReturnPowerLawCreep.h"
+#include "RecomputeRadialReturnHyperbolicViscoplasticity.h"
 #include "RecomputeRadialReturnTempDepHardening.h"
 #include "StressBasedChemicalPotential.h"
 #include "FluxBasedStrainIncrement.h"
@@ -194,7 +194,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(DynamicStressDivergenceTensors);
   registerKernel(OutOfPlanePressure);
 
-  registerMaterial(LinearElasticMaterial);
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainPlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
@@ -203,11 +202,11 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeMultiPlasticityStress);
   registerMaterial(ComputeCosseratLinearElasticStress);
   registerMaterial(ComputeCosseratSmallStrain);
+  registerMaterial(ComputeCosseratIncrementalSmallStrain);
   registerMaterial(ComputeCosseratElasticityTensor);
   registerMaterial(ComputeLayeredCosseratElasticityTensor);
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(MultiPhaseStressMaterial);
-  registerMaterial(SimpleEigenStrainMaterial);
   registerMaterial(CompositeEigenstrain);
   registerMaterial(CompositeElasticityTensor);
   registerMaterial(ComputeElasticityTensor);
@@ -242,6 +241,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
   registerMaterial(RecomputeRadialReturnIsotropicPowerLawHardening);
   registerMaterial(RecomputeRadialReturnPowerLawCreep);
+  registerMaterial(RecomputeRadialReturnHyperbolicViscoplasticity);
   registerMaterial(RecomputeRadialReturnTempDepHardening);
   registerMaterial(StressBasedChemicalPotential);
   registerMaterial(FluxBasedStrainIncrement);

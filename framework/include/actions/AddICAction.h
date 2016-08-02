@@ -28,7 +28,7 @@ class AddICAction : public MooseObjectAction
 public:
   AddICAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDICACTION_H

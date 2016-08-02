@@ -27,10 +27,9 @@ class AnalyticalIndicator :
 {
 public:
   AnalyticalIndicator(const InputParameters & parameters);
-  virtual ~AnalyticalIndicator(){};
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   Function & _func;
 };

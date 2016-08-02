@@ -31,11 +31,10 @@ class FunctionValuePostprocessor : public GeneralPostprocessor
 {
 public:
   FunctionValuePostprocessor(const InputParameters & parameters);
-  virtual ~FunctionValuePostprocessor();
 
-  virtual void initialize();
-  virtual void execute();
-  virtual PostprocessorValue getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual PostprocessorValue getValue() override;
 
 protected:
   Function & _function;

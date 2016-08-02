@@ -29,7 +29,6 @@ class FiniteDifferencePreconditioner : public MoosePreconditioner
 {
 public:
   FiniteDifferencePreconditioner(const InputParameters & params);
-  virtual ~FiniteDifferencePreconditioner();
 };
 
 #endif /* FINITEDIFFERENCEPRECONDITIONER_H */

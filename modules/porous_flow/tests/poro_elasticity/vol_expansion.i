@@ -195,6 +195,10 @@
   [../]
 []
 [Materials]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     # bulk modulus = 1, poisson ratio = 0.2

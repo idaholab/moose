@@ -37,13 +37,12 @@ class AdamsPredictor : public Predictor
 {
 public:
   AdamsPredictor(const InputParameters & parameters);
-  virtual ~AdamsPredictor();
 
-  virtual int order() { return _order; }
-  virtual void timestepSetup();
-  virtual bool shouldApply();
-  virtual void apply(NumericVector<Number> & sln);
-  virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
+  virtual int order() override { return _order; }
+  virtual void timestepSetup() override;
+  virtual bool shouldApply() override;
+  virtual void apply(NumericVector<Number> & sln) override;
+  virtual NumericVector<Number> & solutionPredictor() override { return _solution_predictor; }
 
 protected:
   int _order;

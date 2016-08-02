@@ -55,10 +55,6 @@ CompositeFunction::CompositeFunction(const InputParameters & parameters) :
   }
 }
 
-CompositeFunction::~CompositeFunction()
-{
-}
-
 Real
 CompositeFunction::value(Real t, const Point & p)
 {

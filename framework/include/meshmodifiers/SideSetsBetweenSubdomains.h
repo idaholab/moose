@@ -28,12 +28,8 @@ class SideSetsBetweenSubdomains :
 public:
   SideSetsBetweenSubdomains(const InputParameters & parameters);
 
-  virtual ~SideSetsBetweenSubdomains();
-
-  virtual void modify();
-
 protected:
-
+  virtual void modify() override;
 };
 
 #endif /* SIDESETSBETWEENSUBDOMAINS_H */

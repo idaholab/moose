@@ -40,8 +40,7 @@ public:
    */
   PolynomialFit(std::vector<Real> X, std::vector<Real> Y, unsigned int order, bool truncate_order = false);
 
-  virtual ~PolynomialFit()
-    {}
+  virtual ~PolynomialFit() = default;
 
   /**
    * This function generates the polynomial fit.  This function must be called prior to using

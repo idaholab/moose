@@ -1,3 +1,10 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #ifndef IDEALGASFLUIDPROPERTIES_H
 #define IDEALGASFLUIDPROPERTIES_H
 
@@ -20,8 +27,9 @@ public:
   virtual Real pressure(Real v, Real u) const;
   virtual Real temperature(Real v, Real u) const;
   virtual Real c(Real v, Real u) const;
-  virtual Real cp(Real v, Real u) const;
-  virtual Real cv(Real v, Real u) const;
+  virtual Real cp(Real v = 0., Real u = 0.) const;
+  virtual Real cv(Real v = 0., Real u = 0.) const;
+  virtual Real gamma(Real v = 0., Real u = 0.) const;
   virtual Real mu(Real v, Real u) const;
   virtual Real k(Real v, Real u) const;
   virtual Real s(Real v, Real u) const;

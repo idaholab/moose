@@ -22,6 +22,9 @@
 // libMesh includes
 #include "libmesh/equation_systems.h"
 
+// Ignore warnings coming from Trilinos/DTK headers.
+#include "libmesh/ignore_warnings.h"
+
 // Trilinos Includes
 #include <Teuchos_RCP.hpp>
 #include <Teuchos_GlobalMPISession.hpp>
@@ -36,6 +39,9 @@
 #include <DTK_FieldTools.hpp>
 #include <DTK_CommTools.hpp>
 #include <DTK_CommIndexer.hpp>
+
+// Restore warnings.
+#include "libmesh/restore_warnings.h"
 
 namespace libMesh
 {

@@ -42,10 +42,7 @@ public:
    */
   AddVariableAction(InputParameters params);
 
-  /**
-   * Adds the nonlinear variable
-   */
-  virtual void act();
+  virtual void act() override;
 
   /**
    * Get the possible variable families

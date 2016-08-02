@@ -55,7 +55,7 @@ PenetrationAux::PenetrationAux(const InputParameters & parameters) :
     AuxKernel(parameters),
 
     // Here we cast the value of the MOOSE enum to an integer to the class-based enum.
-    _quantity(PenetrationAux::PA_ENUM(int(getParam<MooseEnum>("quantity")))),
+    _quantity(getParam<MooseEnum>("quantity").getEnum<PenetrationAux::PA_ENUM>()),
     _penetration_locator(_nodal
       ? getPenetrationLocator(
           parameters.get<BoundaryName>("paired_boundary"),
@@ -74,10 +74,6 @@ PenetrationAux::PenetrationAux(const InputParameters & parameters) :
 
   if (parameters.isParamValid("normal_smoothing_method"))
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
-}
-
-PenetrationAux::~PenetrationAux()
-{
 }
 
 Real
@@ -166,4 +162,3 @@ PenetrationAux::computeValue()
 
   return retVal;
 }
-

@@ -15,44 +15,42 @@
   coord_type = RSPHERICAL
 []
 
-[Mesh]#Comment
+[Mesh]
   file = simple_contact_rspherical.e
   construct_side_list_from_node_list = true
   displacements = 'disp_x'
-[] # Mesh
+[]
 
 [Functions]
   [./ur]
     type = ParsedFunction
     value = '-3e-3*x'
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
+
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
+
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -61,49 +59,47 @@
 []
 
 [AuxKernels]
-
   [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xx
     index = 0
   [../]
+
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yy
     index = 1
   [../]
+
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zz
     index = 2
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./ur]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = '1 4'
     function = ur
   [../]
-
-[] # BCs
+[]
 
 [Contact]
   [./fred]
     master = 2
     slave = 3
     disp_x = disp_x
+    system = constraint
   [../]
 []
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = '1 2 3'
@@ -113,27 +109,20 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
   [../]
-
-[] # Materials
+[]
 
 [Executioner]
-
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
 
   line_search = 'none'
 
-
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-11
-
 
   l_max_its = 20
 
@@ -141,8 +130,9 @@
   dt = 1.0
   num_steps = 1
   end_time = 1.0
-[] # Executioner
+[]
 
 [Outputs]
+  file_base = out_rspherical
   exodus = true
-[] # Outputs
+[]

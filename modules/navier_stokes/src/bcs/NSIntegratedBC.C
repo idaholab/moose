@@ -5,6 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "NSIntegratedBC.h"
+
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
 
 template<>
@@ -13,17 +18,15 @@ InputParameters validParams<NSIntegratedBC>()
   InputParameters params = validParams<IntegratedBC>();
 
   params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
+  params.addCoupledVar("v", ""); // only required in >= 2D
   params.addCoupledVar("w", ""); // only required in 3D
 
   params.addRequiredCoupledVar("rho", "density");
   params.addRequiredCoupledVar("rhou", "x-momentum");
-  params.addRequiredCoupledVar("rhov", "y-momentum");
+  params.addCoupledVar("rhov", "y-momentum"); // only required in >= 2D
   params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
-  params.addRequiredCoupledVar("rhoe", "energy");
-
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
-  params.addRequiredParam<Real>("R", "Gas constant.");
+  params.addRequiredCoupledVar("rhoE", "energy");
+  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
 
   return params;
 }
@@ -31,34 +34,33 @@ InputParameters validParams<NSIntegratedBC>()
 NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters) :
     IntegratedBC(parameters),
     _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
 
     _rho(coupledValue("rho")),
     _rho_u(coupledValue("rhou")),
-    _rho_v(coupledValue("rhov")),
+    _rho_v(_mesh.dimension() >= 2 ? coupledValue("rhov") : _zero),
     _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
-    _rho_e(coupledValue("rhoe")),
+    _rho_E(coupledValue("rhoE")),
 
     _grad_rho(coupledGradient("rho")),
     _grad_rho_u(coupledGradient("rhou")),
-    _grad_rho_v(coupledGradient("rhov")),
+    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient("rhov") : _grad_zero),
     _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
-    _grad_rho_e(coupledGradient("rhoe")),
+    _grad_rho_E(coupledGradient("rhoE")),
 
     // Variable numberings
     _rho_var_number( coupled("rho") ),
     _rhou_var_number( coupled("rhou") ),
-    _rhov_var_number( coupled("rhov") ),
+    _rhov_var_number(_mesh.dimension() >= 2 ? coupled("rhov") : libMesh::invalid_uint),
     _rhow_var_number(_mesh.dimension() == 3 ? coupled("rhow") : libMesh::invalid_uint),
-    _rhoe_var_number( coupled("rhoe") ),
+    _rhoE_var_number( coupled("rhoE") ),
 
     _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")),
     _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
 
-    // Required parameters
-    _gamma(getParam<Real>("gamma")),
-    _R(getParam<Real>("R"))
+    // FluidProperties UserObject
+    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }
 
@@ -82,7 +84,7 @@ NSIntegratedBC::mapVarNumber(unsigned var)
     mapped_var_number = 2;
   else if (var == _rhow_var_number)
     mapped_var_number = 3;
-  else if (var == _rhoe_var_number)
+  else if (var == _rhoE_var_number)
     mapped_var_number = 4;
   else
     mooseError("Invalid var!");

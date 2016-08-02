@@ -1,3 +1,10 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "IdealGasFluidProperties.h"
 
 template<>
@@ -67,6 +74,12 @@ Real
 IdealGasFluidProperties::cv(Real, Real) const
 {
   return _cv;
+}
+
+Real
+IdealGasFluidProperties::gamma(Real, Real) const
+{
+  return _gamma;
 }
 
 Real

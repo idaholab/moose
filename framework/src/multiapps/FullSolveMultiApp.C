@@ -33,10 +33,6 @@ FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters):
 {
 }
 
-FullSolveMultiApp::~FullSolveMultiApp()
-{
-}
-
 void
 FullSolveMultiApp::initialSetup()
 {
@@ -100,4 +96,3 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
 
   return last_solve_converged;
 }
-

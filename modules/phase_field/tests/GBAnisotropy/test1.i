@@ -72,7 +72,6 @@
 [Materials]
   [./CuGrGranisotropic]
     type = GBAnisotropy
-    block = 0
     T = 600 # K
 
     # molar_volume_value = 7.11e-6 #Units:m^3/mol

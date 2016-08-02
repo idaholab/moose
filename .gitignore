@@ -162,3 +162,11 @@ out.xyz
 
 # JIT and automatic differentiation cache files
 .jitcache/
+.jitdir/
+
+# Documentation Generation
+*.moose.md
+*.moose.yml
+docs/.moosedocs
+docs/mkdocs.yml
+site

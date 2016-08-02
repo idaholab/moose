@@ -31,7 +31,7 @@ class AddFunctionAction : public MooseObjectAction
 public:
   AddFunctionAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //ADDFUNCTIONACTION_H

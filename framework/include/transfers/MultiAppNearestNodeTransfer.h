@@ -32,11 +32,10 @@ class MultiAppNearestNodeTransfer :
 {
 public:
   MultiAppNearestNodeTransfer(const InputParameters & parameters);
-  virtual ~MultiAppNearestNodeTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   /**

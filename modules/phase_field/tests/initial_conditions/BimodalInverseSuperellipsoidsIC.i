@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 80
-  ny = 80
+  nx = 25
+  ny = 25
   xmax = 50
   ymax = 50
   elem_type = QUAD4
@@ -72,7 +72,6 @@
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 1.0'
-    block = 0
   [../]
 []
 

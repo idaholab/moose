@@ -46,10 +46,6 @@ TopResidualDebugOutput::TopResidualDebugOutput(const InputParameters & parameter
 {
 }
 
-TopResidualDebugOutput::~TopResidualDebugOutput()
-{
-}
-
 void
 TopResidualDebugOutput::output(const ExecFlagType & /*type*/)
 {

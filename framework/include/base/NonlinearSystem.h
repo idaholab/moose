@@ -61,9 +61,9 @@ public:
   NonlinearSystem(FEProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
-  virtual void init();
-  virtual void solve();
-  virtual void restoreSolutions();
+  virtual void init() override;
+  virtual void solve() override;
+  virtual void restoreSolutions() override;
 
   /**
    * Quit the current solve as soon as possible.
@@ -286,20 +286,20 @@ public:
    */
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
-  virtual NumericVector<Number> & solutionUDot();
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type);
+  virtual NumericVector<Number> & solutionUDot() override;
+  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
 
-  virtual const NumericVector<Number> * & currentSolution() { return _current_solution; }
+  virtual const NumericVector<Number> * & currentSolution() override { return _current_solution; }
 
   virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution();
+  virtual NumericVector<Number> & serializedSolution() override;
 
-  virtual NumericVector<Number> & residualCopy();
-  virtual NumericVector<Number> & residualGhosted();
+  virtual NumericVector<Number> & residualCopy() override;
+  virtual NumericVector<Number> & residualGhosted() override;
 
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
-                               std::vector<dof_id_type> & n_oz);
+                               std::vector<dof_id_type> & n_oz) override;
 
   /**
    * Sets a preconditioner

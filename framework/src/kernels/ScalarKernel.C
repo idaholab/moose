@@ -45,6 +45,7 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters) :
     TransientInterface(this),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
+    VectorPostprocessorInterface(this),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
 

@@ -98,7 +98,6 @@
     type = GenericConstantMaterial
     prop_names  = 'kappa_c'
     prop_values = '2.0'
-    block = 0
   [../]
 
   # we assemble the variable dependent anosotropic mobility tensor form two
@@ -107,25 +106,21 @@
     type = ConstantAnisotropicMobility
     tensor = '1 0 0  0 0.5 0  0 0 0'
     M_name = M0
-    block = 0
   [../]
   [./mob1]
     type = ConstantAnisotropicMobility
     tensor = '0.5 0 0  0 1 0  0 0 0'
     M_name = M1
-    block = 0
   [../]
   [./wgt0]
     type = DerivativeParsedMaterial
     f_name = w0
-    block = 0
     function = 'c^2+d'
     args = 'c d'
   [../]
   [./wgt1]
     type = DerivativeParsedMaterial
     f_name = w1
-    block = 0
     function = 'c+d^2'
     args = 'c d'
   [../]
@@ -137,12 +132,10 @@
     tensors = 'M0 M1'
     weights = 'w0 w1'
     args = 'c d'
-    block = 0
   [../]
 
   [./F]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     function = 'c^2'
     args = 'c'

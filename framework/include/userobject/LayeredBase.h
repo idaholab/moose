@@ -37,11 +37,6 @@ public:
   LayeredBase(const InputParameters & parameters);
 
   /**
-   * Class with virtual methods needs a virtual destructor.
-   */
-  virtual ~LayeredBase() {}
-
-  /**
    * Given a Point return the integral value associated with the layer that point falls in.
    *
    * @param p The point to look for in the layers.

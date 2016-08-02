@@ -39,11 +39,6 @@ public:
   FileOutput(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~FileOutput();
-
-  /**
    * The filename for the output file
    * @return A string of output file including the extension, by default this returns _file_base
    */

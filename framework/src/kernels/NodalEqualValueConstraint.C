@@ -39,10 +39,6 @@ NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & par
   }
 }
 
-NodalEqualValueConstraint::~NodalEqualValueConstraint()
-{
-}
-
 void
 NodalEqualValueConstraint::computeResidual()
 {
@@ -71,4 +67,3 @@ NodalEqualValueConstraint::computeJacobian()
     ken(k, 1) = -1.;
   }
 }
-

@@ -31,11 +31,9 @@ class ElementVariablePostprocessor :
 public:
   ElementVariablePostprocessor(const InputParameters & parameters);
 
-  /// Just does a loop over "qp" calling computeQpValue()
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
-
   /// This is what derived classes should override to do something on every quadrature point on every element
   virtual void computeQpValue() = 0;
 

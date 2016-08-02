@@ -33,10 +33,6 @@ KernelValue::KernelValue(const InputParameters & parameters) :
 {
 }
 
-KernelValue::~KernelValue()
-{
-}
-
 void
 KernelValue::computeResidual()
 {
@@ -120,4 +116,3 @@ KernelValue::precomputeQpJacobian()
 {
   return 0.0;
 }
-

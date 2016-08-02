@@ -57,10 +57,6 @@ Checkpoint::Checkpoint(const InputParameters & parameters) :
 {
 }
 
-Checkpoint::~Checkpoint()
-{
-}
-
 std::string
 Checkpoint::filename()
 {

@@ -38,14 +38,10 @@ public:
    */
   SolutionAux(const InputParameters & parameters);
 
-  /** Empty destructor
-   */
-  virtual ~SolutionAux();
-
   /**
    * Sets up the variable name for extraction from the SolutionUserObject
    */
-  void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
 
@@ -55,7 +51,7 @@ protected:
    * flag is set to true.
    * @ return The desired value of the solution for the current node or element
    */
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// Reference to the SolutionUserObject storing the solution
   const SolutionUserObject & _solution_object;
@@ -64,7 +60,7 @@ protected:
   std::string _var_name;
 
   /// Flag for directly grabbing the data based on the dof
-   bool _direct;
+  bool _direct;
 
   /// Multiplier for the solution, the a of ax+b
   const Real _scale_factor;

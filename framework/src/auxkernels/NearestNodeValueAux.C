@@ -37,10 +37,6 @@ NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters) :
     mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
 }
 
-NearestNodeValueAux::~NearestNodeValueAux()
-{
-}
-
 Real
 NearestNodeValueAux::computeValue()
 {
@@ -51,4 +47,3 @@ NearestNodeValueAux::computeValue()
 
   return (*_serialized_solution)(dof_number);
 }
-

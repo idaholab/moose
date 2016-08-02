@@ -42,10 +42,6 @@ SideSetsFromPoints::SideSetsFromPoints(const InputParameters & parameters) :
     mooseError("point list and boundary list are not the same length");
 }
 
-SideSetsFromPoints::~SideSetsFromPoints()
-{
-}
-
 void
 SideSetsFromPoints::modify()
 {

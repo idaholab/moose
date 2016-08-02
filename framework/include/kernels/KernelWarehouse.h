@@ -36,7 +36,7 @@ public:
   /**
    * Add Kernel to the storage structure
    */
-  virtual void addObject(MooseSharedPointer<KernelBase> object, THREAD_ID tid = 0);
+  void addObject(MooseSharedPointer<KernelBase> object, THREAD_ID tid = 0) override;
 
   ///@{
   /**
@@ -49,13 +49,11 @@ public:
   /**
    * Update the active status of Kernels
    */
-  virtual void updateActive(THREAD_ID tid = 0);
+  virtual void updateActive(THREAD_ID tid = 0) override;
 
 protected:
-
   /// Variable based storage
   std::map<unsigned int, MooseObjectWarehouse<KernelBase> > _variable_kernel_storage;
-
 };
 
 #endif // KERNELWAREHOUSE_H

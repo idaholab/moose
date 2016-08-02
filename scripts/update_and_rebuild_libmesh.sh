@@ -32,19 +32,9 @@ else
   cd - >/dev/null # Make this quiet
 fi
 
-# If the user sets both METHOD and METHODS, and they are not the same,
-# this is an error.  Neither is treated as being more important than
-# the other currently.
-if [[ -n "$METHOD" && -n "$METHODS" ]]; then
-  if [ "$METHOD" != "$METHODS" ]; then
-    echo "Error: Both METHOD and METHODS are set, but are not equal."
-    echo "Please set one or the other."
-    exit 1
-  fi
-fi
-
-# If the user set METHOD, we'll use that for METHODS in our script
-if [ -n "$METHOD" ]; then
+# If the user set METHOD, but not METHODS, we'll let METHOD override
+# METHODS in this script.
+if [[ -n "$METHOD" && -z "$METHODS" ]]; then
   export METHODS="$METHOD"
 fi
 
@@ -96,7 +86,7 @@ if [ -z "$go_fast" ]; then
                --enable-unique-ptr \
                --enable-openmp \
                --disable-maintainer-mode \
-               $DISABLE_TIMESTAMPS $*
+               $DISABLE_TIMESTAMPS $* || exit 1
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.

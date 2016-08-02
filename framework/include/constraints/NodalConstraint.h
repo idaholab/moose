@@ -31,7 +31,6 @@ class NodalConstraint :
 {
 public:
   NodalConstraint(const InputParameters & parameters);
-  virtual ~NodalConstraint();
 
   /**
    * Get the list of master nodes

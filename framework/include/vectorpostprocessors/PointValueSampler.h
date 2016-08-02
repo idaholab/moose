@@ -28,8 +28,6 @@ class PointValueSampler : public PointSamplerBase
 {
 public:
   PointValueSampler(const InputParameters & parameters);
-
-  virtual ~PointValueSampler() {}
 };
 
 #endif

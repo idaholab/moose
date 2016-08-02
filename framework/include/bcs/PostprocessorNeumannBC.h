@@ -38,7 +38,7 @@ public:
 
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// Value of grad(u) on the boundary.
   const PostprocessorValue & _value;

@@ -31,10 +31,6 @@ TotalVariableValue::TotalVariableValue(const InputParameters & parameters) :
 {
 }
 
-TotalVariableValue::~TotalVariableValue()
-{
-}
-
 void
 TotalVariableValue::initialize()
 {
@@ -51,4 +47,3 @@ TotalVariableValue::getValue()
 {
   return _value;
 }
-

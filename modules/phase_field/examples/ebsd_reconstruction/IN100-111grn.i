@@ -39,12 +39,17 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./ebsd_grains]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [ICs]
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
+      advanced_op_assignment = true
     [../]
   [../]
 []
@@ -88,6 +93,13 @@
     bubble_object = grain_tracker
     field_display = UNIQUE_REGION
   [../]
+  [./grain_aux]
+    type = EBSDReaderPointDataAux
+    variable = ebsd_grains
+    ebsd_reader = ebsd
+    data_name = 'feature_id'
+    execute_on = 'initial timestep_end'
+  [../]
 []
 
 [Modules]
@@ -104,7 +116,6 @@
   [./Copper]
     # T = 500 # K
     type = GBEvolution
-    block = 0
     T = 500
     wGB = 0.6               # um
     GBmob0 = 2.5e-6         # m^4/(Js) from Schoenfelder 1997

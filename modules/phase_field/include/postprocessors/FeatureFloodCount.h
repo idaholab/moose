@@ -228,6 +228,12 @@ protected:
    */
   void flood(const DofObject * dof_object, unsigned long current_idx, FeatureData * feature);
 
+  /**
+   * Return a comparison threshold to use when inspecting an entity during the flood
+   * stage.
+   */
+  virtual Real getThreshold(unsigned int current_idx, bool active_feature) const;
+
   ///@{
   /**
    * These two routines are utility routines used by the flood routine and by derived classes for visiting neighbors.
@@ -332,11 +338,11 @@ protected:
   /// The vector of coupled in variables
   std::vector<MooseVariable *> _vars;
 
-  /// The threshold above (or below) where a node may begin a new region (bubble)
+  /// The threshold above (or below) where an entity may begin a new region (bubble)
   const Real _threshold;
   Real _step_threshold;
 
-  /// The threshold above (or below) which neighboring nodes are flooded (where regions can be extended but not started)
+  /// The threshold above (or below) which neighboring entities are flooded (where regions can be extended but not started)
   const Real _connecting_threshold;
   Real _step_connecting_threshold;
 

@@ -1246,10 +1246,6 @@ MooseMesh::detectPairedSidesets()
   // multiple sideset ids for a given direction, then we can't pick a
   // single pair for that direction.  In that case, we'll just return
   // as was done in the original algorithm.
-  std::set<BoundaryID>
-    minus_x_ids, plus_x_ids,
-    minus_y_ids, plus_y_ids,
-    minus_z_ids, plus_z_ids;
 
   // Points used for direction comparison
   const Point
@@ -1260,16 +1256,28 @@ MooseMesh::detectPairedSidesets()
     minus_z( 0,  0, -1),
     plus_z ( 0,  0,  1);
 
-  // A first-order Lagrange FE for the face.
-  unsigned int dim = getMesh().mesh_dimension();
-  UniquePtr<FEBase> fe_face (FEBase::build(dim,
-                                           FEType(FIRST, LAGRANGE)));
+  // we need to test all element dimensions from dim down to 1
+  const unsigned int dim = getMesh().mesh_dimension();
 
-  // Face is assumed to be flat, therefore normal is assumed to be
-  // constant over the face, therefore only compute it at 1 qp.
-  QGauss qface(dim-1, CONSTANT);
-  fe_face->attach_quadrature_rule (&qface);
-  const std::vector<Point> & normals = fe_face->get_normals();
+  // boundary id sets for elements of different dimensions
+  std::vector<std::set<BoundaryID>>
+    minus_x_ids(dim), plus_x_ids(dim),
+    minus_y_ids(dim), plus_y_ids(dim),
+    minus_z_ids(dim), plus_z_ids(dim);
+
+  std::vector<UniquePtr<FEBase>> fe_faces(dim);
+  std::vector<UniquePtr<QGauss>> qfaces(dim);
+  for (unsigned side_dim = 0; side_dim < dim; ++side_dim)
+  {
+    // Face is assumed to be flat, therefore normal is assumed to be
+    // constant over the face, therefore only compute it at 1 qp.
+    qfaces[side_dim] = UniquePtr<QGauss>(new QGauss(side_dim, CONSTANT));
+
+    // A first-order Lagrange FE for the face.
+    fe_faces[side_dim] = FEBase::build(side_dim + 1,
+                                       FEType(FIRST, LAGRANGE));
+    fe_faces[side_dim]->attach_quadrature_rule(qfaces[side_dim].get());
+  }
 
   // We need this to get boundary ids for each boundary face we encounter.
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
@@ -1281,6 +1289,10 @@ MooseMesh::detectPairedSidesets()
   {
     Elem * elem = *el;
 
+    // dimension of the current element and its normals
+    unsigned int side_dim = elem->dim() - 1;
+    const std::vector<Point> & normals = fe_faces[side_dim]->get_normals();
+
     // loop over element sides
     for (unsigned int s = 0; s < elem->n_sides(); s++)
     {
@@ -1289,7 +1301,7 @@ MooseMesh::detectPairedSidesets()
       {
         UniquePtr<Elem> side = elem->build_side(s);
 
-        fe_face->reinit(elem, s);
+        fe_faces[side_dim]->reinit(elem, s);
 
         // Get the boundary ID(s) for this side.  If there is more
         // than 1 boundary id, then we already can't determine a
@@ -1299,38 +1311,41 @@ MooseMesh::detectPairedSidesets()
 
         // x-direction faces
         if (normals[0].absolute_fuzzy_equals(minus_x))
-          minus_x_ids.insert(face_ids.begin(), face_ids.end());
+          minus_x_ids[side_dim].insert(face_ids.begin(), face_ids.end());
         else if (normals[0].absolute_fuzzy_equals(plus_x))
-          plus_x_ids.insert(face_ids.begin(), face_ids.end());
+          plus_x_ids[side_dim].insert(face_ids.begin(), face_ids.end());
 
         // y-direction faces
         else if (normals[0].absolute_fuzzy_equals(minus_y))
-          minus_y_ids.insert(face_ids.begin(), face_ids.end());
+          minus_y_ids[side_dim].insert(face_ids.begin(), face_ids.end());
         else if (normals[0].absolute_fuzzy_equals(plus_y))
-          plus_y_ids.insert(face_ids.begin(), face_ids.end());
+          plus_y_ids[side_dim].insert(face_ids.begin(), face_ids.end());
 
         // z-direction faces
         else if (normals[0].absolute_fuzzy_equals(minus_z))
-          minus_z_ids.insert(face_ids.begin(), face_ids.end());
+          minus_z_ids[side_dim].insert(face_ids.begin(), face_ids.end());
         else if (normals[0].absolute_fuzzy_equals(plus_z))
-          plus_z_ids.insert(face_ids.begin(), face_ids.end());
+          plus_z_ids[side_dim].insert(face_ids.begin(), face_ids.end());
       }
     }
   }
 
-  // If unique pairings were found, fill up the _paired_boundary data
-  // structure with that information.
-  if (minus_x_ids.size() == 1 && plus_x_ids.size() == 1)
-    _paired_boundary.push_back(std::make_pair(*(minus_x_ids.begin()),
-                                              *(plus_x_ids.begin())));
+  for (unsigned side_dim = 0; side_dim < dim; ++side_dim)
+  {
+    // If unique pairings were found, fill up the _paired_boundary data
+    // structure with that information.
+    if (minus_x_ids[side_dim].size() == 1 && plus_x_ids[side_dim].size() == 1)
+      _paired_boundary.emplace_back(std::make_pair(*(minus_x_ids[side_dim].begin()),
+                                                   *(plus_x_ids[side_dim].begin())));
 
-  if (minus_y_ids.size() == 1 && plus_y_ids.size() == 1)
-    _paired_boundary.push_back(std::make_pair(*(minus_y_ids.begin()),
-                                              *(plus_y_ids.begin())));
+    if (minus_y_ids[side_dim].size() == 1 && plus_y_ids[side_dim].size() == 1)
+      _paired_boundary.emplace_back(std::make_pair(*(minus_y_ids[side_dim].begin()),
+                                                   *(plus_y_ids[side_dim].begin())));
 
-  if (minus_z_ids.size() == 1 && plus_z_ids.size() == 1)
-    _paired_boundary.push_back(std::make_pair(*(minus_z_ids.begin()),
-                                              *(plus_z_ids.begin())));
+    if (minus_z_ids[side_dim].size() == 1 && plus_z_ids[side_dim].size() == 1)
+      _paired_boundary.emplace_back(std::make_pair(*(minus_z_ids[side_dim].begin()),
+                                                   *(plus_z_ids[side_dim].begin())));
+  }
 }
 
 Real

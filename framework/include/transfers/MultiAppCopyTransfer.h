@@ -31,11 +31,10 @@ class MultiAppCopyTransfer :
 {
 public:
   MultiAppCopyTransfer(const InputParameters & parameters);
-  virtual ~MultiAppCopyTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   AuxVariableName _to_var_name;

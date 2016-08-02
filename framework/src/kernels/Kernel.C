@@ -40,10 +40,6 @@ Kernel::Kernel(const InputParameters & parameters) :
 {
 }
 
-Kernel::~Kernel()
-{
-}
-
 void
 Kernel::computeResidual()
 {
@@ -137,4 +133,3 @@ void
 Kernel::precalculateResidual()
 {
 }
-

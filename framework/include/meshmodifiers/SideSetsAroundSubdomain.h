@@ -36,13 +36,10 @@ class SideSetsAroundSubdomain :
 public:
   SideSetsAroundSubdomain(const InputParameters & parameters);
 
-  virtual ~SideSetsAroundSubdomain();
-
-  virtual void initialize();
-
-  virtual void modify();
+  virtual void initialize() override;
 
 protected:
+  virtual void modify() override;
 
   /// names of the sidesets to which the faces will be added
   std::vector<BoundaryName> _boundary_names;

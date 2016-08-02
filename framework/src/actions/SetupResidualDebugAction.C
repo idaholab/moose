@@ -33,10 +33,6 @@ SetupResidualDebugAction::SetupResidualDebugAction(InputParameters parameters) :
 {
 }
 
-SetupResidualDebugAction::~SetupResidualDebugAction()
-{
-}
-
 void
 SetupResidualDebugAction::act()
 {
@@ -73,4 +69,3 @@ SetupResidualDebugAction::act()
     _problem->addAuxKernel("DebugResidualAux", kern_name, params);
   }
 }
-

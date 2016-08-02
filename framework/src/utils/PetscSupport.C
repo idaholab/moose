@@ -217,7 +217,8 @@ petscSetOptions(FEProblem & problem)
   }
 }
 
-PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
+PetscErrorCode
+petscSetupOutput(CommandLine * cmd_line)
 {
   char code[10] = {45,45,109,111,111,115,101};
   if (cmd_line->getPot()->search(code))
@@ -225,7 +226,8 @@ PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
   return 0;
 }
 
-PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
+PetscErrorCode
+petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
   // Cast the context pointer coming from PETSc to an FEProblem& and
   // get a reference to the System from it.
@@ -299,7 +301,11 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
     *reason = KSP_DIVERGED_NANORINF;
 #endif
     break;
-
+#if !PETSC_VERSION_LESS_THAN(3,6,0) // A new convergence enum in PETSc 3.6
+  case MOOSE_DIVERGED_PCSETUP_FAILED:
+    *reason = KSP_DIVERGED_PCSETUP_FAILED;
+    break;
+#endif
   default:
   {
     // If it's not either of the two specific cases we handle, just go
@@ -311,7 +317,8 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   return 0;
 }
 
-PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
+PetscErrorCode
+petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
   FEProblem & problem = *static_cast<FEProblem *>(ctx);
   NonlinearSystem & system = problem.getNonlinearSystem();
@@ -432,7 +439,8 @@ getPetscPCSide(Moose::PCSideType pcs)
   }
 }
 
-void petscSetDefaults(FEProblem & problem)
+void
+petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
   NonlinearSystem & nl = problem.getNonlinearSystem();

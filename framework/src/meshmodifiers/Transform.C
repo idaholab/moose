@@ -36,10 +36,6 @@ Transform::Transform(const InputParameters & parameters) :
 {
 }
 
-Transform::~Transform()
-{
-}
-
 void
 Transform::modify()
 {

@@ -28,11 +28,9 @@ class MeshExtruder : public MeshModifier
 public:
   MeshExtruder(const InputParameters & parameters);
 
-  virtual ~MeshExtruder();
-
-  virtual void modify();
-
 protected:
+  virtual void modify() override;
+
   const unsigned int _num_layers;
   const RealVectorValue _extrusion_vector;
 

@@ -30,10 +30,9 @@ class FunctionScalarAux : public AuxScalarKernel
 {
 public:
   FunctionScalarAux(const InputParameters & parameters);
-  virtual ~FunctionScalarAux();
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   std::vector<Function *> _functions;
 };

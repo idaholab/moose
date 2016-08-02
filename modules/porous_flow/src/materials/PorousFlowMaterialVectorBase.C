@@ -19,6 +19,7 @@ InputParameters validParams<PorousFlowMaterialVectorBase>()
 PorousFlowMaterialVectorBase::PorousFlowMaterialVectorBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number")),
     _num_phases(_dictator.numPhases()),
     _num_components(_dictator.numComponents()),
     _num_var(_dictator.numVariables())

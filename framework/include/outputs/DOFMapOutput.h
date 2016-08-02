@@ -33,19 +33,18 @@ class DOFMapOutput : public BasicOutput<FileOutput>
 {
 public:
   DOFMapOutput(const InputParameters & parameters);
-  virtual ~DOFMapOutput(){};
 
   /**
    * Creates the output file name
    * Appends the user-supplied 'file_base' input parameter with a '.txt' extension
    * @return A string containing the output filename
    */
-  virtual std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Write the DOF mapt
    */
-  void output(const ExecFlagType & type);
+  void output(const ExecFlagType & type) override;
 
 protected:
 

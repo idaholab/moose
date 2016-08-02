@@ -162,7 +162,6 @@
     block = 0
   [../]
 
-
   [./isotropic_plasticity_recompute]
     type = RecomputeRadialReturnIsotropicPlasticity
     block = 0

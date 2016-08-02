@@ -31,10 +31,6 @@ SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) :
 {
 }
 
-SetupRecoverFileBaseAction::~SetupRecoverFileBaseAction()
-{
-}
-
 void
 SetupRecoverFileBaseAction::act()
 {

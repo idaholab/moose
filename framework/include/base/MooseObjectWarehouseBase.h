@@ -577,7 +577,7 @@ MooseObjectWarehouseBase<T>::sortHelper(std::vector<MooseSharedPointer<T> > & ob
 
 template<typename T>
 inline void
-MooseObjectWarehouseBase<T>::checkThreadID(THREAD_ID tid) const
+MooseObjectWarehouseBase<T>::checkThreadID(THREAD_ID libmesh_dbg_var(tid)) const
 {
   mooseAssert(tid < _num_threads, "Attempting to access a thread id (" << tid << ") greater than the number allowed by the storage item (" << _num_threads << ")");
 }

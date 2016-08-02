@@ -18,9 +18,7 @@
 []
 
 [GlobalParams]
-#  disp_z = disp_z
-#  disp_y = disp_y
-#  disp_x = disp_x
+  displacements = 'disp_x disp_y disp_z'
 []
 
 
@@ -183,14 +181,11 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.4 0.4' # young = 1, poisson = 0.25
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress
@@ -234,7 +229,4 @@
 [Outputs]
   file_base = gravity
   exodus = true
-  [./csv]
-    type = CSV
-    [../]
 []

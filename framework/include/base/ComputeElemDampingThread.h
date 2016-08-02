@@ -36,7 +36,7 @@ public:
 
   virtual ~ComputeElemDampingThread();
 
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem * elem) override;
 
   void join(const ComputeElemDampingThread & /*y*/);
 

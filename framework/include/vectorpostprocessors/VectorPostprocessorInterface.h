@@ -31,7 +31,7 @@ public:
   /**
    * This class has virtual methods, so it needs a virtual dtor.
    */
-  virtual ~VectorPostprocessorInterface() {}
+  virtual ~VectorPostprocessorInterface() = default;
 
   /**
    * Retrieve the value of a VectorPostprocessor

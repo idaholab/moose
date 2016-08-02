@@ -75,7 +75,6 @@
 [Materials]
   [./PFCTrad]
     type = PFCTradMaterial
-    block = 0
     order = 4
   [../]
 []
@@ -127,5 +126,3 @@
   file_base = pfct_newton_split1_asm1_10_out
   exodus = true
 []
-
-

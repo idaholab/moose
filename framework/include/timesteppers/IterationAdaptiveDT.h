@@ -38,19 +38,20 @@ class IterationAdaptiveDT :
 {
 public:
   IterationAdaptiveDT(const InputParameters & parameters);
-  virtual ~IterationAdaptiveDT();
 
-  virtual void init();
-  virtual void preExecute();
+  virtual void init() override;
+  virtual void preExecute() override;
 
-  virtual void rejectStep();
-  virtual void acceptStep();
+  virtual void rejectStep() override;
+  virtual void acceptStep() override;
+
+  virtual bool constrainStep(Real &dt) override;
 
 protected:
-  virtual Real computeInitialDT();
-  virtual Real computeDT();
-  virtual bool constrainStep(Real &dt);
-  virtual Real computeFailedDT();
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
+  virtual Real computeFailedDT() override;
+
   void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
   Real computeInterpolationDT();
   void limitDTByFunction(Real & limitedDT);

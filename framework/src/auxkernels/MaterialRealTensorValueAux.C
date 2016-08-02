@@ -34,10 +34,6 @@ MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & p
     mooseError("The column component " << _col << " does not exist for " << LIBMESH_DIM << " dimensional problems");
 }
 
-MaterialRealTensorValueAux::~MaterialRealTensorValueAux()
-{
-}
-
 Real
 MaterialRealTensorValueAux::getRealValue()
 {

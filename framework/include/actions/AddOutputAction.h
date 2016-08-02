@@ -36,11 +36,7 @@ public:
    */
   AddOutputAction(InputParameters params);
 
-  /**
-   * Creates the actual output object
-   */
-  virtual void act();
-
+  virtual void act() override;
 };
 
 #endif //ADDOUTPUTACTION_H

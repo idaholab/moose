@@ -146,13 +146,11 @@
 [Materials]
   [./constants]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'kappa_gr kappa_c M L'
     prop_values = '250 4000 4.5 60'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = f_loc
     constant_names = 'A B'
     constant_expressions = '450 1.5'
@@ -165,14 +163,12 @@
   [../]
   [./advection_velocity]
     type = GrainAdvectionVelocity
-    block = 0
     grain_force = grain_force
     grain_data = grain_center
     c = c
   [../]
   [./force_density]
     type = ExternalForceDensityMaterial
-    block = 0
     c = c
     k = 10.0
     force_x = load_x

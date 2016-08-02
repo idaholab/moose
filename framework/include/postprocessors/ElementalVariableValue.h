@@ -35,13 +35,9 @@ class ElementalVariableValue : public GeneralPostprocessor
 public:
   ElementalVariableValue(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
-
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual Real getValue() override;
 
 protected:
   MooseMesh & _mesh;

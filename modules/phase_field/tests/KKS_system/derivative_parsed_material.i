@@ -61,7 +61,6 @@
 [Materials]
   [./fa]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = 'c1 c2'
     constant_names       = 'T    kB'

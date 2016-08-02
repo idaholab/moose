@@ -32,13 +32,14 @@ public:
   TimeSequenceStepperBase(const InputParameters & parameters);
 
   void setupSequence(const std::vector<Real> & times);
-  virtual void init() {}
-  virtual void step();
+
+  virtual void init() override {}
+  virtual void step() override;
 
 protected:
-  virtual Real computeInitialDT();
-  virtual Real computeDT();
-  virtual Real computeFailedDT();
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
+  virtual Real computeFailedDT() override;
 
   /// the step that the time stepper is currently at
   unsigned int & _current_step;

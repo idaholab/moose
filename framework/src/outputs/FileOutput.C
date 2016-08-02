@@ -97,10 +97,6 @@ FileOutput::FileOutput(const InputParameters & parameters) :
   }
 }
 
-FileOutput::~FileOutput()
-{
-}
-
 std::string
 FileOutput::getOutputFileBase(MooseApp & app, std::string suffix)
 {

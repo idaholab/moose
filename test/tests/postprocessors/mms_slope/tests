@@ -5,7 +5,7 @@
     exodiff = 'out.e-s002 out.e-s007'
     group = 'adaptive'
     abs_zero = 1e-8
-    method = 'OPT OPROF'
+    method = '!DBG'
     valgrind = 'HEAVY'
   [../]
 []

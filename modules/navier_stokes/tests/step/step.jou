@@ -1,0 +1,177 @@
+# This script builds a mesh with a step in the middle for flow calculations.
+reset
+
+# Set the following numerical values to customize the height and width
+# of the domain and the step.
+#
+#                                  L
+#    ________________________________________________________________
+#   |                                                                |
+#   |                                                                |
+#   |                                                                |
+# H | A                                                              |
+#   |                     __________C___________                     |
+#   |                  B |                      |                    |
+#   |____________________|                      |____________________|
+#
+# A = my_inlet_interval
+# B = my_step_face_interval
+# C = my_step_top_interval
+
+################################################################################
+# The height of the domain.
+################################################################################
+# {H=1}
+
+################################################################################
+# The length of the domain.
+################################################################################
+# {L=3}
+
+################################################################################
+# Number of cells at the inlet
+################################################################################
+# {my_inlet_interval = 20}
+
+################################################################################
+# Number of cells on the step face.  Must be less than
+# my_inlet_interval.
+################################################################################
+# {my_step_face_interval = 2}
+
+################################################################################
+# Number of cells on the top of the step, must be less than top_interval
+################################################################################
+# {my_step_top_interval = 20}
+
+################################################################################
+# Use this number make the grid finer.  If you pick "1" you'll get the
+# coarsest possible discretization.
+################################################################################
+# {interval_multiplier = 1}
+
+
+
+
+
+
+################################################################################
+# Don't set anything below this line!
+################################################################################
+
+# {inlet_interval = my_inlet_interval * interval_multiplier}
+# {step_face_interval = my_step_face_interval * interval_multiplier}
+# {step_top_interval = my_step_top_interval * interval_multiplier}
+
+# Number of cells down the length of the channel.  Satisfies:
+# (L / H) = (top_interval / inlet_interval)
+# {top_interval = my_inlet_interval * L / H * interval_multiplier}
+
+# Check that the number of intervals on the step is less than the number of intervals on the inlet.
+# {if (step_face_interval > inlet_interval) }
+# {PrintError('Error! step_face_interval must be less than inlet_interval!')}
+stop
+# {endif}
+
+
+# Check that the difference between the top and step_top intervals is even
+# {test_val2 = (-1)^(top_interval - step_top_interval)}
+# {if (test_val2 < 1) }
+# {PrintError('Error! top_interval - step_top_interval must be divisible by 2!')}
+stop
+# {endif}
+
+# Compute the step height and length based on step_face_interval
+# {h = H*(step_face_interval/inlet_interval)}
+# {l = L*(step_top_interval/top_interval)}
+
+# Since this is cubit, we do everything in 3D and mesh a face.
+create brick width {L} depth {H} height 1
+create brick width {l} depth {h} height 1
+move body 2 y {0.5*(h-H)}
+subtract body 2 from body 1
+
+# Set intervals.  The interval on the inlet should match up
+# with the interval on the step
+
+# inlet, outlet
+curve 1 3 interval {inlet_interval}
+
+# step front, back faces
+curve 26 33 interval {step_face_interval}
+
+# Top of domain
+curve 2 interval {top_interval}
+
+# top of step
+curve 30 interval {step_top_interval}
+
+# base (before and after the step)
+curve 35 36 interval {(top_interval-step_top_interval)/2}
+
+
+# Mesh the surface.  Scheme auto picked submap and it seemed to work OK...
+surf 16 scheme submap
+mesh surf 16
+
+# Make sidesets
+sideset 1 curve 36 35
+sideset 1 name 'bottom'
+
+sideset 2 curve 1
+sideset 2 name 'right'
+
+sideset 3 curve 2
+sideset 3 name 'top'
+
+sideset 4 curve 3
+sideset 4 name 'left'
+
+sideset 5 curve 26
+sideset 5 name 'step_left'
+
+sideset 6 curve 30
+sideset 6 name 'step_top'
+
+sideset 7 curve 33
+sideset 7 name 'step_right'
+
+# Export the mesh as QUAD4's
+block 1 surf 16
+block 1 element type QUAD4
+export mesh "~/Desktop/step.e" dimension 2 block 1 overwrite
+
+# To run the script
+# play 'step.jou'
+
+# Local Variables:
+# mode: shell-script
+# End:
+
+
+
+# Meshing results for different values of
+# (my_inlet_interval, my_step_face_interval, my_step_top_interval)
+
+# (20, 16, 2)
+# interval_multiplier    num elem   num nodes   notes
+# 1                      1168       1265        Worked OK up to about Re=200
+# 2                      4672       4865
+# 3                      10512      10801
+# 4                      18688      19073
+# 5                      31200      31701
+# 10                     116800     117761
+
+
+# (20, 16, 40)
+# interval_multiplier    num elem   num nodes   notes
+# 1                      560        657
+# 2                      2240       2433
+# 3                      5040       5329
+# 4                      8960       9345
+
+# (20, 18, 2)
+# interval_multiplier    num elem   num nodes   notes
+# 1                      1164       1263
+# 2                      4656       4853
+# 3                      10476      10771

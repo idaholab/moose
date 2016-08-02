@@ -87,21 +87,18 @@
   # simple toy free energies
   [./f1]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F1
     args = 'c1'
     function = '(c1-0.2)^2'
   [../]
   [./f2]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F2
     args = 'c2'
     function = '(c2-0.5)^2'
   [../]
   [./f3]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F3
     args = 'c3'
     function = '(c3-0.8)^2'
@@ -119,38 +116,55 @@
   # h2(eta1, eta2, eta3)
   [./h2]
     type = SwitchingFunction3PhaseMaterial
-    eta_i = eta3
-    eta_j = eta1
-    eta_k = eta2
+    eta_i = eta2
+    eta_j = eta3
+    eta_k = eta1
     f_name = h2
   [../]
   # h3(eta1, eta2, eta3)
   [./h3]
     type = SwitchingFunction3PhaseMaterial
-    eta_i = eta2
-    eta_j = eta3
-    eta_k = eta1
+    eta_i = eta3
+    eta_j = eta1
+    eta_k = eta2
     f_name = h3
+  [../]
+
+  # Coefficients for diffusion equation
+  [./Dh1]
+    type = DerivativeParsedMaterial
+    material_property_names = 'D h1'
+    function = D*h1
+    f_name = Dh1
+  [../]
+  [./Dh2]
+    type = DerivativeParsedMaterial
+    material_property_names = 'D h2'
+    function = D*h2
+    f_name = Dh2
+  [../]
+  [./Dh3]
+    type = DerivativeParsedMaterial
+    material_property_names = 'D h3'
+    function = D*h3
+    f_name = Dh3
   [../]
 
   # Barrier functions for each phase
   [./g1]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta1
     function_name = g1
   [../]
   [./g2]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta2
     function_name = g2
   [../]
   [./g3]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta3
     function_name = g3
@@ -159,16 +173,34 @@
   # constant properties
   [./constants]
     type = GenericConstantMaterial
-    block = 0
-    prop_names  = 'L   kappa'
-    prop_values = '0.7 0.4  '
+    prop_names  = 'L   kappa  D'
+    prop_values = '0.7 0.4    1'
   [../]
 []
 
 [Kernels]
-  [./cdiff]
-    type = Diffusion
+  #Kernels for diffusion equation
+  [./diff_time]
+    type = TimeDerivative
     variable = c
+  [../]
+  [./diff_c1]
+    type = MatDiffusion
+    variable = c
+    D_name = Dh1
+    conc = c1
+  [../]
+  [./diff_c2]
+    type = MatDiffusion
+    variable = c
+    D_name = Dh2
+    conc = c2
+  [../]
+  [./diff_c3]
+    type = MatDiffusion
+    variable = c
+    D_name = Dh3
+    conc = c3
   [../]
 
   # Kernels for Allen-Cahn equation for eta1
@@ -270,6 +302,13 @@
     args      = 'eta2 eta3'
     mob_name  = 1
   [../]
+  [./mult_CoupledACint_1]
+    type = SimpleCoupledACInterface
+    variable = lambda
+    v = eta1
+    kappa_name = kappa
+    mob_name = 1
+  [../]
   [./mult_ACBulkF_2]
     type = KKSMultiACBulkF
     variable  = lambda
@@ -290,6 +329,13 @@
     eta_i     = eta2
     args      = 'eta1 eta3'
     mob_name  = 1
+  [../]
+  [./mult_CoupledACint_2]
+    type = SimpleCoupledACInterface
+    variable = lambda
+    v = eta2
+    kappa_name = kappa
+    mob_name = 1
   [../]
   [./mult_ACBulkF_3]
     type = KKSMultiACBulkF
@@ -312,7 +358,13 @@
     args      = 'eta1 eta2'
     mob_name  = 1
   [../]
-
+  [./mult_CoupledACint_3]
+    type = SimpleCoupledACInterface
+    variable = lambda
+    v = eta3
+    kappa_name = kappa
+    mob_name = 1
+  [../]
 
   # Kernels for constraint equation eta1 + eta2 + eta3 = 1
   # eta3 is the nonlinear variable for the constraint equation
@@ -381,8 +433,6 @@
 
 [Preconditioning]
   active = 'full'
-  #active = 'mydebug'
-  #active = ''
   [./full]
     type = SMP
     full = true
@@ -394,6 +444,5 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
   exodus = true
 []

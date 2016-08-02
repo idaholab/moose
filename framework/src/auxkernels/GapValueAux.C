@@ -65,10 +65,6 @@ GapValueAux::GapValueAux(const InputParameters & parameters) :
 
 }
 
-GapValueAux::~GapValueAux()
-{
-}
-
 Real
 GapValueAux::computeValue()
 {
@@ -105,4 +101,3 @@ GapValueAux::computeValue()
   }
   return gap_value;
 }
-

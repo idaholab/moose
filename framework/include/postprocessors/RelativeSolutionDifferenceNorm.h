@@ -40,15 +40,15 @@ public:
   /**
    * No action taken
    */
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
   ///@}
 
   /**
    * Returns the relative solution norm taken from the transient executioner
    * @return A const reference to the value of the postprocessor
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
   /// Transient executioner

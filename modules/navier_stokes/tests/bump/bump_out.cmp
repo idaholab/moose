@@ -1,0 +1,46 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.69) Modified: 2013-07-11
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#             Run on    2016/07/18   09:30:02 MDT
+#  *****************************************************************
+
+#  FILE 1: /Users/petejw/projects/moose_git/modules/navier_stokes/tests/bump/bump_out.e
+#   Title: bump_out.e
+#          Dim = 2, Blocks = 1, Nodes = 225, Elements = 192, Nodesets = 5, Sidesets = 4
+#          Vars: Global = 1, Nodal = 10, Element = 0, Nodeset = 0, Sideset = 0, Times = 11
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:          0.0005 @ t11
+
+GLOBAL VARIABLES relative 1.e-6 floor 0.0
+	entropy_error absolute 1.e-12  # min:   5.1359785e-15 @ t1	max:    0.0004053014 @ t11
+
+NODAL VARIABLES relative 1.e-6 floor 0.0
+	Mach         # min:               0 @ t1,n1	max:      0.61264001 @ t11,n25
+	enthalpy     # min:       302593.82 @ t8,n29	max:       331472.02 @ t7,n23
+	pressure     # min:       86268.835 @ t8,n27	max:       119894.16 @ t7,n23
+	rho          # min:       1.0480895 @ t8,n27	max:       1.3268611 @ t7,n23
+	rhoe         # min:       232902.05 @ t7,n29	max:       319923.18 @ t7,n23
+	rhou         # min:       173.11111 @ t8,n29	max:       244.13846 @ t11,n25
+	rhov         absolute 1.e-9
+	temperature  # min:       286.79522 @ t7,n27	max:       314.84055 @ t7,n23
+	vel_x        # min:       151.27729 @ t11,n21	max:       211.31524 @ t11,n25
+	vel_y        absolute 1.e-9
+
+# No ELEMENT VARIABLES
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

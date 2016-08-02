@@ -70,7 +70,7 @@ PorousFlow2PhasePS::computeQpProperties()
   }
 
   /// Calculate the capillary pressure and derivatives wrt saturation
-  const Real dpc_nodal = dCapillaryPressure_dS(_phase1_saturation_nodal[_qp]);
+  const Real dpc_nodal = dCapillaryPressure_dS(_phase1_saturation_nodal[_node_number[_qp]]);
   const Real dpc_qp = dCapillaryPressure_dS(_phase1_saturation_qp[_qp]);
   const Real d2pc_qp = d2CapillaryPressure_dS2(_phase1_saturation_qp[_qp]);
 
@@ -107,27 +107,27 @@ PorousFlow2PhasePS::computeQpProperties()
 void
 PorousFlow2PhasePS::buildQpPPSS()
 {
-  _saturation_nodal[_qp][0] = 1.0 - _phase1_saturation_nodal[_qp];
-  _saturation_nodal[_qp][1] = _phase1_saturation_nodal[_qp];
+  _saturation_nodal[_qp][0] = 1.0 - _phase1_saturation_nodal[_node_number[_qp]];
+  _saturation_nodal[_qp][1] = _phase1_saturation_nodal[_node_number[_qp]];
   _saturation_qp[_qp][0] = 1.0 - _phase1_saturation_qp[_qp];
   _saturation_qp[_qp][1] = _phase1_saturation_qp[_qp];
   _grads_qp[_qp][0] = -_phase1_grads_qp[_qp];
   _grads_qp[_qp][1] = _phase1_grads_qp[_qp];
 
-  const Real pc_nodal = capillaryPressure(_phase1_saturation_nodal[_qp]);
+  const Real pc_nodal = capillaryPressure(_phase1_saturation_nodal[_node_number[_qp]]);
   const Real pc_qp = capillaryPressure(_phase1_saturation_qp[_qp]);
   const Real dpc_qp = dCapillaryPressure_dS(_phase1_saturation_qp[_qp]);
 
-  _porepressure_nodal[_qp][0] = _phase0_porepressure_nodal[_qp];
-  _porepressure_nodal[_qp][1] = _phase0_porepressure_nodal[_qp] - pc_nodal;
+  _porepressure_nodal[_qp][0] = _phase0_porepressure_nodal[_node_number[_qp]];
+  _porepressure_nodal[_qp][1] = _phase0_porepressure_nodal[_node_number[_qp]] - pc_nodal;
   _porepressure_qp[_qp][0] = _phase0_porepressure_qp[_qp];
   _porepressure_qp[_qp][1] = _phase0_porepressure_qp[_qp] - pc_qp;
   _gradp_qp[_qp][0] = _phase0_gradp_qp[_qp];
   _gradp_qp[_qp][1] = _phase0_gradp_qp[_qp] - dpc_qp * _grads_qp[_qp][1];
 
   /// Temperature is the same in each phase presently
-  _temperature_nodal[_qp][0] = _temperature_nodal_var[_qp];
-  _temperature_nodal[_qp][1] = _temperature_nodal_var[_qp];
+  _temperature_nodal[_qp][0] = _temperature_nodal_var[_node_number[_qp]];
+  _temperature_nodal[_qp][1] = _temperature_nodal_var[_node_number[_qp]];
   _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
   _temperature_qp[_qp][1] = _temperature_qp_var[_qp];
 }

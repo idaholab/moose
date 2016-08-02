@@ -42,11 +42,11 @@ public:
   virtual void init();
 
   virtual void preExecute();
-  virtual void preSolve() { }
-  virtual void postSolve() { }
-  virtual void postExecute() { }
-  virtual void preStep() { }
-  virtual void postStep() { }
+  virtual void preSolve() {}
+  virtual void postSolve() {}
+  virtual void postExecute() {}
+  virtual void preStep() {}
+  virtual void postStep() {}
 
   /**
    * Called before a new step is started.

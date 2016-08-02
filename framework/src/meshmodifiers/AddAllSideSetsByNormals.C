@@ -36,10 +36,6 @@ AddAllSideSetsByNormals::AddAllSideSetsByNormals(const InputParameters & paramet
 {
 }
 
-AddAllSideSetsByNormals::~AddAllSideSetsByNormals()
-{
-}
-
 void
 AddAllSideSetsByNormals::modify()
 {

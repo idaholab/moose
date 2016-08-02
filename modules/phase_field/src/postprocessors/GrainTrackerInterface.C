@@ -18,6 +18,8 @@ InputParameters validParams<GrainTrackerInterface>()
   params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
                                                   "hold the active order parameter information"
                                                   "should be populated or not");
+  params.addParam<unsigned int>("reserve_op", 0, "Indicates the number of reserved ops (variables that cannot be remapped to)");
+  params.addParam<Real>("reserve_op_threshold", 0.95, "Threshold for locating a new feature on the reserved op variable(s)" );
   params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
 
   params.addRequiredCoupledVarWithAutoBuild("variable", "var_name_base", "op_num", "Array of coupled variables");

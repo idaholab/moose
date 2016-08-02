@@ -4,14 +4,17 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "FluidPropertiesApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
 #include "FluidPropertiesMaterial.h"
+#include "FluidPropertiesMaterialPT.h"
 #include "IdealGasFluidProperties.h"
 #include "StiffenedGasFluidProperties.h"
+#include "MethaneFluidProperties.h"
 
 #include "AddFluidPropertiesAction.h"
 
@@ -62,9 +65,11 @@ void
 FluidPropertiesApp::registerObjects(Factory & factory)
 {
   registerMaterial(FluidPropertiesMaterial);
+  registerMaterial(FluidPropertiesMaterialPT);
 
   registerUserObject(IdealGasFluidProperties);
   registerUserObject(StiffenedGasFluidProperties);
+  registerUserObject(MethaneFluidProperties);
 }
 
 // External entry point for dynamic syntax association

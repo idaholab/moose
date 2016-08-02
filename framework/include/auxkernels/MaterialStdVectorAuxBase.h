@@ -33,11 +33,9 @@ class MaterialStdVectorAuxBase : public MaterialAuxBase<std::vector<T> >
 public:
   MaterialStdVectorAuxBase(const InputParameters & parameters);
 
-  virtual ~MaterialStdVectorAuxBase(){}
-
-  virtual Real computeValue();
-
 protected:
+  virtual Real computeValue() override;
+
   /// index of the vecor element
   unsigned int _index;
 

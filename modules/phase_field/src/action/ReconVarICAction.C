@@ -28,6 +28,7 @@ InputParameters validParams<ReconVarICAction>()
   params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order paraameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<unsigned int>("phase", "EBSD phase number to be assigned to this grain");
+  params.addParam<bool>("advanced_op_assignment", false, "Enable advanced grain to op assignment (avoid invalid graph coloring)");
   return params;
 }
 
@@ -61,6 +62,7 @@ ReconVarICAction::act()
       poly_params.set<unsigned int>("op_index") = op;
       poly_params.set<unsigned int>("op_num") = _op_num;
       poly_params.set<UserObjectName>("ebsd_reader") = getParam<UserObjectName>("ebsd_reader");
+      poly_params.set<bool>("advanced_op_assignment") = getParam<bool>("advanced_op_assignment");
       if (isParamValid("phase"))
         poly_params.set<unsigned int>("phase") = getParam<unsigned int>("phase");
 

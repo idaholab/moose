@@ -23,10 +23,12 @@
 class MultiApp;
 
 // DTK includes
+#include "libmesh/ignore_warnings.h"
 #include <DTK_FieldEvaluator.hpp>
 #include <DTK_FieldContainer.hpp>
 #include <DTK_GeometryManager.hpp>
 #include <DTK_Box.hpp>
+#include "libmesh/restore_warnings.h"
 
 /**
  * Evaluates the specified UserObject and returns the result in a DTK FieldContainer.

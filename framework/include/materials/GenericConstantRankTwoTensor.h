@@ -25,7 +25,7 @@ public:
   GenericConstantRankTwoTensor(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   RankTwoTensor _tensor;
   MaterialProperty<RankTwoTensor> & _prop;

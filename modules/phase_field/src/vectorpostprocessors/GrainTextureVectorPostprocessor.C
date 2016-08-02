@@ -25,10 +25,10 @@ GrainTextureVectorPostprocessor::GrainTextureVectorPostprocessor(const InputPara
     SamplerBase(parameters, this, _communicator),
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
     _unique_grains(coupledValue("unique_grains")),
-    _ncrys(getParam<unsigned int>("grain_num")),
-    _values(4)
+    _grain_num(getParam<unsigned int>("grain_num")),
+    _sample(4)
 {
-  if (_euler.getGrainNum() < _ncrys)
+  if (_euler.getGrainNum() < _grain_num)
     mooseError("Euler angle provider has too few angles.");
 
   std::vector<std::string> output_variables(4);
@@ -48,13 +48,13 @@ GrainTextureVectorPostprocessor::initialize()
 void
 GrainTextureVectorPostprocessor::execute()
 {
-  _values[0] = _unique_grains[0] + 1; // Index starts at 0, but we want to display first grain as grain 1.
+  _sample[0] = _unique_grains[0] + 1; // Index starts at 0, but we want to display first grain as grain 1.
 
   const EulerAngles & angle = _euler.getEulerAngles(_unique_grains[0]);
-  _values[1] = angle.phi1; // Get the Z   rotation
-  _values[2] = angle.Phi;  // Get the X'  rotation
-  _values[3] = angle.phi2; // Get the Z'' rotation
-  SamplerBase::addSample(_current_elem->centroid() /* x,y,z coordinates of elem centroid */, _current_elem->id(), _values);
+  _sample[1] = angle.phi1; // Get the Z   rotation
+  _sample[2] = angle.Phi;  // Get the X'  rotation
+  _sample[3] = angle.phi2; // Get the Z'' rotation
+  SamplerBase::addSample(_current_elem->centroid() /* x,y,z coordinates of elem centroid */, _current_elem->id(), _sample);
 }
 
 void

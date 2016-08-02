@@ -32,10 +32,10 @@ class LayeredAverage : public LayeredIntegral
 public:
   LayeredAverage(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Value of the volume for each layer

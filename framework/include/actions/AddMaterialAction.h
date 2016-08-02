@@ -28,7 +28,7 @@ class AddMaterialAction : public MooseObjectAction
 public:
   AddMaterialAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDMATERIALACTION_H

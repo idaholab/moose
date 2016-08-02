@@ -162,10 +162,6 @@ Transient::Transient(const InputParameters & parameters) :
   }
 }
 
-Transient::~Transient()
-{
-}
-
 void
 Transient::init()
 {

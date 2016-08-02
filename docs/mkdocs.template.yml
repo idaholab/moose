@@ -1,0 +1,18 @@
+site_name: MOOSE
+
+docs_dir: .
+
+site_dir: ../site
+
+extra_javascript:
+    - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+    - mathjaxconfig.js
+
+markdown_extensions:
+    - smarty
+    - admonition
+    - markdown_include.include           # pip install markdown-include
+    - mdx_math                           # pip install python-markdown-math
+    - MooseDocs.extensions.MooseMarkdown:
+          make: ../modules
+          repo: https://github.com/idaholab/moose/blob/master

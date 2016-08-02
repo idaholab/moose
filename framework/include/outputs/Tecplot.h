@@ -43,13 +43,13 @@ protected:
    * Overload the Output::output method, this is required for Tecplot
    * output due to the method utilized for outputing single/global parameters
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix
    * @return A string containing the current filename to be written
    */
-  std::string filename();
+  virtual std::string filename() override;
 
 private:
 

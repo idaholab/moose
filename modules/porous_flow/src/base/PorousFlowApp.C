@@ -45,12 +45,22 @@
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowWater.h"
 #include "PorousFlowJoiner.h"
+#include "PorousFlowNodeNumber.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowEffectiveStressCoupling.h"
 #include "PorousFlowMassVolumetricExpansion.h"
+
+// BoundaryConditions
+#include "PorousFlowSink.h"
+#include "PorousFlowPiecewiseLinearSink.h"
+#include "PorousFlowHalfGaussianSink.h"
+#include "PorousFlowHalfCubicSink.h"
+
+// AuxKernels
+#include "PorousFlowDarcyVelocityComponent.h"
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -134,12 +144,22 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowWater);
   registerMaterial(PorousFlowJoiner);
+  registerMaterial(PorousFlowNodeNumber);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
   registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowEffectiveStressCoupling);
   registerKernel(PorousFlowMassVolumetricExpansion);
+
+  // BoundaryConditions
+  registerBoundaryCondition(PorousFlowSink);
+  registerBoundaryCondition(PorousFlowPiecewiseLinearSink);
+  registerBoundaryCondition(PorousFlowHalfGaussianSink);
+  registerBoundaryCondition(PorousFlowHalfCubicSink);
+
+  // AuxKernels
+  registerAuxKernel(PorousFlowDarcyVelocityComponent);
 }
 
 // External entry point for dynamic syntax association

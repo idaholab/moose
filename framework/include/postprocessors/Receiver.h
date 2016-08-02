@@ -40,20 +40,20 @@ public:
   /**
    * No action taken
    */
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
   ///@}
 
   /**
    * Returns the value stored in _my_value
    * @return A const reference to the value of the postprocessor
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
   /**
    * Initial setup function for applying the default value
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 private:
 

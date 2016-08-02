@@ -47,10 +47,6 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params) :
   _fe_problem.getNonlinearSystem().setPCSide(getParam<MooseEnum>("pc_side"));
 }
 
-MoosePreconditioner::~MoosePreconditioner()
-{
-}
-
 void
 MoosePreconditioner::copyVarValues(MeshBase & mesh,
                                    const unsigned int from_system, const unsigned int from_var, const NumericVector<Number> & from_vector,

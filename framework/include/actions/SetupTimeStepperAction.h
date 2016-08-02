@@ -29,12 +29,8 @@ class SetupTimeStepperAction : public MooseObjectAction
 {
 public:
   SetupTimeStepperAction(InputParameters parameters);
-  virtual ~SetupTimeStepperAction();
 
-  virtual void act();
-
-protected:
-
+  virtual void act() override;
 };
 
 

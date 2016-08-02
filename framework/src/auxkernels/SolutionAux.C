@@ -64,10 +64,6 @@ SolutionAux::initialSetup()
     _direct = true;
 }
 
-SolutionAux::~SolutionAux()
-{
-}
-
 Real
 SolutionAux::computeValue()
 {
@@ -97,4 +93,3 @@ SolutionAux::computeValue()
   // Apply factors and return the value
   return _scale_factor*output + _add_factor;
 }
-

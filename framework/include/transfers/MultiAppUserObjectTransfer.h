@@ -34,11 +34,10 @@ class MultiAppUserObjectTransfer :
 {
 public:
   MultiAppUserObjectTransfer(const InputParameters & parameters);
-  virtual ~MultiAppUserObjectTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   AuxVariableName _to_var_name;

@@ -31,9 +31,7 @@ class LinearCombinationFunction : public Function, protected FunctionInterface
 public:
   LinearCombinationFunction(const InputParameters & parameters);
 
-  virtual ~LinearCombinationFunction();
-
-  virtual Real value(Real t, const Point & pt);
+  virtual Real value(Real t, const Point & pt) override;
 
 private:
 

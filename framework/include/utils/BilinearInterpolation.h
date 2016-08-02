@@ -53,8 +53,7 @@ public:
                         const std::vector<Real> & YAXIS,
                         const ColumnMajorMatrix & ZSURFACE);
 
-  virtual ~BilinearInterpolation()
-    {}
+  virtual ~BilinearInterpolation() = default;
 
   /**
    * This function will take an independent variable input and will

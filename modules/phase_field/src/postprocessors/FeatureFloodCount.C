@@ -397,6 +397,9 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, u
 
     case FieldType::CENTROID:
     {
+      if (_periodic_node_map.size())
+        mooseDoOnce(mooseWarning("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
+
       // If this element contains the centroid of one of features, return it's index
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
 
@@ -685,11 +688,9 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
   if (_entities_visited[current_idx].find(entity_id) != _entities_visited[current_idx].end())
     return;
 
-  // Mark this entity as visited
-  _entities_visited[current_idx][entity_id] = true;
-
-  // Determine which threshold to use based on whether this is an established region
-  auto threshold = feature ? _step_connecting_threshold : _step_threshold;
+  // Determine which threshold to use based on whether this is an established region or
+  // based on some derived class criteria.
+  auto threshold = getThreshold(current_idx, feature != nullptr);
 
   // Get the value of the current variable for the current entity
   Real entity_value;
@@ -714,8 +715,14 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
 
   /**
    * If we reach this point (i.e. we haven't returned early from this routine),
-   * we've found a new mesh entity that's part of a feature.
+   * we've found a new mesh entity that's part of a feature. We need to mark
+   * the entity as visited at this point (and not before!) to avoid infinite
+   * recursion. If you mark the node to early you risk not coloring in a whole
+   * feature any time a "connecting threshold" is used since we may have
+   * already visited this entity earlier but it was in-between two thresholds.
    */
+  _entities_visited[current_idx][entity_id] = true;
+
   auto map_num = _single_map_mode ? decltype(current_idx)(0) : current_idx;
 
   // New Feature (we need to create it and add it to our data structure)
@@ -753,6 +760,12 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
     visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
   else
     visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
+}
+
+Real
+FeatureFloodCount::getThreshold(unsigned int /*current_idx*/, bool active_feature) const
+{
+  return active_feature ? _step_connecting_threshold : _step_threshold;
 }
 
 void

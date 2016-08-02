@@ -38,8 +38,6 @@ public:
    */
   PenetrationAux(const InputParameters & parameters);
 
-  virtual ~PenetrationAux();
-
 protected:
   enum PA_ENUM
   {
@@ -76,7 +74,7 @@ protected:
 
   PA_ENUM _quantity;
 
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   PenetrationLocator & _penetration_locator;
 

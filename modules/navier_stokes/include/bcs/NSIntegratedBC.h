@@ -11,6 +11,7 @@
 
 // Forward Declarations
 class NSIntegratedBC;
+class IdealGasFluidProperties;
 
 template<>
 InputParameters validParams<NSIntegratedBC>();
@@ -37,27 +38,26 @@ protected:
   const VariableValue & _rho_u;
   const VariableValue & _rho_v;
   const VariableValue & _rho_w;
-  const VariableValue & _rho_e;
+  const VariableValue & _rho_E;
 
   const VariableGradient & _grad_rho;
   const VariableGradient & _grad_rho_u;
   const VariableGradient & _grad_rho_v;
   const VariableGradient & _grad_rho_w;
-  const VariableGradient & _grad_rho_e;
+  const VariableGradient & _grad_rho_E;
 
   unsigned _rho_var_number;
   unsigned _rhou_var_number;
   unsigned _rhov_var_number;
   unsigned _rhow_var_number;
-  unsigned _rhoe_var_number;
+  unsigned _rhoE_var_number;
 
   // Integrated BC can use Mat. properties...
   const MaterialProperty<Real> & _dynamic_viscosity;
   const MaterialProperty<RealTensorValue> & _viscous_stress_tensor; // Includes _dynamic_viscosity
 
-  // Required parameters
-  Real _gamma;
-  Real _R;
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 
   // Helper function for mapping Moose variable numberings into
   // the "canonical" numbering for the compressible NS equations.

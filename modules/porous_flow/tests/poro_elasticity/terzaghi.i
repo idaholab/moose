@@ -180,6 +180,10 @@
 
 
 [Materials]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '2 3'

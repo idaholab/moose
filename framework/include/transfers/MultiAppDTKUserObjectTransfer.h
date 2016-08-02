@@ -27,6 +27,9 @@
 // libMesh includes
 #include "libmesh/dtk_adapter.h"
 
+// Ignore warnings coming from DTK/Trilinos headers
+#include "libmesh/ignore_warnings.h"
+
 // DTK includes
 #include <DTK_VolumeSourceMap.hpp>
 #include <DTK_MeshManager.hpp>
@@ -49,6 +52,9 @@
 #include <Teuchos_GlobalMPISession.hpp>
 #include <Teuchos_Ptr.hpp>
 
+// Restore the warnings.
+#include "libmesh/restore_warnings.h"
+
 // Forward declarations
 class MultiAppDTKUserObjectTransfer;
 class DTKInterpolationAdapter;
@@ -65,11 +71,10 @@ class MultiAppDTKUserObjectTransfer :
 {
 public:
   MultiAppDTKUserObjectTransfer(const InputParameters & parameters);
-  virtual ~MultiAppDTKUserObjectTransfer() {}
 
   typedef long unsigned int GlobalOrdinal;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   std::string _user_object_name;

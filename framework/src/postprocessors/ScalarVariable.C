@@ -31,10 +31,6 @@ ScalarVariable::ScalarVariable(const InputParameters & parameters) :
 {
 }
 
-ScalarVariable::~ScalarVariable()
-{
-}
-
 void
 ScalarVariable::initialize()
 {
@@ -51,4 +47,3 @@ ScalarVariable::getValue()
   _var.reinit();
   return _var.sln()[_idx];
 }
-

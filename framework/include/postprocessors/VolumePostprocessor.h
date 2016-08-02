@@ -30,10 +30,11 @@ class VolumePostprocessor : public ElementIntegralPostprocessor
 {
 public:
   VolumePostprocessor(const InputParameters & parameters);
-  virtual void threadJoin(const UserObject & y);
+
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 };
 
 #endif

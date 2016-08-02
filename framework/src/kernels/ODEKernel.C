@@ -28,10 +28,6 @@ ODEKernel::ODEKernel(const InputParameters & parameters) :
 {
 }
 
-ODEKernel::~ODEKernel()
-{
-}
-
 void
 ODEKernel::reinit()
 {
@@ -87,4 +83,3 @@ ODEKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.;
 }
-

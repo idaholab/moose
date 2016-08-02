@@ -30,7 +30,7 @@ class Job(object):
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
     params.addParam('template_script', MOOSE_DIR + '/python/ClusterLauncher/pbs_submit.sh', "The template job script to use.")
     params.addParam('job_name', 'The name of the job')
-    params.addParam('test_name', 'The name of the test')
+    params.addParam('test_name', 'None', 'The name of the test')
     return params
   validParams = staticmethod(validParams)
 

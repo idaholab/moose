@@ -23,9 +23,9 @@ GrainRigidBodyMotionBase::GrainRigidBodyMotionBase(const InputParameters & param
     _c(coupledValue("c")),
     _grad_c(coupledGradient("c")),
     _c_name(getVar("c", 0)->name()),
-    _ncrys(coupledComponents("v")),
-    _vals(_ncrys),
-    _vals_var(_ncrys),
+    _op_num(coupledComponents("v")),
+    _vals(_op_num),
+    _vals_var(_op_num),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _velocity_advection(getMaterialProperty<std::vector<RealGradient> >(_base_name + "advection_velocity")),
     _div_velocity_advection(getMaterialProperty<std::vector<Real> >(_base_name + "advection_velocity_divergence")),
@@ -34,7 +34,7 @@ GrainRigidBodyMotionBase::GrainRigidBodyMotionBase(const InputParameters & param
     _velocity_advection_derivative_eta(getMaterialPropertyByName<std::vector<RealGradient> >(propertyNameFirst(_base_name + "advection_velocity", "eta")))
 {
   //Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _op_num; ++i)
   {
     _vals[i] = &coupledValue("v", i);
     _vals_var[i] = coupled("v", i);

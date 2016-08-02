@@ -46,24 +46,15 @@ public:
     BYPASS
   };
 
-  /**
-   * Accessor for retrieving nodal field information (unique grains or variable indicies)
-   * @param node_id the node identifier for which to retrieve field data
-   * @param var_idx when using multi-map mode, the map number from which to retrieve data.
-   * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
-   * @return the nodal value
-   */
+  // GrainTrackerInterface methods
   virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, unsigned int var_idx=0) const override;
-
-  /**
-   * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
-   * holds the ith node with the inner vector holds the list of active unique grains.
-   * (unique_grain_id, variable_idx)
-   */
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
+  virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const override;
 
 protected:
   virtual void updateFieldInfo() override;
+
+  virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
 
   /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to handle
@@ -145,6 +136,18 @@ protected:
   /// Depth of renumbing recursion (a depth of zero means no recursion)
   static const unsigned int _max_renumbering_recursion = 2;
 
+  /// The number of reserved order parameters
+  const unsigned int _n_reserve_ops;
+
+  /// The cutoff index where if variable index >= this number, no remapping TO that variable will occur
+  const unsigned int _reserve_op_idx;
+
+  /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
+  unsigned int _reserve_grain_first_idx;
+
+  /// The threshold above (or below) where a grain may be found on a reserve op field
+  const Real _reserve_op_threshold;
+
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
 
@@ -171,6 +174,9 @@ protected:
    * elem_id -> a vector of pairs each containing the grain number and the variable index representing that grain
    */
   std::map<dof_id_type, std::vector<std::pair<unsigned int, unsigned int> > > _elemental_data;
+  std::map<dof_id_type, std::vector<unsigned int> > _elemental_data_2;
+
+  static std::vector<unsigned int> _empty_2;
 };
 
 

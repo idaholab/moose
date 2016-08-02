@@ -34,6 +34,10 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
     _halo_level(getParam<unsigned int>("halo_level")),
+    _n_reserve_ops(getParam<unsigned int>("reserve_op")),
+    _reserve_op_idx(_n_reserve_ops <= _n_vars ? _n_vars - _n_reserve_ops : 0),
+    _reserve_grain_first_idx(0),
+    _reserve_op_threshold(getParam<Real>("reserve_op_threshold")),
     _remap(getParam<bool>("remap_grains")),
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, FeatureData> >("unique_grains")),
@@ -42,6 +46,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
 {
   if (!_is_elemental && _compute_op_maps)
     mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
+
+  _empty_2.resize(_n_vars, libMesh::invalid_uint);
 }
 
 GrainTracker::~GrainTracker()
@@ -63,6 +69,7 @@ GrainTracker::initialize()
   FeatureFloodCount::initialize();
 
   _elemental_data.clear();
+  _elemental_data_2.clear();
 }
 
 void
@@ -71,6 +78,18 @@ GrainTracker::execute()
   Moose::perf_log.push("execute()", "GrainTracker");
   FeatureFloodCount::execute();
   Moose::perf_log.pop("execute()", "GrainTracker");
+}
+
+Real
+GrainTracker::getThreshold(unsigned int current_idx, bool active_feature) const
+{
+  // If we are inspecting a reserve op parameter, we need to make sure
+  // that there is an entity above the reserve_op threshold before
+  // starting the flood of the feature.
+  if (!active_feature && current_idx >= _reserve_op_idx)
+    return _reserve_op_threshold;
+  else
+    return FeatureFloodCount::getThreshold(current_idx, active_feature);
 }
 
 void
@@ -119,6 +138,18 @@ GrainTracker::finalize()
                                                 _unique_grain_to_ebsd_num[grain_pair.first] :
                                                 grain_pair.first,
                                                 grain_pair.second._var_idx);
+
+          auto data_pair = _elemental_data_2.find(elem_id);
+          if (data_pair == _elemental_data_2.end())
+          {
+            auto data_pair_pair = _elemental_data_2.emplace(elem_id, std::vector<unsigned int>(_n_vars, libMesh::invalid_uint));
+            data_pair = data_pair_pair.first;
+
+            // insert the reserve op numbers (if appropriate)
+            for (unsigned int reserve_idx = 0; reserve_idx < _n_reserve_ops; ++reserve_idx)
+              data_pair->second[reserve_idx] = _reserve_grain_first_idx + reserve_idx;
+          }
+          data_pair->second[grain_pair.second._var_idx] = _ebsd_reader ? _unique_grain_to_ebsd_num[grain_pair.first] : grain_pair.first;
         }
       }
     }
@@ -141,6 +172,23 @@ GrainTracker::getElementalValues(dof_id_type elem_id) const
 #endif
     return _empty;
   }
+}
+
+const std::vector<unsigned int> &
+GrainTracker::getOpToGrainsVector(dof_id_type elem_id) const
+{
+  const auto pos = _elemental_data_2.find(elem_id);
+
+  if (pos != _elemental_data_2.end())
+    return pos->second;
+  else
+  {
+#if DEBUG
+    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
+#endif
+    return _empty_2;
+  }
+
 }
 
 void
@@ -327,6 +375,10 @@ GrainTracker::trackGrains()
                        });
       }
     }
+    // Reserve op grain ids if we are using reserve_op. We'll mark the first index of the reserved id.
+    // The remaining ids (if any) are sequential
+    _reserve_grain_first_idx = _unique_grains.size();
+
     return;  // Return early - no matching or tracking to do
   }
 
@@ -420,7 +472,7 @@ GrainTracker::trackGrains()
       {
         mooseAssert(_feature_sets[map_num][feature_num]._status == Status::NOT_MARKED, "Feature in wrong state, logic error");
 
-        auto new_idx = _unique_grains.size();
+        auto new_idx = _unique_grains.size() + _n_reserve_ops;
 
         _feature_sets[map_num][feature_num]._status = Status::MARKED;               // Mark it
         _unique_grains[new_idx] = std::move(_feature_sets[map_num][feature_num]);   // transfer ownership
@@ -487,6 +539,24 @@ GrainTracker::remapGrains()
       if (grain_it1->second._status == Status::INACTIVE)
         continue;
 
+      // We need to remap any grains represented on any variable index above the cuttoff
+      if (grain_it1->second._var_idx >= _reserve_op_idx)
+      {
+        Moose::out
+          << COLOR_YELLOW
+          << "Grain #" << grain_it1->first << " detected on a reserved order parameter #" << grain_it1->second._var_idx << ", remapping to another variable\n"
+          << COLOR_DEFAULT;
+
+        for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
+          if (max < _max_renumbering_recursion)
+          {
+            if (attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max))
+              break;
+          }
+          else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max))
+            mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+      }
+
       for (auto grain_it2 = _unique_grains.begin(); grain_it2 != _unique_grains.end(); ++grain_it2)
       {
         // Don't compare a grain with itself and don't try to remap inactive grains
@@ -510,7 +580,7 @@ GrainTracker::remapGrains()
                 break;
             }
             else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) && !attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
-              mooseError(COLOR_RED << "Unable to find any suitable grains for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+              mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
 
           grains_remapped = true;
         }
@@ -549,7 +619,8 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
    */
   for (auto & grain_pair : _unique_grains)
   {
-    if (grain_pair.second._status == Status::INACTIVE || grain_pair.second._var_idx == grain._var_idx)
+    if (grain_pair.second._status == Status::INACTIVE || grain_pair.second._var_idx == grain._var_idx ||
+        (grain_pair.second._var_idx >= _reserve_op_idx))
       continue;
 
     unsigned int target_var_index = grain_pair.second._var_idx;
@@ -990,3 +1061,5 @@ GrainDistance::operator<(const GrainDistance & rhs) const
 {
   return _distance < rhs._distance;
 }
+
+std::vector<unsigned int> GrainTracker::_empty_2;

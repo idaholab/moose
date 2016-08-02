@@ -51,8 +51,8 @@ public:
   TimeIntegrator(const InputParameters & parameters);
   virtual ~TimeIntegrator();
 
-  virtual void preSolve() { }
-  virtual void preStep() { }
+  virtual void preSolve() {}
+  virtual void preStep() {}
   virtual void solve();
 
   /**
@@ -72,7 +72,7 @@ public:
    * postSolve() callback -- there it is used to move the residual
    * from the "old" timestep forward in time to avoid recomputing it.
    */
-  virtual void postSolve() { }
+  virtual void postSolve() {}
 
   virtual int order() = 0;
   virtual void computeTimeDerivatives() = 0;
