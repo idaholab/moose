@@ -497,7 +497,7 @@ SolidModel::applyThermalStrain()
     Real d_thermal_strain_d_temp;
 
     Real old_temp;
-    if (_t_step == 1 && _has_stress_free_temp)
+    if (_t_step == 1 && _has_stress_free_temp && !_app.isRestarting())
       old_temp = _stress_free_temp;
     else
       old_temp = _temperature_old[_qp];
@@ -744,7 +744,7 @@ SolidModel::computeConstitutiveModelStress()
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
 
-  if (_t_step == 0) return;
+  if (_t_step == 0 && !_app.isRestarting()) return;
 
   const SubdomainID current_block = _current_elem->subdomain_id();
   MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];
