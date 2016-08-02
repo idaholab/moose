@@ -39,7 +39,7 @@ MortarPeriodicAction::act()
     mooseError("Please use a MortarPeriodicMesh in your simulation.");
 
   // mesh dimension
-  const unsigned int dim = mesh->dimension();
+  const unsigned short dim = mesh->dimension();
 
   // periodicity subblock name
   std::string periodicity_name = name();
@@ -56,7 +56,7 @@ MortarPeriodicAction::act()
   const std::vector<SubdomainID> & mortar_subdomains = mesh->getMortarSubdomains();
 
   // iterate over the periodic directions
-  for (unsigned int i = 0; i < dim; ++i)
+  for (unsigned short i = 0; i < dim; ++i)
     if (mesh->getPeriodicDirections().contains(i))
     {
       // initialize subdomain restriction set
@@ -79,7 +79,7 @@ MortarPeriodicAction::act()
           switch (_periodicity)
           {
             case 0: // gradient
-              for (unsigned int j = 0; j < dim; ++j)
+              for (unsigned short j = 0; j < dim; ++j)
                 _problem->addVariable(lm_base + "_" + var + "_d" + axis[j],
                                       FEType(Utility::string_to_enum<Order>("FIRST"),
                                              Utility::string_to_enum<FEFamily>("LAGRANGE")),
@@ -122,7 +122,7 @@ MortarPeriodicAction::act()
           switch (_periodicity)
           {
             case 0: // gradient
-              for (unsigned int j = 0; j < dim; ++j)
+              for (unsigned short j = 0; j < dim; ++j)
               {
                 InputParameters params = _factory.getValidParams("EqualGradientConstraint");
                 params.set<NonlinearVariableName>("variable") = lm_base + "_" + var + "_d" + axis[j];
