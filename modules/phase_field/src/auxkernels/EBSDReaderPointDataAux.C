@@ -24,12 +24,18 @@ EBSDReaderPointDataAux::EBSDReaderPointDataAux(const InputParameters & parameter
 {
 }
 
-Real
-EBSDReaderPointDataAux::computeValue()
+void
+EBSDReaderPointDataAux::precalculateValue()
 {
   // EBSD data is defined at element centroids, so this only makes
   // sense as an Element AuxKernel
   Point p = _current_elem->centroid();
 
-  return (*_val)(_ebsd_reader.getData(p));
+  _value = (*_val)(_ebsd_reader.getData(p));
+}
+
+Real
+EBSDReaderPointDataAux::computeValue()
+{
+  return _value;
 }

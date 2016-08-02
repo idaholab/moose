@@ -29,6 +29,8 @@ public:
 
 protected:
   virtual Real computeValue();
+  virtual void precalculateValue();
+
   const EBSDReader & _ebsd_reader;
   const GrainTrackerInterface & _grain_tracker;
 
@@ -40,6 +42,9 @@ protected:
 
   /// Value to return for points without active grains
   const Real _invalid;
+
+  /// precalculated element value
+  Real _value;
 };
 
 #endif //EBSDREADERAVGDATAAUX_H

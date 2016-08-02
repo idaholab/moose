@@ -162,6 +162,8 @@ AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 void
 AuxKernel::compute()
 {
+  precalculateValue();
+
   if (isNodal())           /* nodal variables */
   {
     if (_var.isNodalDefined())

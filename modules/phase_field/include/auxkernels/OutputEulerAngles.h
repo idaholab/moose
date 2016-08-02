@@ -29,6 +29,7 @@ public:
 
 protected:
   virtual Real computeValue();
+  virtual void precalculateValue();
 
   /// Object providing the Euler angles
   const EulerAngleProvider & _euler;
@@ -38,6 +39,9 @@ protected:
 
   /// Number of grains
   MooseEnum _output_euler_angle;
+
+  /// precalculated element value
+  Real _value;
 };
 
 #endif //OUTPUTEULERANGLES_H

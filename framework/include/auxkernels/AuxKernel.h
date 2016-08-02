@@ -123,6 +123,9 @@ protected:
 
   virtual Real computeValue() = 0;
 
+  /// This callback is used for AuxKernels that need to perform a per-element calculation
+  virtual void precalculateValue() {}
+
   /// Subproblem this kernel is part of
   SubProblem & _subproblem;
   /// System this kernel is part of

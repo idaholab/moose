@@ -47,8 +47,8 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
   }
 }
 
-Real
-FeatureFloodCountAux::computeValue()
+void
+FeatureFloodCountAux::precalculateValue()
 {
   switch (_field_display)
   {
@@ -57,13 +57,19 @@ FeatureFloodCountAux::computeValue()
   case 2:  // GHOSTED_ENTITIES
   case 3:  // HALOS
   case 4:  // CENTROID
-    return _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _field_type, _var_idx);
+    _value = _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _field_type, _var_idx);
+    break;
   case 5:  // ACTIVE_BOUNDS
-    return _flood_counter.getElementalValues(_current_elem->id()).size();
+    _value = _flood_counter.getElementalValues(_current_elem->id()).size();
+    break;
 
   default:
     mooseError("Unimplemented \"field_display\" type");
   }
+}
 
-  return 0;
+Real
+FeatureFloodCountAux::computeValue()
+{
+  return _value;
 }
