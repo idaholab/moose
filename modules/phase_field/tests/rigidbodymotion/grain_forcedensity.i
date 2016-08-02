@@ -1,8 +1,8 @@
 # test file for showing reaction forces between particles
-#[GlobalParams]
-#  var_name_base = eta
-#  op_num = 2
-#[]
+[GlobalParams]
+  var_name_base = eta
+  op_num = 2
+[]
 
 [Mesh]
   type = GeneratedMesh
@@ -57,7 +57,7 @@
     c = c
     v = 'eta0 eta1'
     grain_force = grain_force
-    grain_data = grain_center
+    grain_tracker_object = grain_center
   [../]
   [./eta0_dot]
     type = TimeDerivative
@@ -69,7 +69,7 @@
     c = c
     v = 'eta0 eta1'
     grain_force = grain_force
-    grain_data = grain_center
+    grain_tracker_object = grain_center
     op_index = 0
   [../]
   [./acint_eta0]
@@ -97,7 +97,7 @@
     v = 'eta0 eta1'
     op_index = 1
     grain_force = grain_force
-    grain_data = grain_center
+    grain_tracker_object = grain_center
   [../]
   [./acint_eta1]
     type = ACInterface
@@ -127,7 +127,6 @@
     args = 'c eta0 eta1'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
-    #function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+eta0*(1-eta0)*c+eta1*(1-eta1)*c
     derivative_order = 2
   [../]
@@ -136,21 +135,9 @@
     c = c
     etas ='eta0 eta1'
   [../]
-  #[./advection_vel]
-  #  type = GrainAdvectionVelocity
-  #  block = 0
-  #  grain_force = grain_force
-  #  etas = 'eta0 eta1'
-  #  c = c
-  #  grain_data = grain_center
-  #[../]
 []
 
 [AuxVariables]
-  #[./eta0]
-  #[../]
-  #[./eta1]
-  #[../]
   [./bnds]
   [../]
   [./df00]
@@ -169,30 +156,18 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  #[./vadv00]
-  #  order = CONSTANT
-  #  family = MONOMIAL
-  #[../]
-  #[./vadv01]
-  #  order = CONSTANT
-  #  family = MONOMIAL
-  #[../]
-  #[./vadv10]
-  #  order = CONSTANT
-  #  family = MONOMIAL
-  #[../]
-  #[./vadv11]
-  #  order = CONSTANT
-  #  family = MONOMIAL
-  #[../]
-  #[./vadv0_div]
-  #  order = CONSTANT
-  #  family = MONOMIAL
-  #[../]
-  #[./vadv1_div]
-  #  order = CONSTANT
-  #  family = MONOMIAL
-  #[../]
+  [./unique_grains]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./var_indices]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
@@ -231,46 +206,32 @@
     component = 0
     property = force_density
   [../]
-  #[./vadv00]
-  #  type = MaterialStdVectorRealGradientAux
-  #  variable = vadv00
-  #  property = advection_velocity
-  #[../]
-  #[./vadv01]
-  #  type = MaterialStdVectorRealGradientAux
-  #  variable = vadv01
-  #  property = advection_velocity
-  #  component = 1
-  #[../]
-  #[./vadv10]
-  #  type = MaterialStdVectorRealGradientAux
-  #  variable = vadv10
-  #  index = 1
-  #  property = advection_velocity
-  #[../]
-  #[./vadv11]
-  #  type = MaterialStdVectorRealGradientAux
-  #  variable = vadv11
-  #  property = advection_velocity
-  #  index = 1
-  #  component = 1
-  #[../]
-  #[./vadv0_div]
-  #  type = MaterialStdVectorAux
-  #  variable = vadv0_div
-  #  property = advection_velocity_divergence
-  #[../]
-  #[./vadv1_div]
-  #  type = MaterialStdVectorAux
-  #  variable = vadv1_div
-  #  property = advection_velocity_divergence
-  #  index = 1
-  #[../]
+  [./unique_grains]
+    type = FeatureFloodCountAux
+    variable = unique_grains
+    flood_counter = grain_center
+    field_display = UNIQUE_REGION
+    execute_on = timestep_begin
+  [../]
+  [./var_indices]
+    type = FeatureFloodCountAux
+    variable = var_indices
+    flood_counter = grain_center
+    field_display = VARIABLE_COLORING
+    execute_on = timestep_begin
+  [../]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    execute_on = timestep_begin
+    field_display = CENTROID
+    flood_counter = grain_center
+  [../]
 []
 
 [ICs]
   [./ic_eta0]
-    int_width = 6.0
+    int_width = 1.0
     x1 = 20.0
     y1 = 0.0
     radius = 14.0
@@ -280,7 +241,7 @@
     type = SmoothCircleIC
   [../]
   [./IC_eta1]
-    int_width = 6.0
+    int_width = 1.0
     x1 = 30.0
     y1 = 25.0
     radius = 14.0
@@ -293,7 +254,7 @@
     type = SpecifiedSmoothCircleIC
     invalue = 1.0
     outvalue = 0.1
-    int_width = 0.6
+    int_width = 1.0
     x_positions = '20.0 30.0 '
     z_positions = '0.0 0.0 '
     y_positions = '0.0 25.0 '
@@ -305,10 +266,6 @@
 []
 
 [VectorPostprocessors]
-  [./centers]
-    type = GrainCentersPostprocessor
-    grain_data = grain_center
-  [../]
   [./forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
@@ -317,8 +274,10 @@
 
 [UserObjects]
   [./grain_center]
-    type = ComputeGrainCenterUserObject
-    etas = 'eta0 eta1'
+    type = GrainTracker
+    outputs = none
+    compute_op_maps = true
+    calculate_feature_volumes = true
     execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
@@ -328,7 +287,6 @@
     force_density = force_density
     c = c
     etas = 'eta0 eta1'
-    f_name = F
   [../]
 []
 
@@ -336,8 +294,6 @@
   [./SMP]
     type = SMP
     full = true
-    #off_diag_row = '   c w eta0 eta1 w    w    eta0 eta1 eta1 eta0 c    c'
-    #off_diag_column = 'w c c    c    eta0 eta1  eta1 eta0 eta0 eta1 eta0 eta1'
   [../]
 []
 
@@ -345,21 +301,17 @@
   type = Transient
   scheme = bdf2
   solve_type = NEWTON
-  #petsc_options = '-snes_test_display'
-  #petsc_options_iname = '-snes_type'
-  #petsc_options_value = 'test'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
-  num_steps = 10
-  dt = 1
+  num_steps = 1
+  dt = 0.1
 []
 
 [Outputs]
   exodus = true
   csv = true
-  print_perf_log = true
 []
