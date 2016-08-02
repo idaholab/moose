@@ -1,13 +1,8 @@
-# REQUIREMENTS:
-# pip install markdown-include python-markdown-math mkdocs-bootstrap mkdocs-bootswatch click Jinja2 livereload
-
 site_name: MOOSE
 
 docs_dir: .
 
 site_dir: ../site
-
-theme: flatly # pip install mkdocs-bootswatch
 
 extra_javascript:
     - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML

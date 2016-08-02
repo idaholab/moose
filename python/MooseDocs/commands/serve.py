@@ -86,7 +86,6 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     """
 
     # Location of serve site
-    import tempfile
     tempdir = os.path.abspath('.moosedocs')
 
     # Clean the "temp" directory (if desired)

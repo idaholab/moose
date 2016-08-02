@@ -60,7 +60,7 @@ class Database(object):
     def findall(self, key):
         output = []
         for k, v in self._database.iteritems():
-            if k.endswith(key):
+            if key in k:
                 output.append(v)
         return output
 

@@ -1,15 +1,13 @@
-<!-- content/doc_generation/MooseFlavoredMarkdown.md -->
-
 # Moose Flavored Markdown
 
 ## Automatic Links
 
-Moose Flavored Markdown is capable of automtically creating links based on Markdown filenames, which is
-especially useful when linking to generated pages.
+Moose Flavored Markdown is capable of automatically creating links based on Markdown filenames, which is
+especially useful when linking to generated pages. The syntax is as follows:
 
-* `[auto::/Kernels/Diffusion.md]`: [auto::/Kernels/Diffusion.md]
-* `[auto::framework/Kernels/Overview.md]`: [auto::framework/Kernels/Overview.md]
-* `[auto::Testing](/Kernels/Diffusion.md)`: [Testing](auto::/Kernels/Diffusion.md)
+* `[auto::/Kernels/Diffusion]`: [auto::/Kernels/Diffusion]
+* `[auto::framework/Kernels/Overview]`: [auto::/Kernels/Overview]
+* `[Diffusion](auto::/Kernels/Diffusion)`: [Diffusion](auto::/Kernels/Diffusion)
 
 ## Including MOOSE Source Files
 It is possible to include complete or partial C++ or input files from the local MOOSE repository. The following sections detail the custom
@@ -40,7 +38,7 @@ the file. If multiple matches occur only the first match will be shown. For exam
 ### Range Line match
 Code starting and ending on lines containing a string is also possible by using the 'start' and 'end'
 options. If 'start' is omitted then the snippet will start at the beginning of the file. Similarly, if 'end'
-is omiited the snippet will include the remainder of the file content.
+is omitted the snippet will include the remainder of the file content.
 
 ```markdown
 ![](test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner)
@@ -56,9 +54,7 @@ the following limits the included code to the `computeQpResidual` method.
 ![Diffusion.C::computeQpResidual](framework/src/kernels/Diffusion.C::computeQpResidual)
 ```
 
-<!--
 ![Diffusion.C::computeQpResidual](framework/src/kernels/Diffusion.C::computeQpResidual)
--->
 
 !!! warning "Warning"
     This method uses the clang parser directly, which can be slow. Thus, in general source code should be
@@ -86,7 +82,7 @@ The following options may be passed to control how the output is formatted.
 | repo_link            | True    | Include a link to the source code on GitHub ("label" must be True). |
 | label                | True    | Include a label with the filename before the code content block. |
 | overflow-y           | Scroll  | The action to take when the text overflow the html container (see [overflow-y](http://www.w3schools.com/cssref/css3_pr_overflow-y.asp)). |
-| max-hieght           | 500px   | The maximum height of the code window (see [max-height](http://www.w3schools.com/cssref/pr_dim_max-height.asp)). |
+| max-height           | 500px   | The maximum height of the code window (see [max-height](http://www.w3schools.com/cssref/pr_dim_max-height.asp)). |
 | strip-extra-newlines | False   | Remove excessive newlines from the included code. |
 
 ## Slideshows
