@@ -35,8 +35,8 @@ EulerAngleProvider2RGBAux::EulerAngleProvider2RGBAux(const InputParameters & par
 {
 }
 
-Real
-EulerAngleProvider2RGBAux::computeValue()
+void
+EulerAngleProvider2RGBAux::precalculateValue()
 {
   // ID of unique grain at current point
   const unsigned int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
@@ -49,15 +49,21 @@ EulerAngleProvider2RGBAux::computeValue()
 
   // Create correct scalar output
   if (_output_type < 3)
-    return RGB(_output_type);
+    _value = RGB(_output_type);
   else if (_output_type == 3)
   {
       Real RGBint = 0.0;
       for (unsigned int i = 0; i < 3; ++i)
         RGBint = 256 * RGBint + (RGB(i) >= 1 ? 255 : std::floor(RGB(i) * 256.0));
 
-      return RGBint;
+      _value = RGBint;
   }
   else
     mooseError("Incorrect value for output_type in Euler2RGBAux");
+}
+
+Real
+EulerAngleProvider2RGBAux::computeValue()
+{
+  return _value;
 }

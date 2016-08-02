@@ -43,7 +43,7 @@ protected:
   /// This is the virtual that derived classes should override for computing an off-diagonal Jacobian component.
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// This callback is used for Kernels that need to perturb residual calculations
+  /// This callback is used for Kernels that need to perform a per-element calculation
   virtual void precalculateResidual();
 
   /// Holds the solution at current quadrature points

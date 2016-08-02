@@ -28,8 +28,8 @@ OutputEulerAngles::OutputEulerAngles(const InputParameters & parameters) :
 {
 }
 
-Real
-OutputEulerAngles::computeValue()
+void
+OutputEulerAngles::precalculateValue()
 {
   // ID of unique grain at current point
   const unsigned int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
@@ -39,5 +39,11 @@ OutputEulerAngles::computeValue()
   const RealVectorValue angles = _euler.getEulerAngles(grain_id);
 
   // Return specific euler angle
-  return angles(_output_euler_angle);
+  _value = angles(_output_euler_angle);
+}
+
+Real
+OutputEulerAngles::computeValue()
+{
+  return _value;
 }

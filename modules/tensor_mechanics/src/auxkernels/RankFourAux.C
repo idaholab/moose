@@ -37,4 +37,3 @@ RankFourAux::computeValue()
 {
   return _tensor[_qp](_i, _j, _k, _l);
 }
-
