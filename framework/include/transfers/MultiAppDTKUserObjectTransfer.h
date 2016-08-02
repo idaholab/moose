@@ -27,6 +27,9 @@
 // libMesh includes
 #include "libmesh/dtk_adapter.h"
 
+// Ignore warnings coming from DTK/Trilinos headers
+#include "libmesh/ignore_warnings.h"
+
 // DTK includes
 #include <DTK_VolumeSourceMap.hpp>
 #include <DTK_MeshManager.hpp>
@@ -48,6 +51,9 @@
 #include <Teuchos_DefaultComm.hpp>
 #include <Teuchos_GlobalMPISession.hpp>
 #include <Teuchos_Ptr.hpp>
+
+// Restore the warnings.
+#include "libmesh/restore_warnings.h"
 
 // Forward declarations
 class MultiAppDTKUserObjectTransfer;

@@ -95,7 +95,13 @@ def findExecutable(executable_option, method_option):
 def analyze(dofdata, Mfd, Mhc, Mdiff) :
   global options
 
+  if options.only is None :
+    only = None
+  else :
+    only = options.only.split(' ')
+
   diagonal_only = options.diagonal_only
+
   dofs = dofdata['ndof']
   nlvars = [var['name'] for var in dofdata['vars']]
   numvars = len(nlvars)
@@ -143,6 +149,8 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
 
     for j in range(nblocks) :
 
+      if only is not None and ('%s,%s' % (nlvars[i], nlvars[j])) not in only :
+        continue
       if i != j and diagonal_only :
         continue
 
@@ -273,6 +281,7 @@ if __name__ == '__main__':
   parser.add_option("-r", "--resize-mesh", dest="resize_mesh", action="store_true", help="Perform resizing of generated meshs (to speed up the testing).")
   parser.add_option("-s", "--mesh-size", dest="mesh_size", default=1, type="int", help="Set the mesh dimensions to this number of elements along each dimension (defaults to 1, requires -r option).")
 
+  parser.add_option("-o", "--only", dest="only", help="Test specified Jacobians only (space separated list of comma separated variable pairs).")
   parser.add_option("-D", "--on-diagonal-only", dest="diagonal_only", action="store_true", help="Test on-diagonal Jacobians only.")
 
   parser.add_option("-d", "--debug", dest="debug", action="store_true", help="Output the command line used to run the application.")

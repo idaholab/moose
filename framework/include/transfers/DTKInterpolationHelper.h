@@ -23,7 +23,9 @@
 #include "DTKInterpolationAdapter.h"
 
 // DTK includes
+#include "libmesh/ignore_warnings.h"
 #include <DTK_SharedDomainMap.hpp>
+#include "libmesh/restore_warnings.h"
 
 namespace libMesh
 {
