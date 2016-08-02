@@ -182,14 +182,20 @@ ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
       const std::vector<MooseSharedPointer<InterfaceKernel> > & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
       {
+        if (!interface_kernel->isImplicit())
+          continue;
+
         unsigned int ivar = it.first->number();
-        if (interface_kernel->variable().number() == ivar && interface_kernel->isImplicit())
-        {
-          unsigned int jvar = it.second->number();
-          interface_kernel->subProblem().prepareFaceShapes(jvar, _tid);
-          interface_kernel->subProblem().prepareNeighborShapes(jvar, _tid);
-          interface_kernel->computeOffDiagJacobian(jvar);
-        }
+        unsigned int jvar = it.second->number();
+
+        interface_kernel->subProblem().prepareFaceShapes(jvar, _tid);
+        interface_kernel->subProblem().prepareNeighborShapes(jvar, _tid);
+
+        if (interface_kernel->variable().number() == ivar)
+          interface_kernel->computeElementOffDiagJacobian(jvar);
+
+        if (interface_kernel->neighborVariable().number() == ivar)
+          interface_kernel->computeNeighborOffDiagJacobian(jvar);
       }
     }
   }

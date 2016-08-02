@@ -104,8 +104,8 @@ ComputeJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
     if (intk->isImplicit())
     {
       intk->subProblem().prepareFaceShapes(intk->variable().number(), _tid);
-      intk->subProblem().prepareNeighborShapes(intk->variable().number(), _tid);
-      intk->computeJacobian(intk->variable().number());
+      intk->subProblem().prepareNeighborShapes(intk->neighborVariable().number(), _tid);
+      intk->computeJacobian();
     }
 }
 

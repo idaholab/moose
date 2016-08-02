@@ -193,13 +193,11 @@
   [./mass_ph0]
     type = PorousFlowFluidMass
     fluid_component = 0
-    variable = ppwater
     execute_on = 'initial timestep_end'
   [../]
   [./mass_ph1]
     type = PorousFlowFluidMass
     fluid_component = 1
-    variable = ppgas
     execute_on = 'initial timestep_end'
   [../]
 

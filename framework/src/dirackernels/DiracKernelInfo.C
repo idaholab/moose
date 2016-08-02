@@ -126,15 +126,25 @@ DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
   if (_point_locator->initialized() == false)
     mooseError("Error, PointLocator is not initialized!");
 
-  const Elem * elem = (*_point_locator)(p);
-
   // Note: The PointLocator object returns NULL when the Point is not
   // found within the Mesh.  This is not considered to be an error as
   // far as the DiracKernels are concerned: sometimes the Mesh moves
   // out from the Dirac point entirely and in that case the Point just
   // gets "deactivated".
+  const Elem * elem = (*_point_locator)(p);
 
-  return elem;
+  // The processors may not agree on which Elem the point is in.  This
+  // can happen if a Dirac point lies on the processor boundary, and
+  // two or more neighboring processors think the point is in the Elem
+  // on *their* side.
+  dof_id_type elem_id = elem ? elem->id() : DofObject::invalid_id;
+
+  // We are going to let the element with the smallest ID "win", all other
+  // procs will return NULL.
+  dof_id_type min_elem_id = elem_id;
+  mesh.comm().min(min_elem_id);
+
+  return min_elem_id == elem_id ? elem : NULL;
 }
 
 bool

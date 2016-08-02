@@ -182,17 +182,14 @@
   [./total_mass_comp0]
     type = PorousFlowFluidMass
     fluid_component = 0
-    variable = pwater  # the variable is irrelevant here
   [../]
   [./total_mass_comp1]
     type = PorousFlowFluidMass
     fluid_component = 1
-    variable = pwater
   [../]
   [./total_mass_comp2]
     type = PorousFlowFluidMass
     fluid_component = 2
-    variable = pwater
   [../]
   [./frac_ph1_c1_00]
     type = PointValue

@@ -122,7 +122,7 @@ ComputeFiniteStrain::computeQpStrain()
 
     if (_no_thermal_eigenstrains) //Deprecated; use ComputeThermalExpansionEigenStrains instead
     {
-      if (_t_step == 1) // total strain form always uses the ref temp
+      if (_t_step == 1 && !_app.isRestarting()) // total strain form always uses the ref temp
         _strain_increment[_qp].addIa(-_thermal_expansion_coeff * (_T[_qp] - _T0));
 
       else

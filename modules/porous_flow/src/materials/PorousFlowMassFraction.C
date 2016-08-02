@@ -90,7 +90,7 @@ PorousFlowMassFraction::computeQpProperties()
   build_mass_frac(_qp);
 
   if (_yaqi_hacky)
-    if (_t_step == 1)
+    if (_t_step == 1 && !_app.isRestarting())
       for (unsigned int ph = 0; ph < _num_phases; ++ph)
         for (unsigned int comp = 0; comp < _num_components; ++comp)
           _mass_frac_old[_qp][ph][comp] = _mass_frac[_qp][ph][comp];

@@ -87,7 +87,8 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
   // stress = stressOld + stressIncrement
   // creep_strain = creep_strainOld + creep_strainIncrement
 
-  if (_t_step == 0) return;
+  if (_t_step == 0 && !_app.isRestarting())
+    return;
 
   if (_output_iteration_info == true)
   {

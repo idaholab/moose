@@ -51,7 +51,7 @@ void
 ComputeReturnMappingStress::computeQpStress()
 {
   // Nothing to update during the first time step, return immediately
-  if (_t_step == 0)
+  if (_t_step == 0 && !_app.isRestarting())
     return;
 
   RankTwoTensor strain_increment(_strain_increment[_qp]);
@@ -68,7 +68,7 @@ void
 ComputeReturnMappingStress::computeStress(RankTwoTensor & strain_increment,
                                           RankTwoTensor & stress_new)
 {
-  if (_t_step == 0)
+  if (_t_step == 0 && !_app.isRestarting())
     return;
 
   if (_output_iteration_info == true)
