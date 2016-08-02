@@ -38,7 +38,7 @@ ValueRangeMarker::ValueRangeMarker(const InputParameters & parameters) :
     _upper_bound(parameters.get<Real>("upper_bound")),
     _buffer_size(parameters.get<Real>("buffer_size")),
 
-    _third_state((MarkerValue)(int)getParam<MooseEnum>("third_state")),
+    _third_state(getParam<MooseEnum>("third_state").getEnum<MarkerValue>()),
     _inside(getParam<bool>("invert") ? COARSEN : REFINE),
     _outside(getParam<bool>("invert") ? REFINE : COARSEN),
 
@@ -65,4 +65,3 @@ ValueRangeMarker::computeQpMarker()
   // Must be outside the range
   return _outside;
 }
-

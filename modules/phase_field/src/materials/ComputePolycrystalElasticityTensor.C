@@ -29,7 +29,7 @@ InputParameters validParams<ComputePolycrystalElasticityTensor>()
 
 ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const InputParameters & parameters) :
     ComputeElasticityTensorBase(parameters),
-    _C_unrotated(getParam<std::vector<Real> >("Elastic_constants"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")), // TODO: rename to lower case "elastic_constants"
+    _C_unrotated(getParam<std::vector<Real> >("Elastic_constants"), getParam<MooseEnum>("fill_method").getEnum<RankFourTensor::FillMethod>()), // TODO: rename to lower case "elastic_constants"
     _length_scale(getParam<Real>("length_scale")),
     _pressure_scale(getParam<Real>("pressure_scale")),
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),

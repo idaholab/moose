@@ -39,7 +39,7 @@ ValueThresholdMarker::ValueThresholdMarker(const InputParameters & parameters) :
     _refine(parameters.get<Real>("refine")),
 
     _invert(parameters.get<bool>("invert")),
-    _third_state((MarkerValue)(int)getParam<MooseEnum>("third_state")),
+    _third_state(getParam<MooseEnum>("third_state").getEnum<MarkerValue>()),
 
     _u(coupledValue("variable"))
 {
@@ -73,4 +73,3 @@ ValueThresholdMarker::computeQpMarker()
 
   return _third_state;
 }
-
