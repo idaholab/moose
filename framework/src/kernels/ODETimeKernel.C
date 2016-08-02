@@ -12,32 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ODETimeDerivative.h"
+#include "ODETimeKernel.h"
+#include "SystemBase.h"
+#include "Assembly.h"
 
 template<>
-InputParameters validParams<ODETimeDerivative>()
+InputParameters validParams<ODETimeKernel>()
 {
-  InputParameters params = validParams<ODETimeKernel>();
+  InputParameters params = validParams<ODEKernel>();
   return params;
 }
 
-ODETimeDerivative::ODETimeDerivative(const InputParameters & parameters) :
-    ODETimeKernel(parameters)
+ODETimeKernel::ODETimeKernel(const InputParameters & parameters) :
+    ODEKernel(parameters)
 {
 }
 
-Real
-ODETimeDerivative::computeQpResidual()
+void
+ODETimeKernel::computeResidual()
 {
-  return _u_dot[_i];
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number(), Moose::KT_TIME);
+  for (_i = 0; _i < _var.order(); _i++)
+    re(_i) += computeQpResidual();
 }
-
-Real
-ODETimeDerivative::computeQpJacobian()
-{
-  if (_i == _j)
-    return _du_dot_du[_i];
-  else
-    return 0;
-}
-

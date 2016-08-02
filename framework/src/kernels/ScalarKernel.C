@@ -24,6 +24,7 @@ template<>
 InputParameters validParams<ScalarKernel>()
 {
   InputParameters params = validParams<MooseObject>();
+  params += validParams<TransientInterface>();
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this kernel operates on");
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
@@ -53,9 +54,7 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters) :
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-//    _dim(_mesh.dimension()),
-
-    _u(_var.sln()),
+    _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _u_old(_var.slnOld()),
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())

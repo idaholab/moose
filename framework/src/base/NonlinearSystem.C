@@ -62,6 +62,7 @@
 #include "Predictor.h"
 #include "Assembly.h"
 #include "ElementPairLocator.h"
+#include "ODETimeKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -1253,6 +1254,12 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
       const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getActiveObjects();
       for (const auto & scalar_kernel : scalars)
       {
+        // Don't compute the residual if this is an ODETimeKernel and
+        // we've been asked for KT_NONTIME residuals.
+        ODETimeKernel * ode_time = dynamic_cast<ODETimeKernel *>(scalar_kernel.get());
+        if (type == Moose::KT_NONTIME && ode_time)
+          continue;
+
         scalar_kernel->reinit();
         scalar_kernel->computeResidual();
       }
