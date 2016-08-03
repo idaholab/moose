@@ -4,28 +4,49 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef TENSORMECHANICSPLASTICJ2_H
-#define TENSORMECHANICSPLASTICJ2_H
+#ifndef TENSORMECHANICSPLASTICMEANCAPTC_H
+#define TENSORMECHANICSPLASTICMEANCAPTC_H
 
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticJ2;
+
+class TensorMechanicsPlasticMeanCapTC;
+
 
 template<>
-InputParameters validParams<TensorMechanicsPlasticJ2>();
+InputParameters validParams<TensorMechanicsPlasticMeanCapTC>();
 
 /**
- * J2 plasticity, associative, with hardning.
- * Yield_function = sqrt(3*J2) - yield_strength
+ * Rate-independent associative mean-cap tensile AND compressive failure
+ * with hardening/softening of the tensile and compressive strength.
+ * The key point here is that the internal parameter is equal to the
+ * volumetric plastic strain.  This means that upon tensile failure, the
+ * compressive strength can soften (using a TensorMechanicsHardening object)
+ * which physically means that a subsequent compressive stress can
+ * easily squash the material
  */
-class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
+class TensorMechanicsPlasticMeanCapTC : public TensorMechanicsPlasticModel
 {
  public:
-  TensorMechanicsPlasticJ2(const InputParameters & parameters);
+  TensorMechanicsPlasticMeanCapTC(const InputParameters & parameters);
 
-  /// returns the model name (J2)
-  virtual std::string modelName() const;
+  /**
+   * The active yield surfaces, given a vector of yield functions.
+   * This is used by FiniteStrainMultiPlasticity to determine the initial
+   * set of active constraints at the trial (stress, intnl) configuration.
+   * It is up to you (the coder) to determine how accurate you want the
+   * returned_stress to be.  Currently it is only used by FiniteStrainMultiPlasticity
+   * to estimate a good starting value for the Newton-Rahson procedure,
+   * so currently it may not need to be super perfect.
+   * @param f values of the yield functions
+   * @param stress stress tensor
+   * @param intnl internal parameter
+   * @param Eijkl elasticity tensor (stress = Eijkl*strain)
+   * @param[out] act act[i] = true if the i_th yield function is active
+   * @param[out] returned_stress Approximate value of the returned stress
+   */
+  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
 
   /// Returns _use_custom_returnMap
   virtual bool useCustomReturnMap() const;
@@ -107,9 +128,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
                          bool & trial_stress_inadmissible) const;
 
   /**
-    * Calculates a custom consistent tangent operator.
-    * You may choose to over-ride this in your
-    * derived TensorMechanicsPlasticXXXX class.
+    * Calculates the custom consistent tangent operator.
     *
     * @param stress_old trial stress before returning
     * @param intnl_old internal parameter before returning
@@ -122,7 +141,24 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
   virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
                                                    const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
 
+  /// Returns the model name (MeanCapTC)
+  virtual std::string modelName() const;
+
  protected:
+  /// max iters for custom return map loop
+  const unsigned _max_iters;
+
+  /// Whether to use the custom return-map algorithm
+  const bool _use_custom_returnMap;
+
+  /// Whether to use the custom consistent tangent operator algorithm
+  const bool _use_custom_cto;
+
+  /// the tensile strength
+  const TensorMechanicsHardeningModel & _strength;
+
+  /// the compressive strength
+  const TensorMechanicsHardeningModel & _c_strength;
 
   /**
    * The yield function
@@ -130,7 +166,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return the yield function
    */
-  virtual Real yieldFunction(const RankTwoTensor & stress, Real intnl) const;
+  Real yieldFunction(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of yield function with respect to stress
@@ -138,7 +174,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return df_dstress(i, j) = dyieldFunction/dstress(i, j)
    */
-  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const;
+  RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of yield function with respect to the internal parameter
@@ -154,7 +190,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return the flow potential
    */
-  virtual RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const;
+  RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of the flow potential with respect to stress
@@ -162,7 +198,7 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return dr_dstress(i, j, k, l) = dr(i, j)/dstress(k, l)
    */
-  virtual RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const;
+  RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const;
 
   /**
    * The derivative of the flow potential with respect to the internal parameter
@@ -173,29 +209,50 @@ class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
   RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const;
 
   /**
-   * YieldStrength.  The yield function is sqrt(3*J2) - yieldStrength.
-   * In this class yieldStrength = 1, but this
-   * may be over-ridden by derived classes with nontrivial hardning
+   * The hardening potential.  Note that it is -1 for stress.trace() > _strength,
+   * and +1 for stress.trace() < _c_strength.  This implements the idea that
+   * tensile failure will cause a massive reduction in compressive strength
+   * @param stress the stress at which to calculate the hardening potential
+   * @param intnl internal parameter
+   * @return the hardening potential
    */
-  virtual Real yieldStrength(Real intnl) const;
+  Real hardPotential(const RankTwoTensor & stress, Real intnl) const;
 
-  /// d(yieldStrength)/d(intnl)
-  virtual Real dyieldStrength(Real intnl) const;
+  /**
+   * The derivative of the hardening potential with respect to stress
+   * @param stress the stress at which to calculate the hardening potentials
+   * @param intnl internal parameter
+   * @return dh_dstress(i, j) = dh/dstress(i, j)
+   */
+  virtual RankTwoTensor dhardPotential_dstress(const RankTwoTensor & stress, Real intnl) const;
 
- private:
+  /**
+   * The derivative of the hardening potential with respect to the internal parameter
+   * @param stress the stress at which to calculate the hardening potentials
+   * @param intnl internal parameter
+   * @return the derivative
+   */
+  virtual Real dhardPotential_dintnl(const RankTwoTensor & stress, Real intnl) const;
 
-  /// yield strength, from user input
-  const TensorMechanicsHardeningModel & _strength;
+  /**
+   * Derivative of the yield function with respect to stress.  This is also the flow potential.
+   * @param stress the stress at which to calculate the hardening potentials
+   * @param intnl internal parameter
+   * @return the derivative
+   */
+  RankTwoTensor df_dsig(const RankTwoTensor & stress, Real intnl) const;
 
-  /// max iters for custom return map loop
-  const unsigned _max_iters;
+  /// tensile strength as a function of residual value, rate, and internal_param
+  virtual Real tensile_strength(const Real internal_param) const;
 
-  /// Whether to use the custom return-map algorithm
-  const bool _use_custom_returnMap;
+  /// d(tensile strength)/d(internal_param) as a function of residual value, rate, and internal_param
+  virtual Real dtensile_strength(const Real internal_param) const;
 
-  /// Whether to use the custom consistent tangent operator calculation
-  const bool _use_custom_cto;
+  /// compressive strength as a function of residual value, rate, and internal_param
+  virtual Real compressive_strength(const Real internal_param) const;
 
+  /// d(compressive strength)/d(internal_param) as a function of residual value, rate, and internal_param
+  virtual Real dcompressive_strength(const Real internal_param) const;
 };
 
-#endif // TENSORMECHANICSPLASTICJ2_H
+#endif // TENSORMECHANICSPLASTICMEANCAPTC_H
