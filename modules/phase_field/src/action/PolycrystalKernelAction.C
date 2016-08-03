@@ -14,10 +14,11 @@ template<>
 InputParameters validParams<PolycrystalKernelAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");
+  params.addRequiredParam<unsigned int>("op_num", "specifies the total number of grains (deformed + recrystallized) to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
   params.addParam<Real>("en_ratio", 1.0, "Ratio of surface to GB energy");
+  params.addParam<unsigned int>("ndef", 0, "specifies the number of deformed grains to create");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<VariableName>("T", "Name of temperature variable");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
@@ -110,6 +111,8 @@ PolycrystalKernelAction::act()
 
       std::string kernel_name = "ACBubInteraction_" + var_name;
       _problem->addKernel("ACGBPoly", kernel_name, params);
+
     }
+
   }
 }
