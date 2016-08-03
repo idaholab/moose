@@ -151,11 +151,11 @@ TensorMechanicsPlasticJ2::returnMap(const RankTwoTensor & trial_stress, Real int
 }
 
 RankFourTensor
-TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
+TensorMechanicsPlasticJ2::consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
                                                     const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
 {
   if (!_use_custom_cto)
-    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, stress, intnl, E_ijkl, cumulative_pm);
+    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, intnl_old, stress, intnl, E_ijkl, cumulative_pm);
 
   Real mu = E_ijkl(0,1,0,1);
 

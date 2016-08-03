@@ -96,6 +96,7 @@
 #include "TensorMechanicsPlasticIsotropicSD.h"
 #include "TensorMechanicsPlasticOrthotropic.h"
 #include "TensorMechanicsPlasticMeanCap.h"
+#include "TensorMechanicsPlasticMeanCapTC.h"
 #include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
 #include "TensorMechanicsHardeningConstant.h"
 #include "TensorMechanicsHardeningGaussian.h"
@@ -261,6 +262,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticIsotropicSD);
   registerUserObject(TensorMechanicsPlasticOrthotropic);
   registerUserObject(TensorMechanicsPlasticMeanCap);
+  registerUserObject(TensorMechanicsPlasticMeanCapTC);
   registerUserObject(TensorMechanicsPlasticDruckerPragerHyperbolic);
   registerUserObject(TensorMechanicsHardeningConstant);
   registerUserObject(TensorMechanicsHardeningGaussian);

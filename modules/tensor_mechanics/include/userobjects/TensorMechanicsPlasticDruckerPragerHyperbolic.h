@@ -134,13 +134,14 @@ class TensorMechanicsPlasticDruckerPragerHyperbolic : public TensorMechanicsPlas
     * derived TensorMechanicsPlasticXXXX class.
     *
     * @param stress_old trial stress before returning
+    * @param intnl_old internal parameter before returning
     * @param stress current stress state
     * @param intnl internal parameter
     * @param E_ijkl elasticity tensor
     * @param cumulative_pm the cumulative plastic multipliers
     * @return the consistent tangent operator for J2 (radial return) case
     */
-  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
+  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
                                                    const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
 
  private:
