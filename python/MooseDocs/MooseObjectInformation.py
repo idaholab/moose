@@ -41,7 +41,7 @@ class MooseObjectInformation(MooseInformationBase):
         self._tables['Required'] = MooseObjectParameterTable()
         self._tables['Optional'] = MooseObjectParameterTable()
 
-        for param in yaml['parameters']:
+        for param in yaml['parameters'] or []:
             name = param['group_name']
             if not name and param['required']:
                 name = 'Required'
