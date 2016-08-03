@@ -38,7 +38,7 @@ public:
   ExampleAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   const VariableValue & _coupled_val;
 

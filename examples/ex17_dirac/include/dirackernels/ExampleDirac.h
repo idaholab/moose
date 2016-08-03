@@ -29,8 +29,8 @@ class ExampleDirac : public DiracKernel
 public:
   ExampleDirac(const InputParameters & parameters);
 
-  virtual void addPoints();
-  virtual Real computeQpResidual();
+  virtual void addPoints() override;
+  virtual Real computeQpResidual() override;
 
 protected:
   Real _value;
