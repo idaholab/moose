@@ -331,25 +331,6 @@ Transient::takeStep(Real input_dt)
     if (!lastSolveConverged())
       return;
 
-    if (_picard_max_its > 1)
-    {
-      _picard_timestep_end_norm = _problem.computeResidualL2Norm();
-
-      _console << "Picard Norm after TIMESTEP_END MultiApps: " << _picard_timestep_end_norm << '\n';
-
-      Real max_norm = std::max(_picard_timestep_begin_norm, _picard_timestep_end_norm);
-
-      Real max_relative_drop = max_norm / _picard_initial_norm;
-
-      if (max_norm < _picard_abs_tol || max_relative_drop < _picard_rel_tol)
-      {
-        _console << "Picard converged!" << std::endl;
-
-        _picard_converged = true;
-        return;
-      }
-    }
-
     ++_picard_it;
   }
 }
@@ -459,6 +440,26 @@ Transient::solveStep(Real input_dt)
 
   postSolve();
   _time_stepper->postSolve();
+
+  if (_picard_max_its > 1 && lastSolveConverged())
+  {
+    _picard_timestep_end_norm = _problem.computeResidualL2Norm();
+
+    _console << "Picard Norm after TIMESTEP_END MultiApps: " << _picard_timestep_end_norm << '\n';
+
+    Real max_norm = std::max(_picard_timestep_begin_norm, _picard_timestep_end_norm);
+
+    Real max_relative_drop = max_norm / _picard_initial_norm;
+
+    if (max_norm < _picard_abs_tol || max_relative_drop < _picard_rel_tol)
+    {
+      _console << "Picard converged!" << std::endl;
+
+      _picard_converged = true;
+      return;
+    }
+  }
+
   _dt = current_dt; // _dt might be smaller than this at this point for multistep methods
   _time = _time_old;
 }
