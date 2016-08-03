@@ -29,8 +29,7 @@ PolycrystalKernelAction::PolycrystalKernelAction(const InputParameters & params)
     Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
-    _implicit(getParam<bool>("implicit")),
-    _ndef(getParam<unsigned int>("ndef"))
+    _implicit(getParam<bool>("implicit"))
 {
 }
 
@@ -113,24 +112,6 @@ PolycrystalKernelAction::act()
       std::string kernel_name = "ACBubInteraction_" + var_name;
       _problem->addKernel("ACGBPoly", kernel_name, params);
 
-    }
-
-    //
-    // Set up ACSEDGPoly Stored Energy in Deformed Grains kernels
-    //
-
-    if (_ndef != 0)
-    {
-      InputParameters params = _factory.getValidParams("ACSEDGPoly");
-      params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<std::vector<VariableName> >("v") = v;
-      params.set<bool>("implicit") = _implicit;
-      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-      params.set<unsigned int>("ndef") = getParam<unsigned int>("ndef");
-      params.set<unsigned int>("op_index") = op;
-
-      std::string kernel_name = "ACStoredEnergy_" + var_name;
-      _problem->addKernel("ACSEDGPoly", kernel_name, params);
     }
 
   }

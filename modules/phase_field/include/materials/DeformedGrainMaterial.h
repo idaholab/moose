@@ -11,6 +11,7 @@
 
 //Forward Declarations
 class DeformedGrainMaterial;
+class GrainTrackerInterface;
 
 template<>
 InputParameters validParams<DeformedGrainMaterial>();
@@ -70,7 +71,10 @@ protected:
   unsigned int _ndef;
 
   /// total number of grains
-  unsigned int _ncrys;
+  unsigned int _op_num;
+
+  /// Grain tracker object
+  const GrainTrackerInterface & _grain_tracker;
   const Real _kb;
   const Real _JtoeV;
 };

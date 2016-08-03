@@ -11,11 +11,13 @@
 
 /**
  * This kernel adds the contribution of stored energy associated with dislocations to grain growth
- * This allows us to simulate recrystallization.
+ * This allows us to simulate recrystallization.This kernel depends grain_index instead of op_index to take full advantage of Grain Tracker
+ * So a grain_tracker UserObject must be used. If you want use OPs equal to grain_num, you can use the fake grain_tracker UserObject,e.g., FauxGrainTracker
  */
 
 //Forward Declarations
 class ACSEDGPoly;
+class GrainTrackerInterface;
 
 template<>
 InputParameters validParams<ACSEDGPoly>();
@@ -28,7 +30,7 @@ public:
 protected:
   virtual Real computeDFDOP(PFFunctionType type);
 
-  const unsigned int _ncrys;
+  const unsigned int _op_num;
 
   std::vector<const VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
@@ -44,6 +46,9 @@ protected:
 
   /// number of deformed grains
   unsigned int _ndef;
+
+  /// Grain tracker object
+  const GrainTrackerInterface & _grain_tracker;
 
   /// index of the OP the kernel is currently acting on
   unsigned int _op_index;

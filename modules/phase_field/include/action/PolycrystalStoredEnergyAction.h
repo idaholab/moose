@@ -4,18 +4,18 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef POLYCRYSTALKERNELACTION_H
-#define POLYCRYSTALKERNELACTION_H
+#ifndef POLYCRYSTALSTOREDENERGYACTION_H
+#define POLYCRYSTALSTOREDENERGYACTION_H
 #include "Action.h"
 
 /**
- * Action that sets up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly
- * kernels.
+ * Action that sets up ACSEDGPoly Kernels that add the stored energy contribution to grain growth models
+ * This allows such models to simulate recrystallization as well.
  */
-class PolycrystalKernelAction: public Action
+class PolycrystalStoredEnergyAction: public Action
 {
 public:
-  PolycrystalKernelAction(const InputParameters & params);
+  PolycrystalStoredEnergyAction(const InputParameters & params);
 
   virtual void act();
 
@@ -26,12 +26,11 @@ protected:
   /// base name for the order parameter variables
   std::string _var_name_base;
 
-  /// kernels are implicit?
-  bool _implicit;
-
+  /// number of deformed grains
+  unsigned int _ndef;
 };
 
 template<>
-InputParameters validParams<PolycrystalKernelAction>();
+InputParameters validParams<PolycrystalStoredEnergyAction>();
 
-#endif //POLYCRYSTALKERNELACTION_H
+#endif //POLYCRYSTALSTOREDENERGYACTION_H

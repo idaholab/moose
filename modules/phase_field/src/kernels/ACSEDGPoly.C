@@ -6,6 +6,7 @@
 /****************************************************************/
 #include "ACSEDGPoly.h"
 #include "Material.h"
+#include "GrainTrackerInterface.h"
 
 template<>
 InputParameters validParams<ACSEDGPoly>()
@@ -14,22 +15,24 @@ InputParameters validParams<ACSEDGPoly>()
   params.addClassDescription("Stored Energy contribution to grain growth");
   params.addRequiredCoupledVar("v", "Array of coupled variable names");
   params.addRequiredParam<unsigned int>("ndef", "Number of OP representing deformed grains");
+  params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject to get values from.");
   return params;
 }
 
 ACSEDGPoly::ACSEDGPoly(const InputParameters & parameters) :
     ACBulk<Real>(parameters),
-    _ncrys(coupledComponents("v")),
-    _vals(_ncrys),
-    _vals_var(_ncrys),
+    _op_num(coupledComponents("v")),
+    _vals(_op_num),
+    _vals_var(_op_num),
     _beta(getMaterialProperty<Real>("beta")),
     _rho_eff(getMaterialProperty<Real>("rho_eff")),
     _Disloc_Den_i(getMaterialProperty<Real>("Disloc_Den_i")),
     _ndef(getParam<unsigned int>("ndef")),
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _op_index(getParam<unsigned int>("op_index"))
 {
   // Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _op_num; ++i)
   {
     _vals[i] = &coupledValue("v", i);
     _vals_var[i] = coupled("v", i);
@@ -40,7 +43,7 @@ Real
 ACSEDGPoly::computeDFDOP(PFFunctionType type)
 {
   Real SumEtaj = 0.0;
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _op_num; ++i)
     SumEtaj += (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
   // Add the current OP to the sum
@@ -48,8 +51,11 @@ ACSEDGPoly::computeDFDOP(PFFunctionType type)
   // Dislocation density in deformed grains
   Real rho_i = _Disloc_Den_i[_qp];
   // undeformed grains are dislocation-free
-  if (_op_index >= _ndef)
+  const std::vector<unsigned int> & op_to_grain = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const unsigned int grn_index = op_to_grain[_op_index];
+  if (grn_index >= _ndef)
     rho_i = 0.0;
+
   // Calculate the contributions of the deformation energy to the residual and Jacobian
   Real drho_eff_detai = 2.0 * _u[_qp] * (rho_i - _rho_eff[_qp]) / SumEtai2;
 
