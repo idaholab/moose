@@ -150,13 +150,13 @@ public:
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
   template <class T>
-  void rotate(T & R);
+  void rotate(const T & R);
 
   /**
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
-  void rotate(RealTensorValue & R);
+  void rotate(const RealTensorValue & R);
 
   /**
    * Rotate the tensor using
@@ -309,7 +309,7 @@ inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a
 
 template<class T>
 void
-RankFourTensor::rotate(T & R)
+RankFourTensor::rotate(const T & R)
 {
   RankFourTensor old = *this;
 

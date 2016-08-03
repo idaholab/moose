@@ -151,6 +151,7 @@
  */
 #include "FeatureFloodCount.h"
 #include "GrainTracker.h"
+#include "GrainTrackerElasticity.h"
 #include "FauxGrainTracker.h"
 #include "FeatureVolumeFraction.h"
 #include "PFCElementEnergyIntegral.h"
@@ -395,6 +396,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(GrainTracker);
+  registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(FeatureVolumeFraction);
   registerDeprecatedObjectName(FeatureVolumeFraction, "NodalVolumeFraction", "09/01/2016 08:00");
