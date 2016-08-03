@@ -200,7 +200,7 @@ TensorMechanicsPlasticModel::KuhnTuckerSingleSurface(Real yf, Real dpm, Real dpm
 }
 
 RankFourTensor
-TensorMechanicsPlasticModel::consistentTangentOperator(const RankTwoTensor & /*trial_stress*/, const RankTwoTensor & /*stress*/, Real /*intnl*/,
+TensorMechanicsPlasticModel::consistentTangentOperator(const RankTwoTensor & /*trial_stress*/, Real /*intnl_old*/, const RankTwoTensor & /*stress*/, Real /*intnl*/,
                                                        const RankFourTensor & E_ijkl, const std::vector<Real> & /*cumulative_pm*/) const
 {
   return E_ijkl;
