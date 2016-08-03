@@ -29,6 +29,7 @@
     npart = 8
     invalue = 1.0
     outvalue = -0.8
+    nestedvalue = -1.5
     int_width = 0.0
     large_spac = 5
     small_spac = 2
