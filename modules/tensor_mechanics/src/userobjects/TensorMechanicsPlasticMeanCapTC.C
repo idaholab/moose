@@ -217,7 +217,7 @@ TensorMechanicsPlasticMeanCapTC::activeConstraints(const std::vector<Real> & f, 
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
       for (unsigned k = 0; k < 3; ++k)
-	     n(i, j) += dirn * Eijkl(i, j, k, k);
+             n(i, j) += dirn * Eijkl(i, j, k, k);
 
   // returned_stress = stress - gamma*n
   // and taking the trace of this and using
@@ -278,7 +278,7 @@ TensorMechanicsPlasticMeanCapTC::returnMap(const RankTwoTensor & trial_stress, R
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
       for (unsigned k = 0; k < 3; ++k)
-	     n(i, j) += dirn * E_ijkl(i, j, k, k);
+             n(i, j) += dirn * E_ijkl(i, j, k, k);
   const Real n_trace = n.trace();
 
   // Perform a Newton-Raphson to find dpm when
@@ -340,7 +340,7 @@ TensorMechanicsPlasticMeanCapTC::consistentTangentOperator(const RankTwoTensor &
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
       for (unsigned int k = 0; k < 3; ++k)
-	elas(i, j) += E_ijkl(i, j, k, k);
+        elas(i, j) += E_ijkl(i, j, k, k);
 
   const Real hw = -df_dq + alpha * elas.trace();
 
