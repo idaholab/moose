@@ -32,7 +32,8 @@ ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
     _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
     _T_old(coupledValueOld("temperature")), //Deprecated, use ComputeThermalExpansionEigenStrain instead
     _current_elem_volume(_assembly.elemVolume()),
-    _Fhat(_fe_problem.getMaxQps())
+    _Fhat(_fe_problem.getMaxQps()),
+    _step_one(declareRestartableData<bool>("step_one", true))
 {
 }
 
@@ -122,9 +123,11 @@ ComputeFiniteStrain::computeQpStrain()
 
     if (_no_thermal_eigenstrains) //Deprecated; use ComputeThermalExpansionEigenStrains instead
     {
-      if (_t_step == 1 && !_app.isRestarting()) // total strain form always uses the ref temp
-        _strain_increment[_qp].addIa(-_thermal_expansion_coeff * (_T[_qp] - _T0));
+      if (_t_step >= 2)
+          _step_one = false;
 
+      if (_step_one)
+        _strain_increment[_qp].addIa(-_thermal_expansion_coeff * (_T[_qp] - _T0));
       else
         _strain_increment[_qp].addIa(-_thermal_expansion_coeff * (_T[_qp] - _T_old[_qp]));
     }

@@ -50,11 +50,11 @@ ComputeReturnMappingStress::initialSetup()
 void
 ComputeReturnMappingStress::computeQpStress()
 {
-  // Nothing to update during the first time step, return immediately
-  if (_t_step == 0 && !_app.isRestarting())
-    return;
+  // Nothing to update during the first time step
+  // ComputeQpStress is not called during the zeroth time step, so no need to
+  // guard against _t_step == 0
 
-  RankTwoTensor strain_increment(_strain_increment[_qp]);
+  RankTwoTensor strain_increment = _strain_increment[_qp];
   RankTwoTensor stress_new;
   computeStress(strain_increment, stress_new);
   _elastic_strain[_qp] = _rotation_increment[_qp] * (strain_increment + _elastic_strain_old[_qp]) * _rotation_increment[_qp].transpose();
@@ -68,9 +68,6 @@ void
 ComputeReturnMappingStress::computeStress(RankTwoTensor & strain_increment,
                                           RankTwoTensor & stress_new)
 {
-  if (_t_step == 0 && !_app.isRestarting())
-    return;
-
   if (_output_iteration_info == true)
   {
     _console
@@ -87,7 +84,7 @@ ComputeReturnMappingStress::computeStress(RankTwoTensor & strain_increment,
   RankTwoTensor inelastic_strain_increment;
 
   RankTwoTensor elastic_strain_increment;
-  RankTwoTensor stress_new_last(stress_new);
+  RankTwoTensor stress_new_last = stress_new;
   Real delS = _absolute_tolerance+1;
   Real first_delS = delS;
   unsigned int counter =0;

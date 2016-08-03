@@ -31,16 +31,18 @@ InputParameters validParams<ConstitutiveModel>()
 }
 
 
-ConstitutiveModel::ConstitutiveModel(const InputParameters & parameters)
-  :Material(parameters),
-   _has_temp(isCoupled("temp")),
-   _temperature(_has_temp ? coupledValue("temp") : _zero),
-   _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
-   _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
-   _alpha_function(parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
-   _has_stress_free_temp(isParamValid("stress_free_temperature")),
-   _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0),
-   _ref_temp(0.0)
+ConstitutiveModel::ConstitutiveModel(const InputParameters & parameters) :
+    Material(parameters),
+    _has_temp(isCoupled("temp")),
+    _temperature(_has_temp ? coupledValue("temp") : _zero),
+    _temperature_old(_has_temp ? coupledValueOld("temp") : _zero),
+    _alpha(parameters.isParamValid("thermal_expansion") ? getParam<Real>("thermal_expansion") : 0.),
+    _alpha_function(parameters.isParamValid("thermal_expansion_function") ? &getFunction("thermal_expansion_function") : NULL),
+    _has_stress_free_temp(isParamValid("stress_free_temperature")),
+    _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0),
+    _ref_temp(0.0),
+    _step_zero(declareRestartableData<bool>("step_zero", true)),
+    _step_one(declareRestartableData<bool>("step_one", true))
 {
   if (parameters.isParamValid("thermal_expansion_function_type"))
   {
@@ -93,13 +95,19 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
                                       SymmTensor & strain_increment,
                                       SymmTensor & d_strain_dT)
 {
-  if (_has_temp && _t_step != 0)
+  if (_t_step >= 1)
+    _step_zero = false;
+
+  if (_t_step >= 2)
+    _step_one = false;
+
+  if (_has_temp && !_step_zero)
   {
     Real inc_thermal_strain;
     Real d_thermal_strain_d_temp;
 
     Real old_temp;
-    if (_t_step == 1 && _has_stress_free_temp && !_app.isRestarting())
+    if (_step_one && _has_stress_free_temp)
       old_temp = _stress_free_temp;
     else
       old_temp = _temperature_old[qp];
