@@ -6,6 +6,7 @@
 /****************************************************************/
 #ifndef POLYCRYSTALSTOREDENERGYACTION_H
 #define POLYCRYSTALSTOREDENERGYACTION_H
+
 #include "Action.h"
 
 /**

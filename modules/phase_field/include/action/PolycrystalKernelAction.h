@@ -6,6 +6,7 @@
 /****************************************************************/
 #ifndef POLYCRYSTALKERNELACTION_H
 #define POLYCRYSTALKERNELACTION_H
+
 #include "Action.h"
 
 /**
@@ -28,7 +29,6 @@ protected:
 
   /// kernels are implicit?
   bool _implicit;
-
 };
 
 template<>
