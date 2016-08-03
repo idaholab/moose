@@ -33,7 +33,7 @@ public:
   ExampleMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
 private:
   /**

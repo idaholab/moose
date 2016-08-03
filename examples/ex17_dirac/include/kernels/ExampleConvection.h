@@ -57,7 +57,7 @@ protected:
    *
    * This should always be defined in the .C
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /**
    * Responsible for computing the diagonal block of the preconditioning matrix.
@@ -69,7 +69,7 @@ protected:
    *
    * This should always be defined in the .C
    */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
 private:
   /**

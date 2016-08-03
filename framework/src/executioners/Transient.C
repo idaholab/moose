@@ -317,17 +317,6 @@ Transient::takeStep(Real input_dt)
 
   while (_picard_it<_picard_max_its && _picard_converged == false)
   {
-    if (_picard_max_its > 1)
-    {
-      _console << "\nBeginning Picard Iteration " << _picard_it << "\n" << std::endl;
-
-      if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
-      {
-        _picard_initial_norm = _problem.computeResidualL2Norm();
-        _console << "Initial Picard Norm: " << _picard_initial_norm << '\n';
-      }
-    }
-
     // For every iteration other than the first, we need to restore the state of the MultiApps
     if (_picard_it > 0)
     {
@@ -381,6 +370,17 @@ Transient::solveStep(Real input_dt)
 
   // Increment time
   _time = _time_old + _dt;
+
+  if (_picard_max_its > 1)
+  {
+    _console << "\nBeginning Picard Iteration " << _picard_it << "\n" << std::endl;
+
+    if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
+    {
+      _picard_initial_norm = _problem.computeResidualL2Norm();
+      _console << "Initial Picard Norm: " << _picard_initial_norm << '\n';
+    }
+  }
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);

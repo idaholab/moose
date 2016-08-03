@@ -38,7 +38,7 @@ public:
   CoupledNeumannBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
 private:
   /**
