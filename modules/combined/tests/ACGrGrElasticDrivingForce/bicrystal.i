@@ -187,13 +187,7 @@
   [../]
   [./ElasticityTensor]
     type = ComputePolycrystalElasticityTensor
-    block = 0
-    fill_method = symmetric9
-    #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
-    Elastic_constants = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
-    GrainTracker_object = grain_tracker
-    grain_num = 2
-    euler_angle_provider = euler_angle_file
+    grain_tracker = grain_tracker
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -207,17 +201,22 @@
 []
 
 [UserObjects]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = test.tex
+  [../]
   [./grain_tracker]
-    type = GrainTracker
+    type = GrainTrackerElasticity
     connecting_threshold = 0.05
     compute_op_maps = true
     flood_entity_type = elemental
     execute_on = 'initial timestep_begin'
+
+    euler_angle_provider = euler_angle_file
+    fill_method = symmetric9
+    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
+
     outputs = none
-  [../]
-  [./euler_angle_file]
-    type = EulerAngleFileReader
-    file_name = test.tex
   [../]
 []
 

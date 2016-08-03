@@ -194,12 +194,7 @@
   [../]
   [./ElasticityTensor]
     type = ComputePolycrystalElasticityTensor
-    block = 0
-    fill_method = symmetric9
-    #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
-    Elastic_constants = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
-    GrainTracker_object = grain_tracker
-    euler_angle_provider = ebsd
+    grain_tracker = grain_tracker
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -234,12 +229,16 @@
     type = EBSDReader
   [../]
   [./grain_tracker]
-    type = GrainTracker
+    type = GrainTrackerElasticity
     threshold = 0.2
     compute_op_maps = true
     execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd
     flood_entity_type = ELEMENTAL
+
+    fill_method = symmetric9
+    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
+    euler_angle_provider = ebsd
   [../]
 []
 
