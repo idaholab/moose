@@ -14,6 +14,7 @@ InputParameters validParams<SmoothSuperellipsoidBaseIC>()
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("invalue", "The variable value inside the superellipsoid");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the superellipsoid");
+  params.addParam<Real>("nestedvalue", "The variable value for nested particles inside the superellipsoid in inverse configuration");
   params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
   params.addParam<bool>("zero_gradient", false, "Set the gradient DOFs to zero. This can avoid numerical problems with higher order shape functions.");
   params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
@@ -25,6 +26,7 @@ SmoothSuperellipsoidBaseIC::SmoothSuperellipsoidBaseIC(const InputParameters & p
     _mesh(_fe_problem.mesh()),
     _invalue(parameters.get<Real>("invalue")),
     _outvalue(parameters.get<Real>("outvalue")),
+    _nestedvalue(isParamValid("nestedvalue") ? parameters.get<Real>("nestedvalue") : parameters.get<Real>("outvalue")),
     _int_width(parameters.get<Real>("int_width")),
     _zero_gradient(parameters.get<bool>("zero_gradient"))
 {
@@ -142,7 +144,7 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidInverseValue(const Point & p, c
   //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
   //Handle this case independently because we cannot calculate polar angles at this point
   if (dist == 0.0)
-    return _outvalue;
+    return _nestedvalue;
 
   //Compute the distance r from the center of the superellipsoid to its outside edge
   //along the vector from the center to the current point
@@ -160,11 +162,11 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidInverseValue(const Point & p, c
   Real value = _invalue;
 
   if (dist <= r - _int_width/2.0) //Reversing inside and outside values
-    value = _outvalue;
+    value = _nestedvalue;
   else if (dist < r + _int_width/2.0) //Smooth interface
   {
     Real int_pos = (dist - r + _int_width/2.0)/_int_width;
-    value = _invalue + (_outvalue - _invalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+    value = _invalue + (_nestedvalue - _invalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
   }
 
   return value;
