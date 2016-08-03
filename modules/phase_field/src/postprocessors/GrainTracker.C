@@ -363,16 +363,12 @@ GrainTracker::trackGrains()
         // Sort the grains represented by this variable by _min_entity_id
         std::sort(_feature_sets[map_num].begin(), _feature_sets[map_num].end());
 
-        /**
-         * Transfer the grains to the _unique_grains structure and assign ids
-         * Transform a vector that looks like this { A, D, C, B, F, E}
-         * into a map like this { {1,A}, {2,D}, {3,D}, {4, B}, {5, F}, {6, E} }
-         */
-        std::transform(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), std::inserter(_unique_grains, _unique_grains.end()),
-                       [&counter](FeatureData & item)
-                       {
-                         return std::pair<unsigned int, FeatureData>(counter++, std::move(item));
-                       });
+        // Move the grains from the FeatureFloodCount data structure to the _unique_grains data structure.
+        for (auto && grain : _feature_sets[map_num])
+        {
+          _unique_grains.emplace_hint(_unique_grains.end(), std::pair<unsigned int, FeatureData>(counter, std::move(grain)));
+          newGrainCreated(counter++);
+        }
       }
     }
     // Reserve op grain ids if we are using reserve_op. We'll mark the first index of the reserved id.
@@ -499,11 +495,12 @@ GrainTracker::trackGrains()
 void
 GrainTracker::newGrainCreated(unsigned int new_grain_idx)
 {
-  _console << COLOR_YELLOW
-           << "*****************************************************************************\n"
-           << "Couldn't find a matching grain while working on variable index: " << _unique_grains[new_grain_idx]._var_idx
-           << "\nCreating new unique grain: " << new_grain_idx << '\n' << _unique_grains[new_grain_idx]
-           << "\n*****************************************************************************\n" << COLOR_DEFAULT;
+  if (_t_step > _tracking_step)
+    _console << COLOR_YELLOW
+             << "*****************************************************************************\n"
+             << "Couldn't find a matching grain while working on variable index: " << _unique_grains[new_grain_idx]._var_idx
+             << "\nCreating new unique grain: " << new_grain_idx << '\n' << _unique_grains[new_grain_idx]
+             << "\n*****************************************************************************\n" << COLOR_DEFAULT;
 }
 
 void

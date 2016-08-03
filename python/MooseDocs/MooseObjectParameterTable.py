@@ -54,7 +54,7 @@ class MooseObjectParameterTable(MarkdownTable):
             param = re.sub(r'std::__1::vector\<(.*),\sstd::__1::allocator\<(.*)\>\s\>', r'std::vector<\1>', param)
             param = '`' + param + '`'
 
-            string = re.sub(r'std::vector\<(.*),\sstd::allocator\<(.*)\>\s\>',  r'std::vector<\1>', param)
+            param = re.sub(r'std::vector\<(.*),\sstd::allocator\<(.*)\>\s\>',  r'std::vector<\1>', param)
             param = '`' + param + '`'
 
         elif key == 'default':
