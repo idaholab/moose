@@ -115,6 +115,11 @@ protected:
   MaterialProperty<SymmTensor> & _stress;
 private:
   MaterialProperty<SymmTensor> & _stress_old_prop;
+
+  ///@{ Restartable data to check for the zeroth and first time steps for thermal calculations
+  bool & _step_zero;
+  bool & _step_one;
+  ///@}
 protected:
   SymmTensor _stress_old;
 

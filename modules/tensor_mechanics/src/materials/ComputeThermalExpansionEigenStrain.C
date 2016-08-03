@@ -24,7 +24,8 @@ ComputeThermalExpansionEigenStrain::ComputeThermalExpansionEigenStrain(const Inp
     _has_incremental_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _temperature_old(_has_incremental_strain ? & coupledValueOld("temperature") : NULL),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _stress_free_reference_temperature(getParam<Real>("stress_free_reference_temperature"))
+    _stress_free_reference_temperature(getParam<Real>("stress_free_reference_temperature")),
+    _step_one(declareRestartableData<bool>("step_one", true))
 {
 }
 
@@ -34,11 +35,13 @@ ComputeThermalExpansionEigenStrain::computeQpStressFreeStrain()
   RankTwoTensor thermal_strain;
   thermal_strain.zero();
   Real old_temp = 0.0;
+  if (_t_step >= 2)
+    _step_one = false;
 
-  if ((!_has_incremental_strain || _t_step == 1) && !_app.isRestarting()) // total strain form always uses the ref temp
+  if (!_has_incremental_strain || _step_one)
     old_temp = _stress_free_reference_temperature;
 
-  if (_temperature_old)
+  if (_temperature_old) // total strain form always uses the ref temp
     old_temp = (* _temperature_old)[_qp];
 
   thermal_strain.addIa(_thermal_expansion_coeff * (_temperature[_qp] - old_temp));

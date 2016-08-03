@@ -60,6 +60,11 @@ protected:
 private:
   using Material::computeProperties;
   using Material::_qp;
+
+  ///@{ Restartable data to check for the zeroth and first time steps for thermal calculations
+  bool & _step_zero;
+  bool & _step_one;
+  ///@}
 };
 
 template<>

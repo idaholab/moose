@@ -131,6 +131,8 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _dep_matl_props(),
   _stress(createProperty<SymmTensor>("stress")),
   _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
+  _step_zero(declareRestartableData<bool>("step_zero", true)),
+  _step_one(declareRestartableData<bool>("step_one", true)),
   _stress_old(0),
   _total_strain(createProperty<SymmTensor>("total_strain")),
   _total_strain_old(createPropertyOld<SymmTensor>("total_strain")),
@@ -491,13 +493,13 @@ SolidModel::modifyStrainIncrement()
 void
 SolidModel::applyThermalStrain()
 {
-  if ( _has_temp && _t_step != 0 )
+  if ( _has_temp && !_step_zero )
   {
     Real inc_thermal_strain;
     Real d_thermal_strain_d_temp;
 
     Real old_temp;
-    if (_t_step == 1 && _has_stress_free_temp && !_app.isRestarting())
+    if (_step_one && _has_stress_free_temp)
       old_temp = _stress_free_temp;
     else
       old_temp = _temperature_old[_qp];
@@ -640,6 +642,11 @@ SolidModel::initQpStatefulProperties()
 void
 SolidModel::computeProperties()
 {
+  if (_t_step >= 1)
+    _step_zero = false;
+
+  if (_t_step >= 2)
+    _step_one = false;
 
   elementInit();
   _element->init();
@@ -744,7 +751,8 @@ SolidModel::computeConstitutiveModelStress()
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
 
-  if (_t_step == 0 && !_app.isRestarting()) return;
+  if (_step_zero)
+    return;
 
   const SubdomainID current_block = _current_elem->subdomain_id();
   MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];

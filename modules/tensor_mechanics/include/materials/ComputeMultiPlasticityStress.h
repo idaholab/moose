@@ -443,6 +443,14 @@ protected:
    * @param cumulative_pm The plastic multipliers needed for this current Return (this is the sum of the plastic multipliers over all substeps if the strain increment was applied in small substeps)
    */
   RankFourTensor consistentTangentOperator(const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & E_ijkl, const std::vector<Real> & pm_this_step, const std::vector<Real> & cumulative_pm);
+
+private:
+  /// True if this is the first timestep (timestep < 2). In the first timestep,
+  /// an initial stress is needed to subdivide.  This boolean variable
+  /// eliminates the use of the _app.isRestarting() in this class.
+  /// This boolean is delcared as a reference so that the variable is restartable
+  /// data:  if we restart, the code will not think it is the first timestep again.
+  bool & _step_one;
 };
 
 #endif //COMPUTEMULTIPLASTICITYSTRESS_H
