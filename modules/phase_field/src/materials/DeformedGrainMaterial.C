@@ -56,7 +56,7 @@ void
 DeformedGrainMaterial::computeQpProperties()
 {
   _Disloc_Den_i[_qp] = _Disloc_Den * (_length_scale * _length_scale);
-  Real rho_i = _Disloc_Den_i[_qp];
+  Real rho_i;
   Real rho0 = 0.0;
   Real SumEtai2 = 0.0;
   for (unsigned int i = 0; i < _op_num; ++i)
@@ -72,12 +72,14 @@ DeformedGrainMaterial::computeQpProperties()
   for (unsigned int op = 0; op < n_active_ops; ++op)
   {
     // First position of the active ops contains grain number
-    unsigned int grn_index = active_ops[op].first;
+    unsigned int grain_index = active_ops[op].first;
 
     // Second position contains the order parameter index
     unsigned int op_index = active_ops[op].second;
-    if (grn_index >= _ndef)
+    if (grain_index >= _ndef)
       rho_i = 0.0;
+    else
+      rho_i = _Disloc_Den_i[_qp];
     rho0 += rho_i * (*_vals[op_index])[_qp] * (*_vals[op_index])[_qp];
   }
   _rho_eff[_qp] = rho0 / SumEtai2;
