@@ -21,7 +21,7 @@ InputParameters validParams<EulerAngle2RGBAction>()
   MooseEnum structure_enum = MooseEnum("cubic=43 hexagonal=62 tetragonal=42 trigonal=32 orthorhombic=22 monoclinic=2 triclinic=1");
   params.addRequiredParam<MooseEnum>("crystal_structure",structure_enum,"Crystal structure of the material");
   params.addRequiredParam<UserObjectName>("euler_angle_provider", "Name of Euler angle provider user object");
-  params.addRequiredParam<UserObjectName>("grain_tracker_object", "The GrainTracker UserObject to get values from.");
+  params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject to get values from.");
   return params;
 }
 
@@ -59,7 +59,7 @@ EulerAngle2RGBAction::act()
       params.set<MooseEnum>("crystal_structure") = getParam<MooseEnum>("crystal_structure");
       params.set<MooseEnum>("output_type") = colors[i];
       params.set<UserObjectName>("euler_angle_provider") = getParam<UserObjectName>("euler_angle_provider");
-      params.set<UserObjectName>("grain_tracker_object") = getParam<UserObjectName>("grain_tracker_object");
+      params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
       params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
       _problem->addAuxKernel("EulerAngleProvider2RGBAux", var_name, params);
     }

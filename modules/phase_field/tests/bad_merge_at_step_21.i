@@ -71,28 +71,28 @@
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./ghost_elements]
     type = FeatureFloodCountAux
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./proc_id]
     type = ProcessorIDAux
