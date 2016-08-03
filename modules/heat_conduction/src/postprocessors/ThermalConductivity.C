@@ -24,7 +24,8 @@ ThermalConductivity::ThermalConductivity(const InputParameters & parameters) :
     _flux(getPostprocessorValue("flux")),
     _T_hot(getPostprocessorValue("T_hot")),
     _length_scale(getParam<Real>("length_scale")),
-    _k0(getParam<Real>("k0"))
+    _k0(getParam<Real>("k0")),
+    _step_zero(declareRestartableData<bool>("step_zero", true))
 {
 }
 
@@ -33,12 +34,14 @@ ThermalConductivity::getValue()
 {
   const Real T_cold = SideAverageValue::getValue();
   Real Th_cond = 0.0;
+  if (_t_step >= 1)
+    _step_zero = false;
 
   // Calculate effective thermal conductivity in W/(length_scale-K)
   if (std::abs(_T_hot - T_cold) > 1.0e-20)
     Th_cond = std::abs(_flux) * _dx / std::abs(_T_hot - T_cold);
 
-  if (_t_step == 0)
+  if (_step_zero)
     return _k0;
   else
     return Th_cond / _length_scale; //In W/(m-K)
