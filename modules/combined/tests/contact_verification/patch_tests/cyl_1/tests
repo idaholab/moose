@@ -57,6 +57,7 @@
     abs_zero = 1e-6
     superlu = true
     max_parallel = 1
+    deleted = '#6924'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'

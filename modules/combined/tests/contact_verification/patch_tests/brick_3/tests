@@ -8,6 +8,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    deleted = '#6924'
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -58,6 +59,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    deleted = '#6924'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'

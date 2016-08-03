@@ -29,6 +29,7 @@ public:
 
 protected:
   virtual Real computeValue();
+  virtual void precalculateValue();
 
   /// Reference direction of the sample
   const unsigned int _sd;
@@ -44,6 +45,9 @@ protected:
 
   /// Grain tracker object
   const GrainTracker & _grain_tracker;
+
+  /// precalculated element value
+  Real _value;
 };
 
 #endif //EULERANGLEPROVIDER2RGBAUX_H

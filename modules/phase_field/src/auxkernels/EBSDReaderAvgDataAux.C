@@ -30,8 +30,8 @@ EBSDReaderAvgDataAux::EBSDReaderAvgDataAux(const InputParameters & parameters) :
 {
 }
 
-Real
-EBSDReaderAvgDataAux::computeValue()
+void
+EBSDReaderAvgDataAux::precalculateValue()
 {
   // get the dominant grain for the current element/node
   const int grain_id = _grain_tracker.getEntityValue(isNodal() ? _current_node->id() : _current_elem->id(),
@@ -39,8 +39,15 @@ EBSDReaderAvgDataAux::computeValue()
 
   // no grain found
   if (grain_id < 0)
-    return _invalid;
+    _value = _invalid;
 
   // get the data for the grain
-  return (*_val)(_ebsd_reader.getAvgData(grain_id));
+  else
+    _value = (*_val)(_ebsd_reader.getAvgData(grain_id));
+}
+
+Real
+EBSDReaderAvgDataAux::computeValue()
+{
+  return _value;
 }

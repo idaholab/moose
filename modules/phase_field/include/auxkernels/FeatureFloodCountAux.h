@@ -32,6 +32,7 @@ public:
 
 protected:
   virtual Real computeValue();
+  virtual void precalculateValue();
 
   /// Function being used to compute the value of this kernel
   const FeatureFloodCount & _flood_counter;
@@ -41,6 +42,9 @@ protected:
   bool _var_coloring;
 
   const FeatureFloodCount::FieldType _field_type;
+
+  /// precalculated element value
+  Real _value;
 };
 
 #endif //FEATUREFLOODCOUNTAUX_H

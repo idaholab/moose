@@ -27,6 +27,8 @@ public:
 
 protected:
   virtual Real computeValue();
+  virtual void precalculateValue();
+
   const EBSDReader & _ebsd_reader;
 
   /// MooseEnum that stores the type of data this AuxKernel extracts.
@@ -34,6 +36,9 @@ protected:
 
   /// Accessor functor to fetch the selected data field form the EBSD data point
   MooseSharedPointer<EBSDPointDataFunctor> _val;
+
+  /// precalculated element value
+  Real _value;
 };
 
 #endif //EBSDREADERPOINTDATAAUX_H
