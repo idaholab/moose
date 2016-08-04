@@ -48,6 +48,7 @@ protected:
 
   Real _invalue;
   Real _outvalue;
+  Real _nestedvalue;
   Real _int_width;
   bool _zero_gradient;
 
