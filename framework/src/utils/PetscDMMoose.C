@@ -523,6 +523,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       DofMap & dofmap = dmm->_nl->sys().get_dof_map();
       std::set<dof_id_type> indices;
       std::set<dof_id_type> unindices;
+      std::set<dof_id_type> cached_indices;
+      std::set<dof_id_type> cached_unindices;
       for (const auto & vit : *(dmm->_var_ids))
       {
         unsigned int v = vit.second;
@@ -601,6 +603,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
         // Iterate over the contacts included in this split.
         if (dmm->_contact_names->size())
         {
+          std::vector<dof_id_type> evindices;
           for (const auto & it : *(dmm->_contact_names))
           {
             PetscBool displaced = (*dmm->_contact_displaced)[it.second];
@@ -617,27 +620,59 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
             }
             else
-            locator = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
+              locator = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
 
-            std::vector<dof_id_type> & slave_nodes = locator->_nearest_node._slave_nodes;
-            for (dof_id_type i = 0; i < slave_nodes.size(); ++i)
+            evindices.clear();
+            // penetration locator
+            auto lend = locator->_penetration_info.end();
+            for (auto lit  = locator->_penetration_info.begin(); lit!=lend; ++lit)
             {
-              if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end())
-                continue;
-
-              Node & slave_node = dmm->_nl->sys().get_mesh().node_ref(slave_nodes[i]);
-              dof_id_type dof = slave_node.dof_number(dmm->_nl->sys().number(), v, 0);
-
-              // might want to use variable_first/last_local_dof instead
-              if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                indices.insert(dof);
-            }
-          }
-        }
+              const dof_id_type slave_node_num = lit->first;
+              PenetrationInfo * pinfo = lit->second;
+              std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map =
+              dmm->_nl->_fe_problem.mesh().nodeToElemMap();
+              if (pinfo && pinfo->isCaptured())
+              {
+                Node & slave_node = dmm->_nl->sys().get_mesh().node_ref(slave_node_num);
+                dof_id_type dof = slave_node.dof_number(dmm->_nl->sys().number(), v, 0);
+                // might want to use variable_first/last_local_dof instead
+                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                  indices.insert(dof);
+                else
+                  cached_indices.insert(dof); // cache nonlocal indices
+                // indices of slave elements
+                evindices.clear();
+                for (const auto & elem_num : node_to_elem_map[slave_node_num])
+                {
+                  Elem & slave_elem = dmm->_nl->sys().get_mesh().elem_ref(elem_num);
+                  // Get the degree of freedom indices for the given variable off the current element.
+                  evindices.clear();
+                  dofmap.dof_indices(&slave_elem, evindices, v);
+                  // might want to use variable_first/last_local_dof instead
+                  for (const auto & edof : evindices)
+                    if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
+                      indices.insert(edof);
+                    else
+                      cached_indices.insert(edof);
+                }
+                // indices for master element
+                evindices.clear();
+                const Elem * master_elem =  pinfo->_elem;
+                dofmap.dof_indices(master_elem, evindices, v);
+                for (const auto & edof : evindices)
+                  if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
+                    indices.insert(edof);
+                  else
+                    cached_indices.insert(edof);
+              }// if pinfo
+            }// for penetration
+          }// for contact names
+        }// if size of contact names
 
         // Iterate over the contacts excluded from this split.
         if (dmm->_uncontact_names->size())
         {
+          std::vector<dof_id_type> evindices;
           for (const auto & it : *(dmm->_uncontact_names))
           {
             PetscBool displaced = (*dmm->_uncontact_displaced)[it.second];
@@ -654,23 +689,57 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
             }
             else
-            locator = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
+              locator = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
 
-            std::vector<dof_id_type> & slave_nodes = locator->_nearest_node._slave_nodes;
-            for (dof_id_type i = 0; i < slave_nodes.size(); ++i)
+            evindices.clear();
+            // penetration locator
+            auto lend = locator->_penetration_info.end();
+            for (auto lit  = locator->_penetration_info.begin(); lit!=lend; ++lit)
             {
-              if (locator->_has_penetrated.find(slave_nodes[i]) == locator->_has_penetrated.end())
-                continue;
+              const dof_id_type slave_node_num = lit->first;
+              PenetrationInfo * pinfo = lit->second;
+              if (pinfo && pinfo->isCaptured())
+              {
+                Node & slave_node = dmm->_nl->sys().get_mesh().node_ref(slave_node_num);
+                dof_id_type dof = slave_node.dof_number(dmm->_nl->sys().number(), v, 0);
+                // might want to use variable_first/last_local_dof instead
+                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                  unindices.insert(dof);
+                else
+                  cached_unindices.insert(dof);
 
-              // might want to use variable_first/last_local_dof instead
-              Node & slave_node = dmm->_nl->sys().get_mesh().node_ref(slave_nodes[i]);
-              dof_id_type dof = slave_node.dof_number(dmm->_nl->sys().number(), v, 0);
-              if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                unindices.insert(dof);
-            }
-          }
-        }
-      }
+                // indices for master element
+                evindices.clear();
+                const Elem * master_side =  pinfo->_side;
+                dofmap.dof_indices(master_side, evindices, v);
+                // indices of master sides
+                for (const auto & edof : evindices)
+                  if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
+                    unindices.insert(edof);
+                  else
+                    cached_unindices.insert(edof);
+              }// if pinfo
+            }// for penetration
+          }// for uncontact names
+        }// if there exist uncontacts
+      }// variables
+
+      std::vector<dof_id_type> local_vec_indices(cached_indices.size());
+      std::copy(cached_indices.begin(), cached_indices.end(), local_vec_indices.begin());
+      dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
+      // insert indices
+      for (const auto & dof : local_vec_indices)
+        if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+           indices.insert(dof);
+
+      local_vec_indices.clear();
+      local_vec_indices.resize(cached_unindices.size());
+      std::copy(cached_unindices.begin(), cached_unindices.end(), local_vec_indices.begin());
+      dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
+      // insert unindices
+      for (const auto & dof : local_vec_indices)
+        if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+           unindices.insert(dof);
 
       std::set<dof_id_type> dindices;
       std::set_difference(indices.begin(), indices.end(), unindices.begin(), unindices.end(), std::inserter(dindices, dindices.end()));
@@ -1871,9 +1940,7 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
       std::ostringstream oopt,ohelp;
       oopt << "-dm_moose_contact_" << i;
       ohelp << "Master and slave for contact " << i;
-      const char * opts = oopt.str().c_str();
-      const char * helps = ohelp.str().c_str();
-      ierr = PetscOptionsStringArray(opts, helps, "DMMooseSetContacts", master_slave, &sz, PETSC_NULL);
+      ierr = PetscOptionsStringArray(oopt.str().c_str(), ohelp.str().c_str(), "DMMooseSetContacts", master_slave, &sz, PETSC_NULL);
       CHKERRQ(ierr);
       if (sz != 2)
         SETERRQ2(((PetscObject)dm)->comm, PETSC_ERR_ARG_SIZ, "Expected 2 sideset IDs (master & slave) for contact %D, got %D instead", i, sz);

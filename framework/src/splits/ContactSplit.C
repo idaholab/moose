@@ -14,6 +14,7 @@
 
 #include "ContactSplit.h"
 #include "InputParameters.h"
+#include "FEProblem.h"
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 template<>
@@ -22,10 +23,10 @@ InputParameters validParams<ContactSplit>()
   InputParameters params = validParams<Split>();
   params.addParam<std::vector<std::string> >("contact_master", "Master surface list for included contacts");
   params.addParam<std::vector<std::string> >("contact_slave",  "Slave surface list for included contacts");
-  params.addParam<std::vector<bool> >("contact_displaced", "List of indicators whether displaced mesh is used to define included contact");
+  params.addParam<std::vector<int> >("contact_displaced", "List of indicators whether displaced mesh is used to define included contact");
   params.addParam<std::vector<std::string> >("uncontact_master", "Master surface list for excluded contacts");
   params.addParam<std::vector<std::string> >("uncontact_slave",  "Slave surface list for excluded contacts");
-  params.addParam<std::vector<bool> >("uncontact_displaced", "List of indicators whether displaced mesh is used to define excluded contact");
+  params.addParam<std::vector<int> >("uncontact_displaced", "List of indicators whether displaced mesh is used to define excluded contact");
   return params;
 }
 
@@ -33,10 +34,10 @@ ContactSplit::ContactSplit (const InputParameters & params) :
     Split(params),
     _contact_master(getParam<std::vector<std::string> >("contact_master")),
     _contact_slave(getParam<std::vector<std::string> >("contact_slave")),
-    _contact_displaced(getParam<std::vector<bool> >("contact_displaced")),
+    _contact_displaced(getParam<std::vector<int> >("contact_displaced")),
     _uncontact_master(getParam<std::vector<std::string> >("uncontact_master")),
     _uncontact_slave(getParam<std::vector<std::string> >("uncontact_slave")),
-    _uncontact_displaced(getParam<std::vector<bool> >("uncontact_displaced"))
+    _uncontact_displaced(getParam<std::vector<int> >("uncontact_displaced"))
 {
   if (_contact_master.size() != _contact_slave.size()) {
     std::ostringstream err;
@@ -67,49 +68,100 @@ ContactSplit::ContactSplit (const InputParameters & params) :
 void
 ContactSplit::setup(const std::string& prefix)
 {
+  // A reference to the PetscOptions
+  Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
+  // prefix
   std::string    dmprefix = prefix+"dm_moose_", opt, val;
 
   // contacts options
-  if (_contact_master.size()) {
+  if (_contact_master.size())
+  {
     opt = dmprefix+"ncontacts";
     {
       std::ostringstream oval;
       oval << _contact_master.size();
       val  =  oval.str();
     }
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
-    for (unsigned int j = 0;  j < _contact_master.size(); ++j) {
+    //push back PETSc options
+    if (val == "")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
+    for (unsigned int j = 0;  j < _contact_master.size(); ++j)
+    {
       std::ostringstream oopt;
       oopt << dmprefix << "contact_" << j;
       opt = oopt.str();
       val = _contact_master[j]+","+_contact_slave[j];
-      Moose::PetscSupport::setSinglePetscOption(opt, val);
-      if (_contact_displaced[j]) {
-  opt = opt + "_displaced";
-  val = "yes";
-  Moose::PetscSupport::setSinglePetscOption(opt, val);
+      //push back PETSc options
+      if (val == "")
+        po.flags.push_back(opt);
+      else
+      {
+        po.inames.push_back(opt);
+        po.values.push_back(val);
+      }
+      if (_contact_displaced[j])
+      {
+        opt = opt + "_displaced";
+        val = "yes";
+        //push back PETSc options
+        if (val == "")
+          po.flags.push_back(opt);
+        else
+        {
+          po.inames.push_back(opt);
+          po.values.push_back(val);
+        }
       }
     }
   }
   // uncontacts options
-  if (_uncontact_master.size()) {
+  if (_uncontact_master.size())
+  {
     opt = dmprefix+"nuncontacts";
     {
       std::ostringstream oval;
       oval << _uncontact_master.size();
       val  =  oval.str();
     }
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
-    for (unsigned int j = 0;  j < _uncontact_master.size(); ++j) {
+    //push back PETSc options
+    if (val == "")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
+    for (unsigned int j = 0;  j < _uncontact_master.size(); ++j)
+    {
       std::ostringstream oopt;
       oopt << dmprefix << "uncontact_" << j;
       opt = oopt.str();
       val = _uncontact_master[j]+","+_uncontact_slave[j];
-      Moose::PetscSupport::setSinglePetscOption(opt, val);
-      if (_uncontact_displaced[j]) {
-  opt = opt + "_displaced";
-  val = "yes";
-  Moose::PetscSupport::setSinglePetscOption(opt, val);
+      //push back PETSc options
+      if (val == "")
+        po.flags.push_back(opt);
+      else
+      {
+        po.inames.push_back(opt);
+        po.values.push_back(val);
+      }
+      if (_uncontact_displaced[j])
+      {
+        opt = opt + "_displaced";
+        val = "yes";
+        //push back PETSc options
+        if (val == "")
+          po.flags.push_back(opt);
+        else
+        {
+          po.inames.push_back(opt);
+          po.values.push_back(val);
+        }
       }
     }
   }
