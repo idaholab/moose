@@ -308,9 +308,9 @@ DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jva
 }
 
 void
-DisplacedProblem::prepareBlockNonlocal(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
+DisplacedProblem::prepareBlockNonlocal(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, THREAD_ID tid)
 {
-  _assembly[tid]->prepareBlockNonlocal(ivar, jvar, dof_indices);
+  _assembly[tid]->prepareBlockNonlocal(ivar, jvar, idof_indices, jdof_indices);
 }
 
 void
@@ -593,9 +593,9 @@ DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int
 }
 
 void
-DisplacedProblem::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
+DisplacedProblem::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, THREAD_ID tid)
 {
-  _assembly[tid]->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices);
+  _assembly[tid]->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices);
 }
 
 void

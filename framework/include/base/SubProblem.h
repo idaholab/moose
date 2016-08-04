@@ -54,6 +54,8 @@ public:
   virtual EquationSystems & es() = 0;
   virtual MooseMesh & mesh() = 0;
 
+  virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
+
   /**
    * Whether or not this problem should utilize FE shape function caching.
    *
@@ -317,6 +319,8 @@ public:
    */
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
+  std::map<std::string, std::vector<dof_id_type> > _var_dof_map;
+
 protected:
   /// The Factory for building objects
   Factory & _factory;
@@ -355,6 +359,9 @@ protected:
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
+
+  /// nonlocal coupling requirement flag
+  bool _requires_nonlocal_coupling;
 
   /// Elements that should have Dofs ghosted to the local processor
   std::set<dof_id_type> _ghosted_elems;

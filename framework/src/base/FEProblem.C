@@ -19,6 +19,7 @@
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
+#include "SystemBase.h"
 #include "MaterialData.h"
 #include "ComputeUserObjectsThread.h"
 #include "ComputeNodalUserObjectsThread.h"
@@ -73,6 +74,7 @@
 #include "XFEMInterface.h"
 #include "ConsoleUtils.h"
 #include "NonlocalKernel.h"
+#include "ShapeElementUserObject.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -139,8 +141,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
-    _requires_nonlocal_coupling(false),
     _has_nonlocal_coupling(false),
+    _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(false),
     _material_coverage_check(false),
     _max_qps(std::numeric_limits<unsigned int>::max()),
@@ -171,6 +173,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
   _second_phi_zero.resize(n_threads);
+  _uo_jacobian_moose_vars.resize(n_threads);
 
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
@@ -334,7 +337,6 @@ void FEProblem::initialSetup()
 
   // Check whether nonlocal couling is required or not
   checkNonlocalCoupling();
-
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
 
@@ -413,13 +415,17 @@ void FEProblem::initialSetup()
     _internal_side_user_objects.initialSetup(tid);
   }
 
+  for (THREAD_ID tid = 0; tid < n_threads; ++tid)
+    checkUserObjectJacobianRequirement(tid);
+  if (_calculate_jacobian_in_uo)
+    setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
+
   // Call the initialSetup methods for functions
   for (THREAD_ID tid = 0; tid <n_threads; tid++)
   {
     reinitScalars(tid); // initialize scalars so they are properly sized for use as input into ParsedFunctions
     _functions.initialSetup(tid);
   }
-
 
   if (!_app.isRecovering())
   {
@@ -440,7 +446,6 @@ void FEProblem::initialSetup()
       // Call initialSetup on both Material and Material objects
       _all_materials.initialSetup(tid);
     }
-
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
@@ -722,6 +727,34 @@ FEProblem::checkNonlocalCoupling()
 }
 
 void
+FEProblem::checkUserObjectJacobianRequirement(THREAD_ID tid)
+{
+  std::set<MooseVariable *> uo_jacobian_moose_vars;
+  const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveObjects(tid);
+  for (const auto & uo : e_objects)
+  {
+    MooseSharedPointer<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(uo);
+    if (shape_element_uo)
+    {
+      _calculate_jacobian_in_uo = shape_element_uo->computeJacobianFlag();
+      const std::set<MooseVariable *> & mv_deps = shape_element_uo->jacobianMooseVariables();
+      uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+  }
+  _uo_jacobian_moose_vars[tid].assign(uo_jacobian_moose_vars.begin(), uo_jacobian_moose_vars.end());
+}
+
+void
+FEProblem::setVariableAllDoFMap(const std::vector<MooseVariable *> moose_vars)
+{
+  for (unsigned int i = 0; i < moose_vars.size(); ++i)
+  {
+    VariableName var_name = moose_vars[i]->name();
+    _var_dof_map[var_name] = _nl.getVariableGlobalDoFs(var_name);
+  }
+}
+
+void
 FEProblem::prepare(const Elem * elem, THREAD_ID tid)
 {
   _assembly[tid]->reinit(elem);
@@ -759,13 +792,23 @@ FEProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jvar, cons
   _aux.prepare(tid);
   _assembly[tid]->prepareBlock(ivar, jvar, dof_indices);
   if (_has_nonlocal_coupling)
-    _assembly[tid]->prepareBlockNonlocal(ivar, jvar, dof_indices);
+  {
+    MooseVariable & jv = _nl.getVariable(tid, jvar);
+    const auto it = _var_dof_map.find(jv.name());
+    if (it != _var_dof_map.end())
+      _assembly[tid]->prepareBlockNonlocal(ivar, jvar, dof_indices, jv.allDofIndices());
+  }
 
   if (_displaced_problem != NULL && (_reinit_displaced_elem || _reinit_displaced_face))
   {
     _displaced_problem->prepare(_displaced_mesh->elemPtr(elem->id()), ivar, jvar, dof_indices, tid);
     if (_has_nonlocal_coupling)
-      _displaced_problem->prepareBlockNonlocal(ivar, jvar, dof_indices, tid);
+    {
+      MooseVariable & jv = _nl.getVariable(tid, jvar);
+      const auto it = _var_dof_map.find(jv.name());
+      if (it != _var_dof_map.end())
+        _displaced_problem->prepareBlockNonlocal(ivar, jvar, dof_indices, jv.allDofIndices(), tid);
+    }
   }
 }
 
@@ -937,13 +980,23 @@ FEProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, 
 {
   _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
   if (_has_nonlocal_coupling)
-    _assembly[tid]->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices);
+  {
+    MooseVariable & jv = _nl.getVariable(tid, jvar);
+    const auto it = _var_dof_map.find(jv.name());
+    if (it != _var_dof_map.end())
+      _assembly[tid]->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices());
+  }
 
   if (_displaced_problem)
   {
     _displaced_problem->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tid);
     if (_has_nonlocal_coupling)
-      _displaced_problem->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices, tid);
+    {
+      MooseVariable & jv = _nl.getVariable(tid, jvar);
+      const auto it = _var_dof_map.find(jv.name());
+      if (it != _var_dof_map.end())
+        _displaced_problem->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tid);
+    }
   }
 }
 
@@ -3861,9 +3914,10 @@ FEProblem::meshChanged()
       ProjectMaterialProperties pmp(false, *this, _nl, _material_data, _bnd_material_data, _material_props, _bnd_material_props, _assembly);
       Threads::parallel_reduce(*_mesh.coarsenedElementRange(), pmp);
     }
-
   }
 
+  if (_calculate_jacobian_in_uo)
+    setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
   _has_jacobian = false;                    // we have to recompute jacobian when mesh changed
 
   for (const auto & mci : _notify_when_mesh_changes)

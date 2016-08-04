@@ -38,6 +38,7 @@
 class DisplacedProblem;
 class FEProblem;
 class MooseMesh;
+class SystemBase;
 class NonlinearSystem;
 class RandomInterface;
 class RandomData;
@@ -260,6 +261,10 @@ public:
    * @return Flag indicating nonlocal coupling exists or not.
    */
   void checkNonlocalCoupling();
+  void checkUserObjectJacobianRequirement(THREAD_ID tid);
+  void setVariableAllDoFMap(const std::vector<MooseVariable *> moose_vars);
+
+  const std::vector<MooseVariable *> & getUserObjectJacobianVariables(THREAD_ID tid) const { return _uo_jacobian_moose_vars[tid]; }
 
   virtual Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
 
@@ -1203,8 +1208,10 @@ protected:
   bool _has_jacobian;
 
   /// Indicates if nonlocal coupling is required/exists
-  bool _requires_nonlocal_coupling;
   bool _has_nonlocal_coupling;
+  bool _calculate_jacobian_in_uo;
+
+  std::vector<std::vector<MooseVariable *> > _uo_jacobian_moose_vars;
 
   SolverParams _solver_params;
 

@@ -77,8 +77,8 @@ public:
   /**
    * Get all global dofindices for the variable
    */
-  std::vector<dof_id_type> & allDofIndices();
-  unsigned int totalVarDofs() { return _all_dof_indices.size(); }
+  const std::vector<dof_id_type> & allDofIndices() const;
+  unsigned int totalVarDofs() { return allDofIndices().size(); }
 
   /**
    * Kind of the variable (Nonlinear, Auxiliary, ...)
@@ -138,8 +138,6 @@ protected:
   const DofMap & _dof_map;
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
-
-  std::vector<dof_id_type> _all_dof_indices;
   /// mesh the variable is active in
   MooseMesh & _mesh;
   /// scaling factor for this variable

@@ -33,6 +33,7 @@ InputParameters validParams<SubProblem>()
 SubProblem::SubProblem(const InputParameters & parameters) :
     Problem(parameters),
     _factory(_app.getFactory()),
+    _requires_nonlocal_coupling(false),
     _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();

@@ -46,24 +46,10 @@ MooseVariableBase::name() const
   return _sys.system().variable(_var_num).name();
 }
 
-std::vector<dof_id_type> &
-MooseVariableBase::allDofIndices()
+const std::vector<dof_id_type> &
+MooseVariableBase::allDofIndices() const
 {
-  std::vector<std::set<dof_id_type> > dofs(libMesh::n_threads());
-  std::set<dof_id_type> all_dofs;
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    for (unsigned int i = 0; i < _mesh.nElem(); ++i)
-    {
-      std::vector<dof_id_type> di;
-      _dof_map.dof_indices(_mesh.elemPtr(i), di, _var_num);
-      dofs[tid].insert(di.begin(), di.end());
-    }
-    all_dofs.insert(dofs[tid].begin(), dofs[tid].end());
-  }
-  _all_dof_indices.assign(all_dofs.begin(), all_dofs.end());
-
-  return _all_dof_indices;
+  return _subproblem._var_dof_map[name()];
 }
 
 Order

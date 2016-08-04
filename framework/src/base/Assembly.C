@@ -988,12 +988,16 @@ Assembly::prepareNonlocal()
     MooseVariable & ivar = *(it.first);
     MooseVariable & jvar = *(it.second);
 
-    unsigned int vi = ivar.number();
-    unsigned int vj = jvar.number();
+    const auto map_it = _sys.subproblem()._var_dof_map.find(jvar.name());
+    if (map_it != _sys.subproblem()._var_dof_map.end())
+    {
+      unsigned int vi = ivar.number();
+      unsigned int vj = jvar.number();
 
-    jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), _dof_map.n_dofs());
-    jacobianBlockNonlocal(vi,vj).zero();
-    _jacobian_block_nonlocal_used[vi][vj] = 0;
+      jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
+      jacobianBlockNonlocal(vi,vj).zero();
+      _jacobian_block_nonlocal_used[vi][vj] = 0;
+    }
   }
 }
 
@@ -1009,9 +1013,32 @@ Assembly::prepareVariable(MooseVariable * var)
     unsigned int vj = jvar.number();
 
     if (vi == var->number() || vj == var->number())
-    {
       jacobianBlock(vi,vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
-      jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), _dof_map.n_dofs());
+  }
+
+  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  {
+    _sub_Re[i][var->number()].resize(var->dofIndices().size());
+    _sub_Re[i][var->number()].zero();
+  }
+}
+
+void
+Assembly::prepareVariableNonlocal(MooseVariable * var)
+{
+  for (const auto & it : _cm_entry)
+  {
+    MooseVariable & ivar = *(it.first);
+    MooseVariable & jvar = *(it.second);
+
+    const auto map_it = _sys.subproblem()._var_dof_map.find(jvar.name());
+    if (map_it != _sys.subproblem()._var_dof_map.end())
+    {
+      unsigned int vi = ivar.number();
+      unsigned int vj = jvar.number();
+
+      if (vi == var->number() || vj == var->number())
+        jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
     }
   }
 
@@ -1069,9 +1096,9 @@ Assembly::prepareBlock(unsigned int ivar, unsigned int jvar, const std::vector<d
 }
 
 void
-Assembly::prepareBlockNonlocal(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices)
+Assembly::prepareBlockNonlocal(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices)
 {
-  jacobianBlockNonlocal(ivar,jvar).resize(dof_indices.size(), _dof_map.n_dofs());
+  jacobianBlockNonlocal(ivar,jvar).resize(idof_indices.size(), jdof_indices.size());
   jacobianBlockNonlocal(ivar,jvar).zero();
   _jacobian_block_nonlocal_used[ivar][jvar] = 0;
 }
@@ -1399,7 +1426,7 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
 }
 
 void
-Assembly::cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor)
+Assembly::cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor)
 {
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m())
   {
@@ -1477,14 +1504,15 @@ Assembly::addJacobian(SparseMatrix<Number> & jacobian)
 void
 Assembly::addJacobianNonlocal(SparseMatrix<Number> & jacobian)
 {
-  std::vector<dof_id_type> jdof_indices(_dof_map.n_dofs());
-  for (unsigned int i = 0; i < _dof_map.n_dofs(); ++i)
-    jdof_indices[i] = i;
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & ivar : vars)
     for (const auto & jvar : vars)
-      if ((*_cm)(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
-        addJacobianBlock(jacobian, jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jdof_indices, ivar->scalingFactor());
+    {
+      const auto it = _sys.subproblem()._var_dof_map.find(jvar->name());
+      if (it != _sys.subproblem()._var_dof_map.end())
+        if ((*_cm)(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
+          addJacobianBlock(jacobian, jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jvar->allDofIndices(), ivar->scalingFactor());
+    }
 }
 
 void
@@ -1549,14 +1577,15 @@ Assembly::cacheJacobian()
 void
 Assembly::cacheJacobianNonlocal()
 {
-  std::vector<dof_id_type> jdof_indices(_dof_map.n_dofs());
-  for (unsigned int i = 0; i < _dof_map.n_dofs(); ++i)
-    jdof_indices[i] = i;
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & ivar : vars)
     for (const auto & jvar : vars)
-      if ((*_cm)(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
-        cacheJacobianBlockNonlocal(jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jdof_indices, ivar->scalingFactor());
+    {
+      const auto it = _sys.subproblem()._var_dof_map.find(jvar->name());
+      if (it != _sys.subproblem()._var_dof_map.end())
+        if ((*_cm)(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
+          cacheJacobianBlockNonlocal(jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jvar->allDofIndices(), ivar->scalingFactor());
+    }
 }
 
 void
@@ -1594,14 +1623,12 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, u
 }
 
 void
-Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices)
+Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices)
 {
   DenseMatrix<Number> & keg = jacobianBlockNonlocal(ivar, jvar);
 
-  std::vector<dof_id_type> di(dof_indices);
-  std::vector<dof_id_type> dg(_dof_map.n_dofs());
-  for (unsigned int i = 0; i < _dof_map.n_dofs(); ++i)
-    dg[i] = i;
+  std::vector<dof_id_type> di(idof_indices);
+  std::vector<dof_id_type> dg(jdof_indices);
   dof_map.constrain_element_matrix(keg, di, dg, false);
 
   Real scaling_factor = _sys.getVariable(_tid, ivar).scalingFactor();

@@ -3,17 +3,26 @@
     type = RunApp
     input = 'shape_element_user_object.i'
     recover = false
+    allow_warnings = true
+    mesh_mode = SERIAL
   [../]
 
   [./simple_shape_element_uo]
     type = PetscJacobianTester
     input = 'simple_shape_element_uo_test.i'
+    difference_tol = 5e-8
     recover = false
+    allow_warnings = true
+    mesh_mode = SERIAL
   [../]
 
   [./jacobian]
-    type = RunApp
+    #type = RunApp
+    type = PetscJacobianTester
     input = 'jacobian.i'
+    difference_tol = 1.2e-8
     recover = false
+    allow_warnings = true
+    mesh_mode = SERIAL
   [../]
 []

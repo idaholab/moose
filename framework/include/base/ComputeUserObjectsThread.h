@@ -60,8 +60,6 @@ protected:
   const MooseObjectWarehouse<SideUserObject> & _side_user_objects;
   const MooseObjectWarehouse<InternalSideUserObject> & _internal_side_user_objects;
   ///@}
-
-  std::vector<MooseVariable *> _jacobian_moose_vars;
 };
 
 #endif //COMPUTEUSEROBJECTSTHREAD_H

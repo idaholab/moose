@@ -36,10 +36,13 @@ class ShapeElementUserObject : public ElementUserObject
 public:
   ShapeElementUserObject(const InputParameters & parameters);
 
+  /// check if jacobian is to be computed in user objects
+  const bool & computeJacobianFlag() const { return _compute_jacobians; }
+
   /**
    * Returns the set of variables a Jacobian has been requested for
    */
-  const std::set<MooseVariable *> & jacobianMooseVariables() { return _jacobian_moose_variables; }
+  const std::set<MooseVariable *> & jacobianMooseVariables() const { return _jacobian_moose_variables; }
 
   /**
    * This function will be called with the shape functions for jvar initialized. It
@@ -73,9 +76,6 @@ protected:
 
   /// global DOF ID corresponding to _j
   dof_id_type _j_global;
-
-  /// set to true iff the current call of the user object is for the purpose of calculating Jacobians
-  // const bool _currently_computing_jacobian;
 
 private:
   const bool _compute_jacobians;

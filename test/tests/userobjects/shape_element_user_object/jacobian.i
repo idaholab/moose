@@ -6,7 +6,6 @@
   type = GeneratedMesh
   dim = 1
   nx = 2
-  #ny = 2
 []
 
 [Variables]
@@ -76,9 +75,9 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  #petsc_options = '-snes_test_display'
-  #petsc_options_iname = '-snes_type'
-  #petsc_options_value = 'test'
+  petsc_options = '-snes_test_display'
+  petsc_options_iname = '-snes_type'
+  petsc_options_value = 'test'
   dt = 0.1
   num_steps = 2
 []

@@ -28,10 +28,9 @@ ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameter
     ElementUserObject(parameters),
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
-    // _currently_computing_jacobian(_fe_problem.currentlyComputingJacobian()),
     _compute_jacobians(getParam<bool>("compute_jacobians"))
 {
-  // mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
+  mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
 }
 
 unsigned int
