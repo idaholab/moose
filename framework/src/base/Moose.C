@@ -249,7 +249,6 @@
 
 #include "FieldSplitPreconditioner.h"
 #include "Split.h"
-#include "ContactSplit.h"
 #include "AddFieldSplitAction.h"
 
 // dampers
@@ -701,7 +700,6 @@ registerObjects(Factory & factory)
 
   // splits
   registerSplit(Split);
-  registerSplit(ContactSplit);
 
   // MultiApps
   registerMultiApp(TransientMultiApp);
