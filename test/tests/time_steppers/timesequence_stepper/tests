@@ -34,4 +34,51 @@
     input = 'exodustimesequence.i'
     exodiff = 'exodustimesequence_out.e'
   [../]
+
+  [./timesequence_restart1]
+    type = 'Exodiff'
+    input = 'timesequence_restart1.i'
+    exodiff = 'timesequence_restart1.e'
+    cli_args = 'Outputs/file_base=timesequence_restart1'
+    recover = false
+  [../]
+
+  [./timesequence_restart2]
+    type = 'Exodiff'
+    input = 'timesequence_restart2.i'
+    exodiff = 'timesequence_restart2.e'
+    cli_args = 'Outputs/file_base=timesequence_restart2'
+    recover = false
+    prereq = timesequence_restart1
+  [../]
+
+  [./timesequence_restart3]
+    type = 'Exodiff'
+    input = 'timesequence_restart3.i'
+    exodiff = 'timesequence_restart3.e'
+    cli_args = 'Outputs/file_base=timesequence_restart3'
+    recover = false
+    prereq = timesequence_restart1
+  [../]
+
+  [./timesequence_restart_failure_1]
+    type = 'Exodiff'
+    input = 'timesequence_restart1.i'
+    exodiff = 'timesequence_restart_failure1.e'
+    cli_args = 'Outputs/file_base=timesequence_restart_failure1'
+    recover = false
+    max_threads = 1
+    max_parallel = 1
+  [../]
+
+  [./timesequence_restart_failure2]
+    type = 'RunException'
+    input = 'timesequence_restart_failure.i'
+    expect_err = "The timesequence provided in the restart file must be identical"
+    recover = false
+    prereq = timesequence_restart_failure_1
+    max_threads = 1
+    max_parallel = 1
+  [../]
+
 []
