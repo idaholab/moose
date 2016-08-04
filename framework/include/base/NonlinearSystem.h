@@ -517,6 +517,8 @@ protected:
   /// Kernel Storage
   KernelWarehouse _kernels;
   MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
+  MooseObjectWarehouse<ScalarKernel> _time_scalar_kernels;
+  MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
   MooseObjectWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
   MooseObjectWarehouse<KernelBase> _time_kernels;

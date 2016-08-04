@@ -12,32 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ODETimeDerivative.h"
+#ifndef ODETIMEKERNEL_H
+#define ODETIMEKERNEL_H
+
+#include "ODEKernel.h"
+
+// Forward Declarations
+class ODETimeKernel;
 
 template<>
-InputParameters validParams<ODETimeDerivative>()
-{
-  InputParameters params = validParams<ODETimeKernel>();
-  return params;
-}
+InputParameters validParams<ODETimeKernel>();
 
-ODETimeDerivative::ODETimeDerivative(const InputParameters & parameters) :
-    ODETimeKernel(parameters)
+/**
+ * Base class for ODEKernels that contribute to the time residual
+ * vector.
+ */
+class ODETimeKernel : public ODEKernel
 {
-}
+public:
+  ODETimeKernel(const InputParameters & parameters);
 
-Real
-ODETimeDerivative::computeQpResidual()
-{
-  return _u_dot[_i];
-}
+  virtual void computeResidual() override;
+};
 
-Real
-ODETimeDerivative::computeQpJacobian()
-{
-  if (_i == _j)
-    return _du_dot_du[_i];
-  else
-    return 0;
-}
 
+#endif

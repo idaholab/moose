@@ -62,6 +62,7 @@
 #include "Predictor.h"
 #include "Assembly.h"
 #include "ElementPairLocator.h"
+#include "ODETimeKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -543,10 +544,19 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
 }
 
 void
-NonlinearSystem::addScalarKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  MooseSharedPointer<ScalarKernel> kernel = _factory.create<ScalarKernel>(kernel_name, name, parameters);
+  MooseSharedPointer<ScalarKernel> kernel =
+    _factory.create<ScalarKernel>(kernel_name, name, parameters);
   _scalar_kernels.addObject(kernel);
+
+  // Store time/non-time ScalarKernels separately
+  ODETimeKernel * t_kernel = dynamic_cast<ODETimeKernel *>(kernel.get());
+
+  if (t_kernel)
+    _time_scalar_kernels.addObject(kernel);
+  else
+    _non_time_scalar_kernels.addObject(kernel);
 }
 
 void
@@ -1250,8 +1260,28 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     // do scalar kernels (not sure how to thread this)
     if (_scalar_kernels.hasActiveObjects())
     {
-      const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getActiveObjects();
-      for (const auto & scalar_kernel : scalars)
+      const std::vector<MooseSharedPointer<ScalarKernel> > * scalars;
+
+      // Use the right subset of ScalarKernels depending on the KernelType.
+      switch (type)
+      {
+      case Moose::KT_ALL:
+        scalars = &(_scalar_kernels.getActiveObjects());
+        break;
+
+      case Moose::KT_TIME:
+        scalars = &(_time_scalar_kernels.getActiveObjects());
+        break;
+
+      case Moose::KT_NONTIME:
+        scalars = &(_non_time_scalar_kernels.getActiveObjects());
+        break;
+
+      default:
+        mooseError("Unrecognized KernelType in computeResidualInternal().");
+      }
+
+      for (const auto & scalar_kernel : *scalars)
       {
         scalar_kernel->reinit();
         scalar_kernel->computeResidual();
