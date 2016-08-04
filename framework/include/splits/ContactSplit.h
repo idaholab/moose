@@ -31,10 +31,10 @@ class ContactSplit : public Split
  protected:
   std::vector<std::string>              _contact_master;
   std::vector<std::string>              _contact_slave;
-  std::vector<bool>                     _contact_displaced;
+  std::vector<int>                     _contact_displaced;
   std::vector<std::string>              _uncontact_master;
   std::vector<std::string>              _uncontact_slave;
-  std::vector<bool>                     _uncontact_displaced;
+  std::vector<int>                     _uncontact_displaced;
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 };
 
