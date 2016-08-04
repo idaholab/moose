@@ -5,23 +5,13 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef EULERANGLES_H
-#define EULERANGLES_H
+#include "EulerAngles.h"
+#include "MooseRandom.h"
 
-#include "MooseTypes.h"
-#include "libmesh/vector_value.h"
-
-/**
- * Euler angle triplet.
- */
-class EulerAngles
+void
+EulerAngles::random()
 {
-public:
-  Real phi1, Phi, phi2;
-
-  operator RealVectorValue() const { return RealVectorValue(phi1, Phi, phi2); }
-
-  void random();
-};
-
-#endif //EULERANGLES_H
+  phi1 = MooseRandom::rand() * 360.0;
+  Phi  = std::acos(1.0 - 2.0 * MooseRandom::rand()) / libMesh::pi * 180.0;
+  phi2 = MooseRandom::rand() * 360;
+}
