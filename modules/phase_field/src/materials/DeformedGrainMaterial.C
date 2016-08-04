@@ -6,7 +6,7 @@ InputParameters validParams<DeformedGrainMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
-  params.addRequiredParam<unsigned int>("ndef", "Number of OP representing deformed grains");
+  params.addRequiredParam<unsigned int>("deformed_grain_num", "Number of OP representing deformed grains");
   params.addParam<Real>("length_scale", 1.0e-9, "Length scale in m, where default is nm");
   params.addParam<Real>("int_width", 4.0, "Diffuse Interface width in length_scale unit");
   params.addParam<Real>("time_scale", 1.0e-6, "Time scale in sec, where default is micro sec");
@@ -38,7 +38,7 @@ DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters)
     _Disloc_Den_i(declareProperty<Real>("Disloc_Den_i")),
     _rho_eff(declareProperty<Real>("rho_eff")),
     _Def_Eng(declareProperty<Real>("Def_Eng")),
-    _ndef(getParam<unsigned int>("ndef")),
+    _deformed_grain_num(getParam<unsigned int>("deformed_grain_num")),
     _op_num(coupledComponents("v")),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _kb(8.617343e-5), //Boltzmann constant in eV/K
@@ -76,7 +76,7 @@ DeformedGrainMaterial::computeQpProperties()
 
     // Second position contains the order parameter index
     unsigned int op_index = active_ops[op].second;
-    if (grain_index >= _ndef)
+    if (grain_index >= _deformed_grain_num)
       rho_i = 0.0;
     else
       rho_i = _Disloc_Den_i[_qp];
