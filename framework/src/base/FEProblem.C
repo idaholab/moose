@@ -2639,7 +2639,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _to_multi_app_transfers[type].getActiveObjects();
 
-    _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
     {
       Moose::perf_log.push(transfer->name(), "Transfers");
@@ -2650,16 +2650,16 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished\n" << COLOR_DEFAULT << std::endl;
   }
   else if (multi_apps.size())
-      _console << COLOR_CYAN << "No Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "\nNo Transfers on " <<  Moose::stringify(type) << " To MultiApps\n" << COLOR_DEFAULT << std::endl;
 
 
   // Execute MultiApps
   if (multi_apps.size())
   {
-    _console << COLOR_CYAN << "Executing MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "\nExecuting MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
 
     bool success = true;
 
@@ -2674,7 +2674,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     if (!success)
       return false;
 
-    _console << COLOR_CYAN << "Finished Executing MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Finished Executing MultiApps on " <<  Moose::stringify(type) << "\n" << COLOR_DEFAULT << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
@@ -2682,7 +2682,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
   {
     const std::vector<MooseSharedPointer<Transfer> > & transfers = _from_multi_app_transfers[type].getActiveObjects();
 
-    _console << COLOR_CYAN << "Starting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
     {
       Moose::perf_log.push(transfer->name(), "Transfers");
@@ -2693,10 +2693,10 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << COLOR_CYAN << "Transfers " << Moose::stringify(type) << " Are Finished" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Transfers " << Moose::stringify(type) << " Are Finished\n" << COLOR_DEFAULT << std::endl;
   }
   else if (multi_apps.size())
-    _console << COLOR_CYAN << "No Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "\nNo Transfers on " <<  Moose::stringify(type) << " From MultiApps\n" << COLOR_DEFAULT << std::endl;
 
 
   // If we made it here then everything passed
@@ -2710,7 +2710,7 @@ FEProblem::advanceMultiApps(ExecFlagType type)
 
   if (multi_apps.size())
   {
-    _console << "Advancing MultiApps" << std::endl;
+    _console << COLOR_CYAN << "\nAdvancing MultiApps" << COLOR_DEFAULT << std::endl;
 
     for (const auto & multi_app : multi_apps)
       multi_app->advanceStep();
@@ -2718,7 +2718,7 @@ FEProblem::advanceMultiApps(ExecFlagType type)
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << "Finished Advancing MultiApps" << std::endl;
+    _console << COLOR_CYAN << "Finished Advancing MultiApps\n" << COLOR_DEFAULT << std::endl;
   }
 }
 
@@ -2729,7 +2729,7 @@ FEProblem::backupMultiApps(ExecFlagType type)
 
   if (multi_apps.size())
   {
-    _console << "Backing Up MultiApps" << std::endl;
+    _console << COLOR_CYAN << "\nBacking Up MultiApps" << COLOR_DEFAULT << std::endl;
 
     for (const auto & multi_app : multi_apps)
       multi_app->backup();
@@ -2737,7 +2737,7 @@ FEProblem::backupMultiApps(ExecFlagType type)
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << "Finished Backing Up MultiApps" << std::endl;
+    _console << COLOR_CYAN << "Finished Backing Up MultiApps\n" << COLOR_DEFAULT << std::endl;
   }
 }
 
@@ -2749,9 +2749,9 @@ FEProblem::restoreMultiApps(ExecFlagType type, bool force)
   if (multi_apps.size())
   {
     if (force)
-      _console << "\nRestoring Multiapps because of solve failure!" << std::endl;
+      _console << COLOR_CYAN << "\nRestoring Multiapps because of solve failure!" << COLOR_DEFAULT << std::endl;
     else
-      _console << "\nRestoring MultiApps" << std::endl;
+      _console << COLOR_CYAN << "\nRestoring MultiApps" << COLOR_DEFAULT << std::endl;
 
     for (const auto & multi_app : multi_apps)
       if (force || multi_app->needsRestoration())
@@ -2760,7 +2760,7 @@ FEProblem::restoreMultiApps(ExecFlagType type, bool force)
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator);
 
-    _console << "Finished Restoring MultiApps" << std::endl;
+    _console << COLOR_CYAN << "Finished Restoring MultiApps\n" << COLOR_DEFAULT << std::endl;
   }
 }
 
@@ -4165,6 +4165,8 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
   system._current_nl_its = static_cast<unsigned int>(it);
 
   msg = oss.str();
+  if (_app.multiAppLevel() > 0)
+    MooseUtils::indentMessage(_app.name(), msg);
 
   return(reason);
 }
