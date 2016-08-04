@@ -1,0 +1,8 @@
+[Tests]
+  # Test the Crank-Nicolson time integration method for scalar variables.
+  [./scalar]
+    type = 'CSVDiff'
+    input = 'scalar.i'
+    csvdiff = 'scalar_out.csv'
+  [../]
+[]
