@@ -428,7 +428,7 @@ RankFourTensor::invSymm() const
 }
 
 void
-RankFourTensor::rotate(RealTensorValue & R)
+RankFourTensor::rotate(const RealTensorValue & R)
 {
   RankFourTensor old = *this;
 
