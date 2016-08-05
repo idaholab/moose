@@ -18,7 +18,7 @@
 
 [GlobalParams]
   block = 0  
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -144,16 +144,21 @@
 []
 
 [Materials]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
+
   [./massfrac]
-    type = PorousFlowMaterialMassFractionBuilder
+    type = PorousFlowMassFraction
   [../]
 
   # Fluid pressure
   [./eff_fluid_pressure]
-    type = PorousFlowMaterialEffectiveFluidPressure # Calculate effective fluid pressure from fluid phase pressures and saturations
+    type = PorousFlowEffectiveFluidPressure # Calculate effective fluid pressure from fluid phase pressures and saturations
   [../]  
   [./ppss]
-    type = PorousFlowMaterial1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
+    type = PorousFlow1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
     porepressure = pp
     al = 1E-8 # unimportant in this fully-saturated test
     m = 0.8   # unimportant in this fully-saturated test
@@ -161,23 +166,23 @@
   
   # Fluid density
   [./dens0]
-    type = PorousFlowMaterialDensityConstBulk
+    type = PorousFlowDensityConstBulk
     density_P0 = 1000
     bulk_modulus = 2.2E9
     phase = 0
   [../]
   [./dens_all]
-    type = PorousFlowMaterialJoiner
+    type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density
   [../]
   [./dens_all_at_quadpoints]
-    type = PorousFlowMaterialJoiner
+    type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
   [../]
   
   # Porosity 
   [./porosity]
-    type = PorousFlowMaterialPorosityConst
+    type = PorousFlowPorosityConst
     porosity = 0.1
   [../]
   
@@ -192,23 +197,23 @@
     n = 7
   [../]
   [./relperm]
-    type = PorousFlowMaterialRelativePermeabilityCorey
+    type = PorousFlowRelativePermeabilityCorey
     n_j = 0 # unimportant in this fully-saturated situation
     phase = 0
   [../]
   [./relperm_all]
-    type = PorousFlowMaterialJoiner
+    type = PorousFlowJoiner
     material_property = PorousFlow_relative_permeability
   [../]
   
   # Fluid viscosity (assumed constant)
   [./visc0]
-    type = PorousFlowMaterialViscosityConst
+    type = PorousFlowViscosityConst
     viscosity = 1E-3
     phase = 0
   [../]
   [./visc_all]
-    type = PorousFlowMaterialJoiner
+    type = PorousFlowJoiner
     material_property = PorousFlow_viscosity
   [../]
 []
