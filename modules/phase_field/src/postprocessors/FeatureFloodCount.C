@@ -166,9 +166,6 @@ FeatureFloodCount::initialize()
     _halo_ids[map_num].clear();
   }
 
-  for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
-    _entities_visited[var_num].clear();
-
   // Calculate the thresholds for this iteration
   _step_threshold = _element_average_value + _threshold;
   _step_connecting_threshold = _element_average_value + _connecting_threshold;
@@ -180,6 +177,15 @@ FeatureFloodCount::initialize()
 
   // Reset the feature count
   _feature_count = 0;
+
+  clearDataStructures();
+}
+
+void
+FeatureFloodCount::clearDataStructures()
+{
+  for (auto & map_ref : _entities_visited)
+    map_ref.clear();
 }
 
 void
@@ -210,8 +216,8 @@ FeatureFloodCount::meshChanged()
 void
 FeatureFloodCount::execute()
 {
-  const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
-  for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
+  const auto end = _mesh.getMesh().active_local_elements_end();
+  for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
     const Elem * current_elem = *el;
 
@@ -265,6 +271,9 @@ void FeatureFloodCount::communicateAndMerge()
   recv_buffers.reserve(_app.n_processors());
 
   serialize(send_buffers[0]);
+
+  // Free up as much memory as possible here before we do global communication
+  clearDataStructures();
 
   /**
    * Each processor needs information from all other processors to create a complete
@@ -626,9 +635,6 @@ FeatureFloodCount::updateFieldInfo()
      * sorted indices vector.
      */
     Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector);
-
-    // Clear out the original markings since they aren't unique globally
-    _feature_maps[map_num].clear();
 
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
     auto map_idx = (_single_map_mode || _condense_map_info) ? decltype(map_num)(0) : map_num;

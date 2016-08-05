@@ -288,6 +288,12 @@ protected:
   void communicateAndMerge();
 
   /**
+   * Helper routine for clearing up data structures during initialize and prior to parallel
+   * communication.
+   */
+  virtual void clearDataStructures();
+
+  /**
    * This routine adds the periodic node information to our data structure prior to packing the data
    * this makes those periodic neighbors appear much like ghosted nodes in a multiprocessor setting
    */
