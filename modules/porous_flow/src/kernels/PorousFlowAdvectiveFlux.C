@@ -25,8 +25,8 @@ InputParameters validParams<PorousFlowAdvectiveFlux>()
 
 PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & parameters) :
     Kernel(parameters),
-    _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability")),
-    _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_dvar")),
+    _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
+    _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar")),
     _fluid_density_node(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
     _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
     _fluid_density_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
