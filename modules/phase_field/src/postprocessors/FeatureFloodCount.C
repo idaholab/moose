@@ -207,7 +207,7 @@ FeatureFloodCount::meshChanged()
   {
     _all_boundary_entity_ids.clear();
     if (_is_elemental)
-      for (MooseMesh::bnd_elem_iterator elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd();
+      for (auto elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd();
            elem_it != elem_end; ++elem_it)
         _all_boundary_entity_ids.insert((*elem_it)->_elem->id());
   }
@@ -279,8 +279,11 @@ void FeatureFloodCount::communicateAndMerge()
    * Each processor needs information from all other processors to create a complete
    * global feature map.
    */
+  _communicator.barrier();
+  Moose::perf_log.push("allgather_packed_range()", "FeatureFloodCount");
   _communicator.allgather_packed_range((void *)(nullptr), send_buffers.begin(), send_buffers.end(),
                                        std::back_inserter(recv_buffers));
+  Moose::perf_log.pop("allgather_packed_range()", "FeatureFloodCount");
 
   deserialize(recv_buffers);
 
@@ -443,8 +446,8 @@ FeatureFloodCount::prepareDataForTransfer()
 {
   MeshBase & mesh = _mesh.getMesh();
 
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto & feature : _partial_feature_sets[map_num])
+  for (auto & list_ref : _partial_feature_sets)
+    for (auto & feature : list_ref)
     {
       for (auto & entity_id : feature._local_ids)
       {
@@ -507,17 +510,17 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
   std::istringstream iss;
 
   mooseAssert(serialized_buffers.size() == _app.n_processors(), "Unexpected size of serialized_buffers: " << serialized_buffers.size());
-
-  for (auto rank = decltype(_n_procs)(0); rank < serialized_buffers.size(); ++rank)
+  auto rank = processor_id();
+  for (decltype(rank) proc_id = 0; proc_id < serialized_buffers.size(); ++proc_id)
   {
     /**
      * We should already have the local processor data in the features data structure.
      * Don't unpack the local buffer again.
      */
-    if (rank == processor_id())
+    if (proc_id == rank)
       continue;
 
-    iss.str(serialized_buffers[rank]);    // populate the stream with a new buffer
+    iss.str(serialized_buffers[proc_id]);    // populate the stream with a new buffer
     iss.clear();                          // reset the string stream state
 
     // Load the communicated data into all of the other processors' slots
@@ -999,18 +1002,17 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
   std::vector<bool> intersected_boxes(rhs._bboxes.size(), false);
 
   auto box_expanded = false;
-  for (unsigned int i = 0; i < _bboxes.size(); ++i)
-    for (unsigned int j = 0; j < rhs._bboxes.size(); ++j)
-      if (_bboxes[i].intersect(rhs._bboxes[j]))
+  for (auto & bbox : _bboxes)
+    for (size_t j = 0; j < rhs._bboxes.size(); ++j)
       {
-        updateBBoxExtremes(_bboxes[i], rhs._bboxes[j]);
+        updateBBoxExtremes(bbox, rhs._bboxes[j]);
         intersected_boxes[j] = true;
         box_expanded = true;
       }
 
   // Any bounding box in the rhs vector that doesn't intersect
   // needs to be appended to the lhs vector
-  for (unsigned int j = 0; j < intersected_boxes.size(); ++j)
+  for (size_t j = 0; j < intersected_boxes.size(); ++j)
     if (!intersected_boxes[j])
       _bboxes.push_back(rhs._bboxes[j]);
 
