@@ -20,6 +20,8 @@
 
 #include "libmesh/dense_matrix.h"
 
+#include "Eigen/Core"
+
 // Forward declarations
 class Assembly;
 class SubProblem;
@@ -35,9 +37,9 @@ template <typename T> class NumericVector;
 template <typename T> class DenseVector;
 }
 
-typedef MooseArray<DenseVector<Real> >       ArrayVariableValue;
-typedef MooseArray<DenseMatrix<Real> >       ArrayVariableGradient;
-// typedef MooseArray<RealTensor>         VariableSecond;
+typedef MooseArray<Eigen::VectorXd>       ArrayVariableValue;
+typedef MooseArray<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> >       ArrayVariableGradient;
+typedef MooseArray<RealTensor>         ArrayVariableSecond;
 
 // typedef MooseArray<std::vector<Real> >         VariableTestValue;
 // typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
@@ -328,6 +330,14 @@ protected:
   /// DOF indices (neighbor)
   std::vector<dof_id_type> _dof_indices_neighbor;
 
+  /// Cache of local dof indices for the first variable in the variable group
+  std::vector<dof_id_type> _local_dof_indices;
+
+  /// Interface to raw PetscVector data
+  Eigen::Map<Eigen::VectorXd> _mapped_values;
+
+  // Interface to the current gradient
+  Eigen::Map<Eigen::Vector3d> _mapped_grad_phi;
 
   bool _need_u_old;
   bool _need_u_older;

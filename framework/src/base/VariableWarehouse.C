@@ -16,6 +16,7 @@
 #include "MooseVariable.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
+#include "ArrayMooseVariable.h"
 
 VariableWarehouse::VariableWarehouse()
 {
@@ -37,6 +38,10 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
   if (dynamic_cast<MooseVariable *>(var) != NULL)
   {
     _vars.push_back(dynamic_cast<MooseVariable *>(var));
+  }
+  else if (dynamic_cast<ArrayMooseVariable *>(var) != NULL)
+  {
+    _array_vars.push_back(dynamic_cast<ArrayMooseVariable *>(var));
   }
   else if (dynamic_cast<MooseVariableScalar *>(var) != NULL)
   {
@@ -99,6 +104,12 @@ const std::vector<MooseVariableScalar *> &
 VariableWarehouse::scalars()
 {
   return _scalar_vars;
+}
+
+const std::vector<ArrayMooseVariable *> &
+VariableWarehouse::arrayVars()
+{
+  return _array_vars;
 }
 
 const std::set<MooseVariable *> &

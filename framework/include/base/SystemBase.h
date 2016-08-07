@@ -22,6 +22,7 @@
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
 #include "MooseVariable.h"
+#include "ArrayMooseVariable.h"
 #include "DataIO.h"
 
 // libMesh
@@ -171,6 +172,17 @@ public:
    * @param active_subdomains a list of subdomain ids this variable is active on
    */
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL) = 0;
+
+  /**
+   * Adds an array-variable to the system
+   *
+   * @param var_name name of the variable
+   * @param type FE type of the variable
+   * @param scale_factor the scaling factor for the variable
+   * @param active_subdomains a list of subdomain ids this variable is active on
+   */
+  virtual void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL) = 0;
+
 
   /**
    * Query a system for a variable
@@ -452,6 +464,43 @@ public:
     else
       for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
         _var_map[var_num].insert(*it);
+  }
+
+  /**
+   * Add count number of variables as an ArrayVariable.
+   *
+   * Note: calling this turns off automatic variable group identification for this system...
+   */
+  virtual void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL)
+  {
+    // Turn off automatic variable group identification so that we can be sure that this variable
+    // group will be ordered exactly like it should be
+    _sys.identify_variable_groups(false);
+
+    // Build up the variable names
+    std::vector<std::string> var_names;
+    for (unsigned int i = 0; i < count; i++)
+      var_names.push_back(var_name + "_" + std::to_string(i));
+
+    unsigned int var_num = _sys.add_variables(var_names, type, active_subdomains);
+
+    if (active_subdomains == NULL)
+    {
+      for (unsigned int i = 0; i < count; i++)
+        _var_map[var_num] = std::set<SubdomainID>();
+    }
+    else
+      for (unsigned int i = 0; i < count; i++)
+        for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+          _var_map[var_num].insert(*it);
+
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
+      ArrayMooseVariable * var = new ArrayMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      var->scalingFactor(scale_factor);
+      _vars[tid].add(var_name, var);
+    }
   }
 
   /**

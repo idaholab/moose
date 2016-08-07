@@ -52,6 +52,9 @@ InputParameters validParams<AddVariableAction>()
   params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
 
+  // For Array Variables
+  params.addParam<unsigned int>("count", 1, "The multiplicity of this variable for use with ArrayKernels.  1 means just a normal variable anything more than 1 will create an ArrayMooseVariable");
+
   // Advanced input options
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
@@ -132,6 +135,15 @@ AddVariableAction::addVariable(std::string & var_name)
   // Scalar variable
   if (_scalar_var)
     _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
+
+  // Array variables
+  else if(getParam<unsigned int>("count") > 1)
+  {
+    if (blocks.empty())
+      _problem->addArrayVariable(var_name, _fe_type, scale_factor, getParam<unsigned int>("count"));
+    else
+      _problem->addArrayVariable(var_name, _fe_type, scale_factor, getParam<unsigned int>("count"), &blocks);
+  }
 
   // Block restricted variable
   else if (blocks.empty())

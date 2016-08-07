@@ -1299,6 +1299,17 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 }
 
 void
+FEProblem::addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
+{
+  for (unsigned int i=0; i<count; i++)
+  {
+    _nl.addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
+    if (_displaced_problem)
+      _displaced_problem->addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
+  }
+}
+
+void
 FEProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
   if (order > _max_scalar_order)

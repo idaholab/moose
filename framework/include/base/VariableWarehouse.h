@@ -24,6 +24,7 @@
 class MooseVariableBase;
 class MooseVariable;
 class MooseVariableScalar;
+class ArrayMooseVariable;
 
 /**
  * Holds variables and provides some services
@@ -101,6 +102,12 @@ public:
    */
   const std::vector<MooseVariableScalar *> & scalars();
 
+  /**
+   * Get the list of Array variables
+   * @return The list of Array variables
+   */
+  const std::vector<ArrayMooseVariable *> & arrayVars();
+
 protected:
   /// list of variable names
   std::vector<VariableName> _names;
@@ -110,6 +117,8 @@ protected:
   std::map<std::string, MooseVariableBase *> _var_name;
   /// Map to variables that need to be evaluated on a boundary
   std::map<BoundaryID, std::set<MooseVariable *> > _boundary_vars;
+
+  std::vector<ArrayMooseVariable *> _array_vars;
 
   /// list of all variables
   std::vector<MooseVariableScalar *> _scalar_vars;

@@ -435,6 +435,7 @@ public:
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
+  void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);

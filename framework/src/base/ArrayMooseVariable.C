@@ -38,6 +38,9 @@ ArrayMooseVariable::ArrayMooseVariable(unsigned int var_num, const FEType & fe_t
     _current_side(_assembly.side()),
     _neighbor(_assembly.neighbor()),
 
+    _mapped_values(NULL, 0),
+    _mapped_grad_phi(NULL),
+
     _need_u_old(false),
     _need_u_older(false),
 
@@ -537,86 +540,10 @@ ArrayMooseVariable::computeElemValues()
 
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = _qrule->n_points();
+  unsigned int n_shapes = _dof_indices.size();
 
-  _u.resize(nqp);
-  _grad_u.resize(nqp);
-
-//  if (_need_second)
-//    _second_u.resize(nqp);
-
-  if (is_transient)
-  {
-    _u_dot.resize(nqp);
-    _du_dot_du.resize(nqp);
-
-    if (_need_u_old)
-      _u_old.resize(nqp);
-
-    if (_need_u_older)
-      _u_older.resize(nqp);
-
-    if (_need_grad_old)
-      _grad_u_old.resize(nqp);
-
-    if (_need_grad_older)
-      _grad_u_older.resize(nqp);
-
-//    if (_need_second_old)
-//      _second_u_old.resize(nqp);
-
-//    if (_need_second_older)
-//      _second_u_older.resize(nqp);
-  }
-
-  /*
-  for (unsigned int i = 0; i < nqp; ++i)
-  {
-    _u[i] = 0;
-    _grad_u[i] = 0;
-
-//    if (_need_second)
-//      _second_u[i] = 0;
-
-    if (is_transient)
-    {
-      _u_dot[i] = 0;
-      _du_dot_du[i] = 0;
-
-      if (_need_u_old)
-        _u_old[i] = 0;
-
-      if (_need_u_older)
-        _u_older[i] = 0;
-
-      if (_need_grad_old)
-        _grad_u_old[i] = 0;
-
-      if (_need_grad_older)
-        _grad_u_older[i] = 0;
-
-//      if (_need_second_old)
-//        _second_u_old[i] = 0;
-
-//      if (_need_second_older)
-//        _second_u_older[i] = 0;
-    }
-  }
-  */
-
-//  unsigned int num_dofs = _dof_indices.size();
-
-
-//  if (_need_nodal_u)
-//    _nodal_u.resize(num_dofs);
-//  if (is_transient)
-//  {
-//    if (_need_nodal_u_old)
-//      _nodal_u_old.resize(num_dofs);
-//    if (_need_nodal_u_older)
-//      _nodal_u_older.resize(num_dofs);
-//    if (_need_nodal_u_dot)
-//      _nodal_u_dot.resize(num_dofs);
-//  }
+  auto var_group = _sys.system().variable_group(0);
+  unsigned int n_vars = var_group.n_variables();
 
   const PetscVector<Real> & current_solution = dynamic_cast<const PetscVector<Real>&>(*_sys.currentSolution());
   const PetscVector<Real> & solution_old     = dynamic_cast<const PetscVector<Real>&>(_sys.solutionOld());
@@ -624,129 +551,54 @@ ArrayMooseVariable::computeElemValues()
   const PetscVector<Real> & u_dot            = dynamic_cast<const PetscVector<Real>&>(_sys.solutionUDot());
   const Real & du_dot_du                       = _sys.duDotDu();
 
+  // We need to get array only for reading... but we need to be able to pass the raw pointer into an Eigen::Map
+  // Eigen::Map requires a non-const pointer... so we're going to const_cast it here
+  // (but we're still NOT going to modify it).
+  PetscScalar * current_solution_values = const_cast<PetscScalar *>(current_solution.get_array_read());
 
+  _u.resize(nqp);
+  for (unsigned int qp = 0; qp < nqp; qp++)
+  {
+    auto & qp_value = _u[qp];
 
+    qp_value.resize(n_vars);
+    qp_value.setZero();
+  }
 
-  const PetscScalar * current_solution_values = current_solution.get_array_read();
-//
-//
-//
-//
-//
-//
-//   dof_id_type idx = 0;
-//   Real soln_local = 0;
-//   Real soln_old_local = 0;
-//   Real soln_older_local = 0;
-//   Real u_dot_local = 0;
-//
-//   Real phi_local = 0;
-//   const RealGradient * dphi_qp = NULL;
-//   const RealTensor * d2phi_local = NULL;
-//
-//   RealGradient * grad_u_qp = NULL;
-//
-//   RealGradient * grad_u_old_qp = NULL;
-//   RealGradient * grad_u_older_qp = NULL;
-//
-// //  RealTensor * second_u_qp = NULL;
-//
-// //  RealTensor * second_u_old_qp = NULL;
-// //  RealTensor * second_u_older_qp = NULL;
-//
-//   for (unsigned int i=0; i < num_dofs; i++)
-//   {
-//     idx = _dof_indices[i];
-//     soln_local = current_solution(idx);
-//
-//     if (_need_nodal_u)
-//       _nodal_u[i] = soln_local;
-//
-//     if (is_transient)
-//     {
-//       if (_need_u_old || _need_grad_old || /*_need_second_old*/ || _need_nodal_u_old)
-//         soln_old_local = solution_old(idx);
-//
-//       if (_need_u_older || _need_grad_older || /*_need_second_older*/ || _need_nodal_u_older)
-//         soln_older_local = solution_older(idx);
-//
-//       if (_need_nodal_u_old)
-//         _nodal_u_old[i] = soln_old_local;
-//       if (_need_nodal_u_older)
-//         _nodal_u_older[i] = soln_older_local;
-//
-//       u_dot_local        = u_dot(idx);
-//       if (_need_nodal_u_dot)
-//         _nodal_u_dot[i] = u_dot_local;
-//     }
-//
-//     for (unsigned int qp=0; qp < nqp; qp++)
-//     {
-//       phi_local = _phi[i][qp];
-//       dphi_qp = &_grad_phi[i][qp];
-//
-//       grad_u_qp = &_grad_u[qp];
-//
-//       if (is_transient)
-//       {
-//         if (_need_grad_old)
-//           grad_u_old_qp = &_grad_u_old[qp];
-//
-//         if (_need_grad_older)
-//           grad_u_older_qp = &_grad_u_older[qp];
-//       }
-//
-//       /*
-//       if (_need_second || _need_second_old || _need_second_older)
-//       {
-//         d2phi_local = &(*_second_phi)[i][qp];
-//
-//         if (_need_second)
-//           second_u_qp = &_second_u[qp];
-//
-//         if (is_transient)
-//         {
-//           if (_need_second_old)
-//             second_u_old_qp = &_second_u_old[qp];
-//
-//           if (_need_second_older)
-//             second_u_older_qp = &_second_u_older[qp];
-//         }
-//       }
-//       */
-//
-//       _u[qp] += phi_local * soln_local;
-//
-//       grad_u_qp->add_scaled(*dphi_qp, soln_local);
-//
-// //      if (_need_second)
-// //        second_u_qp->add_scaled(*d2phi_local, soln_local);
-//
-//       if (is_transient)
-//       {
-//         _u_dot[qp]        += phi_local * u_dot_local;
-//         _du_dot_du[qp]    = du_dot_du;
-//
-//         if (_need_u_old)
-//           _u_old[qp]        += phi_local * soln_old_local;
-//
-//         if (_need_u_older)
-//           _u_older[qp]      += phi_local * soln_older_local;
-//
-//         if (_need_grad_old)
-//           grad_u_old_qp->add_scaled(*dphi_qp, soln_old_local);
-//
-//         if (_need_grad_older)
-//           grad_u_older_qp->add_scaled(*dphi_qp, soln_older_local);
-//
-// //        if (_need_second_old)
-// //          second_u_old_qp->add_scaled(*d2phi_local, soln_old_local);
-//
-// //        if (_need_second_older)
-// //          second_u_older_qp->add_scaled(*d2phi_local, soln_older_local);
-//       }
-//     }
-//   }
+  _grad_u.resize(nqp);
+  for (unsigned int qp = 0; qp < nqp; qp++)
+  {
+    auto & qp_value = _grad_u[qp];
+
+    qp_value.resize(n_vars, Eigen::NoChange);
+    qp_value.setZero();
+  }
+
+  auto n_dofs = _dof_indices.size();
+
+  // Global to local map them
+  _local_dof_indices.resize(n_dofs);
+
+  for (unsigned int i = 0; i < n_dofs; i++)
+    _local_dof_indices[i] = current_solution.map_global_to_local_index(_dof_indices[i]);
+
+  for (unsigned int i = 0; i < n_shapes; i++)
+  {
+    new (&_mapped_values) Eigen::Map<Eigen::VectorXd>(current_solution_values + _local_dof_indices[i], n_vars);
+
+    for (unsigned int qp = 0; qp < nqp; qp++)
+      _u[qp].noalias() += _mapped_values * _phi[i][qp];
+
+    for (unsigned int qp = 0; qp < nqp; qp++)
+    {
+      new (&_mapped_grad_phi) Eigen::Map<Eigen::Vector3d>(const_cast<Real *>(&_grad_phi[i][qp](0)));
+
+      _grad_u[qp].noalias() += _mapped_values * _mapped_grad_phi.transpose();
+    }
+  }
+
+  const_cast<PetscVector<Real> &>(current_solution).restore_array();
+
 }
 
 // void
@@ -831,7 +683,7 @@ ArrayMooseVariable::computeElemValues()
 //       _nodal_u_dot.resize(num_dofs);
 //   }
 
-//   const NumericVector<Real> & current_solution = *_sys.currentSolution();
+//   const NumericVector<Real> & crruent_solution = *_sys.currentSolution();
 //   const NumericVector<Real> & solution_old     = _sys.solutionOld();
 //   const NumericVector<Real> & solution_older   = _sys.solutionOlder();
 //   const NumericVector<Real> & u_dot            = _sys.solutionUDot();
