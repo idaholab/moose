@@ -33,10 +33,7 @@ InputParameters validParams<EigenKernel>()
 }
 
 EigenKernel::EigenKernel(const InputParameters & parameters) :
-    KernelBase(parameters),
-    MooseVariableInterface(this, false),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    Kernel(parameters),
     _eigen(getParam<bool>("eigen")),
     _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
     _eigenvalue(NULL)

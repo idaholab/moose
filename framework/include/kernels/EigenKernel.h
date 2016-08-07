@@ -15,7 +15,7 @@
 #ifndef EIGENKERNEL_H
 #define EIGENKERNEL_H
 
-#include "KernelBase.h"
+#include "Kernel.h"
 
 //Forward Declarations
 class EigenKernel;
@@ -31,8 +31,7 @@ InputParameters validParams<EigenKernel>();
  *    eigen_postprocessor - string, the name of the postprocessor to obtain the eigenvalue
  */
 class EigenKernel :
-  public KernelBase,
-  public MooseVariableInterface
+  public Kernel
 {
 public:
   virtual void computeResidual() override;
@@ -44,14 +43,7 @@ public:
   virtual bool enabled() override;
 
 protected:
-  virtual Real computeQpResidual() = 0;
-  virtual Real computeQpJacobian();
-
-  /// Holds the solution at current quadrature points
-  const VariableValue & _u;
-
-  /// Holds the solution gradient at the current quadrature points
-  const VariableGradient & _grad_u;
+  virtual Real computeQpJacobian() override;
 
   /// flag for as an eigen kernel or a normal kernel
   bool _eigen;
