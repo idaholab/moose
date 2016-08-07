@@ -23,7 +23,8 @@ template<>
 InputParameters validParams<Kernel>();
 
 class Kernel :
-  public KernelBase
+  public KernelBase,
+  public MooseVariableInterface
 {
 public:
   Kernel(const InputParameters & parameters);

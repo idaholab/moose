@@ -33,11 +33,13 @@ InputParameters validParams<Kernel>()
 
 Kernel::Kernel(const InputParameters & parameters) :
     KernelBase(parameters),
+    MooseVariableInterface(this, false),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
+  addMooseVariableDependency(mooseVariable());
 }
 
 void

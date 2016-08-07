@@ -30,7 +30,9 @@ InputParameters validParams<EigenKernel>();
  * This kernel also obtain the postprocessor for eigenvalue by one problem-wise global parameter
  *    eigen_postprocessor - string, the name of the postprocessor to obtain the eigenvalue
  */
-class EigenKernel : public KernelBase
+class EigenKernel :
+  public KernelBase,
+  public MooseVariableInterface
 {
 public:
   virtual void computeResidual() override;

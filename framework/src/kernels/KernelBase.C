@@ -50,7 +50,8 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
+    Coupleable(this, false),
+    ScalarCoupleable(this),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
@@ -84,6 +85,10 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
 {
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
+
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
