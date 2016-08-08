@@ -37,6 +37,7 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
   storeHelper(stream, feature._periodic_nodes, context);
   storeHelper(stream, feature._var_idx, context);
   storeHelper(stream, feature._bboxes, context);
+  storeHelper(stream, feature._orig_ids, context);
   storeHelper(stream, feature._min_entity_id, context);
   storeHelper(stream, feature._volume, context);
   storeHelper(stream, feature._vol_count, context);
@@ -64,6 +65,7 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._periodic_nodes, context);
   loadHelper(stream, feature._var_idx, context);
   loadHelper(stream, feature._bboxes, context);
+  loadHelper(stream, feature._orig_ids, context);
   loadHelper(stream, feature._min_entity_id, context);
   loadHelper(stream, feature._volume, context);
   loadHelper(stream, feature._vol_count, context);
@@ -777,7 +779,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
 
   // New Feature (we need to create it and add it to our data structure)
   if (!feature)
-    _partial_feature_sets[map_num].emplace_back(current_idx);
+    _partial_feature_sets[map_num].emplace_back(current_idx, _partial_feature_sets[map_num].size(), processor_id());
 
   // Get a handle to the feature we will update (always the last feature in the data structure)
   feature = &_partial_feature_sets[map_num].back();
@@ -1028,6 +1030,9 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   else
     std::move(rhs._bboxes.begin(), rhs._bboxes.end(), std::back_inserter(_bboxes));
 
+  // Keep track of the original ids so we can notify other processors of the local to global mapping
+  _orig_ids.splice(_orig_ids.end(), std::move(rhs._orig_ids));
+
   // Update the min feature id
   _min_entity_id = std::min(_min_entity_id, rhs._min_entity_id);
 
@@ -1116,6 +1121,9 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 
   if (debug)
   {
+    out << "\nOrig IDs (rank, index): ";
+    for (const auto & orig_pair : feature._orig_ids)
+      out << '(' << orig_pair.first << ", " << orig_pair.second << ") ";
     out << "\nVolume: " << volume;
     out << "\nVar_idx: " << feature._var_idx;
     out << "\nMin Entity ID: " << feature._min_entity_id;

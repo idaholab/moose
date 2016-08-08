@@ -86,7 +86,18 @@ public:
 
   struct FeatureData
   {
-    FeatureData(unsigned int var_idx = std::numeric_limits<unsigned int>::max()) :
+    FeatureData() :
+        FeatureData(std::numeric_limits<unsigned int>::max())
+    {
+    }
+
+    FeatureData(unsigned int var_idx, unsigned int local_index, processor_id_type rank) :
+        FeatureData(var_idx)
+    {
+      _orig_ids = { std::make_pair(rank, local_index) };
+    }
+
+    FeatureData(unsigned int var_idx) :
         _var_idx(var_idx),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
@@ -196,6 +207,9 @@ public:
 
     /// The vector of bounding boxes completely enclosing this feature (multiple used with periodic constraints)
     std::vector<MeshTools::BoundingBox> _bboxes;
+
+    /// Original processor/local ids
+    std::list<std::pair<processor_id_type, unsigned int> > _orig_ids;
 
     /// The minimum entity seen in the _local_ids, used for sorting features
     dof_id_type _min_entity_id;
