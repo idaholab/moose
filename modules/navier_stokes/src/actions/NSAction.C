@@ -4,7 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSAction.h"
+#include "NS.h"
 
 // MOOSE includes
 #include "MooseMesh.h"
@@ -37,29 +40,29 @@ NSAction::act()
 
   // Build up the vector of variable names for the user, depending on
   // the mesh dimension.
-  _vars.push_back("rho");
-  _vars.push_back("rhou");
+  _vars.push_back(NS::density);
+  _vars.push_back(NS::momentum_x);
   if (_dim >= 2)
-    _vars.push_back("rhov");
+    _vars.push_back(NS::momentum_y);
   if (_dim >= 3)
-    _vars.push_back("rhow");
-  _vars.push_back("rhoE");
+    _vars.push_back(NS::momentum_z);
+  _vars.push_back(NS::total_energy);
 
   // Add Aux variables.  These are all required in order for the code
   // to run, so they should not be independently selectable by the
   // user.
-  _auxs.push_back("vel_x");
+  _auxs.push_back(NS::velocity_x);
   if (_dim >= 2)
-    _auxs.push_back("vel_y");
+    _auxs.push_back(NS::velocity_y);
   if (_dim >= 3)
-    _auxs.push_back("vel_z");
+    _auxs.push_back(NS::velocity_z);
 
-  _auxs.push_back("pressure");
-  _auxs.push_back("temperature");
-  _auxs.push_back("enthalpy");
-  _auxs.push_back("Mach");
+  _auxs.push_back(NS::pressure);
+  _auxs.push_back(NS::temperature);
+  _auxs.push_back(NS::enthalpy);
+  _auxs.push_back(NS::mach_number);
 
   // Needed for FluidProperties calculations
-  _auxs.push_back("internal_energy");
-  _auxs.push_back("specific_volume");
+  _auxs.push_back(NS::internal_energy);
+  _auxs.push_back(NS::specific_volume);
 }

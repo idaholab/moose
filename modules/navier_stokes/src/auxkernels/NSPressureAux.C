@@ -5,7 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes inclues
 #include "NSPressureAux.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -19,8 +21,8 @@ InputParameters validParams<NSPressureAux>()
   InputParameters params = validParams<AuxKernel>();
 
   // Mark variables as required
-  params.addRequiredCoupledVar("specific_volume", "");
-  params.addRequiredCoupledVar("internal_energy", "");
+  params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
+  params.addRequiredCoupledVar(NS::internal_energy, "internal energy");
   params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
 
   return params;
@@ -28,8 +30,8 @@ InputParameters validParams<NSPressureAux>()
 
 NSPressureAux::NSPressureAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _specific_volume(coupledValue("specific_volume")),
-    _internal_energy(coupledValue("internal_energy")),
+    _specific_volume(coupledValue(NS::specific_volume)),
+    _internal_energy(coupledValue(NS::internal_energy)),
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }

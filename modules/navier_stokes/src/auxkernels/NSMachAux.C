@@ -5,7 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes includes
 #include "NSMachAux.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -18,11 +20,11 @@ InputParameters validParams<NSMachAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  params.addRequiredCoupledVar("u", "x-velocity");
-  params.addCoupledVar("v", "y-velocity"); // Only required in >= 2D
-  params.addCoupledVar("w", "z-velocity"); // Only required in 3D...
-  params.addRequiredCoupledVar("specific_volume", "");
-  params.addRequiredCoupledVar("internal_energy", "");
+  params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
+  params.addCoupledVar(NS::velocity_y, "y-velocity"); // Only required in >= 2D
+  params.addCoupledVar(NS::velocity_z, "z-velocity"); // Only required in 3D...
+  params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
+  params.addRequiredCoupledVar(NS::internal_energy, "internal energy");
   params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
 
   return params;
@@ -30,11 +32,11 @@ InputParameters validParams<NSMachAux>()
 
 NSMachAux::NSMachAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _u_vel(coupledValue("u")),
-    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
-    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-    _specific_volume(coupledValue("specific_volume")),
-    _internal_energy(coupledValue("internal_energy")),
+    _u_vel(coupledValue(NS::velocity_x)),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
+    _specific_volume(coupledValue(NS::specific_volume)),
+    _internal_energy(coupledValue(NS::internal_energy)),
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }

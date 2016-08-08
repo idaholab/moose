@@ -91,8 +91,8 @@
     rhou = rhou
     rhov = rhov
     rhoE = rhoE
-    u = vel_x
-    v = vel_y
+    vel_x = vel_x
+    vel_y = vel_y
     temperature = temperature
     enthalpy = enthalpy
     # This value is not used in the Euler equations, but it *is* used

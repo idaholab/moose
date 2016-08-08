@@ -5,7 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes includes
 #include "NSStagnationTemperatureBC.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -14,14 +16,14 @@ template<>
 InputParameters validParams<NSStagnationTemperatureBC>()
 {
   InputParameters params = validParams<NSStagnationBC>();
-  params.addRequiredCoupledVar("temperature", "");
+  params.addRequiredCoupledVar(NS::temperature, "temperature");
   params.addRequiredParam<Real>("desired_stagnation_temperature", "");
   return params;
 }
 
 NSStagnationTemperatureBC::NSStagnationTemperatureBC(const InputParameters & parameters) :
     NSStagnationBC(parameters),
-    _temperature(coupledValue("temperature")),
+    _temperature(coupledValue(NS::temperature)),
     _desired_stagnation_temperature(getParam<Real>("desired_stagnation_temperature"))
 {
 }

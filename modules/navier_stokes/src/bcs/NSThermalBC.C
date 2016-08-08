@@ -5,7 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes includes
 #include "NSThermalBC.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -14,7 +16,7 @@ template<>
 InputParameters validParams<NSThermalBC>()
 {
   InputParameters params = validParams<NodalBC>();
-  params.addRequiredCoupledVar("rho", "");
+  params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredParam<Real>("initial", "Initial temperature");
   params.addRequiredParam<Real>("final", "Final temperature");
   params.addRequiredParam<Real>("duration", "Time over which temperature ramps up from initial to final");
@@ -24,8 +26,8 @@ InputParameters validParams<NSThermalBC>()
 
 NSThermalBC::NSThermalBC(const InputParameters & parameters) :
     NodalBC(parameters),
-    _rho_var(coupled("rho")),
-    _rho(coupledValue("rho")),
+    _rho_var(coupled(NS::density)),
+    _rho(coupledValue(NS::density)),
     _initial(getParam<Real>("initial")),
     _final(getParam<Real>("final")),
     _duration(getParam<Real>("duration")),

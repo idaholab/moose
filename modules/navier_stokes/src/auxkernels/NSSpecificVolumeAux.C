@@ -5,7 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes includes
 #include "NSSpecificVolumeAux.h"
+#include "NS.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
 
 template<>
@@ -13,14 +17,14 @@ InputParameters validParams<NSSpecificVolumeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  params.addRequiredCoupledVar("rho", "density");
+  params.addRequiredCoupledVar(NS::density, "density");
 
   return params;
 }
 
 NSSpecificVolumeAux::NSSpecificVolumeAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _rho(coupledValue("rho"))
+    _rho(coupledValue(NS::density))
 {
 }
 

@@ -4,7 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnthalpyAux.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSEnthalpyAux>()
@@ -12,18 +15,18 @@ InputParameters validParams<NSEnthalpyAux>()
   InputParameters params = validParams<AuxKernel>();
 
   // Mark variables as required
-  params.addRequiredCoupledVar("rho", "density");
-  params.addRequiredCoupledVar("rhoE", "total energy");
-  params.addRequiredCoupledVar("pressure", "pressure");
+  params.addRequiredCoupledVar(NS::density, "density");
+  params.addRequiredCoupledVar(NS::total_energy, "total energy");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
 
   return params;
 }
 
 NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _rho(coupledValue("rho")),
-    _rhoE(coupledValue("rhoE")),
-    _pressure(coupledValue("pressure"))
+    _rho(coupledValue(NS::density)),
+    _rhoE(coupledValue(NS::total_energy)),
+    _pressure(coupledValue(NS::pressure))
 {
 }
 

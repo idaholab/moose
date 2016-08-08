@@ -4,6 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "AddNavierStokesICsAction.h"
 #include "NavierStokesApp.h"
 #include "NSInitialCondition.h"
