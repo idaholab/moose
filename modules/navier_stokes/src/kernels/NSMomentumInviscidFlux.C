@@ -4,7 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSMomentumInviscidFlux.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -13,14 +16,14 @@ template<>
 InputParameters validParams<NSMomentumInviscidFlux>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addRequiredCoupledVar("pressure", "");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<unsigned int>("component", "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
   return params;
 }
 
 NSMomentumInviscidFlux::NSMomentumInviscidFlux(const InputParameters & parameters) :
     NSKernel(parameters),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _component(getParam<unsigned int>("component"))
 {
 }

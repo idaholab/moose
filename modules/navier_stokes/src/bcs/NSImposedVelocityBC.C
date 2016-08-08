@@ -4,20 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSImposedVelocityBC.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSImposedVelocityBC>()
 {
   InputParameters params = validParams<NodalBC>();
-  params.addRequiredCoupledVar("rho", "");
+  params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredParam<Real>("desired_velocity", "");
   return params;
 }
 
 NSImposedVelocityBC::NSImposedVelocityBC(const InputParameters & parameters) :
     NodalBC(parameters),
-    _rho(coupledValue("rho")),
+    _rho(coupledValue(NS::density)),
     _desired_velocity(getParam<Real>("desired_velocity"))
 {
 }

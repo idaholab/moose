@@ -5,6 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes includes
+#include "NS.h"
 #include "AddNavierStokesBCsAction.h"
 
 // MOOSE includes
@@ -63,7 +65,7 @@ AddNavierStokesBCsAction::addNSMassWeakStagnationBC()
 {
   const std::string kernel_type = "NSMassWeakStagnationBC";
   InputParameters params = _factory.getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = "rho";
+  params.set<NonlinearVariableName>("variable") = NS::density;
   setCommonParams(params);
 
   // Pick up values specific to this BC from the Action's params.
@@ -82,7 +84,7 @@ AddNavierStokesBCsAction::addNSEnergyWeakStagnationBC()
 {
   const std::string kernel_type = "NSEnergyWeakStagnationBC";
   InputParameters params = _factory.getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = "rhoE";
+  params.set<NonlinearVariableName>("variable") = NS::total_energy;
   setCommonParams(params);
   params += _moose_object_pars;
   _problem->addBoundaryCondition(kernel_type, "weak_stagnation_energy_inflow", params);
@@ -93,7 +95,9 @@ AddNavierStokesBCsAction::addNSEnergyWeakStagnationBC()
 void
 AddNavierStokesBCsAction::addNSMomentumWeakStagnationBC(unsigned int component)
 {
-  const static std::string momentums[3] = {"rhou", "rhov", "rhow"};
+  const static std::string momentums[3] = {NS::momentum_x,
+                                           NS::momentum_y,
+                                           NS::momentum_z};
 
   // Convective part
   {
@@ -129,7 +133,9 @@ AddNavierStokesBCsAction::addNSMomentumWeakStagnationBC(unsigned int component)
 void
 AddNavierStokesBCsAction::addNoPenetrationBC(unsigned int component)
 {
-  const static std::string momentums[3] = {"rhou", "rhov", "rhow"};
+  const static std::string momentums[3] = {NS::momentum_x,
+                                           NS::momentum_y,
+                                           NS::momentum_z};
   const std::string kernel_type = "NSPressureNeumannBC";
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = momentums[component];
@@ -138,7 +144,7 @@ AddNavierStokesBCsAction::addNoPenetrationBC(unsigned int component)
 
   // These BCs also need the component and couping to the pressure.
   params.set<unsigned int>("component") = component;
-  params.set<std::vector<VariableName> >("pressure") = {"pressure"};
+  params.set<CoupledName>(NS::pressure) = {NS::pressure};
 
   _problem->addBoundaryCondition(kernel_type, momentums[component] + std::string("_no_penetration"), params);
 }
@@ -150,7 +156,7 @@ AddNavierStokesBCsAction::addNSMassUnspecifiedNormalFlowBC()
 {
   const std::string kernel_type = "NSMassUnspecifiedNormalFlowBC";
   InputParameters params = _factory.getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = "rho";
+  params.set<NonlinearVariableName>("variable") = NS::density;
   setCommonParams(params);
   params += _moose_object_pars;
   _problem->addBoundaryCondition(kernel_type, "mass_outflow", params);
@@ -161,7 +167,9 @@ AddNavierStokesBCsAction::addNSMassUnspecifiedNormalFlowBC()
 void
 AddNavierStokesBCsAction::addNSMomentumInviscidSpecifiedPressureBC(unsigned int component)
 {
-  const static std::string momentums[3] = {"rhou", "rhov", "rhow"};
+  const static std::string momentums[3] = {NS::momentum_x,
+                                           NS::momentum_y,
+                                           NS::momentum_z};
   const std::string kernel_type = "NSMomentumInviscidSpecifiedPressureBC";
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = momentums[component];
@@ -181,11 +189,11 @@ AddNavierStokesBCsAction::addNSEnergyInviscidSpecifiedPressureBC()
 {
   const std::string kernel_type = "NSEnergyInviscidSpecifiedPressureBC";
   InputParameters params = _factory.getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = "rhoE";
+  params.set<NonlinearVariableName>("variable") = NS::total_energy;
   setCommonParams(params);
   params += _moose_object_pars;
   // This BC also requires the current value of the temperature.
-  params.set<std::vector<VariableName> >("temperature") = {"temperature"};
+  params.set<CoupledName>(NS::temperature) = {NS::temperature};
   _problem->addBoundaryCondition(kernel_type, "rhoE_specified_pressure_outflow", params);
 }
 
@@ -195,8 +203,8 @@ void
 AddNavierStokesBCsAction::setCommonParams (InputParameters & params)
 {
   // coupled variables
-  params.set<std::vector<VariableName> >("rho")  = {"rho"};
-  params.set<std::vector<VariableName> >("rhoE") = {"rhoE"};
+  params.set<CoupledName>(NS::density) = {NS::density};
+  params.set<CoupledName>(NS::total_energy) = {NS::total_energy};
 
   // Couple the appropriate number of velocities
   coupleVelocities(params);
@@ -208,13 +216,13 @@ AddNavierStokesBCsAction::setCommonParams (InputParameters & params)
 void
 AddNavierStokesBCsAction::coupleVelocities (InputParameters & params)
 {
-  params.set<std::vector<VariableName> >("u") = {"vel_x"};
+  params.set<CoupledName>(NS::velocity_x) = {NS::velocity_x};
 
   if (_dim >= 2)
-    params.set<std::vector<VariableName> >("v") = {"vel_y"};
+    params.set<CoupledName>(NS::velocity_y) = {NS::velocity_y};
 
   if (_dim >= 3)
-    params.set<std::vector<VariableName> >("w") = {"vel_z"};
+    params.set<CoupledName>(NS::velocity_z) = {NS::velocity_z};
 }
 
 
@@ -222,11 +230,11 @@ AddNavierStokesBCsAction::coupleVelocities (InputParameters & params)
 void
 AddNavierStokesBCsAction::coupleMomentums (InputParameters & params)
 {
-  params.set<std::vector<VariableName> >("rhou") = {"rhou"};
+  params.set<CoupledName>(NS::momentum_x) = {NS::momentum_x};
 
   if (_dim >= 2)
-    params.set<std::vector<VariableName> >("rhov") = {"rhov"};
+    params.set<CoupledName>(NS::momentum_y) = {NS::momentum_y};
 
   if (_dim >= 3)
-    params.set<std::vector<VariableName> >("rhow") = {"rhow"};
+    params.set<CoupledName>(NS::momentum_z) = {NS::momentum_z};
 }

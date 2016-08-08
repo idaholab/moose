@@ -4,20 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes inclues
 #include "NSMomentumInviscidFluxWithGradP.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSMomentumInviscidFluxWithGradP>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addRequiredCoupledVar("pressure", "");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }
 
 NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputParameters & parameters) :
     NSKernel(parameters),
-    _grad_p(coupledGradient("pressure")),
+    _grad_p(coupledGradient(NS::pressure)),
     _component(getParam<unsigned int>("component")),
     _pressure_derivs(*this)
 {
