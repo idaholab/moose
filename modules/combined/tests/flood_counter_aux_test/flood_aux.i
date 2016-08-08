@@ -80,7 +80,7 @@
     type = FeatureFloodCountAux
     variable = bubble_map
     execute_on = timestep_end
-    bubble_object = bubbles
+    flood_counter = bubbles
   [../]
 []
 

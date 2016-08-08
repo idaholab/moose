@@ -45,14 +45,14 @@
   [./nodal_flood_aux]
     variable = grain_auxvar
     type = FeatureFloodCountAux
-    bubble_object = flood_count_pp
+    flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
   [../]
 
   [./centroids]
     type = FeatureFloodCountAux
     variable = centroids
-    bubble_object = flood_count_pp
+    flood_counter = flood_count_pp
     field_display = CENTROID
     execute_on = 'initial timestep_end'
   [../]

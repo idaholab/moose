@@ -50,7 +50,7 @@
   [./centroids]
     type = FeatureFloodCountAux
     variable = centroids
-    bubble_object = bubbles
+    flood_counter = bubbles
     execute_on = 'initial timestep_end'
     field_display = CENTROID
   [../]

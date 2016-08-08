@@ -31,7 +31,7 @@
   [./nodal_flood_aux]
     type = FeatureFloodCountAux
     variable = feature
-    bubble_object = flood_count_pp
+    flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
   [../]
   [./proc_id]
@@ -43,7 +43,7 @@
     type = FeatureFloodCountAux
     variable = feature_ghost
     field_display = GHOSTED_ENTITIES
-    bubble_object = flood_count_pp
+    flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
   [../]
 []

@@ -116,14 +116,14 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     execute_on = 'initial timestep_begin'
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     execute_on = 'initial timestep_begin'
     field_display = VARIABLE_COLORING
   [../]
@@ -142,13 +142,13 @@
     variable = active_bounds_elemental
     field_display = ACTIVE_BOUNDS
     execute_on = 'initial timestep_begin'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./euler_angle]
     type = OutputEulerAngles
     variable = euler_angle
     euler_angle_provider = euler_angle_file
-    GrainTracker_object = grain_tracker
+    grain_tracker = grain_tracker
     output_euler_angle = 'phi1'
   [../]
 []

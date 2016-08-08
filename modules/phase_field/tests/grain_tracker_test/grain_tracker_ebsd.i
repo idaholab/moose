@@ -63,14 +63,14 @@
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
   [./grain_aux]
@@ -84,7 +84,7 @@
     type = OutputEulerAngles
     euler_angle_provider = ebsd
     output_euler_angle = phi1
-    GrainTracker_object = grain_tracker
+    grain_tracker = grain_tracker
     variable = phi1
   [../]
 []
@@ -94,7 +94,7 @@
     [./EulerAngles2RGB]
       crystal_structure = cubic
       euler_angle_provider = ebsd
-      grain_tracker_object = grain_tracker
+      grain_tracker = grain_tracker
     [../]
   [../]
 []
