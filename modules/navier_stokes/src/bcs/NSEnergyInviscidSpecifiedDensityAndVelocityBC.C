@@ -4,8 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 // This was experimental code and did not really work out, do not use!
 #include "NSEnergyInviscidSpecifiedDensityAndVelocityBC.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>()
@@ -13,7 +16,7 @@ InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>()
   InputParameters params = validParams<NSEnergyInviscidBC>();
 
   // Coupled variables
-  params.addRequiredCoupledVar("pressure", "");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
 
   // Required parameters
   params.addRequiredParam<Real>("specified_density", "The specified density for this boundary");
@@ -26,7 +29,7 @@ InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>()
 
 NSEnergyInviscidSpecifiedDensityAndVelocityBC::NSEnergyInviscidSpecifiedDensityAndVelocityBC(const InputParameters & parameters) :
     NSEnergyInviscidBC(parameters),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _specified_density(getParam<Real>("specified_density")),
     _specified_u(getParam<Real>("specified_u")),
     _specified_v(getParam<Real>("specified_v")),

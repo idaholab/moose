@@ -21,7 +21,7 @@ InputParameters validParams<EulerAngleProvider2RGBAux>()
   MooseEnum output_types = MooseEnum("red green blue scalar", "scalar");
   params.addParam<MooseEnum>("output_type", output_types, "Type of value that will be outputted");
   params.addRequiredParam<UserObjectName>("euler_angle_provider", "Name of Euler angle provider user object");
-  params.addRequiredParam<UserObjectName>("grain_tracker_object", "The GrainTracker UserObject to get values from.");
+  params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject to get values from.");
   return params;
 }
 
@@ -31,7 +31,7 @@ EulerAngleProvider2RGBAux::EulerAngleProvider2RGBAux(const InputParameters & par
     _xtal_class(getParam<MooseEnum>("crystal_structure")),
     _output_type(getParam<MooseEnum>("output_type")),
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
-    _grain_tracker(getUserObject<GrainTracker>("grain_tracker_object"))
+    _grain_tracker(getUserObject<GrainTracker>("grain_tracker"))
 {
 }
 

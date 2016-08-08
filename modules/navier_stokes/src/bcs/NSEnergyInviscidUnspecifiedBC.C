@@ -4,19 +4,22 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnergyInviscidUnspecifiedBC.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSEnergyInviscidUnspecifiedBC>()
 {
   InputParameters params = validParams<NSEnergyInviscidBC>();
-  params.addRequiredCoupledVar("pressure", "");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   return params;
 }
 
 NSEnergyInviscidUnspecifiedBC::NSEnergyInviscidUnspecifiedBC(const InputParameters & parameters) :
     NSEnergyInviscidBC(parameters),
-    _pressure(coupledValue("pressure"))
+    _pressure(coupledValue(NS::pressure))
 {
 }
 

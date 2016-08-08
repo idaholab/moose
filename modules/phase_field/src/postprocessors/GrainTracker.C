@@ -155,6 +155,8 @@ GrainTracker::finalize()
     }
   }
 
+  _console << "Finished inside of GrainTracker" << std::endl;
+
   Moose::perf_log.pop("finalize()", "GrainTracker");
 }
 
@@ -194,8 +196,8 @@ GrainTracker::getOpToGrainsVector(dof_id_type elem_id) const
 void
 GrainTracker::expandHalos()
 {
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto & feature : _partial_feature_sets[map_num])
+  for (auto & list_ref  : _partial_feature_sets)
+    for (auto & feature : list_ref)
     {
       for (auto halo_level = decltype(_halo_level)(1); halo_level < _halo_level; ++halo_level)
       {
@@ -271,7 +273,7 @@ GrainTracker::trackGrains()
 
       std::vector<Point> center_points(grain_num);
 
-      for (unsigned int gr = 0; gr < grain_num; ++gr)
+      for (decltype(grain_num) gr = 0; gr < grain_num; ++gr)
       {
         const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
         center_points[gr] = d._p;
@@ -286,8 +288,8 @@ GrainTracker::trackGrains()
       std::map<unsigned int, unsigned int> error_indices;
 
       unsigned int total_grains = 0;
-      for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-        total_grains += _feature_sets[map_num].size();
+      for (const auto & vector_ref : _feature_sets)
+        total_grains += vector_ref.size();
 
       if (grain_num != total_grains && processor_id() == 0)
         mooseWarning("Mismatch:\nEBSD centers: " << grain_num << " Grain Tracker Centers: " << total_grains);
@@ -295,20 +297,20 @@ GrainTracker::trackGrains()
       auto next_index = grain_num;
 
       // Loop over all of the features (grains)
-      for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-        for (unsigned int feature_num = 0; feature_num < _feature_sets[map_num].size(); ++feature_num)
+      for (auto & vector_ref : _feature_sets)
+        for (auto && feature : vector_ref)
         {
           Real min_centroid_diff = std::numeric_limits<Real>::max();
           unsigned int closest_match_idx = 0;
 
-          for (unsigned int j = 0; j < center_points.size(); ++j)
+          for (size_t j = 0; j < center_points.size(); ++j)
           {
             // Update the ebsd bbox data to be used in the centroidRegionDistance calculation
             // Since we are using centroid matching we'll just make it easy and set both the min/max of the box to the same
             // value (i.e. a zero sized box).
             ebsd_vector[0].min() = ebsd_vector[0].max() = center_points[j];
 
-            Real curr_centroid_diff = centroidRegionDistance(ebsd_vector, _feature_sets[map_num][feature_num]._bboxes);
+            Real curr_centroid_diff = centroidRegionDistance(ebsd_vector, feature._bboxes);
             if (curr_centroid_diff <= min_centroid_diff)
             {
               closest_match_idx = j;
@@ -320,7 +322,7 @@ GrainTracker::trackGrains()
           {
             Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
                        << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-            _unique_grains[next_index] = std::move(_feature_sets[map_num][feature_num]);
+            _unique_grains[next_index] = std::move(feature);
 
             _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
 
@@ -330,7 +332,7 @@ GrainTracker::trackGrains()
           {
             Moose::out << "Assigning center " << closest_match_idx << " "
                        << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-            _unique_grains[closest_match_idx] = std::move(_feature_sets[map_num][feature_num]);
+            _unique_grains[closest_match_idx] = std::move(feature);
 
             _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
 
@@ -358,13 +360,13 @@ GrainTracker::trackGrains()
        * to order the grains.
        */
       unsigned int counter = 0;
-      for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+      for (auto & vector_ref : _feature_sets)
       {
         // Sort the grains represented by this variable by _min_entity_id
-        std::sort(_feature_sets[map_num].begin(), _feature_sets[map_num].end());
+        std::sort(vector_ref.begin(), vector_ref.end());
 
         // Move the grains from the FeatureFloodCount data structure to the _unique_grains data structure.
-        for (auto && grain : _feature_sets[map_num])
+        for (auto && grain : vector_ref)
         {
           _unique_grains.emplace_hint(_unique_grains.end(), std::pair<unsigned int, FeatureData>(counter, std::move(grain)));
           newGrainCreated(counter++);
@@ -396,7 +398,7 @@ GrainTracker::trackGrains()
 
     // We only need to examine grains that have matching variable indices
     unsigned int map_idx = _single_map_mode ? 0 : grain_pair.second._var_idx;
-    for (unsigned int new_grain_idx = 0; new_grain_idx < _feature_sets[map_idx].size(); ++new_grain_idx)
+    for (size_t new_grain_idx = 0; new_grain_idx < _feature_sets[map_idx].size(); ++new_grain_idx)
     {
       if (grain_pair.second._var_idx == _feature_sets[map_idx][new_grain_idx]._var_idx)  // Do the variables indicies match?
       {
@@ -544,7 +546,7 @@ GrainTracker::remapGrains()
           << "Grain #" << grain_it1->first << " detected on a reserved order parameter #" << grain_it1->second._var_idx << ", remapping to another variable\n"
           << COLOR_DEFAULT;
 
-        for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
+        for (auto max = decltype(_max_renumbering_recursion)(0); max <= _max_renumbering_recursion; ++max)
           if (max < _max_renumbering_recursion)
           {
             if (attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max))
@@ -570,7 +572,7 @@ GrainTracker::remapGrains()
             << " (variable index: " << grain_it1->second._var_idx << ")\n"
             << COLOR_DEFAULT;
 
-          for (unsigned int max = 0; max <= _max_renumbering_recursion; ++max)
+          for (auto max = decltype(_max_renumbering_recursion)(0); max <= _max_renumbering_recursion; ++max)
             if (max < _max_renumbering_recursion)
             {
               if (attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max) || attemptGrainRenumber(grain_it2->second, grain_it2->first, 0, max))
@@ -685,10 +687,10 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
                 return lhs.begin()->_distance > rhs.begin()->_distance;
             });
 
-  for (unsigned int i = 0; i < min_distances.size(); ++i)
+  for (auto & list_ref : min_distances)
   {
-    const auto target_it = min_distances[i].begin();
-    if (target_it == min_distances[i].end())
+    const auto target_it = list_ref.begin();
+    if (target_it == list_ref.end())
       continue;
 
     // If the distance is positive we can just remap and be done
@@ -710,7 +712,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     auto next_target_it = target_it;
     bool intersection_hit = false;
     std::ostringstream oss;
-    while (!intersection_hit && next_target_it != min_distances[i].end())
+    while (!intersection_hit && next_target_it != list_ref.end())
     {
       if (next_target_it->_distance > 0)
         break;

@@ -5,14 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes inclues
 #include "NSPressureNeumannBC.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSPressureNeumannBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
 
-  params.addRequiredCoupledVar("pressure", "The current value of the pressure");
+  params.addRequiredCoupledVar(NS::pressure, "The current value of the pressure");
   params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
 
   return params;
@@ -22,7 +24,7 @@ InputParameters validParams<NSPressureNeumannBC>()
 
 NSPressureNeumannBC::NSPressureNeumannBC(const InputParameters & parameters) :
     NSIntegratedBC(parameters),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _component(getParam<unsigned>("component")),
     _pressure_derivs(*this)
 {

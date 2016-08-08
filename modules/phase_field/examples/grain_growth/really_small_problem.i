@@ -106,28 +106,28 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
     execute_on = 'initial timestep_end'
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
   [../]
   [./ghosted_entities]
     type = FeatureFloodCountAux
     variable = ghost_regions
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = HALOS
     execute_on = 'initial timestep_end'
   [../]
@@ -140,42 +140,42 @@
     variable = halo0
     map_index = 0
     field_display = HALOS
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./halo1]
     type = FeatureFloodCountAux
     variable = halo1
     map_index = 1
     field_display = HALOS
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./halo2]
     type = FeatureFloodCountAux
     variable = halo2
     map_index = 2
     field_display = HALOS
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./halo3]
     type = FeatureFloodCountAux
     variable = halo3
     map_index = 3
     field_display = HALOS
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./halo4]
     type = FeatureFloodCountAux
     variable = halo4
     map_index = 4
     field_display = HALOS
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./halo5]
     type = FeatureFloodCountAux
     variable = halo5
     map_index = 5
     field_display = HALOS
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
 []
 

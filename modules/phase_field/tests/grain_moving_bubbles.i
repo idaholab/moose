@@ -91,7 +91,7 @@
     type = FeatureFloodCountAux
     variable = grain_map
     execute_on = 'initial timestep_end'
-    bubble_object = grains
+    flood_counter = grains
     field_display = UNIQUE_REGION
   [../]
 []

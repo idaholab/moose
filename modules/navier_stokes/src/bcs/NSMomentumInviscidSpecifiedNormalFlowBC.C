@@ -4,20 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSMomentumInviscidSpecifiedNormalFlowBC.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
-  params.addRequiredCoupledVar("pressure", "");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<Real>("rhou_udotn", "The _component'th entry of the (rho*u)(u.n) vector for this boundary");
   return params;
 }
 
 NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC(const InputParameters & parameters) :
     NSMomentumInviscidBC(parameters),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _rhou_udotn(getParam<Real>("rhou_udotn"))
 {
 }

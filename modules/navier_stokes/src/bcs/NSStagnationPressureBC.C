@@ -5,7 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes inclues
 #include "NSStagnationPressureBC.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -15,14 +17,14 @@ template<>
 InputParameters validParams<NSStagnationPressureBC>()
 {
   InputParameters params = validParams<NSStagnationBC>();
-  params.addRequiredCoupledVar("pressure", "");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<Real>("desired_stagnation_pressure", "");
   return params;
 }
 
 NSStagnationPressureBC::NSStagnationPressureBC(const InputParameters & parameters) :
     NSStagnationBC(parameters),
-    _pressure(coupledValue("pressure")),
+    _pressure(coupledValue(NS::pressure)),
     _desired_stagnation_pressure(getParam<Real>("desired_stagnation_pressure"))
 {
 }

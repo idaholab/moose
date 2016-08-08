@@ -625,7 +625,7 @@ public:
 
     in += size_bytes + string_len;
 
-    return std::string(oss.str());
+    return oss.str();
   }
 
 };

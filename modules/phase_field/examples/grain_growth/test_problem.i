@@ -84,25 +84,25 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
   [./ghost_elements]
     type = FeatureFloodCountAux
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     field_display = VARIABLE_COLORING
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
 []
 

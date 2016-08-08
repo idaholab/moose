@@ -4,19 +4,22 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnergyViscousBC.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSEnergyViscousBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-  params.addRequiredCoupledVar("temperature", "");
+  params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }
 
 NSEnergyViscousBC::NSEnergyViscousBC(const InputParameters & parameters) :
     NSIntegratedBC(parameters),
-    _grad_temperature(coupledGradient("temperature")),
+    _grad_temperature(coupledGradient(NS::temperature)),
     _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
     // Viscous stress tensor derivative computing object
     _vst_derivs(*this),

@@ -4,7 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnergyInviscidBC.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -13,13 +16,13 @@ template<>
 InputParameters validParams<NSEnergyInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-  params.addRequiredCoupledVar("temperature", "");
+  params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }
 
 NSEnergyInviscidBC::NSEnergyInviscidBC(const InputParameters & parameters) :
     NSIntegratedBC(parameters),
-    _temperature(coupledValue("temperature")),
+    _temperature(coupledValue(NS::temperature)),
     // Object for computing deriviatives of pressure
     _pressure_derivs(*this)
 {

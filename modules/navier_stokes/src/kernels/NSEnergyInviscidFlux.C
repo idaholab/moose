@@ -4,7 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnergyInviscidFlux.h"
+#include "NS.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -13,13 +16,13 @@ template<>
 InputParameters validParams<NSEnergyInviscidFlux>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addRequiredCoupledVar("enthalpy", "");
+  params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
   return params;
 }
 
 NSEnergyInviscidFlux::NSEnergyInviscidFlux(const InputParameters & parameters) :
     NSKernel(parameters),
-    _enthalpy(coupledValue("enthalpy"))
+    _enthalpy(coupledValue(NS::enthalpy))
 {
 }
 

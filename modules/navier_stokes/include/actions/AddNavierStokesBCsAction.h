@@ -76,6 +76,9 @@ protected:
   // components into a Kernel.
   void coupleVelocities(InputParameters & params);
   void coupleMomentums(InputParameters & params);
+
+  // Type that we use in Actions for declaring coupling
+  typedef std::vector<VariableName> CoupledName;
 };
 
 #endif

@@ -35,6 +35,9 @@ protected:
   // The Mesh dimension.  Derived classes may need to this when adding
   // variables and Kernels.
   unsigned int _dim;
+
+  // Type that we use in Actions for declaring coupling
+  typedef std::vector<VariableName> CoupledName;
 };
 
 #endif
