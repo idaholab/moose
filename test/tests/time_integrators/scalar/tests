@@ -4,5 +4,7 @@
     type = 'CSVDiff'
     input = 'scalar.i'
     csvdiff = 'scalar_out.csv'
+    # This test features a single element mesh and a single ODE, so only run in serial.
+    max_parallel = 1
   [../]
 []
