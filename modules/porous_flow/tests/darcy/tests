@@ -1,0 +1,14 @@
+[Tests]
+  [./PermFromPoro01]
+    type = 'CSVDiff'
+    input = 'PermFromPoro01.i'
+    csvdiff = 'PermFromPoro01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermFromPoro02]
+    type = 'CSVDiff'
+    input = 'PermFromPoro02.i'
+    csvdiff = 'PermFromPoro02.csv'
+    rel_err = 1.0E-5
+  [../]
+[]
