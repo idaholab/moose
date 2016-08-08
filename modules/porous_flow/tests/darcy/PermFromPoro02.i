@@ -4,16 +4,10 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 10
+  dim = 1
+  nx = 3
   xmin = 0
-  xmax = 1
-  ymin = 0
-  ymax = 1
-  zmin = 0
-  zmax = 10
+  xmax = 3
 []
 
 [GlobalParams]
@@ -42,13 +36,13 @@
   [./ptop]
     type = PresetBC
     variable = pp
-    boundary = front
+    boundary = right
     value = 0
   [../]
   [./pbase]
     type = PresetBC
     variable = pp
-    boundary = back
+    boundary = left
     value = 1
   [../]
 []
@@ -120,17 +114,17 @@
   [./perm_x_top]
     type = PointValue
     variable = perm_x
-    point = '0 0 10'
+    point = '3 0 0'
   [../]
   [./perm_y_top]
     type = PointValue
     variable = perm_y
-    point = '0 0 10'
+    point = '3 0 0'
   [../]
   [./perm_z_top]
     type = PointValue
     variable = perm_z
-    point = '0 0 10'
+    point = '3 0 0'
   [../]
 []
 
