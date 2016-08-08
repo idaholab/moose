@@ -41,8 +41,8 @@ ConstitutiveModel::ConstitutiveModel(const InputParameters & parameters) :
     _has_stress_free_temp(isParamValid("stress_free_temperature")),
     _stress_free_temp(_has_stress_free_temp ? getParam<Real>("stress_free_temperature") : 0.0),
     _ref_temp(0.0),
-    _step_zero(declareRestartableData<bool>("step_zero", true)),
-    _step_one(declareRestartableData<bool>("step_one", true))
+    _step_zero_cm(declareRestartableData<bool>("step_zero_cm", true)),
+    _step_one_cm(declareRestartableData<bool>("step_one_cm", true))
 {
   if (parameters.isParamValid("thermal_expansion_function_type"))
   {
@@ -96,18 +96,18 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
                                       SymmTensor & d_strain_dT)
 {
   if (_t_step >= 1)
-    _step_zero = false;
+    _step_zero_cm = false;
 
   if (_t_step >= 2)
-    _step_one = false;
+    _step_one_cm = false;
 
-  if (_has_temp && !_step_zero)
+  if (_has_temp && !_step_zero_cm)
   {
     Real inc_thermal_strain;
     Real d_thermal_strain_d_temp;
 
     Real old_temp;
-    if (_step_one && _has_stress_free_temp)
+    if (_step_one_cm && _has_stress_free_temp)
       old_temp = _stress_free_temp;
     else
       old_temp = _temperature_old[qp];
