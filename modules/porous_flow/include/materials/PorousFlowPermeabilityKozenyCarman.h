@@ -17,11 +17,11 @@ template<>
 InputParameters validParams<PorousFlowPermeabilityKozenyCarman>();
 
 /**
- * Material designed to provide the permeability tensor which is calculated 
- * from porosity using a form of the Kozeny-Carman equation (e.g. Oelkers 
+ * Material designed to provide the permeability tensor which is calculated
+ * from porosity using a form of the Kozeny-Carman equation (e.g. Oelkers
  * 1996: Reviews in Mineralogy v. 34, p. 131-192):
  * k = k_ijk * A * phi^n / (1 - phi)^m
- * where k_ijk is a tensor providing the anisotropy, phi is porosity, 
+ * where k_ijk is a tensor providing the anisotropy, phi is porosity,
  * n and m are positive scalar constants and A is given in one of the
  * following forms:
  * A = k0 * (1 - phi0)^m / phi0^n
@@ -40,28 +40,28 @@ protected:
 
   /// Reference scalar permeability in A = k0 * (1 - phi0)^m / phi0^n
   const Real _k0;
-  
+
   /// Reference porosity in A = k0 * (1 - phi0)^m / phi0^n
   const Real _phi0;
-  
+
   /// Multiplying factor in A = f * d^2
   const Real _f;
-  
+
   /// Grain diameter in A = f * d^2
   const Real _d;
-  
+
   /// Exponent in k = k_ijk * A * phi^n / (1 - phi)^m
   const Real _m;
 
   /// Exponent in k = k_ijk * A * phi^n / (1 - phi)^m
-  const Real _n;  
+  const Real _n;
 
   /// Tensor multiplier k_ijk in k = k_ijk * A * phi^n / (1 - phi)^m
   const RealTensorValue _k_anisotropy;
 
   /// quadpoint porosity
   const MaterialProperty<Real> & _porosity_qp;
-  
+
   /// d(quadpoint porosity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<Real> > & _dporosity_qp_dvar;
 

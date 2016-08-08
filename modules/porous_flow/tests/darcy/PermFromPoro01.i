@@ -17,7 +17,7 @@
 []
 
 [GlobalParams]
-  block = 0  
+  block = 0
   PorousFlowDictator = dictator
 []
 
@@ -33,7 +33,7 @@
 [Kernels]
   [./flux]
     type = PorousFlowAdvectiveFlux
-    gravity = '0 0 0'  
+    gravity = '0 0 0'
     variable = pp
   [../]
 []
@@ -48,7 +48,7 @@
   [./pbase]
     type = PresetBC
     variable = pp
-    boundary = back 
+    boundary = back
     value = 1
   [../]
 []
@@ -156,14 +156,14 @@
   # Fluid pressure
   [./eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure # Calculate effective fluid pressure from fluid phase pressures and saturations
-  [../]  
+  [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
     porepressure = pp
     al = 1E-8 # unimportant in this fully-saturated test
     m = 0.8   # unimportant in this fully-saturated test
   [../]
-  
+
   # Fluid density
   [./dens0]
     type = PorousFlowDensityConstBulk
@@ -179,13 +179,13 @@
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
   [../]
-  
-  # Porosity 
+
+  # Porosity
   [./porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
   [../]
-  
+
   # Permeability
   [./permeability]
     type = PorousFlowPermeabilityKozenyCarman
@@ -205,7 +205,7 @@
     type = PorousFlowJoiner
     material_property = PorousFlow_relative_permeability
   [../]
-  
+
   # Fluid viscosity (assumed constant)
   [./visc0]
     type = PorousFlowViscosityConst
@@ -233,7 +233,7 @@
   nl_rel_tol = 1E-8
   l_max_its = 200
   nl_max_its = 400
-  
+
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
   petsc_options_value = ' asm      2              lu            gmres     200'
 []
