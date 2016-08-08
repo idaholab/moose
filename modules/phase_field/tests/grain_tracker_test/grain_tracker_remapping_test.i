@@ -175,7 +175,7 @@
   [../]
   [./halo6]
     type = FeatureFloodCountAux
-    variable = halo5
+    variable = halo6
     map_index = 6
     field_display = HALOS
     flood_counter = grain_tracker

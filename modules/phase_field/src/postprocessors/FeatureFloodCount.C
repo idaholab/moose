@@ -166,9 +166,6 @@ FeatureFloodCount::initialize()
     _halo_ids[map_num].clear();
   }
 
-  for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
-    _entities_visited[var_num].clear();
-
   // Calculate the thresholds for this iteration
   _step_threshold = _element_average_value + _threshold;
   _step_connecting_threshold = _element_average_value + _connecting_threshold;
@@ -180,6 +177,15 @@ FeatureFloodCount::initialize()
 
   // Reset the feature count
   _feature_count = 0;
+
+  clearDataStructures();
+}
+
+void
+FeatureFloodCount::clearDataStructures()
+{
+  for (auto & map_ref : _entities_visited)
+    map_ref.clear();
 }
 
 void
@@ -201,7 +207,7 @@ FeatureFloodCount::meshChanged()
   {
     _all_boundary_entity_ids.clear();
     if (_is_elemental)
-      for (MooseMesh::bnd_elem_iterator elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd();
+      for (auto elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd();
            elem_it != elem_end; ++elem_it)
         _all_boundary_entity_ids.insert((*elem_it)->_elem->id());
   }
@@ -210,8 +216,8 @@ FeatureFloodCount::meshChanged()
 void
 FeatureFloodCount::execute()
 {
-  const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
-  for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
+  const auto end = _mesh.getMesh().active_local_elements_end();
+  for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
     const Elem * current_elem = *el;
 
@@ -266,12 +272,18 @@ void FeatureFloodCount::communicateAndMerge()
 
   serialize(send_buffers[0]);
 
+  // Free up as much memory as possible here before we do global communication
+  clearDataStructures();
+
   /**
    * Each processor needs information from all other processors to create a complete
    * global feature map.
    */
+  _communicator.barrier();
+  Moose::perf_log.push("allgather_packed_range()", "FeatureFloodCount");
   _communicator.allgather_packed_range((void *)(nullptr), send_buffers.begin(), send_buffers.end(),
                                        std::back_inserter(recv_buffers));
+  Moose::perf_log.pop("allgather_packed_range()", "FeatureFloodCount");
 
   deserialize(recv_buffers);
 
@@ -434,8 +446,8 @@ FeatureFloodCount::prepareDataForTransfer()
 {
   MeshBase & mesh = _mesh.getMesh();
 
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto & feature : _partial_feature_sets[map_num])
+  for (auto & list_ref : _partial_feature_sets)
+    for (auto & feature : list_ref)
     {
       for (auto & entity_id : feature._local_ids)
       {
@@ -498,17 +510,17 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
   std::istringstream iss;
 
   mooseAssert(serialized_buffers.size() == _app.n_processors(), "Unexpected size of serialized_buffers: " << serialized_buffers.size());
-
-  for (auto rank = decltype(_n_procs)(0); rank < serialized_buffers.size(); ++rank)
+  auto rank = processor_id();
+  for (decltype(rank) proc_id = 0; proc_id < serialized_buffers.size(); ++proc_id)
   {
     /**
      * We should already have the local processor data in the features data structure.
      * Don't unpack the local buffer again.
      */
-    if (rank == processor_id())
+    if (proc_id == rank)
       continue;
 
-    iss.str(serialized_buffers[rank]);    // populate the stream with a new buffer
+    iss.str(serialized_buffers[proc_id]);    // populate the stream with a new buffer
     iss.clear();                          // reset the string stream state
 
     // Load the communicated data into all of the other processors' slots
@@ -626,9 +638,6 @@ FeatureFloodCount::updateFieldInfo()
      * sorted indices vector.
      */
     Moose::indirectSort(_feature_sets[map_num].begin(), _feature_sets[map_num].end(), index_vector);
-
-    // Clear out the original markings since they aren't unique globally
-    _feature_maps[map_num].clear();
 
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
     auto map_idx = (_single_map_mode || _condense_map_info) ? decltype(map_num)(0) : map_num;
@@ -993,18 +1002,17 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
   std::vector<bool> intersected_boxes(rhs._bboxes.size(), false);
 
   auto box_expanded = false;
-  for (unsigned int i = 0; i < _bboxes.size(); ++i)
-    for (unsigned int j = 0; j < rhs._bboxes.size(); ++j)
-      if (_bboxes[i].intersect(rhs._bboxes[j]))
+  for (auto & bbox : _bboxes)
+    for (size_t j = 0; j < rhs._bboxes.size(); ++j)
       {
-        updateBBoxExtremes(_bboxes[i], rhs._bboxes[j]);
+        updateBBoxExtremes(bbox, rhs._bboxes[j]);
         intersected_boxes[j] = true;
         box_expanded = true;
       }
 
   // Any bounding box in the rhs vector that doesn't intersect
   // needs to be appended to the lhs vector
-  for (unsigned int j = 0; j < intersected_boxes.size(); ++j)
+  for (size_t j = 0; j < intersected_boxes.size(); ++j)
     if (!intersected_boxes[j])
       _bboxes.push_back(rhs._bboxes[j]);
 
