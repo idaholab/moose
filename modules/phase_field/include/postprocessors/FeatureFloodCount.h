@@ -294,8 +294,8 @@ protected:
   ///@}
 
   /**
-   * This routine merges the data in _feature_sets from separate threads/processes to resolve
-   * any bubbles that were counted as unique by multiple processors.
+   * This routine is called on the master rank only and stitches together the partial
+   * feature pieces seen on any processor.
    */
   void mergeSets(bool use_periodic_boundary_info);
 
@@ -304,6 +304,20 @@ protected:
    * containing FeatureData objects.
    */
   void communicateAndMerge();
+
+  /**
+   * This routine builds local to global indices. It is intended to be overridden in derived classes.
+   */
+  virtual void buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_all) const;
+
+  /**
+   * Method for scattering the local to global indicies to all ranks. This method is not intended to
+   * be overridden in derived classes.
+   *
+   * Note: The parameter cannot be constant since most constant types are not specialized in
+   * libMesh's parallel.h or parallel_implementation.h.
+   */
+  void scatterIndices(std::vector<std::vector<unsigned int> > & local_to_global_all);
 
   /**
    * Helper routine for clearing up data structures during initialize and prior to parallel
@@ -436,6 +450,9 @@ protected:
   /// The number of features seen by this object (same as summing _feature_counts_per_map)
   unsigned int _feature_count;
 
+  /// The largest size of any partial local feature set on all processors
+  unsigned int _max_local_size;
+
   /**
    * The data structure used to hold partial and communicated feature data.
    * The data structure mirrors that found in _feature_sets, but contains
@@ -455,6 +472,8 @@ protected:
    */
   std::vector<std::map<dof_id_type, int> > _feature_maps;
 
+  /// The map recording the local to global feature ids
+  std::vector<unsigned int> _local_to_global_feature_map;
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
@@ -518,37 +537,36 @@ template <class T>
 void
 FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> data)
 {
-  if (processor_id() == 0)
+  mooseAssert(processor_id() == 0, "Only write files on processor zero");
+
+  // Try to find the filename
+  auto handle_it = _file_handles.find(file_name);
+
+  // If the file_handle isn't found, create it
+  if (handle_it == _file_handles.end())
   {
-    // Try to find the filename
-    auto handle_it = _file_handles.find(file_name);
+    MooseUtils::checkFileWriteable(file_name);
 
-    // If the file_handle isn't found, create it
-    if (handle_it == _file_handles.end())
-    {
-      MooseUtils::checkFileWriteable(file_name);
+    // Store the new filename in the map
+    auto result = _file_handles.insert(std::make_pair(file_name, libmesh_make_unique<std::ofstream>(file_name.c_str())));
 
-      // Store the new filename in the map
-      auto result = _file_handles.insert(std::make_pair(file_name, libmesh_make_unique<std::ofstream>(file_name.c_str())));
+    // Be sure that the insert worked!
+    mooseAssert(result.second, "Insertion into _file_handles map failed!");
 
-      // Be sure that the insert worked!
-      mooseAssert(result.second, "Insertion into _file_handles map failed!");
-
-      // Set handle_it to be an iterator to the new file.
-      handle_it = result.first;
-    }
-
-    // Get reference to the stream, makes syntax below much simpler
-    std::ofstream & the_stream = *(handle_it->second);
-
-    // Set formatting flags on the stream - technically we only need to do this once, but whatever.
-    the_stream << std::scientific << std::setprecision(6);
-
-    mooseAssert(the_stream.is_open(), "File handle is not open");
-
-    std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(the_stream, ", "));
-    the_stream << std::endl;
+    // Set handle_it to be an iterator to the new file.
+    handle_it = result.first;
   }
+
+  // Get reference to the stream, makes syntax below much simpler
+  std::ofstream & the_stream = *(handle_it->second);
+
+  // Set formatting flags on the stream - technically we only need to do this once, but whatever.
+  the_stream << std::scientific << std::setprecision(6);
+
+  mooseAssert(the_stream.is_open(), "File handle is not open");
+
+  std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(the_stream, ", "));
+  the_stream << std::endl;
 }
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
