@@ -362,6 +362,87 @@ agreement with the expected flux and the MOOSE implementation.
 \end{figure}
 
 
+\chapter{Advection of a fluid component}
+
+The porepressure at a boundary may be maintained at a fixed value by
+applying a sufficiently strong piecewise-linear sink:
+\begin{equation}
+f = Cp \ ,
+\end{equation}
+(measured in kg.m$^{-2}$.s$^{-1}$) for large\footnote{If $C$ is too
+  large then it will dominate the numerics and MOOSE will not
+  converge.} conductance $C$.  In the multi-component case, the flux
+of of fluid component $\kappa$ should be made proportional to the
+component mass fraction, $\chi^{\kappa}$:
+\begin{equation}
+f^{\kappa} = C\chi^{\kappa}p \ .
+\label{eqn.flux.rhs}
+\end{equation}
+This is a ``natural'' boundary condition, in that fluid exits or
+enters the porous material at a rate dictated by the mass-fraction
+within the porous material.  This means, for instance, that if fluid
+is exiting ($p>0$ in this case) then only components that exist at the
+boundary system will exit, and MOOSE will not attempt to extract fluid
+components that have zero mass-fraction.
+
+This example concerns a 1D porous material occupying the space $0\leq
+x \leq 1$.  It contains a single phase fluid with two
+fluid components.  The porous material initially only contains fluid
+component $1$, and there is a pressure gradient:
+\begin{equation}
+p(t=0) = 1 - x \ \ \ \mbox{and}\ \ \ \chi^{0}(t=0) = 0 \ .
+\end{equation}
+For $t>0$, fluid component $0$ is introduced on the material's left
+side ($x=0$), by applying the fixed boundary conditions:
+\begin{equation}
+p(x=0) = 1 \ \ \ \mbox{and}\ \ \ \chi^{0}(x=0) = 1 \ .
+\end{equation}
+The right-hand side, at $x=1$, is subjected to the flux of
+Eqn~(\ref{eqn.flux.rhs}).  The fluid-component $0$ flows from the left
+side to the right side via the pressure gradient.  To simplify the
+following analysis, the fluid bulk modulus is taken to be very large.
+
+Because the fluid bulk modulus is very large, $\partial P/\partial x = -1$ is a
+solution for all time.  This means that the governing equation reduces
+to
+\begin{equation}
+\phi \frac{\partial \chi}{\partial t} =  (k_{ij}/\mu) \nabla_{j}
+\chi \nabla_{i}P \ .
+\end{equation}
+In this equation $\phi$ is the porosity, $k_{ij}$ is the permeability
+tensor, and $\mu$ is the fluid viscosity.  This is just the advection
+equation for the mass fraction $\chi$, with velocity
+\begin{equation}
+\mbox{velocity}_{j} = \nabla_{i}P\frac{k_{ij}}{\mu\phi} \ .
+\end{equation}
+In this test, the parameters are chosen such that velocity$=1$\,m.s$^{-1}$.
+
+The sharp front (described by the advection equation
+with the initial and boundary conditions) is {\em not} maintained by
+MOOSE.  This is due to numerical diffusion, which is particularly
+strong in the upwinding scheme implemented in the PorousFlow module.
+Nevertheless, MOOSE advects the smooth front with the correct
+velocity, as shown in Figure~\ref{s09.fig}.
+
+\begin{figure}[htb]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=7cm]{s09_0_1.pdf}  &
+\includegraphics[width=7cm]{s09_0_5.pdf}
+\end{tabular} \\
+\includegraphics[width=7cm]{s09_1_0.pdf}
+\caption{Results of the advection of a fluid component test,
+  illustrating that the numerical implementation of porous flow within
+  MOOSE diffuses sharp fronts, but advects them at the correct
+  velocity ($v=1$\,m.s$^{-1}$ in this case, and notice the centre of
+  the front is at the correct position in each picture).  Top left: mass fraction at
+  $t=0.1$\,s.  Top right: mass fraction
+  at $t=0.5$\,s.  Bottom: mass
+  fraction at $t=1.0$\,s.}
+\label{s09.fig}
+\end{center}
+\end{figure}
+
 
 
 
