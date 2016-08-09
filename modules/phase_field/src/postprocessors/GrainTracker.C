@@ -266,13 +266,13 @@ GrainTracker::trackGrains()
     bool display_them = false;
     for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     {
-      _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _feature_sets[map_num].size();
-      if (map_sizes[map_num] > _feature_sets[map_num].size())
+      _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> " << _feature_counts_per_map[map_num];
+      if (map_sizes[map_num] > _feature_counts_per_map[map_num])
       {
         _console << "--";
         display_them = true;
       }
-      else if (map_sizes[map_num] < _feature_sets[map_num].size())
+      else if (map_sizes[map_num] < _feature_counts_per_map[map_num])
       {
         _console << "++";
         display_them = true;
@@ -311,60 +311,55 @@ GrainTracker::trackGrains()
       std::set<unsigned int> used_indices;
       std::map<unsigned int, unsigned int> error_indices;
 
-      unsigned int total_grains = 0;
-      for (const auto & vector_ref : _feature_sets)
-        total_grains += vector_ref.size();
-
-      if (grain_num != total_grains && processor_id() == 0)
-        mooseWarning("Mismatch:\nEBSD centers: " << grain_num << " Grain Tracker Centers: " << total_grains);
+      if (grain_num != _feature_count && processor_id() == 0)
+        mooseWarning("Mismatch:\nEBSD centers: " << grain_num << " Grain Tracker Centers: " << _feature_count);
 
       auto next_index = grain_num;
 
       // Loop over all of the features (grains)
-      for (auto & vector_ref : _feature_sets)
-        for (auto && feature : vector_ref)
+      for (auto && feature : _feature_sets)
+      {
+        Real min_centroid_diff = std::numeric_limits<Real>::max();
+        unsigned int closest_match_idx = 0;
+
+        for (size_t j = 0; j < center_points.size(); ++j)
         {
-          Real min_centroid_diff = std::numeric_limits<Real>::max();
-          unsigned int closest_match_idx = 0;
+          // Update the ebsd bbox data to be used in the centroidRegionDistance calculation
+          // Since we are using centroid matching we'll just make it easy and set both the min/max of the box to the same
+          // value (i.e. a zero sized box).
+          ebsd_vector[0].min() = ebsd_vector[0].max() = center_points[j];
 
-          for (size_t j = 0; j < center_points.size(); ++j)
+          Real curr_centroid_diff = centroidRegionDistance(ebsd_vector, feature._bboxes);
+          if (curr_centroid_diff <= min_centroid_diff)
           {
-            // Update the ebsd bbox data to be used in the centroidRegionDistance calculation
-            // Since we are using centroid matching we'll just make it easy and set both the min/max of the box to the same
-            // value (i.e. a zero sized box).
-            ebsd_vector[0].min() = ebsd_vector[0].max() = center_points[j];
-
-            Real curr_centroid_diff = centroidRegionDistance(ebsd_vector, feature._bboxes);
-            if (curr_centroid_diff <= min_centroid_diff)
-            {
-              closest_match_idx = j;
-              min_centroid_diff = curr_centroid_diff;
-            }
-          }
-
-          if (used_indices.find(closest_match_idx) != used_indices.end())
-          {
-            Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
-                       << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-            feature._status = Status::MARKED;
-            _unique_grains[next_index] = std::move(feature);
-
-            _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
-
-            ++next_index;
-          }
-          else
-          {
-            Moose::out << "Assigning center " << closest_match_idx << " "
-                       << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
-            feature._status = Status::MARKED;
-            _unique_grains[closest_match_idx] = std::move(feature);
-
-            _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
-
-            used_indices.insert(closest_match_idx);
+            closest_match_idx = j;
+            min_centroid_diff = curr_centroid_diff;
           }
         }
+
+        if (used_indices.find(closest_match_idx) != used_indices.end())
+        {
+          Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
+                     << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+          feature._status = Status::MARKED;
+          _unique_grains[next_index] = std::move(feature);
+
+          _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
+
+          ++next_index;
+        }
+        else
+        {
+          Moose::out << "Assigning center " << closest_match_idx << " "
+                     << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+          feature._status = Status::MARKED;
+          _unique_grains[closest_match_idx] = std::move(feature);
+
+          _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
+
+          used_indices.insert(closest_match_idx);
+        }
+      }
 
       if (!error_indices.empty())
       {
@@ -380,25 +375,16 @@ GrainTracker::trackGrains()
     }
     else
     {
-      /**
-       * Here we want to assign the grains in some partitioning invariant way. We'll sort first by
-       * _var_idx (already partitioned in that manner) then sort on the _min_entity_id
-       * to order the grains.
-       */
       unsigned int counter = 0;
-      for (auto & vector_ref : _feature_sets)
+      // Move the grains from the FeatureFloodCount data structure to the _unique_grains data structure.
+      for (auto && grain : _feature_sets)
       {
-        // Sort the grains represented by this variable by _min_entity_id
-        std::sort(vector_ref.begin(), vector_ref.end());
-
-        // Move the grains from the FeatureFloodCount data structure to the _unique_grains data structure.
-        for (auto && grain : vector_ref)
-        {
-          grain._status = Status::MARKED;
-          _unique_grains.emplace_hint(_unique_grains.end(), std::pair<unsigned int, FeatureData>(counter, std::move(grain)));
-          newGrainCreated(counter++);
-        }
+        _unique_grains.emplace_hint(_unique_grains.end(), std::pair<unsigned int, FeatureData>(counter, std::move(grain)));
+        newGrainCreated(counter++);
       }
+
+      // Clean up the "moved" Features
+      _feature_sets.clear();
     }
     // Reserve op grain ids if we are using reserve_op. We'll mark the first index of the reserved id.
     // The remaining ids (if any) are sequential
@@ -412,7 +398,7 @@ GrainTracker::trackGrains()
    * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
    * index whose centroid is closest to this unique grain.
    */
-  std::map<std::pair<unsigned int, unsigned int>, unsigned int> new_grain_idx_to_existing_grain_idx;
+  std::map<unsigned int, unsigned int> new_grain_idx_to_existing_grain_idx;
 
   for (auto & grain_pair : _unique_grains)
   {
@@ -424,12 +410,12 @@ GrainTracker::trackGrains()
     Real min_centroid_diff = std::numeric_limits<Real>::max();
 
     // We only need to examine grains that have matching variable indices
-    unsigned int map_idx = _single_map_mode ? 0 : grain_pair.second._var_idx;
-    for (size_t new_grain_idx = 0; new_grain_idx < _feature_sets[map_idx].size(); ++new_grain_idx)
+    for (size_t new_grain_idx = 0; new_grain_idx < _feature_sets.size(); ++new_grain_idx)
     {
-      if (grain_pair.second._var_idx == _feature_sets[map_idx][new_grain_idx]._var_idx)  // Do the variables indicies match?
+      // TODO: It's possible to loop over just a subset of these indicies for efficiency
+      if (grain_pair.second._var_idx == _feature_sets[new_grain_idx]._var_idx)  // Do the variables indicies match?
       {
-        Real curr_centroid_diff = centroidRegionDistance(grain_pair.second._bboxes, _feature_sets[map_idx][new_grain_idx]._bboxes);
+        Real curr_centroid_diff = centroidRegionDistance(grain_pair.second._bboxes, _feature_sets[new_grain_idx]._bboxes);
         if (curr_centroid_diff <= min_centroid_diff)
         {
           found_one = true;
@@ -442,19 +428,19 @@ GrainTracker::trackGrains()
     if (found_one)
     {
       // Keep track of which new grains the existing ones want to map to
-      const auto match_pair = std::make_pair(map_idx, closest_match_idx);
+//      const auto match_pair = std::make_pair(map_idx, closest_match_idx);
 
      /**
       * It's possible that multiple existing grains will map to a single new grain (indicated by finding multiple
       * matches when we are building this map). This will happen any time a grain disappears during
       * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
       */
-      const auto map_it = new_grain_idx_to_existing_grain_idx.find(match_pair);
+      const auto map_it = new_grain_idx_to_existing_grain_idx.find(closest_match_idx);
 
       if (map_it != new_grain_idx_to_existing_grain_idx.end())
       {
         // The new feature being competed for
-        auto & feature = _feature_sets[map_idx][closest_match_idx];
+        auto & feature = _feature_sets[closest_match_idx];
 
         // The two older grains competing (iterators into the map)
         const auto & grain_it1 = _unique_grains.find(map_it->second);
@@ -472,10 +458,10 @@ GrainTracker::trackGrains()
 
         // Make sure we update the new to existing map if necessary
         if (grain_it1->first == inactive_it->first)
-          new_grain_idx_to_existing_grain_idx[match_pair] = grain_pair.first;
+          new_grain_idx_to_existing_grain_idx[closest_match_idx] = grain_pair.first;
       }
       else
-        new_grain_idx_to_existing_grain_idx[std::make_pair(map_idx, closest_match_idx)] = grain_pair.first;
+        new_grain_idx_to_existing_grain_idx[closest_match_idx] = grain_pair.first;
     }
   }
 
@@ -483,28 +469,26 @@ GrainTracker::trackGrains()
   for (const auto & new_to_exist_kv : new_grain_idx_to_existing_grain_idx)
   {
     auto curr_idx = new_to_exist_kv.second;
-                                                       // map index                 // feature index
-    _unique_grains[curr_idx] = std::move(_feature_sets[new_to_exist_kv.first.first][new_to_exist_kv.first.second]);
+                                                       // feature index
+    _unique_grains[curr_idx] = std::move(_feature_sets[new_to_exist_kv.first]);
     _unique_grains[curr_idx]._status = Status::MARKED;
   }
 
   //  Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    for (auto feature_num = decltype(_feature_sets[map_num].size())(0);
-         feature_num < _feature_sets[map_num].size(); ++feature_num)
-      // If it's not in the index list, it hasn't been transferred
-      if (new_grain_idx_to_existing_grain_idx.find(std::make_pair(map_num, feature_num)) == new_grain_idx_to_existing_grain_idx.end())
-      {
-        mooseAssert(_feature_sets[map_num][feature_num]._status == Status::CLEAR, "Feature in wrong state, logic error");
+  for (auto feature_num = decltype(_feature_sets.size())(0); feature_num < _feature_sets.size(); ++feature_num)
+    // If it's not in the index list, it hasn't been transferred
+    if (new_grain_idx_to_existing_grain_idx.find(feature_num) == new_grain_idx_to_existing_grain_idx.end())
+    {
+      mooseAssert(_feature_sets[feature_num]._status == Status::CLEAR, "Feature in wrong state, logic error");
 
-        auto new_idx = _unique_grains.size() + _n_reserve_ops;
+      auto new_idx = _unique_grains.size() + _n_reserve_ops;
 
-        _feature_sets[map_num][feature_num]._status = Status::MARKED;               // Mark it
-        _unique_grains[new_idx] = std::move(_feature_sets[map_num][feature_num]);   // transfer ownership
+      _feature_sets[feature_num]._status = Status::MARKED;               // Mark it
+      _unique_grains[new_idx] = std::move(_feature_sets[feature_num]);   // transfer ownership
 
-        // Trigger the callback
-        newGrainCreated(new_idx);
-      }
+      // Trigger the callback
+      newGrainCreated(new_idx);
+    }
 
   /**
    * Finally we need to mark any grains in the unique list that aren't marked as inactive.  These are the unique grains
