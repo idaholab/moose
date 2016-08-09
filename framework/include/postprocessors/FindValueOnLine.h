@@ -71,7 +71,7 @@ protected:
   std::vector<Point> _point_vec;
 
   /// helper object to locate elements containing points
-  UniquePtr<PointLocatorBase> _pl;
+  std::unique_ptr<PointLocatorBase> _pl;
 };
 
 #endif // FINDVALUEONLINE_H

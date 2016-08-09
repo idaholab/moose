@@ -63,10 +63,10 @@ MaxQpsThread::operator() (const ConstElemRange & range)
       // We cannot mess with the FE objects in Assembly, because we might need to request second derivatives
       // later on. If we used them, we'd call reinit on them, thus making the call to request second
       // derivatives harmful (i.e. leading to segfaults/asserts). Thus, we have to use a locally allocated object here.
-      UniquePtr<FEBase> fe (FEBase::build(dim, fe_type));
+      std::unique_ptr<FEBase> fe (FEBase::build(dim, fe_type));
 
       // figure out the number of qps for volume
-      UniquePtr<QBase> qrule (QBase::build(_qtype, dim, _order));
+      std::unique_ptr<QBase> qrule (QBase::build(_qtype, dim, _order));
       fe->attach_quadrature_rule(qrule.get());
       fe->reinit(elem);
       if (qrule->n_points() > _max)
@@ -78,7 +78,7 @@ MaxQpsThread::operator() (const ConstElemRange & range)
 
       // figure out the number of qps for the face
       // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps than in the volume
-      UniquePtr<QBase> qrule_face (QBase::build(_qtype, dim - 1, _face_order));
+      std::unique_ptr<QBase> qrule_face (QBase::build(_qtype, dim - 1, _face_order));
       fe->attach_quadrature_rule(qrule_face.get());
       fe->reinit(elem, side);
       if (qrule_face->n_points() > _max)

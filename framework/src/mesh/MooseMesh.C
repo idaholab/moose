@@ -1072,7 +1072,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 
   MeshBase::const_element_iterator it = getMesh().active_elements_begin();
   MeshBase::const_element_iterator it_end = getMesh().active_elements_end();
-  UniquePtr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
+  std::unique_ptr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
 
   // Get a const reference to the BoundaryInfo object that we will use several times below...
   const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
@@ -1100,8 +1100,8 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
           const Elem * neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
           unsigned int s_neigh = boundary_info.side_with_boundary_id (neigh, periodic->pairedboundary);
 
-          UniquePtr<Elem> elem_side = elem->build_side(s);
-          UniquePtr<Elem> neigh_side = neigh->build_side(s_neigh);
+          std::unique_ptr<Elem> elem_side = elem->build_side(s);
+          std::unique_ptr<Elem> neigh_side = neigh->build_side(s_neigh);
 
           // At this point we have matching sides - lets find matching nodes
           for (unsigned int i = 0; i < elem_side->n_nodes(); ++i)
@@ -1266,13 +1266,13 @@ MooseMesh::detectPairedSidesets()
     minus_y_ids(dim), plus_y_ids(dim),
     minus_z_ids(dim), plus_z_ids(dim);
 
-  std::vector<UniquePtr<FEBase>> fe_faces(dim);
-  std::vector<UniquePtr<QGauss>> qfaces(dim);
+  std::vector<std::unique_ptr<FEBase>> fe_faces(dim);
+  std::vector<std::unique_ptr<QGauss>> qfaces(dim);
   for (unsigned side_dim = 0; side_dim < dim; ++side_dim)
   {
     // Face is assumed to be flat, therefore normal is assumed to be
     // constant over the face, therefore only compute it at 1 qp.
-    qfaces[side_dim] = UniquePtr<QGauss>(new QGauss(side_dim, CONSTANT));
+    qfaces[side_dim] = std::unique_ptr<QGauss>(new QGauss(side_dim, CONSTANT));
 
     // A first-order Lagrange FE for the face.
     fe_faces[side_dim] = FEBase::build(side_dim + 1,
@@ -1300,7 +1300,7 @@ MooseMesh::detectPairedSidesets()
       // If side is on the boundary
       if (elem->neighbor(s) == NULL)
       {
-        UniquePtr<Elem> side = elem->build_side(s);
+        std::unique_ptr<Elem> side = elem->build_side(s);
 
         fe_faces[side_dim]->reinit(elem, s);
 
@@ -1665,11 +1665,11 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   for (unsigned int i = 0; i < template_elem->n_nodes(); ++i)
     elem->set_node(i) = mesh.node_ptr(i);
 
-  UniquePtr<FEBase> fe (FEBase::build(dim, FEType()));
+  std::unique_ptr<FEBase> fe (FEBase::build(dim, FEType()));
   fe->get_phi();
   const std::vector<Point> & q_points_volume = fe->get_xyz();
 
-  UniquePtr<FEBase> fe_face (FEBase::build(dim, FEType()));
+  std::unique_ptr<FEBase> fe_face (FEBase::build(dim, FEType()));
   fe_face->get_phi();
   const std::vector<Point> & q_points_face = fe_face->get_xyz();
 
@@ -2423,7 +2423,7 @@ MooseMesh::setIsCustomPartitionerRequested(bool cpr)
   _custom_partitioner_requested = cpr;
 }
 
-UniquePtr<PointLocatorBase>
+std::unique_ptr<PointLocatorBase>
 MooseMesh::getPointLocator() const
 {
   return getMesh().sub_point_locator();

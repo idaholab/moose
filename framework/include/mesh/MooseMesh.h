@@ -769,7 +769,7 @@ public:
    * libmesh mesh (default), or to allow derived meshes to return a custom
    * point locator
    */
-  virtual UniquePtr<PointLocatorBase> getPointLocator() const;
+  virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
@@ -795,7 +795,7 @@ protected:
   bool _partitioner_overridden;
 
   /// The custom partitioner
-  UniquePtr<Partitioner> _custom_partitioner;
+  std::unique_ptr<Partitioner> _custom_partitioner;
   bool _custom_partitioner_requested;
 
   /// Convenience enums
@@ -876,7 +876,7 @@ protected:
   ///@}
 
   /// The boundary to normal map - valid only when AddAllSideSetsByNormals is active
-  UniquePtr<std::map<BoundaryID, RealVectorValue> > _boundary_to_normal_map;
+  std::unique_ptr<std::map<BoundaryID, RealVectorValue> > _boundary_to_normal_map;
 
   /// array of boundary nodes
   std::vector<BndNode *> _bnd_nodes;

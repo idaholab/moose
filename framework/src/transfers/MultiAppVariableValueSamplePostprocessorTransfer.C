@@ -55,7 +55,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
       MooseMesh & from_mesh = from_problem.mesh();
 
-      UniquePtr<PointLocatorBase> pl = from_mesh.getPointLocator();
+      std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {

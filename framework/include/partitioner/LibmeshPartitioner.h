@@ -28,7 +28,7 @@ public:
   LibmeshPartitioner(const InputParameters & params);
   virtual ~LibmeshPartitioner();
 
-  virtual UniquePtr<Partitioner> clone() const;
+  virtual std::unique_ptr<Partitioner> clone() const;
   virtual void partition(MeshBase &mesh, const unsigned int n);
   virtual void partition(MeshBase &mesh);
 
