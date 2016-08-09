@@ -764,6 +764,13 @@ public:
   /// Getter to query if the mesh was detected to be regular and orthogonal
   bool isRegularOrthogonal() { return _regular_orthogonal_mesh; }
 
+  /**
+   * Proxy function to get a (sub)PointLocator from either the underlying
+   * libmesh mesh (default), or to allow derived meshes to return a custom
+   * point locator
+   */
+  virtual UniquePtr<PointLocatorBase> getPointLocator() const;
+
 protected:
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.

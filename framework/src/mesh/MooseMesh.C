@@ -51,6 +51,7 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/quadrature_gauss.h"
+#include "libmesh/point_locator_base.h"
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -2420,6 +2421,12 @@ void
 MooseMesh::setIsCustomPartitionerRequested(bool cpr)
 {
   _custom_partitioner_requested = cpr;
+}
+
+UniquePtr<PointLocatorBase>
+MooseMesh::getPointLocator() const
+{
+  return getMesh().sub_point_locator();
 }
 
 void
