@@ -131,8 +131,6 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _dep_matl_props(),
   _stress(createProperty<SymmTensor>("stress")),
   _stress_old_prop(createPropertyOld<SymmTensor>("stress")),
-  _step_zero(declareRestartableData<bool>("step_zero", true)),
-  _step_one(declareRestartableData<bool>("step_one", true)),
   _stress_old(0),
   _total_strain(createProperty<SymmTensor>("total_strain")),
   _total_strain_old(createPropertyOld<SymmTensor>("total_strain")),
@@ -165,6 +163,8 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _J_thermal_term_vec(NULL),
   _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
   _constitutive_active(false),
+  _step_zero(declareRestartableData<bool>("step_zero", true)),
+  _step_one(declareRestartableData<bool>("step_one", true)),
   _element(NULL),
   _local_elasticity_tensor(NULL)
 {
