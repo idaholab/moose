@@ -176,7 +176,7 @@ void recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, 
   return;
 }
 
-void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & /*mesh*/, MooseSharedPointer<PointLocatorBase> & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
+void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & /*mesh*/, const UniquePtr<PointLocatorBase> & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
 {
   // Make sure our list is clear
   intersected_elems.clear();

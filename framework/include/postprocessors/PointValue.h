@@ -68,7 +68,7 @@ protected:
   const VariableValue & _u;
 
   /// A convenience reference to the libMesh::MeshBase object
-  MeshBase & _mesh;
+  MooseMesh & _mesh;
 
   /// The point to locate, stored as a vector for use with reinitElemPhys
   std::vector<Point> _point_vec;
