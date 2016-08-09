@@ -1,0 +1,16 @@
+[Tests]
+  [./nc01]
+    type = 'CSVDiff'
+    input = 'nc01.i'
+    csvdiff = 'nc01_porepressure_0101.csv'
+    rel_err = 1E-5
+    heavy = True
+    max_time = 1000
+  [../]
+  [./nc02]
+    type = 'CSVDiff'
+    input = 'nc02.i'
+    csvdiff = 'nc02_porepressure_0001.csv'
+    rel_err = 1E-5
+  [../]
+[]

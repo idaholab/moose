@@ -116,10 +116,6 @@ protected:
 private:
   MaterialProperty<SymmTensor> & _stress_old_prop;
 
-  ///@{ Restartable data to check for the zeroth and first time steps for thermal calculations
-  bool & _step_zero;
-  bool & _step_one;
-  ///@}
 protected:
   SymmTensor _stress_old;
 
@@ -267,6 +263,11 @@ protected:
   virtual void computeConstitutiveModelStress();
 
   void createConstitutiveModel(const std::string & cm_name);
+
+  ///@{ Restartable data to check for the zeroth and first time steps for thermal calculations
+  bool & _step_zero;
+  bool & _step_one;
+  ///@}
 
 
 private:
