@@ -19,4 +19,14 @@
     input = 'j_integral_2d_inst_ctefunc.i'
     csvdiff = 'inst_out.csv'
   [../]
+  [./test_iithermal]
+    type = 'Exodiff'
+    input = 'interaction_integral_2d.i'
+    exodiff = 'interaction_integral_2d_out.e'
+  [../]
+  [./test_iithermal_rot]
+    type = 'Exodiff'
+    input = 'interaction_integral_2d_rot.i'
+    exodiff = 'interaction_integral_2d_rot_out.e'
+  [../]
 []
