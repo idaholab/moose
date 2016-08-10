@@ -169,7 +169,7 @@ public:
     /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
-      return _min_entity_id < rhs._min_entity_id;
+      return _var_idx < rhs._var_idx || (_var_idx == rhs._var_idx && _min_entity_id < rhs._min_entity_id);
     }
 
     /// stream output operator
@@ -412,7 +412,10 @@ protected:
   /// The data structure used to find neighboring elements give a node ID
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
 
-  // The number of features seen by this object
+  /// The number of features seen by this object per map
+  std::vector<unsigned int> _feature_counts_per_map;
+
+  /// The number of features seen by this object (same as summing _feature_counts_per_map)
   unsigned int _feature_count;
 
   /**
@@ -426,7 +429,7 @@ protected:
    * The data structure used to hold the globally unique features. The outer vector
    * is indexed by variable number, the inner vector is indexed by feature number
    */
-  std::vector<std::vector<FeatureData> > _feature_sets;
+  std::vector<FeatureData> _feature_sets;
 
   /**
    * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
