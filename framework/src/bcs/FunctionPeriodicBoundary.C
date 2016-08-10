@@ -79,12 +79,12 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
   return pt;
 }
 
-UniquePtr<PeriodicBoundaryBase> FunctionPeriodicBoundary::clone(TransformationType t) const
+std::unique_ptr<PeriodicBoundaryBase> FunctionPeriodicBoundary::clone(TransformationType t) const
 {
   if (t==INVERSE)
     mooseError("No way to automatically clone() an inverse FunctionPeriodicBoundary object");
 
-  return UniquePtr<PeriodicBoundaryBase>(new FunctionPeriodicBoundary(*this));
+  return std::unique_ptr<PeriodicBoundaryBase>(new FunctionPeriodicBoundary(*this));
 }
 
 void

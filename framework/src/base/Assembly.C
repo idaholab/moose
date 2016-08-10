@@ -570,7 +570,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   // Calculate the volume of the neighbor
 
   FEType fe_type (neighbor->default_order() , LAGRANGE);
-  UniquePtr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
+  std::unique_ptr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
 
   const std::vector<Real> & JxW = fe->get_JxW();
   const std::vector<Point> & q_points = fe->get_xyz();

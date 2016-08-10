@@ -114,7 +114,7 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
 
   // Setup system vectors and matrices.
   FEType fe_type = system.variable_type(0);
-  UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
+  std::unique_ptr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
   QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
   const DofMap& dof_map = system.get_dof_map();
@@ -226,7 +226,7 @@ MultiAppProjectionTransfer::execute()
       LinearImplicitSystem & system = * _proj_sys[i_to];
 
       FEType fe_type = system.variable_type(0);
-      UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
+      std::unique_ptr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
       QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
       fe->attach_quadrature_rule(&qrule);
       const std::vector<Point> & xyz = fe->get_xyz();
@@ -407,7 +407,7 @@ MultiAppProjectionTransfer::execute()
     LinearImplicitSystem & system = * _proj_sys[i_to];
 
     FEType fe_type = system.variable_type(0);
-    UniquePtr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
+    std::unique_ptr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
     QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
     fe->attach_quadrature_rule(&qrule);
     const std::vector<Point> & xyz = fe->get_xyz();

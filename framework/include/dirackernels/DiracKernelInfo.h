@@ -103,7 +103,7 @@ protected:
   /// by all DiracKernels to find Points.  It needs to be centrally managed and it
   /// also needs to be rebuilt in FEProblem::meshChanged() to work with Mesh
   /// adaptivity.
-  UniquePtr<PointLocatorBase> _point_locator;
+  std::unique_ptr<PointLocatorBase> _point_locator;
 
   /// threshold distance squared below which two points are considered identical
   const Real _point_equal_distance_sq;

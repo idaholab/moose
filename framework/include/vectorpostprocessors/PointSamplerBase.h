@@ -70,7 +70,7 @@ protected:
   /// So we don't have to create and destroy this
   std::vector<Point> _point_vec;
 
-  UniquePtr<PointLocatorBase> _pl;
+  std::unique_ptr<PointLocatorBase> _pl;
 };
 
 #endif

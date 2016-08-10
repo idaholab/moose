@@ -53,7 +53,7 @@ PointSamplerBase::initialize()
   SamplerBase::initialize();
 
   // We do this here just in case it's been destroyed and recreated becaue of mesh adaptivity.
-  _pl = _mesh.getMesh().sub_point_locator();
+  _pl = _mesh.getPointLocator();
 
   // Reset the _found_points array
   _found_points.resize(_points.size());
