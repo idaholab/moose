@@ -138,19 +138,16 @@ LineMaterialSamplerBase<T>::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  MooseSharedPointer<PointLocatorBase> plb = MooseSharedPointer<PointLocatorBase>(_fe_problem.mesh().getMesh().sub_point_locator().release());
-
-  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), plb, intersected_elems, segments);
+  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  Moose::elementsIntersectedByLine(_start, _end, _mesh, *pl, intersected_elems, segments);
 
   const RealVectorValue line_vec = _end - _start;
   const Real line_length(line_vec.norm());
   const RealVectorValue line_unit_vec = line_vec / line_length;
   std::vector<Real> values(_material_properties.size());
 
-  for (unsigned int i = 0; i < intersected_elems.size(); ++i)
+  for (const auto & elem : intersected_elems)
   {
-    const Elem * elem = intersected_elems[i];
-
     if (elem->processor_id() != processor_id())
       continue;
 

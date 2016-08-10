@@ -50,7 +50,7 @@ void
 FindValueOnLine::initialize()
 {
   // We do this here just in case it's been destroyed and recreated becaue of mesh adaptivity.
-  _pl = _mesh.getMesh().sub_point_locator();
+  _pl = _mesh.getPointLocator();
 }
 
 void

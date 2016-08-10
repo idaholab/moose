@@ -31,7 +31,7 @@ PointValue::PointValue(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
-    _mesh(_subproblem.mesh().getMesh()),
+    _mesh(_subproblem.mesh()),
     _point_vec(1, getParam<Point>("point")),
     _value(0),
     _root_id(0),
@@ -44,7 +44,7 @@ PointValue::execute()
 {
   // Locate the element and store the id
   // We can't store the actual Element pointer here b/c PointLocatorBase returns a const Elem *
-  UniquePtr<PointLocatorBase> pl = _mesh.sub_point_locator();
+  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
   const Elem * elem = (*pl)(_point_vec[0]);
 
   // Error if the element cannot be located
@@ -65,7 +65,7 @@ PointValue::finalize()
   // Compute the value at the point
   if (_root_id == processor_id())
   {
-    const Elem * elem = _mesh.elem(_elem_id);
+    const Elem * elem = _mesh.getMesh().elem(_elem_id);
     std::set<MooseVariable *> var_list;
     var_list.insert(&_var);
 

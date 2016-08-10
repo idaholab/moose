@@ -3521,7 +3521,7 @@ FEProblem::computePostCheck(NonlinearImplicitSystem & sys,
 
     // Construct zeroed-out clones with the same ghosted dofs as the
     // System's current_local_solution.
-    UniquePtr<NumericVector<Number> >
+    std::unique_ptr<NumericVector<Number> >
       ghosted_solution = sys.current_local_solution->zero_clone(),
       ghosted_search_direction = sys.current_local_solution->zero_clone();
 

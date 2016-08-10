@@ -67,7 +67,7 @@ MortarPeriodicMesh::buildMesh()
           unsigned short int  s = (*it)->_side;
 
           // build element from the side
-          UniquePtr<Elem> side (elem->build_side(s, false));
+          std::unique_ptr<Elem> side (elem->build_side(s, false));
           side->processor_id() = elem->processor_id();
 
           // Add the side set subdomain
