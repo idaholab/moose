@@ -1,3 +1,22 @@
+#This problem from [Wilson 1979] tests the thermal strain term in the
+#interaction integral
+#
+#theta_e = 10 degrees C; a = 252; E = 207000; nu = 0.3; alpha = 1.35e-5
+#
+#With uniform_refine = 3, KI converges to
+#KI = 5.602461e+02 (interaction integral)
+#KI = 5.655005e+02 (J-integral)
+#
+#Both are in good agreement with [Shih 1986]:
+#average_value = 0.4857 = KI / (sigma_theta * sqrt(pi * a))
+#sigma_theta = E * alpha * theta_e / (1 - nu)
+# = 207000 * 1.35e-5 * 10 / (1 - 0.3) = 39.9214
+#KI = average_value * sigma_theta * sqrt(pi * a) = 5.656e+02
+#
+#References:
+#W.K. Wilson, I.-W. Yu, Int J Fract 15 (1979) 377-387
+#C.F. Shih, B. Moran, T. Nakamura, Int J Fract 30 (1986) 79-102
+
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
