@@ -61,12 +61,6 @@ protected:
   virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
 
   /**
-   * This method is called when a new grain is detected. It can be overridden by a derived class to handle
-   * setting new properties on the newly created grain.
-   */
-  virtual void newGrainCreated(unsigned int new_grain_idx);
-
-  /**
    * This method serves two purposes:
    * 1) When the tracking phase starts (_t_step == _tracking_step) it assigns a unique id to every FeatureData object
    *    found by the FeatureFloodCount object. If an EBSDReader is linked into the GrainTracker the information from the
@@ -77,8 +71,23 @@ protected:
    *    track grains between time steps.
    *
    * This method updates the _unique_grains datastructure.
+   * This method should only be called on the root processor
+   *
+   * @param new_grain_indices Contains the list of new ids found during the tracking step. This
+   *                          vector should be communicated on all processors.
    */
-  void trackGrains();
+  void trackGrains(std::vector<unsigned int> & new_grain_indices);
+
+  /**
+   * This method is called when a new grain is detected. It can be overridden by a derived class to handle
+   * setting new properties on the newly created grain.
+   */
+  virtual void newGrainCreated(unsigned int new_grain_idx);
+
+  /**
+   * Builds local to global indices taking into account the unique grain structure
+   */
+  virtual void buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_indices) const override;
 
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.

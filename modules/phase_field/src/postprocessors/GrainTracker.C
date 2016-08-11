@@ -135,6 +135,11 @@ GrainTracker::getThreshold(unsigned int current_idx, bool active_feature) const
 void
 GrainTracker::finalize()
 {
+  /**
+   * Some perf_log operations appear here instead of inside of the named routines
+   * because of multiple return paths.
+   */
+
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
@@ -143,20 +148,77 @@ GrainTracker::finalize()
 
   expandHalos();
 
-  FeatureFloodCount::communicateAndMerge();
+  // Build up the grain map on the root processor
+  communicateAndMerge();
 
-  _console << "Finished inside of FeatureFloodCount" << std::endl;
+  /**
+   * Track Grains
+   */
+  Moose::perf_log.push("trackGrains()", "GrainTracker");
+  std::vector<unsigned int> new_grain_indices;
 
-  Moose::perf_log.push("trackGrains()","GrainTracker");
-  trackGrains();
-  Moose::perf_log.pop("trackGrains()","GrainTracker");
+  // Track grains (only on the root processor)
+  if (processor_id() == 0)
+    trackGrains(new_grain_indices);
+
+  if (processor_id() == 0)
+  {
+    std::cerr << "******************* Processor " << processor_id() << " *************************\n";
+    for (auto & grain_pair : _unique_grains)
+      std::cerr << grain_pair.second << '\n';
+  }
+
+  if (!new_grain_indices.empty())
+  {
+    // Communicate new grain indices with the remaining processors
+    auto new_grains_count = new_grain_indices.size();
+    _communicator.broadcast(new_grains_count);
+
+    new_grain_indices.resize(new_grains_count);
+    _communicator.broadcast(new_grain_indices);
+
+    // Trigger the callback on all processors
+    for (auto idx : new_grain_indices)
+      newGrainCreated(idx);
+  }
+
+  std::vector<std::vector<unsigned int> > local_to_global_all;
+  if (processor_id() == 0)
+    buildLocalToGlobalIndices(local_to_global_all);
+
+  scatterIndices(local_to_global_all);
+
+  if (processor_id() != 0)
+  {
+    /**
+     * On non-root processors we can't maintain the _unique_grains structure since we don't have all
+     * of the global information. We clear it every time this object runs and populate
+     * it with the information we do have.
+     */
+    _unique_grains.clear();
+
+    for (auto & list_ref : _partial_feature_sets)
+      for (auto && feature : list_ref)
+      {
+        mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
+        auto local_id = feature._orig_ids.begin()->second;
+
+        mooseAssert(local_id < _local_to_global_feature_map.size(), "local_id : " << local_id << " is out of range (" << _local_to_global_feature_map.size() << ')');
+        _unique_grains.emplace(std::pair<unsigned int, FeatureData>(_local_to_global_feature_map[local_id], std::move(feature)));
+      }
+
+    std::cerr << "******************* Processor " << processor_id() << " *************************\n";
+    for (auto & grain_pair : _unique_grains)
+      std::cerr << grain_pair.second << '\n';
+  }
+  Moose::perf_log.pop("trackGrains()", "GrainTracker");
 
   _console << "Finished inside of trackGrains" << std::endl;
 
-  Moose::perf_log.push("remapGrains()","GrainTracker");
+  Moose::perf_log.push("remapGrains()", "GrainTracker");
   if (_remap)
     remapGrains();
-  Moose::perf_log.pop("remapGrains()","GrainTracker");
+  Moose::perf_log.pop("remapGrains()", "GrainTracker");
 
   updateFieldInfo();
 
@@ -243,11 +305,13 @@ GrainTracker::expandHalos()
 }
 
 void
-GrainTracker::trackGrains()
+GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
 {
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
+
+  mooseAssert(processor_id() == 0, "trackGrains() should only be called on the root process");
 
   // Reset Status on active unique grains
   std::vector<unsigned int> map_sizes(_maps_size);
@@ -486,8 +550,8 @@ GrainTracker::trackGrains()
       _feature_sets[feature_num]._status = Status::MARKED;               // Mark it
       _unique_grains[new_idx] = std::move(_feature_sets[feature_num]);   // transfer ownership
 
-      // Trigger the callback
-      newGrainCreated(new_idx);
+      // Save off the ids of the newly created grains for the remaining ranks
+      new_grain_indices.emplace_back(new_idx);
     }
 
   /**
@@ -514,6 +578,30 @@ GrainTracker::newGrainCreated(unsigned int new_grain_idx)
              << "Couldn't find a matching grain while working on variable index: " << _unique_grains[new_grain_idx]._var_idx
              << "\nCreating new unique grain: " << new_grain_idx << '\n' << _unique_grains[new_grain_idx]
              << "\n*****************************************************************************\n" << COLOR_DEFAULT;
+}
+
+void
+GrainTracker::buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_all) const
+{
+  mooseAssert(processor_id() == 0, "This method must only be called on the root processor");
+
+  local_to_global_all.resize(_n_procs, std::vector<unsigned int>(_max_local_size));
+
+  for (const auto & grain_pair : _unique_grains)
+  {
+    // Get the local indicies from the feature and build a map
+    for (const auto & local_index_pair : grain_pair.second._orig_ids)
+    {
+      mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
+      mooseAssert(local_index_pair.second < _max_local_size, local_index_pair.second << ", " << _max_local_size);
+
+      std::cout << local_index_pair.first << " : " << local_index_pair.second << " : " << grain_pair.first << '\n';
+
+
+                              // rank                 // local index
+      local_to_global_all[local_index_pair.first][local_index_pair.second] = grain_pair.first;
+    }
+  }
 }
 
 void
