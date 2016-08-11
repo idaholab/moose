@@ -30,7 +30,8 @@ NonlinearPlaneStrain::NonlinearPlaneStrain( SolidModel & solid_model,
    _grad_disp_x_old(coupledGradientOld("disp_x")),
    _grad_disp_y_old(coupledGradientOld("disp_y")),
    _strain_zz_old(_have_strain_zz?coupledValueOld("strain_zz"):_zero),
-   _scalar_strain_zz_old(_have_scalar_strain_zz?coupledScalarValueOld("scalar_strain_zz"):_zero)
+   _scalar_strain_zz_old(_have_scalar_strain_zz?coupledScalarValueOld("scalar_strain_zz"):_zero),
+   _volumetric_locking_correction(_solid_model.getParam<bool>("volumetric_locking_correction"))
 {
 }
 
@@ -94,25 +95,29 @@ NonlinearPlaneStrain::computeIncrementalDeformationGradient( std::vector<ColumnM
     Fhat[qp] = A * Fbar_inverse;
     Fhat[qp].addDiag( 1 );
 
+    if (_volumetric_locking_correction)
+    {
+      // Now include the contribution for the integration of Fhat over the element
+      Fhat_average += Fhat[qp] * _solid_model.JxW(qp);
 
-    // Now include the contribution for the integration of Fhat over the element
-    Fhat_average += Fhat[qp] * _solid_model.JxW(qp);
-
-    volume += _solid_model.JxW(qp);  // Accumulate original configuration volume
+      volume += _solid_model.JxW(qp);  // Accumulate original configuration volume
+    }
   }
 
-  Fhat_average /= volume;
-  const Real det_Fhat_average( detMatrix( Fhat_average ) );
-  const Real third( 1./3. );
-
-  // Finalize volumetric locking correction
-  for ( unsigned qp=0; qp < _solid_model.qrule()->n_points(); ++qp )
+  if (_volumetric_locking_correction)
   {
-    const Real det_Fhat( detMatrix( Fhat[qp] ) );
-    const Real factor( std::pow( det_Fhat_average/det_Fhat, third ) );
+    Fhat_average /= volume;
+    const Real det_Fhat_average( detMatrix( Fhat_average ) );
 
-    Fhat[qp] *= factor;
+    // Finalize volumetric locking correction
+    for ( unsigned qp=0; qp < _solid_model.qrule()->n_points(); ++qp )
+    {
+      const Real det_Fhat( detMatrix( Fhat[qp] ) );
+      const Real factor( std::cbrt( det_Fhat_average/det_Fhat) );
 
+      Fhat[qp] *= factor;
+
+    }
   }
 //    Moose::out << "Fhat(0,0)" << Fhat[0](0,0) << std::endl;
 }
