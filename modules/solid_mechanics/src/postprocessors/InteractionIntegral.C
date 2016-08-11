@@ -45,13 +45,13 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters) :
     _grad_temp(_has_temp ? coupledGradient("temp") : _grad_zero),
     _aux_stress(getMaterialProperty<ColumnMajorMatrix>("aux_stress")),
     _aux_grad_disp(getMaterialProperty<ColumnMajorMatrix>("aux_grad_disp")),
-    _thermal_expansion_coeff(hasMaterialProperty<Real>("thermal_expansion_coeff") ? &getMaterialProperty<Real>("thermal_expansion_coeff") : NULL),
+    _current_instantaneous_thermal_expansion_coef(hasMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef") ? &getMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef") : NULL),
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _t_stress(getParam<bool>("t_stress")),
     _poissons_ratio(getParam<Real>("poissons_ratio"))
 {
-  if (_has_temp && !_thermal_expansion_coeff)
+  if (_has_temp && !_current_instantaneous_thermal_expansion_coef)
     mooseError("To include thermal strain term in interaction integral, must both couple temperature in DomainIntegral block and compute thermal expansion property in material model using compute_InteractionIntegral = true.");
 }
 
@@ -156,14 +156,13 @@ InteractionIntegral::computeQpIntegral()
   // Term3 = aux stress * strain * dq_x   (= stress * aux strain * dq_x)
   Real term3 = dq(0,0) * _aux_stress[_qp].doubleContraction(strain_cf);
 
-  // Term4 (thermal strain term) = q * aux_stress * alpha * x1-derivative of theta
+  // Term4 (thermal strain term) = q * aux_stress * alpha * dtheta_x
   // - the term including the derivative of alpha is not implemented
   Real term4 = 0.0;
   if (_has_temp)
   {
     Real aux_stress_trace = _aux_stress[_qp](0,0) + _aux_stress[_qp](1,1) + _aux_stress[_qp](2,2);
-    Real grad_temp_sum = grad_temp_cf(0) + grad_temp_cf(1) + grad_temp_cf(2);
-    term4 = _scalar_q[_qp] * aux_stress_trace * (*_thermal_expansion_coeff)[_qp] * grad_temp_sum;
+    term4 = _scalar_q[_qp] * aux_stress_trace * (*_current_instantaneous_thermal_expansion_coef)[_qp] * grad_temp_cf(0);
   }
 
   Real q_avg_seg = 1.0;

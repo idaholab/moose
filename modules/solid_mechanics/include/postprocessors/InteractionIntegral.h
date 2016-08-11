@@ -49,7 +49,7 @@ protected:
   const MaterialProperty<ColumnMajorMatrix> & _aux_stress;
   std::string _aux_grad_disp_name;
   const MaterialProperty<ColumnMajorMatrix> & _aux_grad_disp;
-  const MaterialProperty<Real> * _thermal_expansion_coeff;
+  const MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
   Real _K_factor;
   bool _has_symmetry_plane;
   bool _t_stress;
