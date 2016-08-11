@@ -24,18 +24,16 @@ template<>
 InputParameters validParams<VectorPostprocessor>()
 {
   InputParameters params = validParams<UserObject>();
-
-  params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of this VectorPostprocessor (empty outputs to all)");
+  params += validParams<OutputInterface>();
 
   params.addParamNamesToGroup("outputs", "Advanced");
-
   params.registerBase("VectorPostprocessor");
   return params;
 }
 
 VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters) :
+    OutputInterface(parameters),
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
-    _outputs(parameters.get<std::vector<OutputName> >("outputs")),
     _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
 }
