@@ -230,7 +230,9 @@ public:
    */
   void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
 
-  const std::vector<dof_id_type> & getVariableGlobalDoFs(const std::string & var_name);
+  /// set all the global dof indices for a nonlinear variable
+  void setVariableGlobalDoFs(const std::string & var_name);
+  const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
 
   /**
    * Computes Jacobian

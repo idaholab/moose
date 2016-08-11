@@ -331,6 +331,9 @@ public:
 
   void init();
 
+  /// Create pair of vaiables requiring nonlocal jacobian contibiutions
+  void initNonlocalCoupling();
+
   /**
    * Whether or not this assembly should utilize FE shape function caching.
    *
@@ -415,7 +418,6 @@ public:
    */
   void cacheJacobianNonlocal();
 
-
   /**
    * Takes the values that are currently in the neighbor Dense Matrices and appends them to the cached values.
    */
@@ -438,6 +440,7 @@ public:
   void cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries() { return _cm_entry; }
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & nonlocalCouplingEntries() { return _cm_nonlocal_entry; }
 
   const VariablePhiValue & phi() { return _phi; }
   const VariablePhiGradient & gradPhi() { return _grad_phi; }
@@ -558,8 +561,10 @@ protected:
   SystemBase & _sys;
   /// Reference to coupling matrix
   CouplingMatrix * & _cm;
+  const CouplingMatrix & _nonlocal_cm;
   /// Entries in the coupling matrix (only for field variables)
   std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_entry;
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_nonlocal_entry;
   /// Flag that indicates if the jacobian block was used
   std::vector<std::vector<unsigned char> > _jacobian_block_used;
   std::vector<std::vector<unsigned char> > _jacobian_block_nonlocal_used;

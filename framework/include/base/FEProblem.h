@@ -38,7 +38,6 @@
 class DisplacedProblem;
 class FEProblem;
 class MooseMesh;
-class SystemBase;
 class NonlinearSystem;
 class RandomInterface;
 class RandomData;
@@ -154,9 +153,13 @@ public:
   void setCouplingMatrix(CouplingMatrix * cm);
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
+  /// Set custom coupling matrix for variables requiring nonlocal contribution
+  void setNonlocalCouplingMatrix();
+
   bool areCoupled(unsigned int ivar, unsigned int jvar);
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries(THREAD_ID tid);
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & nonlocalCouplingEntries(THREAD_ID tid);
 
   /**
    * Check for converence of the nonlinear solution
@@ -1249,6 +1252,11 @@ protected:
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif //LIBMESH_HAVE_PETSC
+
+/**
+ * Method for sorting the MooseVariables based on variable numbers
+ */
+static bool sortMooseVariables(MooseVariable * a, MooseVariable * b) { return a->number() < b->number(); }
 
 private:
   bool _use_legacy_uo_aux_computation;

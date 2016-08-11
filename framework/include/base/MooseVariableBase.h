@@ -138,8 +138,10 @@ protected:
   const DofMap & _dof_map;
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
+
   /// mesh the variable is active in
   MooseMesh & _mesh;
+
   /// scaling factor for this variable
   Real _scaling_factor;
 };

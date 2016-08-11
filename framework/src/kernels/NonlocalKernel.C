@@ -39,10 +39,8 @@ NonlocalKernel::NonlocalKernel(const InputParameters & parameters) :
 }
 
 void
-NonlocalKernel::computeJacobian()
+NonlocalKernel::computeNonlocalJacobian()
 {
-  Kernel::computeJacobian();
-
   DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), _var.number());
   // compiling set of global IDs for the local DOFs on the element
   std::set<dof_id_type> local_dofindices(_var.dofIndices().begin(), _var.dofIndices().end());
@@ -61,14 +59,12 @@ NonlocalKernel::computeJacobian()
 }
 
 void
-NonlocalKernel::computeOffDiagJacobian(unsigned int jvar)
+NonlocalKernel::computeNonlocalOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var.number())
-    computeJacobian();
+    computeNonlocalJacobian();
   else
   {
-    Kernel::computeOffDiagJacobian(jvar);
-
     MooseVariable & jv = _sys.getVariable(_tid, jvar);
     DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), jvar);
     // compiling set of global IDs for the local DOFs on the element

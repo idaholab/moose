@@ -12,41 +12,43 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ExampleShapeElementKernel.h"
+#include "ExampleShapeElementKernel2.h"
 
 template<>
-InputParameters validParams<ExampleShapeElementKernel>()
+InputParameters validParams<ExampleShapeElementKernel2>()
 {
   InputParameters params = validParams<NonlocalKernel>();
   params.addRequiredParam<UserObjectName>("user_object", "Name of an ExampleShapeElementUserObject");
-  params.addRequiredCoupledVar("v", "coupled variable");
+  params.addRequiredCoupledVar("u", "coupled variable");
+  params.addRequiredCoupledVar("v", "second coupled variable");
   return params;
 }
 
-ExampleShapeElementKernel::ExampleShapeElementKernel(const InputParameters & parameters) :
+ExampleShapeElementKernel2::ExampleShapeElementKernel2(const InputParameters & parameters) :
     NonlocalKernel(parameters),
     _shp(getUserObject<ExampleShapeElementUserObject>("user_object")),
     _shp_integral(_shp.getIntegral()),
     _shp_jacobian(_shp.getJacobian()),
+    _u_var(coupled("u")),
     _v_var(coupled("v"))
 {
 }
 
 Real
-ExampleShapeElementKernel::computeQpResidual()
+ExampleShapeElementKernel2::computeQpResidual()
 {
   return _test[_i][_qp] * _shp_integral;
 }
 
 Real
-ExampleShapeElementKernel::computeQpJacobian()
+ExampleShapeElementKernel2::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return _test[_i][_qp] * _shp_jacobian[_var.dofIndices()[_j]];
-}
+  if (jvar == _u_var)
+  {
+    MooseVariable & jv = _sys.getVariable(_tid, _u_var);
+    return _test[_i][_qp] * _shp_jacobian[jv.dofIndices()[_j]];
+  }
 
-Real
-ExampleShapeElementKernel::computeQpOffDiagJacobian(unsigned int jvar)
-{
   if (jvar == _v_var)
   {
     MooseVariable & jv = _sys.getVariable(_tid, _v_var);
@@ -57,14 +59,11 @@ ExampleShapeElementKernel::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 Real
-ExampleShapeElementKernel::computeQpNonlocalJacobian(dof_id_type dof_index)
+ExampleShapeElementKernel2::computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index)
 {
-  return _test[_i][_qp] * _shp_jacobian[dof_index];
-}
+  if (jvar == _u_var)
+    return _test[_i][_qp] * _shp_jacobian[dof_index];
 
-Real
-ExampleShapeElementKernel::computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index)
-{
   if (jvar == _v_var)
     return _test[_i][_qp] * _shp_jacobian[dof_index];
 

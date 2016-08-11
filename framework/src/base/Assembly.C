@@ -37,6 +37,7 @@
 Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _sys(sys),
     _cm(cm),
+    _nonlocal_cm(_sys.subproblem().nonlocalCouplingMatrix()),
     _dof_map(_sys.dofMap()),
     _tid(tid),
     _mesh(sys.mesh()),
@@ -956,6 +957,23 @@ Assembly::init()
 }
 
 void
+Assembly::initNonlocalCoupling()
+{
+  _cm_nonlocal_entry.clear();
+  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+  for (const auto & jvar : vars)
+  {
+    unsigned int j = jvar->number();
+    for (const auto & ivar : vars)
+    {
+      unsigned int i = ivar->number();
+      if (_nonlocal_cm(i, j) != 0)
+        _cm_nonlocal_entry.push_back(std::make_pair(ivar, jvar));
+    }
+  }
+}
+
+void
 Assembly::prepare()
 {
   for (const auto & it : _cm_entry)
@@ -983,21 +1001,17 @@ Assembly::prepare()
 void
 Assembly::prepareNonlocal()
 {
-  for (const auto & it : _cm_entry)
+  for (const auto & it : _cm_nonlocal_entry)
   {
     MooseVariable & ivar = *(it.first);
     MooseVariable & jvar = *(it.second);
 
-    const auto map_it = _sys.subproblem()._var_dof_map.find(jvar.name());
-    if (map_it != _sys.subproblem()._var_dof_map.end())
-    {
-      unsigned int vi = ivar.number();
-      unsigned int vj = jvar.number();
+    unsigned int vi = ivar.number();
+    unsigned int vj = jvar.number();
 
-      jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
-      jacobianBlockNonlocal(vi,vj).zero();
-      _jacobian_block_nonlocal_used[vi][vj] = 0;
-    }
+    jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
+    jacobianBlockNonlocal(vi,vj).zero();
+    _jacobian_block_nonlocal_used[vi][vj] = 0;
   }
 }
 
@@ -1026,26 +1040,16 @@ Assembly::prepareVariable(MooseVariable * var)
 void
 Assembly::prepareVariableNonlocal(MooseVariable * var)
 {
-  for (const auto & it : _cm_entry)
+  for (const auto & it : _cm_nonlocal_entry)
   {
     MooseVariable & ivar = *(it.first);
     MooseVariable & jvar = *(it.second);
 
-    const auto map_it = _sys.subproblem()._var_dof_map.find(jvar.name());
-    if (map_it != _sys.subproblem()._var_dof_map.end())
-    {
-      unsigned int vi = ivar.number();
-      unsigned int vj = jvar.number();
+    unsigned int vi = ivar.number();
+    unsigned int vj = jvar.number();
 
-      if (vi == var->number() || vj == var->number())
-        jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
-    }
-  }
-
-  for (unsigned int i = 0; i < _sub_Re.size(); i++)
-  {
-    _sub_Re[i][var->number()].resize(var->dofIndices().size());
-    _sub_Re[i][var->number()].zero();
+    if (vi == var->number() || vj == var->number())
+      jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
   }
 }
 
@@ -1452,8 +1456,9 @@ Assembly::cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block, const std:
 void
 Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
 {
-  mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
-              "Error: Cached data sizes MUST be the same!");
+  if (!_sys.subproblem().checkNonlocalCouplingRequirement())
+    mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
+                "Error: Cached data sizes MUST be the same!");
 
   for (unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
     jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
@@ -1501,18 +1506,15 @@ Assembly::addJacobian(SparseMatrix<Number> & jacobian)
     }
   }
 }
+
 void
 Assembly::addJacobianNonlocal(SparseMatrix<Number> & jacobian)
 {
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & ivar : vars)
     for (const auto & jvar : vars)
-    {
-      const auto it = _sys.subproblem()._var_dof_map.find(jvar->name());
-      if (it != _sys.subproblem()._var_dof_map.end())
-        if ((*_cm)(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
-          addJacobianBlock(jacobian, jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jvar->allDofIndices(), ivar->scalingFactor());
-    }
+      if (_nonlocal_cm(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
+        addJacobianBlock(jacobian, jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jvar->allDofIndices(), ivar->scalingFactor());
 }
 
 void
@@ -1580,12 +1582,8 @@ Assembly::cacheJacobianNonlocal()
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & ivar : vars)
     for (const auto & jvar : vars)
-    {
-      const auto it = _sys.subproblem()._var_dof_map.find(jvar->name());
-      if (it != _sys.subproblem()._var_dof_map.end())
-        if ((*_cm)(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
-          cacheJacobianBlockNonlocal(jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jvar->allDofIndices(), ivar->scalingFactor());
-    }
+      if (_nonlocal_cm(ivar->number(), jvar->number()) != 0 && _jacobian_block_nonlocal_used[ivar->number()][jvar->number()])
+        cacheJacobianBlockNonlocal(jacobianBlockNonlocal(ivar->number(), jvar->number()), ivar->dofIndices(), jvar->allDofIndices(), ivar->scalingFactor());
 }
 
 void

@@ -49,7 +49,11 @@ MooseVariableBase::name() const
 const std::vector<dof_id_type> &
 MooseVariableBase::allDofIndices() const
 {
-  return _subproblem._var_dof_map[name()];
+  const auto it = _sys.subproblem()._var_dof_map.find(name());
+  if (it != _sys.subproblem()._var_dof_map.end())
+    return it->second;
+  else
+   mooseError("VariableAllDoFMap not prepared for " << name() << " . Check nonlocal coupling requirement for the variable.");
 }
 
 Order

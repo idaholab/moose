@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #ifndef EXAMPLESHAPEELEMENTUSEROBJECT_H
 #define EXAMPLESHAPEELEMENTUSEROBJECT_H
 

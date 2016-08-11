@@ -37,6 +37,7 @@ protected:
   const std::vector<Real> & _shp_jacobian;
 
   unsigned int _v_var;
+  const std::vector<dof_id_type> & _v_dofs;
 };
 
 template<>

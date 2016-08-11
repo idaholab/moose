@@ -38,8 +38,8 @@ SimpleTestShapeElementUserObject::initialize()
   // Jacobian term storage is up to the user. One option is using an std::vector
   // We resize it to the total number of DOFs in the system and zero it out.
   // WARNING: this can be large number (smart sparse storage could be a future improvement)
-  // if (_currently_computing_jacobian)
-  _jacobian_storage.assign(_subproblem.es().n_dofs(), 0.0);
+  if (_fe_problem.currentlyComputingJacobian())
+    _jacobian_storage.assign(_subproblem.es().n_dofs(), 0.0);
 }
 
 void
@@ -72,7 +72,8 @@ void
 SimpleTestShapeElementUserObject::finalize()
 {
   gatherSum(_integral);
-  gatherSum(_jacobian_storage);
+  if (_fe_problem.currentlyComputingJacobian())
+    gatherSum(_jacobian_storage);
 }
 
 void
@@ -82,7 +83,10 @@ SimpleTestShapeElementUserObject::threadJoin(const UserObject & y)
 
   _integral += shp_uo._integral;
 
-  mooseAssert(_jacobian_storage.size() == shp_uo._jacobian_storage.size(), "Jacobian storage size is inconsistent across threads");
-  for (unsigned int i = 0; i < _jacobian_storage.size(); ++i)
-    _jacobian_storage[i] += shp_uo._jacobian_storage[i];
+  if (_fe_problem.currentlyComputingJacobian())
+  {
+    mooseAssert(_jacobian_storage.size() == shp_uo._jacobian_storage.size(), "Jacobian storage size is inconsistent across threads");
+    for (unsigned int i = 0; i < _jacobian_storage.size(); ++i)
+      _jacobian_storage[i] += shp_uo._jacobian_storage[i];
+  }
 }

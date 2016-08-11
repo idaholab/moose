@@ -94,6 +94,7 @@
 #include "DotCouplingAux.h"
 #include "VectorPostprocessorAux.h"
 #include "ExampleShapeElementKernel.h"
+#include "ExampleShapeElementKernel2.h"
 #include "SimpleTestShapeElementKernel.h"
 
 #include "RobinBC.h"
@@ -349,6 +350,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(DefaultMatPropConsumerKernel);
   registerKernel(DoNotCopyParametersKernel);
   registerKernel(ExampleShapeElementKernel);
+  registerKernel(ExampleShapeElementKernel2);
   registerKernel(SimpleTestShapeElementKernel);
 
   // Aux kernels

@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #ifndef TESTSHAPEELEMENTUSEROBJECT_H
 #define TESTSHAPEELEMENTUSEROBJECT_H
 

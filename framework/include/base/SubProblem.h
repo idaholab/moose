@@ -21,6 +21,9 @@
 #include "GeometricSearchData.h"
 #include "MooseVariableBase.h" // VariableValue
 
+// libMesh includes
+#include "libmesh/coupling_matrix.h"
+
 class MooseMesh;
 class SubProblem;
 class Factory;
@@ -34,6 +37,7 @@ namespace libMesh
 {
 class EquationSystems;
 class DofMap;
+class CouplingMatrix;
 template <typename T> class SparseMatrix;
 template <typename T> class NumericVector;
 }
@@ -320,10 +324,13 @@ public:
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
   std::map<std::string, std::vector<dof_id_type> > _var_dof_map;
+  const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
 
 protected:
   /// The Factory for building objects
   Factory & _factory;
+
+  CouplingMatrix _nonlocal_cm; /// nonlocal coupling matrix;
 
   /// Type of coordinate system per subdomain
   std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;

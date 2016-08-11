@@ -19,6 +19,7 @@
 #include "IntegratedBC.h"
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
+#include "NonlocalKernel.h"
 // libmesh includes
 #include "libmesh/threads.h"
 
@@ -62,11 +63,38 @@ ComputeFullJacobianThread::computeJacobian()
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
       const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
-      {
         if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
           kernel->subProblem().prepareShapes(jvar, _tid);
           kernel->computeOffDiagJacobian(jvar);
+        }
+    }
+  }
+
+  /// done only when nonlocal kernels exist in the system
+  if (_fe_problem.checkNonlocalCouplingRequirement())
+  {
+    std::vector<std::pair<MooseVariable *, MooseVariable *> > & cne = _fe_problem.nonlocalCouplingEntries(_tid);
+    for (const auto & it : cne)
+    {
+      MooseVariable & ivariable = *(it.first);
+      MooseVariable & jvariable = *(it.second);
+
+      unsigned int ivar = ivariable.number();
+      unsigned int jvar = jvariable.number();
+
+      if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) && _kernels.hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
+      {
+        const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+        for (const auto & kernel : kernels)
+        {
+          MooseSharedPointer<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
+          if (nonlocal_kernel)
+            if ((kernel->variable().number() == ivar) && kernel->isImplicit())
+            {
+              kernel->subProblem().prepareShapes(jvar, _tid);
+              kernel->computeNonlocalOffDiagJacobian(jvar);
+            }
         }
       }
     }

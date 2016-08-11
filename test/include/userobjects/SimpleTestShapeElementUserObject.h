@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #ifndef SIMPLETESTSHAPEELEMENTUSEROBJECT_H
 #define SIMPLETESTSHAPEELEMENTUSEROBJECT_H
 

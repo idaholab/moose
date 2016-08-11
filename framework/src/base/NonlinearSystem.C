@@ -2089,16 +2089,14 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     _fe_problem.getAuxiliarySystem().update();
 }
 
-const std::vector<dof_id_type> &
-NonlinearSystem::getVariableGlobalDoFs(const std::string & var_name)
+void
+NonlinearSystem::setVariableGlobalDoFs(const std::string & var_name)
 {
   AllLocalDofIndicesThread aldit(_sys.system(), { var_name });
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   Threads::parallel_reduce(elem_range, aldit);
+  _communicator.set_union(aldit._all_dof_indices);
   _var_all_dof_indices.assign(aldit._all_dof_indices.begin(), aldit._all_dof_indices.end());
-  _communicator.allgather(_var_all_dof_indices);
-
-  return _var_all_dof_indices;
 }
 
 void
