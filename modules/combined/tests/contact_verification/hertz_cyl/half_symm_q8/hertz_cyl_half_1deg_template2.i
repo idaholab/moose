@@ -20,7 +20,7 @@
   inc_slip_y = inc_slip_y
   contact_slip_tolerance_factor = 100
   target_relative_contact_residual = 5.e-3
-  maximum_slip_iterations = 50
+  maximum_slip_iterations = 100
   minimum_slip_iterations = 1
   slip_updates_per_iteration = 3
   solution_variables = 'disp_x disp_y'

@@ -40,7 +40,7 @@
     type = Exodiff
     input = cracking_rz_exponential.i
     exodiff = cracking_rz_exponential_out.e
-    abs_zero = 1e-4
+    abs_zero = 5e-4
     scale_refine = 0
     max_parallel = 1
   [../]

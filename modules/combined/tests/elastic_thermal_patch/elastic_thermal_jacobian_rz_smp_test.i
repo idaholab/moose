@@ -228,7 +228,7 @@
   line_search = 'none'
 
 
-  nl_abs_tol = 1e-11
+  nl_abs_tol = 1e-9
   nl_rel_tol = 1e-12
 
 

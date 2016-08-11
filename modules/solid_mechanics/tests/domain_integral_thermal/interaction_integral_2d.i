@@ -22,6 +22,7 @@
   family = LAGRANGE
   disp_x = disp_x
   disp_y = disp_y
+  volumetric_locking_correction = False
 []
 
 [Mesh]
