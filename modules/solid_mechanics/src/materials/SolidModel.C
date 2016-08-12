@@ -59,6 +59,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D/RZ formulation.");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ, SphericalR, and PlaneStrain formulations.");
   params.addParam<bool>("compute_JIntegral", false, "Whether to compute the J Integral.");
+  params.addParam<bool>("compute_InteractionIntegral", false, "Whether to compute the Interaction Integral.");
   params.addParam<bool>("store_stress_older", false, "Parameter which indicates whether the older stress state, required for HHT time integration, needs to be stored");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
@@ -156,11 +157,13 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _total_strain_increment(0),
   _strain_increment(0),
   _compute_JIntegral(getParam<bool>("compute_JIntegral")),
+  _compute_InteractionIntegral(getParam<bool>("compute_InteractionIntegral")),
   _store_stress_older(getParam<bool>("store_stress_older")),
   _SED(NULL),
   _SED_old(NULL),
   _Eshelby_tensor(NULL),
   _J_thermal_term_vec(NULL),
+  _current_instantaneous_thermal_expansion_coef(NULL),
   _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
   _constitutive_active(false),
   _step_zero(declareRestartableData<bool>("step_zero", true)),
@@ -279,8 +282,11 @@ SolidModel::SolidModel( const InputParameters & parameters) :
     _SED_old = &declarePropertyOld<Real>("strain_energy_density");
     _Eshelby_tensor = &declareProperty<ColumnMajorMatrix>("Eshelby_tensor");
     _J_thermal_term_vec = &declareProperty<RealVectorValue>("J_thermal_term_vec");
+    _current_instantaneous_thermal_expansion_coef = &declareProperty<Real>("current_instantaneous_thermal_expansion_coef");
   }
 
+  if (_compute_InteractionIntegral && !hasMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef"))
+    _current_instantaneous_thermal_expansion_coef = &declareProperty<Real>("current_instantaneous_thermal_expansion_coef");
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -682,6 +688,9 @@ SolidModel::computeProperties()
 
     if (_compute_JIntegral && _has_temp)
       computeThermalJvec();
+
+    if (_compute_InteractionIntegral && _has_temp)
+      computeCurrentInstantaneousThermalExpansionCoefficient();
 
     computePreconditioning();
 
@@ -1537,8 +1546,22 @@ SolidModel::computeThermalJvec()
 {
   mooseAssert(_J_thermal_term_vec, "_J_thermal_term_vec not initialized");
 
-  Real stress_trace;
-  stress_trace = _stress[_qp].xx() + _stress[_qp].yy() + _stress[_qp].zz();
+  Real stress_trace = _stress[_qp].xx() + _stress[_qp].yy() + _stress[_qp].zz();
+
+  computeCurrentInstantaneousThermalExpansionCoefficient();
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    Real dthermstrain_dx = _temp_grad[_qp](i) * (*_current_instantaneous_thermal_expansion_coef)[_qp];
+    (*_J_thermal_term_vec)[_qp](i) = stress_trace * dthermstrain_dx;
+  }
+}
+
+void
+SolidModel::computeCurrentInstantaneousThermalExpansionCoefficient()
+{
+  mooseAssert(_current_instantaneous_thermal_expansion_coef, "_current_instantaneous_thermal_expansion_coef not initialized");
+
+  (*_current_instantaneous_thermal_expansion_coef)[_qp] = 0.0;
 
   if (_alpha_function)
   {
@@ -1548,11 +1571,7 @@ SolidModel::computeThermalJvec()
     if (!_mean_alpha_function)
     {
       Real alpha = _alpha_function->value(current_temp,p);
-      for (unsigned int i=0; i<3; ++i)
-      {
-        Real dthermstrain_dx = _temp_grad[_qp](i) * (alpha);
-        (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
-      }
+      (*_current_instantaneous_thermal_expansion_coef)[_qp] = alpha;
     }
     else
     {
@@ -1564,20 +1583,9 @@ SolidModel::computeThermalJvec()
       Real denominator = 1.0 + alphabar_Tsf * (_stress_free_temp - _ref_temp);
       if (denominator < small)
         mooseError("Denominator too small in thermal strain calculation");
-      Real dthermstrain_dT = numerator / denominator;
-      for (unsigned int i=0; i<3; ++i)
-      {
-        Real dthermstrain_dx = _temp_grad[_qp](i) * dthermstrain_dT;
-        (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
-      }
+      (*_current_instantaneous_thermal_expansion_coef)[_qp] = numerator / denominator;
     }
   }
   else
-  {
-    for (unsigned int i=0; i<3; ++i)
-    {
-      Real dthermstrain_dx = _temp_grad[_qp](i) * _alpha;
-      (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
-    }
-  }
+    (*_current_instantaneous_thermal_expansion_coef)[_qp] = _alpha;
 }

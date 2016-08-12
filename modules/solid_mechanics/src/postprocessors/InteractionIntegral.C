@@ -17,6 +17,7 @@ InputParameters validParams<InteractionIntegral>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addCoupledVar("temp", "The temperature (optional). Must be provided to correctly compute stress intensity factors in models with thermal strain gradients.");
   params.addRequiredParam<UserObjectName>("crack_front_definition","The CrackFrontDefinition user object name");
   params.addParam<unsigned int>("crack_front_point_index","The index of the point on the crack front corresponding to this q function");
   params.addParam<Real>("K_factor", "Conversion factor between interaction integral and stress intensity factor K");
@@ -29,24 +30,29 @@ InputParameters validParams<InteractionIntegral>()
 
 InteractionIntegral::InteractionIntegral(const InputParameters & parameters) :
     ElementIntegralPostprocessor(parameters),
+    _scalar_q(coupledValue("q")),
     _grad_of_scalar_q(coupledGradient("q")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _has_crack_front_point_index(isParamValid("crack_front_point_index")),
     _crack_front_point_index(_has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
     _treat_as_2d(false),
-    _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
     _stress(getMaterialPropertyByName<SymmTensor>("stress")),
     _strain(getMaterialPropertyByName<SymmTensor>("elastic_strain")),
     _grad_disp_x(coupledGradient("disp_x")),
     _grad_disp_y(coupledGradient("disp_y")),
     _grad_disp_z(parameters.get<SubProblem *>("_subproblem")->mesh().dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
+    _has_temp(isCoupled("temp")),
+    _grad_temp(_has_temp ? coupledGradient("temp") : _grad_zero),
     _aux_stress(getMaterialProperty<ColumnMajorMatrix>("aux_stress")),
     _aux_grad_disp(getMaterialProperty<ColumnMajorMatrix>("aux_grad_disp")),
+    _current_instantaneous_thermal_expansion_coef(hasMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef") ? &getMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef") : NULL),
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _t_stress(getParam<bool>("t_stress")),
     _poissons_ratio(getParam<Real>("poissons_ratio"))
 {
+  if (_has_temp && !_current_instantaneous_thermal_expansion_coef)
+    mooseError("To include thermal strain term in interaction integral, must both couple temperature in DomainIntegral block and compute thermal expansion property in material model using compute_InteractionIntegral = true.");
 }
 
 void
@@ -57,18 +63,13 @@ InteractionIntegral::initialSetup()
   if (_treat_as_2d)
   {
     if (_has_crack_front_point_index)
-    {
       mooseWarning("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
-    }
   }
   else
   {
     if (!_has_crack_front_point_index)
-    {
       mooseError("crack_front_point_index must be specified in qFunctionJIntegral3D");
-    }
   }
-
 }
 
 Real
@@ -130,11 +131,12 @@ InteractionIntegral::computeQpIntegral()
   grad_disp(2,1) = _grad_disp_z[_qp](1);
   grad_disp(2,2) = _grad_disp_z[_qp](2);
 
-  //Rotate stress, strain, and displacement to crack front coordinate system
-  RealVectorValue grad_q_cf = _crack_front_definition->rotateToCrackFrontCoords(grad_q,_crack_front_point_index);
-  ColumnMajorMatrix grad_disp_cf = _crack_front_definition->rotateToCrackFrontCoords(grad_disp,_crack_front_point_index);
-  ColumnMajorMatrix stress_cf = _crack_front_definition->rotateToCrackFrontCoords(stress,_crack_front_point_index);
-  ColumnMajorMatrix strain_cf = _crack_front_definition->rotateToCrackFrontCoords(strain,_crack_front_point_index);
+  //Rotate stress, strain, displacement and temperature to crack front coordinate system
+  RealVectorValue grad_q_cf = _crack_front_definition->rotateToCrackFrontCoords(grad_q, _crack_front_point_index);
+  ColumnMajorMatrix grad_disp_cf = _crack_front_definition->rotateToCrackFrontCoords(grad_disp, _crack_front_point_index);
+  ColumnMajorMatrix stress_cf = _crack_front_definition->rotateToCrackFrontCoords(stress, _crack_front_point_index);
+  ColumnMajorMatrix strain_cf = _crack_front_definition->rotateToCrackFrontCoords(strain, _crack_front_point_index);
+  RealVectorValue grad_temp_cf = _crack_front_definition->rotateToCrackFrontCoords(_grad_temp[_qp], _crack_front_point_index);
 
   ColumnMajorMatrix dq;
   dq(0,0) = crack_direction(0)*grad_q_cf(0);
@@ -154,6 +156,15 @@ InteractionIntegral::computeQpIntegral()
   // Term3 = aux stress * strain * dq_x   (= stress * aux strain * dq_x)
   Real term3 = dq(0,0) * _aux_stress[_qp].doubleContraction(strain_cf);
 
+  // Term4 (thermal strain term) = q * aux_stress * alpha * dtheta_x
+  // - the term including the derivative of alpha is not implemented
+  Real term4 = 0.0;
+  if (_has_temp)
+  {
+    Real aux_stress_trace = _aux_stress[_qp](0,0) + _aux_stress[_qp](1,1) + _aux_stress[_qp](2,2);
+    term4 = _scalar_q[_qp] * aux_stress_trace * (*_current_instantaneous_thermal_expansion_coef)[_qp] * grad_temp_cf(0);
+  }
+
   Real q_avg_seg = 1.0;
   if (!_crack_front_definition->treatAs2D())
   {
@@ -161,7 +172,7 @@ InteractionIntegral::computeQpIntegral()
                  _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_point_index)) / 2.0;
   }
 
-  Real eq = term1 + term2 - term3;
+  Real eq = term1 + term2 - term3 + term4;
 
   if (_has_symmetry_plane)
     eq *= 2.0;

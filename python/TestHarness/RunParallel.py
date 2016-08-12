@@ -84,6 +84,7 @@ class RunParallel:
         self.big_queue.append([tester, command, os.getcwd()])
       else:
         self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+        self.skipped_jobs.add(tester.specs['test_name'])
       return
 
     # Now make sure that this job doesn't have an unsatisfied prereq
