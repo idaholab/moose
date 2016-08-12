@@ -1066,6 +1066,22 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
       (MooseUtils::absoluteFuzzyEqual(bbox.max()(2), bbox.min()(2)) ? 1 : bbox.max()(2) - bbox.min()(2));
   }
 
+  out << "\nStatus: ";
+  switch (feature._status)
+  {
+    case FeatureFloodCount::Status::NOT_MARKED:
+      out << "NOT_MARKED";
+      break;
+    case FeatureFloodCount::Status::MARKED:
+      out << "MARKED";
+      break;
+    case FeatureFloodCount::Status::INACTIVE:
+      out << "INACTIVE";
+      break;
+    default:
+      mooseError("Missing Status");
+  }
+
   if (debug)
   {
     out << "\nVolume: " << volume;

@@ -43,7 +43,8 @@ public:
   {
     FILL,
     USE,
-    BYPASS
+    BYPASS,
+    DO_NOTHING
   };
 
   // GrainTrackerInterface methods
@@ -101,14 +102,14 @@ protected:
    * A routine for moving all of the solution values from a given grain to a new variable number. It is called
    * with different modes to only cache, or actually do the work, or bypass the cache altogether.
    */
-  void swapSolutionValues(FeatureData &  grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+  void swapSolutionValues(FeatureData &  grain, unsigned int var_idx, std::vector<std::map<Node *, CacheValues> > & cache,
                           RemapCacheMode cache_mode, unsigned int depth);
 
   /**
    * Helper method for actually performing the swaps.
    */
-  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
-                                RemapCacheMode cache_mode);
+  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx,
+                                std::vector<std::map<Node *, CacheValues> > & cache, RemapCacheMode cache_mode);
 
   /**
    * This method returns the minimum periodic distance between two vectors of bounding boxes. If the bounding boxes overlap

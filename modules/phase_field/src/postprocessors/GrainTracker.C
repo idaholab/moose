@@ -346,6 +346,7 @@ GrainTracker::trackGrains()
           {
             Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
                        << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+            feature._status = Status::MARKED;
             _unique_grains[next_index] = std::move(feature);
 
             _unique_grain_to_ebsd_num[next_index] = closest_match_idx;
@@ -356,6 +357,7 @@ GrainTracker::trackGrains()
           {
             Moose::out << "Assigning center " << closest_match_idx << " "
                        << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+            feature._status = Status::MARKED;
             _unique_grains[closest_match_idx] = std::move(feature);
 
             _unique_grain_to_ebsd_num[closest_match_idx] = closest_match_idx;
@@ -392,6 +394,7 @@ GrainTracker::trackGrains()
         // Move the grains from the FeatureFloodCount data structure to the _unique_grains data structure.
         for (auto && grain : vector_ref)
         {
+          grain._status = Status::MARKED;
           _unique_grains.emplace_hint(_unique_grains.end(), std::pair<unsigned int, FeatureData>(counter, std::move(grain)));
           newGrainCreated(counter++);
         }
@@ -462,10 +465,10 @@ GrainTracker::trackGrains()
 
         auto & inactive_it = (centroid_diff1 < centroid_diff2) ? grain_it2 : grain_it1;
 
+        inactive_it->second._status = Status::INACTIVE;
         _console << "Marking Grain " << inactive_it->first << " as INACTIVE (variable index: "
                  << inactive_it->second._var_idx << ")\n"
                  << inactive_it->second;
-        inactive_it->second._status = Status::INACTIVE;
 
         // Make sure we update the new to existing map if necessary
         if (grain_it1->first == inactive_it->first)
@@ -511,10 +514,10 @@ GrainTracker::trackGrains()
   for (auto & grain_pair : _unique_grains)
     if (grain_pair.second._status == Status::NOT_MARKED)
     {
+      grain_pair.second._status = Status::INACTIVE;
       _console << "Marking Grain " << grain_pair.first << " as INACTIVE (variable index: "
                << grain_pair.second._var_idx <<  ")\n"
                << grain_pair.second;
-      grain_pair.second._status = Status::INACTIVE;
     }
 }
 
@@ -541,18 +544,27 @@ GrainTracker::remapGrains()
   /**
    * The remapping algorithm is recursive. We will use the status variable in each FeatureData
    * to track which grains are currently being remapped so we don't have runaway recursion.
-   * To begin we need to reset all of the flags to NOT_MARKED.
+   * To begin we need to reset all of the active (MARKED) flags to NOT_MARKED.
+   *
+   * Additionally we need to record each grain's variable index so that we can communicate
+   * changes to the non-root ranks later in a single batch.
    */
-  std::for_each(_unique_grains.begin(), _unique_grains.end(),
-                [](std::pair<const unsigned int, FeatureData> & grain_pair)
-                {
-                  if (grain_pair.second._status == Status::MARKED)
-                    grain_pair.second._status = Status::NOT_MARKED;
-                });
+  std::vector<unsigned int> grain_id_to_existing_var_idx(_unique_grains.size(), std::numeric_limits<unsigned int>::max());
+  for (auto & grain_pair : _unique_grains)
+  {
+    mooseAssert(grain_pair.second._status != Status::NOT_MARKED, "Grain " << grain_pair.first << " status in wrong state.");
+
+    if (grain_pair.second._status == Status::MARKED)
+    {
+      grain_pair.second._status = Status::NOT_MARKED;
+      grain_id_to_existing_var_idx[grain_pair.first] = grain_pair.second._var_idx;
+    }
+  }
 
   /**
    * Loop over each grain and see if any grains represented by the same variable are "touching"
    */
+  bool any_grains_remapped = false;
   bool grains_remapped;
   do
   {
@@ -578,6 +590,8 @@ GrainTracker::remapGrains()
           }
           else if (!attemptGrainRenumber(grain_it1->second, grain_it1->first, 0, max))
             mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping. Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+
+        grains_remapped = true;
       }
 
       for (auto grain_it2 = _unique_grains.begin(); grain_it2 != _unique_grains.end(); ++grain_it2)
@@ -609,8 +623,58 @@ GrainTracker::remapGrains()
         }
       }
     }
+    any_grains_remapped |= grains_remapped;
   }
   while (grains_remapped);
+
+  /**
+   * Now actually preform the remapping
+   */
+  std::cout << "\n\nStarting Actual Remapping\n";
+
+  if (any_grains_remapped)
+  {
+    std::vector<std::map<Node *, CacheValues> > cache(_n_vars);
+    for (auto & grain_pair : _unique_grains)
+    {
+      auto & grain = grain_pair.second;
+      auto var_idx = grain_id_to_existing_var_idx[grain_pair.first];
+
+      if (grain._status != Status::INACTIVE && var_idx != grain._var_idx)
+      {
+        std::cout << "Caching solution values on grain #" << grain_pair.first << " from variable index " << var_idx << '\n';
+        auto tmp = grain._var_idx;
+        grain._var_idx = var_idx;
+        var_idx = tmp;
+
+        mooseAssert(var_idx != std::numeric_limits<unsigned int>::max(), "var_idx in incorrect state");
+        swapSolutionValues(grain, var_idx, cache, RemapCacheMode::FILL, 1);
+      }
+    }
+
+    for (auto & grain_pair : _unique_grains)
+    {
+      auto & grain = grain_pair.second;
+      auto var_idx = grain_id_to_existing_var_idx[grain_pair.first];
+
+      if (grain._status != Status::INACTIVE && var_idx != grain._var_idx)
+      {
+        std::cout << "Writing solution values from cache on grain #" << grain_pair.first << " to variable index " << grain._var_idx << '\n';
+        auto tmp = grain._var_idx;
+        grain._var_idx = var_idx;
+        var_idx = tmp;
+
+        mooseAssert(var_idx != std::numeric_limits<unsigned int>::max(), "var_idx in incorrect state");
+        swapSolutionValues(grain, var_idx, cache, RemapCacheMode::USE, 1);
+      }
+    }
+
+    _nl.solution().close();
+    _nl.solutionOld().close();
+    _nl.solutionOlder().close();
+
+    _fe_problem.getNonlinearSystem().sys().update();
+  }
 }
 
 void
@@ -678,7 +742,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
 
   unsigned int curr_var_idx = grain._var_idx;
 
-  std::map<Node *, CacheValues> cache;
+  std::vector<std::map<Node *, CacheValues> > cache;
 
   std::vector<std::list<GrainDistance> > min_distances(_vars.size());
 
@@ -727,7 +791,9 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
         << ") is at a distance of " << target_it->_distance << "\n"
         << COLOR_DEFAULT;
 
-      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::BYPASS, depth);
+      // TODO: Status Dirty?
+      grain._var_idx = target_it->_var_index;
+//      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::BYPASS, depth);
       return true;
     }
 
@@ -762,7 +828,9 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
         << " are inside our bounding sphere but whose halo(s) are not touching.\n"
         << COLOR_DEFAULT;
 
-      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::BYPASS, depth);
+      // TODO: Status Dirty?
+      grain._var_idx = target_it->_var_index;
+//      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::BYPASS, depth);
       return true;
     }
 
@@ -783,8 +851,10 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     if (target_grain._status == Status::MARKED)
       return false;
 
+    // TODO: Status Dirty?
+    grain._var_idx = target_it->_var_index;
     // Save the solution values in case we overwrite them during recursion
-    swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::FILL, depth);
+//    swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::FILL, depth);
 
     // Propose a new variable index for the current grain and recurse
     grain._var_idx = target_it->_var_index;
@@ -801,7 +871,9 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
       // NOTE: swapSolutionValues currently reads the current variable index off the grain. We need to set
       //       back here before calling this method.
       grain._var_idx = curr_var_idx;
-      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::USE, depth);
+//      swapSolutionValues(grain, target_it->_var_index, cache, RemapCacheMode::USE, depth);
+      // TODO: Status Dirty?
+      grain._var_idx = target_it->_var_index;
 
       return true;
     }
@@ -817,7 +889,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
 }
 
 void
-GrainTracker::swapSolutionValues(FeatureData & grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
+GrainTracker::swapSolutionValues(FeatureData & grain, unsigned int var_idx, std::vector<std::map<Node *, CacheValues> > & cache,
                                  RemapCacheMode cache_mode, unsigned int depth)
 {
   MeshBase & mesh = _mesh.getMesh();
@@ -861,9 +933,12 @@ GrainTracker::swapSolutionValues(FeatureData & grain, unsigned int var_idx, std:
 }
 
 void
-GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
-                                       RemapCacheMode cache_mode)
+GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx,
+                                       std::vector<std::map<Node *, CacheValues> > & cache, RemapCacheMode cache_mode)
 {
+  if (cache_mode == RemapCacheMode::DO_NOTHING)
+    return;
+
   if (curr_node && curr_node->processor_id() == processor_id())
   {
     // Reinit the node so we can get and set values of the solution here
@@ -880,8 +955,8 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
     }
     else // USE
     {
-      const auto cache_it = cache.find(curr_node);
-      mooseAssert(cache_it != cache.end(), "Error in cache");
+      const auto cache_it = cache[curr_var_idx].find(curr_node);
+      mooseAssert(cache_it != cache[curr_var_idx].end(), "Error in cache");
       current = cache_it->second.current;
       old = cache_it->second.old;
       older = cache_it->second.older;
@@ -890,9 +965,15 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
     // Cache the value or use it!
     if (cache_mode == RemapCacheMode::FILL)
     {
-      cache[curr_node].current = current;
-      cache[curr_node].old = old;
-      cache[curr_node].older = older;
+      cache[curr_var_idx][curr_node].current = current;
+      cache[curr_var_idx][curr_node].old = old;
+      cache[curr_var_idx][curr_node].older = older;
+
+//      const auto & dof_index = _vars[curr_var_idx]->nodalDofIndex();
+//      // Set the DOF for the current variable to zero
+//      _nl.solution().set(dof_index, 0.0);
+//      _nl.solutionOld().set(dof_index, 0.0);
+//      _nl.solutionOlder().set(dof_index, 0.0);
     }
     else // USE or BYPASS
     {
