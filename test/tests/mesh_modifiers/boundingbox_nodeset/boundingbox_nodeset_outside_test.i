@@ -12,8 +12,8 @@
   [./middle_node]
     type = BoundingBoxNodeSet
     new_boundary = middle_node
-    top_right = '1 1 0'
-    bottom_left = '0.5 0.5 0'
+    top_right = '1.1 1.1 0'
+    bottom_left = '0.51 0.51 0'
     location = OUTSIDE
   [../]
 []
@@ -63,4 +63,3 @@
   file_base = boundingbox_nodeset_outside_out
   exodus = true
 []
-
