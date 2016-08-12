@@ -152,6 +152,7 @@ protected:
   SymmTensor _strain_increment;
 
   const bool _compute_JIntegral;
+  const bool _compute_InteractionIntegral;
   bool _store_stress_older;
 
   //These are used in calculation of the J integral
@@ -159,6 +160,9 @@ protected:
   MaterialProperty<Real> * _SED_old;
   MaterialProperty<ColumnMajorMatrix> * _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
+
+  //This is used in calculation of the J Integral and Interaction Integral
+  MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
 
   virtual void initQpStatefulProperties();
 
@@ -198,6 +202,9 @@ protected:
 
   // Compute quantity used in thermal term of J Integral
   virtual void computeThermalJvec();
+
+  //Compute current thermal expansion coefficient, used in J Integral and Interaction Integral
+  virtual void computeCurrentInstantaneousThermalExpansionCoefficient();
 
   /*
    * Determine whether new cracks have formed.
