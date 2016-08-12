@@ -36,9 +36,11 @@ def command_line_options():
     serve_parser.add_argument('--no-livereload', dest='livereload', action='store_const', const='no-livereload', help="Disable the live reloading of the served site.")
     serve_parser.add_argument('--strict', action='store_true', help='Enable strict mode and abort on warnings.')
     serve_parser.add_argument('--dirty', action='store_false', dest='clean', help='Do not clean the temporary build prior to building site.')
+    serve_parser.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
 
     # Build options
     build_parser = subparser.add_parser('build', help='Generate and Build the documentation for serving.')
+    build_parser.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
 
     # Both build and serve need config file
     for p in [serve_parser, build_parser]:
@@ -66,9 +68,9 @@ if __name__ == '__main__':
     if options.command == 'generate':
         MooseDocs.commands.generate(config_file=options.moosedocs_config_file, purge=options.purge)
     elif options.command == 'serve':
-        MooseDocs.commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload, clean=options.clean)
+        MooseDocs.commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme)
     elif options.command == 'build':
-        MooseDocs.commands.build(config_file=options.mkdocs_config_file)
+        MooseDocs.commands.build(config_file=options.mkdocs_config_file, theme=options.theme)
 
     # Display logging results
     print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])
