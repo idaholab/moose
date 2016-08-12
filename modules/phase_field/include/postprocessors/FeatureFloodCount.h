@@ -21,6 +21,9 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/mesh_tools.h"
 
+// External includes
+#include "bitmask_operators.h"
+
 //Forward Declarations
 class FeatureFloodCount;
 class MooseMesh;
@@ -73,11 +76,12 @@ public:
   inline bool isElemental() const { return _is_elemental; }
 
   /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
-  enum class Status
+  enum class Status : unsigned char
   {
-    NOT_MARKED,
-    MARKED,
-    INACTIVE
+    CLEAR = 0x0,
+    MARKED = 0x1,
+    DIRTY = 0x2,
+    INACTIVE = 0x4
   };
 
   struct FeatureData
@@ -88,7 +92,7 @@ public:
         _min_entity_id(DofObject::invalid_id),
         _volume(0.0),
         _vol_count(0),
-        _status(Status::NOT_MARKED),
+        _status(Status::CLEAR),
         _intersects_boundary(false)
     {
     }
@@ -536,5 +540,6 @@ template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, 
 template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
 template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
 
+template<> struct enable_bitmask_operators<FeatureFloodCount::Status> { static const bool enable=true; };
 
 #endif //FEATUREFLOODCOUNT_H

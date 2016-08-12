@@ -103,7 +103,7 @@ protected:
    * with different modes to only cache, or actually do the work, or bypass the cache altogether.
    */
   void swapSolutionValues(FeatureData &  grain, unsigned int var_idx, std::vector<std::map<Node *, CacheValues> > & cache,
-                          RemapCacheMode cache_mode, unsigned int depth);
+                          RemapCacheMode cache_mode);
 
   /**
    * Helper method for actually performing the swaps.
