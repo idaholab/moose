@@ -1,7 +1,7 @@
 import os
 import MooseDocs
 
-def generate(config_file='moosedocs.yml', purge=False):
+def generate(config_file='moosedocs.yml', purge=False, theme=None, **kwargs):
     """
     Generates MOOSE system and object markdown files from the source code and detail markdown files.
 
@@ -14,5 +14,5 @@ def generate(config_file='moosedocs.yml', purge=False):
         raise IOError("The supplied configuration file was not found: {}".format(config_file))
 
     # Generate the Markdown
-    gen = MooseDocs.MooseApplicationDocGenerator(config_file)
+    gen = MooseDocs.MooseApplicationDocGenerator(config_file, theme=theme)
     gen.generate(purge=purge)

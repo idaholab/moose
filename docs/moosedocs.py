@@ -28,6 +28,7 @@ def command_line_options():
     generate_parser = subparser.add_parser('generate', help="Generate the markdown documentation from MOOSE application executable. This is done by the serve and build command automatically.")
     generate_parser.add_argument('--moosedocs-config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
     generate_parser.add_argument('--purge', action='store_true', help="Remove all content from the install directories.")
+    generate_parser.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
 
     # Serve options
     serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 
     # Execute command
     if options.command == 'generate':
-        MooseDocs.commands.generate(config_file=options.moosedocs_config_file, purge=options.purge)
+        MooseDocs.commands.generate(config_file=options.moosedocs_config_file, purge=options.purge, theme=options.theme)
     elif options.command == 'serve':
         MooseDocs.commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload, clean=options.clean)
     elif options.command == 'build':

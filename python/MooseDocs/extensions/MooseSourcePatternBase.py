@@ -6,9 +6,10 @@ log = logging.getLogger(__name__)
 
 from markdown.inlinepatterns import Pattern
 from markdown.util import etree
+from MooseCommonExtension import MooseCommonExtension
 import MooseDocs
 
-class MooseSourcePatternBase(Pattern):
+class MooseSourcePatternBase(MooseCommonExtension, Pattern):
     """
     Base class for pattern matching source code blocks.
 
@@ -34,26 +35,6 @@ class MooseSourcePatternBase(Pattern):
                           'overflow-y':'scroll',
                           'max-height':'500px',
                           'strip-extra-newlines':False}
-
-    def getSettings(self, settings):
-        """
-        Return the settings captured from the regular expression.
-
-        Args:
-            settings[str]: A string containing the space separate key, value pairs (key=value key2=value2).
-        """
-        output = copy.copy(self._settings)
-        for s in settings.split(' '):
-            if s:
-                k, v = s.strip().split('=')
-                if k not in output:
-                    log.warning('Unknown setting {}'.format(k))
-                    continue
-                try:
-                    output[k] = eval(v)
-                except:
-                    output[k] = str(v)
-        return output
 
     def style(self, *keys):
         """
@@ -90,33 +71,6 @@ class MooseSourcePatternBase(Pattern):
             content = content.replace(content[strt:stop+9], '')
 
         return content.strip()
-
-
-    def createErrorElement(self, rel_filename, message=None):
-        """
-        Returns a tree element containing error message.
-
-        Uses the html to match the python markdown admonition package.
-        https://pythonhosted.org/Markdown/extensions/admonition.html
-
-        <div class="admonition danger">
-        <p class="admonition-title">Don't try this at home</p>
-        <p>...</p>
-        </div>
-        """
-
-        el = etree.Element('div')
-        el.set('class', "admonition danger")
-
-        title = etree.SubElement(el, 'p')
-        title.set('class', "admonition-title")
-        title.text = "Markdown Parsing Error"
-
-        msg = etree.SubElement(el, 'p')
-        msg.text = 'Invalid markdown for ' + rel_filename
-        if message:
-            msg.text += '<br>{}'.format(message)
-        return el
 
     def checkFilename(self, rel_filename):
         """

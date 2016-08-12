@@ -42,7 +42,7 @@ class MkMooseDocsFormatter(logging.Formatter):
             level = 4
         elif record.name.endswith('Database'):
             level = 3
-        elif record.name.endswith('MooseInformationBase') or record.name.endswith('MooseObjectInformation') or record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseSystemInformation'):
+        elif record.name.endswith('MooseInformationBase') or record.name.endswith('MooseObjectInformation') or record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseSystemInformation') or record.name.endswith('MooseCommonFunctions'):
             level = 2
         elif record.name.endswith('MooseSubApplicationDocGenerator'):
             level = 1

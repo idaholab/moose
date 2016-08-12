@@ -28,6 +28,7 @@ class MooseApplicationDocGenerator(object):
         self._exe = None
         self._modified = None
         self._develop = kwargs.pop('develop', False)
+        self._theme = kwargs.pop('theme', None)
 
     def generate(self, purge=False):
         """
@@ -137,7 +138,10 @@ class MooseApplicationDocGenerator(object):
                         yield '{}- {}: {}'.format(' '*4*(level), key, value)
 
         pages = MooseDocs.yaml_load('pages.yml')
-        output = ['pages:']
+        output = []
+        if self._theme:
+            output = ['theme: {}'.format(self._theme)]
+        output.append('pages:')
         output += dumptree(pages, 1)
         shutil.copyfile('mkdocs.template.yml', 'mkdocs.yml')
         with open('mkdocs.yml', 'a') as fid:
