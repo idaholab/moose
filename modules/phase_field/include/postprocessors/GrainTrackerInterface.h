@@ -47,6 +47,21 @@ public:
    * with each entry containing an invalid uint (no grain active at that location) or a grain id if it's active at that location.
    */
   virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const = 0;
+
+  /**
+   * Returns the number of grains stored in this object.
+   */
+  virtual unsigned int getNumberGrains() const = 0;
+
+  /**
+   * Returns the volume for the given grain number.
+   */
+  virtual Real getGrainVolume(unsigned int grain_id) const = 0;
+
+  /**
+   * Returns the centroid for the given grain number.
+   */
+  virtual Point getGrainCentroid(unsigned int grain_id) const = 0;
 };
 
 #endif

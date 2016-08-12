@@ -50,6 +50,9 @@ public:
   virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, unsigned int var_idx=0) const override;
   virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
   virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const override;
+  virtual unsigned int getNumberGrains() const override;
+  virtual Real getGrainVolume(unsigned int grain_id) const override;
+  virtual Point getGrainCentroid(unsigned int grain_id) const override;
 
 protected:
   virtual void updateFieldInfo() override;
