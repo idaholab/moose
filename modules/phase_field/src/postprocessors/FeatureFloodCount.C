@@ -1004,6 +1004,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
   auto box_expanded = false;
   for (auto & bbox : _bboxes)
     for (size_t j = 0; j < rhs._bboxes.size(); ++j)
+      if (bbox.intersect(rhs._bboxes[j]))
       {
         updateBBoxExtremes(bbox, rhs._bboxes[j]);
         intersected_boxes[j] = true;
