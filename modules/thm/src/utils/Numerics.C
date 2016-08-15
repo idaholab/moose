@@ -182,3 +182,34 @@ ireg_vu_SBTL95(double v, double u, double& vt, double& ps, double& ts, double& x
     }
     return ireg;
 }
+
+
+Real
+dv_daAL(Real sign, Real U0)
+{
+  return (sign / U0);
+}
+
+Real
+dv_dU0(Real area, Real U0)
+{
+  return - area / U0 / U0;
+}
+
+Real
+de_dU0(Real U0, Real U1, Real U2)
+{
+  return (-U2 / U0 / U0 + U1 * U1 / U0 / U0 / U0);
+}
+
+Real
+de_dU1(Real U0, Real U1)
+{
+  return (-U1 / U0 / U0);
+}
+
+Real
+de_dU2(Real U0)
+{
+  return (1 / U0);
+}
