@@ -169,8 +169,14 @@ petscSetupDM (NonlinearSystem & nl) {
   CHKERRABORT(nl.comm().get(),ierr);
   ierr = DMDestroy(&dm);
   CHKERRABORT(nl.comm().get(),ierr);
-  ierr = SNESSetUpdate(snes,SNESUpdateDMMoose);
-  CHKERRABORT(nl.comm().get(),ierr);
+  // We temporarily comment out this updating function because
+  // we lack an approach to check if the problem
+  // structure has been changed from the last iteration.
+  // The indices will be rebuilt for every timestep.
+  // TODO: figure out a way to check the structure changes of the
+  // matrix
+  // ierr = SNESSetUpdate(snes,SNESUpdateDMMoose);
+  // CHKERRABORT(nl.comm().get(),ierr);
 #endif
 }
 
