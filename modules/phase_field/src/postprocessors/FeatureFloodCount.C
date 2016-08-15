@@ -327,11 +327,26 @@ void FeatureFloodCount::communicateAndMerge()
 }
 
 void
-FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_all) const
+FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const
 {
   mooseAssert(processor_id() == 0, "This method must only be called on the root processor");
 
-  local_to_global_all.resize(_n_procs, std::vector<unsigned int>(_max_local_size));
+  counts.resize(_n_procs, 0);
+  for (auto & feature : _feature_sets)
+    for (const auto & local_index_pair : feature._orig_ids)
+          // local index                                              // rank
+      if (local_index_pair.second >= static_cast<unsigned int>(counts[local_index_pair.first]))
+        counts[local_index_pair.first] = local_index_pair.second + 1;
+
+  unsigned int globalsize = 0;
+  std::vector<int> offsets(_n_procs);
+  for (auto i = decltype(_n_procs)(0); i < _n_procs; ++i)
+  {
+    offsets[i] = globalsize;
+    globalsize += counts[i];
+  }
+
+  local_to_global_all.resize(globalsize);
 
   for (decltype(_feature_sets.size()) i = 0, end_index = _feature_sets.size(); i < end_index; ++i)
   {
@@ -340,38 +355,14 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::vector<unsigned in
     {
       mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
       mooseAssert(local_index_pair.second < _max_local_size, local_index_pair.second << ", " << _max_local_size);
+                                  // rank                   // local index
+      auto global_index = offsets[local_index_pair.first] + local_index_pair.second;
 
-                              // rank                 // local index
-      local_to_global_all[local_index_pair.first][local_index_pair.second] = i;
+      mooseAssert(global_index < globalsize, "Global index: " << global_index << " is out of range");
+
+      // Finally fill in the vector
+      local_to_global_all[global_index] = i;
     }
-  }
-}
-
-void
-FeatureFloodCount::scatterIndices(std::vector<std::vector<unsigned int> > & local_to_global_all)
-{
-  // First send _feature_count and _max_local_size for sizing vectors
-
-  std::pair<unsigned int, unsigned int> sizes_pair(_feature_count, _max_local_size);
-  _communicator.broadcast(sizes_pair);
-
-  if (processor_id() == 0)
-  {
-    // TODO: Replace with MPI_SCATTER
-    mooseAssert(local_to_global_all.size() == _n_procs, "local_to_global not sized properly");
-
-    for (auto rank = decltype(_n_procs)(1); rank < _n_procs; ++rank)
-      _communicator.send(rank, local_to_global_all[rank]);
-  }
-  else // Ranks 1..n
-  {
-    // Set _feature_count and _max_local_size on remaining ranks
-    _feature_count = sizes_pair.first;
-    _max_local_size = sizes_pair.second;
-
-    // Now receive the local to global map from the root process
-    _local_to_global_feature_map.resize(_max_local_size);
-    _communicator.receive(0, _local_to_global_feature_map);
   }
 }
 
@@ -380,12 +371,16 @@ FeatureFloodCount::finalize()
 {
   communicateAndMerge();
 
-  // local to global map (one per processor)
-  std::vector<std::vector<unsigned int> > local_to_global_all;
-  if (processor_id() == 0)
-    buildLocalToGlobalIndices(local_to_global_all);
+  {
+    // local to global map (one per processor)
+    std::vector<int> counts;
+    std::vector<unsigned int> local_to_global_all;
+    if (processor_id() == 0)
+      buildLocalToGlobalIndices(local_to_global_all, counts);
 
-  scatterIndices(local_to_global_all);
+    // Scatter local_to_global indices to all processors and store in class member variable
+    _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
+  }
 
   if (processor_id() != 0)
   {

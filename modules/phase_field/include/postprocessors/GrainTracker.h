@@ -85,7 +85,7 @@ protected:
   /**
    * Builds local to global indices taking into account the unique grain structure
    */
-  virtual void buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_indices) const override;
+  virtual void buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_indices, std::vector<int> & count) const override;
 
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.

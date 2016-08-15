@@ -306,18 +306,15 @@ protected:
   void communicateAndMerge();
 
   /**
-   * This routine builds local to global indices. It is intended to be overridden in derived classes.
-   */
-  virtual void buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_all) const;
-
-  /**
-   * Method for scattering the local to global indices to all ranks. This method is not intended to
-   * be overridden in derived classes.
+   * This routine populatess a stacked vector of local to global indices per rank and the associated count
+   * vector for scattering the vector to the ranks. The individual vectors can be different sizes. The ith
+   * vector will be distributed to the ith processor including the master rank.
+   * e.g.
+   * [ ... n_0 ] [ ... n_1 ] ... [ ... n_m ]
    *
-   * Note: The parameter cannot be constant since most constant types are not specialized in
-   * libMesh's parallel.h or parallel_implementation.h.
+   * It is intended to be overridden in derived classes.
    */
-  void scatterIndices(std::vector<std::vector<unsigned int> > & local_to_global_all);
+  virtual void buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const;
 
   /**
    * Helper routine for clearing up data structures during initialize and prior to parallel

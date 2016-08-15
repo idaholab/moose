@@ -174,11 +174,15 @@ GrainTracker::finalize()
       newGrainCreated(idx);
   }
 
-  std::vector<std::vector<unsigned int> > local_to_global_all;
-  if (processor_id() == 0)
-    buildLocalToGlobalIndices(local_to_global_all);
+  {
+    std::vector<int> counts;
+    std::vector<unsigned int> local_to_global_all;
+    if (processor_id() == 0)
+      buildLocalToGlobalIndices(local_to_global_all, counts);
 
-  scatterIndices(local_to_global_all);
+    // Scatter local_to_global indices to all processors and store in class member variable
+    _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
+  }
 
   if (processor_id() != 0)
   {
@@ -590,11 +594,31 @@ GrainTracker::newGrainCreated(unsigned int new_grain_idx)
 }
 
 void
-GrainTracker::buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_all) const
+GrainTracker::buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const
 {
   mooseAssert(processor_id() == 0, "This method must only be called on the root processor");
 
-  local_to_global_all.resize(_n_procs, std::vector<unsigned int>(_max_local_size));
+  counts.resize(_n_procs, 0);
+  for (const auto & grain_pair : _unique_grains)
+  {
+    if (grain_pair.second._status == Status::INACTIVE)
+      continue;
+
+    for (const auto & local_index_pair : grain_pair.second._orig_ids)
+          // local index                                              // rank
+      if (local_index_pair.second >= static_cast<unsigned int>(counts[local_index_pair.first]))
+        counts[local_index_pair.first] = local_index_pair.second + 1;
+  }
+
+  unsigned int globalsize = 0;
+  std::vector<int> offsets(_n_procs);
+  for (auto i = decltype(_n_procs)(0); i < _n_procs; ++i)
+  {
+    offsets[i] = globalsize;
+    globalsize += counts[i];
+  }
+
+  local_to_global_all.resize(globalsize);
 
   for (const auto & grain_pair : _unique_grains)
   {
@@ -606,8 +630,13 @@ GrainTracker::buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > 
     {
       mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
       mooseAssert(local_index_pair.second < _max_local_size, local_index_pair.second << ", " << _max_local_size);
-                          // rank                 // local index
-      local_to_global_all[local_index_pair.first][local_index_pair.second] = grain_pair.first;
+                                  // rank                   // local index
+      auto global_index = offsets[local_index_pair.first] + local_index_pair.second;
+
+      mooseAssert(global_index < globalsize, "Global index: " << global_index << " is out of range");
+
+      // Finally fill in the vector
+      local_to_global_all[global_index] = grain_pair.first;
     }
   }
 }
