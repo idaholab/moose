@@ -14,7 +14,6 @@
 
 // LibMesh includes
 #include "libmesh/periodic_boundary_base.h"
-#include "libmesh/sphere.h"
 
 #include <limits>
 #include <algorithm>
@@ -161,16 +160,6 @@ GrainTracker::finalize()
   if (processor_id() == 0)
     trackGrains(new_grain_indices);
 
-  // TODO: Remove
-  _console << std::endl;
-
-//  if (processor_id() == 0)
-//  {
-//    std::cerr << "******************* Processor " << processor_id() << " *************************\n";
-//    for (auto & grain_pair : _unique_grains)
-//      std::cerr << grain_pair.second << '\n';
-//  }
-
   if (!new_grain_indices.empty())
   {
     // Communicate new grain indices with the remaining processors
@@ -201,7 +190,7 @@ GrainTracker::finalize()
     _unique_grains.clear();
 
     for (auto & list_ref : _partial_feature_sets)
-      for (auto && feature : list_ref)
+      for (auto & feature : list_ref)
       {
         mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
         auto local_id = feature._orig_ids.begin()->second;
@@ -223,10 +212,6 @@ GrainTracker::finalize()
         else // Grain already in the map (need to merge)
           feature_it->second.merge(std::move(feature));
       }
-
-//    std::cerr << "******************* Processor " << processor_id() << " *************************\n";
-//    for (auto & grain_pair : _unique_grains)
-//      std::cerr << grain_pair.second << '\n';
   }
   Moose::perf_log.pop("trackGrains()", "GrainTracker");
 
@@ -407,7 +392,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
       auto next_index = grain_num;
 
       // Loop over all of the features (grains)
-      for (auto && feature : _feature_sets)
+      for (auto & feature : _feature_sets)
       {
         Real min_centroid_diff = std::numeric_limits<Real>::max();
         unsigned int closest_match_idx = 0;
@@ -467,7 +452,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
     {
       unsigned int counter = 0;
       // Move the grains from the FeatureFloodCount data structure to the _unique_grains data structure.
-      for (auto && grain : _feature_sets)
+      for (auto & grain : _feature_sets)
       {
         grain._status = Status::MARKED;
         _unique_grains.emplace_hint(_unique_grains.end(), std::pair<unsigned int, FeatureData>(counter, std::move(grain)));
@@ -503,8 +488,8 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
     // We only need to examine grains that have matching variable indices
     for (size_t new_grain_idx = 0; new_grain_idx < _feature_sets.size(); ++new_grain_idx)
     {
-      // TODO: It's possible to loop over just a subset of these indicies for efficiency
-      if (grain_pair.second._var_idx == _feature_sets[new_grain_idx]._var_idx)  // Do the variables indicies match?
+      // TODO: It's possible to loop over just a subset of these indices for efficiency
+      if (grain_pair.second._var_idx == _feature_sets[new_grain_idx]._var_idx)  // Do the variables indices match?
       {
         Real curr_centroid_diff = centroidRegionDistance(grain_pair.second._bboxes, _feature_sets[new_grain_idx]._bboxes);
         if (curr_centroid_diff <= min_centroid_diff)
@@ -518,9 +503,6 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
 
     if (found_one)
     {
-      // Keep track of which new grains the existing ones want to map to
-//      const auto match_pair = std::make_pair(map_idx, closest_match_idx);
-
      /**
       * It's possible that multiple existing grains will map to a single new grain (indicated by finding multiple
       * matches when we are building this map). This will happen any time a grain disappears during
@@ -543,8 +525,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
         auto & inactive_it = (centroid_diff1 < centroid_diff2) ? grain_it2 : grain_it1;
 
         inactive_it->second._status = Status::INACTIVE;
-        //TODO: Undo change to std::cout
-        std::cout << "Marking Grain " << inactive_it->first << " as INACTIVE (variable index: "
+        _console << "Marking Grain " << inactive_it->first << " as INACTIVE (variable index: "
                  << inactive_it->second._var_idx << ")\n"
                  << inactive_it->second;
 
@@ -591,8 +572,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
     if (grain_pair.second._status == Status::CLEAR)
     {
       grain_pair.second._status = Status::INACTIVE;
-      // TODO: Undo switch to std::cout
-      std::cout << "Marking Grain " << grain_pair.first << " as INACTIVE (variable index: "
+      _console << "Marking Grain " << grain_pair.first << " as INACTIVE (variable index: "
                << grain_pair.second._var_idx <<  ")\n"
                << grain_pair.second;
     }
@@ -616,7 +596,6 @@ GrainTracker::buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > 
 
   local_to_global_all.resize(_n_procs, std::vector<unsigned int>(_max_local_size));
 
-  std::cout << "Printing local to global\n";
   for (const auto & grain_pair : _unique_grains)
   {
     if (grain_pair.second._status == Status::INACTIVE)
@@ -627,12 +606,7 @@ GrainTracker::buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > 
     {
       mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
       mooseAssert(local_index_pair.second < _max_local_size, local_index_pair.second << ", " << _max_local_size);
-
-      // TODO: Remove
-      std::cout << local_index_pair.first << " : " << local_index_pair.second << " : " << grain_pair.first << '\n';
-
-
-                              // rank                 // local index
+                          // rank                 // local index
       local_to_global_all[local_index_pair.first][local_index_pair.second] = grain_pair.first;
     }
   }
@@ -776,80 +750,48 @@ GrainTracker::remapGrains()
     }
   } // root processor
 
-  _console << "Communicating swaps with remaining processors\n";
   _communicator.broadcast(unique_id_to_new_var);
 
-  // Cache for holding values during swaps
-  std::vector<std::map<Node *, CacheValues> > cache(_n_vars);
-
-  // Perform the actual swaps on all processors
-  for (const auto & new_var_pair : unique_id_to_new_var)
+  // Perform swaps if any occurred
+  if (!unique_id_to_new_var.empty())
   {
-    // See if this processor has a record for this grain, if not continue
-    if (_unique_grains.find(new_var_pair.first) == _unique_grains.end())
-      continue;
+    _console << "Communicating swaps with remaining processors\n";
 
-    auto & grain = _unique_grains[new_var_pair.first];
-    auto new_var_idx = new_var_pair.second;
+      // Cache for holding values during swaps
+    std::vector<std::map<Node *, CacheValues> > cache(_n_vars);
 
-    std::cout << "Caching solution values on grain #" << new_var_pair.first
-              << " from variable index " << grain._var_idx << '\n';
+    // Perform the actual swaps on all processors
+    for (const auto & new_var_pair : unique_id_to_new_var)
+    {
+      // See if this processor has a record for this grain, if not continue
+      if (_unique_grains.find(new_var_pair.first) == _unique_grains.end())
+        continue;
 
-    swapSolutionValues(grain, new_var_idx, cache, RemapCacheMode::FILL);
+      auto & grain = _unique_grains[new_var_pair.first];
+      auto new_var_idx = new_var_pair.second;
+
+      swapSolutionValues(grain, new_var_idx, cache, RemapCacheMode::FILL);
+    }
+
+    for (const auto & new_var_pair : unique_id_to_new_var)
+    {
+      // See if this processor has a record for this grain, if not continue
+      if (_unique_grains.find(new_var_pair.first) == _unique_grains.end())
+        continue;
+
+      auto & grain = _unique_grains[new_var_pair.first];
+      auto new_var_idx = new_var_pair.second;
+
+      swapSolutionValues(grain, new_var_idx, cache, RemapCacheMode::USE);
+    }
+    _console << "Swaps complete\n";
+
+    _nl.solution().close();
+    _nl.solutionOld().close();
+    _nl.solutionOlder().close();
+
+    _fe_problem.getNonlinearSystem().sys().update();
   }
-
-  for (const auto & new_var_pair : unique_id_to_new_var)
-  {
-    // See if this processor has a record for this grain, if not continue
-    if (_unique_grains.find(new_var_pair.first) == _unique_grains.end())
-      continue;
-
-    auto & grain = _unique_grains[new_var_pair.first];
-    auto new_var_idx = new_var_pair.second;
-
-    std::cout << "Writing solution values from cache on grain #" << new_var_pair.first
-              << " to variable index " << new_var_idx << '\n';
-
-    swapSolutionValues(grain, new_var_idx, cache, RemapCacheMode::USE);
-  }
-  _console << "Swaps complete\n";
-
-//  if (any_grains_remapped)
-//  {
-//    std::vector<std::map<Node *, CacheValues> > cache(_n_vars);
-//    for (auto & grain_pair : _unique_grains)
-//    {
-//      auto & grain = grain_pair.second;
-//      auto old_var_idx = grain_id_to_existing_var_idx[grain_pair.first];
-//
-//      if (grain._status != Status::INACTIVE && old_var_idx != grain._var_idx)
-//      {
-//        std::cout << "Caching solution values on grain #" << grain_pair.first << " from variable index " << old_var_idx << '\n';
-//
-//        mooseAssert(old_var_idx != std::numeric_limits<unsigned int>::max(), "old_var_idx in incorrect state");
-//        swapSolutionValues(grain, old_var_idx, cache, RemapCacheMode::FILL);
-//      }
-//    }
-//
-//    for (auto & grain_pair : _unique_grains)
-//    {
-//      auto & grain = grain_pair.second;
-//      auto old_var_idx = grain_id_to_existing_var_idx[grain_pair.first];
-//
-//      if (grain._status != Status::INACTIVE && old_var_idx != grain._var_idx)
-//      {
-//        std::cout << "Writing solution values from cache on grain #" << grain_pair.first << " to variable index " << grain._var_idx << '\n';
-//
-//        mooseAssert(old_var_idx != std::numeric_limits<unsigned int>::max(), "old_var_idx in incorrect state");
-//        swapSolutionValues(grain, old_var_idx, cache, RemapCacheMode::USE);
-//      }
-//    }
-
-  _nl.solution().close();
-  _nl.solutionOld().close();
-  _nl.solutionOlder().close();
-
-  _fe_problem.getNonlinearSystem().sys().update();
 }
 
 void
@@ -888,12 +830,12 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
     unsigned int target_var_index = grain_pair.second._var_idx;
     unsigned int target_grain_id = grain_pair.first;
 
-    Real curr_sphere_diff = boundingRegionDistance(grain._bboxes, grain_pair.second._bboxes);
+    Real curr_bbox_diff = boundingRegionDistance(grain._bboxes, grain_pair.second._bboxes);
 
-    GrainDistance grain_distance_obj(curr_sphere_diff, target_grain_id, target_var_index);
+    GrainDistance grain_distance_obj(curr_bbox_diff, target_grain_id, target_var_index);
 
     // To handle touching halos we penalize the top pick each time we see another
-    if (curr_sphere_diff == -1.0 && !min_distances[target_var_index].empty())
+    if (curr_bbox_diff == -1.0 && !min_distances[target_var_index].empty())
     {
       Real last_distance = min_distances[target_var_index].begin()->_distance;
       if (last_distance < 0)
@@ -923,20 +865,21 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
 
   /**
    * We have two grains that are getting close represented by the same order parameter.
-   * We need to map to the variable whose closest grain to this one is furthest away by sphere to sphere distance.
+   * We need to map to the variable whose closest grain to this one is furthest away by bounding region to
+   * bounding region distance.
    */
   computeMinDistancesFromGrain(grain, min_distances);
 
   /**
-   * We have a vector of the distances to the closest grains represented by each of our variables.  We just need to pick
-   * a suitable grain to replace with.  We will start with the maximum of this this list: (max of the mins), but will settle
-   * for next to largest and so forth as we make more attempts at remapping grains.  This is a graph coloring problem so
-   * more work will be required to optimize this process.
+   * We have a vector of the distances to the closest grains represented by each of our variables.
+   * We just need to pick a suitable grain to replace with. We will start with the maximum of this this
+   * list: (max of the mins), but will settle for next to largest and so forth as we make more attempts
+   * at remapping grains. This is a graph coloring problem so more work will be required to optimize
+   * this process.
    *
-   * Note: We don't have an explicit check here to avoid remapping a  variable to itself.  This is unnecessary since the
-   * min_distance of a variable is explicitly set up above.
+   * Note: We don't have an explicit check here to avoid remapping a  variable to itself.  This is
+   * unnecessary since the min_distance of a variable is explicitly set up above.
    */
-
   std::sort(min_distances.begin(), min_distances.end(),
             [](const std::list<GrainDistance> & lhs, const std::list<GrainDistance> & rhs)
             {
@@ -961,9 +904,9 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     {
       Moose::out
         << COLOR_GREEN
-        << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index " << curr_var_idx
-        << " to " << target_it->_var_index << " whose closest grain (#" << target_it->_grain_id
-        << ") is at a distance of " << target_it->_distance << "\n"
+        << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index "
+        << curr_var_idx << " to " << target_it->_var_index << " whose closest grain (#"
+        << target_it->_grain_id << ") is at a distance of " << target_it->_distance << "\n"
         << COLOR_DEFAULT;
 
       grain._status |= Status::DIRTY;
@@ -981,7 +924,8 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
       if (next_target_it->_distance > 0)
         break;
 
-      mooseAssert(_unique_grains.find(next_target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
+      mooseAssert(_unique_grains.find(next_target_it->_grain_id) != _unique_grains.end(),
+                  "Error in indexing target grain in attemptGrainRenumber");
       FeatureData & next_target_grain = _unique_grains[next_target_it->_grain_id];
 
       // If any grains touch we're done here
@@ -997,9 +941,9 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     {
       Moose::out
         << COLOR_GREEN
-        << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index " << curr_var_idx
-        << " to " << target_it->_var_index << " whose closest grain(s):" << oss.str()
-        << " are inside our bounding sphere but whose halo(s) are not touching.\n"
+        << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index "
+        << curr_var_idx << " to " << target_it->_var_index << " whose closest grain:"
+        << oss.str() << " is inside our bounding box but whose halo(s) are not touching.\n"
         << COLOR_DEFAULT;
 
       grain._status |= Status::DIRTY;
@@ -1008,13 +952,15 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     }
 
     // If we reach this part of the loop, there is no simple renumbering that can be done.
-    mooseAssert(_unique_grains.find(target_it->_grain_id) != _unique_grains.end(), "Error in indexing target grain in attemptGrainRenumber");
+    mooseAssert(_unique_grains.find(target_it->_grain_id) != _unique_grains.end(),
+                "Error in indexing target grain in attemptGrainRenumber");
     FeatureData & target_grain = _unique_grains[target_it->_grain_id];
 
     /**
-     * If we get to this case and the best distance is less than -1, we are in big trouble. This means that grains represented by all of
-     * the remaining order parameters are overlapping this one in at least two places. We'd have to maintain multiple recursive chains,
-     * or just start over from scratch...
+     * If we get to this case and the best distance is less than -1, we are in big trouble.
+     * This means that grains represented by all of the remaining order parameters are
+     * overlapping this one in at least two places. We'd have to maintain multiple recursive
+     * chains, or just start over from scratch...
      * Let's just return false and see if there is another remapping option.
      */
     if (target_it->_distance < -1)

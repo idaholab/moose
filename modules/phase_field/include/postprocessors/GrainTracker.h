@@ -13,7 +13,6 @@
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
-#include "libmesh/auto_ptr.h"
 
 class GrainTracker;
 class EBSDReader;
@@ -43,7 +42,7 @@ public:
   {
     FILL,
     USE,
-    BYPASS,
+    BYPASS
   };
 
   // GrainTrackerInterface methods

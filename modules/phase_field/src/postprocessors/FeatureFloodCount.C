@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <unistd.h>
 
 template<>
 void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
@@ -318,7 +317,7 @@ void FeatureFloodCount::communicateAndMerge()
 
       mooseAssert(range_front <= range_back && range_back < _feature_count, "Indexing error in feature sets");
 
-      if (_feature_sets[range_front]._var_idx != map_num || _feature_sets[range_back]._var_idx != map_num)
+      if (!_single_map_mode && (_feature_sets[range_front]._var_idx != map_num || _feature_sets[range_back]._var_idx != map_num))
         mooseError("Error in _feature_sets sorting, map index: " << map_num);
 
       feature_offset += _feature_counts_per_map[map_num];
@@ -336,7 +335,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::vector<unsigned in
 
   for (decltype(_feature_sets.size()) i = 0, end_index = _feature_sets.size(); i < end_index; ++i)
   {
-    // Get the local indicies from the feature and build a map
+    // Get the local indices from the feature and build a map
     for (const auto & local_index_pair : _feature_sets[i]._orig_ids)
     {
       mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
@@ -398,7 +397,7 @@ FeatureFloodCount::finalize()
      */
     _feature_sets.reserve(_max_local_size);
     for (auto & list_ref : _partial_feature_sets)
-      for (auto && feature : list_ref)
+      for (auto & feature : list_ref)
         _feature_sets.emplace_back(std::move(feature));
   }
 
@@ -734,7 +733,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
     _partial_feature_sets[map_num].clear();
   }
 
-  // The local indicies size is +1 from the max index
+  // The local indices size is +1 from the max index
   _max_local_size += 1;
 
   // IMPORTANT: FeatureFloodCount::_feature_count and FeatureFloodCount::_max_local_size is set on rank 0 at this point
@@ -755,12 +754,6 @@ FeatureFloodCount::updateFieldInfo()
     _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 1 : _maps_size);
   }
 
-//  decltype(FeatureFloodCount::FeatureData::_var_idx) old_var_index = 0;
-
-  /**
-   * To produce the proper global numbering, we need to loop over the local to
-   * global map and
-   */
   for (decltype(_feature_sets.size()) i = 0, end_index = _feature_sets.size(); i < end_index; ++i)
   {
     auto & feature = _feature_sets[i];
@@ -790,7 +783,7 @@ FeatureFloodCount::updateFieldInfo()
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
     auto map_idx = (_single_map_mode || _condense_map_info) ? decltype(feature._var_idx)(0) : feature._var_idx;
 
-    // Loop over the entitiy ids of this feature and update our local map
+    // Loop over the entity ids of this feature and update our local map
     for (auto entity : feature._local_ids)
     {
       _feature_maps[map_idx][entity] = static_cast<int>(global_feature_number);
@@ -934,7 +927,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
   std::vector<const Elem *> all_active_neighbors;
 
   // Loop over all neighbors (at the the same level as the current element)
-  for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
+  for (auto end = elem->n_neighbors(), i = 0u; i < end; ++i)
   {
     const Elem * neighbor_ancestor = elem->neighbor(i);
     if (neighbor_ancestor)
@@ -1006,7 +999,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
     {
       Elem * elem = _mesh.elemPtr(entity);
 
-      for (unsigned int node_n = 0; node_n < elem->n_nodes(); node_n++)
+      for (auto end = elem->n_nodes(), node_n = 0u; node_n < end; ++node_n)
       {
         auto iters = _periodic_node_map.equal_range(elem->node(node_n));
 
@@ -1046,7 +1039,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox
 void
 FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Elem & elem)
 {
-  for (unsigned int node_n = 0; node_n < elem.n_nodes(); ++node_n)
+  for (auto n = elem.n_nodes(), node_n = 0u; node_n < n; ++node_n)
     updateBBoxExtremes(bbox, *(elem.get_node(node_n)));
 }
 

@@ -311,7 +311,7 @@ protected:
   virtual void buildLocalToGlobalIndices(std::vector<std::vector<unsigned int> > & local_to_global_all) const;
 
   /**
-   * Method for scattering the local to global indicies to all ranks. This method is not intended to
+   * Method for scattering the local to global indices to all ranks. This method is not intended to
    * be overridden in derived classes.
    *
    * Note: The parameter cannot be constant since most constant types are not specialized in
