@@ -1217,7 +1217,9 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
       (MooseUtils::absoluteFuzzyEqual(bbox.max()(2), bbox.min()(2)) ? 1 : bbox.max()(2) - bbox.min()(2));
   }
 
-  out << "\nStatus:";
+  out << "\nStatus: ";
+  if (feature._status == FeatureFloodCount::Status::CLEAR)
+    out << "CLEAR";
   if (static_cast<bool>(feature._status & FeatureFloodCount::Status::MARKED))
     out << " MARKED";
   if (static_cast<bool>(feature._status & FeatureFloodCount::Status::DIRTY))
