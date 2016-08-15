@@ -63,6 +63,46 @@ GrainTracker::getEntityValue(dof_id_type node_id, FieldType field_type, unsigned
   return FeatureFloodCount::getEntityValue(node_id, field_type, var_idx);
 }
 
+const std::vector<std::pair<unsigned int, unsigned int> > &
+GrainTracker::getElementalValues(dof_id_type elem_id) const
+{
+  const auto pos = _elemental_data.find(elem_id);
+
+  if (pos != _elemental_data.end())
+    return pos->second;
+  else
+  {
+#if DEBUG
+    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
+#endif
+    return _empty;
+  }
+}
+
+unsigned int
+GrainTracker::getNumberGrains() const
+{
+  return _feature_count;
+}
+
+Real
+GrainTracker::getGrainVolume(unsigned int grain_id) const
+{
+  const auto feature_pair = _unique_grains.find(grain_id);
+  mooseAssert(feature_pair != _unique_grains.end(), "Grain " << grain_id << " does not exist in data structure");
+
+  return feature_pair->second._volume;
+}
+
+Point
+GrainTracker::getGrainCentroid(unsigned int grain_id) const
+{
+  const auto feature_pair = _unique_grains.find(grain_id);
+  mooseAssert(feature_pair != _unique_grains.end(), "Grain " << grain_id << " does not exist in data structure");
+
+  return feature_pair->second._centroid;
+}
+
 void
 GrainTracker::initialize()
 {
@@ -158,22 +198,6 @@ GrainTracker::finalize()
   _console << "Finished inside of GrainTracker" << std::endl;
 
   Moose::perf_log.pop("finalize()", "GrainTracker");
-}
-
-const std::vector<std::pair<unsigned int, unsigned int> > &
-GrainTracker::getElementalValues(dof_id_type elem_id) const
-{
-  const auto pos = _elemental_data.find(elem_id);
-
-  if (pos != _elemental_data.end())
-    return pos->second;
-  else
-  {
-#if DEBUG
-    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
-#endif
-    return _empty;
-  }
 }
 
 const std::vector<unsigned int> &

@@ -84,6 +84,28 @@ FauxGrainTracker::getOpToGrainsVector(dof_id_type /*elem_id*/) const
   return _faux_data_2;
 }
 
+unsigned int
+FauxGrainTracker::getNumberGrains() const
+{
+  return _variables_used.size();
+}
+
+Real
+FauxGrainTracker::getGrainVolume(unsigned int /*grain_id*/) const
+{
+  mooseError("Unimplemented");
+
+  return 0;
+}
+
+Point
+FauxGrainTracker::getGrainCentroid(unsigned int /*grain_id*/) const
+{
+  mooseError("Unimplemented");
+
+  return Point();
+}
+
 void
 FauxGrainTracker::initialize()
 {
