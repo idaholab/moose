@@ -135,7 +135,8 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _halo_ids(_maps_size),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
-    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false)
+    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false),
+    _is_master(processor_id() == 0)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -268,7 +269,7 @@ void FeatureFloodCount::communicateAndMerge()
    * go ahead and use a vector.
    */
   std::vector<std::string> recv_buffers;
-  if (processor_id() == 0)
+  if (_is_master)
     recv_buffers.reserve(_app.n_processors());
 
   serialize(send_buffers[0]);
@@ -283,7 +284,7 @@ void FeatureFloodCount::communicateAndMerge()
   _communicator.gather_packed_range(0, (void *)(nullptr), send_buffers.begin(), send_buffers.end(),
                                     std::back_inserter(recv_buffers));
 
-  if (processor_id() == 0)
+  if (_is_master)
   {
     // The root process now needs to deserialize and merge all of the data
     deserialize(recv_buffers);
@@ -329,7 +330,7 @@ void FeatureFloodCount::communicateAndMerge()
 void
 FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const
 {
-  mooseAssert(processor_id() == 0, "This method must only be called on the root processor");
+  mooseAssert(_is_master, "This method must only be called on the root processor");
 
   counts.resize(_n_procs, 0);
   for (auto & feature : _feature_sets)
@@ -375,14 +376,14 @@ FeatureFloodCount::finalize()
     // local to global map (one per processor)
     std::vector<int> counts;
     std::vector<unsigned int> local_to_global_all;
-    if (processor_id() == 0)
+    if (_is_master)
       buildLocalToGlobalIndices(local_to_global_all, counts);
 
     // Scatter local_to_global indices to all processors and store in class member variable
     _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
   }
 
-  if (processor_id() != 0)
+  if (!_is_master)
   {
     /**
      * The rest of the ranks just need to move their own data to the flat data structure.
@@ -405,7 +406,7 @@ FeatureFloodCount::finalize()
 void
 FeatureFloodCount::writeFeatureVolumeFile()
 {
-  if (_pars.isParamValid("bubble_volume_file") && processor_id() == 0)
+  if (_is_master && _pars.isParamValid("bubble_volume_file"))
   {
     // Pre-populated by updateFieldInfo
     mooseAssert(_all_feature_volumes.size() == _feature_count, "Incorrect number of volume entries");
@@ -628,7 +629,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
 
   // Since we gathered only on the root process, we only need to merge sets on the root process.
-  mooseAssert(processor_id() == 0, "mergeSets() should only be called on the root process");
+  mooseAssert(_is_master, "mergeSets() should only be called on the root process");
 
   // Local variable used for sizing structures, it will be >= the actual number of features
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
@@ -740,7 +741,7 @@ void
 FeatureFloodCount::updateFieldInfo()
 {
   // Whether or not we should store and write out volume information
-  if (_calculate_feature_volumes && processor_id() == 0)
+  if (_calculate_feature_volumes && _is_master)
   {
     // store volumes per feature
     _all_feature_volumes.reserve(_feature_count);
@@ -754,7 +755,7 @@ FeatureFloodCount::updateFieldInfo()
     auto & feature = _feature_sets[i];
     decltype(end_index) global_feature_number;
 
-    if (processor_id() == 0)
+    if (_is_master)
       /**
        * If we are on processor zero, the global feature number is simply the current
        * index since we previously merged and sorted the partial features.
@@ -796,7 +797,7 @@ FeatureFloodCount::updateFieldInfo()
       _ghosted_entity_ids[entity] = 1;
 
     // Save off volume information
-    if (_calculate_feature_volumes && processor_id() == 0)
+    if (_calculate_feature_volumes && _is_master)
     {
       _all_feature_volumes.push_back(feature._volume);
       if (feature._intersects_boundary)
@@ -815,7 +816,7 @@ FeatureFloodCount::updateFieldInfo()
   }
 
   // Sort the feature volumes
-  if (_calculate_feature_volumes && processor_id() == 0)
+  if (_calculate_feature_volumes && _is_master)
     std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
 
 //  mooseAssert(_feature_count == feature_number, "feature_number does not agree with previously calculated _feature_count");

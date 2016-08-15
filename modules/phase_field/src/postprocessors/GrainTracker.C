@@ -157,7 +157,7 @@ GrainTracker::finalize()
   std::vector<unsigned int> new_grain_indices;
 
   // Track grains (only on the root processor)
-  if (processor_id() == 0)
+  if (_is_master)
     trackGrains(new_grain_indices);
 
   if (!new_grain_indices.empty())
@@ -177,14 +177,14 @@ GrainTracker::finalize()
   {
     std::vector<int> counts;
     std::vector<unsigned int> local_to_global_all;
-    if (processor_id() == 0)
+    if (_is_master)
       buildLocalToGlobalIndices(local_to_global_all, counts);
 
     // Scatter local_to_global indices to all processors and store in class member variable
     _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
   }
 
-  if (processor_id() != 0)
+  if (!_is_master)
   {
     /**
      * On non-root processors we can't maintain the _unique_grains structure since we don't have all
@@ -326,7 +326,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
   if (_t_step < _tracking_step)
     return;
 
-  mooseAssert(processor_id() == 0, "trackGrains() should only be called on the root process");
+  mooseAssert(_is_master, "trackGrains() should only be called on the root process");
 
   // Reset Status on active unique grains
   std::vector<unsigned int> map_sizes(_maps_size);
@@ -390,7 +390,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
       std::set<unsigned int> used_indices;
       std::map<unsigned int, unsigned int> error_indices;
 
-      if (grain_num != _feature_count && processor_id() == 0)
+      if (grain_num != _feature_count && _is_master)
         mooseWarning("Mismatch:\nEBSD centers: " << grain_num << " Grain Tracker Centers: " << _feature_count);
 
       auto next_index = grain_num;
@@ -596,7 +596,7 @@ GrainTracker::newGrainCreated(unsigned int new_grain_idx)
 void
 GrainTracker::buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const
 {
-  mooseAssert(processor_id() == 0, "This method must only be called on the root processor");
+  mooseAssert(_is_master, "This method must only be called on the root processor");
 
   counts.resize(_n_procs, 0);
   for (const auto & grain_pair : _unique_grains)
@@ -666,7 +666,7 @@ GrainTracker::remapGrains()
    * Additionally we need to record each grain's variable index so that we can communicate
    * changes to the non-root ranks later in a single batch.
    */
-  if (processor_id() == 0)
+  if (_is_master)
   {
     std::vector<unsigned int> grain_id_to_existing_var_idx(_unique_grains.size(), std::numeric_limits<unsigned int>::max());
     for (auto & grain_pair : _unique_grains)

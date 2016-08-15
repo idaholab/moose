@@ -528,6 +528,9 @@ protected:
 
   /// Determines if the flood counter is elements or not (nodes)
   bool _is_elemental;
+
+  /// Convenience variable for testing master rank
+  bool _is_master;
 };
 
 template <class T>
