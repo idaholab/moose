@@ -27,11 +27,10 @@ StressDivergenceRZTensors::StressDivergenceRZTensors(const InputParameters & par
 Real
 StressDivergenceRZTensors::computeQpResidual()
 {
+  mooseAssert(_assembly.coordSystem() == Moose::COORD_RZ,
+              "The coordinate system in the Problem block must be set to RZ for Axisymmetric geometries.");
+
   Real div = 0;
-
-  if (_assembly.coordSystem() != Moose::COORD_RZ)
-    mooseError("The coordinate system in the Problem block must be set to RZ for Axisymmetric geometries.");
-
   if (_component == 0)
   {
     div = _grad_test[_i][_qp](0) * _stress[_qp](0,0) +
