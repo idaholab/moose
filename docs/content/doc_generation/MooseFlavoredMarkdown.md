@@ -1,4 +1,61 @@
-# Moose Flavored Markdown
+# MOOSE Flavored Markdown
+
+Documentation generated using MOOSE is generated using the [python-markdown](http://pythonhosted.org/Markdown/) package,
+which includes the ability to use extensions from others as well as define custom extensions. This page outlines the
+extensions included as well as the custom syntax defined exclusively for documenting MOOSE source code.
+
+---
+
+## Extensions
+### Symbol Conversion
+This package converts ASCII symbols for dashes, quotes, and ellipses to the correct html, for more information see the
+documentation for this package: [SmartyPants](http://pythonhosted.org/Markdown/extensions/smarty.html).
+
+### Markdown Include
+This package allows for other markdown file to be include within the current file by enclosing the markdown file to
+be included within \{\! and \!\}. For more information refer to the package documentation: [markdown-include](https://github.com/cmacmackin/markdown-include).
+
+### Mathematics
+The enables the use of [MathJax](http://www.mathjax.org) within markdown, refer to the package documentation for complete
+details: [python-markdown-math](https://github.com/mitya57/python-markdown-math).
+
+Inline math may be specified by enclosing the latex in single `$`: $y=a\cdot x + b$. Addtionally, stand-alone math may
+be enclosed in `$$`:
+
+$$
+x=\frac{1+y}{1+2z^2}.
+$$
+
+### Admonition
+The [admonition](https://pythonhosted.org/Markdown/extensions/admonition.html) package enables for important and critical
+items to be highlighted, using the syntax detailed below and the package documentation: [admonition](https://pythonhosted.org/Markdown/extensions/admonition.html).
+
+```markdown
+!!! type "An optional title"
+    A detailed message paragraph that is indented by 4 spaces and can include any number of lines.
+```
+
+The supported "types" for MOOSE are: "info", "note", "important, "warning", "danger", and "error."
+
+!!! info "Optional Info Title"
+    This is some information you want people to know about.
+
+!!! note "Optional Note Title"
+    This is an example of a note.
+
+!!! important "Optional Important Title"
+    This is an example of something important.
+
+!!! warning "Optional Warning Title"
+    This is a warning.
+
+!!! danger "Optional Danger Title"
+    This is something very dangerous.
+
+!!! error "Optional Error Title"
+    This is an error message.
+
+---
 
 ## Automatic Links
 
@@ -86,3 +143,6 @@ The following options may be passed to control how the output is formatted.
 | strip-extra-newlines | False   | Remove excessive newlines from the included code. |
 
 ## Slideshows
+
+!!! info "Under Development"
+    We will soon include a method for creating slide shows of images.
