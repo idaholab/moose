@@ -25,23 +25,35 @@ DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters
 {
 }
 
-void
-DynamicTensorMechanicsAction::addkernel(const std::string & name, InputParameters & params)
+std::string
+DynamicTensorMechanicsAction::getKernelType()
 {
-  //Add the zeta and alpha parameters to the params (which belongs to StressDivergenceTensors).
-  //Add DynamicStressDivergenceTensors kernel
+  std::string type;
+
+  // choose kernel type based on coordinate system
+  switch (_coord_system)
+  {
+    case Moose::COORD_XYZ:
+      type = "DynamicStressDivergenceTensors";
+      break;
+
+    default:
+      mooseError("Unsupported coordinate system");
+  }
+
+  return type;
+}
+
+InputParameters
+DynamicTensorMechanicsAction::getParameters(std::string type)
+{
+  InputParameters params = TensorMechanicsAction::getParameters(type);
+
   params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
   params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
 
   params.set<Real>("zeta") = getParam<Real>("zeta");
   params.set<Real>("alpha") = getParam<Real>("alpha");
 
-  _problem->addKernel("DynamicStressDivergenceTensors", name, params);
+  return params;
 }
-
-void
-DynamicTensorMechanicsAction::act()
-{
-  TensorMechanicsAction::act();
-}
-
