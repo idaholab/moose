@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "MooseMesh.h"
 #include "FrictionalContactProblem.h"
+#include "Executioner.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
@@ -147,10 +148,8 @@ MechanicalContactConstraint::jacobianSetup()
 void
 MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
 {
-  std::map<dof_id_type, PenetrationInfo *>::iterator
-    it  = _penetration_locator._penetration_info.begin(),
-    end = _penetration_locator._penetration_info.end();
-  for (; it!=end; ++it)
+  for (auto it = _penetration_locator._penetration_info.begin();
+       it != _penetration_locator._penetration_info.end(); ++it)
   {
     const dof_id_type slave_node_num = it->first;
     PenetrationInfo * pinfo = it->second;
@@ -161,29 +160,35 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
 
     if (beginning_of_step)
     {
+      if (_app.getExecutioner()->lastSolveConverged()) {
+        pinfo->_contact_force_old = pinfo->_contact_force;
+        pinfo->_accumulated_slip_old = pinfo->_accumulated_slip;
+        pinfo->_frictional_energy_old = pinfo->_frictional_energy;
+        pinfo->_mech_status_old = pinfo->_mech_status;
+      }
+      else if (pinfo->_mech_status_old == PenetrationInfo::MS_NO_CONTACT &&
+               pinfo->_mech_status != PenetrationInfo::MS_NO_CONTACT)
+      {
+        // The penetration info object could be based on a bad state so delete it
+        delete it->second;
+        it->second = NULL;
+        continue;
+      }
+
       pinfo->_locked_this_step = 0;
       pinfo->_stick_locked_this_step = 0;
       pinfo->_starting_elem = it->second->_elem;
       pinfo->_starting_side_num = it->second->_side_num;
       pinfo->_starting_closest_point_ref = it->second->_closest_point_ref;
-      pinfo->_contact_force_old = pinfo->_contact_force;
-      pinfo->_accumulated_slip_old = pinfo->_accumulated_slip;
-      pinfo->_frictional_energy_old = pinfo->_frictional_energy;
-      pinfo->_lagrange_multiplier = 0;
-      if (pinfo->isCaptured() && _model == CM_COULOMB)
-        pinfo ->_mech_status_old = PenetrationInfo::MS_STICKING;
+      pinfo->_lagrange_multiplier = 0.0;
     }
     pinfo->_incremental_slip_prev_iter = pinfo->_incremental_slip;
-    if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING &&
-        pinfo->_mech_status_old != PenetrationInfo::MS_SLIPPING)
-      ++pinfo->_stick_locked_this_step;
-    pinfo->_mech_status_old = pinfo->_mech_status;
 
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(*pinfo);
     const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(slave_node_num));
 
     // Capture
-    if ( ! pinfo->isCaptured() && MooseUtils::absoluteFuzzyGreaterEqual(distance, 0, _capture_tolerance))
+    if ( ! pinfo->isCaptured() && MooseUtils::absoluteFuzzyGreaterEqual(distance, 0.0, _capture_tolerance))
     {
       pinfo->capture();
 
@@ -194,7 +199,7 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
     // Release
     else if (_model != CM_GLUED &&
              pinfo->isCaptured() &&
-             _tension_release >= 0 &&
+             _tension_release >= 0.0 &&
              -contact_pressure >= _tension_release &&
              pinfo->_locked_this_step < 2)
     {
@@ -324,7 +329,12 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
               pinfo->_mech_status=PenetrationInfo::MS_SLIPPING_FRICTION;
           }
           else
-            pinfo->_mech_status=PenetrationInfo::MS_STICKING;
+          {
+            if (pinfo->_mech_status != PenetrationInfo::MS_STICKING &&
+                pinfo->_mech_status != PenetrationInfo::MS_NO_CONTACT)
+              ++pinfo->_stick_locked_this_step;
+            pinfo->_mech_status = PenetrationInfo::MS_STICKING;
+          }
           break;
         }
         case CF_PENALTY:
@@ -457,7 +467,6 @@ MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
         }
         else if (_model == CM_GLUED || _model == CM_COULOMB_MP)
           resid += pen_force(_component);
-
       }
       else if (_formulation == CF_TANGENTIAL_PENALTY && _model == CM_COULOMB)
       {
