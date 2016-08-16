@@ -228,6 +228,17 @@ DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   return _displaced_aux.getVariable(tid, var_name);
 }
 
+MooseVariableBase &
+DisplacedProblem::getVariableBase(THREAD_ID tid, const std::string & var_name)
+{
+  if (_displaced_nl.hasVariable(var_name))
+    return _displaced_nl.getVariable(tid, var_name);
+  else if (!_displaced_aux.hasVariable(var_name))
+    mooseError("No variable with name '" + var_name + "'");
+
+  return _displaced_aux.getVariable(tid, var_name);
+}
+
 bool
 DisplacedProblem::hasScalarVariable(const std::string & var_name)
 {

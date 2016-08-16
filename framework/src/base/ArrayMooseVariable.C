@@ -34,7 +34,6 @@ ArrayMooseVariable::ArrayMooseVariable(unsigned int var_num, const FEType & fe_t
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
     _qrule_neighbor(_assembly.qRuleNeighbor()),
-    _elem(_assembly.elem()),
     _current_side(_assembly.side()),
     _neighbor(_assembly.neighbor()),
 

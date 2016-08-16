@@ -27,7 +27,7 @@ InputParameters validParams<MassLumpedTimeDerivative>()
 
 MassLumpedTimeDerivative::MassLumpedTimeDerivative(const InputParameters & parameters) :
     TimeKernel(parameters),
-    _u_dot_nodal(_var.nodalValueDot())
+    _u_dot_nodal(_moose_var.nodalValueDot())
 {
 }
 
@@ -52,4 +52,3 @@ MassLumpedTimeDerivative::computeJacobian()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       ke(_i, _i) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 }
-

@@ -32,6 +32,7 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_typ
     _variable(sys.system().variable(_var_num)),
     _assembly(assembly),
     _dof_map(sys.dofMap()),
+    _elem(_assembly.elem()),
     _scaling_factor(1.0)
 {
 }
@@ -51,4 +52,3 @@ MooseVariableBase::order() const
 {
   return _fe_type.order;
 }
-

@@ -12,22 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef KERNEL_H
-#define KERNEL_H
+#ifndef ARRAYKERNEL_H
+#define ARRAYKERNEL_H
 
 #include "KernelBase.h"
+#include "ArrayMooseVariableInterface.h"
 
-class Kernel;
+class ArrayKernel;
 
 template<>
-InputParameters validParams<Kernel>();
+InputParameters validParams<ArrayKernel>();
 
-class Kernel :
+class ArrayKernel :
   public KernelBase,
-  public MooseVariableInterface
+  public ArrayMooseVariableInterface
 {
 public:
-  Kernel(const InputParameters & parameters);
+  ArrayKernel(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -35,32 +36,32 @@ public:
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
-  /// Compute this Kernel's contribution to the residual at the current quadrature point
+  /// Compute this ArrayKernel's contribution to the residual at the current quadrature point
   virtual Real computeQpResidual() = 0;
 
-  /// Compute this Kernel's contribution to the Jacobian at the current quadrature point
+  /// Compute this ArrayKernel's contribution to the Jacobian at the current quadrature point
   virtual Real computeQpJacobian();
 
   /// This is the virtual that derived classes should override for computing an off-diagonal Jacobian component.
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// This callback is used for Kernels that need to perform a per-element calculation
+  /// This callback is used for ArrayKernels that need to perform a per-element calculation
   virtual void precalculateResidual();
 
-  /// The variable this Kernel is operating on
-  MooseVariable & _moose_var;
+  /// The variable this ArrayKernel is operating on
+  ArrayMooseVariable & _array_var;
 
   /// Holds the solution at current quadrature points
-  const VariableValue & _u;
+  const ArrayVariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
-  const VariableGradient & _grad_u;
+  const ArrayVariableGradient & _grad_u;
 
   /// Time derivative of u
-  const VariableValue & _u_dot;
+  const ArrayVariableValue & _u_dot;
 
   /// Derivative of u_dot with respect to u
-  const VariableValue & _du_dot_du;
+  const ArrayVariableValue & _du_dot_du;
 
   /// the current test function
   const VariableTestValue & _test;
@@ -75,4 +76,4 @@ protected:
   const VariablePhiGradient & _grad_phi;
 };
 
-#endif /* KERNEL_H */
+#endif /* ARRAYKERNEL_H */

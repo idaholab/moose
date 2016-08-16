@@ -43,7 +43,7 @@ typedef MooseArray<RealTensor>         ArrayVariableSecond;
 
 // typedef MooseArray<std::vector<Real> >         VariableTestValue;
 // typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
-// typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
+typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
 //
 // typedef MooseArray<std::vector<Real> >         VariablePhiValue;
 // typedef MooseArray<std::vector<RealGradient> > VariablePhiGradient;
@@ -70,19 +70,19 @@ public:
    */
   void clearDofIndices();
 
-  void prepare();
+  virtual void prepare() override;
 
-  void prepareNeighbor();
-  void prepareAux();
-  void prepareIC();
+  virtual void prepareNeighbor() override;
+  virtual void prepareAux() override;
+  virtual void prepareIC() override;
 
-  void reinitNode();
-  void reinitNodeNeighbor();
-  void reinitAux();
-  void reinitAuxNeighbor();
+  virtual void reinitNode() override;
+  virtual void reinitNodeNeighbor() override;
+  virtual void reinitAux() override;
+  virtual void reinitAuxNeighbor() override;
 
-  void reinitNodes(const std::vector<dof_id_type> & nodes);
-  void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes);
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes) override;
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes) override;
 
   const std::set<SubdomainID> & activeSubdomains();
 
@@ -100,11 +100,6 @@ public:
   virtual bool isNodal() const override;
 
   /**
-   * Current element this variable is evaluated at
-   */
-  const Elem * & currentElem() { return _elem; }
-
-  /**
    * Current side this variable is being evaluated on
    */
   unsigned int & currentSide() { return _current_side; }
@@ -117,23 +112,23 @@ public:
   /**
    * Whether or not this variable is computing any second derivatives.
    */
-//  bool computingSecond() { return _need_second || _need_second_old || _need_second_older; }
+  bool computingSecond() { return _need_second || _need_second_old || _need_second_older; }
 
   const VariablePhiValue & phi();
   const VariablePhiGradient & gradPhi();
-//  const VariablePhiSecond & secondPhi();
+  const VariablePhiSecond & secondPhi();
 
   const VariablePhiValue & phiFace();
   const VariablePhiGradient & gradPhiFace();
-//  const VariablePhiSecond & secondPhiFace();
+  const VariablePhiSecond & secondPhiFace();
 
   const VariablePhiValue & phiNeighbor();
   const VariablePhiGradient & gradPhiNeighbor();
-//  const VariablePhiSecond & secondPhiNeighbor();
+  const VariablePhiSecond & secondPhiNeighbor();
 
   const VariablePhiValue & phiFaceNeighbor();
   const VariablePhiGradient & gradPhiFaceNeighbor();
-//  const VariablePhiSecond & secondPhiFaceNeighbor();
+  const VariablePhiSecond & secondPhiFaceNeighbor();
 
   const MooseArray<Point> & normals() { return _normals; }
 
@@ -146,9 +141,9 @@ public:
   const ArrayVariableGradient & gradSln() { return _grad_u; }
   const ArrayVariableGradient & gradSlnOld() { _need_grad_old = true; return _grad_u_old; }
   const ArrayVariableGradient & gradSlnOlder() { _need_grad_older = true; return _grad_u_older; }
-//  const VariableSecond & secondSln() { _need_second = true; secondPhi(); secondPhiFace(); return _second_u; }
-//  const VariableSecond & secondSlnOld() { _need_second_old = true; secondPhi(); secondPhiFace(); return _second_u_old; }
-//  const VariableSecond & secondSlnOlder() { _need_second_older = true; secondPhi(); secondPhiFace(); return _second_u_older; }
+  const ArrayVariableSecond & secondSln() { _need_second = true; secondPhi(); secondPhiFace(); return _second_u; }
+  const ArrayVariableSecond & secondSlnOld() { _need_second_old = true; secondPhi(); secondPhiFace(); return _second_u_old; }
+  const ArrayVariableSecond & secondSlnOlder() { _need_second_older = true; secondPhi(); secondPhiFace(); return _second_u_older; }
 
   const ArrayVariableValue & uDot() { return _u_dot; }
   const ArrayVariableValue & duDotDu() { return _du_dot_du; }
@@ -178,9 +173,9 @@ public:
   const ArrayVariableGradient & gradSlnNeighbor() { return _grad_u_neighbor; }
   const ArrayVariableGradient & gradSlnOldNeighbor() { _need_grad_old_neighbor = true; return _grad_u_old_neighbor; }
   const ArrayVariableGradient & gradSlnOlderNeighbor() { _need_grad_older_neighbor = true; return _grad_u_older_neighbor; }
-//  const VariableSecond & secondSlnNeighbor() { _need_second_neighbor = true; secondPhiFaceNeighbor(); return _second_u_neighbor; }
-//  const VariableSecond & secondSlnOldNeighbor() { _need_second_old_neighbor = true; secondPhiFaceNeighbor(); return _second_u_old_neighbor; }
-//  const VariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
+  const ArrayVariableSecond & secondSlnNeighbor() { _need_second_neighbor = true; secondPhiFaceNeighbor(); return _second_u_neighbor; }
+  const ArrayVariableSecond & secondSlnOldNeighbor() { _need_second_old_neighbor = true; secondPhiFaceNeighbor(); return _second_u_old_neighbor; }
+  const ArrayVariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
 
   const ArrayVariableValue & uDotNeighbor() { return _u_dot_neighbor; }
   const ArrayVariableValue & duDotDuNeighbor() { return _du_dot_du_neighbor; }
@@ -197,7 +192,7 @@ public:
   /**
    * Compute values at interior quadrature points
    */
-  void computeElemValues();
+  virtual void computeElemValues() override;
 //  /**
 //   * Compute values at facial quadrature points
 //   */
@@ -298,7 +293,7 @@ public:
   /**
    * Whether or not this variable is actually using the shape function second derivative.
    */
-//  bool usesSecondPhi() { return _need_second || _need_second_old || _need_second_older; }
+  bool usesSecondPhi() { return _need_second || _need_second_old || _need_second_older; }
 
 protected:
   /**
@@ -319,8 +314,6 @@ protected:
   /// Quadrature rule for the neighbor
   QBase * & _qrule_neighbor;
 
-  /// current element
-  const Elem * & _elem;
   /// the side of the current element (valid when doing face assembly)
   unsigned int & _current_side;
 
@@ -345,9 +338,9 @@ protected:
   bool _need_grad_old;
   bool _need_grad_older;
 
-//  bool _need_second;
-//  bool _need_second_old;
-//  bool _need_second_older;
+  bool _need_second;
+  bool _need_second_old;
+  bool _need_second_older;
 
 
   bool _need_u_old_neighbor;
@@ -356,9 +349,9 @@ protected:
   bool _need_grad_old_neighbor;
   bool _need_grad_older_neighbor;
 
-//  bool _need_second_neighbor;
-//  bool _need_second_old_neighbor;
-//  bool _need_second_older_neighbor;
+  bool _need_second_neighbor;
+  bool _need_second_old_neighbor;
+  bool _need_second_older_neighbor;
 
   bool _need_nodal_u;
   bool _need_nodal_u_old;
@@ -373,22 +366,22 @@ protected:
   // Shape function values, gradients. second derivatives
   const VariablePhiValue & _phi;
   const VariablePhiGradient & _grad_phi;
-//  const VariablePhiSecond * _second_phi;
+  const VariablePhiSecond * _second_phi;
 
   // Values, gradients and second derivatives of shape function on faces
   const VariablePhiValue & _phi_face;
   const VariablePhiGradient & _grad_phi_face;
-//  const VariablePhiSecond * _second_phi_face;
+  const VariablePhiSecond * _second_phi_face;
 
  // Values, gradients and second derivatives of shape function
   const VariablePhiValue & _phi_neighbor;
   const VariablePhiGradient & _grad_phi_neighbor;
-//  const VariablePhiSecond * _second_phi_neighbor;
+  const VariablePhiSecond * _second_phi_neighbor;
 
   // Values, gradients and second derivatives of shape function on faces
   const VariablePhiValue & _phi_face_neighbor;
   const VariablePhiGradient & _grad_phi_face_neighbor;
-//  const VariablePhiSecond * _second_phi_face_neighbor;
+  const VariablePhiSecond * _second_phi_face_neighbor;
 
   /// Normals at QPs on faces
   const MooseArray<Point> & _normals;
@@ -399,9 +392,9 @@ protected:
   ArrayVariableGradient  _grad_u, _grad_u_bak;
   ArrayVariableGradient  _grad_u_old, _grad_u_old_bak;
   ArrayVariableGradient  _grad_u_older, _grad_u_older_bak;
-//  ArrayVariableSecond _second_u, _second_u_bak;
-//  ArrayVariableSecond _second_u_old, _second_u_old_bak;
-//  ArrayVariableSecond _second_u_older, _second_u_older_bak;
+  ArrayVariableSecond _second_u, _second_u_bak;
+  ArrayVariableSecond _second_u_old, _second_u_old_bak;
+  ArrayVariableSecond _second_u_older, _second_u_older_bak;
 
   ArrayVariableValue _u_neighbor;
   ArrayVariableValue _u_old_neighbor;
@@ -409,9 +402,9 @@ protected:
   ArrayVariableGradient _grad_u_neighbor;
   ArrayVariableGradient _grad_u_old_neighbor;
   ArrayVariableGradient _grad_u_older_neighbor;
-//  ArrayVariableSecond _second_u_neighbor;
-//  ArrayVariableSecond _second_u_old_neighbor;
-//  ArrayVariableSecond _second_u_older_neighbor;
+  ArrayVariableSecond _second_u_neighbor;
+  ArrayVariableSecond _second_u_old_neighbor;
+  ArrayVariableSecond _second_u_older_neighbor;
 
   // time derivatives
 

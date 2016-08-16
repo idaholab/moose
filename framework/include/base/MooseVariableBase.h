@@ -110,6 +110,27 @@ public:
    */
   virtual bool isNodal() const = 0;
 
+  /**
+   * Current element this variable is evaluated at
+   */
+  const Elem * & currentElem() { return _elem; }
+
+  virtual void prepare() {}
+
+  virtual void prepareNeighbor() {}
+  virtual void prepareAux() {}
+  virtual void prepareIC() {}
+
+  virtual void reinitNode() {}
+  virtual void reinitNodeNeighbor() {}
+  virtual void reinitAux() {}
+  virtual void reinitAuxNeighbor() {}
+
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes) {}
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes) {}
+
+  virtual void computeElemValues() {}
+
 protected:
   /// variable number (from libMesh)
   unsigned int _var_num;
@@ -132,6 +153,9 @@ protected:
   const DofMap & _dof_map;
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
+
+  /// current element
+  const Elem * & _elem;
 
   /// scaling factor for this variable
   Real _scaling_factor;

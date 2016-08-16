@@ -75,13 +75,6 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
-
-    _test(_var.phi()),
-    _grad_test(_var.gradPhi()),
-
-    _phi(_assembly.phi()),
-    _grad_phi(_assembly.gradPhi()),
-
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
 {
@@ -132,7 +125,7 @@ KernelBase::~KernelBase()
 {
 }
 
-MooseVariable &
+MooseVariableBase &
 KernelBase::variable()
 {
   return _var;

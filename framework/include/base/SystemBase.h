@@ -213,6 +213,31 @@ public:
    */
   virtual MooseVariable & getVariable(THREAD_ID tid, unsigned int var_number);
 
+
+
+
+  /**
+   * Gets a reference to a variable of with specified name
+   *
+   * @param tid Thread id
+   * @param var_name variable name
+   * @return reference the variable (class)
+   */
+  virtual MooseVariableBase & getVariableBase(THREAD_ID tid, const std::string & var_name);
+
+  /**
+   * Gets a reference to a variable with specified number
+   *
+   * @param tid Thread id
+   * @param var_number libMesh variable number
+   * @return reference the variable (class)
+   */
+  virtual MooseVariableBase & getVariableBase(THREAD_ID tid, unsigned int var_number);
+
+
+
+
+
   /**
    * Gets a reference to a scalar variable with specified number
    *

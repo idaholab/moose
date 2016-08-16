@@ -48,7 +48,7 @@ public:
       // When using vector variables, we are only going to use the first one in the list at the interface level...
       variable_name = parameters.getVecMooseType(var_param_name)[0];
 
-    _variable = &problem.getVariable(tid, variable_name);
+    _variable = dynamic_cast<MooseVariableType *>(&problem.getVariableBase(tid, variable_name));
 
     _mvi_assembly = &problem.assembly(tid);
   }
@@ -57,7 +57,7 @@ public:
    * Get the variable that this object is using.
    * @return The variable this object is using.
    */
-  MooseVariable * mooseVariable()
+  MooseVariableType * mooseVariable()
   {
     return _variable;
   }

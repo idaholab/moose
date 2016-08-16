@@ -12,34 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEVARIABLEDEPENDENCYINTERFACE_H
-#define MOOSEVARIABLEDEPENDENCYINTERFACE_H
+#ifndef ARRAYMOOSEVARIABLEINTERFACE_H
+#define ARRAYMOOSEVARIABLEINTERFACE_H
 
-#include <set>
+#include "ArrayMooseVariable.h"
+#include "InputParameters.h"
+#include "MooseVariableInterfaceBase.h"
 
-// Forward declarations
-class MooseVariableBase;
-
-class MooseVariableDependencyInterface
+/**
+ * Interface for objects that need to get values of MooseVariables
+ */
+class ArrayMooseVariableInterface : public MooseVariableInterfaceBase<ArrayMooseVariable, ArrayVariableValue, ArrayVariableGradient, ArrayVariableSecond>
 {
 public:
-  MooseVariableDependencyInterface() {}
-
   /**
-   * Retrieve the set of MooseVariables that _this_ object depends on.
-   * @return The MooseVariables that MUST be reinited before evaluating this object
+   * Constructing the object
+   * @param parameters Parameters that come from constructing the object
+   * @param nodal true if the variable is nodal
+   * @param var_param_name the parameter name where we will find the coupled variable name
    */
-  const std::set<MooseVariableBase *> & getMooseVariableDependencies() { return _moose_variable_dependencies; }
-
-protected:
-
-  /**
-   * Call this function ot add the passed in MooseVariable as a variable that _this_ object depends on.
-   */
-  void addMooseVariableDependency(MooseVariableBase * var) { _moose_variable_dependencies.insert(var); }
-
-private:
-  std::set<MooseVariableBase *> _moose_variable_dependencies;
+  ArrayMooseVariableInterface(const MooseObject * moose_object, bool nodal, std::string var_param_name = "variable") :
+      MooseVariableInterfaceBase(moose_object, nodal, var_param_name)
+  {
+  }
 };
 
-#endif // MOOSEVARIABLEDEPENDENCYINTERFACE_H
+
+#endif /* ARRAYMOOSEVARIABLEINTERFACE_H */

@@ -107,6 +107,30 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
   return *var;
 }
 
+
+
+
+MooseVariableBase &
+SystemBase::getVariableBase(THREAD_ID tid, const std::string & var_name)
+{
+  MooseVariableBase * var = _vars[tid].getVariable(var_name);
+  if (var == NULL)
+    mooseError("Variable '" + var_name + "' does not exist in this system");
+  return *var;
+}
+
+MooseVariableBase &
+SystemBase::getVariableBase(THREAD_ID tid, unsigned int var_number)
+{
+  MooseVariableBase * var = _vars[tid].getVariable(var_number);
+  if (var == NULL)
+    mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
+  return *var;
+}
+
+
+
+
 MooseVariableScalar &
 SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 {
@@ -204,7 +228,7 @@ SystemBase::prepare(THREAD_ID tid)
 {
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    const std::set<MooseVariableBase *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
     for (const auto & var : vars)
       var->clearDofIndices();
@@ -226,7 +250,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 {
   if (_subproblem.hasActiveElementalMooseVariables(tid)) // We only need to do something if the element prepare was restricted
   {
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    const std::set<MooseVariableBase *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
 
     std::vector<MooseVariable *> newly_prepared_vars;
 
@@ -262,7 +286,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    const std::set<MooseVariableBase *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     for (const auto & var : active_elemental_moose_variables)
       if (&(var->sys()) == this)
         var->computeElemValues();
