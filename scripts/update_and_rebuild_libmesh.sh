@@ -38,6 +38,12 @@ if [[ -n "$METHOD" && -z "$METHODS" ]]; then
   export METHODS="$METHOD"
 fi
 
+# If the user has VTK available via our modules, we'll build with VTK
+VTK_OPTIONS=""
+if [[ ! -z "$VTKLIB_DIR" && ! -z "$VTKINCLUDE_DIR" ]]; then
+  export VTK_OPTIONS="--with-vtk-lib=$VTKLIB_DIR --with-vtk-include=$VTKINCLUDE_DIR"
+fi
+
 # Finally, if METHODS is still not set, set a default value.
 export METHODS=${METHODS:="opt oprof dbg"}
 
@@ -87,7 +93,7 @@ if [ -z "$go_fast" ]; then
                --enable-openmp \
                --disable-maintainer-mode \
                --enable-petsc-required \
-               $DISABLE_TIMESTAMPS $* || exit 1
+               $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.
