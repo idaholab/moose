@@ -69,7 +69,7 @@ BoundingBoxNodeSet::modify()
   }
 
   if (!found_node)
-    mooseError("No element centroids found within the bounding box!");
+    mooseError("No nodes found within the bounding box");
 
   boundary_info.nodeset_name(boundary_ids[0]) = boundary_names[0];
 }

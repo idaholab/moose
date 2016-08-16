@@ -14,7 +14,7 @@
   [./test_bad_coord]
     type = 'RunException'
     input = 'boundingbox_nodeset_inside_test.i'
-    expect_err = "No element centroids found within the bounding box!"
+    expect_err = "No nodes found within the bounding box"
     cli_args = 'MeshModifiers/middle_node/bottom_left="1.05 1.05 0"'
   [../]
 
