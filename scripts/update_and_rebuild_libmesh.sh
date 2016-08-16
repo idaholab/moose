@@ -21,7 +21,7 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ ! -z "$LIBMESH_DIR" ]; then
+if [[ -n "$LIBMESH_DIR" ]]; then
   echo "INFO: LIBMESH_DIR set - overriding default installed path"
   echo "INFO: No cleaning will be done in specified path"
   mkdir -p $LIBMESH_DIR
@@ -40,7 +40,7 @@ fi
 
 # If the user has VTK available via our modules, we'll build with VTK
 VTK_OPTIONS=""
-if [[ ! -z "$VTKLIB_DIR" && ! -z "$VTKINCLUDE_DIR" ]]; then
+if [[ -n "$VTKLIB_DIR" && -n "$VTKINCLUDE_DIR" ]]; then
   export VTK_OPTIONS="--with-vtk-lib=$VTKLIB_DIR --with-vtk-include=$VTKINCLUDE_DIR"
 fi
 
