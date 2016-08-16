@@ -8,6 +8,7 @@ from MooseCppMethod import MooseCppMethod
 from MoosePackageParser import MoosePackageParser
 from MooseMarkdownLinkPreprocessor import MooseMarkdownLinkPreprocessor
 from MooseSlideTreeprocessor import MooseSlideTreeprocessor
+from MooseCarousel import MooseCarousel
 import MooseDocs
 import utils
 
@@ -37,6 +38,9 @@ class MooseMarkdown(markdown.Extension):
         # Preprocessors
         #md.treeprocessors.add('moose_slides', MooseSlideTreeprocessor(md), '_end')
         md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(md, self._markdown_database_dir), '>include')
+
+        # Block processors
+        md.parser.blockprocessors.add('slideshow', MooseCarousel(md.parser), '_begin')
 
         # Inline Patterns
         md.inlinePatterns.add('moose_input_block', MooseInputBlock(config), '<image_link')
