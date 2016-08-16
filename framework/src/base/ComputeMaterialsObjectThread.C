@@ -21,6 +21,7 @@
 #include "MaterialData.h"
 #include "Assembly.h"
 #include "AuxKernel.h"
+#include "ArbitraryQuadrature.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -30,8 +31,10 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_proble
                                                            std::vector<MooseSharedPointer<MaterialData> > & material_data,
                                                            std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                                                            std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,
+                                                           std::vector<MooseSharedPointer<MaterialData> > & dirac_material_data,
                                                            MaterialPropertyStorage & material_props,
                                                            MaterialPropertyStorage & bnd_material_props,
+                                                           MaterialPropertyStorage & dirac_material_props,
                                                            std::vector<Assembly *> & assembly) :
 ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
   _fe_problem(fe_problem),
@@ -39,13 +42,16 @@ ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
   _material_data(material_data),
   _bnd_material_data(bnd_material_data),
   _neighbor_material_data(neighbor_material_data),
+  _dirac_material_data(dirac_material_data),
   _material_props(material_props),
   _bnd_material_props(bnd_material_props),
+  _dirac_material_props(dirac_material_props),
   _materials(_fe_problem.getMaterialWarehouse()),
   _assembly(assembly),
   _need_internal_side_material(false),
   _has_stateful_props(_material_props.hasStatefulProperties()),
-  _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties())
+  _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties()),
+  _has_dirac_stateful_props(_dirac_material_props.hasStatefulProperties())
 {
 }
 
@@ -57,13 +63,16 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
     _material_data(x._material_data),
     _bnd_material_data(x._bnd_material_data),
     _neighbor_material_data(x._neighbor_material_data),
+    _dirac_material_data(x._dirac_material_data),
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
+    _dirac_material_props(x._dirac_material_props),
     _materials(x._materials),
     _assembly(x._assembly),
     _need_internal_side_material(x._need_internal_side_material),
     _has_stateful_props(_material_props.hasStatefulProperties()),
-    _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties())
+    _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties()),
+    _has_dirac_stateful_props(_dirac_material_props.hasStatefulProperties())
 {
 }
 

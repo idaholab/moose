@@ -253,14 +253,14 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const s
   if (propsOlder()[&elem][side].size() == 0) propsOlder()[&elem][side].resize(_stateful_prop_id_to_prop_id.size());
 
   // init properties (allocate memory. etc)
-  for (unsigned int i=0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+  for (unsigned int i = 0; i < _stateful_prop_id_to_prop_id.size(); ++i)
   {
     // duplicate the stateful property in property storage (all three states - we will reuse the allocated memory there)
     // also allocating the right amount of memory, so we do not have to resize, etc.
-    if (props()[&elem][side][i] == NULL) props()[&elem][side][i] = material_data.props()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
-    if (propsOld()[&elem][side][i] == NULL) propsOld()[&elem][side][i] = material_data.propsOld()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
+    if (props()[&elem][side][i] == NULL || props()[&elem][side][i]->size() != n_qpoints) props()[&elem][side][i] = material_data.props()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
+    if (propsOld()[&elem][side][i] == NULL || propsOld()[&elem][side][i]->size() != n_qpoints) propsOld()[&elem][side][i] = material_data.propsOld()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
     if (hasOlderProperties())
-      if (propsOlder()[&elem][side][i] == NULL) propsOlder()[&elem][side][i] = material_data.propsOlder()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
+      if (propsOlder()[&elem][side][i] == NULL || propsOlder()[&elem][side][i]->size() != n_qpoints) propsOlder()[&elem][side][i] = material_data.propsOlder()[ _stateful_prop_id_to_prop_id[i] ]->init(n_qpoints);
   }
   // copy from storage to material data
   swap(material_data, elem, side);
@@ -279,6 +279,7 @@ MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const s
           propsOlder()[&elem][side][i]->qpCopy(qp, props()[&elem][side][i], qp);
       }
 }
+
 void
 MaterialPropertyStorage::shift()
 {
@@ -302,7 +303,6 @@ MaterialPropertyStorage::copy(MaterialData & material_data, const Elem & elem_to
   // WARNING: This is not capable of copying material data to/from elements on other processors.
   //          It only works if both elem_to and elem_from are both on the local processor.
   //          We can't currently check to ensure that they're on processor here because this isn't a ParallelObject.
-
   if (props()[&elem_to][side].size() == 0) props()[&elem_to][side].resize(_stateful_prop_id_to_prop_id.size());
   if (propsOld()[&elem_to][side].size() == 0) propsOld()[&elem_to][side].resize(_stateful_prop_id_to_prop_id.size());
   if (hasOlderProperties())
@@ -347,6 +347,32 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data, const Elem & ele
   shallowCopyDataBack(_stateful_prop_id_to_prop_id, propsOld()[&elem][side], material_data.propsOld());
   if (hasOlderProperties())
     shallowCopyDataBack(_stateful_prop_id_to_prop_id, propsOlder()[&elem][side], material_data.propsOlder());
+}
+
+bool
+MaterialPropertyStorage::needInitialized(unsigned int n_qpoints, const Elem & elem, unsigned int side)
+{
+  bool need = false;
+
+  // Has not been intialized
+  if (props()[&elem][side].size() == 0 || propsOld()[&elem][side].size() == 0) need = true;
+  if (hasOlderProperties())
+    if (propsOlder()[&elem][side].size() == 0) need = true;
+
+  // The number of q_points has changed
+  if (!need)
+  {
+    for (unsigned int i=0; i < _stateful_prop_id_to_prop_id.size(); ++i)
+    {
+      if (props()[&elem][side][i]->size() != n_qpoints || propsOld()[&elem][side][i]->size() != n_qpoints) need = true;
+      if (hasOlderProperties())
+        if (propsOlder()[&elem][side][i]->size() != n_qpoints) need = true;
+      if (need)
+        break;
+    }
+  }
+
+  return need;
 }
 
 bool

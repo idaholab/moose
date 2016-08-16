@@ -47,6 +47,8 @@ InputParameters validParams<DiracKernel>()
   params.declareControllable("enable");
   params.registerBase("DiracKernel");
 
+  params.set<Moose::MaterialDataType>("_material_data_type") = Moose::DIRAC_MATERIAL_DATA;
+
   return params;
 }
 
@@ -86,8 +88,6 @@ DiracKernel::DiracKernel(const InputParameters & parameters) :
     _du_dot_du(_var.duDotDu()),
     _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points"))
 {
-  // Stateful material properties are not allowed on DiracKernels
-  statefulPropertiesAllowed(false);
 }
 
 void
