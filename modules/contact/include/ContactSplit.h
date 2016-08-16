@@ -35,6 +35,7 @@ class ContactSplit : public Split
   std::vector<std::string>              _uncontact_master;
   std::vector<std::string>              _uncontact_slave;
   std::vector<int>                     _uncontact_displaced;
+  bool _include_all_contact_nodes;
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 };
 

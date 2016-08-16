@@ -27,6 +27,9 @@ InputParameters validParams<ContactSplit>()
   params.addParam<std::vector<std::string> >("uncontact_master", "Master surface list for excluded contacts");
   params.addParam<std::vector<std::string> >("uncontact_slave",  "Slave surface list for excluded contacts");
   params.addParam<std::vector<int> >("uncontact_displaced", "List of indicators whether displaced mesh is used to define excluded contact");
+  // Right now, we consider this as a required parameter.
+  // After some tests from BISON, we will set a default value for this parameter.
+  params.addRequiredParam<bool>("include_all_contact_nodes","Whether to include all nodes on the contact surfaces");
   return params;
 }
 
@@ -37,7 +40,8 @@ ContactSplit::ContactSplit (const InputParameters & params) :
     _contact_displaced(getParam<std::vector<int> >("contact_displaced")),
     _uncontact_master(getParam<std::vector<std::string> >("uncontact_master")),
     _uncontact_slave(getParam<std::vector<std::string> >("uncontact_slave")),
-    _uncontact_displaced(getParam<std::vector<int> >("uncontact_displaced"))
+    _uncontact_displaced(getParam<std::vector<int> >("uncontact_displaced")),
+    _include_all_contact_nodes(getParam<bool >("include_all_contact_nodes"))
 {
   if (_contact_master.size() != _contact_slave.size()) {
     std::ostringstream err;
@@ -165,6 +169,16 @@ ContactSplit::setup(const std::string& prefix)
       }
     }
   }
+
+  // Whether to include all nodes on the contact surfaces
+  // into the contact subsolver
+  opt = dmprefix+"includeAllContactNodes";
+  if (_include_all_contact_nodes)
+    val = "yes";
+  else
+    val = "no";
+  po.inames.push_back(opt);
+  po.values.push_back(val);
   Split::setup(prefix);
 }
 #endif

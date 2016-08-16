@@ -75,6 +75,7 @@ struct DM_Moose
   std::map<ContactName,PetscBool> * _uncontact_displaced;
   bool _nocontacts;
   bool _nouncontacts;
+  bool _include_all_contact_nodes;
   // to locate splits without having to search, however,
   // maintain a multimap from names to split locations (to enable
   // the same split to appear in multiple spots (this might
@@ -600,8 +601,37 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           }
         }
 
+        // Include all nodes on the contact surfaces
+        if (dmm->_contact_names->size() && dmm->_include_all_contact_nodes)
+        {
+          std::set<boundary_id_type> bc_id_set;
+          // loop over contacts
+          for (const auto & it : *(dmm->_contact_names))
+          {
+            bc_id_set.insert(it.first.first); // master
+            bc_id_set.insert(it.first.second); // slave
+          }
+          // loop over boundary elements
+          std::vector<dof_id_type> evindices;
+          ConstBndElemRange & range = *dmm->_nl->_fe_problem.mesh().getBoundaryElementRange();
+          for (const auto & belem : range)
+          {
+            const Elem * elem_bdry = belem->_elem;
+            BoundaryID boundary_id = belem->_bnd_id;
+
+            if (bc_id_set.find(boundary_id) == bc_id_set.end())
+              continue;
+
+            evindices.clear();
+            dofmap.dof_indices(elem_bdry, evindices, v);
+            for (const auto & edof : evindices)
+              if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
+                indices.insert(edof);
+          }
+        }
+
         // Iterate over the contacts included in this split.
-        if (dmm->_contact_names->size())
+        if (dmm->_contact_names->size() && !(dmm->_include_all_contact_nodes))
         {
           std::vector<dof_id_type> evindices;
           for (const auto & it : *(dmm->_contact_names))
@@ -669,8 +699,39 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           }// for contact names
         }// if size of contact names
 
+        if (dmm->_uncontact_names->size() && dmm->_include_all_contact_nodes)
+        {
+          std::set<boundary_id_type> bc_id_set;
+          // loop over contacts
+          for (const auto & it : *(dmm->_uncontact_names))
+          {
+            bc_id_set.insert(it.first.first);
+            bc_id_set.insert(it.first.second);
+          }
+          // loop over boundary elements
+          std::vector<dof_id_type> evindices;
+          ConstBndElemRange & range = *dmm->_nl->_fe_problem.mesh().getBoundaryElementRange();
+          for (const auto & belem : range)
+          {
+            const Elem * elem_bdry = belem->_elem;
+            unsigned short int side = belem->_side;
+            BoundaryID boundary_id = belem->_bnd_id;
+
+            if (bc_id_set.find(boundary_id) == bc_id_set.end())
+              continue;
+
+            UniquePtr<Elem> side_bdry = elem_bdry->build_side(side, false);
+            evindices.clear();
+            dofmap.dof_indices(side_bdry.get(), evindices, v);
+            for (const auto & edof : evindices)
+              if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
+                unindices.insert(edof);
+          }
+        }
+
+
         // Iterate over the contacts excluded from this split.
-        if (dmm->_uncontact_names->size())
+        if (dmm->_uncontact_names->size() && !(dmm->_include_all_contact_nodes))
         {
           std::vector<dof_id_type> evindices;
           for (const auto & it : *(dmm->_uncontact_names))
@@ -726,7 +787,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
       std::vector<dof_id_type> local_vec_indices(cached_indices.size());
       std::copy(cached_indices.begin(), cached_indices.end(), local_vec_indices.begin());
-      dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
+      if (dmm->_contact_names->size() && !(dmm->_include_all_contact_nodes))
+        dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
       // insert indices
       for (const auto & dof : local_vec_indices)
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
@@ -735,7 +797,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       local_vec_indices.clear();
       local_vec_indices.resize(cached_unindices.size());
       std::copy(cached_unindices.begin(), cached_unindices.end(), local_vec_indices.begin());
-      dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
+      if (dmm->_uncontact_names->size() && !(dmm->_include_all_contact_nodes))
+        dmm->_nl->_fe_problem.mesh().comm().allgather(local_vec_indices, false);
       // insert unindices
       for (const auto & dof : local_vec_indices)
         if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
@@ -1964,6 +2027,15 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   {
     ierr = DMMooseSetContacts(dm, contacts, contact_displaced);
     CHKERRQ(ierr);
+  }
+  {
+    std::ostringstream oopt,ohelp;
+    PetscBool is_include_all_nodes;
+    oopt << "-dm_moose_includeAllContactNodes";
+    ohelp << "Whether to include all nodes on the contact surfaces into the subsolver";
+    ierr = PetscOptionsBool(oopt.str().c_str(), ohelp.str().c_str(), "", PETSC_FALSE, &is_include_all_nodes, PETSC_NULL);
+    CHKERRQ(ierr);
+    dmm->_include_all_contact_nodes = is_include_all_nodes;
   }
   std::vector<DM_Moose::ContactName> uncontacts;
   std::vector<PetscBool> uncontact_displaced;
