@@ -6,8 +6,10 @@
 /****************************************************************/
 
 #include "StressDivergenceRSphericalTensors.h"
-#include "Assembly.h"
 #include "ElasticityTensorTools.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
+
 
 template<>
 InputParameters validParams<StressDivergenceRSphericalTensors>()
@@ -24,22 +26,24 @@ StressDivergenceRSphericalTensors::StressDivergenceRSphericalTensors(const Input
 {
 }
 
+void
+StressDivergenceRSphericalTensors::initialSetup()
+{
+  const auto & subdomainIDs = _mesh.meshSubdomains();
+  for (auto subdomainID : subdomainIDs)
+    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RSPHERICAL)
+      mooseError("The coordinate system in the Problem block must be set to RSPHERICAL for 1D spherically symmetric geometries.");
+}
+
+
 Real
 StressDivergenceRSphericalTensors::computeQpResidual()
 {
-  Real div = 0;
+  mooseAssert(_component == 0, "Invalid component for this 1D RSpherical problem.");
 
-  if (_assembly.coordSystem() != Moose::COORD_RSPHERICAL)
-    mooseError("The coordinate system in the Problem block must be set to RSPHERICAL for 1D spherically symmetric geometries.");
-
-  if (_component == 0)
-  {
-    div = _grad_test[_i][_qp](0) * _stress[_qp](0,0) + //stress_{rr} part 1
-        + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](1,1) + //stress_{\theta \theta}
-        + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2); //stress_{\phi \phi}
-  }
-  else
-    mooseError("Invalid component for this 1D RSpherical problem.");
+  Real div = _grad_test[_i][_qp](0) * _stress[_qp](0,0) + //stress_{rr} part 1
+    + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](1,1) + //stress_{\theta \theta}
+    + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2); //stress_{\phi \phi}
 
   return div;
 }
@@ -70,6 +74,8 @@ StressDivergenceRSphericalTensors::calculateJacobian(unsigned int ivar, unsigned
 {
   RealGradient test_r, phi_r;
 
+  mooseAssert(ivar == 0 && jvar == 0, "Invalid component in Jacobian Calculation"); // Only nonzero case for a 1D simulation
+
   if (ivar == 0)  //Case grad_test for r, requires contributions from stress_{rr}, stress_{\theta \theta}, and stress_{\phi \phi}
   {
     test_r(0) = _grad_test[_i][_qp](0);
@@ -84,10 +90,5 @@ StressDivergenceRSphericalTensors::calculateJacobian(unsigned int ivar, unsigned
     phi_r(2) = _phi[_j][_qp] / _q_point[_qp](0);
   }
 
-  if (ivar == 0 && jvar == 0)  // Only nonzero case for a 1D simulation
-  {
-    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test_r, phi_r);
-  }
-  else
-    mooseError("Invalid component in Jacobian Calculation");
+  return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test_r, phi_r);
 }
