@@ -4,9 +4,12 @@ docs_dir: .
 
 site_dir: ../site
 
+extra_css:
+    - css/moose.css
+
 extra_javascript:
     - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-    - mathjaxconfig.js
+    - js/mathjaxconfig.js
 
 markdown_extensions:
     - smarty

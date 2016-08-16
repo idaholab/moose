@@ -1,0 +1,35 @@
+.admonition.info {
+  color: #186a3b;
+  background-color: #82e0aa;
+  border-color: #82e0aa;
+}
+
+.admonition.note {
+  color: #1b4f72 ;
+  background-color: #85c1e9;
+  border-color: #85c1e9;
+}
+
+.admonition.important {
+    color: #000000;
+    background-color: #FF00FF;
+    border-color: #FF00FF;
+}
+
+.admonition.warning {
+    color: #9c640c;
+    background-color: #fff9c4;
+    border-color: #fff9c4
+}
+
+.admonition.danger {
+    color: #6e2c00;
+    background-color: #ffb74d;
+    border-color: #ffb74d;
+}
+
+.admonition.error {
+    color: #000000;
+    background-color: #ff0000;
+    border-color: #ff0000;
+}

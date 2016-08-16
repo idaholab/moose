@@ -45,21 +45,3 @@ class MooseMarkdown(markdown.Extension):
 
 def makeExtension(*args, **kwargs):
     return MooseMarkdown(*args, **kwargs)
-
-if __name__ == '__main__':
-
-    import logging
-    logging.basicConfig()
-
-    md = markdown.Markdown(extensions=[makeExtension(repo='https://github.com/idaholab/moose/blob/master', make='/Users/slauae/projects/moose-doc/modules/')])
-
-    #filename = '/Users/slauae/projects/moose-doc/docs/documentation/generation/Overview.md'
-    filename = '/Users/slauae/projects/moose-doc/docs/content/generation/MooseFlavoredMarkdown.md'
-    with open(filename) as fid:
-        content = fid.read()
-
-    content = '<!-- {} -->\n{}'.format(filename, content)
-
-    html = md.convert(content)
-    with open('test.html', 'w') as fid:
-        fid.write(html)
