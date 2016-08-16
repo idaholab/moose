@@ -374,8 +374,9 @@ FeatureFloodCount::finalize()
 
   {
     // local to global map (one per processor)
-    std::vector<int> counts;
-    std::vector<unsigned int> local_to_global_all;
+    // TODO: Remove size one vectors after next libMesh update
+    std::vector<int> counts(1, 0);
+    std::vector<unsigned int> local_to_global_all(1, 0);
     if (_is_master)
       buildLocalToGlobalIndices(local_to_global_all, counts);
 
