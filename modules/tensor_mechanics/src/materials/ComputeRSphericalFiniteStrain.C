@@ -7,6 +7,8 @@
 
 #include "ComputeRSphericalFiniteStrain.h"
 #include "Assembly.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
@@ -28,8 +30,10 @@ ComputeRSphericalFiniteStrain::ComputeRSphericalFiniteStrain(const InputParamete
 void
 ComputeRSphericalFiniteStrain::initialSetup()
 {
-  if (_assembly.coordSystem() != Moose::COORD_RSPHERICAL)
-    mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
+  const auto & subdomainIDs = _mesh.meshSubdomains();
+  for (auto subdomainID : subdomainIDs)
+    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RSPHERICAL)
+      mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
 }
 
 void
