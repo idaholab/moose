@@ -229,7 +229,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _node_to_elem_map_built(false),
     _patch_size(40),
     _patch_update_strategy(other_mesh._patch_update_strategy),
-    _regular_orthogonal_mesh(false)
+    _regular_orthogonal_mesh(false),
+    _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
