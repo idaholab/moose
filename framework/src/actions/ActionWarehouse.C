@@ -60,10 +60,9 @@ ActionWarehouse::clear()
   // destructor) we must guarantee that ActionWarehouse::clear()
   // releases all the resources which have to be released _before_ the
   // _comm object owned by the MooseApp is destroyed.
-  _mesh.reset();
-  _displaced_mesh.reset();
-
   _problem.reset();
+  _displaced_mesh.reset();
+  _mesh.reset();
 }
 
 void
