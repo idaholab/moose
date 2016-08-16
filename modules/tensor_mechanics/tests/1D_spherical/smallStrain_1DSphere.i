@@ -41,7 +41,7 @@
 []
 
 [Kernels]
-  [./StressDivergence1DRSpherical]
+  [./TensorMechanics]
     use_displaced_mesh = true
     save_in = residual_r
   [../]

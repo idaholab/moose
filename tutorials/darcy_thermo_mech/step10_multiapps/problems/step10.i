@@ -61,7 +61,7 @@
     variable = temp
     darcy_pressure = pressure
   [../]
-  [./StressDivergence2DAxisymmetricRZ]
+  [./TensorMechanics]
     # This block adds all of the proper Kernels for TensorMechanics in RZ
     use_displaced_mesh = true
     displacements = 'disp_r disp_z'

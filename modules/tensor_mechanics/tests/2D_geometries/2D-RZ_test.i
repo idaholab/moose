@@ -38,7 +38,7 @@
 []
 
 [Kernels]
-  [./StressDivergence2DAxisymmetricRZ]
+  [./TensorMechanics]
     displacements = 'disp_r disp_z'
     use_displaced_mesh = true
   [../]
