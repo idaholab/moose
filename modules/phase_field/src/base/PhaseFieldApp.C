@@ -434,14 +434,14 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(DiscreteNucleationMap);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
-  registerDeprecatedObjectName(GrainTracker, "ComputeGrainCenterUserObject", "11/01/2016 00:00");
+  registerDeprecatedObjectName(FauxGrainTracker, "ComputeGrainCenterUserObject", "11/01/2016 00:00");
 
   registerUserObject(EBSDReader);
   registerUserObject(SolutionRasterizer);
 
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);
-  registerDeprecatedObjectName(GrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
+  registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
 
   registerMesh(EBSDMesh);
   registerMesh(MortarPeriodicMesh);

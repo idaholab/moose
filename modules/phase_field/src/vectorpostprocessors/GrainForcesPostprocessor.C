@@ -22,17 +22,15 @@ GrainForcesPostprocessor::GrainForcesPostprocessor(const InputParameters & param
     _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
     _grain_forces(_grain_force_torque.getForceValues()),
     _grain_torques(_grain_force_torque.getTorqueValues()),
-    // _grain_force_derivatives(_grain_force_torque.getForceJacobians()),
-    // _grain_torque_derivatives(_grain_force_torque.getTorqueJacobians()),
-    _total_grains(_grain_forces.size())
+    _grain_num(_grain_forces.size())
 {
-  _grain_force_torque_vector.resize(_total_grains*12);
+  _grain_force_torque_vector.resize(_grain_num*12);
 }
 
 void
 GrainForcesPostprocessor::execute()
 {
-  for (unsigned int i=0; i< _total_grains; ++i)
+  for (unsigned int i=0; i< _grain_num; ++i)
   {
     _grain_force_torque_vector[12*i+0] = _grain_forces[i](0);
     _grain_force_torque_vector[12*i+1] = _grain_forces[i](1);
@@ -40,16 +38,5 @@ GrainForcesPostprocessor::execute()
     _grain_force_torque_vector[12*i+3] = _grain_torques[i](0);
     _grain_force_torque_vector[12*i+4] = _grain_torques[i](1);
     _grain_force_torque_vector[12*i+5] = _grain_torques[i](2);
-
-    // if (_fe_problem.currentlyComputingJacobian())
-    // for (unsigned int j = 0; j < _subproblem.es().n_dofs(); ++j)
-    // {
-    //   _grain_force_torque_vector[12*i+6] += _grain_force_derivatives[i][j](0);
-    //   _grain_force_torque_vector[12*i+7] += _grain_force_derivatives[i][j](1);
-    //   _grain_force_torque_vector[12*i+8] += _grain_force_derivatives[i][j](2);
-    //   _grain_force_torque_vector[12*i+9] += _grain_torque_derivatives[i][j](0);
-    //   _grain_force_torque_vector[12*i+10] += _grain_torque_derivatives[i][j](1);
-    //   _grain_force_torque_vector[12*i+11] += _grain_torque_derivatives[i][j](2);
-    // }
   }
 }

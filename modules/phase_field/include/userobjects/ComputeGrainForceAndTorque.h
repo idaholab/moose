@@ -9,7 +9,6 @@
 
 #include "ShapeElementUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
-// #include "DerivativeMaterialInterface.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
 //Forward Declarations

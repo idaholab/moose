@@ -32,7 +32,6 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
     _dFdc(getMaterialPropertyByName<std::vector<RealGradient> >(propertyNameFirst(_dF_name, _c_name))),
     _op_num(coupledComponents("etas")),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data")),
-    _ncomp(6*_op_num),
     _vals_var(_op_num),
     _vals_name(_op_num),
     _dFdgradeta(_op_num)

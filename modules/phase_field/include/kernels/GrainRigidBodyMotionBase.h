@@ -8,7 +8,6 @@
 #define GRAINRIGIDBODYMOTIONBASE_H
 
 #include "NonlocalKernel.h"
-// #include "ComputeGrainCenterUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
 
 //Forward Declarations
@@ -43,22 +42,21 @@ protected:
 
   /// int label for the Concentration
   unsigned int _c_var;
-
   /// Variable value for the concentration
   const VariableValue & _c;
-
   /// Variable gradient for the concentration
   const VariableGradient & _grad_c;
-
   /// local dof indices of variable c
   const std::vector<dof_id_type> & _c_dofs;
+
+  /// no. of order parameters
   unsigned int _op_num;
   /// Variable value for the order parameters
   std::vector<const VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;
   std::vector<const VariableGradient *> _grad_vals;
 
-  /// type of force density material
+  /// base name specifying type of force density material
   std::string _base_name;
 
   /// getting userobject for calculating grain forces and torques
@@ -70,12 +68,17 @@ protected:
 
   /// constant value corresponding to grain translation
   Real _mt;
-
   /// constant value corresponding to grain rotation
   Real _mr;
-  const GrainTrackerInterface & _grain_tracker;
-  unsigned int _grain_num;
 
+  /// grain tracker object
+  const GrainTrackerInterface & _grain_tracker;
+  /// total no. of grains
+  unsigned int _grain_num;
+  /// get the total no. of dofs in the system
+  unsigned int _total_dofs;
+
+  /// storing the jacobian entries calculated in userobjects
   RealGradient _force_c_jacobian;
   RealGradient _torque_c_jacobian;
   RealGradient _force_eta_jacobian;
