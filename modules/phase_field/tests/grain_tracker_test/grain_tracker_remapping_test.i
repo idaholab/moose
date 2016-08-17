@@ -213,6 +213,7 @@
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
     volume_threshold = 0.5
+    compute_halo_maps = true # For displaying HALO fields
   [../]
   [./dt]
     # Outputs the current time step

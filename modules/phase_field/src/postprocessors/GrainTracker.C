@@ -290,7 +290,6 @@ GrainTracker::expandHalos()
 {
   for (auto & list_ref  : _partial_feature_sets)
   {
-    std::set<dof_id_type> set_difference;
     for (auto & feature : list_ref)
     {
       for (auto halo_level = decltype(_halo_level)(1); halo_level < _halo_level; ++halo_level)
@@ -309,12 +308,6 @@ GrainTracker::expandHalos()
             visitNodalNeighbors(_mesh.nodePtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
         }
       }
-
-      // Adjust the halo marking region
-      set_difference.clear();
-      std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
-                          std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
-      feature._halo_ids.swap(set_difference);
     }
   }
 }
@@ -1188,8 +1181,9 @@ GrainTracker::updateFieldInfo()
         tmp_map[entity] = entity_value;
       }
     }
+
     for (auto entity : grain_pair.second._halo_ids)
-      _halo_ids[grain_pair.second._var_idx][entity] += grain_pair.second._var_idx;
+      _halo_ids[grain_pair.second._var_idx][entity] = grain_pair.second._var_idx;
 
     for (auto entity : grain_pair.second._ghosted_ids)
       _ghosted_entity_ids[entity] = 1;
@@ -1201,6 +1195,65 @@ GrainTracker::updateFieldInfo()
       if (grain_pair.second._intersects_boundary)
         _total_volume_intersecting_boundary[map_idx] += grain_pair.second._volume;
     }
+  }
+
+  communicateHaloMap();
+}
+
+void
+GrainTracker::communicateHaloMap()
+{
+  if (_compute_halo_maps)
+  {
+    //rank               var_idx        entity_id
+    std::vector<std::pair<unsigned int, dof_id_type> > halo_ids_all;
+
+    // TODO: Remove size one vectors after next libMesh update
+    std::vector<int> counts(1)
+    std::vector<std::pair<unsigned int, dof_id_type> > local_halo_ids(1, std::make_pair(0, 0));
+    std::size_t counter = 0;
+
+    if (_is_master)
+    {
+      std::vector<std::vector<std::pair<unsigned int, dof_id_type> > > root_halo_ids(_n_procs);
+      counts.resize(_n_procs);
+
+      auto & mesh = _mesh.getMesh();
+      // Loop over the _halo_ids "field" and build minimal lists for all of the other ranks
+      for (unsigned int var_idx = 0; var_idx < _halo_ids.size(); ++var_idx)
+      {
+        for (const auto & entity_pair : _halo_ids[var_idx])
+        {
+          DofObject * halo_entity;
+          if (_is_elemental)
+            halo_entity = mesh.elem(entity_pair.first);
+          else
+            halo_entity = &mesh.node(entity_pair.first);
+
+          root_halo_ids[halo_entity->processor_id()].push_back(std::make_pair(var_idx, entity_pair.first));
+        }
+      }
+
+      // Build up the counts vector for MPI scatter
+      std::size_t global_count = 0;
+      for (const auto & vector_ref : root_halo_ids)
+      {
+        std::copy(vector_ref.begin(), vector_ref.end(), std::back_inserter(halo_ids_all));
+        counts[counter] = vector_ref.size();
+        global_count += counts[counter++];
+      }
+    }
+
+    _communicator.scatter(halo_ids_all, counts, local_halo_ids);
+
+    // Now add the contributions from the root process to the processor local maps
+    for (const auto & halo_pair : local_halo_ids)
+      _halo_ids[halo_pair.first].emplace(std::make_pair(halo_pair.second, halo_pair.first));
+
+    // Finally remove halo markings from stitch regions
+    for (const auto & grain_pair : _unique_grains)
+      for (auto local_id : grain_pair.second._local_ids)
+        _halo_ids[grain_pair.second._var_idx].erase(local_id);
   }
 }
 

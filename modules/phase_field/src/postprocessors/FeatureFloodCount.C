@@ -93,11 +93,15 @@ InputParameters validParams<FeatureFloodCount>()
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", true, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: true)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
+  params.addParam<bool>("compute_halo_maps", false, "Instruct the UO to communicate proper halo information to all ranks");
   params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether bubbles are defined to be less than or greater than the threshold value.");
   params.addParam<bool>("calculate_feature_volumes", false, "Flag to calculate feature volumes (Automatically set to True if \"bubble_volume_file\" is set)");
   params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
   params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
   params.set<bool>("use_displaced_mesh") = true;
+
+  params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering calculate_feature_volumes bubble_volume_file "
+                             "compute_boundary_intersecting_volume", "Advanced");
 
   MooseEnum flood_type("NODAL ELEMENTAL", "ELEMENTAL");
   params.addParam<MooseEnum>("flood_entity_type", flood_type, "Determines whether the flood algorithm runs on nodes or elements");
@@ -120,6 +124,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _condense_map_info(getParam<bool>("condense_map_info")),
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),
+    _compute_halo_maps(getParam<bool>("compute_halo_maps")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
     _calculate_feature_volumes(getParam<bool>("calculate_feature_volumes") || isParamValid("bubble_volume_file")),
     _n_vars(_vars.size()),
@@ -542,9 +547,28 @@ FeatureFloodCount::prepareDataForTransfer()
 {
   MeshBase & mesh = _mesh.getMesh();
 
+  std::set<dof_id_type> local_ids_no_ghost, set_difference;
+
   for (auto & list_ref : _partial_feature_sets)
     for (auto & feature : list_ref)
     {
+      /**
+       * We need to adjust the halo markings before sending. We need to discard all of the
+       * local cell information but not any of the stitch region information. To do that
+       * we subtract off the ghosted cells from the local cells and use that in the
+       * set difference operation with the halo_ids.
+       */
+      std::set_difference(feature._local_ids.begin(), feature._local_ids.end(),
+                          feature._ghosted_ids.begin(), feature._ghosted_ids.end(),
+                          std::insert_iterator<std::set<dof_id_type> >(local_ids_no_ghost, local_ids_no_ghost.begin()));
+
+      std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(),
+                          local_ids_no_ghost.begin(), local_ids_no_ghost.end(),
+                          std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
+      feature._halo_ids.swap(set_difference);
+      local_ids_no_ghost.clear();
+      set_difference.clear();
+
       for (auto & entity_id : feature._local_ids)
       {
         /**
@@ -705,12 +729,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       // First we need to calculate the centroid now that we are doing merging all partial features
       if (feature._vol_count != 0)
         feature._centroid /= feature._vol_count;
-
-      // Adjust the halo marking region
-      set_difference.clear();
-      std::set_difference(feature._halo_ids.begin(), feature._halo_ids.end(), feature._local_ids.begin(), feature._local_ids.end(),
-                          std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
-      feature._halo_ids.swap(set_difference);
 
       // Update the max ID
       for (const auto & local_index_pair : feature._orig_ids)

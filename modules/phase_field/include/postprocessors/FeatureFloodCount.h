@@ -402,8 +402,11 @@ protected:
   /// This variable is used to indicate whether or not we identify bubbles with unique numbers on multiple maps
   const bool _global_numbering;
 
-  /// This variable is used to inidicate whether the maps will continue unique region information or just the variable numbers owning those regions
+  /// This variable is used to indicate whether the maps will continue unique region information or just the variable numbers owning those regions
   const bool _var_index_mode;
+
+  /// Indicates whether or not to communicate halo map information with all ranks
+  const bool _compute_halo_maps;
 
   /**
    * Use less-than when comparing values against the threshold value.

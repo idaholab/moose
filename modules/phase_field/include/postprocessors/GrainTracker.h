@@ -58,6 +58,8 @@ protected:
 
   virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
 
+  void communicateHaloMap();
+
   /**
    * This method serves two purposes:
    * 1) When the tracking phase starts (_t_step == _tracking_step) it assigns a unique id to every FeatureData object
