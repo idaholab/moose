@@ -12,52 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "SideAverageValue.h"
+#include "AxisymmetricCenterlineAverageValue.h"
+// libmesh includes
+#include "libmesh/quadrature.h"
 
 template<>
-InputParameters validParams<SideAverageValue>()
+InputParameters validParams<AxisymmetricCenterlineAverageValue>()
 {
-  InputParameters params = validParams<SideIntegralVariablePostprocessor>();
+  InputParameters params = validParams<SideAverageValue>();
   return params;
 }
 
-SideAverageValue::SideAverageValue(const InputParameters & parameters) :
-    SideIntegralVariablePostprocessor(parameters),
+AxisymmetricCenterlineAverageValue::AxisymmetricCenterlineAverageValue(const InputParameters & parameters) :
+    SideAverageValue(parameters),
     _volume(0)
 {}
 
-void
-SideAverageValue::initialize()
+Real
+AxisymmetricCenterlineAverageValue::volume()
 {
-  SideIntegralVariablePostprocessor::initialize();
-  _volume = 0;
-}
-
-void
-SideAverageValue::execute()
-{
-  SideIntegralVariablePostprocessor::execute();
-  _volume += volume();
+  return _current_side_elem->volume();
 }
 
 Real
-SideAverageValue::getValue()
+AxisymmetricCenterlineAverageValue::computeIntegral()
 {
-  Real integral = SideIntegralVariablePostprocessor::getValue();
-  gatherSum(_volume);
-  return integral / _volume;
-}
-
-Real
-SideAverageValue::volume()
-{
-  return _current_side_volume;
-}
-
-void
-SideAverageValue::threadJoin(const UserObject & y)
-{
-  SideIntegralVariablePostprocessor::threadJoin(y);
-  const SideAverageValue & pps = static_cast<const SideAverageValue &>(y);
-  _volume += pps._volume;
+  Real sum = 0;
+  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+    sum += _JxW[_qp]*computeQpIntegral();
+  return sum;
 }
