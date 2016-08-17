@@ -27,7 +27,7 @@
 []
 
 [Kernels]
-  [./StressDivergence2DAxisymmetricRZ]
+  [./TensorMechanics]
   [../]
 []
 
