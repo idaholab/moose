@@ -7,19 +7,17 @@
 #ifndef TENSORMECHANICSAXISYMMETRICRZACTION_H
 #define TENSORMECHANICSAXISYMMETRICRZACTION_H
 
-#include "Action.h"
+#include "TensorMechanicsAction.h"
 
 class TensorMechanicsAxisymmetricRZAction;
 
 template<>
 InputParameters validParams<TensorMechanicsAxisymmetricRZAction>();
 
-class TensorMechanicsAxisymmetricRZAction : public Action
+class TensorMechanicsAxisymmetricRZAction : public TensorMechanicsAction
 {
 public:
   TensorMechanicsAxisymmetricRZAction(const InputParameters & params);
-
-  virtual void act();
 };
 
 #endif //TENSORMECHANICSAXISYMMETRICRZACTION_H

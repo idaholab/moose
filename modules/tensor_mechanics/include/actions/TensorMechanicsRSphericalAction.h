@@ -7,19 +7,17 @@
 #ifndef TENSORMECHANICSRSPHERICALACTION_H
 #define TENSORMECHANICSRSPHERICALACTION_H
 
-#include "Action.h"
+#include "TensorMechanicsAction.h"
 
 class TensorMechanicsRSphericalAction;
 
 template<>
 InputParameters validParams<TensorMechanicsRSphericalAction>();
 
-class TensorMechanicsRSphericalAction : public Action
+class TensorMechanicsRSphericalAction : public TensorMechanicsAction
 {
 public:
   TensorMechanicsRSphericalAction(const InputParameters & params);
-
-  virtual void act();
 };
 
 #endif //TENSORMECHANICSRSPHERICALACTION_H
