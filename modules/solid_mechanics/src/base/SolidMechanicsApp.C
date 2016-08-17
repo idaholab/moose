@@ -43,6 +43,7 @@
 #include "InteractionIntegralBenchmarkBC.h"
 #include "MaterialTensorIntegralSM.h"
 #include "CrackDataSampler.h"
+#include "LineMaterialSymmTensorSampler.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
 #include "SolidMechImplicitEuler.h"
@@ -138,6 +139,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(MixedModeEquivalentK);
 
   registerVectorPostprocessor(CrackDataSampler);
+  registerVectorPostprocessor(LineMaterialSymmTensorSampler);
 
   registerUserObject(CrackFrontDefinition);
 }
