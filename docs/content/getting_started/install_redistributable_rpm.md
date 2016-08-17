@@ -13,7 +13,7 @@ if [ -f /opt/moose/environments/moose_profile ]; then
   . /opt/moose/environments/moose_profile
 fi
 ```
-!!! warning
+!!! Important
     If you have any opened terminals at this point, you will need to close them, and re-open them in order for the MOOSE environment to take affect. The following instructions will ultimately fail if you do not.
 
 !!! Info
