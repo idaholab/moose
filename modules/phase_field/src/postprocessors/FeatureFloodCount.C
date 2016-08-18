@@ -85,22 +85,24 @@ template<>
 InputParameters validParams<FeatureFloodCount>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredCoupledVar("variable", "The variable(s) for which to find connected regions of interests, i.e. \"bubbles\".");
-  params.addParam<Real>("threshold", 0.5, "The threshold value for which a new bubble may be started");
-  params.addParam<Real>("connecting_threshold", "The threshold for which an existing bubble may be extended (defaults to \"threshold\")");
+  params.addRequiredCoupledVar("variable", "The variable(s) for which to find connected regions of interests, i.e. \"features\".");
+  params.addParam<Real>("threshold", 0.5, "The threshold value for which a new feature may be started");
+  params.addParam<Real>("connecting_threshold", "The threshold for which an existing feature may be extended (defaults to \"threshold\")");
   params.addParam<Real>("volume_threshold", "The threshold used for calculating feature volumes (defaults to \"threshold\")");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
-  params.addParam<bool>("use_global_numbering", true, "Determine whether or not global numbers are used to label bubbles on multiple maps (default: true)");
+  params.addParam<bool>("use_global_numbering", true, "Determine whether or not global numbers are used to label features on multiple maps (default: true)");
   params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
   params.addParam<bool>("compute_halo_maps", false, "Instruct the UO to communicate proper halo information to all ranks");
-  params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether bubbles are defined to be less than or greater than the threshold value.");
-  params.addParam<bool>("calculate_feature_volumes", false, "Flag to calculate feature volumes (Automatically set to True if \"bubble_volume_file\" is set)");
-  params.addParam<FileName>("bubble_volume_file", "An optional file name where bubble volumes can be output.");
-  params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of bubbles which intersect the boundary");
+  params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether features are defined to be less than or greater than the threshold value.");
+  params.addParam<bool>("calculate_feature_volumes", false, "Flag to calculate feature volumes (Automatically set to True if \"feature_volume_file\" is set)");
+  params.addParam<FileName>("feature_volume_file", "An optional file name where feature volumes can be output.");
+  params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of features which intersect the boundary");
   params.set<bool>("use_displaced_mesh") = true;
 
-  params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering calculate_feature_volumes bubble_volume_file "
+  params.addDeprecatedParam<FileName>("bubble_volume_file", "An optional file name where feature volumes can be output.", "Use feature_volume_file instead");
+
+  params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering calculate_feature_volumes feature_volume_file "
                              "compute_boundary_intersecting_volume", "Advanced");
 
   MooseEnum flood_type("NODAL ELEMENTAL", "ELEMENTAL");
@@ -126,21 +128,20 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _compute_halo_maps(getParam<bool>("compute_halo_maps")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
-    _calculate_feature_volumes(getParam<bool>("calculate_feature_volumes") || isParamValid("bubble_volume_file")),
+    _calculate_feature_volumes(getParam<bool>("calculate_feature_volumes") || isParamValid("feature_volume_file")),
     _n_vars(_vars.size()),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _n_procs(_app.n_processors()),
     _entities_visited(_vars.size()), // This map is always sized to the number of variables
     _feature_counts_per_map(_maps_size),
     _feature_count(0),
-    _max_local_size(0),
     _partial_feature_sets(_maps_size),
     _feature_maps(_maps_size),
     _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _halo_ids(_maps_size),
     _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
-    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL" ? true : false),
+    _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
     _is_master(processor_id() == 0)
 {
   if (_var_index_mode)
@@ -163,7 +164,7 @@ FeatureFloodCount::initialSetup()
 void
 FeatureFloodCount::initialize()
 {
-  // Clear the bubble marking maps and region counters and other data structures
+  // Clear the feature marking maps and region counters and other data structures
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
     _feature_maps[map_num].clear();
@@ -188,7 +189,6 @@ FeatureFloodCount::initialize()
 
   // Reset the feature count and max local size
   _feature_count = 0;
-  _max_local_size = 0;
 
   clearDataStructures();
 }
@@ -338,7 +338,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
   mooseAssert(_is_master, "This method must only be called on the root processor");
 
   counts.resize(_n_procs, 0);
-  for (auto & feature : _feature_sets)
+  for (const auto & feature : _feature_sets)
     for (const auto & local_index_pair : feature._orig_ids)
           // local index                                              // rank
       if (local_index_pair.second >= static_cast<unsigned int>(counts[local_index_pair.first]))
@@ -360,7 +360,6 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
     for (const auto & local_index_pair : _feature_sets[i]._orig_ids)
     {
       mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
-      mooseAssert(local_index_pair.second < _max_local_size, local_index_pair.second << ", " << _max_local_size);
                                   // rank                   // local index
       auto global_index = offsets[local_index_pair.first] + local_index_pair.second;
 
@@ -397,7 +396,6 @@ FeatureFloodCount::finalize()
      * will contain the original position which can be used to look up the global id
      * number later after we receive the map from the root process.
      */
-    _feature_sets.reserve(_max_local_size);
     for (auto & list_ref : _partial_feature_sets)
       for (auto & feature : list_ref)
         _feature_sets.emplace_back(std::move(feature));
@@ -412,7 +410,7 @@ FeatureFloodCount::finalize()
 void
 FeatureFloodCount::writeFeatureVolumeFile()
 {
-  if (_is_master && _pars.isParamValid("bubble_volume_file"))
+  if (_is_master && _pars.isParamValid("feature_volume_file"))
   {
     // Pre-populated by updateFieldInfo
     mooseAssert(_all_feature_volumes.size() == _feature_count, "Incorrect number of volume entries");
@@ -424,17 +422,17 @@ FeatureFloodCount::writeFeatureVolumeFile()
     data.push_back(_fe_problem.timeStep());
     data.push_back(_fe_problem.time());
 
-    // Insert the (sorted) bubble volumes into the data vector
+    // Insert the (sorted) feature volumes into the data vector
     data.insert(data.end(), _all_feature_volumes.begin(), _all_feature_volumes.end());
 
     // If we are computing the boundary-intersecting volumes, insert
-    // those numbers into the normalized boundary-intersecting bubble
+    // those numbers into the normalized boundary-intersecting feature
     // volumes into the data vector.
     if (_compute_boundary_intersecting_volume)
       data.insert(data.end(), _total_volume_intersecting_boundary.begin(), _total_volume_intersecting_boundary.end());
 
     // Finally, write the file
-    writeCSVFile(getParam<FileName>("bubble_volume_file"), data);
+    writeCSVFile(getParam<FileName>("feature_volume_file"), data);
   }
 }
 
@@ -515,7 +513,7 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, u
       if (_periodic_node_map.size())
         mooseDoOnce(mooseWarning("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
 
-      // If this element contains the centroid of one of features, return it's index
+      // If this element contains the centroid of one of features, return one
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
 
       for (const auto & feature : _feature_sets)
@@ -716,8 +714,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 
   // Offset where the current set of features with the same variable id starts in the flat vector
   unsigned int feature_offset = 0;
-  // Max local size seen on any processor
-  _max_local_size = 0;
   // Set the member feature count to zero and start counting the actual features
   _feature_count = 0;
 
@@ -729,10 +725,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       // First we need to calculate the centroid now that we are doing merging all partial features
       if (feature._vol_count != 0)
         feature._centroid /= feature._vol_count;
-
-      // Update the max ID
-      for (const auto & local_index_pair : feature._orig_ids)
-        _max_local_size = std::max(_max_local_size, local_index_pair.second);
 
       _feature_sets.emplace_back(std::move(feature));
       ++_feature_count;
@@ -748,10 +740,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
     _partial_feature_sets[map_num].clear();
   }
 
-  // The local indices size is +1 from the max index
-  _max_local_size += 1;
-
-  // IMPORTANT: FeatureFloodCount::_feature_count and FeatureFloodCount::_max_local_size is set on rank 0 at this point
+  // IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point
 
   Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
@@ -807,9 +796,10 @@ FeatureFloodCount::updateFieldInfo()
         _var_index_maps[map_idx][entity] = feature._var_idx;
     }
 
-    // Loop over the halo ids to update cells with halo information
-    for (auto entity : feature._halo_ids)
-      _halo_ids[map_idx][entity] = static_cast<int>(global_feature_number);
+    if (_compute_halo_maps)
+      // Loop over the halo ids to update cells with halo information
+      for (auto entity : feature._halo_ids)
+        _halo_ids[map_idx][entity] = static_cast<int>(global_feature_number);
 
     // Loop over the ghosted ids to update cells with ghost information
     for (auto entity : feature._ghosted_ids)
@@ -942,7 +932,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
   std::vector<const Elem *> all_active_neighbors;
 
   // Loop over all neighbors (at the the same level as the current element)
-  for (auto end = elem->n_neighbors(), i = 0u; i < end; ++i)
+  for (decltype(elem->n_neighbors()) i = 0; i < elem->n_neighbors(); ++i)
   {
     const Elem * neighbor_ancestor = elem->neighbor(i);
     if (neighbor_ancestor)

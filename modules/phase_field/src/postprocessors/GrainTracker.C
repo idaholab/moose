@@ -332,7 +332,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
     }
   }
 
-  // Print out info on the number of unique grains per variable vs the incoming bubble set sizes
+  // Print out info on the number of unique grains per variable vs the incoming feature set sizes
   if (_t_step > _tracking_step)
   {
     bool display_them = false;
@@ -622,7 +622,6 @@ GrainTracker::buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_glo
     for (const auto & local_index_pair : grain_pair.second._orig_ids)
     {
       mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
-      mooseAssert(local_index_pair.second < _max_local_size, local_index_pair.second << ", " << _max_local_size);
                                   // rank                   // local index
       auto global_index = offsets[local_index_pair.first] + local_index_pair.second;
 
@@ -1130,7 +1129,7 @@ void
 GrainTracker::updateFieldInfo()
 {
   // Whether or not we should store and write out volume information
-  bool gather_volumes = _pars.isParamValid("bubble_volume_file");
+  bool gather_volumes = _pars.isParamValid("feature_volume_file");
   if (gather_volumes)
   {
     // store volumes per feature
@@ -1182,8 +1181,9 @@ GrainTracker::updateFieldInfo()
       }
     }
 
-    for (auto entity : grain_pair.second._halo_ids)
-      _halo_ids[grain_pair.second._var_idx][entity] = grain_pair.second._var_idx;
+    if (_compute_halo_maps)
+      for (auto entity : grain_pair.second._halo_ids)
+        _halo_ids[grain_pair.second._var_idx][entity] = grain_pair.second._var_idx;
 
     for (auto entity : grain_pair.second._ghosted_ids)
       _ghosted_entity_ids[entity] = 1;

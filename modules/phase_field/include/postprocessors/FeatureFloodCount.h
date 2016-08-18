@@ -330,7 +330,7 @@ protected:
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining
-   * the proper global number for a bubble when using multimap mode
+   * the proper global number for a feature when using multimap mode
    */
   void updateRegionOffsets();
 
@@ -341,7 +341,7 @@ protected:
 
   /**
    * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
-   * but is used to write out bubble volumes for this class.
+   * but is used to write out feature volumes for this class.
    */
   template<class T>
   void writeCSVFile(const std::string file_name, const std::vector<T> data);
@@ -373,7 +373,7 @@ protected:
   /// The vector of coupled in variables
   std::vector<MooseVariable *> _vars;
 
-  /// The threshold above (or below) where an entity may begin a new region (bubble)
+  /// The threshold above (or below) where an entity may begin a new region (feature)
   const Real _threshold;
   Real _step_threshold;
 
@@ -399,7 +399,7 @@ protected:
 
   const bool _condense_map_info;
 
-  /// This variable is used to indicate whether or not we identify bubbles with unique numbers on multiple maps
+  /// This variable is used to indicate whether or not we identify features with unique numbers on multiple maps
   const bool _global_numbering;
 
   /// This variable is used to indicate whether the maps will continue unique region information or just the variable numbers owning those regions
@@ -450,9 +450,6 @@ protected:
   /// The number of features seen by this object (same as summing _feature_counts_per_map)
   unsigned int _feature_count;
 
-  /// The largest size of any partial local feature set on all processors
-  unsigned int _max_local_size;
-
   /**
    * The data structure used to hold partial and communicated feature data.
    * The data structure mirrors that found in _feature_sets, but contains
@@ -478,7 +475,7 @@ protected:
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
 
-  /// Average value of the domain which can optionally be used to find bubbles in a field
+  /// Average value of the domain which can optionally be used to find features in a field
   const PostprocessorValue & _element_average_value;
 
   /// The map for holding reconstructed ghosted element information
@@ -497,13 +494,13 @@ protected:
   std::multimap<dof_id_type, dof_id_type> _periodic_node_map;
 
   /**
-   * The filename and filehandle used if bubble volumes are being recorded to a file.
+   * The filename and filehandle used if feature volumes are being recorded to a file.
    * std::unique_ptr is used so we don't have to worry about cleaning up after ourselves...
    */
   std::map<std::string, std::unique_ptr<std::ofstream> > _file_handles;
 
   /**
-   * The vector hold the volume of each flooded bubble.  Note: this vector is only populated
+   * The vector hold the volume of each flooded feature.  Note: this vector is only populated
    * when requested by passing a file name to write this information to.
    */
   std::vector<Real> _all_feature_volumes;
@@ -513,14 +510,14 @@ protected:
 
   /**
    * Vector of length _maps_size to keep track of the total
-   * boundary-intersecting bubble volume scaled by the total domain
+   * boundary-intersecting feature volume scaled by the total domain
    * volume for each variable.
    */
   std::vector<Real> _total_volume_intersecting_boundary;
 
   /**
    * If true, the FeatureFloodCount object also computes the
-   * (normalized) volume of bubbles which intersect the boundary and
+   * (normalized) volume of features which intersect the boundary and
    * reports this value in the CSV file (if available).  Defaults to
    * false.
    */
