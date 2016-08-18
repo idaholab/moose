@@ -8,7 +8,7 @@
 # With bulk modulus = 1 then should have
 # vol_strain = strain_xx + strain_yy + strain_zz = t.
 #
-# With the biot coefficient being 1, the porosity (phi) # at time t is: 
+# With the biot coefficient being 1, the porosity (phi) # at time t is:
 # phi = 1 - (1 - phi0) / exp(vol_strain)
 # where phi0 is the porosity at t = 0 and P = 0.
 #
@@ -231,7 +231,7 @@
     porosity_zero = 0.1
     solid_bulk = 1
     biot_coefficient = 1
-  [../]  
+  [../]
   [./permeability]
     type = PorousFlowPermeabilityKozenyCarman
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
