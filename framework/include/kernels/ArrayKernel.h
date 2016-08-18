@@ -37,13 +37,13 @@ public:
 
 protected:
   /// Compute this ArrayKernel's contribution to the residual at the current quadrature point
-  virtual Real computeQpResidual() = 0;
+  virtual void computeQpResidual() = 0;
 
   /// Compute this ArrayKernel's contribution to the Jacobian at the current quadrature point
-  virtual Real computeQpJacobian();
+  virtual void computeQpJacobian();
 
   /// This is the virtual that derived classes should override for computing an off-diagonal Jacobian component.
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual void computeQpOffDiagJacobian(unsigned int jvar);
 
   /// This callback is used for ArrayKernels that need to perform a per-element calculation
   virtual void precalculateResidual();
@@ -66,14 +66,17 @@ protected:
   /// the current test function
   const VariableTestValue & _test;
 
-  /// gradient of the test function
-  const VariableTestGradient & _grad_test;
+  /// gradient of the current test function
+  const ArrayVariableTestGradient & _grad_test;
 
   /// the current shape functions
   const VariablePhiValue & _phi;
 
   /// gradient of the shape function
   const VariablePhiGradient & _grad_phi;
+
+  /// The residual for each shape function.  This should be set within computeQpResidual()
+  Eigen::VectorXd _residual;
 };
 
 #endif /* ARRAYKERNEL_H */

@@ -40,7 +40,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
     mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
 
   NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
-  unsigned int n_vars = nl.nVariables();
+  unsigned int n_vars = nl.numLibMeshVariables();
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars);
 

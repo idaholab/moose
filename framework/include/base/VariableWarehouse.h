@@ -78,6 +78,12 @@ public:
   MooseVariableBase * getVariable(unsigned int var_number);
 
   /**
+   * @param name The name of the variable
+   * @return Whether or not the variable exists in this warehouse
+   */
+  bool hasVariable(const std::string & var_name) const;
+
+  /**
    * Get the list of all variable names
    * @return The list of variable names
    */
@@ -108,6 +114,30 @@ public:
    */
   const std::vector<ArrayMooseVariable *> & arrayVars();
 
+  /**
+   * Get the total number of actual (libmesh) variables represented by the MooseVariables stored in this Warehouse
+   * @return The number of libMesh variables
+   */
+  unsigned int numLibMeshVariables();
+
+  /**
+   * Get the total number of actual MooseVariables (i.e. single scalar variables)
+   * @return The number of MooseVariables
+   */
+  unsigned int numMooseVariables();
+
+  /**
+   * Get the total number of actual ScalarMooseVariables
+   * @return The number of MooseVariables
+   */
+  unsigned int numScalarMooseVariables();
+
+  /**
+   * Get the total number of actual ArrayMooseVariables
+   * @return The number of ArrayMooseVariables
+   */
+  unsigned int numArrayMooseVariables();
+
 protected:
   /// list of variable names
   std::vector<VariableName> _names;
@@ -125,6 +155,9 @@ protected:
 
   /// All instances of objects (raw pointers)
   std::vector<MooseVariableBase *> _all_objects;
+
+  /// The total number of variables held in this warehouse
+  unsigned int _n_libmesh_vars = 0;
 };
 
 #endif // VARIABLEWAREHOUSE_H

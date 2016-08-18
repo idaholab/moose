@@ -12,44 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseVariableBase.h"
-#include "SubProblem.h"
-#include "SystemBase.h"
-#include "Assembly.h"
-#include "SystemBase.h"
+#include "AddArrayKernelAction.h"
+#include "FEProblem.h"
 
-// libMesh includes
-#include "libmesh/variable.h"
-#include "libmesh/dof_map.h"
+template<>
+InputParameters validParams<AddArrayKernelAction>()
+{
+  return validParams<MooseObjectAction>();
+}
 
-
-MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count) :
-    _var_num(var_num),
-    _fe_type(fe_type),
-    _var_kind(var_kind),
-    _subproblem(sys.subproblem()),
-    _sys(sys),
-    _variable(sys.system().variable(_var_num)),
-    _assembly(assembly),
-    _dof_map(sys.dofMap()),
-    _elem(_assembly.elem()),
-    _scaling_factor(1.0),
-    _count(count)
+AddArrayKernelAction::AddArrayKernelAction(InputParameters params) :
+    MooseObjectAction(params)
 {
 }
 
-MooseVariableBase::~MooseVariableBase()
+void
+AddArrayKernelAction::act()
 {
-}
-
-const std::string &
-MooseVariableBase::name() const
-{
-  return _sys.system().variable(_var_num).name();
-}
-
-Order
-MooseVariableBase::order() const
-{
-  return _fe_type.order;
+  if (_current_task == "add_array_kernel")
+    _problem->addKernel(_type, _name, _moose_object_pars);
+//  else
+//    _problem->addAuxArrayKernel(_type, _name, _moose_object_pars);
 }

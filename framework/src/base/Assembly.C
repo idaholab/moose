@@ -33,6 +33,9 @@
 #include "libmesh/node.h"
 #include "libmesh/sparse_matrix.h"
 
+// System
+#include <numeric>
+
 Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _sys(sys),
     _cm(cm),
@@ -874,7 +877,7 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, u
 void
 Assembly::init()
 {
-  unsigned int n_vars = _sys.nVariables();
+  auto n_libmesh_vars = _sys.numLibMeshVariables();
 
   // I want the blocks to go by columns first to reduce copying of shape function in assembling "full" Jacobian
   _cm_entry.clear();
@@ -891,10 +894,10 @@ Assembly::init()
   }
 
   unsigned int max_rows_per_column = 0;  // If this is 1 then we are using a block-diagonal preconditioner and we can save a bunch of memory.
-  for (unsigned int i = 0; i < n_vars; i++)
+  for (unsigned int i = 0; i < n_libmesh_vars; i++)
   {
     unsigned int max_rows_per_this_column = 0;
-    for (unsigned int j = 0; j < n_vars; j++)
+    for (unsigned int j = 0; j < n_libmesh_vars; j++)
     {
       if ((*_cm)(i, j) != 0)
         max_rows_per_this_column++;
@@ -905,6 +908,8 @@ Assembly::init()
   if (max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
     _block_diagonal_matrix = true;
 
+  auto n_vars = _sys.numMooseVariables() + _sys.numScalarMooseVariables();
+
   // two vectors: one for time residual contributions and one for non-time residual contributions
   _sub_Re.resize(2);
   _sub_Rn.resize(2);
@@ -913,6 +918,15 @@ Assembly::init()
     _sub_Re[i].resize(n_vars);
     _sub_Rn[i].resize(n_vars);
   }
+
+  auto n_array_vars = _sys.numArrayMooseVariables();
+
+  std::cout<<"n_array_vars: "<<n_array_vars<<std::endl;
+
+  // two vectors: one for time residual contributions and one for non-time residual contributions
+  _array_sub_Re.resize(2);
+  for (auto i = decltype(_array_sub_Re.size())(0); i < _array_sub_Re.size(); i++)
+    _array_sub_Re[i].resize(n_array_vars);
 
   _sub_Kee.resize(n_vars);
   _sub_Ken.resize(n_vars);
@@ -958,13 +972,35 @@ Assembly::prepare()
     _jacobian_block_used[vi][vj] = 0;
   }
 
-  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
-  for (const auto & var : vars)
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  {
+    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    for (const auto & var : vars)
+      for (unsigned int i = 0; i < _sub_Re.size(); i++)
+      {
+        _sub_Re[i][var->number()].resize(var->dofIndices().size());
+        _sub_Re[i][var->number()].zero();
+      }
+  }
+
+
+  {
+    const std::vector<ArrayMooseVariable *> & vars = _sys.getArrayVariables(_tid);
+    for (const auto & var : vars)
     {
-      _sub_Re[i][var->number()].resize(var->dofIndices().size());
-      _sub_Re[i][var->number()].zero();
+      for (auto & sub_Re : _array_sub_Re)
+      {
+        auto & dof_Re = sub_Re[var->number()];
+
+        dof_Re.resize(var->dofIndices().size());
+
+        for (auto & var_Re : dof_Re)
+        {
+          var_Re.resize(var->count());
+          var_Re.setZero();
+        }
+      }
     }
+  }
 }
 
 void
@@ -1215,10 +1251,60 @@ Assembly::addResidualScalar(NumericVector<Number> & residual, Moose::KernelType 
 void
 Assembly::cacheResidual()
 {
-  const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
-  for (const auto & var : vars)
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
-      cacheResidualBlock(_cached_residual_values[i], _cached_residual_rows[i], _sub_Re[i][var->number()], var->dofIndices(), var->scalingFactor());
+  {
+    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    for (const auto & var : vars)
+      for (unsigned int i = 0; i < _sub_Re.size(); i++)
+        cacheResidualBlock(_cached_residual_values[i], _cached_residual_rows[i], _sub_Re[i][var->number()], var->dofIndices(), var->scalingFactor());
+  }
+
+  // Ok... look... this sucks, but is currently necessary.
+  // The deal is that we have to get the ArrayKernel residual contributions back into a DenseVector
+  // The reason for this is because we need to be able to call DofMap::constrain_element_vector() on them
+  // Further, DenseVector is implemented with a std::vector underneath... so we have no clean way to just
+  // do a pointer swap.  Because of that I'm doing raw array copying using the raw arrays from Eigen and the DenseVector.
+  // Also, we don't actually have a full list of the dof_indices for ArrayMooseVariables... so we have to make one
+  // I've done my best to try to make this as performant as possible (which happers readability quite a bit).
+  // In the future I'd like to do better here... I'm just going to cross my fingers and hope that this stuff
+  // doesn't show up in any performance analysis...
+  {
+    const std::vector<ArrayMooseVariable *> & vars = _sys.getArrayVariables(_tid);
+    for (const auto & var : vars)
+    {
+      auto & dof_indices = var->dofIndices();
+
+      for (auto sub_Re_i = decltype(_array_sub_Re.size())(0); sub_Re_i < _array_sub_Re.size(); sub_Re_i++)
+      {
+        auto & sub_Re = _array_sub_Re[sub_Re_i];
+
+        auto & dof_Re = sub_Re[var->number()];
+
+        for (auto dof_i = decltype(dof_Re.size())(0); dof_i < dof_Re.size(); dof_i++)
+        {
+          auto & var_Re = dof_Re[dof_i];
+
+          auto starting_dof = dof_indices[dof_i];
+
+          auto Re_size = var_Re.size();
+
+          _tmp_array_Re.resize(Re_size);
+
+          // Get raw pointers so we can do an efficient copy
+          auto tmp_array_data = &_tmp_array_Re.get_values()[0];
+          auto var_Re_data = var_Re.data();
+
+          std::memcpy(tmp_array_data, var_Re_data, Re_size * sizeof(decltype(*var_Re_data)));
+
+          _tmp_array_dofs.resize(Re_size);
+
+          // The dofs are all in a row starting with the first dof
+          std::iota(_tmp_array_dofs.begin(), _tmp_array_dofs.end(), starting_dof);
+
+          cacheResidualBlock(_cached_residual_values[sub_Re_i], _cached_residual_rows[sub_Re_i], _tmp_array_Re, _tmp_array_dofs, var->scalingFactor());
+        }
+      }
+    }
+  }
 }
 
 void

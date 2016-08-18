@@ -45,27 +45,25 @@ ArrayKernel::ArrayKernel(const InputParameters & parameters) :
     _grad_phi(_assembly.gradPhi())
 {
   addMooseVariableDependency(mooseVariable());
+
+  _residual.resize(_array_var.count());
 }
 
 void
 ArrayKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_array_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  auto & re = _assembly.arrayResidualBlock(_array_var.number());
 
-  precalculateResidual();
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
-
-  re += _local_re;
-
-  if (_has_save_in)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (const auto & var : _save_in)
-      var->sys().solution().add_vector(_local_re, var->dofIndices());
+    for (_i = 0; _i < _test.size(); _i++)
+    {
+      computeQpResidual();
+
+      // Note: using an external code I have micro-optimized this.
+      // This is as close to optimal as can be
+      re[_i].noalias() += _JxW[_qp] * _coord[_qp] * _residual;
+    }
   }
 }
 
@@ -76,10 +74,10 @@ ArrayKernel::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < _phi.size(); _j++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+//  for (_i = 0; _i < _test.size(); _i++)
+//    for (_j = 0; _j < _phi.size(); _j++)
+//      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+//        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
   ke += _local_ke;
 
@@ -105,10 +103,10 @@ ArrayKernel::computeOffDiagJacobian(unsigned int jvar)
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_array_var.number(), jvar);
 
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+//    for (_i = 0; _i < _test.size(); _i++)
+//      for (_j = 0; _j < _phi.size(); _j++)
+//        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+//          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
   }
 }
 
@@ -118,22 +116,20 @@ ArrayKernel::computeOffDiagJacobianScalar(unsigned int jvar)
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_array_var.number(), jvar);
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < jv.order(); _j++)
-      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+//  for (_i = 0; _i < _test.size(); _i++)
+//    for (_j = 0; _j < jv.order(); _j++)
+//      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+//        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
 }
 
-Real
+void
 ArrayKernel::computeQpJacobian()
 {
-  return 0;
 }
 
-Real
+void
 ArrayKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
-  return 0;
 }
 
 void

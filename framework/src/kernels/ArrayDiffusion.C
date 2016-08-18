@@ -12,44 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseVariableBase.h"
-#include "SubProblem.h"
-#include "SystemBase.h"
-#include "Assembly.h"
-#include "SystemBase.h"
-
-// libMesh includes
-#include "libmesh/variable.h"
-#include "libmesh/dof_map.h"
+#include "ArrayDiffusion.h"
 
 
-MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count) :
-    _var_num(var_num),
-    _fe_type(fe_type),
-    _var_kind(var_kind),
-    _subproblem(sys.subproblem()),
-    _sys(sys),
-    _variable(sys.system().variable(_var_num)),
-    _assembly(assembly),
-    _dof_map(sys.dofMap()),
-    _elem(_assembly.elem()),
-    _scaling_factor(1.0),
-    _count(count)
+template<>
+InputParameters validParams<ArrayDiffusion>()
+{
+  InputParameters params = validParams<ArrayKernel>();
+  params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak form of $(\\nabla \\phi_i, \\nabla u_h)$.");
+  return params;
+}
+
+ArrayDiffusion::ArrayDiffusion(const InputParameters & parameters) :
+    ArrayKernel(parameters)
 {
 }
 
-MooseVariableBase::~MooseVariableBase()
+void
+ArrayDiffusion::computeQpResidual()
 {
+  _residual.noalias() = _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
-const std::string &
-MooseVariableBase::name() const
+void
+ArrayDiffusion::computeQpJacobian()
 {
-  return _sys.system().variable(_var_num).name();
-}
-
-Order
-MooseVariableBase::order() const
-{
-  return _fe_type.order;
+//  return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }

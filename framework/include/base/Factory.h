@@ -54,6 +54,7 @@
 #define registerMeshModifier(name)                  registerObject(name)
 #define registerConstraint(name)                    registerObject(name)
 #define registerScalarKernel(name)                  registerObject(name)
+#define registerArrayKernel(name)                   registerObject(name)
 #define registerUserObject(name)                    registerObject(name)
 #define registerPreconditioner(name)                registerObject(name)
 #define registerIndicator(name)                     registerObject(name)

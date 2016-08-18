@@ -28,8 +28,8 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/petsc_vector.h"
 
-ArrayMooseVariable::ArrayMooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    MooseVariableBase(var_num, fe_type, sys, assembly, var_kind),
+ArrayMooseVariable::ArrayMooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count) :
+    MooseVariableBase(0 /* FIXME: use the libmesh variable number here! */, fe_type, sys, assembly, var_kind, count),
 
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
@@ -367,10 +367,10 @@ ArrayMooseVariable::phi()
   return _phi;
 }
 
-const VariablePhiGradient &
+const ArrayVariablePhiGradient &
 ArrayMooseVariable::gradPhi()
 {
-  return _grad_phi;
+  return _mapped_grad_phi;
 }
 
 // const VariablePhiSecond &
@@ -538,7 +538,7 @@ ArrayMooseVariable::computeElemValues()
 {
 
   bool is_transient = _subproblem.isTransient();
-  unsigned int nqp = _qrule->n_points();
+  unsigned int n_qp = _qrule->n_points();
   unsigned int n_shapes = _dof_indices.size();
 
   auto var_group = _sys.system().variable_group(0);
@@ -555,8 +555,8 @@ ArrayMooseVariable::computeElemValues()
   // (but we're still NOT going to modify it).
   PetscScalar * current_solution_values = const_cast<PetscScalar *>(current_solution.get_array_read());
 
-  _u.resize(nqp);
-  for (unsigned int qp = 0; qp < nqp; qp++)
+  _u.resize(n_qp);
+  for (unsigned int qp = 0; qp < n_qp; qp++)
   {
     auto & qp_value = _u[qp];
 
@@ -564,8 +564,8 @@ ArrayMooseVariable::computeElemValues()
     qp_value.setZero();
   }
 
-  _grad_u.resize(nqp);
-  for (unsigned int qp = 0; qp < nqp; qp++)
+  _grad_u.resize(n_qp);
+  for (unsigned int qp = 0; qp < n_qp; qp++)
   {
     auto & qp_value = _grad_u[qp];
 
@@ -575,25 +575,32 @@ ArrayMooseVariable::computeElemValues()
 
   auto n_dofs = _dof_indices.size();
 
-  // Global to local map them
+  // Global to local map the dof indices
   _local_dof_indices.resize(n_dofs);
-
   for (unsigned int i = 0; i < n_dofs; i++)
     _local_dof_indices[i] = current_solution.map_global_to_local_index(_dof_indices[i]);
 
+  // Map grad_phi using Eigen so that we can reference it in the normal way
+  _mapped_grad_phi.resize(n_dofs);
+  for (unsigned int i = 0; i < n_dofs; i++)
+  {
+    _mapped_grad_phi[i].resize(n_qp, NULL);
+    for (unsigned int qp = 0; qp < n_qp; qp++)
+      // Note to future self: this does NOT do any allocation.  It is "reconstructing" the object in place and it is FAST
+      new (&_mapped_grad_phi[i][qp]) Eigen::Map<Eigen::Vector3d>(const_cast<Real *>(&_grad_phi[i][qp](0)));
+  }
+
   for (unsigned int i = 0; i < n_shapes; i++)
   {
+    // Same here (no allocation actually done)
     new (&_mapped_values) Eigen::Map<Eigen::VectorXd>(current_solution_values + _local_dof_indices[i], n_vars);
 
-    for (unsigned int qp = 0; qp < nqp; qp++)
+    // Note: "noalias" means that the LHS is not modified by the RHS... so more optimization can be done!
+    for (unsigned int qp = 0; qp < n_qp; qp++)
       _u[qp].noalias() += _mapped_values * _phi[i][qp];
 
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      new (&_mapped_grad_phi) Eigen::Map<Eigen::Vector3d>(const_cast<Real *>(&_grad_phi[i][qp](0)));
-
-      _grad_u[qp].noalias() += _mapped_values * _mapped_grad_phi.transpose();
-    }
+    for (unsigned int qp = 0; qp < n_qp; qp++)
+      _grad_u[qp].noalias() += _mapped_values * _mapped_grad_phi[i][qp].transpose();
   }
 
   const_cast<PetscVector<Real> &>(current_solution).restore_array();

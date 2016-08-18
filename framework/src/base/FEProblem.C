@@ -1301,12 +1301,9 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 void
 FEProblem::addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
-  for (unsigned int i=0; i<count; i++)
-  {
-    _nl.addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
-    if (_displaced_problem)
-      _displaced_problem->addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
-  }
+  _nl.addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
 }
 
 void
@@ -2869,7 +2866,7 @@ MooseVariableBase &
 FEProblem::getVariableBase(THREAD_ID tid, const std::string & var_name)
 {
   if (_nl.hasVariable(var_name))
-    return _nl.getVariable(tid, var_name);
+    return _nl.getVariableBase(tid, var_name);
   else if (!_aux.hasVariable(var_name))
     mooseError("Unknown variable " + var_name);
 
@@ -3011,7 +3008,10 @@ FEProblem::init()
   if (_initialized)
     return;
 
-  unsigned int n_vars = _nl.nVariables();
+  unsigned int n_vars = _nl.numLibMeshVariables();
+
+  std::cout<<"n vars"<<n_vars<<std::endl;
+
   switch (_coupling)
   {
   case Moose::COUPLING_DIAG:

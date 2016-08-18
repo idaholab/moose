@@ -1416,7 +1416,7 @@ NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & do
   unsigned int s = number();
   if (node.has_dofs(s))
   {
-    for (unsigned int v = 0; v < nVariables(); v++)
+    for (unsigned int v = 0; v < numLibMeshVariables(); v++)
       for (unsigned int c = 0; c < node.n_comp(s, v); c++)
         dofs.push_back(node.dof_number(s, v, c));
   }

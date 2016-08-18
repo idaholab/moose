@@ -42,11 +42,11 @@ typedef MooseArray<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM> >       Arra
 typedef MooseArray<RealTensor>         ArrayVariableSecond;
 
 // typedef MooseArray<std::vector<Real> >         VariableTestValue;
-// typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
+typedef std::vector<std::vector<Eigen::Map<Eigen::Vector3d> > >       ArrayVariableTestGradient;
 typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
 //
 // typedef MooseArray<std::vector<Real> >         VariablePhiValue;
-// typedef MooseArray<std::vector<RealGradient> > VariablePhiGradient;
+typedef std::vector<std::vector<Eigen::Map<Eigen::Vector3d> > > ArrayVariablePhiGradient;
 // typedef MooseArray<std::vector<RealTensor> >   VariablePhiSecond;
 
 class Assembly;
@@ -62,7 +62,7 @@ class SystemBase;
 class ArrayMooseVariable : public MooseVariableBase
 {
 public:
-  ArrayMooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  ArrayMooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count);
   virtual ~ArrayMooseVariable();
 
   /**
@@ -115,7 +115,7 @@ public:
   bool computingSecond() { return _need_second || _need_second_old || _need_second_older; }
 
   const VariablePhiValue & phi();
-  const VariablePhiGradient & gradPhi();
+  const ArrayVariablePhiGradient & gradPhi();
   const VariablePhiSecond & secondPhi();
 
   const VariablePhiValue & phiFace();
@@ -329,8 +329,8 @@ protected:
   /// Interface to raw PetscVector data
   Eigen::Map<Eigen::VectorXd> _mapped_values;
 
-  // Interface to the current gradient
-  Eigen::Map<Eigen::Vector3d> _mapped_grad_phi;
+  // Interface to the current gradient for each shape function
+  ArrayVariablePhiGradient _mapped_grad_phi;
 
   bool _need_u_old;
   bool _need_u_older;

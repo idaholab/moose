@@ -50,7 +50,7 @@ class SystemBase;
 class MooseVariableBase
 {
 public:
-  MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count = 1);
   virtual ~MooseVariableBase();
 
   /**
@@ -126,10 +126,15 @@ public:
   virtual void reinitAux() {}
   virtual void reinitAuxNeighbor() {}
 
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes) {}
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes) {}
+  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) {}
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) {}
 
   virtual void computeElemValues() {}
+
+  /**
+   * The number of variables represented by this ArrayMooseVariable.
+   */
+  unsigned int count() { return _count; }
 
 protected:
   /// variable number (from libMesh)
@@ -159,6 +164,9 @@ protected:
 
   /// scaling factor for this variable
   Real _scaling_factor;
+
+  /// The number of variables represented by this MooseVariable
+  unsigned int _count;
 };
 
 #endif /* MOOSEVARIABLEBASE_H */

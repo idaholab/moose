@@ -67,7 +67,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getVariableBase(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _current_elem(_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),

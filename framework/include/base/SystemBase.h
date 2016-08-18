@@ -265,10 +265,24 @@ public:
   virtual const std::set<SubdomainID> * getVariableBlocks(unsigned int var_number);
 
   /**
-   * Get the number of variables in this system
-   * @return the number of variables
+   * Get the number of actual libmesh variables in the system
    */
-  virtual unsigned int nVariables() = 0;
+  virtual unsigned int numLibMeshVariables() = 0;
+
+  /**
+   * Get the number of MooseVariables (i.e. single scalar variables) in the system
+   */
+  virtual unsigned int numMooseVariables() = 0;
+
+  /**
+   * Get the number of ScalarMooseVariables in the system
+   */
+  virtual unsigned int numScalarMooseVariables() = 0;
+
+  /**
+   * Get the number of ArrayMooseVariables in the system
+   */
+  virtual unsigned int numArrayMooseVariables() = 0;
 
   /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
@@ -407,6 +421,7 @@ public:
   virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep) = 0;
 
   const std::vector<MooseVariable *> & getVariables(THREAD_ID tid) { return _vars[tid].variables(); }
+  const std::vector<ArrayMooseVariable *> & getArrayVariables(THREAD_ID tid) { return _vars[tid].arrayVars(); }
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid) { return _vars[tid].scalars(); }
 
   const std::set<SubdomainID> & getSubdomainsForVar(unsigned int var_number) const { return _var_map.at(var_number); }
@@ -498,6 +513,8 @@ public:
    */
   virtual void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL)
   {
+    std::cout<<"addArrayVariable : "<<var_name<<std::endl;
+
     // Turn off automatic variable group identification so that we can be sure that this variable
     // group will be ordered exactly like it should be
     _sys.identify_variable_groups(false);
@@ -508,6 +525,9 @@ public:
       var_names.push_back(var_name + "_" + std::to_string(i));
 
     unsigned int var_num = _sys.add_variables(var_names, type, active_subdomains);
+
+    // FIXME: need to get this properly!
+    var_num = 0;
 
     if (active_subdomains == NULL)
     {
@@ -522,7 +542,7 @@ public:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
-      ArrayMooseVariable * var = new ArrayMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      ArrayMooseVariable * var = new ArrayMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind, count);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
@@ -556,6 +576,8 @@ public:
   {
     if (_sys.has_variable(var_name))
       return _sys.variable_type(var_name).family != SCALAR;
+    else if (_vars[0].hasVariable(var_name))// Need to search for ArrayVariables since their name doesn't match their libmesh name
+      return _vars[0].getVariable(var_name)->feType().family != SCALAR;
     else
       return false;
   }
@@ -573,7 +595,25 @@ public:
     return (_sys.variable(var_num).type().family == SCALAR);
   }
 
-  virtual unsigned int nVariables() { return _vars[0].names().size(); }
+  virtual unsigned int numLibMeshVariables()
+  {
+    return _vars[0].numLibMeshVariables();
+  }
+
+  virtual unsigned int numMooseVariables()
+  {
+    return _vars[0].numMooseVariables();
+  }
+
+  virtual unsigned int numScalarMooseVariables()
+  {
+    return _vars[0].numScalarMooseVariables();
+  }
+
+  virtual unsigned int numArrayMooseVariables()
+  {
+    return _vars[0].numArrayMooseVariables();
+  }
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 

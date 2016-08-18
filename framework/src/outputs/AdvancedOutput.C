@@ -466,7 +466,7 @@ AdvancedOutput<T>::initAvailableLists()
   {
     if (T::_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = T::_problem_ptr->getVariable(0, var_name);
+      MooseVariableBase & var = T::_problem_ptr->getVariableBase(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].available.insert(var_name);

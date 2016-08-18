@@ -44,7 +44,7 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
     _nl(_fe_problem.getNonlinearSystem())
 {
   // number of variables
-  unsigned int n_vars        = _nl.nVariables();
+  unsigned int n_vars        = _nl.numLibMeshVariables();
   // if we want to construct a full Jacobian?
   // it is recommended to have a full Jacobian for using
   // the fieldSplit preconditioner

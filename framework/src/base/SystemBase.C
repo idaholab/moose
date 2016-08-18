@@ -93,6 +93,7 @@ MooseVariable &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));
+
   if (var == NULL)
     mooseError("Variable '" + var_name + "' does not exist in this system");
   return *var;
@@ -106,9 +107,6 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
     mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
-
-
-
 
 MooseVariableBase &
 SystemBase::getVariableBase(THREAD_ID tid, const std::string & var_name)

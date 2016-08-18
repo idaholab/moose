@@ -31,6 +31,10 @@ VariableWarehouse::~VariableWarehouse()
 void
 VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 {
+  std::cout<<"VariableWarehouse::add() : "<<var_name<<std::endl;
+
+  _n_libmesh_vars += var->count();
+
   _names.push_back(var_name);
   _var_name[var_name] = var;
   _all_objects.push_back(var);
@@ -88,6 +92,12 @@ VariableWarehouse::getVariable(unsigned int var_number)
     return NULL;
 }
 
+bool
+VariableWarehouse::hasVariable(const std::string & var_name) const
+{
+  return (_var_name.find(var_name) != _var_name.end() && _var_name.at(var_name) != NULL);
+}
+
 const std::vector<VariableName> &
 VariableWarehouse::names() const
 {
@@ -116,4 +126,28 @@ const std::set<MooseVariable *> &
 VariableWarehouse::boundaryVars(BoundaryID bnd)
 {
   return _boundary_vars[bnd];
+}
+
+unsigned int
+VariableWarehouse::numLibMeshVariables()
+{
+  return _n_libmesh_vars;
+}
+
+unsigned int
+VariableWarehouse::numMooseVariables()
+{
+  return _vars.size();
+}
+
+unsigned int
+VariableWarehouse::numScalarMooseVariables()
+{
+  return _scalar_vars.size();
+}
+
+unsigned int
+VariableWarehouse::numArrayMooseVariables()
+{
+  return _array_vars.size();
 }

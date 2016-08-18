@@ -64,6 +64,9 @@
 #include "Reaction.h"
 #include "MassEigenKernel.h"
 
+// ArrayKernels
+#include "ArrayDiffusion.h"
+
 // bcs
 #include "ConvectiveFluxBC.h"
 #include "DirichletBC.h"
@@ -344,6 +347,7 @@
 #include "AddInitialConditionAction.h"
 #include "AddKernelAction.h"
 #include "AddScalarKernelAction.h"
+#include "AddArrayKernelAction.h"
 #include "AddDGKernelAction.h"
 #include "AddInterfaceKernelAction.h"
 #include "AddPeriodicBCAction.h"
@@ -478,6 +482,9 @@ registerObjects(Factory & factory)
   registerKernel(BodyForce);
   registerKernel(Reaction);
   registerKernel(MassEigenKernel);
+
+  // ArrayKernels
+  registerArrayKernel(ArrayDiffusion);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
@@ -837,6 +844,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
+  registerMooseObjectTask("add_array_kernel",             ArrayKernel,            false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
   registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
@@ -978,7 +986,7 @@ addActionTypes(Syntax & syntax)
 "(add_output)"
 "(add_postprocessor)"
 "(add_vector_postprocessor)"
-"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel, add_scalar_kernel, add_array_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
 "(add_control)"
 "(check_output)"
 "(check_integrity)"
@@ -1064,6 +1072,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddKernelAction, "add_aux_kernel");
   registerAction(AddScalarKernelAction, "add_scalar_kernel");
   registerAction(AddScalarKernelAction, "add_aux_scalar_kernel");
+  registerAction(AddArrayKernelAction, "add_array_kernel");
   registerAction(AddDGKernelAction, "add_dg_kernel");
   registerAction(AddInterfaceKernelAction, "add_interface_kernel");
   registerAction(AddBCAction, "add_bc");
