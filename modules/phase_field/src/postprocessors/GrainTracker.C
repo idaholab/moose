@@ -254,7 +254,7 @@ GrainTracker::finalize()
             data_pair = data_pair_pair.first;
 
             // insert the reserve op numbers (if appropriate)
-            for (unsigned int reserve_idx = 0; reserve_idx < _n_reserve_ops; ++reserve_idx)
+            for (auto reserve_idx = decltype(_n_reserve_ops)(0); reserve_idx < _n_reserve_ops; ++reserve_idx)
               data_pair->second[reserve_idx] = _reserve_grain_first_idx + reserve_idx;
           }
           data_pair->second[grain_pair.second._var_idx] = _ebsd_reader ? _unique_grain_to_ebsd_num[grain_pair.first] : grain_pair.first;
@@ -394,7 +394,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
         Real min_centroid_diff = std::numeric_limits<Real>::max();
         unsigned int closest_match_idx = 0;
 
-        for (size_t j = 0; j < center_points.size(); ++j)
+        for (auto j = beginIndex(center_points); j < center_points.size(); ++j)
         {
           // Update the ebsd bbox data to be used in the centroidRegionDistance calculation
           // Since we are using centroid matching we'll just make it easy and set both the min/max of the box to the same
@@ -483,7 +483,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
     Real min_centroid_diff = std::numeric_limits<Real>::max();
 
     // We only need to examine grains that have matching variable indices
-    for (size_t new_grain_idx = 0; new_grain_idx < _feature_sets.size(); ++new_grain_idx)
+    for (auto new_grain_idx = beginIndex(_feature_sets); new_grain_idx < _feature_sets.size(); ++new_grain_idx)
     {
       // TODO: It's possible to loop over just a subset of these indices for efficiency
       if (grain_pair.second._var_idx == _feature_sets[new_grain_idx]._var_idx)  // Do the variables indices match?
@@ -545,7 +545,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
   }
 
   //  Next we need to look at our new list and see which grains weren't matched up.  These are new grains.
-  for (auto feature_num = decltype(_feature_sets.size())(0); feature_num < _feature_sets.size(); ++feature_num)
+  for (auto feature_num = beginIndex(_feature_sets); feature_num < _feature_sets.size(); ++feature_num)
     // If it's not in the index list, it hasn't been transferred
     if (new_grain_idx_to_existing_grain_idx.find(feature_num) == new_grain_idx_to_existing_grain_idx.end())
     {
@@ -1209,7 +1209,7 @@ GrainTracker::communicateHaloMap()
     std::vector<std::pair<unsigned int, dof_id_type> > halo_ids_all;
 
     // TODO: Remove size one vectors after next libMesh update
-    std::vector<int> counts(1)
+    std::vector<int> counts(1);
     std::vector<std::pair<unsigned int, dof_id_type> > local_halo_ids(1, std::make_pair(0, 0));
     std::size_t counter = 0;
 

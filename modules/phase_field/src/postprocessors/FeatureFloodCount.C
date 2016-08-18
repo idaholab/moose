@@ -236,7 +236,7 @@ FeatureFloodCount::execute()
     // Loop over elements or nodes
     if (_is_elemental)
     {
-      for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
+      for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
         flood(current_elem, var_num, nullptr /* Designates inactive feature */);
     }
     else
@@ -246,7 +246,7 @@ FeatureFloodCount::execute()
       {
         const Node * current_node = current_elem->get_node(i);
 
-        for (auto var_num = decltype(_n_vars)(0); var_num < _vars.size(); ++var_num)
+        for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
           flood(current_node, var_num, nullptr /* Designates inactive feature */);
       }
     }
@@ -354,7 +354,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
 
   local_to_global_all.resize(globalsize);
 
-  for (decltype(_feature_sets.size()) i = 0, end_index = _feature_sets.size(); i < end_index; ++i)
+  for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
   {
     // Get the local indices from the feature and build a map
     for (const auto & local_index_pair : _feature_sets[i]._orig_ids)
@@ -631,7 +631,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
 
   mooseAssert(serialized_buffers.size() == _app.n_processors(), "Unexpected size of serialized_buffers: " << serialized_buffers.size());
   auto rank = processor_id();
-  for (decltype(rank) proc_id = 0; proc_id < serialized_buffers.size(); ++proc_id)
+  for (auto proc_id = beginIndex(serialized_buffers); proc_id < serialized_buffers.size(); ++proc_id)
   {
     /**
      * We should already have the local processor data in the features data structure.
@@ -769,10 +769,10 @@ FeatureFloodCount::updateFieldInfo()
     _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 1 : _maps_size);
   }
 
-  for (decltype(_feature_sets.size()) i = 0, end_index = _feature_sets.size(); i < end_index; ++i)
+  for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
   {
     auto & feature = _feature_sets[i];
-    decltype(end_index) global_feature_number;
+    decltype(i) global_feature_number;
 
     if (_is_master)
       /**
@@ -1162,7 +1162,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 
   auto box_expanded = false;
   for (auto & bbox : _bboxes)
-    for (size_t j = 0; j < rhs._bboxes.size(); ++j)
+    for (auto j = beginIndex(rhs._bboxes); j < rhs._bboxes.size(); ++j)
       if (bbox.intersect(rhs._bboxes[j]))
       {
         updateBBoxExtremes(bbox, rhs._bboxes[j]);
@@ -1172,7 +1172,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 
   // Any bounding box in the rhs vector that doesn't intersect
   // needs to be appended to the lhs vector
-  for (size_t j = 0; j < intersected_boxes.size(); ++j)
+  for (auto j = beginIndex(intersected_boxes); j < intersected_boxes.size(); ++j)
     if (!intersected_boxes[j])
       _bboxes.push_back(rhs._bboxes[j]);
 
@@ -1181,11 +1181,11 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
   {
     std::ostringstream oss;
     oss << "LHS BBoxes:\n";
-    for (unsigned int i = 0; i < _bboxes.size(); ++i)
+    for (auto i = beginIndex(_bboxes); i < _bboxes.size(); ++i)
       oss << "Max: " << _bboxes[i].max() << " Min: " << _bboxes[i].min() << '\n';
 
     oss << "RHS BBoxes:\n";
-    for (unsigned int i = 0; i < rhs._bboxes.size(); ++i)
+    for (auto i = beginIndex(rhs._bboxes); i < rhs._bboxes.size(); ++i)
       oss << "Max: " << rhs._bboxes[i].max() << " Min: " << rhs._bboxes[i].min() << '\n';
 
     mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n" << oss.str());
