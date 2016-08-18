@@ -5,9 +5,9 @@ import markdown
 from MooseSourceFile import MooseSourceFile
 from MooseInputBlock import MooseInputBlock
 from MooseCppMethod import MooseCppMethod
+from MoosePackageParser import MoosePackageParser
 from MooseMarkdownLinkPreprocessor import MooseMarkdownLinkPreprocessor
 from MooseSlideTreeprocessor import MooseSlideTreeprocessor
-
 import MooseDocs
 import utils
 
@@ -42,6 +42,7 @@ class MooseMarkdown(markdown.Extension):
         md.inlinePatterns.add('moose_input_block', MooseInputBlock(config), '<image_link')
         md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(config), '<image_link')
         md.inlinePatterns.add('moose_source', MooseSourceFile(config), '<image_link')
+        md.inlinePatterns.add('moose_package_parser', MoosePackageParser(config), '<image_link')
 
 def makeExtension(*args, **kwargs):
     return MooseMarkdown(*args, **kwargs)
