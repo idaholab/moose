@@ -50,8 +50,14 @@ def run_moose(dt, time_integrator):
                        'GlobalParams/implicit={}'.format(implicit_flag)]
   try:
     child = subprocess.Popen(command_line_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    data = child.communicate()[0]
-    child.wait()
+    # communicate() waits for the process to terminate, so there's no
+    # need to wait() for it.  It also sets the returncode attribute on
+    # child.
+    (stdoutdata, stderrdata) = child.communicate()
+    if (child.returncode != 0):
+      print('Running MOOSE failed: program output is below:')
+      print(stdoutdata)
+      raise
   except:
     print('Error executing moose_test')
     sys.exit(1)
