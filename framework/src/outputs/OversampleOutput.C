@@ -73,14 +73,15 @@ OversampleOutput::~OversampleOutput()
   // they are owned by other objects.
   if (_oversample || _change_position)
   {
-    // Delete the mesh and equation system pointers
-    delete _mesh_ptr;
-    delete _es_ptr;
-
     // Delete the mesh functions
     for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
       for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
         delete _mesh_functions[sys_num][var_num];
+
+    // Delete the mesh and equation system pointers, in the correct
+    // order.
+    delete _es_ptr;
+    delete _mesh_ptr;
   }
 }
 
