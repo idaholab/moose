@@ -7,4 +7,20 @@
     # This test features a single element mesh and a single ODE, so only run in serial.
     max_parallel = 1
   [../]
+  [./stiff_linear]
+    type = 'CSVDiff'
+    input = 'stiff.i'
+    cli_args = 'Outputs/file_base=linear_stiff_out Y2_EXPONENT=1 LAMBDA=-1000'
+    csvdiff = 'linear_stiff_out.csv'
+    # This test features a single element mesh, so only run in serial.
+    max_parallel = 1
+  [../]
+  [./stiff_nonlinear]
+    type = 'CSVDiff'
+    input = 'stiff.i'
+    cli_args = 'Outputs/file_base=nonlinear_stiff_out Y2_EXPONENT=2 LAMBDA=-1000'
+    csvdiff = 'nonlinear_stiff_out.csv'
+    # This test features a single element mesh, so only run in serial.
+    max_parallel = 1
+  [../]
 []
