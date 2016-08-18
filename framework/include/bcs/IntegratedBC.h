@@ -54,6 +54,9 @@ public:
   void computeJacobianBlockScalar(unsigned int jvar);
 
 protected:
+  /// The MooseVariable currently being operated on
+  MooseVariable & _moose_var;
+
   /// current element
   const Elem * & _current_elem;
   /// Volume of the current element

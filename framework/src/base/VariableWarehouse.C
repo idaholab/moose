@@ -56,20 +56,20 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 }
 
 void
-VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariable *var)
+VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariableBase *var)
 {
   _boundary_vars[bnd].insert(var);
 }
 
 void
-VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable *var)
+VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariableBase *var)
 {
   for (const auto & bid : boundary_ids)
     addBoundaryVar(bid, var);
 }
 
 void
-VariableWarehouse::addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariable *> > & vars)
+VariableWarehouse::addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariableBase *> > & vars)
 {
   for (const auto & bid : boundary_ids)
     for (const auto & it : vars)
@@ -122,7 +122,7 @@ VariableWarehouse::arrayVars()
   return _array_vars;
 }
 
-const std::set<MooseVariable *> &
+const std::set<MooseVariableBase *> &
 VariableWarehouse::boundaryVars(BoundaryID bnd)
 {
   return _boundary_vars[bnd];

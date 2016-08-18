@@ -32,8 +32,9 @@ NodalBC::NodalBC(const InputParameters & parameters) :
     BoundaryCondition(parameters, true), // true is for being Nodal
     RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    _current_node(_var.node()),
-    _u(_var.nodalSln()),
+    _moose_var(dynamic_cast<MooseVariable &>(*_variable)),
+    _current_node(_moose_var.node()),
+    _u(_moose_var.nodalSln()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
 {
@@ -72,9 +73,9 @@ NodalBC::NodalBC(const InputParameters & parameters) :
 void
 NodalBC::computeResidual(NumericVector<Number> & residual)
 {
-  if (_var.isNodalDefined())
+  if (_moose_var.isNodalDefined())
   {
-    dof_id_type & dof_idx = _var.nodalDofIndex();
+    dof_id_type & dof_idx = _moose_var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
     residual.set(dof_idx, res);
@@ -95,11 +96,11 @@ NodalBC::computeJacobian()
   // results in the _assembly object. We can't store them directly in
   // the element stiffness matrix, as they will only be inserted after
   // all the assembly is done.
-  if (_var.isNodalDefined())
+  if (_moose_var.isNodalDefined())
   {
     _qp = 0;
     Real cached_val = computeQpJacobian();
-    dof_id_type cached_row = _var.nodalDofIndex();
+    dof_id_type cached_row = _moose_var.nodalDofIndex();
 
     // Cache the user's computeQpJacobian() value for later use.
     _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val);
@@ -122,7 +123,7 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
   {
     _qp = 0;
     Real cached_val = computeQpOffDiagJacobian(jvar);
-    dof_id_type cached_row = _var.nodalDofIndex();
+    dof_id_type cached_row = _moose_var.nodalDofIndex();
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 

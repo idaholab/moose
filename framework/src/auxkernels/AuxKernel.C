@@ -105,7 +105,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
 {
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
+  std::map<std::string, std::vector<MooseVariableBase *> > coupled_vars = getCoupledVars();
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
@@ -224,7 +224,7 @@ AuxKernel::isNodal()
 const VariableValue &
 AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableBase * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
     mooseError(name() << ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
 
@@ -234,7 +234,7 @@ AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 const VariableValue &
 AuxKernel::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableBase * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
     mooseError(name() << ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
 

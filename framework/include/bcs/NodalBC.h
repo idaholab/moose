@@ -47,6 +47,9 @@ public:
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
+  /// The MooseVariable this BC is acting on
+  MooseVariable & _moose_var;
+
   /// current node being processed
   const Node * & _current_node;
 

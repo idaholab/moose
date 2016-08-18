@@ -29,7 +29,7 @@ InputParameters validParams<InterfaceKernel>()
 
 InterfaceKernel::InterfaceKernel(const InputParameters & parameters) :
     DGKernel(parameters),
-    _neighbor_var(*getVar("neighbor_var", 0)),
+    _neighbor_var(*getMooseVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor())
 {

@@ -58,7 +58,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters) :
     _phi_slave(1),  // One entry
     _test_slave(1),  // One entry
 
-    _master_var(*getVar("master_variable", 0)),
+    _master_var(*getMooseVar("master_variable", 0)),
     _master_var_num(_master_var.number()),
 
     _phi_master(_assembly.phiFaceNeighbor()),

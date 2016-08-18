@@ -52,12 +52,12 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getVariableBase(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh())
 {
 }
 
-MooseVariable &
+MooseVariableBase &
 BoundaryCondition::variable()
 {
   return _var;

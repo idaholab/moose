@@ -44,13 +44,14 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters) :
     RandomInterface(parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this),
+    _moose_var(dynamic_cast<MooseVariable &>(*_variable)),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
     _current_side_volume(_assembly.sideElemVolume()),
 
-    _normals(_var.normals()),
+    _normals(_moose_var.normals()),
 
     _qrule(_assembly.qRuleFace()),
     _q_point(_assembly.qPointsFace()),
@@ -60,11 +61,11 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters) :
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
 
-    _test(_var.phiFace()),
-    _grad_test(_var.gradPhiFace()),
+    _test(_moose_var.phiFace()),
+    _grad_test(_moose_var.gradPhiFace()),
 
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    _u(_is_implicit ? _moose_var.sln() : _moose_var.slnOld()),
+    _grad_u(_is_implicit ? _moose_var.gradSln() : _moose_var.gradSlnOld()),
 
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))

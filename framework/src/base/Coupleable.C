@@ -85,7 +85,7 @@ Coupleable::coupledCallback(const std::string & /*var_name*/, bool /*is_old*/)
 bool
 Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {
-  std::map<std::string, std::vector<MooseVariable *> >::iterator it = _coupled_vars.find(var_name);
+  auto it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
   else
@@ -104,7 +104,7 @@ Coupleable::coupledComponents(const std::string & var_name)
   return _coupled_vars[var_name].size();
 }
 
-MooseVariable *
+MooseVariableBase *
 Coupleable::getVar(const std::string & var_name, unsigned int comp)
 {
   if (_coupled_vars.find(var_name) != _coupled_vars.end())
@@ -123,13 +123,20 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
     mooseError("Trying to get a non-existent variable '" + var_name + "'");
 }
 
+MooseVariable *
+Coupleable::getMooseVar(const std::string & var_name, unsigned int comp)
+{
+  return dynamic_cast<MooseVariable *>(getVar(var_name, comp));
+}
+
+
 unsigned int
 Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name))
     return _optional_var_index[var_name];
 
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableBase * var = getVar(var_name, comp);
   switch (var->kind())
   {
     case Moose::VAR_NONLINEAR:
@@ -160,7 +167,7 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
     return *getDefaultValue(var_name);
 
   coupledCallback(var_name, false);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
   {
@@ -192,7 +199,7 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
   {
@@ -218,7 +225,7 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
   {
@@ -263,7 +270,7 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
 
   if (!_coupleable_neighbor)
@@ -288,7 +295,7 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
   {
@@ -317,7 +324,7 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->gradSln() : var->gradSlnOld();
@@ -336,7 +343,7 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->gradSlnOld() : var->gradSlnOlder();
@@ -355,7 +362,7 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
     mooseError("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (_c_is_implicit)
   {
@@ -378,7 +385,7 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->secondSln() : var->secondSlnOlder();
@@ -397,7 +404,7 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have second derivatives");
 
   validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->secondSlnOld() : var->secondSlnOlder();
   else
@@ -415,7 +422,7 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have second derivatives");
 
   validateExecutionerType(var_name);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
   if (_c_is_implicit)
   {
     if (!_coupleable_neighbor)
@@ -434,7 +441,7 @@ Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
     return *getDefaultValue(var_name);
 
   coupledCallback(var_name, false);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->nodalValue() : var->nodalValueOld();
@@ -450,7 +457,7 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->nodalValueOld() : var->nodalValueOlder();
@@ -466,7 +473,7 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
   if (_c_is_implicit)
   {
     if (!_coupleable_neighbor)
@@ -485,7 +492,7 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
     return _default_value_zero;
 
   coupledCallback(var_name, false);
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariable * var = getMooseVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return var->nodalValueDot();
