@@ -101,6 +101,7 @@
 #include "TensorMechanicsHardeningConstant.h"
 #include "TensorMechanicsHardeningGaussian.h"
 #include "TensorMechanicsHardeningExponential.h"
+#include "TensorMechanicsHardeningPowerRule.h"
 #include "TensorMechanicsHardeningCutExponential.h"
 #include "TensorMechanicsHardeningCubic.h"
 #include "ElementPropertyReadFile.h"
@@ -267,6 +268,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsHardeningConstant);
   registerUserObject(TensorMechanicsHardeningGaussian);
   registerUserObject(TensorMechanicsHardeningExponential);
+  registerUserObject(TensorMechanicsHardeningPowerRule);
   registerUserObject(TensorMechanicsHardeningCutExponential);
   registerUserObject(TensorMechanicsHardeningCubic);
   registerUserObject(ElementPropertyReadFile);
