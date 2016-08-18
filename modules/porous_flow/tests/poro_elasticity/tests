@@ -29,4 +29,9 @@
     input = terzaghi.i
     csvdiff = terzaghi.csv
   [../]
+  [./vol_expansion_poroperm]
+    type = CSVDiff
+    input = vol_expansion_poroperm.i
+    csvdiff = vol_expansion_poroperm.csv
+  [../]
 []
