@@ -78,7 +78,7 @@ def _livereload(host, port, config, builder, site_dir):
     server.serve(root=site_dir, host=host, port=int(port), restart_delay=0)
 
 
-def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True):
+def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, **kwargs):
     """
     Mimics mkdocs serve command.
 
@@ -98,7 +98,7 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
         os.mkdir(tempdir)
 
     def builder(**kwargs):
-        config = mkdocs.config.load_config(config_file=config_file, strict=strict)
+        config = mkdocs.config.load_config(config_file=config_file, strict=strict, **kwargs)
         config['site_dir'] = tempdir
         live_server = livereload in ['dirtyreload', 'livereload']
         dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
@@ -107,7 +107,7 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
 
     # Perform the initial build
     log.info("Building documentation...")
-    config = builder(dirty=not clean)
+    config = builder(dirty=not clean, **kwargs)
     host, port = config['dev_addr'].split(':', 1)
 
     try:
