@@ -28,7 +28,7 @@ protected:
   std::string _var_name_base;
 
   /// number of deformed grains
-  unsigned int _ndef;
+  unsigned int _deformed_grain_num;
 };
 
 template<>

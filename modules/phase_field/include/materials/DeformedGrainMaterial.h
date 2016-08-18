@@ -68,7 +68,7 @@ protected:
   // Constants
 
   /// number of deformed grains
-  unsigned int _ndef;
+  unsigned int _deformed_grain_num;
 
   /// total number of grains
   unsigned int _op_num;
