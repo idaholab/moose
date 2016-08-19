@@ -32,7 +32,9 @@ public:
   enum ExtremeType
   {
     MAX,
-    MIN
+    MIN,
+    ABS_MAX,
+    ABS_MIN
   };
 
   /**
@@ -47,7 +49,7 @@ public:
 protected:
   const PostprocessorValue & _postprocessor;
 
-  /// The extreme value type ("min" or "max")
+  /// The extreme value type ("max", "min", etc.)
   ExtremeType _type;
 
   /// The extreme value
