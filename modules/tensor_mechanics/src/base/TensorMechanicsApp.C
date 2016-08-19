@@ -123,6 +123,8 @@
 #include "StressDivergencePFFracTensors.h"
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
+#include "RadialDisplacementCylinderAux.h"
+#include "RadialDisplacementSphereAux.h"
 
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
@@ -295,6 +297,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerAux(RankTwoScalarAux);
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
+  registerAux(RadialDisplacementCylinderAux);
+  registerAux(RadialDisplacementSphereAux);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);
