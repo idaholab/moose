@@ -1203,7 +1203,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
 
       auto tmp_Re_size = _tmp_Re.size();
 
-      for (unsigned int i=0; i<_tmp_Re_size; i++)
+      for (unsigned int i=0; i<tmp_Re_size; i++)
       {
         cached_residual_values.push_back(_tmp_Re(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);

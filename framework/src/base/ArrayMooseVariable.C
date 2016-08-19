@@ -591,15 +591,52 @@ ArrayMooseVariable::computeElemValues()
 
   for (unsigned int i = 0; i < n_shapes; i++)
   {
+    auto coefficients_start = current_solution_values + _local_dof_indices[i];
+
     // Same here (no allocation actually done)
-    new (&_mapped_values) Eigen::Map<Eigen::VectorXd>(current_solution_values + _local_dof_indices[i], n_vars);
+    new (&_mapped_values) Eigen::Map<Eigen::VectorXd>(coefficients_start, n_vars);
 
     // Note: "noalias" means that the LHS is not modified by the RHS... so more optimization can be done!
     for (unsigned int qp = 0; qp < n_qp; qp++)
       _u[qp].noalias() += _mapped_values * _phi[i][qp];
 
+    // This looks like a good idea... but it turns out it's slow as dirt:
+    //
+    // for (unsigned int qp = 0; qp < n_qp; qp++)
+    //  _grad_u[qp].noalias() += _mapped_values * _mapped_grad_phi[i][qp].transpose();
+    //
+    // This one is quite a bit better:
+    //
+    //  _grad_u[qp].col(0).noalias() += _mapped_values * grad_phi[i][qp](0);
+    //  _grad_u[qp].col(1).noalias() += _mapped_values * grad_phi[i][qp](1);
+    //  _grad_u[qp].col(2).noalias() += _mapped_values * grad_phi[i][qp](2);
+    //
+    // But still not quite optimal.
+    //
+    // SO: I've rolled my own instead (meticulously optimized in an external code)
+    // All this does is compute the gradient of each variable by summing into the columns
+    //
+    // Note: No reason to roll my own for the computation of _u above... it's perfectly fast
+    //
+    // Note: Eigen Matrix objects are _column major_ by default... which helps us here!
     for (unsigned int qp = 0; qp < n_qp; qp++)
-      _grad_u[qp].noalias() += _mapped_values * _mapped_grad_phi[i][qp].transpose();
+    {
+      // Grab the raw (column major) grad_u data
+      auto grad_u_data = _grad_u[qp].data();
+
+      for (unsigned int col = 0; col < LIBMESH_DIM; col++)
+      {
+        auto current_col_start = grad_u_data + (col * n_vars);
+
+        auto grad_val = _grad_phi[i][qp](col);
+
+        // As the number of variables goes up... this gets awesome
+        // It's zipping down an entire column and doing FMAdd (Fused Multiply Add) operations
+        // On Haswell+ this can rock and roll...
+        for (auto row = decltype(n_vars)(0); row < n_vars; row++)
+          current_col_start[row] += coefficients_start[row] * grad_val;
+      }
+    }
   }
 
   const_cast<PetscVector<Real> &>(current_solution).restore_array();
