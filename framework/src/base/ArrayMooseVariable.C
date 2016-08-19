@@ -28,8 +28,8 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/petsc_vector.h"
 
-ArrayMooseVariable::ArrayMooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count) :
-    MooseVariableBase(0 /* FIXME: use the libmesh variable number here! */, fe_type, sys, assembly, var_kind, count),
+ArrayMooseVariable::ArrayMooseVariable(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count) :
+    MooseVariableBase(name, var_num, fe_type, sys, assembly, var_kind, count),
 
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
@@ -38,7 +38,7 @@ ArrayMooseVariable::ArrayMooseVariable(unsigned int var_num, const FEType & fe_t
     _neighbor(_assembly.neighbor()),
 
     _mapped_values(NULL, 0),
-    _mapped_grad_phi(NULL),
+    _mapped_grad_phi(0),
 
     _need_u_old(false),
     _need_u_older(false),
@@ -205,7 +205,6 @@ void
 ArrayMooseVariable::prepareIC()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
-  _nodal_u.resize(_dof_indices.size());
 
   unsigned int nqp = _qrule->n_points();
   _u.resize(nqp);
@@ -604,7 +603,6 @@ ArrayMooseVariable::computeElemValues()
   }
 
   const_cast<PetscVector<Real> &>(current_solution).restore_array();
-
 }
 
 // void
@@ -1088,43 +1086,42 @@ ArrayMooseVariable::computeElemValues()
 //   }
 // }
 
-// void
-// ArrayMooseVariable::computeNodalValues()
-// {
-//   if (_is_defined)
-//   {
-//     const unsigned int n = _dof_indices.size();
-//     mooseAssert(n, "Defined but empty?");
-//     _nodal_u.resize(n);
-//     _sys.currentSolution()->get(_dof_indices, &_nodal_u[0]);
-//     if (_subproblem.isTransient())
-//     {
-//       _nodal_u_old.resize(n);
-//       _nodal_u_older.resize(n);
-//       _sys.solutionOld().get(_dof_indices, &_nodal_u_old[0]);
-//       _sys.solutionOlder().get(_dof_indices, &_nodal_u_older[0]);
+void
+ArrayMooseVariable::computeNodalValues()
+{
+  if (_is_defined)
+  {
+    _nodal_u.resize(1);
+    _nodal_u[0].resize(_count);
 
-//       _nodal_u_dot.resize(n);
-//       _nodal_du_dot_du.resize(n);
-//       for (unsigned int i = 0; i < n; i++)
-//       {
-//         _nodal_u_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
-//         _nodal_du_dot_du[i] = _sys.duDotDu();
-//       }
-//     }
-//   }
-//   else
-//   {
-//     _nodal_u.resize(0);
-//     if (_subproblem.isTransient())
-//     {
-//       _nodal_u_old.resize(0);
-//       _nodal_u_older.resize(0);
-//       _nodal_u_dot.resize(0);
-//       _nodal_du_dot_du.resize(0);
-//     }
-//   }
-// }
+    auto & petsc_solution = dynamic_cast<const PetscVector<Number> &>(*_sys.currentSolution());
+
+    auto local_nodal_dof_index = petsc_solution.map_global_to_local_index(_nodal_dof_index);
+
+    // About the const_cast: See the explanation for the same thing in computeElemValues()
+    auto solution_values = const_cast<PetscScalar *>(petsc_solution.get_array_read());
+
+    // Ok - nodalSln() must return the same type as sln() so, for now, I'm going to do this copy here
+    // It would be much more awesome to just Eigen::Map the values directly... but to do that I would
+    // have to change the type of _u to be a Map and then I would have to compute the values into an
+    // Eigen::Vector (which I would store elsewhere) and then Map them.  That sounds like no fun...
+    // so for now I'm just doing a copy...
+    std::memcpy(_nodal_u[0].data(), solution_values + local_nodal_dof_index, _count * sizeof(Real));
+
+    const_cast<PetscVector<Real> &>(petsc_solution).restore_array();
+  }
+  else
+  {
+    _nodal_u.resize(0);
+    if (_subproblem.isTransient())
+    {
+      _nodal_u_old.resize(0);
+      _nodal_u_older.resize(0);
+      _nodal_u_dot.resize(0);
+      _nodal_du_dot_du.resize(0);
+    }
+  }
+}
 
 // void
 // ArrayMooseVariable::computeNodalNeighborValues()

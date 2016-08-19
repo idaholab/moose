@@ -921,8 +921,6 @@ Assembly::init()
 
   auto n_array_vars = _sys.numArrayMooseVariables();
 
-  std::cout<<"n_array_vars: "<<n_array_vars<<std::endl;
-
   // two vectors: one for time residual contributions and one for non-time residual contributions
   _array_sub_Re.resize(2);
   for (auto i = decltype(_array_sub_Re.size())(0); i < _array_sub_Re.size(); i++)
@@ -1203,7 +1201,9 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
 
-      for (unsigned int i=0; i<_tmp_Re.size(); i++)
+      auto tmp_Re_size = _tmp_Re.size();
+
+      for (unsigned int i=0; i<_tmp_Re_size; i++)
       {
         cached_residual_values.push_back(_tmp_Re(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -1211,7 +1211,9 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
     }
     else
     {
-      for (unsigned int i=0; i<res_block.size(); i++)
+      auto res_block_size = res_block.size();
+
+      for (unsigned int i=0; i<res_block_size; i++)
       {
         cached_residual_values.push_back(res_block(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);

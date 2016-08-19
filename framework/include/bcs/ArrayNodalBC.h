@@ -12,13 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALBC_H
-#define NODALBC_H
+#ifndef ARRAYNODALBC_H
+#define ARRAYNODALBC_H
 
 #include "NodalBCBase.h"
 
 // Forward declarations
-class NodalBC;
+class ArrayNodalBC;
 
 // libMesh forward declarations
 namespace libMesh
@@ -27,15 +27,15 @@ template <typename T> class NumericVector;
 }
 
 template<>
-InputParameters validParams<NodalBC>();
+InputParameters validParams<ArrayNodalBC>();
 
 /**
  * Base class for deriving any boundary condition that works at nodes
  */
-class NodalBC : public NodalBCBase
+class ArrayNodalBC : public NodalBCBase
 {
 public:
-  NodalBC(const InputParameters & parameters);
+  ArrayNodalBC(const InputParameters & parameters);
 
   virtual void computeResidual(NumericVector<Number> & residual);
   virtual void computeJacobian();
@@ -43,31 +43,25 @@ public:
 
 protected:
   /// The MooseVariable this BC is acting on
-  MooseVariable & _moose_var;
+  ArrayMooseVariable & _array_var;
 
   /// current node being processed
   const Node * & _current_node;
 
+  /// The residual values to be set in computeQpResidual()
+  Eigen::Map<Eigen::VectorXd> _residual;
+
   /// Quadrature point index
   unsigned int _qp;
+
   /// Value of the unknown variable this BC is acting on
-  const VariableValue & _u;
+  const ArrayVariableValue & _u;
 
-  /// The aux variables to save the residual contributions to
-  bool _has_save_in;
-  std::vector<MooseVariable*> _save_in;
-  std::vector<AuxVariableName> _save_in_strings;
-
-  /// The aux variables to save the diagonal Jacobian contributions to
-  bool _has_diag_save_in;
-  std::vector<MooseVariable*> _diag_save_in;
-  std::vector<AuxVariableName> _diag_save_in_strings;
-
-  virtual Real computeQpResidual() = 0;
+  virtual void computeQpResidual() = 0;
 
   /**
    * The user can override this function to compute the "on-diagonal"
-   * Jacobian contribution for this NodalBC.  If not overriden,
+   * Jacobian contribution for this ArrayNodalBC.  If not overriden,
    * returns 1.
    */
   virtual Real computeQpJacobian();
@@ -79,4 +73,4 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
 
-#endif /* NODALBC_H */
+#endif /* ARRAYNODALBC_H */

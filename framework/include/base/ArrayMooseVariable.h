@@ -62,7 +62,7 @@ class SystemBase;
 class ArrayMooseVariable : public MooseVariableBase
 {
 public:
-  ArrayMooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count);
+  ArrayMooseVariable(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count);
   virtual ~ArrayMooseVariable();
 
   /**
@@ -205,10 +205,10 @@ public:
 //   * Compute values at quadrature points for the neighbor
 //   */
 //  void computeNeighborValues();
-//  /**
-//   * Compute nodal values of this variable
-//   */
-//  void computeNodalValues();
+    /**
+     * Compute nodal values of this variable
+     */
+    void computeNodalValues();
 //  /**
 //   * Compute nodal values of this variable in the neighbor
 //   */

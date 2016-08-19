@@ -1,13 +1,14 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 20
+  ny = 20
+  nz = 20
 []
 
 [Variables]
   [./u]
-    count = 3
+    count = 2
   [../]
 []
 
@@ -18,16 +19,15 @@
   [../]
 []
 
-[BCs]
-  active = ''
+[ArrayBCs]
   [./left]
-    type = DirichletBC
+    type = ArrayDirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
   [./right]
-    type = DirichletBC
+    type = ArrayDirichletBC
     variable = u
     boundary = right
     value = 1
@@ -44,12 +44,12 @@
 
   # Preconditioned JFNK (default)
   solve_type = 'JFNK'
-
-
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+  [../]
 []

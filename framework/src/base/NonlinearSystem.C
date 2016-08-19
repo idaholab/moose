@@ -573,7 +573,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
   _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
 
   // Cast to the various types of BCs
-  MooseSharedPointer<NodalBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBC>(bc);
+  MooseSharedPointer<NodalBCBase> nbc = MooseSharedNamespace::dynamic_pointer_cast<NodalBCBase>(bc);
   MooseSharedPointer<IntegratedBC> ibc = MooseSharedNamespace::dynamic_pointer_cast<IntegratedBC>(bc);
 
   // NodalBC
@@ -1394,7 +1394,7 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 
         if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
         {
-          const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+          auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
           for (const auto & nbc : bcs)
             if (nbc->shouldApply())
               nbc->computeResidual(residual);
@@ -2013,7 +2013,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       // safe if there are NodalBCs there to be gotten...
       if (_nodal_bcs.hasActiveBoundaryObjects(bid))
       {
-        const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(bid);
+        auto & bcs = _nodal_bcs.getActiveBoundaryObjects(bid);
         for (const auto & bc : bcs)
         {
           const std::vector<MooseVariable *> & coupled_moose_vars = bc->getCoupledMooseVars();
@@ -2047,7 +2047,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
       {
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+        auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
         for (const auto & bc : bcs)
         {
           // Get the set of involved MOOSE vars for this BC
@@ -2181,7 +2181,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 
         if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
         {
-          const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+          auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
 
           if (node->processor_id() == processor_id())
           {

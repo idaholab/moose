@@ -41,7 +41,7 @@ template <typename T> class DenseVector;
 class MooseVariable : public MooseVariableBase
 {
 public:
-  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariable(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariable();
 
   /**

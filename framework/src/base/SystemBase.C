@@ -210,12 +210,25 @@ Order
 SystemBase::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
-  std::vector<MooseVariable *> vars = _vars[0].variables();
-  for (const auto & var : vars)
+
   {
-    FEType fe_type = var->feType();
-    if (fe_type.default_quadrature_order() > order)
-      order = fe_type.default_quadrature_order();
+    std::vector<MooseVariable *> vars = _vars[0].variables();
+    for (const auto & var : vars)
+    {
+      FEType fe_type = var->feType();
+      if (fe_type.default_quadrature_order() > order)
+        order = fe_type.default_quadrature_order();
+    }
+  }
+
+  {
+    std::vector<ArrayMooseVariable *> vars = _vars[0].arrayVars();
+    for (const auto & var : vars)
+    {
+      FEType fe_type = var->feType();
+      if (fe_type.default_quadrature_order() > order)
+        order = fe_type.default_quadrature_order();
+    }
   }
 
   return order;
@@ -338,13 +351,27 @@ SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 void
 SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (const auto & var : vars)
   {
-    if (var->isNodal())
+    auto & vars = _vars[tid].variables();
+    for (const auto & var : vars)
     {
-      var->reinitNode();
-      var->computeNodalValues();
+      if (var->isNodal())
+      {
+        var->reinitNode();
+        var->computeNodalValues();
+      }
+    }
+  }
+
+  {
+    auto & vars = _vars[tid].arrayVars();
+    for (const auto & var : vars)
+    {
+      if (var->isNodal())
+      {
+        var->reinitNode();
+        var->computeNodalValues();
+      }
     }
   }
 }

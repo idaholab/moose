@@ -33,7 +33,7 @@ class Predictor;
 class ElementDamper;
 class GeneralDamper;
 class IntegratedBC;
-class NodalBC;
+class NodalBCBase;
 class PresetNodalBC;
 class DGKernel;
 class InterfaceKernel;
@@ -529,7 +529,7 @@ protected:
   ///@{
   /// BoundaryCondition Warhouses
   MooseObjectWarehouse<IntegratedBC> _integrated_bcs;
-  MooseObjectWarehouse<NodalBC> _nodal_bcs;
+  MooseObjectWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
   ///@}
 

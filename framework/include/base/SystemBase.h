@@ -495,7 +495,7 @@ public:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
-      MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      MooseVariable * var = new MooseVariable(var_name, var_num, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
@@ -513,8 +513,6 @@ public:
    */
   virtual void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL)
   {
-    std::cout<<"addArrayVariable : "<<var_name<<std::endl;
-
     // Turn off automatic variable group identification so that we can be sure that this variable
     // group will be ordered exactly like it should be
     _sys.identify_variable_groups(false);
@@ -524,10 +522,8 @@ public:
     for (unsigned int i = 0; i < count; i++)
       var_names.push_back(var_name + "_" + std::to_string(i));
 
-    unsigned int var_num = _sys.add_variables(var_names, type, active_subdomains);
-
-    // FIXME: need to get this properly!
-    var_num = 0;
+    // The number returned by libMesh is the _last_ variable number... we want to hold onto the _first_
+    unsigned int var_num = _sys.add_variables(var_names, type, active_subdomains) - (count - 1);
 
     if (active_subdomains == NULL)
     {
@@ -542,7 +538,7 @@ public:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
-      ArrayMooseVariable * var = new ArrayMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind, count);
+      ArrayMooseVariable * var = new ArrayMooseVariable(var_name, var_num, type, *this, _subproblem.assembly(tid), _var_kind, count);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
@@ -561,7 +557,7 @@ public:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
-      MooseVariableScalar * var = new MooseVariableScalar(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      MooseVariableScalar * var = new MooseVariableScalar(var_name, var_num, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }

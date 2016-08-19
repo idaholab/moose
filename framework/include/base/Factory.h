@@ -38,6 +38,7 @@
 #define registerKernel(name)                        registerObject(name)
 #define registerNodalKernel(name)                   registerObject(name)
 #define registerBoundaryCondition(name)             registerObject(name)
+#define registerArrayBoundaryCondition(name)        registerObject(name)
 #define registerAux(name)                           registerObject(name)
 #define registerAuxKernel(name)                     registerObject(name)
 #define registerMaterial(name)                      registerObject(name)
