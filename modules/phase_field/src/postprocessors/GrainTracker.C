@@ -72,7 +72,7 @@ GrainTracker::getElementalValues(dof_id_type elem_id) const
   else
   {
 #if DEBUG
-    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
+    mooseDoOnce(_console << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
 #endif
     return _empty;
   }
@@ -278,7 +278,7 @@ GrainTracker::getOpToGrainsVector(dof_id_type elem_id) const
   else
   {
 #if DEBUG
-    mooseDoOnce(Moose::out << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
+    mooseDoOnce(_console << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
 #endif
     return _empty_2;
   }
@@ -374,7 +374,7 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
         const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
         center_points[gr] = d._p;
 
-        Moose::out << "EBSD Grain " << gr << " " << center_points[gr] << '\n';
+        _console << "EBSD Grain " << gr << " " << center_points[gr] << '\n';
       }
 
       // To find the minimum distance we will use the centroidRegionDistance routine.
@@ -411,8 +411,8 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
 
         if (used_indices.find(closest_match_idx) != used_indices.end())
         {
-          Moose::out << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
-                     << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+          _console << "Re-assigning center " << closest_match_idx << " -> " << next_index << " "
+                   << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
           feature._status = Status::MARKED;
           _unique_grains[next_index] = std::move(feature);
 
@@ -422,8 +422,8 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
         }
         else
         {
-          Moose::out << "Assigning center " << closest_match_idx << " "
-                     << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
+          _console << "Assigning center " << closest_match_idx << " "
+                   << center_points[closest_match_idx] << " absolute distance: " << min_centroid_diff << '\n';
           feature._status = Status::MARKED;
           _unique_grains[closest_match_idx] = std::move(feature);
 
@@ -436,11 +436,11 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
       if (!error_indices.empty())
       {
         for (const auto & grain_pair : _unique_grains)
-          Moose::out << "Grain " << grain_pair.first << ": " << center_points[grain_pair.first] << '\n';
+          _console << "Grain " << grain_pair.first << ": " << center_points[grain_pair.first] << '\n';
 
-        Moose::out << "Error Indices:\n";
+        _console << "Error Indices:\n";
         for (const auto & error_kv : error_indices)
-          Moose::out << "Grain " << error_kv.first << '(' << error_kv.second << ')' << ": " << center_points[error_kv.second] << '\n';
+          _console << "Grain " << error_kv.first << '(' << error_kv.second << ')' << ": " << center_points[error_kv.second] << '\n';
 
         mooseError("Error with ESBD Mapping (see above unused indices)");
       }
@@ -688,7 +688,7 @@ GrainTracker::remapGrains()
         // We need to remap any grains represented on any variable index above the cuttoff
         if (grain_it1->second._var_idx >= _reserve_op_idx)
         {
-          Moose::out
+          _console
             << COLOR_YELLOW
             << "Grain #" << grain_it1->first << " detected on a reserved order parameter #" << grain_it1->second._var_idx << ", remapping to another variable\n"
             << COLOR_DEFAULT;
@@ -715,7 +715,7 @@ GrainTracker::remapGrains()
               grain_it1->second.boundingBoxesIntersect(grain_it2->second) &&  // If so, do their bboxes intersect (coarse level check)?
               grain_it1->second.halosIntersect(grain_it2->second))            // If so, do they actually overlap (tight "hull" check)?
           {
-            Moose::out
+            _console
               << COLOR_YELLOW
               << "Grain #" << grain_it1->first << " intersects Grain #" << grain_it2->first
               << " (variable index: " << grain_it1->second._var_idx << ")\n"
@@ -923,7 +923,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     // If the distance is positive we can just remap and be done
     if (target_it->_distance > 0)
     {
-      Moose::out
+      _console
         << COLOR_GREEN
         << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index "
         << curr_var_idx << " to " << target_it->_var_index << " whose closest grain (#"
@@ -960,7 +960,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
 
     if (!intersection_hit)
     {
-      Moose::out
+      _console
         << COLOR_GREEN
         << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index "
         << curr_var_idx << " to " << target_it->_var_index << " whose closest grain:"
@@ -1001,7 +1001,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int grain_id, u
     if (attemptGrainRenumber(target_grain, target_it->_grain_id, depth+1, max))
     {
       // SUCCESS!
-      Moose::out
+      _console
         << COLOR_GREEN
         << "- Depth " << depth << ": Remapping grain #" << grain_id << " from variable index " << curr_var_idx
         << " to " << target_it->_var_index << '\n'
