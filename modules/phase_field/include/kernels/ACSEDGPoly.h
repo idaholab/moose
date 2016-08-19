@@ -45,7 +45,7 @@ protected:
   const MaterialProperty<Real> & _Disloc_Den_i;
 
   /// number of deformed grains
-  unsigned int _ndef;
+  unsigned int _deformed_grain_num;
 
   /// Grain tracker object
   const GrainTrackerInterface & _grain_tracker;

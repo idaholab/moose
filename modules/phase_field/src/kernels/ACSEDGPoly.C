@@ -14,7 +14,7 @@ InputParameters validParams<ACSEDGPoly>()
   InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription("Stored Energy contribution to grain growth");
   params.addRequiredCoupledVar("v", "Array of coupled variable names");
-  params.addRequiredParam<unsigned int>("ndef", "Number of OP representing deformed grains");
+  params.addRequiredParam<unsigned int>("deformed_grain_num", "Number of OP representing deformed grains");
   params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject to get values from.");
   return params;
 }
@@ -27,7 +27,7 @@ ACSEDGPoly::ACSEDGPoly(const InputParameters & parameters) :
     _beta(getMaterialProperty<Real>("beta")),
     _rho_eff(getMaterialProperty<Real>("rho_eff")),
     _Disloc_Den_i(getMaterialProperty<Real>("Disloc_Den_i")),
-    _ndef(getParam<unsigned int>("ndef")),
+    _deformed_grain_num(getParam<unsigned int>("deformed_grain_num")),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _op_index(getParam<unsigned int>("op_index"))
 {
@@ -53,7 +53,7 @@ ACSEDGPoly::computeDFDOP(PFFunctionType type)
   // undeformed grains are dislocation-free
   const std::vector<unsigned int> & op_to_grain = _grain_tracker.getOpToGrainsVector(_current_elem->id());
   const unsigned int grn_index = op_to_grain[_op_index];
-  if (grn_index >= _ndef)
+  if (grn_index >= _deformed_grain_num)
     rho_i = 0.0;
 
   // Calculate the contributions of the deformation energy to the residual and Jacobian
