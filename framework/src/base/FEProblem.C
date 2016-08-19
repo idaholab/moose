@@ -3010,8 +3010,6 @@ FEProblem::init()
 
   unsigned int n_vars = _nl.numLibMeshVariables();
 
-  std::cout<<"n vars"<<n_vars<<std::endl;
-
   switch (_coupling)
   {
   case Moose::COUPLING_DIAG:

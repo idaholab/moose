@@ -137,7 +137,7 @@ AddVariableAction::addVariable(std::string & var_name)
     _problem->addScalarVariable(var_name, _fe_type.order, scale_factor);
 
   // Array variables
-  else if(getParam<unsigned int>("count") > 1)
+  else if (getParam<unsigned int>("count") > 1)
   {
     if (blocks.empty())
       _problem->addArrayVariable(var_name, _fe_type, scale_factor, getParam<unsigned int>("count"));

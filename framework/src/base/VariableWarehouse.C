@@ -31,8 +31,6 @@ VariableWarehouse::~VariableWarehouse()
 void
 VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 {
-  std::cout<<"VariableWarehouse::add() : "<<var_name<<std::endl;
-
   _n_libmesh_vars += var->count();
 
   _names.push_back(var_name);
