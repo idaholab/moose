@@ -372,12 +372,12 @@ ArrayMooseVariable::gradPhi()
   return _mapped_grad_phi;
 }
 
-// const VariablePhiSecond &
-// ArrayMooseVariable::secondPhi()
-// {
-//   _second_phi = &_assembly.feSecondPhi(_fe_type);
-//   return *_second_phi;
-// }
+const VariablePhiSecond &
+ArrayMooseVariable::secondPhi()
+{
+  _second_phi = &_assembly.feSecondPhi(_fe_type);
+  return *_second_phi;
+}
 
 const VariablePhiValue &
 ArrayMooseVariable::phiFace()
@@ -391,12 +391,12 @@ ArrayMooseVariable::gradPhiFace()
   return _grad_phi_face;
 }
 
-// const VariablePhiSecond &
-// ArrayMooseVariable::secondPhiFace()
-// {
-//   _second_phi_face = &_assembly.feSecondPhiFace(_fe_type);
-//   return *_second_phi_face;
-// }
+const VariablePhiSecond &
+ArrayMooseVariable::secondPhiFace()
+{
+  _second_phi_face = &_assembly.feSecondPhiFace(_fe_type);
+  return *_second_phi_face;
+}
 
 const VariablePhiValue &
 ArrayMooseVariable::phiNeighbor()
@@ -410,12 +410,12 @@ ArrayMooseVariable::gradPhiNeighbor()
   return _grad_phi_neighbor;
 }
 
-// const VariablePhiSecond &
-// ArrayMooseVariable::secondPhiNeighbor()
-// {
-//   _second_phi_neighbor = &_assembly.feSecondPhiNeighbor(_fe_type);
-//   return *_second_phi_neighbor;
-// }
+const VariablePhiSecond &
+ArrayMooseVariable::secondPhiNeighbor()
+{
+  _second_phi_neighbor = &_assembly.feSecondPhiNeighbor(_fe_type);
+  return *_second_phi_neighbor;
+}
 
 const VariablePhiValue &
 ArrayMooseVariable::phiFaceNeighbor()
@@ -429,12 +429,12 @@ ArrayMooseVariable::gradPhiFaceNeighbor()
   return _grad_phi_face_neighbor;
 }
 
-// const VariablePhiSecond &
-// ArrayMooseVariable::secondPhiFaceNeighbor()
-// {
-//   _second_phi_face_neighbor = &_assembly.feSecondPhiFaceNeighbor(_fe_type);
-//   return *_second_phi_face_neighbor;
-// }
+const VariablePhiSecond &
+ArrayMooseVariable::secondPhiFaceNeighbor()
+{
+  _second_phi_face_neighbor = &_assembly.feSecondPhiFaceNeighbor(_fe_type);
+  return *_second_phi_face_neighbor;
+}
 
 // const VariableValue &
 // ArrayMooseVariable::nodalValue()

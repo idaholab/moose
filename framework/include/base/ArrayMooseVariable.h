@@ -157,15 +157,15 @@ public:
   const ArrayVariableValue & nodalSlnDot() { return _nodal_u_dot; }
   const ArrayVariableValue & nodalSlnDuDotDu() { return _nodal_du_dot_du; }
 
-  const ArrayVariableValue & nodalValue();
-  const ArrayVariableValue & nodalValueOld();
-  const ArrayVariableValue & nodalValueOlder();
-  const ArrayVariableValue & nodalValueDot();
-
-  const ArrayVariableValue & nodalValueNeighbor();
-  const ArrayVariableValue & nodalValueOldNeighbor();
-  const ArrayVariableValue & nodalValueOlderNeighbor();
-  const ArrayVariableValue & nodalValueDotNeighbor();
+//  const ArrayVariableValue & nodalValue();
+//  const ArrayVariableValue & nodalValueOld();
+//  const ArrayVariableValue & nodalValueOlder();
+//  const ArrayVariableValue & nodalValueDot();
+//
+//  const ArrayVariableValue & nodalValueNeighbor();
+//  const ArrayVariableValue & nodalValueOldNeighbor();
+//  const ArrayVariableValue & nodalValueOlderNeighbor();
+//  const ArrayVariableValue & nodalValueDotNeighbor();
 
   const ArrayVariableValue & slnNeighbor() { return _u_neighbor; }
   const ArrayVariableValue & slnOldNeighbor() { _need_u_old_neighbor = true; return _u_old_neighbor; }
@@ -173,9 +173,9 @@ public:
   const ArrayVariableGradient & gradSlnNeighbor() { return _grad_u_neighbor; }
   const ArrayVariableGradient & gradSlnOldNeighbor() { _need_grad_old_neighbor = true; return _grad_u_old_neighbor; }
   const ArrayVariableGradient & gradSlnOlderNeighbor() { _need_grad_older_neighbor = true; return _grad_u_older_neighbor; }
-  const ArrayVariableSecond & secondSlnNeighbor() { _need_second_neighbor = true; secondPhiFaceNeighbor(); return _second_u_neighbor; }
-  const ArrayVariableSecond & secondSlnOldNeighbor() { _need_second_old_neighbor = true; secondPhiFaceNeighbor(); return _second_u_old_neighbor; }
-  const ArrayVariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
+//  const ArrayVariableSecond & secondSlnNeighbor() { _need_second_neighbor = true; secondPhiFaceNeighbor(); return _second_u_neighbor; }
+//  const ArrayVariableSecond & secondSlnOldNeighbor() { _need_second_old_neighbor = true; secondPhiFaceNeighbor(); return _second_u_old_neighbor; }
+//  const ArrayVariableSecond & secondSlnOlderNeighbor() { _need_second_older_neighbor = true; secondPhiFaceNeighbor(); return _second_u_older_neighbor; }
 
   const ArrayVariableValue & uDotNeighbor() { return _u_dot_neighbor; }
   const ArrayVariableValue & duDotDuNeighbor() { return _du_dot_du_neighbor; }
