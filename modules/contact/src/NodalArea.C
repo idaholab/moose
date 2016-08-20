@@ -21,7 +21,7 @@ InputParameters validParams<NodalArea>()
 
 NodalArea::NodalArea(const InputParameters & parameters) :
     SideIntegralVariableUserObject(parameters),
-    _phi(getCoupledVars().find("variable")->second[0]->phiFace()),
+    _phi(dynamic_cast<MooseVariable *>(getCoupledVars().find("variable")->second[0])->phiFace()),
     _system( _variable->sys() ),
     _aux_solution( _system.solution() )
 {}
@@ -109,4 +109,3 @@ NodalArea::nodalArea( const Node * node ) const
   }
   return retVal;
 }
-

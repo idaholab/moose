@@ -66,7 +66,7 @@ Q2PPiecewiseLinearSink::prepareNodalValues()
   {
     for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
     {
-      _pp[nodenum] = _var.nodalSln()[nodenum];
+      _pp[nodenum] = _moose_var.nodalSln()[nodenum];
       _sat[nodenum] = _other_var_nodal[nodenum];
     }
   }
@@ -75,7 +75,7 @@ Q2PPiecewiseLinearSink::prepareNodalValues()
     for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
     {
       _pp[nodenum] = _other_var_nodal[nodenum];
-      _sat[nodenum] = _var.nodalSln()[nodenum];
+      _sat[nodenum] = _moose_var.nodalSln()[nodenum];
     }
   }
 
@@ -239,4 +239,3 @@ Q2PPiecewiseLinearSink::jac(unsigned int wrt_num)
 
   return _test[_i][_qp]*deriv*phi;
 }
-
