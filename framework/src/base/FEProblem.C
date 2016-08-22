@@ -39,7 +39,7 @@
 #include "PetscSupport.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
-#include "EigenSystem.h"
+#include "MooseEigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
 #include "ComputeJacobianBlocksThread.h"
@@ -111,7 +111,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
 
-    _nl(getParam<bool>("use_nonlinear") ? *(new NonlinearSystem(*this, "nl0")) : *(new EigenSystem(*this, "nl0"))),
+    _nl(getParam<bool>("use_nonlinear") ? *(new NonlinearSystem(*this, "nl0")) : *(new MooseEigenSystem(*this, "eigen0"))),
     _aux(*this, "aux0"),
     _coupling(Moose::COUPLING_DIAG),
     _cm(NULL),
