@@ -1,12 +1,14 @@
 # HPC Cluster Setup
 The following document aims at setting up a baseline multi-user environment for building MOOSE based applications in a job scheduling capable environment.
 
+---
 ## Prerequisites
 Both of these pre-reqs are in the hands of the admins of the cluster.
 
 * Modules. If not already installed. ['Modules Environment'](http://modules.sourceforge.net/) (Or some kind of environment management software)
-* What ever compiler you choose to use on your cluster (GCC/Clang/Intel, MPICH/OpenMPI/MVAPICH), the minimum requirement, is that it must be C++11 compatible. If you are unsure, please consult with your system admins for your cluster on which compiler to use (and how to use it).
+* Whatever compiler you choose to use on your cluster (GCC/Clang/Intel, MPICH/OpenMPI/MVAPICH), the minimum requirement, is that it must be C++11 compatible. If you are unsure, please consult with your system admins for your cluster on which compiler to use (and how to use it).
 
+---
 ## Environment Setup
 * Begin by creating an area for which to build.
 
@@ -35,10 +37,10 @@ export PACKAGES_DIR=/opt/moose-compilers
 ```
 
 !!! Important
-    The PACKAGES_DIR must reside in a location where all the compute nodes can access
+    You can change this path to whatever you want. The only exception, is this path must reside in a location where all your compute nodes have access (nfs|panfs share)
 
 #### Setup Modules
-Even if you're not using Modules the following instructions should give you a good idea of what is needed in the MOOSE environment.
+Even if you're not using Modules, the following step should give you an idea of what is needed in the users environment for MOOSE developement.
 
 * Create a MOOSE module
 
@@ -68,7 +70,7 @@ setenv          PETSC_DIR       $base_path/petsc/petsc-{!content/getting_started
 ```
 
 !!! note
-    You must change 'INSERT PACKAGES_DIR HERE' appropriately; it should mirror what ever you had set $PACKAGES_DIR to. The bit about 'some GCC MPI compiler', is referring to you having to add any additional environment changes in order make your cluster's MPI implementation work. Normally, this would be loading an additional module (module load mvapich2-gcc/1.7 for example)
+    You must replace 'INSERT PACKAGES_DIR HERE' with whatever you had set for $PACKAGES_DIR. The bit about 'some GCC MPI compiler', is referring to you having to add any additional environment changes in order make your cluster's MPI implementation work. Normally, this would be loading an additional module (example: module load mvapich2-gcc/1.7)
 
 
 * To make the module available in your terminal session throughout the rest of the instructions, export the following:
@@ -76,12 +78,12 @@ setenv          PETSC_DIR       $base_path/petsc/petsc-{!content/getting_started
 export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
 ```
 
-* The above will have to be performed using a more permanent method so that it may be usable by everyone. Something on the oder of
+* The above will have to be performed using a more permanent method so that it may be usable by everyone at anytime (including while on a node). Something on the oder of
     1. Copy the moose-dev-gcc module file to where-ever the rest of the system's modules are located
-    2. Add the above export command to the system-wide bash profile
-    3. Inform the user how to add the above export command to their personal profile
+    2. Add the above export command to the system-wide bash profile (using absolute paths instead of $PACKAGES_DIR variable)
+    3. Inform the user how to add the above export command to their personal profile (using absolute paths instead of $PACKAGES_DIR variable)
 
-* On our systems, we prefer option 3, as that will allow the moose-dev-gcc module to be easily found, while not being intrusive to other non-MOOSE users (because only your MOOSE user is exporting that MODULEPATH command. Example:
+* On our systems, we prefer option 3. Option 3 will allow the moose-dev-gcc module to be easily found, while not being intrusive to other non-MOOSE users (because only your MOOSE user is exporting that MODULEPATH command) Example:
 ```text
 me@some_machine#>  module available
 
@@ -105,8 +107,9 @@ pgi/12.4                   starccm+/7.04.006          vtk
 moose-dev-gcc      moose-dev-gcc-parmesh     moose-dev-clang    moose-tools
 me@some_machine#>
 ```
-* The point being, some HPC clusters can have hundreds of available modules. While using this method, you can group and display certain modules at the end of stdout.
+* The point being, some HPC clusters can have hundreds of available modules. While using this method, you can group and display certain modules pertinent to your MOOSE users at the end of stdout.
 
+---
 ## Building PETSc
 * Now that we have our environment ready, we will load it up as a user would. This will ensure that everything we did above is going to work for our end-users.
 
@@ -124,12 +127,13 @@ curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-{!content/ge
 tar -xf petsc-{!content/getting_started/petsc_default_version.md!}.tar.gz
 cd petsc-{!content/getting_started/petsc_default_version.md!}
 ```
-* Configure PETSc using the following options (see Info abnomition below):
+* Configure PETSc using the following options (see Info admonition below):
 
 {!content/getting_started/petsc_default.md!}
 
 During the configure/build process, you will be prompted to enter proper make commands. This can be different from system to system, so I leave that task to the reader.
 
+---
 ## Clean Up
 * Clean all the temporary stuff:
 
@@ -137,4 +141,6 @@ During the configure/build process, you will be prompted to enter proper make co
 rm -rf $CLUSTER_TEMP
 ```
 
-Once the above is complete, verify that any user can load/use the MOOSE module, and has read access to the PETSC_DIR location. It would also be wise to move on to Step 2 as a normal user, on our [Getting Started](http://mooseframework.org/getting-started/) pages, to confirm everything will work for your users on your cluster.
+{!content/getting_started/clone_moose.md!}
+{!content/getting_started/build_libmesh.md!}
+
