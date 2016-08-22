@@ -103,7 +103,6 @@ class MooseApplicationDocGenerator(object):
                 configs.append(update_config(value))
         return configs
 
-
     def _generate(self):
         """
         Generate the documentation.
@@ -122,23 +121,3 @@ class MooseApplicationDocGenerator(object):
         for config in configs:
             generator = MooseSubApplicationDocGenerator(ydata, config)
             generator.write()
-
-        # Create the mkdocs.yml file
-        # TODO: When mkdocs plugins API is up and running this should go away.
-
-        def dumptree(node, level=0):
-            for item in node:
-                for key, value in item.iteritems():
-                    if isinstance(value, list):
-                        yield '{}- {}:'.format(' '*4*level, key)
-                        for f in dumptree(value, level+1):
-                            yield f
-                    else:
-                        yield '{}- {}: {}'.format(' '*4*(level), key, value)
-
-        pages = MooseDocs.yaml_load('pages.yml')
-        output = ['pages:']
-        output += dumptree(pages, 1)
-        shutil.copyfile('mkdocs.template.yml', 'mkdocs.yml')
-        with open('mkdocs.yml', 'a') as fid:
-            fid.write('\n'.join(output))
