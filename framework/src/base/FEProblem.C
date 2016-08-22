@@ -463,23 +463,12 @@ void FEProblem::initialSetup()
   if (!_app.isRecovering())
   {
     Moose::perf_log.push("initial adaptivity", "Setup");
-    unsigned int n = adaptivity().getInitialSteps();
 
+    unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
       mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
 
-    for (unsigned int i = 0; i < n; i++)
-    {
-      _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
-      computeIndicators();
-      computeMarkers();
-
-      _adaptivity.initialAdaptMesh();
-      meshChanged();
-
-      //reproject the initial condition
-      projectSolution();
-    }
+    initialAdaptMesh();
     Moose::perf_log.pop("initial adaptivity", "Setup");
   }
 
@@ -3666,6 +3655,24 @@ FEProblem::possiblyRebuildGeomSearchPatches()
 }
 
 #ifdef LIBMESH_ENABLE_AMR
+void
+FEProblem::initialAdaptMesh()
+{
+  unsigned int n = adaptivity().getInitialSteps();
+  for (unsigned int i = 0; i < n; i++)
+  {
+    _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
+    computeIndicators();
+    computeMarkers();
+
+    _adaptivity.initialAdaptMesh();
+    meshChanged();
+
+    //reproject the initial condition
+    projectSolution();
+  }
+}
+
 void
 FEProblem::adaptMesh()
 {
