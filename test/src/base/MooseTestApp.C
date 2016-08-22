@@ -234,6 +234,9 @@
 #include "AddLotsOfDiffusion.h"
 #include "BadAddKernelAction.h"
 
+// TimeSteppers
+#include "TimeSequenceStepperFailTest.h"
+
 // From MOOSE
 #include "AddVariableAction.h"
 
@@ -497,6 +500,9 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerProblem(MooseTestProblem);
   registerProblem(FailingProblem);
+
+  // TimeSteppers
+  registerTimeStepper(TimeSequenceStepperFailTest);
 
   // Outputs
   registerOutput(OutputObjectTest);
