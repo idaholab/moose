@@ -12,35 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SIDEAVERAGEVALUE_H
-#define SIDEAVERAGEVALUE_H
+#ifndef AXISYMMETRICCENTERLINEAVERAGEVALUE_H
+#define AXISYMMETRICCENTERLINEAVERAGEVALUE_H
 
-#include "SideIntegralVariablePostprocessor.h"
+#include "SideAverageValue.h"
 
 //Forward Declarations
-class SideAverageValue;
+class AxisymmetricCenterlineAverageValue;
 
 template<>
-InputParameters validParams<SideAverageValue>();
+InputParameters validParams<AxisymmetricCenterlineAverageValue>();
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
- *
- * Note that specializations of this integral are possible by deriving from this
- * class and overriding computeQpIntegral().
+ * This postprocessor computes a line integral of the specified variable
+ * along the centerline of an axisymmetric domain.
  */
-class SideAverageValue : public SideIntegralVariablePostprocessor
+class AxisymmetricCenterlineAverageValue : public SideAverageValue
 {
 public:
-  SideAverageValue(const InputParameters & parameters);
-
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual Real getValue() override;
-  virtual void threadJoin(const UserObject & y) override;
+  AxisymmetricCenterlineAverageValue(const InputParameters & parameters);
 
 protected:
-  virtual Real volume();
+  virtual Real computeIntegral() override;
+  virtual Real volume() override;
   Real _volume;
 };
 
