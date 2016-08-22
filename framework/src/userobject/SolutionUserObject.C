@@ -138,22 +138,23 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
 
 SolutionUserObject::~SolutionUserObject()
 {
-  delete _es;
-  delete _mesh;
-  delete _serialized_solution;
-  delete _mesh_function;
-
   if (_exodusII_io)
     delete _exodusII_io;
 
-  if (_es2)
-    delete _es2;
+  delete _serialized_solution;
+  delete _mesh_function;
+  delete _es;
 
   if (_mesh_function2)
     delete _mesh_function2;
 
   if (_serialized_solution2)
     delete _serialized_solution2;
+
+  if (_es2)
+    delete _es2;
+
+  delete _mesh;
 }
 
 void
