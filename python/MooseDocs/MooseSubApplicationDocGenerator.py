@@ -32,6 +32,7 @@ class MooseSubApplicationDocGenerator(object):
         inputs = collections.OrderedDict()
         children = collections.OrderedDict()
         options = {'repo': self._config['repo']}
+        log.info('Building input and inheritance databases...')
         for key, path in links.iteritems():
             inputs[key] = database.Database('.i', path, database.items.InputFileItem, **options)
             children[key] = database.Database('.h', path, database.items.ChildClassItem, **options)

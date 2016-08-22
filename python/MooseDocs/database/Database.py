@@ -33,7 +33,7 @@ class Database(object):
 
         # Walk the directory, looking for files with the supplied extension.
         for path in paths:
-            for root, dirs, files in os.walk(path, topdown=False):
+            for root, dirs, files in os.walk(os.path.abspath(path), topdown=False):
                 for filename in files:
                     if filename.endswith(ext):
                         self.update(os.path.join(root, filename))
