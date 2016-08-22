@@ -84,7 +84,7 @@ $(CROW_DIR)/control_modules/_distribution1D.so : $(CROW_DIR)/control_modules/dis
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
 	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(PYTHON_INCLUDE)\
-	 -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) \
+	 -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) -std=c++11 \
 	 -c  $(CROW_MODULES)/distribution1D_wrap.cxx -o $(CROW_DIR)/control_modules/distribution1D_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \
