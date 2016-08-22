@@ -147,6 +147,7 @@
 #include "SwitchingFunction3PhaseMaterial.h"
 #include "SwitchingFunctionMaterial.h"
 #include "ThirdPhaseSuppressionMaterial.h"
+#include "TimeStepMaterial.h"
 #include "VariableGradientMaterial.h"
 
 /*
@@ -399,6 +400,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(SwitchingFunction3PhaseMaterial);
   registerMaterial(SwitchingFunctionMaterial);
   registerMaterial(ThirdPhaseSuppressionMaterial);
+  registerMaterial(TimeStepMaterial);
   registerMaterial(VariableGradientMaterial);
 
   registerPostprocessor(FeatureFloodCount);
