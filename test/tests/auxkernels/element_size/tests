@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = Exodiff
-    input = element_size.i
-    exodiff = element_size_out.e
-  [../]
-[]

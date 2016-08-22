@@ -16,13 +16,13 @@
 
 [AuxKernels]
   [./min]
-    type = ElementSizeAux
+    type = ElementLengthAux
     variable = min
     method = min
     execute_on = initial
   [../]
   [./max]
-    type = ElementSizeAux
+    type = ElementLengthAux
     variable = max
     method = max
     execute_on = initial

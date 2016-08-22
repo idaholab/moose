@@ -11,26 +11,26 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef ELEMENTSIZEAUX_H
-#define ELEMENTSIZEAUX_H
+#ifndef ELEMENTLENGTHAUX_H
+#define ELEMENTLENGTHAUX_H
 
 // MOOSE includes
 #include "AuxKernel.h"
 
 
 // Forward Declarations
-class ElementSizeAux;
+class ElementLengthAux;
 
 template<>
-InputParameters validParams<ElementSizeAux>();
+InputParameters validParams<ElementLengthAux>();
 
 /**
- * Computes the min or max of element size.
+ * Computes the min or max of element length.
  */
-class ElementSizeAux : public AuxKernel
+class ElementLengthAux : public AuxKernel
 {
 public:
-  ElementSizeAux(const InputParameters & parameters);
+  ElementLengthAux(const InputParameters & parameters);
 
 protected:
 
@@ -43,4 +43,4 @@ protected:
   const MooseEnum & _method;
 };
 
-#endif // ELEMENTSIZEAUX_H
+#endif // ELEMENTLENGTHAUX_H
