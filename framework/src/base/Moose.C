@@ -211,6 +211,7 @@
 #include "ElementL2Difference.h"
 #include "TimeExtremeValue.h"
 #include "RelativeSolutionDifferenceNorm.h"
+#include "AxisymmetricCenterlineAverageValue.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -624,6 +625,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementL2Difference);
   registerPostprocessor(TimeExtremeValue);
   registerPostprocessor(RelativeSolutionDifferenceNorm);
+  registerPostprocessor(AxisymmetricCenterlineAverageValue);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
