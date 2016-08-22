@@ -35,10 +35,10 @@ protected:
   const MaterialProperty<std::vector<Real> > & _porepressure_qp;
 
   /// Fluid temperature at the nodes
-  const MaterialProperty<std::vector<Real> > & _temperature_nodal;
+  const MaterialProperty<Real> & _temperature_nodal;
 
   /// Fluid temperature at the qps
-  const MaterialProperty<std::vector<Real> > & _temperature_qp;
+  const MaterialProperty<Real> & _temperature_qp;
 
   /// Name of (dummy) pressure primary variable
   const VariableName _pressure_variable_name;

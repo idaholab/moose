@@ -34,25 +34,25 @@ PorousFlowMethane::PorousFlowMethane(const InputParameters & parameters) :
 void
 PorousFlowMethane::initQpStatefulProperties()
 {
-  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp][_phase_num]);
+  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp]);
 }
 
 void
 PorousFlowMethane::computeQpProperties()
 {
   /// Density and derivatives wrt pressure and temperature at the nodes
-  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp][_phase_num]);
-  _ddensity_nodal_dp[_qp] = dDensity_dP(_temperature_nodal[_qp][_phase_num]);
-  _ddensity_nodal_dt[_qp] = dDensity_dT(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp][_phase_num]);
+  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp]);
+  _ddensity_nodal_dp[_qp] = dDensity_dP(_temperature_nodal[_qp]);
+  _ddensity_nodal_dt[_qp] = dDensity_dT(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp]);
 
   /// Density and derivatives wrt pressure and temperature at the qps
-  _density_qp[_qp] = density(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp][_phase_num]);
-  _ddensity_qp_dp[_qp] = dDensity_dP(_temperature_qp[_qp][_phase_num]);
-  _ddensity_qp_dt[_qp] = dDensity_dT(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp][_phase_num]);
+  _density_qp[_qp] = density(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp]);
+  _ddensity_qp_dp[_qp] = dDensity_dP(_temperature_qp[_qp]);
+  _ddensity_qp_dt[_qp] = dDensity_dT(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp]);
 
   /// Viscosity and derivative wrt temperature at the nodes
-  _viscosity_nodal[_qp] = viscosity(_temperature_nodal[_qp][_phase_num]);
-  _dviscosity_nodal_dt[_qp] = dViscosity_dT(_temperature_nodal[_qp][_phase_num]);
+  _viscosity_nodal[_qp] = viscosity(_temperature_nodal[_qp]);
+  _dviscosity_nodal_dt[_qp] = dViscosity_dT(_temperature_nodal[_qp]);
 }
 
 Real

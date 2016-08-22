@@ -26,7 +26,7 @@ public:
 
 protected:
   /**
-   * Assemble std::vectors of porepressure, saturation and temperature at the nodes
+   * Assemble std::vectors of porepressure and saturation at the nodes
    * and quadpoints
    */
   void buildQpPPSS();
@@ -93,9 +93,6 @@ protected:
 
   /// PorousFlow variable number of the phase1 saturation
   const unsigned int _svar;
-
-  /// PorousFlow variable number of the temperature
-  const unsigned int _tvar;
 
   /// Constant capillary pressure (Pa)
   const Real _pc;

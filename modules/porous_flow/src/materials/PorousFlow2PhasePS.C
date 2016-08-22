@@ -33,8 +33,6 @@ PorousFlow2PhasePS::PorousFlow2PhasePS(const InputParameters & parameters) :
     _phase1_saturation_varnum(coupled("phase1_saturation")),
     _svar(_dictator.isPorousFlowVariable(_phase1_saturation_varnum) ? _dictator.porousFlowVariableNum(_phase1_saturation_varnum) : 0),
 
-    _tvar(_dictator.isPorousFlowVariable(_temperature_varnum) ? _dictator.porousFlowVariableNum(_temperature_varnum) : 0),
-
     _pc(getParam<Real>("pc"))
 
 {
@@ -91,17 +89,6 @@ PorousFlow2PhasePS::computeQpProperties()
     _dgradp_qp_dv[_qp][1][_svar] = - d2pc_qp * _grads_qp[_qp][1];
     _dgradp_qp_dgradv[_qp][1][_svar] = - dpc_qp;
   }
-
-  // _temperature is only dependent on temperature, and its derivative is = 1
-  if (_dictator.isPorousFlowVariable(_temperature_varnum))
-  {
-    // _phase0_temperature is a PorousFlow variable
-    for (unsigned int phase = 0; phase < _num_phases; ++phase)
-    {
-      _dtemperature_nodal_dvar[_qp][phase][_tvar] = 1.0;
-      _dtemperature_qp_dvar[_qp][phase][_tvar] = 1.0;
-    }
-  }
 }
 
 void
@@ -124,12 +111,6 @@ PorousFlow2PhasePS::buildQpPPSS()
   _porepressure_qp[_qp][1] = _phase0_porepressure_qp[_qp] - pc_qp;
   _gradp_qp[_qp][0] = _phase0_gradp_qp[_qp];
   _gradp_qp[_qp][1] = _phase0_gradp_qp[_qp] - dpc_qp * _grads_qp[_qp][1];
-
-  /// Temperature is the same in each phase presently
-  _temperature_nodal[_qp][0] = _temperature_nodal_var[_node_number[_qp]];
-  _temperature_nodal[_qp][1] = _temperature_nodal_var[_node_number[_qp]];
-  _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
-  _temperature_qp[_qp][1] = _temperature_qp_var[_qp];
 }
 
 Real

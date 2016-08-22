@@ -24,8 +24,7 @@ PorousFlow1PhaseP::PorousFlow1PhaseP(const InputParameters & parameters) :
     _porepressure_qp_var(coupledValue("porepressure")),
     _gradp_qp_var(coupledGradient("porepressure")),
     _porepressure_varnum(coupled("porepressure")),
-    _p_var_num(_dictator.isPorousFlowVariable(_porepressure_varnum) ? _dictator.porousFlowVariableNum(_porepressure_varnum) : 0),
-    _t_var_num(_dictator.isPorousFlowVariable(_temperature_varnum) ? _dictator.porousFlowVariableNum(_temperature_varnum) : 0)
+    _p_var_num(_dictator.isPorousFlowVariable(_porepressure_varnum) ? _dictator.porousFlowVariableNum(_porepressure_varnum) : 0)
 {
   if (_dictator.numPhases() != 1)
     mooseError("The Dictator proclaims that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow1PhaseP can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
@@ -78,21 +77,6 @@ PorousFlow1PhaseP::computeQpProperties()
     _dgrads_qp_dgradv[_qp][0][_p_var_num] = dEffectiveSaturation_dP(_porepressure_qp_var[_qp]);
     _dgrads_qp_dv[_qp][0][_p_var_num] = d2EffectiveSaturation_dP2(_porepressure_qp_var[_qp]) * _gradp_qp_var[_qp];
   }
-
-  // prepare the derivative matrix with zeroes
-  for (unsigned phase = 0; phase < _num_phases; ++phase)
-  {
-    _dtemperature_nodal_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
-    _dtemperature_qp_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
-  }
-
-  // _temperature is only dependent on _temperature, and its derivative is = 1
-  if (_dictator.isPorousFlowVariable(_temperature_varnum))
-  {
-    // _temperature is a porflow variable
-    _dtemperature_nodal_dvar[_qp][0][_t_var_num] = 1.0;
-    _dtemperature_qp_dvar[_qp][0][_t_var_num] = 1.0;
-  }
 }
 
 void
@@ -105,10 +89,6 @@ PorousFlow1PhaseP::buildQpPPSS()
   _saturation_nodal[_qp][0] = effectiveSaturation(_porepressure_nodal_var[_node_number[_qp]]);
   _saturation_qp[_qp][0] = effectiveSaturation(_porepressure_qp_var[_qp]);
   _grads_qp[_qp][0] = dEffectiveSaturation_dP(_porepressure_qp_var[_qp]) * _gradp_qp_var[_qp];
-
-  /// Temperature is the same in each phase presently
-  _temperature_nodal[_qp][0] = _temperature_nodal_var[_node_number[_qp]];
-  _temperature_qp[_qp][0] = _temperature_qp_var[_qp];
 }
 
 Real
