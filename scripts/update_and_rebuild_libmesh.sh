@@ -49,9 +49,9 @@ export METHODS=${METHODS:="opt oprof dbg"}
 
 cd $SCRIPT_DIR/..
 
-# Test for git repository
+# Test for git repository when not using fast
 git_dir=`git rev-parse --show-cdup 2>/dev/null`
-if [[ $? == 0 && "x$git_dir" == "x" ]]; then
+if [[ -z "$go_fast" && $? == 0 && "x$git_dir" == "x" ]]; then
   git submodule init
   git submodule update
   if [[ $? != 0 ]]; then
