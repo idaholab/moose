@@ -33,21 +33,21 @@ PorousFlowIdealGas::PorousFlowIdealGas(const InputParameters & parameters) :
 void
 PorousFlowIdealGas::initQpStatefulProperties()
 {
-  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp][_phase_num], _molar_mass);
+  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp], _molar_mass);
 }
 
 void
 PorousFlowIdealGas::computeQpProperties()
 {
   /// Density and derivatives wrt pressure and temperature at the nodes
-  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp][_phase_num], _molar_mass);
-  _ddensity_nodal_dp[_qp] = dDensity_dP(_temperature_nodal[_qp][_phase_num], _molar_mass);
-  _ddensity_nodal_dt[_qp] = dDensity_dT(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp][_phase_num], _molar_mass);
+  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp], _molar_mass);
+  _ddensity_nodal_dp[_qp] = dDensity_dP(_temperature_nodal[_qp], _molar_mass);
+  _ddensity_nodal_dt[_qp] = dDensity_dT(_porepressure_nodal[_qp][_phase_num], _temperature_nodal[_qp], _molar_mass);
 
   /// Density and derivatives wrt pressure and temperature at the qps
-  _density_qp[_qp] = density(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp][_phase_num], _molar_mass);
-  _ddensity_qp_dp[_qp] = dDensity_dP(_temperature_qp[_qp][_phase_num], _molar_mass);
-  _ddensity_qp_dt[_qp] = dDensity_dT(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp][_phase_num], _molar_mass);
+  _density_qp[_qp] = density(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp], _molar_mass);
+  _ddensity_qp_dp[_qp] = dDensity_dP(_temperature_qp[_qp], _molar_mass);
+  _ddensity_qp_dt[_qp] = dDensity_dT(_porepressure_qp[_qp][_phase_num], _temperature_qp[_qp], _molar_mass);
 }
 
 Real

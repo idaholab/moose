@@ -32,7 +32,7 @@ protected:
   virtual void computeQpProperties();
 
   /**
-   * Assemble std::vectors of porepressure, saturation and temperature at the nodes
+   * Assemble std::vectors of porepressure and saturation at the nodes
    * and quadpoints
    */
   void buildQpPPSS();
@@ -96,9 +96,6 @@ protected:
 
   /// PorousFlow variable number of the phase1 porepressure
   const unsigned int _p1var;
-
-  /// PorousFlow variable number of the temperature
-  const unsigned int _tvar;
 };
 
 #endif //POROUSFLOW2PHASEPP_H

@@ -19,7 +19,7 @@ InputParameters validParams<PorousFlowVariableBase>();
 
 /**
  * Base class for thermophysical variable materials, which assemble materials for
- * primary variables such as porepressure, saturation, temperature, etc, at the nodes
+ * primary variables such as porepressure and saturation at the nodes
  * and quadpoints for all phases as required
  */
 class PorousFlowVariableBase : public DerivativeMaterialInterface<Material>
@@ -42,15 +42,6 @@ protected:
 
   /// Number of PorousFlow variables
   const unsigned int _num_pf_vars;
-
-  /// Nodal value of temperature
-  const VariableValue & _temperature_nodal_var;
-
-  /// Quadpoint value of temperature
-  const VariableValue & _temperature_qp_var;
-
-  /// Moose variable number of the phase0 temperature
-  const unsigned int _temperature_varnum;
 
   /// Nearest node number for each quadpoint
   const MaterialProperty<unsigned int> & _node_number;
@@ -102,18 +93,6 @@ protected:
 
   /// d(grad saturation)/d(PorousFlow variable) at the quadpoints
   MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgrads_qp_dv;
-
-  /// Nodal values of the temperature of the phases
-  MaterialProperty<std::vector<Real> > & _temperature_nodal;
-
-  /// Quadpoint values of the temperature of the phases
-  MaterialProperty<std::vector<Real> > & _temperature_qp;
-
-  /// d(nodal temperature)/d(nodal PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_nodal_dvar;
-
-  /// d(quadpoint temperature)/d(quadpoint PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_qp_dvar;
 };
 
 #endif //POROUSFLOWVARIABLEBASE_H

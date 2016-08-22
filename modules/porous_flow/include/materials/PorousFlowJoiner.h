@@ -72,7 +72,7 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_dvar;
 
   /// Derivatives of temperature variable wrt PorousFlow variables at the qps or nodes
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real> > & _dtemperature_dvar;
 
   /// computed property of the phase
   MaterialProperty<std::vector<Real> > & _property;
