@@ -44,13 +44,16 @@
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+    temperature = temp
+  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseP
-    temperature = temp
     porepressure = pp
   [../]
   [./dens0]

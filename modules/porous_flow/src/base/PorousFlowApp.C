@@ -47,6 +47,7 @@
 #include "PorousFlowWater.h"
 #include "PorousFlowJoiner.h"
 #include "PorousFlowNodeNumber.h"
+#include "PorousFlowTemperature.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -147,6 +148,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowWater);
   registerMaterial(PorousFlowJoiner);
   registerMaterial(PorousFlowNodeNumber);
+  registerMaterial(PorousFlowTemperature);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);

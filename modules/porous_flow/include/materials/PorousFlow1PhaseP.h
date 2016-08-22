@@ -82,9 +82,6 @@ protected:
 
   /// the PorousFlow variable number of the porepressure
   const unsigned int _p_var_num;
-
-  /// the PorousFlow variable number of the temperature
-  const unsigned int _t_var_num;
 };
 
 #endif //POROUSFLOW1PHASEP_H
