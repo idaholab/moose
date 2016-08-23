@@ -76,7 +76,7 @@ PorousFlowEnergyTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 Real
 PorousFlowEnergyTimeDerivative::computeQpJac(unsigned int pvar)
 {
-  // porosity is dependent on variables that are lumped to the nodes, 
+  // porosity is dependent on variables that are lumped to the nodes,
   // but it can depend on the gradient
   // of variables, which are NOT lumped to the nodes, hence:
   Real denergy = - _dporosity_dgradvar[_i][pvar] * _grad_phi[_j][_i] * _rock_energy_nodal[_i];
