@@ -168,5 +168,4 @@ out.xyz
 *.moose.md
 *.moose.yml
 docs/.moosedocs
-docs/mkdocs.yml
 site

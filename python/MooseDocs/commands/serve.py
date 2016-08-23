@@ -3,9 +3,10 @@ import sys
 import glob
 import re
 import mkdocs
-import livereload# import Server
+import livereload
 import logging
 import shutil
+import MooseDocs
 log = logging.getLogger(__name__)
 
 
@@ -78,7 +79,7 @@ def _livereload(host, port, config, builder, site_dir):
     server.serve(root=site_dir, host=host, port=int(port), restart_delay=0)
 
 
-def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, **kwargs):
+def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, pages='pages.yml', **kwargs):
     """
     Mimics mkdocs serve command.
 
@@ -97,11 +98,14 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     if not os.path.exists(tempdir):
         os.mkdir(tempdir)
 
+    # Read the pages file
+    pages = MooseDocs.yaml_load(pages)
+
     def builder(**kwargs):
-        config = mkdocs.config.load_config(config_file=config_file, strict=strict, **kwargs)
+        dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
+        config = mkdocs.config.load_config(config_file=config_file, strict=strict, pages=pages, **kwargs)
         config['site_dir'] = tempdir
         live_server = livereload in ['dirtyreload', 'livereload']
-        dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
         mkdocs.commands.build.build(config, live_server=live_server, dirty=dirty)
         return config
 
