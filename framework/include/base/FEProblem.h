@@ -830,6 +830,7 @@ public:
 #ifdef LIBMESH_ENABLE_AMR
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
+  virtual void initialAdaptMesh();
   virtual void adaptMesh();
 #endif //LIBMESH_ENABLE_AMR
 

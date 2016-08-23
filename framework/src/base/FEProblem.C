@@ -423,47 +423,6 @@ void FEProblem::initialSetup()
     projectSolution();
   }
 
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
-  {
-    _internal_side_indicators.initialSetup(tid);
-    _indicators.initialSetup(tid);
-    _markers.sort(tid);
-    _markers.initialSetup(tid);
-  }
-
-#ifdef LIBMESH_ENABLE_AMR
-
-  if (!_app.isRecovering())
-  {
-    Moose::perf_log.push("initial adaptivity", "Setup");
-    unsigned int n = adaptivity().getInitialSteps();
-
-    if (n && !_app.isUltimateMaster() && _app.isRestarting())
-      mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
-
-    for (unsigned int i = 0; i < n; i++)
-    {
-      _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
-      computeIndicators();
-      computeMarkers();
-
-      _adaptivity.initialAdaptMesh();
-      meshChanged();
-
-      //reproject the initial condition
-      projectSolution();
-    }
-    Moose::perf_log.pop("initial adaptivity", "Setup");
-  }
-
-#endif //LIBMESH_ENABLE_AMR
-
-  if (!_app.isRecovering() && !_app.isRestarting())
-  {
-    // During initial setup the solution is copied to solution_old and solution_older
-    copySolutionsBackwards();
-  }
-
   // Materials
   if (_all_materials.hasActiveObjects(0))
   {
@@ -489,6 +448,36 @@ void FEProblem::initialSetup()
 
     if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
       _has_initialized_stateful = true;
+  }
+
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
+  {
+    _internal_side_indicators.initialSetup(tid);
+    _indicators.initialSetup(tid);
+    _markers.sort(tid);
+    _markers.initialSetup(tid);
+  }
+
+#ifdef LIBMESH_ENABLE_AMR
+
+  if (!_app.isRecovering())
+  {
+    Moose::perf_log.push("initial adaptivity", "Setup");
+
+    unsigned int n = adaptivity().getInitialSteps();
+    if (n && !_app.isUltimateMaster() && _app.isRestarting())
+      mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
+
+    initialAdaptMesh();
+    Moose::perf_log.pop("initial adaptivity", "Setup");
+  }
+
+#endif //LIBMESH_ENABLE_AMR
+
+  if (!_app.isRecovering() && !_app.isRestarting())
+  {
+    // During initial setup the solution is copied to solution_old and solution_older
+    copySolutionsBackwards();
   }
 
   if (!_app.isRecovering())
@@ -3666,6 +3655,24 @@ FEProblem::possiblyRebuildGeomSearchPatches()
 }
 
 #ifdef LIBMESH_ENABLE_AMR
+void
+FEProblem::initialAdaptMesh()
+{
+  unsigned int n = adaptivity().getInitialSteps();
+  for (unsigned int i = 0; i < n; i++)
+  {
+    _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
+    computeIndicators();
+    computeMarkers();
+
+    _adaptivity.initialAdaptMesh();
+    meshChanged();
+
+    //reproject the initial condition
+    projectSolution();
+  }
+}
+
 void
 FEProblem::adaptMesh()
 {

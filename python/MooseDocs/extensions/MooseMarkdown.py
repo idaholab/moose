@@ -36,7 +36,7 @@ class MooseMarkdown(markdown.Extension):
 
         # Preprocessors
         #md.treeprocessors.add('moose_slides', MooseSlideTreeprocessor(md), '_end')
-        md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(md, self._markdown_database_dir), '_begin')
+        md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(md, self._markdown_database_dir), '>include')
 
         # Inline Patterns
         md.inlinePatterns.add('moose_input_block', MooseInputBlock(config), '<image_link')

@@ -246,6 +246,9 @@
 // Controls
 #include "TestControl.h"
 
+// Indicators
+#include "MaterialTestIndicator.h"
+
 template<>
 InputParameters validParams<MooseTestApp>()
 {
@@ -509,6 +512,9 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Controls
   registerControl(TestControl);
+
+  // Indicators
+  registerIndicator(MaterialTestIndicator);
 }
 
 // External entry point for dynamic syntax association
