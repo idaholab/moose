@@ -402,7 +402,7 @@ protected:
   /// This variable is used to indicate whether or not we identify features with unique numbers on multiple maps
   const bool _global_numbering;
 
-  /// This variable is used to indicate whether the maps will continue unique region information or just the variable numbers owning those regions
+  /// This variable is used to indicate whether the maps will contain unique region information or just the variable numbers owning those regions
   const bool _var_index_mode;
 
   /// Indicates whether or not to communicate halo map information with all ranks

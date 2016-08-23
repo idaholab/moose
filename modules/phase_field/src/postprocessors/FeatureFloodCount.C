@@ -346,7 +346,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
 
   unsigned int globalsize = 0;
   std::vector<int> offsets(_n_procs);
-  for (auto i = decltype(_n_procs)(0); i < _n_procs; ++i)
+  for (auto i = beginIndex(offsets); i < offsets.size(); ++i)
   {
     offsets[i] = globalsize;
     globalsize += counts[i];
@@ -932,7 +932,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
   std::vector<const Elem *> all_active_neighbors;
 
   // Loop over all neighbors (at the the same level as the current element)
-  for (decltype(elem->n_neighbors()) i = 0; i < elem->n_neighbors(); ++i)
+  for (auto i = decltype(elem->n_neighbors())(0); i < elem->n_neighbors(); ++i)
   {
     const Elem * neighbor_ancestor = elem->neighbor(i);
     if (neighbor_ancestor)
@@ -1004,7 +1004,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & data) const
     {
       Elem * elem = _mesh.elemPtr(entity);
 
-      for (auto end = elem->n_nodes(), node_n = 0u; node_n < end; ++node_n)
+      for (auto node_n = decltype(elem->n_nodes())(0); node_n < elem->n_nodes(); ++node_n)
       {
         auto iters = _periodic_node_map.equal_range(elem->node(node_n));
 
@@ -1044,7 +1044,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox
 void
 FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshTools::BoundingBox & bbox, const Elem & elem)
 {
-  for (auto n = elem.n_nodes(), node_n = 0u; node_n < n; ++node_n)
+  for (auto node_n = decltype(elem.n_nodes())(0); node_n < elem.n_nodes();  ++node_n)
     updateBBoxExtremes(bbox, *(elem.get_node(node_n)));
 }
 

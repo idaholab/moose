@@ -160,12 +160,12 @@ GrainTracker::finalize()
   if (_is_master)
     trackGrains(new_grain_indices);
 
-  if (!new_grain_indices.empty())
-  {
-    // Communicate new grain indices with the remaining processors
-    auto new_grains_count = new_grain_indices.size();
-    _communicator.broadcast(new_grains_count);
+  // Communicate new grain indices with the remaining processors
+  auto new_grains_count = new_grain_indices.size();
+  _communicator.broadcast(new_grains_count);
 
+  if (new_grains_count)
+  {
     new_grain_indices.resize(new_grains_count);
     _communicator.broadcast(new_grain_indices);
 
@@ -1220,7 +1220,7 @@ GrainTracker::communicateHaloMap()
 
       auto & mesh = _mesh.getMesh();
       // Loop over the _halo_ids "field" and build minimal lists for all of the other ranks
-      for (unsigned int var_idx = 0; var_idx < _halo_ids.size(); ++var_idx)
+      for (auto var_idx = beginIndex(_halo_ids); var_idx < _halo_ids.size(); ++var_idx)
       {
         for (const auto & entity_pair : _halo_ids[var_idx])
         {
