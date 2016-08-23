@@ -1,0 +1,21 @@
+## /Applications/Cubit-14.0/Cubit.app/Contents/MacOS/cubitclx
+## Cubit Version 14.0
+## Cubit Build 387010
+## Revised 2013-06-11 10:13:37 -0600 (Tue, 11 Jun 2013)
+## Running 08/22/2016 03:59:10 PM
+## Command Options:
+## -warning = On
+## -information = On
+create cylinder radius 1 height 1
+webcut volume all with plane xplane
+webcut volume all with plane yplane
+delete volume 4 2 1
+volume 3 size 0.25
+volume 3 move 0 0 0.5
+mesh volume 3
+block 1 surface 18
+block 1 element type QUAD9
+sideset 1 curve 27
+sideset 2 curve 24
+sideset 5 curve 28
+export mesh "circle_sector_2d.e" overwrite

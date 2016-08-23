@@ -1,0 +1,56 @@
+[Tests]
+  [./cylinder_2d_axisymmetric]
+    type = 'Exodiff'
+    input = 'cylinder_2d_axisymmetric.i'
+    exodiff = 'cylinder_2d_axisymmetric_out.e'
+  [../]
+  [./cylinder_2d_cartesian]
+    type = 'Exodiff'
+    input = 'cylinder_2d_cartesian.i'
+    exodiff = 'cylinder_2d_cartesian_out.e'
+  [../]
+  [./cylinder_3d_cartesian]
+    type = 'Exodiff'
+    input = 'cylinder_3d_cartesian.i'
+    exodiff = 'cylinder_3d_cartesian_out.e'
+  [../]
+  [./sphere_1d_spherical]
+    type = 'Exodiff'
+    input = 'sphere_1d_spherical.i'
+    exodiff = 'sphere_1d_spherical_out.e'
+  [../]
+  [./sphere_2d_axisymmetric]
+    type = 'Exodiff'
+    input = 'sphere_2d_axisymmetric.i'
+    exodiff = 'sphere_2d_axisymmetric_out.e'
+  [../]
+  [./sphere_3d_cartesian]
+    type = 'Exodiff'
+    input = 'sphere_3d_cartesian.i'
+    exodiff = 'sphere_3d_cartesian_out.e'
+  [../]
+
+  [./sphere_1d_spherical_except_1]
+    type = 'RunException'
+    input = 'sphere_1d_spherical.i'
+    cli_args = "AuxKernels/raddispaux/origin='0 0 0'"
+    expect_err = "The 'origin' parameter is only valid for models with Cartesian or axisymmetric coordinate systems."
+    prereq = sphere_1d_spherical
+  [../]
+
+  [./cylinder_2d_axisymmetric_except_1]
+    type = 'RunException'
+    input = 'cylinder_2d_axisymmetric.i'
+    cli_args = "AuxKernels/raddispaux/axis_vector='0 0 1'"
+    expect_err = "The 'axis_vector' parameter is only valid for 3D Cartesian models."
+    prereq = cylinder_2d_axisymmetric
+  [../]
+
+  [./cylinder_3d_cartesian_except_1]
+    type = 'RunException'
+    input = 'cylinder_3d_cartesian.i'
+    cli_args = "AuxKernels/raddispaux/axis_vector='0 0 0'"
+    expect_err = "axis_vector must have nonzero length"
+    prereq = cylinder_3d_cartesian
+  [../]
+[]
