@@ -105,18 +105,17 @@ file is generated for each item in the "include" setting discussed above and is 
 ---
 
 ## MkDocs Configuration
-As mentioned the MOOSE documentation system relies on [mkdocs], thus a configuration file must exist for it. However,
-the MOOSE system generates this file ("mkdocs.yml") using the "mkdocs.template.yml" in combination with the "pages.yml"
-discussed above. Therefore, any changes that need to be made to [mkdocs] must be done in the template file and then
-the documentation must be generated again.
+As mentioned the MOOSE documentation system relies on [mkdocs], thus a configuration file must exist for it. MOOSE
+uses the default filename from [mkdocs]: "mkdocs.yml."  Therefore, any changes that need to be made to [mkdocs] must
+be done in this file.
 
 ##### **Markdown Extensions**
 
 The [mkdocs] uses the python [markdown](http://pythonhosted.org/Markdown/) package and adds a custom extension to add the
 necessary functionality. This custom extension is located in `python/MooseDocs/extensions/MooseMarkdown.py` and includes
-three configuration options, which are set as done in the `mkdocs.template.yml` file.
+three configuration options, which are set as done in the `mkdocs.yml` file.
 
-![](docs/mkdocs.template.yml start=markdown_extensions: end=pages:)
+![](docs/mkdocs.yml start=markdown_extensions)
 
 | Option | Description |
 | ------ | ----------- |
@@ -181,9 +180,9 @@ cd ~/projects/your_app_name_here/docs
 ./moosedocs.py serve
 ```
 
-(4) Deploy the page.
-
-The location is given by "site_dir" in your [MkDocs Configure File](#mkdocs-configuration).
+To deploy the page, run the script with the 'build' options. This will create the site in the location is given
+by "site_dir" in your [MkDocs Configure File](#mkdocs-configuration). This site can then be copied to a server for
+hosting.
 
 ```text
 ./moosedocs.py build
