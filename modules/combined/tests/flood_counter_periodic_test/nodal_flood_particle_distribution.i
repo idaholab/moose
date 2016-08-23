@@ -69,13 +69,11 @@
 []
 
 [Postprocessors]
-  active = 'bubbles'
-
   [./bubbles]
     type = FeatureFloodCount
     variable = u
     threshold = 0.5
-    bubble_volume_file = nodal_flood_particle_distribution.csv
+    feature_volume_file = nodal_flood_particle_distribution.csv
     execute_on = 'initial timestep_end'
     flood_entity_type = ELEMENTAL
   [../]

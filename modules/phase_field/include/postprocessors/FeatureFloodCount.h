@@ -21,6 +21,9 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/mesh_tools.h"
 
+// External includes
+#include "bitmask_operators.h"
+
 //Forward Declarations
 class FeatureFloodCount;
 class MooseMesh;
@@ -73,22 +76,34 @@ public:
   inline bool isElemental() const { return _is_elemental; }
 
   /// This enumeration is used to indicate status of the grains in the _unique_grains data structure
-  enum class Status
+  enum class Status : unsigned char
   {
-    NOT_MARKED,
-    MARKED,
-    INACTIVE
+    CLEAR = 0x0,
+    MARKED = 0x1,
+    DIRTY = 0x2,
+    INACTIVE = 0x4
   };
 
   struct FeatureData
   {
-    FeatureData(unsigned int var_idx = std::numeric_limits<unsigned int>::max()) :
+    FeatureData() :
+        FeatureData(std::numeric_limits<unsigned int>::max())
+    {
+    }
+
+    FeatureData(unsigned int var_idx, unsigned int local_index, processor_id_type rank) :
+        FeatureData(var_idx)
+    {
+      _orig_ids = { std::make_pair(rank, local_index) };
+    }
+
+    FeatureData(unsigned int var_idx) :
         _var_idx(var_idx),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _volume(0.0),
         _vol_count(0),
-        _status(Status::NOT_MARKED),
+        _status(Status::CLEAR),
         _intersects_boundary(false)
     {
     }
@@ -169,7 +184,7 @@ public:
     /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
-      return _min_entity_id < rhs._min_entity_id;
+      return _var_idx < rhs._var_idx || (_var_idx == rhs._var_idx && _min_entity_id < rhs._min_entity_id);
     }
 
     /// stream output operator
@@ -192,6 +207,9 @@ public:
 
     /// The vector of bounding boxes completely enclosing this feature (multiple used with periodic constraints)
     std::vector<MeshTools::BoundingBox> _bboxes;
+
+    /// Original processor/local ids
+    std::list<std::pair<processor_id_type, unsigned int> > _orig_ids;
 
     /// The minimum entity seen in the _local_ids, used for sorting features
     dof_id_type _min_entity_id;
@@ -276,8 +294,8 @@ protected:
   ///@}
 
   /**
-   * This routine merges the data in _feature_sets from separate threads/processes to resolve
-   * any bubbles that were counted as unique by multiple processors.
+   * This routine is called on the master rank only and stitches together the partial
+   * feature pieces seen on any processor.
    */
   void mergeSets(bool use_periodic_boundary_info);
 
@@ -286,6 +304,17 @@ protected:
    * containing FeatureData objects.
    */
   void communicateAndMerge();
+
+  /**
+   * This routine populatess a stacked vector of local to global indices per rank and the associated count
+   * vector for scattering the vector to the ranks. The individual vectors can be different sizes. The ith
+   * vector will be distributed to the ith processor including the master rank.
+   * e.g.
+   * [ ... n_0 ] [ ... n_1 ] ... [ ... n_m ]
+   *
+   * It is intended to be overridden in derived classes.
+   */
+  virtual void buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const;
 
   /**
    * Helper routine for clearing up data structures during initialize and prior to parallel
@@ -301,7 +330,7 @@ protected:
 
   /**
    * This routine updates the _region_offsets variable which is useful for quickly determining
-   * the proper global number for a bubble when using multimap mode
+   * the proper global number for a feature when using multimap mode
    */
   void updateRegionOffsets();
 
@@ -312,7 +341,7 @@ protected:
 
   /**
    * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
-   * but is used to write out bubble volumes for this class.
+   * but is used to write out feature volumes for this class.
    */
   template<class T>
   void writeCSVFile(const std::string file_name, const std::vector<T> data);
@@ -344,7 +373,7 @@ protected:
   /// The vector of coupled in variables
   std::vector<MooseVariable *> _vars;
 
-  /// The threshold above (or below) where an entity may begin a new region (bubble)
+  /// The threshold above (or below) where an entity may begin a new region (feature)
   const Real _threshold;
   Real _step_threshold;
 
@@ -370,11 +399,14 @@ protected:
 
   const bool _condense_map_info;
 
-  /// This variable is used to indicate whether or not we identify bubbles with unique numbers on multiple maps
+  /// This variable is used to indicate whether or not we identify features with unique numbers on multiple maps
   const bool _global_numbering;
 
-  /// This variable is used to inidicate whether the maps will continue unique region information or just the variable numbers owning those regions
+  /// This variable is used to indicate whether the maps will contain unique region information or just the variable numbers owning those regions
   const bool _var_index_mode;
+
+  /// Indicates whether or not to communicate halo map information with all ranks
+  const bool _compute_halo_maps;
 
   /**
    * Use less-than when comparing values against the threshold value.
@@ -412,7 +444,10 @@ protected:
   /// The data structure used to find neighboring elements give a node ID
   std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
 
-  // The number of features seen by this object
+  /// The number of features seen by this object per map
+  std::vector<unsigned int> _feature_counts_per_map;
+
+  /// The number of features seen by this object (same as summing _feature_counts_per_map)
   unsigned int _feature_count;
 
   /**
@@ -426,7 +461,7 @@ protected:
    * The data structure used to hold the globally unique features. The outer vector
    * is indexed by variable number, the inner vector is indexed by feature number
    */
-  std::vector<std::vector<FeatureData> > _feature_sets;
+  std::vector<FeatureData> _feature_sets;
 
   /**
    * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
@@ -434,11 +469,13 @@ protected:
    */
   std::vector<std::map<dof_id_type, int> > _feature_maps;
 
+  /// The map recording the local to global feature ids
+  std::vector<unsigned int> _local_to_global_feature_map;
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
 
-  /// Average value of the domain which can optionally be used to find bubbles in a field
+  /// Average value of the domain which can optionally be used to find features in a field
   const PostprocessorValue & _element_average_value;
 
   /// The map for holding reconstructed ghosted element information
@@ -457,13 +494,13 @@ protected:
   std::multimap<dof_id_type, dof_id_type> _periodic_node_map;
 
   /**
-   * The filename and filehandle used if bubble volumes are being recorded to a file.
+   * The filename and filehandle used if feature volumes are being recorded to a file.
    * std::unique_ptr is used so we don't have to worry about cleaning up after ourselves...
    */
   std::map<std::string, std::unique_ptr<std::ofstream> > _file_handles;
 
   /**
-   * The vector hold the volume of each flooded bubble.  Note: this vector is only populated
+   * The vector hold the volume of each flooded feature.  Note: this vector is only populated
    * when requested by passing a file name to write this information to.
    */
   std::vector<Real> _all_feature_volumes;
@@ -473,14 +510,14 @@ protected:
 
   /**
    * Vector of length _maps_size to keep track of the total
-   * boundary-intersecting bubble volume scaled by the total domain
+   * boundary-intersecting feature volume scaled by the total domain
    * volume for each variable.
    */
   std::vector<Real> _total_volume_intersecting_boundary;
 
   /**
    * If true, the FeatureFloodCount object also computes the
-   * (normalized) volume of bubbles which intersect the boundary and
+   * (normalized) volume of features which intersect the boundary and
    * reports this value in the CSV file (if available).  Defaults to
    * false.
    */
@@ -491,43 +528,45 @@ protected:
 
   /// Determines if the flood counter is elements or not (nodes)
   bool _is_elemental;
+
+  /// Convenience variable for testing master rank
+  bool _is_master;
 };
 
 template <class T>
 void
 FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> data)
 {
-  if (processor_id() == 0)
+  mooseAssert(processor_id() == 0, "Only write files on processor zero");
+
+  // Try to find the filename
+  auto handle_it = _file_handles.find(file_name);
+
+  // If the file_handle isn't found, create it
+  if (handle_it == _file_handles.end())
   {
-    // Try to find the filename
-    auto handle_it = _file_handles.find(file_name);
+    MooseUtils::checkFileWriteable(file_name);
 
-    // If the file_handle isn't found, create it
-    if (handle_it == _file_handles.end())
-    {
-      MooseUtils::checkFileWriteable(file_name);
+    // Store the new filename in the map
+    auto result = _file_handles.insert(std::make_pair(file_name, libmesh_make_unique<std::ofstream>(file_name.c_str())));
 
-      // Store the new filename in the map
-      auto result = _file_handles.insert(std::make_pair(file_name, libmesh_make_unique<std::ofstream>(file_name.c_str())));
+    // Be sure that the insert worked!
+    mooseAssert(result.second, "Insertion into _file_handles map failed!");
 
-      // Be sure that the insert worked!
-      mooseAssert(result.second, "Insertion into _file_handles map failed!");
-
-      // Set handle_it to be an iterator to the new file.
-      handle_it = result.first;
-    }
-
-    // Get reference to the stream, makes syntax below much simpler
-    std::ofstream & the_stream = *(handle_it->second);
-
-    // Set formatting flags on the stream - technically we only need to do this once, but whatever.
-    the_stream << std::scientific << std::setprecision(6);
-
-    mooseAssert(the_stream.is_open(), "File handle is not open");
-
-    std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(the_stream, ", "));
-    the_stream << std::endl;
+    // Set handle_it to be an iterator to the new file.
+    handle_it = result.first;
   }
+
+  // Get reference to the stream, makes syntax below much simpler
+  std::ofstream & the_stream = *(handle_it->second);
+
+  // Set formatting flags on the stream - technically we only need to do this once, but whatever.
+  the_stream << std::scientific << std::setprecision(6);
+
+  mooseAssert(the_stream.is_open(), "File handle is not open");
+
+  std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(the_stream, ", "));
+  the_stream << std::endl;
 }
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
@@ -536,5 +575,6 @@ template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, 
 template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
 template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
 
+template<> struct enable_bitmask_operators<FeatureFloodCount::Status> { static const bool enable=true; };
 
 #endif //FEATUREFLOODCOUNT_H
