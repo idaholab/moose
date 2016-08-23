@@ -7,11 +7,10 @@ from MooseInputBlock import MooseInputBlock
 from MooseCppMethod import MooseCppMethod
 from MoosePackageParser import MoosePackageParser
 from MooseMarkdownLinkPreprocessor import MooseMarkdownLinkPreprocessor
-from MooseSlideTreeprocessor import MooseSlideTreeprocessor
 from MooseCarousel import MooseCarousel
+from MooseSlidePreprocessor import MooseSlidePreprocessor
 import MooseDocs
 import utils
-
 
 class MooseMarkdown(markdown.Extension):
 
@@ -24,6 +23,7 @@ class MooseMarkdown(markdown.Extension):
         self.config['make'] = [root, "The location of the Makefile responsible for building the application."]
         self.config['repo'] = ['', "The remote repository to create hyperlinks."]
         self.config['docs_dir'] = [os.path.join('docs', 'content'), "The location of the markdown to be used for generating the site."]
+        self.config['slides'] = [False, "Enable the parsing for creating reveal.js slides."]
 
         self._markdown_database_dir = os.path.join(self.config['root'][0], self.config['docs_dir'][0])
         super(MooseMarkdown, self).__init__(*args, **kwargs)
@@ -35,9 +35,11 @@ class MooseMarkdown(markdown.Extension):
         for key, value in self.config.iteritems():
             config[key] = value[0]
 
-        # Preprocessors
-        #md.treeprocessors.add('moose_slides', MooseSlideTreeprocessor(md), '_end')
-        md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(md, self._markdown_database_dir), '>include')
+        # Prepcoessors
+        md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(self._markdown_database_dir), '_begin')
+
+        if config['slides']:
+            md.preprocessors.add('moose_slides', MooseSlidePreprocessor(md), '_end')
 
         # Block processors
         md.parser.blockprocessors.add('slideshow', MooseCarousel(md.parser), '_begin')

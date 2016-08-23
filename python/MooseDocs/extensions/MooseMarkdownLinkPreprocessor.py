@@ -10,8 +10,8 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
     A preprocessor for creating automatic linking between markdown files.
     """
 
-    def __init__(self, md, database_dir, *args, **kwargs):
-        super(MooseMarkdownLinkPreprocessor, self).__init__(md, *args, **kwargs)
+    def __init__(self, database_dir, *args, **kwargs):
+        super(MooseMarkdownLinkPreprocessor, self).__init__(*args, **kwargs)
         self._database_dir = database_dir
         self._database = None
 

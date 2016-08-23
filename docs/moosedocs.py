@@ -22,7 +22,7 @@ def command_line_options():
     # Command-line options
     parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
     parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
-    subparser = parser.add_subparsers(title='Commands', description="Documenation creation command to execute.", dest='command')
+    subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
     # Generate options
     generate_parser = subparser.add_parser('generate', help="Generate the markdown documentation from MOOSE application executable. This is done by the serve and build command automatically.")
