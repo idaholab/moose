@@ -48,12 +48,17 @@
 #include "PorousFlowJoiner.h"
 #include "PorousFlowNodeNumber.h"
 #include "PorousFlowTemperature.h"
+#include "PorousFlowThermalConductivityIdeal.h"
+#include "PorousFlowMatrixInternalEnergy.h"
+#include "PorousFlowInternalEnergyIdeal.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowEffectiveStressCoupling.h"
 #include "PorousFlowMassVolumetricExpansion.h"
+#include "PorousFlowEnergyTimeDerivative.h"
+#include "PorousFlowHeatConduction.h"
 
 // BoundaryConditions
 #include "PorousFlowSink.h"
@@ -149,12 +154,17 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowJoiner);
   registerMaterial(PorousFlowNodeNumber);
   registerMaterial(PorousFlowTemperature);
+  registerMaterial(PorousFlowThermalConductivityIdeal);
+  registerMaterial(PorousFlowMatrixInternalEnergy);
+  registerMaterial(PorousFlowInternalEnergyIdeal);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
   registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowEffectiveStressCoupling);
   registerKernel(PorousFlowMassVolumetricExpansion);
+  registerKernel(PorousFlowEnergyTimeDerivative);
+  registerKernel(PorousFlowHeatConduction);
 
   // BoundaryConditions
   registerBoundaryCondition(PorousFlowSink);
