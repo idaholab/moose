@@ -129,7 +129,6 @@
 #include "GBDependentDiffusivity.h"
 #include "GBEvolution.h"
 #include "GrainAdvectionVelocity.h"
-#include "InclusionProperties.h"
 #include "InterfaceOrientationMaterial.h"
 #include "KKSXeVacSolidMaterial.h"
 #include "MathEBFreeEnergy.h"
@@ -382,7 +381,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(GBDependentAnisotropicTensor);
   registerMaterial(GBDependentDiffusivity);
   registerMaterial(GrainAdvectionVelocity);
-  registerMaterial(InclusionProperties);
   registerMaterial(InterfaceOrientationMaterial);
   registerMaterial(KKSXeVacSolidMaterial);
   registerMaterial(MathEBFreeEnergy);
