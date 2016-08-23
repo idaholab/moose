@@ -24,7 +24,6 @@ InputParameters validParams<MaterialTestIndicator>()
   return params;
 }
 
-
 MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters) :
     Indicator(parameters),
     MaterialPropertyInterface(this),
@@ -34,12 +33,11 @@ MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters)
 {
 }
 
-
 void
 MaterialTestIndicator::computeIndicator()
 {
-  std::vector<Real> min(_qrule->n_points());
+  Real min = std::numeric_limits<Real>::max();
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    min[qp] = _property[qp];
-  _indicator_var.setNodalValue(*std::min_element(min.begin(), min.end()));
+    min = std::min(min, _property[qp]);
+  _indicator_var.setNodalValue(min);
 }

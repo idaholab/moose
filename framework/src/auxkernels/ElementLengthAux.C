@@ -25,18 +25,16 @@ InputParameters validParams<ElementLengthAux>()
   return params;
 }
 
-
 ElementLengthAux::ElementLengthAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _method(getParam<MooseEnum>("method"))
+    _use_min(getParam<MooseEnum>("method") == "min")
 {
 }
-
 
 Real
 ElementLengthAux::computeValue()
 {
-  if (_method == "min")
+  if (_use_min)
     return _current_elem->hmin();
   return _current_elem->hmax();
 }

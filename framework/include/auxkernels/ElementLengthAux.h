@@ -40,7 +40,7 @@ protected:
   virtual Real computeValue() override;
 
   /// The type of calculation to perform min or max
-  const MooseEnum & _method;
+  const bool _use_min;
 };
 
 #endif // ELEMENTLENGTHAUX_H
