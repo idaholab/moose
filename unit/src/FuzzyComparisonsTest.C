@@ -34,7 +34,10 @@ FuzzyComparisonsTest::fuzzyFunctions()
   libMesh::Real bminus = b-0.5*rtol;
   libMesh::Real bplus2 = b+1.5*rtol;
   libMesh::Real bminus2 = b-1.5*rtol;
+  libMesh::Real zero = 0.0;
 
+  CPPUNIT_ASSERT(MooseUtils::absoluteFuzzyEqual(zero,zero));
+  CPPUNIT_ASSERT(MooseUtils::absoluteFuzzyEqual(tol,tol));
   CPPUNIT_ASSERT(MooseUtils::absoluteFuzzyEqual(a,aplus));
   CPPUNIT_ASSERT(!MooseUtils::absoluteFuzzyEqual(a,aplus2));
 
@@ -54,6 +57,9 @@ FuzzyComparisonsTest::fuzzyFunctions()
   CPPUNIT_ASSERT(MooseUtils::absoluteFuzzyLessEqual(aminus2,a));
   CPPUNIT_ASSERT(!MooseUtils::absoluteFuzzyLessEqual(aplus2,a));
 
+  CPPUNIT_ASSERT(MooseUtils::relativeFuzzyEqual(zero,zero));
+  CPPUNIT_ASSERT(MooseUtils::relativeFuzzyEqual(tol,tol));
+  CPPUNIT_ASSERT(!MooseUtils::relativeFuzzyEqual(zero,tol));
   CPPUNIT_ASSERT(MooseUtils::relativeFuzzyEqual(b,bplus));
   CPPUNIT_ASSERT(!MooseUtils::relativeFuzzyEqual(b,bplus2));
 

@@ -257,7 +257,7 @@ baseName(const std::string & name)
 bool
 absoluteFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (std::abs(var1 - var2) < tol);
+  return (std::abs(var1 - var2) <= tol);
 }
 
 bool
