@@ -180,7 +180,14 @@ protected:
   /// Optional ESBD Reader
   const EBSDReader * _ebsd_reader;
 
-  bool _compute_op_maps;
+  /// The phase to retrieve EBSD information from
+  const unsigned int _phase;
+
+  /// Boolean to indicate that we should retrieve EBSD information from a specific phase
+  const bool _consider_phase;
+
+  /// Boolean to indicate whether or not we should populate order parameter map information
+  const bool _compute_op_maps;
 
   /**
    * Data structure for active order parameter information on elements:

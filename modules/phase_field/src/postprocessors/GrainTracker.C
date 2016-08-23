@@ -41,6 +41,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _unique_grains(declareRestartableData<std::map<unsigned int, FeatureData> >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
+    _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : 0),
+    _consider_phase(isParamValid("phase")),
     _compute_op_maps(getParam<bool>("compute_op_maps"))
 {
   if (!_is_elemental && _compute_op_maps)
@@ -365,13 +367,13 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
   {
     if (_ebsd_reader)
     {
-      auto grain_num = _ebsd_reader->getGrainNum();
+      auto grain_num = _consider_phase ? _ebsd_reader->getGrainNum(_phase) : _ebsd_reader->getGrainNum();
 
       std::vector<Point> center_points(grain_num);
 
       for (decltype(grain_num) gr = 0; gr < grain_num; ++gr)
       {
-        const EBSDReader::EBSDAvgData & d = _ebsd_reader->getAvgData(gr);
+        const EBSDReader::EBSDAvgData & d = _consider_phase ? _ebsd_reader->getAvgData(_phase, gr) : _ebsd_reader->getAvgData(gr);
         center_points[gr] = d._p;
 
         _console << "EBSD Grain " << gr << " " << center_points[gr] << '\n';

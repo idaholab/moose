@@ -91,6 +91,7 @@
     type = GrainTracker
     execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd
+    phase = 2
   [../]
 []
 
