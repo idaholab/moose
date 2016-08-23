@@ -85,8 +85,8 @@
     variable = u
     threshold = 1.0
 
-    # File to write bubble volume data to
-    bubble_volume_file = bubble_volumes.csv
+    # File to write feature volume data to
+    feature_volume_file = feature_volumes.csv
 
     # Explicitly turn on the boundary-intersecting volume calculation
     compute_boundary_intersecting_volume = true

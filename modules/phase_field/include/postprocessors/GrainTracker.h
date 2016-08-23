@@ -13,7 +13,6 @@
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
-#include "libmesh/auto_ptr.h"
 
 class GrainTracker;
 class EBSDReader;
@@ -59,11 +58,7 @@ protected:
 
   virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
 
-  /**
-   * This method is called when a new grain is detected. It can be overridden by a derived class to handle
-   * setting new properties on the newly created grain.
-   */
-  virtual void newGrainCreated(unsigned int new_grain_idx);
+  void communicateHaloMap();
 
   /**
    * This method serves two purposes:
@@ -76,8 +71,23 @@ protected:
    *    track grains between time steps.
    *
    * This method updates the _unique_grains datastructure.
+   * This method should only be called on the root processor
+   *
+   * @param new_grain_indices Contains the list of new ids found during the tracking step. This
+   *                          vector should be communicated on all processors.
    */
-  void trackGrains();
+  void trackGrains(std::vector<unsigned int> & new_grain_indices);
+
+  /**
+   * This method is called when a new grain is detected. It can be overridden by a derived class to handle
+   * setting new properties on the newly created grain.
+   */
+  virtual void newGrainCreated(unsigned int new_grain_idx);
+
+  /**
+   * Builds local to global indices taking into account the unique grain structure
+   */
+  virtual void buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_indices, std::vector<int> & count) const override;
 
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.
@@ -101,14 +111,14 @@ protected:
    * A routine for moving all of the solution values from a given grain to a new variable number. It is called
    * with different modes to only cache, or actually do the work, or bypass the cache altogether.
    */
-  void swapSolutionValues(FeatureData &  grain, unsigned int var_idx, std::map<Node *, CacheValues> & cache,
-                          RemapCacheMode cache_mode, unsigned int depth);
+  void swapSolutionValues(FeatureData &  grain, unsigned int new_var_idx, std::vector<std::map<Node *, CacheValues> > & cache,
+                          RemapCacheMode cache_mode);
 
   /**
    * Helper method for actually performing the swaps.
    */
-  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx, std::map<Node *, CacheValues> & cache,
-                                RemapCacheMode cache_mode);
+  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx,
+                                std::vector<std::map<Node *, CacheValues> > & cache, RemapCacheMode cache_mode);
 
   /**
    * This method returns the minimum periodic distance between two vectors of bounding boxes. If the bounding boxes overlap
