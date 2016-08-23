@@ -31,13 +31,13 @@ include:
         install: content/framework/systems
         links:
             Tests:
-                - ../framework/test/tests
-                - ../framework/modules/phase_field/tests
+                - ../test/tests
+                - ../modules/phase_field/tests
             Examples:
-                - ../framework/examples
-                - ../framework/modules/phase_field/examples
+                - ../examples
+                - ../modules/phase_field/examples
             Tutorials:
-                - ../framework/tutorials
+                - ../tutorials
 
     phase_field:
         source: ../modules/phase_field

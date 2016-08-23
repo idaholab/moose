@@ -111,6 +111,7 @@
 #include "VariableGradientComponent.h"
 #include "ParsedAux.h"
 #include "VariableTimeIntegrationAux.h"
+#include "ElementLengthAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -532,6 +533,7 @@ registerObjects(Factory & factory)
   registerAux(VariableGradientComponent);
   registerAux(ParsedAux);
   registerAux(VariableTimeIntegrationAux);
+  registerAux(ElementLengthAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);

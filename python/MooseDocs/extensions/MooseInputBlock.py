@@ -39,7 +39,10 @@ class MooseInputBlock(MooseSourcePatternBase):
             else:
                 content = node.createString()
 
-            label = '{} [{}]'.format(match.group(2), match.group(4))
+            if match.group(2):
+                label = match.group(2)
+            else:
+                label = rel_filename
             el = self.createElement(label, content, filename, rel_filename, settings)
 
         return el

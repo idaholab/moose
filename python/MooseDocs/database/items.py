@@ -51,6 +51,7 @@ class MarkdownIncludeItem(DatabaseItem):
     def markdown(self):
         return '{{!{}!}}'.format(self._filename)
 
+
 class RegexItem(DatabaseItem):
     """
     An item that creates keys base on regex match.
@@ -66,9 +67,13 @@ class RegexItem(DatabaseItem):
         """
         Return the keys for which this item will be stored in the database.
         """
-
+        keys = []
         for match in re.finditer(self._regex, self.content()):
-            yield match.group('key')
+            k = match.group('key')
+            if k not in keys:
+                keys.append(k)
+        return keys
+
 
 class InputFileItem(RegexItem):
     """
@@ -79,6 +84,7 @@ class InputFileItem(RegexItem):
 
     def markdown(self):
         return '* [{}]({})'.format(self._rel_path, self._repo)
+
 
 class ChildClassItem(RegexItem):
     """
