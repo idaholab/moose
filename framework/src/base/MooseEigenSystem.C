@@ -11,13 +11,13 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "EigenSystem.h"
+#include "MooseEigenSystem.h"
 
 #include "MaterialData.h"
 #include "Factory.h"
 #include "EigenKernel.h"
 
-EigenSystem::EigenSystem(FEProblem & fe_problem, const std::string & name) :
+MooseEigenSystem::MooseEigenSystem(FEProblem & fe_problem, const std::string & name) :
     NonlinearSystem(fe_problem, name),
     _all_eigen_vars(false),
     _active_on_old(false),
@@ -25,12 +25,12 @@ EigenSystem::EigenSystem(FEProblem & fe_problem, const std::string & name) :
 {
 }
 
-EigenSystem::~EigenSystem()
+MooseEigenSystem::~MooseEigenSystem()
 {
 }
 
 void
-EigenSystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+MooseEigenSystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -72,13 +72,13 @@ EigenSystem::addKernel(const std::string & kernel_name, const std::string & name
 }
 
 void
-EigenSystem::markEigenVariable(const VariableName & var_name)
+MooseEigenSystem::markEigenVariable(const VariableName & var_name)
 {
   _eigen_var_names.insert(var_name);
 }
 
 void
-EigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
+MooseEigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
 {
   if (tag==ALL)
   {
@@ -101,7 +101,7 @@ EigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
 }
 
 void
-EigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coefficients)
+MooseEigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coefficients)
 {
   mooseAssert(coefficients.size()>0 && coefficients.size()<=3, "Size error on coefficients");
   if (tag==ALL)
@@ -154,7 +154,7 @@ EigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coef
 }
 
 void
-EigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
+MooseEigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
 {
   if (tag==ALL)
   {
@@ -177,7 +177,7 @@ EigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
 }
 
 void
-EigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
+MooseEigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
 {
   if (tag==ALL)
   {
@@ -200,27 +200,27 @@ EigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
 }
 
 void
-EigenSystem::eigenKernelOnOld()
+MooseEigenSystem::eigenKernelOnOld()
 {
   _active_on_old = true;
   _fe_problem.updateActiveObjects();   // update warehouse active objects
 }
 
 void
-EigenSystem::eigenKernelOnCurrent()
+MooseEigenSystem::eigenKernelOnCurrent()
 {
   _active_on_old = false;
   _fe_problem.updateActiveObjects();   // update warehouse active objects
 }
 
 bool
-EigenSystem::activeOnOld()
+MooseEigenSystem::activeOnOld()
 {
   return _active_on_old;
 }
 
 void
-EigenSystem::buildSystemDoFIndices(SYSTEMTAG tag)
+MooseEigenSystem::buildSystemDoFIndices(SYSTEMTAG tag)
 {
   if (tag==ALL)
   {
@@ -245,7 +245,7 @@ EigenSystem::buildSystemDoFIndices(SYSTEMTAG tag)
 }
 
 bool
-EigenSystem::containsEigenKernel() const
+MooseEigenSystem::containsEigenKernel() const
 {
   return _eigen_kernel_counter>0;
 }

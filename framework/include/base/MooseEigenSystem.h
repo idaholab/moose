@@ -17,13 +17,16 @@
 
 #include "NonlinearSystem.h"
 
+// libMesh
+#include "libmesh/eigen_system.h"
+
 class FEProblem;
 
-class EigenSystem : public NonlinearSystem
+class MooseEigenSystem : public NonlinearSystem
 {
 public:
-  EigenSystem(FEProblem & problem, const std::string & name);
-  virtual ~EigenSystem();
+  MooseEigenSystem(FEProblem & problem, const std::string & name);
+  virtual ~MooseEigenSystem();
 
   /**
    * Adds a kernel

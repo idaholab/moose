@@ -19,7 +19,7 @@
 
 //Forward Declarations
 class EigenKernel;
-class EigenSystem;
+class MooseEigenSystem;
 
 template<>
 InputParameters validParams<EigenKernel>();
@@ -55,7 +55,7 @@ protected:
   bool _eigen;
 
   /// EigenKernel always lives in EigenSystem
-  EigenSystem * _eigen_sys;
+  MooseEigenSystem * _eigen_sys;
 
   /**
    * A pointer to the eigenvalue that is stored in a postprocessor

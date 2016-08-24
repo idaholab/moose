@@ -19,7 +19,7 @@
 
 // Forward Declarations
 class EigenExecutionerBase;
-class EigenSystem;
+class MooseEigenSystem;
 class FEProblem;
 
 template<>
@@ -123,7 +123,7 @@ protected:
 
   // the fe problem
   FEProblem & _problem;
-  EigenSystem & _eigen_sys;
+  MooseEigenSystem & _eigen_sys;
 
   /// Storage for the eigenvalue computed by the executioner
   Real & _eigenvalue;
