@@ -5,29 +5,29 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef POROUSFLOWADVECTIVEFLUX_H
-#define POROUSFLOWADVECTIVEFLUX_H
+#ifndef POROUSFLOWCONVECTIVEFLUX_H
+#define POROUSFLOWCONVECTIVEFLUX_H
 
 #include "PorousFlowDarcyBase.h"
 
-class PorousFlowAdvectiveFlux;
+class PorousFlowConvectiveFlux;
 
 template<>
-InputParameters validParams<PorousFlowAdvectiveFlux>();
+InputParameters validParams<PorousFlowConvectiveFlux>();
 
 /**
  * Convective flux of component k in fluid phase alpha.
  * A fully-updwinded version is implemented, where the mobility
  * of the upstream nodes is used.
  */
-class PorousFlowAdvectiveFlux : public PorousFlowDarcyBase
+class PorousFlowConvectiveFlux : public PorousFlowDarcyBase
 {
 public:
-  PorousFlowAdvectiveFlux(const InputParameters & parameters);
+  PorousFlowConvectiveFlux(const InputParameters & parameters);
 
 protected:
   /** The mobility of the fluid.
-   * This is mass_fraction * fluid_density * relative_permeability / fluid_viscosity
+   * This is enthalpy * fluid_density * relative_permeability / fluid_viscosity
    * @param nodenum The node-number to evaluate the mobility for
    * @param phase the fluid phase number
    */
@@ -40,20 +40,17 @@ protected:
    */
   virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar);
 
-  /// Mass fraction of each component in each phase
-  const MaterialProperty<std::vector<std::vector<Real> > > & _mass_fractions;
+  /// Enthalpy of each phase
+  const MaterialProperty<std::vector<Real> > & _enthalpy;
 
-  /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_fractions_dvar;
+  /// Derivative of the enthalpy wrt PorousFlow variables
+  const MaterialProperty<std::vector<std::vector<Real> > > & _denthalpy_dvar;
 
   /// Relative permeability of each phase
   const MaterialProperty<std::vector<Real> > & _relative_permeability;
 
   /// Derivative of relative permeability of each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
-
-  /// Index of the fluid component that this kernel acts on
-  const unsigned int _fluid_component;
 };
 
-#endif // POROUSFLOWADVECTIVEFLUX_H
+#endif // POROUSFLOWCONVECTIVEFLUX_H
