@@ -21,7 +21,7 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
-#include "EigenSystem.h"
+#include "MooseEigenSystem.h"
 #include "MooseObjectAction.h"
 #include "MooseMesh.h"
 
@@ -143,7 +143,7 @@ AddVariableAction::addVariable(std::string & var_name)
 
   if (getParam<bool>("eigen"))
   {
-    EigenSystem & esys(static_cast<EigenSystem &>(_problem->getNonlinearSystem()));
+    MooseEigenSystem & esys(static_cast<MooseEigenSystem &>(_problem->getNonlinearSystem()));
     esys.markEigenVariable(var_name);
   }
 }

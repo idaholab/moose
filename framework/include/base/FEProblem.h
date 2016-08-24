@@ -1246,7 +1246,7 @@ private:
 
   friend class AuxiliarySystem;
   friend class NonlinearSystem;
-  friend class EigenSystem;
+  friend class MooseEigenSystem;
   friend class Resurrector;
   friend class RestartableDataIO;
   friend class Restartable;

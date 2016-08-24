@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "EigenExecutionerBase.h"
-#include "EigenSystem.h"
+#include "MooseEigenSystem.h"
 
 #include "MooseApp.h"
 #include "DisplacedProblem.h"
@@ -49,7 +49,7 @@ EigenExecutionerBase::eigenvalueOld()
 EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
     Executioner(parameters),
     _problem(_fe_problem),
-    _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
+    _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystem())),
     _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
     _source_integral(getPostprocessorValue("bx_norm")),
     _source_integral_old(1),
@@ -84,16 +84,16 @@ void
 EigenExecutionerBase::init()
 {
   checkIntegrity();
-  _eigen_sys.buildSystemDoFIndices(EigenSystem::EIGEN);
+  _eigen_sys.buildSystemDoFIndices(MooseEigenSystem::EIGEN);
 
   if (getParam<bool>("auto_initialization"))
   {
     // Initialize the solution of the eigen variables
     // Note: initial conditions will override this if there is any by _problem.initialSetup()
-    _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
+    _eigen_sys.initSystemSolution(MooseEigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
-  _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
+  _eigen_sys.initSystemSolutionOld(MooseEigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
   ExecFlagType bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execBitFlags();
@@ -142,7 +142,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
   while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
   {
     // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
-    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, k/_source_integral);
+    _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, k/_source_integral);
     _problem.execute(EXEC_LINEAR);
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
@@ -410,7 +410,7 @@ EigenExecutionerBase::normalizeSolution(bool force)
   if (scaling != 1.0)
   {
     //FIXME: we assume linear scaling here!
-    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, scaling);
+    _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, scaling);
     // update all aux variables and user objects
     for (unsigned int i=0; i<Moose::exec_types.size(); i++)
     {
@@ -484,7 +484,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
       std::vector<double> coef(2);
       coef[0] = alp;
       coef[1] = 1-alp;
-      _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
+      _eigen_sys.combineSystemSolution(MooseEigenSystem::EIGEN, coef);
       _problem.execute(EXEC_LINEAR);
       _eigenvalue = _source_integral;
     }
@@ -535,7 +535,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
         coef[0] = alp;
         coef[1] = 1-alp+beta;
         coef[2] = -beta;
-        _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
+        _eigen_sys.combineSystemSolution(MooseEigenSystem::EIGEN, coef);
         _problem.execute(EXEC_LINEAR);
         _eigenvalue = _source_integral;
       }
