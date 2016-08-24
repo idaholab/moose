@@ -177,4 +177,17 @@
     difference_tol = 1E10
   [../]
 
+  [./convect01]
+    type = 'PetscJacobianTester'
+    input = 'convect01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./convect02]
+    type = 'PetscJacobianTester'
+    input = 'convect02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
 []
