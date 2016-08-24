@@ -37,6 +37,11 @@ using boost::math::normal;
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
+#ifndef M_PI
+//PI is not actually defined anywhere in the C++ standard.
+#define M_PI 3.14159265358979323846
+#endif
+
 void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN){
     /**
      * This function convert a number in base 10 to a new number in any base N
