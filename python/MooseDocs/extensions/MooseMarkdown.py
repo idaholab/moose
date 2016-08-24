@@ -2,7 +2,7 @@ import os
 import subprocess
 import markdown
 
-from MooseSourceFile import MooseSourceFile
+from MooseTextFile import MooseTextFile
 from MooseInputBlock import MooseInputBlock
 from MooseCppMethod import MooseCppMethod
 from MoosePackageParser import MoosePackageParser
@@ -58,7 +58,7 @@ class MooseMarkdown(markdown.Extension):
         # Inline Patterns
         md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
         md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, make=config['make'], repo=config['repo'], root=config['root']), '<image_link')
-        md.inlinePatterns.add('moose_source', MooseSourceFile(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
+        md.inlinePatterns.add('moose_source', MooseTextFile(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
 
         if config['package']:
             md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md), '_end')
