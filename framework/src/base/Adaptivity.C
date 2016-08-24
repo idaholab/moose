@@ -129,13 +129,17 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 }
 
 bool
-Adaptivity::adaptMesh()
+Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 {
-  bool meshChanged = false;
+  // If the marker name is supplied, use it. Otherwise, use the one in _marker_variable_name
+  if (marker_name.empty())
+    marker_name = _marker_variable_name;
+
+  bool mesh_changed = false;
 
   if (_use_new_system)
   {
-    if (_marker_variable_name != "") // Only flag if a marker variable name has been set
+    if (!marker_name.empty()) // Only flag if a marker variable name has been set
     {
       _mesh_refinement->clean_refinement_flags();
 
@@ -143,7 +147,7 @@ Adaptivity::adaptMesh()
       _subproblem.getAuxiliarySystem().solution().close();
       _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-      FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level);
+      FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level, marker_name);
       ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
                                _subproblem.mesh().getMesh().active_elements_end(), 1);
       Threads::parallel_reduce(all_elems, fet);
@@ -174,40 +178,30 @@ Adaptivity::adaptMesh()
     _displaced_problem->undisplaceMesh();
 
   // Perform refinement and coarsening
-  meshChanged = _mesh_refinement->refine_and_coarsen_elements();
+  mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
 
-  if (_displaced_problem && meshChanged)
+  if (_displaced_problem && mesh_changed)
   {
     // Now do refinement/coarsening
-    bool dispMeshChanged = _displaced_mesh_refinement->refine_and_coarsen_elements();
+    bool displaced_mesh_changed = _displaced_mesh_refinement->refine_and_coarsen_elements();
 
     // Since the undisplaced mesh changed, the displaced mesh better have changed!
-    mooseAssert(dispMeshChanged, "Undisplaced mesh changed, but displaced mesh did not!");
+    mooseAssert(displaced_mesh_changed, "Undisplaced mesh changed, but displaced mesh did not!");
   }
 
-  if (meshChanged && _print_mesh_changed)
+  if (mesh_changed && _print_mesh_changed)
   {
     _console << "\nMesh Changed:\n";
     _mesh.printInfo();
   }
 
-  return meshChanged;
+  return mesh_changed;
 }
 
-void
+bool
 Adaptivity::initialAdaptMesh()
 {
-  if (_initial_marker_variable_name != "")
-  {
-    std::string temp = _marker_variable_name;
-    _marker_variable_name = _initial_marker_variable_name;
-
-    adaptMesh();
-
-    _marker_variable_name = temp;
-  }
-  else
-    adaptMesh();
+  return adaptMesh(_initial_marker_variable_name);
 }
 
 void
@@ -267,12 +261,6 @@ void
 Adaptivity::setInitialMarkerVariableName(std::string marker_field)
 {
   _initial_marker_variable_name = marker_field;
-}
-
-MooseVariable &
-Adaptivity::getMarkerVariable()
-{
-  return _subproblem.getVariable(0, _marker_variable_name);
 }
 
 ErrorVector &

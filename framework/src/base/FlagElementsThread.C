@@ -27,14 +27,15 @@
 
 FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
                                        std::vector<Number> & serialized_solution,
-                                       unsigned int max_h_level) :
+                                       unsigned int max_h_level,
+                                       const std::string & marker_name) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),
     _fe_problem(fe_problem),
     _displaced_problem(_fe_problem.getDisplacedProblem()),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _system_number(_aux_sys.number()),
     _adaptivity(_fe_problem.adaptivity()),
-    _field_var(_adaptivity.getMarkerVariable()),
+    _field_var(_fe_problem.getVariable(0, marker_name)),
     _field_var_number(_field_var.number()),
     _serialized_solution(serialized_solution),
     _max_h_level(max_h_level)
