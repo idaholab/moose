@@ -1,16 +1,16 @@
 import re
 import os
 import MooseDocs
-from MooseSourcePatternBase import MooseSourcePatternBase
+from MooseTextPatternBase import MooseTextPatternBase
 
-class MooseSourceFile(MooseSourcePatternBase):
+class MooseTextFile(MooseTextPatternBase):
     """
     A markdown extension for including complete source code files.
     """
-    RE = r'!\[(.*?)\]\((.*\.\w+\b)\s*(.*?)\)'
+    RE = r'!text\s+(.*\/(.*?))\s+(.*)'
 
     def __init__(self, config):
-        super(MooseSourceFile, self).__init__(self.RE, config)
+        super(MooseTextFile, self).__init__(self.RE, config)
 
         # Add to the default settings
         self._settings['line'] = None
@@ -19,14 +19,14 @@ class MooseSourceFile(MooseSourcePatternBase):
 
     def handleMatch(self, match):
         """
-        Process the C++ file provided.
+        Process the text file provided.
         """
 
         # Update the settings from regex match
         settings = self.getSettings(match.group(4))
 
         # Read the file
-        rel_filename = match.group(3).lstrip('/')
+        rel_filename = match.group(2).lstrip('/')
         filename = self.checkFilename(rel_filename)
 
         if not filename:
@@ -44,10 +44,10 @@ class MooseSourceFile(MooseSourcePatternBase):
 
         if content == None:
             log.error("Failed to extract content from {}.".format(filename))
-            return self.createErrorElement(rel_filename)
+            return self.createErrorElement(rel_filename, 'No content')
 
         # Return the Element object
-        el = self.createElement(match.group(2), content, filename, rel_filename, settings)
+        el = self.createElement(match.group(3), content, filename, rel_filename, settings)
         return el
 
     def extractLine(self, filename, desired):
