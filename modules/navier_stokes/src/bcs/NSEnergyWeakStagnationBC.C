@@ -23,9 +23,6 @@ NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & param
 
 Real NSEnergyWeakStagnationBC::computeQpResidual()
 {
-  // Ratio of specific heats
-  const Real gam = _fp.gamma();
-
   // Compute stagnation values
   Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
   staticValues(T_s, p_s, rho_s);

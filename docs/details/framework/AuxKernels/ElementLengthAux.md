@@ -4,4 +4,4 @@ with the result. The element size calculation uses the [libMesh](http://libmesh.
 from the [`Elem`](https://libmesh.github.io/doxygen/classlibMesh_1_1Elem.html) class to compute the length.
 
 ## Example Syntax
-![](test/tests/auxkernels/element_size/element_size.i::AuxKernels)
+![](test/tests/auxkernels/element_length/element_length.i::AuxKernels)

@@ -660,7 +660,10 @@ GrainTracker::remapGrains()
    */
   if (_is_master)
   {
-    std::vector<unsigned int> grain_id_to_existing_var_idx(_unique_grains.size(), std::numeric_limits<unsigned int>::max());
+    mooseAssert(!_unique_grains.empty(), "Unique grains data structure is empty!");
+
+    // Resize our vector to the largest grain index (last one in the map) plus one to hold all of the potential remapping indices
+    std::vector<unsigned int> grain_id_to_existing_var_idx(_unique_grains.rbegin()->first + 1, std::numeric_limits<unsigned int>::max());
     for (auto & grain_pair : _unique_grains)
     {
       mooseAssert(!(grain_pair.second._status == Status::CLEAR), "Grain " << grain_pair.first << " status in wrong state.");
@@ -746,6 +749,8 @@ GrainTracker::remapGrains()
     for (auto & grain_pair : _unique_grains)
     {
       auto & grain = grain_pair.second;
+
+      mooseAssert(grain_pair.first < grain_id_to_existing_var_idx.size(), "Error indexing into grain_remapping map");
       auto old_var_idx = grain_id_to_existing_var_idx[grain_pair.first];
 
       if (grain._status != Status::INACTIVE && old_var_idx != grain._var_idx)
@@ -1133,7 +1138,8 @@ GrainTracker::updateFieldInfo()
   if (gather_volumes)
   {
     // store volumes per feature
-    _all_feature_volumes.reserve(_unique_grains.size());
+    mooseAssert(!_unique_grains.empty(), "Unique grain structure is empty!");
+    _all_feature_volumes.resize(_unique_grains.rbegin()->first + 1, 0);
 
     // store totals per variable (or smaller)
     _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 0 : _maps_size);
@@ -1191,7 +1197,7 @@ GrainTracker::updateFieldInfo()
     // Save off volume information (no sort required)
     if (gather_volumes)
     {
-      _all_feature_volumes.push_back(grain_pair.second._volume);
+      _all_feature_volumes[grain_pair.first] = grain_pair.second._volume;
       if (grain_pair.second._intersects_boundary)
         _total_volume_intersecting_boundary[map_idx] += grain_pair.second._volume;
     }
