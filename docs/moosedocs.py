@@ -10,7 +10,9 @@ if not os.path.exists(MOOSE_DIR):
     raise Exception('Failed to locate MOOSE, specify the MOOSE_DIR environment variable.')
 
 # Append MOOSE python directory
-sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+MOOSE_PYTHON_DIR = os.path.join(MOOSE_DIR, 'python')
+if MOOSE_PYTHON_DIR not in sys.path:
+    sys.path.append(MOOSE_PYTHON_DIR)
 import MooseDocs
 
 if __name__ == '__main__':

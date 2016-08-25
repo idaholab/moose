@@ -9,11 +9,11 @@
 
 * GMail Users: Just click the "Join group" button. Everyone else: Send an email to
 
-    
+
     * [moose-users+subscribe@googlegroups.com](mailto:moose-users+subscribe@googlegroups.com)
 <br>
     * [mailto:moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com)
-    
+
 
 * Update your copy of MOOSE for the latest features and fixes.
 
@@ -25,7 +25,8 @@
 
 ---
 ## Create an App
-* Creating your very own MOOSE application is a cinch: you do it by "Forking the Stork!"... which is our application template, just follow the instructions for [creating an application](create_an_app.md), and check out our list of tutorials.
+Creating your very own MOOSE application is a cinch: you do it by "Forking the Stork!"... which is our application template,
+just follow the instructions for [creating an application](/content/application_development/create_an_app.md), and check out our list of tutorials.
 
 ---
 ## Get Social!
