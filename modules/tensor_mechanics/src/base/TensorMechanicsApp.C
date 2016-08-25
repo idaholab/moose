@@ -83,6 +83,7 @@
 #include "SumTensorIncrements.h"
 #include "ComputeStrainIncrementBasedStress.h"
 #include "ComputeElasticSmearedCrackingStress.h"
+#include "InclusionProperties.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -249,6 +250,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(SumTensorIncrements);
   registerMaterial(ComputeStrainIncrementBasedStress);
   registerMaterial(ComputeElasticSmearedCrackingStress);
+  registerMaterial(InclusionProperties);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
