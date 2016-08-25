@@ -31,12 +31,9 @@ InclusionProperties::InclusionProperties(const InputParameters & parameters) :
     _lambda(getParam<Real>("lambda")),
     _mu(getParam<Real>("mu")),
     _misfit(getParam<std::vector<Real> >("misfit_strains")),
-    _stress_name(getParam<MaterialPropertyName>("stress_name")),
-    _strain_name(getParam<MaterialPropertyName>("strain_name")),
-    _energy_name(getParam<MaterialPropertyName>("energy_name")),
-    _stress(declareProperty<RankTwoTensor>(_stress_name)),
-    _strain(declareProperty<RankTwoTensor>(_strain_name)),
-    _elastic_energy(declareProperty<Real>(_energy_name))
+    _stress(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("stress_name"))),
+    _strain(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("strain_name"))),
+    _elastic_energy(declareProperty<Real>(getParam<MaterialPropertyName>("energy_name")))
 {
   if (_misfit.size() != 2)
     mooseError("Supply 2 misfit_strains in order eps_11, eps_22 in InclusionProperties.");
