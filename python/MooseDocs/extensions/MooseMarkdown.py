@@ -29,6 +29,7 @@ class MooseMarkdown(markdown.Extension):
         self.config['repo'] = ['', "The remote repository to create hyperlinks."]
         self.config['docs_dir'] = [os.path.join('docs', 'content'), "The location of the markdown to be used for generating the site."]
         self.config['slides'] = [False, "Enable the parsing for creating reveal.js slides."]
+        self.config['package'] = [False, "Enable the use of the MoosePackageParser."]
 
         # Define the directory where the markdown is contained, which will be searched for auto link creation
         self._markdown_database_dir = os.path.join(self.config['root'][0], self.config['docs_dir'][0])
