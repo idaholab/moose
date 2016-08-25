@@ -26,3 +26,5 @@ fedora23:
     name: moose-environment-7_Fedora-23_x86_64.rpm
 centos7:
     name: moose-environment-1_CentOS-7_x86_64.rpm
+virtual:
+    name: moose_3-29-2016.zip
