@@ -453,7 +453,9 @@ GrainTracker::trackGrains(std::vector<unsigned int> & new_grain_indices)
       {
         grain._status = Status::MARKED;
         _unique_grains.emplace_hint(_unique_grains.end(), std::pair<unsigned int, FeatureData>(counter, std::move(grain)));
-        newGrainCreated(counter++);
+
+        // Save off the ids of the newly created grains for the remaining ranks
+        new_grain_indices.emplace_back(counter++);
       }
 
       // Clean up the "moved" Features
