@@ -1,0 +1,12 @@
+[Tests]
+  [./timestepmaterial]
+    type = 'Exodiff'
+    input = 'timestepmaterial.i'
+    exodiff = 'timestepmaterial_out.e'
+  [../]
+  [./variablegradientmaterial]
+    type = 'Exodiff'
+    input = 'variablegradientmaterial.i'
+    exodiff = 'variablegradientmaterial_out.e'
+  [../]
+[]
