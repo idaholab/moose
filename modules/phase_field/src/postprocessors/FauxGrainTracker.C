@@ -172,8 +172,8 @@ FauxGrainTracker::finalize()
 {
   Moose::perf_log.push("finalize()", "FauxGrainTracker");
 
-  _communicator.set_union(_variables_used, 0);
-  _communicator.set_union(_entity_id_to_var_num, 0);
+  _communicator.set_union(_variables_used);
+  _communicator.set_union(_entity_id_to_var_num);
 
   Moose::perf_log.pop("finalize()", "FauxGrainTracker");
 }
