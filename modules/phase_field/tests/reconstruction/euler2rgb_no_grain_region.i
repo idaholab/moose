@@ -29,11 +29,23 @@
 []
 
 [AuxVariables]
+  active = 'c bnds'
+
   [./c]
   [../]
   [./bnds]
   [../]
   [./ebsd_numbers]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+
+  # Note: Not active
+  [./unique_grains]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./var_indices]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -46,6 +58,8 @@
 []
 
 [AuxKernels]
+  active = 'BndsCalc'
+
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
@@ -57,6 +71,22 @@
     ebsd_reader = ebsd
     grain_tracker = grain_tracker
     variable = ebsd_numbers
+    execute_on = 'initial timestep_end'
+  [../]
+
+  # Note: Not active
+  [./unique_grains]
+    type = FeatureFloodCountAux
+    variable = unique_grains
+    flood_counter = grain_tracker
+    field_display = UNIQUE_REGION
+    execute_on = 'initial timestep_end'
+  [../]
+  [./var_indices]
+    type = FeatureFloodCountAux
+    variable = var_indices
+    flood_counter = grain_tracker
+    field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -114,6 +144,7 @@
 []
 
 [Outputs]
+  csv = true
   exodus = true
   execute_on = 'INITIAL TIMESTEP_END'
   print_perf_log = true

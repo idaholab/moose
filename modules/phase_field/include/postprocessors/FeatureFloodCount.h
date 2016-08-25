@@ -99,6 +99,7 @@ public:
 
     FeatureData(unsigned int var_idx) :
         _var_idx(var_idx),
+        _aux_id(libMesh::invalid_uint),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _volume(0.0),
@@ -181,6 +182,9 @@ public:
      */
     void merge(FeatureData && rhs);
 
+    // TODO: Doco
+    void clear();
+
     /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
@@ -204,6 +208,9 @@ public:
 
     /// The Moose variable where this feature was found (often the "order parameter")
     unsigned int _var_idx;
+
+    /// An extra ID for this grain (uesed in derived class)
+    unsigned int _aux_id;
 
     /// The vector of bounding boxes completely enclosing this feature (multiple used with periodic constraints)
     std::vector<MeshTools::BoundingBox> _bboxes;
@@ -251,6 +258,12 @@ protected:
    * stage.
    */
   virtual Real getThreshold(unsigned int current_idx, bool active_feature) const;
+
+  /**
+   *
+   */
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature);
+  virtual bool currentElemContributesToVolume(unsigned long current_idx) const;
 
   ///@{
   /**
@@ -304,6 +317,13 @@ protected:
    * containing FeatureData objects.
    */
   void communicateAndMerge();
+
+  /**
+   * Sort and assign Ids to features.
+   */
+  void sortAndLabel();
+
+  void scatterAndUpdateRanks();
 
   /**
    * This routine populatess a stacked vector of local to global indices per rank and the associated count

@@ -55,10 +55,13 @@ public:
 
 protected:
   virtual void updateFieldInfo() override;
-
   virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature) override;
+  virtual bool currentElemContributesToVolume(unsigned long current_idx) const override;
 
   void communicateHaloMap();
+
+  void assignGrains();
 
   /**
    * This method serves two purposes:
@@ -76,7 +79,7 @@ protected:
    * @param new_grain_indices Contains the list of new ids found during the tracking step. This
    *                          vector should be communicated on all processors.
    */
-  void trackGrains(std::vector<unsigned int> & new_grain_indices);
+  void trackGrains();
 
   /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to handle
@@ -84,10 +87,10 @@ protected:
    */
   virtual void newGrainCreated(unsigned int new_grain_idx);
 
-  /**
-   * Builds local to global indices taking into account the unique grain structure
-   */
-  virtual void buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_indices, std::vector<int> & count) const override;
+//  /**
+//   * Builds local to global indices taking into account the unique grain structure
+//   */
+//  virtual void buildLocalToGlobalIndices(std::vector<std::pair<unsigned int, unsigned int> > & local_to_global_indices, std::vector<int> & count) const override;
 
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.
@@ -105,7 +108,7 @@ protected:
    * This is the recursive part of the remapping algorithm. It attempts to remap a grain to a new index and recurses until max_depth
    * is reached.
    */
-  bool attemptGrainRenumber(FeatureData & grain, unsigned int grain_idx, unsigned int depth, unsigned int max);
+  bool attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsigned int max);
 
   /**
    * A routine for moving all of the solution values from a given grain to a new variable number. It is called
@@ -136,6 +139,8 @@ protected:
    */
   void expandHalos();
 
+  unsigned int getNextUniqueID();
+
   /*************************************************
    *************** Data Structures *****************
    ************************************************/
@@ -155,9 +160,6 @@ protected:
   /// The cutoff index where if variable index >= this number, no remapping TO that variable will occur
   const unsigned int _reserve_op_idx;
 
-  /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
-  unsigned int _reserve_grain_first_idx;
-
   /// The threshold above (or below) where a grain may be found on a reserve op field
   const Real _reserve_op_threshold;
 
@@ -168,7 +170,8 @@ protected:
   NonlinearSystem & _nl;
 
   /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-  std::map<unsigned int, FeatureData> & _unique_grains;
+//  std::map<unsigned int, FeatureData> & _unique_grains;
+  std::vector<FeatureData> & _feature_sets_old;
 
   /**
    * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
@@ -197,6 +200,13 @@ protected:
   std::map<dof_id_type, std::vector<unsigned int> > _elemental_data_2;
 
   static std::vector<unsigned int> _empty_2;
+
+private:
+  /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
+  unsigned int _reserve_grain_first_idx;
+
+  /// Holds the next "regular" grain ID (a grain found or remapped to the standard op vars)
+  unsigned int _max_curr_grain_id;
 };
 
 
@@ -207,7 +217,7 @@ protected:
 struct GrainDistance
 {
   GrainDistance();
-  GrainDistance(Real distance, unsigned int grain_id, unsigned int var_index);
+  GrainDistance(Real distance, std::size_t grain_idx, unsigned int unique_id, unsigned int var_index);
 
   // Copy constructors
   GrainDistance(const GrainDistance & f) = default;
@@ -220,7 +230,8 @@ struct GrainDistance
   bool operator<(const GrainDistance & rhs) const;
 
   Real _distance;
-  unsigned int _grain_id;
+  std::size_t _grain_idx;
+  unsigned int _unique_id;
   unsigned int _var_index;
 };
 
