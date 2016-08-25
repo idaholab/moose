@@ -143,6 +143,34 @@ The following options may be passed to control how the output is formatted.
 | strip-extra-newlines | False   | Remove excessive newlines from the included code. |
 
 ## Slideshows
+A sequence of images can be shown via a `carousel`. By default the images will auto cycle between images.
 
-!!! info "Under Development"
-    We will soon include a method for creating slide shows of images.
+A simple example:
+
+```markdown
+!slideshow
+    images/intro.png
+    images/other*.png
+```
+
+This would create a slideshow with the first image as `intro.png` and the next images those that are matched by the wildcard `other*.png`.
+
+Valid options for the slideshow are the same as for the `bootstrap` [carousel](http://getbootstrap.com/javascript/#carousel):
+
+| Option               | Default | Description |
+| -------------------- | ------- | ----------- |
+| interval             | 5000    | The amount of time delay between images, in milliseconds. |
+| pause                | hover   | If set to "hover" then the carousel will pause when the mouse is moved over it. |
+| wrap                 | true    | If true then the carousel will cycle continuously. |
+| keyboard             | true    | If true then the carousel will respond to keyboard events. |
+
+Additionally, a `caption` option can be set globally or for each image line. The global caption will be used if no caption is specified on the image
+line.
+
+A full slideshow example might be:
+```markdown
+!slideshow caption=My caption with spaces interval=1000 pause=null wrap=false keyboard=false
+    images/intro.png caption=Introduction image
+    images/other*.png caption=Other images
+    images/more*.png
+```
