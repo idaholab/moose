@@ -330,6 +330,9 @@ void FeatureFloodCount::communicateAndMerge()
     }
 #endif
   }
+
+  // Make sure that feature count is communicated to all ranks
+  _communicator.broadcast(_feature_count);
 }
 
 void
@@ -374,6 +377,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
 void
 FeatureFloodCount::finalize()
 {
+  // Gather all information on processor zero and merge
   communicateAndMerge();
 
   {
