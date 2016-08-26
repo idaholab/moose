@@ -130,12 +130,14 @@ public:
    *
    * @return a boolean that indicates whether the mesh was changed
    */
-  bool adaptMesh();
+  bool adaptMesh(std::string marker_name = std::string());
 
   /**
    * Used during initial adaptivity.
+   *
+   * @return a boolean that indicates whether the mesh was changed
    */
-  void initialAdaptMesh();
+  bool initialAdaptMesh();
 
   /**
    * Performs uniform refinement of the passed Mesh object. The
@@ -197,14 +199,6 @@ public:
    * Set the interval (number of timesteps) between refinement steps.
    */
   void setInterval(unsigned int interval) { _interval = interval; }
-
-  /**
-   * Get the MooseVariable corresponding to the Marker Field Name that is actually going to be used
-   * to refine / coarsen the mesh.
-   *
-   * @return The MooseVariable
-   */
-  MooseVariable & getMarkerVariable();
 
   /**
    * Get an ErrorVector that will be filled up with values corresponding to the
