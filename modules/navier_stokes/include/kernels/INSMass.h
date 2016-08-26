@@ -27,10 +27,29 @@ public:
 
   virtual ~INSMass(){}
 
+  enum COORD_TYPE
+  {
+    XYZ,
+    RZ,
+    RSPHERICAL
+  };
+
+  static void setGeometryParameter(const InputParameters & params, COORD_TYPE & coord_type);
+
 protected:
+  virtual void computeResidual();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
+
+  bool _coord_type_set;
+  COORD_TYPE _coord_type;
+
+  // Coupled values
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
+  
 
   // Coupled Gradients
   const VariableGradient & _grad_u_vel;
