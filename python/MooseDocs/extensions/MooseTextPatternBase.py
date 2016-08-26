@@ -9,9 +9,9 @@ from markdown.util import etree
 from MooseCommonExtension import MooseCommonExtension
 import MooseDocs
 
-class MooseSourcePatternBase(MooseCommonExtension, Pattern):
+class MooseTextPatternBase(MooseCommonExtension, Pattern):
     """
-    Base class for pattern matching source code blocks.
+    Base class for pattern matching text blocks.
 
     Args:
         regex: The string containing the regular expression to match.
@@ -32,6 +32,8 @@ class MooseSourcePatternBase(MooseCommonExtension, Pattern):
         self._settings = {'strip_header':True,
                           'repo_link':True,
                           'label':True,
+                          'method':True,
+                          'block':True,
                           'overflow-y':'scroll',
                           'max-height':'500px',
                           'strip-extra-newlines':False}

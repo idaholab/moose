@@ -22,3 +22,6 @@
     - Documenting Applications:
         - Creating Documentation: 'content/doc_generation/Overview.md'
         - Moose Flavored Markdown: 'content/doc_generation/MooseFlavoredMarkdown.md'
+- Wiki:
+    - Memory Logger: 'content/moose_tools/memory_logger.md'
+

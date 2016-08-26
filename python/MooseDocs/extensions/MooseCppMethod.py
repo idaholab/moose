@@ -5,7 +5,7 @@ import logging
 log = logging.getLogger(__name__)
 
 import MooseDocs
-from MooseSourcePatternBase import MooseSourcePatternBase
+from MooseTextPatternBase import MooseTextPatternBase
 import utils
 
 try:
@@ -15,27 +15,26 @@ except:
     HAVE_MOOSE_CPP_PARSER = False
 
 
-class MooseCppMethod(MooseSourcePatternBase):
+class MooseCppMethod(MooseTextPatternBase):
     """
-    A markdown extension for including complete source code files.
+    A markdown extension for including source code files.
     """
 
-    # REGEX for finding: [Something here](source.C::method_name)
-    CPP_RE = r'!\[(.*?)\]\((.*\.[Ch])::(\w+)\s*(.*?)\)'
+    # REGEX for finding: !clang /path/to/file.C|h method=some_method
+    CPP_RE = r'!clang\s+(.*\/(.*\.[Ch]))\s+(.*)'
 
     def __init__(self, src):
         super(MooseCppMethod, self).__init__(self.CPP_RE, src, 'cpp')
-
 
     def handleMatch(self, match):
         """
         Process the C++ file provided.
         """
         # Update the settings from regex match
-        settings = self.getSettings(match.group(5))
+        settings = self.getSettings(match.group(4))
 
         # Extract relative filename
-        rel_filename = match.group(3).lstrip('/')
+        rel_filename = match.group(2).lstrip('/')
 
         # Error if the clang parser did not load
         if not HAVE_MOOSE_CPP_PARSER:
@@ -46,7 +45,9 @@ class MooseCppMethod(MooseSourcePatternBase):
         # Read the file and create element
         filename = self.checkFilename(rel_filename)
         if not filename:
-            el = self.createErrorElement(rel_filename)
+            el = self.createErrorElement(rel_filename, message="File not found")
+        elif not settings.has_key('method'):
+            el = self.createErrorElement(rel_filename, message="Use of !clang syntax while not providing a method=some_method. If you wish to include the entire file, use !text instead")
         else:
             make = self._config.get('make', None)
             repo = self._config.get('repo', None)
@@ -55,11 +56,11 @@ class MooseCppMethod(MooseSourcePatternBase):
                 log.error('The location of the Makefile must be supplied to parser.')
                 el = self.createErrorElement(rel_filename)
             else:
-                log.info('Parsing method "{}" from {}'.format(match.group(4), filename))
+                log.info('Parsing method "{}" from {}'.format(settings['method'], filename))
 
                 parser = utils.MooseSourceParser(make)
                 parser.parse(filename)
-                decl, defn = parser.method(match.group(4))
+                decl, defn = parser.method(settings['method'])
                 el = self.createElement(match.group(2), defn, filename, rel_filename, settings)
 
         # Return the Element object
