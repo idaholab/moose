@@ -13,15 +13,16 @@
   [../]
   [./velocity_inletBC_by_parts]
     type = 'Exodiff'
-    input = 'velocity_inletBC_by_parts.i'
+    input = 'velocity_inletBC.i'
     exodiff = 'velocity_inletBC_by_parts_out.e'
+    cli_args = 'Outputs/file_base=velocity_inletBC_by_parts_out GlobalParams/integrate_p_by_parts=true'
     abs_zero = 1e-7
   [../]
   [./velocity_inletBC_no_parts]
     type = 'Exodiff'
-    input = 'velocity_inletBC_no_parts.i'
+    input = 'velocity_inletBC.i'
     exodiff = 'velocity_inletBC_no_parts_out.e'
+    cli_args = 'Outputs/file_base=velocity_inletBC_no_parts_out GlobalParams/integrate_p_by_parts=false'
     abs_zero = 1e-7
   [../]
-  
 []
