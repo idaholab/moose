@@ -17,5 +17,6 @@ markdown_extensions:
     - markdown_include.include           # pip install markdown-include
     - mdx_math                           # pip install python-markdown-math
     - MooseDocs.extensions.MooseMarkdown:
+          package: True
           make: ../modules
           repo: https://github.com/idaholab/moose/blob/master

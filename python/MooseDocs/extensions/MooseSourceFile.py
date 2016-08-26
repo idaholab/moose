@@ -9,8 +9,8 @@ class MooseSourceFile(MooseSourcePatternBase):
     """
     RE = r'!\[(.*?)\]\((.*\.\w+\b)\s*(.*?)\)'
 
-    def __init__(self, config):
-        super(MooseSourceFile, self).__init__(self.RE, config)
+    def __init__(self, **kwargs):
+        super(MooseSourceFile, self).__init__(self.RE, **kwargs)
 
         # Add to the default settings
         self._settings['line'] = None
