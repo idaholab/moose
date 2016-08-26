@@ -10,8 +10,8 @@ class MooseInputBlock(MooseSourcePatternBase):
 
     CPP_RE = r'!\[(.*?)\]\((.*\.[i])::(\w+)\s*(.*?)\)'
 
-    def __init__(self, src):
-        super(MooseInputBlock, self).__init__(self.CPP_RE, src, 'text')
+    def __init__(self, **kwargs):
+        super(MooseInputBlock, self).__init__(self.CPP_RE, language='text', **kwargs)
 
     def handleMatch(self, match):
         """

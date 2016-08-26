@@ -6,7 +6,7 @@
 MOOSE includes tools for auto-generating web-sites (like this one) that documents your application. Included
 in this tool is the ability to:
 
-* Add detailed descriptions of custom systems and objects using [Moose Style Markdown](MooseFlavoredMarkdown.md),
+* Add detailed descriptions of custom systems and objects using [Moose Style Markdown](moose_flavored_markdown.md),
 which has useful features designed for documenting source code and input file syntax;
 * Generate pages based on class descriptions and input parameter documentation included in your source code;
 * Generate links to examples and source code that use or inherit from your objects;
@@ -44,7 +44,7 @@ listed; the table includes the class description from the source code.
 
 ### Markdown Descriptions
 A detailed description may be provided to the generated documentation for an object by creating a markdown file using
-[MOOSE Flavored Markdown](MooseFlavoredMarkdown.md). The created file must be stored in a file named according to the
+[MOOSE Flavored Markdown](moose_flavored_markdown.md). The created file must be stored in a file named according to the
 registered MOOSE syntax within the "details" directory explained in the [Configuration](#configuration) section below.
 For example, the details for the [Diffision](/Kernels/Diffusion.md) are in the `framework/docs/details/Kernels/Diffusion.md`
 file.

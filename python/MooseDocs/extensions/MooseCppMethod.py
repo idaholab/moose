@@ -23,9 +23,11 @@ class MooseCppMethod(MooseSourcePatternBase):
     # REGEX for finding: [Something here](source.C::method_name)
     CPP_RE = r'!\[(.*?)\]\((.*\.[Ch])::(\w+)\s*(.*?)\)'
 
-    def __init__(self, src):
-        super(MooseCppMethod, self).__init__(self.CPP_RE, src, 'cpp')
+    def __init__(self, make=None, **kwargs):
+        super(MooseCppMethod, self).__init__(self.CPP_RE, language='cpp', **kwargs)
 
+        # The make command to execute
+        self._make = make
 
     def handleMatch(self, match):
         """
@@ -48,16 +50,13 @@ class MooseCppMethod(MooseSourcePatternBase):
         if not filename:
             el = self.createErrorElement(rel_filename)
         else:
-            make = self._config.get('make', None)
-            repo = self._config.get('repo', None)
-
-            if make == None:
+            if self._make == None:
                 log.error('The location of the Makefile must be supplied to parser.')
                 el = self.createErrorElement(rel_filename)
             else:
                 log.info('Parsing method "{}" from {}'.format(match.group(4), filename))
 
-                parser = utils.MooseSourceParser(make)
+                parser = utils.MooseSourceParser(self._make)
                 parser.parse(filename)
                 decl, defn = parser.method(match.group(4))
                 el = self.createElement(match.group(2), defn, filename, rel_filename, settings)

@@ -71,7 +71,15 @@ class MooseSubApplicationDocGenerator(object):
             obj.write()
 
         yml = self.generateYAML()
+        if not yml:
+            log.warning("No pages generated, the source location(s) must be empty.")
+            return
+
         install_dir = self._config.get('install')
+        if not os.path.exists(install_dir):
+            log.info('Creating install directory: {}'.format(install_dir))
+            os.mkdir(install_dir)
+
         filename = os.path.abspath(os.path.join(install_dir, 'pages.moose.yml'))
         log.info('Creating YAML file: {}'.format(filename))
         with open(filename, 'w') as fid:

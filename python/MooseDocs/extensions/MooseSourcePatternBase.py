@@ -18,15 +18,15 @@ class MooseSourcePatternBase(MooseCommonExtension, Pattern):
         language[str]: The code language (e.g., 'python' or 'c++')
     """
 
-    def __init__(self, regex, config, language=None):
-        Pattern.__init__(self, regex)
-        #super(Pattern, self).__init__(regex) # This fails
+    def __init__(self, pattern, language=None, repo=None, root=None, **kwargs):
+        Pattern.__init__(self, pattern, **kwargs)
 
         # Set the language
         self._language = language
 
-        # The root directory
-        self._config = config
+        # The root/repo settings
+        self._root = root
+        self._repo = repo
 
         # The default settings
         self._settings = {'strip_header':True,
@@ -80,7 +80,7 @@ class MooseSourcePatternBase(MooseCommonExtension, Pattern):
             filename[str]: The filename to check for existence.
         """
 
-        filename = os.path.abspath(os.path.join(self._config['root'], rel_filename))
+        filename = os.path.abspath(os.path.join(self._root, rel_filename))
         if os.path.exists(filename):
             return filename
         return None
@@ -106,9 +106,9 @@ class MooseSourcePatternBase(MooseCommonExtension, Pattern):
         el = etree.Element('div')
 
         # Build label
-        if settings['repo_link'] and self._config['repo']:
+        if settings['repo_link'] and self._repo:
             title = etree.SubElement(el, 'a')
-            title.set('href', os.path.join(self._config['repo'], rel_filename))
+            title.set('href', os.path.join(self._repo, rel_filename))
         else:
             title = etree.SubElement(el, 'div')
 

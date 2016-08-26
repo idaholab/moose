@@ -39,6 +39,7 @@ class MooseApplicationDocGenerator(object):
 
         # Remove all '.moose.md/.moose.yml' files from the current directory
         if purge:
+            log.info('Purging *.moose.md and *.moose.yml files from {}'.format(os.getcwd()))
             for root, dirs, files in os.walk(os.getcwd(), topdown=False):
                 for name in files:
                     if name.endswith('.moose.md') or name.endswith('.moose.yml'):

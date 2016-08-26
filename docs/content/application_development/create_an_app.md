@@ -1,5 +1,5 @@
 # Create an Appplication
-Creating your very own MOOSE application is a cinch: you do it by "Forking the Stork!"... which is our application template.
+Creating your very own MOOSE application is a cinch: you do it by "Forking the Stork!"... which is our application template:
 
 ---
 ## Choose a new application name.

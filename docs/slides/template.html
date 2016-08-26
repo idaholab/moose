@@ -1,0 +1,57 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="$MOOSE_REVEAL_JS_DIR/css/reveal.css">
+		<link rel="stylesheet" href="$MOOSE_REVEAL_JS_DIR/css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="$MOOSE_REVEAL_JS_DIR/lib/css/zenburn.css">
+
+		<!-- MOOSE stylesheet -->
+		<link rel='stylesheet' href='../css/moose.css'>
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? '$MOOSE_REVEAL_JS_DIR/css/print/pdf.css' : '$MOOSE_REVEAL_JS_DIR/css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+			INSERT_MOOSE_SLIDES_HERE
+			</div>
+		</div>
+
+		<script src="$MOOSE_REVEAL_JS_DIR/lib/js/head.min.js"></script>
+		<script src="$MOOSE_REVEAL_JS_DIR/js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				math: {
+					mathjax: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js'
+				},
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: '../js/mathjaxconfig.js'},
+					{ src: '$MOOSE_REVEAL_JS_DIR/plugin/math/math.js', async: true },
+					{ src: '$MOOSE_REVEAL_JS_DIR/plugin/markdown/markdown.js' },
+					{ src: '$MOOSE_REVEAL_JS_DIR/plugin/markdown/marked.js' },
+					{ src: '$MOOSE_REVEAL_JS_DIR/plugin/notes/notes.js', async: true },
+					{ src: '$MOOSE_REVEAL_JS_DIR/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>

@@ -16,9 +16,11 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
 
     CPP_RE = r'!MOOSEPACKAGE\s*(.*?)!'
 
-    def __init__(self, src):
+    def __init__(self, **kwargs):
         MooseCommonExtension.__init__(self)
-        Pattern.__init__(self, self.CPP_RE)
+        Pattern.__init__(self, self.CPP_RE, **kwargs)
+
+        # Load the yaml data containing package information
         self.package = MooseDocs.yaml_load("packages.yml")
 
         # The default settings
