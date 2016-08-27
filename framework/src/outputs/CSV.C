@@ -101,7 +101,8 @@ CSV::output(const ExecFlagType & type)
     _all_data_table.printCSV(filename(), 1, _align);
 
   // Output each VectorPostprocessor's data to a file
-  if (_write_vector_table)
+  if (_write_vector_table && processor_id() == 0)
+  {
     for (auto & it : _vector_postprocessor_tables)
     {
       std::ostringstream output;
@@ -120,6 +121,7 @@ CSV::output(const ExecFlagType & type)
         _vector_postprocessor_time_tables[it.first].printCSV(filename.str());
       }
     }
+  }
 
   // Re-set write flags
   _write_all_table = false;
