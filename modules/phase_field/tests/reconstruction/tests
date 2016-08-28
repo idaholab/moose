@@ -47,9 +47,9 @@
   [../]
 
   [./regions_without_grains]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'euler2rgb_no_grain_region.i'
-    exodiff = 'euler2rgb_no_grain_region_out.e'
+    csvdiff = 'euler2rgb_no_grain_region_out.csv'
     max_time = 1000
   [../]
 []

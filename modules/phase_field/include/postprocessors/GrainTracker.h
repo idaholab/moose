@@ -61,23 +61,20 @@ protected:
 
   void communicateHaloMap();
 
+  /**
+   * When the tracking phase starts (_t_step == _tracking_step) it assigns a unique id to every FeatureData object
+   * found by the FeatureFloodCount object. If an EBSDReader is linked into the GrainTracker the information from the
+   * reader is used to assign grain information, otherwise it's ordered by each Feature's "minimum entity id" and
+   * assigned a non-negative integer.
+   */
   void assignGrains();
 
   /**
-   * This method serves two purposes:
-   * 1) When the tracking phase starts (_t_step == _tracking_step) it assigns a unique id to every FeatureData object
-   *    found by the FeatureFloodCount object. If an EBSDReader is linked into the GrainTracker the information from the
-   *    reader is used to assign grain information, otherwise it's ordered by each Feature's "minimum entity id" and
-   *    assigned a non-negative integer.
+   * On subsequent time_steps, incoming FeatureData objects are compared to previous time_step information to
+   * track grains between time steps.
    *
-   * 2) On subsequent time_steps, incoming FeatureData objects are compared to previous time_step information to
-   *    track grains between time steps.
-   *
-   * This method updates the _unique_grains datastructure.
+   * This method updates the _feature_sets data structure.
    * This method should only be called on the root processor
-   *
-   * @param new_grain_indices Contains the list of new ids found during the tracking step. This
-   *                          vector should be communicated on all processors.
    */
   void trackGrains();
 
@@ -86,11 +83,6 @@ protected:
    * setting new properties on the newly created grain.
    */
   virtual void newGrainCreated(unsigned int new_grain_idx);
-
-//  /**
-//   * Builds local to global indices taking into account the unique grain structure
-//   */
-//  virtual void buildLocalToGlobalIndices(std::vector<std::pair<unsigned int, unsigned int> > & local_to_global_indices, std::vector<int> & count) const override;
 
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.
@@ -139,6 +131,10 @@ protected:
    */
   void expandHalos();
 
+  /**
+   * Retrieve the next unique grain number if a new grain is detected during trackGrains. This method
+   * handles reserve order parameter indices properly. Direct access to the next index should be avoided.
+   */
   unsigned int getNextUniqueID();
 
   /*************************************************
@@ -169,16 +165,11 @@ protected:
   /// A reference to the nonlinear system (used for retrieving solution vectors)
   NonlinearSystem & _nl;
 
-  /// This data structure holds the map of unique grains.  The information is updated each timestep to track grains over time.
-//  std::map<unsigned int, FeatureData> & _unique_grains;
-  std::vector<FeatureData> & _feature_sets_old;
-
   /**
-   * This data structure holds unique grain to EBSD data map information. It's possible when using 2D scans of 3D microstructures
-   * to end up with disjoint grains with the same orientation in a single slice. To properly handle this in the grain tracker
-   * we need yet another map that takes a unique_grain number and retrieves the proper EBSD numbering (non-unique)
+   * This data structure holds the map of unique grains from the previous time step.
+   * The information is updated each timestep to track grains over time.
    */
-  std::map<unsigned int, unsigned int> _unique_grain_to_ebsd_num;
+  std::vector<FeatureData> & _feature_sets_old;
 
   /// Optional ESBD Reader
   const EBSDReader * _ebsd_reader;

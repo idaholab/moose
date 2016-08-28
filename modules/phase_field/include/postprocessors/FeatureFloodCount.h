@@ -99,7 +99,7 @@ public:
 
     FeatureData(unsigned int var_idx) :
         _var_idx(var_idx),
-        _aux_id(libMesh::invalid_uint),
+        _id(libMesh::invalid_uint),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _volume(0.0),
@@ -209,8 +209,8 @@ public:
     /// The Moose variable where this feature was found (often the "order parameter")
     unsigned int _var_idx;
 
-    /// An extra ID for this grain (uesed in derived class)
-    unsigned int _aux_id;
+    /// An ID for this feature
+    unsigned int _id;
 
     /// The vector of bounding boxes completely enclosing this feature (multiple used with periodic constraints)
     std::vector<MeshTools::BoundingBox> _bboxes;

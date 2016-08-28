@@ -36,7 +36,7 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
   storeHelper(stream, feature._halo_ids, context);
   storeHelper(stream, feature._periodic_nodes, context);
   storeHelper(stream, feature._var_idx, context);
-  storeHelper(stream, feature._aux_id, context);
+  storeHelper(stream, feature._id, context);
   storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._orig_ids, context);
   storeHelper(stream, feature._min_entity_id, context);
@@ -65,7 +65,7 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._halo_ids, context);
   loadHelper(stream, feature._periodic_nodes, context);
   loadHelper(stream, feature._var_idx, context);
-  loadHelper(stream, feature._aux_id, context);
+  loadHelper(stream, feature._id, context);
   loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._orig_ids, context);
   loadHelper(stream, feature._min_entity_id, context);
@@ -302,9 +302,6 @@ void FeatureFloodCount::communicateAndMerge()
 
   // Make sure that feature count is communicated to all ranks
   _communicator.broadcast(_feature_count);
-
-  std::cout << "CommAndMerge" << std::endl;
-  _communicator.barrier();
 }
 
 void
@@ -347,7 +344,7 @@ FeatureFloodCount::sortAndLabel()
 
   // Label the features with an ID based on the sorting (processor number independent value)
   for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
-    _feature_sets[i]._aux_id = i;
+    _feature_sets[i]._id = i;
 }
 
 void
@@ -386,7 +383,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
       auto stacked_local_index = offsets[rank] + local_index;
 
       mooseAssert(stacked_local_index < globalsize, "Global index: " << stacked_local_index << " is out of range");
-      local_to_global_all[stacked_local_index] = feature._aux_id;
+      local_to_global_all[stacked_local_index] = feature._id;
     }
   }
 }
@@ -397,24 +394,17 @@ FeatureFloodCount::finalize()
   // Gather all information on processor zero and merge
   communicateAndMerge();
 
-  std::cout << "Here1" << std::endl;
-  _communicator.barrier();
-
   // Sort and label the features
   if (_is_master)
     sortAndLabel();
 
-  std::cout << "Here2" << std::endl;
-  _communicator.barrier();
-
+  // Send out the local to global mappings
   scatterAndUpdateRanks();
 
   // Populate _feature_maps and _var_index_maps
   updateFieldInfo();
 
-  std::cout << "Here3" << std::endl;
-  _communicator.barrier();
-
+  // Output the CSV information on grains
   writeFeatureVolumeFile();
 }
 
@@ -428,19 +418,8 @@ FeatureFloodCount::scatterAndUpdateRanks()
   if (_is_master)
     buildLocalToGlobalIndices(local_to_global_all, counts);
 
-  int foo = 5;
-  _communicator.broadcast(foo);
-  std::cout << "Here2" << std::endl;
-  _communicator.barrier();
-  std::cout << "Here2" << std::endl;
-
-
   // Scatter local_to_global indices to all processors and store in class member variable
   _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
-
-  std::cout << "Here3" << std::endl;
-  _communicator.barrier();
-
 
   if (!_is_master)
   {
@@ -457,7 +436,6 @@ FeatureFloodCount::scatterAndUpdateRanks()
       for (auto & feature : list_ref)
       {
         mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
-//        mooseAssert(feature._aux_id != libMesh::invalid_uint, "Missing feature ID");
 
         auto local_id = feature._orig_ids.begin()->second;
         mooseAssert(local_id < _local_to_global_feature_map.size(), "local_id : "
@@ -466,7 +444,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
         auto global_id = _local_to_global_feature_map[local_id];
 
         // Set the correct global id
-        feature._aux_id = global_id;
+        feature._id = global_id;
 
         // Move the feature into place
         _feature_sets.emplace_back(std::move(feature));
@@ -1178,7 +1156,7 @@ void
 FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 {
   mooseAssert(_var_idx == rhs._var_idx, "Mismatched variable index in merge");
-  mooseAssert(_aux_id == rhs._aux_id, "Mismatched auxiliary id in merge");
+  mooseAssert(_id == rhs._id, "Mismatched auxiliary id in merge");
 
   std::set<dof_id_type> set_union;
 
@@ -1282,9 +1260,15 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 {
   static const bool debug = true;
 
+  out << "Grain ID: ";
+  if (feature._id != libMesh::invalid_uint)
+    out << feature._id;
+  else
+    out << "invalid";
+
   if (debug)
   {
-    out << "Ghosted Entities: ";
+    out << "\nGhosted Entities: ";
     for (auto ghosted_id : feature._ghosted_ids)
       out << ghosted_id << " ";
 
@@ -1328,11 +1312,6 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
     out << "\nVolume: " << volume;
     out << "\nVar_idx: " << feature._var_idx;
     out << "\nMin Entity ID: " << feature._min_entity_id;
-    out << "\nAux ID: ";
-    if (feature._aux_id != libMesh::invalid_uint)
-      out << feature._aux_id;
-    else
-      out << "invalid";
   }
   out << "\n\n";
 
