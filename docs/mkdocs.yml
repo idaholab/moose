@@ -4,6 +4,8 @@ docs_dir: .
 
 site_dir: ../site
 
+repo_url: https://github.com/idaholab/moose/
+
 extra_css:
     - css/moose.css
 

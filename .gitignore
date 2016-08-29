@@ -169,3 +169,6 @@ out.xyz
 *.moose.yml
 docs/.moosedocs
 site
+
+# Do not ignore files in docs/media
+!docs/media/*.*
