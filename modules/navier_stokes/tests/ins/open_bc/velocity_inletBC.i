@@ -1,7 +1,6 @@
 # This input file tests outflow boundary conditions for the incompressible NS equations.
 
 [GlobalParams]
-  # Dummy parameters
   gravity = '0 0 0'
   rho = 1
   mu = 1
@@ -33,26 +32,14 @@
   [./vel_x]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
   [../]
   [./vel_y]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
   [../]
   [./p]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0 # This number is arbitrary for NS...
-    [../]
   [../]
 []
 
