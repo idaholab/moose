@@ -95,7 +95,7 @@ Real INSMomentumNoBCBC::computeQpResidual()
   RealVectorValue test;
   test(_component) = _test[_i][_qp];
 
-  return _normals[_qp] * (sigma * test);
+  return -_normals[_qp] * (sigma * test);
 }
 
 
@@ -104,7 +104,7 @@ Real INSMomentumNoBCBC::computeQpResidual()
 Real INSMomentumNoBCBC::computeQpJacobian()
 {
   // The extra contribution comes from the "2" on the diagonal of the viscous stress tensor
-  return _mu * (_grad_phi[_j][_qp]             * _normals[_qp] +
+  return -_mu * (_grad_phi[_j][_qp]             * _normals[_qp] +
                 _grad_phi[_j][_qp](_component) * _normals[_qp](_component)) * _test[_i][_qp];
 }
 
@@ -114,18 +114,18 @@ Real INSMomentumNoBCBC::computeQpJacobian()
 Real INSMomentumNoBCBC::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
-    return _mu * _grad_phi[_j][_qp](_component) * _normals[_qp](0) * _test[_i][_qp];
+    return -_mu * _grad_phi[_j][_qp](_component) * _normals[_qp](0) * _test[_i][_qp];
 
   else if (jvar == _v_vel_var_number)
-    return _mu * _grad_phi[_j][_qp](_component) * _normals[_qp](1) * _test[_i][_qp];
+    return -_mu * _grad_phi[_j][_qp](_component) * _normals[_qp](1) * _test[_i][_qp];
 
   else if (jvar == _w_vel_var_number)
-    return _mu * _grad_phi[_j][_qp](_component) * _normals[_qp](2) * _test[_i][_qp];
+    return -_mu * _grad_phi[_j][_qp](_component) * _normals[_qp](2) * _test[_i][_qp];
 
   else if (jvar == _p_var_number)
   {
     if (_integrate_p_by_parts)
-      return -_phi[_j][_qp] * _normals[_qp](_component) * _test[_i][_qp];
+      return _phi[_j][_qp] * _normals[_qp](_component) * _test[_i][_qp];
     else
       return 0.;
   }
