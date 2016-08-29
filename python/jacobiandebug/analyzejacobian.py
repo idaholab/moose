@@ -142,7 +142,8 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
   norm = norm**0.5
   all_good = True
 
-  e = 1e-4
+  rel_tol = options.rel_tol
+  abs_tol = options.abs_tol
 
   for i in range(nblocks) :
     printed = False
@@ -154,7 +155,7 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
       if i != j and diagonal_only :
         continue
 
-      if norm[i][j] > e*fd[i][j] :
+      if norm[i][j] > rel_tol * fd[i][j] and norm[i][j] > abs_tol:
         if not printed :
           print "\nKernel for variable '%s':" % nlvars[i]
           printed = True
@@ -287,6 +288,8 @@ if __name__ == '__main__':
   parser.add_option("-d", "--debug", dest="debug", action="store_true", help="Output the command line used to run the application.")
   parser.add_option("-w", "--write-matrices", dest="write_matrices", action="store_true", help="Output the Jacobian matrices in gnuplot format.")
   parser.add_option("-n", "--no-auto-options", dest="noauto", action="store_true", help="Do not add automatic options to the invocation of the moose based application. Requres a specially prepared input file for debugging.")
+  parser.add_option("--rel-tol", dest="rel_tol", default=1e-4, type="float", help="The relative tolerance on the Jacobian elements between the hand-coded and those evaluated with finite difference.")
+  parser.add_option("--abs-tol", dest="abs_tol", default=1e-12, type="float", help="The absolute tolerance on the Jacobian elements between the hand-coded and those evaluated with finite difference.")
 
   (options, args) = parser.parse_args()
 
