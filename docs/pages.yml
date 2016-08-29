@@ -1,16 +1,16 @@
 - Home: 'index.md'
 - Getting Started:
-    - Mac OS: 'content/getting_started/macosx.md'
-    - Ubuntu: 'content/getting_started/ubuntu.md'
-    - Mint: 'content/getting_started/mint.md'
-    - OpenSUSE: 'content/getting_started/opensuse.md'
-    - Fedora: 'content/getting_started/fedora.md'
-    - CentOS: 'content/getting_started/centos.md'
-    - Windows 10: 'content/getting_started/windows10.md'
-    - HPC Cluster: 'content/getting_started/cluster.md'
-    - Virtual Machine: 'content/getting_started/virtual_machine.md'
-    - Manual Installation: 'content/getting_started/manual_installation.md'
-- Application Development:
+    - Installation:
+        - Mac OS: 'content/getting_started/macosx.md'
+        - Ubuntu: 'content/getting_started/ubuntu.md'
+        - Mint: 'content/getting_started/mint.md'
+        - OpenSUSE: 'content/getting_started/opensuse.md'
+        - Fedora: 'content/getting_started/fedora.md'
+        - CentOS: 'content/getting_started/centos.md'
+        - Windows 10: 'content/getting_started/windows10.md'
+        - HPC Cluster: 'content/getting_started/cluster.md'
+        - Virtual Machine: 'content/getting_started/virtual_machine.md'
+        - Manual Installation: 'content/getting_started/manual_installation.md'
     - Create an Application: 'content/application_development/create_an_app.md'
 - Framework:
     - Systems: !include content/framework/systems/pages.moose.yml
@@ -23,6 +23,7 @@
     - Documentation:
         - Creation: 'content/utilities/documentation/create.md'
         - Moose Flavored Markdown: 'content/utilities/documentation/moose_flavored_markdown.md'
+    - Memory Logger: 'content/moose_tools/memory_logger.md'
 - Help:
     - Frequently Asked Questions: 'content/help/faq.md'
     - Contact Us: 'content/help/contact_us.md'
