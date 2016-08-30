@@ -40,6 +40,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystem()),
     _feature_sets_old(declareRestartableData<std::vector<FeatureData> >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
+    _ebsd_op_var(_ebsd_reader ? &_fe_problem.getVariable(0, getParam<std::string>("var_name_base") + "_op") : nullptr),
     _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : 0),
     _consider_phase(isParamValid("phase")),
     _compute_op_maps(getParam<bool>("compute_op_maps")),
@@ -48,6 +49,9 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
 {
   if (!_is_elemental && _compute_op_maps)
     mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
+
+  if (_ebsd_reader && !_ebsd_op_var)
+    mooseError("EBSD OP variable must be supplied if the reader is supplied");
 
   _empty_2.resize(_n_vars, libMesh::invalid_uint);
 }
@@ -156,60 +160,51 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsign
   {
     mooseAssert(_is_elemental, "EBSD only works with elemental grain tracker");
 
-    // Since we sample all of the EBSD data in one round we don't need to inspect
-    // the entire (local) mesh entities for each coupled variable.
-    if (current_idx != 0)
+    /**
+     * First inspect the order parameter assigned to the feature at this
+     * element and see if it matches the current_idx.
+     */
+    const Elem * elem = static_cast<const Elem *>(dof_object);
+    unsigned int op = static_cast<unsigned int>(std::round(_ebsd_op_var->getElementalValue(elem)));
+    if (current_idx != op)
       return false;
 
-    // Sample the EBSD Reader for the current element
-    const Elem * elem = static_cast<const Elem *>(dof_object);
+    // Sample the EBSD Reader and retrieve the global_id or local_id and phase for the current element
     std::vector<Point> centroid = { elem->centroid() };
     const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader->getData(centroid[0]);
-    const unsigned int global_id = _ebsd_reader->getGlobalID(d._feature_id);
-    const unsigned int grain_index = _ebsd_reader->getAvgData(global_id)._local_id;
     const auto phase = d._phase;
 
     // See if we are in a phase that we are actually tracking
     if (_consider_phase && phase != _phase)
       return false;
 
+    // Get the ids from the EBSD reader
+    const auto global_id = _ebsd_reader->getGlobalID(d._feature_id);
+    const auto local_id = _ebsd_reader->getAvgData(global_id)._local_id;
+
     /**
-     * If we don't have an active feature we need to create with with special an aux id that
+     * If we don't have an active feature we need to create one with an id that
      * contains the actual EBSD grain number. We'll use that information when assigning
      * the initial grain IDs.
      */
     if (!feature)
     {
-      /**
-       * It turns out that we can't completely skip looking at the underlying
-       * nonlinear variable data. The EBSD Reader doesn't know which OP is being
-       * used to represent this grain. Here's we'll figure that out by looking
-       * at all of them and finding the one with the highest value.
-       */
-      unsigned long max_var_num = 0;
-      Real max_entity_value = std::numeric_limits<Real>::lowest();
-      _subproblem.reinitElemPhys(elem, centroid, 0);
-      for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
-        if (_vars[var_num]->sln()[0] > max_entity_value)
-        {
-          max_var_num = var_num;
-          max_entity_value = _vars[var_num]->sln()[0];
-        }
-
-      auto map_num = _single_map_mode ? decltype(max_var_num)(0) : max_var_num;
+      auto map_num = _single_map_mode ? decltype(current_idx)(0) : current_idx;
 
       /**
        * Normally we'd let the flood() routine create new grains. We can't do that here though
        * since we need to set the correct variable index and insert into the current variable
        * index's map. So we'll slam it in there and use the reference to the pointer to
        * reflect that change back down in the flood() routine.
+       *
+       * TODO: This is less true now - might be able to move this back to FeatureCountFlood::flood()
        */
-      _partial_feature_sets[map_num].emplace_back(max_var_num, _feature_count++, processor_id());
+      _partial_feature_sets[map_num].emplace_back(current_idx, _feature_count++, processor_id());
       // Assign a current feature here
       feature = &_partial_feature_sets[map_num].back();
 
       // Set the Auxiliary ID (EBSD ID)
-      feature->_id = grain_index;
+      feature->_id = _consider_phase ? local_id : global_id;
 
       return true;
     }
@@ -219,9 +214,9 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsign
 
       /**
        * If we have an active feature just make sure that the current active feature ID
-       * matches the current entities EBSD grain_index.
+       * matches the current entities EBSD local_id.
        */
-      return feature->_id == grain_index;
+      return feature->_id == (_consider_phase ? local_id : global_id);
     }
   }
   else
@@ -252,6 +247,9 @@ GrainTracker::finalize()
     return;
 
   Moose::perf_log.push("finalize()", "GrainTracker");
+
+  if (_ebsd_reader && _tracking_step == _t_step)
+    expandEBSDGrains();
 
   expandHalos();
 
@@ -369,6 +367,63 @@ GrainTracker::expandHalos()
             visitNodalNeighbors(_mesh.nodePtr(entity), feature._var_idx, &feature, /*expand_halos_only =*/true);
         }
       }
+    }
+  }
+}
+
+void
+GrainTracker::expandEBSDGrains()
+{
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  decltype(FeatureData::_local_ids) expanded_local_ids;
+  decltype(FeatureData::_ghosted_ids) expanded_ghosted_ids;
+  auto my_processor_id = processor_id();
+
+  for (auto & list_ref : _partial_feature_sets)
+  {
+    for (auto & feature : list_ref)
+    {
+      expanded_local_ids.clear();
+      expanded_ghosted_ids.clear();
+
+      for (auto entity : feature._local_ids)
+      {
+        const Elem * elem = _mesh.elemPtr(entity);
+        mooseAssert(elem, "elem pointer is NULL");
+
+        auto n_nodes = elem->n_vertices();
+        for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
+        {
+          const Node * current_node = elem->get_node(i);
+
+          auto elem_vector_it = node_to_elem_map.find(current_node->id());
+          if (elem_vector_it == node_to_elem_map.end())
+            mooseError("Error in node to elem map");
+
+          const auto & elem_vector = elem_vector_it->second;
+
+          expanded_local_ids.insert(elem_vector.begin(), elem_vector.end());
+
+          // Now see which elements need to go into the ghosted set
+          for (auto entity : elem_vector)
+          {
+            const Elem * neighbor = _mesh.elemPtr(entity);
+            mooseAssert(neighbor, "neighbor pointer is NULL");
+
+            if (neighbor->processor_id() != my_processor_id)
+              feature._ghosted_ids.insert(neighbor->id());
+          }
+        }
+      }
+
+      // Replace the existing local ids with the expanded local ids
+      feature._local_ids.swap(expanded_local_ids);
+
+      // Replace the existing ghosted ids with the expanded ghosted ids
+      feature._ghosted_ids.swap(expanded_ghosted_ids);
+
+      // Copy the expanded local_ids into the halo_ids container
+      feature._halo_ids = feature._local_ids;
     }
   }
 }
@@ -1159,8 +1214,24 @@ GrainTracker::updateFieldInfo()
       {
         const Elem * elem = mesh.elem(entity);
         std::vector<Point> centroid(1, elem->centroid());
-        _fe_problem.reinitElemPhys(elem, centroid, 0);
-        entity_value = _vars[curr_var]->sln()[0];
+        if (_ebsd_reader)
+        {
+          const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader->getData(centroid[0]);
+          const auto phase = d._phase;
+          if (!_consider_phase || phase == _phase)
+          {
+            const auto global_id = _ebsd_reader->getGlobalID(d._feature_id);
+            const auto local_id = _ebsd_reader->getAvgData(global_id)._local_id;
+            const auto unique_id = _consider_phase ? local_id : global_id;
+            if (unique_id == grain._id)
+              entity_value = std::numeric_limits<Real>::max();
+          }
+        }
+        else
+        {
+          _fe_problem.reinitElemPhys(elem, centroid, 0);
+          entity_value = _vars[curr_var]->sln()[0];
+        }
       }
       else
       {
@@ -1173,7 +1244,7 @@ GrainTracker::updateFieldInfo()
         mooseAssert(grain._id != libMesh::invalid_uint,  "Missing Grain ID");
         _feature_maps[map_idx][entity] = grain._id;
         if (_var_index_mode)
-          _var_index_maps[map_idx][entity] = grain._var_idx;
+            _var_index_maps[map_idx][entity] = grain._var_idx;
 
         tmp_map[entity] = entity_value;
       }

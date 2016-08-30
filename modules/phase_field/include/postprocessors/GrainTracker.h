@@ -127,6 +127,13 @@ protected:
   Real centroidRegionDistance(std::vector<MeshTools::BoundingBox> & bboxes1, std::vector<MeshTools::BoundingBox> bboxes2) const;
 
   /**
+   * This method takes all of the partial features and expands the local, ghosted, and halo sets around those regions
+   * to account for the diffuse interface. Rather than using any kind of recursion here, we simply expand the region
+   * by all "point" neighbors from the actual grain cells since all point neighbors will contain contributions to the region.
+   */
+  void expandEBSDGrains();
+
+  /**
    * This method colors neighbors of halo entries to expand the halo as desired for a given simulation.
    */
   void expandHalos();
@@ -173,6 +180,9 @@ protected:
 
   /// Optional ESBD Reader
   const EBSDReader * _ebsd_reader;
+
+  /// Optional EBSD OP variable pointer (required if EBSD is supplied)
+  MooseVariable * _ebsd_op_var;
 
   /// The phase to retrieve EBSD information from
   const unsigned int _phase;

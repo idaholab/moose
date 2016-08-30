@@ -46,6 +46,34 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+  [./halo0]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo3]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo4]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo5]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo6]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -87,17 +115,66 @@
     grain_tracker = grain_tracker
     variable = phi1
   [../]
-[]
-
-[Modules]
-  [./PhaseField]
-    [./EulerAngles2RGB]
-      crystal_structure = cubic
-      euler_angle_provider = ebsd
-      grain_tracker = grain_tracker
-    [../]
+    [./halo0]
+    type = FeatureFloodCountAux
+    variable = halo0
+    map_index = 0
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo1]
+    type = FeatureFloodCountAux
+    variable = halo1
+    map_index = 1
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo2]
+    type = FeatureFloodCountAux
+    variable = halo2
+    map_index = 2
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo3]
+    type = FeatureFloodCountAux
+    variable = halo3
+    map_index = 3
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo4]
+    type = FeatureFloodCountAux
+    variable = halo4
+    map_index = 4
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo5]
+    type = FeatureFloodCountAux
+    variable = halo5
+    map_index = 5
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo6]
+    type = FeatureFloodCountAux
+    variable = halo6
+    map_index = 6
+    field_display = HALOS
+    flood_counter = grain_tracker
   [../]
 []
+
+#[Modules]
+#  [./PhaseField]
+#    [./EulerAngles2RGB]
+#      crystal_structure = cubic
+#      euler_angle_provider = ebsd
+#      grain_tracker = grain_tracker
+#    [../]
+#  [../]
+#[]
 
 [Materials]
   [./CuGrGr]
@@ -127,6 +204,7 @@
   [./grain_tracker]
     type = GrainTracker
     ebsd_reader = ebsd
+    compute_halo_maps = true # For displaying HALO fields
   [../]
 []
 
