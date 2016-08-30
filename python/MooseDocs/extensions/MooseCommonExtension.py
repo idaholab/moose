@@ -16,25 +16,42 @@ class MooseCommonExtension(object):
     def __init__(self):
         self._settings = dict() # The default settings should be stored here
 
-    def getSettings(self, settings):
+    def checkFilename(self, rel_filename):
         """
-        Return the settings captured from the regular expression.
+        Checks that the filename exists, if it does not a error Element is return.
 
         Args:
-        settings[str]: A string containing the space separate key, value pairs (key=value key2=value2).
+            filename[str]: The filename to check for existence.
         """
-        output = copy.copy(self._settings)
-        for s in settings.split(' '):
-            if s:
-                k, v = s.strip().split('=')
-                if k not in output:
-                    log.warning('Unknown setting {}'.format(k))
-                    continue
-                try:
-                    output[k] = eval(v)
-                except:
-                    output[k] = str(v)
-        return output
+
+        filename = os.path.abspath(os.path.join(self._root, rel_filename))
+        if os.path.exists(filename):
+            return filename
+        return None
+
+    def getSettings(self, settings_line):
+      """
+      Parses a string of space seperated key=value pairs.
+      This supports having values with spaces in them.
+      So something like "key0=foo bar key1=value1"
+      is supported.
+      Input:
+        settings_line[str]: Line to parse
+      Returns:
+        dict of values that were parsed
+      """
+
+      # Crazy RE capable of many things
+      # like understanding key=value pairs with spaces in them!
+      SETTINGS_RE = re.compile("([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))")
+      matches = SETTINGS_RE.findall(settings_line.strip())
+
+      if not matches:
+        return {}
+      options = copy.copy(self._settings)
+      for entry in matches:
+        options[entry[0].strip()] = entry[1].strip()
+      return options
 
     def createErrorElement(self, rel_filename='', message=None):
         """

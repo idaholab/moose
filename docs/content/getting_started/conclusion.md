@@ -17,11 +17,11 @@
 
 * Update your copy of MOOSE for the latest features and fixes.
 
-    <pre>
-    cd ~/projects/moose
-    git fetch origin
-    git rebase origin/master
-    </pre>
+```bash
+cd ~/projects/moose
+git fetch origin
+git rebase origin/master
+```
 
 ---
 ## Create an App

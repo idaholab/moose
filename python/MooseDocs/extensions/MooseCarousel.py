@@ -19,29 +19,9 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
     """
 
     RE = re.compile(r'^!\ ?slideshow(.*)')
-    SETTINGS_RE = re.compile("([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))")
     # If there are multiple carousels on the same page then
     # they need to have different ids
     MATCHES_FOUND = 0
-
-    def parseOptions(self, settings_line):
-      """
-      Parses a string of space seperated key=value pairs.
-      This supports having values with spaces in them.
-      So something like "key0=foo bar key1=value1"
-      is supported.
-      Input:
-        settings_line[str]: Line to parse
-      Returns:
-        dict of values that were parsed
-      """
-      matches = self.SETTINGS_RE.findall(settings_line.strip())
-      if not matches:
-        return {}
-      options = {}
-      for entry in matches:
-        options[entry[0].strip()] = entry[1].strip()
-      return options
 
     def parseFilenames(self, filenames_block):
       """
@@ -97,7 +77,7 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
       if m:
         # Parse out the options on the slideshow line
         options = m.group(1)
-        parsed_options = self.parseOptions(options)
+        parsed_options = self.getSettings(options)
         block = block[m.end() + 1:] # removes the slideshow line
 
       block, theRest = self.detab(block)

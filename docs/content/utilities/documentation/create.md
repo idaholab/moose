@@ -27,7 +27,7 @@ of the `InputParameters` object. For example, in the [FunctionIC](../systems/fra
 the following parameter documentation is added, which is then present in the parameter summary table of the
 generated site.
 
-![](framework/src/ics/FunctionIC.C line=addRequiredParam)
+!text framework/src/ics/FunctionIC.C line=addRequiredParam
 
 The string supplied in this function will appear in the parameter tables within the documentation that is generated.
 For example, see the parameter table for the [DirichletBC object](/BCs/DirichletBC.md).
@@ -36,7 +36,7 @@ Secondly, a short description should be supplied in each `addParam`, `addPrivate
 example, in the [Diffusion](/Kernels/Diffusion.md) object the following class
 description.
 
-![](framework/src/kernels/Diffusion.C line=addClassDescription)
+!text framework/src/kernels/Diffusion.C line=addClassDescription
 
 When the documentation for this object is generated this string is added to the first portion of the page and the
 system overview table. For example, the [Kernels overview](/Kernels/Overview.md) includes a table with each object
@@ -82,7 +82,7 @@ The include option contains the information that indicates what documentation sh
 the MOOSE documentation the following is contained within this option to build the documentation from the framework itself
 as well as the phase field module.
 
-![](docs/moosedocs.yml start=include end=contact:)
+!text docs/moosedocs.yml start=include end=contact:
 
 The names provided in the sub-sections (i.e., "framework" and "phase_field") are arbitrary. All of the options listed
 in the table above may be used within each of the sub-sections to taylor the generation of the pages as needed to
@@ -97,7 +97,7 @@ the docs directory. The information within this file mimics the [mkdocs pages](h
 configuration, with one exception: it is possible to include other markdown files. For example, the "pages.yml" for
 the MOOSE website includes the following.
 
-![](docs/pages.yml)
+!text docs/pages.yml
 
 Notice, that the framework and the modules each have include statements pointing to another "pages.yml" file. This
 file is generated for each item in the "include" setting discussed above and is placed in the "install" directory.
@@ -115,7 +115,7 @@ The [mkdocs] uses the python [markdown](http://pythonhosted.org/Markdown/) packa
 necessary functionality. This custom extension is located in `python/MooseDocs/extensions/MooseMarkdown.py` and includes
 three configuration options, which are set as done in the `mkdocs.yml` file.
 
-![](docs/mkdocs.yml start=markdown_extensions)
+!text docs/mkdocs.yml start=markdown_extensions
 
 | Option | Description |
 | ------ | ----------- |

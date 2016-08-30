@@ -194,7 +194,7 @@ Date Stamp                 Memory Usage | Percent of MAX memory used: ( 264,256 
 Okay... A bit too accurate, as several samples remained unchanged during tracking. However sometimes more is desirable, though just not printed in this fashion. For data dumps like this, using Matplotlib is far more efficient.
 
 ## Using Matplotlib
-!image memory_logger-plot_multi.png width=300 align=right
+!image memory_logger-plot_multi.png width=300 float=right
 
 We can visualize the results by plotting the data with Matplotlib:
 ```text
@@ -233,7 +233,7 @@ You can also display stdout along the Matplotlib graph:
 ```text
 memory_logger.py --pstack --stdout --plot simple_diffusion_memory.log
 ```
-!image memory_logger-darkmode.png width=300 align=right
+!image memory_logger-darkmode.png width=300 float=right
 
 That white back ground to bright for you? Try dark mode:
 ```text
