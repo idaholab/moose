@@ -25,4 +25,16 @@
     cli_args = 'Outputs/file_base=velocity_inletBC_no_parts_out GlobalParams/integrate_p_by_parts=false'
     custom_cmp = velocity_inletBC_no_parts_out.cmp
   [../]
+  [./RZ_p_no_parts_do_nothing_bcs_cone]
+    type = 'Exodiff'
+    input = 'RZ_do_nothing_bcs_cone.i'
+    exodiff = 'RZ_p_no_parts_do_nothing_bcs_cone_out.e'
+    cli_args = 'Outputs/file_base=RZ_p_no_parts_do_nothing_bcs_cone_out GlobalParams/integrate_p_by_parts=false'
+  [../]
+  [./RZ_p_parts_do_nothing_bcs_cone]
+    type = 'Exodiff'
+    input = 'RZ_do_nothing_bcs_cone.i'
+    exodiff = 'RZ_p_parts_do_nothing_bcs_cone_out.e'
+    cli_args = 'Outputs/file_base=RZ_p_parts_do_nothing_bcs_cone_out GlobalParams/integrate_p_by_parts=true'
+  [../]  
 []

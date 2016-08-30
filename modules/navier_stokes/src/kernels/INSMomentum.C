@@ -141,6 +141,8 @@ Real INSMomentum::computeQpResidual()
 
   // The viscous part, tau : grad(v)
   Real viscous_part = _mu * (tau_row * _grad_test[_i][_qp]);
+  if (_coord_type == INSMomentum::RZ && _component == 0)
+    viscous_part += 2. * _u_vel[_qp] * _test[_i][_qp] / std::pow(_q_point[_qp](0), 2);
 
   // Simplified version: mu * Laplacian(u_component)
   // Real viscous_part = _mu * (_grad_u[_qp] * _grad_test[_i][_qp]);
@@ -170,6 +172,8 @@ Real INSMomentum::computeQpJacobian()
   // on the diagonal of the viscous stress tensor.
   Real viscous_part = _mu * (_grad_phi[_j][_qp]             * _grad_test[_i][_qp] +
                              _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
+  if (_coord_type == INSMomentum::RZ && _component == 0)
+    viscous_part += 2. * _phi[_j][_qp] * _test[_i][_qp] / std::pow(_q_point[_qp](0), 2);
 
   return convective_part + viscous_part;
 }

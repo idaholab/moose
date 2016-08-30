@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<INSMass>()
 {
   InputParameters params = validParams<Kernel>();
-  
+
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D
@@ -25,31 +25,29 @@ InputParameters validParams<INSMass>()
 
 
 INSMass::INSMass(const InputParameters & parameters) :
-  Kernel(parameters),
+    Kernel(parameters),
 
-  _coord_type_set(false),
+    _coord_type_set(false),
 
-  // Velocities (important for non-cartesian coordinates)
-  _u_vel(coupledValue("u")),
-  _v_vel(coupledValue("v")),
-  _w_vel(coupledValue("w")),
+    // Velocities (important for non-cartesian coordinates)
+    _u_vel(coupledValue("u")),
 
-  // Gradients
-  _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(coupledGradient("v")),
-  _grad_w_vel(coupledGradient("w")),
+    // Gradients
+    _grad_u_vel(coupledGradient("u")),
+    _grad_v_vel(coupledGradient("v")),
+    _grad_w_vel(coupledGradient("w")),
 
-  // Variable numberings
-  _u_vel_var_number(coupled("u")),
-  _v_vel_var_number(coupled("v")),
-  _w_vel_var_number(coupled("w")),
-  _p_var_number(coupled("p"))
+    // Variable numberings
+    _u_vel_var_number(coupled("u")),
+    _v_vel_var_number(coupled("v")),
+    _w_vel_var_number(coupled("w")),
+    _p_var_number(coupled("p"))
 
 {
 }
 
 void INSMass::setGeometryParameter(const InputParameters & params,
-                                    INSMass::COORD_TYPE & coord_type)
+                                   INSMass::COORD_TYPE & coord_type)
 {
   if (params.isParamSetByUser("coord_type"))
   {
@@ -77,7 +75,7 @@ Real INSMass::computeQpResidual()
   // (div u) * q
   // Note: we (arbitrarily) multilply this term by -1 so that it matches the -p(div v)
   // term in the momentum equation.  Not sure if that is really important?
-  switch(_coord_type)
+  switch (_coord_type)
   {
     case INSMass::XYZ:
       return -(_grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2)) * _test[_i][_qp];
@@ -106,7 +104,7 @@ Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
   {
-    switch(_coord_type)
+    switch (_coord_type)
     {
       case INSMass::XYZ:
         return -_grad_phi[_j][_qp](0) * _test[_i][_qp];
@@ -121,7 +119,7 @@ Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
 
   else if (jvar == _v_vel_var_number)
   {
-    switch(_coord_type)
+    switch (_coord_type)
     {
       case INSMass::XYZ:
       case INSMass::RZ:
@@ -132,14 +130,14 @@ Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
         mooseError("coord_type doesn't match XYZ, RZ, or RSPHERICAL");
     }
   }
-  
+
   else if (jvar == _w_vel_var_number)
   {
-    switch(_coord_type)
+    switch (_coord_type)
     {
-      case INSMass:XYZ:
+      case INSMass::XYZ:
         return -_grad_phi[_j][_qp](2) * _test[_i][_qp];
-      case INSMass:RZ:
+      case INSMass::RZ:
         return 0.;
       case INSMass::RSPHERICAL:
         mooseError("Spherical coordinates not currently supported.");
@@ -147,7 +145,7 @@ Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
         mooseError("coord_type doesn't match XYZ, RZ, or RSPHERICAL");
     }
   }
-  
+
   else
     return 0;
 }

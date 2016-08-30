@@ -47,9 +47,7 @@ protected:
 
   // Coupled values
   const VariableValue & _u_vel;
-  const VariableValue & _v_vel;
-  const VariableValue & _w_vel;
-  
+
 
   // Coupled Gradients
   const VariableGradient & _grad_u_vel;
