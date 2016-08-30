@@ -75,6 +75,20 @@ namespace MooseUtils
   void parallelBarrierNotify(const libMesh::Parallel::Communicator & comm);
 
   /**
+   * This function marks the begin of a section of code that is executed in serial
+   * rank by rank. The section must be closed with a call to serialEnd.
+   * These functions are intended for debugging use to obtain clean terminal output
+   * from multiple ranks (use --keep-cout).
+   */
+  void serialBegin(const libMesh::Parallel::Communicator & comm);
+
+  /**
+   * Closes a section of code that is executed in serial rank by rank, and that was
+   * opened with a call to serialBegin. No MPI communication can happen in this block.
+   */
+  void serialEnd(const libMesh::Parallel::Communicator & comm);
+
+  /**
    * Function tests if the supplied filename as the desired extension
    * @param filename The filename to test the extension
    * @param ext The extension to test for (do not include the .)

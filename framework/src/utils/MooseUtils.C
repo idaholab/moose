@@ -145,6 +145,32 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
   comm.barrier();
 }
 
+void serialBegin(const libMesh::Parallel::Communicator & comm)
+{
+  // unless we are the first processor...
+  if (comm.rank() > 0)
+  {
+    // ...wait for the previous processor to finish
+    int dummy = 0;
+    comm.receive(comm.rank() - 1, dummy);
+  }
+  else
+    mooseWarning("Entering serial execution block (use only for debugging)");
+}
+
+void serialEnd(const libMesh::Parallel::Communicator & comm)
+{
+  // unless we are the last processor...
+  if (comm.rank() + 1 < comm.size())
+  {
+    // ...notify the next processor of its turn
+    int dummy = 0;
+    comm.send(comm.rank() + 1, dummy);
+  }
+  else
+    mooseWarning("Leaving serial execution block (use only for debugging)");
+}
+
 bool
 hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext)
 {
