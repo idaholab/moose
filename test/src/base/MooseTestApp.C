@@ -193,6 +193,7 @@
 #include "ElementSidePP.h"
 #include "RealControlParameterReporter.h"
 #include "ScalarCoupledPostprocessor.h"
+#include "NumAdaptivityCycles.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -493,6 +494,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(ElementSidePP);
   registerPostprocessor(RealControlParameterReporter);
   registerPostprocessor(ScalarCoupledPostprocessor);
+  registerPostprocessor(NumAdaptivityCycles);
 
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);

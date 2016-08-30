@@ -210,6 +210,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
+
+  _cycles_completed = 0;
 }
 
 FEProblem::~FEProblem()
@@ -3659,6 +3661,7 @@ void
 FEProblem::initialAdaptMesh()
 {
   unsigned int n = adaptivity().getInitialSteps();
+  _cycles_completed = 0;
   for (unsigned int i = 0; i < n; i++)
   {
     _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
@@ -3671,13 +3674,14 @@ FEProblem::initialAdaptMesh()
 
       //reproject the initial condition
       projectSolution();
+
+      _cycles_completed++;
     }
     else
     {
       _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
       return;
     }
-
   }
 }
 
@@ -3688,6 +3692,7 @@ FEProblem::adaptMesh()
     return;
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
+  _cycles_completed = 0;
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
     _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << '\n';
@@ -3695,7 +3700,10 @@ FEProblem::adaptMesh()
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
       computeMarkers();
     if (_adaptivity.adaptMesh())
+    {
       meshChanged();
+      _cycles_completed++;
+    }
     else
     {
       _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
