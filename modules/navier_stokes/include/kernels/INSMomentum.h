@@ -27,10 +27,23 @@ public:
 
   virtual ~INSMomentum(){}
 
+  enum COORD_TYPE
+  {
+    XYZ,
+    RZ,
+    RSPHERICAL
+  };
+
+  static void setGeometryParameter(const InputParameters & params, COORD_TYPE & coord_type);
+
 protected:
+  virtual void computeResidual();
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
+
+  bool _coord_type_set;
+  COORD_TYPE _coord_type;
 
   // Coupled variables
   const VariableValue & _u_vel;

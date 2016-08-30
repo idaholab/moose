@@ -24,6 +24,8 @@ InputParameters validParams<INSMomentum>()
   params.addRequiredParam<unsigned>("component", "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
   params.addParam<bool>("integrate_p_by_parts", true, "Allows simulations to be run with pressure BC if set to false");
 
+  MooseEnum coord_types("XYZ RZ RSPHERICAL");
+  params.addParam<MooseEnum>("coord_type", coord_types, "Coordinate system types. Choices are: " + coord_types.getRawNames());
   return params;
 }
 
@@ -31,6 +33,8 @@ InputParameters validParams<INSMomentum>()
 
 INSMomentum::INSMomentum(const InputParameters & parameters) :
   Kernel(parameters),
+
+  _coord_type_set(false),
 
   // Coupled variables
   _u_vel(coupledValue("u")),
@@ -62,6 +66,29 @@ INSMomentum::INSMomentum(const InputParameters & parameters) :
 {
 }
 
+void INSMomentum::setGeometryParameter(const InputParameters & params,
+                                    INSMomentum::COORD_TYPE & coord_type)
+{
+  if (params.isParamSetByUser("coord_type"))
+  {
+    coord_type = INSMomentum::COORD_TYPE(int(params.get<MooseEnum>("coord_type")));
+  }
+  else
+  {
+    coord_type = INSMomentum::XYZ;
+  }
+}
+
+void INSMomentum::computeResidual()
+{
+  if (!_coord_type_set)
+  {
+    setGeometryParameter(_pars, _coord_type);
+    _coord_type_set = true;
+  }
+
+  Kernel::computeResidual();
+}
 
 
 Real INSMomentum::computeQpResidual()
@@ -76,7 +103,11 @@ Real INSMomentum::computeQpResidual()
   // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
   Real pressure_part = 0.;
   if (_integrate_p_by_parts)
+  {
     pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
+    if (_coord_type == INSMomentum::RZ && _component == 0)
+      pressure_part += -_p[_qp] / _q_point[_qp](0) * _test[_i][_qp];
+  }
   else
     pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
 
