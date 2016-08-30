@@ -1,7 +1,5 @@
-# This input file tests the fieldSplit preconditioner  for the incompressible NS equations.
-
+# This input file tests Dirichlet pressure in/outflow boundary conditions for the incompressible NS equations.
 [GlobalParams]
-  # Dummy parameters
   gravity = '0 0 0'
   rho = 1
   mu = 1
@@ -23,26 +21,14 @@
   [./vel_x]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
   [../]
   [./vel_y]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
   [../]
   [./p]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0 # This number is arbitrary for NS...
-    [../]
   [../]
 []
 
@@ -164,7 +150,7 @@
 [Executioner]
   type = Steady
   solve_type = PJFNK
-  nl_rel_tol = 1e-9
+  nl_rel_tol = 1e-12
   nl_max_its = 6
   l_tol = 1e-6
   l_max_its = 300
