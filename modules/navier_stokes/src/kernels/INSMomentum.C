@@ -207,7 +207,12 @@ Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _p_var_number)
   {
     if (_integrate_p_by_parts)
-      return -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
+    {
+      Real pressure_part = -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
+      if (_coord_type == INSMomentum::RZ && _component == 0)
+        pressure_part += -_phi[_j][_qp] / _q_point[_qp](0) * _test[_i][_qp];
+      return pressure_part;
+    }
     else
       return _grad_phi[_j][_qp](_component) * _test[_i][_qp];
   }

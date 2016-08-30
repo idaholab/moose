@@ -84,7 +84,7 @@ Real INSMass::computeQpResidual()
     case INSMass::RZ:
       return -(_grad_u_vel[_qp](0) + _u_vel[_qp] / _q_point[_qp](0) + _grad_v_vel[_qp](1)) * _test[_i][_qp];
     case INSMass::RSPHERICAL:
-      mooseError("You're looking at flow in a sphere!");
+      mooseError("Spherical coordinates not currently supported.");
     default:
       mooseError("coord_type doesn't match XYZ, RZ, or RSPHERICAL");
   }
@@ -105,13 +105,49 @@ Real INSMass::computeQpJacobian()
 Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _u_vel_var_number)
-    return -_grad_phi[_j][_qp](0) * _test[_i][_qp];
+  {
+    switch(_coord_type)
+    {
+      case INSMass::XYZ:
+        return -_grad_phi[_j][_qp](0) * _test[_i][_qp];
+      case INSMass::RZ:
+        return -(_grad_phi[_j][_qp](0) + _phi[_j][_qp] / _q_point[_qp](0)) * _test[_i][_qp];
+      case INSMass::RSPHERICAL:
+        mooseError("Spherical coordinates not currently supported.");
+      default:
+        mooseError("coord_type doesn't match XYZ, RZ, or RSPHERICAL");
+    }
+  }
 
   else if (jvar == _v_vel_var_number)
-    return -_grad_phi[_j][_qp](1) * _test[_i][_qp];
-
+  {
+    switch(_coord_type)
+    {
+      case INSMass::XYZ:
+      case INSMass::RZ:
+        return -_grad_phi[_j][_qp](1) * _test[_i][_qp];
+      case INSMass::RSPHERICAL:
+        mooseError("Spherical coordinates not currently supported.");
+      default:
+        mooseError("coord_type doesn't match XYZ, RZ, or RSPHERICAL");
+    }
+  }
+  
   else if (jvar == _w_vel_var_number)
-    return -_grad_phi[_j][_qp](2) * _test[_i][_qp];
+  {
+    switch(_coord_type)
+    {
+      case INSMass:XYZ:
+        return -_grad_phi[_j][_qp](2) * _test[_i][_qp];
+      case INSMass:RZ:
+        return 0.;
+      case INSMass::RSPHERICAL:
+        mooseError("Spherical coordinates not currently supported.");
+      default:
+        mooseError("coord_type doesn't match XYZ, RZ, or RSPHERICAL");
+    }
+  }
+  
   else
     return 0;
 }
