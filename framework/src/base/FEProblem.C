@@ -3665,11 +3665,19 @@ FEProblem::initialAdaptMesh()
     computeIndicators();
     computeMarkers();
 
-    _adaptivity.initialAdaptMesh();
-    meshChanged();
+    if (_adaptivity.initialAdaptMesh())
+    {
+      meshChanged();
 
-    //reproject the initial condition
-    projectSolution();
+      //reproject the initial condition
+      projectSolution();
+    }
+    else
+    {
+      _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
+      return;
+    }
+
   }
 }
 
@@ -3688,6 +3696,11 @@ FEProblem::adaptMesh()
       computeMarkers();
     if (_adaptivity.adaptMesh())
       meshChanged();
+    else
+    {
+      _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
+      return;
+    }
 
     // Show adaptivity progress
     _console << std::flush;
