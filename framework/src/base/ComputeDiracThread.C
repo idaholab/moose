@@ -18,7 +18,7 @@
 #include "ParallelUniqueId.h"
 #include "DiracKernel.h"
 #include "Problem.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "MooseVariable.h"
 #include "DiracKernel.h"
 #include "Assembly.h"
@@ -27,7 +27,7 @@
 #include "libmesh/threads.h"
 
 ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
-                                       NonlinearSystem & system,
+                                       NonlinearSystemBase & system,
                                        SparseMatrix<Number> * jacobian) :
     ThreadedElementLoop<DistElemRange>(feproblem, system),
     _jacobian(jacobian),

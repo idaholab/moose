@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ComputeFullJacobianThread.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBC.h"
@@ -22,7 +22,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
+ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystemBase & sys, SparseMatrix<Number> & jacobian) :
     ComputeJacobianThread(fe_problem, sys, jacobian),
     _integrated_bcs(sys.getIntegratedBCWarehouse()),
     _dg_kernels(sys.getDGKernelWarehouse()),

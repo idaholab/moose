@@ -19,12 +19,12 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
 public:
-  ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
+  ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystemBase & sys, SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);
