@@ -836,7 +836,7 @@ public:
   /**
    * @return The number of adaptivity cycles completed.
    */
-  unsigned int getNumCycles() { return _cycles_completed; }
+  unsigned int getNumCyclesCompleted() { return _cycles_completed; }
 #endif //LIBMESH_ENABLE_AMR
 
   /// Create XFEM controller object

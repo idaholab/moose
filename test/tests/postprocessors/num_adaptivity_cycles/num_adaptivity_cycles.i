@@ -86,6 +86,7 @@
 [Postprocessors]
   [./adaptivity_cycles]
     type = NumAdaptivityCycles
+    execute_on = 'initial timestep_end'
   [../]
 []
 

@@ -15,8 +15,6 @@
 // MOOSE includes
 #include "NumAdaptivityCycles.h"
 #include "FEProblem.h"
-//#include "SubProblem.h"
-//#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<NumAdaptivityCycles>()
@@ -32,6 +30,6 @@ NumAdaptivityCycles::NumAdaptivityCycles(const InputParameters & parameters) :
 Real
 NumAdaptivityCycles::getValue()
 {
-  return _fe_problem.getNumCycles();
+  return _fe_problem.getNumCyclesCompleted();
 }
 
