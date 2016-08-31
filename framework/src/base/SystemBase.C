@@ -93,6 +93,7 @@ MooseVariable &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));
+
   if (var == NULL)
     mooseError("Variable '" + var_name + "' does not exist in this system");
   return *var;
@@ -106,6 +107,27 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
     mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
+
+MooseVariableBase &
+SystemBase::getVariableBase(THREAD_ID tid, const std::string & var_name)
+{
+  MooseVariableBase * var = _vars[tid].getVariable(var_name);
+  if (var == NULL)
+    mooseError("Variable '" + var_name + "' does not exist in this system");
+  return *var;
+}
+
+MooseVariableBase &
+SystemBase::getVariableBase(THREAD_ID tid, unsigned int var_number)
+{
+  MooseVariableBase * var = _vars[tid].getVariable(var_number);
+  if (var == NULL)
+    mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
+  return *var;
+}
+
+
+
 
 MooseVariableScalar &
 SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
@@ -188,12 +210,25 @@ Order
 SystemBase::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
-  std::vector<MooseVariable *> vars = _vars[0].variables();
-  for (const auto & var : vars)
+
   {
-    FEType fe_type = var->feType();
-    if (fe_type.default_quadrature_order() > order)
-      order = fe_type.default_quadrature_order();
+    std::vector<MooseVariable *> vars = _vars[0].variables();
+    for (const auto & var : vars)
+    {
+      FEType fe_type = var->feType();
+      if (fe_type.default_quadrature_order() > order)
+        order = fe_type.default_quadrature_order();
+    }
+  }
+
+  {
+    std::vector<ArrayMooseVariable *> vars = _vars[0].arrayVars();
+    for (const auto & var : vars)
+    {
+      FEType fe_type = var->feType();
+      if (fe_type.default_quadrature_order() > order)
+        order = fe_type.default_quadrature_order();
+    }
   }
 
   return order;
@@ -204,7 +239,7 @@ SystemBase::prepare(THREAD_ID tid)
 {
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    const std::set<MooseVariableBase *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
     for (const auto & var : vars)
       var->clearDofIndices();
@@ -226,7 +261,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 {
   if (_subproblem.hasActiveElementalMooseVariables(tid)) // We only need to do something if the element prepare was restricted
   {
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    const std::set<MooseVariableBase *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
 
     std::vector<MooseVariable *> newly_prepared_vars;
 
@@ -262,7 +297,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
+    const std::set<MooseVariableBase *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     for (const auto & var : active_elemental_moose_variables)
       if (&(var->sys()) == this)
         var->computeElemValues();
@@ -316,13 +351,27 @@ SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 void
 SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (const auto & var : vars)
   {
-    if (var->isNodal())
+    auto & vars = _vars[tid].variables();
+    for (const auto & var : vars)
     {
-      var->reinitNode();
-      var->computeNodalValues();
+      if (var->isNodal())
+      {
+        var->reinitNode();
+        var->computeNodalValues();
+      }
+    }
+  }
+
+  {
+    auto & vars = _vars[tid].arrayVars();
+    for (const auto & var : vars)
+    {
+      if (var->isNodal())
+      {
+        var->reinitNode();
+        var->computeNodalValues();
+      }
     }
   }
 }

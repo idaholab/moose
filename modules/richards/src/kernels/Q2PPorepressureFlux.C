@@ -60,8 +60,8 @@ Q2PPorepressureFlux::prepareNodalValues()
 
   for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
   {
-    density = _density.density(_var.nodalSln()[nodenum]); // fluid density at the node
-    ddensity_dp = _density.ddensity(_var.nodalSln()[nodenum]); // d(fluid density)/dP at the node
+    density = _density.density(_moose_var.nodalSln()[nodenum]); // fluid density at the node
+    ddensity_dp = _density.ddensity(_moose_var.nodalSln()[nodenum]); // d(fluid density)/dP at the node
     relperm = _relperm.relperm(_sat[nodenum]); // relative permeability of the fluid at node nodenum
     drelperm_ds = _relperm.drelperm(_sat[nodenum]); // d(relperm)/dsat
 
@@ -287,4 +287,3 @@ Q2PPorepressureFlux::upwind(bool compute_res, bool compute_jac, unsigned int jva
   }
 
 }
-

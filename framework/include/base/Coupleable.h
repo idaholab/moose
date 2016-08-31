@@ -46,7 +46,7 @@ public:
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::map<std::string, std::vector<MooseVariable *> > & getCoupledVars() { return _coupled_vars; }
+  const std::map<std::string, std::vector<MooseVariableBase *> > & getCoupledVars() { return _coupled_vars; }
 
   /**
    * Get the list of coupled variables
@@ -231,7 +231,7 @@ protected:
   FEProblem & _c_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;
+  std::map<std::string, std::vector<MooseVariableBase *> > _coupled_vars;
 
   /// Vector of coupled variables
   std::vector<MooseVariable *> _coupled_moose_vars;
@@ -263,7 +263,15 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariable *getVar(const std::string & var_name, unsigned int comp);
+  MooseVariableBase * getVar(const std::string & var_name, unsigned int comp);
+
+  /**
+   * Extract the pointer to a coupled MooseVariable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  MooseVariable * getMooseVar(const std::string & var_name, unsigned int comp);
 
   /**
    * Checks to make sure that the current Executioner has set "_it_transient" when old/older values

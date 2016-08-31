@@ -27,8 +27,8 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/dense_vector.h"
 
-MooseVariable::MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    MooseVariableBase(var_num, fe_type, sys, assembly, var_kind),
+MooseVariable::MooseVariable(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+    MooseVariableBase(name, var_num, fe_type, sys, assembly, var_kind),
 
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
@@ -908,6 +908,7 @@ MooseVariable::computeElemValues()
     for (unsigned int qp=0; qp < nqp; qp++)
     {
       phi_local = _phi[i][qp];
+
       dphi_qp = &_grad_phi[i][qp];
 
       grad_u_qp = &_grad_u[qp];

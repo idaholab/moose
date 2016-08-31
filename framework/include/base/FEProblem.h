@@ -205,6 +205,7 @@ public:
 
   virtual bool hasVariable(const std::string & var_name) override;
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual MooseVariableBase & getVariableBase(THREAD_ID tid, const std::string & var_name) override;
   virtual bool hasScalarVariable(const std::string & var_name) override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) override;
 
@@ -214,14 +215,14 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid) override;
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableBase *> & moose_vars, THREAD_ID tid) override;
 
   /**
    * Get the MOOSE variables to be reinited on each element.
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid) override;
+  virtual const std::set<MooseVariableBase *> & getActiveElementalMooseVariables(THREAD_ID tid) override;
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
@@ -435,6 +436,7 @@ public:
   // NL /////
   NonlinearSystem & getNonlinearSystem() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
+  void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);

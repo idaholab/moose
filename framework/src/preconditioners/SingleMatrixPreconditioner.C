@@ -37,7 +37,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
     MoosePreconditioner(params)
 {
   NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
-  unsigned int n_vars = nl.nVariables();
+  unsigned int n_vars = nl.numLibMeshVariables();
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars);
   bool full = getParam<bool>("full");

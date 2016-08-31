@@ -23,7 +23,8 @@ template<>
 InputParameters validParams<Kernel>();
 
 class Kernel :
-  public KernelBase
+  public KernelBase,
+  public MooseVariableInterface
 {
 public:
   Kernel(const InputParameters & parameters);
@@ -46,6 +47,9 @@ protected:
   /// This callback is used for Kernels that need to perform a per-element calculation
   virtual void precalculateResidual();
 
+  /// The variable this Kernel is operating on
+  MooseVariable & _moose_var;
+
   /// Holds the solution at current quadrature points
   const VariableValue & _u;
 
@@ -57,6 +61,18 @@ protected:
 
   /// Derivative of u_dot with respect to u
   const VariableValue & _du_dot_du;
+
+  /// the current test function
+  const VariableTestValue & _test;
+
+  /// gradient of the test function
+  const VariableTestGradient & _grad_test;
+
+  /// the current shape functions
+  const VariablePhiValue & _phi;
+
+  /// gradient of the shape function
+  const VariablePhiGradient & _grad_phi;
 };
 
 #endif /* KERNEL_H */

@@ -29,7 +29,7 @@ FluxAverageAux::FluxAverageAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _diffusivity(getParam<Real>("diffusivity")),
     _coupled_gradient(coupledGradient("coupled")),
-    _coupled_var(*(getCoupledVars().find("coupled")->second)[0]),
+    _coupled_var(*getMooseVar("coupled", 0)),
     _normals(_coupled_var.normals())
 {
 }

@@ -45,13 +45,13 @@ SubProblem::~SubProblem()
 }
 
 void
-SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
+SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariableBase *> & moose_vars, THREAD_ID tid)
 {
   _has_active_elemental_moose_variables[tid] = 1;
   _active_elemental_moose_variables[tid] = moose_vars;
 }
 
-const std::set<MooseVariable *> &
+const std::set<MooseVariableBase *> &
 SubProblem::getActiveElementalMooseVariables(THREAD_ID tid)
 {
   return _active_elemental_moose_variables[tid];

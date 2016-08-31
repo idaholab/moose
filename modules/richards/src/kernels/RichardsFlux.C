@@ -34,7 +34,7 @@ RichardsFlux::RichardsFlux(const InputParameters & parameters) :
     _d2flux_dgradvdv(getMaterialProperty<std::vector<std::vector<std::vector<RealTensorValue> > > >("d2flux_dgradvdv")),
     _d2flux_dvdgradv(getMaterialProperty<std::vector<std::vector<std::vector<RealTensorValue> > > >("d2flux_dvdgradv")),
 
-    _second_u(getParam<bool>("linear_shape_fcns") ? _second_zero : (_is_implicit ? _var.secondSln() : _var.secondSlnOld())),
+    _second_u(getParam<bool>("linear_shape_fcns") ? _second_zero : (_is_implicit ? _moose_var.secondSln() : _moose_var.secondSlnOld())),
     _second_phi(getParam<bool>("linear_shape_fcns") ? _second_phi_zero : secondPhi()),
 
     _tauvel_SUPG(getMaterialProperty<std::vector<RealVectorValue> >("tauvel_SUPG")),

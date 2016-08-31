@@ -66,7 +66,7 @@ PointValue::finalize()
   if (_root_id == processor_id())
   {
     const Elem * elem = _mesh.getMesh().elem(_elem_id);
-    std::set<MooseVariable *> var_list;
+    std::set<MooseVariableBase *> var_list;
     var_list.insert(&_var);
 
     _fe_problem.setActiveElementalMooseVariables(var_list, _tid);

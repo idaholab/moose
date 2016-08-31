@@ -33,13 +33,13 @@ InputParameters validParams<EigenKernel>()
 }
 
 EigenKernel::EigenKernel(const InputParameters & parameters) :
-    KernelBase(parameters),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    Kernel(parameters),
     _eigen(getParam<bool>("eigen")),
     _eigen_sys(dynamic_cast<MooseEigenSystem *>(&_fe_problem.getNonlinearSystem())),
     _eigenvalue(NULL)
 {
+  addMooseVariableDependency(mooseVariable());
+
   // The name to the postprocessor storing the eigenvalue
   std::string eigen_pp_name;
 

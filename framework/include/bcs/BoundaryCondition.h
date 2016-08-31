@@ -70,7 +70,7 @@ public:
    * Gets the variable this BC is active on
    * @return the variable
    */
-  MooseVariable & variable();
+  MooseVariableBase & variable();
 
   /**
    * Get a reference to the subproblem
@@ -107,7 +107,7 @@ protected:
   Assembly & _assembly;
 
   /// variable this BC works on
-  MooseVariable & _var;
+  MooseVariableBase & _var;
 
   /// Mesh this BC is defined on
   MooseMesh & _mesh;

@@ -24,6 +24,7 @@
 class MooseVariableBase;
 class MooseVariable;
 class MooseVariableScalar;
+class ArrayMooseVariable;
 
 /**
  * Holds variables and provides some services
@@ -46,21 +47,21 @@ public:
    * @param bnd The boundary id where this variable is defined
    * @param var The variable
    */
-  void addBoundaryVar(BoundaryID bnd, MooseVariable *var);
+  void addBoundaryVar(BoundaryID bnd, MooseVariableBase *var);
 
   /**
    * Add a variable to a set of boundaries
    * @param boundary_ids The boundary ids where this variable is defined
    * @param var The variable
    */
-  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable *var);
+  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariableBase *var);
 
   /**
    * Add a map of variables to a set of boundaries
    * @param boundary_ids The boundary ids where this variable is defined
    * @param vars A map of variables
    */
-  void addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariable *> > & vars);
+  void addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariableBase *> > & vars);
 
   /**
    * Get a variable from the warehouse
@@ -75,6 +76,12 @@ public:
    * @return The retrieved variable
    */
   MooseVariableBase * getVariable(unsigned int var_number);
+
+  /**
+   * @param name The name of the variable
+   * @return Whether or not the variable exists in this warehouse
+   */
+  bool hasVariable(const std::string & var_name) const;
 
   /**
    * Get the list of all variable names
@@ -93,13 +100,43 @@ public:
    * @param bnd The boundary ID
    * @return The list of variables
    */
-  const std::set<MooseVariable *> & boundaryVars(BoundaryID bnd);
+  const std::set<MooseVariableBase *> & boundaryVars(BoundaryID bnd);
 
   /**
    * Get the list of scalar variables
    * @return The list of scalar variables
    */
   const std::vector<MooseVariableScalar *> & scalars();
+
+  /**
+   * Get the list of Array variables
+   * @return The list of Array variables
+   */
+  const std::vector<ArrayMooseVariable *> & arrayVars();
+
+  /**
+   * Get the total number of actual (libmesh) variables represented by the MooseVariables stored in this Warehouse
+   * @return The number of libMesh variables
+   */
+  unsigned int numLibMeshVariables();
+
+  /**
+   * Get the total number of actual MooseVariables (i.e. single scalar variables)
+   * @return The number of MooseVariables
+   */
+  unsigned int numMooseVariables();
+
+  /**
+   * Get the total number of actual ScalarMooseVariables
+   * @return The number of MooseVariables
+   */
+  unsigned int numScalarMooseVariables();
+
+  /**
+   * Get the total number of actual ArrayMooseVariables
+   * @return The number of ArrayMooseVariables
+   */
+  unsigned int numArrayMooseVariables();
 
 protected:
   /// list of variable names
@@ -109,13 +146,18 @@ protected:
   /// Name to variable mapping
   std::map<std::string, MooseVariableBase *> _var_name;
   /// Map to variables that need to be evaluated on a boundary
-  std::map<BoundaryID, std::set<MooseVariable *> > _boundary_vars;
+  std::map<BoundaryID, std::set<MooseVariableBase *> > _boundary_vars;
+
+  std::vector<ArrayMooseVariable *> _array_vars;
 
   /// list of all variables
   std::vector<MooseVariableScalar *> _scalar_vars;
 
   /// All instances of objects (raw pointers)
   std::vector<MooseVariableBase *> _all_objects;
+
+  /// The total number of variables held in this warehouse
+  unsigned int _n_libmesh_vars = 0;
 };
 
 #endif // VARIABLEWAREHOUSE_H

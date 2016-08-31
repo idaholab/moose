@@ -41,7 +41,7 @@ template <typename T> class DenseVector;
 class MooseVariable : public MooseVariableBase
 {
 public:
-  MooseVariable(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariable(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariable();
 
   /**
@@ -49,19 +49,19 @@ public:
    */
   void clearDofIndices();
 
-  void prepare();
+  virtual void prepare() override;
 
-  void prepareNeighbor();
-  void prepareAux();
-  void prepareIC();
+  virtual void prepareNeighbor() override;
+  virtual void prepareAux() override;
+  virtual void prepareIC() override;
 
-  void reinitNode();
-  void reinitNodeNeighbor();
-  void reinitAux();
-  void reinitAuxNeighbor();
+  virtual void reinitNode() override;
+  virtual void reinitNodeNeighbor() override;
+  virtual void reinitAux() override;
+  virtual void reinitAuxNeighbor() override;
 
-  void reinitNodes(const std::vector<dof_id_type> & nodes);
-  void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes);
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes) override;
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes) override;
 
   const std::set<SubdomainID> & activeSubdomains();
 
@@ -191,7 +191,8 @@ public:
   /**
    * Compute values at interior quadrature points
    */
-  void computeElemValues();
+  virtual void computeElemValues() override;
+
   /**
    * Compute values at facial quadrature points
    */

@@ -270,13 +270,13 @@ BlockRestrictable::variableSubdomainIDs(const InputParameters & parameters) cons
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
   // Pointer to MooseVariable
-  MooseVariable * var = NULL;
+  MooseVariableBase * var = NULL;
 
   // Get the variable based on the type
   if (parameters.have_parameter<NonlinearVariableName>("variable"))
-    var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
+    var = &_blk_feproblem->getVariableBase(tid, parameters.get<NonlinearVariableName>("variable"));
   else if (parameters.have_parameter<AuxVariableName>("variable"))
-    var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
+    var = &_blk_feproblem->getVariableBase(tid, parameters.get<AuxVariableName>("variable"));
   else
     mooseError("Unknown variable.");
 

@@ -15,9 +15,7 @@
 #ifndef NODALBC_H
 #define NODALBC_H
 
-#include "BoundaryCondition.h"
-#include "RandomInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "NodalBCBase.h"
 
 // Forward declarations
 class NodalBC;
@@ -34,10 +32,7 @@ InputParameters validParams<NodalBC>();
 /**
  * Base class for deriving any boundary condition that works at nodes
  */
-class NodalBC :
-  public BoundaryCondition,
-  public RandomInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface
+class NodalBC : public NodalBCBase
 {
 public:
   NodalBC(const InputParameters & parameters);
@@ -47,6 +42,9 @@ public:
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
 protected:
+  /// The MooseVariable this BC is acting on
+  MooseVariable & _moose_var;
+
   /// current node being processed
   const Node * & _current_node;
 

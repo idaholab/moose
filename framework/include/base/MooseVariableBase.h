@@ -50,7 +50,7 @@ class SystemBase;
 class MooseVariableBase
 {
 public:
-  MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableBase(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count = 1);
   virtual ~MooseVariableBase();
 
   /**
@@ -70,9 +70,15 @@ public:
   SystemBase & sys() { return _sys; }
 
   /**
-   * Get the variable number
+   * Get the variable name
    */
   const std::string & name() const;
+
+  /**
+   * Get the names of all of the variables represented by this MoosevariableBase
+   * Note: this is usually built on the fly, so try not to call it too much!
+   */
+  const std::vector<std::string> names() const;
 
   /**
    * Kind of the variable (Nonlinear, Auxiliary, ...)
@@ -110,7 +116,35 @@ public:
    */
   virtual bool isNodal() const = 0;
 
+  /**
+   * Current element this variable is evaluated at
+   */
+  const Elem * & currentElem() { return _elem; }
+
+  virtual void prepare() {}
+
+  virtual void prepareNeighbor() {}
+  virtual void prepareAux() {}
+  virtual void prepareIC() {}
+
+  virtual void reinitNode() {}
+  virtual void reinitNodeNeighbor() {}
+  virtual void reinitAux() {}
+  virtual void reinitAuxNeighbor() {}
+
+  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) {}
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) {}
+
+  virtual void computeElemValues() {}
+
+  /**
+   * The number of variables represented by this ArrayMooseVariable.
+   */
+  unsigned int count() const { return _count; }
+
 protected:
+  /// The name of the variable
+  std::string _name;
   /// variable number (from libMesh)
   unsigned int _var_num;
   /// The FEType associated with this variable
@@ -133,8 +167,14 @@ protected:
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
 
+  /// current element
+  const Elem * & _elem;
+
   /// scaling factor for this variable
   Real _scaling_factor;
+
+  /// The number of variables represented by this MooseVariable
+  unsigned int _count;
 };
 
 #endif /* MOOSEVARIABLEBASE_H */

@@ -38,7 +38,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
     _args(_nargs),
     _arg_names(_nargs),
     _func_dFdarg(_nargs),
-    _number_of_nl_variables(_sys.nVariables()),
+    _number_of_nl_variables(_sys.numLibMeshVariables()),
     _arg_index(_number_of_nl_variables, -1)
 {
   // build variables argument (start with variable the kernel is operating on)

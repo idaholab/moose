@@ -88,7 +88,7 @@ GapConductance::GapConductance(const InputParameters & parameters) :
                  1.0 / getParam<Real>("emissivity_1") + 1.0 / getParam<Real>("emissivity_2") - 1 : 0.0),
     _min_gap(getParam<Real>("min_gap")),
     _max_gap(getParam<Real>("max_gap")),
-    _temp_var(_quadrature ? getVar("variable",0) : NULL),
+    _temp_var(_quadrature ? getMooseVar("variable",0) : NULL),
     _penetration_locator(NULL),
     _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
     _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),

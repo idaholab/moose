@@ -50,7 +50,8 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
+    Coupleable(this, false),
+    ScalarCoupleable(this),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
@@ -66,7 +67,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getVariableBase(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _current_elem(_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),
@@ -74,16 +75,13 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
-
-    _test(_var.phi()),
-    _grad_test(_var.gradPhi()),
-
-    _phi(_assembly.phi()),
-    _grad_phi(_assembly.gradPhi()),
-
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
 {
+  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  for (unsigned int i=0; i<coupled_vars.size(); i++)
+    addMooseVariableDependency(coupled_vars[i]);
+
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
@@ -127,7 +125,7 @@ KernelBase::~KernelBase()
 {
 }
 
-MooseVariable &
+MooseVariableBase &
 KernelBase::variable()
 {
   return _var;

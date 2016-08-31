@@ -71,6 +71,7 @@ public:
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) = 0;
+  virtual MooseVariableBase & getVariableBase(THREAD_ID tid, const std::string & var_name) = 0;
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
   virtual bool hasScalarVariable(const std::string & var_name) = 0;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
@@ -81,14 +82,14 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid);
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableBase *> & moose_vars, THREAD_ID tid);
 
   /**
    * Get the MOOSE variables to be reinited on each element.
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariable *> & getActiveElementalMooseVariables(THREAD_ID tid);
+  virtual const std::set<MooseVariableBase *> & getActiveElementalMooseVariables(THREAD_ID tid);
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
@@ -350,7 +351,7 @@ protected:
   ///@}
 
   /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
-  std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;
+  std::vector<std::set<MooseVariableBase *> > _active_elemental_moose_variables;
 
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */

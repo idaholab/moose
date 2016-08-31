@@ -31,7 +31,7 @@ PresetNodalBC::PresetNodalBC(const InputParameters & parameters) :
 void
 PresetNodalBC::computeValue(NumericVector<Number> & current_solution)
 {
-  dof_id_type & dof_idx = _var.nodalDofIndex();
+  dof_id_type & dof_idx = _moose_var.nodalDofIndex();
   _qp = 0;
   current_solution.set(dof_idx, computeQpValue());
 }

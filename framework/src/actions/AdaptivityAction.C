@@ -89,7 +89,7 @@ AdaptivityAction::act()
       mooseError("Number of weight_names must be equal to number of weight_values in Execution/Adaptivity");
 
     // If weights have been specified then set the default weight to zero
-    std::vector<Real> weights(system.nVariables(),0);
+    std::vector<Real> weights(system.numLibMeshVariables(),0);
 
     for (int i=0;i<num_weight_names;i++)
     {
@@ -99,7 +99,7 @@ AdaptivityAction::act()
       weights[system.getVariable(0, name).number()] = value;
     }
 
-    std::vector<FEMNormType> norms(system.nVariables(), H1_SEMINORM);
+    std::vector<FEMNormType> norms(system.numLibMeshVariables(), H1_SEMINORM);
 
     SystemNorm sys_norm(norms, weights);
 

@@ -25,6 +25,9 @@
 #include "libmesh/fe_base.h"
 #include "libmesh/enum_quadrature_type.h"
 
+// Eigen
+#include "Eigen/Core"
+
 // MOOSE Forward Declares
 class MooseMesh;
 class ArbitraryQuadrature;
@@ -420,6 +423,8 @@ public:
   DenseVector<Number> & residualBlock(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _sub_Re[static_cast<unsigned int>(type)][var_num]; }
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _sub_Rn[static_cast<unsigned int>(type)][var_num]; }
 
+  std::vector<Eigen::VectorXd> & arrayResidualBlock(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _array_sub_Re[static_cast<unsigned int>(type)][var_num]; }
+
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
@@ -683,6 +688,15 @@ protected:
   std::vector<std::vector<DenseVector<Number> > > _sub_Rn;
   /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
   DenseVector<Number> _tmp_Re;
+
+  /// residual contributions for array variables from the element
+  /// indices: KernelType, array_var_num, dofs, var_num
+  std::vector<std::vector<std::vector<Eigen::VectorXd> > > _array_sub_Re;
+
+  /// Temporary vector for copying residual contributions from ArrayMooseVariables
+  DenseVector<Number> _tmp_array_Re;
+  /// Temporary vector for copying dofs from ArrayMooseVariables
+  std::vector<dof_id_type> _tmp_array_dofs;
 
   /// jacobian contributions
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Kee;

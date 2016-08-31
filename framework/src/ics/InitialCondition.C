@@ -60,7 +60,7 @@ InitialCondition::InitialCondition(const InputParameters & parameters) :
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
+  auto & coupled_vars = getCoupledVars();
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());

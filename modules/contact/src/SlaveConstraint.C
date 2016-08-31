@@ -59,7 +59,7 @@ SlaveConstraint::SlaveConstraint(const InputParameters & parameters) :
     _z_var(isCoupled("disp_z") ? coupled("disp_z") : libMesh::invalid_uint),
     _vars(_x_var, _y_var, _z_var),
     _mesh_dimension(_mesh.dimension()),
-    _nodal_area_var(getVar("nodal_area", 0)),
+    _nodal_area_var(getMooseVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution())
 {
@@ -291,4 +291,3 @@ SlaveConstraint::nodalArea(PenetrationInfo & pinfo)
   }
   return area;
 }
-

@@ -47,7 +47,9 @@ class KernelBase :
   public MooseObject,
   public BlockRestrictable,
   public SetupInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
+  public Coupleable,
+  public ScalarCoupleable,
+  public MooseVariableDependencyInterface,
   public FunctionInterface,
   public UserObjectInterface,
   public TransientInterface,
@@ -80,7 +82,7 @@ public:
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) = 0;
 
   /// Returns the variable number that this Kernel operates on.
-  MooseVariable & variable();
+  MooseVariableBase & variable();
 
   /// Returns a reference to the SubProblem for which this Kernel is active
   SubProblem & subProblem();
@@ -102,7 +104,7 @@ protected:
   Assembly & _assembly;
 
   /// Reference to this Kernel's MooseVariable object
-  MooseVariable & _var;
+  MooseVariableBase & _var;
 
   /// Reference to this Kernel's mesh object
   MooseMesh & _mesh;
@@ -132,18 +134,6 @@ protected:
 
   /// current index for the shape function
   unsigned int _j;
-
-  /// the current test function
-  const VariableTestValue & _test;
-
-  /// gradient of the test function
-  const VariableTestGradient & _grad_test;
-
-  /// the current shape functions
-  const VariablePhiValue & _phi;
-
-  /// gradient of the shape function
-  const VariablePhiGradient & _grad_phi;
 
   /// Holds residual entries as they are accumulated by this Kernel
   DenseVector<Number> _local_re;

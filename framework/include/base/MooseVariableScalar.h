@@ -30,7 +30,7 @@ template <typename T> class NumericVector;
 class MooseVariableScalar : public MooseVariableBase
 {
 public:
-  MooseVariableScalar(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableScalar(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
   virtual ~MooseVariableScalar();
 
   void reinit();

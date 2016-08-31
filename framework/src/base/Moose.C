@@ -65,6 +65,9 @@
 #include "Reaction.h"
 #include "MassEigenKernel.h"
 
+// ArrayKernels
+#include "ArrayDiffusion.h"
+
 // bcs
 #include "ConvectiveFluxBC.h"
 #include "DirichletBC.h"
@@ -85,6 +88,9 @@
 #include "DiffusionFluxBC.h"
 #include "PostprocessorDirichletBC.h"
 #include "OneDEqualValueConstraintBC.h"
+
+// ArrayBCs
+#include "ArrayDirichletBC.h"
 
 // auxkernels
 #include "ConstantAux.h"
@@ -342,11 +348,13 @@
 
 // Actions
 #include "AddBCAction.h"
+#include "AddArrayBCAction.h"
 #include "AddDiracKernelAction.h"
 #include "AddICAction.h"
 #include "AddInitialConditionAction.h"
 #include "AddKernelAction.h"
 #include "AddScalarKernelAction.h"
+#include "AddArrayKernelAction.h"
 #include "AddDGKernelAction.h"
 #include "AddInterfaceKernelAction.h"
 #include "AddPeriodicBCAction.h"
@@ -483,6 +491,9 @@ registerObjects(Factory & factory)
   registerKernel(Reaction);
   registerKernel(MassEigenKernel);
 
+  // ArrayKernels
+  registerArrayKernel(ArrayDiffusion);
+
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
   registerBoundaryCondition(DirichletBC);
@@ -504,6 +515,9 @@ registerObjects(Factory & factory)
   registerBoundaryCondition(DiffusionFluxBC);
   registerBoundaryCondition(PostprocessorDirichletBC);
   registerBoundaryCondition(OneDEqualValueConstraintBC);
+
+  // ArrayBCs
+  registerArrayBoundaryCondition(ArrayDirichletBC);
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
@@ -837,12 +851,14 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_material",                 Material,               false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
+  registerMooseObjectTask("add_array_bc",                 BoundaryCondition,      false);
   registerMooseObjectTask("add_function",                 Function,               false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
+  registerMooseObjectTask("add_array_kernel",             ArrayKernel,            false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
   registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
@@ -984,7 +1000,7 @@ addActionTypes(Syntax & syntax)
 "(add_output)"
 "(add_postprocessor)"
 "(add_vector_postprocessor)"
-"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+"(add_aux_kernel, add_bc, add_array_bc, add_damper, add_dirac_kernel, add_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel, add_scalar_kernel, add_array_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
 "(add_control)"
 "(check_output)"
 "(check_integrity)"
@@ -1070,9 +1086,11 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddKernelAction, "add_aux_kernel");
   registerAction(AddScalarKernelAction, "add_scalar_kernel");
   registerAction(AddScalarKernelAction, "add_aux_scalar_kernel");
+  registerAction(AddArrayKernelAction, "add_array_kernel");
   registerAction(AddDGKernelAction, "add_dg_kernel");
   registerAction(AddInterfaceKernelAction, "add_interface_kernel");
   registerAction(AddBCAction, "add_bc");
+  registerAction(AddArrayBCAction, "add_array_bc");
   registerAction(EmptyAction, "no_action");  // placeholder
   registerAction(AddPeriodicBCAction, "add_periodic_bc");
   registerAction(AddMaterialAction, "add_material");

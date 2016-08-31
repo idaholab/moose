@@ -33,17 +33,24 @@ InputParameters validParams<Kernel>()
 
 Kernel::Kernel(const InputParameters & parameters) :
     KernelBase(parameters),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu())
+    MooseVariableInterface(this, false),
+    _moose_var(dynamic_cast<MooseVariable &>(*_variable)),
+    _u(_is_implicit ? _moose_var.sln() : _moose_var.slnOld()),
+    _grad_u(_is_implicit ? _moose_var.gradSln() : _moose_var.gradSlnOld()),
+    _u_dot(_moose_var.uDot()),
+    _du_dot_du(_moose_var.duDotDu()),
+    _test(_moose_var.phi()),
+    _grad_test(_moose_var.gradPhi()),
+    _phi(_assembly.phi()),
+    _grad_phi(_assembly.gradPhi())
 {
+  addMooseVariableDependency(mooseVariable());
 }
 
 void
 Kernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_moose_var.number());
   _local_re.resize(re.size());
   _local_re.zero();
 
@@ -65,7 +72,7 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_moose_var.number(), _moose_var.number());
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
@@ -92,11 +99,11 @@ Kernel::computeJacobian()
 void
 Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _var.number())
+  if (jvar == _moose_var.number())
     computeJacobian();
   else
   {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_moose_var.number(), jvar);
 
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
@@ -108,7 +115,7 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
 void
 Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_moose_var.number(), jvar);
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
 
   for (_i = 0; _i < _test.size(); _i++)

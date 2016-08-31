@@ -23,7 +23,8 @@
 #include "libmesh/dof_map.h"
 
 
-MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
+MooseVariableBase::MooseVariableBase(const std::string & name, unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind, unsigned int count) :
+    _name(name),
     _var_num(var_num),
     _fe_type(fe_type),
     _var_kind(var_kind),
@@ -32,7 +33,9 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_typ
     _variable(sys.system().variable(_var_num)),
     _assembly(assembly),
     _dof_map(sys.dofMap()),
-    _scaling_factor(1.0)
+    _elem(_assembly.elem()),
+    _scaling_factor(1.0),
+    _count(count)
 {
 }
 
@@ -43,12 +46,27 @@ MooseVariableBase::~MooseVariableBase()
 const std::string &
 MooseVariableBase::name() const
 {
-  return _sys.system().variable(_var_num).name();
+  return _name;
 }
+
+const std::vector<std::string>
+MooseVariableBase::names() const
+{
+  if (count() == 1)
+    return std::vector<std::string>{_name};
+
+  // For ArrayVariables
+  std::vector<std::string> the_names(count());
+
+  for (auto i = decltype(count())(0); i < count(); i++)
+    the_names[i] = _name + "_" + std::to_string(i);
+
+  return the_names;
+}
+
 
 Order
 MooseVariableBase::order() const
 {
   return _fe_type.order;
 }
-

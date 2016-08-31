@@ -466,12 +466,18 @@ AdvancedOutput<T>::initAvailableLists()
   {
     if (T::_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = T::_problem_ptr->getVariable(0, var_name);
-      const FEType type = var.feType();
-      if (type.order == CONSTANT)
-        _execute_data["elemental"].available.insert(var_name);
-      else
-        _execute_data["nodal"].available.insert(var_name);
+      MooseVariableBase & var = T::_problem_ptr->getVariableBase(0, var_name);
+
+      auto names = var.names();
+
+      for (auto & name : names)
+      {
+        const FEType type = var.feType();
+        if (type.order == CONSTANT)
+          _execute_data["elemental"].available.insert(name);
+        else
+          _execute_data["nodal"].available.insert(name);
+      }
     }
 
     else if (T::_problem_ptr->hasScalarVariable(var_name))
@@ -501,7 +507,6 @@ template<class T>
 void
 AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, const std::vector<VariableName> & hide)
 {
-
   // Storage for user-supplied input that is unknown as a variable or postprocessor
   std::set<std::string> unknown;
 
@@ -515,12 +520,18 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
   {
     if (T::_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = T::_problem_ptr->getVariable(0, var_name);
-      const FEType type = var.feType();
-      if (type.order == CONSTANT)
-        _execute_data["elemental"].show.insert(var_name);
-      else
-        _execute_data["nodal"].show.insert(var_name);
+      MooseVariableBase & var = T::_problem_ptr->getVariableBase(0, var_name);
+
+      auto names = var.names();
+
+      for (auto & name : names)
+      {
+        const FEType type = var.feType();
+        if (type.order == CONSTANT)
+          _execute_data["elemental"].show.insert(name);
+        else
+          _execute_data["nodal"].show.insert(name);
+      }
     }
     else if (T::_problem_ptr->hasScalarVariable(var_name))
       _execute_data["scalars"].show.insert(var_name);
@@ -538,11 +549,17 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
     if (T::_problem_ptr->hasVariable(var_name))
     {
       MooseVariable & var = T::_problem_ptr->getVariable(0, var_name);
-      const FEType type = var.feType();
-      if (type.order == CONSTANT)
-        _execute_data["elemental"].hide.insert(var_name);
-      else
-        _execute_data["nodal"].hide.insert(var_name);
+
+      auto names = var.names();
+
+      for (auto & name : names)
+      {
+        const FEType type = var.feType();
+        if (type.order == CONSTANT)
+          _execute_data["elemental"].hide.insert(name);
+        else
+          _execute_data["nodal"].hide.insert(name);
+      }
     }
     else if (T::_problem_ptr->hasScalarVariable(var_name))
       _execute_data["scalars"].hide.insert(var_name);

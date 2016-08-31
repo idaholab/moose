@@ -32,7 +32,7 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
   for (unsigned int i = 0; i < _num_variables; ++i)
     _moose_var_num[i] = coupled("porous_flow_vars", i);
 
-  _pf_var_num.assign(_fe_problem.getNonlinearSystem().nVariables(), _num_variables); // Note: the _num_variables assignment indicates that "this is not a PorousFlow variable"
+  _pf_var_num.assign(_fe_problem.getNonlinearSystem().numMooseVariables(), _num_variables); // Note: the _num_variables assignment indicates that "this is not a PorousFlow variable"
   for (unsigned int i = 0; i < _num_variables; ++i)
     if (_moose_var_num[i] < _pf_var_num.size())
       _pf_var_num[_moose_var_num[i]] = i;

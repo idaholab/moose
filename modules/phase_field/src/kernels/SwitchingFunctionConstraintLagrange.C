@@ -23,7 +23,7 @@ SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const I
     _num_h(_h_names.size()),
     _h(_num_h),
     _dh(_num_h),
-    _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
+    _number_of_nl_variables(_fe_problem.getNonlinearSystem().numMooseVariables()),
     _j_eta(_number_of_nl_variables, -1),
     _epsilon(getParam<Real>("epsilon"))
 {
@@ -70,4 +70,3 @@ SwitchingFunctionConstraintLagrange::computeQpOffDiagJacobian(unsigned int j_var
   else
     return 0.0;
 }
-

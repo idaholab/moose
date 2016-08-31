@@ -228,6 +228,17 @@ DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   return _displaced_aux.getVariable(tid, var_name);
 }
 
+MooseVariableBase &
+DisplacedProblem::getVariableBase(THREAD_ID tid, const std::string & var_name)
+{
+  if (_displaced_nl.hasVariable(var_name))
+    return _displaced_nl.getVariable(tid, var_name);
+  else if (!_displaced_aux.hasVariable(var_name))
+    mooseError("No variable with name '" + var_name + "'");
+
+  return _displaced_aux.getVariable(tid, var_name);
+}
+
 bool
 DisplacedProblem::hasScalarVariable(const std::string & var_name)
 {
@@ -254,6 +265,12 @@ void
 DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
   _displaced_nl.addVariable(var_name, type, scale_factor, active_subdomains);
+}
+
+void
+DisplacedProblem::addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains)
+{
+  _displaced_nl.addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
 }
 
 void

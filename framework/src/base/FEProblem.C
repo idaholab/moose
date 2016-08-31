@@ -1288,6 +1288,14 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 }
 
 void
+FEProblem::addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
+{
+  _nl.addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
+  if (_displaced_problem)
+    _displaced_problem->addArrayVariable(var_name, type, scale_factor, count, active_subdomains);
+}
+
+void
 FEProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
 {
   if (order > _max_scalar_order)
@@ -1832,7 +1840,7 @@ FEProblem::addMaterial(const std::string & mat_name, const std::string & name, I
 void
 FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
-  std::set<MooseVariable *> needed_moose_vars;
+  std::set<MooseVariableBase *> needed_moose_vars;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
     _all_materials.updateVariableDependency(needed_moose_vars, tid);
@@ -1841,7 +1849,7 @@ FEProblem::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   for (const auto & id : ids)
     _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
 
-  const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
+  const std::set<MooseVariableBase *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(), current_active_elemental_moose_variables.end());
 
   if (!needed_moose_vars.empty())
@@ -2843,6 +2851,17 @@ FEProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   return _aux.getVariable(tid, var_name);
 }
 
+MooseVariableBase &
+FEProblem::getVariableBase(THREAD_ID tid, const std::string & var_name)
+{
+  if (_nl.hasVariable(var_name))
+    return _nl.getVariableBase(tid, var_name);
+  else if (!_aux.hasVariable(var_name))
+    mooseError("Unknown variable " + var_name);
+
+  return _aux.getVariable(tid, var_name);
+}
+
 bool
 FEProblem::hasScalarVariable(const std::string & var_name)
 {
@@ -2866,7 +2885,7 @@ FEProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 void
-FEProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
+FEProblem::setActiveElementalMooseVariables(const std::set<MooseVariableBase *> & moose_vars, THREAD_ID tid)
 {
   SubProblem::setActiveElementalMooseVariables(moose_vars, tid);
 
@@ -2874,7 +2893,7 @@ FEProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & mo
     _displaced_problem->setActiveElementalMooseVariables(moose_vars, tid);
 }
 
-const std::set<MooseVariable *> &
+const std::set<MooseVariableBase *> &
 FEProblem::getActiveElementalMooseVariables(THREAD_ID tid)
 {
   return SubProblem::getActiveElementalMooseVariables(tid);
@@ -2978,7 +2997,8 @@ FEProblem::init()
   if (_initialized)
     return;
 
-  unsigned int n_vars = _nl.nVariables();
+  unsigned int n_vars = _nl.numLibMeshVariables();
+
   switch (_coupling)
   {
   case Moose::COUPLING_DIAG:

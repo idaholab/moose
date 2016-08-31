@@ -40,7 +40,10 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
   syntax.registerActionSyntax("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
+  syntax.registerActionSyntax("AddArrayKernelAction", "ArrayKernels/*", "add_array_kernel");
+
   syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
+  syntax.registerActionSyntax("AddArrayBCAction", "ArrayBCs/*", "add_array_bc");
 
   syntax.registerActionSyntax("CreateProblemAction", "Problem");
   syntax.registerActionSyntax("DynamicObjectRegistrationAction", "Problem");

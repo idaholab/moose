@@ -22,6 +22,7 @@
 #include "SubProblem.h"
 #include "MooseVariableScalar.h"
 #include "MooseVariable.h"
+#include "ArrayMooseVariable.h"
 #include "DataIO.h"
 
 // libMesh
@@ -173,6 +174,17 @@ public:
   virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL) = 0;
 
   /**
+   * Adds an array-variable to the system
+   *
+   * @param var_name name of the variable
+   * @param type FE type of the variable
+   * @param scale_factor the scaling factor for the variable
+   * @param active_subdomains a list of subdomain ids this variable is active on
+   */
+  virtual void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL) = 0;
+
+
+  /**
    * Query a system for a variable
    *
    * @param var_name name of the variable
@@ -201,6 +213,31 @@ public:
    */
   virtual MooseVariable & getVariable(THREAD_ID tid, unsigned int var_number);
 
+
+
+
+  /**
+   * Gets a reference to a variable of with specified name
+   *
+   * @param tid Thread id
+   * @param var_name variable name
+   * @return reference the variable (class)
+   */
+  virtual MooseVariableBase & getVariableBase(THREAD_ID tid, const std::string & var_name);
+
+  /**
+   * Gets a reference to a variable with specified number
+   *
+   * @param tid Thread id
+   * @param var_number libMesh variable number
+   * @return reference the variable (class)
+   */
+  virtual MooseVariableBase & getVariableBase(THREAD_ID tid, unsigned int var_number);
+
+
+
+
+
   /**
    * Gets a reference to a scalar variable with specified number
    *
@@ -228,10 +265,24 @@ public:
   virtual const std::set<SubdomainID> * getVariableBlocks(unsigned int var_number);
 
   /**
-   * Get the number of variables in this system
-   * @return the number of variables
+   * Get the number of actual libmesh variables in the system
    */
-  virtual unsigned int nVariables() = 0;
+  virtual unsigned int numLibMeshVariables() = 0;
+
+  /**
+   * Get the number of MooseVariables (i.e. single scalar variables) in the system
+   */
+  virtual unsigned int numMooseVariables() = 0;
+
+  /**
+   * Get the number of ScalarMooseVariables in the system
+   */
+  virtual unsigned int numScalarMooseVariables() = 0;
+
+  /**
+   * Get the number of ArrayMooseVariables in the system
+   */
+  virtual unsigned int numArrayMooseVariables() = 0;
 
   /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
@@ -370,6 +421,7 @@ public:
   virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep) = 0;
 
   const std::vector<MooseVariable *> & getVariables(THREAD_ID tid) { return _vars[tid].variables(); }
+  const std::vector<ArrayMooseVariable *> & getArrayVariables(THREAD_ID tid) { return _vars[tid].arrayVars(); }
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid) { return _vars[tid].scalars(); }
 
   const std::set<SubdomainID> & getSubdomainsForVar(unsigned int var_number) const { return _var_map.at(var_number); }
@@ -443,7 +495,7 @@ public:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
-      MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      MooseVariable * var = new MooseVariable(var_name, var_num, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
@@ -452,6 +504,44 @@ public:
     else
       for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
         _var_map[var_num].insert(*it);
+  }
+
+  /**
+   * Add count number of variables as an ArrayVariable.
+   *
+   * Note: calling this turns off automatic variable group identification for this system...
+   */
+  virtual void addArrayVariable(const std::string & var_name, const FEType & type, Real scale_factor, unsigned int count, const std::set< SubdomainID > * const active_subdomains = NULL)
+  {
+    // Turn off automatic variable group identification so that we can be sure that this variable
+    // group will be ordered exactly like it should be
+    _sys.identify_variable_groups(false);
+
+    // Build up the variable names
+    std::vector<std::string> var_names;
+    for (unsigned int i = 0; i < count; i++)
+      var_names.push_back(var_name + "_" + std::to_string(i));
+
+    // The number returned by libMesh is the _last_ variable number... we want to hold onto the _first_
+    unsigned int var_num = _sys.add_variables(var_names, type, active_subdomains) - (count - 1);
+
+    if (active_subdomains == NULL)
+    {
+      for (unsigned int i = 0; i < count; i++)
+        _var_map[var_num] = std::set<SubdomainID>();
+    }
+    else
+      for (unsigned int i = 0; i < count; i++)
+        for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+          _var_map[var_num].insert(*it);
+
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    {
+      //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
+      ArrayMooseVariable * var = new ArrayMooseVariable(var_name, var_num, type, *this, _subproblem.assembly(tid), _var_kind, count);
+      var->scalingFactor(scale_factor);
+      _vars[tid].add(var_name, var);
+    }
   }
 
   /**
@@ -467,7 +557,7 @@ public:
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
       //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
-      MooseVariableScalar * var = new MooseVariableScalar(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      MooseVariableScalar * var = new MooseVariableScalar(var_name, var_num, type, *this, _subproblem.assembly(tid), _var_kind);
       var->scalingFactor(scale_factor);
       _vars[tid].add(var_name, var);
     }
@@ -482,6 +572,8 @@ public:
   {
     if (_sys.has_variable(var_name))
       return _sys.variable_type(var_name).family != SCALAR;
+    else if (_vars[0].hasVariable(var_name))// Need to search for ArrayVariables since their name doesn't match their libmesh name
+      return _vars[0].getVariable(var_name)->feType().family != SCALAR;
     else
       return false;
   }
@@ -499,7 +591,25 @@ public:
     return (_sys.variable(var_num).type().family == SCALAR);
   }
 
-  virtual unsigned int nVariables() { return _vars[0].names().size(); }
+  virtual unsigned int numLibMeshVariables()
+  {
+    return _vars[0].numLibMeshVariables();
+  }
+
+  virtual unsigned int numMooseVariables()
+  {
+    return _vars[0].numMooseVariables();
+  }
+
+  virtual unsigned int numScalarMooseVariables()
+  {
+    return _vars[0].numScalarMooseVariables();
+  }
+
+  virtual unsigned int numArrayMooseVariables()
+  {
+    return _vars[0].numArrayMooseVariables();
+  }
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
