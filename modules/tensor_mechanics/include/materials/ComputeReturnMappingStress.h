@@ -18,7 +18,12 @@ class RecomputeRadialReturn;
  * increment tensor from the mechanical strain tensor.  Mechanical strain is
  * considered as the sum of the elastic and inelastic (plastic, creep, ect) strains.
  *
- * This material is used to call the recompute iterative materials.
+ * This material is used to call the recompute iterative materials, and, if two
+ * over more recompute radial return materials are specified, iterates
+ * over the change in the total effective (scalar) radial return stress between
+ * loops over all of the recompute materials: once the change in stress is within
+ * a user-specified tolerance, this class calculates the final stress and elastic
+ * strain for the time increment.
  */
 
 class ComputeReturnMappingStress : public ComputeFiniteStrainElasticStress
@@ -31,6 +36,8 @@ protected:
 
   virtual void computeQpStress();
 
+  /// Calls all of the user-specified radial recompute materials and iterates
+  /// over the change in the effective radial return stress.
   virtual void computeStress(RankTwoTensor & strain_increment,
                              RankTwoTensor & stress_new);
 
@@ -41,7 +48,11 @@ protected:
 
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
-  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+
+  /// The user supplied list of recompute radial return models to use in the
+  /// simulation.  Users should take care to list creep models first and plasticity
+  // models last to allow for the case when a creep model relaxes the stress state
+  /// inside of the yield surface in an iteration.
   std::vector<MooseSharedPointer<RecomputeRadialReturn> > _models;
 };
 

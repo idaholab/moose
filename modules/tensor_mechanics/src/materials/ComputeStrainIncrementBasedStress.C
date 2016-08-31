@@ -32,8 +32,8 @@ ComputeStrainIncrementBasedStress::ComputeStrainIncrementBasedStress(const Input
 
     for (unsigned int i = 0; i < _num_property; ++i)
     {
-      _inelastic_strains[i] = &getMaterialProperty<RankTwoTensor>(_property_names[i]);
-      _inelastic_strains_old[i] = &getMaterialPropertyOld<RankTwoTensor>(_property_names[i]);
+      _inelastic_strains[i] = & getMaterialProperty<RankTwoTensor>(_property_names[i]);
+      _inelastic_strains_old[i] = & getMaterialPropertyOld<RankTwoTensor>(_property_names[i]);
     }
   }
 }
