@@ -72,14 +72,14 @@ markdown syntax to needed, including the application of special settings in the 
 the custom markdown. A complete list of available settings is provided in the [Settings](MooseFlavoredMarkdown.md#optional-settings) of the included code.
 
 ### Complete Files
-You can include complete files from the repository using the `![]()` syntax similar to that used in images. For example, the following
+You can include complete files from the repository using the `!text` syntax. For example, the following
 includes the complete code as shown.
 
 ```markdown
-![Diffusion.C](framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True)
+!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True
 ```
 
-![Diffusion.C](framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True)
+!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True
 
 ### Single Line Match
 It is possible to show a single line of a file by a snippet that allows the line to be located within
@@ -87,10 +87,10 @@ the file. If multiple matches occur only the first match will be shown. For exam
 `addClassDescription` can be shown by adding the following.
 
 ```markdown
-![](framework/src/kernels/Diffusion.C line=addClassDescription)
+!text framework/src/kernels/Diffusion.C line=addClassDescription
 ```
 
-![](framework/src/kernels/Diffusion.C line=addClassDescription)
+!text framework/src/kernels/Diffusion.C line=addClassDescription
 
 ### Range Line match
 Code starting and ending on lines containing a string is also possible by using the 'start' and 'end'
@@ -98,20 +98,20 @@ options. If 'start' is omitted then the snippet will start at the beginning of t
 is omitted the snippet will include the remainder of the file content.
 
 ```markdown
-![](test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner)
+!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner
 ```
 
-![](test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner)
+!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner
 
 ### Class Methods
 By including a method name, in C++ syntax fashion, it is possible to include specific methods from C++ classes in MOOSE. For example,
 the following limits the included code to the `computeQpResidual` method.
 
 ```markdown
-![Diffusion.C::computeQpResidual](framework/src/kernels/Diffusion.C::computeQpResidual)
+!clang framework/src/kernels/Diffusion.C method=computeQpResidual
 ```
 
-![Diffusion.C::computeQpResidual](framework/src/kernels/Diffusion.C::computeQpResidual)
+!clang framework/src/kernels/Diffusion.C method=computeQpResidual
 
 !!! warning "Warning"
     This method uses the clang parser directly, which can be slow. Thus, in general source code should be
@@ -123,11 +123,10 @@ the following limits the included code to the `computeQpResidual` method.
 By including a block name the included content will be limited to the content matching the supplied name. Notice that the supplied name may be approximate; however, if it is not unique only the first match will appear.
 
 ```markdown
-![simple_diffusion.i](test/tests/kernels/simple_diffusion/simple_diffusion.i::Kernels)
+!input test/tests/kernels/simple_diffusion/simple_diffusion.i block=Kernels
 ```
 
-![simple_diffusion.i](test/tests/kernels/simple_diffusion/simple_diffusion.i::Kernels repo_link=True)
-
+!input test/tests/kernels/simple_diffusion/simple_diffusion.i block=Kernels
 
 ### Optional Settings
 The following options may be passed to control how the output is formatted.
