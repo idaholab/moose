@@ -35,4 +35,3 @@ ComputeElasticityTensorBase::computeQpProperties()
   if (_prefactor_function)
     _elasticity_tensor[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
 }
-
