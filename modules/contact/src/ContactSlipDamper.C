@@ -186,15 +186,15 @@ ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
         }
       }
     }
-    _console << std::flush;
-    _communicator.sum(_num_contact_nodes);
-    _communicator.sum(_num_sticking);
-    _communicator.sum(_num_slipping);
-    _communicator.sum(_num_slipping_friction);
-    _communicator.sum(_num_stick_locked);
-    _communicator.sum(_num_slip_reversed);
-    _communicator.min(damping);
   }
+  _console << std::flush;
+  _communicator.sum(_num_contact_nodes);
+  _communicator.sum(_num_sticking);
+  _communicator.sum(_num_slipping);
+  _communicator.sum(_num_slipping_friction);
+  _communicator.sum(_num_stick_locked);
+  _communicator.sum(_num_slip_reversed);
+  _communicator.min(damping);
 
   _console << "   ContactSlipDamper: Damping     #Cont    #Stick     #Slip #SlipFric #StickLock  #SlipRev\n";
 
