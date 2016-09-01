@@ -126,6 +126,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _from_multi_app_transfers(/*threaded=*/false),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
+    _cycles_completed(0),
 #endif
     _displaced_mesh(NULL),
     _geometric_search_data(*this, _mesh),
@@ -3659,17 +3660,27 @@ void
 FEProblem::initialAdaptMesh()
 {
   unsigned int n = adaptivity().getInitialSteps();
+  _cycles_completed = 0;
   for (unsigned int i = 0; i < n; i++)
   {
     _console << "Initial adaptivity step " << i+1 << " of " << n << std::endl;
     computeIndicators();
     computeMarkers();
 
-    _adaptivity.initialAdaptMesh();
-    meshChanged();
+    if (_adaptivity.initialAdaptMesh())
+    {
+      meshChanged();
 
-    //reproject the initial condition
-    projectSolution();
+      //reproject the initial condition
+      projectSolution();
+
+      _cycles_completed++;
+    }
+    else
+    {
+      _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
+      return;
+    }
   }
 }
 
@@ -3680,6 +3691,7 @@ FEProblem::adaptMesh()
     return;
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
+  _cycles_completed = 0;
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
     _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << '\n';
@@ -3687,7 +3699,15 @@ FEProblem::adaptMesh()
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
       computeMarkers();
     if (_adaptivity.adaptMesh())
+    {
       meshChanged();
+      _cycles_completed++;
+    }
+    else
+    {
+      _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
+      return;
+    }
 
     // Show adaptivity progress
     _console << std::flush;
