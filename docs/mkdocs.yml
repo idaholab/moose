@@ -8,6 +8,8 @@ site_dir: ../site
 
 repo_url: https://github.com/idaholab/moose/
 
+theme: flatly
+
 extra_css:
     - css/moose.css
 
