@@ -126,7 +126,7 @@
     variable = vel_y
   [../]
   [./mass]
-    type = INSMass
+    type = INSMassRZ
     variable = p
     u = vel_x
     v = vel_y

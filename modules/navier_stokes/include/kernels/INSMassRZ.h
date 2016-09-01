@@ -4,45 +4,37 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INSMASS_H
-#define INSMASS_H
+#ifndef INSMASSRZ_H
+#define INSMASSRZ_H
 
-#include "Kernel.h"
+#include "INSMass.h"
 
 // Forward Declarations
-class INSMass;
+class INSMassRZ;
 
 template<>
-InputParameters validParams<INSMass>();
+InputParameters validParams<INSMassRZ>();
 
 /**
  * This class computes the mass equation residual and Jacobian
  * contributions for the incompressible Navier-Stokes momentum
- * equation.
+ * equation in RZ coordinates.  Inherits most of its functionality
+ * from INSMass, and calls its computeQpXYZ() functions when
+ * necessary.
  */
-class INSMass : public Kernel
+class INSMassRZ : public INSMass
 {
 public:
-  INSMass(const InputParameters & parameters);
-
-  virtual ~INSMass(){}
+  INSMassRZ(const InputParameters & parameters);
+  virtual ~INSMassRZ(){}
 
 protected:
   virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
-  // Coupled Gradients
-  const VariableGradient & _grad_u_vel;
-  const VariableGradient & _grad_v_vel;
-  const VariableGradient & _grad_w_vel;
-
-  // Variable numberings
-  unsigned _u_vel_var_number;
-  unsigned _v_vel_var_number;
-  unsigned _w_vel_var_number;
-  unsigned _p_var_number;
+  // Coupled values
+  const VariableValue & _u_vel;
 };
 
 
-#endif // INSMASS_H
+#endif // INSMASSRZ_H
