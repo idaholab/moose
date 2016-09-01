@@ -8,7 +8,6 @@
 
 #include <iostream>
 
-
 template<>
 InputParameters validParams<DesorptionToPorespace>()
 {
@@ -26,17 +25,16 @@ DesorptionToPorespace::DesorptionToPorespace(const InputParameters & parameters)
     _dmass_rate_from_matrix_dp(getMaterialProperty<Real>("dmass_rate_from_matrix_dp"))
 {}
 
-
 Real
 DesorptionToPorespace::computeQpResidual()
 {
-  return -_test[_i][_qp]*_mass_rate_from_matrix[_qp];
+  return - _test[_i][_qp] * _mass_rate_from_matrix[_qp];
 }
 
 Real
 DesorptionToPorespace::computeQpJacobian()
 {
-  return -_test[_i][_qp]*_dmass_rate_from_matrix_dp[_qp]*_phi[_j][_qp];
+  return - _test[_i][_qp] * _dmass_rate_from_matrix_dp[_qp] * _phi[_j][_qp];
 }
 
 Real
@@ -44,6 +42,5 @@ DesorptionToPorespace::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar != _conc_var)
     return 0.0;
-  return -_test[_i][_qp]*_dmass_rate_from_matrix_dC[_qp]*_phi[_j][_qp];
+  return - _test[_i][_qp] * _dmass_rate_from_matrix_dC[_qp] * _phi[_j][_qp];
 }
-

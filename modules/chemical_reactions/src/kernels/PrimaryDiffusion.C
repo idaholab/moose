@@ -22,17 +22,12 @@ PrimaryDiffusion::PrimaryDiffusion(const InputParameters & parameters) :
 Real
 PrimaryDiffusion::computeQpResidual()
 {
-  // Also... we're reusing the Diffusion Kernel's residual
-  // so that we don't have to recode that.
-  //  if (_u[_qp]>=0.0)
   return _diffusivity[_qp] * Diffusion::computeQpResidual();
 }
 
 Real
 PrimaryDiffusion::computeQpJacobian()
 {
-  // Also... we're reusing the Diffusion Kernel's residual
-  // so that we don't have to recode that.
   return _diffusivity[_qp] * Diffusion::computeQpJacobian();
 }
 
