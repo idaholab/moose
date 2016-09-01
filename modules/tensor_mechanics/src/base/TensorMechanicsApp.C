@@ -58,6 +58,7 @@
 #include "ComputeAxisymmetricRZFiniteStrain.h"
 #include "ComputeRSphericalFiniteStrain.h"
 #include "ComputeLinearElasticStress.h"
+#include "ComputeLinearElasticStress_CUT_DT.h"
 #include "ComputeFiniteStrainElasticStress.h"
 #include "ComputeEigenstrain.h"
 #include "ComputeVariableBaseEigenStrain.h"
@@ -225,6 +226,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetricRZFiniteStrain);
   registerMaterial(ComputeRSphericalFiniteStrain);
   registerMaterial(ComputeLinearElasticStress);
+  registerMaterial(ComputeLinearElasticStress_CUT_DT);
   registerMaterial(ComputeFiniteStrainElasticStress);
   registerMaterial(ComputeEigenstrain);
   registerMaterial(ComputeVariableBaseEigenStrain);
