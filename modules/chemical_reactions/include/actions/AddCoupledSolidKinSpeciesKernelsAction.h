@@ -14,7 +14,6 @@ class AddCoupledSolidKinSpeciesKernelsAction;
 template<>
 InputParameters validParams<AddCoupledSolidKinSpeciesKernelsAction>();
 
-
 class AddCoupledSolidKinSpeciesKernelsAction : public Action
 {
 public:
@@ -22,6 +21,9 @@ public:
 
   virtual void act();
 
+private:
+  const std::vector<NonlinearVariableName> _vars;
+  const std::vector<std::string> _reactions;
 };
 
 #endif // ADDCOUPLEDSOLIDKINSPECIESKERNELSACTION_H

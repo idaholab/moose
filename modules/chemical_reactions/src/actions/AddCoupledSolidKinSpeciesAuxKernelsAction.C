@@ -21,7 +21,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-
 template<>
 InputParameters validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>()
 {
@@ -34,42 +33,37 @@ InputParameters validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>()
   params.addRequiredParam<Real>("gas_constant", "Gas constant, 8.314 (J/mol/K)");
   params.addRequiredParam<std::vector<Real> >("reference_temperature", "The list of reference temperatures for all reactions, (K)");
   params.addRequiredParam<std::vector<Real> >("system_temperature", "The list of system temperatures for all reactions, (K)");
-
   return params;
 }
 
-
 AddCoupledSolidKinSpeciesAuxKernelsAction::AddCoupledSolidKinSpeciesAuxKernelsAction(const InputParameters & params) :
-    Action(params)
+    Action(params),
+    _reactions(getParam<std::vector<std::string> >("kin_reactions")),
+    _logk(getParam<std::vector<Real> >("log10_keq")),
+    _r_area(getParam<std::vector<Real> >("specific_reactive_surface_area")),
+    _ref_kconst(getParam<std::vector<Real> >("kinetic_rate_constant")),
+    _e_act(getParam<std::vector<Real> >("activation_energy")),
+    _gas_const(getParam<Real>("gas_constant")),
+    _ref_temp(getParam<std::vector<Real> >("reference_temperature")),
+    _sys_temp(getParam<std::vector<Real> >("system_temperature"))
 {
 }
 
 void
 AddCoupledSolidKinSpeciesAuxKernelsAction::act()
 {
-  std::vector<std::string> reactions = getParam<std::vector<std::string> >("kin_reactions");
-  std::vector<Real> logk = getParam<std::vector<Real> >("log10_keq");
-  std::vector<Real> r_area = getParam<std::vector<Real> >("specific_reactive_surface_area");
-  std::vector<Real> ref_kconst = getParam<std::vector<Real> >("kinetic_rate_constant");
-  std::vector<Real> e_act = getParam<std::vector<Real> >("activation_energy");
-  Real gas_const = getParam<Real>("gas_constant");
-  std::vector<Real> ref_temp = getParam<std::vector<Real> >("reference_temperature");
-  std::vector<Real> sys_temp = getParam<std::vector<Real> >("system_temperature");
-
-// NEED TO ADD AN ERROR MESSAGE IF THE SIZES OF ABOVE ARRAYS ARE NOT THE SAME //
-
-  for (unsigned int j=0; j < reactions.size(); j++)
+  for (unsigned int j = 0; j < _reactions.size(); ++j)
   {
     std::vector<std::string> tokens;
-    std::vector<std::string> solid_kin_species(reactions.size());
+    std::vector<std::string> solid_kin_species(_reactions.size());
 
     // Parsing each reaction
-    MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
+    MooseUtils::tokenize(_reactions[j], tokens, 1, "+=");
 
-    std::vector<Real> stos(tokens.size()-1);
-    std::vector<VariableName> rxn_vars(tokens.size()-1);
+    std::vector<Real> stos(tokens.size() - 1);
+    std::vector<VariableName> rxn_vars(tokens.size() - 1);
 
-    for (unsigned int k=0; k < tokens.size(); k++)
+    for (unsigned int k = 0; k < tokens.size(); ++k)
     {
       _console << tokens[k] << "\t";
       std::vector<std::string> stos_vars;
@@ -88,24 +82,19 @@ AddCoupledSolidKinSpeciesAuxKernelsAction::act()
       }
     }
 
-//    Moose::out << "the " << j+1 << "-th solid kinetic species: " << solid_kin_species[j] << "\n";
-
     InputParameters params_kin = _factory.getValidParams("KineticDisPreConcAux");
     params_kin.set<AuxVariableName>("variable") = solid_kin_species[j];
-    params_kin.set<Real>("log_k") = logk[j];
-    params_kin.set<Real>("r_area") = r_area[j];
-    params_kin.set<Real>("ref_kconst") = ref_kconst[j];
-    params_kin.set<Real>("e_act") = e_act[j];
-    params_kin.set<Real>("gas_const") = gas_const;
-    params_kin.set<Real>("ref_temp") = ref_temp[j];
-    params_kin.set<Real>("sys_temp") = sys_temp[j];
+    params_kin.set<Real>("log_k") = _logk[j];
+    params_kin.set<Real>("r_area") = _r_area[j];
+    params_kin.set<Real>("ref_kconst") = _ref_kconst[j];
+    params_kin.set<Real>("e_act") = _e_act[j];
+    params_kin.set<Real>("gas_const") = _gas_const;
+    params_kin.set<Real>("ref_temp") = _ref_temp[j];
+    params_kin.set<Real>("sys_temp") = _sys_temp[j];
     params_kin.set<std::vector<Real> >("sto_v") = stos;
     params_kin.set<std::vector<VariableName> >("v") = rxn_vars;
-    _problem->addAuxKernel("KineticDisPreConcAux", "aux_"+solid_kin_species[j], params_kin);
+    _problem->addAuxKernel("KineticDisPreConcAux", "aux_" + solid_kin_species[j], params_kin);
 
-    _console << "aux_"+solid_kin_species[j] << "\n";
-    params_kin.print();
+    _console << "aux_" + solid_kin_species[j] << "\n";
   }
-
 }
-
