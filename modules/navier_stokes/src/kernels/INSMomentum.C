@@ -93,6 +93,9 @@ void INSMomentum::computeResidual()
 
 Real INSMomentum::computeQpResidual()
 {
+  // We need this for RZ kernels.
+  const Real r = _q_point[_qp](0);
+
   // The convection part, rho * (u.grad) * u_component * v.
   // Note: _grad_u is the gradient of the _component entry of the velocity vector.
   Real convective_part = _rho *
@@ -106,7 +109,7 @@ Real INSMomentum::computeQpResidual()
   {
     pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
     if (_coord_type == INSMomentum::RZ && _component == 0)
-      pressure_part += -_p[_qp] / _q_point[_qp](0) * _test[_i][_qp];
+      pressure_part += -_p[_qp] / r * _test[_i][_qp];
   }
   else
     pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
@@ -142,7 +145,7 @@ Real INSMomentum::computeQpResidual()
   // The viscous part, tau : grad(v)
   Real viscous_part = _mu * (tau_row * _grad_test[_i][_qp]);
   if (_coord_type == INSMomentum::RZ && _component == 0)
-    viscous_part += 2. * _u_vel[_qp] * _test[_i][_qp] / std::pow(_q_point[_qp](0), 2);
+    viscous_part += 2. * _u_vel[_qp] * _test[_i][_qp] / (r*r);
 
   // Simplified version: mu * Laplacian(u_component)
   // Real viscous_part = _mu * (_grad_u[_qp] * _grad_test[_i][_qp]);
@@ -160,6 +163,9 @@ Real INSMomentum::computeQpResidual()
 
 Real INSMomentum::computeQpJacobian()
 {
+  // We need this for RZ kernels.
+  const Real r = _q_point[_qp](0);
+
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
@@ -173,7 +179,7 @@ Real INSMomentum::computeQpJacobian()
   Real viscous_part = _mu * (_grad_phi[_j][_qp]             * _grad_test[_i][_qp] +
                              _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
   if (_coord_type == INSMomentum::RZ && _component == 0)
-    viscous_part += 2. * _phi[_j][_qp] * _test[_i][_qp] / std::pow(_q_point[_qp](0), 2);
+    viscous_part += 2. * _phi[_j][_qp] * _test[_i][_qp] / (r*r);
 
   return convective_part + viscous_part;
 }
@@ -183,6 +189,9 @@ Real INSMomentum::computeQpJacobian()
 
 Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
 {
+  // We need this for RZ kernels.
+  const Real r = _q_point[_qp](0);
+
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
   {
@@ -214,7 +223,7 @@ Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
     {
       Real pressure_part = -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
       if (_coord_type == INSMomentum::RZ && _component == 0)
-        pressure_part += -_phi[_j][_qp] / _q_point[_qp](0) * _test[_i][_qp];
+        pressure_part += -_phi[_j][_qp] / r * _test[_i][_qp];
       return pressure_part;
     }
     else

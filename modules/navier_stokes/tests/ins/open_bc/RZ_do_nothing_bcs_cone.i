@@ -22,9 +22,21 @@
 []
 
 [Executioner]
-  type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -ksp_type'
-  petsc_options_value = 'lu NONZERO 1.e-10 preonly'
+  type = Transient
+  dt = 0.005
+  num_steps = 5
+  l_max_its = 299
+
+  # Note: The Steady executioner can be used for this problem, if you
+  # drop the INSMomentumTimeDerivative kernels and use the following
+  # direct solver options.
+  # petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -ksp_type'
+  # petsc_options_value = 'lu NONZERO 1.e-10 preonly'
+
+  # "Standard" ILU options
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type -sub_pc_factor_levels'
+  petsc_options_value = '300                bjacobi  ilu          4'
+
   nl_rel_tol = 1e-12
   nl_max_its = 6
 []
@@ -36,13 +48,13 @@
 []
 
 [Variables]
-  # Velocity in radial direction
-  [./u]
+  [./vel_x]
+    # Velocity in radial (r) direction
     family = LAGRANGE
     order = SECOND
   [../]
-  # Velocity in axial direction
-  [./v]
+  [./vel_y]
+    # Velocity in axial (z) direction
     family = LAGRANGE
     order = SECOND
   [../]
@@ -62,71 +74,77 @@
   [./u_in]
     type = DirichletBC
     boundary = bottom
-    variable = u
+    variable = vel_x
     value = 0
   [../]
   [./v_in]
     type = FunctionDirichletBC
     boundary = bottom
-    variable = v
+    variable = vel_y
     function = 'inlet_func'
   [../]
   [./u_out]
     type = INSMomentumNoBCBC
     boundary = top
-    variable = u
-    u = u
-    v = v
+    variable = vel_x
+    u = vel_x
+    v = vel_y
     p = p
     component = 0
   [../]
   [./v_out]
     type = INSMomentumNoBCBC
     boundary = top
-    variable = v
-    u = u
-    v = v
+    variable = vel_y
+    u = vel_x
+    v = vel_y
     p = p
     component = 1
   [../]
   [./u_axis_and_walls]
     type = DirichletBC
     boundary = 'left right'
-    variable = u
+    variable = vel_x
     value = 0
   [../]
   [./v_no_slip]
     type = DirichletBC
     boundary = 'right'
-    variable = v
+    variable = vel_y
     value = 0
   [../]
 []
 
 
 [Kernels]
-  # mass
+  [./x_momentum_time]
+    type = INSMomentumTimeDerivative
+    variable = vel_x
+  [../]
+  [./y_momentum_time]
+    type = INSMomentumTimeDerivative
+    variable = vel_y
+  [../]
   [./mass]
     type = INSMass
     variable = p
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     p = p
   [../]
   [./x_momentum_space]
     type = INSMomentum
-    variable = u
-    u = u
-    v = v
+    variable = vel_x
+    u = vel_x
+    v = vel_y
     p = p
     component = 0
   [../]
-  # z-momentum, space
   [./y_momentum_space]
     type = INSMomentum
-    variable = v
-    u = u
-    v = v
+    variable = vel_y
+    u = vel_x
+    v = vel_y
     p = p
     component = 1
   [../]

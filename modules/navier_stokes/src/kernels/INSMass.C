@@ -75,12 +75,16 @@ Real INSMass::computeQpResidual()
   // (div u) * q
   // Note: we (arbitrarily) multilply this term by -1 so that it matches the -p(div v)
   // term in the momentum equation.  Not sure if that is really important?
+
+  // We need this for RZ kernels.
+  const Real r = _q_point[_qp](0);
+
   switch (_coord_type)
   {
     case INSMass::XYZ:
       return -(_grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2)) * _test[_i][_qp];
     case INSMass::RZ:
-      return -(_grad_u_vel[_qp](0) + _u_vel[_qp] / _q_point[_qp](0) + _grad_v_vel[_qp](1)) * _test[_i][_qp];
+      return -(_grad_u_vel[_qp](0) + _u_vel[_qp] / r + _grad_v_vel[_qp](1)) * _test[_i][_qp];
     case INSMass::RSPHERICAL:
       mooseError("Spherical coordinates not currently supported.");
     default:
@@ -102,6 +106,9 @@ Real INSMass::computeQpJacobian()
 
 Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
 {
+  // We need this for RZ kernels.
+  const Real r = _q_point[_qp](0);
+
   if (jvar == _u_vel_var_number)
   {
     switch (_coord_type)
@@ -109,7 +116,7 @@ Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
       case INSMass::XYZ:
         return -_grad_phi[_j][_qp](0) * _test[_i][_qp];
       case INSMass::RZ:
-        return -(_grad_phi[_j][_qp](0) + _phi[_j][_qp] / _q_point[_qp](0)) * _test[_i][_qp];
+        return -(_grad_phi[_j][_qp](0) + _phi[_j][_qp] / r) * _test[_i][_qp];
       case INSMass::RSPHERICAL:
         mooseError("Spherical coordinates not currently supported.");
       default:
