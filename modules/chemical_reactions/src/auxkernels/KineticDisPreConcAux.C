@@ -15,9 +15,9 @@ InputParameters validParams<KineticDisPreConcAux>()
   params.addParam<Real>("r_area", 0.1, "Specific reactive surface area in m^2/L solution");
   params.addParam<Real>("ref_kconst", 6.456542e-8, "Kinetic rate constant in mol/m^2 s");
   params.addParam<Real>("e_act", 2.91e4, "Activation energy, J/mol");
-  params.addParam<Real>("gas_const" ,8.31434, "Gas constant, in J/mol K");
+  params.addParam<Real>("gas_const", 8.31434, "Gas constant, in J/mol K");
   params.addParam<Real>("ref_temp", 298.15, "Reference temperature, K");
-  params.addParam<Real>("sys_temp", 298.15, "System temperature at simulation, K");
+  params.addParam<Real>("sys_temp", 298.15, "System temperature, K");
   params.addCoupledVar("v", "The list of reactant species");
   return params;
 }
@@ -47,7 +47,7 @@ KineticDisPreConcAux::computeValue()
 
   if (_vals.size())
   {
-    for (unsigned int i=0; i<_vals.size(); ++i)
+    for (unsigned int i = 0; i<_vals.size(); ++i)
     {
       if ((*_vals[i])[_qp] < 0.0)
         omega *= std::pow(0.0, _sto_v[i]);

@@ -21,34 +21,29 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-
 template<>
 InputParameters validParams<AddPrimarySpeciesAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<NonlinearVariableName> >("primary_species", "The list of primary variables to add");
-
   return params;
 }
 
-
 AddPrimarySpeciesAction::AddPrimarySpeciesAction(const InputParameters & params) :
-    Action(params)
+    Action(params),
+    _vars(getParam<std::vector<NonlinearVariableName> >("primary_species"))
 {
 }
 
 void
 AddPrimarySpeciesAction::act()
 {
-  std::vector<NonlinearVariableName> vars = getParam<std::vector<NonlinearVariableName> >("primary_species");
-
-  for (unsigned int i=0; i < vars.size(); i++)
+  for (unsigned int i = 0; i < _vars.size(); ++i)
   {
     FEType fe_type(Utility::string_to_enum<Order>("first"),
                    Utility::string_to_enum<FEFamily>("lagrange"));
+
     Real scale_factor = 1.0;
-    _problem->addVariable(vars[i], fe_type, scale_factor);
+    _problem->addVariable(_vars[i], fe_type, scale_factor);
   }
-
 }
-

@@ -5,17 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "CoupledBEEquilibriumSub.h"
-#include "Material.h"
 
 template<>
 InputParameters validParams<CoupledBEEquilibriumSub>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("weight", 1.0, "The weight of the equilibrium species");
-  params.addParam<Real>("log_k", 0.0, "The equilibrium constaant of this equilibrium species in dissociateion reaction");
-  params.addParam<Real>("sto_u", 1.0, "The stochiomentic coef of the primary variable this kernel operats on");
+  params.addParam<Real>("log_k", 0.0, "The equilibrium constaant of this equilibrium species in the dissociation reaction");
+  params.addParam<Real>("sto_u", 1.0, "The stochiometric coefficient of the primary variable this kernel operates on");
   params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficients of coupled primary species");
-  params.addCoupledVar("v", "Coupled primary species constituting the equalibrium species");
+  params.addCoupledVar("v", "Coupled primary species constituting the equilibrium species");
   return params;
 }
 
@@ -33,18 +32,18 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & paramet
   _v_vals.resize(n);
   _v_vals_old.resize(n);
 
-  for (unsigned int i=0; i < n; ++i)
+  for (unsigned int i = 0; i < n; ++i)
   {
     _vars[i] = coupled("v", i);
     _v_vals[i] = &coupledValue("v", i);
-    _v_vals_old[i] = & coupledValueOld("v", i);
+    _v_vals_old[i] = &coupledValueOld("v", i);
   }
 }
 
 Real CoupledBEEquilibriumSub::computeQpResidual()
 {
-  Real _val_new = std::pow(10.0, _log_k)*std::pow(_u[_qp], _sto_u);
-  Real _val_old = std::pow(10.0, _log_k)*std::pow(_u_old[_qp], _sto_u);
+  Real _val_new = std::pow(10.0, _log_k) * std::pow(_u[_qp], _sto_u);
+  Real _val_old = std::pow(10.0, _log_k) * std::pow(_u_old[_qp], _sto_u);
   for (unsigned int i = 0; i < _v_vals.size(); ++i)
   {
     _val_new *= std::pow((*_v_vals[i])[_qp], _sto_v[i]);
@@ -60,7 +59,7 @@ Real CoupledBEEquilibriumSub::computeQpJacobian()
   for (unsigned int i = 0; i < _v_vals.size(); ++i)
     _val_new *= std::pow((*_v_vals[i])[_qp], _sto_v[i]);
 
-  return _porosity[_qp]*_test[_i][_qp] * _weight * _val_new / _dt;
+  return _porosity[_qp] * _test[_i][_qp] * _weight * _val_new / _dt;
 }
 
 Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
@@ -70,7 +69,7 @@ Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
   if (_vars.size() == 0)
     return 0.0;
 
-  for (unsigned int i=0; i<_vars.size(); ++i)
+  for (unsigned int i = 0; i < _vars.size(); ++i)
   {
     if (jvar == _vars[i])
       _val_new *= _sto_v[i] * std::pow((*_v_vals[i])[_qp], _sto_v[i] - 1.0) * _phi[_j][_qp];

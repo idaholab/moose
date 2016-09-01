@@ -24,18 +24,15 @@
 // Regular expression includes
 #include "pcrecpp.h"
 
-
 template<>
 InputParameters validParams<AddCoupledEqSpeciesKernelsAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<NonlinearVariableName> >("primary_species", "The list of primary variables to add");
   params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
-  params.addParam<std::string>("pressure","Checks if pressure is a primary variable");
-
+  params.addParam<std::string>("pressure", "Checks if pressure is a primary variable");
   return params;
 }
-
 
 AddCoupledEqSpeciesKernelsAction::AddCoupledEqSpeciesKernelsAction(const InputParameters & params) :
     Action(params)
@@ -50,7 +47,7 @@ AddCoupledEqSpeciesKernelsAction::act()
   std::string reactions = getParam<std::string>("reactions");
 
   // Getting ready for the parsing system
-  pcrecpp::RE re_reactions("(.*?)"                     // the reaction network (any character until the equalibrium coefficient appears)
+  pcrecpp::RE re_reactions("(.*?)"                     // the reaction network (any character until the equilibrium coefficient appears)
                            "\\s"                       // word boundary
                              "("                       // start capture
                                "-?"                    // optional minus sign
@@ -64,7 +61,6 @@ AddCoupledEqSpeciesKernelsAction::act()
   pcrecpp::RE re_coeff_and_species("(?: \\(? (.*?) \\)? )"  // match the leading coefficent
                                    "([A-Za-z].*)"           // match the species
                                    , pcrecpp::RE_Options().set_extended(true));
-
 
   pcrecpp::StringPiece input(reactions);
 
@@ -82,7 +78,6 @@ AddCoupledEqSpeciesKernelsAction::act()
   std::vector<std::vector<Real> > stos;
   std::vector<std::vector<std::string> > primary_species_involved;
 
-
   unsigned int n_reactions = 0;
 
   // Start parsing
@@ -95,7 +90,7 @@ AddCoupledEqSpeciesKernelsAction::act()
     oss << "\n\n" << n_reactions << "_th reaction: " << single_reaction << std::endl;
 
     eq_const.push_back(equal_coeff);
-    oss << "\nEqualibrium: " << eq_const[n_reactions-1] << std::endl;
+    oss << "\nEquilibrium: " << eq_const[n_reactions-1] << std::endl;
 
     // capture all of the terms
     std::string species, coeff_str;
@@ -109,7 +104,6 @@ AddCoupledEqSpeciesKernelsAction::act()
     // Going to find every single term in this reaction, sto_species combos and operators
     while (re_terms.FindAndConsume(&single_reaction, &term))
     {
-
       // Separating the sto from species
       if (re_coeff_and_species.PartialMatch(term, &coeff_str, &species))
       {
@@ -156,7 +150,6 @@ AddCoupledEqSpeciesKernelsAction::act()
 
     stos.push_back(local_stos);
     primary_species_involved.push_back(local_species_list);
-
   }
 
   if (n_reactions == 0) mooseError("No equilibrium reaction provided!");
@@ -165,7 +158,7 @@ AddCoupledEqSpeciesKernelsAction::act()
   oss << "Number of reactions: " << n_reactions << std::endl;
 
   // Start picking out primary species and coupled primary species and assigning corresponding stoichiomentric coefficients
-  for (unsigned int i=0; i < vars.size(); i++)
+  for (unsigned int i = 0; i < vars.size(); ++i)
   {
     oss << "\nPrimary species - " << vars[i] << std::endl;
 
@@ -175,18 +168,17 @@ AddCoupledEqSpeciesKernelsAction::act()
     weight.resize(n_reactions);
 
     primary_participation[i].resize(n_reactions, false);
-    for (unsigned int j=0; j < n_reactions; j++)
+    for (unsigned int j = 0; j < n_reactions; ++j)
     {
-      for (unsigned int k=0; k < primary_species_involved[j].size(); k++)
-      {
-        if (primary_species_involved[j][k] == vars[i]) primary_participation[i][j] = true;
-      }
+      for (unsigned int k=0; k < primary_species_involved[j].size(); ++k)
+        if (primary_species_involved[j][k] == vars[i])
+          primary_participation[i][j] = true;
 
       oss << "\nPrimary species " << vars[i] << " participation in " << j << "_th reaction (0 or 1): " << primary_participation[i][j] << std::endl;
 
       if (primary_participation[i][j])
       {
-        for (unsigned int k=0; k < primary_species_involved[j].size(); k++)
+        for (unsigned int k=0; k < primary_species_involved[j].size(); ++k)
         {
           if (primary_species_involved[j][k] == vars[i])
           {
@@ -204,27 +196,21 @@ AddCoupledEqSpeciesKernelsAction::act()
         oss << "\n#Coupled species: " << coupled_v[i][j].size() << std::endl;
         oss << "\nCoupled species: ";
 
-        for (unsigned int m=0; m < coupled_v[i][j].size(); m++)
-        {
+        for (unsigned int m = 0; m < coupled_v[i][j].size(); ++m)
           oss <<  coupled_v[i][j][m] << "  " << std::endl;
-        }
-
       }
     }
   }
 
   // Done parsing, adding kernels
-  for (unsigned int i=0; i < vars.size(); i++)
+  for (unsigned int i = 0; i < vars.size(); ++i)
   {
-
     //  Adding the coupled kernels if the primary species participates in this equilibrium reaction
-
-    for (unsigned int j=0; j < eq_const.size(); j++)
+    for (unsigned int j=0; j < eq_const.size(); ++j)
     {
       if (primary_participation[i][j])
       {
-
-          // Building kernels for equilbirium aqueous species
+        // Building kernels for equilbirium aqueous species
         InputParameters params_sub = _factory.getValidParams("CoupledBEEquilibriumSub");
         params_sub.set<NonlinearVariableName>("variable") = vars[i];
         params_sub.set<Real>("weight") = weight[j];
@@ -232,10 +218,9 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_sub.set<Real>("sto_u") = sto_u[i][j];
         params_sub.set<std::vector<Real> >("sto_v") = sto_v[i][j];
         params_sub.set<std::vector<VariableName> >("v") = coupled_v[i][j];
-        _problem->addKernel("CoupledBEEquilibriumSub", vars[i]+"_"+eq_species[j]+"_sub", params_sub);
+        _problem->addKernel("CoupledBEEquilibriumSub", vars[i] + "_" + eq_species[j] + "_sub", params_sub);
 
         oss << vars[i]+"_"+eq_species[j]+"_sub" << "\n";
-        params_sub.print();
 
         InputParameters params_cd = _factory.getValidParams("CoupledDiffusionReactionSub");
         params_cd.set<NonlinearVariableName>("variable") = vars[i];
@@ -244,10 +229,9 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_cd.set<Real>("sto_u") = sto_u[i][j];
         params_cd.set<std::vector<Real> >("sto_v") = sto_v[i][j];
         params_cd.set<std::vector<VariableName> >("v") = coupled_v[i][j];
-        _problem->addKernel("CoupledDiffusionReactionSub", vars[i]+"_"+eq_species[j]+"_cd", params_cd);
+        _problem->addKernel("CoupledDiffusionReactionSub", vars[i] + "_" + eq_species[j] + "_cd", params_cd);
 
-        oss << vars[i]+"_"+eq_species[j]+"_diff" << "\n";
-        params_cd.print();
+        oss << vars[i] + "_"+eq_species[j] + "_diff" << "\n";
 
         oss << "whether pressure is present" << _pars.isParamValid("pressure") << "\n";
 
@@ -267,10 +251,9 @@ AddCoupledEqSpeciesKernelsAction::act()
           params_conv.set<std::vector<VariableName> >("v") = coupled_v[i][j];
           // Pressure is required to be named as "pressure" if it is a primary variable
           params_conv.set<std::vector<VariableName> >("p") = press;
-          _problem->addKernel("CoupledConvectionReactionSub", vars[i]+"_"+eq_species[j]+"_conv", params_conv);
+          _problem->addKernel("CoupledConvectionReactionSub", vars[i] + "_" + eq_species[j] + "_conv", params_conv);
 
           oss << vars[i]+"_"+eq_species[j]+"_conv" << "\n";
-          params_conv.print();
         }
       }
     }

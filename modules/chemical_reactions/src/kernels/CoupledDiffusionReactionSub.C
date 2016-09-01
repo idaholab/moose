@@ -6,19 +6,15 @@
 /****************************************************************/
 #include "CoupledDiffusionReactionSub.h"
 
-#include "Material.h"
-
 template<>
 InputParameters validParams<CoupledDiffusionReactionSub>()
 {
   InputParameters params = validParams<Kernel>();
-
-  params.addParam<Real>("weight",1.0,"Weight of equilibrium species concentration in the primary species concentration");
-  params.addParam<Real>("log_k",0.0,"Equilibrium constant of the equilbrium reaction in dissociation form");
-  params.addParam<Real>("sto_u",1.0,"Stochiometric coef of the primary species this kernel operates on in the equilibrium reaction");
-  params.addRequiredParam<std::vector<Real> >("sto_v","The stochiometric coefficients of coupled primary species");
-  params.addParam<MaterialPropertyName>("diffusivity","diffusivity","The real material property to use as the diffusivity of this particular species");
-  params.addCoupledVar("v","List of coupled primary species in this equilibrium species");
+  params.addParam<Real>("weight", 1.0, "Weight of equilibrium species concentration in the primary species concentration");
+  params.addParam<Real>("log_k", 0.0, "Equilibrium constant of the equilbrium reaction in dissociation form");
+  params.addParam<Real>("sto_u", 1.0, "Stochiometric coef of the primary species this kernel operates on in the equilibrium reaction");
+  params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficients of coupled primary species");
+  params.addCoupledVar("v", "List of coupled primary species in this equilibrium species");
   return params;
 }
 
@@ -113,8 +109,8 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (jvar == _vars[i])
     {
-      diff2_1 = _sto_v[i] * (_sto_v[i]-1.0)*std::pow((*_vals[i])[_qp], _sto_v[i]-2.0) * _phi[_j][_qp] * (*_grad_vals[i])[_qp];
-      diff2_2 = _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i]-1.0) * _grad_phi[_j][_qp];
+      diff2_1 = _sto_v[i] * (_sto_v[i] - 1.0) * std::pow((*_vals[i])[_qp], _sto_v[i] - 2.0) * _phi[_j][_qp] * (*_grad_vals[i])[_qp];
+      diff2_2 = _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * _grad_phi[_j][_qp];
     }
 
   RealGradient diff2 = val_u * (diff2_1 + diff2_2);
@@ -137,7 +133,7 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (i != var)
     {
-      diff3 = val_jvar*_sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i]-1.0) * (*_grad_vals[i])[_qp];
+      diff3 = val_jvar*_sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
 
       for (unsigned int j = 0; j < _vals.size(); ++j)
         if (j != var && j != i)

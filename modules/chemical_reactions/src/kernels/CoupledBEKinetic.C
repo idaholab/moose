@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "CoupledBEKinetic.h"
-#include "Material.h"
 
 template<>
 InputParameters validParams<CoupledBEKinetic>()
