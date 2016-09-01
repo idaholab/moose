@@ -243,7 +243,11 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     // Make sure to resize the residual and jacobian datastructures for all the new variables
     if (resize_data)
       for (unsigned int i=0; i<newly_prepared_vars.size(); i++)
+      {
         _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
+        if (_subproblem.checkNonlocalCouplingRequirement())
+          _subproblem.assembly(tid).prepareVariableNonlocal(newly_prepared_vars[i]);
+      }
   }
 }
 

@@ -331,6 +331,9 @@ public:
 
   void init();
 
+  /// Create pair of vaiables requiring nonlocal jacobian contibiutions
+  void initNonlocalCoupling();
+
   /**
    * Whether or not this assembly should utilize FE shape function caching.
    *
@@ -339,6 +342,7 @@ public:
   void useFECache(bool fe_cache) { _should_use_fe_cache = fe_cache; }
 
   void prepare();
+  void prepareNonlocal();
 
   /**
    * Used for preparing the dense residual and jacobian blocks for one particular variable.
@@ -346,8 +350,10 @@ public:
    * @param var The variable that needs to have it's datastructures prepared
    */
   void prepareVariable(MooseVariable * var);
+  void prepareVariableNonlocal(MooseVariable * var);
   void prepareNeighbor();
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<dof_id_type> & dof_indices);
+  void prepareBlockNonlocal(unsigned int ivar, unsigned jvar, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices);
   void prepareScalar();
   void prepareOffDiagScalar();
 
@@ -394,7 +400,9 @@ public:
   void setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
 
   void addJacobian(SparseMatrix<Number> & jacobian);
+  void addJacobianNonlocal(SparseMatrix<Number> & jacobian);
   void addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices);
+  void addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian);
   void addJacobianNeighbor(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, std::vector<dof_id_type> & neighbor_dof_indices);
   void addJacobianScalar(SparseMatrix<Number> & jacobian);
@@ -404,6 +412,11 @@ public:
    * Takes the values that are currently in _sub_Kee and appends them to the cached values.
    */
   void cacheJacobian();
+
+  /**
+   * Takes the values that are currently in _sub_Keg and appends them to the cached values.
+   */
+  void cacheJacobianNonlocal();
 
   /**
    * Takes the values that are currently in the neighbor Dense Matrices and appends them to the cached values.
@@ -421,10 +434,13 @@ public:
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, Moose::KernelType type = Moose::KT_NONTIME) { return _sub_Rn[static_cast<unsigned int>(type)][var_num]; }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
+  DenseMatrix<Number> & jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> & jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id_type> & idof_indices, std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
+  void cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, Real scaling_factor);
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries() { return _cm_entry; }
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & nonlocalCouplingEntries() { return _cm_nonlocal_entry; }
 
   const VariablePhiValue & phi() { return _phi; }
   const VariablePhiGradient & gradPhi() { return _grad_phi; }
@@ -545,10 +561,13 @@ protected:
   SystemBase & _sys;
   /// Reference to coupling matrix
   CouplingMatrix * & _cm;
+  const CouplingMatrix & _nonlocal_cm;
   /// Entries in the coupling matrix (only for field variables)
   std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_entry;
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_nonlocal_entry;
   /// Flag that indicates if the jacobian block was used
   std::vector<std::vector<unsigned char> > _jacobian_block_used;
+  std::vector<std::vector<unsigned char> > _jacobian_block_nonlocal_used;
   /// Flag that indicates if the jacobian block for neighbor was used
   std::vector<std::vector<unsigned char> > _jacobian_block_neighbor_used;
   /// DOF map
@@ -686,6 +705,7 @@ protected:
 
   /// jacobian contributions
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Kee;
+  std::vector<std::vector<DenseMatrix<Number> > > _sub_Keg;
 
   /// jacobian contributions from the element and neighbor
   std::vector<std::vector<DenseMatrix<Number> > > _sub_Ken;

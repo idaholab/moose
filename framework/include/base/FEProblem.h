@@ -66,6 +66,7 @@ class ElementUserObject;
 class InternalSideUserObject;
 class GeneralUserObject;
 class Function;
+class KernelBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -152,9 +153,13 @@ public:
   void setCouplingMatrix(CouplingMatrix * cm);
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
+  /// Set custom coupling matrix for variables requiring nonlocal contribution
+  void setNonlocalCouplingMatrix();
+
   bool areCoupled(unsigned int ivar, unsigned int jvar);
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries(THREAD_ID tid);
+  std::vector<std::pair<MooseVariable *, MooseVariable *> > & nonlocalCouplingEntries(THREAD_ID tid);
 
   /**
    * Check for converence of the nonlinear solution
@@ -254,6 +259,15 @@ public:
    * @return The maximum order for all scalar variables in this problem's systems.
    */
   Order getMaxScalarOrder() const;
+
+  /**
+   * @return Flag indicating nonlocal coupling exists or not.
+   */
+  void checkNonlocalCoupling();
+  void checkUserObjectJacobianRequirement(THREAD_ID tid);
+  void setVariableAllDoFMap(const std::vector<MooseVariable *> moose_vars);
+
+  const std::vector<MooseVariable *> & getUserObjectJacobianVariables(THREAD_ID tid) const { return _uo_jacobian_moose_vars[tid]; }
 
   virtual Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
 
@@ -1068,6 +1082,9 @@ protected:
   /// functions
   MooseObjectWarehouse<Function> _functions;
 
+  /// nonlocal kernels
+  MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
+
   ///@{
   /// Initial condition storage
   InitialConditionWarehouse _ics;
@@ -1198,6 +1215,12 @@ protected:
   /// Indicates if the Jacobian was computed
   bool _has_jacobian;
 
+  /// Indicates if nonlocal coupling is required/exists
+  bool _has_nonlocal_coupling;
+  bool _calculate_jacobian_in_uo;
+
+  std::vector<std::vector<MooseVariable *> > _uo_jacobian_moose_vars;
+
   SolverParams _solver_params;
 
   /// Determines whether a check to verify an active kernel on every subdomain
@@ -1234,6 +1257,11 @@ protected:
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif //LIBMESH_HAVE_PETSC
+
+/**
+ * Method for sorting the MooseVariables based on variable numbers
+ */
+static bool sortMooseVariables(MooseVariable * a, MooseVariable * b) { return a->number() < b->number(); }
 
 private:
   bool _use_legacy_uo_aux_computation;
