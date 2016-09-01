@@ -127,6 +127,9 @@ Real INSMomentum::computeQpResidual()
 
 Real INSMomentum::computeQpJacobian()
 {
+  // We need this for RZ kernels.
+  const Real r = _q_point[_qp](0);
+
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
@@ -148,6 +151,9 @@ Real INSMomentum::computeQpJacobian()
 
 Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
 {
+  // We need this for RZ kernels.
+  const Real r = _q_point[_qp](0);
+
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
   {

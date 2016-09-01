@@ -23,22 +23,20 @@ InputParameters validParams<INSMass>()
 
 
 INSMass::INSMass(const InputParameters & parameters) :
-  Kernel(parameters),
+    Kernel(parameters),
 
-  // Gradients
-  _grad_u_vel(coupledGradient("u")),
-  _grad_v_vel(coupledGradient("v")),
-  _grad_w_vel(coupledGradient("w")),
+    // Gradients
+    _grad_u_vel(coupledGradient("u")),
+    _grad_v_vel(coupledGradient("v")),
+    _grad_w_vel(coupledGradient("w")),
 
-  // Variable numberings
-  _u_vel_var_number(coupled("u")),
-  _v_vel_var_number(coupled("v")),
-  _w_vel_var_number(coupled("w")),
-  _p_var_number(coupled("p"))
+    // Variable numberings
+    _u_vel_var_number(coupled("u")),
+    _v_vel_var_number(coupled("v")),
+    _w_vel_var_number(coupled("w")),
+    _p_var_number(coupled("p"))
 {
 }
-
-
 
 Real INSMass::computeQpResidual()
 {
@@ -70,6 +68,7 @@ Real INSMass::computeQpOffDiagJacobian(unsigned jvar)
 
   else if (jvar == _w_vel_var_number)
     return -_grad_phi[_j][_qp](2) * _test[_i][_qp];
+
   else
     return 0;
 }
