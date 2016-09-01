@@ -214,6 +214,7 @@
 #include "TimeExtremeValue.h"
 #include "RelativeSolutionDifferenceNorm.h"
 #include "AxisymmetricCenterlineAverageValue.h"
+#include "VariableInnerProduct.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -630,6 +631,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(TimeExtremeValue);
   registerPostprocessor(RelativeSolutionDifferenceNorm);
   registerPostprocessor(AxisymmetricCenterlineAverageValue);
+  registerPostprocessor(VariableInnerProduct);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);

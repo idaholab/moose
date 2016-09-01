@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'num_adaptivity_cycles.i'
+    csvdiff = 'num_adaptivity_cycles_out.csv'
+  [../]
+[]
