@@ -35,6 +35,8 @@ protected:
   const SimpleTestShapeElementUserObject & _shp;
   const Real & _shp_integral;
   const std::vector<Real> & _shp_jacobian;
+
+  const std::vector<dof_id_type> & _var_dofs;
 };
 
 template<>

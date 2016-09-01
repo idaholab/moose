@@ -335,8 +335,6 @@ void FEProblem::initialSetup()
   // This can be used to throw errors in methods that _must_ be called at construction time.
   _started_initial_setup = true;
 
-  // Check whether nonlocal couling is required or not
-  checkNonlocalCoupling();
   // Perform output related setups
   _app.getOutputWarehouse().initialSetup();
 
@@ -415,9 +413,12 @@ void FEProblem::initialSetup()
     _internal_side_user_objects.initialSetup(tid);
   }
 
+  // check if jacobian calculation is done in userobject
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
     checkUserObjectJacobianRequirement(tid);
-  if (_calculate_jacobian_in_uo)
+  // Check whether nonlocal couling is required or not
+  checkNonlocalCoupling();
+  if (_requires_nonlocal_coupling)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   // Call the initialSetup methods for functions
@@ -645,7 +646,7 @@ void FEProblem::initialSetup()
 
   Moose::perf_log.pop("initialSetup()", "Setup");
 
-  if (_calculate_jacobian_in_uo)
+  if (_requires_nonlocal_coupling)
   {
     setNonlocalCouplingMatrix();
     for (THREAD_ID tid = 0; tid < n_threads; ++tid)
@@ -687,7 +688,7 @@ void FEProblem::timestepSetup()
    // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
 
-  if (_calculate_jacobian_in_uo)
+  if (_requires_nonlocal_coupling)
     if (_nonlocal_kernels.hasActiveObjects())
       _has_nonlocal_coupling = true;
 }
@@ -726,7 +727,8 @@ FEProblem::checkNonlocalCoupling()
       MooseSharedPointer<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
       if (nonlocal_kernel)
       {
-        _requires_nonlocal_coupling = true;
+        if (_calculate_jacobian_in_uo)
+          _requires_nonlocal_coupling = true;
         _nonlocal_kernels.addObject(kernel, tid);
       }
     }

@@ -26,7 +26,8 @@ SimpleTestShapeElementKernel::SimpleTestShapeElementKernel(const InputParameters
     NonlocalKernel(parameters),
     _shp(getUserObject<SimpleTestShapeElementUserObject>("user_object")),
     _shp_integral(_shp.getIntegral()),
-    _shp_jacobian(_shp.getJacobian())
+    _shp_jacobian(_shp.getJacobian()),
+    _var_dofs(_var.dofIndices())
 {
 }
 
@@ -39,7 +40,7 @@ SimpleTestShapeElementKernel::computeQpResidual()
 Real
 SimpleTestShapeElementKernel::computeQpJacobian()
 {
-  return _test[_i][_qp] * _shp_jacobian[_var.dofIndices()[_j]];
+  return _test[_i][_qp] * _shp_jacobian[_var_dofs[_j]];
 }
 
 Real

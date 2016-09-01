@@ -30,7 +30,9 @@ ExampleShapeElementKernel2::ExampleShapeElementKernel2(const InputParameters & p
     _shp_integral(_shp.getIntegral()),
     _shp_jacobian(_shp.getJacobian()),
     _u_var(coupled("u")),
-    _v_var(coupled("v"))
+    _u_dofs(getVar("u", 0)->dofIndices()),
+    _v_var(coupled("v")),
+    _v_dofs(getVar("v", 0)->dofIndices())
 {
 }
 
@@ -44,16 +46,10 @@ Real
 ExampleShapeElementKernel2::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _u_var)
-  {
-    MooseVariable & jv = _sys.getVariable(_tid, _u_var);
-    return _test[_i][_qp] * _shp_jacobian[jv.dofIndices()[_j]];
-  }
+    return _test[_i][_qp] * _shp_jacobian[_u_dofs[_j]];
 
   if (jvar == _v_var)
-  {
-    MooseVariable & jv = _sys.getVariable(_tid, _v_var);
-    return _test[_i][_qp] * _shp_jacobian[jv.dofIndices()[_j]];
-  }
+    return _test[_i][_qp] * _shp_jacobian[_v_dofs[_j]];
 
   return 0.0;
 }

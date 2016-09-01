@@ -65,9 +65,13 @@ ComputeJacobianThread::computeJacobian()
       {
         kernel->subProblem().prepareShapes(kernel->variable().number(), _tid);
         kernel->computeJacobian();
-        MooseSharedPointer<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
-        if (nonlocal_kernel)
-          kernel->computeNonlocalJacobian();
+        /// done only when nonlocal kernels exist in the system
+        if (_fe_problem.checkNonlocalCouplingRequirement())
+        {
+          MooseSharedPointer<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
+          if (nonlocal_kernel)
+            kernel->computeNonlocalJacobian();
+        }
       }
   }
 }
