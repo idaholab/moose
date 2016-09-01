@@ -141,6 +141,25 @@ def yaml_load(filename, loader=yaml.Loader):
         yml = yaml.load(fid.read(), Loader)
     return yml
 
+def purge(extensions):
+    """
+    Removes generated files from repository.
+
+    Args:
+        extensions[list]: List of file extensions to purge (.e.g., 'png'); it will be prefixed with '.moose.'
+                          so the files actually removed are '.moose.png'.
+    """
+    for i, ext in enumerate(extensions):
+        extensions[i] = '.moose.{}'.format(ext)
+
+    log = logging.getLogger('MooseDocs')
+    for root, dirs, files in os.walk(os.getcwd(), topdown=False):
+        for name in files:
+            if any([name.endswith(ext) for ext in extensions]):
+                full_file = os.path.join(root, name)
+                log.debug('Removing: {}'.format(full_file))
+                os.remove(full_file)
+
 def command_line_options():
     """
     Return the command line options for the moosedocs script.
@@ -149,12 +168,13 @@ def command_line_options():
     # Command-line options
     parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
     parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
+    parser.add_argument('--purge', '-p', action='store_true', help="Remove all generated content (*.moose.md, *.moose.svg, *.moose.yml files) from the install directories.")
+
     subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
     # Generate options
     generate_parser = subparser.add_parser('generate', help="Generate the markdown documentation from MOOSE application executable. This is done by the serve and build command automatically.")
     generate_parser.add_argument('--moosedocs-config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
-    generate_parser.add_argument('--purge', action='store_true', help="Remove all content from the install directories.")
 
     # Serve options
     serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
@@ -189,10 +209,19 @@ def moosedocs():
 
     # Initialize logging
     formatter = init_logging(options.verbose)
+    log = logging.getLogger('MooseDocs')
+
+    # Purge
+    if options.purge:
+        log.info('Purging *.moose.md, *.moose.yml, and *.moose.svg files from {}'.format(os.getcwd()))
+        purge(['md', 'yml', 'svg'])
+    else:
+        log.info('Removing *.moose.svg files from {}'.format(os.getcwd()))
+        purge(['svg'])
 
     # Execute command
     if options.command == 'generate':
-        commands.generate(config_file=options.moosedocs_config_file, purge=options.purge)
+        commands.generate(config_file=options.moosedocs_config_file)
     elif options.command == 'serve':
         commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme, pages=options.pages)
     elif options.command == 'build':

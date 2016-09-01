@@ -1,7 +1,7 @@
 import os
 import MooseDocs
 
-def generate(config_file='moosedocs.yml', purge=False, **kwargs):
+def generate(config_file='moosedocs.yml', **kwargs):
     """
     Generates MOOSE system and object markdown files from the source code and detail markdown files.
 
@@ -15,4 +15,4 @@ def generate(config_file='moosedocs.yml', purge=False, **kwargs):
 
     # Generate the Markdown
     gen = MooseDocs.MooseApplicationDocGenerator(config_file)
-    gen.generate(purge=purge)
+    gen.generate()

@@ -9,6 +9,7 @@ from MooseCppMethod import MooseCppMethod
 from MoosePackageParser import MoosePackageParser
 from MooseMarkdownLinkPreprocessor import MooseMarkdownLinkPreprocessor
 from MooseCarousel import MooseCarousel
+from MooseDiagram import MooseDiagram
 from MooseSlidePreprocessor import MooseSlidePreprocessor
 import MooseDocs
 import utils
@@ -32,6 +33,7 @@ class MooseMarkdown(markdown.Extension):
         self.config['media_dir'] = [os.path.join('docs', 'media'), "The location of the media files to be used for generating the site."]
         self.config['slides'] = [False, "Enable the parsing for creating reveal.js slides."]
         self.config['package'] = [False, "Enable the use of the MoosePackageParser."]
+        self.config['graphviz'] = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
 
         # Define the directory where the markdown is contained, which will be searched for auto link creation
         self._markdown_database_dir = os.path.join(self.config['root'][0], self.config['docs_dir'][0])
@@ -56,6 +58,7 @@ class MooseMarkdown(markdown.Extension):
 
         # Block processors
         md.parser.blockprocessors.add('slideshow', MooseCarousel(md.parser), '_begin')
+        md.parser.blockprocessors.add('diagrams', MooseDiagram(md.parser, graphviz=config['graphviz']), '_begin')
 
         # Inline Patterns
         md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')

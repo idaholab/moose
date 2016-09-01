@@ -11,3 +11,4 @@ def build(config_file='mkdocs.yml', pages='pages.yml', **kwargs):
     pages = MooseDocs.yaml_load(pages)
     config = mkdocs.config.load_config(config_file, pages=pages, **kwargs)
     mkdocs.commands.build.build(config)
+    mkdocs.utils.copy_media_files(config['docs_dir'], config['site_dir'])

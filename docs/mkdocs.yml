@@ -16,6 +16,7 @@ extra_javascript:
     - js/mathjaxconfig.js
 
 markdown_extensions:
+    - toc
     - smarty
     - admonition
     - markdown_include.include           # pip install markdown-include
