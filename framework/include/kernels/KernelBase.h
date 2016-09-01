@@ -79,6 +79,18 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) = 0;
 
+  /**
+   * Compute this Kernel's contribution to the diagonal Jacobian entries
+   * corresponding to nonlocal dofs of the variable
+   */
+  virtual void computeNonlocalJacobian() {}
+
+  /**
+   * Computes d-residual / d-jvar... corresponding to nonlocal dofs of the jvar
+   * and stores the result in nonlocal ke
+   */
+  virtual void computeNonlocalOffDiagJacobian(unsigned int /* jvar */) {}
+
   /// Returns the variable number that this Kernel operates on.
   MooseVariable & variable();
 

@@ -230,6 +230,10 @@ public:
    */
   void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
 
+  /// set all the global dof indices for a nonlinear variable
+  void setVariableGlobalDoFs(const std::string & var_name);
+  const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
+
   /**
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
@@ -624,6 +628,8 @@ protected:
   bool _has_nodalbc_diag_save_in;
 
   void getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs);
+
+  std::vector<dof_id_type> _var_all_dof_indices;
 };
 
 #endif /* NONLINEARSYSTEM_H */

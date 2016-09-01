@@ -33,6 +33,8 @@ InputParameters validParams<SubProblem>()
 SubProblem::SubProblem(const InputParameters & parameters) :
     Problem(parameters),
     _factory(_app.getFactory()),
+    _nonlocal_cm(),
+    _requires_nonlocal_coupling(false),
     _rz_coord_axis(1) // default to RZ rotation around y-axis
 {
   unsigned int n_threads = libMesh::n_threads();
@@ -351,7 +353,6 @@ SubProblem::getAxisymmetricRadialCoord()
   else
     return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
 }
-
 
 void
 SubProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
