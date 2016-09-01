@@ -15,13 +15,21 @@
 []
 
 [GlobalParams]
-  op_num = 9
+  op_num = 8
   var_name_base = gr
+  execute_on = 'initial'
+  family = MONOMIAL
+  order = CONSTANT
 []
 
 [UserObjects]
   [./ebsd]
     type = EBSDReader
+  [../]
+  [./grain_tracker]
+    type = GrainTracker
+    ebsd_reader = ebsd
+    compute_halo_maps = true # For displaying HALO fields
   [../]
 []
 
@@ -35,25 +43,39 @@
 
 [Variables]
   [./PolycrystalVariables]
+    order = FIRST
+    family = LAGRANGE
   [../]
 []
 
 [AuxVariables]
   [./PHI1]
-    family = MONOMIAL
-    order = CONSTANT
   [../]
   [./PHI]
-    family = MONOMIAL
-    order = CONSTANT
   [../]
   [./PHI2]
-    family = MONOMIAL
-    order = CONSTANT
   [../]
   [./GRAIN]
-    family = MONOMIAL
-    order = CONSTANT
+  [../]
+  [./unique_grains]
+  [../]
+  [./var_indices]
+  [../]
+  [./halo0]
+  [../]
+  [./halo1]
+  [../]
+  [./halo2]
+  [../]
+  [./halo3]
+  [../]
+  [./halo4]
+  [../]
+  [./halo5]
+  [../]
+  [./halo6]
+  [../]
+  [./halo7]
   [../]
 []
 
@@ -63,34 +85,97 @@
     variable = PHI1
     ebsd_reader = ebsd
     data_name = 'phi1'
-    execute_on = 'initial'
   [../]
   [./phi_aux]
     type = EBSDReaderPointDataAux
     variable = PHI
     ebsd_reader = ebsd
     data_name = 'phi'
-    execute_on = 'initial'
   [../]
   [./phi2_aux]
     type = EBSDReaderPointDataAux
     variable = PHI2
     ebsd_reader = ebsd
     data_name = 'phi2'
-    execute_on = 'initial'
   [../]
   [./grain_aux]
     type = EBSDReaderPointDataAux
     variable = GRAIN
     ebsd_reader = ebsd
     data_name = 'feature_id'
-    execute_on = 'initial'
+  [../]
+  [./unique_grains]
+    type = FeatureFloodCountAux
+    variable = unique_grains
+    flood_counter = grain_tracker
+    field_display = UNIQUE_REGION
+  [../]
+  [./var_indices]
+    type = FeatureFloodCountAux
+    variable = var_indices
+    flood_counter = grain_tracker
+    field_display = VARIABLE_COLORING
+  [../]
+  [./halo0]
+    type = FeatureFloodCountAux
+    variable = halo0
+    map_index = 0
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo1]
+    type = FeatureFloodCountAux
+    variable = halo1
+    map_index = 1
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo2]
+    type = FeatureFloodCountAux
+    variable = halo2
+    map_index = 2
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo3]
+    type = FeatureFloodCountAux
+    variable = halo3
+    map_index = 3
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo4]
+    type = FeatureFloodCountAux
+    variable = halo4
+    map_index = 4
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo5]
+    type = FeatureFloodCountAux
+    variable = halo5
+    map_index = 5
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo6]
+    type = FeatureFloodCountAux
+    variable = halo6
+    map_index = 6
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo7]
+    type = FeatureFloodCountAux
+    variable = halo7
+    map_index = 7
+    field_display = HALOS
+    flood_counter = grain_tracker
   [../]
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 0
+  type = Steady
 []
 
 [Outputs]

@@ -11,8 +11,14 @@
     type = 'Exodiff'
     input = '1phase_reconstruction.i'
     exodiff = '1phase_reconstruction_out.e'
-    max_time = 1000
-    recover = false # issue #5188
+  [../]
+  [./1phase_reconstruction_40x40]
+    type = 'Exodiff'
+    input = '1phase_reconstruction.i'
+
+    # Read in a 2-phase file but ignore phase
+    cli_args = 'Mesh/filename=ebsd_40x40_2_phase.txt Outputs/file_base=1phase_reconstruction_40x40_out'
+    exodiff = '1phase_reconstruction_40x40_out.e'
   [../]
 
   [./1phase_evolution]

@@ -376,21 +376,28 @@ GrainTracker::expandEBSDGrains()
 {
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
   decltype(FeatureData::_local_ids) expanded_local_ids;
-  decltype(FeatureData::_ghosted_ids) expanded_ghosted_ids;
   auto my_processor_id = processor_id();
 
+  /**
+   * To expand the EBSD region to the actual flooded
+   * region we need to add in all point neighbors of the
+   * current local region for each feature. This is
+   * because the variable influence spreads from the
+   * EBSD data out exactly one element from every
+   * point by design (elem_to_node_weight_map)
+   */
   for (auto & list_ref : _partial_feature_sets)
   {
     for (auto & feature : list_ref)
     {
       expanded_local_ids.clear();
-      expanded_ghosted_ids.clear();
 
       for (auto entity : feature._local_ids)
       {
         const Elem * elem = _mesh.elemPtr(entity);
         mooseAssert(elem, "elem pointer is NULL");
 
+        // Get the nodes on a current element so that we can add in point neighbors
         auto n_nodes = elem->n_vertices();
         for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
         {
@@ -411,16 +418,13 @@ GrainTracker::expandEBSDGrains()
             mooseAssert(neighbor, "neighbor pointer is NULL");
 
             if (neighbor->processor_id() != my_processor_id)
-              feature._ghosted_ids.insert(neighbor->id());
+              feature._ghosted_ids.insert(elem->id());
           }
         }
       }
 
       // Replace the existing local ids with the expanded local ids
       feature._local_ids.swap(expanded_local_ids);
-
-      // Replace the existing ghosted ids with the expanded ghosted ids
-      feature._ghosted_ids.swap(expanded_ghosted_ids);
 
       // Copy the expanded local_ids into the halo_ids container
       feature._halo_ids = feature._local_ids;
@@ -742,8 +746,11 @@ GrainTracker::remapGrains()
                 break;
             }
             else if (!attemptGrainRenumber(grain1, 0, max))
+            {
+              _console << std::flush;
               mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping."
                          " Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+            }
 
           grains_remapped = true;
         }
@@ -773,8 +780,11 @@ GrainTracker::remapGrains()
               }
               else if (!attemptGrainRenumber(grain1, 0, max)
                        && !attemptGrainRenumber(grain2, 0, max))
+              {
+                _console << std::flush;
                 mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping."
                            "Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+              }
 
             grains_remapped = true;
           }

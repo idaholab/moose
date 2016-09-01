@@ -154,8 +154,8 @@ protected:
   /// The thickness of the halo surrounding each grain
   const unsigned int _halo_level;
 
-  /// Depth of renumbing recursion (a depth of zero means no recursion)
-  static const unsigned int _max_renumbering_recursion = 2;
+  /// Depth of renumbering recursion (a depth of zero means no recursion)
+  static const unsigned int _max_renumbering_recursion = 4;
 
   /// The number of reserved order parameters
   const unsigned int _n_reserve_ops;

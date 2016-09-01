@@ -1,10 +1,10 @@
 [Mesh]
   type = EBSDMesh
-  filename = UO2-SMALL.txt
+  filename = ebsd_small.txt
 []
 
 [GlobalParams]
-  op_num = 10
+  op_num = 9
   var_name_base = gr
 []
 

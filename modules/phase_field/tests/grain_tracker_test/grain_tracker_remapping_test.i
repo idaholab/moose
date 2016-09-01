@@ -17,7 +17,7 @@
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 7 # Number of order parameters used
+  op_num = 8 # Number of order parameters used
   var_name_base = gr # Base name of grains
   order = CONSTANT
   family = MONOMIAL
@@ -80,6 +80,9 @@
   [../]
 
   [./halo6]
+  [../]
+
+  [./halo7]
   [../]
 
   [./centroids]
@@ -177,6 +180,13 @@
     type = FeatureFloodCountAux
     variable = halo6
     map_index = 6
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo7]
+    type = FeatureFloodCountAux
+    variable = halo7
+    map_index = 7
     field_display = HALOS
     flood_counter = grain_tracker
   [../]
