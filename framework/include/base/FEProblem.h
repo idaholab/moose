@@ -832,7 +832,6 @@ public:
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void initialAdaptMesh();
   virtual void adaptMesh();
-  unsigned int _cycles_completed;
   /**
    * @return The number of adaptivity cycles completed.
    */
@@ -1164,6 +1163,7 @@ protected:
 
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
+  unsigned int _cycles_completed;
 #endif
 
   /// Pointer to XFEM controller

@@ -126,6 +126,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _from_multi_app_transfers(/*threaded=*/false),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
+    _cycles_completed(0),
 #endif
     _displaced_mesh(NULL),
     _geometric_search_data(*this, _mesh),
@@ -210,8 +211,6 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _resurrector = new Resurrector(*this);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
-
-  _cycles_completed = 0;
 }
 
 FEProblem::~FEProblem()
