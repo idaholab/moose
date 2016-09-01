@@ -38,7 +38,7 @@
 class DisplacedProblem;
 class FEProblem;
 class MooseMesh;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
@@ -153,6 +153,8 @@ public:
   CouplingMatrix * & couplingMatrix() { return _cm; }
 
   bool areCoupled(unsigned int ivar, unsigned int jvar);
+
+  bool hasConstraints() const { return _has_constraints; }
 
   std::vector<std::pair<MooseVariable *, MooseVariable *> > & couplingEntries(THREAD_ID tid);
 

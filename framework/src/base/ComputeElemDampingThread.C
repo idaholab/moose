@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "ComputeElemDampingThread.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "Problem.h"
 #include "ElementDamper.h"
 
@@ -22,7 +22,7 @@
 #include "libmesh/threads.h"
 
 ComputeElemDampingThread::ComputeElemDampingThread(FEProblem & feproblem,
-                                                   NonlinearSystem & sys) :
+                                                   NonlinearSystemBase & sys) :
     ThreadedElementLoop<ConstElemRange>(feproblem, sys),
     _damping(1.0),
     _nl(sys),

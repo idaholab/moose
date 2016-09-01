@@ -22,7 +22,7 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class IntegratedBC;
 class DGKernel;
 class InterfaceKernel;
@@ -31,7 +31,7 @@ class KernelWarehouse;
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
+  ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystemBase & sys, SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
@@ -50,7 +50,7 @@ public:
 
 protected:
   SparseMatrix<Number> & _jacobian;
-  NonlinearSystem & _sys;
+  NonlinearSystemBase & _sys;
 
   unsigned int _num_cached;
 

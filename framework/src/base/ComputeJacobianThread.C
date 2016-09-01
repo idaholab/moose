@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ComputeJacobianThread.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 #include "TimeDerivative.h"
 #include "IntegratedBC.h"
@@ -24,7 +24,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
+ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystemBase & sys, SparseMatrix<Number> & jacobian) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
     _jacobian(jacobian),
     _sys(sys),
