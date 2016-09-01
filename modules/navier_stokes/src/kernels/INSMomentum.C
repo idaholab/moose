@@ -24,8 +24,6 @@ InputParameters validParams<INSMomentum>()
   params.addRequiredParam<unsigned>("component", "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
   params.addParam<bool>("integrate_p_by_parts", true, "Allows simulations to be run with pressure BC if set to false");
 
-  MooseEnum coord_types("XYZ RZ RSPHERICAL");
-  params.addParam<MooseEnum>("coord_type", coord_types, "Coordinate system types. Choices are: " + coord_types.getRawNames());
   return params;
 }
 
@@ -33,8 +31,6 @@ InputParameters validParams<INSMomentum>()
 
 INSMomentum::INSMomentum(const InputParameters & parameters) :
   Kernel(parameters),
-
-  _coord_type_set(false),
 
   // Coupled variables
   _u_vel(coupledValue("u")),
@@ -66,36 +62,10 @@ INSMomentum::INSMomentum(const InputParameters & parameters) :
 {
 }
 
-void INSMomentum::setGeometryParameter(const InputParameters & params,
-                                    INSMomentum::COORD_TYPE & coord_type)
-{
-  if (params.isParamSetByUser("coord_type"))
-  {
-    coord_type = INSMomentum::COORD_TYPE(int(params.get<MooseEnum>("coord_type")));
-  }
-  else
-  {
-    coord_type = INSMomentum::XYZ;
-  }
-}
-
-void INSMomentum::computeResidual()
-{
-  if (!_coord_type_set)
-  {
-    setGeometryParameter(_pars, _coord_type);
-    _coord_type_set = true;
-  }
-
-  Kernel::computeResidual();
-}
 
 
 Real INSMomentum::computeQpResidual()
 {
-  // We need this for RZ kernels.
-  const Real r = _q_point[_qp](0);
-
   // The convection part, rho * (u.grad) * u_component * v.
   // Note: _grad_u is the gradient of the _component entry of the velocity vector.
   Real convective_part = _rho *
@@ -106,11 +76,7 @@ Real INSMomentum::computeQpResidual()
   // The pressure part, -p (div v) or (dp/dx_{component}) * test if not integrated by parts.
   Real pressure_part = 0.;
   if (_integrate_p_by_parts)
-  {
     pressure_part = -_p[_qp] * _grad_test[_i][_qp](_component);
-    if (_coord_type == INSMomentum::RZ && _component == 0)
-      pressure_part += -_p[_qp] / r * _test[_i][_qp];
-  }
   else
     pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
 
@@ -144,8 +110,6 @@ Real INSMomentum::computeQpResidual()
 
   // The viscous part, tau : grad(v)
   Real viscous_part = _mu * (tau_row * _grad_test[_i][_qp]);
-  if (_coord_type == INSMomentum::RZ && _component == 0)
-    viscous_part += 2. * _mu * _u_vel[_qp] * _test[_i][_qp] / (r*r);
 
   // Simplified version: mu * Laplacian(u_component)
   // Real viscous_part = _mu * (_grad_u[_qp] * _grad_test[_i][_qp]);
@@ -178,8 +142,6 @@ Real INSMomentum::computeQpJacobian()
   // on the diagonal of the viscous stress tensor.
   Real viscous_part = _mu * (_grad_phi[_j][_qp]             * _grad_test[_i][_qp] +
                              _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
-  if (_coord_type == INSMomentum::RZ && _component == 0)
-    viscous_part += 2. * _mu * _phi[_j][_qp] * _test[_i][_qp] / (r*r);
 
   return convective_part + viscous_part;
 }
@@ -220,12 +182,7 @@ Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _p_var_number)
   {
     if (_integrate_p_by_parts)
-    {
-      Real pressure_part = -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
-      if (_coord_type == INSMomentum::RZ && _component == 0)
-        pressure_part += -_phi[_j][_qp] / r * _test[_i][_qp];
-      return pressure_part;
-    }
+      return -_phi[_j][_qp] * _grad_test[_i][_qp](_component);
     else
       return _grad_phi[_j][_qp](_component) * _test[_i][_qp];
   }
