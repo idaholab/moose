@@ -1,0 +1,7 @@
+[Tests]
+  [./error_function_aux]
+    type = 'Exodiff'
+    input = 'error_function_aux.i'
+    exodiff = 'error_function_aux_out.e'
+  [../]
+[]
