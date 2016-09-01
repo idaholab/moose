@@ -72,8 +72,10 @@
 
 // Kernels
 #include "INSMass.h"
+#include "INSMassRZ.h"
 #include "INSMomentumTimeDerivative.h"
 #include "INSMomentum.h"
+#include "INSMomentumRZ.h"
 #include "INSTemperatureTimeDerivative.h"
 #include "INSTemperature.h"
 #include "INSSplitMomentum.h"
@@ -194,8 +196,10 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Kernels
   registerKernel(INSMass);
+  registerKernel(INSMassRZ);
   registerKernel(INSMomentumTimeDerivative);
   registerKernel(INSMomentum);
+  registerKernel(INSMomentumRZ);
   registerKernel(INSTemperatureTimeDerivative);
   registerKernel(INSTemperature);
   registerKernel(INSSplitMomentum);
