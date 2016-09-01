@@ -423,7 +423,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
 
   if (!_is_master)
   {
-    _feature_sets.reserve(_local_to_global_feature_map.size());
+    _feature_sets.resize(_local_to_global_feature_map.size());
 
     /**
      * On non-root processors we can't maintain the full _feature_sets data structure since
@@ -431,6 +431,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
      * feature sets into a flat structure maintaining order and update the internal IDs
      * with the proper global ID.
      */
+    unsigned int local_feature_count = 0;
     for (auto & list_ref : _partial_feature_sets)
     {
       for (auto & feature : list_ref)
@@ -446,10 +447,14 @@ FeatureFloodCount::scatterAndUpdateRanks()
         // Set the correct global id
         feature._id = global_id;
 
-        // Move the feature into place
-        _feature_sets.emplace_back(std::move(feature));
+        // Move the feature into the correct place
+        _feature_sets[local_id] = std::move(feature);
+
+        ++local_feature_count;
       }
     }
+
+    mooseAssert(local_feature_count == _local_to_global_feature_map.size(), "Indexing error");
   }
 }
 
@@ -895,7 +900,8 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
     return;
 
   // See if the current entity either starts a new feature or continues an existing feature
-  if (!isNewFeatureOrConnectedRegion(dof_object, current_idx, feature))
+  auto new_id = libMesh::invalid_uint;  // Writable reference to hold an optional id;
+  if (!isNewFeatureOrConnectedRegion(dof_object, current_idx, feature, new_id))
     return;
 
   /**
@@ -917,6 +923,10 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
 
     // Get a handle to the feature we will update (always the last feature in the data structure)
     feature = &_partial_feature_sets[map_num].back();
+
+    // If new_id is valid, we'll set it in the feature here.
+    if (new_id != libMesh::invalid_uint)
+      feature->_id = new_id;
   }
 
   // Insert the current entity into the local ids map
@@ -954,7 +964,7 @@ FeatureFloodCount::getThreshold(unsigned int /*current_idx*/, bool active_featur
   return active_feature ? _step_connecting_threshold : _step_threshold;
 }
 
-bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature)
+bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & /*new_id*/)
 {
   auto threshold = getThreshold(current_idx, feature);
 

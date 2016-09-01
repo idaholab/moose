@@ -188,7 +188,16 @@ public:
     /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
-      return _var_idx < rhs._var_idx || (_var_idx == rhs._var_idx && _min_entity_id < rhs._min_entity_id);
+      if (_id != libMesh::invalid_uint)
+      {
+        mooseAssert(rhs._id != libMesh::invalid_uint, "Asymmetric setting of ids detected during sort");
+
+        // Sort based on ids
+        return _id < rhs._id;
+      }
+      else
+        // Sort based on processor independent information (mesh and variable info)
+        return _var_idx < rhs._var_idx || (_var_idx == rhs._var_idx && _min_entity_id < rhs._min_entity_id);
     }
 
     /// stream output operator
@@ -262,7 +271,7 @@ protected:
   /**
    *
    */
-  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature);
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & new_id);
   virtual bool currentElemContributesToVolume(unsigned long current_idx) const;
 
   ///@{
@@ -319,10 +328,15 @@ protected:
   void communicateAndMerge();
 
   /**
-   * Sort and assign Ids to features.
+   * Sort and assign ids to features based on their positionn in the container after sorting.
    */
   void sortAndLabel();
 
+  /**
+   * Calls buildLocalToGlobalIndices to build the individual local to global indicies for each rank and
+   * scatters that information to all ranks. Finally, the non-master ranks update their own data
+   * structures to reflect the global mappings.
+   */
   void scatterAndUpdateRanks();
 
   /**

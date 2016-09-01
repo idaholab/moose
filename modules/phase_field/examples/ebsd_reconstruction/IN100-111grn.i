@@ -144,11 +144,11 @@
   [../]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.2
-    connecting_threshold = 0.2
-    execute_on = 'initial timestep_begin'
+#    threshold = 0.2
+#    connecting_threshold = 0.2
+#    execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd
-    flood_entity_type = ELEMENTAL
+#    flood_entity_type = ELEMENTAL
     compute_halo_maps = true # Only necessary for displaying HALOS
   [../]
 []

@@ -56,7 +56,7 @@ public:
 protected:
   virtual void updateFieldInfo() override;
   virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
-  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature) override;
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & new_id) override;
   virtual bool currentElemContributesToVolume(unsigned long current_idx) const override;
 
   void communicateHaloMap();
