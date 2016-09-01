@@ -22,6 +22,7 @@ InputParameters validParams<EulerAngleProvider2RGBAux>()
   params.addParam<MooseEnum>("output_type", output_types, "Type of value that will be outputted");
   params.addRequiredParam<UserObjectName>("euler_angle_provider", "Name of Euler angle provider user object");
   params.addRequiredParam<UserObjectName>("grain_tracker", "The GrainTracker UserObject to get values from.");
+  params.addParam<Point>("no_grain_color", Point(0, 0, 0), "RGB value of color used to represent area with no grains, defaults to black");
   return params;
 }
 
@@ -31,7 +32,8 @@ EulerAngleProvider2RGBAux::EulerAngleProvider2RGBAux(const InputParameters & par
     _xtal_class(getParam<MooseEnum>("crystal_structure")),
     _output_type(getParam<MooseEnum>("output_type")),
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
-    _grain_tracker(getUserObject<GrainTracker>("grain_tracker"))
+    _grain_tracker(getUserObject<GrainTracker>("grain_tracker")),
+    _no_grain_color(getParam<Point>("no_grain_color"))
 {
 }
 
@@ -39,13 +41,19 @@ void
 EulerAngleProvider2RGBAux::precalculateValue()
 {
   // ID of unique grain at current point
-  const unsigned int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
+  const int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
                                                               FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
   // Recover euler angles for current grain
-  const RealVectorValue angles = _euler.getEulerAngles(grain_id);
+  RealVectorValue angles;
+  if (grain_id >= 0)
+    angles = _euler.getEulerAngles(grain_id);
 
-  // Return RGB value computed from Euler angles
-  Point RGB = euler2RGB(_sd, angles(0) / 180.0 * libMesh::pi, angles(1) / 180.0 * libMesh::pi, angles(2) / 180.0 * libMesh::pi, 1.0, _xtal_class);
+  // Assign correct RGB value either from euler2RGB or from _no_grain_color
+  Point RGB;
+  if (grain_id < 0) //If not in a grain, return _no_grain_color
+    RGB = _no_grain_color;
+  else
+    RGB = euler2RGB(_sd, angles(0) / 180.0 * libMesh::pi, angles(1) / 180.0 * libMesh::pi, angles(2) / 180.0 * libMesh::pi, 1.0, _xtal_class);
 
   // Create correct scalar output
   if (_output_type < 3)
@@ -59,7 +67,7 @@ EulerAngleProvider2RGBAux::precalculateValue()
       _value = RGBint;
   }
   else
-    mooseError("Incorrect value for output_type in Euler2RGBAux");
+    mooseError("Incorrect value for output_type in EulerAngleProvider2RGBAux");
 }
 
 Real
