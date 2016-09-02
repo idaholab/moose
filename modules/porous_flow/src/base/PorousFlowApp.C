@@ -70,6 +70,7 @@
 
 // AuxKernels
 #include "PorousFlowDarcyVelocityComponent.h"
+#include "PorousFlowPropertyAux.h"
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -179,6 +180,7 @@ PorousFlowApp::registerObjects(Factory & factory)
 
   // AuxKernels
   registerAuxKernel(PorousFlowDarcyVelocityComponent);
+  registerAuxKernel(PorousFlowPropertyAux);
 }
 
 // External entry point for dynamic syntax association
