@@ -36,6 +36,7 @@
 #include "PorousFlowMethane.h"
 #include "PorousFlowPermeabilityConst.h"
 #include "PorousFlowPermeabilityKozenyCarman.h"
+#include "PorousFlowPermeabilityExponential.h"
 #include "PorousFlowPorosityConst.h"
 #include "PorousFlowPorosityHM.h"
 #include "PorousFlowPorosityUnity.h"
@@ -145,6 +146,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMethane);
   registerMaterial(PorousFlowPermeabilityConst);
   registerMaterial(PorousFlowPermeabilityKozenyCarman);
+  registerMaterial(PorousFlowPermeabilityExponential);
   registerMaterial(PorousFlowPorosityConst);
   registerMaterial(PorousFlowPorosityHM);
   registerMaterial(PorousFlowPorosityUnity);
