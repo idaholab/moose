@@ -5,4 +5,9 @@
     csvdiff = 'darcy_velocity.csv'
     rel_err = 1.0E-5
   [../]
+  [./properties]
+    type = 'Exodiff'
+    input = 'properties.i'
+    exodiff = 'properties_out.e'
+  [../]
 []
