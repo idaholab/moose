@@ -94,6 +94,7 @@ GrainTracker::getNumberGrains() const
 Real
 GrainTracker::getGrainVolume(unsigned int grain_id) const
 {
+  // TODO: Create map for getting grain by id
   mooseAssert(grain_id < _feature_sets.size() && _feature_sets[grain_id]._status != Status::INACTIVE,
               "Grain " << grain_id << " does not exist in data structure or is INACTIVE");
 
@@ -103,6 +104,7 @@ GrainTracker::getGrainVolume(unsigned int grain_id) const
 Point
 GrainTracker::getGrainCentroid(unsigned int grain_id) const
 {
+  // TODO: Create map for getting grain by id
   mooseAssert(grain_id < _feature_sets.size() && _feature_sets[grain_id]._status != Status::INACTIVE,
               "Grain " << grain_id << " does not exist in data structure or is INACTIVE");
 
@@ -286,25 +288,22 @@ GrainTracker::finalize()
   {
     for (const auto & grain : _feature_sets)
     {
-      if (grain._status != Status::INACTIVE)
+      for (auto elem_id : grain._local_ids)
       {
-        for (auto elem_id : grain._local_ids)
+        mooseAssert(grain._id != libMesh::invalid_uint,  "Missing Grain ID");
+        _elemental_data[elem_id].emplace_back(grain._id, grain._var_idx);
+
+        auto data_pair = _elemental_data_2.find(elem_id);
+        if (data_pair == _elemental_data_2.end())
         {
-          mooseAssert(grain._id != libMesh::invalid_uint,  "Missing Grain ID");
-          _elemental_data[elem_id].emplace_back(grain._id, grain._var_idx);
+          auto data_pair_pair = _elemental_data_2.emplace(elem_id, std::vector<unsigned int>(_n_vars, libMesh::invalid_uint));
+          data_pair = data_pair_pair.first;
 
-          auto data_pair = _elemental_data_2.find(elem_id);
-          if (data_pair == _elemental_data_2.end())
-          {
-            auto data_pair_pair = _elemental_data_2.emplace(elem_id, std::vector<unsigned int>(_n_vars, libMesh::invalid_uint));
-            data_pair = data_pair_pair.first;
-
-            // insert the reserve op numbers (if appropriate)
-            for (auto reserve_idx = decltype(_n_reserve_ops)(0); reserve_idx < _n_reserve_ops; ++reserve_idx)
-              data_pair->second[reserve_idx] = _reserve_grain_first_idx + reserve_idx;
-          }
-          data_pair->second[grain._var_idx] = grain._id;
+          // insert the reserve op numbers (if appropriate)
+          for (auto reserve_idx = decltype(_n_reserve_ops)(0); reserve_idx < _n_reserve_ops; ++reserve_idx)
+            data_pair->second[reserve_idx] = _reserve_grain_first_idx + reserve_idx;
         }
+        data_pair->second[grain._var_idx] = grain._id;
       }
     }
   }
@@ -675,9 +674,6 @@ GrainTracker::remapGrains()
     std::map<unsigned int, unsigned int> unique_id_to_existing_var_idx;
     for (auto & grain : _feature_sets)
     {
-      if (grain._status == Status::INACTIVE)
-        continue;
-
       // Unmark the grain so it can be used in the remap loop
       grain._status = Status::CLEAR;
 
@@ -690,13 +686,11 @@ GrainTracker::remapGrains()
       for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
       {
         auto & grain1 = _feature_sets[i];
-        if (grain1._status == Status::INACTIVE)
-          continue;
 
         for (auto j = beginIndex(_feature_sets); j < _feature_sets.size(); ++j)
         {
           auto & grain2 = _feature_sets[j];
-          if (i == j || grain2._status == Status::INACTIVE)
+          if (i == j)
             continue;
 
           if (grain1._id == grain2._id)
@@ -732,9 +726,6 @@ GrainTracker::remapGrains()
       grains_remapped = false;
       for (auto & grain1 : _feature_sets)
       {
-        if (grain1._status == Status::INACTIVE)
-          continue;
-
         // We need to remap any grains represented on any variable index above the cuttoff
         if (grain1._var_idx >= _reserve_op_idx)
         {
@@ -763,7 +754,7 @@ GrainTracker::remapGrains()
         for (auto & grain2 : _feature_sets)
         {
           // Don't compare a grain with itself and don't try to remap inactive grains
-          if (&grain1 == &grain2 || grain2._status == Status::INACTIVE)
+          if (&grain1 == &grain2)
             continue;
 
           if (grain1._var_idx == grain2._var_idx &&     // Are the grains represented by the same variable?
@@ -812,15 +803,12 @@ GrainTracker::remapGrains()
      */
     for (auto & grain : _feature_sets)
     {
-      if (grain._status == Status::INACTIVE)
-        continue;
-
       mooseAssert(unique_id_to_existing_var_idx.find(grain._id) != unique_id_to_existing_var_idx.end(),
                   "Missing unique ID");
 
       auto old_var_idx = unique_id_to_existing_var_idx[grain._id];
 
-      if (grain._status != Status::INACTIVE && old_var_idx != grain._var_idx)
+      if (old_var_idx != grain._var_idx)
       {
         mooseAssert(static_cast<bool>(grain._status & Status::DIRTY), "grain status is incorrect");
 
@@ -918,8 +906,7 @@ GrainTracker::computeMinDistancesFromGrain(FeatureData & grain,
   {
     auto & other_grain = _feature_sets[i];
 
-    if (other_grain._status == Status::INACTIVE || other_grain._var_idx == grain._var_idx ||
-        (other_grain._var_idx >= _reserve_op_idx))
+    if (other_grain._var_idx == grain._var_idx || other_grain._var_idx >= _reserve_op_idx)
       continue;
 
     auto target_var_index = other_grain._var_idx;
@@ -1225,9 +1212,6 @@ GrainTracker::updateFieldInfo()
   {
     unsigned int curr_var = grain._var_idx;
     unsigned int map_idx = (_single_map_mode || _condense_map_info) ? 0 : curr_var;
-
-    if (grain._status == Status::INACTIVE)
-      continue;
 
     for (auto entity : grain._local_ids)
     {
