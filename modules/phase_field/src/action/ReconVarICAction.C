@@ -80,6 +80,7 @@ ReconVarICAction::act()
     poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<bool>("all_op_elemental") = true;
     poly_params.set<UserObjectName>("ebsd_reader") = getParam<UserObjectName>("ebsd_reader");
+    poly_params.set<bool>("advanced_op_assignment") = getParam<bool>("advanced_op_assignment");
     if (isParamValid("phase"))
       poly_params.set<unsigned int>("phase") = getParam<unsigned int>("phase");
 

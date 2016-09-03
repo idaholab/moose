@@ -41,18 +41,20 @@ ReconVarIC::initialSetup()
   // number of grains this ICs deals with
   _grain_num = _consider_phase ?_ebsd_reader.getGrainNum(_phase) : _ebsd_reader.getGrainNum();
 
-  // fetch all center points
-  _centerpoints.resize(_grain_num);
-  for (unsigned int index = 0; index < _grain_num; ++index)
-    _centerpoints[index] = getCenterPoint(index);
-
   // We do not want to have more order parameters than grains. That would leave some unused.
   if (_op_num > _grain_num)
     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   if (!_advanced_op_assignment)
+  {
+    // fetch all center points
+    _centerpoints.resize(_grain_num);
+    for (unsigned int index = 0; index < _grain_num; ++index)
+      _centerpoints[index] = getCenterPoint(index);
+
     // Assign grains to each order parameter in a way that maximizes distance
     _assigned_op = PolycrystalICTools::assignPointsToVariables(_centerpoints, _op_num, _mesh, _var);
+  }
   else
   {
     std::map<dof_id_type, unsigned int> entity_to_grain;
@@ -62,10 +64,11 @@ ReconVarIC::initialSetup()
     {
       Point centroid = (*el)->centroid();
       const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader.getData(centroid);
-      const unsigned int global_id = _ebsd_reader.getGlobalID(d._feature_id);
-      const unsigned int grain_index = _ebsd_reader.getAvgData(global_id)._local_id;
+      const auto global_id = _ebsd_reader.getGlobalID(d._feature_id);
+      const auto local_id = _ebsd_reader.getAvgData(global_id)._local_id;
+      const auto index = _consider_phase ? local_id : global_id;
 
-      entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*el)->id(), grain_index));
+      entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*el)->id(), index));
     }
 
     auto grain_neighbor_graph = PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, _grain_num, true);
