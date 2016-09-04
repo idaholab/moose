@@ -61,12 +61,12 @@ GrainTracker::~GrainTracker()
 }
 
 Real
-GrainTracker::getEntityValue(dof_id_type node_id, FieldType field_type, unsigned int var_idx) const
+GrainTracker::getEntityValue(dof_id_type entity_id, FieldType field_type, unsigned int var_idx) const
 {
   if (_t_step < _tracking_step)
     return 0;
 
-  return FeatureFloodCount::getEntityValue(node_id, field_type, var_idx);
+  return FeatureFloodCount::getEntityValue(entity_id, field_type, var_idx);
 }
 
 const std::vector<std::pair<unsigned int, unsigned int> > &
@@ -88,27 +88,42 @@ GrainTracker::getElementalValues(dof_id_type elem_id) const
 unsigned int
 GrainTracker::getNumberGrains() const
 {
+  // Note: This value is parallel consistent, see FeatureFloodCount::communicateAndMerge()
   return _feature_count;
 }
 
 Real
 GrainTracker::getGrainVolume(unsigned int grain_id) const
 {
-  // TODO: Create map for getting grain by id
-  mooseAssert(grain_id < _feature_sets.size() && _feature_sets[grain_id]._status != Status::INACTIVE,
-              "Grain " << grain_id << " does not exist in data structure or is INACTIVE");
+  mooseAssert(grain_id < _grain_id_to_grain_idx.size(), "Grain ID out of bounds");
+  auto grain_idx = _grain_id_to_grain_idx[grain_id];
 
-  return _feature_sets[grain_id]._volume;
+  if (grain_idx != libMesh::invalid_uint)
+  {
+    mooseAssert(_grain_id_to_grain_idx[grain_id] < _feature_sets.size(), "Grain index out of bounds");
+    // TODO: Not parallel consistent
+    return _feature_sets[_grain_id_to_grain_idx[grain_id]]._volume;
+  }
+
+  // Inactive grain
+  return 0;
 }
 
 Point
 GrainTracker::getGrainCentroid(unsigned int grain_id) const
 {
-  // TODO: Create map for getting grain by id
-  mooseAssert(grain_id < _feature_sets.size() && _feature_sets[grain_id]._status != Status::INACTIVE,
-              "Grain " << grain_id << " does not exist in data structure or is INACTIVE");
+  mooseAssert(grain_id < _grain_id_to_grain_idx.size(), "Grain ID out of bounds");
+  auto grain_idx = _grain_id_to_grain_idx[grain_id];
 
-  return _feature_sets[grain_id]._centroid;
+  if (grain_idx != libMesh::invalid_uint)
+  {
+    mooseAssert(_grain_id_to_grain_idx[grain_id] < _feature_sets.size(), "Grain index out of bounds");
+    // TODO: Not parallel consistent
+    return _feature_sets[_grain_id_to_grain_idx[grain_id]]._centroid;
+  }
+
+  // Inactive grain
+  return Point();
 }
 
 void
@@ -281,6 +296,14 @@ GrainTracker::finalize()
 
   _console << "Finished inside of updateFieldInfo" << std::endl;
 
+  // Build grain id to grain idx (_feature_sets) map
+  _grain_id_to_grain_idx.resize(_max_curr_grain_id + 1, libMesh::invalid_uint);
+  for (auto grain_idx = beginIndex(_feature_sets); grain_idx < _feature_sets.size(); ++grain_idx)
+  {
+    mooseAssert(_feature_sets[grain_idx]._id <= _max_curr_grain_id, "Grain ID out of range");
+    _grain_id_to_grain_idx[_feature_sets[grain_idx]._id] = grain_idx;
+  }
+
   writeFeatureVolumeFile();
 
   // Build data structures for the various GrainTracker APIs
@@ -307,6 +330,8 @@ GrainTracker::finalize()
       }
     }
   }
+
+  // TODO: Release non essential memory
 
   _console << "Finished inside of GrainTracker" << std::endl;
   Moose::perf_log.pop("finalize()", "GrainTracker");
@@ -431,17 +456,24 @@ GrainTracker::assignGrains()
    */
   if (_is_master)
   {
+    mooseAssert(!_feature_sets.empty(), "Feature sets empty!");
+
+    // Find the largest grain ID, this requires sorting if the ID is not already set
     if (_ebsd_reader)
-      std::sort(_feature_sets.begin(), _feature_sets.end());
+    {
+      auto grain_num = _consider_phase ?_ebsd_reader->getGrainNum(_phase) : _ebsd_reader->getGrainNum();
+      _max_curr_grain_id = grain_num - 1;
+    }
     else
+    {
       sortAndLabel();
+      _max_curr_grain_id = _feature_sets[_feature_sets.size()-1]._id;
+    }
 
     for (auto & grain : _feature_sets)
       grain._status = Status::MARKED;                 // Mark the grain
 
-    // Set up the first reserve grain index and the first regular grain index
-    mooseAssert(!_feature_sets.empty(), "Feature sets empty!");
-    _max_curr_grain_id = _feature_sets[_feature_sets.size()-1]._id;
+    // Set up the first reserve grain index based on the largest grain ID
     _reserve_grain_first_idx = _max_curr_grain_id + 1;
   }
 
@@ -500,7 +532,7 @@ GrainTracker::trackGrains()
     Real min_centroid_diff = std::numeric_limits<Real>::max();
 
     /**
-     * The _feature_sets vector is sorted by _var_idx so we can avoid looping over all indices.
+     * The _feature_sets vector is constructed by _var_idx so we can avoid looping over all indices.
      * We can quickly jump to the first matching index to reduce the number of comparisons and
      * terminate our loop when our variable index stops matching.
      */
@@ -619,9 +651,6 @@ GrainTracker::trackGrains()
                << grain._var_idx <<  ")\n"
                << grain;
     }
-
-  // Sort based on internal IDs
-  std::sort(_feature_sets.begin(), _feature_sets.end());
 }
 
 void
@@ -1196,7 +1225,7 @@ GrainTracker::updateFieldInfo()
   {
     // store volumes per feature
     mooseAssert(!_feature_sets.empty(), "Unique grain structure is empty!");
-    _all_feature_volumes.resize(_feature_sets.size(), 0);
+    _all_feature_volumes.resize(_max_curr_grain_id + 1, 0);
 
     // store totals per variable (or smaller)
     _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 0 : _maps_size);
@@ -1415,11 +1444,10 @@ GrainTracker::getNextUniqueID()
    * Get the next unique grain ID but make sure to respect
    * reserve ids.
    */
-  auto new_idx = ++_max_curr_grain_id;
-  while (new_idx <= _reserve_grain_first_idx + _n_reserve_ops)
-    ++new_idx;
+  while (++_max_curr_grain_id <= _reserve_grain_first_idx + _n_reserve_ops)
+    ; // empty on purpose
 
-  return new_idx;
+  return _max_curr_grain_id;
 }
 
 /*************************************************

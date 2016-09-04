@@ -193,6 +193,9 @@ protected:
   /// Boolean to indicate whether or not we should populate order parameter map information
   const bool _compute_op_maps;
 
+  /// Data structure to hold grain_id to grain_idx
+  std::vector<unsigned int> _grain_id_to_grain_idx;
+
   /**
    * Data structure for active order parameter information on elements:
    * elem_id -> a vector of pairs each containing the grain number and the variable index representing that grain

@@ -463,9 +463,6 @@ FeatureFloodCount::writeFeatureVolumeFile()
 {
   if (_is_master && _pars.isParamValid("feature_volume_file"))
   {
-    // Pre-populated by updateFieldInfo
-    mooseAssert(_all_feature_volumes.size() == _feature_count, "Incorrect number of volume entries");
-
     std::vector<Real> data;
     data.reserve(_all_feature_volumes.size() + _total_volume_intersecting_boundary.size() + 2);
 
