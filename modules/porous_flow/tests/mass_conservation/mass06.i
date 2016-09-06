@@ -1,5 +1,7 @@
-# checking that the mass postprocessor correctly calculates the mass
-# of each component in each phase
+# Checking that the mass postprocessor correctly calculates the mass
+# of each component in each phase, as well as the total mass of each
+# component in all phases. Also tests that optional saturation threshold
+# gives the correct mass
 # 2phase, 2component, constant porosity
 # saturation_threshold set to 0.6 for phase 1
 
@@ -75,15 +77,9 @@
     on_initial_only = true
   [../]
   [./ppss]
-    type = PorousFlow2PhasePS_VG
+    type = PorousFlow2PhasePS
     phase0_porepressure = pp
     phase1_saturation = sat
-    m = 0.5
-    pc_max = 0
-    sat_lr = 0
-    sat_ls = 1
-    p0 = 1
-
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
@@ -158,6 +154,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = fluidmass2
+  file_base = mass06
   csv = true
 []

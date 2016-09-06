@@ -1,5 +1,5 @@
-# checking that the mass postprocessor throws the correct error if
-# too many phases are supplied
+# Checking that the mass postprocessor throws the correct error when more than a single
+# phase index is given when using the saturation_threshold parameter
 
 [Mesh]
   type = GeneratedMesh
@@ -114,7 +114,8 @@
   [./comp1_total_mass]
     type = PorousFlowFluidMass
     fluid_component = 1
-    phase = '0 1 2'
+    saturation_threshold = 0.5
+    phase = '0 1'
   [../]
 []
 

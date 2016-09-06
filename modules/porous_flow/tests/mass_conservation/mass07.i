@@ -1,11 +1,10 @@
-# checking that the mass postprocessor correctly calculates the mass
-# of each component in each phase
-# 2phase, 2component, constant porosity
+# Checking that the mass postprocessor throws the correct error if
+# too many phases are supplied
 
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 2
+  nx = 10
   xmin = 0
   xmax = 1
 []
@@ -23,10 +22,10 @@
 
 [AuxVariables]
   [./massfrac_ph0_sp0]
-    initial_condition = 0.3
+    initial_condition = 1
   [../]
   [./massfrac_ph1_sp0]
-    initial_condition = 0.55
+    initial_condition = 0
   [../]
 []
 
@@ -82,6 +81,7 @@
     sat_lr = 0
     sat_ls = 1
     p0 = 1
+
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
@@ -111,33 +111,10 @@
 []
 
 [Postprocessors]
-  [./comp0_phase0_mass]
-    type = PorousFlowFluidMass
-    fluid_component = 0
-    phase = 0
-  [../]
-  [./comp0_phase1_mass]
-    type = PorousFlowFluidMass
-    fluid_component = 0
-    phase = 1
-  [../]
-  [./comp0_total_mass]
-    type = PorousFlowFluidMass
-    fluid_component = 0
-  [../]
-  [./comp1_phase0_mass]
-    type = PorousFlowFluidMass
-    fluid_component = 1
-    phase = 0
-  [../]
-  [./comp1_phase1_mass]
-    type = PorousFlowFluidMass
-    fluid_component = 1
-    phase = 1
-  [../]
   [./comp1_total_mass]
     type = PorousFlowFluidMass
     fluid_component = 1
+    phase = '0 1 2'
   [../]
 []
 
@@ -146,10 +123,4 @@
   solve_type = Newton
   dt = 1
   end_time = 1
-[]
-
-[Outputs]
-  execute_on = 'timestep_end'
-  file_base = fluidmass1
-  csv = true
 []
