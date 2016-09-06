@@ -173,3 +173,12 @@ A full slideshow example might be:
     images/other*.png caption=Other images
     images/more*.png
 ```
+
+## Images
+You can include images in your documentation by use of the !image markdown syntax:
+
+```markdown
+!image memory_logger-plot_multi.png width=300 align=right caption=figure 1
+```
+!image memory_logger-plot_multi.png width=300 align=right caption=figure 1
+

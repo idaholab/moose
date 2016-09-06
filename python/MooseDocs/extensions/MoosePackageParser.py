@@ -14,11 +14,11 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
     Markdown extension for extracting package arch and version.
     """
 
-    CPP_RE = r'!MOOSEPACKAGE\s*(.*?)!'
+    RE = r'!MOOSEPACKAGE\s*(.*?)!'
 
     def __init__(self, **kwargs):
         MooseCommonExtension.__init__(self)
-        Pattern.__init__(self, self.CPP_RE, **kwargs)
+        Pattern.__init__(self, self.RE, **kwargs)
 
         # Load the yaml data containing package information
         self.package = MooseDocs.yaml_load("packages.yml")

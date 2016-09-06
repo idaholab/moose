@@ -3,6 +3,7 @@ import subprocess
 import markdown
 
 from MooseTextFile import MooseTextFile
+from MooseImageFile import MooseImageFile
 from MooseInputBlock import MooseInputBlock
 from MooseCppMethod import MooseCppMethod
 from MoosePackageParser import MoosePackageParser
@@ -28,6 +29,7 @@ class MooseMarkdown(markdown.Extension):
         self.config['make'] = [root, "The location of the Makefile responsible for building the application."]
         self.config['repo'] = ['', "The remote repository to create hyperlinks."]
         self.config['docs_dir'] = [os.path.join('docs', 'content'), "The location of the markdown to be used for generating the site."]
+        self.config['media_dir'] = [os.path.join('docs', 'media'), "The location of the media files to be used for generating the site."]
         self.config['slides'] = [False, "Enable the parsing for creating reveal.js slides."]
         self.config['package'] = [False, "Enable the use of the MoosePackageParser."]
 
@@ -58,7 +60,8 @@ class MooseMarkdown(markdown.Extension):
         # Inline Patterns
         md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
         md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, make=config['make'], repo=config['repo'], root=config['root']), '<image_link')
-        md.inlinePatterns.add('moose_source', MooseTextFile(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
+        md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
+        md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, media_dir=config['media_dir'], root=config['root']), '<image_link')
 
         if config['package']:
             md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md), '_end')
