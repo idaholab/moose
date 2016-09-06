@@ -7,6 +7,7 @@ import livereload
 import logging
 import shutil
 import MooseDocs
+import build
 log = logging.getLogger(__name__)
 
 
@@ -101,11 +102,8 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
 
     def builder(**kwargs):
         dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
-        config = mkdocs.config.load_config(config_file=config_file, strict=strict, pages=pages, **kwargs)
-        config['site_dir'] = tempdir
         live_server = livereload in ['dirtyreload', 'livereload']
-        mkdocs.commands.build.build(config, live_server=live_server, dirty=dirty)
-        mkdocs.utils.copy_media_files(config['docs_dir'], config['site_dir'], dirty=dirty)
+        config = build.build(live_server=live_server, dirty=dirty, site_dir=tempdir)
         return config
 
     # Perform the initial build

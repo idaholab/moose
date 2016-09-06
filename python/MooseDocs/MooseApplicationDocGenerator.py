@@ -89,6 +89,11 @@ class MooseApplicationDocGenerator(object):
             else:
                 self._exe = app
 
+        # Error if the executable is not found
+        if not os.path.exists(self._exe):
+            print 'Unable to locate a working executable: {}'.format(self._exe)
+            os.exit()
+
         configs = []
         if 'include' in yml:
             for key, value in yml['include'].iteritems():

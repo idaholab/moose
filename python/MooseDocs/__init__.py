@@ -29,17 +29,12 @@ from MooseApplicationSyntax import MooseApplicationSyntax
 from MooseApplicationDocGenerator import MooseApplicationDocGenerator
 from MooseSubApplicationDocGenerator import MooseSubApplicationDocGenerator
 
-MOOSE_REPOSITORY = 'https://github.com/idaholab/moose/blob/devel/'
-MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getenv('HOME'), 'projects', 'moose'))
-MOOSE_DOCS_DIR = os.path.join(MOOSE_DIR, 'docs', 'documentation')
-MOOSE_DOXYGEN = 'http://mooseframework.com/docs/doxygen/moose/'
-
-# Throw an exception if MOOSE_DIR is not found.
-if not os.path.exists(MOOSE_DIR):
-    raise Exception('The MOOSE directory was not located.')
-
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), 'moose'))
+if not os.path.exists(MOOSE_DIR):
+    MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
 
 class MkMooseDocsFormatter(logging.Formatter):
     """
