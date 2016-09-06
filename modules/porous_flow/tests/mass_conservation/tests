@@ -23,4 +23,29 @@
     csvdiff = 'mass04.csv'
     rel_err = 1.0E-5
   [../]
+  [./mass05]
+    type = 'CSVDiff'
+    input = 'mass05.i'
+    csvdiff = 'mass05.csv'
+  [../]
+  [./mass06]
+    type = 'CSVDiff'
+    input = 'mass06.i'
+    csvdiff = 'mass06.csv'
+  [../]
+  [./mass07]
+    type = 'RunException'
+    input = 'mass07.i'
+    expect_err = 'The Dictator decrees that the number of phases in this simulation is 2 but you have entered 3 phases in the Postprocessor comp1_total_mass'
+  [../]
+  [./mass08]
+    type = 'RunException'
+    input = 'mass08.i'
+    expect_err = 'The Dictator proclaims that the phase index 2 in the Postprocessor comp1_total_mass is greater than the largest phase index possible, which is 1'
+  [../]
+  [./mass09]
+  type = 'RunException'
+  input = 'mass09.i'
+  expect_err = 'A single phase_index must be entered when prescribing a saturation_threshold in the Postprocessor comp1_total_mass'
+[../]
 []
