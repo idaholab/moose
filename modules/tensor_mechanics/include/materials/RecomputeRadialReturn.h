@@ -51,6 +51,7 @@ protected:
   virtual void iterationFinalize(Real /*scalar*/) {}
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
   virtual Real getIsotropicShearModulus();
+  virtual Real getIsotropicBulkModulus();
 
   const std::string _base_name;
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
