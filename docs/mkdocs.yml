@@ -2,6 +2,8 @@ site_name: MOOSE
 
 docs_dir: .
 
+media_dir: ../media
+
 site_dir: ../site
 
 repo_url: https://github.com/idaholab/moose/

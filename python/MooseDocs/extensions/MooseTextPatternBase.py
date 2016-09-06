@@ -74,19 +74,6 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
 
         return content.strip()
 
-    def checkFilename(self, rel_filename):
-        """
-        Checks that the filename exists, if it does not a error Element is return.
-
-        Args:
-            filename[str]: The filename to check for existence.
-        """
-
-        filename = os.path.abspath(os.path.join(self._root, rel_filename))
-        if os.path.exists(filename):
-            return filename
-        return None
-
     def createElement(self, label, content, filename, rel_filename, settings):
         """
         Create the code element from the supplied source code content.

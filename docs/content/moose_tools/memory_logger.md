@@ -1,5 +1,5 @@
 # Memory Logger
-Memory Logger is a simple tool for gathering information about a running process. Such things as memory usage, stdout and stack traces can be sampled, either on a single process or on multiple nodes in a job scheduling environment. Currently PBS is the only job scheduling system supported. memory_logger.py is located in the moose/scripts directory.
+Memory Logger is a simple tool for gathering information about a running process. Such things as memory usage, stdout and stack traces can be sampled, either on a single process or on multiple nodes in a job scheduling environment. Currently PBS is the only job scheduling system supported.
 
 ## Basic usage
 In its simplest use case scenario, you encapsulate the command you would normally run with out Memory Logger as an argument to Memory Logger:
@@ -194,15 +194,16 @@ Date Stamp                 Memory Usage | Percent of MAX memory used: ( 264,256 
 Okay... A bit too accurate, as several samples remained unchanged during tracking. However sometimes more is desirable, though just not printed in this fashion. For data dumps like this, using Matplotlib is far more efficient.
 
 ## Using Matplotlib
-<img width="300" src="../../../media/memory_logger-plot_multi.png">
+!image memory_logger-plot_multi.png width=300 float=right
 
-We can visualize the results by plotting the data with Matplotlib. In the following sample we load up two results for a side-by-side comparison. You can load as many samples as you like in this fashion:
+We can visualize the results by plotting the data with Matplotlib:
 ```text
 memory_logger.py --plot simple_diffusion-r4_memory.log simple_diffusion-r6_repeat-rate0.01_memory.log
 ```
+We can render multiple logs simultaneously to allow an easy comparison.
 
 ## Tracking PBS jobs
-Memory Logger has the ability to track your processes across multiple nodes. In order for this to work correctly, we must launch Memory Logger within an interactive job (qsub -I) while providing the --pbs argument.
+Memory Logger has the ability to track your processes across multiple nodes. In order for this to work correctly, we must launch an interactive job (qsub -I). The reason for this, is we can not have PBS launch a bunch of memory_loggers all in the same fashion... Instead we need one memory_logger, acting as the server, while a bunch of others acting as agents gathering data. The only thing we need to do is provide the --pbs argument.
 
 ```text
 headnode #> qsub -I
@@ -210,7 +211,7 @@ headnode #> qsub -I
 node #> memory_logger.py --pbs \
 --run "mpiexec /absolute/path/to/moose_test-opt -i simple_diffusion.i -r 5"
 ```
-When Memory Logger encounters a --pbs argument, it will look at the contents of your $PBS_NODEFILE and determine what other machines will be used to process your job. Memory Logger will remote into these machines (using SSH), and launch its own memory_logger process, instructing it how to communicate back to the original memory_logger you launched interactively.
+When Memory Logger encounters a --pbs argument, it will look at the contents of your $PBS_NODEFILE, to determine what other machines will be used to process your job. Memory Logger will remote into these machines (SSH), and launch its own memory_logger process, instructing it, how to communicate back to the original memory_logger you launched interactively.
 
 
 ## Stack Traces, Dark Mode and other cool things
@@ -219,25 +220,24 @@ Obtaining stack traces while tracking memory usage on a single machine or across
 memory_logger.py --pstack --debugger gdb \
 --run "mpiexec /absolute/path/to/moose_test-opt -i simple_diffusion.i -r 5"
 ```
-!!! Info
-    While both LLDB and GDB are supported, GDB is many times quicker at gathering stack traces.
-
 The --pstack argument is used for both tracking and plotting. It tells Memory Logger to actually display stack trace information (if available in the log file).
 ```text
 memory_logger.py --pstack --plot simple_diffusion_memory.log
 ```
-Stack traces are represented in the form of points along the line graph. Clicking on these dots will cause memory_logger.py to print the actual stack trace gleamed at the time to stdout. However, if you choose to display all this junk on the terminal, you can with --read:
+Stack traces are represented in the form of points along the Matplotlib line graph. Clicking on these dots will cause memory_logger.py to print the actual stack trace gleamed at that time to stdout. However, if you choose to display all this junk on the terminal, you can with --read:
 ```text
 memory_logger.py --pstack --read simple_diffusion_memory.log
+<not going to paste this data here. I am telling ya, its pages and pages>
 ```
-You can also display stdout along the plotted graph:
+You can also display stdout along the Matplotlib graph:
 ```text
 memory_logger.py --pstack --stdout --plot simple_diffusion_memory.log
 ```
+!image memory_logger-darkmode.png width=300 float=right
+
 That white back ground to bright for you? Try dark mode:
 ```text
 memory_logger.py --pstack \
 --darkmode \
 --plot simple_diffusion-r4_memory.log simple_diffusion-r6_repeat-rate0.01_memory.log
 ```
-<img width="300" src="../../../media/memory_logger-darkmode.png">
