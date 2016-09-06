@@ -146,6 +146,8 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
+
+  addMooseVariableDependency(_vars);
 }
 
 FeatureFloodCount::~FeatureFloodCount()
