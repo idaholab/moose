@@ -45,7 +45,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _consider_phase(isParamValid("phase")),
     _compute_op_maps(getParam<bool>("compute_op_maps")),
     _reserve_grain_first_idx(0),
-    _max_curr_grain_id(0)
+    _max_curr_grain_id(0),
+    _first_time(true)
 {
   if (!_is_elemental && _compute_op_maps)
     mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
@@ -130,11 +131,11 @@ void
 GrainTracker::initialize()
 {
   /**
-   * If we are passed the first tracking step, we need to save the existing
+   * If we are passed the first time, we need to save the existing
    * grains before beginning the tracking on the current step. We'll do that
    * with a swap since the _feature_sets contents will be cleared anyway.
    */
-  if (_t_step > _tracking_step)
+  if (!_first_time)
     _feature_sets_old.swap(_feature_sets);
 
   FeatureFloodCount::initialize();
@@ -170,11 +171,12 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsign
    * When working with the EBSD reader we need to make sure that we get an accurate map
    * of the EBSD initial condition for the physics simulation to be correct. This is
    * incredibly difficult if we can only view the nodal interpolation of the elemental
-   * EBSD data. Instead, we'll use the EBSD Reader data directly in the first
-   * tracking step to build the initial grain map.
+   * EBSD data. Instead, we'll use the EBSD Reader data directly the first time this
+   * object runs. Using EBSD data is only valid if we begin tracking in the zeroeth step
    */
-  if (_ebsd_reader && _t_step == _tracking_step)
+  if (_ebsd_reader && _first_time)
   {
+    mooseAssert(_t_step == 0, "EBSD only works if we begin in the initial condition");
     mooseAssert(_is_elemental, "EBSD only works with elemental grain tracker");
 
     /**
@@ -230,7 +232,7 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsign
 bool
 GrainTracker::currentElemContributesToVolume(unsigned long current_idx) const
 {
-  if (_ebsd_reader && _t_step == _tracking_step)
+  if (_ebsd_reader && _first_time)
     // During the initial EBSD flood, every single element will contribute to a grain
     return true;
   else
@@ -251,7 +253,7 @@ GrainTracker::finalize()
 
   Moose::perf_log.push("finalize()", "GrainTracker");
 
-  if (_ebsd_reader && _tracking_step == _t_step)
+  if (_ebsd_reader && _first_time)
     expandEBSDGrains();
 
   expandHalos();
@@ -264,8 +266,11 @@ GrainTracker::finalize()
    */
   Moose::perf_log.push("trackGrains()", "GrainTracker");
 
-  if (_t_step == _tracking_step)
+  if (_first_time)
+  {
     assignGrains();
+    _first_time = false;
+  }
   else
   {
     auto old_max_grain_id = _max_curr_grain_id;
@@ -384,6 +389,9 @@ GrainTracker::expandHalos()
 void
 GrainTracker::expandEBSDGrains()
 {
+  mooseAssert(_t_step == 0, "EBSD only works if we begin in the initial condition");
+  mooseAssert(_is_elemental, "EBSD only works with elemental grain tracker");
+
   const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
   decltype(FeatureData::_local_ids) expanded_local_ids;
   auto my_processor_id = processor_id();
@@ -445,7 +453,7 @@ GrainTracker::expandEBSDGrains()
 void
 GrainTracker::assignGrains()
 {
-  mooseAssert(_t_step == _tracking_step, "assignGrains may only be called on the first tracking step");
+  mooseAssert(_first_time, "assignGrains may only be called on the first tracking step");
 
   /**
    * When using the EBSD reader, the grain IDs will already be assigned. We'll
@@ -487,7 +495,7 @@ GrainTracker::assignGrains()
 void
 GrainTracker::trackGrains()
 {
-  mooseAssert(_t_step > _tracking_step, "Track grains may only be called when _tracking_step > _t_step");
+  mooseAssert(!_first_time, "Track grains may only be called when _tracking_step > _t_step");
   mooseAssert(_is_master, "Track grains may only be called on the master rank");
 
   // Reset Status on active unique grains
@@ -634,7 +642,7 @@ GrainTracker::trackGrains()
     {
       mooseAssert(new_grain_idx_to_existing_grain_idx.find(feature_num) == new_grain_idx_to_existing_grain_idx.end(),
                   "New grain index shows up in new to old map - this shouldn't be possible");
-      mooseAssert(!_ebsd_reader || _t_step != _tracking_step, "Can't create new grains in intial EBSD step, logic error");
+      mooseAssert(!_ebsd_reader || !_first_time, "Can't create new grains in intial EBSD step, logic error");
 
       auto new_idx = getNextUniqueID();
       _feature_sets[feature_num]._id = new_idx;                      // Set the ID
@@ -656,7 +664,7 @@ GrainTracker::trackGrains()
 void
 GrainTracker::newGrainCreated(unsigned int new_grain_id)
 {
-  if (_is_master && _t_step > _tracking_step)
+  if (!_first_time)
   {
     auto new_idx = _feature_sets.size() - (_max_curr_grain_id - new_grain_id) - 1;
     mooseAssert(new_idx < _feature_sets.size(), "new_idx in newGrainCreated is out of bounds");

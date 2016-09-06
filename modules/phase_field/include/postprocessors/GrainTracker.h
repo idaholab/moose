@@ -211,6 +211,10 @@ private:
 
   /// Holds the next "regular" grain ID (a grain found or remapped to the standard op vars)
   unsigned int _max_curr_grain_id;
+
+  /// Boolean to indicate the first time this object executes.
+  /// _tracking_step isn't enough if people skip initial or execute more than once per step
+  bool _first_time;
 };
 
 
