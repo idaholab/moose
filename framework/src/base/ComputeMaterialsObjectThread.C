@@ -21,6 +21,7 @@
 #include "MaterialData.h"
 #include "Assembly.h"
 #include "AuxKernel.h"
+#include "Material.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -76,6 +77,10 @@ ComputeMaterialsObjectThread::subdomainChanged()
 {
   _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
   _fe_problem.subdomainSetup(_subdomain, _tid);
+
+  std::set<MooseVariable *> needed_moose_vars;
+  _materials.updateVariableDependency(needed_moose_vars, _tid);
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 }
 
 void
@@ -156,4 +161,10 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
 void
 ComputeMaterialsObjectThread::join(const ComputeMaterialsObjectThread & /*y*/)
 {
+}
+
+void
+ComputeMaterialsObjectThread::post()
+{
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
