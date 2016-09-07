@@ -1126,7 +1126,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
   THREAD_ID tid = 0;
   // go over mortar interfaces
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
     if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
@@ -1734,7 +1734,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
   THREAD_ID tid = 0;
   // go over mortar interfaces
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
     if (_constraints.hasActiveFaceFaceConstraints(iface->_name))

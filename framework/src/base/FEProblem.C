@@ -4045,7 +4045,7 @@ FEProblem::checkProblemIntegrity()
       }
 
       // also exclude mortar spaces from the material check
-      std::vector<MooseMesh::MortarInterface *> & mortar_ifaces = _mesh.getMortarInterfaces();
+      auto & mortar_ifaces = _mesh.getMortarInterfaces();
       for (const auto & mortar_iface : mortar_ifaces)
         local_mesh_subs.erase(mortar_iface->_id);
 

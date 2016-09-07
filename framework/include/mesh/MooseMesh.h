@@ -21,6 +21,8 @@
 #include "Restartable.h"
 #include "MooseEnum.h"
 
+#include <memory> //std::unique_ptr
+
 // libMesh
 #include "libmesh/mesh.h"
 #include "libmesh/elem_range.h"
@@ -745,7 +747,7 @@ public:
 
   void addMortarInterface(const std::string & name, BoundaryName master, BoundaryName slave, SubdomainName domain_id);
 
-  std::vector<MooseMesh::MortarInterface *> & getMortarInterfaces() { return _mortar_interface; }
+  std::vector<std::unique_ptr<MooseMesh::MortarInterface> > & getMortarInterfaces() { return _mortar_interface; }
 
   MooseMesh::MortarInterface * getMortarInterfaceByName(const std::string name);
   MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave);
@@ -788,7 +790,7 @@ protected:
   bool _parallel_type_overridden;
 
   /// Pointer to underlying libMesh mesh object
-  libMesh::MeshBase * _mesh;
+  std::unique_ptr<libMesh::MeshBase> _mesh;
 
   /// The partitioner used on this mesh
   MooseEnum _partitioner_name;
@@ -825,10 +827,10 @@ protected:
   bool _needs_prepare_for_use;
 
   /// The elements that were just refined.
-  ConstElemPointerRange * _refined_elements;
+  std::unique_ptr<ConstElemPointerRange> _refined_elements;
 
   /// The elements that were just coarsened.
-  ConstElemPointerRange * _coarsened_elements;
+  std::unique_ptr<ConstElemPointerRange> _coarsened_elements;
 
   /// Map of Parent elements to child elements for elements that were just coarsened.  NOTE: the child element pointers ARE PROBABLY INVALID.  Only use them for indexing!
   std::map<const Elem *, std::vector<const Elem *> > _coarsened_element_children;
@@ -840,13 +842,13 @@ protected:
    * A range for use with threading.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).
    */
-  ConstElemRange * _active_local_elem_range;
-  /// active local + active ghosted
-  SemiLocalNodeRange * _active_semilocal_node_range;
-  NodeRange * _active_node_range;
-  ConstNodeRange * _local_node_range;
-  StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> * _bnd_node_range;
-  StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * _bnd_elem_range;
+  std::unique_ptr<ConstElemRange> _active_local_elem_range;
+
+  std::unique_ptr<SemiLocalNodeRange> _active_semilocal_node_range;
+  std::unique_ptr<NodeRange> _active_node_range;
+  std::unique_ptr<ConstNodeRange> _local_node_range;
+  std::unique_ptr<StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> > _bnd_node_range;
+  std::unique_ptr<StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> > _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
   std::map<dof_id_type, std::vector<dof_id_type> > _node_to_elem_map;
@@ -928,7 +930,7 @@ protected:
 
   /// Mortar interfaces mapped through their names
   std::map<std::string, MortarInterface *> _mortar_interface_by_name;
-  std::vector<MortarInterface *> _mortar_interface;
+  std::vector<std::unique_ptr<MortarInterface> > _mortar_interface;
   /// Mortar interfaces mapped though master, slave IDs pairs
   std::map<std::pair<BoundaryID, BoundaryID>, MortarInterface *> _mortar_interface_by_ids;
 
