@@ -27,6 +27,12 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
         self._settings = {'arch' : None,
                           'return' : None}
 
+        # We need a way to limit _some_ CSS that we know causes issues.
+        # example: to ignore overflow-y to only div elements
+        # self.invalid_css = { 'div' : ['overflow-y'] }
+        #
+        self._invalid_css = {}
+
     def handleMatch(self, match):
         """
         Returns a tree element containing error message.
@@ -40,7 +46,7 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
         </div>
         """
         # Update the settings from regex match
-        settings = self.getSettings(match.group(2))
+        settings, styles = self.getSettings(match.group(2))
         if not settings.has_key('arch') or not settings.has_key('return'):
             el = self.createErrorElement('', message='Invalid MOOSEPACKAGE markdown syntax. Requires arch=, return=link|name')
         else:

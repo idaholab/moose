@@ -29,26 +29,20 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         self._repo = repo
 
         # The default settings
-        self._settings = {'strip_header':True,
-                          'repo_link':True,
-                          'label':True,
-                          'method':True,
-                          'block':True,
-                          'overflow-y':'scroll',
-                          'max-height':'500px',
-                          'strip-extra-newlines':False}
+        self._settings = {'strip_header'        : True,
+                          'repo_link'           : True,
+                          'label'               : True,
+                          'method'              : True,
+                          'block'               : True,
+                          'strip-extra-newlines': False}
 
-    def style(self, *keys):
-        """
-        Extract the html style string from a list of settings.
-
-        Args:
-            *keys[str]: A list of keys to compose into a style string.
-        """
-        style = []
-        for k in keys:
-            style.append('{}:{}'.format(k, self._settings[k]))
-        return ';'.join(style)
+        # We need a way to limit CSS to elements that we know causes issues.
+        # example: to ignore overflow-y to only div elements
+        # self.invalid_css = { 'div' : ['overflow-y'] }
+        #
+        # Applying overflow/max-height CSS to <div> and <code> causes multiple
+        # scroll bars
+        self._invalid_css = { 'div' : ['overflow-y', 'overflow-x', 'max-height'] }
 
     def prepareContent(self, content, settings):
         """
@@ -74,7 +68,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
 
         return content.strip()
 
-    def createElement(self, label, content, filename, rel_filename, settings):
+    def createElement(self, label, content, filename, rel_filename, settings, styles):
         """
         Create the code element from the supplied source code content.
 
@@ -92,7 +86,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         content = self.prepareContent(content, settings)
 
         # Build outer div container
-        el = etree.Element('div')
+        el = self.addStyle(etree.Element('div'), **styles)
 
         # Build label
         if settings['repo_link'] and self._repo:
@@ -106,10 +100,9 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
 
         # Build the code
         pre = etree.SubElement(el, 'pre')
-        code = etree.SubElement(pre, 'code')
+        code = self.addStyle(etree.SubElement(pre, 'code'), **styles)
         if self._language:
             code.set('class', 'hljs ' + self._language)
-        code.set('style', self.style('overflow-y', 'max-height'))
         code.text = content
 
         return el

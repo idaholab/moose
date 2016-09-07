@@ -23,7 +23,6 @@ class MooseCommonExtension(object):
         Args:
             filename[str]: The filename to check for existence.
         """
-
         filename = os.path.abspath(os.path.join(self._root, rel_filename))
         if os.path.exists(filename):
             return filename
@@ -49,9 +48,39 @@ class MooseCommonExtension(object):
       if not matches:
         return {}
       options = copy.copy(self._settings)
+      styles = {}
       for entry in matches:
-        options[entry[0].strip()] = entry[1].strip()
-      return options
+        if entry[0] in options.keys():
+            options[entry[0].strip()] = entry[1].strip()
+        else:
+            styles[entry[0].strip()] = entry[1].strip()
+      return options, styles
+
+    def addStyle(self, element, **kwargs):
+        """
+        Returns supplied element with style attributes.
+
+        Useful for adding things like; sizing, floating,
+        padding, margins, etc to any element.
+
+        Usage:
+        addStyle(etree.Element, width='300px')
+
+        returns your element with style="with=300px;" along
+        with any pre-existing styles set.
+
+        """
+        if kwargs == {}:
+            return element
+        else:
+            for attribute, value in kwargs.iteritems():
+                if self._invalid_css.has_key(element.tag) and (attribute in self._invalid_css[element.tag]):
+                    continue
+                if element.get('style') is not None:
+                    element.set('style', ';'.join([':'.join([attribute,value]), element.get('style')]))
+                else:
+                    element.set('style', ':'.join([attribute,value]) + ';')
+            return element
 
     def createErrorElement(self, rel_filename='', message=None, title='Markdown Parsing Error', parent=None):
         """

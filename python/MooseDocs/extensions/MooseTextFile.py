@@ -13,9 +13,9 @@ class MooseTextFile(MooseTextPatternBase):
         super(MooseTextFile, self).__init__(self.RE, **kwargs)
 
         # Add to the default settings
-        self._settings['line'] = None
-        self._settings['start'] = None
-        self._settings['end'] = None
+        self._settings['line'] =  None
+        self._settings['start'] =  None
+        self._settings['end'] =  None
 
     def handleMatch(self, match):
         """
@@ -23,7 +23,7 @@ class MooseTextFile(MooseTextPatternBase):
         """
 
         # Update the settings from regex match
-        settings = self.getSettings(match.group(4))
+        settings, styles = self.getSettings(match.group(4))
 
         # Read the file
         rel_filename = match.group(2).lstrip('/')
@@ -47,7 +47,7 @@ class MooseTextFile(MooseTextPatternBase):
             return self.createErrorElement(rel_filename, 'No content')
 
         # Return the Element object
-        el = self.createElement(match.group(3), content, filename, rel_filename, settings)
+        el = self.createElement(match.group(3), content, filename, rel_filename, settings, styles)
         return el
 
     def extractLine(self, filename, desired):
