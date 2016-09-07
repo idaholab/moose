@@ -6,11 +6,17 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
+  [../]
+[]
+
+[AuxVariables]
+  [./aux]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 2
   [../]
 []
 
@@ -26,6 +32,7 @@
     variable = u
   [../]
 []
+
 
 [BCs]
   [./left]
@@ -44,18 +51,11 @@
 []
 
 [Materials]
-  # This material couples in a stateful property from StatefulTest
-  [./coupled_mat]
-    type = CoupledMaterial
-    mat_prop = 'some_prop'
-    coupled_mat_prop = 'thermal_conductivity'
-    use_old_prop = true
-    block = 0
-  [../]
-
+  # This material couples to an aux variable and
+  # uses it in stateful property initialization
   [./stateful_mat]
     type = StatefulTest
-    block = 0
+    coupled = aux
     output_properties = thermal_conductivity
     outputs = exodus
   [../]
@@ -63,7 +63,6 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
   num_steps = 4
 []
 

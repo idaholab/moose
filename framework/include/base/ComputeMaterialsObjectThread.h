@@ -43,6 +43,7 @@ public:
 
   virtual ~ComputeMaterialsObjectThread();
 
+  virtual void post() override;
   virtual void subdomainChanged() override;
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
