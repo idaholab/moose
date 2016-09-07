@@ -36,7 +36,7 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
 {
   if (_flood_counter.isElemental() == isNodal() &&
       (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING" || _field_display == "GHOSTED_ENTITIES" || _field_display == "HALOS"))
-    mooseError("UNIQUE_REGION, VARIABLE_COLORING, GHOSTED_ENTITITES and HALOS must be on variable types that match the entity mode of the FeatureFloodCounter");
+    mooseError("UNIQUE_REGION, VARIABLE_COLORING, GHOSTED_ENTITIES and HALOS must be on variable types that match the entity mode of the FeatureFloodCounter");
 
   if (isNodal())
   {

@@ -42,6 +42,7 @@ private:
 
   unsigned int _grain_num;
 
+  const bool _all_op_elemental;
   const bool _advanced_op_assignment;
 
   std::vector<Point> _centerpoints;

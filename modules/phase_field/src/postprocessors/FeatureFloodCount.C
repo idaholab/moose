@@ -36,6 +36,7 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
   storeHelper(stream, feature._halo_ids, context);
   storeHelper(stream, feature._periodic_nodes, context);
   storeHelper(stream, feature._var_idx, context);
+  storeHelper(stream, feature._id, context);
   storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._orig_ids, context);
   storeHelper(stream, feature._min_entity_id, context);
@@ -64,6 +65,7 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._halo_ids, context);
   loadHelper(stream, feature._periodic_nodes, context);
   loadHelper(stream, feature._var_idx, context);
+  loadHelper(stream, feature._id, context);
   loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._orig_ids, context);
   loadHelper(stream, feature._min_entity_id, context);
@@ -298,39 +300,6 @@ void FeatureFloodCount::communicateAndMerge()
     recv_buffers.clear();
 
     mergeSets(true);
-
-    /**
-     * Perform a sort to give a parallel unique sorting to the identified features.
-     * We use the "min_entity_id" inside each feature to assign it's position in the
-     * sorted vector.
-     */
-    std::sort(_feature_sets.begin(), _feature_sets.end());
-
-#ifndef NDEBUG
-    /**
-     * Sanity check. Now that we've sorted the flattened vector of features
-     * we need to make sure that the counts vector still lines up appropriately
-     * with each feature's _var_index.
-     */
-    unsigned int feature_offset = 0;
-    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-    {
-      // Skip empty map checks
-      if (_feature_counts_per_map[map_num] == 0)
-        continue;
-
-      // Check the begin and end of the current range
-      auto range_front = feature_offset;
-      auto range_back = feature_offset + _feature_counts_per_map[map_num] - 1;
-
-      mooseAssert(range_front <= range_back && range_back < _feature_count, "Indexing error in feature sets");
-
-      if (!_single_map_mode && (_feature_sets[range_front]._var_idx != map_num || _feature_sets[range_back]._var_idx != map_num))
-        mooseError("Error in _feature_sets sorting, map index: " << map_num);
-
-      feature_offset += _feature_counts_per_map[map_num];
-    }
-#endif
   }
 
   // Make sure that feature count is communicated to all ranks
@@ -338,40 +307,85 @@ void FeatureFloodCount::communicateAndMerge()
 }
 
 void
+FeatureFloodCount::sortAndLabel()
+{
+  mooseAssert(_is_master, "sortAndLabel can only be called on the master");
+
+  /**
+   * Perform a sort to give a parallel unique sorting to the identified features.
+   * We use the "min_entity_id" inside each feature to assign it's position in the
+   * sorted vector.
+   */
+  std::sort(_feature_sets.begin(), _feature_sets.end());
+
+#ifndef NDEBUG
+  /**
+   * Sanity check. Now that we've sorted the flattened vector of features
+   * we need to make sure that the counts vector still lines up appropriately
+   * with each feature's _var_index.
+   */
+  unsigned int feature_offset = 0;
+  for (auto map_num = beginIndex(_feature_counts_per_map); map_num < _maps_size; ++map_num)
+  {
+    // Skip empty map checks
+    if (_feature_counts_per_map[map_num] == 0)
+      continue;
+
+    // Check the begin and end of the current range
+    auto range_front = feature_offset;
+    auto range_back = feature_offset + _feature_counts_per_map[map_num] - 1;
+
+    mooseAssert(range_front <= range_back && range_back < _feature_count, "Indexing error in feature sets");
+
+    if (!_single_map_mode && (_feature_sets[range_front]._var_idx != map_num || _feature_sets[range_back]._var_idx != map_num))
+      mooseError("Error in _feature_sets sorting, map index: " << map_num);
+
+    feature_offset += _feature_counts_per_map[map_num];
+  }
+#endif
+
+  // Label the features with an ID based on the sorting (processor number independent value)
+  for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
+    _feature_sets[i]._id = i;
+}
+
+void
 FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const
 {
   mooseAssert(_is_master, "This method must only be called on the root processor");
 
-  counts.resize(_n_procs, 0);
+  counts.assign(_n_procs, 0);
+  // Now size the individual counts vectors based on the largest index seen per processor
   for (const auto & feature : _feature_sets)
     for (const auto & local_index_pair : feature._orig_ids)
           // local index                                              // rank
       if (local_index_pair.second >= static_cast<unsigned int>(counts[local_index_pair.first]))
         counts[local_index_pair.first] = local_index_pair.second + 1;
 
+  // Build the offsets vector
   unsigned int globalsize = 0;
-  std::vector<int> offsets(_n_procs);
+  std::vector<int> offsets(_n_procs); // Type is signed for use with the MPI API
   for (auto i = beginIndex(offsets); i < offsets.size(); ++i)
   {
     offsets[i] = globalsize;
     globalsize += counts[i];
   }
 
+  // Finally populate the master vector
   local_to_global_all.resize(globalsize);
-
-  for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
+  for (const auto & feature : _feature_sets)
   {
     // Get the local indices from the feature and build a map
-    for (const auto & local_index_pair : _feature_sets[i]._orig_ids)
+    for (const auto & local_index_pair : feature._orig_ids)
     {
-      mooseAssert(local_index_pair.first < _n_procs, local_index_pair.first << ", " << _n_procs);
-                                  // rank                   // local index
-      auto global_index = offsets[local_index_pair.first] + local_index_pair.second;
+      auto rank = local_index_pair.first;
+      mooseAssert(rank < _n_procs, rank << ", " << _n_procs);
 
-      mooseAssert(global_index < globalsize, "Global index: " << global_index << " is out of range");
+      auto local_index = local_index_pair.second;
+      auto stacked_local_index = offsets[rank] + local_index;
 
-      // Finally fill in the vector
-      local_to_global_all[global_index] = i;
+      mooseAssert(stacked_local_index < globalsize, "Global index: " << stacked_local_index << " is out of range");
+      local_to_global_all[stacked_local_index] = feature._id;
     }
   }
 }
@@ -382,35 +396,68 @@ FeatureFloodCount::finalize()
   // Gather all information on processor zero and merge
   communicateAndMerge();
 
-  {
-    // local to global map (one per processor)
-    // TODO: Remove size one vectors after next libMesh update
-    std::vector<int> counts(1, 0);
-    std::vector<unsigned int> local_to_global_all(1, 0);
-    if (_is_master)
-      buildLocalToGlobalIndices(local_to_global_all, counts);
+  // Sort and label the features
+  if (_is_master)
+    sortAndLabel();
 
-    // Scatter local_to_global indices to all processors and store in class member variable
-    _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
-  }
-
-  if (!_is_master)
-  {
-    /**
-     * The rest of the ranks just need to move their own data to the flat data structure.
-     * Note that sorting is unecessary. The original ID inside of the unmerged feature
-     * will contain the original position which can be used to look up the global id
-     * number later after we receive the map from the root process.
-     */
-    for (auto & list_ref : _partial_feature_sets)
-      for (auto & feature : list_ref)
-        _feature_sets.emplace_back(std::move(feature));
-  }
+  // Send out the local to global mappings
+  scatterAndUpdateRanks();
 
   // Populate _feature_maps and _var_index_maps
   updateFieldInfo();
 
+  // Output the CSV information on grains
   writeFeatureVolumeFile();
+}
+
+void
+FeatureFloodCount::scatterAndUpdateRanks()
+{
+  // local to global map (one per processor)
+  // TODO: Remove size one vectors after next libMesh update
+  std::vector<int> counts(1, 0);
+  std::vector<unsigned int> local_to_global_all(1, 0);
+  if (_is_master)
+    buildLocalToGlobalIndices(local_to_global_all, counts);
+
+  // Scatter local_to_global indices to all processors and store in class member variable
+  _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
+
+  if (!_is_master)
+  {
+    _feature_sets.resize(_local_to_global_feature_map.size());
+
+    /**
+     * On non-root processors we can't maintain the full _feature_sets data structure since
+     * we don't have all of the global information. We'll move the items from the partial
+     * feature sets into a flat structure maintaining order and update the internal IDs
+     * with the proper global ID.
+     */
+    unsigned int local_feature_count = 0;
+    for (auto & list_ref : _partial_feature_sets)
+    {
+      for (auto & feature : list_ref)
+      {
+        mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
+
+        auto local_id = feature._orig_ids.begin()->second;
+        mooseAssert(local_id < _local_to_global_feature_map.size(), "local_id : "
+                    << local_id << " is out of range (" << _local_to_global_feature_map.size() << ')');
+
+        auto global_id = _local_to_global_feature_map[local_id];
+
+        // Set the correct global id
+        feature._id = global_id;
+
+        // Move the feature into the correct place
+        _feature_sets[local_id] = std::move(feature);
+
+        ++local_feature_count;
+      }
+    }
+
+    mooseAssert(local_feature_count == _local_to_global_feature_map.size(), "Indexing error");
+  }
 }
 
 void
@@ -418,9 +465,6 @@ FeatureFloodCount::writeFeatureVolumeFile()
 {
   if (_is_master && _pars.isParamValid("feature_volume_file"))
   {
-    // Pre-populated by updateFieldInfo
-    mooseAssert(_all_feature_volumes.size() == _feature_count, "Incorrect number of volume entries");
-
     std::vector<Real> data;
     data.reserve(_all_feature_volumes.size() + _total_volume_intersecting_boundary.size() + 2);
 
@@ -573,6 +617,11 @@ FeatureFloodCount::prepareDataForTransfer()
       local_ids_no_ghost.clear();
       set_difference.clear();
 
+      mooseAssert(!feature._local_ids.empty(), "local entity ids cannot be empty");
+
+      // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
+      feature._min_entity_id = *feature._local_ids.begin();
+
       for (auto & entity_id : feature._local_ids)
       {
         /**
@@ -585,9 +634,6 @@ FeatureFloodCount::prepareDataForTransfer()
           feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(entity_id));
         else
           feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(entity_id));
-
-        // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
-        feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
       }
 
       // Now extend the bounding box by the halo region
@@ -746,7 +792,10 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
     _partial_feature_sets[map_num].clear();
   }
 
-  // IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point
+  /**
+   * IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point but
+   * we can't broadcast it here because this routine is not collective.
+   */
 
   Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
@@ -780,12 +829,13 @@ FeatureFloodCount::updateFieldInfo()
       /**
        * For the remaining ranks, obtaining the feature number requires us to
        * first obtain the original local index (stored inside of the feature).
-       * Once we have that index, we can use it to local up the global id
+       * Once we have that index, we can use it to look up the global id
        * in the local to global map.
        */
       mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
-      auto local_id = feature._orig_ids.begin()->second;
 
+      // Get the local ID from the orig IDs
+      auto local_id = feature._orig_ids.begin()->second;
       mooseAssert(local_id < _local_to_global_feature_map.size(), "local_id : " << local_id << " is out of range (" << _local_to_global_feature_map.size() << ')');
       global_feature_number = _local_to_global_feature_map[local_id];
     }
@@ -850,36 +900,16 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
   if (_entities_visited[current_idx].find(entity_id) != _entities_visited[current_idx].end())
     return;
 
-  // Determine which threshold to use based on whether this is an established region or
-  // based on some derived class criteria.
-  auto threshold = getThreshold(current_idx, feature != nullptr);
-
-  // Get the value of the current variable for the current entity
-  Real entity_value;
-  const Elem * elem = nullptr;
-  if (_is_elemental)
-  {
-    elem = static_cast<const Elem *>(dof_object);
-    std::vector<Point> centroid(1, elem->centroid());
-    _subproblem.reinitElemPhys(elem, centroid, 0);
-    entity_value = _vars[current_idx]->sln()[0];
-  }
-  else
-    entity_value = _vars[current_idx]->getNodalValue(*static_cast<const Node *>(dof_object));
-
-  // This node hasn't been marked, is it in a feature?  We must respect
-  // the user-selected value of _use_less_than_threshold_comparison.
-  if (_use_less_than_threshold_comparison && (entity_value < threshold))
-    return;
-
-  if (!_use_less_than_threshold_comparison && (entity_value > threshold))
+  // See if the current entity either starts a new feature or continues an existing feature
+  auto new_id = libMesh::invalid_uint;  // Writable reference to hold an optional id;
+  if (!isNewFeatureOrConnectedRegion(dof_object, current_idx, feature, new_id))
     return;
 
   /**
    * If we reach this point (i.e. we haven't returned early from this routine),
    * we've found a new mesh entity that's part of a feature. We need to mark
    * the entity as visited at this point (and not before!) to avoid infinite
-   * recursion. If you mark the node to early you risk not coloring in a whole
+   * recursion. If you mark the node too early you risk not coloring in a whole
    * feature any time a "connecting threshold" is used since we may have
    * already visited this entity earlier but it was in-between two thresholds.
    */
@@ -889,10 +919,16 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
 
   // New Feature (we need to create it and add it to our data structure)
   if (!feature)
+  {
     _partial_feature_sets[map_num].emplace_back(current_idx, _feature_count++, processor_id());
 
-  // Get a handle to the feature we will update (always the last feature in the data structure)
-  feature = &_partial_feature_sets[map_num].back();
+    // Get a handle to the feature we will update (always the last feature in the data structure)
+    feature = &_partial_feature_sets[map_num].back();
+
+    // If new_id is valid, we'll set it in the feature here.
+    if (new_id != libMesh::invalid_uint)
+      feature->_id = new_id;
+  }
 
   // Insert the current entity into the local ids map
   feature->_local_ids.insert(entity_id);
@@ -902,11 +938,10 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
    * 1) greater (or less) than the volume threshold which may be independent of the flooding threshold
    * 2) owned by this processor so it's not double counted
    */
-  if (_is_elemental &&
-      (entity_value >= _volume_threshold || (!_use_less_than_threshold_comparison && entity_value <= _volume_threshold)) &&
-      processor_id() == dof_object->processor_id())
+  if (_is_elemental && processor_id() == dof_object->processor_id() && currentElemContributesToVolume(current_idx))
   {
-    // TODO: Cache element volumes?
+    const Elem * elem = static_cast<const Elem *>(dof_object);
+
     feature->_volume += elem->volume();
     feature->_vol_count++;
 
@@ -928,6 +963,35 @@ Real
 FeatureFloodCount::getThreshold(unsigned int /*current_idx*/, bool active_feature) const
 {
   return active_feature ? _step_connecting_threshold : _step_threshold;
+}
+
+bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & /*new_id*/)
+{
+  auto threshold = getThreshold(current_idx, feature);
+
+  // Get the value of the current variable for the current entity
+  Real entity_value;
+  if (_is_elemental)
+  {
+    const Elem * elem = static_cast<const Elem *>(dof_object);
+    std::vector<Point> centroid(1, elem->centroid());
+    _subproblem.reinitElemPhys(elem, centroid, 0);
+    entity_value = _vars[current_idx]->sln()[0];
+  }
+  else
+    entity_value = _vars[current_idx]->getNodalValue(*static_cast<const Node *>(dof_object));
+
+  // This entity hasn't been marked, is it in a feature?  We must respect
+  // the user-selected value of _use_less_than_threshold_comparison.
+  return ((_use_less_than_threshold_comparison && (entity_value >= threshold)) ||
+          (!_use_less_than_threshold_comparison && (entity_value <= threshold)));
+}
+
+bool
+FeatureFloodCount::currentElemContributesToVolume(unsigned long current_idx) const
+{
+  auto entity_value = _vars[current_idx]->sln()[0];
+  return (entity_value >= _volume_threshold || (!_use_less_than_threshold_comparison && entity_value <= _volume_threshold));
 }
 
 void
@@ -1102,6 +1166,9 @@ FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
 void
 FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 {
+  mooseAssert(_var_idx == rhs._var_idx, "Mismatched variable index in merge");
+  mooseAssert(_id == rhs._id, "Mismatched auxiliary id in merge");
+
   std::set<dof_id_type> set_union;
 
   /**
@@ -1152,6 +1219,17 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 }
 
 void
+FeatureFloodCount::FeatureData::clear()
+{
+  _local_ids.clear();
+  _periodic_nodes.clear();
+  _halo_ids.clear();
+  _ghosted_ids.clear();
+  _bboxes.clear();
+  _orig_ids.clear();
+}
+
+void
 FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 {
   std::vector<bool> intersected_boxes(rhs._bboxes.size(), false);
@@ -1193,9 +1271,15 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 {
   static const bool debug = true;
 
+  out << "Grain ID: ";
+  if (feature._id != libMesh::invalid_uint)
+    out << feature._id;
+  else
+    out << "invalid";
+
   if (debug)
   {
-    out << "Ghosted Entities: ";
+    out << "\nGhosted Entities: ";
     for (auto ghosted_id : feature._ghosted_ids)
       out << ghosted_id << " ";
 
