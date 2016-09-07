@@ -20,11 +20,11 @@ class MooseApplicationSyntax(object):
 
     Args:
         yaml[MooseYaml]: The MooseYaml object obtained by running the application with --yaml option.
-        path[str]: Valid source directory to extract syntax.
+        path[str|list]: Valid source directory to extract syntax.
     """
 
 
-    def __init__(self, yaml_data, path):
+    def __init__(self, yaml_data, paths):
 
         # The databases containing the system/object/markdown/source information for this directory
         self._yaml_data = yaml_data
@@ -33,11 +33,16 @@ class MooseApplicationSyntax(object):
         self._filenames = dict()
         self._syntax = set()
 
+        # Path should be a list of directories
+        if not isinstance(paths, list):
+            paths = [paths]
+
         # Update the syntax maps
-        if (not path) or (not os.path.exists(path)):
-            log.critical("Unknown source directory supplied: {}".format(os.path.abspath(path)))
-            raise IOError(os.path.abspath(path))
-        self._updateSyntax(path)
+        for path in paths:
+            if (not path) or (not os.path.exists(path)):
+                log.critical("Unknown source directory supplied: {}".format(os.path.abspath(path)))
+                raise IOError(os.path.abspath(path))
+            self._updateSyntax(path)
 
         for s in self._syntax:
             nodes = self._yaml_data[s]
