@@ -53,29 +53,32 @@ class MooseCommonExtension(object):
         options[entry[0].strip()] = entry[1].strip()
       return options
 
-    def createErrorElement(self, rel_filename='', message=None):
+    def createErrorElement(self, rel_filename='', message=None, title='Markdown Parsing Error', parent=None):
         """
         Returns a tree element containing error message.
 
         Uses the html to match the python markdown admonition package.
         https://pythonhosted.org/Markdown/extensions/admonition.html
 
-        <div class="admonition danger">
+        <div class="admonition error">
         <p class="admonition-title">Don't try this at home</p>
         <p>...</p>
         </div>
         """
 
-        el = etree.Element('div')
-        el.set('class', "admonition danger")
+        if parent:
+            el = etree.SubElement(parent, 'div')
+        else:
+            el = etree.Element('div')
+        el.set('class', "admonition error")
 
-        title = etree.SubElement(el, 'p')
-        title.set('class', "admonition-title")
-        title.text = "Markdown Parsing Error"
+        title_el = etree.SubElement(el, 'p')
+        title_el.set('class', "admonition-title")
+        title_el.text = title
 
         msg = etree.SubElement(el, 'p')
         msg.text = 'Invalid markdown for ' + rel_filename
         if message:
-            msg.text += '<br>{}'.format(message)
-        log.error(msg.text)
+            msg.text = message
+        log.error('{}\n{}'.format(title, message))
         return el

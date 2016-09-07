@@ -7,6 +7,7 @@ import livereload
 import logging
 import shutil
 import MooseDocs
+import build
 log = logging.getLogger(__name__)
 
 
@@ -26,7 +27,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
 
     def is_glob_changed(self, path, ignore=None):
         """
-        Implement a recurseive glob, which is only available in python 3.5.
+        Implement a recursive glob, which is only available in python 3.5.
         """
 
         if sys.version < (3, 5) and '**' in path:
@@ -82,12 +83,10 @@ def _livereload(host, port, config, builder, site_dir):
 def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, pages='pages.yml', **kwargs):
     """
     Mimics mkdocs serve command.
-
-    @TODO: When the mkdocs plugin system allows for custom Watcher this should be removed.
     """
 
     # Location of serve site
-    tempdir = os.path.abspath('.moosedocs')
+    tempdir = os.path.abspath(os.path.join(os.getenv('HOME'), '.local', 'share', 'moose', 'site'))
 
     # Clean the "temp" directory (if desired)
     if clean and os.path.exists(tempdir):
@@ -96,17 +95,15 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
 
     # Create the "temp" directory
     if not os.path.exists(tempdir):
-        os.mkdir(tempdir)
+        os.makedirs(tempdir)
 
     # Read the pages file
     pages = MooseDocs.yaml_load(pages)
 
     def builder(**kwargs):
         dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
-        config = mkdocs.config.load_config(config_file=config_file, strict=strict, pages=pages, **kwargs)
-        config['site_dir'] = tempdir
         live_server = livereload in ['dirtyreload', 'livereload']
-        mkdocs.commands.build.build(config, live_server=live_server, dirty=dirty)
+        config = build.build(live_server=live_server, dirty=dirty, site_dir=tempdir)
         return config
 
     # Perform the initial build

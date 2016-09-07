@@ -26,34 +26,26 @@ class MooseApplicationDocGenerator(object):
         self._root = os.path.dirname(config_file)
         self._config_file = config_file
         self._exe = None
-        self._modified = None
         self._develop = kwargs.pop('develop', False)
 
-    def generate(self, purge=False):
+    def generate(self):
         """
-        Operator(). Calling this function causes the documentation to generated.
-
-        Args:
-            purge[bool]: When True the install directory is cleaned.
+        Generate the documentation.
         """
 
-        # Remove all '.moose.md/.moose.yml' files from the current directory
-        if purge:
-            log.info('Purging *.moose.md and *.moose.yml files from {}'.format(os.getcwd()))
-            for root, dirs, files in os.walk(os.getcwd(), topdown=False):
-                for name in files:
-                    if name.endswith('.moose.md') or name.endswith('.moose.yml'):
-                        full_file = os.path.join(root, name)
-                        log.debug('Removing: {}'.format(full_file))
-                        os.remove(full_file)
+        # Setup the location
+        log.info('Generating Documentation: {}'.format(self._config_file))
 
-        """
-        TODO: Tie this into the mkdocs livereload. To do this the mkdocs watching should be paused while
-        the files are generated and then mkdocs livereload restarted. Otherwise, each file that changes
-        spawns a rebuild.
-        """
-        self._generate()
-        self._modified = os.path.getmtime(self._exe)
+        # Parse the configuration file for the desired paths
+        configs = self._configure()
+
+        # Locate and run the MOOSE executable
+        raw = utils.runExe(self._exe, '--yaml')
+        ydata = utils.MooseYaml(raw)
+
+        for config in configs:
+            generator = MooseSubApplicationDocGenerator(ydata, config)
+            generator.write()
 
     def _configure(self):
         """
@@ -97,28 +89,14 @@ class MooseApplicationDocGenerator(object):
             else:
                 self._exe = app
 
+        # Error if the executable is not found
+        if not os.path.exists(self._exe):
+            print 'Unable to locate a working executable: {}'.format(self._exe)
+            os.exit()
+
         configs = []
         if 'include' in yml:
             for key, value in yml['include'].iteritems():
                 log.debug('Configuring settings for including {}'.format(key))
                 configs.append(update_config(value))
         return configs
-
-    def _generate(self):
-        """
-        Generate the documentation.
-        """
-
-        # Setup the location
-        log.info('Generating Documentation: {}'.format(self._config_file))
-
-        # Parse the configuration file for the desired paths
-        configs = self._configure()
-
-        # Locate and run the MOOSE executable
-        raw = utils.runExe(self._exe, '--yaml')
-        ydata = utils.MooseYaml(raw)
-
-        for config in configs:
-            generator = MooseSubApplicationDocGenerator(ydata, config)
-            generator.write()

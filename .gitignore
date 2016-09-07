@@ -167,8 +167,9 @@ out.xyz
 # Documentation Generation
 *.moose.md
 *.moose.yml
+*.moose.svg
 docs/.moosedocs
 site
 
 # Do not ignore files in docs/media
-!docs/media/*.*
+!docs/media/*.png
