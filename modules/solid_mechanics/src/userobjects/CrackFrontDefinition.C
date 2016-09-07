@@ -276,18 +276,17 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> &nodes)
     //Loop through the set of crack front nodes, and create a node to element map for just the crack front nodes
     //The main reason for creating a second map is that we need to do a sort prior to the set_intersection.
     //The original map contains vectors, and we can't sort them, so we create sets in the local map.
-    std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
+    const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
     std::map<dof_id_type, std::set<dof_id_type> > crack_front_node_to_elem_map;
 
-    for (std::set<dof_id_type>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit )
+    for (const auto & node_id : nodes)
     {
-      std::map<dof_id_type, std::vector<dof_id_type> >::iterator nemit = node_to_elem_map.find(*nit);
-      if (nemit == node_to_elem_map.end())
-        mooseError("Could not find crack front node " << *nit << "in the node to elem map");
+      const auto & node_to_elem_pair = node_to_elem_map.find(node_id);
+      mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Could not find crack front node " << node_id << "in the node to elem map");
 
-      std::vector<dof_id_type> & connected_elems = nemit->second;
-      for (unsigned int i=0; i<connected_elems.size(); ++i)
-        crack_front_node_to_elem_map[*nit].insert(connected_elems[i]);
+      const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
+      for (unsigned int i = 0; i < connected_elems.size(); ++i)
+        crack_front_node_to_elem_map[node_id].insert(connected_elems[i]);
     }
 
 

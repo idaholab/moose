@@ -151,7 +151,7 @@ public:
    * If not already created, creates a map from every node to all
    * elements to which they are connected.
    */
-  std::map<dof_id_type, std::vector<dof_id_type> > & nodeToElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type> > & nodeToElemMap();
 
   /**
    * If not already created, creates a map from every node to all
@@ -160,7 +160,7 @@ public:
    * one node with a local element.
    * \note Extra ghosted elements are not included in this map!
    */
-  std::map<dof_id_type, std::vector<dof_id_type> > & nodeToActiveSemilocalElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type> > & nodeToActiveSemilocalElemMap();
 
   /**
    * These structs are required so that the bndNodes{Begin,End} and
@@ -279,7 +279,7 @@ public:
    *
    * @return The _Parent_ elements that are now set to be INACTIVE.  Their _children_ are the new elements.
    */
-  ConstElemPointerRange * refinedElementRange();
+  ConstElemPointerRange * refinedElementRange() const;
 
   /**
    * Return a range that is suitable for threaded execution over elements that were just coarsened.
@@ -287,7 +287,7 @@ public:
    * are the elements that were just removed.  Use coarsenedElementChildren() to get the element
    * IDs for the children that were just removed for a particular parent element.
    */
-  ConstElemPointerRange * coarsenedElementRange();
+  ConstElemPointerRange * coarsenedElementRange() const;
 
   /**
    * Get the newly removed children element ids for an element that was just coarsened.
@@ -295,7 +295,7 @@ public:
    * @param elem Pointer to the parent element that was coarsened to.
    * @return The child element ids in Elem::child() order.
    */
-  std::vector<const Elem *> & coarsenedElementChildren(const Elem * elem);
+  const std::vector<const Elem *> & coarsenedElementChildren(const Elem * elem) const;
 
   /**
    * Clears the "semi-local" node list and rebuilds it.  Semi-local nodes
@@ -316,7 +316,7 @@ public:
    */
   ConstElemRange * getActiveLocalElementRange();
   NodeRange * getActiveNodeRange();
-  SemiLocalNodeRange * getActiveSemiLocalNodeRange();
+  SemiLocalNodeRange * getActiveSemiLocalNodeRange() const;
   ConstNodeRange * getLocalNodeRange();
   StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> * getBoundaryNodeRange();
   StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * getBoundaryElementRange();
@@ -398,12 +398,12 @@ public:
   /**
    * Return a writable reference to the set of ghosted boundary IDs.
    */
-  std::set<unsigned int> & getGhostedBoundaries();
+  const std::set<unsigned int> & getGhostedBoundaries() const;
 
   /**
    * Return a writable reference to the _ghosted_boundaries_inflation vector.
    */
-  std::vector<Real> & getGhostedBoundaryInflation();
+  const std::vector<Real> & getGhostedBoundaryInflation() const;
 
   /**
    * Actually do the ghosting of boundaries that need to be ghosted to this processor.
@@ -616,7 +616,7 @@ public:
    * @param component - An integer representing the desired component (dimension)
    * @return std::pair pointer - The matching boundary pairs for the passed component
    */
-  std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component);
+  const std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component);
 
   /**
    * Create the refinement and coarsening maps necessary for projection of stateful material properties

@@ -500,21 +500,23 @@ MooseMesh::cacheChangedLists()
 }
 
 ConstElemPointerRange *
-MooseMesh::refinedElementRange()
+MooseMesh::refinedElementRange() const
 {
   return _refined_elements;
 }
 
 ConstElemPointerRange *
-MooseMesh::coarsenedElementRange()
+MooseMesh::coarsenedElementRange() const
 {
   return _coarsened_elements;
 }
 
-std::vector<const Elem *> &
-MooseMesh::coarsenedElementChildren(const Elem * elem)
+const std::vector<const Elem *> &
+MooseMesh::coarsenedElementChildren(const Elem * elem) const
 {
-  return _coarsened_element_children[elem];
+  auto elem_to_child_pair = _coarsened_element_children.find(elem);
+  mooseAssert(elem_to_child_pair != _coarsened_element_children.end(), "Missing element in map");
+  return elem_to_child_pair->second;
 }
 
 void
@@ -643,7 +645,7 @@ MooseMesh::buildBndElemList()
   }
 }
 
-std::map<dof_id_type, std::vector<dof_id_type> > &
+const std::map<dof_id_type, std::vector<dof_id_type> > &
 MooseMesh::nodeToElemMap()
 {
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
@@ -665,7 +667,7 @@ MooseMesh::nodeToElemMap()
   return _node_to_elem_map;
 }
 
-std::map<dof_id_type, std::vector<dof_id_type> > &
+const std::map<dof_id_type, std::vector<dof_id_type> > &
 MooseMesh::nodeToActiveSemilocalElemMap()
 {
   if (!_node_to_active_semilocal_elem_map_built) // Guard the creation with a double checked lock
@@ -714,16 +716,9 @@ MooseMesh::getActiveNodeRange()
 }
 
 SemiLocalNodeRange *
-MooseMesh::getActiveSemiLocalNodeRange()
+MooseMesh::getActiveSemiLocalNodeRange() const
 {
   mooseAssert(_active_semilocal_node_range, "_active_semilocal_node_range has not been created yet!");
-/*
-  if (!_active_node_range)
-  {
-    _active_semilocal_node_range = new NodeRange(getMesh().local_nodes_begin(),
-                                                 getMesh().local_nodes_end(), GRAIN_SIZE);
-  }
- */
 
   return _active_semilocal_node_range;
 }
@@ -1389,7 +1384,7 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
 
   for (unsigned int component = 0; component < dimension(); ++component)
   {
-    std::pair<BoundaryID, BoundaryID> * boundary_ids = getPairedBoundaryMapping(component);
+    const std::pair<BoundaryID, BoundaryID> * boundary_ids = getPairedBoundaryMapping(component);
 
     if (boundary_ids != NULL &&
         ((boundary_ids->first == primary && boundary_ids->second == secondary) ||
@@ -1442,7 +1437,7 @@ MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q)
   return minPeriodicVector(nonlinear_var_num, p, q).norm();
 }
 
-std::pair<BoundaryID, BoundaryID> *
+const std::pair<BoundaryID, BoundaryID> *
 MooseMesh::getPairedBoundaryMapping(unsigned int component)
 {
   if (!_regular_orthogonal_mesh)
@@ -2117,14 +2112,14 @@ MooseMesh::setGhostedBoundaryInflation(const std::vector<Real> & inflation)
   _ghosted_boundaries_inflation = inflation;
 }
 
-std::set<unsigned int> &
-MooseMesh::getGhostedBoundaries()
+const std::set<unsigned int> &
+MooseMesh::getGhostedBoundaries() const
 {
   return _ghosted_boundaries;
 }
 
-std::vector<Real> &
-MooseMesh::getGhostedBoundaryInflation()
+const std::vector<Real> &
+MooseMesh::getGhostedBoundaryInflation() const
 {
   return _ghosted_boundaries_inflation;
 }

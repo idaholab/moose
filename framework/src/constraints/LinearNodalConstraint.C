@@ -60,13 +60,18 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
         _connected_nodes.push_back(dof);
   }
 
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+
   // Add elements connected to master node to Ghosted Elements
   for (const auto & dof : _master_node_ids)
   {
     // defining master nodes in base class
     _master_node_vector.push_back(dof);
 
-    std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[dof];
+    auto node_to_elem_pair = node_to_elem_map.find(dof);
+    mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+    const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
+
     for (const auto & elem_id : elems)
       _subproblem.addGhostedElem(elem_id);
   }

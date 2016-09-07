@@ -1437,7 +1437,10 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
       std::set<dof_id_type> unique_slave_indices;
       std::set<dof_id_type> unique_master_indices;
 
-      std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[slave_node];
+      const auto & node_to_elem_map = _mesh.nodeToElemMap();
+      auto node_to_elem_pair = node_to_elem_map.find(slave_node);
+      mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+      const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
       // Get the dof indices from each elem connected to the node
       for (const auto & cur_elem : elems)
@@ -1453,7 +1456,9 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
 
       for (const auto & master_node : master_nodes)
       {
-        std::vector<dof_id_type> & master_node_elems = _mesh.nodeToElemMap()[master_node];
+        auto master_node_to_elem_pair = node_to_elem_map.find(master_node);
+        mooseAssert(master_node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+        const std::vector<dof_id_type> & master_node_elems = master_node_to_elem_pair->second;
 
         // Get the dof indices from each elem connected to the node
         for (const auto & cur_elem : master_node_elems)
