@@ -90,8 +90,7 @@ ReconVarIC::value(const Point & /*p*/)
     auto index = _consider_phase ? local_id : global_id;
 
     mooseAssert(index < _assigned_op.size(), "EBSD Global ID is out of bounds");
-    if (index < _assigned_op.size())
-      return _assigned_op[index];
+    return _assigned_op[index];
     return 0;
   }
 

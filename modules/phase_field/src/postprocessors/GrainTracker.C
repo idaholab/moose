@@ -225,7 +225,7 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsign
     }
   }
   else
-    // Just use normally variable inspection on subsequent steps
+    // Just use normal variable inspection on subsequent steps
     return FeatureFloodCount::isNewFeatureOrConnectedRegion(dof_object, current_idx, feature, new_id);
 }
 
@@ -1288,7 +1288,7 @@ GrainTracker::updateFieldInfo()
         mooseAssert(grain._id != libMesh::invalid_uint,  "Missing Grain ID");
         _feature_maps[map_idx][entity] = grain._id;
         if (_var_index_mode)
-            _var_index_maps[map_idx][entity] = grain._var_idx;
+          _var_index_maps[map_idx][entity] = grain._var_idx;
 
         tmp_map[entity] = entity_value;
       }
@@ -1450,10 +1450,12 @@ GrainTracker::getNextUniqueID()
 {
   /**
    * Get the next unique grain ID but make sure to respect
-   * reserve ids.
+   * reserve ids. Note, that the first valid ID for a new
+   * grain is _reserve_grain_first_idx + _n_reserve_ops because
+   * _reserve_grain_first_idx IS a valid index. It does not
+   * point to the last valid index of the non-reserved grains.
    */
-  while (++_max_curr_grain_id <= _reserve_grain_first_idx + _n_reserve_ops)
-    ; // empty on purpose
+  _max_curr_grain_id = std::max(_max_curr_grain_id + 1, _reserve_grain_first_idx + _n_reserve_ops /* no +1 here!*/);
 
   return _max_curr_grain_id;
 }

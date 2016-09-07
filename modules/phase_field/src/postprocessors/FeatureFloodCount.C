@@ -323,7 +323,7 @@ FeatureFloodCount::sortAndLabel()
    * with each feature's _var_index.
    */
   unsigned int feature_offset = 0;
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+  for (auto map_num = beginIndex(_feature_counts_per_map); map_num < _maps_size; ++map_num)
   {
     // Skip empty map checks
     if (_feature_counts_per_map[map_num] == 0)
@@ -352,7 +352,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
 {
   mooseAssert(_is_master, "This method must only be called on the root processor");
 
-  counts.resize(_n_procs, 0);
+  counts.assign(_n_procs, 0);
   // Now size the individual counts vectors based on the largest index seen per processor
   for (const auto & feature : _feature_sets)
     for (const auto & local_index_pair : feature._orig_ids)
@@ -362,7 +362,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
 
   // Build the offsets vector
   unsigned int globalsize = 0;
-  std::vector<int> offsets(_n_procs);
+  std::vector<int> offsets(_n_procs); // Type is signed for use with the MPI API
   for (auto i = beginIndex(offsets); i < offsets.size(); ++i)
   {
     offsets[i] = globalsize;

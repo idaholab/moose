@@ -23,7 +23,6 @@ InputParameters validParams<GrainTrackerInterface>()
   params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
   params.addParam<unsigned int>("phase", "EBSD phase number from which to retrieve information");
 
-
   params.addRequiredCoupledVarWithAutoBuild("variable", "var_name_base", "op_num", "Array of coupled variables");
 
   params.suppressParameter<std::vector<VariableName> >("variable");
