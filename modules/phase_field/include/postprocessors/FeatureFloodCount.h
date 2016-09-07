@@ -328,7 +328,7 @@ protected:
   void communicateAndMerge();
 
   /**
-   * Sort and assign ids to features based on their positionn in the container after sorting.
+   * Sort and assign ids to features based on their position in the container after sorting.
    */
   void sortAndLabel();
 
@@ -340,7 +340,7 @@ protected:
   void scatterAndUpdateRanks();
 
   /**
-   * This routine populatess a stacked vector of local to global indices per rank and the associated count
+   * This routine populates a stacked vector of local to global indices per rank and the associated count
    * vector for scattering the vector to the ranks. The individual vectors can be different sizes. The ith
    * vector will be distributed to the ith processor including the master rank.
    * e.g.

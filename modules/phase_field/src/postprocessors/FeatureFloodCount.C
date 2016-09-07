@@ -615,6 +615,11 @@ FeatureFloodCount::prepareDataForTransfer()
       local_ids_no_ghost.clear();
       set_difference.clear();
 
+      mooseAssert(!feature._local_ids.empty(), "local entity ids cannot be empty");
+
+      // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
+      feature._min_entity_id = *feature._local_ids.begin();
+
       for (auto & entity_id : feature._local_ids)
       {
         /**
@@ -627,9 +632,6 @@ FeatureFloodCount::prepareDataForTransfer()
           feature.updateBBoxExtremes(feature._bboxes[0], *mesh.elem(entity_id));
         else
           feature.updateBBoxExtremes(feature._bboxes[0], mesh.node(entity_id));
-
-        // Save off the min entity id present in the feature to uniquely identify the feature regardless of n_procs
-        feature._min_entity_id = std::min(feature._min_entity_id, entity_id);
       }
 
       // Now extend the bounding box by the halo region
