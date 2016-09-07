@@ -66,6 +66,8 @@ especially useful when linking to generated pages. The syntax is as follows:
 * `[auto::framework/Kernels/Overview]`: [auto::/Kernels/Overview]
 * `[Diffusion](auto::/Kernels/Diffusion)`: [Diffusion](auto::/Kernels/Diffusion)
 
+---
+
 ## Including MOOSE Source Files
 It is possible to include complete or partial C++ or input files from the local MOOSE repository. The following sections detail the custom
 markdown syntax to needed, including the application of special settings in the form of key, value pairings that are supplied within
@@ -110,7 +112,6 @@ the following limits the included code to the `computeQpResidual` method.
 ```markdown
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
 ```
-
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
 
 !!! warning "Warning"
@@ -140,6 +141,8 @@ The following options may be passed to control how the output is formatted.
 | overflow-y           | Scroll  | The action to take when the text overflow the html container (see [overflow-y](http://www.w3schools.com/cssref/css3_pr_overflow-y.asp)). |
 | max-height           | 500px   | The maximum height of the code window (see [max-height](http://www.w3schools.com/cssref/pr_dim_max-height.asp)). |
 | strip-extra-newlines | False   | Remove excessive newlines from the included code. |
+
+---
 
 ## Slideshows
 A sequence of images can be shown via a `carousel`. By default the images will auto cycle between images.
@@ -174,11 +177,42 @@ A full slideshow example might be:
     images/more*.png
 ```
 
+---
+
 ## Images
 You can include images in your documentation by use of the !image markdown syntax:
 
 ```markdown
-!image memory_logger-plot_multi.png width=300 align=right caption=figure 1
+!image memory_logger-plot_multi.png width=300 align=right caption=Figure 1
 ```
-!image memory_logger-plot_multi.png width=300 align=right caption=figure 1
+!image memory_logger-plot_multi.png width=300 align=right caption=Figure 1
 
+---
+
+## Flow Charts
+The ability to include diagrams using [GraphViz](http://www.graphviz.org/) using the [dot]() language is provided.
+Simply, include the "dot" syntax in the markdown, being sure to include the keywords ("graph" or
+"digraph") on the start of a new line.
+
+* The official page for the dot language is detailed here: [dot](http://www.graphviz.org/content/dot-language)
+* There are many sites that provide examples, for example:
+    * [https://en.wikipedia.org/wiki/DOT_(graph_description_language)](https://en.wikipedia.org/wiki/DOT_(graph_description_language))
+    * [http://graphs.grevian.org/example](http://graphs.grevian.org/example)
+* There also exists live, online tools for writing dot:
+    * [http://dreampuf.github.io/GraphvizOnline/](http://dreampuf.github.io/GraphvizOnline/)
+    * [http://www.webgraphviz.com/](http://www.webgraphviz.com/)
+
+For example, the following dot syntax placed directly in the markdown produces the following graph.
+```text
+graph {
+    bgcolor="#ffffff00" // transparent background
+    a -- b -- c;
+    b -- d;
+}
+```
+
+graph {
+    bgcolor="#ffffff00" // transparent background
+    a -- b -- c;
+    b -- d;
+}

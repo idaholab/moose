@@ -1,5 +1,14 @@
+a {
+	color: #0333a5;
+	text-decoration: none;
+}
+
+a:hover, a:focus {
+  color: #0333a5;
+	text-decoration: underline;
+}
+
 .admonition-title {
-    margin: -15px;
     font-weight: bold;
     display: block;
     padding: 6px 12px;
@@ -7,9 +16,23 @@
     margin-bottom: 12px;
     border: 0px solid transparent;
 }
+
 .info .admonition-title {
     background: #528452;
 }
+
+.admonition {
+  padding: 0px;
+}
+
+.admonition > p{
+  padding: 6px;
+}
+
+.info .admonition-title {
+    background: #528452;
+}
+
 .admonition.info {
     background: #82e0aa;
     color: #000;

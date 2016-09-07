@@ -103,7 +103,7 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
         """
         Creates the actual HTML required for the carousel to work.
         Input:
-          options[dict]: Set on the slidshow line of the markdown
+          options[dict]: Set on the slideshow line of the markdown
           top_div: div element that will be the carousel
           files[list]: List of dicts with filename paths and associated captions
         """
