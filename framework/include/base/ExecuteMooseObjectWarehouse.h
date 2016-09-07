@@ -21,6 +21,9 @@
 
 /**
  * A class for storing MooseObjects based on execution flag.
+ *
+ * Note: The global list of objects, those accessed via the "get" methods of this class, are not sorted when the
+ *       sort method is called. This is because cyclic errors occur even when the execution flags differ.
  */
 template<typename T>
 class ExecuteMooseObjectWarehouse : public MooseObjectWarehouse<T>
@@ -84,6 +87,7 @@ public:
 
   /**
    * Performs a sort using the DependencyResolver.
+   * @param tid The thread id to access.
    */
   void sort(THREAD_ID tid = 0);
 
@@ -233,9 +237,6 @@ template<typename T>
 void
 ExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid/* = 0*/)
 {
-  // Sort all objects
-  MooseObjectWarehouse<T>::sort(tid);
-
   // Sort execute object storage
   typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::iterator iter;
   for (iter = _execute_objects.begin(); iter != _execute_objects.end(); ++iter)
