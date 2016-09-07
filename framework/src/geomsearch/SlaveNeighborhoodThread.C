@@ -115,16 +115,18 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     {
       {
         auto node_to_elem_pair = _node_to_elem_map.find(node_id);
-        mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
-        const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+        if (node_to_elem_pair != _node_to_elem_map.end())
+        {
+          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
 
-        // See if we own any of the elements connected to the slave node
-        for (const auto & dof : elems_connected_to_node)
-          if (_mesh.elemPtr(dof)->processor_id() == processor_id)
-          {
-            need_to_track = true;
-            break; // Break out of element loop
-          }
+          // See if we own any of the elements connected to the slave node
+          for (const auto & dof : elems_connected_to_node)
+            if (_mesh.elemPtr(dof)->processor_id() == processor_id)
+            {
+              need_to_track = true;
+              break; // Break out of element loop
+            }
+        }
       }
 
       if (!need_to_track)
@@ -163,11 +165,14 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
 
       { // Add the elements connected to the slave node to the ghosted list
         auto node_to_elem_pair = _node_to_elem_map.find(node_id);
-        mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
-        const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
 
-        for (const auto & dof : elems_connected_to_node)
-          _ghosted_elems.insert(dof);
+        if (node_to_elem_pair != _node_to_elem_map.end())
+        {
+          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+
+          for (const auto & dof : elems_connected_to_node)
+            _ghosted_elems.insert(dof);
+        }
       }
 
       // Now add elements connected to the neighbor nodes to the ghosted list

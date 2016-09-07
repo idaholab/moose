@@ -1428,6 +1428,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   for (const auto & it : nearest_node_locators)
   {
     std::vector<dof_id_type> & slave_nodes = it.second->_slave_nodes;
@@ -1437,19 +1438,20 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
       std::set<dof_id_type> unique_slave_indices;
       std::set<dof_id_type> unique_master_indices;
 
-      const auto & node_to_elem_map = _mesh.nodeToElemMap();
       auto node_to_elem_pair = node_to_elem_map.find(slave_node);
-      mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
-      const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
-
-      // Get the dof indices from each elem connected to the node
-      for (const auto & cur_elem : elems)
+      if (node_to_elem_pair != node_to_elem_map.end())
       {
-        std::vector<dof_id_type> dof_indices;
-        dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+        const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
-        for (const auto & dof : dof_indices)
-          unique_slave_indices.insert(dof);
+        // Get the dof indices from each elem connected to the node
+        for (const auto & cur_elem : elems)
+        {
+          std::vector<dof_id_type> dof_indices;
+          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+
+          for (const auto & dof : dof_indices)
+            unique_slave_indices.insert(dof);
+        }
       }
 
       std::vector<dof_id_type> master_nodes = it.second->_neighbor_nodes[slave_node];
