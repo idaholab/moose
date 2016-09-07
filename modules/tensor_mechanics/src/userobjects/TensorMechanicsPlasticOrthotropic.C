@@ -107,8 +107,7 @@ TensorMechanicsPlasticOrthotropic::dflowPotential_dstress(const RankTwoTensor & 
                               + dphi_dj2(j2,j3) * _l1.innerProductTranspose(dj2_dSkl(j2prime))
                               + dphi_dj3(j2,j3) * _l2.innerProductTranspose(j3prime.ddet());
     const Real norm = r.L2norm();
-    const RankFourTensor a = dr / norm - (r / std::pow(norm, 3)).outerProduct(dr.innerProductTranspose(r));
-    return a / a.L2norm();
+    return dr / norm - (r / std::pow(norm, 3)).outerProduct(dr.innerProductTranspose(r));
   }
   else
     return TensorMechanicsPlasticJ2::dflowPotential_dstress(stress, 0);
