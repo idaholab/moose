@@ -1,4 +1,12 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "PFCEnergyDensity.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<PFCEnergyDensity>()
@@ -34,16 +42,15 @@ PFCEnergyDensity::PFCEnergyDensity(const InputParameters & parameters) :
 Real
 PFCEnergyDensity::computeValue()
 {
-  Real val = std::pow((*_vals[0])[_qp],2)*(1 - (*_coeff[0])[_qp])/2.0;
+  Real val = Utility::pow<2>((*_vals[0])[_qp]) * (1.0 - (*_coeff[0])[_qp]) / 2.0;
 
   // Loop Through Variables
   // the sign of negative terms have been taken care of by changing the sign of the coefficients;
   for (unsigned int i = 1; i < _order; ++i)
-    val += (*_coeff[i])[_qp] * (*_vals[0])[_qp] * (*_vals[i])[_qp]/2.0;
+    val += (*_coeff[i])[_qp] * (*_vals[0])[_qp] * (*_vals[i])[_qp] / 2.0;
 
-  val +=   (_b[_qp]/12.0 * std::pow((*_vals[0])[_qp], 4.0))
-         - (_a[_qp]/6.0 * std::pow((*_vals[0])[_qp], 3.0));
+  val +=   (_b[_qp]/12.0 * Utility::pow<4>((*_vals[0])[_qp]))
+         - (_a[_qp]/6.0 * Utility::pow<3>((*_vals[0])[_qp]));
 
   return val;
 }
-

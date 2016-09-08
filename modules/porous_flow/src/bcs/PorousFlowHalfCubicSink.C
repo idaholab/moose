@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowHalfCubicSink.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<PorousFlowHalfCubicSink>()
@@ -40,7 +40,7 @@ PorousFlowHalfCubicSink::multiplier()
   if (x <= cutoff)
     return 0.0;
 
-  return PorousFlowSink::multiplier() * _maximum * (2 * x + cutoff) * (x - cutoff) * (x - cutoff) / std::pow(cutoff, 3);
+  return PorousFlowSink::multiplier() * _maximum * (2 * x + cutoff) * (x - cutoff) * (x - cutoff) / Utility::pow<3>(cutoff);
 }
 
 Real
@@ -55,7 +55,7 @@ PorousFlowHalfCubicSink::dmultiplier_dvar(unsigned int pvar)
   if (x <= cutoff)
     return 0.0;
 
-  const Real str = _maximum * (2 * x + cutoff) * (x - cutoff) * (x - cutoff) / std::pow(cutoff, 3);
-  const Real deriv = _maximum * 6 * x * (x - cutoff) / std::pow(cutoff, 3);
+  const Real str = _maximum * (2 * x + cutoff) * (x - cutoff) * (x - cutoff) / Utility::pow<3>(cutoff);
+  const Real deriv = _maximum * 6 * x * (x - cutoff) / Utility::pow<3>(cutoff);
   return PorousFlowSink::dmultiplier_dvar(pvar) * str + PorousFlowSink::multiplier() * deriv * _dpp_dvar[_qp_map[_i]][_ph][pvar];
 }

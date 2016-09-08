@@ -6,6 +6,7 @@
 /****************************************************************/
 #include "Euler2RGB.h"
 #include "MathUtils.h"
+#include "libmesh/utility.h"
 
 /**
  * This function rotates a set of three Bunge Euler angles into
@@ -179,7 +180,7 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
     eta_min =  0 * (pi / 180);
     eta_max = 45 * (pi / 180);
     chi_min =  0 * (pi / 180);
-    chi_max = std::acos(std::sqrt(1 / (2 + (std::tan(std::pow(eta_max, 2))))));
+    chi_max = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(Utility::pow<2>(eta_max))))));
   }
 
   //  Load hexagonal parameters (class 622)
@@ -313,7 +314,7 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
 
     //  Adjust maximum chi value to ensure it falls within the SST (cubic materials only)
     if (sym == 43)
-      chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(std::pow(eta, 2))))));
+      chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(Utility::pow<2>(eta))))));
     else
       chi_max2 = pi / 2;
 

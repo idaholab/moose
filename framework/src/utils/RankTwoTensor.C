@@ -5,13 +5,14 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "RankTwoTensor.h"
+#include "MaterialProperty.h"
 
 // Any other includes here
 #include <vector>
 #include <ostream>
 #include "libmesh/libmesh.h"
+#include "libmesh/utility.h"
 #include "libmesh/tensor_value.h"
-#include "MaterialProperty.h"
 
 template<>
 void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v)
@@ -514,8 +515,8 @@ Real
 RankTwoTensor::generalSecondInvariant() const
 {
   const RankTwoTensor &a = *this;
-  Real result = a(0,0)*a(1,1) + a(0,0)*a(2,2) + a(1,1)*a(2,2)
-                - a(0,1)*a(1,0) - a(0,2)*a(2,0) - a(1,2)*a(2,1);
+  Real result =  a(0,0) * a(1,1) + a(0,0) * a(2,2) + a(1,1) * a(2,2)
+                -a(0,1) * a(1,0) - a(0,2) * a(2,0) - a(1,2) * a(2,1);
   return result;
 }
 
@@ -528,12 +529,12 @@ RankTwoTensor::secondInvariant() const
   //RankTwoTensor deviatoric(*this);
   //deviatoric.addIa(-1.0/3.0 * trace()); // actually construct deviatoric part
   //result = 0.5*(deviatoric + deviatoric.transpose()).doubleContraction(deviatoric + deviatoric.transpose());
-  result = std::pow(a(0,0) - a(1,1), 2)/6.0;
-  result += std::pow(a(0,0) - a(2,2), 2)/6.0;
-  result += std::pow(a(1,1) - a(2,2), 2)/6.0;
-  result += std::pow(a(0,1) + a(1,0), 2)/4.0;
-  result += std::pow(a(0,2) + a(2,0), 2)/4.0;
-  result += std::pow(a(1,2) + a(2,1), 2)/4.0;
+  result = Utility::pow<2>(a(0,0) - a(1,1)) / 6.0;
+  result += Utility::pow<2>(a(0,0) - a(2,2)) / 6.0;
+  result += Utility::pow<2>(a(1,1) - a(2,2)) / 6.0;
+  result += Utility::pow<2>(a(0,1) + a(1,0)) / 4.0;
+  result += Utility::pow<2>(a(0,2) + a(2,0)) / 4.0;
+  result += Utility::pow<2>(a(1,2) + a(2,1)) / 4.0;
   return result;
 }
 

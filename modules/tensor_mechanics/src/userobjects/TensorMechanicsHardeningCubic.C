@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "TensorMechanicsHardeningCubic.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<TensorMechanicsHardeningCubic>()
@@ -12,8 +13,8 @@ InputParameters validParams<TensorMechanicsHardeningCubic>()
   InputParameters params = validParams<TensorMechanicsHardeningModel>();
   params.addRequiredParam<Real>("value_0", "The value of the parameter for all internal_parameter <= internal_0");
   params.addParam<Real>("value_residual", "The value of the parameter for internal_parameter >= internal_limit.  Default = value_0, ie perfect plasticity");
-  params.addParam<Real>("internal_0", 0, "The value of the internal_parameter when hardening begins");
-  params.addParam<Real>("internal_limit", 1, "The value of the internal_parameter when hardening ends.  This hardening forms a cubic between (internal_0, value_0) and (internal_limit, value_residual) that is smooth at internal_0 and internal_limit");
+  params.addParam<Real>("internal_0", 0.0, "The value of the internal_parameter when hardening begins");
+  params.addParam<Real>("internal_limit", 1.0, "The value of the internal_parameter when hardening ends.  This hardening forms a cubic between (internal_0, value_0) and (internal_limit, value_residual) that is smooth at internal_0 and internal_limit");
   params.addClassDescription("Hardening is Cubic");
   return params;
 }
@@ -25,8 +26,8 @@ TensorMechanicsHardeningCubic::TensorMechanicsHardeningCubic(const InputParamete
   _intnl_0(getParam<Real>("internal_0")),
   _intnl_limit(getParam<Real>("internal_limit")),
   _half_intnl_limit(0.5*(_intnl_limit - _intnl_0)),
-  _alpha((_val_0 - _val_res)/4.0/std::pow(_half_intnl_limit, 3)),
-  _beta(-3.0*_alpha*std::pow(_half_intnl_limit, 2))
+  _alpha((_val_0 - _val_res) / (4.0 * Utility::pow<3>(_half_intnl_limit))),
+  _beta(-3.0 * _alpha * Utility::pow<2>(_half_intnl_limit))
 {
   if (_intnl_limit <= _intnl_0)
     mooseError("internal_limit must be greater than internal_0 in Cubic Hardening");
@@ -35,25 +36,25 @@ TensorMechanicsHardeningCubic::TensorMechanicsHardeningCubic(const InputParamete
 Real
 TensorMechanicsHardeningCubic::value(Real intnl) const
 {
-  Real x = intnl - _intnl_0;
-  if (x <= 0)
+  const Real x = intnl - _intnl_0;
+  if (x <= 0.0)
     return _val_0;
   else if (intnl >= _intnl_limit)
     return _val_res;
   else
-    return _alpha*std::pow(x - _half_intnl_limit, 3) + _beta*(x - _half_intnl_limit) + 0.5*(_val_0 + _val_res);
+    return _alpha * Utility::pow<3>(x - _half_intnl_limit) + _beta * (x - _half_intnl_limit) + 0.5 * (_val_0 + _val_res);
 }
 
 Real
 TensorMechanicsHardeningCubic::derivative(Real intnl) const
 {
-  Real x = intnl - _intnl_0;
-  if (x <= 0)
-    return 0;
+  const Real x = intnl - _intnl_0;
+  if (x <= 0.0)
+    return 0.0;
   else if (intnl >= _intnl_limit)
-    return 0;
+    return 0.0;
   else
-    return 3*_alpha*std::pow(x - _half_intnl_limit, 2) + _beta;
+    return 3.0 * _alpha * Utility::pow<2>(x - _half_intnl_limit) + _beta;
 }
 
 std::string

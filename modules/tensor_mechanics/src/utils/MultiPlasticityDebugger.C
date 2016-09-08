@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "MultiPlasticityDebugger.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<MultiPlasticityDebugger>()
@@ -154,8 +155,8 @@ MultiPlasticityDebugger::checkJacobian(const RankFourTensor & E_inv, const std::
   for (unsigned row = 0; row < jac.size(); ++row)
     for (unsigned col = 0; col < jac.size(); ++col)
     {
-      L2_numer += std::pow(jac[row][col] - fdjac[row][col], 2);
-      L2_denom += std::pow(jac[row][col] + fdjac[row][col], 2);
+      L2_numer += Utility::pow<2>(jac[row][col] - fdjac[row][col]);
+      L2_denom += Utility::pow<2>(jac[row][col] + fdjac[row][col]);
     }
   Moose::err << "\nRelative L2norm = " << std::sqrt(L2_numer/L2_denom)/0.5 << "\n";
 
@@ -383,8 +384,8 @@ MultiPlasticityDebugger::checkSolution(const RankFourTensor & E_inv)
   for (unsigned row = 0; row < jac_coded.size(); ++row)
     for (unsigned col = 0; col < jac_coded.size(); ++col)
     {
-      L2_numer += std::pow(jac_coded[row][col] - jac_fd[row][col], 2);
-      L2_denom += std::pow(jac_coded[row][col] + jac_fd[row][col], 2);
+      L2_numer += Utility::pow<2>(jac_coded[row][col] - jac_fd[row][col]);
+      L2_denom += Utility::pow<2>(jac_coded[row][col] + jac_fd[row][col]);
     }
   Moose::err << "Relative L2norm of the hand-coded and finite-difference Jacobian is " << std::sqrt(L2_numer/L2_denom)/0.5 << "\n";
 
@@ -407,10 +408,10 @@ MultiPlasticityDebugger::checkSolution(const RankFourTensor & E_inv)
   L2_denom = 0;
   for (unsigned i = 0; i < orig_rhs.size(); ++i)
   {
-    L2_numer += std::pow(orig_rhs[i] - fd_times_x[i], 2);
-    L2_denom += std::pow(orig_rhs[i] + fd_times_x[i], 2);
+    L2_numer += Utility::pow<2>(orig_rhs[i] - fd_times_x[i]);
+    L2_denom += Utility::pow<2>(orig_rhs[i] + fd_times_x[i]);
   }
-  Moose::err << "\nRelative L2norm of these is " << std::sqrt(L2_numer/L2_denom)/0.5 << "\n";
+  Moose::err << "\nRelative L2norm of these is " << std::sqrt(L2_numer / L2_denom) / 0.5 << "\n";
 }
 
 
@@ -493,7 +494,7 @@ MultiPlasticityDebugger::fddflowPotential_dstress(const RankTwoTensor & stress, 
       for (unsigned surface = 0; surface < _num_surfaces; ++surface)
         for (unsigned k = 0; k < 3; ++k)
           for (unsigned l = 0; l < 3; ++l)
-            dr_dstress[surface](k, l, i, j) = (rep[surface](k, l) - rep_minus[surface](k, l))/ep;
+            dr_dstress[surface](k, l, i, j) = (rep[surface](k, l) - rep_minus[surface](k, l)) / ep;
     }
 }
 

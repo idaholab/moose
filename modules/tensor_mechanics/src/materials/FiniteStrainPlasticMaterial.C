@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "FiniteStrainPlasticMaterial.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<FiniteStrainPlasticMaterial>()
@@ -340,7 +341,7 @@ FiniteStrainPlasticMaterial::getJac(const RankTwoTensor & sig, const RankFourTen
 
   f1 = 3.0 / (2.0 * sig_eqv);
   f2 = f1 / 3.0;
-  f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
+  f3 = 9.0 / (4.0 * Utility::pow<3>(sig_eqv));
 
   dft_dsig = f1 * _deltaMixed - f2 * _deltaOuter - f3 * sig_dev.outerProduct(sig_dev);
 
@@ -413,4 +414,3 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
 
   return 0.0;
 }
-

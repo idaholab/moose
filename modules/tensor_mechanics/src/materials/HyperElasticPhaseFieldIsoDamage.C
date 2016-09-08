@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "HyperElasticPhaseFieldIsoDamage.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<HyperElasticPhaseFieldIsoDamage>()
@@ -72,7 +73,7 @@ HyperElasticPhaseFieldIsoDamage::computeDamageStress()
   Real mu = _elasticity_tensor[_qp](0, 1, 0, 1);
 
   Real c = _c[_qp];
-  Real xfac = std::pow(1.0-c, 2.0) + _kdamage;
+  Real xfac = Utility::pow<2>(1.0-c) + _kdamage;
 
   std::vector<Real> w;
   RankTwoTensor evec;
@@ -92,8 +93,8 @@ HyperElasticPhaseFieldIsoDamage::computeDamageStress()
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
-    pk2pos += _etens[i] * (lambda * etrpos + 2.0 * mu * (std::abs(w[i]) + w[i])/2.0);
-    pk2neg += _etens[i] * (lambda * etrneg + 2.0 * mu * (std::abs(w[i]) - w[i])/2.0);
+    pk2pos += _etens[i] * (lambda * etrpos + 2.0 * mu * (std::abs(w[i]) + w[i]) / 2.0);
+    pk2neg += _etens[i] * (lambda * etrneg + 2.0 * mu * (std::abs(w[i]) - w[i]) / 2.0);
   }
 
   _pk2_tmp = pk2pos * xfac - pk2neg;
@@ -102,13 +103,13 @@ HyperElasticPhaseFieldIsoDamage::computeDamageStress()
   {
     std::vector<Real> epos(LIBMESH_DIM);
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      epos[i] = (std::abs(w[i]) + w[i])/2.0;
+      epos[i] = (std::abs(w[i]) + w[i]) / 2.0;
 
     _G0[_qp] = 0.0;
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      _G0[_qp] += std::pow(epos[i], 2.0);
+      _G0[_qp] += Utility::pow<2>(epos[i]);
     _G0[_qp] *= mu;
-    _G0[_qp] += lambda * std::pow(etrpos, 2.0)/2.0;
+    _G0[_qp] += lambda * Utility::pow<2>(etrpos) / 2.0;
 
     _dG0_dee = pk2pos;
     _dpk2_dc = -pk2pos * (2.0 * (1.0-c));
@@ -135,8 +136,8 @@ HyperElasticPhaseFieldIsoDamage::computeNumStiffness()
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
         for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
         {
-          _dpk2_dee(k, l, i, j) = (_pk2_tmp(k, l) - _pk2[_qp](k, l))/ee_pert;
-          _dpk2_dee(k, l, j, i) = (_pk2_tmp(k, l) - _pk2[_qp](k, l))/ee_pert;
+          _dpk2_dee(k, l, i, j) = (_pk2_tmp(k, l) - _pk2[_qp](k, l)) / ee_pert;
+          _dpk2_dee(k, l, j, i) = (_pk2_tmp(k, l) - _pk2[_qp](k, l)) / ee_pert;
         }
       _ee = ee_tmp;
     }
