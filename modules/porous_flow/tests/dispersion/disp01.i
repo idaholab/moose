@@ -5,7 +5,7 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 1
   nx = 100
   xmax = 10
 []
@@ -197,6 +197,8 @@
   [./smp]
     type = SMP
     full = true
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm lu 1E-15 1E-10 10000 NONZERO'
   [../]
 []
 

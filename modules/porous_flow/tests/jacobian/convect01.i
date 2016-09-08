@@ -59,13 +59,13 @@
 []
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    temperature = temp
-  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
+  [../]
+  [./temperature]
+    type = PorousFlowTemperature
+    temperature = temp
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
