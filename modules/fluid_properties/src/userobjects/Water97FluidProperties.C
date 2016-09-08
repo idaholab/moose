@@ -72,33 +72,33 @@ Water97FluidProperties::rho(Real pressure, Real temperature) const
 {
   Real density, pi, tau;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
 
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       density = pressure / (pi * _Rw * temperature * dgamma1_dpi(pi, tau));
-       break;
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      density = pressure / (pi * _Rw * temperature * dgamma1_dpi(pi, tau));
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       density = pressure / (pi * _Rw * temperature * dgamma2_dpi(pi, tau));
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      density = pressure / (pi * _Rw * temperature * dgamma2_dpi(pi, tau));
+      break;
 
-     case 3:
-       density = densityRegion3(pressure, temperature);
-       break;
+    case 3:
+      density = densityRegion3(pressure, temperature);
+      break;
 
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       density = pressure / (pi * _Rw * temperature * dgamma5_dpi(pi, tau));
-       break;
-    }
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      density = pressure / (pi * _Rw * temperature * dgamma5_dpi(pi, tau));
+      break;
+  }
   return density;
 }
 
@@ -169,41 +169,41 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
 {
   Real internal_energy, pi, tau;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       internal_energy = _Rw * temperature * (tau * dgamma1_dtau(pi, tau)
-         - pi * dgamma1_dpi(pi, tau));
-       break;
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      internal_energy = _Rw * temperature * (tau * dgamma1_dtau(pi, tau)
+        - pi * dgamma1_dpi(pi, tau));
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       internal_energy = _Rw * temperature * (tau * dgamma2_dtau(pi, tau)
-         - pi * dgamma2_dpi(pi, tau));
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      internal_energy = _Rw * temperature * (tau * dgamma2_dtau(pi, tau)
+        - pi * dgamma2_dpi(pi, tau));
+      break;
 
-     case 3:
-     {
-       // Calculate density first, then use that in Helmholtz free energy
-       Real density3 = densityRegion3(pressure, temperature);
-       Real delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       internal_energy = _Rw * temperature * tau * dphi3_dtau(delta, tau);
-       break;
-     }
-
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       internal_energy = _Rw * temperature * (tau * dgamma5_dtau(pi, tau)
-         - pi * dgamma5_dpi(pi, tau));
-       break;
+    case 3:
+    {
+      // Calculate density first, then use that in Helmholtz free energy
+      Real density3 = densityRegion3(pressure, temperature);
+      Real delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      internal_energy = _Rw * temperature * tau * dphi3_dtau(delta, tau);
+      break;
     }
+
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      internal_energy = _Rw * temperature * (tau * dgamma5_dtau(pi, tau)
+        - pi * dgamma5_dpi(pi, tau));
+      break;
+  }
   // Output in kJ/kg
   return internal_energy / 1000.0;
 }
@@ -213,62 +213,62 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
 {
   Real pi, tau, dinternal_energy_dp, dinternal_energy_dT;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-     {
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       Real dgdp = dgamma1_dpi(pi, tau);
-       Real d2gdpt = d2gamma1_dpitau(pi, tau);
-       dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
-         d2gamma1_dpi2(pi, tau)) / _p_star[0];
-       dinternal_energy_dT = _Rw * (tau * tau * d2gamma1_dtau2(pi, tau) - pi *
-         dgdp - pi * tau * d2gdpt);
-       break;
-     }
-
-     case 2:
-     {
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       Real dgdp = dgamma2_dpi(pi, tau);
-       Real d2gdpt = d2gamma2_dpitau(pi, tau);
-       dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
-         d2gamma2_dpi2(pi, tau)) / _p_star[1];
-       dinternal_energy_dT = _Rw * (tau * tau * d2gamma2_dtau2(pi, tau) - pi *
-         dgdp - pi * tau * d2gdpt);
-       break;
-     }
-
-     case 3:
-     {
-       // Calculate density first, then use that in Helmholtz free energy
-       Real density3 = densityRegion3(pressure, temperature);
-       Real delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       dinternal_energy_dp = _Rw * _T_star[2] * d2phi3_ddeltatau(delta, tau) /
-         _rho_critical / (2.0 * _Rw * temperature * delta * dphi3_ddelta(delta, tau) +
-         _Rw * temperature * delta * delta * d2phi3_ddelta2(delta, tau));
-       dinternal_energy_dT = - _Rw * tau * tau * ( d2phi3_dtau2(delta, tau));
-       break;
-     }
-
-     case 5:
-     {
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       Real dgdp = dgamma5_dpi(pi, tau);
-       Real d2gdpt = d2gamma5_dpitau(pi, tau);
-       dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
-         d2gamma5_dpi2(pi, tau)) / _p_star[4];
-       dinternal_energy_dT = _Rw * (tau * tau * d2gamma5_dtau2(pi, tau) - pi *
-         dgdp - pi * tau * d2gdpt);
-       break;
-     }
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+    {
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      Real dgdp = dgamma1_dpi(pi, tau);
+      Real d2gdpt = d2gamma1_dpitau(pi, tau);
+      dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
+        d2gamma1_dpi2(pi, tau)) / _p_star[0];
+      dinternal_energy_dT = _Rw * (tau * tau * d2gamma1_dtau2(pi, tau) - pi *
+        dgdp - pi * tau * d2gdpt);
+      break;
     }
+
+    case 2:
+    {
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      Real dgdp = dgamma2_dpi(pi, tau);
+      Real d2gdpt = d2gamma2_dpitau(pi, tau);
+      dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
+        d2gamma2_dpi2(pi, tau)) / _p_star[1];
+      dinternal_energy_dT = _Rw * (tau * tau * d2gamma2_dtau2(pi, tau) - pi *
+        dgdp - pi * tau * d2gdpt);
+      break;
+    }
+
+    case 3:
+    {
+      // Calculate density first, then use that in Helmholtz free energy
+      Real density3 = densityRegion3(pressure, temperature);
+      Real delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      dinternal_energy_dp = _Rw * _T_star[2] * d2phi3_ddeltatau(delta, tau) /
+        _rho_critical / (2.0 * _Rw * temperature * delta * dphi3_ddelta(delta, tau) +
+        _Rw * temperature * delta * delta * d2phi3_ddelta2(delta, tau));
+      dinternal_energy_dT = - _Rw * tau * tau * ( d2phi3_dtau2(delta, tau));
+      break;
+    }
+
+    case 5:
+    {
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      Real dgdp = dgamma5_dpi(pi, tau);
+      Real d2gdpt = d2gamma5_dpitau(pi, tau);
+      dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
+        d2gamma5_dpi2(pi, tau)) / _p_star[4];
+      dinternal_energy_dT = _Rw * (tau * tau * d2gamma5_dtau2(pi, tau) - pi *
+        dgdp - pi * tau * d2gdpt);
+      break;
+    }
+  }
 
   e = this->e(pressure, temperature);
   // Divide by 1000 as output in kJ/kg
@@ -288,46 +288,46 @@ Water97FluidProperties::c(Real pressure, Real temperature) const
 {
   Real speed2, pi, tau, delta;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       speed2 = _Rw * temperature * std::pow(dgamma1_dpi(pi, tau), 2.0) /
-       (std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2.0) /
-       (tau * tau * d2gamma1_dtau2(pi, tau)) - d2gamma1_dpi2(pi, tau));
-       break;
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      speed2 = _Rw * temperature * std::pow(dgamma1_dpi(pi, tau), 2.0) /
+        (std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2.0) /
+        (tau * tau * d2gamma1_dtau2(pi, tau)) - d2gamma1_dpi2(pi, tau));
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       speed2 = _Rw * temperature * std::pow(pi * dgamma2_dpi(pi, tau), 2.0) /
-         ((- pi * pi * d2gamma2_dpi2(pi, tau)) + std::pow(pi * dgamma2_dpi(pi, tau) -
-         tau * pi * d2gamma2_dpitau(pi, tau), 2.0)/(tau * tau * d2gamma2_dtau2(pi, tau)));
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      speed2 = _Rw * temperature * std::pow(pi * dgamma2_dpi(pi, tau), 2.0) /
+        ((- pi * pi * d2gamma2_dpi2(pi, tau)) + std::pow(pi * dgamma2_dpi(pi, tau) -
+        tau * pi * d2gamma2_dpitau(pi, tau), 2.0)/(tau * tau * d2gamma2_dtau2(pi, tau)));
+      break;
 
-     case 3:
-     {
-       // Calculate density first, then use that in Helmholtz free energy
-       Real density3 = densityRegion3(pressure, temperature);
-       delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       speed2 = _Rw * temperature * (2.0 * delta * dphi3_ddelta(delta, tau) +
-         delta * delta * d2phi3_ddelta2(delta, tau) - std::pow(delta * dphi3_ddelta(delta, tau) -
-         delta * tau * d2phi3_ddeltatau(delta, tau), 2.0) / (tau * tau * d2phi3_dtau2(delta, tau)));
-       break;
-     }
-
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       speed2 = _Rw * temperature * std::pow(pi * dgamma5_dpi(pi, tau), 2.0) /
-         ((- pi * pi * d2gamma5_dpi2(pi, tau)) + std::pow(pi * dgamma5_dpi(pi, tau) -
-         tau * pi * d2gamma5_dpitau(pi, tau), 2.0)/(tau * tau * d2gamma5_dtau2(pi, tau)));
-       break;
+    case 3:
+    {
+      // Calculate density first, then use that in Helmholtz free energy
+      Real density3 = densityRegion3(pressure, temperature);
+      delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      speed2 = _Rw * temperature * (2.0 * delta * dphi3_ddelta(delta, tau) +
+        delta * delta * d2phi3_ddelta2(delta, tau) - std::pow(delta * dphi3_ddelta(delta, tau) -
+        delta * tau * d2phi3_ddeltatau(delta, tau), 2.0) / (tau * tau * d2phi3_dtau2(delta, tau)));
+      break;
     }
+
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      speed2 = _Rw * temperature * std::pow(pi * dgamma5_dpi(pi, tau), 2.0) /
+        ((- pi * pi * d2gamma5_dpi2(pi, tau)) + std::pow(pi * dgamma5_dpi(pi, tau) -
+        tau * pi * d2gamma5_dpitau(pi, tau), 2.0)/(tau * tau * d2gamma5_dtau2(pi, tau)));
+      break;
+  }
 
   return std::sqrt(speed2);
 }
@@ -337,41 +337,41 @@ Water97FluidProperties::cp(Real pressure, Real temperature) const
 {
   Real specific_heat, pi, tau, delta;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       specific_heat = - _Rw * tau * tau * d2gamma1_dtau2(pi, tau);
-       break;
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      specific_heat = - _Rw * tau * tau * d2gamma1_dtau2(pi, tau);
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       specific_heat = - _Rw * tau * tau * d2gamma2_dtau2(pi, tau);
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      specific_heat = - _Rw * tau * tau * d2gamma2_dtau2(pi, tau);
+      break;
 
-     case 3:
-     {
-       // Calculate density first, then use that in Helmholtz free energy
-       Real density3 = densityRegion3(pressure, temperature);
-       delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       specific_heat = _Rw * (- tau * tau * d2phi3_dtau2(delta, tau) +
-         (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) *
-         (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) /
-         (2.0 * delta * dphi3_ddelta(delta, tau) + delta * delta * d2phi3_ddelta2(delta, tau)));
-       break;
-     }
-
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       specific_heat = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
-       break;
+    case 3:
+    {
+      // Calculate density first, then use that in Helmholtz free energy
+      Real density3 = densityRegion3(pressure, temperature);
+      delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      specific_heat = _Rw * (- tau * tau * d2phi3_dtau2(delta, tau) +
+        (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) *
+        (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) /
+        (2.0 * delta * dphi3_ddelta(delta, tau) + delta * delta * d2phi3_ddelta2(delta, tau)));
+      break;
     }
+
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      specific_heat = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
+      break;
+  }
   // Output in kJ/kg
   return specific_heat / 1000.0;
 }
@@ -381,44 +381,44 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
 {
   Real specific_heat, pi, tau, delta;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       specific_heat = _Rw * (- tau * tau * d2gamma1_dtau2(pi, tau) +
-         std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2) /
-         d2gamma1_dpi2(pi, tau));
-       break;
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      specific_heat = _Rw * (- tau * tau * d2gamma1_dtau2(pi, tau) +
+        std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2) /
+        d2gamma1_dpi2(pi, tau));
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       specific_heat = _Rw * (- tau * tau * d2gamma2_dtau2(pi, tau) +
-         std::pow(dgamma2_dpi(pi, tau) - tau * d2gamma2_dpitau(pi, tau), 2) /
-         d2gamma2_dpi2(pi, tau));
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      specific_heat = _Rw * (- tau * tau * d2gamma2_dtau2(pi, tau) +
+        std::pow(dgamma2_dpi(pi, tau) - tau * d2gamma2_dpitau(pi, tau), 2) /
+        d2gamma2_dpi2(pi, tau));
+      break;
 
-     case 3:
-     {
-       // Calculate density first, then use that in Helmholtz free energy
-       Real density3 = densityRegion3(pressure, temperature);
-       delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       specific_heat = _Rw * (- tau * tau * d2phi3_dtau2(delta, tau));
-       break;
-     }
-
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       specific_heat = _Rw * (- tau * tau * d2gamma5_dtau2(pi, tau) +
-         std::pow(dgamma5_dpi(pi, tau) - tau * d2gamma5_dpitau(pi, tau), 2) /
-         d2gamma5_dpi2(pi, tau));
-       break;
+    case 3:
+    {
+      // Calculate density first, then use that in Helmholtz free energy
+      Real density3 = densityRegion3(pressure, temperature);
+      delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      specific_heat = _Rw * (- tau * tau * d2phi3_dtau2(delta, tau));
+      break;
     }
+
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      specific_heat = _Rw * (- tau * tau * d2gamma5_dtau2(pi, tau) +
+        std::pow(dgamma5_dpi(pi, tau) - tau * d2gamma5_dpitau(pi, tau), 2) /
+        d2gamma5_dpi2(pi, tau));
+      break;
+  }
   // Output in kJ/kg
   return specific_heat / 1000.0;
 }
@@ -544,36 +544,36 @@ Water97FluidProperties::s(Real pressure, Real temperature) const
 {
   Real entropy, pi, tau, density3, delta;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       entropy = _Rw * (tau * dgamma1_dtau(pi, tau) - gamma1(pi, tau));
-       break;
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      entropy = _Rw * (tau * dgamma1_dtau(pi, tau) - gamma1(pi, tau));
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       entropy = _Rw * (tau * dgamma2_dtau(pi, tau) - gamma2(pi, tau));
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      entropy = _Rw * (tau * dgamma2_dtau(pi, tau) - gamma2(pi, tau));
+      break;
 
-     case 3:
-       // Calculate density first, then use that in Helmholtz free energy
-       density3 = densityRegion3(pressure, temperature);
-       delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       entropy = _Rw * (tau *  dphi3_dtau(delta, tau) - phi3(delta, tau));
-       break;
+    case 3:
+      // Calculate density first, then use that in Helmholtz free energy
+      density3 = densityRegion3(pressure, temperature);
+      delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      entropy = _Rw * (tau *  dphi3_dtau(delta, tau) - phi3(delta, tau));
+      break;
 
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       entropy = _Rw * (tau * dgamma5_dtau(pi, tau) - gamma5(pi, tau));
-       break;
-    }
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      entropy = _Rw * (tau * dgamma5_dtau(pi, tau) - gamma5(pi, tau));
+      break;
+  }
   // Output in kJ/kg
   return entropy / 1000.0;
 }
@@ -583,39 +583,39 @@ Water97FluidProperties::h(Real pressure, Real temperature) const
 {
   Real enthalpy, pi, tau, delta;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       enthalpy = _Rw * _T_star[0] * dgamma1_dtau(pi, tau);
-       break;
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      enthalpy = _Rw * _T_star[0] * dgamma1_dtau(pi, tau);
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       enthalpy = _Rw * _T_star[1] * dgamma2_dtau(pi, tau);
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      enthalpy = _Rw * _T_star[1] * dgamma2_dtau(pi, tau);
+      break;
 
-     case 3:
-     {
-       // Calculate density first, then use that in Helmholtz free energy
-       Real density3 = densityRegion3(pressure, temperature);
-       delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       enthalpy = _Rw * temperature * (tau *  dphi3_dtau(delta, tau) +
-         delta *  dphi3_ddelta(delta, tau));
-       break;
-     }
-
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       enthalpy = _Rw * _T_star[4] * dgamma5_dtau(pi, tau);
-       break;
+    case 3:
+    {
+      // Calculate density first, then use that in Helmholtz free energy
+      Real density3 = densityRegion3(pressure, temperature);
+      delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      enthalpy = _Rw * temperature * (tau *  dphi3_dtau(delta, tau) +
+        delta *  dphi3_ddelta(delta, tau));
+      break;
     }
+
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      enthalpy = _Rw * _T_star[4] * dgamma5_dtau(pi, tau);
+      break;
+  }
   // Output in kJ/kg
   return enthalpy / 1000.0;
 }
@@ -625,52 +625,52 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
 {
   Real enthalpy, pi, tau, delta, denthalpy_dp, denthalpy_dT;
 
-   // Determine which region the point is in
-   unsigned int region = inRegion(pressure, temperature);
-   switch (region)
-   {
-     case 1:
-       pi = pressure / _p_star[0];
-       tau = _T_star[0] / temperature;
-       enthalpy = _Rw * _T_star[0] * dgamma1_dtau(pi, tau);
-       denthalpy_dp = _Rw * _T_star[0] * d2gamma1_dpitau(pi, tau) / _p_star[0];
-       denthalpy_dT = - _Rw * tau * tau * d2gamma1_dtau2(pi, tau);
-       break;
+  // Determine which region the point is in
+  unsigned int region = inRegion(pressure, temperature);
+  switch (region)
+  {
+    case 1:
+      pi = pressure / _p_star[0];
+      tau = _T_star[0] / temperature;
+      enthalpy = _Rw * _T_star[0] * dgamma1_dtau(pi, tau);
+      denthalpy_dp = _Rw * _T_star[0] * d2gamma1_dpitau(pi, tau) / _p_star[0];
+      denthalpy_dT = - _Rw * tau * tau * d2gamma1_dtau2(pi, tau);
+      break;
 
-     case 2:
-       pi = pressure / _p_star[1];
-       tau = _T_star[1] / temperature;
-       enthalpy = _Rw * _T_star[1] * dgamma2_dtau(pi, tau);
-       denthalpy_dp = _Rw * _T_star[1] * d2gamma2_dpitau(pi, tau) / _p_star[1];
-       denthalpy_dT = - _Rw * tau * tau * d2gamma2_dtau2(pi, tau);
-       break;
+    case 2:
+      pi = pressure / _p_star[1];
+      tau = _T_star[1] / temperature;
+      enthalpy = _Rw * _T_star[1] * dgamma2_dtau(pi, tau);
+      denthalpy_dp = _Rw * _T_star[1] * d2gamma2_dpitau(pi, tau) / _p_star[1];
+      denthalpy_dT = - _Rw * tau * tau * d2gamma2_dtau2(pi, tau);
+      break;
 
-     case 3:
-     {
-       // Calculate density first, then use that in Helmholtz free energy
-       Real density3 = densityRegion3(pressure, temperature);
-       delta = density3 / _rho_critical;
-       tau = _T_star[2] / temperature;
-       Real dpdd = dphi3_ddelta(delta, tau);
-       Real d2pddt = d2phi3_ddeltatau(delta, tau);
-       Real d2pdd2 = d2phi3_ddelta2(delta, tau);
-       enthalpy = _Rw * temperature * (tau *  dphi3_dtau(delta, tau) +
-         delta * dpdd);
-       denthalpy_dp = (d2pddt + dpdd + delta * d2pdd2) / _rho_critical /
-         (2.0 * delta * dpdd + delta * delta * d2pdd2);
-       denthalpy_dT = - _Rw * tau * tau * d2phi3_dtau2(delta, tau) +
-         _Rw * delta * (dpdd - tau * d2pddt);
-       break;
-     }
-
-     case 5:
-       pi = pressure / _p_star[4];
-       tau = _T_star[4] / temperature;
-       enthalpy = _Rw * _T_star[4] * dgamma5_dtau(pi, tau);
-       denthalpy_dp = _Rw * _T_star[4] * d2gamma5_dpitau(pi, tau) / _p_star[4];
-       denthalpy_dT = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
-       break;
+    case 3:
+    {
+      // Calculate density first, then use that in Helmholtz free energy
+      Real density3 = densityRegion3(pressure, temperature);
+      delta = density3 / _rho_critical;
+      tau = _T_star[2] / temperature;
+      Real dpdd = dphi3_ddelta(delta, tau);
+      Real d2pddt = d2phi3_ddeltatau(delta, tau);
+      Real d2pdd2 = d2phi3_ddelta2(delta, tau);
+      enthalpy = _Rw * temperature * (tau *  dphi3_dtau(delta, tau) +
+        delta * dpdd);
+      denthalpy_dp = (d2pddt + dpdd + delta * d2pdd2) / _rho_critical /
+        (2.0 * delta * dpdd + delta * delta * d2pdd2);
+      denthalpy_dT = - _Rw * tau * tau * d2phi3_dtau2(delta, tau) +
+        _Rw * delta * (dpdd - tau * d2pddt);
+      break;
     }
+
+    case 5:
+      pi = pressure / _p_star[4];
+      tau = _T_star[4] / temperature;
+      enthalpy = _Rw * _T_star[4] * dgamma5_dtau(pi, tau);
+      denthalpy_dp = _Rw * _T_star[4] * d2gamma5_dpitau(pi, tau) / _p_star[4];
+      denthalpy_dT = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
+      break;
+  }
   // Output in kJ/kg
   h = enthalpy / 1000.0;
   dh_dp = denthalpy_dp / 1000.0;
@@ -828,7 +828,7 @@ Water97FluidProperties::d2gamma1_dpi2(Real pi, Real tau) const
 {
   Real sum = 0.0;
   for (unsigned int i = 0; i < _n1.size(); ++i)
-    sum += _n1[i] * _I1[i] *(_I1[i] - 1) * std::pow(7.1 - pi, _I1[i] - 2) * std::pow(tau - 1.222, _J1[i]);
+    sum += _n1[i] * _I1[i] * (_I1[i] - 1) * std::pow(7.1 - pi, _I1[i] - 2) * std::pow(tau - 1.222, _J1[i]);
 
   return sum;
 }
@@ -876,9 +876,7 @@ Water97FluidProperties::gamma2(Real pi, Real tau) const
   // Residual part of the Gibbs free energy
   Real gr = 0.0;
   for (unsigned int i = 0; i < _n2.size(); ++i)
-  {
     gr += _n2[i] * std::pow(pi, _I2[i]) * std::pow(tau - 0.5, _J2[i]);
-  }
 
   return g0 + gr;
 }
@@ -1118,105 +1116,105 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
 
   if (pMPa > 40.0 && pMPa <= 100.0)
   {
-    if (temperature <= tempXY(pressure, "ab"))
+    if (temperature <= tempXY(pressure, AB))
       subregion = 0;
-    else // (temperature > tempXY(pressure, "ab"))
+    else // (temperature > tempXY(pressure, AB))
       subregion = 1;
   }
   else if (pMPa > 25.0 && pMPa <= 40.0)
   {
-    if (temperature <= tempXY(pressure, "cd"))
+    if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, "cd") && temperature <= tempXY(pressure, "ab"))
+    else if (temperature > tempXY(pressure, CD) && temperature <= tempXY(pressure, AB))
       subregion = 3;
-    else if (temperature > tempXY(pressure, "ab") && temperature <= tempXY(pressure, "ef"))
+    else if (temperature > tempXY(pressure, AB) && temperature <= tempXY(pressure, EF))
       subregion = 4;
-    else // (temperature > tempXY(pressure, "ef"))
+    else // (temperature > tempXY(pressure, EF))
       subregion = 5;
   }
   else if (pMPa > 23.5 && pMPa <= 25.0)
   {
-    if (temperature <= tempXY(pressure, "cd"))
+    if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, "cd") && temperature <= tempXY(pressure, "gh"))
+    else if (temperature > tempXY(pressure, CD) && temperature <= tempXY(pressure, GH))
       subregion = 6;
-    else if (temperature > tempXY(pressure, "gh") && temperature <= tempXY(pressure, "ef"))
+    else if (temperature > tempXY(pressure, GH) && temperature <= tempXY(pressure, EF))
       subregion = 7;
-    else if (temperature > tempXY(pressure, "ef") && temperature <= tempXY(pressure, "ij"))
+    else if (temperature > tempXY(pressure, EF) && temperature <= tempXY(pressure, IJ))
       subregion = 8;
-    else if (temperature > tempXY(pressure, "ij") && temperature <= tempXY(pressure, "jk"))
+    else if (temperature > tempXY(pressure, IJ) && temperature <= tempXY(pressure, JK))
       subregion = 9;
-    else // (temperature > tempXY(pressure, "jk"))
+    else // (temperature > tempXY(pressure, JK))
       subregion = 10;
   }
   else if (pMPa > 23.0 && pMPa <= 23.5)
   {
-    if (temperature <= tempXY(pressure, "cd"))
+    if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, "cd") && temperature <= tempXY(pressure, "gh"))
+    else if (temperature > tempXY(pressure, CD) && temperature <= tempXY(pressure, GH))
       subregion = 11;
-    else if (temperature > tempXY(pressure, "gh") && temperature <= tempXY(pressure, "ef"))
+    else if (temperature > tempXY(pressure, GH) && temperature <= tempXY(pressure, EF))
       subregion = 7;
-    else if (temperature > tempXY(pressure, "ef") && temperature <= tempXY(pressure, "ij"))
+    else if (temperature > tempXY(pressure, EF) && temperature <= tempXY(pressure, IJ))
       subregion = 8;
-    else if (temperature > tempXY(pressure, "ij") && temperature <= tempXY(pressure, "jk"))
+    else if (temperature > tempXY(pressure, IJ) && temperature <= tempXY(pressure, JK))
       subregion = 9;
-    else // (temperature > tempXY(pressure, "jk"))
+    else // (temperature > tempXY(pressure, JK))
       subregion = 10;
   }
   else if (pMPa > 22.5 && pMPa <= 23.0)
   {
-    if (temperature <= tempXY(pressure, "cd"))
+    if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, "cd") && temperature <= tempXY(pressure, "gh"))
+    else if (temperature > tempXY(pressure, CD) && temperature <= tempXY(pressure, GH))
       subregion = 11;
-    else if (temperature > tempXY(pressure, "gh") && temperature <= tempXY(pressure, "mn"))
+    else if (temperature > tempXY(pressure, GH) && temperature <= tempXY(pressure, MN))
       subregion = 12;
-    else if (temperature > tempXY(pressure, "mn") && temperature <= tempXY(pressure, "ef"))
+    else if (temperature > tempXY(pressure, MN) && temperature <= tempXY(pressure, EF))
       subregion = 13;
-    else if (temperature > tempXY(pressure, "ef") && temperature <= tempXY(pressure, "op"))
+    else if (temperature > tempXY(pressure, EF) && temperature <= tempXY(pressure, OP))
       subregion = 14;
-    else if (temperature > tempXY(pressure, "op") && temperature <= tempXY(pressure, "ij"))
+    else if (temperature > tempXY(pressure, OP) && temperature <= tempXY(pressure, IJ))
       subregion = 15;
-    else if (temperature > tempXY(pressure, "ij") && temperature <= tempXY(pressure, "jk"))
+    else if (temperature > tempXY(pressure, IJ) && temperature <= tempXY(pressure, JK))
       subregion = 9;
-    else // (temperature > tempXY(pressure, "jk"))
+    else // (temperature > tempXY(pressure, JK))
       subregion = 10;
   }
   else if (pMPa > pSat(643.15) * 1.0e-6 && pMPa <= 22.5) // pSat(643.15) = 21.04 MPa
   {
-    if (temperature <= tempXY(pressure, "cd"))
+    if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, "cd") && temperature <= tempXY(pressure, "qu"))
+    else if (temperature > tempXY(pressure, CD) && temperature <= tempXY(pressure, QU))
       subregion = 16;
-    else if (temperature > tempXY(pressure, "qu") && temperature <= tempXY(pressure, "rx"))
+    else if (temperature > tempXY(pressure, QU) && temperature <= tempXY(pressure, RX))
     {
       if (pMPa > 22.11 && pMPa <= 22.5)
       {
-        if (temperature <= tempXY(pressure, "uv"))
+        if (temperature <= tempXY(pressure, UV))
           subregion = 20;
-        else if (temperature > tempXY(pressure, "uv") && temperature <= tempXY(pressure, "ef"))
+        else if (temperature > tempXY(pressure, UV) && temperature <= tempXY(pressure, EF))
           subregion = 21;
-        else if (temperature > tempXY(pressure, "ef") && temperature <= tempXY(pressure, "wx"))
+        else if (temperature > tempXY(pressure, EF) && temperature <= tempXY(pressure, WX))
           subregion = 22;
-        else // (temperature > tempXY(pressure, "wx") && temperature <= tempXY(pressure, "rx"))
+        else // (temperature > tempXY(pressure, WX) && temperature <= tempXY(pressure, RX))
           subregion = 23;
       }
       else if (pMPa > 22.064 && pMPa <= 22.11)
       {
-        if (temperature <= tempXY(pressure, "uv"))
+        if (temperature <= tempXY(pressure, UV))
           subregion = 20;
-        else if (temperature > tempXY(pressure, "uv") && temperature <= tempXY(pressure, "ef"))
+        else if (temperature > tempXY(pressure, UV) && temperature <= tempXY(pressure, EF))
           subregion = 24;
-        else if (temperature > tempXY(pressure, "ef") && temperature <= tempXY(pressure, "wx"))
+        else if (temperature > tempXY(pressure, EF) && temperature <= tempXY(pressure, WX))
           subregion = 25;
-        else // (temperature > tempXY(pressure, "wx") && temperature <= tempXY(pressure, "rx"))
+        else // (temperature > tempXY(pressure, WX) && temperature <= tempXY(pressure, RX))
           subregion = 23;
       }
       else if (temperature <= TSat(pressure))
       {
         if (pMPa > 21.93161551 && pMPa <= 22.064)
-          if (temperature > tempXY(pressure, "qu") && temperature <= tempXY(pressure, "uv"))
+          if (temperature > tempXY(pressure, QU) && temperature <= tempXY(pressure, UV))
             subregion = 20;
           else
             subregion = 24;
@@ -1227,7 +1225,7 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
       {
         if (pMPa > 21.90096265 && pMPa <= 22.064)
         {
-          if (temperature <= tempXY(pressure, "wx"))
+          if (temperature <= tempXY(pressure, WX))
             subregion = 25;
           else
             subregion = 23;
@@ -1236,27 +1234,27 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
           subregion = 23;
       }
     }
-    else if (temperature > tempXY(pressure, "rx") && temperature <= tempXY(pressure, "jk"))
+    else if (temperature > tempXY(pressure, RX) && temperature <= tempXY(pressure, JK))
       subregion = 17;
     else
       subregion = 10;
   }
   else if (pMPa > 20.5 && pMPa <= pSat(643.15) * 1.0e-6) // pSat(643.15) = 21.04 MPa
   {
-    if (temperature <= tempXY(pressure, "cd"))
+    if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, "cd") && temperature <= TSat(pressure))
+    else if (temperature > tempXY(pressure, CD) && temperature <= TSat(pressure))
       subregion = 16;
-    else if (temperature > TSat(pressure) && temperature <= tempXY(pressure, "jk"))
+    else if (temperature > TSat(pressure) && temperature <= tempXY(pressure, JK))
       subregion = 17;
-    else // (temperature > tempXY(pressure, "jk"))
+    else // (temperature > tempXY(pressure, JK))
       subregion = 10;
   }
   else if (pMPa > P3cd && pMPa <= 20.5) // P3cd  = 19.00881189173929
   {
-    if (temperature <= tempXY(pressure, "cd"))
+    if (temperature <= tempXY(pressure, CD))
       subregion = 2;
-    else if (temperature > tempXY(pressure, "cd") && temperature <= TSat(pressure))
+    else if (temperature > tempXY(pressure, CD) && temperature <= TSat(pressure))
       subregion = 18;
     else
       subregion = 19;
@@ -1270,24 +1268,24 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
   }
   else if (pMPa > 22.11 && pMPa <= 22.5)
   {
-    if (temperature > tempXY(pressure, "qu") && temperature <= tempXY(pressure, "uv"))
+    if (temperature > tempXY(pressure, QU) && temperature <= tempXY(pressure, UV))
       subregion = 20;
-    else if (temperature > tempXY(pressure, "uv") && temperature <= tempXY(pressure, "ef"))
+    else if (temperature > tempXY(pressure, UV) && temperature <= tempXY(pressure, EF))
       subregion = 21;
-    else if (temperature > tempXY(pressure, "ef") && temperature <= tempXY(pressure, "wx"))
+    else if (temperature > tempXY(pressure, EF) && temperature <= tempXY(pressure, WX))
       subregion = 22;
-    else // (temperature > tempXY(pressure, "wx") && temperature <= tempXY(pressure, "rx"))
+    else // (temperature > tempXY(pressure, WX) && temperature <= tempXY(pressure, RX))
       subregion = 23;
   }
   else if (pMPa > 22.064 && pMPa <= 22.11)
   {
-    if (temperature > tempXY(pressure, "qu") && temperature <= tempXY(pressure, "uv"))
+    if (temperature > tempXY(pressure, QU) && temperature <= tempXY(pressure, UV))
       subregion = 20;
-    else if (temperature > tempXY(pressure, "uv") && temperature <= tempXY(pressure, "ef"))
+    else if (temperature > tempXY(pressure, UV) && temperature <= tempXY(pressure, EF))
       subregion = 24;
-    else if (temperature > tempXY(pressure, "ef") && temperature <= tempXY(pressure, "wx"))
+    else if (temperature > tempXY(pressure, EF) && temperature <= tempXY(pressure, WX))
       subregion = 25;
-    else // (temperature > tempXY(pressure, "wx") && temperature <= tempXY(pressure, "rx"))
+    else // (temperature > tempXY(pressure, WX) && temperature <= tempXY(pressure, RX))
       subregion = 23;
   }
   else
@@ -1297,7 +1295,7 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::tempXY(Real pressure, std::string xy) const
+Water97FluidProperties::tempXY(Real pressure, subregionEnum xy) const
 {
   Real pi = pressure / 1.0e6;
 
@@ -1319,39 +1317,51 @@ Water97FluidProperties::tempXY(Real pressure, std::string xy) const
   // Choose the constants based on the string xy
   unsigned int row;
 
-  if (xy == "ab")
-    row = 0;
-  else if (xy == "cd")
-    row = 1;
-  else if (xy == "gh")
-    row = 2;
-  else if (xy == "ij")
-    row = 3;
-  else if (xy == "jk")
-    row = 4;
-  else if (xy == "mn")
-    row = 5;
-  else if (xy == "op")
-    row = 6;
-  else if (xy == "qu")
-    row = 7;
-  else if (xy == "rx")
-    row = 8;
-  else if (xy == "uv")
-    row = 9;
-  else if (xy == "wx")
-    row = 10;
-  else if (xy == "ef")
-    row = 0; // not used
-  else
-    mooseError("PorousFlowWaterProperties::tempXY: Invalid boundary specified");
+  switch (xy)
+  {
+    case AB:
+      row = 0;
+      break;
+    case CD:
+      row = 1;
+      break;
+    case GH:
+      row = 2;
+      break;
+    case IJ:
+      row = 3;
+      break;
+    case JK:
+      row = 4;
+      break;
+    case MN:
+      row = 5;
+      break;
+    case OP:
+      row = 6;
+      break;
+    case QU:
+      row = 7;
+      break;
+    case RX:
+      row = 8;
+      break;
+    case UV:
+      row = 9;
+      break;
+    case WX:
+      row = 10;
+      break;
+    default:
+      row = 0;
+  }
 
   Real sum = 0.0;
 
-  if (xy == "ab" || xy == "op" || xy == "wx")
+  if (xy == AB || xy == OP || xy == WX)
     for (unsigned int i = 0; i < n[row].size(); ++i)
       sum += n[row][i] * std::pow(std::log(pi), I[row][i]);
-  else if (xy == "ef")
+  else if (xy == EF)
       sum += 3.727888004 * (pi - _p_critical / 1.0e6) + _T_critical;
   else
     for (unsigned int i = 0; i < n[row].size(); ++i)

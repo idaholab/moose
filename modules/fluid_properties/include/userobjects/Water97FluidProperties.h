@@ -35,17 +35,16 @@ InputParameters validParams<Water97FluidProperties>();
  * Ordinary Water Substance
  */
 class Water97FluidProperties : public SinglePhaseFluidPropertiesPT
-
 {
 public:
   Water97FluidProperties(const InputParameters & parameters);
   virtual ~Water97FluidProperties();
 
- /**
-  * Water molar mass
-  * @return molar mass (kg/mol)
-  */
- virtual Real molarMass() const;
+  /**
+   * Water molar mass
+   * @return molar mass (kg/mol)
+   */
+  virtual Real molarMass() const;
 
   /**
    * Water critical pressure
@@ -174,13 +173,13 @@ public:
   /**
    * Water viscosity and derivatives wrt density and temperature
    *
-   * @param pressure fluid pressure (Pa)
+   * @param density fluid density (kg/m^3)
    * @param temperature fluid temperature (K)
    * @param[out] mu viscosity (Pa.s)
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(Real denisty, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
+  virtual void mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /**
    * Thermal conductivity as a function of density and temperature
@@ -538,19 +537,6 @@ public:
   unsigned int subregion3(Real pressure, Real temperature) const;
 
   /**
-   * Boundaries between subregions in region 3.
-   * From Revised Supplementary Release on Backward Equations for
-   * Specific Volume as a Function of Pressure and Temperature v(p,T)
-   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
-   * Thermodynamic Properties of Water and Steam
-   *
-   * @param pressure water pressure (Pa)
-   * @param xy string to select the boundary between two subregions
-   * @return temperature (K) along the boundary
-   */
-  Real tempXY(Real pressure, std::string xy) const;
-
-  /**
    * Specific volume in all subregions of region 3 EXCEPT subregion n (13).
    *
    * @param pi scaled water pressure
@@ -591,6 +577,34 @@ protected:
   const Real _p_triple;
   /// Triple point temperature (K)
   const Real _T_triple;
+  /// Enum of subregion ids for region 3
+  enum subregionEnum {
+    AB,
+    CD,
+    GH,
+    IJ,
+    JK,
+    MN,
+    OP,
+    QU,
+    RX,
+    UV,
+    WX,
+    EF
+  };
+
+  /**
+   * Boundaries between subregions in region 3.
+   * From Revised Supplementary Release on Backward Equations for
+   * Specific Volume as a Function of Pressure and Temperature v(p,T)
+   * for Region 3 of the IAPWS Industrial Formulation 1997 for the
+   * Thermodynamic Properties of Water and Steam
+   *
+   * @param pressure water pressure (Pa)
+   * @param xy string to select the boundary between two subregions
+   * @return temperature (K) along the boundary
+   */
+  Real tempXY(Real pressure, subregionEnum xy) const;
 
   /**
    * Reference constants used in to calculate thermophysical properties of water.
