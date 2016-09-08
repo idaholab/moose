@@ -19,7 +19,7 @@ class MooseMarkdown(markdown.Extension):
     Extensions that comprise the MOOSE flavored markdown.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
 
         # Determine the root directory via git
         root = os.path.dirname(subprocess.check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.STDOUT))
@@ -39,7 +39,7 @@ class MooseMarkdown(markdown.Extension):
         self._markdown_database_dir = os.path.join(self.config['root'][0], self.config['docs_dir'][0])
 
         # Construct the extension object
-        super(MooseMarkdown, self).__init__(*args, **kwargs)
+        super(MooseMarkdown, self).__init__(**kwargs)
 
     def extendMarkdown(self, md, md_globals):
         """
@@ -47,9 +47,7 @@ class MooseMarkdown(markdown.Extension):
         """
 
         # Strip description from config
-        config = dict()
-        for key, value in self.config.iteritems():
-            config[key] = value[0]
+        config = self.getConfigs()
 
         # Prepcoessors
         md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(self._markdown_database_dir, markdown_instance=md), '_begin')
