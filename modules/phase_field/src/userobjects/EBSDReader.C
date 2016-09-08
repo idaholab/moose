@@ -315,8 +315,8 @@ EBSDReader::buildNodeWeightMaps()
   libMesh::MeshBase &mesh = _mesh.getMesh();
 
   // Loop through each node in mesh and calculate eta values for each grain associated with the node
-  MeshBase::const_node_iterator ni = mesh.nodes_begin();
-  const MeshBase::const_node_iterator nend = mesh.nodes_end();
+  MeshBase::const_node_iterator ni = mesh.active_nodes_begin();
+  const MeshBase::const_node_iterator nend = mesh.active_nodes_end();
   for (; ni != nend; ++ni)
   {
     // Get node_id

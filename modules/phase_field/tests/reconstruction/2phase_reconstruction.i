@@ -12,7 +12,7 @@
 
 [Mesh]
   type = EBSDMesh
-  filename = 'Ti_2Phase_28x28_Sqr_Marmot.txt'
+  filename = 'Ti_2Phase_28x28_ebsd.txt'
 []
 
 [UserObjects]

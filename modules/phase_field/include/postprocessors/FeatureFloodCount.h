@@ -99,6 +99,7 @@ public:
 
     FeatureData(unsigned int var_idx) :
         _var_idx(var_idx),
+        _id(libMesh::invalid_uint),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _volume(0.0),
@@ -181,10 +182,22 @@ public:
      */
     void merge(FeatureData && rhs);
 
+    // TODO: Doco
+    void clear();
+
     /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
-      return _var_idx < rhs._var_idx || (_var_idx == rhs._var_idx && _min_entity_id < rhs._min_entity_id);
+      if (_id != libMesh::invalid_uint)
+      {
+        mooseAssert(rhs._id != libMesh::invalid_uint, "Asymmetric setting of ids detected during sort");
+
+        // Sort based on ids
+        return _id < rhs._id;
+      }
+      else
+        // Sort based on processor independent information (mesh and variable info)
+        return _var_idx < rhs._var_idx || (_var_idx == rhs._var_idx && _min_entity_id < rhs._min_entity_id);
     }
 
     /// stream output operator
@@ -204,6 +217,9 @@ public:
 
     /// The Moose variable where this feature was found (often the "order parameter")
     unsigned int _var_idx;
+
+    /// An ID for this feature
+    unsigned int _id;
 
     /// The vector of bounding boxes completely enclosing this feature (multiple used with periodic constraints)
     std::vector<MeshTools::BoundingBox> _bboxes;
@@ -251,6 +267,12 @@ protected:
    * stage.
    */
   virtual Real getThreshold(unsigned int current_idx, bool active_feature) const;
+
+  /**
+   *
+   */
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & new_id);
+  virtual bool currentElemContributesToVolume(unsigned long current_idx) const;
 
   ///@{
   /**
@@ -306,7 +328,19 @@ protected:
   void communicateAndMerge();
 
   /**
-   * This routine populatess a stacked vector of local to global indices per rank and the associated count
+   * Sort and assign ids to features based on their position in the container after sorting.
+   */
+  void sortAndLabel();
+
+  /**
+   * Calls buildLocalToGlobalIndices to build the individual local to global indicies for each rank and
+   * scatters that information to all ranks. Finally, the non-master ranks update their own data
+   * structures to reflect the global mappings.
+   */
+  void scatterAndUpdateRanks();
+
+  /**
+   * This routine populates a stacked vector of local to global indices per rank and the associated count
    * vector for scattering the vector to the ranks. The individual vectors can be different sizes. The ith
    * vector will be distributed to the ith processor including the master rank.
    * e.g.
