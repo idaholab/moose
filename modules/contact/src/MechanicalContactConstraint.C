@@ -193,7 +193,7 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
       pinfo->capture();
 
       // Increment the lock count every time the node comes back into contact from not being in contact.
-      if (_formulation == CF_KINEMATIC)
+      if (_formulation == CF_KINEMATIC || _formulation == CF_TANGENTIAL_PENALTY)
         ++pinfo->_locked_this_step;
     }
     // Release
