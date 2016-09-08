@@ -1229,6 +1229,8 @@ void
 FEProblem::reinitOffDiagScalars(THREAD_ID tid)
 {
   _assembly[tid]->prepareOffDiagScalar();
+  if (_displaced_problem != NULL)
+    _displaced_problem->reinitOffDiagScalars(tid);
 }
 
 

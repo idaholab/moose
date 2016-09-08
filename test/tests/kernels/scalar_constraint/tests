@@ -5,7 +5,14 @@
     exodiff = 'scalar_constraint_kernel_out.e'
     max_parallel = 1
   [../]
-  
+
+  [./kernel_disp]
+    type = 'Exodiff'
+    input = 'scalar_constraint_kernel_disp.i'
+    exodiff = 'scalar_constraint_kernel_disp_out.e'
+    max_parallel = 1
+  [../]
+
   [./bc]
     type = 'Exodiff'
     input = 'scalar_constraint_bc.i'
