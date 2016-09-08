@@ -25,7 +25,8 @@ defaults:
 # Directories/applications to include
 include:
     framework:
-        source: ../framework
+        source: ../framework/src
+        include: ../framework/include
         doxygen: http://mooseframework.com/docs/doxygen/moose/
         details: details/framework
         install: content/framework/systems
@@ -40,7 +41,8 @@ include:
                 - ../tutorials
 
     phase_field:
-        source: ../modules/phase_field
+        source: ../modules/phase_field/src
+        include: ../modules/phase_field/include
         doxygen: http://mooseframework.com/docs/doxygen/modules/
         details: details/phase_field
         install: content/modules/phase_field/systems
@@ -53,7 +55,8 @@ include:
                 - ../modules/phase_field/examples
 
     contact:
-        source: ../modules/contact
+        source: ../modules/contact/src
+        include: ../modules/contact/include
         doxygen: http://mooseframework.com/docs/doxygen/modules/
         details: details/contact
         install: content/modules/contact/systems

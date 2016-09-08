@@ -37,11 +37,19 @@ class MooseSubApplicationDocGenerator(object):
             inputs[key] = database.Database('.i', path, database.items.InputFileItem, **options)
             children[key] = database.Database('.h', path, database.items.ChildClassItem, **options)
 
+        # Combine the 'include' and 'source' into a single list (putting the include first)
+        include = self._config.get('include')
+        if not isinstance(include, list):
+            include = [include]
+        source = self._config.get('source')
+        if not isinstance(source, list):
+            source = [source]
+
         # Parse the syntax for the given source directory.
-        src = self._config.get('source')
-        log.info('Locating syntax for application: {}'.format(src))
+        paths = include + source
+        log.info('Locating syntax for application: {}'.format(paths))
         self._yaml_data = yaml_data
-        self._syntax = MooseApplicationSyntax(yaml_data, src)
+        self._syntax = MooseApplicationSyntax(yaml_data, paths)
 
         self._systems = []
         log.info('Initializing MOOSE system information...')

@@ -59,6 +59,7 @@ class MooseApplicationDocGenerator(object):
         defaults = yml.get('defaults', dict())
         defaults.setdefault('details', os.path.join(os.getcwd(), 'details'))
         defaults.setdefault('source', None)
+        defaults.setdefault('include', None)
         defaults.setdefault('install', os.path.join(os.getcwd(), 'content'))
         defaults.setdefault('repo', None)
         defaults.setdefault('doxygen', None)
