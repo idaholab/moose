@@ -20,7 +20,7 @@ class MooseApplicationSyntax(object):
 
     Args:
         yaml[MooseYaml]: The MooseYaml object obtained by running the application with --yaml option.
-        path[str|list]: Valid source directory to extract syntax.
+        paths[list]: Valid source directory to extract syntax.
     """
 
 
@@ -33,13 +33,12 @@ class MooseApplicationSyntax(object):
         self._filenames = dict()
         self._syntax = set()
 
-        # Path should be a list of directories
-        if not isinstance(paths, list):
-            paths = [paths]
-
         # Update the syntax maps
         for path in paths:
-            if (not path) or (not os.path.exists(path)):
+            if (not path):
+                log.critical("Missing or invalid source/include directory.")
+                raise Exception("A directory with a value of None was supplied, which is not allowed.")
+            elif not os.path.exists(path):
                 log.critical("Unknown source directory supplied: {}".format(os.path.abspath(path)))
                 raise IOError(os.path.abspath(path))
             self._updateSyntax(path)
