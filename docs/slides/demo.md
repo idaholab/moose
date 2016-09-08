@@ -24,7 +24,7 @@ $$\frac{\partial \phi}{\partial t} - \vec{v} \nabla \phi = 0$$
 ## Source Code
 Complete source code and snippets are available.
 
-![](test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner)
+!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner
 
 --
 ## Include Markdown
