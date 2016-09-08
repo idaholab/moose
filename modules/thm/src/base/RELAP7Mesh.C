@@ -12,7 +12,6 @@ RELAP7Mesh::RELAP7Mesh(const InputParameters & parameters) :
     MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim"))
 {
-  _mesh->set_mesh_dimension(_dim);
 }
 
 RELAP7Mesh::RELAP7Mesh(const RELAP7Mesh & other_mesh) :
@@ -46,5 +45,4 @@ void
 RELAP7Mesh::prep()
 {
   prepare(true);
-  getMesh().set_mesh_dimension(_dim);
 }
