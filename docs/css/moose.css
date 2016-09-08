@@ -91,6 +91,11 @@ Slide style
     font-size: 2em;
 }
 
+.reveal h2 {
+    font-size: 1.5em;
+}
+
+
 .reveal .slides > section {
   text-align: left;
 }
