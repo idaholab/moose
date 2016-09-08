@@ -480,6 +480,12 @@ DisplacedProblem::reinitScalars(THREAD_ID tid)
 }
 
 void
+DisplacedProblem::reinitOffDiagScalars(THREAD_ID tid)
+{
+  _assembly[tid]->prepareOffDiagScalar();
+}
+
+void
 DisplacedProblem::getDiracElements(std::set<const Elem *> & elems)
 {
   elems = _dirac_kernel_info.getElements();

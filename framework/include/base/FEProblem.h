@@ -304,7 +304,7 @@ public:
   virtual void reinitNeighborPhys(const Elem * neighbor, const std::vector<Point> & physical_points, THREAD_ID tid) override;
   virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid) override;
   virtual void reinitScalars(THREAD_ID tid) override;
-  virtual void reinitOffDiagScalars(THREAD_ID tid);
+  virtual void reinitOffDiagScalars(THREAD_ID tid) override;
 
   /// Fills "elems" with the elements that should be looped over for Dirac Kernels
   virtual void getDiracElements(std::set<const Elem *> & elems) override;
