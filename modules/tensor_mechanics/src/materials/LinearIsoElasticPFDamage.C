@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "LinearIsoElasticPFDamage.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<LinearIsoElasticPFDamage>()
@@ -44,7 +45,7 @@ LinearIsoElasticPFDamage::updateVar()
   Real lambda = _elasticity_tensor[_qp](0,0,1,1);
   Real mu = _elasticity_tensor[_qp](0,1,0,1);
   Real c = _c[_qp];
-  Real xfac = std::pow(1.0-c,2.0) + _kdamage;
+  Real xfac = Utility::pow<2>(1.0-c) + _kdamage;
 
   _mechanical_strain[_qp].symmetricEigenvaluesEigenvectors(_eigval, _eigvec);
 
@@ -58,32 +59,32 @@ LinearIsoElasticPFDamage::updateVar()
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     etr += _eigval[i];
 
-  Real etrpos=(std::abs(etr)+etr)/2.0;
-  Real etrneg=(std::abs(etr)-etr)/2.0;
+  Real etrpos = (std::abs(etr) + etr) / 2.0;
+  Real etrneg = (std::abs(etr) - etr) / 2.0;
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
-    stress0pos += _etens[i] * (lambda * etrpos + 2.0 * mu * (std::abs(_eigval[i]) + _eigval[i])/2.0);
-    stress0neg += _etens[i] * (lambda * etrneg + 2.0 * mu * (std::abs(_eigval[i]) - _eigval[i])/2.0);
+    stress0pos += _etens[i] * (lambda * etrpos + 2.0 * mu * (std::abs(_eigval[i]) + _eigval[i]) / 2.0);
+    stress0neg += _etens[i] * (lambda * etrneg + 2.0 * mu * (std::abs(_eigval[i]) - _eigval[i]) / 2.0);
   }
 
   //Damage associated with positive component of stress
   _stress[_qp] = stress0pos * xfac - stress0neg;
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    _epos[i] = (std::abs(_eigval[i]) + _eigval[i])/2.0;
+    _epos[i] = (std::abs(_eigval[i]) + _eigval[i]) / 2.0;
 
   Real val = 0.0;
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    val += std::pow(_epos[i],2.0);
+    val += Utility::pow<2>(_epos[i]);
   val *= mu;
 
   //Energy with positive principal strains
-  _G0_pos[_qp] = lambda * std::pow(etrpos,2.0)/2.0 + val;
+  _G0_pos[_qp] = lambda * Utility::pow<2>(etrpos) / 2.0 + val;
   //Used in PFFracBulkRate Jacobian
   _dG0_pos_dstrain[_qp] = stress0pos;
   //Used in StressDivergencePFFracTensors Jacobian
-  _dstress_dc[_qp] = -stress0pos * (2 * (1.0-c));
+  _dstress_dc[_qp] = -stress0pos * (2.0 * (1.0 - c));
 }
 
 void

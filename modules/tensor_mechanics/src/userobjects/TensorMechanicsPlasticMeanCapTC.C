@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "TensorMechanicsPlasticMeanCapTC.h"
-#include <math.h> // for M_PI
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticMeanCapTC>()
@@ -42,6 +42,7 @@ TensorMechanicsPlasticMeanCapTC::yieldFunction(const RankTwoTensor & stress, Rea
   const Real t_str = tensile_strength(intnl);
   if (tr >= t_str)
     return tr - t_str;
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return -(tr - c_str);
@@ -49,7 +50,7 @@ TensorMechanicsPlasticMeanCapTC::yieldFunction(const RankTwoTensor & stress, Rea
   // it also has derivative = 1 at tr = t_str, and derivative = -1 at tr = c_str
   // it also has second derivative = 0, at these points.
   // This makes the complete yield function C2 continuous.
-  return (c_str - t_str) / M_PI * std::sin(M_PI * (tr - c_str) / (t_str - c_str));
+  return (c_str - t_str) / libMesh::pi * std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str));
 }
 
 RankTwoTensor
@@ -66,12 +67,14 @@ TensorMechanicsPlasticMeanCapTC::dyieldFunction_dintnl(const RankTwoTensor & str
   const Real t_str = tensile_strength(intnl);
   if (tr >= t_str)
     return -dtensile_strength(intnl);
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return dcompressive_strength(intnl);
+
   const Real dt = dtensile_strength(intnl);
   const Real dc = dcompressive_strength(intnl);
-  return (dc - dt) / M_PI * std::sin(M_PI * (tr - c_str) / (t_str - c_str)) + 1.0 / (t_str - c_str) * std::cos(M_PI * (tr - c_str) / (t_str - c_str)) * ((tr - c_str) * dt - (tr - t_str) * dc );
+  return (dc - dt) / libMesh::pi * std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) + 1.0 / (t_str - c_str) * std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)) * ((tr - c_str) * dt - (tr - t_str) * dc );
 }
 
 RankTwoTensor
@@ -81,10 +84,12 @@ TensorMechanicsPlasticMeanCapTC::df_dsig(const RankTwoTensor & stress, Real intn
   const Real t_str = tensile_strength(intnl);
   if (tr >= t_str)
     return stress.dtrace();
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return -stress.dtrace();
-  return - std::cos(M_PI * (tr - c_str) / (t_str - c_str)) * stress.dtrace();
+
+  return - std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace();
 }
 
 RankTwoTensor
@@ -100,10 +105,12 @@ TensorMechanicsPlasticMeanCapTC::dflowPotential_dstress(const RankTwoTensor & st
   const Real t_str = tensile_strength(intnl);
   if (tr >= t_str)
     return RankFourTensor();
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return RankFourTensor();
-  return M_PI / (t_str - c_str) * std::sin(M_PI * (tr - c_str) / (t_str - c_str)) * stress.dtrace().outerProduct(stress.dtrace());
+
+  return libMesh::pi / (t_str - c_str) * std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace().outerProduct(stress.dtrace());
 }
 
 RankTwoTensor
@@ -113,12 +120,14 @@ TensorMechanicsPlasticMeanCapTC::dflowPotential_dintnl(const RankTwoTensor & str
   const Real t_str = tensile_strength(intnl);
   if (tr >= t_str)
     return RankTwoTensor();
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return RankTwoTensor();
+
   const Real dt = dtensile_strength(intnl);
   const Real dc = dcompressive_strength(intnl);
-  return std::sin(M_PI * (tr - c_str) / (t_str - c_str)) * stress.dtrace() * M_PI / std::pow(t_str - c_str, 2) * ((tr - t_str) * dc - (tr - c_str) * dt);
+  return std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace() * libMesh::pi / Utility::pow<2>(t_str - c_str) * ((tr - t_str) * dc - (tr - c_str) * dt);
 }
 
 Real
@@ -127,12 +136,15 @@ TensorMechanicsPlasticMeanCapTC::hardPotential(const RankTwoTensor & stress, Rea
   // This is the key for this whole class!
   const Real tr = stress.trace();
   const Real t_str = tensile_strength(intnl);
+
   if (tr >= t_str)
     return -1.0; // this will serve to *increase* the internal parameter (so internal parameter will be a measure of volumetric strain)
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return 1.0; // this will serve to *decrease* the internal parameter (so internal parameter will be a measure of volumetric strain)
-  return std::cos(M_PI * (tr - c_str) / (t_str - c_str)); // this interpolates C2 smoothly between 1 and -1
+
+  return std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)); // this interpolates C2 smoothly between 1 and -1
 }
 
 RankTwoTensor
@@ -142,10 +154,12 @@ TensorMechanicsPlasticMeanCapTC::dhardPotential_dstress(const RankTwoTensor & st
   const Real t_str = tensile_strength(intnl);
   if (tr >= t_str)
     return RankTwoTensor();
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return RankTwoTensor();
-  return - std::sin(M_PI * (tr - c_str) / (t_str - c_str)) * M_PI / (t_str - c_str) * stress.dtrace();
+
+  return - std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * libMesh::pi / (t_str - c_str) * stress.dtrace();
 }
 
 Real
@@ -155,12 +169,14 @@ TensorMechanicsPlasticMeanCapTC::dhardPotential_dintnl(const RankTwoTensor & str
   const Real t_str = tensile_strength(intnl);
   if (tr >= t_str)
     return 0.0;
+
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
     return 0.0;
+
   const Real dt = dtensile_strength(intnl);
   const Real dc = dcompressive_strength(intnl);
-  return - std::sin(M_PI * (tr - c_str) / (t_str - c_str)) * M_PI / std::pow(t_str - c_str, 2) * ((tr - t_str) * dc - (tr - c_str) * dt);
+  return - std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * libMesh::pi / Utility::pow<2>(t_str - c_str) * ((tr - t_str) * dc - (tr - c_str) * dt);
 }
 
 Real

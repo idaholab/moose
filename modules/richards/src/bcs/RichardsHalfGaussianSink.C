@@ -5,11 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RichardsHalfGaussianSink.h"
 #include "Material.h"
 #include "Function.h"
-
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<RichardsHalfGaussianSink>()
@@ -33,28 +32,28 @@ RichardsHalfGaussianSink::RichardsHalfGaussianSink(const InputParameters & param
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
     _pp(getMaterialProperty<std::vector<Real> >("porepressure")),
     _dpp_dv(getMaterialProperty<std::vector<std::vector<Real> > >("dporepressure_dv"))
-{}
+{
+}
 
 Real
 RichardsHalfGaussianSink::computeQpResidual()
 {
-  Real test_fcn_f = _test[_i][_qp]*_m_func.value(_t, _q_point[_qp]);
+  const Real test_fcn_f = _test[_i][_qp] * _m_func.value(_t, _q_point[_qp]);
 
   if (_pp[_qp][_pvar] >= _centre)
-    return test_fcn_f*_maximum;
-  else
-    return test_fcn_f*_maximum*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2));
+    return test_fcn_f * _maximum;
+
+  return test_fcn_f * _maximum * std::exp(-0.5 * Utility::pow<2>((_pp[_qp][_pvar] - _centre) / _sd));
 }
 
 Real
 RichardsHalfGaussianSink::computeQpJacobian()
 {
-  Real test_fcn_f = _test[_i][_qp]*_m_func.value(_t, _q_point[_qp]);
-
   if (_pp[_qp][_pvar] >= _centre)
     return 0.0;
-  else
-    return -test_fcn_f*_maximum*(_pp[_qp][_pvar] - _centre)/std::pow(_sd, 2)*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][_pvar];
+
+  const Real test_fcn_f = _test[_i][_qp] * _m_func.value(_t, _q_point[_qp]);
+  return -test_fcn_f*_maximum*(_pp[_qp][_pvar] - _centre) / Utility::pow<2>(_sd) * std::exp(-0.5 * Utility::pow<2>((_pp[_qp][_pvar] - _centre) / _sd)) * _phi[_j][_qp] * _dpp_dv[_qp][_pvar][_pvar];
 }
 
 Real
@@ -62,13 +61,11 @@ RichardsHalfGaussianSink::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (_richards_name_UO.not_richards_var(jvar))
     return 0.0;
-  unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
-
-  Real test_fcn_f = _test[_i][_qp]*_m_func.value(_t, _q_point[_qp]);
 
   if (_pp[_qp][_pvar] >= _centre)
     return 0.0;
-  else
-    return -test_fcn_f*_maximum*(_pp[_qp][_pvar] - _centre)/std::pow(_sd, 2)*exp(-0.5*std::pow((_pp[_qp][_pvar] - _centre)/_sd, 2))*_phi[_j][_qp]*_dpp_dv[_qp][_pvar][dvar];
-}
 
+  const Real test_fcn_f = _test[_i][_qp] * _m_func.value(_t, _q_point[_qp]);
+  const unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
+  return -test_fcn_f * _maximum * (_pp[_qp][_pvar] - _centre) / Utility::pow<2>(_sd) * std::exp(-0.5 * Utility::pow<2>((_pp[_qp][_pvar] - _centre) / _sd)) * _phi[_j][_qp] * _dpp_dv[_qp][_pvar][dvar];
+}

@@ -8,9 +8,10 @@
 #include "RankTwoTensor.h"
 #include "MooseException.h"
 #include "MatrixTools.h"
+#include "MaterialProperty.h"
 
 // Any other includes here
-#include "MaterialProperty.h"
+#include "libmesh/utility.h"
 #include <ostream>
 
 template<>
@@ -307,7 +308,7 @@ RankFourTensor::L2norm() const
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          l2 += std::pow(a(i,j,k,l), 2);
+          l2 += Utility::pow<2>(a(i,j,k,l));
 
   return std::sqrt(l2);
 }

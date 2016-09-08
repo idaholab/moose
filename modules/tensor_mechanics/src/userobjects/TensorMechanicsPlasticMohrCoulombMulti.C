@@ -8,6 +8,7 @@
 
 // Following is for perturbing eigvenvalues.  This looks really bodgy, but works quite well!
 #include "MooseRandom.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulombMulti>()
@@ -537,7 +538,7 @@ TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigv
     do {
       deriv_phi = dphi(intnl_old + x);
       deriv_coh = dcohesion(intnl_old + x);
-      jacobian = 1.0/cohcot_coeff + deriv_coh*cosphi/sinphi - coh*deriv_phi/std::pow(sinphi, 2);
+      jacobian = 1.0/cohcot_coeff + deriv_coh*cosphi/sinphi - coh*deriv_phi/Utility::pow<2>(sinphi);
       x += -residual/jacobian;
 
       if (iter > _max_iters) // not converging
@@ -619,21 +620,24 @@ TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & ei
   Real coh = cohesion(intnl_old + dpm[3]);
   cohcos = coh*cosphi;
 
-  Real alpha = n[3](0) - n[3](2) - (n[3](2) + n[3](0))*sinphi;
+  Real alpha = n[3](0) - n[3](2) - (n[3](2) + n[3](0)) * sinphi;
   Real deriv_phi;
   Real dalpha;
   const Real beta = eigvals[2] + eigvals[0];
-  Real residual = alpha*dpm[3] + eigvals[2] - eigvals[0] + beta*sinphi - 2*cohcos; // this is 2*yf[3]
   Real deriv_coh;
+
+  Real residual = alpha*dpm[3] + eigvals[2] - eigvals[0] + beta * sinphi - 2.0 * cohcos; // this is 2*yf[3]
   Real jacobian;
+
+  const Real f_tol2 =  Utility::pow<2>(_f_tol);
   unsigned int iter = 0;
   do {
     deriv_phi = dphi(intnl_old + dpm[3]);
-    dalpha = -(n[3](2) + n[3](0))*cosphi*deriv_phi;
+    dalpha = -(n[3](2) + n[3](0)) * cosphi * deriv_phi;
     deriv_coh = dcohesion(intnl_old + dpm[3]);
-    jacobian = alpha + dalpha*dpm[3] + beta*cosphi*deriv_phi - 2*deriv_coh*cosphi + 2*coh*sinphi*deriv_phi;
+    jacobian = alpha + dalpha * dpm[3] + beta * cosphi * deriv_phi - 2.0 * deriv_coh * cosphi + 2.0 * coh * sinphi * deriv_phi;
 
-    dpm[3] -= residual/jacobian;
+    dpm[3] -= residual / jacobian;
     if (iter > _max_iters) // not converging
     {
       nr_converged = false;
@@ -643,11 +647,11 @@ TensorMechanicsPlasticMohrCoulombMulti::returnPlane(const std::vector<Real> & ei
     sinphi = std::sin(phi(intnl_old + dpm[3]));
     cosphi = std::cos(phi(intnl_old + dpm[3]));
     coh = cohesion(intnl_old + dpm[3]);
-    cohcos = coh*cosphi;
-    alpha = n[3](0) - n[3](2) - (n[3](2) + n[3](0))*sinphi;
-    residual = alpha*dpm[3] + eigvals[2] - eigvals[0] + beta*sinphi - 2*cohcos;
-    iter ++;
-  } while (residual*residual > _f_tol*_f_tol);
+    cohcos = coh * cosphi;
+    alpha = n[3](0) - n[3](2) - (n[3](2) + n[3](0)) * sinphi;
+    residual = alpha * dpm[3] + eigvals[2] - eigvals[0] + beta * sinphi - 2.0 * cohcos;
+    iter++;
+  } while (residual * residual > f_tol2);
 
   // so the NR process converged, but we must
   // check Kuhn-Tucker
@@ -709,7 +713,7 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge000101(const std::vector<Real>
   Real deriv_phi;
   Real deriv_coh;
   Real jacobian;
-  const Real tol = std::pow(_f_tol/mag_E/10.0, 2);
+  const Real tol = Utility::pow<2>(_f_tol / (mag_E * 10.0));
   unsigned int iter = 0;
   do {
     do {
@@ -734,9 +738,9 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge000101(const std::vector<Real>
     } while (residual*residual > tol);
 
     // now must ensure that yf[3] and yf[5] are both "zero"
-    const Real dpm3minusdpm5 = (2*(eigvals[0] - eigvals[1]) + x*(n[3](1) - n[3](0) + n[5](1) - n[5](0)))/(n[3](0) - n[3](1) + n[5](1) - n[5](0));
-    dpm[3] = (x + dpm3minusdpm5)/2.0;
-    dpm[5] = (x - dpm3minusdpm5)/2.0;
+    const Real dpm3minusdpm5 = (2.0 * (eigvals[0] - eigvals[1]) + x*(n[3](1) - n[3](0) + n[5](1) - n[5](0)))/(n[3](0) - n[3](1) + n[5](1) - n[5](0));
+    dpm[3] = (x + dpm3minusdpm5) / 2.0;
+    dpm[5] = (x - dpm3minusdpm5) / 2.0;
 
     for (unsigned i = 0; i < 3; ++i)
       returned_stress(i, i) = eigvals[i] - dpm[3]*n[3](i) - dpm[5]*n[5](i);
@@ -799,7 +803,7 @@ TensorMechanicsPlasticMohrCoulombMulti::returnEdge010100(const std::vector<Real>
   Real deriv_phi;
   Real deriv_coh;
   Real jacobian;
-  const Real tol = std::pow(_f_tol/mag_E/10.0, 2);
+  const Real tol = Utility::pow<2>(_f_tol / (mag_E * 10.0));
   unsigned int iter = 0;
   do {
     do {
@@ -866,4 +870,3 @@ TensorMechanicsPlasticMohrCoulombMulti::useCustomReturnMap() const
 {
   return _use_custom_returnMap;
 }
-

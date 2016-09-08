@@ -1,3 +1,10 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #ifndef PFC_ENERGY_DENSITY_H
 #define PFC_ENERGY_DENSITY_H
 
