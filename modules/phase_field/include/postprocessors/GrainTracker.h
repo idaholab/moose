@@ -155,7 +155,7 @@ protected:
   /**
    * This method colors neighbors of halo entries to expand the halo as desired for a given simulation.
    */
-  void expandHalos();
+  void expandHalos(unsigned int num_layers_to_expand);
 
   /**
    * Retrieve the next unique grain number if a new grain is detected during trackGrains. This method

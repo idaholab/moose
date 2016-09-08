@@ -283,10 +283,19 @@ GrainTracker::finalize()
 
   Moose::perf_log.push("finalize()", "GrainTracker");
 
+  // Expand the depth of the halos around all grains
+  auto num_halo_layers = _halo_level >= 1 ? _halo_level - 1 : 0; // The first level of halos already exists so subtract one
   if (_ebsd_reader && _first_time)
+  {
     expandEBSDGrains();
 
-  expandHalos();
+    /**
+     * By expanding the EBSD Grains we've effectively erased one level of halo.
+     * We'll just request one additional layer of halo this time around.
+     */
+    ++num_halo_layers;
+  }
+  expandHalos(num_halo_layers);
 
   // Build up the grain map on the root processor
   communicateAndMerge();
@@ -296,10 +305,7 @@ GrainTracker::finalize()
    */
   Moose::perf_log.push("trackGrains()", "GrainTracker");
   if (_first_time)
-  {
     assignGrains();
-    _first_time = false;
-  }
   else
     trackGrains();
   Moose::perf_log.pop("trackGrains()", "GrainTracker");
@@ -347,6 +353,9 @@ GrainTracker::finalize()
       }
     }
   }
+
+  // Set the first time flag false here (after all methods of finalize() have completed)
+  _first_time = false;
 
   // TODO: Release non essential memory
 
@@ -424,13 +433,16 @@ GrainTracker::broadcastAndUpdateGrainData()
 }
 
 void
-GrainTracker::expandHalos()
+GrainTracker::expandHalos(unsigned int num_layers_to_expand)
 {
+  if (num_layers_to_expand == 0)
+    return;
+
   for (auto & list_ref  : _partial_feature_sets)
   {
     for (auto & feature : list_ref)
     {
-      for (auto halo_level = decltype(_halo_level)(1); halo_level < _halo_level; ++halo_level)
+      for (auto halo_level = decltype(num_layers_to_expand)(0); halo_level < num_layers_to_expand; ++halo_level)
       {
         /**
          * Create a copy of the halo set so that as we insert new ids into the
@@ -1369,7 +1381,7 @@ GrainTracker::updateFieldInfo()
       {
         const Elem * elem = mesh.elem(entity);
         std::vector<Point> centroid(1, elem->centroid());
-        if (_ebsd_reader)
+        if (_ebsd_reader && _first_time)
         {
           const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader->getData(centroid[0]);
           const auto phase = d._phase;
