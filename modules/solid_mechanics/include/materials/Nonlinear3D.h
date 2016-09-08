@@ -42,7 +42,7 @@ protected:
   virtual Real volumeRatioOld(unsigned qp) const;
 
   virtual void computeIncrementalDeformationGradient( std::vector<ColumnMajorMatrix> & Fhat);
-
+  const bool _volumetric_locking_correction;
 };
 
 } // namespace solid_mechanics

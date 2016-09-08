@@ -398,3 +398,21 @@ SymmElasticityTensor::valueAtIndex(int i) const
 {
   return _val[i];
 }
+
+Real
+SymmElasticityTensor::sum_3x3() const
+{
+   // summation of Cij for i and j ranging from 0 to 2 - used in the volumetric locking correction
+   return _val[0] + 2 * ( _val[1] + _val[2] + _val[7]) + _val[6] + _val[11];
+}
+
+RealGradient
+SymmElasticityTensor::sum_3x1() const
+{
+  // used for volumetric locking correction
+  RealGradient a(3);
+  a(0) = _val[0] + _val[1] + _val[2]; // C00 + C01 + C02
+  a(1) = _val[1] + _val[6] + _val[7]; // C10 + C11 + C12
+  a(2) = _val[2] + _val[7] + _val[11]; // C20 + C21 + C22
+  return a;
+}

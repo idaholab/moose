@@ -120,6 +120,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    skip = 'needs review - volumetric locking'
   [../]
   [./mu_0_pen]
     type = 'CSVDiff'

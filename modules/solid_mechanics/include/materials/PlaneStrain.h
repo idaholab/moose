@@ -44,6 +44,7 @@ protected:
   const VariableValue & _strain_zz;
   bool _have_scalar_strain_zz;
   const VariableValue & _scalar_strain_zz;
+  const bool _volumetric_locking_correction;
 };
 
 }

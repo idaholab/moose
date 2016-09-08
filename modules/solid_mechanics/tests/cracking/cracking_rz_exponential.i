@@ -190,19 +190,32 @@
   l_tol = 1e-6
 
   nl_max_its = 10
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-10
 
-  # This test takes hundreds of timesteps where the initial nonlinear
-  # residual is something like 1.e-25, so setting an absolute tolerance
-  # is legitimate here.
-  nl_abs_tol = 1e-20
+  nl_abs_tol = 6e-10
 
   start_time = 0.0
   end_time = 6.0
   dt = 0.005
+  dtmin = 0.005
+[]
+
+[Postprocessors]
+  [./stress_yy]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = stress_yy
+  [../]
+
+  [./strain_yy]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = strain_yy
+  [../]
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []
 

@@ -45,7 +45,7 @@
     csvdiff = 'brick4_frictionless_aug_check.csv brick4_frictionless_aug_check_cont_press_0001.csv brick4_frictionless_aug_check_x_disp_0001.csv brick4_frictionless_aug_check_y_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=brick4_frictionless_aug_out Outputs/chkfile/file_base=brick4_frictionless_aug_check'
     rel_err = 1e-5
-    abs_zero = 1e-8
+    abs_zero = 1e-7
     max_parallel = 1
     superlu = true
   [../]

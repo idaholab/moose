@@ -206,6 +206,19 @@
   [../]
 []
 
+[Postprocessors]
+  [./strain_xx]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = strain_xx
+  [../]
+  [./stress_xx]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = stress_xx
+  [../]
+[]
+
 [Executioner]
   type = Transient
 
@@ -219,19 +232,18 @@
   l_tol = 1e-6
 
   nl_max_its = 10
-  nl_rel_tol = 1e-12
+  nl_rel_tol = 1e-9
 
-  # Some timesteps in this example start from very small initial
-  # residuals, so it is legitimate to use a (very small) nl_abs_tol.
-  nl_abs_tol = 1.e-20
+  nl_abs_tol = 1.e-8
 
   start_time = 0.0
   dt = 0.005
-  dtmin = 0.005
+  #dtmin = 0.005
   num_steps = 1200
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
