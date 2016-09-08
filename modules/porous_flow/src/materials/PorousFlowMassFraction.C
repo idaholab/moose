@@ -26,8 +26,6 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
     _grad_mass_frac(declareProperty<std::vector<std::vector<RealGradient> > >("PorousFlow_grad_mass_frac")),
     _dmass_frac_dvar(declareProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
 
-    _yaqi_hacky(false),
-
     _num_passed_mf_vars(coupledComponents("mass_fraction_vars"))
 {
   if (_num_phases < 1 || _num_components < 1)
@@ -65,7 +63,7 @@ PorousFlowMassFraction::initQpStatefulProperties()
 
   // the derivative matrix is fixed for all time
   // so it can be built here instead of in computeQpProperties
-  unsigned int i = 0;
+  unsigned i = 0;
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
@@ -80,20 +78,14 @@ PorousFlowMassFraction::initQpStatefulProperties()
       i++;
     }
   }
-  if (!_yaqi_hacky)
-    build_mass_frac(_qp);
+
+  build_mass_frac(_qp);
 }
 
 void
 PorousFlowMassFraction::computeQpProperties()
 {
   build_mass_frac(_qp);
-
-  if (_yaqi_hacky)
-    if (_t_step == 1 && !_app.isRestarting())
-      for (unsigned int ph = 0; ph < _num_phases; ++ph)
-        for (unsigned int comp = 0; comp < _num_components; ++comp)
-          _mass_frac_old[_qp][ph][comp] = _mass_frac[_qp][ph][comp];
 }
 
 void

@@ -48,18 +48,6 @@ protected:
   void build_mass_frac(unsigned int qp);
 
   /**
-   * YAQI HACK !!!
-   * Since PR#6763 i can often build_mass_frac(_qp) in
-   * initQpStatefulProperties, but sometimes it causes
-   * MOOSE to crash (see, eg, tests/pressure_pulse/pressure_pulse_1d_2phase)
-   * and i need the YaqiHack to get the simulation
-   * to work.  But then other simulations fail, because
-   * the Yaqi Hack doesn't work, boohoo.
-   * This will be removed when we get to the bottom of why ICs aren't working as I had hoped
-   */
-  const bool _yaqi_hacky;
-
-  /**
    * Number of mass-fraction variables provided by the user
    * This needs to be _num_phases*(_num_components - 1), since the
    * mass fraction of the final component in each phase is

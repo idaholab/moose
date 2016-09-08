@@ -76,8 +76,6 @@ protected:
 
   /// d(grad temperature)/d(PorousFlow variable) at the quadpoints
   MaterialProperty<std::vector<RealGradient> > & _dgradt_qp_dv;
-
-  const bool _yaqi_hacky;
 };
 
 #endif //POROUSFLOWTEMPERATURE_H
