@@ -48,9 +48,6 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
   const std::vector<std::pair<unsigned int, unsigned int> > & active_ops = _grain_tracker.getElementalValues(_current_elem->id());
   unsigned int n_active_ops = active_ops.size();
 
-  if (n_active_ops < 1 && _t_step > 0)
-    mooseError("No active order parameters");
-
   // Calculate elasticity tensor
   _elasticity_tensor[_qp].zero();
   Real sum_h = 0.0;
