@@ -240,6 +240,20 @@ GrainTracker::currentElemContributesToVolume(unsigned long current_idx) const
 }
 
 void
+GrainTracker::buildGrainIdToGrainIdx(unsigned int max_id)
+{
+  /**
+   * Build grain id to grain idx mapping
+   */
+  _grain_id_to_grain_idx.assign(max_id + 1, libMesh::invalid_uint);
+  for (auto grain_idx = beginIndex(_feature_sets); grain_idx < _feature_sets.size(); ++grain_idx)
+  {
+    mooseAssert(_feature_sets[grain_idx]._id <= max_id, "Grain ID out of range");
+    _grain_id_to_grain_idx[_feature_sets[grain_idx]._id] = grain_idx;
+  }
+}
+
+void
 GrainTracker::finalize()
 {
   /**
@@ -262,52 +276,29 @@ GrainTracker::finalize()
   communicateAndMerge();
 
   /**
-   * Track Grains
+   * Assign or Track Grains
    */
   Moose::perf_log.push("trackGrains()", "GrainTracker");
-
   if (_first_time)
   {
     assignGrains();
     _first_time = false;
   }
   else
-  {
-    auto old_max_grain_id = _max_curr_grain_id;
-    if (_is_master)
-      trackGrains();
-    _communicator.broadcast(_max_curr_grain_id);
-
-    // Did we create any grains?
-    if (old_max_grain_id < _max_curr_grain_id)
-    {
-      for (auto new_id = old_max_grain_id + 1; new_id <= _max_curr_grain_id; ++new_id)
-        // Don't trigger the callback on the reserve IDs
-        if (new_id >= _reserve_grain_first_idx + _n_reserve_ops)
-          newGrainCreated(new_id);
-    }
-  }
-
-  scatterAndUpdateRanks();
+    trackGrains();
   Moose::perf_log.pop("trackGrains()", "GrainTracker");
   _console << "Finished inside of trackGrains" << std::endl;
 
+  /**
+   * Remap Grains
+   */
   Moose::perf_log.push("remapGrains()", "GrainTracker");
   if (_remap)
     remapGrains();
   Moose::perf_log.pop("remapGrains()", "GrainTracker");
 
   updateFieldInfo();
-
   _console << "Finished inside of updateFieldInfo" << std::endl;
-
-  // Build grain id to grain idx (_feature_sets) map
-  _grain_id_to_grain_idx.resize(_max_curr_grain_id + 1, libMesh::invalid_uint);
-  for (auto grain_idx = beginIndex(_feature_sets); grain_idx < _feature_sets.size(); ++grain_idx)
-  {
-    mooseAssert(_feature_sets[grain_idx]._id <= _max_curr_grain_id, "Grain ID out of range");
-    _grain_id_to_grain_idx[_feature_sets[grain_idx]._id] = grain_idx;
-  }
 
   writeFeatureVolumeFile();
 
@@ -483,11 +474,20 @@ GrainTracker::assignGrains()
 
     // Set up the first reserve grain index based on the largest grain ID
     _reserve_grain_first_idx = _max_curr_grain_id + 1;
-  }
+  } // is_master
+
+  /*************************************************************
+   ****************** COLLECTIVE WORK SECTION ******************
+   *************************************************************/
+
+  // Make IDs on all non-master ranks consistent
+  scatterAndUpdateRanks();
+
+  // Build up an id to index map
+  _communicator.broadcast(_max_curr_grain_id);
+  buildGrainIdToGrainIdx(_max_curr_grain_id);
 
   // Now trigger the newGrainCreated() callback on all ranks
-  _communicator.broadcast(_max_curr_grain_id);
-
   for (auto new_id = decltype(_max_curr_grain_id)(0); new_id <= _max_curr_grain_id; ++new_id)
     newGrainCreated(new_id);
 }
@@ -496,183 +496,221 @@ void
 GrainTracker::trackGrains()
 {
   mooseAssert(!_first_time, "Track grains may only be called when _tracking_step > _t_step");
-  mooseAssert(_is_master, "Track grains may only be called on the master rank");
 
-  // Reset Status on active unique grains
-  std::vector<unsigned int> map_sizes(_maps_size);
-  for (auto & grain : _feature_sets_old)
-  {
-    if (grain._status != Status::INACTIVE)
-    {
-      grain._status = Status::CLEAR;
-      map_sizes[grain._var_idx]++;
-    }
-  }
-
-  // Print out stats on overall tracking changes per var_idx
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
-  {
-    _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num]
-             << " -> " << _feature_counts_per_map[map_num];
-    if (map_sizes[map_num] > _feature_counts_per_map[map_num])
-      _console << "--";
-    else if (map_sizes[map_num] < _feature_counts_per_map[map_num])
-      _console << "++";
-  }
-  _console << '\n' << std::endl;
+  // Used to track indices for which to trigger the new grain callback on (used on all ranks)
+  auto old_max_grain_id = _max_curr_grain_id;
 
   /**
-   * To track grains across time steps, we will loop over our unique grains and link each one up with one of our new
-   * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
-   * index whose centroid is closest to this unique grain.
+   * Only the master rank does tracking, the remaining ranks
+   * wait to receive local to global indices from the master.
+   * I'm using a GOTO here rather than a gigantic if statement
+   * that's hard to see on any editor. All ranks participate
+   * in triggering the callback at the bottom of this method.
    */
-  std::map<unsigned int, unsigned int> new_grain_idx_to_existing_grain_idx;
-
-  for (auto old_grain_idx = beginIndex(_feature_sets_old); old_grain_idx < _feature_sets_old.size(); ++old_grain_idx)
+  if (_is_master)
   {
-    auto & old_grain = _feature_sets_old[old_grain_idx];
+    // Reset Status on active unique grains
+    std::vector<unsigned int> map_sizes(_maps_size);
+    for (auto & grain : _feature_sets_old)
+    {
+      if (grain._status != Status::INACTIVE)
+      {
+        grain._status = Status::CLEAR;
+        map_sizes[grain._var_idx]++;
+      }
+    }
 
-    if (old_grain._status == Status::INACTIVE)      // Don't try to find matches for inactive grains
-      continue;
-
-    unsigned int closest_match_idx;
-    bool found_one = false;
-    Real min_centroid_diff = std::numeric_limits<Real>::max();
+    // Print out stats on overall tracking changes per var_idx
+    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+    {
+      _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num]
+               << " -> " << _feature_counts_per_map[map_num];
+      if (map_sizes[map_num] > _feature_counts_per_map[map_num])
+        _console << "--";
+      else if (map_sizes[map_num] < _feature_counts_per_map[map_num])
+        _console << "++";
+    }
+    _console << '\n' << std::endl;
 
     /**
-     * The _feature_sets vector is constructed by _var_idx so we can avoid looping over all indices.
-     * We can quickly jump to the first matching index to reduce the number of comparisons and
-     * terminate our loop when our variable index stops matching.
+     * To track grains across time steps, we will loop over our unique grains and link each one up with one of our new
+     * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
+     * index whose centroid is closest to this unique grain.
      */
-    auto start_it = std::lower_bound(_feature_sets.begin(), _feature_sets.end(), old_grain._var_idx,
-                                     [](const FeatureData & item, unsigned int var_idx)
-                                     {
-                                       return item._var_idx < var_idx;
-                                     });
+    std::map<unsigned int, unsigned int> new_grain_idx_to_existing_grain_idx;
 
-    // We only need to examine grains that have matching variable indices
-    for (decltype(_feature_sets.size()) new_grain_idx = std::distance(_feature_sets.begin(), start_it);
-         new_grain_idx < _feature_sets.size() && _feature_sets[new_grain_idx]._var_idx == old_grain._var_idx;
-         ++new_grain_idx)
+    for (auto old_grain_idx = beginIndex(_feature_sets_old); old_grain_idx < _feature_sets_old.size(); ++old_grain_idx)
     {
-      Real curr_centroid_diff = centroidRegionDistance(old_grain._bboxes, _feature_sets[new_grain_idx]._bboxes);
-      if (curr_centroid_diff <= min_centroid_diff)
+      auto & old_grain = _feature_sets_old[old_grain_idx];
+
+      if (old_grain._status == Status::INACTIVE)      // Don't try to find matches for inactive grains
+        continue;
+
+      unsigned int closest_match_idx;
+      bool found_one = false;
+      Real min_centroid_diff = std::numeric_limits<Real>::max();
+
+      /**
+       * The _feature_sets vector is constructed by _var_idx so we can avoid looping over all indices.
+       * We can quickly jump to the first matching index to reduce the number of comparisons and
+       * terminate our loop when our variable index stops matching.
+       */
+      auto start_it = std::lower_bound(_feature_sets.begin(), _feature_sets.end(), old_grain._var_idx,
+                                       [](const FeatureData & item, unsigned int var_idx)
+                                       {
+                                         return item._var_idx < var_idx;
+                                       });
+
+      // We only need to examine grains that have matching variable indices
+      for (decltype(_feature_sets.size()) new_grain_idx = std::distance(_feature_sets.begin(), start_it);
+           new_grain_idx < _feature_sets.size() && _feature_sets[new_grain_idx]._var_idx == old_grain._var_idx;
+           ++new_grain_idx)
       {
-        found_one = true;
-        closest_match_idx = new_grain_idx;
-        min_centroid_diff = curr_centroid_diff;
+        Real curr_centroid_diff = centroidRegionDistance(old_grain._bboxes, _feature_sets[new_grain_idx]._bboxes);
+        if (curr_centroid_diff <= min_centroid_diff)
+        {
+          found_one = true;
+          closest_match_idx = new_grain_idx;
+          min_centroid_diff = curr_centroid_diff;
+        }
       }
-    }
 
-    if (found_one)
-    {
-     /**
-      * It's possible that multiple existing grains will map to a single new grain (indicated by finding multiple
-      * matches when we are building this map). This will happen any time a grain disappears during
-      * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
-      */
-      const auto map_it = new_grain_idx_to_existing_grain_idx.find(closest_match_idx);
-
-      if (map_it != new_grain_idx_to_existing_grain_idx.end())
+      if (found_one)
       {
-        // The new feature being competed for
-        auto & feature = _feature_sets[closest_match_idx];
-
-        // The other old grain competing to match up to the same new grain
-        auto & other_old_grain = _feature_sets_old[map_it->second];
-
-        auto centroid_diff1 = centroidRegionDistance(feature._bboxes, old_grain._bboxes);
-        auto centroid_diff2 = centroidRegionDistance(feature._bboxes, other_old_grain._bboxes);
-
-        auto & inactive_grain = (centroid_diff1 < centroid_diff2) ? other_old_grain : old_grain;
-
-        inactive_grain._status = Status::INACTIVE;
-        _console << "Marking Grain " << inactive_grain._id << " as INACTIVE (variable index: "
-                 << inactive_grain._var_idx << ")\n"
-                 << inactive_grain;
-
         /**
-         * If the grain we just marked inactive was the one whose index was in the new grain
-         * to existing grain map (other_old_grain). Then we need to update the map to point
-         * to the new match winner.
+         * It's possible that multiple existing grains will map to a single new grain (indicated by finding multiple
+         * matches when we are building this map). This will happen any time a grain disappears during
+         * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
          */
-        if (&inactive_grain == &other_old_grain)
+        const auto map_it = new_grain_idx_to_existing_grain_idx.find(closest_match_idx);
+
+        if (map_it != new_grain_idx_to_existing_grain_idx.end())
+        {
+          // The new feature being competed for
+          auto & feature = _feature_sets[closest_match_idx];
+
+          // The other old grain competing to match up to the same new grain
+          auto & other_old_grain = _feature_sets_old[map_it->second];
+
+          auto centroid_diff1 = centroidRegionDistance(feature._bboxes, old_grain._bboxes);
+          auto centroid_diff2 = centroidRegionDistance(feature._bboxes, other_old_grain._bboxes);
+
+          auto & inactive_grain = (centroid_diff1 < centroid_diff2) ? other_old_grain : old_grain;
+
+          inactive_grain._status = Status::INACTIVE;
+          _console << "Marking Grain " << inactive_grain._id << " as INACTIVE (variable index: "
+                   << inactive_grain._var_idx << ")\n"
+                   << inactive_grain;
+
+          /**
+           * If the grain we just marked inactive was the one whose index was in the new grain
+           * to existing grain map (other_old_grain). Then we need to update the map to point
+           * to the new match winner.
+           */
+          if (&inactive_grain == &other_old_grain)
+            new_grain_idx_to_existing_grain_idx[closest_match_idx] = old_grain_idx;
+        }
+        else
           new_grain_idx_to_existing_grain_idx[closest_match_idx] = old_grain_idx;
       }
-      else
-        new_grain_idx_to_existing_grain_idx[closest_match_idx] = old_grain_idx;
     }
-  }
 
-  // Mark all resolved grain matches
-  for (const auto & new_to_exist_kv : new_grain_idx_to_existing_grain_idx)
-  {
-    auto curr_idx = new_to_exist_kv.second;
-    auto new_idx = new_to_exist_kv.first;
+    // Mark all resolved grain matches
+    for (const auto & new_to_exist_kv : new_grain_idx_to_existing_grain_idx)
+    {
+      auto curr_idx = new_to_exist_kv.second;
+      auto new_idx = new_to_exist_kv.first;
 
-    mooseAssert(new_idx < _feature_sets.size(), "Invalid feature index");
-    mooseAssert(_feature_sets_old[curr_idx]._id != libMesh::invalid_uint, "Invalid ID in old grain structure");
+      mooseAssert(new_idx < _feature_sets.size(), "Invalid feature index");
+      mooseAssert(_feature_sets_old[curr_idx]._id != libMesh::invalid_uint, "Invalid ID in old grain structure");
 
-    _feature_sets[new_idx]._id = _feature_sets_old[curr_idx]._id;   // Transfer ID
-    _feature_sets[new_idx]._status = Status::MARKED;                // Mark the status in the new set
-    _feature_sets_old[curr_idx]._status = Status::MARKED;           // Mark the status in the old set
-  }
+      _feature_sets[new_idx]._id = _feature_sets_old[curr_idx]._id;   // Transfer ID
+      _feature_sets[new_idx]._status = Status::MARKED;                // Mark the status in the new set
+      _feature_sets_old[curr_idx]._status = Status::MARKED;           // Mark the status in the old set
+    }
+
+    /**
+     * At this point we have should have only two cases left to handle:
+     * Case 1: A grain in the new set who has an unset status (These are new grains, previously untracked)
+     *         This case is easy to understand. Since we are matching up grains by looking at the old set
+     *         and finding closest matches in the new set, any grain in the new set that isn't matched up
+     *         is simply new since some other grain satisfied each and every request from the old set.
+
+     * Case 2: A grain in the old set who has an unset status (These are inactive grains that haven't been marked)
+     *         We can only fall into this case when the very last grain on a given variable disappears
+     *         during the current time step. In that case we never have a matching _var_idx in the
+     *         comparison loop above so that old grain never competes for any new grain which means
+     *         it can't be marked inactive in the loop above.
+     */
+
+    // Case 1 (new grains in _feature_sets):
+    for (auto feature_num = beginIndex(_feature_sets); feature_num < _feature_sets.size(); ++feature_num)
+    {
+      auto & feature = _feature_sets[feature_num];
+
+      // New Grain
+      if (feature._status == Status::CLEAR)
+      {
+        mooseAssert(new_grain_idx_to_existing_grain_idx.find(feature_num) == new_grain_idx_to_existing_grain_idx.end(),
+                    "New grain index shows up in new to old map - this shouldn't be possible");
+        mooseAssert(!_ebsd_reader || !_first_time, "Can't create new grains in intial EBSD step, logic error");
+
+        auto new_idx = getNextUniqueID();
+        _feature_sets[feature_num]._id = new_idx;                      // Set the ID
+        _feature_sets[feature_num]._status = Status::MARKED;           // Mark it
+      }
+    }
+
+    // Case 2 (inactive grains in _feature_sets_old)
+    for (auto & grain : _feature_sets_old)
+    {
+      if (grain._status == Status::CLEAR)
+      {
+        grain._status = Status::INACTIVE;
+        _console << "Marking Grain " << grain._id << " as INACTIVE (variable index: "
+                 << grain._var_idx <<  ")\n"
+                 << grain;
+      }
+    }
+  } // is_master
+
+  /*************************************************************
+   ****************** COLLECTIVE WORK SECTION ******************
+   *************************************************************/
+
+  // Make IDs on all non-master ranks consistent
+  scatterAndUpdateRanks();
+
+  // Build up an id to index map
+  _communicator.broadcast(_max_curr_grain_id);
+  buildGrainIdToGrainIdx(_max_curr_grain_id);
 
   /**
-   * At this point we have should have only two cases left to handle:
-   * Case 1: A grain in the new set who has an unset status (These are new grains, previously untracked)
-   *         This case is easy to understand. Since we are matching up grains by looking at the old set
-   *         and finding closest matches in the new set, any grain in the new set that isn't matched up
-   *         is simply new since some other grain satisfied each and every request from the old set.
-
-   * Case 2: A grain in the old set who has an unset status (These are inactive grains that haven't been marked)
-   *         We can only fall into this case when the very last grain on a given variable disappears
-   *         during the current time step. In that case we never have a matching _var_idx in the
-   *         comparison loop above so that old grain never competes for any new grain which means
-   *         it can't be marked inactive in the loop above.
+   * Trigger callback for new grains
    */
-
-  // Case 1 (new grains in _feature_sets):
-  for (auto feature_num = beginIndex(_feature_sets); feature_num < _feature_sets.size(); ++feature_num)
+  if (old_max_grain_id < _max_curr_grain_id)
   {
-    auto & feature = _feature_sets[feature_num];
-
-    // New Grain
-    if (feature._status == Status::CLEAR)
-    {
-      mooseAssert(new_grain_idx_to_existing_grain_idx.find(feature_num) == new_grain_idx_to_existing_grain_idx.end(),
-                  "New grain index shows up in new to old map - this shouldn't be possible");
-      mooseAssert(!_ebsd_reader || !_first_time, "Can't create new grains in intial EBSD step, logic error");
-
-      auto new_idx = getNextUniqueID();
-      _feature_sets[feature_num]._id = new_idx;                      // Set the ID
-      _feature_sets[feature_num]._status = Status::MARKED;           // Mark it
-    }
+    for (auto new_id = old_max_grain_id + 1; new_id <= _max_curr_grain_id; ++new_id)
+      // Don't trigger the callback on the reserve IDs
+      if (new_id >= _reserve_grain_first_idx + _n_reserve_ops)
+        newGrainCreated(new_id);
   }
-
-  // Case 2 (inactive grains in _feature_sets_old)
-  for (auto & grain : _feature_sets_old)
-    if (grain._status == Status::CLEAR)
-    {
-      grain._status = Status::INACTIVE;
-      _console << "Marking Grain " << grain._id << " as INACTIVE (variable index: "
-               << grain._var_idx <<  ")\n"
-               << grain;
-    }
 }
 
 void
 GrainTracker::newGrainCreated(unsigned int new_grain_id)
 {
-  if (!_first_time)
+  if (!_first_time && _is_master)
   {
-    auto new_idx = _feature_sets.size() - (_max_curr_grain_id - new_grain_id) - 1;
-    mooseAssert(new_idx < _feature_sets.size(), "new_idx in newGrainCreated is out of bounds");
+    mooseAssert(new_grain_id < _grain_id_to_grain_idx.size(), "new_grain_id is out of bounds");
+    auto grain_idx = _grain_id_to_grain_idx[new_grain_id];
+    mooseAssert(grain_idx != libMesh::invalid_uint && grain_idx < _feature_sets.size(), "new_grain_id appears to be invalid");
 
+    const auto & grain = _feature_sets[grain_idx];
     _console << COLOR_YELLOW
              << "*****************************************************************************\n"
-             << "Couldn't find a matching grain while working on variable index: " << _feature_sets[new_idx]._var_idx
-             << "\nCreating new unique grain: " << new_grain_id << '\n' << _feature_sets[new_idx]
+             << "Couldn't find a matching grain while working on variable index: " << grain._var_idx
+             << "\nCreating new unique grain: " << new_grain_id << '\n' << grain
              << "\n*****************************************************************************\n" << COLOR_DEFAULT;
   }
 }

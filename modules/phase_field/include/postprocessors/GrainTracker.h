@@ -90,6 +90,11 @@ protected:
   void remapGrains();
 
   /**
+   * Builds a grain ID to grain index for operations that need to access a grain by ID instead of index.
+   */
+  void buildGrainIdToGrainIdx(unsigned int max_id);
+
+  /**
    * Populates and sorts a min_distances vector with the minimum distances to all grains in the simulation
    * for a given grain. There are _vars.size() entries in the outer vector, one for each order parameter.
    * A list of grains with the same OP are ordered in lists per OP.
