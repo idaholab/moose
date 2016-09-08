@@ -31,6 +31,14 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
+  // Struct used to transfer minimal data to all ranks
+  struct PartialFeatureData
+  {
+    unsigned int id;
+    Point centroid;
+    Real volume;
+  };
+
   struct CacheValues
   {
     Real current;
@@ -93,6 +101,12 @@ protected:
    * Builds a grain ID to grain index for operations that need to access a grain by ID instead of index.
    */
   void buildGrainIdToGrainIdx(unsigned int max_id);
+
+  /**
+   * Broadcast essential Grain information to all processors. This method is used to get certain
+   * attributes like volume and centroid updated.
+   */
+  void broadcastAndUpdateGrainData();
 
   /**
    * Populates and sorts a min_distances vector with the minimum distances to all grains in the simulation
@@ -247,5 +261,9 @@ struct GrainDistance
   unsigned int _unique_id;
   unsigned int _var_index;
 };
+
+template<> void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context);
+template<> void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context);
+
 
 #endif

@@ -19,6 +19,22 @@
 #include <algorithm>
 
 template<>
+void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context)
+{
+  storeHelper(stream, feature.id, context);
+  storeHelper(stream, feature.volume, context);
+  storeHelper(stream, feature.centroid, context);
+}
+
+template<>
+void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context)
+{
+  loadHelper(stream, feature.id, context);
+  loadHelper(stream, feature.volume, context);
+  loadHelper(stream, feature.centroid, context);
+}
+
+template<>
 InputParameters validParams<GrainTracker>()
 {
   InputParameters params = validParams<FeatureFloodCount>();
@@ -290,6 +306,11 @@ GrainTracker::finalize()
   _console << "Finished inside of trackGrains" << std::endl;
 
   /**
+   * Broadcast essential data
+   */
+  broadcastAndUpdateGrainData();
+
+  /**
    * Remap Grains
    */
   Moose::perf_log.push("remapGrains()", "GrainTracker");
@@ -348,6 +369,58 @@ GrainTracker::getOpToGrainsVector(dof_id_type elem_id) const
     return _empty_2;
   }
 
+}
+
+void
+GrainTracker::broadcastAndUpdateGrainData()
+{
+  std::vector<PartialFeatureData> root_feature_data;
+  std::vector<std::string> send_buffer(1), recv_buffer;
+
+  if (_is_master)
+  {
+    root_feature_data.reserve(_feature_sets.size());
+
+    // Populate a subset of the information in a small data structure
+    std::transform(_feature_sets.begin(), _feature_sets.end(), std::back_inserter(root_feature_data),
+                   [](FeatureData & feature)
+                   {
+                     PartialFeatureData partial_feature;
+                     partial_feature.id = feature._id;
+                     partial_feature.volume = feature._volume;
+                     partial_feature.centroid = feature._centroid;
+                     return partial_feature;
+                   });
+
+    std::ostringstream oss;
+    dataStore(oss, root_feature_data, this);
+    send_buffer[0].assign(oss.str());
+  }
+
+  // Broadcast the data to all ranks
+  _communicator.broadcast_packed_range((void *)(nullptr), send_buffer.begin(), send_buffer.end(),
+                                       (void *)(nullptr), std::back_inserter(recv_buffer));
+
+  // Unpack and update
+  if (!_is_master)
+  {
+    std::istringstream iss;
+    iss.str(recv_buffer[0]);
+    iss.clear();
+
+    dataLoad(iss, root_feature_data, this);
+
+    for (const auto & partial_data : root_feature_data)
+    {
+      // See if this processor has a record of this grain
+      if (partial_data.id < _grain_id_to_grain_idx.size() && _grain_id_to_grain_idx[partial_data.id] != libMesh::invalid_uint)
+      {
+        auto & grain = _feature_sets[_grain_id_to_grain_idx[partial_data.id]];
+        grain._centroid = partial_data.centroid;
+        grain._volume = partial_data.volume;
+      }
+    }
+  }
 }
 
 void
