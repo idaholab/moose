@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "TensorMechanicsPlasticMohrCoulomb.h"
-#include <math.h> // for M_PI
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticMohrCoulomb>()
@@ -32,17 +32,17 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const Input
     _phi(getUserObject<TensorMechanicsHardeningModel>("friction_angle")),
     _psi(getUserObject<TensorMechanicsHardeningModel>("dilation_angle")),
     _tip_scheme(getParam<MooseEnum>("tip_scheme")),
-    _small_smoother2(std::pow(getParam<Real>("mc_tip_smoother"), 2)),
+    _small_smoother2(Utility::pow<2>(getParam<Real>("mc_tip_smoother"))),
     _cap_start(getParam<Real>("cap_start")),
     _cap_rate(getParam<Real>("cap_rate")),
-    _tt(getParam<Real>("mc_edge_smoother")*M_PI/180.0),
+    _tt(getParam<Real>("mc_edge_smoother") * libMesh::pi / 180.0),
     _costt(std::cos(_tt)),
     _sintt(std::sin(_tt)),
     _cos3tt(std::cos(3*_tt)),
     _sin3tt(std::sin(3*_tt)),
     _cos6tt(std::cos(6*_tt)),
     _sin6tt(std::sin(6*_tt)),
-    _lode_cutoff(parameters.isParamValid("mc_lode_cutoff") ? getParam<Real>("mc_lode_cutoff") : 1.0E-5*std::pow(_f_tol, 2))
+    _lode_cutoff(parameters.isParamValid("mc_lode_cutoff") ? getParam<Real>("mc_lode_cutoff") : 1.0E-5*Utility::pow<2>(_f_tol))
 
 {
   if (_lode_cutoff < 0)
@@ -50,7 +50,7 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const Input
 
   // With arbitary UserObjects, it is impossible to check everything, and
   // I think this is the best I can do
-  if (phi(0) < 0 || psi(0) < 0 || phi(0) > M_PI/2.0 || psi(0) > M_PI/2.0)
+  if (phi(0) < 0 || psi(0) < 0 || phi(0) > libMesh::pi / 2.0 || psi(0) > libMesh::pi / 2.0)
     mooseError("Mohr-Coulomb friction and dilation angles must lie in [0, Pi/2]");
   if (phi(0) < psi(0))
     mooseError("Mohr-Coulomb friction angle must not be less than Mohr-Coulomb dilation angle");
@@ -62,7 +62,7 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const Input
   // I think the following is the best we can do
   Real sin_angle = std::sin(std::max(phi(0), psi(0)));
   sin_angle = std::max(sin_angle, std::sin(std::max(phi(1E6), psi(1E6))));
-  Real rhs = std::sqrt(3)*(35*std::sin(_tt) + 14*std::sin(5*_tt) - 5*std::sin(7*_tt))/16/std::pow(std::cos(_tt), 5)/(11 - 10*std::cos(2*_tt));
+  Real rhs = std::sqrt(3)*(35*std::sin(_tt) + 14*std::sin(5*_tt) - 5*std::sin(7*_tt))/16/Utility::pow<5>(std::cos(_tt))/(11 - 10*std::cos(2*_tt));
   if (rhs <= sin_angle)
     mooseError("Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value");
 }
@@ -80,16 +80,16 @@ TensorMechanicsPlasticMohrCoulomb::yieldFunction(const RankTwoTensor & stress, R
     // the non-edge-smoothed version
     std::vector<Real> eigvals;
     stress.symmetricEigenvalues(eigvals);
-    return mean_stress*sinphi + std::sqrt(smooth(stress) + 0.25*std::pow(eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sinphi, 2)) - cohesion(intnl)*cosphi;
+    return mean_stress*sinphi + std::sqrt(smooth(stress) + 0.25*Utility::pow<2>(eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sinphi)) - cohesion(intnl)*cosphi;
   }
   else
   {
     // the edge-smoothed version
     Real aaa, bbb, ccc;
     abbo(sin3Lode, sinphi, aaa, bbb, ccc);
-    Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
+    Real kk = aaa + bbb*sin3Lode + ccc*Utility::pow<2>(sin3Lode);
     Real sibar2 = stress.secondInvariant();
-    return mean_stress*sinphi + std::sqrt(smooth(stress) + sibar2*std::pow(kk, 2)) - cohesion(intnl)*cosphi;
+    return mean_stress*sinphi + std::sqrt(smooth(stress) + sibar2*Utility::pow<2>(kk)) - cohesion(intnl)*cosphi;
   }
 }
 
@@ -107,7 +107,7 @@ TensorMechanicsPlasticMohrCoulomb::df_dsig(const RankTwoTensor & stress, const R
     stress.dsymmetricEigenvalues(eigvals, deigvals);
     Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sin_angle;
     RankTwoTensor dtmp = deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2*dmean_stress)*sin_angle;
-    Real denom = std::sqrt(smooth(stress) + 0.25*std::pow(tmp, 2));
+    Real denom = std::sqrt(smooth(stress) + 0.25*Utility::pow<2>(tmp));
     return dmean_stress*sin_angle + (0.5*dsmooth(stress)*dmean_stress + 0.25*tmp*dtmp)/denom;
   }
   else
@@ -115,12 +115,12 @@ TensorMechanicsPlasticMohrCoulomb::df_dsig(const RankTwoTensor & stress, const R
     // the edge-smoothed version
     Real aaa, bbb, ccc;
     abbo(sin3Lode, sin_angle, aaa, bbb, ccc);
-    Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
+    Real kk = aaa + bbb*sin3Lode + ccc*Utility::pow<2>(sin3Lode);
     RankTwoTensor dkk = (bbb + 2*ccc*sin3Lode)*stress.dsin3Lode(_lode_cutoff);
     Real sibar2 = stress.secondInvariant();
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
-    Real denom = std::sqrt(smooth(stress) + sibar2*std::pow(kk, 2));
-    return dmean_stress*sin_angle + (0.5*dsmooth(stress)*dmean_stress + 0.5*dsibar2*std::pow(kk, 2) + sibar2*kk*dkk)/denom;
+    Real denom = std::sqrt(smooth(stress) + sibar2*Utility::pow<2>(kk));
+    return dmean_stress*sin_angle + (0.5*dsmooth(stress)*dmean_stress + 0.5*dsibar2*Utility::pow<2>(kk) + sibar2*kk*dkk)/denom;
   }
 }
 
@@ -149,7 +149,7 @@ TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dintnl(const RankTwoTensor & s
     stress.symmetricEigenvalues(eigvals);
     Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sin_angle;
     Real dtmp = (eigvals[2] + eigvals[0] - 2*mean_stress)*dsin_angle;
-    Real denom = std::sqrt(smooth(stress) + 0.25*std::pow(tmp, 2));
+    Real denom = std::sqrt(smooth(stress) + 0.25*Utility::pow<2>(tmp));
     return mean_stress*dsin_angle + 0.25*tmp*dtmp/denom - dcohesion(intnl)*cos_angle - cohesion(intnl)*dcos_angle;
   }
   else
@@ -159,10 +159,10 @@ TensorMechanicsPlasticMohrCoulomb::dyieldFunction_dintnl(const RankTwoTensor & s
     abbo(sin3Lode, sin_angle, aaa, bbb, ccc);
     Real daaa, dbbb, dccc;
     dabbo(sin3Lode, sin_angle, daaa, dbbb, dccc);
-    Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
-    Real dkk = (daaa + dbbb*sin3Lode + dccc*std::pow(sin3Lode, 2))*dsin_angle;
+    Real kk = aaa + bbb*sin3Lode + ccc*Utility::pow<2>(sin3Lode);
+    Real dkk = (daaa + dbbb*sin3Lode + dccc*Utility::pow<2>(sin3Lode))*dsin_angle;
     Real sibar2 = stress.secondInvariant();
-    Real denom = std::sqrt(smooth(stress) + sibar2*std::pow(kk, 2));
+    Real denom = std::sqrt(smooth(stress) + sibar2*Utility::pow<2>(kk));
     return mean_stress*dsin_angle + sibar2*kk*dkk/denom - dcohesion(intnl)*cos_angle - cohesion(intnl)*dcos_angle;
   }
 }
@@ -193,8 +193,8 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
 
     Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2*mean_stress)*sin_angle;
     RankTwoTensor dtmp = deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2*dmean_stress)*sin_angle;
-    Real denom = std::sqrt(smooth(stress) + 0.25*std::pow(tmp, 2));
-    Real denom3 = std::pow(denom, 3.0);
+    Real denom = std::sqrt(smooth(stress) + 0.25*Utility::pow<2>(tmp));
+    Real denom3 = Utility::pow<3>(denom);
     Real d2smooth_over_denom = d2smooth(stress)/denom;
     RankTwoTensor numer = dsmooth(stress)*dmean_stress + 0.5*tmp*dtmp;
 
@@ -216,7 +216,7 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
     Real aaa, bbb, ccc;
     abbo(sin3Lode, sin_angle, aaa, bbb, ccc);
     RankTwoTensor dsin3Lode = stress.dsin3Lode(_lode_cutoff);
-    Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
+    Real kk = aaa + bbb*sin3Lode + ccc*Utility::pow<2>(sin3Lode);
     RankTwoTensor dkk = (bbb + 2*ccc*sin3Lode)*dsin3Lode;
     RankFourTensor d2kk = (bbb + 2*ccc*sin3Lode)*stress.d2sin3Lode(_lode_cutoff);
     for (unsigned i = 0; i < 3; ++i)
@@ -229,12 +229,12 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
     RankFourTensor d2sibar2 = stress.d2secondInvariant();
 
-    Real denom = std::sqrt(smooth(stress) + sibar2*std::pow(kk, 2));
-    Real denom3 = std::pow(denom, 3.0);
+    Real denom = std::sqrt(smooth(stress) + sibar2*Utility::pow<2>(kk));
+    Real denom3 = Utility::pow<3>(denom);
     Real d2smooth_over_denom = d2smooth(stress)/denom;
     RankTwoTensor numer_full = 0.5*dsmooth(stress)*dmean_stress + 0.5*dsibar2*kk*kk + sibar2*kk*dkk;
 
-    dr_dstress = (0.5*d2sibar2*std::pow(kk, 2) + sibar2*kk*d2kk)/denom;
+    dr_dstress = (0.5*d2sibar2*Utility::pow<2>(kk) + sibar2*kk*d2kk)/denom;
     for (unsigned i = 0; i < 3; ++i)
       for (unsigned j = 0; j < 3; ++j)
         for (unsigned k = 0; k < 3; ++k)
@@ -268,27 +268,27 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dintnl(const RankTwoTensor & s
     Real dtmp_dintnl = (eigvals[2] + eigvals[0] - 2*mean_stress)*dsin_angle;
     RankTwoTensor dtmp_dstress = deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2*dmean_stress)*sin_angle;
     RankTwoTensor d2tmp_dstress_dintnl = (deigvals[2] + deigvals[0] - 2*dmean_stress)*dsin_angle;
-    Real denom = std::sqrt(smooth(stress) + 0.25*std::pow(tmp, 2));
-    return dmean_stress*dsin_angle + 0.25*dtmp_dintnl*dtmp_dstress/denom + 0.25*tmp*d2tmp_dstress_dintnl/denom - 0.5*(dsmooth(stress)*dmean_stress + 0.5*tmp*dtmp_dstress)*0.25*tmp*dtmp_dintnl/std::pow(denom, 3);
+    Real denom = std::sqrt(smooth(stress) + 0.25*Utility::pow<2>(tmp));
+    return dmean_stress*dsin_angle + 0.25*dtmp_dintnl*dtmp_dstress/denom + 0.25*tmp*d2tmp_dstress_dintnl/denom - 0.5*(dsmooth(stress)*dmean_stress + 0.5*tmp*dtmp_dstress)*0.25*tmp*dtmp_dintnl/Utility::pow<3>(denom);
   }
   else
   {
     // the edge-smoothed version
     Real aaa, bbb, ccc;
     abbo(sin3Lode, sin_angle, aaa, bbb, ccc);
-    Real kk = aaa + bbb*sin3Lode + ccc*std::pow(sin3Lode, 2);
+    Real kk = aaa + bbb*sin3Lode + ccc*Utility::pow<2>(sin3Lode);
 
     Real daaa, dbbb, dccc;
     dabbo(sin3Lode, sin_angle, daaa, dbbb, dccc);
-    Real dkk_dintnl = (daaa + dbbb*sin3Lode + dccc*std::pow(sin3Lode, 2))*dsin_angle;
+    Real dkk_dintnl = (daaa + dbbb*sin3Lode + dccc*Utility::pow<2>(sin3Lode))*dsin_angle;
     RankTwoTensor dkk_dstress = (bbb + 2*ccc*sin3Lode)*stress.dsin3Lode(_lode_cutoff);
     RankTwoTensor d2kk_dstress_dintnl = (dbbb + 2*dccc*sin3Lode)*stress.dsin3Lode(_lode_cutoff)*dsin_angle;
 
     Real sibar2 = stress.secondInvariant();
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
-    Real denom = std::sqrt(smooth(stress) + sibar2*std::pow(kk, 2));
+    Real denom = std::sqrt(smooth(stress) + sibar2*Utility::pow<2>(kk));
 
-    return dmean_stress*dsin_angle + (dsibar2*kk*dkk_dintnl + sibar2*dkk_dintnl*dkk_dstress + sibar2*kk*d2kk_dstress_dintnl)/denom - (0.5*dsmooth(stress)*dmean_stress + 0.5*dsibar2*std::pow(kk, 2) + sibar2*kk*dkk_dstress)*sibar2*kk*dkk_dintnl/std::pow(denom, 3);
+    return dmean_stress*dsin_angle + (dsibar2*kk*dkk_dintnl + sibar2*dkk_dintnl*dkk_dstress + sibar2*kk*d2kk_dstress_dintnl)/denom - (0.5*dsmooth(stress)*dmean_stress + 0.5*dsibar2*Utility::pow<2>(kk) + sibar2*kk*dkk_dstress)*sibar2*kk*dkk_dintnl/Utility::pow<3>(denom);
   }
 }
 
@@ -339,14 +339,14 @@ TensorMechanicsPlasticMohrCoulomb::abbo(const Real sin3lode, const Real sin_angl
 
   ccc = -_cos3tt*tmp1;
   ccc += (sin3lode >= 0 ? -3*_sin3tt*tmp2 : 3*_sin3tt*tmp2);
-  ccc /= 18*std::pow(_cos3tt, 3);
+  ccc /= 18*Utility::pow<3>(_cos3tt);
 
   bbb = (sin3lode >= 0 ? _sin6tt*tmp1 : -_sin6tt*tmp1);
   bbb -= 6*_cos6tt*tmp2;
-  bbb /= 18*std::pow(_cos3tt, 3);
+  bbb /= 18*Utility::pow<3>(_cos3tt);
 
   aaa = (sin3lode >= 0 ? -sin_angle*_sintt/std::sqrt(3.0) - bbb*_sin3tt : sin_angle*_sintt/std::sqrt(3.0) + bbb*_sin3tt);
-  aaa += -ccc*std::pow(_sin3tt, 2) + _costt;
+  aaa += -ccc*Utility::pow<2>(_sin3tt) + _costt;
 }
 
 void
@@ -357,14 +357,14 @@ TensorMechanicsPlasticMohrCoulomb::dabbo(const Real sin3lode, const Real /*sin_a
 
   dccc = -_cos3tt*dtmp1;
   dccc += (sin3lode >= 0 ? -3*_sin3tt*dtmp2 : 3*_sin3tt*dtmp2);
-  dccc /= 18*std::pow(_cos3tt, 3);
+  dccc /= 18*Utility::pow<3>(_cos3tt);
 
   dbbb = (sin3lode >= 0 ? _sin6tt*dtmp1 : -_sin6tt*dtmp1);
   dbbb -= 6*_cos6tt*dtmp2;
-  dbbb /= 18*std::pow(_cos3tt, 3);
+  dbbb /= 18*Utility::pow<3>(_cos3tt);
 
   daaa = (sin3lode >= 0 ? -_sintt/std::sqrt(3.0) - dbbb*_sin3tt : _sintt/std::sqrt(3.0) + dbbb*_sin3tt);
-  daaa += -dccc*std::pow(_sin3tt, 2);
+  daaa += -dccc*Utility::pow<2>(_sin3tt);
 }
 
 Real
@@ -377,7 +377,7 @@ TensorMechanicsPlasticMohrCoulomb::smooth(const RankTwoTensor & stress) const
     Real p = 0;
     if (x > 0)
       p = x*(1 - std::exp(-_cap_rate*x));
-    smoother2 += std::pow(p, 2);
+    smoother2 += Utility::pow<2>(p);
   }
   return smoother2;
 }
@@ -416,9 +416,9 @@ TensorMechanicsPlasticMohrCoulomb::d2smooth(const RankTwoTensor & stress) const
     {
       p = x*(1 - std::exp(-_cap_rate*x));
       dp_dx = (1 - std::exp(-_cap_rate*x)) + x*_cap_rate*std::exp(-_cap_rate*x);
-      d2p_dx2 = 2*_cap_rate*std::exp(-_cap_rate*x) - x*std::pow(_cap_rate, 2)*std::exp(-_cap_rate*x);
+      d2p_dx2 = 2*_cap_rate*std::exp(-_cap_rate*x) - x*Utility::pow<2>(_cap_rate)*std::exp(-_cap_rate*x);
     }
-    d2smoother2 += 2*std::pow(dp_dx, 2) + 2*p*d2p_dx2;
+    d2smoother2 += 2*Utility::pow<2>(dp_dx) + 2*p*d2p_dx2;
   }
   return d2smoother2;
 }
@@ -428,4 +428,3 @@ TensorMechanicsPlasticMohrCoulomb::modelName() const
 {
   return "MohrCoulomb";
 }
-

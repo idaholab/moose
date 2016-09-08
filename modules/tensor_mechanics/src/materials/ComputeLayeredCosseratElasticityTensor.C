@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ComputeLayeredCosseratElasticityTensor.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<ComputeLayeredCosseratElasticityTensor>()
@@ -36,7 +37,7 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(c
   // shear modulus of jointed material
   const Real Gprime = G * b * ks / (b * ks + G);
 
-  const Real a0000 = (b * kn > 0.0) ? E / (1.0 - nu * nu - std::pow(nu * (1.0 + nu), 2) / (1.0 - nu * nu + E / b / kn)) : E / (1.0 - nu * nu);
+  const Real a0000 = (b * kn > 0.0) ? E / (1.0 - nu * nu - Utility::pow<2>(nu * (1.0 + nu)) / (1.0 - nu * nu + E / b / kn)) : E / (1.0 - nu * nu);
   const Real a0011 = nu * a0000 / (1.0 - nu);
   const Real a2222 = (b * kn > 0.0) ? 1.0 / ( (1.0 + nu) * (1.0 - 2.0 * nu) / E / (1.0 - nu) + 1.0 / b / kn) : 0.0;
   const Real a0022 = nu * a2222 / (1.0 - nu);
@@ -55,7 +56,7 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(c
 
   // most of Bijkl is zero since the only nonzero moment stresses are m01 and m10.
   // It also does not have the usual symmetries.
-  const Real D0 = E * std::pow(b, 3) / 12.0 / (1.0 - nu * nu);   // bending rigidity of a layer
+  const Real D0 = E * Utility::pow<3>(b) / 12.0 / (1.0 - nu * nu);   // bending rigidity of a layer
   const Real b0101 = D0 / b * G / (2.0 * b * ks + G);
   const Real b0110 = - nu * b0101;
   _Bijkl(0, 1, 0, 1) = _Bijkl(1, 0, 1, 0) = b0101;

@@ -13,8 +13,7 @@
 /****************************************************************/
 
 #include "DGDiffusion.h"
-
-#include <cmath>
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<DGDiffusion>()
@@ -39,7 +38,7 @@ DGDiffusion::computeQpResidual(Moose::DGResidualType type)
   Real r = 0;
 
   const unsigned int elem_b_order = _var.order();
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
+  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./Utility::pow<2>(elem_b_order);
 
   switch (type)
   {
@@ -67,7 +66,7 @@ DGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
   Real r = 0;
 
   const unsigned int elem_b_order = _var.order();
-  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./std::pow(elem_b_order, 2.);
+  const double h_elem = _current_elem->volume()/_current_side_elem->volume() * 1./Utility::pow<2>(elem_b_order);
 
   switch (type)
   {
@@ -99,4 +98,3 @@ DGDiffusion::computeQpJacobian(Moose::DGJacobianType type)
 
   return r;
 }
-

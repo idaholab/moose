@@ -11,6 +11,8 @@
 #include "MooseException.h"
 #include "RotationMatrix.h" // for rotVecToZ
 
+#include "libmesh/utility.h"
+
 template<>
 InputParameters validParams<ComputeMultiPlasticityStress>()
 {
@@ -573,7 +575,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   Real nr_res2 = 0;
   for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (act[surface])
-      nr_res2 += 0.5*std::pow(f[surface]/_f[modelNumber(surface)]->_f_tol, 2.0);
+      nr_res2 += 0.5 * Utility::pow<2>(f[surface]/_f[modelNumber(surface)]->_f_tol);
 
   successful_return = false;
 
@@ -761,7 +763,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
         if (act[surface])
         {
           if (f[ind] > _f[modelNumber(surface)]->_f_tol)
-            nr_res2 += 0.5*std::pow(f[ind]/_f[modelNumber(surface)]->_f_tol, 2);
+            nr_res2 += 0.5 * Utility::pow<2>(f[ind]/_f[modelNumber(surface)]->_f_tol);
           ind++;
         }
     }
@@ -1116,14 +1118,14 @@ ComputeMultiPlasticityStress::residual2(const std::vector<Real> & pm, const std:
       if (!deactivated_due_to_ld[surface])
       {
         if (!(pm[surface] == 0 && f[ind] <= 0) )
-          nr_res2 += 0.5*std::pow( f[ind]/_f[modelNumber(surface)]->_f_tol, 2);
+          nr_res2 += 0.5 * Utility::pow<2>( f[ind]/_f[modelNumber(surface)]->_f_tol);
       }
       else if (deactivated_due_to_ld[surface] && f[ind] > 0)
-        nr_res2 += 0.5*std::pow(f[ind]/_f[modelNumber(surface)]->_f_tol, 2);
+        nr_res2 += 0.5 * Utility::pow<2>(f[ind]/_f[modelNumber(surface)]->_f_tol);
       ind++;
     }
 
-  nr_res2 += 0.5*std::pow(epp.L2norm()/_epp_tol, 2);
+  nr_res2 += 0.5 * Utility::pow<2>(epp.L2norm()/_epp_tol);
 
   std::vector<bool> active_not_deact(_num_surfaces);
   for (unsigned surface = 0; surface < _num_surfaces; ++surface)
@@ -1131,7 +1133,7 @@ ComputeMultiPlasticityStress::residual2(const std::vector<Real> & pm, const std:
   ind = 0;
   for (unsigned model = 0; model < _num_models; ++model)
     if (anyActiveSurfaces(model, active_not_deact))
-      nr_res2 += 0.5*std::pow(ic[ind++]/_f[model]->_ic_tol, 2);
+      nr_res2 += 0.5 * Utility::pow<2>(ic[ind++]/_f[model]->_ic_tol);
 
   return nr_res2;
 }
@@ -1227,26 +1229,26 @@ ComputeMultiPlasticityStress::lineSearch(Real & nr_res2,
       // model as a cubic
       Real rhs1 = nr_res2 - f0 - lam*slope;
       Real rhs2 = f2 - f0 - lam2*slope;
-      Real a = (rhs1/std::pow(lam, 2) - rhs2/std::pow(lam2, 2))/(lam - lam2);
-      Real b = (-lam2*rhs1/std::pow(lam, 2) + lam*rhs2/std::pow(lam2, 2))/(lam - lam2);
+      Real a = (rhs1 / Utility::pow<2>(lam) - rhs2 / Utility::pow<2>(lam2)) / (lam - lam2);
+      Real b = (-lam2 * rhs1 / Utility::pow<2>(lam) + lam * rhs2 / Utility::pow<2>(lam2)) / (lam - lam2);
       if (a == 0)
-        tmp_lam = -slope/2.0/b;
+        tmp_lam = -slope / (2.0 * b);
       else
       {
-        Real disc = std::pow(b, 2) - 3*a*slope;
+        Real disc = Utility::pow<2>(b) - 3 * a * slope;
         if (disc < 0)
-          tmp_lam = 0.5*lam;
+          tmp_lam = 0.5 * lam;
         else if (b <= 0)
-          tmp_lam = (-b + std::sqrt(disc))/3.0/a;
+          tmp_lam = (-b + std::sqrt(disc)) / (3.0 * a);
         else
-          tmp_lam = -slope/(b + std::sqrt(disc));
+          tmp_lam = -slope / (b + std::sqrt(disc));
       }
-      if (tmp_lam > 0.5*lam)
-        tmp_lam = 0.5*lam;
+      if (tmp_lam > 0.5 * lam)
+        tmp_lam = 0.5 * lam;
     }
     lam2 = lam;
     f2 = nr_res2;
-    lam = std::max(tmp_lam, 0.1*lam);
+    lam = std::max(tmp_lam, 0.1 * lam);
   }
 
   if (lam < 1.0)

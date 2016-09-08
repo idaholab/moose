@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "InclusionProperties.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<InclusionProperties>()
@@ -59,7 +60,7 @@ InclusionProperties::computeQpProperties()
   {
     // Outside the inclusion
     Real l = 0.5 * (x*x + y*y - _a*_a - _b*_b   // Parameter l called lambda in the paper
-              + std::sqrt(std::pow((x*x + y*y - _a*_a + _b*_b),2) + 4*(_a*_a - _b*_b) * y*y) );
+              + std::sqrt(Utility::pow<2>((x*x + y*y - _a*_a + _b*_b)) + 4*(_a*_a - _b*_b) * y*y) );
     Real rho_a = _a / sqrt(_a*_a + l);
     Real rho_b = _b / sqrt(_b*_b + l);
     Real m_x = x / (_a*_a + l);
@@ -70,15 +71,15 @@ InclusionProperties::computeQpProperties()
                 - 4 * rho_b*rho_b * n_y*n_y - 4;
 
     Real H11 = rho_a * _b * (_a * rho_b + _b * rho_a + 2 * _a * rho_a*rho_a * rho_b
-            + _b * std::pow(rho_a, 3)) / std::pow((_a * rho_b + _b * rho_a), 2)
+            + _b * Utility::pow<3>(rho_a)) / Utility::pow<2>((_a * rho_b + _b * rho_a))
             + n_x*n_x * (2 - 6 * rho_a*rho_a + (8 * rho_a*rho_a + T_6) * n_x*n_x);
 
     Real H22 = rho_b * _a * (_a * rho_b + _b * rho_a + 2 * _b * rho_a * rho_b*rho_b
-            + _a * std::pow(rho_b, 3)) / std::pow((_a * rho_b + _b * rho_a), 2)
+            + _a * Utility::pow<3>(rho_b)) / Utility::pow<2>((_a * rho_b + _b * rho_a))
             + n_y*n_y * (2 - 6 * rho_b*rho_b + (8 * rho_b*rho_b + T_6) * n_y*n_y);
 
     Real H12 = (_a*_a * rho_a*rho_a * rho_b*rho_b + _b*_b * rho_a*rho_a + _a * _b * rho_a * rho_b)
-              / std::pow((_a * rho_b + _b * rho_a), 2)
+              / Utility::pow<2>((_a * rho_b + _b * rho_a))
             - rho_b*rho_b * n_x*n_x - rho_a*rho_a * n_y*n_y
             + (4*rho_a*rho_a + 4 * rho_b*rho_b + T_6) * n_x*n_x * n_y*n_y;
 
@@ -100,13 +101,13 @@ InclusionProperties::computeQpProperties()
                           * (H41 * _misfit[0] + H42 * _misfit[1]);
 
     Real J1 = rho_a*rho_a * rho_b * _b / (_a * rho_b + _b * rho_a);
-    Real J11 = std::pow(rho_a, 4) * rho_b * _b / (3 * _a*_a)
-              * (2 * _a * rho_b + _b * rho_a) / std::pow((_a * rho_b + _b * rho_a), 2);
-    Real J12 = std::pow(rho_a, 3) * std::pow(rho_b, 3)
-              / std::pow((_a * rho_b + _b * rho_a), 2);
+    Real J11 = Utility::pow<4>(rho_a) * rho_b * _b / (3 * _a*_a)
+              * (2 * _a * rho_b + _b * rho_a) / Utility::pow<2>((_a * rho_b + _b * rho_a));
+    Real J12 = Utility::pow<3>(rho_a) * Utility::pow<3>(rho_b)
+              / Utility::pow<2>((_a * rho_b + _b * rho_a));
     Real J2 = rho_b*rho_b * rho_a * _a / (_a * rho_b + _b * rho_a);
-    Real J22 = std::pow(rho_b, 4) * rho_a * _a / (3 * _b*_b)
-              * (2 * _b * rho_a + _a * rho_b) / std::pow((_a * rho_b + _b * rho_a), 2);
+    Real J22 = Utility::pow<4>(rho_b) * rho_a * _a / (3 * _b*_b)
+              * (2 * _b * rho_a + _a * rho_b) / Utility::pow<2>((_a * rho_b + _b * rho_a));
 
     Real G1111 = ((1 - 2 * _nu) * J1 + 3 * _a*_a * J11) / (2 * (1 - _nu))
                 + rho_a * rho_b * n_x*n_x / (2 * (1 - _nu))
