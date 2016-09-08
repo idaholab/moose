@@ -16,6 +16,10 @@ class MooseCommonExtension(object):
     def __init__(self):
         self._settings = dict() # The default settings should be stored here
 
+        # Any CSS you wish not to be set should be stored here
+        # { element.tag : [attribute,] }
+        self._invalid_css = dict()
+
     def checkFilename(self, rel_filename):
         """
         Checks that the filename exists, if it does not a error Element is return.

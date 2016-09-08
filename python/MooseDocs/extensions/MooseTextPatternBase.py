@@ -36,12 +36,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
                           'block'               : True,
                           'strip-extra-newlines': False}
 
-        # We need a way to limit CSS to elements that we know causes issues.
-        # example: to ignore overflow-y to only div elements
-        # self.invalid_css = { 'div' : ['overflow-y'] }
-        #
-        # Applying overflow/max-height CSS to <div> and <code> causes multiple
-        # scroll bars
+        # Applying overflow/max-height CSS to <div> and <code> causes multiple scroll bars
         self._invalid_css = { 'div' : ['overflow-y', 'overflow-x', 'max-height'] }
 
     def prepareContent(self, content, settings):

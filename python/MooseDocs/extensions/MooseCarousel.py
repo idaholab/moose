@@ -37,11 +37,6 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
                         'wrap'     : None,
                         'keyboard' : None}
 
-      # We need a way to limit CSS to elements that we know causes issues.
-      # example: to ignore overflow-y to only div elements
-      # self.invalid_css = { 'div' : ['overflow-y'] }
-      self._invalid_css = {}
-
     def parseFilenames(self, filenames_block):
       """
       Parse a set of lines with filenames in them and an optional caption.

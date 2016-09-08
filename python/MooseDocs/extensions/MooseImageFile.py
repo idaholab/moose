@@ -33,11 +33,6 @@ class MooseImageFile(MooseCommonExtension, Pattern):
         # style settings
         self._settings = {'caption' : None}
 
-        # We need a way to limit CSS to elements that we know causes issues.
-        # example: to ignore overflow-y to only div elements
-        # self.invalid_css = { 'div' : ['overflow-y'] }
-        self._invalid_css = {}
-
     def handleMatch(self, match):
         """
         process settings associated with !image markdown
