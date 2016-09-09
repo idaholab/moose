@@ -40,7 +40,7 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
         </div>
         """
         # Update the settings from regex match
-        settings = self.getSettings(match.group(2))
+        settings, styles = self.getSettings(match.group(2))
         if not settings.has_key('arch') or not settings.has_key('return'):
             el = self.createErrorElement('', message='Invalid MOOSEPACKAGE markdown syntax. Requires arch=, return=link|name')
         else:

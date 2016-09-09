@@ -34,7 +34,7 @@ class MooseCppMethod(MooseTextPatternBase):
         Process the C++ file provided.
         """
         # Update the settings from regex match
-        settings = self.getSettings(match.group(4))
+        settings, styles = self.getSettings(match.group(4))
 
         # Extract relative filename
         rel_filename = match.group(2).lstrip('/')
@@ -61,7 +61,7 @@ class MooseCppMethod(MooseTextPatternBase):
                 parser = utils.MooseSourceParser(self._make)
                 parser.parse(filename)
                 decl, defn = parser.method(settings['method'])
-                el = self.createElement(match.group(2), defn, filename, rel_filename, settings)
+                el = self.createElement(match.group(2), defn, filename, rel_filename, settings, styles)
 
         # Return the Element object
         return el

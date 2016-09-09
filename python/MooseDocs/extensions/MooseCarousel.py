@@ -2,6 +2,7 @@ from markdown.blockprocessors import BlockProcessor
 from MooseCommonExtension import MooseCommonExtension
 import glob
 import re
+import os
 from markdown.util import etree
 
 class MooseCarousel(BlockProcessor, MooseCommonExtension):
@@ -22,6 +23,19 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
     # If there are multiple carousels on the same page then
     # they need to have different ids
     MATCHES_FOUND = 0
+
+    def __init__(self, parser, root=None, **kwargs):
+      MooseCommonExtension.__init__(self)
+      BlockProcessor.__init__(self, parser, **kwargs)
+
+      self._root = os.path.join(root, 'docs/media')
+
+      # The default settings
+      self._settings = {'caption'  : None,
+                        'interval' : None,
+                        'pause'    : None,
+                        'wrap'     : None,
+                        'keyboard' : None}
 
     def parseFilenames(self, filenames_block):
       """
@@ -48,7 +62,8 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
         else:
           caption = ""
           fname = sline
-        new_files = glob.glob(fname)
+
+        new_files = glob.glob(os.path.join(self._root, fname))
         if not new_files:
           # If one of the paths is broken then
           # we return an empty list to indicate
@@ -77,14 +92,14 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
       if m:
         # Parse out the options on the slideshow line
         options = m.group(1)
-        parsed_options = self.getSettings(options)
+        parsed_options, styles = self.getSettings(options)
         block = block[m.end() + 1:] # removes the slideshow line
 
       block, theRest = self.detab(block)
 
       if m:
         files = block
-        div = etree.SubElement(parent, "div")
+        div = self.addStyle(etree.SubElement(parent, "div"), **styles)
         filenames = self.parseFilenames(files)
         if not filenames:
             return self.createErrorElement(files, "No matching files found")
@@ -141,7 +156,7 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
                 active = "active"
             item_div.set("class", "item %s" % active)
             img = etree.SubElement(item_div, "img")
-            img.set("src", f["path"])
+            img.set("src", os.path.join('/media', os.path.basename(f["path"])))
             caption = f["caption"]
             if not caption:
               caption = default_caption

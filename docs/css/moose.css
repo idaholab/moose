@@ -1,11 +1,25 @@
 a {
-	color: #0333a5;
-	text-decoration: none;
+    color: #0333a5;
+    text-decoration: none;
 }
 
 a:hover, a:focus {
-  color: #0333a5;
-	text-decoration: underline;
+    color: #0333a5;
+    text-decoration: underline;
+}
+
+/* NavBar hover color modification (bluish to more closely match our </a> links color) */
+.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus , .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    color: #b7c0ff;
+}
+
+pre {
+    overflow: auto;
+}
+
+hr {
+    border-bottom-style: groove;
+    border-bottom-width: 2px;
 }
 
 .admonition-title {
@@ -17,16 +31,18 @@ a:hover, a:focus {
     border: 0px solid transparent;
 }
 
+.admonition {
+    padding: 0px;
+    overflow: auto;
+    margin-bottom: 20px;
+}
+
 .info .admonition-title {
     background: #528452;
 }
 
-.admonition {
-  padding: 0px;
-}
-
 .admonition > p{
-  padding: 6px;
+    padding: 6px;
 }
 
 .info .admonition-title {

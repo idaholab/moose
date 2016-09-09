@@ -19,7 +19,7 @@ class MooseInputBlock(MooseTextPatternBase):
         """
 
         # Update the settings from regex match
-        settings = self.getSettings(match.group(4))
+        settings, styles = self.getSettings(match.group(4))
 
         # Build the complete filename.
         # NOTE: os.path.join doesn't like the unicode even if you call str() on it first.
@@ -45,6 +45,6 @@ class MooseInputBlock(MooseTextPatternBase):
                 label = match.group(2)
             else:
                 label = rel_filename
-            el = self.createElement(label, content, filename, rel_filename, settings)
+            el = self.createElement(label, content, filename, rel_filename, settings, styles)
 
         return el
