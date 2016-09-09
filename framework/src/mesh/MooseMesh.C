@@ -410,13 +410,13 @@ MooseMesh::meshChanged()
 {
   update();
 
-  // Release all of the cached ranges
-  _active_local_elem_range.release();
-  _active_node_range.release();
-  _active_semilocal_node_range.release();
-  _local_node_range.release();
-  _bnd_node_range.release();
-  _bnd_elem_range.release();
+  // Delete all of the cached ranges
+  _active_local_elem_range.reset();
+  _active_node_range.reset();
+  _active_semilocal_node_range.reset();
+  _local_node_range.reset();
+  _bnd_node_range.reset();
+  _bnd_elem_range.reset();
 
   // Rebuild the ranges
   getActiveLocalElementRange();
@@ -849,7 +849,7 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
   _extra_bnd_nodes.push_back(*bnode);
 
   // Do this so the range will be regenerated next time it is accessed
-  _bnd_node_range.release();
+  _bnd_node_range.reset();
 
   return qnode;
 }
