@@ -20,6 +20,8 @@
 #include "MooseUtils.h"
 #include "MooseApp.h"
 
+#include <utility>
+
 // libMesh
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_tools.h"
@@ -114,7 +116,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _use_distributed_mesh(false),
     _distribution_overridden(false),
     _parallel_type_overridden(false),
-    _mesh(NULL),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
     _partitioner_overridden(false),
     _custom_partitioner_requested(false),
@@ -123,14 +124,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _is_nemesis(getParam<bool>("nemesis")),
     _is_prepared(false),
     _needs_prepare_for_use(false),
-    _refined_elements(NULL),
-    _coarsened_elements(NULL),
-    _active_local_elem_range(NULL),
-    _active_semilocal_node_range(NULL),
-    _active_node_range(NULL),
-    _local_node_range(NULL),
-    _bnd_node_range(NULL),
-    _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
     _patch_size(40),
@@ -192,7 +185,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
 
   if (_use_distributed_mesh)
   {
-    _mesh = new DistributedMesh(_communicator, dim);
+    _mesh = libmesh_make_unique<DistributedMesh>(_communicator, dim);
     if (_partitioner_name != "default" && _partitioner_name != "parmetis")
     {
       _partitioner_name = "parmetis";
@@ -200,7 +193,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     }
   }
   else
-    _mesh = new ReplicatedMesh(_communicator, dim);
+    _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
@@ -210,7 +203,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _mesh_parallel_type(other_mesh._mesh_parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
-    _mesh(other_mesh.getMesh().clone().release()),
+    _mesh(other_mesh.getMesh().clone()),
     _partitioner_name(other_mesh._partitioner_name),
     _partitioner_overridden(other_mesh._partitioner_overridden),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
@@ -218,14 +211,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _is_nemesis(false),
     _is_prepared(false),
     _needs_prepare_for_use(false),
-    _refined_elements(NULL),
-    _coarsened_elements(NULL),
-    _active_local_elem_range(NULL),
-    _active_semilocal_node_range(NULL),
-    _active_node_range(NULL),
-    _local_node_range(NULL),
-    _bnd_node_range(NULL),
-    _bnd_elem_range(NULL),
     _node_to_elem_map_built(false),
     _patch_size(40),
     _patch_update_strategy(other_mesh._patch_update_strategy),
@@ -265,19 +250,6 @@ MooseMesh::~MooseMesh()
   freeBndNodes();
   freeBndElems();
   clearQuadratureNodes();
-
-  delete _active_local_elem_range;
-  delete _active_node_range;
-  delete _active_semilocal_node_range;
-  delete _local_node_range;
-  delete _bnd_node_range;
-  delete _bnd_elem_range;
-  delete _refined_elements;
-  delete _coarsened_elements;
-  delete _mesh;
-
-  for (auto & mi : _mortar_interface)
-    delete mi;
 }
 
 void
@@ -438,29 +410,13 @@ MooseMesh::meshChanged()
 {
   update();
 
-  // Rebuild the active local element range
-  delete _active_local_elem_range;
-  _active_local_elem_range = NULL;
-
-  // Rebuild the node range
-  delete _active_node_range;
-  _active_node_range = NULL;
-
-  // Rebuild the semilocal range
-  delete _active_semilocal_node_range;
-  _active_semilocal_node_range = NULL;
-
-  // Rebuild the local node range
-  delete _local_node_range;
-  _local_node_range = NULL;
-
-  // Rebuild the boundary node range
-  delete _bnd_node_range;
-  _bnd_node_range = NULL;
-
-  // Rebuild the boundary element rage
-  delete _bnd_elem_range;
-  _bnd_elem_range = NULL;
+  // Release all of the cached ranges
+  _active_local_elem_range.release();
+  _active_node_range.release();
+  _active_semilocal_node_range.release();
+  _local_node_range.release();
+  _bnd_node_range.release();
+  _bnd_elem_range.release();
 
   // Rebuild the ranges
   getActiveLocalElementRange();
@@ -474,7 +430,6 @@ MooseMesh::meshChanged()
 
   // Call the callback function onMeshChanged
   onMeshChanged();
-
 }
 
 void
@@ -490,31 +445,31 @@ MooseMesh::cacheChangedLists()
   CacheChangedListsThread cclt(*this);
   Threads::parallel_reduce(elem_range, cclt);
 
-  delete _refined_elements;
-  delete _coarsened_elements;
   _coarsened_element_children.clear();
 
-  _refined_elements = new ConstElemPointerRange(cclt._refined_elements.begin(), cclt._refined_elements.end());
-  _coarsened_elements = new ConstElemPointerRange(cclt._coarsened_elements.begin(), cclt._coarsened_elements.end());
+  _refined_elements = libmesh_make_unique<ConstElemPointerRange>(cclt._refined_elements.begin(), cclt._refined_elements.end());
+  _coarsened_elements = libmesh_make_unique<ConstElemPointerRange>(cclt._coarsened_elements.begin(), cclt._coarsened_elements.end());
   _coarsened_element_children = cclt._coarsened_element_children;
 }
 
 ConstElemPointerRange *
-MooseMesh::refinedElementRange()
+MooseMesh::refinedElementRange() const
 {
-  return _refined_elements;
+  return _refined_elements.get();
 }
 
 ConstElemPointerRange *
-MooseMesh::coarsenedElementRange()
+MooseMesh::coarsenedElementRange() const
 {
-  return _coarsened_elements;
+  return _coarsened_elements.get();
 }
 
-std::vector<const Elem *> &
-MooseMesh::coarsenedElementChildren(const Elem * elem)
+const std::vector<const Elem *> &
+MooseMesh::coarsenedElementChildren(const Elem * elem) const
 {
-  return _coarsened_element_children[elem];
+  auto elem_to_child_pair = _coarsened_element_children.find(elem);
+  mooseAssert(elem_to_child_pair != _coarsened_element_children.end(), "Missing element in map");
+  return elem_to_child_pair->second;
 }
 
 void
@@ -551,10 +506,8 @@ MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
     }
   }
 
-  delete _active_semilocal_node_range;
-
   // Now create the actual range
-  _active_semilocal_node_range = new SemiLocalNodeRange(_semilocal_node_list.begin(), _semilocal_node_list.end());
+  _active_semilocal_node_range = libmesh_make_unique<SemiLocalNodeRange>(_semilocal_node_list.begin(), _semilocal_node_list.end());
 }
 
 bool
@@ -643,7 +596,7 @@ MooseMesh::buildBndElemList()
   }
 }
 
-std::map<dof_id_type, std::vector<dof_id_type> > &
+const std::map<dof_id_type, std::vector<dof_id_type> > &
 MooseMesh::nodeToElemMap()
 {
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
@@ -665,7 +618,7 @@ MooseMesh::nodeToElemMap()
   return _node_to_elem_map;
 }
 
-std::map<dof_id_type, std::vector<dof_id_type> > &
+const std::map<dof_id_type, std::vector<dof_id_type> > &
 MooseMesh::nodeToActiveSemilocalElemMap()
 {
   if (!_node_to_active_semilocal_elem_map_built) // Guard the creation with a double checked lock
@@ -693,75 +646,58 @@ ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
   if (!_active_local_elem_range)
-  {
-    _active_local_elem_range = new ConstElemRange(getMesh().active_local_elements_begin(),
-                                                  getMesh().active_local_elements_end(), GRAIN_SIZE);
-  }
+    _active_local_elem_range = libmesh_make_unique<ConstElemRange>(getMesh().active_local_elements_begin(),
+                                                                   getMesh().active_local_elements_end(), GRAIN_SIZE);
 
-  return _active_local_elem_range;
+  return _active_local_elem_range.get();
 }
 
 NodeRange *
 MooseMesh::getActiveNodeRange()
 {
   if (!_active_node_range)
-  {
-    _active_node_range = new NodeRange(getMesh().active_nodes_begin(),
-                                       getMesh().active_nodes_end(), GRAIN_SIZE);
-  }
+    _active_node_range = libmesh_make_unique<NodeRange>(getMesh().active_nodes_begin(),
+                                                        getMesh().active_nodes_end(), GRAIN_SIZE);
 
-  return _active_node_range;
+  return _active_node_range.get();
 }
 
 SemiLocalNodeRange *
-MooseMesh::getActiveSemiLocalNodeRange()
+MooseMesh::getActiveSemiLocalNodeRange() const
 {
   mooseAssert(_active_semilocal_node_range, "_active_semilocal_node_range has not been created yet!");
-/*
-  if (!_active_node_range)
-  {
-    _active_semilocal_node_range = new NodeRange(getMesh().local_nodes_begin(),
-                                                 getMesh().local_nodes_end(), GRAIN_SIZE);
-  }
- */
 
-  return _active_semilocal_node_range;
+  return _active_semilocal_node_range.get();
 }
 
 ConstNodeRange *
 MooseMesh::getLocalNodeRange()
 {
   if (!_local_node_range)
-  {
-    _local_node_range = new ConstNodeRange(getMesh().local_nodes_begin(),
-                                           getMesh().local_nodes_end(), GRAIN_SIZE);
-  }
+    _local_node_range = libmesh_make_unique<ConstNodeRange>(getMesh().local_nodes_begin(),
+                                                            getMesh().local_nodes_end(), GRAIN_SIZE);
 
-  return _local_node_range;
+  return _local_node_range.get();
 }
 
 ConstBndNodeRange *
 MooseMesh::getBoundaryNodeRange()
 {
   if (!_bnd_node_range)
-  {
-    _bnd_node_range = new ConstBndNodeRange(bndNodesBegin(),
-                                            bndNodesEnd(), GRAIN_SIZE);
-  }
+    _bnd_node_range = libmesh_make_unique<ConstBndNodeRange>(bndNodesBegin(),
+                                                             bndNodesEnd(), GRAIN_SIZE);
 
-  return _bnd_node_range;
+  return _bnd_node_range.get();
 }
 
 ConstBndElemRange *
 MooseMesh::getBoundaryElementRange()
 {
   if (!_bnd_elem_range)
-  {
-    _bnd_elem_range = new ConstBndElemRange(bndElemsBegin(),
-                                            bndElemsEnd(), GRAIN_SIZE);
-  }
+    _bnd_elem_range = libmesh_make_unique<ConstBndElemRange>(bndElemsBegin(),
+                                                             bndElemsEnd(), GRAIN_SIZE);
 
-  return _bnd_elem_range;
+  return _bnd_elem_range.get();
 }
 
 void
@@ -854,7 +790,7 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
     }
   }
 
-  Node *node = NULL;
+  Node *node = nullptr;
   for (unsigned int i = 0; i < _node_map.size(); ++i)
   {
     if (p.relative_fuzzy_equals(*_node_map[i], tol))
@@ -863,13 +799,13 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
       break;
     }
   }
-  if (node == NULL)
+  if (node == nullptr)
   {
     node = getMesh().add_node(new Node(p));
     _node_map.push_back(node);
   }
 
-  mooseAssert(node != NULL, "Node is NULL");
+  mooseAssert(node != nullptr, "Node is NULL");
   return node;
 }
 
@@ -913,8 +849,7 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
   _extra_bnd_nodes.push_back(*bnode);
 
   // Do this so the range will be regenerated next time it is accessed
-  delete _bnd_node_range;
-  _bnd_node_range = NULL;
+  _bnd_node_range.release();
 
   return qnode;
 }
@@ -1299,7 +1234,7 @@ MooseMesh::detectPairedSidesets()
     for (unsigned int s = 0; s < elem->n_sides(); s++)
     {
       // If side is on the boundary
-      if (elem->neighbor(s) == NULL)
+      if (elem->neighbor(s) == nullptr)
       {
         std::unique_ptr<Elem> side = elem->build_side(s);
 
@@ -1389,9 +1324,9 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
 
   for (unsigned int component = 0; component < dimension(); ++component)
   {
-    std::pair<BoundaryID, BoundaryID> * boundary_ids = getPairedBoundaryMapping(component);
+    const std::pair<BoundaryID, BoundaryID> * boundary_ids = getPairedBoundaryMapping(component);
 
-    if (boundary_ids != NULL &&
+    if (boundary_ids != nullptr &&
         ((boundary_ids->first == primary && boundary_ids->second == secondary) ||
          (boundary_ids->first == secondary && boundary_ids->second == primary)))
       _periodic_dim[var_num][component] = true;
@@ -1442,7 +1377,7 @@ MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q)
   return minPeriodicVector(nonlinear_var_num, p, q).norm();
 }
 
-std::pair<BoundaryID, BoundaryID> *
+const std::pair<BoundaryID, BoundaryID> *
 MooseMesh::getPairedBoundaryMapping(unsigned int component)
 {
   if (!_regular_orthogonal_mesh)
@@ -1456,7 +1391,7 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
   if (component < _paired_boundary.size())
     return &_paired_boundary[component];
   else
-    return NULL;
+    return nullptr;
 }
 
 void
@@ -1822,7 +1757,7 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
 const RealVectorValue &
 MooseMesh::getNormalByBoundaryID(BoundaryID id) const
 {
-  mooseAssert(_boundary_to_normal_map.get() != NULL, "Boundary To Normal Map not built!");
+  mooseAssert(_boundary_to_normal_map.get() != nullptr, "Boundary To Normal Map not built!");
 
   // Note: Boundaries that are not in the map (existing boundaries) will default
   // construct a new RealVectorValue - (x,y,z)=(0, 0, 0)
@@ -2117,14 +2052,14 @@ MooseMesh::setGhostedBoundaryInflation(const std::vector<Real> & inflation)
   _ghosted_boundaries_inflation = inflation;
 }
 
-std::set<unsigned int> &
-MooseMesh::getGhostedBoundaries()
+const std::set<unsigned int> &
+MooseMesh::getGhostedBoundaries() const
 {
   return _ghosted_boundaries;
 }
 
-std::vector<Real> &
-MooseMesh::getGhostedBoundaryInflation()
+const std::vector<Real> &
+MooseMesh::getGhostedBoundaryInflation() const
 {
   return _ghosted_boundaries_inflation;
 }
@@ -2272,14 +2207,14 @@ MooseMesh::operator const libMesh::MeshBase & () const
 MeshBase &
 MooseMesh::getMesh()
 {
-  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
+  mooseAssert(_mesh, "Mesh hasn't been created");
   return *_mesh;
 }
 
 const MeshBase &
 MooseMesh::getMesh() const
 {
-  mooseAssert(_mesh != NULL, "Mesh hasn't been created");
+  mooseAssert(_mesh, "Mesh hasn't been created");
   return *_mesh;
 }
 
@@ -2287,7 +2222,7 @@ ExodusII_IO *
 MooseMesh::exReader() const
 {
   //TODO: Implement or remove
-  return NULL;
+  return nullptr;
 }
 
 void MooseMesh::printInfo(std::ostream &os) const
@@ -2437,7 +2372,7 @@ MooseMesh::addMortarInterface(const std::string & name, BoundaryName master, Bou
   boundary_id_type master_id = getBoundaryID(master);
   boundary_id_type slave_id = getBoundaryID(slave);
 
-  MortarInterface * iface = new MortarInterface;
+  std::unique_ptr<MortarInterface> iface = libmesh_make_unique<MortarInterface>();
 
   iface->_id = domain_id;
   iface->_master = master;
@@ -2448,15 +2383,14 @@ MooseMesh::addMortarInterface(const std::string & name, BoundaryName master, Bou
   const MeshBase::element_iterator end_el = _mesh->level_elements_end(0);
   for (; el != end_el; ++el)
   {
-    Elem *elem = *el;
+    Elem * elem = *el;
     if (elem->subdomain_id() == domain_id)
       iface->_elems.push_back(elem);
   }
 
   setSubdomainName(iface->_id, name);
-//  _mesh_subdomains.insert(iface->_id);
 
-  _mortar_interface.push_back(iface);
-  _mortar_interface_by_name[name] = iface;
-  _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master_id, slave_id)] = iface;
+  _mortar_interface.push_back(std::move(iface));
+  _mortar_interface_by_name[name] = _mortar_interface.back().get();
+  _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master_id, slave_id)] = _mortar_interface.back().get();
 }

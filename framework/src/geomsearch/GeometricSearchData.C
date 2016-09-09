@@ -420,7 +420,7 @@ GeometricSearchData::updateMortarNodes()
 {
   const MooseArray<Point> & qpoints = _subproblem.assembly(0).qPoints();
 
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
     for (const auto & elem : iface->_elems)
     {
@@ -436,7 +436,7 @@ GeometricSearchData::reinitMortarNodes()
 {
   _mortar_boundaries.clear();
   // Regenerate the quadrature nodes for mortar spaces
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
     unsigned int master_id = _mesh.getBoundaryID(iface->_master);

@@ -169,7 +169,7 @@ MaterialPropertyStorage::prolongStatefulProps(const std::vector<std::vector<QpMa
 
 void
 MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map,
-                                               std::vector<const Elem *> & coarsened_element_children,
+                                               const std::vector<const Elem *> & coarsened_element_children,
                                                QBase & qrule,
                                                QBase & qrule_face,
                                                MaterialData & material_data,

@@ -43,7 +43,7 @@ PenetrationThread::PenetrationThread(SubProblem & subproblem,
                                      std::vector<std::vector<FEBase *> > & fes,
                                      FEType & fe_type,
                                      NearestNodeLocator & nearest_node,
-                                     std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
+                                     const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
                                      std::vector<dof_id_type> & elem_list,
                                      std::vector<unsigned short int> & side_list,
                                      std::vector<boundary_id_type> & id_list) :
@@ -182,7 +182,9 @@ PenetrationThread::operator() (const NodeIdRange & range)
     if (!info_set)
     {
       const Node * closest_node = _nearest_node.nearestNode(node.id());
-      std::vector<dof_id_type> & closest_elems = _node_to_elem_map[closest_node->id()];
+      auto node_to_elem_pair = _node_to_elem_map.find(closest_node->id());
+      mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
+      const std::vector<dof_id_type> & closest_elems = node_to_elem_pair->second;
 
       for (const auto & elem_id : closest_elems)
       {
@@ -1495,7 +1497,9 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node * slave_node,
                                                   std::vector<PenetrationInfo *> & p_info)
 {
   //elems connected to a node on this edge, find one that has the same corners as this, and is not the current elem
-  std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[edge_nodes[0]->id()]; //just need one of the nodes
+  auto node_to_elem_pair = _node_to_elem_map.find(edge_nodes[0]->id()); //just need one of the nodes
+  mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
+  const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
 
   std::vector<const Elem *> elems_connected_to_edge;
 

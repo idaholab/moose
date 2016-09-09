@@ -1126,7 +1126,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
   THREAD_ID tid = 0;
   // go over mortar interfaces
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
     if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
@@ -1428,6 +1428,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   for (const auto & it : nearest_node_locators)
   {
     std::vector<dof_id_type> & slave_nodes = it.second->_slave_nodes;
@@ -1437,23 +1438,29 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
       std::set<dof_id_type> unique_slave_indices;
       std::set<dof_id_type> unique_master_indices;
 
-      std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[slave_node];
-
-      // Get the dof indices from each elem connected to the node
-      for (const auto & cur_elem : elems)
+      auto node_to_elem_pair = node_to_elem_map.find(slave_node);
+      if (node_to_elem_pair != node_to_elem_map.end())
       {
-        std::vector<dof_id_type> dof_indices;
-        dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+        const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
-        for (const auto & dof : dof_indices)
-          unique_slave_indices.insert(dof);
+        // Get the dof indices from each elem connected to the node
+        for (const auto & cur_elem : elems)
+        {
+          std::vector<dof_id_type> dof_indices;
+          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+
+          for (const auto & dof : dof_indices)
+            unique_slave_indices.insert(dof);
+        }
       }
 
       std::vector<dof_id_type> master_nodes = it.second->_neighbor_nodes[slave_node];
 
       for (const auto & master_node : master_nodes)
       {
-        std::vector<dof_id_type> & master_node_elems = _mesh.nodeToElemMap()[master_node];
+        auto master_node_to_elem_pair = node_to_elem_map.find(master_node);
+        mooseAssert(master_node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+        const std::vector<dof_id_type> & master_node_elems = master_node_to_elem_pair->second;
 
         // Get the dof indices from each elem connected to the node
         for (const auto & cur_elem : master_node_elems)
@@ -1729,7 +1736,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
   THREAD_ID tid = 0;
   // go over mortar interfaces
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
     if (_constraints.hasActiveFaceFaceConstraints(iface->_name))

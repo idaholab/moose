@@ -111,7 +111,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 
       if (component >= 0)
       {
-        std::pair<BoundaryID, BoundaryID> * boundary_ids = _mesh->getPairedBoundaryMapping(component);
+        const std::pair<BoundaryID, BoundaryID> * boundary_ids = _mesh->getPairedBoundaryMapping(component);
         RealVectorValue v;
         v(component) = _mesh->dimensionWidth(component);
         PeriodicBoundary p(v);
@@ -184,4 +184,3 @@ AddPeriodicBCAction::act()
     mooseError("You have to specify either 'auto_direction', 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
   }
 }
-

@@ -78,10 +78,10 @@ You can include complete files from the repository using the `!text` syntax. For
 includes the complete code as shown.
 
 ```markdown
-!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True
+!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True overflow-y=scroll
 ```
 
-!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True
+!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True overflow-y=scroll
 
 ### Single Line Match
 It is possible to show a single line of a file by a snippet that allows the line to be located within
@@ -100,10 +100,10 @@ options. If 'start' is omitted then the snippet will start at the beginning of t
 is omitted the snippet will include the remainder of the file content.
 
 ```markdown
-!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner
+!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner overflow-y=scroll max-height=500px
 ```
 
-!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner
+!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner overflow-y=scroll max-height=500px
 
 ### Class Methods
 By including a method name, in C++ syntax fashion, it is possible to include specific methods from C++ classes in MOOSE. For example,
@@ -151,8 +151,8 @@ A simple example:
 
 ```markdown
 !slideshow
-    images/intro.png
-    images/other*.png
+    intro.png
+    other*.png
 ```
 
 This would create a slideshow with the first image as `intro.png` and the next images those that are matched by the wildcard `other*.png`.
@@ -171,11 +171,16 @@ line.
 
 A full slideshow example might be:
 ```markdown
-!slideshow caption=My caption with spaces interval=1000 pause=null wrap=false keyboard=false
-    images/intro.png caption=Introduction image
-    images/other*.png caption=Other images
-    images/more*.png
+!slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
+    memory_logger-plot_multi.png caption=Memory Logger plotting two results
+    memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
+    memory_*.png
 ```
+
+!slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
+    memory_logger-plot_multi.png caption=Memory Logger plotting two results
+    memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
+    memory_*.png
 
 ---
 
@@ -183,9 +188,31 @@ A full slideshow example might be:
 You can include images in your documentation by use of the !image markdown syntax:
 
 ```markdown
-!image memory_logger-plot_multi.png width=300 align=right caption=Figure 1
+!image memory_logger-plot_multi.png width=300px align=right caption=figure 1
 ```
-!image memory_logger-plot_multi.png width=300 align=right caption=Figure 1
+
+!image memory_logger-plot_multi.png width=300px align=right caption=figure 1
+
+---
+
+## Inline CSS Options
+!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner float=right padding-left=20px font-size=smaller
+
+You can provide any valid CSS attribute to any markdown extension (!text, !input, !clang, !image, !slideshow). Some extensions can not be controlled as much as others. For example the !slideshow extension ignores alignment attributes. Your milage may vary.
+
+Some of the most useful ones are perhaps width, float, align and padding. However, it is CSS. So be creative!
+
+In the following example, we will display an input code block. It will 'float' to the right, which should allow this section of text and elements, to appear to the left of the code block, and wrap around it.
+
+  * Keep in mind, that the actual element tag was placed in this document just beneath the "Inline CSS Options" title. This is because the placement of the element still applies to where it starts being drawn on the screen.
+
+!!! Info
+    It should also work with admonitions
+
+Markdown allowing an input code block to float to the right:
+```markdown
+!text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner float=right padding-left=20px font-size=smaller
+```
 
 ---
 

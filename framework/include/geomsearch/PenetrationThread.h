@@ -40,7 +40,7 @@ public:
                     std::vector<std::vector<FEBase *> > & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
-                    std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
+                    const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
                     std::vector<dof_id_type> & elem_list,
                     std::vector<unsigned short int> & side_list,
                     std::vector<boundary_id_type> & id_list);
@@ -78,7 +78,7 @@ protected:
 
   NearestNodeLocator & _nearest_node;
 
-  std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
+  const std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
 
   std::vector<dof_id_type> & _elem_list;
   std::vector<unsigned short int> & _side_list;

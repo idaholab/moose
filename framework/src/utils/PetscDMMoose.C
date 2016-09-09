@@ -659,7 +659,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             {
               const dof_id_type slave_node_num = lit->first;
               PenetrationInfo * pinfo = lit->second;
-              std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map =
+              const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map =
               dmm->_nl->_fe_problem.mesh().nodeToElemMap();
               if (pinfo && pinfo->isCaptured())
               {
@@ -672,7 +672,10 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                   cached_indices.insert(dof); // cache nonlocal indices
                 // indices of slave elements
                 evindices.clear();
-                for (const auto & elem_num : node_to_elem_map[slave_node_num])
+
+                auto node_to_elem_pair = node_to_elem_map.find(slave_node_num);
+                mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+                for (const auto & elem_num : node_to_elem_pair->second)
                 {
                   Elem & slave_elem = dmm->_nl->sys().get_mesh().elem_ref(elem_num);
                   // Get the degree of freedom indices for the given variable off the current element.

@@ -88,7 +88,11 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   }
 
   // Add elements connected to master node to Ghosted Elements
-  std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[_master_node_vector[0]];
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[0]);
+  mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+  const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
+
   if (elems.size() == 0)
     mooseError("Couldn't find any elements connected to master node");
   _subproblem.addGhostedElem(elems[0]);

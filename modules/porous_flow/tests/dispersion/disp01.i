@@ -5,7 +5,7 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 1
   nx = 100
   xmax = 10
 []

@@ -27,6 +27,7 @@ InputParameters validParams<SolidMechanicsAction>()
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that these kernels will be applied to");
+  params.addParam<bool>("volumetric_locking_correction", true, "Set to false to turn off volumetric locking correction");
 
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_x", "Auxiliary variables to save the x displacement residuals.");
   params.addParam<std::vector<AuxVariableName> >("save_in_disp_y", "Auxiliary variables to save the y displacement residuals.");
@@ -218,7 +219,7 @@ SolidMechanicsAction::act()
       params.set<std::vector<AuxVariableName> >("diag_save_in") = diag_save_in[i];
       params.set<Real>("zeta") = _zeta;
       params.set<Real>("alpha") = _alpha;
-
+      params.set<bool>("volumetric_locking_correction") = getParam<bool>("volumetric_locking_correction");
       _problem->addKernel(type, name.str(), params);
     }
   }

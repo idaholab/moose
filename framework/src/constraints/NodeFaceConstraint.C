@@ -229,7 +229,9 @@ NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
   _connected_dof_indices.clear();
   std::set<dof_id_type> unique_dof_indices;
 
-  std::vector<dof_id_type> & elems = _node_to_elem_map[_current_node->id()];
+  auto node_to_elem_pair = _node_to_elem_map.find(_current_node->id());
+  mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
+  const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
   // Get the dof indices from each elem connected to the node
   for (const auto & cur_elem : elems)

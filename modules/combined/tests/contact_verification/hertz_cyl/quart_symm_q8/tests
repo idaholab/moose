@@ -65,5 +65,6 @@
     heavy = true
     max_time = 1000
     superlu = true
+    skip = 'needs review - volumetric locking'
   [../]
 []

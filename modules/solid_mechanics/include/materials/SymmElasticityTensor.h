@@ -160,6 +160,9 @@ public:
 
   void fillFromInputVector(std::vector<Real> input, bool all);
 
+  Real sum_3x3() const;
+  RealGradient sum_3x1() const;
+
   /*
    * @return the value of the tensor given the index supplied.
    */

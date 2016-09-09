@@ -69,6 +69,7 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("scalar_strain_zz", "The zz strain (scalar variable)");
   params.addParam<std::vector<std::string> >("dep_matl_props", "Names of material properties this material depends on.");
   params.addParam<std::string>("constitutive_model", "ConstitutiveModel to use (optional)");
+  params.addParam<bool>("volumetric_locking_correction", true, "Set to false to turn off volumetric locking correction");
   return params;
 }
 

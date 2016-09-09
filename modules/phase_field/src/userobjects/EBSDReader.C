@@ -311,7 +311,7 @@ EBSDReader::buildNodeWeightMaps()
 {
   // Import nodeToElemMap from MooseMesh for current node
   // This map consists of the node index followed by a vector of element indices that are associated with that node
-  std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
   libMesh::MeshBase &mesh = _mesh.getMesh();
 
   // Loop through each node in mesh and calculate eta values for each grain associated with the node
@@ -327,12 +327,14 @@ EBSDReader::buildNodeWeightMaps()
     _node_to_phase_weight_map[node_id].assign(getPhaseNum(), 0.0);
 
     // Loop through element indices associated with the current node and record weighted eta value in new map
-    unsigned int n_elems = node_to_elem_map[node_id].size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
+    const auto & node_to_elem_pair = node_to_elem_map.find(node_id);
+    mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing node in node to elem map");
+    unsigned int n_elems = node_to_elem_pair->second.size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
 
     for (unsigned int ne = 0; ne < n_elems; ++ne)
     {
       // Current element index
-      unsigned int elem_id = node_to_elem_map[node_id][ne];
+      unsigned int elem_id = (node_to_elem_pair->second)[ne];
 
       // Retrieve EBSD grain number for the current element index
       const Elem * elem = mesh.elem(elem_id);

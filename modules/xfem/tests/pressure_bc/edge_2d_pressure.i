@@ -1,6 +1,7 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
+  volumetric_locking_correction = False
 []
 
 [XFEM]
