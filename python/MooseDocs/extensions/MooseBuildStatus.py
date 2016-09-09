@@ -12,12 +12,11 @@ import utils
 
 class MooseBuildStatus(MooseCommonExtension, Pattern):
     """
-    Markdown extension for handling images.
+    Markdown extension for add Build Status widget.
 
     Usage:
-      !image image_file.png|jpg|etc attribute=setting
+      !buildstatus http://civet/buildstatus/site css_attribute=setting
 
-    All images/media should be stored in docs/media
     """
 
     # Find !buildstatus url attribute=value
