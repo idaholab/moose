@@ -12,9 +12,12 @@
 
 #include "FluidPropertiesMaterial.h"
 #include "FluidPropertiesMaterialPT.h"
+#include "WaterFluidPropertiesTestMaterial.h"
+
 #include "IdealGasFluidProperties.h"
 #include "StiffenedGasFluidProperties.h"
 #include "MethaneFluidProperties.h"
+#include "Water97FluidProperties.h"
 
 #include "AddFluidPropertiesAction.h"
 
@@ -66,10 +69,12 @@ FluidPropertiesApp::registerObjects(Factory & factory)
 {
   registerMaterial(FluidPropertiesMaterial);
   registerMaterial(FluidPropertiesMaterialPT);
+  registerMaterial(WaterFluidPropertiesTestMaterial);
 
   registerUserObject(IdealGasFluidProperties);
   registerUserObject(StiffenedGasFluidProperties);
   registerUserObject(MethaneFluidProperties);
+  registerUserObject(Water97FluidProperties);
 }
 
 // External entry point for dynamic syntax association
