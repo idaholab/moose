@@ -18,17 +18,19 @@
 // MOOSE includes
 #include "MooseObjectWarehouse.h"
 
+// Forward declarations
+class Material;
+
 /**
  * Material objects are special in that they have additional objects created automatically (see FEProblem::addMaterial).
  *
  * This class specializes the base class to acount for the additional Neightbor and face objects that may
  * exist.
  */
-template<typename T>
-class MaterialWarehouse : public MooseObjectWarehouse<T>
+class MaterialWarehouse : public MooseObjectWarehouse<Material>
 {
 public:
-  const MooseObjectWarehouse<T> & operator[](Moose::MaterialDataType data_type) const;
+  const MooseObjectWarehouse<Material> & operator[](Moose::MaterialDataType data_type) const;
 
   ///@{
   /**
@@ -47,122 +49,14 @@ public:
   /**
    * A special method unique to this class for adding Block, Neighbor, and Face material objects.
    */
-  void addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, THREAD_ID tid = 0);
+  void addObjects(MooseSharedPointer<Material> block, MooseSharedPointer<Material> neighbor, MooseSharedPointer<Material> face, THREAD_ID tid = 0);
 
 protected:
   /// Stroage for neighbor material objects (Block are stored in the base class)
-  MooseObjectWarehouse<T> _neighbor_materials;
+  MooseObjectWarehouse<Material> _neighbor_materials;
 
   /// Stroage for face material objects (Block are stored in the base class)
-  MooseObjectWarehouse<T> _face_materials;
+  MooseObjectWarehouse<Material> _face_materials;
 };
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, THREAD_ID tid /*=0*/)
-{
-  MooseObjectWarehouse<T>::addObject(block, tid);
-  _neighbor_materials.addObject(neighbor, tid);
-  _face_materials.addObject(face, tid);
-}
-
-
-template<typename T>
-const MooseObjectWarehouse<T> &
-MaterialWarehouse<T>::operator[](Moose::MaterialDataType data_type) const
-{
-  switch (data_type)
-  {
-  case Moose::NEIGHBOR_MATERIAL_DATA:
-    return _neighbor_materials;
-    break;
-  case Moose::FACE_MATERIAL_DATA:
-    return _face_materials;
-    break;
-  default:
-    return *this;
-  }
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::initialSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<T>::initialSetup(tid);
-  _neighbor_materials.initialSetup(tid);
-  _face_materials.initialSetup(tid);
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::timestepSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<T>::timestepSetup(tid);
-  _neighbor_materials.timestepSetup(tid);
-  _face_materials.timestepSetup(tid);
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::subdomainSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<T>::subdomainSetup(tid);
-  _neighbor_materials.subdomainSetup(tid);
-  _face_materials.subdomainSetup(tid);
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::subdomainSetup(SubdomainID id, THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<T>::subdomainSetup(id, tid);
-  _neighbor_materials.subdomainSetup(id, tid);
-  _face_materials.subdomainSetup(id, tid);
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::residualSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<T>::residualSetup(tid);
-  _neighbor_materials.residualSetup(tid);
-  _face_materials.residualSetup(tid);
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::jacobianSetup(THREAD_ID tid /*=0*/) const
-{
-  MooseObjectWarehouse<T>::jacobianSetup(tid);
-  _neighbor_materials.jacobianSetup(tid);
-  _face_materials.jacobianSetup(tid);
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::updateActive(THREAD_ID tid /*=0*/)
-{
-  MooseObjectWarehouse<T>::updateActive(tid);
-  _neighbor_materials.updateActive(tid);
-  _face_materials.updateActive(tid);
-}
-
-
-template<typename T>
-void
-MaterialWarehouse<T>::sort(THREAD_ID tid /*=0*/)
-{
-  MooseObjectWarehouse<T>::sort(tid);
-  _neighbor_materials.sort(tid);
-  _face_materials.sort(tid);
-}
 
 #endif // MATERIALWAREHOUSE_H

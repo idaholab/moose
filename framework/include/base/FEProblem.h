@@ -950,7 +950,7 @@ public:
   /*
    * Return a reference to the material warehouse of Material objects.
    */
-  const MaterialWarehouse<Material> & getMaterialWarehouse() { return _all_materials; }
+  const MaterialWarehouse & getMaterialWarehouse() { return _all_materials; }
 
   /**
    * Return a pointer to a Material object.
@@ -1101,9 +1101,9 @@ protected:
 
   ///@{
   // Material Warehouses
-  MaterialWarehouse<Material> _materials; // Traditional materials that MOOSE computes
-  MaterialWarehouse<Material> _discrete_materials; // Materials that the user must compute
-  MaterialWarehouse<Material> _all_materials; // All materials for error checking and MaterialData storage
+  MaterialWarehouse _materials; // Traditional materials that MOOSE computes
+  MaterialWarehouse _discrete_materials; // Materials that the user must compute
+  MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}
 
   ///@{
