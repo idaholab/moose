@@ -62,7 +62,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _compute_op_maps(getParam<bool>("compute_op_maps")),
     _reserve_grain_first_idx(0),
     _max_curr_grain_id(0),
-    _first_time(true)
+    _first_time(true),
+    _is_transient(_subproblem.isTransient())
 {
   if (!_is_elemental && _compute_op_maps)
     mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
@@ -1289,13 +1290,16 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
     _subproblem.reinitNode(curr_node, 0);
 
     // Local variables to hold values being transferred
-    Real current, old, older;
+    Real current, old = 0, older = 0;
     // Retrieve the value either from the old variable or cache
     if (cache_mode == RemapCacheMode::FILL || cache_mode == RemapCacheMode::BYPASS)
     {
       current = _vars[curr_var_idx]->nodalSln()[0];
-      old = _vars[curr_var_idx]->nodalSlnOld()[0];
-      older = _vars[curr_var_idx]->nodalSlnOlder()[0];
+      if (_is_transient)
+      {
+        old = _vars[curr_var_idx]->nodalSlnOld()[0];
+        older = _vars[curr_var_idx]->nodalSlnOlder()[0];
+      }
     }
     else // USE
     {
@@ -1319,8 +1323,11 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
 
       // Transfer this solution from the old to the current
       _nl.solution().set(dof_index, current);
-      _nl.solutionOld().set(dof_index, old);
-      _nl.solutionOlder().set(dof_index, older);
+      if (_is_transient)
+      {
+        _nl.solutionOld().set(dof_index, old);
+        _nl.solutionOlder().set(dof_index, older);
+      }
     }
 
     /**
@@ -1341,8 +1348,11 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_i
 
       // Set the DOF for the current variable to zero
       _nl.solution().set(dof_index, 0.0);
-      _nl.solutionOld().set(dof_index, 0.0);
-      _nl.solutionOlder().set(dof_index, 0.0);
+      if (_is_transient)
+      {
+        _nl.solutionOld().set(dof_index, 0.0);
+        _nl.solutionOlder().set(dof_index, 0.0);
+      }
     }
   }
 }

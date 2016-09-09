@@ -234,6 +234,9 @@ private:
   /// Boolean to indicate the first time this object executes.
   /// _tracking_step isn't enough if people skip initial or execute more than once per step
   bool _first_time;
+
+  /// Boolean to indicate whether this is a Steady or Transient solve
+  const bool _is_transient;
 };
 
 
