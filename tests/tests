@@ -77,4 +77,10 @@
   input = 'test_transformationMatrix_index.py'
   requires_swig2 = True
  [../]
+
+ [./test_inverse_transformationMatrix]
+  type = 'CrowPython'
+  input = 'test_inverse_transformation_matrix.py'
+  requires_swig2 = True
+ [../]
 []
