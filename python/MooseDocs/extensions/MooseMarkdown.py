@@ -11,6 +11,7 @@ from MooseMarkdownLinkPreprocessor import MooseMarkdownLinkPreprocessor
 from MooseCarousel import MooseCarousel
 from MooseDiagram import MooseDiagram
 from MooseSlidePreprocessor import MooseSlidePreprocessor
+from MooseBuildStatus import MooseBuildStatus
 import MooseDocs
 import utils
 
@@ -62,6 +63,7 @@ class MooseMarkdown(markdown.Extension):
         md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, make=config['make'], repo=config['repo'], root=config['root']), '<image_link')
         md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
         md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, root=config['root']), '<image_link')
+        md.inlinePatterns.add('moose_build_status', MooseBuildStatus(markdown_instance=md), '_begin')
 
         if config['package']:
             md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md), '_end')
