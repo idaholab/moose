@@ -16,7 +16,7 @@
 #define MATERIALWAREHOUSE_H
 
 // MOOSE includes
-#include "ExecuteMooseObjectWarehouse.h"
+#include "MooseObjectWarehouse.h"
 
 /**
  * Material objects are special in that they have additional objects created automatically (see FEProblem::addMaterial).
@@ -25,10 +25,10 @@
  * exist.
  */
 template<typename T>
-class MaterialWarehouse : public ExecuteMooseObjectWarehouse<T>
+class MaterialWarehouse : public MooseObjectWarehouse<T>
 {
 public:
-  const ExecuteMooseObjectWarehouse<T> & operator[](Moose::MaterialDataType data_type) const;
+  const MooseObjectWarehouse<T> & operator[](Moose::MaterialDataType data_type) const;
 
   ///@{
   /**
@@ -51,10 +51,10 @@ public:
 
 protected:
   /// Stroage for neighbor material objects (Block are stored in the base class)
-  ExecuteMooseObjectWarehouse<T> _neighbor_materials;
+  MooseObjectWarehouse<T> _neighbor_materials;
 
   /// Stroage for face material objects (Block are stored in the base class)
-  ExecuteMooseObjectWarehouse<T> _face_materials;
+  MooseObjectWarehouse<T> _face_materials;
 };
 
 
@@ -62,14 +62,14 @@ template<typename T>
 void
 MaterialWarehouse<T>::addObjects(MooseSharedPointer<T> block, MooseSharedPointer<T> neighbor, MooseSharedPointer<T> face, THREAD_ID tid /*=0*/)
 {
-  ExecuteMooseObjectWarehouse<T>::addObject(block, tid);
+  MooseObjectWarehouse<T>::addObject(block, tid);
   _neighbor_materials.addObject(neighbor, tid);
   _face_materials.addObject(face, tid);
 }
 
 
 template<typename T>
-const ExecuteMooseObjectWarehouse<T> &
+const MooseObjectWarehouse<T> &
 MaterialWarehouse<T>::operator[](Moose::MaterialDataType data_type) const
 {
   switch (data_type)
@@ -90,7 +90,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::initialSetup(THREAD_ID tid /*=0*/) const
 {
-  ExecuteMooseObjectWarehouse<T>::initialSetup(tid);
+  MooseObjectWarehouse<T>::initialSetup(tid);
   _neighbor_materials.initialSetup(tid);
   _face_materials.initialSetup(tid);
 }
@@ -100,7 +100,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::timestepSetup(THREAD_ID tid /*=0*/) const
 {
-  ExecuteMooseObjectWarehouse<T>::timestepSetup(tid);
+  MooseObjectWarehouse<T>::timestepSetup(tid);
   _neighbor_materials.timestepSetup(tid);
   _face_materials.timestepSetup(tid);
 }
@@ -110,7 +110,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::subdomainSetup(THREAD_ID tid /*=0*/) const
 {
-  ExecuteMooseObjectWarehouse<T>::subdomainSetup(tid);
+  MooseObjectWarehouse<T>::subdomainSetup(tid);
   _neighbor_materials.subdomainSetup(tid);
   _face_materials.subdomainSetup(tid);
 }
@@ -120,7 +120,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::subdomainSetup(SubdomainID id, THREAD_ID tid /*=0*/) const
 {
-  ExecuteMooseObjectWarehouse<T>::subdomainSetup(id, tid);
+  MooseObjectWarehouse<T>::subdomainSetup(id, tid);
   _neighbor_materials.subdomainSetup(id, tid);
   _face_materials.subdomainSetup(id, tid);
 }
@@ -130,7 +130,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::residualSetup(THREAD_ID tid /*=0*/) const
 {
-  ExecuteMooseObjectWarehouse<T>::residualSetup(tid);
+  MooseObjectWarehouse<T>::residualSetup(tid);
   _neighbor_materials.residualSetup(tid);
   _face_materials.residualSetup(tid);
 }
@@ -140,7 +140,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::jacobianSetup(THREAD_ID tid /*=0*/) const
 {
-  ExecuteMooseObjectWarehouse<T>::jacobianSetup(tid);
+  MooseObjectWarehouse<T>::jacobianSetup(tid);
   _neighbor_materials.jacobianSetup(tid);
   _face_materials.jacobianSetup(tid);
 }
@@ -150,7 +150,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::updateActive(THREAD_ID tid /*=0*/)
 {
-  ExecuteMooseObjectWarehouse<T>::updateActive(tid);
+  MooseObjectWarehouse<T>::updateActive(tid);
   _neighbor_materials.updateActive(tid);
   _face_materials.updateActive(tid);
 }
@@ -160,7 +160,7 @@ template<typename T>
 void
 MaterialWarehouse<T>::sort(THREAD_ID tid /*=0*/)
 {
-  ExecuteMooseObjectWarehouse<T>::sort(tid);
+  MooseObjectWarehouse<T>::sort(tid);
   _neighbor_materials.sort(tid);
   _face_materials.sort(tid);
 }
