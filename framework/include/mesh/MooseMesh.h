@@ -21,6 +21,8 @@
 #include "Restartable.h"
 #include "MooseEnum.h"
 
+#include <memory> //std::unique_ptr
+
 // libMesh
 #include "libmesh/mesh.h"
 #include "libmesh/elem_range.h"
@@ -151,7 +153,7 @@ public:
    * If not already created, creates a map from every node to all
    * elements to which they are connected.
    */
-  std::map<dof_id_type, std::vector<dof_id_type> > & nodeToElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type> > & nodeToElemMap();
 
   /**
    * If not already created, creates a map from every node to all
@@ -160,7 +162,7 @@ public:
    * one node with a local element.
    * \note Extra ghosted elements are not included in this map!
    */
-  std::map<dof_id_type, std::vector<dof_id_type> > & nodeToActiveSemilocalElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type> > & nodeToActiveSemilocalElemMap();
 
   /**
    * These structs are required so that the bndNodes{Begin,End} and
@@ -279,7 +281,7 @@ public:
    *
    * @return The _Parent_ elements that are now set to be INACTIVE.  Their _children_ are the new elements.
    */
-  ConstElemPointerRange * refinedElementRange();
+  ConstElemPointerRange * refinedElementRange() const;
 
   /**
    * Return a range that is suitable for threaded execution over elements that were just coarsened.
@@ -287,7 +289,7 @@ public:
    * are the elements that were just removed.  Use coarsenedElementChildren() to get the element
    * IDs for the children that were just removed for a particular parent element.
    */
-  ConstElemPointerRange * coarsenedElementRange();
+  ConstElemPointerRange * coarsenedElementRange() const;
 
   /**
    * Get the newly removed children element ids for an element that was just coarsened.
@@ -295,7 +297,7 @@ public:
    * @param elem Pointer to the parent element that was coarsened to.
    * @return The child element ids in Elem::child() order.
    */
-  std::vector<const Elem *> & coarsenedElementChildren(const Elem * elem);
+  const std::vector<const Elem *> & coarsenedElementChildren(const Elem * elem) const;
 
   /**
    * Clears the "semi-local" node list and rebuilds it.  Semi-local nodes
@@ -316,7 +318,7 @@ public:
    */
   ConstElemRange * getActiveLocalElementRange();
   NodeRange * getActiveNodeRange();
-  SemiLocalNodeRange * getActiveSemiLocalNodeRange();
+  SemiLocalNodeRange * getActiveSemiLocalNodeRange() const;
   ConstNodeRange * getLocalNodeRange();
   StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> * getBoundaryNodeRange();
   StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * getBoundaryElementRange();
@@ -398,12 +400,12 @@ public:
   /**
    * Return a writable reference to the set of ghosted boundary IDs.
    */
-  std::set<unsigned int> & getGhostedBoundaries();
+  const std::set<unsigned int> & getGhostedBoundaries() const;
 
   /**
    * Return a writable reference to the _ghosted_boundaries_inflation vector.
    */
-  std::vector<Real> & getGhostedBoundaryInflation();
+  const std::vector<Real> & getGhostedBoundaryInflation() const;
 
   /**
    * Actually do the ghosting of boundaries that need to be ghosted to this processor.
@@ -616,7 +618,7 @@ public:
    * @param component - An integer representing the desired component (dimension)
    * @return std::pair pointer - The matching boundary pairs for the passed component
    */
-  std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component);
+  const std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component);
 
   /**
    * Create the refinement and coarsening maps necessary for projection of stateful material properties
@@ -745,7 +747,7 @@ public:
 
   void addMortarInterface(const std::string & name, BoundaryName master, BoundaryName slave, SubdomainName domain_id);
 
-  std::vector<MooseMesh::MortarInterface *> & getMortarInterfaces() { return _mortar_interface; }
+  std::vector<std::unique_ptr<MooseMesh::MortarInterface> > & getMortarInterfaces() { return _mortar_interface; }
 
   MooseMesh::MortarInterface * getMortarInterfaceByName(const std::string name);
   MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave);
@@ -788,7 +790,7 @@ protected:
   bool _parallel_type_overridden;
 
   /// Pointer to underlying libMesh mesh object
-  libMesh::MeshBase * _mesh;
+  std::unique_ptr<libMesh::MeshBase> _mesh;
 
   /// The partitioner used on this mesh
   MooseEnum _partitioner_name;
@@ -825,10 +827,10 @@ protected:
   bool _needs_prepare_for_use;
 
   /// The elements that were just refined.
-  ConstElemPointerRange * _refined_elements;
+  std::unique_ptr<ConstElemPointerRange> _refined_elements;
 
   /// The elements that were just coarsened.
-  ConstElemPointerRange * _coarsened_elements;
+  std::unique_ptr<ConstElemPointerRange> _coarsened_elements;
 
   /// Map of Parent elements to child elements for elements that were just coarsened.  NOTE: the child element pointers ARE PROBABLY INVALID.  Only use them for indexing!
   std::map<const Elem *, std::vector<const Elem *> > _coarsened_element_children;
@@ -840,13 +842,13 @@ protected:
    * A range for use with threading.  We do this so that it doesn't have
    * to get rebuilt all the time (which takes time).
    */
-  ConstElemRange * _active_local_elem_range;
-  /// active local + active ghosted
-  SemiLocalNodeRange * _active_semilocal_node_range;
-  NodeRange * _active_node_range;
-  ConstNodeRange * _local_node_range;
-  StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> * _bnd_node_range;
-  StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> * _bnd_elem_range;
+  std::unique_ptr<ConstElemRange> _active_local_elem_range;
+
+  std::unique_ptr<SemiLocalNodeRange> _active_semilocal_node_range;
+  std::unique_ptr<NodeRange> _active_node_range;
+  std::unique_ptr<ConstNodeRange> _local_node_range;
+  std::unique_ptr<StoredRange<MooseMesh::const_bnd_node_iterator, const BndNode*> > _bnd_node_range;
+  std::unique_ptr<StoredRange<MooseMesh::const_bnd_elem_iterator, const BndElement*> > _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
   std::map<dof_id_type, std::vector<dof_id_type> > _node_to_elem_map;
@@ -928,7 +930,7 @@ protected:
 
   /// Mortar interfaces mapped through their names
   std::map<std::string, MortarInterface *> _mortar_interface_by_name;
-  std::vector<MortarInterface *> _mortar_interface;
+  std::vector<std::unique_ptr<MortarInterface> > _mortar_interface;
   /// Mortar interfaces mapped though master, slave IDs pairs
   std::map<std::pair<BoundaryID, BoundaryID>, MortarInterface *> _mortar_interface_by_ids;
 
