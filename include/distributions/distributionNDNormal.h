@@ -65,6 +65,10 @@ public:
   std::vector<double> getTransformationMatrix(std::vector<int> index);
   std::vector<int> getTransformationMatrixDimensions();
   std::vector<int> getTransformationMatrixDimensions(std::vector<int> index);
+  std::vector<double> getInverseTransformationMatrix();
+  std::vector<double> getInverseTransformationMatrix(std::vector<int> index);
+  std::vector<int> getInverseTransformationMatrixDimensions();
+  std::vector<int> getInverseTransformationMatrixDimensions(std::vector<int> index);
   int  getSingularValuesDimension();
   int  getSingularValuesDimension(std::vector<int> index);
 
