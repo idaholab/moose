@@ -948,9 +948,14 @@ public:
   unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
   /*
-   * Return a reference to the material warehouse of Material objects.
+   * Return a reference to the material warehouse of *all* Material objects.
    */
   const MaterialWarehouse & getMaterialWarehouse() { return _all_materials; }
+
+  /*
+   * Return a reference to the material warehouse of Material objects to be computed.
+   */
+  const MaterialWarehouse & getComputeMaterialWarehouse() { return _materials; }
 
   /**
    * Return a pointer to a Material object.
