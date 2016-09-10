@@ -328,24 +328,26 @@ EBSDReader::buildNodeWeightMaps()
 
     // Loop through element indices associated with the current node and record weighted eta value in new map
     const auto & node_to_elem_pair = node_to_elem_map.find(node_id);
-    mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing node in node to elem map");
-    unsigned int n_elems = node_to_elem_pair->second.size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
-
-    for (unsigned int ne = 0; ne < n_elems; ++ne)
+    if (node_to_elem_pair != node_to_elem_map.end())
     {
-      // Current element index
-      unsigned int elem_id = (node_to_elem_pair->second)[ne];
+      unsigned int n_elems = node_to_elem_pair->second.size();  // n_elems can range from 1 to 4 for 2D and 1 to 8 for 3D problems
 
-      // Retrieve EBSD grain number for the current element index
-      const Elem * elem = mesh.elem(elem_id);
-      const EBSDReader::EBSDPointData & d = getData(elem->centroid());
+      for (unsigned int ne = 0; ne < n_elems; ++ne)
+      {
+        // Current element index
+        unsigned int elem_id = (node_to_elem_pair->second)[ne];
 
-      // get the (global) grain ID for the EBSD feature ID
-      const unsigned int global_id = getGlobalID(d._feature_id);
+        // Retrieve EBSD grain number for the current element index
+        const Elem * elem = mesh.elem(elem_id);
+        const EBSDReader::EBSDPointData & d = getData(elem->centroid());
 
-      // Calculate eta value and add to map
-      _node_to_grain_weight_map[node_id][global_id] += 1.0 / n_elems;
-      _node_to_phase_weight_map[node_id][d._phase] += 1.0 / n_elems;
+        // get the (global) grain ID for the EBSD feature ID
+        const unsigned int global_id = getGlobalID(d._feature_id);
+
+        // Calculate eta value and add to map
+        _node_to_grain_weight_map[node_id][global_id] += 1.0 / n_elems;
+        _node_to_phase_weight_map[node_id][d._phase] += 1.0 / n_elems;
+      }
     }
   }
 }
