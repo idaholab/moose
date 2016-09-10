@@ -589,9 +589,6 @@ GrainTracker::trackGrains()
   /**
    * Only the master rank does tracking, the remaining ranks
    * wait to receive local to global indices from the master.
-   * I'm using a GOTO here rather than a gigantic if statement
-   * that's hard to see on any editor. All ranks participate
-   * in triggering the callback at the bottom of this method.
    */
   if (_is_master)
   {
@@ -623,7 +620,7 @@ GrainTracker::trackGrains()
      * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
      * index whose centroid is closest to this unique grain.
      */
-    std::map<unsigned int, unsigned int> new_grain_idx_to_existing_grain_idx;
+    std::vector<unsigned int> new_grain_idx_to_existing_grain_idx(_feature_sets.size(), libMesh::invalid_uint);
 
     for (auto old_grain_idx = beginIndex(_feature_sets_old); old_grain_idx < _feature_sets_old.size(); ++old_grain_idx)
     {
@@ -668,15 +665,14 @@ GrainTracker::trackGrains()
          * matches when we are building this map). This will happen any time a grain disappears during
          * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
          */
-        const auto map_it = new_grain_idx_to_existing_grain_idx.find(closest_match_idx);
-
-        if (map_it != new_grain_idx_to_existing_grain_idx.end())
+        auto curr_idx = new_grain_idx_to_existing_grain_idx[closest_match_idx];
+        if (curr_idx != libMesh::invalid_uint)
         {
           // The new feature being competed for
           auto & feature = _feature_sets[closest_match_idx];
 
           // The other old grain competing to match up to the same new grain
-          auto & other_old_grain = _feature_sets_old[map_it->second];
+          auto & other_old_grain = _feature_sets_old[curr_idx];
 
           auto centroid_diff1 = centroidRegionDistance(feature._bboxes, old_grain._bboxes);
           auto centroid_diff2 = centroidRegionDistance(feature._bboxes, other_old_grain._bboxes);
@@ -702,12 +698,15 @@ GrainTracker::trackGrains()
     }
 
     // Mark all resolved grain matches
-    for (const auto & new_to_exist_kv : new_grain_idx_to_existing_grain_idx)
+    for (auto new_idx = beginIndex(new_grain_idx_to_existing_grain_idx);
+         new_idx < new_grain_idx_to_existing_grain_idx.size(); ++new_idx)
     {
-      auto curr_idx = new_to_exist_kv.second;
-      auto new_idx = new_to_exist_kv.first;
+      auto curr_idx = new_grain_idx_to_existing_grain_idx[new_idx];
 
-      mooseAssert(new_idx < _feature_sets.size(), "Invalid feature index");
+      // This may be a new grain, we'll handle that case below
+      if (curr_idx == libMesh::invalid_uint)
+        continue;
+
       mooseAssert(_feature_sets_old[curr_idx]._id != libMesh::invalid_uint, "Invalid ID in old grain structure");
 
       _feature_sets[new_idx]._id = _feature_sets_old[curr_idx]._id;   // Transfer ID
@@ -737,8 +736,6 @@ GrainTracker::trackGrains()
       // New Grain
       if (feature._status == Status::CLEAR)
       {
-        mooseAssert(new_grain_idx_to_existing_grain_idx.find(feature_num) == new_grain_idx_to_existing_grain_idx.end(),
-                    "New grain index shows up in new to old map - this shouldn't be possible");
         mooseAssert(!_ebsd_reader || !_first_time, "Can't create new grains in intial EBSD step, logic error");
 
         auto new_idx = getNextUniqueID();
