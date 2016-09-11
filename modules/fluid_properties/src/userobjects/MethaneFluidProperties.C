@@ -162,7 +162,7 @@ MethaneFluidProperties::mu_drhoT(Real density, Real temperature, Real & mu, Real
   Real dmudt = 0.0;
   for (unsigned int i = 0; i < a.size(); ++i)
     dmudt += i * a[i] * std::pow(temperature, i - 1.0);
-  dmu_dT = dmudt  * 1.e-6;
+  dmu_dT = dmudt * 1.e-6;
 }
 
 Real
