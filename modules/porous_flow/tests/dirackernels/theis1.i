@@ -46,12 +46,12 @@
 []
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
+  [../]
+  [./temperature]
+    type = PorousFlowTemperature
   [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG
@@ -123,6 +123,8 @@
   [./smp]
     type = SMP
     full = true
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_rtol -snes_max_it -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm lu 1E-10 10000 NONZERO'
   [../]
 []
 

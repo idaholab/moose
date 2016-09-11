@@ -110,13 +110,13 @@
 []
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    temperature = temp
-  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
+  [../]
+  [./temperature]
+    type = PorousFlowTemperature
+    temperature = temp
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
