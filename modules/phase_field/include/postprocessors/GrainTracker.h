@@ -31,6 +31,14 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
+  // Struct used to transfer minimal data to all ranks
+  struct PartialFeatureData
+  {
+    unsigned int id;
+    Point centroid;
+    Real volume;
+  };
+
   struct CacheValues
   {
     Real current;
@@ -90,6 +98,17 @@ protected:
   void remapGrains();
 
   /**
+   * Builds a grain ID to grain index for operations that need to access a grain by ID instead of index.
+   */
+  void buildGrainIdToGrainIdx(unsigned int max_id);
+
+  /**
+   * Broadcast essential Grain information to all processors. This method is used to get certain
+   * attributes like volume and centroid updated.
+   */
+  void broadcastAndUpdateGrainData();
+
+  /**
    * Populates and sorts a min_distances vector with the minimum distances to all grains in the simulation
    * for a given grain. There are _vars.size() entries in the outer vector, one for each order parameter.
    * A list of grains with the same OP are ordered in lists per OP.
@@ -136,7 +155,7 @@ protected:
   /**
    * This method colors neighbors of halo entries to expand the halo as desired for a given simulation.
    */
-  void expandHalos();
+  void expandHalos(unsigned int num_layers_to_expand);
 
   /**
    * Retrieve the next unique grain number if a new grain is detected during trackGrains. This method
@@ -215,6 +234,9 @@ private:
   /// Boolean to indicate the first time this object executes.
   /// _tracking_step isn't enough if people skip initial or execute more than once per step
   bool _first_time;
+
+  /// Boolean to indicate whether this is a Steady or Transient solve
+  const bool _is_transient;
 };
 
 
@@ -242,5 +264,9 @@ struct GrainDistance
   unsigned int _unique_id;
   unsigned int _var_index;
 };
+
+template<> void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context);
+template<> void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context);
+
 
 #endif

@@ -97,7 +97,6 @@
     connecting_threshold = 0.5
     remap_grains = false
     halo_level = 0
-
   [../]
   [./DOFs]
     type = NumDOFs
