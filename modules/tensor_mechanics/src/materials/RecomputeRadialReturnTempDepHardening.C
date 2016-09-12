@@ -85,7 +85,8 @@ RecomputeRadialReturnTempDepHardening::initializeHardeningFunctions()
     {
       if (temp >= _hf_temperatures[i] && temp < _hf_temperatures[i+1])
       {
-        _hf_index = i;
+        _hf_index_lo = i;
+        _hf_index_hi = i + 1;
         Real temp_lo = _hf_temperatures[i];
         Real temp_hi = _hf_temperatures[i+1];
         _hf_fraction = (temp - temp_lo) / (temp_hi - temp_lo);
@@ -95,13 +96,15 @@ RecomputeRadialReturnTempDepHardening::initializeHardeningFunctions()
 
   else if (temp <= _hf_temperatures[0])
   {
-    _hf_index = 0;
+    _hf_index_lo = 0;
+    _hf_index_hi = _hf_index_lo;
     _hf_fraction = 0.0;
   }
 
   else if (temp >= _hf_temperatures.back())
   {
-    _hf_index = _hf_temperatures.size() - 1;
+    _hf_index_lo = _hf_temperatures.size() - 1;
+    _hf_index_hi = _hf_index_lo;
     _hf_fraction = 1.0;
   }
 
@@ -114,9 +117,8 @@ Real
 RecomputeRadialReturnTempDepHardening::computeHardeningValue(Real scalar)
 {
   const Real strain = (*_scalar_plastic_strain_old)[_qp] + scalar;
-  const Point p;
-  const Real stress =   (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->value(strain, p)
-                      + _hf_fraction * _hardening_functions[_hf_index+1]->value(strain, p);
+  const Real stress =   (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->value(strain, Point())
+                      + _hf_fraction * _hardening_functions[_hf_index_hi]->value(strain, Point());
 
   return stress - _yield_stress;
 }
@@ -125,10 +127,9 @@ Real
 RecomputeRadialReturnTempDepHardening::computeHardeningDerivative(Real /*scalar*/)
 {
   const Real strain_old = (*_scalar_plastic_strain_old)[_qp];
-  const Point p;
 
-  return   (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->timeDerivative(strain_old, p)
-         + _hf_fraction * _hardening_functions[_hf_index+1]->timeDerivative(strain_old, p);
+  return   (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->timeDerivative(strain_old, Point())
+         + _hf_fraction * _hardening_functions[_hf_index_hi]->timeDerivative(strain_old, Point());
 }
 
 void

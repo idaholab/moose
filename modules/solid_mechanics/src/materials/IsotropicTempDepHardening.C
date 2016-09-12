@@ -34,12 +34,12 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
     _hardening_functions_names(getParam<std::vector<FunctionName> >("hardening_functions")),
     _hf_temperatures(getParam<std::vector<Real> >("temperatures"))
 {
-  const unsigned len = _hardening_functions_names.size();
+  const unsigned int len = _hardening_functions_names.size();
   if (len < 2)
     mooseError("At least two stress-strain curves must be provided in hardening_functions");
   _hardening_functions.resize(len);
 
-  const unsigned len_temps = _hf_temperatures.size();
+  const unsigned int len_temps = _hf_temperatures.size();
   if (len != len_temps)
     mooseError("The vector of hardening function temperatures must have the same length as the vector of temperature dependent hardening functions.");
 
@@ -59,8 +59,7 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
 
     _hardening_functions[i] = f;
 
-    Point p;
-    yield_stress_vec.push_back(f->value(0.0, p));
+    yield_stress_vec.push_back(f->value(0.0, Point()));
   }
 
   _interp_yield_stress = MooseSharedPointer<LinearInterpolation>(new LinearInterpolation(_hf_temperatures, yield_stress_vec));
@@ -87,14 +86,15 @@ IsotropicTempDepHardening::computeStressInitialize(unsigned qp, Real effectiveTr
 void
 IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
 {
-  Real temp = _temperature[qp];
+  const Real temp = _temperature[qp];
   if (temp > _hf_temperatures[0] && temp < _hf_temperatures.back())
   {
     for (unsigned int i = 0; i < _hf_temperatures.size() - 1; ++i)
     {
       if (temp >= _hf_temperatures[i] && temp < _hf_temperatures[i+1])
       {
-        _hf_index = i;
+        _hf_index_lo = i;
+        _hf_index_hi = i + 1;
         Real temp_lo = _hf_temperatures[i];
         Real temp_hi = _hf_temperatures[i+1];
         _hf_fraction = (temp - temp_lo) / (temp_hi - temp_lo);
@@ -104,13 +104,15 @@ IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
 
   else if (temp <= _hf_temperatures[0])
   {
-    _hf_index = 0;
+    _hf_index_lo = 0;
+    _hf_index_hi = _hf_index_lo;
     _hf_fraction = 0.0;
   }
 
   else if (temp >= _hf_temperatures.back())
   {
-    _hf_index = _hf_temperatures.size() - 1;
+    _hf_index_lo = _hf_temperatures.size() - 1;
+    _hf_index_hi = _hf_index_lo;
     _hf_fraction = 1.0;
   }
 
@@ -122,11 +124,9 @@ Real
 IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
 {
   const Real strain = (*_scalar_plastic_strain_old)[qp] + scalar;
-  Real stress = 0.0;
-  Point p;
 
-  stress += (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->value(strain, p);
-  stress += _hf_fraction * _hardening_functions[_hf_index+1]->value(strain, p);
+  const Real stress = (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->value(strain, Point())
+                      + _hf_fraction * _hardening_functions[_hf_index_hi]->value(strain, Point());
 
   return stress - _yield_stress;
 }
@@ -135,11 +135,9 @@ Real
 IsotropicTempDepHardening::computeHardeningDerivative(unsigned qp, Real /*scalar*/)
 {
   const Real strain_old = (*_scalar_plastic_strain_old)[qp];
-  Real derivative = 0.0;
-  Point p;
 
-  derivative += (1.0 - _hf_fraction) * _hardening_functions[_hf_index]->timeDerivative(strain_old, p);
-  derivative += _hf_fraction * _hardening_functions[_hf_index+1]->timeDerivative(strain_old, p);
+  const Real derivative = (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->timeDerivative(strain_old, Point())
+                          + _hf_fraction * _hardening_functions[_hf_index_hi]->timeDerivative(strain_old, Point());
 
   return derivative;
 }
@@ -148,7 +146,6 @@ void
 IsotropicTempDepHardening::computeYieldStress(unsigned qp)
 {
   _yield_stress = _interp_yield_stress->sample(_temperature[qp]);
-
-  if (_yield_stress <= 0)
-    mooseError("Yield stress must be greater than zero");
+  if (_yield_stress <= 0.0)
+    mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
 }
