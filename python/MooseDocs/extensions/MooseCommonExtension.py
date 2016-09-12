@@ -49,10 +49,11 @@ class MooseCommonExtension(object):
       SETTINGS_RE = re.compile("([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))")
       matches = SETTINGS_RE.findall(settings_line.strip())
 
-      if not matches:
-        return {}
       options = copy.copy(self._settings)
       styles = {}
+      if len(matches) == 0:
+          return options, styles
+
       for entry in matches:
         if entry[0] in options.keys():
             options[entry[0].strip()] = entry[1].strip()

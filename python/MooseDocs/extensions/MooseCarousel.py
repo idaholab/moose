@@ -181,10 +181,10 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
         """
         c = etree.SubElement(parent, "a")
         alt_dir = "left"
-        chev = "glyphicon-chevron-left"
+        chev = "fa-chevron-circle-left"
         if direction == "next":
             alt_dir = "right"
-            chev = "glyphicon-chevron-right"
+            chev = "fa-chevron-circle-right"
 
         c.set("class", "%s carousel-control" % alt_dir)
         c.set("href", "#%s" % cid)
@@ -192,7 +192,7 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
         c.set("data-slide", direction)
         s = etree.SubElement(c, "span")
 
-        s.set("class", "glyphicon %s" % chev)
+        s.set("class", "fa %s" % chev)
         s.set("aria-hidden", "true")
         s = etree.SubElement(c, "span")
         s.set("class", "sr-only")
