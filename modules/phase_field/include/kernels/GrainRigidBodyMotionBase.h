@@ -67,9 +67,9 @@ protected:
   const std::vector<std::vector<Real> > & _grain_force_eta_jacobians;
 
   /// constant value corresponding to grain translation
-  Real _mt;
+  const Real _mt;
   /// constant value corresponding to grain rotation
-  Real _mr;
+  const Real _mr;
 
   /// grain tracker object
   const GrainTrackerInterface & _grain_tracker;

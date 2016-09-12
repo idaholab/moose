@@ -30,10 +30,12 @@ SingleGrainRigidBodyMotion::computeQpResidual()
   {
     const auto volume = _grain_tracker.getGrainVolume(grain_index);
     const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
-    const RealGradient velocity_advection = _mt / volume * _grain_forces[grain_index] * _u[_qp]
-                                            + _mr / volume * _grain_torques[grain_index].cross(_q_point[_qp] - centroid) * _u[_qp];
-    const Real div_velocity_advection = _mt / volume * _grain_forces[grain_index] * _grad_u[_qp]
-                                        + _mr / volume * _grain_torques[grain_index].cross(_q_point[_qp] - centroid) * _grad_u[_qp];
+
+    const auto force = _mt / volume * _grain_forces[grain_index];
+    const auto torque = _mr / volume * (_grain_torques[grain_index].cross(_q_point[_qp] - centroid));
+
+    const RealGradient velocity_advection = (force + torque) * _u[_qp];
+    const Real div_velocity_advection = (force + torque) * _grad_u[_qp];
 
     return velocity_advection * _grad_u[_qp] * _test[_i][_qp] + div_velocity_advection * _u[_qp] * _test[_i][_qp];
   }
@@ -49,21 +51,20 @@ SingleGrainRigidBodyMotion::computeQpJacobian()
   {
     const auto volume = _grain_tracker.getGrainVolume(grain_index);
     const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
-    getUserObjectEtaJacobians(_var_dofs[_j], _op_index, grain_index);
 
-    const RealGradient velocity_advection = _mt / volume * _grain_forces[grain_index] * _u[_qp]
-                                            + _mr / volume * _grain_torques[grain_index].cross(_q_point[_qp] - centroid) * _u[_qp];
-    const Real div_velocity_advection = _mt / volume * _grain_forces[grain_index] * _grad_u[_qp]
-                                        + _mr / volume * _grain_torques[grain_index].cross(_q_point[_qp] - centroid) * _grad_u[_qp];
-    const RealGradient velocity_advection_derivative_eta = _mt / volume * (_grain_forces[grain_index] * _phi[_j][_qp] + _u[_qp] * _force_eta_jacobian)
-                                                           + _mr / volume * ((_grain_torques[grain_index].cross(_q_point[_qp] - centroid) * _phi[_j][_qp])
-                                                           + (_torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _u[_qp]));
-    const Real div_velocity_advection_derivative_eta = _mt / volume * (_grain_forces[grain_index] * _grad_phi[_j][_qp] + _force_eta_jacobian * _grad_u[_qp])
-                                                       + _mr / volume * ((_grain_torques[grain_index].cross(_q_point[_qp] - centroid) * _grad_phi[_j][_qp])
-                                                       + (_torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _grad_u[_qp]));
+    getUserObjectEtaJacobians(_var_dofs[_j], _op_index, grain_index);
+    const auto force = _mt / volume * _grain_forces[grain_index];
+    const auto torque = _mr / volume * (_grain_torques[grain_index].cross(_q_point[_qp] - centroid));
+    const auto force_jac = _mt / volume * _force_eta_jacobian;
+    const auto torque_jac = _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid);
+
+    const RealGradient velocity_advection = (force + torque) * _u[_qp];
+    const Real div_velocity_advection = (force + torque) * _grad_u[_qp];
+    const RealGradient velocity_advection_jacobian_eta = (force + torque) * _phi[_j][_qp] + (force_jac + torque_jac) * _u[_qp];
+    const Real div_velocity_advection_jacobian_eta = (force + torque) * _grad_phi[_j][_qp] + (force_jac + torque_jac) * _grad_u[_qp];
 
     return (velocity_advection * _grad_phi[_j][_qp] + div_velocity_advection * _phi[_j][_qp]) * _test[_i][_qp]
-           + (velocity_advection_derivative_eta * _grad_u[_qp] + div_velocity_advection_derivative_eta * _u[_qp]) * _test[_i][_qp];
+           + (velocity_advection_jacobian_eta * _grad_u[_qp] + div_velocity_advection_jacobian_eta * _u[_qp]) * _test[_i][_qp];
   }
 
   return 0.0;
@@ -72,39 +73,45 @@ SingleGrainRigidBodyMotion::computeQpJacobian()
 Real
 SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned int grain_index = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
-  if (grain_index != libMesh::invalid_uint)
+  if (jvar == _c_var)
   {
-    if (jvar == _c_var)
+    unsigned int grain_index = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+    if (grain_index != libMesh::invalid_uint)
     {
       const auto volume = _grain_tracker.getGrainVolume(grain_index);
       const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+
       getUserObjectCJacobians(_c_dofs[_j], grain_index);
+      const auto force_jac = _mt / volume * _force_c_jacobian;
+      const auto torque_jac = _mr / volume * _torque_c_jacobian.cross(_q_point[_qp] - centroid);
 
-      const RealGradient velocity_advection_derivative_c = _mt / volume * _force_c_jacobian * _u[_qp]
-                                                            + _mr / volume * (_torque_c_jacobian.cross(_q_point[_qp] - centroid)) * _u[_qp];
-      const Real div_velocity_advection_derivative_c = _mt / volume * _grad_u[_qp] * _force_c_jacobian
-                                                        + _mr / volume * (_torque_c_jacobian.cross(_q_point[_qp] - centroid)) * _grad_u[_qp];
+      const RealGradient velocity_advection_jacobian_c = (force_jac + torque_jac) * _u[_qp];
+      const Real div_velocity_advection_jacobian_c = (force_jac + torque_jac) * _grad_u[_qp];
 
-      return velocity_advection_derivative_c * _grad_u[_qp] * _test[_i][_qp]
-             + div_velocity_advection_derivative_c * _u[_qp] * _test[_i][_qp];
+      return velocity_advection_jacobian_c * _grad_u[_qp] * _test[_i][_qp]
+             + div_velocity_advection_jacobian_c * _u[_qp] * _test[_i][_qp];
     }
+  }
 
-    for (unsigned int op = 0; op < _op_num; ++op)
-      if (jvar == _vals_var[op])
+  for (unsigned int op = 0; op < _op_num; ++op)
+    if (jvar == _vals_var[op])
+    {
+      unsigned int grain_index = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+      if (grain_index != libMesh::invalid_uint)
       {
         const auto volume = _grain_tracker.getGrainVolume(grain_index);
         const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+
         MooseVariable & jv = _sys.getVariable(_tid, _vals_var[op]);
         getUserObjectEtaJacobians(jv.dofIndices()[_j], op, grain_index);
+        const auto force_jac = _mt / volume * _force_eta_jacobian;
+        const auto torque_jac = _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid);
 
-        const RealGradient velocity_advection_derivative_eta = _mt / volume * _force_eta_jacobian * _u[_qp]
-                                                               + _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _u[_qp];
-        const Real div_velocity_advection_derivative_eta = _mt / volume * _force_eta_jacobian * _grad_u[_qp]
-                                                           + _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _grad_u[_qp];
+        const RealGradient velocity_advection_jacobian_eta = (force_jac + torque_jac) * _u[_qp];
+        const Real div_velocity_advection_jacobian_eta = (force_jac + torque_jac) * _grad_u[_qp];
 
-        return velocity_advection_derivative_eta * _grad_u[_qp] * _test[_i][_qp]
-               + div_velocity_advection_derivative_eta * _u[_qp] * _test[_i][_qp];
+        return velocity_advection_jacobian_eta * _grad_u[_qp] * _test[_i][_qp]
+               + div_velocity_advection_jacobian_eta * _u[_qp] * _test[_i][_qp];
      }
    }
 
@@ -119,15 +126,16 @@ SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type dof_index)
   {
     const auto volume = _grain_tracker.getGrainVolume(grain_index);
     const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+
     getUserObjectEtaJacobians(dof_index, _op_index, grain_index);
+    const auto force_jac = _mt / volume * _force_eta_jacobian;
+    const auto torque_jac = _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid);
 
-    const RealGradient velocity_advection_derivative_eta = _mt / volume * _u[_qp] * _force_eta_jacobian
-                                                           + _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _u[_qp];
-    const Real div_velocity_advection_derivative_eta = _mt / volume * _force_eta_jacobian * _grad_u[_qp]
-                                                       + _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _grad_u[_qp];
+    const RealGradient velocity_advection_jacobian_eta = (force_jac + torque_jac) * _u[_qp];
+    const Real div_velocity_advection_jacobian_eta = (force_jac + torque_jac) * _grad_u[_qp];
 
-    return velocity_advection_derivative_eta * _grad_u[_qp] * _test[_i][_qp]
-           + div_velocity_advection_derivative_eta * _u[_qp] * _test[_i][_qp];
+    return velocity_advection_jacobian_eta * _grad_u[_qp] * _test[_i][_qp]
+           + div_velocity_advection_jacobian_eta * _u[_qp] * _test[_i][_qp];
    }
 
    return 0.0;
@@ -136,38 +144,44 @@ SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type dof_index)
 Real
 SingleGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index)
 {
-  unsigned int grain_index = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
-  if (grain_index != libMesh::invalid_uint)
+  if (jvar == _c_var)
   {
-    if (jvar == _c_var)
+    unsigned int grain_index = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+    if (grain_index != libMesh::invalid_uint)
     {
       const auto volume = _grain_tracker.getGrainVolume(grain_index);
       const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+
       getUserObjectCJacobians(dof_index, grain_index);
+      const auto force_jac = _mt / volume * _force_c_jacobian;
+      const auto torque_jac = _mr / volume * _torque_c_jacobian.cross(_q_point[_qp] - centroid);
 
-      const RealGradient velocity_advection_derivative_c = _mt / volume * _u[_qp] * _force_c_jacobian
-                                                            + _mr / volume * _torque_c_jacobian.cross(_q_point[_qp] - centroid) * _u[_qp];
-      const Real div_velocity_advection_derivative_c = _mt / volume * _grad_u[_qp] * _force_c_jacobian
-                                                       + _mr / volume * _torque_c_jacobian.cross(_q_point[_qp] - centroid) * _grad_u[_qp];
+      const RealGradient velocity_advection_jacobian_c = (force_jac + torque_jac) * _u[_qp];
+      const Real div_velocity_advection_jacobian_c = (force_jac + torque_jac) * _grad_u[_qp];
 
-      return velocity_advection_derivative_c * _grad_u[_qp] * _test[_i][_qp]
-             + div_velocity_advection_derivative_c * _u[_qp] * _test[_i][_qp];
+      return velocity_advection_jacobian_c * _grad_u[_qp] * _test[_i][_qp]
+             + div_velocity_advection_jacobian_c * _u[_qp] * _test[_i][_qp];
     }
+  }
 
-    for (unsigned int op = 0; op < _op_num; ++op)
-      if (jvar == _vals_var[op])
+  for (unsigned int op = 0; op < _op_num; ++op)
+    if (jvar == _vals_var[op])
+    {
+      unsigned int grain_index = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+      if (grain_index != libMesh::invalid_uint)
       {
         const auto volume = _grain_tracker.getGrainVolume(grain_index);
         const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+
         getUserObjectEtaJacobians(dof_index, op, grain_index);
+        const auto force_jac = _mt / volume * _force_eta_jacobian;
+        const auto torque_jac = _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid);
 
-        const RealGradient velocity_advection_derivative_eta = _mt / volume * _force_eta_jacobian * _u[_qp]
-                                                               + _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _u[_qp];
-        const Real div_velocity_advection_derivative_eta = _mt / volume * _force_eta_jacobian * _grad_u[_qp]
-                                                           + _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid) * _grad_u[_qp];
+        const RealGradient velocity_advection_jacobian_eta = (force_jac + torque_jac) * _u[_qp];
+        const Real div_velocity_advection_jacobian_eta = (force_jac + torque_jac) * _grad_u[_qp];
 
-        return velocity_advection_derivative_eta * _grad_u[_qp] * _test[_i][_qp]
-               + div_velocity_advection_derivative_eta * _u[_qp] * _test[_i][_qp];
+        return velocity_advection_jacobian_eta * _grad_u[_qp] * _test[_i][_qp]
+               + div_velocity_advection_jacobian_eta * _u[_qp] * _test[_i][_qp];
       }
   }
 
