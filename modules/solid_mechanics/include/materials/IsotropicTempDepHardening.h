@@ -30,7 +30,8 @@ protected:
   const std::vector<FunctionName> _hardening_functions_names;
   std::vector<PiecewiseLinear *> _hardening_functions;
   std::vector<Real> _hf_temperatures;
-  unsigned int _hf_index;
+  unsigned int _hf_index_lo;
+  unsigned int _hf_index_hi;
   Real _hf_fraction;
 };
 
