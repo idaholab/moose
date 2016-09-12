@@ -22,27 +22,26 @@
 #include "libmesh/threads.h"
 #include "libmesh/error_vector.h"
 
-UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem, std::map<std::string, ErrorVector *> indicator_field_to_error_vector) :
+UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem,
+                                                   const std::map<std::string, std::unique_ptr<ErrorVector> > & indicator_field_to_error_vector) :
     ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),
-    _fe_problem(fe_problem),
     _indicator_field_to_error_vector(indicator_field_to_error_vector),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _system_number(_aux_sys.number()),
-    _adaptivity(_fe_problem.adaptivity()),
+    _adaptivity(fe_problem.adaptivity()),
     _solution(_aux_sys.solution())
 {
   // Build up this map once so we don't have to do these lookups over and over again
   for (const auto & it : _indicator_field_to_error_vector)
   {
     unsigned int var_num = _aux_sys.getVariable(0, it.first).number();
-    _indicator_field_number_to_error_vector[var_num] = it.second;
+    _indicator_field_number_to_error_vector.emplace(var_num, it.second.get());
   }
 }
 
 // Splitting Constructor
 UpdateErrorVectorsThread::UpdateErrorVectorsThread(UpdateErrorVectorsThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
-    _fe_problem(x._fe_problem),
     _indicator_field_to_error_vector(x._indicator_field_to_error_vector),
     _aux_sys(x._aux_sys),
     _system_number(x._system_number),

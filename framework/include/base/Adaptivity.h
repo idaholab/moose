@@ -208,7 +208,7 @@ public:
    *
    * @param indicator_field The name of the field to get an ErrorVector for.
    */
-  ErrorVector & getErrorVector(std::string indicator_field);
+  ErrorVector & getErrorVector(const std::string & indicator_field);
 
   /**
    * Update the ErrorVectors that have been requested through calls to getErrorVector().
@@ -227,16 +227,16 @@ protected:
   /// on/off flag reporting if the adaptivity is being used
   bool _mesh_refinement_on;
   /// A mesh refinement object to be used either with initial refinement or with Adaptivity.
-  MeshRefinement * _mesh_refinement;
+  std::unique_ptr<MeshRefinement> _mesh_refinement;
   /// Error estimator to be used by the apps.
-  ErrorEstimator * _error_estimator;
+  std::unique_ptr<ErrorEstimator> _error_estimator;
   /// Error vector for use with the error estimator.
-  ErrorVector * _error;
+  std::unique_ptr<ErrorVector> _error;
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
 
   /// A mesh refinement object for displaced mesh
-  MeshRefinement * _displaced_mesh_refinement;
+  std::unique_ptr<MeshRefinement> _displaced_mesh_refinement;
 
   /// the number of adaptivity steps to do at the beginning of simulation
   unsigned int _initial_steps;
@@ -275,7 +275,7 @@ protected:
   bool _recompute_markers_during_cycles;
 
   /// Stores pointers to ErrorVectors associated with indicator field names
-  std::map<std::string, ErrorVector *> _indicator_field_to_error_vector;
+  std::map<std::string, std::unique_ptr<ErrorVector> > _indicator_field_to_error_vector;
 };
 
 template<typename T>

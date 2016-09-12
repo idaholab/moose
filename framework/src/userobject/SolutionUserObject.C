@@ -75,19 +75,11 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
     _system_variables(getParam<std::vector<std::string> >("system_variables")),
     _exodus_time_index(-1),
     _interpolate_times(false),
-    _mesh(NULL),
-    _es(NULL),
-    _system(NULL),
-    _mesh_function(NULL),
-    _exodusII_io(NULL),
-    _serialized_solution(NULL),
-    _es2(NULL),
-    _system2(NULL),
-    _mesh_function2(NULL),
-    _serialized_solution2(NULL),
+    _system(nullptr),
+    _system2(nullptr),
     _interpolation_time(0.0),
     _interpolation_factor(0.0),
-    _exodus_times(NULL),
+    _exodus_times(nullptr),
     _exodus_index1(-1),
     _exodus_index2(-1),
     _scale(getParam<std::vector<Real> >("scale")),
@@ -102,7 +94,6 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
     _transformation_order(getParam<MultiMooseEnum>("transformation_order")),
     _initialized(false)
 {
-
   // form rotation matrices with the specified angles
   Real halfPi = std::acos(0.0);
   Real a;
@@ -138,23 +129,6 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
 
 SolutionUserObject::~SolutionUserObject()
 {
-  if (_exodusII_io)
-    delete _exodusII_io;
-
-  delete _serialized_solution;
-  delete _mesh_function;
-  delete _es;
-
-  if (_mesh_function2)
-    delete _mesh_function2;
-
-  if (_serialized_solution2)
-    delete _serialized_solution2;
-
-  if (_es2)
-    delete _es2;
-
-  delete _mesh;
 }
 
 void
@@ -168,7 +142,7 @@ SolutionUserObject::readXda()
   _mesh->read(_mesh_file);
 
   // Create the libmesh::EquationSystems
-  _es = new EquationSystems(*_mesh);
+  _es = libmesh_make_unique<EquationSystems>(*_mesh);
 
   // Use new read syntax (binary)
   if (_file_type ==  "xdr")
@@ -195,7 +169,7 @@ SolutionUserObject::readExodusII()
     _system_name = "SolutionUserObjectSystem";
 
   // Read the Exodus file
-  _exodusII_io = new ExodusII_IO (*_mesh);
+  _exodusII_io = libmesh_make_unique<ExodusII_IO>(*_mesh);
   _exodusII_io->read(_mesh_file);
   _exodus_times = &_exodusII_io->get_time_steps();
 
@@ -223,7 +197,7 @@ SolutionUserObject::readExodusII()
     mooseError("In SolutionUserObject, exodus file contains no timesteps.");
 
   // Account for parallel mesh
-  if (dynamic_cast<DistributedMesh *>(_mesh))
+  if (dynamic_cast<DistributedMesh *>(_mesh.get()))
   {
     _mesh->allow_renumbering(true);
     _mesh->prepare_for_use(/*false*/);
@@ -235,7 +209,7 @@ SolutionUserObject::readExodusII()
   }
 
   // Create EquationSystems object for solution
-  _es = new EquationSystems(*_mesh);
+  _es = libmesh_make_unique<EquationSystems>(*_mesh);
   _es->add_system<ExplicitSystem> (_system_name);
   _system = &_es->get_system(_system_name);
 
@@ -277,7 +251,7 @@ SolutionUserObject::readExodusII()
   if (_interpolate_times)
   {
     // Create a second equation system
-    _es2 = new EquationSystems(*_mesh);
+    _es2 = libmesh_make_unique<EquationSystems>(*_mesh);
     _es2->add_system<ExplicitSystem> (_system_name);
     _system2 = &_es2->get_system(_system_name);
 
@@ -405,7 +379,7 @@ SolutionUserObject::initialSetup()
   // Create a libmesh::Mesh object for storing the loaded data.  Since
   // SolutionUserObject is restricted to only work with ReplicatedMesh
   // (see above) we can force the Mesh used here to be a ReplicatedMesh.
-  _mesh = new ReplicatedMesh(_communicator);
+  _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator);
 
   // ExodusII mesh file supplied
   if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/ true))
@@ -432,7 +406,7 @@ SolutionUserObject::initialSetup()
     mooseError("In SolutionUserObject, invalid file type (only .xda, .xdr, and .e supported)");
 
   // Intilize the serial solution vector
-  _serialized_solution = NumericVector<Number>::build(_communicator).release();
+  _serialized_solution = NumericVector<Number>::build(_communicator);
   _serialized_solution->init(_system->n_dofs(), false, SERIAL);
 
   // Pull down a full copy of this vector on every processor so we can get values in parallel
@@ -457,19 +431,19 @@ SolutionUserObject::initialSetup()
   }
 
   // Create the MeshFunction for working with the solution data
-  _mesh_function = new MeshFunction(*_es, *_serialized_solution, _system->get_dof_map(), var_nums);
+  _mesh_function = libmesh_make_unique<MeshFunction>(*_es, *_serialized_solution, _system->get_dof_map(), var_nums);
   _mesh_function->init();
 
   // Build second MeshFunction for interpolation
   if (_interpolate_times)
   {
     // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-    _serialized_solution2 = NumericVector<Number>::build(_communicator).release();
+    _serialized_solution2 = NumericVector<Number>::build(_communicator);
     _serialized_solution2->init(_system2->n_dofs(), false, SERIAL);
     _system2->solution->localize(*_serialized_solution2);
 
     // Create the MeshFunction for the second copy of the data
-    _mesh_function2 = new MeshFunction(*_es2, *_serialized_solution2, _system2->get_dof_map(), var_nums);
+    _mesh_function2 = libmesh_make_unique<MeshFunction>(*_es2, *_serialized_solution2, _system2->get_dof_map(), var_nums);
     _mesh_function2->init();
 
   }
