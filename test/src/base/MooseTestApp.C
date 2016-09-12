@@ -214,7 +214,6 @@
 #include "FrontSource.h"
 #include "MaterialPointSource.h"
 #include "MaterialMultiPointSource.h"
-#include "StatefulPointSource.h"
 #include "CachingPointSource.h"
 #include "BadCachingPointSource.h"
 #include "NonlinearSource.h"
@@ -456,7 +455,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerDiracKernel(FrontSource);
   registerDiracKernel(MaterialPointSource);
   registerDiracKernel(MaterialMultiPointSource);
-  registerDiracKernel(StatefulPointSource);
   registerDiracKernel(CachingPointSource);
   registerDiracKernel(BadCachingPointSource);
   registerDiracKernel(NonlinearSource);

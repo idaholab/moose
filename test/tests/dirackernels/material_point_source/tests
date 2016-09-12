@@ -4,4 +4,15 @@
     input = 'material_point_source.i'
     exodiff = 'out.e'
   [../]
+  [./material_error_check_old]
+    type = 'RunException'
+    input = 'material_error_check.i'
+    expect_err = 'Stateful material properties not allowed for this object\. Old property for \S+ was requested.'
+  [../]
+  [./material_error_check_older]
+    type = 'RunException'
+    input = 'material_error_check.i'
+    cli_args = 'DiracKernels/material_source/prop_state=older'
+    expect_err = 'Stateful material properties not allowed for this object\. Older property for \S+ was requested.'
+  [../]
 []

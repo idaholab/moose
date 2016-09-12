@@ -294,6 +294,10 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Old property for \"" << name << "\" was requested.");
+
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
@@ -309,6 +313,10 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Older property for \"" << name << "\" was requested.");
+
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
@@ -340,9 +348,6 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   checkExecutionStage();
   checkMaterialProperty(name);
 
-  if (!_stateful_allowed && _material_data->getMaterialPropertyStorage().hasStatefulProperties())
-    mooseError("Error: Stateful material properties not allowed for this object.");
-
   // mark property as requested
   markMatPropRequested(name);
 
@@ -358,7 +363,8 @@ const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
-    mooseError("Error: Stateful material properties not allowed for this object.");
+    mooseError("Stateful material properties not allowed for this object."
+               " Old property for \"" << name << "\" was requested.");
 
   // mark property as requested
   markMatPropRequested(name);
@@ -371,7 +377,8 @@ const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
-    mooseError("Error: Stateful material properties not allowed for this object.");
+    mooseError("Stateful material properties not allowed for this object."
+               " Older property for \"" << name << "\" was requested.");
 
   // mark property as requested
   markMatPropRequested(name);
