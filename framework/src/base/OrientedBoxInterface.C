@@ -36,9 +36,9 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters) :
   const std::string & name = parameters.get<std::string>("_object_name");
 
   // Define the bounding box
-  Real xmax = 0.5*parameters.get<Real>("width");
-  Real ymax = 0.5*parameters.get<Real>("length");
-  Real zmax = 0.5*parameters.get<Real>("height");
+  Real xmax = 0.5 * parameters.get<Real>("width");
+  Real ymax = 0.5 * parameters.get<Real>("length");
+  Real zmax = 0.5 * parameters.get<Real>("height");
 
   Point bottom_left(-xmax, -ymax, -zmax);
   Point top_right(xmax, ymax, zmax);
@@ -57,14 +57,13 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters) :
    * Normalize the width and length directions in readiness for
    * insertion into the rotation matrix
    */
-  Real len;
-  len = std::pow(w*w, 0.5);
-  if (len == 0)
+  Real len = w.norm();
+  if (len == 0.0)
     mooseError("Length of width_direction vector is zero in " << name);
   w /= len;
 
-  len = std::pow(l*l, 0.5);
-  if (len == 0)
+  len = l.norm();
+  if (len == 0.0)
     mooseError("Length of length_direction vector is zero in " << name);
   l /= len;
 
@@ -86,5 +85,5 @@ bool
 OrientedBoxInterface::containsPoint(const Point & point)
 {
   // Translate the point to the origin, and then rotate
-  return _bounding_box->contains_point((*_rot_matrix)*(point - _center));
+  return _bounding_box->contains_point((*_rot_matrix) * (point - _center));
 }

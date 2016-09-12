@@ -490,7 +490,7 @@ FiniteStrainHyperElasticViscoPlastic::computeNorm(const std::vector<Real> & var)
   Real val = 0.0;
   for (unsigned int i = 0; i < var.size(); ++i)
     val += Utility::pow<2>(var[i]);
-  return std::pow(val, 0.5);
+  return std::sqrt(val);
 }
 
 void

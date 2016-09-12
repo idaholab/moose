@@ -998,7 +998,7 @@ RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
   diag.zero();
 
   for (unsigned int i = 0; i < N; ++i)
-    diag(i,i) = std::pow(w[i], 0.5);
+    diag(i,i) = std::sqrt(w[i]);
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
