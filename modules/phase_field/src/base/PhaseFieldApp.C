@@ -424,7 +424,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(OutputEulerAngles);
   registerAux(EulerAngleProvider2RGBAux);
 
-  registerUserObject(ComputeGrainCenterUserObject);
   registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);
@@ -435,13 +434,14 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(DiscreteNucleationMap);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
+  registerDeprecatedObjectName(FauxGrainTracker, "ComputeGrainCenterUserObject", "11/01/2016 00:00");
 
   registerUserObject(EBSDReader);
   registerUserObject(SolutionRasterizer);
 
-  registerVectorPostprocessor(GrainCentersPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);
+  registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
 
   registerMesh(EBSDMesh);
   registerMesh(MortarPeriodicMesh);

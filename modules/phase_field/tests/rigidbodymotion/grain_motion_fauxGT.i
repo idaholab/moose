@@ -211,19 +211,19 @@
     variable = unique_grains
     flood_counter = grain_center
     field_display = UNIQUE_REGION
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_end'
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_center
     field_display = VARIABLE_COLORING
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_end'
   [../]
   [./centroids]
     type = FeatureFloodCountAux
     variable = centroids
-    execute_on = timestep_begin
+    execute_on = 'initial timestep_end'
     field_display = CENTROID
     flood_counter = grain_center
   [../]
@@ -274,11 +274,12 @@
 
 [UserObjects]
   [./grain_center]
-    type = GrainTracker
+    type = FauxGrainTracker
     outputs = none
     compute_op_maps = true
     calculate_feature_volumes = true
     execute_on = 'initial timestep_begin'
+    variable = 'eta0 eta1'
   [../]
   [./grain_force]
     type = ComputeGrainForceAndTorque

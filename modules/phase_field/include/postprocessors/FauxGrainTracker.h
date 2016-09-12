@@ -54,6 +54,16 @@ private:
 
   std::vector<std::pair<unsigned int, unsigned int> > _faux_data;
   std::vector<unsigned int> _faux_data_2;
+
+  /// The volume of the feature
+  std::map<unsigned int, Real> _volume;
+
+  /// The count of entities contributing to the volume calculation
+  std::map<unsigned int, unsigned int> _vol_count;
+
+  /// The centroid of the feature (average of coordinates from entities participating in the volume calculation)
+  std::map<unsigned int, Point> _centroid;
+
 };
 
 #endif

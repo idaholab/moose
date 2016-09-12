@@ -1,10 +1,14 @@
 # test file for showing summing forces and torques obtained from other userobjects
+[GlobalParams]
+  var_name_base = eta
+  op_num = 2
+[]
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 15
+  nx = 5
+  ny = 3
   nz = 0
   xmax = 50
   ymax = 25
@@ -75,13 +79,6 @@
     c = c
     etas ='eta0 eta1'
   [../]
-  [./advection_vel]
-    type = GrainAdvectionVelocity
-    c = c
-    grain_force = grain_force
-    etas = 'eta0 eta1'
-    grain_data = grain_center
-  [../]
 []
 
 [AuxVariables]
@@ -106,99 +103,6 @@
   [./df11]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vadv00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv01]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv10]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv0_div]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv1_div]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./bnds]
-    type = BndsCalcAux
-    variable = bnds
-    var_name_base = eta
-    op_num = 2.0
-    v = 'eta0 eta1'
-  [../]
-  [./df01]
-    type = MaterialStdVectorRealGradientAux
-    variable = df01
-    component = 1
-    property = force_density
-  [../]
-  [./df11]
-    type = MaterialStdVectorRealGradientAux
-    variable = df11
-    index = 1
-    component = 1
-    property = force_density
-  [../]
-  [./df00]
-    type = MaterialStdVectorRealGradientAux
-    variable = df00
-    property = force_density
-  [../]
-  [./df10]
-    type = MaterialStdVectorRealGradientAux
-    variable = df10
-    index = 1
-    property = force_density
-  [../]
-  [./vadv00]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv00
-    property = advection_velocity
-  [../]
-  [./vadv01]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv01
-    property = advection_velocity
-    component = 1
-  [../]
-  [./vadv10]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv10
-    index = 1
-    property = advection_velocity
-  [../]
-  [./vadv11]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv11
-    property = advection_velocity
-    index = 1
-    component = 1
-  [../]
-  [./vadv0_div]
-    type = MaterialStdVectorAux
-    variable = vadv0_div
-    property = advection_velocity_divergence
-  [../]
-  [./vadv1_div]
-    type = MaterialStdVectorAux
-    variable = vadv1_div
-    property = advection_velocity_divergence
-    index = 1
   [../]
 []
 
@@ -226,10 +130,6 @@
 []
 
 [VectorPostprocessors]
-  [./centers]
-    type = GrainCentersPostprocessor
-    grain_data = grain_center
-  [../]
   [./forces_dns]
     type = GrainForcesPostprocessor
     grain_force = grain_force_dns
@@ -246,33 +146,35 @@
 
 [UserObjects]
   [./grain_center]
-    type = ComputeGrainCenterUserObject
-    etas = 'eta0 eta1'
-    execute_on = 'initial timestep_end linear'
+    type = GrainTracker
+    outputs = none
+    compute_op_maps = true
+    calculate_feature_volumes = true
+    execute_on = 'initial timestep_begin'
   [../]
   [./grain_force_dns]
     type = ComputeGrainForceAndTorque
     c = c
-    execute_on = 'initial timestep_end linear'
+    etas = 'eta0 eta1'
+    execute_on = 'linear nonlinear'
     grain_data = grain_center
     force_density = force_density
   [../]
   [./grain_force_const]
     type = ConstantGrainForceAndTorque
-    execute_on = 'initial timestep_end linear'
+    execute_on = 'linear nonlinear'
     force =  '2.0 0.0 0.0 0.0 0.0 0.0'
     torque = '0.0 0.0 0.0 0.0 0.0 0.0'
   [../]
   [./grain_force]
     type = GrainForceAndTorqueSum
-    execute_on = 'initial timestep_end linear'
+    execute_on = 'linear nonlinear'
     grain_forces = 'grain_force_dns grain_force_const'
-    op_num = 2
+    grain_num = 2
   [../]
 []
 
 [Preconditioning]
-  # active = ' '
   [./SMP]
     type = SMP
     full = true
@@ -282,7 +184,7 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
   l_max_its = 20
