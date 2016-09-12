@@ -956,6 +956,7 @@ public:
    * Return a reference to the material warehouse of Material objects to be computed.
    */
   const MaterialWarehouse & getComputeMaterialWarehouse() { return _materials; }
+  const MaterialWarehouse & getDiscreteMaterialWarehouse() { return _discrete_materials; }
 
   /**
    * Return a pointer to a Material object.
