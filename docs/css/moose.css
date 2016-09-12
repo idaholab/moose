@@ -29,6 +29,11 @@ hr {
     color: #383d3e;
 }
 
+/* Slideshows with white backgrounds and captions, need a black drop text shadow */
+.carousel-caption {
+    text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
+}
+
 .admonition-title {
     font-weight: bold;
     display: block;
