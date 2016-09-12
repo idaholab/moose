@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "FiniteStrainCPSlipRateRes.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<FiniteStrainCPSlipRateRes>()
@@ -252,8 +253,8 @@ FiniteStrainCPSlipRateRes::calcResidNorm()
 {
   Real rnorm = 0.0;
   for (unsigned int i = 0; i < _nss; ++i)
-    rnorm += std::pow(_resid(i), 2.0);
-  rnorm = std::pow(rnorm, 0.5) / _nss;
+    rnorm += Utility::pow<2>(_resid(i));
+  rnorm = std::sqrt(rnorm) / _nss;
 
   return rnorm;
 }

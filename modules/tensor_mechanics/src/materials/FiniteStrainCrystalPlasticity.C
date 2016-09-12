@@ -362,7 +362,7 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
     // Normalize the vectors
     Real mag;
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
-    mag = std::pow(mag, 0.5);
+    mag = std::sqrt(mag);
 
     for (unsigned j = 0; j < LIBMESH_DIM; ++j)
       _no(i*LIBMESH_DIM+j) = vec[j]/mag;
@@ -374,7 +374,7 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
 
     // Normalize the vectors
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
-    mag = std::pow(mag, 0.5);
+    mag = std::sqrt(mag);
 
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       _mo(i*LIBMESH_DIM+j) = vec[j] / mag;
@@ -918,7 +918,7 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
   diag.zero();
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    diag(i,i) = std::pow(w[i], 0.5);
+    diag(i,i) = std::sqrt(w[i]);
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)

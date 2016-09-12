@@ -24,14 +24,14 @@ RichardsDensityVDW::RichardsDensityVDW(const InputParameters & parameters) :
     RichardsDensity(parameters),
     _a(getParam<Real>("a")),
     _b(getParam<Real>("b")),
-    _rt(getParam<Real>("temperature")*8.314472), // multiply by gas constant
+    _rt(getParam<Real>("temperature") * 8.314472), // multiply by gas constant
     _molar_mass(getParam<Real>("molar_mass")),
     _infinity_ratio(getParam<Real>("infinity_ratio")),
-    _rhs(_rt*_b/_a),
-    _b2oa(_b*_b/_a)
+    _rhs(_rt * _b / _a),
+    _b2oa(_b * _b / _a)
 {
   _vdw0 = densityVDW(0);
-  _slope0 = ddensity(0)/_molar_mass/_infinity_ratio;
+  _slope0 = ddensity(0) / (_molar_mass * _infinity_ratio);
 }
 
 Real
@@ -43,12 +43,12 @@ RichardsDensityVDW::densityVDW(Real p) const
   // Then solve for x, using mathematica
   // Then density = molar_mass/V = molar_mass*x/b
   Real y = _b2oa*p;
-  Real sq = std::pow(4.0 * Utility::pow<3>(-1 + 3*y + 3*_rhs) + Utility::pow<2>(-2 - 18*y + 9*_rhs), 0.5);
-  Real cr = std::pow(-2 + 9*_rhs - 18*y + sq, 1.0/3.0);
-  Real x = (1.0/3.0);
-  x += std::pow(2.0, 1.0/3.0)*(-1 + 3*_rhs + 3*y)/3/cr;
-  x -= cr / (3.0 * std::pow(2.0, 1.0/3.0));
-  return _molar_mass*x/_b;
+  Real sq = std::sqrt(4.0 * Utility::pow<3>(-1.0 + 3.0 * y + 3.0 * _rhs) + Utility::pow<2>(-2.0 - 18.0 * y + 9.0 * _rhs));
+  Real cr = std::cbrt(-2.0 + 9.0 * _rhs - 18.0 * y + sq);
+  Real x = 1.0/3.0;
+  x += std::cbrt(2.0) * (-1.0 + 3.0 * _rhs + 3.0 * y) / (3.0 * cr);
+  x -= cr / (3.0 * std::cbrt(2.0));
+  return _molar_mass * x / _b;
 }
 
 Real
@@ -57,7 +57,7 @@ RichardsDensityVDW::density(Real p) const
   if (p >= 0)
     return densityVDW(p) - _vdw0;
   else
-    return _infinity_ratio*_molar_mass*(std::exp(_slope0*p) - 1);
+    return _infinity_ratio * _molar_mass * (std::exp(_slope0 * p) - 1.0);
 }
 
 
@@ -66,15 +66,16 @@ RichardsDensityVDW::ddensity(Real p) const
 {
   if (p >= 0)
   {
-    Real y = _b2oa*p;
+    Real y = _b2oa * p;
     Real dy = _b2oa;
-    Real sq = std::pow(4.0 * Utility::pow<3>(-1 + 3*y + 3*_rhs) + Utility::pow<2>(-2.0 - 18.0 * y + 9.0 * _rhs), 0.5);
-    Real dsq = 0.5 / sq * (4.0 * 3.0  *Utility::pow<2>(-1 + 3*y + 3*_rhs)*3*dy + 2.0 * (-2.0 - 18.0 * y + 9.0 * _rhs) * (-18.0 * dy));
-    Real cr = std::pow(-2.0 + 9*_rhs - 18*y + sq, 1.0/3.0);
-    Real dcr = (1.0/3.0)*std::pow(-2 + 9*_rhs - 18*y + sq, -2.0/3.0) * (-18.0 * dy + dsq);
-    Real dx = std::pow(2.0, 1.0/3.0) * ( (3*dy)/3/cr + (-1 + 3*_rhs + 3*y) / 3.0 * (-dcr/cr/cr));
-    dx -= dcr / (3.0 * std::pow(2, 1.0/3.0));
-    return _molar_mass*dx/_b;
+    Real sq = std::sqrt(4.0 * Utility::pow<3>(-1.0 + 3.0 * y + 3.0 * _rhs)
+                            + Utility::pow<2>(-2.0 - 18.0 * y + 9.0 * _rhs));
+    Real dsq = 0.5 / sq * (4.0 * 3.0  *Utility::pow<2>(-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy + 2.0 * (-2.0 - 18.0 * y + 9.0 * _rhs) * (-18.0 * dy));
+    Real cr = std::cbrt(-2.0 + 9.0 * _rhs - 18.0 * y + sq);
+    Real dcr = 1.0/3.0 * std::pow(-2.0 + 9.0 * _rhs - 18.0 * y + sq, -2.0/3.0) * (-18.0 * dy + dsq);
+    Real dx = std::cbrt(2.0) * ((3.0 * dy) / (3.0 * cr) + (-1.0 + 3.0 * _rhs + 3.0 * y) / 3.0 * (-dcr / (cr * cr)));
+    dx -= dcr / (3.0 * std::cbrt(2.0));
+    return _molar_mass * dx / _b;
   }
   else
     return _infinity_ratio * _molar_mass * _slope0 * std::exp(_slope0 * p);
@@ -89,18 +90,20 @@ RichardsDensityVDW::d2density(Real p) const
   {
     Real y = _b2oa*p;
     Real dy = _b2oa;
-    Real sq = std::pow(4*Utility::pow<3>(-1 + 3*y + 3*_rhs) + Utility::pow<2>(-2 - 18*y + 9*_rhs), 0.5);
-    Real dsq = 0.5/sq*(4*3*Utility::pow<2>(-1 + 3*y + 3*_rhs)*3*dy + 2*(-2 - 18*y + 9*_rhs)*(-18*dy));
-    Real d2sq = -dsq*dsq/sq;
-    d2sq += 0.5/sq*(4*3*2*(-1 + 3*y + 3*_rhs)*3*dy*3*dy + 2*(-18*dy)*(-18*dy));
-    Real cr = std::pow(-2 + 9*_rhs - 18*y + sq, 1.0/3.0);
-    Real dcr = 1.0/3.0 * std::pow(-2 + 9*_rhs - 18*y + sq, -2./3.)*(-18*dy + dsq);
+    Real sq = std::sqrt(4.0 * Utility::pow<3>(-1.0 + 3.0 * y + 3.0 * _rhs)
+                            + Utility::pow<2>(-2.0 - 18.0 * y + 9.0 * _rhs));
+    Real dsq = 0.5 / sq * (4.0 * 3.0 * Utility::pow<2>(-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy + 2.0 * (-2.0 - 18.0 * y + 9.0 * _rhs) * (-18.0 * dy));
+    Real d2sq = -dsq * dsq / sq;
+    d2sq += 0.5 / sq * (4.0 * 3.0 * 2.0 * (-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy * 3.0 * dy + 2.0 * (-18.0 * dy) * (-18.0 * dy));
+    Real cr = std::cbrt(-2.0 + 9.0 * _rhs - 18.0 * y + sq);
+    Real dcr = 1.0/3.0 * std::pow(-2.0 + 9.0 * _rhs - 18.0 * y + sq, -2.0/3.0) * (-18.0 * dy + dsq);
     Real d2cr = 1.0/3.0 * (-2.0/3.0) * std::pow(-2 + 9*_rhs - 18*y + sq, -5./3.)*Utility::pow<2>(-18*dy + dsq);
     d2cr += 1.0/3.0 * std::pow(-2 + 9*_rhs - 18*y + sq, -2./3.)*d2sq;
     // Real dx = std::pow(2, 1.0/3.0)*( (3*dy)/3/cr + (-1 + 3*_rhs + 3*y)/3*(-dcr/cr/cr));
     // dx -= dcr/3/std::pow(2, 1.0/3.0);
-    Real d2x = std::pow(2, 1.0/3.0)*( -(3*dy)*dcr/3/cr/cr + 3*dy/3*(-dcr/cr/cr) + (-1 + 3*_rhs + 3*y)/3*(-d2cr/cr/cr + 2*dcr*dcr/Utility::pow<3>(cr)) );
-    d2x -= d2cr / (3.0 * std::pow(2, 1.0/3.0));
+    Real d2x = std::cbrt(2.0) * (  -(3.0 * dy) * dcr / (3.0 * cr * cr) + 3.0 * dy / 3.0 * (-dcr / (cr * cr))
+                                 + (-1.0 + 3.0 * _rhs + 3.0 * y) / 3.0 * (-d2cr / (cr * cr) + 2.0 * dcr * dcr / Utility::pow<3>(cr)));
+    d2x -= d2cr / (3.0 * std::cbrt(2.0));
     return _molar_mass * d2x / _b;
   }
   else
