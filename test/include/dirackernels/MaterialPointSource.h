@@ -40,7 +40,7 @@ public:
 protected:
   const Point & _p;
 
-  const MaterialProperty<Real> & _value;
+  const MaterialProperty<Real> * _value;
 };
 
 #endif //MATERIALPOINTSOURCE_H
