@@ -4,9 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #include "ComputeGrainForceAndTorque.h"
-#include "ComputeGrainCenterUserObject.h"
+#include "GrainTrackerInterface.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
@@ -14,76 +13,132 @@
 template<>
 InputParameters validParams<ComputeGrainForceAndTorque>()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = validParams<ShapeElementUserObject>();
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
   params.addParam<MaterialPropertyName>("force_density", "force_density", "Force density material");
   params.addParam<UserObjectName>("grain_data", "center of mass of grains");
   params.addCoupledVar("c", "Concentration field");
+  params.addCoupledVar("etas", "Array of coupled order parameters");
   return params;
 }
 
 ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & parameters) :
-    ElementUserObject(parameters),
+    ShapeElementUserObject(parameters),
     GrainForceAndTorqueInterface(),
     _c_name(getVar("c", 0)->name()),
-    _dF(getMaterialProperty<std::vector<RealGradient> >("force_density")),
+    _c_var(coupled("c")),
     _dF_name(getParam<MaterialPropertyName>("force_density")),
+    _dF(getMaterialPropertyByName<std::vector<RealGradient> >(_dF_name)),
     _dFdc(getMaterialPropertyByName<std::vector<RealGradient> >(propertyNameFirst(_dF_name, _c_name))),
-    _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
-    _grain_volumes(_grain_data.getGrainVolumes()),
-    _grain_centers(_grain_data.getGrainCenters()),
-    _ncrys(_grain_volumes.size()),
-    _ncomp(6*_ncrys),
-    _force_values(_ncrys),
-    _torque_values(_ncrys),
-    _force_derivatives(_ncrys),
-    _torque_derivatives(_ncrys),
-    _force_torque_store(_ncomp),
-    _force_torque_derivative_store(_ncomp)
+    _op_num(coupledComponents("etas")),
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data")),
+    _vals_var(_op_num),
+    _vals_name(_op_num),
+    _dFdgradeta(_op_num)
 {
+  for (unsigned int i = 0; i < _op_num; ++i)
+  {
+    _vals_var[i] = coupled("etas", i);
+    _vals_name[i] = getVar("etas", i)->name();
+    _dFdgradeta[i] = &getMaterialPropertyByName<std::vector<Real> >(propertyNameFirst(_dF_name, _vals_name[i]));
+  }
 }
 
 void
 ComputeGrainForceAndTorque::initialize()
 {
-  for (unsigned int i = 0; i < _ncomp; ++i)
+  _grain_num = _grain_tracker.getNumberGrains();
+  _ncomp = 6 * _grain_num;
+
+  _force_values.resize(_grain_num);
+  _torque_values.resize(_grain_num);
+  _force_torque_store.assign(_ncomp, 0.0);
+
+  if (_fe_problem.currentlyComputingJacobian())
   {
-    _force_torque_store[i] = 0;
-    _force_torque_derivative_store[i] = 0;
+    _total_dofs = _subproblem.es().n_dofs();
+    _force_torque_c_jacobian_store.assign(_ncomp*_total_dofs, 0.0);
+    _force_torque_eta_jacobian_store.resize(_op_num);
+
+    for (unsigned int i = 0; i < _op_num; ++i)
+      _force_torque_eta_jacobian_store[i].assign(_ncomp*_total_dofs, 0.0);
   }
 }
 
 void
 ComputeGrainForceAndTorque::execute()
 {
-  for (unsigned int i = 0; i < _ncrys; ++i)
-    for (_qp=0; _qp<_qrule->n_points(); ++_qp)
-    {
-      const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dF[_qp][i]);
-      _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](0);
-      _force_torque_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](1);
-      _force_torque_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dF[_qp][i](2);
-      _force_torque_store[6*i+3] += compute_torque(0);
-      _force_torque_store[6*i+4] += compute_torque(1);
-      _force_torque_store[6*i+5] += compute_torque(2);
+  std::vector<unsigned int> grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
-      const RealGradient compute_torque_derivative_c =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - _grain_centers[i]).cross(_dFdc[_qp][i]);
-      _force_torque_derivative_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](0);
-      _force_torque_derivative_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](1);
-      _force_torque_derivative_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dFdc[_qp][i](2);
-      _force_torque_derivative_store[6*i+3] += compute_torque_derivative_c(0);
-      _force_torque_derivative_store[6*i+4] += compute_torque_derivative_c(1);
-      _force_torque_derivative_store[6*i+5] += compute_torque_derivative_c(2);
-    }
+  for (unsigned int i = 0; i < _grain_num; ++i)
+    for (unsigned int j = 0; j < _op_num; ++j)
+      if (i == _grain_tracker.getOpToGrainsVector(_current_elem->id())[j])
+      {
+        const auto centroid = _grain_tracker.getGrainCentroid(i);
+        for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+          if (_dF[_qp][j](0) != 0.0 || _dF[_qp][j](1) != 0.0 || _dF[_qp][j](2) != 0.0)
+          {
+            const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - centroid).cross(_dF[_qp][j]);
+            _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](0);
+            _force_torque_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](1);
+            _force_torque_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](2);
+            _force_torque_store[6*i+3] += compute_torque(0);
+            _force_torque_store[6*i+4] += compute_torque(1);
+            _force_torque_store[6*i+5] += compute_torque(2);
+          }
+      }
+}
+
+void
+ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
+{
+  if (jvar == _c_var)
+    for (unsigned int i = 0; i < _grain_num; ++i)
+      for (unsigned int j = 0; j < _op_num; ++j)
+        if (i == _grain_tracker.getOpToGrainsVector(_current_elem->id())[j])
+        {
+          const auto centroid = _grain_tracker.getGrainCentroid(i);
+          for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+            if (_dFdc[_qp][j](0) != 0.0 || _dFdc[_qp][j](1) != 0.0 || _dFdc[_qp][j](2) != 0.0)
+            {
+              const Real factor = _JxW[_qp] * _coord[_qp] * _phi[_j][_qp];
+              const RealGradient compute_torque_jacobian_c = factor * (_q_point[_qp] - centroid).cross(_dFdc[_qp][j]);
+              _force_torque_c_jacobian_store[(6*i+0)*_total_dofs+_j_global] += factor * _dFdc[_qp][j](0);
+              _force_torque_c_jacobian_store[(6*i+1)*_total_dofs+_j_global] += factor * _dFdc[_qp][j](1);
+              _force_torque_c_jacobian_store[(6*i+2)*_total_dofs+_j_global] += factor * _dFdc[_qp][j](2);
+              _force_torque_c_jacobian_store[(6*i+3)*_total_dofs+_j_global] += compute_torque_jacobian_c(0);
+              _force_torque_c_jacobian_store[(6*i+4)*_total_dofs+_j_global] += compute_torque_jacobian_c(1);
+              _force_torque_c_jacobian_store[(6*i+5)*_total_dofs+_j_global] += compute_torque_jacobian_c(2);
+            }
+        }
+
+  for (unsigned int i = 0; i < _op_num; ++i)
+    if (jvar == _vals_var[i])
+      for (unsigned int j = 0; j < _grain_num; ++j)
+        for (unsigned int k = 0; k < _op_num; ++k)
+          if (j == _grain_tracker.getOpToGrainsVector(_current_elem->id())[k])
+          {
+            const auto centroid = _grain_tracker.getGrainCentroid(j);
+            for (_qp=0; _qp<_qrule->n_points(); ++_qp)
+              if ((*_dFdgradeta[i])[_qp][j] != 0.0)
+              {
+                const Real factor =_JxW[_qp] * _coord[_qp] * (*_dFdgradeta[i])[_qp][k];
+                const RealGradient compute_torque_jacobian_eta = factor * (_q_point[_qp] - centroid).cross(_grad_phi[_j][_qp]);
+                _force_torque_eta_jacobian_store[i][(6*j+0)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](0);
+                _force_torque_eta_jacobian_store[i][(6*j+1)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](1);
+                _force_torque_eta_jacobian_store[i][(6*j+2)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](2);
+                _force_torque_eta_jacobian_store[i][(6*j+3)*_total_dofs+_j_global] += compute_torque_jacobian_eta(0);
+                _force_torque_eta_jacobian_store[i][(6*j+4)*_total_dofs+_j_global] += compute_torque_jacobian_eta(1);
+                _force_torque_eta_jacobian_store[i][(6*j+5)*_total_dofs+_j_global] += compute_torque_jacobian_eta(2);
+              }
+          }
 }
 
 void
 ComputeGrainForceAndTorque::finalize()
 {
   gatherSum(_force_torque_store);
-  gatherSum(_force_torque_derivative_store);
-
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _grain_num; ++i)
   {
     _force_values[i](0) = _force_torque_store[6*i+0];
     _force_values[i](1) = _force_torque_store[6*i+1];
@@ -91,13 +146,13 @@ ComputeGrainForceAndTorque::finalize()
     _torque_values[i](0) = _force_torque_store[6*i+3];
     _torque_values[i](1) = _force_torque_store[6*i+4];
     _torque_values[i](2) = _force_torque_store[6*i+5];
+  }
 
-    _force_derivatives[i](0) = _force_torque_derivative_store[6*i+0];
-    _force_derivatives[i](1) = _force_torque_derivative_store[6*i+1];
-    _force_derivatives[i](2) = _force_torque_derivative_store[6*i+2];
-    _torque_derivatives[i](0) = _force_torque_derivative_store[6*i+3];
-    _torque_derivatives[i](1) = _force_torque_derivative_store[6*i+4];
-    _torque_derivatives[i](2) = _force_torque_derivative_store[6*i+5];
+  if (_fe_problem.currentlyComputingJacobian())
+  {
+    gatherSum(_force_torque_c_jacobian_store);
+    for (unsigned int i = 0; i < _op_num; ++i)
+      gatherSum(_force_torque_eta_jacobian_store[i]);
   }
 }
 
@@ -106,9 +161,14 @@ ComputeGrainForceAndTorque::threadJoin(const UserObject & y)
 {
   const ComputeGrainForceAndTorque & pps = static_cast<const ComputeGrainForceAndTorque &>(y);
   for (unsigned int i = 0; i < _ncomp; ++i)
-  {
     _force_torque_store[i] += pps._force_torque_store[i];
-    _force_torque_derivative_store[i] += pps._force_torque_derivative_store[i];
+  if (_fe_problem.currentlyComputingJacobian())
+  {
+    for (unsigned int i = 0; i < _ncomp*_total_dofs; ++i)
+      _force_torque_c_jacobian_store[i] += pps._force_torque_c_jacobian_store[i];
+    for (unsigned int i = 0; i < _op_num; ++i)
+      for (unsigned int j = 0; j < _ncomp*_total_dofs; ++j)
+        _force_torque_eta_jacobian_store[i][j] += pps._force_torque_eta_jacobian_store[i][j];
   }
 }
 
@@ -124,14 +184,13 @@ ComputeGrainForceAndTorque::getTorqueValues() const
   return _torque_values;
 }
 
-const std::vector<RealGradient> &
-ComputeGrainForceAndTorque::getForceDerivatives() const
+const std::vector<Real> &
+ComputeGrainForceAndTorque::getForceCJacobians() const
 {
-  return _force_derivatives;
+  return _force_torque_c_jacobian_store;
 }
-
-const std::vector<RealGradient> &
-ComputeGrainForceAndTorque::getTorqueDerivatives() const
+const std::vector<std::vector<Real> > &
+ComputeGrainForceAndTorque::getForceEtaJacobians() const
 {
-  return _torque_derivatives;
+  return _force_torque_eta_jacobian_store;
 }

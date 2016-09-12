@@ -26,6 +26,29 @@
   [../]
 []
 
+[AuxVariables]
+  [./vadv00]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./vadv01]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./vadv0_div]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./unique_grains]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./centroids]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   [./c_res]
     type = SplitCHParsed
@@ -81,6 +104,39 @@
   [../]
 []
 
+[AuxKernels]
+  [./vadv00]
+    type = MaterialStdVectorRealGradientAux
+    variable = vadv00
+    property = advection_velocity
+  [../]
+  [./vadv01]
+    type = MaterialStdVectorRealGradientAux
+    variable = vadv01
+    property = advection_velocity
+    component = 1
+  [../]
+  [./vadv0_div]
+    type = MaterialStdVectorAux
+    variable = vadv0_div
+    property = advection_velocity_divergence
+  [../]
+  [./unique_grains]
+    type = FeatureFloodCountAux
+    variable = unique_grains
+    flood_counter = grain_center
+    field_display = UNIQUE_REGION
+    execute_on = 'initial timestep_end'
+  [../]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    execute_on = 'initial timestep_end'
+    field_display = CENTROID
+    flood_counter = grain_center
+  [../]
+[]
+
 [Materials]
   [./pfmobility]
     type = GenericConstantMaterial
@@ -113,7 +169,7 @@
 
 [UserObjects]
   [./grain_center]
-    type = GrainTracker
+    type = FauxGrainTracker
     variable = eta
     outputs = none
     compute_op_maps = true
@@ -146,7 +202,7 @@
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
-  dt = 0.2
+  dt = 0.5
   num_steps = 1
 []
 

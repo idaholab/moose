@@ -23,63 +23,51 @@ InputParameters validParams<GrainAdvectionVelocity>()
 
 GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameters) :
    DerivativeMaterialInterface<Material>(parameters),
-   _grain_data(getUserObject<ComputeGrainCenterUserObject>("grain_data")),
-   _grain_volumes(_grain_data.getGrainVolumes()),
-   _grain_centers(_grain_data.getGrainCenters()),
+   _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data")),
    _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
    _grain_forces(_grain_force_torque.getForceValues()),
    _grain_torques(_grain_force_torque.getTorqueValues()),
-   _grain_force_derivatives(_grain_force_torque.getForceDerivatives()),
-   _grain_torque_derivatives(_grain_force_torque.getTorqueDerivatives()),
    _mt(getParam<Real>("translation_constant")),
    _mr(getParam<Real>("rotation_constant")),
-   _ncrys(_grain_forces.size()),
-   _vals(_ncrys),
-   _grad_vals(_ncrys),
+   _grain_num(_grain_forces.size()),
+   _op_num(coupledComponents("etas")),
+   _vals(_op_num),
+   _grad_vals(_op_num),
    _c_name(getVar("c", 0)->name()),
    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
    _velocity_advection(declareProperty<std::vector<RealGradient> >(_base_name + "advection_velocity")),
-   _div_velocity_advection(declareProperty<std::vector<Real> >(_base_name + "advection_velocity_divergence")),
-   _velocity_advection_derivative_c(declarePropertyDerivative<std::vector<RealGradient> >(_base_name + "advection_velocity", _c_name )),
-   _div_velocity_advection_derivative_c(declarePropertyDerivative<std::vector<Real> >(_base_name + "advection_velocity_divergence", _c_name)),
-   _velocity_advection_derivative_eta(declarePropertyDerivative<std::vector<RealGradient> >(_base_name + "advection_velocity", "eta"))
+   _div_velocity_advection(declareProperty<std::vector<Real> >(_base_name + "advection_velocity_divergence"))
 {
   //Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _op_num; ++i)
   {
     _vals[i] = &coupledValue("etas", i);
     _grad_vals[i] = &coupledGradient("etas",i);
   }
+  mooseWarning("GrainAdvectionVelocity is no longer used by RBM kernels, it can be used for visualization only.");
 }
 
 void
 GrainAdvectionVelocity::computeQpProperties()
 {
-  _velocity_advection[_qp].resize(_ncrys);
-  _div_velocity_advection[_qp].resize(_ncrys);
-  _velocity_advection_derivative_c[_qp].resize(_ncrys);
-  _div_velocity_advection_derivative_c[_qp].resize(_ncrys);
-  _velocity_advection_derivative_eta[_qp].resize(_ncrys);
+  _velocity_advection[_qp].resize(_grain_num);
+  _div_velocity_advection[_qp].resize(_grain_num);
 
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _grain_num; ++i)
   {
-    const RealGradient velocity_translation = _mt / _grain_volumes[i] * ((*_vals[i])[_qp] * _grain_forces[i]);
-    const Real div_velocity_translation = _mt / _grain_volumes[i] * ((*_grad_vals[i])[_qp] * _grain_forces[i]);
-    const RealGradient velocity_rotation = _mr / _grain_volumes[i] * (_grain_torques[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_vals[i])[_qp];
-    const Real div_velocity_rotation = _mr / _grain_volumes[i] * (_grain_torques[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_grad_vals[i])[_qp];
+    const auto volume = _grain_tracker.getGrainVolume(i);
+    const auto centroid = _grain_tracker.getGrainCentroid(i);
 
-    const RealGradient velocity_translation_derivative_c = _mt / _grain_volumes[i] * ((*_vals[i])[_qp] * _grain_force_derivatives[i]);
-    const Real div_velocity_translation_derivative_c = _mt / _grain_volumes[i] * ((*_grad_vals[i])[_qp] * _grain_force_derivatives[i]);
-    const RealGradient velocity_rotation_derivative_c = _mr / _grain_volumes[i] * (_grain_torque_derivatives[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_vals[i])[_qp];
-    const Real div_velocity_rotation_derivative_c = _mr / _grain_volumes[i] * (_grain_torque_derivatives[i].cross(_q_point[_qp] - _grain_centers[i])) * (*_grad_vals[i])[_qp] ;
+    for (unsigned int j = 0; j < _op_num; ++j)
+      if (i == _grain_tracker.getOpToGrainsVector(_current_elem->id())[j])
+      {
+        const RealGradient velocity_translation = _mt / volume * ((*_vals[j])[_qp] * _grain_forces[i]);
+        const Real div_velocity_translation = _mt / volume * ((*_grad_vals[j])[_qp] * _grain_forces[i]);
+        const RealGradient velocity_rotation = _mr / volume * (_grain_torques[i].cross(_q_point[_qp] - centroid)) * (*_vals[j])[_qp];
+        const Real div_velocity_rotation = _mr / volume * (_grain_torques[i].cross(_q_point[_qp] - centroid)) * (*_grad_vals[j])[_qp];
 
-    const RealGradient velocity_translation_derivative_eta = _mt / _grain_volumes[i] * _grain_forces[i];
-    const RealGradient velocity_rotation_derivative_eta = _mr / _grain_volumes[i] * (_grain_torques[i].cross(_q_point[_qp] - _grain_centers[i]));
-
-    _velocity_advection[_qp][i] = velocity_translation + velocity_rotation;
-    _div_velocity_advection[_qp][i] = div_velocity_translation + div_velocity_rotation;
-    _velocity_advection_derivative_c[_qp][i] = velocity_translation_derivative_c + velocity_rotation_derivative_c;
-    _div_velocity_advection_derivative_c[_qp][i] = div_velocity_translation_derivative_c + div_velocity_rotation_derivative_c;
-    _velocity_advection_derivative_eta[_qp][i] = velocity_translation_derivative_eta + velocity_rotation_derivative_eta;
-  }
+        _velocity_advection[_qp][i] = velocity_translation + velocity_rotation;
+        _div_velocity_advection[_qp][i] = div_velocity_translation + div_velocity_rotation;
+      }
+    }
 }
