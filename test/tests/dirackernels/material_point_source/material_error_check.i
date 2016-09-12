@@ -31,17 +31,18 @@
 
 [DiracKernels]
   [./material_source]
-    type = StatefulPointSource
+    type = MaterialPointSource
     variable = u
     point = '0.2 0.3 0.0'
+    material_prop = 'diffusivity'
+    prop_state = 'old'
   [../]
 []
 
 
 [Materials]
   [./stateful]
-    type = StatefulTest
-    block = '0'
+    type = StatefulMaterial
   [../]
 []
 
