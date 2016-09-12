@@ -1,5 +1,5 @@
 #This is a simple 1D test of the volumetric heat source with material properties
-#that are somewhat similar to UO2.  A bar is uniformly heated, and a temperature
+#of a representative ceramic material.  A bar is uniformly heated, and a temperature
 #boundary condition is applied to the left side of the bar.
 
 #Important properties of problem:

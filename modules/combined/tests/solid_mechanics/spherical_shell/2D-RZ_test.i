@@ -142,7 +142,7 @@
 
 [Materials]
 
- [./fuel_disp]                         # thermal and irradiation creep for UO2 (bison kernel)
+ [./fuel_disp]
     type = Elastic
     block = 1
     disp_r = disp_x
