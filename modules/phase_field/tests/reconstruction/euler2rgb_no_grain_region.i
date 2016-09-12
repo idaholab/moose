@@ -103,7 +103,7 @@
 []
 
 [Materials]
-  [./UO2]
+  [./bulk]
     type = GBEvolution
     block = 0
     T = 2273
