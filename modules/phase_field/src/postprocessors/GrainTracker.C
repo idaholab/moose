@@ -90,6 +90,8 @@ GrainTracker::getEntityValue(dof_id_type entity_id, FieldType field_type, unsign
 const std::vector<std::pair<unsigned int, unsigned int> > &
 GrainTracker::getElementalValues(dof_id_type elem_id) const
 {
+  mooseDeprecated("GrainTrackerInterface::getElementalValues() is deprecated use GrainTrackerInterface::getOpToGrainsVector() instead");
+
   const auto pos = _elemental_data.find(elem_id);
 
   if (pos != _elemental_data.end())

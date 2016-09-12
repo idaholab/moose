@@ -31,13 +31,13 @@ ComputePolycrystalElasticityTensor::ComputePolycrystalElasticityTensor(const Inp
     _JtoeV(6.24150974e18)
 {
   // Loop over variables (ops)
-  for (unsigned int op = 0; op < _op_num; ++op)
+  for (auto op_index = decltype(_op_num)(0); op_index < _op_num; ++op_index)
   {
     // Initialize variables
-    _vals[op] = &coupledValue("v", op);
+    _vals[op_index] = &coupledValue("v", op_index);
 
     // declare elasticity tensor derivative properties
-    _D_elastic_tensor[op] = &declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, getVar("v", op)->name());
+    _D_elastic_tensor[op_index] = &declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, getVar("v", op_index)->name());
   }
 }
 
@@ -45,16 +45,16 @@ void
 ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
 {
   // Get list of active order parameters from grain tracker
-  const std::vector<std::pair<unsigned int, unsigned int> > & active_ops = _grain_tracker.getElementalValues(_current_elem->id());
-  unsigned int n_active_ops = active_ops.size();
+  const auto & op_to_grain = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
   // Calculate elasticity tensor
   _elasticity_tensor[_qp].zero();
   Real sum_h = 0.0;
-  for (unsigned int op = 0; op < n_active_ops; ++op)
+  for (auto op_index = beginIndex(op_to_grain); op_index < op_to_grain.size(); ++op_index)
   {
-    const unsigned int grain_index = active_ops[op].first;
-    const unsigned int op_index = active_ops[op].second;
+    const unsigned int grain_index = op_to_grain[op_index];
+    if (grain_index == libMesh::invalid_uint)
+      continue;
 
     // Interpolation factor for elasticity tensors
     Real h = (1.0 + std::sin(libMesh::pi * ((*_vals[op_index])[_qp] - 0.5))) / 2.0;
@@ -69,13 +69,14 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
   _elasticity_tensor[_qp] /= sum_h;
 
   // Calculate elasticity tensor derivative: Cderiv = dhdopi/sum_h * (Cop - _Cijkl)
-  for (unsigned int op = 0; op < _op_num; ++op)
-    (*_D_elastic_tensor[op])[_qp].zero();
+  for (auto op_index = decltype(_op_num)(0); op_index < _op_num; ++op_index)
+    (*_D_elastic_tensor[op_index])[_qp].zero();
 
-  for (unsigned int op = 0; op < n_active_ops; ++op)
+  for (auto op_index = beginIndex(op_to_grain); op_index < op_to_grain.size(); ++op_index)
   {
-    const unsigned int grain_index = active_ops[op].first;
-    const unsigned int op_index = active_ops[op].second;
+    const unsigned int grain_index = op_to_grain[op_index];
+    if (grain_index == libMesh::invalid_uint)
+      continue;
 
     Real dhdopi = libMesh::pi * std::cos(libMesh::pi * ((*_vals[op_index])[_qp] - 0.5)) / 2.0;
     RankFourTensor & C_deriv = (*_D_elastic_tensor[op_index])[_qp];
