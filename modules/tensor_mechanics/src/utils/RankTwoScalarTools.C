@@ -107,13 +107,13 @@ vonMisesStress(const RankTwoTensor & stress)
 {
   RankTwoTensor dev_stress = stress.deviatoric();
 
-  return std::pow(3.0 / 2.0 * dev_stress.doubleContraction(dev_stress), 0.5);
+  return std::sqrt(3.0 / 2.0 * dev_stress.doubleContraction(dev_stress));
 }
 
 Real
 equivalentPlasticStrain(const RankTwoTensor & strain)
 {
-  return std::pow(2.0 / 3.0 * strain.doubleContraction(strain), 0.5);
+  return std::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
 }
 
 Real

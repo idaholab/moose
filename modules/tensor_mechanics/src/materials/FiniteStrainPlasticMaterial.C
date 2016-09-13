@@ -290,7 +290,7 @@ RankTwoTensor
 FiniteStrainPlasticMaterial::dyieldFunction_dstress(const RankTwoTensor & sig)
 {
   RankTwoTensor deriv = sig.dsecondInvariant();
-  deriv *= std::pow(3/sig.secondInvariant(), 0.5)/2;
+  deriv *= std::sqrt(3.0 / sig.secondInvariant()) / 2.0;
   return deriv;
 }
 
@@ -318,7 +318,7 @@ FiniteStrainPlasticMaterial::internalPotential()
 Real
 FiniteStrainPlasticMaterial::getSigEqv(const RankTwoTensor & stress)
 {
-  return std::pow(3*stress.secondInvariant(), 0.5);
+  return std::sqrt(3*stress.secondInvariant());
 }
 
 
