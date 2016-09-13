@@ -7,7 +7,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_glued_kin_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_glued_kin_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_glued_kin_check2'
     rel_err = 1e-5
-    abs_zero = 1e-6
+    abs_zero = 3e-6
     max_parallel = 1
     heavy = true
     superlu = true
@@ -36,6 +36,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_frictionless_kin_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_kin_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_kin_check2
     Outputs/chkfile/start_time=3.49'
+    max_time = 1000
     rel_err = 1e-5
     abs_zero = 1e-6
     max_parallel = 1
@@ -53,6 +54,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_frictionless_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_pen_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_pen_check2
     Outputs/chkfile/start_time=3.49'
+    max_time = 1000
     rel_err = 1e-5
     abs_zero = 1e-6
     max_parallel = 1
@@ -70,6 +72,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_frictionless_aug_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_aug_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_frictionless_aug_check2
     Outputs/chkfile/start_time=3.49'
+    max_time = 1000
     rel_err = 1e-5
     abs_zero = 1e-6
     max_parallel = 1
@@ -85,7 +88,7 @@
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_kin_check2
     Outputs/chkfile/start_time=0.09 Outputs/chkfile2/start_time=0.09'
     rel_err = 1e-5
-    abs_zero = 1e-8
+    abs_zero = 1e-6
     max_parallel = 1
     heavy = true
     superlu = true
@@ -101,7 +104,7 @@
     Outputs/chkfile/start_time=0.09 Outputs/chkfile2/start_time=0.09'
     max_time = 500
     rel_err = 1e-5
-    abs_zero = 1e-8
+    abs_zero = 1e-6
     max_parallel = 1
     heavy = true
     superlu = true
@@ -130,6 +133,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_mu_0_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_pen_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_pen_check2
     Outputs/chkfile/start_time=1.99'
+    max_time = 1000
     rel_err = 1e-5
     abs_zero = 2e-6
     max_parallel = 1
@@ -144,7 +148,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_mu_0_2_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_2_pen_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_0_2_pen_check2
     Outputs/chkfile/start_time=5.99'
-    max_time = 1000
+    max_time = 2500
     rel_err = 1e-5
     abs_zero = 1e-5
     max_parallel = 1
@@ -159,6 +163,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_mu_1_0_pen_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_1_0_pen_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_mu_1_0_pen_check2
     Outputs/chkfile/start_time=0.99'
+    max_time = 1000
     rel_err = 1e-5
     abs_zero = 1e-6
     max_parallel = 1
