@@ -4,18 +4,20 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef MATVECREALGRADAUXKERNELACTION_H
-#define MATVECREALGRADAUXKERNELACTION_H
+#ifndef MATERIALVECTORGRADAUXKERNELACTION_H
+#define MATERIALVECTORGRADAUXKERNELACTION_H
 
-#include "Action.h"
+#include "MaterialVectorAuxKernelAction.h"
 
-class MatVecRealGradAuxKernelAction: public Action
+class MaterialVectorGradAuxKernelAction: public MaterialVectorAuxKernelAction
 {
 public:
-  MatVecRealGradAuxKernelAction(const InputParameters & params);
+  MaterialVectorGradAuxKernelAction(const InputParameters & params);
+
+  virtual void act();
 };
 
 template<>
-InputParameters validParams<MatVecRealGradAuxKernelAction>();
+InputParameters validParams<MaterialVectorGradAuxKernelAction>();
 
-#endif //MATVECREALGRADAUXKERNELACTION_H
+#endif //MATERIALVECTORGRADAUXKERNELACTION_H

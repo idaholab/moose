@@ -88,17 +88,30 @@
     c = c
     etas ='eta0 eta1'
   [../]
+  [./advection_vel]
+    type = GrainAdvectionVelocity
+    etas = 'eta0 eta1'
+    c = c
+    grain_data = grain_center
+    grain_force = grain_force
+  [../]
 []
 
 [AuxVariables]
   [./bnds]
   [../]
+  #[./MultiAuxVariables]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #  var_name_base = 'df vadv'
+  #  op_num = 2
+  #[../]
   [./MultiAuxVariables]
     order = CONSTANT
     family = MONOMIAL
-    var_name_base = 'df'
-    dim = 2
-    op_num = 2
+    variable_base = 'df vadv vadv_div'
+    data_type = 'RealGradient RealGradient Real'
+    grain_num = 2
   [../]
   [./unique_grains]
     order = CONSTANT
@@ -122,11 +135,15 @@
     op_num = 2.0
     v = 'eta0 eta1'
   [../]
-  [./MatVecRealGradAuxKernel]
-    var_name_base = 'df'
-    dim = 2
-    op_num = 2
-    property = force_density
+  [./MaterialVectorGradAuxKernel]
+    variable_base = 'df vadv '
+    grain_num = 2
+    property = 'force_density advection_velocity'
+  [../]
+  [./MaterialVectorAuxKernel]
+    variable_base = 'vadv_div '
+    grain_num = 2
+    property = 'advection_velocity_divergence'
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
@@ -204,7 +221,7 @@
   [../]
   [./grain_force]
     type = ComputeGrainForceAndTorque
-    execute_on = 'linear nonlinear'
+    execute_on = 'initial linear nonlinear'
     grain_data = grain_center
     force_density = force_density
     c = c
