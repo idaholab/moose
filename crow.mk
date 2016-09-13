@@ -63,7 +63,7 @@ CROW_MODULES = $(CROW_DIR)/control_modules
 ifeq ($(UNAME),Darwin)
 DISTRIBUTION_KLUDGE=$(CROW_LIB)
 else
-DISTRIBUTION_KLUDGE=$(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix)  $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix) $(CROW_DIR)/src/distributions/distributionNDBase.$(obj-suffix) $(CROW_DIR)/src/distributions/distributionNDNormal.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution.$(obj-suffix) $(CROW_DIR)/src/distributions/DistributionContainer.$(obj-suffix)
+DISTRIBUTION_KLUDGE=$(CROW_DIR)/src/distributions/distribution_1D.$(obj-suffix)  $(CROW_DIR)/src/distributions/distributionFunctions.$(obj-suffix) $(CROW_DIR)/src/distributions/distributionNDBase.$(obj-suffix) $(CROW_DIR)/src/distributions/distributionNDNormal.$(obj-suffix) $(CROW_DIR)/src/distributions/distribution.$(obj-suffix) $(CROW_DIR)/src/distributions/DistributionContainer.$(obj-suffix) $(CROW_DIR)/src/distributions/distributionNDCartesianSpline.$(obj-suffix)  $(CROW_DIR)/src/utilities/inverseDistanceWeigthing.$(obj-suffix) $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.$(obj-suffix) $(CROW_DIR)/src/utilities/microSphere.$(obj-suffix) $(CROW_DIR)/src/utilities/NDspline.$(obj-suffix) $(CROW_DIR)/src/utilities/MDreader.$(obj-suffix) $(CROW_DIR)/src/distributions/randomClass.$(obj-suffix)
 endif
 
 $(CROW_DIR)/control_modules/_distribution1D.so : $(CROW_DIR)/control_modules/distribution1D.i \
@@ -84,7 +84,7 @@ $(CROW_DIR)/control_modules/_distribution1D.so : $(CROW_DIR)/control_modules/dis
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
 	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(PYTHON_INCLUDE)\
-	 -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) \
+	 -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/ -I$(CROW_LIB_INCLUDE_DIR) -std=c++11 \
 	 -c  $(CROW_MODULES)/distribution1D_wrap.cxx -o $(CROW_DIR)/control_modules/distribution1D_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \
@@ -111,7 +111,7 @@ $(CROW_DIR)/control_modules/_crowtools.so : $(CROW_DIR)/control_modules/crowtool
 #swig -c++ -python $(SWIG_PY_FLAGS) -I$(CROW_DIR)/include/tools/  -I$(CROW_DIR)/include/utilities/ $(CROW_DIR)/control_modules/crowtools.i
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
-	$(libmesh_CXX) $(libmeh_CPPFLAGS) $(PYTHON_INCLUDE) $(app_INCLUDES)  $(libmesh_INCLUDE) \
+	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(PYTHON_INCLUDE) $(app_INCLUDES)  $(libmesh_INCLUDE) -std=c++11 \
 	 -c  $(CROW_MODULES)/crowtools_wrap.cxx -o $(CROW_DIR)/control_modules/crowtools_wrap.lo
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link \
 	 $(libmesh_CXX) $(libmesh_CXXFLAGS) \

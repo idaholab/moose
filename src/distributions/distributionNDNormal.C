@@ -37,6 +37,11 @@ using boost::math::normal;
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
+#ifndef M_PI
+//PI is not actually defined anywhere in the C++ standard.
+#define M_PI 3.14159265358979323846
+#endif
+
 void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN){
     /**
      * This function convert a number in base 10 to a new number in any base N
@@ -338,6 +343,71 @@ std::vector<int> BasicMultivariateNormal::getTransformationMatrixDimensions(std:
    */
   std::vector<int> returnVector;
   returnVector.push_back(_svdTransformedMatrix.size());
+  returnVector.push_back(index.size());
+  return returnVector;
+}
+
+std::vector<double> BasicMultivariateNormal::getInverseTransformationMatrix() {
+  /**
+   * this function returns the inverse transformation matrix
+   * @ In, None
+   * @ Out, returnVectors,std::vector<double>, the vector stores the inverse transformation matrix
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < inverseTransformedMatrix.size(); ++i) {
+    for(unsigned int j = 0; j < inverseTransformedMatrix.at(0).size(); ++j) {
+      returnVectors.push_back(inverseTransformedMatrix.at(i).at(j));
+    }
+  }
+  return returnVectors;
+}
+
+std::vector<double> BasicMultivariateNormal::getInverseTransformationMatrix(std::vector<int> index) {
+  /**
+   * this function returns the transformation matrix
+   * @ In, index, std::vector<int>, the index of inverse transformation matrix
+   * @ Out, returnVectors,std::vector<double>, the vector stores the inverse transformation matrix associated with the provided index
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < inverseTransformedMatrix.size(); ++i) {
+    for(unsigned int j = 0; j < index.size(); ++j) {
+      if (index.at(j) < 0) {
+        throwError("Negative value is not allowed in the provided column index vector");
+      }
+      returnVectors.push_back(inverseTransformedMatrix.at(i).at(index.at(j)));
+    }
+  }
+  return returnVectors;
+}
+
+std::vector<int> BasicMultivariateNormal::getInverseTransformationMatrixDimensions() {
+  /**
+   * return the row and colum of the inverse transformation matrix stored in returnVector.at(0) and returnVector.at(1) respectively
+   * @ In, None
+   * @ Out, returnVector, std::vector<int>, row stored in returnVector.at(0), and column stored in returnVector.at(1)
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<int> returnVector;
+  returnVector.push_back(inverseTransformedMatrix.size());
+  returnVector.push_back(inverseTransformedMatrix.at(0).size());
+  return returnVector;
+}
+
+std::vector<int> BasicMultivariateNormal::getInverseTransformationMatrixDimensions(std::vector<int> index) {
+  /**
+   * return the row and colum of the transformation matrix
+   * @ In, index, std::vector<int>, the index of inverse transformation matrix
+   * @ Out,returnVector, std::vector<int>, row stored in returnVector.at(0), and column stored in returnVector.at(1).
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<int> returnVector;
+  returnVector.push_back(inverseTransformedMatrix.size());
   returnVector.push_back(index.size());
   return returnVector;
 }

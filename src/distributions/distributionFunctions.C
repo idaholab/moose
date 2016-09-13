@@ -235,6 +235,7 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
    * leftSingularVectors: stores the left singular vectors for given matrix
    * rightSingularVectors: stores the right singular vectors for given matrix
    * singularValues: stores the singular values for given matrix
+   * transformedMatrix: stores the transformation matrix
    */
   unsigned int row = matrix.size();
   unsigned int col = matrix.at(0).size();
@@ -261,6 +262,31 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
   matrixConversionToCxxVVectorType(V,rightSingularVectors);
   vectorConversionToCxxVectorType(S,singularValues);
   matrixConversionToCxxVVectorType(X,transformedMatrix);
+}
+
+void getInverseTransformedMatrix(const std::vector<std::vector<double> > &leftSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &inverseTransformedMatrix) {
+  /**
+   * This function compute the inverse transformation matrix
+   * Input Parameters
+   * leftSingularVectors: stores the left singular vectors for given matrix
+   * singularValues: stores the singular values for given matrix
+   * Output Parameters
+   * inverseTransformedMatrix: stores the inverse transformation matrix
+   */
+  unsigned int row = leftSingularVectors.size();
+  unsigned int col = leftSingularVectors.at(0).size();
+  unsigned int dim = singularValues.size();
+  Eigen::MatrixXd U(row,col);
+  Eigen::MatrixXd inverseX(row,dim);
+  matrixConversionToEigenType(leftSingularVectors,U);
+  for (unsigned int i = 0; i < dim; ++i) {
+    if (singularValues.at(i) == 0) {
+      inverseX.col(i) = U.col(i) * 0.0;
+    } else {
+      inverseX.col(i) = U.col(i) * (1.0/sqrt(singularValues.at(i)));
+    }
+  }
+  matrixConversionToCxxVVectorType(inverseX.transpose(),inverseTransformedMatrix);
 }
 
 void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix, unsigned int rank) {
