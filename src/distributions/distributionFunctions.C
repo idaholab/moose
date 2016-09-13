@@ -349,7 +349,7 @@ void resetSingularValues(std::vector<std::vector<double> > &leftSingularVectors,
   double tol;
   tol = 1.0E-15;
   if (singularValues.at(0) == 0.0) {
-    throwError("The provided covariance is matrix is zero matrix!")
+    throwError("The provided covariance matrix is zero matrix!")
   }
   for (unsigned int i = 0; i < singularValues.size(); ++i) {
     if ((A.col(i) + B.col(i)).lpNorm<1>()/row1 < tol) {
