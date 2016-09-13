@@ -48,4 +48,11 @@
     exodiff = 'grain_maskedforce_out.e'
     allow_warnings = true
   [../]
+
+  [./polycrystal_action]
+    type = 'Exodiff'
+    input = 'polycrystal_action.i'
+    exodiff = 'polycrystal_action_out.e'
+    allow_warnings = true
+  [../]
 []
