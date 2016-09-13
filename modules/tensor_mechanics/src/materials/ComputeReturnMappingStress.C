@@ -39,7 +39,7 @@ ComputeReturnMappingStress::initialSetup()
   std::vector<MaterialName> models = getParam<std::vector<MaterialName> >("return_mapping_models");
   for (unsigned i = 0; i < models.size(); ++i)
   {
-    RecomputeRadialReturn * rrr = dynamic_cast<RecomputeRadialReturn*>(&getMaterialByName(models[i]));
+    MooseSharedPointer<RecomputeRadialReturn> rrr = MooseSharedNamespace::dynamic_pointer_cast<RecomputeRadialReturn>(getMaterialSharedPointerByName(models[i]));
     if (rrr)
       _models.push_back(rrr);
     else

@@ -38,19 +38,14 @@ PorousFlowTemperature::PorousFlowTemperature(const InputParameters & parameters)
     _dtemperature_nodal_dvar(declareProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
     _dtemperature_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar")),
     _dgradt_qp_dgradv(declareProperty<std::vector<Real> >("dPorousFlow_grad_temperature_qp_dgradvar")),
-    _dgradt_qp_dv(declareProperty<std::vector<RealGradient> >("dPorousFlow_grad_temperature_qp_dvar")),
-
-    _yaqi_hacky(true)
+    _dgradt_qp_dv(declareProperty<std::vector<RealGradient> >("dPorousFlow_grad_temperature_qp_dvar"))
 {
 }
 
 void
 PorousFlowTemperature::initQpStatefulProperties()
 {
-  if (_yaqi_hacky)
-    _temperature_nodal[_qp] = _temperature_nodal_var[_qp];
-  else
-    _temperature_nodal[_qp] = _temperature_nodal_var[_node_number[_qp]];
+  _temperature_nodal[_qp] = _temperature_nodal_var[_node_number[_qp]];
 }
 
 void

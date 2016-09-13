@@ -51,7 +51,7 @@ MaterialPropertyDebugOutput::printMaterialMap() const
   std::stringstream active_block, active_face, active_neighbor, active_boundary;
 
   // Reference to the Material warehouse
-  const MaterialWarehouse<Material> & warehouse = _problem_ptr->getMaterialWarehouse();
+  const MaterialWarehouse & warehouse = _problem_ptr->getMaterialWarehouse();
 
 
   // Active materials on block

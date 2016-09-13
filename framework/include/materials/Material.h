@@ -231,7 +231,7 @@ protected:
   std::set<std::string> _supplied_props;
 
   /// If False MOOSE does not compute this property
-  bool _compute;
+  const bool _compute;
 
   enum QP_Data_Type {
     CURR,
