@@ -32,7 +32,9 @@ InputParameters validParams<Material>()
   params += validParams<MaterialPropertyInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  params.addParam<bool>("compute", true, "When false MOOSE will not call compute methods on this material, compute then must be called retrieving the Material object via MaterialPropertyInterface::getMaterial and calling the computeProerties method. Non-computed Materials are not sorted for dependencies.");
+  params.addParam<bool>("compute", true, "When false MOOSE will not call compute methods on this material, compute then "
+                                         "must be called retrieving the Material object via MaterialPropertyInterface::getMaterial "
+                                         "and calling the computeProerties method. Non-computed Materials are not sorted for dependencies.");
 
   // Outputs
   params += validParams<OutputInterface>();

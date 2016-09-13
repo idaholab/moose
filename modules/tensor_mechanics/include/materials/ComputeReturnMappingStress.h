@@ -42,7 +42,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  std::vector<MooseSharedPointer<RecomputeRadialReturn>> _models;
+  std::vector<MooseSharedPointer<RecomputeRadialReturn> > _models;
 };
 
 #endif //COMPUTERETURNMAPPINGSTRESS_H

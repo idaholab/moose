@@ -445,10 +445,6 @@ void FEProblem::initialSetup()
       // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
       _materials.sort(tid);
 
-      // Sort the complete material warehouse, including "discrete" materials that are not computed by MOOSE. This
-      // complete list is needed for stateful initialization.
-      //_all_materials.sort(tid);
-
       // Call initialSetup on both Material and Material objects
       _all_materials.initialSetup(tid);
     }

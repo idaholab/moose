@@ -63,7 +63,7 @@ PorousFlowMassFraction::initQpStatefulProperties()
 
   // the derivative matrix is fixed for all time
   // so it can be built here instead of in computeQpProperties
-  unsigned i = 0;
+  unsigned int i = 0;
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
