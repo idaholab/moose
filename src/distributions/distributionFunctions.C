@@ -340,7 +340,7 @@ void  computeNearestSymmetricMatrix(const std::vector<std::vector<double> > &mat
   unsigned int col = matrix.at(0).size();
   if (row != col) {
     throwError("The provided matrix is not a square matrix!" );
-  } 
+  }
   Eigen::MatrixXd A(row,col);
   Eigen::MatrixXd B(col,row);
   matrixConversionToEigenType(matrix,A);
@@ -368,7 +368,7 @@ void resetSingularValues(std::vector<std::vector<double> > &leftSingularVectors,
   unsigned int rank = transformedMatrix.at(0).size();
   if (row1 != row2 && col1 != col2) {
     throwError("The provided matrices should have the same shape!" );
-  } 
+  }
   Eigen::MatrixXd A(row1,col1);
   Eigen::MatrixXd B(row2,col2);
   Eigen::MatrixXd X(row1,rank);

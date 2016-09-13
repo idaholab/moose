@@ -253,7 +253,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
   //compute the svd
   computeSVD(_rank);
   //setup the nearest symmetric semi-positive definite covariance matrix
-  resetSingularValues(_leftSingularVectors, _rightSingularVectors, _singularValues,_svdTransformedMatrix); 
+  resetSingularValues(_leftSingularVectors, _rightSingularVectors, _singularValues,_svdTransformedMatrix);
 
   int numberOfDiscretizations = 10;
   unsigned int dimensions = _mu.size();
