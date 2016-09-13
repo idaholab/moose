@@ -20,7 +20,7 @@ class MooseImageFile(MooseCommonExtension, Pattern):
     """
 
     # Find !image /path/to/file attribute=setting
-    RE = r'^!\ ?image\s+(.*?)\s+(.*)'
+    RE = r'^!image\s+(.*?)(?:$|\s+)(.*)'
 
     def __init__(self, root=None, **kwargs):
         MooseCommonExtension.__init__(self)
