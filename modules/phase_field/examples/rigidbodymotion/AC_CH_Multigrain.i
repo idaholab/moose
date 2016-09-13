@@ -20,7 +20,7 @@
   ymin = 0
   ymax = 600
   elem_type = QUAD4
-  uniform_refine = 2
+  uniform_refine = 1
 []
 
 [Variables]
@@ -35,12 +35,6 @@
 [AuxVariables]
   [./bnds]
   [../]
-  [./MultiAuxVariables]
-    order = CONSTANT
-    family = MONOMIAL
-    var_name_base = 'df vadv' # Names of force density variables
-    dim = 2
-  [../]
   [./force]
     order = CONSTANT
     family = MONOMIAL
@@ -49,7 +43,15 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vadv_div]
+  [./unique_grains]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./var_indices]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./centroids]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -75,6 +77,8 @@
     f_name = f_loc
     mob_name = L
     kappa_name = kappa_gr
+    grain_force = grain_force
+    grain_tracker_object = grain_center
   [../]
   # Cahn Hilliard kernels
   [./dt_w]
@@ -99,6 +103,9 @@
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
+    v = 'gr0 gr1 gr2 gr3'
+    grain_force = grain_force
+    grain_tracker_object = grain_center
   [../]
 []
 
@@ -123,13 +130,6 @@
   [./bnds]
     type = BndsCalcAux
     variable = bnds
-  [../]
-  [./MatVecRealGradAuxKernel]
-    var_name_base = 'df vadv'
-    property = 'force_density_ext advection_velocity'
-    dim = 2
-    divergence_variable = vadv_div
-    divergence_property = advection_velocity_divergence
   [../]
 []
 
@@ -161,12 +161,6 @@
                                  #Copy/paste from lines 5-6
     derivative_order = 2
   [../]
-  [./advection_velocity]
-    type = GrainAdvectionVelocity
-    grain_force = grain_force
-    grain_data = grain_center
-    c = c
-  [../]
   [./force_density]
     type = ExternalForceDensityMaterial
     c = c
@@ -185,29 +179,27 @@
 []
 
 [VectorPostprocessors]
-  [./centers]
-    type = GrainCentersPostprocessor
-    grain_data = grain_center
-    outputs = csv
-  [../]
   [./forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
-    outputs = csv
   [../]
 []
 
 [UserObjects]
   [./grain_center]
-    type = ComputeGrainCenterUserObject
-    execute_on = 'initial timestep_end'
+    type = GrainTracker
+    outputs = none
+    compute_op_maps = true
+    calculate_feature_volumes = true
+    execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
     type = ComputeGrainForceAndTorque
     grain_data = grain_center
     c = c
+    etas = 'gr0 gr1 gr2 gr3'
     force_density = force_density_ext
-    execute_on = 'initial timestep_end'
+    execute_on = 'linear nonlinear'
   [../]
 []
 
@@ -232,21 +224,12 @@
   nl_rel_tol = 1e-07
   nl_abs_tol = 1e-09
   start_time = 0.0
-  end_time = 5
+  end_time = 4
   dt = 0.05
-  [./Adaptivity]
-    coarsen_fraction = 0.1
-    refine_fraction = 0.9
-    initial_adaptivity = 2
-    max_h_level = 3
-    weight_names = 'c gr0 gr1 gr2 gr3'
-    weight_values = '0.5 1 1 1 1'
-  [../]
 []
 
 [Outputs]
   exodus = true
-  csv = true
   print_perf_log = true
   [./display]
     type = Console
