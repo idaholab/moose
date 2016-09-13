@@ -49,6 +49,10 @@ class MooseApplicationSyntax(object):
                 name = node['name'].split('/')[-1]
                 if name not in self._objects:
                     self._systems.add(node['name'].rstrip('/*'))
+                else:
+                    name = node['name'].rsplit('/', 1)[0]
+                    self._systems.add(name)
+
 
     def systems(self):
         """
