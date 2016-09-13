@@ -26,7 +26,7 @@ class AddSideSetsBase;
 // libMesh forward declarations
 namespace libMesh
 {
-class QGauss;
+  class QGauss;
 }
 
 template<>
@@ -36,8 +36,7 @@ class AddSideSetsBase : public MeshModifier
 {
 public:
   AddSideSetsBase(const InputParameters & parameters);
-
-  virtual ~AddSideSetsBase();
+  virtual ~AddSideSetsBase(); // dtor required for unique_ptr with forward declarations
 
 protected:
   /**
@@ -64,8 +63,8 @@ protected:
   Real _variance;
   bool _fixed_normal;
 
-  FEBase *_fe_face;
-  QGauss *_qface;
+  std::unique_ptr<FEBase> _fe_face;
+  std::unique_ptr<QGauss> _qface;
   std::map<BoundaryID, std::set<const Elem *> > _visited;
 };
 

@@ -37,50 +37,40 @@ InputParameters validParams<AddSideSetsBase>()
 AddSideSetsBase::AddSideSetsBase(const InputParameters & parameters) :
     MeshModifier(parameters),
     _variance(getParam<Real>("variance")),
-    _fixed_normal(getParam<bool>("fixed_normal")),
-    _fe_face(NULL),
-    _qface(NULL)
+    _fixed_normal(getParam<bool>("fixed_normal"))
 {
 }
 
 AddSideSetsBase::~AddSideSetsBase()
 {
-  delete _qface;
-  delete _fe_face;
-
-  _qface = NULL;
-  _fe_face = NULL;
 }
 
 void
 AddSideSetsBase::setup()
 {
-  mooseAssert(_mesh_ptr != NULL, "Mesh pointer is NULL");
-  mooseAssert(_fe_face == NULL, "FE Face has already been initialized");
+  mooseAssert(_mesh_ptr, "Mesh pointer is NULL");
+  mooseAssert(_fe_face == nullptr, "FE Face has already been initialized");
 
   unsigned int dim = _mesh_ptr->dimension();
 
   // Setup the FE Object so we can calculate normals
   FEType fe_type(Utility::string_to_enum<Order>("CONSTANT"), Utility::string_to_enum<FEFamily>("MONOMIAL"));
-  _fe_face = (FEBase::build(dim, fe_type)).release();
-  _qface = new QGauss(dim-1, FIRST);
-  _fe_face->attach_quadrature_rule(_qface);
+  _fe_face = FEBase::build(dim, fe_type);
+  _qface = libmesh_make_unique<QGauss>(dim-1, FIRST);
+  _fe_face->attach_quadrature_rule(_qface.get());
 }
 
 void
 AddSideSetsBase::finalize()
 {
-  delete _qface;
-  delete _fe_face;
-
-  _qface = NULL;
-  _fe_face = NULL;
+  _qface.reset();
+  _fe_face.reset();
 }
 
 void
 AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
 {
-  if (elem == NULL || (_visited[side_id].find(elem) != _visited[side_id].end()))
+  if (elem == nullptr || (_visited[side_id].find(elem) != _visited[side_id].end()))
     return;
 
   _visited[side_id].insert(elem);
