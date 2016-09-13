@@ -59,6 +59,7 @@
     type = 'CSVDiff'
     input = 'hertz_cyl_qsym_1deg_mu_1_0_kin_q4.i'
     csvdiff = 'hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check.csv hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check_cont_press_0010.csv hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check_x_disp_0010.csv hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check_y_disp_0010.csv'
+    max_time = 1000
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
