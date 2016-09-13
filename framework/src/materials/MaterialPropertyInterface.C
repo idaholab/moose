@@ -199,6 +199,12 @@ MaterialPropertyInterface::getMaterial(const std::string & name)
 Material &
 MaterialPropertyInterface::getMaterialByName(const std::string & name)
 {
+  return *getMaterialSharedPointerByName(name);
+}
+
+MooseSharedPointer<Material>
+MaterialPropertyInterface::getMaterialSharedPointerByName(const std::string & name)
+{
   MooseSharedPointer<Material> discrete = _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid);
 
   // Check block compatibility
@@ -233,7 +239,7 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name)
     mooseError(oss.str());
   }
 
-  return *discrete;
+  return discrete;
 }
 
 void

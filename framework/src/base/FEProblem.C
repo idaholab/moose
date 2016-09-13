@@ -2006,11 +2006,8 @@ FEProblem::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful
     if (_discrete_materials.hasActiveBlockObjects(blk_id, tid))
       _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
 
-    for (auto map_iter = _materials.begin(); map_iter != _materials.end(); ++map_iter)
-    {
-      if (map_iter->second.hasActiveBlockObjects(blk_id, tid))
-        _material_data[tid]->reinit(map_iter->second.getActiveBlockObjects(blk_id, tid));
-    }
+    if (_materials.hasActiveBlockObjects(blk_id, tid))
+      _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -2032,11 +2029,8 @@ FEProblem::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
     if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reset(_discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    for (auto map_iter = _materials[Moose::FACE_MATERIAL_DATA].begin(); map_iter != _materials[Moose::FACE_MATERIAL_DATA].end(); ++map_iter)
-    {
-      if (map_iter->second.hasActiveBlockObjects(blk_id, tid))
-        _bnd_material_data[tid]->reinit(map_iter->second.getActiveBlockObjects(blk_id, tid));
-    }
+    if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _bnd_material_data[tid]->reinit(_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -2059,11 +2053,8 @@ FEProblem::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_
     if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reset(_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    for (auto map_iter = _materials[Moose::NEIGHBOR_MATERIAL_DATA].begin(); map_iter != _materials[Moose::NEIGHBOR_MATERIAL_DATA].end(); ++map_iter)
-    {
-      if (map_iter->second.hasActiveBlockObjects(blk_id, tid))
-        _neighbor_material_data[tid]->reinit(map_iter->second.getActiveBlockObjects(blk_id, tid));
-    }
+    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _neighbor_material_data[tid]->reinit(_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 

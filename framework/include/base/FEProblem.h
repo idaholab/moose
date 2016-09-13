@@ -948,9 +948,15 @@ public:
   unsigned int subspaceDim(const std::string& prefix) const {if (_subspace_dim.count(prefix)) return _subspace_dim.find(prefix)->second; else return 0;}
 
   /*
-   * Return a reference to the material warehouse of Material objects.
+   * Return a reference to the material warehouse of *all* Material objects.
    */
-  const MaterialWarehouse<Material> & getMaterialWarehouse() { return _all_materials; }
+  const MaterialWarehouse & getMaterialWarehouse() { return _all_materials; }
+
+  /*
+   * Return a reference to the material warehouse of Material objects to be computed.
+   */
+  const MaterialWarehouse & getComputeMaterialWarehouse() { return _materials; }
+  const MaterialWarehouse & getDiscreteMaterialWarehouse() { return _discrete_materials; }
 
   /**
    * Return a pointer to a Material object.
@@ -1101,9 +1107,9 @@ protected:
 
   ///@{
   // Material Warehouses
-  MaterialWarehouse<Material> _materials; // Traditional materials that MOOSE computes
-  MaterialWarehouse<Material> _discrete_materials; // Materials that the user must compute
-  MaterialWarehouse<Material> _all_materials; // All materials for error checking and MaterialData storage
+  MaterialWarehouse _materials; // Traditional materials that MOOSE computes
+  MaterialWarehouse _discrete_materials; // Materials that the user must compute
+  MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}
 
   ///@{

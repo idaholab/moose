@@ -40,14 +40,12 @@
     input = 's07.i'
     csvdiff = 's07.csv'
     rel_err = 1.0E-5
-    skip = 'opts runs fine, but must skip because of YaqiHack (Issue #6774)'
   [../]
   [./s08]
     type = 'CSVDiff'
     input = 's08.i'
     csvdiff = 's08.csv'
     rel_err = 1.0E-5
-    skip = 'opts runs fine, but must skip because of YaqiHack (Issue #6774)'
   [../]
   [./s09]
     type = Exodiff
