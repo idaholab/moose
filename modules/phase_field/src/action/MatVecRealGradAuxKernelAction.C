@@ -36,8 +36,12 @@ MatVecRealGradAuxKernelAction::act()
 {
   std::vector<std::string> var_name_base = getParam<std::vector<std::string> >("var_name_base");
   std::vector<MaterialPropertyName> _prop = getParam<std::vector<MaterialPropertyName> >("property");
-  AuxVariableName _div_var = getParam<AuxVariableName>("divergence_variable");
-  MaterialPropertyName _div_prop = getParam<MaterialPropertyName>("divergence_property");
+  if (isParamValid("divergence_variable"))
+  {
+    AuxVariableName _div_var = getParam<AuxVariableName>("divergence_variable");
+    if (isParamValid("divergence_property"))
+      MaterialPropertyName _div_prop = getParam<MaterialPropertyName>("divergence_property");
+  }
 
   unsigned int op_num = getParam<unsigned int>("op_num");
   unsigned int dim = getParam<unsigned int>("dim");
