@@ -150,13 +150,13 @@ public:
    * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
    * Computer Equations.
    *
-   * @param pressure fluid pressure (Pa)
+   * @param density fluid density (kg/m^3)
    * @param temperature fluid temperature (K)
    * @param[out] mu viscosity (Pa.s)
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(Real denisty, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const;
+  virtual void mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const;
 
   /**
    * Thermal conductivity as a function of pressure and temperature.

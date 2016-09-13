@@ -39,4 +39,10 @@
     input = 'viscosity.i'
     csvdiff = 'viscosity_out.csv'
   [../]
+  [./water_derivatives]
+    type = Exodiff
+    input = 'water_derivatives.i'
+    exodiff = 'water_derivatives_out.e'
+    rel_err = 1e-4
+  [../]
 []
