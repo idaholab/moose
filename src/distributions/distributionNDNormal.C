@@ -212,7 +212,12 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, int rank){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
-   * This function will compute the svd of given vecCovMatrix
+   * First, we will make sure the given covariance, i.e. vecCovMatrix, is symmetric, function 'computeNearestSymmetricMatrix' will be called
+   * Second, we will compute the svd of the computed symmetric matrix
+   * Third, we will make sure the reconstructed covariance matrix will be symmetric positive semidefinite matrix, function resetSingularValues will be called
+   * Reference for compute the nearest symmetric positive semidefinte matrix:
+   * 1. Nicholas J. Higham, "Computing a Nearest Symmetric Positive Semidefinite Matrix," Linear Algebra and Its Applications, vol. 103, pp. 103-118 (1988)
+   * 2. Risto Vanhanen, "Computing Positive Semidefinite Multigroup Nuclear Data Covariances," Nuclear Science and Engineering, vol. 179, pp. 411-422 (2015)
    * Input Parameters
    * - vecCovMatrix: covariance matrix stored in a vector<double>
    * - mu: the mean value vector
