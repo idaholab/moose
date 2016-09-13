@@ -342,8 +342,10 @@ void  computeNearestSymmetricMatrix(const std::vector<std::vector<double> > &mat
     throwError("The provided matrix is not a square matrix!" );
   } 
   Eigen::MatrixXd A(row,col);
+  Eigen::MatrixXd B(col,row);
   matrixConversionToEigenType(matrix,A);
-  A = (A + A.transpose())*0.5;
+  B = A.transpose();
+  A = (A + B)*0.5;
   matrixConversionToCxxVVectorType(A,symmetricMatrix);
 }
 
