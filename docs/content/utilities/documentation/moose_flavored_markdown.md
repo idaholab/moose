@@ -195,7 +195,9 @@ You can include images in your documentation by use of the !image markdown synta
 
 ---
 
-## Inline CSS Options
+## CSS Options
+
+### In-line CSS
 !text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner float=right padding-left=20px font-size=smaller
 
 You can provide any valid CSS attribute to any markdown extension (!text, !input, !clang, !image, !slideshow). Some extensions can not be controlled as much as others. For example the !slideshow extension ignores alignment attributes. Your milage may vary.
@@ -204,7 +206,7 @@ Some of the most useful ones are perhaps width, float, align and padding. Howeve
 
 In the following example, we will display an input code block. It will 'float' to the right, which should allow this section of text and elements, to appear to the left of the code block, and wrap around it.
 
-  * Keep in mind, that the actual element tag was placed in this document just beneath the "Inline CSS Options" title. This is because the placement of the element still applies to where it starts being drawn on the screen.
+  * Keep in mind, that the actual element tag was placed in this document just beneath the "In-line CSS" title. This is because the placement of the element still applies to where it starts being drawn on the screen.
 
 !!! Info
     It should also work with admonitions
@@ -213,6 +215,31 @@ Markdown allowing an input code block to float to the right:
 ```markdown
 !text test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner float=right padding-left=20px font-size=smaller
 ```
+
+### Block CSS Options
+You can apply a style sheet to a markdown paragraph through the use of !css extension:
+
+```markdown
+!css font-size=smaller margin-left=70% color=red text-shadow=1px 1px 1px rgba(0,0,0,.4)
+This paragraph should be of a smaller red font with a black offset text shadow. The text
+will be aligned to the right due to the margin-left attribute (nice trick to preserve the
+'justify' attribute currently in use)
+
+An empty new line, designates the end of the css block.
+
+!css font-size=smaller margin-left=70% color=red text-shadow=1px 1px 1px rgba(0,0,0,.4)
+Another paragraph modified by CSS.
+```
+
+!css font-size=smaller margin-left=70% color=red text-shadow=1px 1px 1px rgba(0,0,0,.4)
+This paragraph should be of a smaller red font with a black offset text shadow. The text
+will be aligned to the right due to the margin-left attribute (nice trick to preserve the
+'justify' attribute currently in use)
+
+An empty new line, designates the end of the css block.
+
+!css font-size=smaller margin-left=70% color=red text-shadow=1px 1px 1px rgba(0,0,0,.4)
+Another paragraph modified by CSS.
 
 ---
 
@@ -243,3 +270,18 @@ graph {
     a -- b -- c;
     b -- d;
 }
+
+---
+
+## Build Status
+!buildstatus https://moosebuild.org/mooseframework/ float=right padding-left=10px
+
+You can add a Civet build status widget to any page using !buildstatus http://url/to/civet
+
+Currently this will only work with Civet CI servicies.
+
+```markdown
+!buildstatus https://moosebuild.org/mooseframework/ float=right padding-left=10px
+```
+!!! note
+    Be sure to follow your !buildstatus extension with an empty new line.
