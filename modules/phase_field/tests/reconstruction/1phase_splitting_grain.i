@@ -1,7 +1,7 @@
 [Mesh]
-  uniform_refine = 2
+  uniform_refine = 1
   type = EBSDMesh
-  filename = IN100_120x120.txt
+  filename = IN100_30x30_splitting_grain.txt
 []
 
 [GlobalParams]
