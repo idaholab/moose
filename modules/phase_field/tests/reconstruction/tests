@@ -58,4 +58,11 @@
     csvdiff = 'euler2rgb_no_grain_region_out.csv'
     max_time = 1000
   [../]
+
+  [./splitting grains]
+    type = 'CSVDiff'
+    input = '1phase_splitting_grain.i'
+    csvdiff = none
+    skip = 'Not implemented #7712'
+  [../]
 []
