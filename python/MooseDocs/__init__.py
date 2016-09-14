@@ -100,6 +100,10 @@ def init_logging(verbose=False):
 def yaml_load(filename, loader=yaml.Loader):
     """
     Load a YAML file capable of including other YAML files.
+
+    Args:
+        filename[str]: The name fo the file to load.
+        loader[yaml.Loader]: The loader to utilize.
     """
 
     def include(self, node):
@@ -131,6 +135,7 @@ def yaml_load(filename, loader=yaml.Loader):
 
     with open(filename, 'r') as fid:
         yml = yaml.load(fid.read(), Loader)
+
     return yml
 
 def load_pages(filename, keys=[], **kwargs):
@@ -201,7 +206,7 @@ def command_line_options():
     for p in [serve_parser, build_parser]:
         p.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
         p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item.")
-
+        p.add_argument('--page-keys', default=[], nargs='+', help='A list of top-level keys from the "pages" file to include. This is a tool to help speed up the serving for development of documentation.')
     # Parse the arguments
     options = parser.parse_args()
 
@@ -231,9 +236,9 @@ def moosedocs():
             purge(['md', 'yml', 'svg'])
         commands.generate(config_file=options.config_file)
     elif options.command == 'serve':
-        commands.serve(config_file=options.config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme, pages=options.pages)
+        commands.serve(config_file=options.config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme, pages=options.pages, page_keys=options.page_keys)
     elif options.command == 'build':
-        commands.build(config_file=options.config_file, theme=options.theme, pages=options.pages)
+        commands.build(config_file=options.config_file, theme=options.theme, pages=options.pages, page_keys=options.page_keys)
 
     # Display logging results
     print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])

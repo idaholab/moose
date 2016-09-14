@@ -80,7 +80,7 @@ def _livereload(host, port, config, builder, site_dir):
     server.serve(root=site_dir, host=host, port=int(port), restart_delay=0)
 
 
-def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, pages='pages.yml', **kwargs):
+def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, pages='pages.yml', page_keys=[], **kwargs):
     """
     Mimics mkdocs serve command.
     """
@@ -96,9 +96,6 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     # Create the "temp" directory
     if not os.path.exists(tempdir):
         os.makedirs(tempdir)
-
-    # Read the pages file
-    pages = MooseDocs.yaml_load(pages)
 
     def builder(**kwargs):
         clean = kwargs.pop('clean', livereload != 'dirtyreload')
