@@ -29,7 +29,6 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameter
    _grain_torques(_grain_force_torque.getTorqueValues()),
    _mt(getParam<Real>("translation_constant")),
    _mr(getParam<Real>("rotation_constant")),
-   _grain_num(_grain_forces.size()),
    _op_num(coupledComponents("etas")),
    _vals(_op_num),
    _grad_vals(_op_num),
@@ -45,6 +44,18 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameter
     _grad_vals[i] = &coupledGradient("etas",i);
   }
   mooseWarning("GrainAdvectionVelocity is no longer used by RBM kernels, it can be used for visualization only.");
+}
+
+void
+GrainAdvectionVelocity::initialSetup()
+{
+  getTotalNumberOfGrains();
+}
+
+void
+GrainAdvectionVelocity::residualSetup()
+{
+  getTotalNumberOfGrains();
 }
 
 void
@@ -70,4 +81,10 @@ GrainAdvectionVelocity::computeQpProperties()
         _div_velocity_advection[_qp][i] = div_velocity_translation + div_velocity_rotation;
       }
     }
+}
+
+void
+GrainAdvectionVelocity::getTotalNumberOfGrains()
+{
+  _grain_num = _grain_tracker.getNumberGrains();
 }

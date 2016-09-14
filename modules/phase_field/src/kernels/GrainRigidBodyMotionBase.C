@@ -56,7 +56,6 @@ void
 GrainRigidBodyMotionBase::timestepSetup()
 {
   _total_dofs = _subproblem.es().n_dofs();
-  _grain_num = _grain_tracker.getNumberGrains();
 }
 
 void
