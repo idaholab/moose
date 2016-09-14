@@ -40,6 +40,22 @@ include:
             Tutorials:
                 - ../tutorials
 
+    tensor_mechanics:
+        source: ../modules/tensor_mechanics/src
+        include: ../modules/tensor_mechanics/include
+        doxygen: http://mooseframework.com/docs/doxygen/modules/
+        details: details/tensor_mechanics
+        install: content/modules/tensor_mechanics/systems
+        hide:
+            - /XFEM
+        links:
+            Tests:
+                - ../modules/tensor_mechanics/tests
+            Examples:
+                - ../modules/tensor_mechanics/examples
+            Tutorials:
+                - ../modules/tensor_mechanics/tutorials
+
     phase_field:
         source: ../modules/phase_field/src
         include: ../modules/phase_field/include
