@@ -1,0 +1,13 @@
+[Test]
+  [./overflow]
+    type = RunApp
+    input = 'packed_range_debug.i'
+    cli_args = "UserObjects/pack/buffer_size=1000080"
+  [../]
+  [./underflow]
+    type = RunApp
+    input = 'packed_range_debug.i'
+    cli_args = "UserObjects/pack/buffer_size=999920"
+    prereq = overflow
+  [../]
+[]
