@@ -39,6 +39,8 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
 void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted);
 void matrixConversionToCxxVVectorType(const Eigen::MatrixXd & original, std::vector<std::vector<double> > &converted);
 void vectorConversionToCxxVectorType(const Eigen::VectorXd & original, std::vector<double>  &converted);
+void computeNearestSymmetricMatrix(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &symmetricMatrix);
+void resetSingularValues(std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues, std::vector<std::vector<double> > &transformedMatrix);
 
 void nrerror(const char error_text[]);
 

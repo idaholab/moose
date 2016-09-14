@@ -212,7 +212,12 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, int rank){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
-   * This function will compute the svd of given vecCovMatrix
+   * First, we will make sure the given covariance, i.e. vecCovMatrix, is symmetric, function 'computeNearestSymmetricMatrix' will be called
+   * Second, we will compute the svd of the computed symmetric matrix
+   * Third, we will make sure the reconstructed covariance matrix will be symmetric positive semidefinite matrix, function resetSingularValues will be called
+   * Reference for compute the nearest symmetric positive semidefinte matrix:
+   * 1. Nicholas J. Higham, "Computing a Nearest Symmetric Positive Semidefinite Matrix," Linear Algebra and Its Applications, vol. 103, pp. 103-118 (1988)
+   * 2. Risto Vanhanen, "Computing Positive Semidefinite Multigroup Nuclear Data Covariances," Nuclear Science and Engineering, vol. 179, pp. 411-422 (2015)
    * Input Parameters
    * - vecCovMatrix: covariance matrix stored in a vector<double>
    * - mu: the mean value vector
@@ -221,10 +226,13 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
    */
   unsigned int rows, columns;
   std::vector<std::vector<double> > covMatrix;
+  std::vector<std::vector<double> > symmetricCovMatrix;
   // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+  // compute the nearest symmetric covariance matrix
+  computeNearestSymmetricMatrix(covMatrix,symmetricCovMatrix);
   _mu = mu;
-  _cov_matrix = covMatrix;
+  _cov_matrix = symmetricCovMatrix;
   _rank = (unsigned int) rank;
   _covarianceType = std::string(type);
   if(_rank > _mu.size()) {
@@ -244,6 +252,8 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 
   //compute the svd
   computeSVD(_rank);
+  //setup the nearest symmetric semi-positive definite covariance matrix
+  resetSingularValues(_leftSingularVectors, _rightSingularVectors, _singularValues,_svdTransformedMatrix);
 
   int numberOfDiscretizations = 10;
   unsigned int dimensions = _mu.size();
