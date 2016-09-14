@@ -63,25 +63,27 @@ DeformedGrainMaterial::computeQpProperties()
     SumEtai2 += (*_vals[i])[_qp]*(*_vals[i])[_qp];
 
   // calculate effective dislocation density and assign zero dislocation densities to undeformed grains
-  const std::vector<std::pair<unsigned int, unsigned int> > & active_ops = _grain_tracker.getElementalValues(_current_elem->id());
-  unsigned int n_active_ops= active_ops.size();
-  if (n_active_ops < 1 && _t_step > 0)
-    mooseError("No active order parameters");
+  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
   // loop over active OPs
-  for (unsigned int op = 0; op < n_active_ops; ++op)
+  bool one_active = false;
+  for (auto op_index = beginIndex(op_to_grains); op_index < op_to_grains.size(); ++op_index)
   {
-    // First position of the active ops contains grain number
-    unsigned int grain_index = active_ops[op].first;
+    if (op_to_grains[op_index] == libMesh::invalid_uint)
+      continue;
 
-    // Second position contains the order parameter index
-    unsigned int op_index = active_ops[op].second;
+    one_active = true;
+    auto grain_index = op_to_grains[op_index];
+
     if (grain_index >= _deformed_grain_num)
       rho_i = 0.0;
     else
       rho_i = _Disloc_Den_i[_qp];
     rho0 += rho_i * (*_vals[op_index])[_qp] * (*_vals[op_index])[_qp];
   }
+  if (!one_active && _t_step > 0)
+    mooseError("No active order parameters");
+
   _rho_eff[_qp] = rho0 / SumEtai2;
   if (_rho_eff[_qp]<1e-9)
   {

@@ -90,6 +90,8 @@ GrainTracker::getEntityValue(dof_id_type entity_id, FieldType field_type, unsign
 const std::vector<std::pair<unsigned int, unsigned int> > &
 GrainTracker::getElementalValues(dof_id_type elem_id) const
 {
+  mooseDeprecated("GrainTrackerInterface::getElementalValues() is deprecated use GrainTrackerInterface::getOpToGrainsVector() instead");
+
   const auto pos = _elemental_data.find(elem_id);
 
   if (pos != _elemental_data.end())
@@ -119,7 +121,7 @@ GrainTracker::getGrainVolume(unsigned int grain_id) const
   if (grain_idx != libMesh::invalid_uint)
   {
     mooseAssert(_grain_id_to_grain_idx[grain_id] < _feature_sets.size(), "Grain index out of bounds");
-    // TODO: Not parallel consistent
+    // Note: This value is parallel consistent, see GrainTracker::broadcastAndUpdateGrainData()
     return _feature_sets[_grain_id_to_grain_idx[grain_id]]._volume;
   }
 
@@ -136,7 +138,7 @@ GrainTracker::getGrainCentroid(unsigned int grain_id) const
   if (grain_idx != libMesh::invalid_uint)
   {
     mooseAssert(_grain_id_to_grain_idx[grain_id] < _feature_sets.size(), "Grain index out of bounds");
-    // TODO: Not parallel consistent
+    // Note: This value is parallel consistent, see GrainTracker::broadcastAndUpdateGrainData()
     return _feature_sets[_grain_id_to_grain_idx[grain_id]]._centroid;
   }
 
