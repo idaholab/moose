@@ -328,6 +328,73 @@ void svdDecomposition(const std::vector<std::vector<double> > &matrix, std::vect
   matrixConversionToCxxVVectorType(X,transformedMatrix);
 }
 
+void  computeNearestSymmetricMatrix(const std::vector<std::vector<double> > &matrix, std::vector<std::vector<double> > &symmetricMatrix) {
+  /**
+   * This function used to compute the nearest symmetric matrix
+   * Input Parameters
+   * matrix: std::vector<std::vector<double> >, given matrix
+   * Output Parameters
+   * symmetricMatrix: std::vector<std::vector<double> >, the computed symmetric matrix
+   */
+  unsigned int row = matrix.size();
+  unsigned int col = matrix.at(0).size();
+  if (row != col) {
+    throwError("The provided matrix is not a square matrix!" );
+  }
+  Eigen::MatrixXd A(row,col);
+  Eigen::MatrixXd B(col,row);
+  matrixConversionToEigenType(matrix,A);
+  B = A.transpose();
+  A = (A + B)*0.5;
+  matrixConversionToCxxVVectorType(A,symmetricMatrix);
+}
+
+void resetSingularValues(std::vector<std::vector<double> > &leftSingularVectors, std::vector<std::vector<double> > &rightSingularVectors, std::vector<double> &singularValues,std::vector<std::vector<double> > &transformedMatrix) {
+  /**
+   * used to reset singular values
+   * Input Parameters
+   * leftSingularVectors: std::vector<std::vector<double> >, the left singular vectors
+   * rightSingularVectors: std::vector<std::vector<double> >, the right singular vectors
+   * singularValues: std::vector<double>, the singular values
+   * transformedMatrix: std::vector<vector<double> >, the transformation matrix
+   * Output Parameters
+   * singularValues: std::vector<double>, the modified singular values
+   * transformedMatrix: std::vector<vector<double> >, the updated transformation matrix
+   */
+  unsigned int row1 = leftSingularVectors.size();
+  unsigned int col1 = leftSingularVectors.at(0).size();
+  unsigned int row2 = rightSingularVectors.size();
+  unsigned int col2 = rightSingularVectors.at(0).size();
+  unsigned int rank = transformedMatrix.at(0).size();
+  if (row1 != row2 && col1 != col2) {
+    throwError("The provided matrices should have the same shape!" );
+  }
+  Eigen::MatrixXd A(row1,col1);
+  Eigen::MatrixXd B(row2,col2);
+  Eigen::MatrixXd X(row1,rank);
+  matrixConversionToEigenType(leftSingularVectors,A);
+  matrixConversionToEigenType(rightSingularVectors,B);
+  double tol;
+  tol = 1.0E-15;
+  if (singularValues.at(0) == 0.0) {
+    throwError("The provided covariance matrix is zero matrix!")
+  }
+  for (unsigned int i = 0; i < singularValues.size(); ++i) {
+    if ((A.col(i) + B.col(i)).lpNorm<1>()/row1 < tol) {
+      singularValues.at(i) = 0.0;
+    }
+    if (singularValues.at(i)/singularValues.at(0) < tol) {
+      singularValues.at(i) = 0.0;
+    }
+  }
+  for(unsigned int i = 0; i < rank; ++i) {
+    X.col(i) = A.col(i)*sqrt(singularValues.at(i));
+  }
+  transformedMatrix.clear();
+  matrixConversionToCxxVVectorType(X,transformedMatrix);
+}
+
+
 void matrixConversionToEigenType(std::vector<std::vector<double> > original, Eigen::MatrixXd &converted) {
   /**
    * This function convert the data from type std::vector<std::vector<double> > to Eigen::MatrixXd
