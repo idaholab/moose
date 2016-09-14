@@ -21,14 +21,14 @@ def update_extra():
                     shutil.copy(src, dst)
 
 
-def build(config_file='mkdocs.yml', pages='pages.yml', **kwargs):
+def build(config_file='moosedocs.yml', live_server=False, pages='pages.yml', page_keys=[], clean_site_dir=False, **kwargs):
     """
     Build the documentation using mkdocs build command.
 
     Args:
         config_file[str]: (Default: 'mkdocs.yml') The configure file to pass to mkdocs.
     """
-    pages = MooseDocs.yaml_load(pages)
+    pages = MooseDocs.load_pages(pages, keys=page_keys)
     config = mkdocs.config.load_config(config_file, pages=pages, **kwargs)
     update_extra()
     mkdocs.commands.build.build(config)

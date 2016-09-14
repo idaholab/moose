@@ -2,28 +2,61 @@
 # Configuration for creating MOOSE application documentation. #
 ###############################################################
 
-# Executable directory or executable
-app: ../modules/combined
+# MkDocs Settings
+# The settings in this section are for MkDocs, asny MkDocs settings can be set via this file.
+site_name: MOOSE
 
-defaults:
-    # Complete YAML syntax to ignore (must include leading /). All "systems" in MOOSE matching
-    # these values will be completly ignored and all objects within the associated system will
-    # also be ignored. It is also possible to have a hide block in the local config.yml which will
-    # be joined with these value.
-    hide:
-        - /BCs/Periodic
-        - /Bounds
-        - /AuxVariables/*/InitialCondition
-        - /Variables/*/InitialCondition
+docs_dir: .
 
-    # Install markdown directory
-    install: content
+site_dir: ../site
 
-    # The default repository for linking
-    repo: https://github.com/idaholab/moose/blob/master
+repo_url: https://github.com/idaholab/moose/
 
-# Directories/applications to include
-include:
+theme: flatly
+
+extra_css:
+    - css/moose.css
+
+extra_javascript:
+    - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+    - js/mathjaxconfig.js
+
+markdown_extensions:
+    - toc
+    - smarty
+    - admonition
+    - markdown_include.include           # pip install markdown-include
+    - mdx_math                           # pip install python-markdown-math
+    - MooseDocs.extensions.MooseMarkdown:
+          package: True
+          make: ../modules
+          repo: https://github.com/idaholab/moose/blob/master
+
+# MooseDocs
+# The settings in ths section are for MOOSE documentation generation.
+extra:
+    defaults:
+
+      # Executable directory or executable
+      executable: ../modules/combined
+
+      # Complete YAML syntax to ignore (must include leading /). All "systems" in MOOSE matching
+      # these values will be completly ignored and all objects within the associated system will
+      # also be ignored. It is also possible to have a hide block in the local config.yml which will
+      # be joined with these value.
+      hide:
+          - /BCs/Periodic
+          - /Bounds
+          - /AuxVariables/*/InitialCondition
+          - /Variables/*/InitialCondition
+
+      # Install markdown directory
+      install: content
+
+      # The default repository for linking
+      repo: https://github.com/idaholab/moose/blob/master
+
+    # Directories/applications to include
     framework:
         source: ../framework/src
         include: ../framework/include

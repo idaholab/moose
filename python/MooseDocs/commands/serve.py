@@ -101,14 +101,14 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     pages = MooseDocs.yaml_load(pages)
 
     def builder(**kwargs):
-        dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
+        clean = kwargs.pop('clean', livereload != 'dirtyreload')
         live_server = livereload in ['dirtyreload', 'livereload']
-        config = build.build(live_server=live_server, dirty=dirty, site_dir=tempdir)
+        config = build.build(live_server=live_server, site_dir=tempdir,  pages=pages, page_keys=page_keys, clean_site_dir=clean, **kwargs)
         return config
 
     # Perform the initial build
     log.info("Building documentation...")
-    config = builder(dirty=not clean, **kwargs)
+    config = builder(clean=clean, **kwargs)
     host, port = config['dev_addr'].split(':', 1)
 
     try:

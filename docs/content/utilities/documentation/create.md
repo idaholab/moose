@@ -1,3 +1,4 @@
+# MOOSE Documentation Creation
 MOOSE includes tools for auto-generating web-sites (like this one) that documents your application. Included
 in this tool is the ability to:
 
@@ -63,7 +64,7 @@ file is generated for object in the application and is placed in the "install" d
 To generate the documentation from your application, first your application must be compiled. Then following
 should be executed:
 
-Move to your application docs directory (where the [Configure File](#configuration) is located).
+Move to your application docs directory (where the [Configure File](/content/utilities/documentation/setup.md#configuration) is located).
 ```text
 cd ~/projects/your_app_name_here/docs
 ```
