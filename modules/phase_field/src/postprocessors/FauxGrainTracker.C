@@ -93,6 +93,8 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
 const std::vector<std::pair<unsigned int, unsigned int> > &
 FauxGrainTracker::getElementalValues(dof_id_type /*elem_id*/) const
 {
+  mooseDeprecated("GrainTrackerInterface::getElementalValues() is deprecated use GrainTrackerInterface::getOpToGrainsVector() instead");
+
   return _faux_data;
 }
 
