@@ -55,6 +55,7 @@ hr {
 
 .admonition > p{
     padding: 6px;
+    text-align: left;
 }
 
 .info .admonition-title {

@@ -15,6 +15,8 @@
 - Framework:
     - Systems: !include content/framework/systems/pages.moose.yml
 - Modules:
+    - Tensor Mechanics:
+        - Systems: !include content/modules/tensor_mechanics/systems/pages.moose.yml
     - Phase Field:
         - Systems: !include content/modules/phase_field/systems/pages.moose.yml
     - Contact:
