@@ -18,7 +18,7 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(const InputPa
     ComputeStressBase(parameters),
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
-    _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress"))
+    _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain"))
 {
 }
 
@@ -26,15 +26,14 @@ void
 ComputeFiniteStrainElasticStress::initQpStatefulProperties()
 {
   ComputeStressBase::initQpStatefulProperties();
-
-    _stress_old[_qp] = _stress[_qp];
+  _elastic_strain_old[_qp] = _elastic_strain[_qp];
 }
 
 void
 ComputeFiniteStrainElasticStress::computeQpStress()
 {
-  // stress = s_old + C * de
-  RankTwoTensor intermediate_stress = _stress_old[_qp] + _elasticity_tensor[_qp]*_strain_increment[_qp]; //Calculate stress in intermediate configruation
+  // stress = C * (de + e_old), calculate stress in intermediate configruation
+  RankTwoTensor intermediate_stress = _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
 
   //Rotate the stress to the current configuration
   _stress[_qp] = _rotation_increment[_qp]*intermediate_stress*_rotation_increment[_qp].transpose();

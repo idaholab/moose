@@ -70,13 +70,7 @@
  [./fix_corner_y]
    type = PresetBC
    variable = disp_y
-   boundary = 101
-   value = 0
- [../]
- [./fix_y]
-   type = PresetBC
-   variable = disp_y
-   boundary = 102
+   boundary = '101 102'
    value = 0
  [../]
  [./move_y]
