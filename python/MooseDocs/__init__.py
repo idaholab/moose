@@ -1,25 +1,21 @@
 import os
+import sys
 import argparse
 import yaml
+import argparse
+import logging
 
 import extensions
 import database
 import commands
 import utils
 
-import os
-import logging
-import sys
-
-import utils
-import argparse
-
 # Check for the necessary packages, this does a load so they should all get loaded.
 if utils.check_configuration(['yaml', 'mkdocs', 'markdown', 'markdown_include', 'mdx_math']):
     sys.exit(1)
 
+import mkdocs
 from mkdocs.commands import serve, build
-from mkdocs.config import load_config
 
 from MarkdownTable import MarkdownTable
 from MooseObjectParameterTable import MooseObjectParameterTable
@@ -103,6 +99,11 @@ def init_logging(verbose=False):
 
 def yaml_load(filename, loader=yaml.Loader):
     """
+    Load a YAML file capable of including other YAML files.
+
+    Args:
+        filename[str]: The name fo the file to load.
+        loader[yaml.Loader]: The loader to utilize.
     """
 
     def include(self, node):
@@ -134,7 +135,27 @@ def yaml_load(filename, loader=yaml.Loader):
 
     with open(filename, 'r') as fid:
         yml = yaml.load(fid.read(), Loader)
+
     return yml
+
+def load_pages(filename, keys=[], **kwargs):
+    """
+    A YAML loader for reading the pages file.
+
+    Args:
+        filename[str]: The name fo the file to load.
+        keys[list]: A list of top-level keys to include.
+        kwargs: key, value pairs passed to yaml_load function.
+    """
+
+    # Load the yaml data
+    pages = yaml_load(filename, **kwargs)
+
+    # Restrict the top-level keys to those provided in the 'include' argument
+    if keys:
+        pages = [page for page in pages if page.keys()[0] in keys]
+
+    return pages
 
 def purge(extensions):
     """
@@ -163,12 +184,12 @@ def command_line_options():
     # Command-line options
     parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
     parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
+    parser.add_argument('--config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
 
     subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
     # Generate options
     generate_parser = subparser.add_parser('generate', help="Generate the markdown documentation from MOOSE application executable. This is done by the serve and build command automatically.")
-    generate_parser.add_argument('--moosedocs-config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
     generate_parser.add_argument('--purge', '-p', action='store_true', help="Remove all generated content (*.moose.md, *.moose.svg, *.moose.yml files) from the install directories.")
 
     # Serve options
@@ -184,10 +205,9 @@ def command_line_options():
 
     # Both build and serve need config file
     for p in [serve_parser, build_parser]:
-        p.add_argument('--mkdocs-config-file', type=str, default=os.path.join('mkdocs.yml'), help="The configuration file to use for building the documentation using mkdocs. (Default: %(default)s)")
         p.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
         p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item.")
-
+        p.add_argument('--page-keys', default=[], nargs='+', help='A list of top-level keys from the "pages" file to include. This is a tool to help speed up the serving for development of documentation.')
     # Parse the arguments
     options = parser.parse_args()
 
@@ -215,11 +235,11 @@ def moosedocs():
         if options.purge:
             log.info('Purging *.moose.md, *.moose.yml, and *.moose.svg files from {}'.format(os.getcwd()))
             purge(['md', 'yml', 'svg'])
-        commands.generate(config_file=options.moosedocs_config_file)
+        commands.generate(config_file=options.config_file)
     elif options.command == 'serve':
-        commands.serve(config_file=options.mkdocs_config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme, pages=options.pages)
+        commands.serve(config_file=options.config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme, pages=options.pages, page_keys=options.page_keys)
     elif options.command == 'build':
-        commands.build(config_file=options.mkdocs_config_file, theme=options.theme, pages=options.pages)
+        commands.build(config_file=options.config_file, theme=options.theme, pages=options.pages, page_keys=options.page_keys)
 
     # Display logging results
     print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])

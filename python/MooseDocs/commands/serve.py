@@ -43,7 +43,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
 
     def is_file_changed(self, path, ignore=None):
         """
-        Implements examinining nested files.
+        Implements examining nested files.
         """
         with open(path) as fid:
             content = fid.read()
@@ -80,7 +80,7 @@ def _livereload(host, port, config, builder, site_dir):
     server.serve(root=site_dir, host=host, port=int(port), restart_delay=0)
 
 
-def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, pages='pages.yml', **kwargs):
+def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, pages='pages.yml', page_keys=[], **kwargs):
     """
     Mimics mkdocs serve command.
     """
@@ -97,18 +97,15 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
     if not os.path.exists(tempdir):
         os.makedirs(tempdir)
 
-    # Read the pages file
-    pages = MooseDocs.yaml_load(pages)
-
     def builder(**kwargs):
-        dirty = kwargs.pop('dirty', livereload == 'dirtyreload')
+        clean = kwargs.pop('clean', livereload != 'dirtyreload')
         live_server = livereload in ['dirtyreload', 'livereload']
-        config = build.build(live_server=live_server, dirty=dirty, site_dir=tempdir)
+        config = build.build(live_server=live_server, site_dir=tempdir,  pages=pages, page_keys=page_keys, clean_site_dir=clean, **kwargs)
         return config
 
     # Perform the initial build
     log.info("Building documentation...")
-    config = builder(dirty=not clean, **kwargs)
+    config = builder(clean=clean, **kwargs)
     host, port = config['dev_addr'].split(':', 1)
 
     try:

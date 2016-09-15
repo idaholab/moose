@@ -23,7 +23,8 @@
         - Systems: !include content/modules/contact/systems/pages.moose.yml
 - Utilites:
     - Documentation:
-        - Creation: 'content/utilities/documentation/create.md'
+        - Setup and Configuration: 'content/utilities/documentation/setup.md'
+        - Creating Documentation: 'content/utilities/documentation/create.md'
         - Moose Flavored Markdown: 'content/utilities/documentation/moose_flavored_markdown.md'
     - Memory Logger: 'content/moose_tools/memory_logger.md'
 - Help:
