@@ -104,15 +104,12 @@ includes the complete set of options that can be set in the defaults section and
 | hide       | A list of syntax to ignore. |
 | links      | Source code paths for generating code links. This options could contain headings (e.g., Tests), under each heading is a list of directories that will be searched for input files and source code. |
 
-The defaults may be overridden by listing the option in the "defaults" section.
-
-!text docs/moosedocs.yml start=defaults: end=framework: max-height=400px font-size=small
-
-Any number of additional documentation content may be listed in the "extra" section. Each item will generate documentation,
+The defaults may be overridden by listing the option in the "defaults" section. Any number of additional documentation
+content may be listed in the "extra" section. Each item will generate documentation,
 which can be directed to the content directories for your application site. For example, within the MOOSE documentation
 the following is contained within this option to build the documentation from the framework itself as well as the modules.
 
-!text docs/moosedocs.yml start=framework: max-height=400px font-size=small
+!text docs/moosedocs.yml max-height=400px font-size=small
 
 The names provided in the sub-sections (i.e., "framework" and "phase_field") are arbitrary. All of the options listed
 in the table above may be used within each of the sub-sections to taylor the generation of the pages as needed to

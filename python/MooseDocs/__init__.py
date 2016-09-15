@@ -154,6 +154,7 @@ def load_pages(filename, keys=[], **kwargs):
     # Restrict the top-level keys to those provided in the 'include' argument
     if keys:
         pages = [page for page in pages if page.keys()[0] in keys]
+
     return pages
 
 def purge(extensions):

@@ -43,7 +43,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
 
     def is_file_changed(self, path, ignore=None):
         """
-        Implements examinining nested files.
+        Implements examining nested files.
         """
         with open(path) as fid:
             content = fid.read()

@@ -21,7 +21,7 @@ class MooseCppMethod(MooseTextPatternBase):
     """
 
     # REGEX for finding: !clang /path/to/file.C|h method=some_method
-    CPP_RE = r'!clang\s+(.*\/(.*\.[Ch]))\s+(.*)'
+    CPP_RE = r'^!clang\s+(.*?)(?:$|\s+)(.*)'
 
     def __init__(self, make=None, **kwargs):
         super(MooseCppMethod, self).__init__(self.CPP_RE, language='cpp', **kwargs)
@@ -34,7 +34,7 @@ class MooseCppMethod(MooseTextPatternBase):
         Process the C++ file provided.
         """
         # Update the settings from regex match
-        settings, styles = self.getSettings(match.group(4))
+        settings, styles = self.getSettings(match.group(3))
 
         # Extract relative filename
         rel_filename = match.group(2).lstrip('/')

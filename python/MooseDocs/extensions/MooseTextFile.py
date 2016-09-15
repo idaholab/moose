@@ -7,10 +7,10 @@ class MooseTextFile(MooseTextPatternBase):
     """
     A markdown extension for including complete source code files.
     """
-    RE = r'!text\s+(.*\/(.*?))\s+(.*)'
+    RE = r'^!text\s+(.*?)(?:$|\s+)(.*)'
 
     def __init__(self, **kwargs):
-        super(MooseTextFile, self).__init__(self.RE, **kwargs)
+        super(MooseTextFile, self).__init__(self.RE, language='text', **kwargs)
 
         # Add to the default settings
         self._settings['line'] =  None
@@ -23,7 +23,7 @@ class MooseTextFile(MooseTextPatternBase):
         """
 
         # Update the settings from regex match
-        settings, styles = self.getSettings(match.group(4))
+        settings, styles = self.getSettings(match.group(3))
 
         # Read the file
         rel_filename = match.group(2).lstrip('/')
@@ -47,7 +47,7 @@ class MooseTextFile(MooseTextPatternBase):
             return self.createErrorElement(rel_filename, 'No content')
 
         # Return the Element object
-        el = self.createElement(match.group(3), content, filename, rel_filename, settings, styles)
+        el = self.createElement(match.group(2), content, filename, rel_filename, settings, styles)
         return el
 
     def extractLine(self, filename, desired):
