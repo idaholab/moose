@@ -10,18 +10,19 @@ template<>
 InputParameters validParams<ComputePlaneSmallStrain>()
 {
   InputParameters params = validParams<Compute2DSmallStrain>();
-  params.addClassDescription("Compute a small strain under traditional plane strain assumptions where the out of plane strain is zero.");
+  params.addClassDescription("Compute a small strain under generalized plane strain assumptions where the out of plane strain is generally nonzero.");
+  params.addCoupledVar("strain_zz", "Variable containing the out-of-plane strain");
   return params;
 }
 
 ComputePlaneSmallStrain::ComputePlaneSmallStrain(const InputParameters & parameters) :
-    Compute2DSmallStrain(parameters)
+    Compute2DSmallStrain(parameters),
+    _strain_zz(isCoupledScalar("strain_zz") ? coupledScalarValue("strain_zz") : _zero)
 {
 }
 
 Real
 ComputePlaneSmallStrain::computeStrainZZ()
 {
-  return 0.0;
+  return _strain_zz[0];
 }
-

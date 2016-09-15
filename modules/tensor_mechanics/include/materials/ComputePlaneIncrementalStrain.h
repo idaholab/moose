@@ -4,19 +4,19 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTEPLANEFINITESTRAIN_H
-#define COMPUTEPLANEFINITESTRAIN_H
+#ifndef COMPUTEPLANEINCREMENTALSTRAIN_H
+#define COMPUTEPLANEINCREMENTALSTRAIN_H
 
-#include "Compute2DFiniteStrain.h"
+#include "Compute2DIncrementalStrain.h"
 
 /**
- * ComputePlaneFiniteStrain defines strain increment and rotation
- * increment for finite strain under 2D planar assumptions.
+ * ComputePlaneIncrementalStrain defines strain increment
+ * for small strains in a 2D planar simulation.
  */
-class ComputePlaneFiniteStrain : public Compute2DFiniteStrain
+class ComputePlaneIncrementalStrain : public Compute2DIncrementalStrain
 {
 public:
-  ComputePlaneFiniteStrain(const InputParameters & parameters);
+  ComputePlaneIncrementalStrain(const InputParameters & parameters);
 
 protected:
   virtual Real computeDeformGradZZ();
@@ -27,4 +27,4 @@ private:
   const VariableValue & _strain_zz_old;
 };
 
-#endif //COMPUTEPLANEFINITESTRAIN_H
+#endif //COMPUTEPLANEINCREMENTALSTRAIN_H

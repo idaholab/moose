@@ -8,6 +8,7 @@
 #define COMPUTETHERMALEXPANSIONEIGENSTRAIN_H
 
 #include "ComputeStressFreeStrainBase.h"
+#include "RankTwoTensor.h"
 
 class ComputeThermalExpansionEigenStrain;
 
@@ -30,6 +31,7 @@ protected:
   bool _has_incremental_strain;
   const VariableValue * _temperature_old;
   const Real & _thermal_expansion_coeff;
+  MaterialProperty <RankTwoTensor> & _dstrain_dT;
   const Real & _stress_free_reference_temperature;
 
 private:

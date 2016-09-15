@@ -1,0 +1,8 @@
+[Tests]
+ [./weak_planestress]
+   type = 'Exodiff'
+   input = 'weak_planestress.i'
+   exodiff = 'weak_planestress_out.e'
+   custom_cmp = 'generalized.exodiff'
+ [../]
+[]

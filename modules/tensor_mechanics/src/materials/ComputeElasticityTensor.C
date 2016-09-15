@@ -34,4 +34,3 @@ ComputeElasticityTensor::computeQpElasticityTensor()
   //Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl;
 }
-

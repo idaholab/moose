@@ -24,6 +24,7 @@ ComputeThermalExpansionEigenStrain::ComputeThermalExpansionEigenStrain(const Inp
     _has_incremental_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _temperature_old(_has_incremental_strain ? & coupledValueOld("temperature") : NULL),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
+    _dstrain_dT(declareProperty<RankTwoTensor>(_base_name + "dstrain_dT")),
     _stress_free_reference_temperature(getParam<Real>("stress_free_reference_temperature")),
     _step_one(declareRestartableData<bool>("step_one", true))
 {
@@ -50,4 +51,7 @@ ComputeThermalExpansionEigenStrain::computeQpStressFreeStrain()
 
   if (_has_incremental_strain)  // Necessary to avoid zero values of incremental stress free strain with a linear temperature increase
     _stress_free_strain[_qp] += (*_stress_free_strain_old)[_qp];
+
+  RankTwoTensor identity(RankTwoTensor::initIdentity);
+  _dstrain_dT[_qp] = -_thermal_expansion_coeff * identity;
 }
