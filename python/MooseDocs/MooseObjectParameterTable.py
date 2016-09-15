@@ -27,7 +27,6 @@ class MooseObjectParameterTable(MarkdownTable):
         items = []
         for key in self.PARAMETER_TABLE_COLUMNS:
             items.append(self._formatParam(param[key], key, param['cpp_type']))
-
         self.addRow(*items)
 
     def _formatParam(self, param, key, ptype):

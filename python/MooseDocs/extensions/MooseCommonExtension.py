@@ -14,7 +14,9 @@ class MooseCommonExtension(object):
 
     """
     def __init__(self):
-        self._settings = dict() # The default settings should be stored here
+
+        # The default settings should be stored here
+        self._settings = dict()
 
         # Any CSS you wish not to be set should be stored here
         # { element.tag : [attribute,] }
@@ -114,5 +116,5 @@ class MooseCommonExtension(object):
         msg.text = 'Invalid markdown for ' + rel_filename
         if message:
             msg.text = message
-        log.error('{}\n{}'.format(title, message))
+        log.error('{}: {}'.format(title, message))
         return el

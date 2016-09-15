@@ -1,3 +1,8 @@
+!devel /Kernels/Diffusion float=right width=auto margin=20px padding=20px background-color=#F8F8F8
+
+# Diffusion
+!description /Kernels/Diffusion
+
 ## Description
 
 The steady-state diffusion equation on a domain $\Omega$ is defined as
@@ -9,3 +14,9 @@ where $\phi_i$ are the test functions and $u_h$ is the finite element solution o
 
 The Jacobian is defined as:
 $$\frac{\partial R_i(u_h)}{\partial u_j} = (\nabla \phi_i, \nabla \psi_j).$$
+
+!parameters /Kernels/Diffusion
+
+!inputfiles /Kernels/Diffusion
+
+!childobjects /Kernels/Diffusion
