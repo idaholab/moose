@@ -192,6 +192,8 @@
   [./smp]
     type = SMP
     full = true
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
+    petsc_options_value = 'gmres      asm      lu           NONZERO                   2             '
   [../]
 []
 
