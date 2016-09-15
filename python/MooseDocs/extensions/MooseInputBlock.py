@@ -8,7 +8,7 @@ class MooseInputBlock(MooseTextPatternBase):
     Markdown extension for extracting blocks from input files.
     """
 
-    CPP_RE = r'!input\s+(.*\/(.*?))\s+(.*)'
+    CPP_RE = r'^!input\s+(.*?)(?:$|\s+)(.*)'
 
     def __init__(self, **kwargs):
         super(MooseInputBlock, self).__init__(self.CPP_RE, language='text', **kwargs)
@@ -19,7 +19,7 @@ class MooseInputBlock(MooseTextPatternBase):
         """
 
         # Update the settings from regex match
-        settings, styles = self.getSettings(match.group(4))
+        settings, styles = self.getSettings(match.group(3))
 
         # Build the complete filename.
         # NOTE: os.path.join doesn't like the unicode even if you call str() on it first.
@@ -37,7 +37,7 @@ class MooseInputBlock(MooseTextPatternBase):
             node = parser.root_node.getNode(settings['block'])
 
             if node == None:
-                content = 'ERROR: Failed to find {} in {}.'.format(match.group(3), rel_filename)
+                content = 'ERROR: Failed to find {} in {}.'.format(match.group(2), rel_filename)
             else:
                 content = node.createString()
 
