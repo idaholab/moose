@@ -14,11 +14,13 @@
 #include "FluidPropertiesMaterialPT.h"
 #include "WaterFluidPropertiesTestMaterial.h"
 #include "FluidPropertiesDerivativeTestMaterial.h"
+#include "CO2FluidPropertiesTestMaterial.h"
 
 #include "IdealGasFluidProperties.h"
 #include "StiffenedGasFluidProperties.h"
 #include "MethaneFluidProperties.h"
 #include "Water97FluidProperties.h"
+#include "CO2FluidProperties.h"
 
 #include "AddFluidPropertiesAction.h"
 
@@ -72,11 +74,13 @@ FluidPropertiesApp::registerObjects(Factory & factory)
   registerMaterial(FluidPropertiesMaterialPT);
   registerMaterial(WaterFluidPropertiesTestMaterial);
   registerMaterial(FluidPropertiesDerivativeTestMaterial);
+  registerMaterial(CO2FluidPropertiesTestMaterial);
 
   registerUserObject(IdealGasFluidProperties);
   registerUserObject(StiffenedGasFluidProperties);
   registerUserObject(MethaneFluidProperties);
   registerUserObject(Water97FluidProperties);
+  registerUserObject(CO2FluidProperties);
 }
 
 // External entry point for dynamic syntax association
