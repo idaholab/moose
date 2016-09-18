@@ -69,13 +69,7 @@ FileMesh::buildMesh()
 
     getMesh().allow_renumbering(false);
 
-    // Even if we want repartitioning when load balancing later, we'll
-    // begin with the default partitioning defined by the Nemesis
-    // file.
-    bool skip_partitioning_later = getMesh().skip_partitioning();
-    getMesh().skip_partitioning(true);
     getMesh().prepare_for_use();
-    getMesh().skip_partitioning(skip_partitioning_later);
   }
   else // not reading Nemesis files
   {
