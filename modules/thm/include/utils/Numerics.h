@@ -8,6 +8,9 @@ using namespace libMesh;
 // gravitational acceleration, or gravity constant
 static const Real gravity_const = 9.81;
 
+// Stefan-Boltzman constant, in [W/m^2-K]
+static const Real Stefan_Boltzman_const = 5.670e-8;
+
 /**
  * The sign function
  * @param val The argument of the sign function
