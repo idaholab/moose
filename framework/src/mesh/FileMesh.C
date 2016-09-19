@@ -21,6 +21,7 @@
 // libMesh includes
 #include "libmesh/exodusII_io.h"
 #include "libmesh/nemesis_io.h"
+#include "libmesh/checkpoint_io.h"
 #include "libmesh/parallel_mesh.h"
 
 template<>
@@ -29,19 +30,24 @@ InputParameters validParams<FileMesh>()
   InputParameters params = validParams<MooseMesh>();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
   params.addClassDescription("Read a mesh from a file.");
+  params.addParam<bool>("checkpoint", false, "Whether or not the file format is a checkpoint file");
   return params;
 }
 
 FileMesh::FileMesh(const InputParameters & parameters) :
     MooseMesh(parameters),
-    _file_name(getParam<MeshFileName>("file"))
+    _file_name(getParam<MeshFileName>("file")),
+    _is_checkpoint(getParam<bool>("checkpoint")),
+    _exreader(NULL)
 {
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh) :
     MooseMesh(other_mesh),
-    _file_name(other_mesh._file_name)
+    _file_name(other_mesh._file_name),
+    _is_checkpoint(other_mesh._is_checkpoint),
+    _exreader(NULL)
 {
 }
 
@@ -76,6 +82,30 @@ FileMesh::buildMesh()
     getMesh().skip_partitioning(true);
     getMesh().prepare_for_use();
     getMesh().skip_partitioning(skip_partitioning_later);
+  }
+  else if (_is_checkpoint)
+  {
+    CheckpointIO reader(getMesh());
+
+    reader.binary() = true;
+
+    auto & mesh = getMesh();
+
+    DistributedMesh * pmesh = cast_ptr<DistributedMesh *>(&mesh);
+
+    if (pmesh)
+      reader.parallel() = true;
+
+    reader.read(_file_name);
+
+    mesh.update_parallel_id_counts();
+    //mesh.find_neighbors(true, true);
+    //mesh.update_parallel_id_counts();
+    //mesh.redistribute();
+    //mesh.delete_remote_elements();
+    mesh.skip_partitioning(true);
+    mesh.prepare_for_use();
+    mesh.print_info();
   }
   else // not reading Nemesis files
   {
