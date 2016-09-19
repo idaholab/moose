@@ -32,7 +32,6 @@
     type = 'Exodiff'
     input = '2phase_reconstruction.i'
     exodiff = '2phase_reconstruction_out.e'
-    max_time = 1000
     recover = false # issue #5188
   [../]
 
@@ -40,7 +39,6 @@
     type = 'Exodiff'
     input = '2phase_reconstruction2.i'
     exodiff = '2phase_reconstruction2_out.e'
-    max_time = 1000
     recover = false # issue #5188
   [../]
 
@@ -48,7 +46,13 @@
     type = 'Exodiff'
     input = '2phase_reconstruction3.i'
     exodiff = '2phase_reconstruction3_out.e'
-    max_time = 1000
+    recover = false # issue #5188
+  [../]
+
+  [./2phase_reconstruction4]
+    type = 'Exodiff'
+    input = '2phase_reconstruction4.i'
+    exodiff = '2phase_reconstruction4_out.e'
     recover = false # issue #5188
   [../]
 

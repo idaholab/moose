@@ -85,13 +85,17 @@ ReconVarIC::value(const Point & /*p*/)
     mooseAssert(_current_elem, "Current element is NULL");
     Point centroid = _current_elem->centroid();
     const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader.getData(centroid);
-    const unsigned int global_id = _ebsd_reader.getGlobalID(d._feature_id);
-    const unsigned int local_id = _ebsd_reader.getAvgData(global_id)._local_id;
-    auto index = _consider_phase ? local_id : global_id;
+    const auto phase = d._phase;
+    if (!_consider_phase || phase == _phase)
+    {
+      const unsigned int global_id = _ebsd_reader.getGlobalID(d._feature_id);
+      const unsigned int local_id = _ebsd_reader.getAvgData(global_id)._local_id;
+      auto index = _consider_phase ? local_id : global_id;
 
-    mooseAssert(index < _assigned_op.size(), "EBSD Global ID is out of bounds");
-    return _assigned_op[index];
-    return 0;
+      mooseAssert(index < _assigned_op.size(), "EBSD Global ID is out of bounds");
+      return _assigned_op[index];
+    }
+    return -1.0;
   }
 
   // Return error if current node is NULL
