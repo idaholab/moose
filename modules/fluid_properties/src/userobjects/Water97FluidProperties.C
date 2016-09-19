@@ -98,6 +98,9 @@ Water97FluidProperties::rho(Real pressure, Real temperature) const
       tau = _T_star[4] / temperature;
       density = pressure / (pi * _Rw * temperature * dgamma5_dpi(pi, tau));
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
   return density;
 }
@@ -158,6 +161,9 @@ Water97FluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Rea
         temperature * temperature * dgdp * dgdp);
       break;
     }
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
 
   rho = this->rho(pressure, temperature);
@@ -204,6 +210,9 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
       internal_energy = _Rw * temperature * (tau * dgamma5_dtau(pi, tau)
         - pi * dgamma5_dpi(pi, tau));
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return internal_energy / 1000.0;
@@ -272,6 +281,9 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
         d2gamma5_dtau2(pi, tau) - pi * dgdp);
       break;
     }
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
 
   e = this->e(pressure, temperature);
@@ -331,6 +343,9 @@ Water97FluidProperties::c(Real pressure, Real temperature) const
         ((- pi * pi * d2gamma5_dpi2(pi, tau)) + std::pow(pi * dgamma5_dpi(pi, tau) -
         tau * pi * d2gamma5_dpitau(pi, tau), 2.0) / (tau * tau * d2gamma5_dtau2(pi, tau)));
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
 
   return std::sqrt(speed2);
@@ -375,6 +390,9 @@ Water97FluidProperties::cp(Real pressure, Real temperature) const
       tau = _T_star[4] / temperature;
       specific_heat = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return specific_heat / 1000.0;
@@ -422,6 +440,9 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
         std::pow(dgamma5_dpi(pi, tau) - tau * d2gamma5_dpitau(pi, tau), 2) /
         d2gamma5_dpi2(pi, tau));
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return specific_heat / 1000.0;
@@ -577,6 +598,9 @@ Water97FluidProperties::s(Real pressure, Real temperature) const
       tau = _T_star[4] / temperature;
       entropy = _Rw * (tau * dgamma5_dtau(pi, tau) - gamma5(pi, tau));
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return entropy / 1000.0;
@@ -619,6 +643,9 @@ Water97FluidProperties::h(Real pressure, Real temperature) const
       tau = _T_star[4] / temperature;
       enthalpy = _Rw * _T_star[4] * dgamma5_dtau(pi, tau);
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return enthalpy / 1000.0;
@@ -675,6 +702,9 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
       denthalpy_dp = _Rw * _T_star[4] * d2gamma5_dpitau(pi, tau) / _p_star[4];
       denthalpy_dT = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
       break;
+
+    default:
+      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   h = enthalpy / 1000.0;
