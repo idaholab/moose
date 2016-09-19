@@ -39,8 +39,9 @@ MultiAuxVariablesAction::act()
 
   // Blocks from the input
   std::set<SubdomainID> blocks = getSubdomainIDs();
-  // mesh dimension required for gradient components
+  // mesh dimension & components required for gradient variables
   unsigned int dim = _mesh->dimension();
+  const std::vector<char> suffix = {'x', 'y', 'z'};
 
   // Loop through the number of order parameters
   for (unsigned int val = 0; val < _num_var; ++val)
@@ -62,12 +63,10 @@ MultiAuxVariablesAction::act()
         for (unsigned int x = 0; x < dim; ++x)
         {
           /*
-          / The name of the variable is the variable name base followed by two digits.
-          / The first digit in the name is the order parameter it applies to.
-          / The second digit in the name is the dimension it applies to:
-          / 0 = x, 1 = y, 2 = z (or some other criteria as user needs).
+          / The name of the variable is the variable name base followed by
+          /the order parameter and a suffix mentioning dimension it applies to.
           */
-          std::string var_name = _var_name_base[val] + Moose::stringify(gr) + Moose::stringify(x);
+          std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x] ;
 
           if (blocks.empty())
             _problem->addAuxVariable(var_name, _fe_type);

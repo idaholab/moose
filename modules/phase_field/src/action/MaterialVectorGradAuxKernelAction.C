@@ -29,11 +29,16 @@ MaterialVectorGradAuxKernelAction::act()
   if (_num_prop != _num_var)
     mooseError("variable_base and property must be vectors of the same size");
 
+  // mesh dimension required for gradient variables
+  unsigned int dim = _mesh->dimension();
+  // For Specifying the components of the gradient terms
+  const std::vector<char> suffix = {'x', 'y', 'z'};
+
   for (unsigned int gr = 0; gr < _grain_num; ++gr)
     for (unsigned int val = 0; val < _num_var; ++val)
-      for (unsigned int x = 0; x < _mesh->dimension(); ++x)
+      for (unsigned int x = 0; x < dim; ++x)
       {
-        std::string var_name = _var_name_base[val] + Moose::stringify(gr) + Moose::stringify(x);
+        std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x];
 
         InputParameters params = _factory.getValidParams("MaterialStdVectorRealGradientAux");
         params.set<AuxVariableName>("variable") = var_name;

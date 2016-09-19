@@ -13,6 +13,13 @@ class MatVecRealGradAuxKernelAction: public Action
 {
 public:
   MatVecRealGradAuxKernelAction(const InputParameters & params);
+
+  virtual void act();
+
+protected:
+  AuxVariableName _div_var;
+  std::vector<MaterialPropertyName> _prop;
+  MaterialPropertyName _div_prop;
 };
 
 template<>

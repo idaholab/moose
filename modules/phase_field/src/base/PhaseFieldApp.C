@@ -492,6 +492,7 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(EulerAngle2RGBAction, "add_aux_kernel");
   registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
+  registerAction(MatVecRealGradAuxKernelAction, "add_aux_kernel");
   registerAction(MaterialVectorAuxKernelAction, "add_aux_kernel");
   registerAction(MaterialVectorGradAuxKernelAction, "add_aux_kernel");
   registerAction(MortarPeriodicAction, "add_variable");
