@@ -144,6 +144,7 @@
 #include "RandomMaterial.h"
 #include "RecomputeMaterial.h"
 #include "NewtonMaterial.h"
+#include "ThrowMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGAdvection.h"
@@ -433,6 +434,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(RandomMaterial);
   registerMaterial(RecomputeMaterial);
   registerMaterial(NewtonMaterial);
+  registerMaterial(ThrowMaterial);
 
 
   registerScalarKernel(ExplicitODE);
