@@ -1415,7 +1415,7 @@ GrainTracker::updateFieldInfo()
         entity_value = _vars[curr_var]->getNodalValue(node);
       }
 
-      if (tmp_map.find(entity) == tmp_map.end() || entity_value > tmp_map[entity])
+      if (entity_value != std::numeric_limits<Real>::lowest() && (tmp_map.find(entity) == tmp_map.end() || entity_value > tmp_map[entity]))
       {
         mooseAssert(grain._id != libMesh::invalid_uint,  "Missing Grain ID");
         _feature_maps[map_idx][entity] = grain._id;
