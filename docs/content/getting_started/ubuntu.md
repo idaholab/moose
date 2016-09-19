@@ -6,22 +6,22 @@
 ## Pre-Reqs
 * Install the following using apt-get
 
-    <pre>
-    sudo apt-get install build-essential \
-    gfortran \
-    tcl \
-    git \
-    m4 \
-    freeglut3 \
-    doxygen \
-    libblas-dev \
-    liblapack-dev \
-    libx11-dev \
-    libnuma-dev \
-    libcurl4-gnutls-dev \
-    zlib1g-dev \
-    libhwloc-dev
-    </pre>
+```bash
+  sudo apt-get install build-essential \
+gfortran \
+tcl \
+git \
+m4 \
+freeglut3 \
+doxygen \
+libblas-dev \
+liblapack-dev \
+libx11-dev \
+libnuma-dev \
+libcurl4-gnutls-dev \
+zlib1g-dev \
+libhwloc-dev
+```
 
 * Download one of our redistributables according to your version of Ubuntu
 

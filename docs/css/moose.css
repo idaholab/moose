@@ -1,3 +1,30 @@
+/* Collapse Nav-bar correctly */
+@media(min-width: 768px) {
+    .bs-sidebar.affix {
+	top: 110px;
+    }
+    div.col-md-3 {
+	margin-top: 60px;
+    }
+}
+@media(min-width:992px) {
+    .bs-sidebar.affix {
+	top: 140px;
+}
+    div.col-md-9 {
+	margin-top: 50px;
+    }
+}
+@media(min-width:1200px) {
+    .bs-sidebar.affix {
+	top: 90px;
+}
+    div.col-md-9 {
+	margin-top: 5px;
+    }
+}
+/* End Collapse Nav-bar correctly */
+
 p {
     text-align: justify;
 }
