@@ -110,6 +110,12 @@ FauxGrainTracker::getNumberGrains() const
   return _variables_used.size();
 }
 
+unsigned int
+FauxGrainTracker::getTotalNumberGrains() const
+{
+  return _variables_used.size();
+}
+
 Real
 FauxGrainTracker::getGrainVolume(unsigned int grain_id) const
 {

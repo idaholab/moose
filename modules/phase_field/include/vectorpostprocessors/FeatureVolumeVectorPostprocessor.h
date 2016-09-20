@@ -1,0 +1,67 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+#ifndef FEATUREVOLUMEVECTORPOSTPROCESSOR_H
+#define FEATUREVOLUMEVECTORPOSTPROCESSOR_H
+
+#include "GeneralVectorPostprocessor.h"
+#include "MooseVariableDependencyInterface.h"
+
+//Forward Declarations
+class FeatureVolumeVectorPostprocessor;
+class FeatureFloodCount;
+
+template<>
+InputParameters validParams<FeatureVolumeVectorPostprocessor>();
+
+/**
+ * This VectorPostprocessor is intended to be used to calculate
+ * accurate volumes from the FeatureFloodCount and/or GrainTracker
+ * objects. It is a GeneralVectorPostProcessor instead of the
+ * more natural elemental kind so that dependency resolution
+ * will work properly when an AuxVariable is not depending
+ * on the FeatureFloodCount object. It obtains the coupled
+ * variables from the FeatureFloodCount object so that there's
+ * one less thing for the user of this class to worry about.
+ */
+class FeatureVolumeVectorPostprocessor :
+  public GeneralVectorPostprocessor,
+  public MooseVariableDependencyInterface
+{
+public:
+  FeatureVolumeVectorPostprocessor(const InputParameters & parameters);
+
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+
+  /**
+   * Returns the volume for the given grain number.
+   */
+  Real getGrainVolume(unsigned int grain_id) const;
+
+  Real computeIntegral(std::size_t op_index) const;
+
+protected:
+  /// A reference to the feature flood count object
+  const FeatureFloodCount & _flood_counter;
+
+  VectorPostprocessorValue & _grain_volumes;
+
+private:
+  const std::vector<MooseVariable *> & _vars;
+  std::vector<const VariableValue *> _coupled_sln;
+
+  MooseMesh & _mesh;
+  Assembly & _assembly;
+  const MooseArray<Point> & _q_point;
+  QBase * & _qrule;
+  const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _coord;
+};
+
+#endif

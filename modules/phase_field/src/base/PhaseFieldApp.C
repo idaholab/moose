@@ -236,10 +236,10 @@
 /*
  * VectorPostprocessors
  */
- #include "GrainCentersPostprocessor.h"
- #include "GrainForcesPostprocessor.h"
- #include "GrainTextureVectorPostprocessor.h"
-
+#include "GrainCentersPostprocessor.h"
+#include "GrainForcesPostprocessor.h"
+#include "GrainTextureVectorPostprocessor.h"
+#include "FeatureVolumeVectorPostprocessor.h"
 
 template<>
 InputParameters validParams<PhaseFieldApp>()
@@ -444,6 +444,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);
   registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
+  registerVectorPostprocessor(FeatureVolumeVectorPostprocessor);
 
   registerMesh(EBSDMesh);
   registerMesh(MortarPeriodicMesh);

@@ -49,9 +49,17 @@ public:
   virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const = 0;
 
   /**
-   * Returns the number of grains stored in this object.
+   * Returns the number of active grains in a simulation. Note: This value will count
+   * each piece of a split grain (often enountered in EBSD datasets).
    */
   virtual unsigned int getNumberGrains() const = 0;
+
+  /**
+   * Returns the maximum grain ID in use. This method can be used to size an array
+   * or other data structure to maintain information about all grains (active and inactive)
+   * in a simulation.
+   */
+  virtual unsigned int getTotalNumberGrains() const = 0;
 
   /**
    * Returns the volume for the given grain number.
