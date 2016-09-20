@@ -30,6 +30,20 @@ Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l)
 }
 
 Real
+Laplace(Real surf_tension, Real rho_l, Real rho_v)
+{
+  // Eq. 4-119; 5-13.
+  return std::sqrt(surf_tension / gravity_const / (rho_l - rho_v));
+}
+
+Real
+viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_rho)
+{
+  // Equation (4-23), page 129. See also its definition on page 120.
+  return viscosity / std::sqrt(rho_k * surf_tension * std::sqrt(surf_tension / gravity_const / delta_rho));
+}
+
+Real
 wallHeatTransferCoefficient(Real Nu, Real k, Real Dh)
 {
   return Nu * k / Dh;

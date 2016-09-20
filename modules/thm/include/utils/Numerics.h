@@ -55,6 +55,25 @@ Real Prandtl(Real cp, Real mu, Real k);
 Real Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l);
 
 /**
+ * Compute Laplace number (or coefficient)
+ * @param surf_tension Surface tension
+ * @param rho_l Density of liquid
+ * @param rho_v Density of vapor
+ * @return Laplace number
+ */
+Real Laplace(Real surf_tension, Real rho_l, Real rho_v);
+
+/**
+ * Compute viscosity number (or coefficient)
+ * @param viscosity Viscosity
+ * @param surf_tension Surface tension
+ * @param rho_k Density of k-th phase of interest
+ * @param delta_rho Density difference
+ * @return viscosity number
+ */
+Real viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_rho);
+
+/**
  * Compute wall heat transfer coefficient
  * @param Nu Nusselt number
  * @param k Thermal conductivity
