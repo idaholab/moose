@@ -6,15 +6,17 @@
 ## Pre-Reqs
 * Install the following using apt-get
 
-        sudo -E apt-get install build-essential \
-        gfortran \
-        tcl \
-        freeglut3 \
-        libX11-dev \
-        libblas-dev \
-        liblapack-dev \
-        git \
-        m4
+```bash
+  sudo -E apt-get install build-essential \
+gfortran \
+tcl \
+freeglut3 \
+libX11-dev \
+libblas-dev \
+liblapack-dev \
+git \
+m4
+```
 
 * Download one our redistributables according to your version of Mint
 

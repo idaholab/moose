@@ -6,17 +6,17 @@
 ## Pre-Reqs
 * Install the following using zypper
 
-    <pre>
-    sudo -E zypper install gcc-c++ \
-    gcc-fortran \
-    make \
-    libX11-devel \
-    blas-devel \
-    lapack-devel \
-    freeglut-devel \
-    m4 \
-    git
-    </pre>
+```bash
+  sudo -E zypper install gcc-c++ \
+gcc-fortran \
+make \
+libX11-devel \
+blas-devel \
+lapack-devel \
+freeglut-devel \
+m4 \
+git
+```
 
 * Download one our redistributables according to your version of OpenSUSE
 

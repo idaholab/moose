@@ -11,42 +11,42 @@
 ## Run Bash
 * modify the /etc/hosts file and add the results of `hostname` to resolve to 127.0.0.1
 
-    <pre>
-    [~]> hostname
-    DESKTOP-L7BGA7L
-    [~]> sudo vi /etc/hosts
-    127.0.0.1   localhost
-    127.0.0.1   DESKTOP-L7BGA7L    <---- ADD THAT
-    </pre>
+```bash
+[~]> hostname
+DESKTOP-L7BGA7L
+[~]> sudo vi /etc/hosts
+127.0.0.1   localhost
+127.0.0.1   DESKTOP-L7BGA7L    <---- ADD THAT
+```
 
 * Update Ubuntu to latest version
 
-    <pre>
-    sudo apt-get update
-    sudo apt-get upgrade
-    </pre>
+```bash
+sudo apt-get update
+sudo apt-get upgrade
+```
 
 * Install the Ubuntu pre-reqs for MOOSE development
 
 
-    <pre>
-    sudo apt-get install build-essential \
-    gfortran \
-    tcl \
-    git \
-    m4 \
-    freeglut3 \
-    doxygen \
-    libblas-dev \
-    liblapack-dev \
-    libx11-dev \
-    libnuma-dev \
-    libcurl4-gnutls-dev \
-    zlib1g-dev \
-    libhwloc-dev
-    x11-apps \
-    libglu1-mesa
-    </pre>
+```bash
+  sudo apt-get install build-essential \
+gfortran \
+tcl \
+git \
+m4 \
+freeglut3 \
+doxygen \
+libblas-dev \
+liblapack-dev \
+libx11-dev \
+libnuma-dev \
+libcurl4-gnutls-dev \
+zlib1g-dev \
+libhwloc-dev
+x11-apps \
+libglu1-mesa
+```
 
 
 * Download our redistributatble package for Ubuntu 14.04
