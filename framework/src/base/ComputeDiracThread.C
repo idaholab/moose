@@ -27,19 +27,18 @@
 #include "libmesh/threads.h"
 
 ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
-                                       NonlinearSystem & system,
                                        SparseMatrix<Number> * jacobian) :
-    ThreadedElementLoop<DistElemRange>(feproblem, system),
+    ThreadedElementLoop<DistElemRange>(feproblem),
     _jacobian(jacobian),
-    _sys(system),
-    _dirac_kernels(_sys.getDiracKernelWarehouse())
+    _nl(feproblem.getNonlinearSystem()),
+    _dirac_kernels(_nl.getDiracKernelWarehouse())
 {}
 
 // Splitting Constructor
 ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split) :
     ThreadedElementLoop<DistElemRange>(x, split),
     _jacobian(x._jacobian),
-    _sys(x._sys),
+    _nl(x._nl),
     _dirac_kernels(x._dirac_kernels)
 {
 }

@@ -36,7 +36,6 @@ class ComputeNodalKernelJacobiansThread : public ThreadedNodeLoop<ConstNodeRange
 {
 public:
   ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
-                                    AuxiliarySystem & sys,
                                     const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                     SparseMatrix<Number> & jacobian);
 

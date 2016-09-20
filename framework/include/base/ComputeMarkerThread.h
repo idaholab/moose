@@ -25,7 +25,7 @@ class AuxiliarySystem;
 class ComputeMarkerThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeMarkerThread(FEProblem & fe_problem, AuxiliarySystem & sys);
+  ComputeMarkerThread(FEProblem & fe_problem);
 
   // Splitting Constructor
   ComputeMarkerThread(ComputeMarkerThread & x, Threads::split split);

@@ -33,7 +33,7 @@ public:
    * @param indicator_whs Warehouse of Indicator objects.
    * @param finalize Whether or not we are just in the "finalize" stage or not.
    */
-  ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, bool finalize = false);
+  ComputeIndicatorThread(FEProblem & fe_problem, bool finalize = false);
 
   // Splitting Constructor
   ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split);

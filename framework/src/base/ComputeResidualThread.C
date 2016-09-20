@@ -27,24 +27,24 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, Moose::KernelType type) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
-    _sys(sys),
+ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type) :
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
+    _nl(fe_problem.getNonlinearSystem()),
     _kernel_type(type),
     _num_cached(0),
-    _integrated_bcs(sys.getIntegratedBCWarehouse()),
-    _dg_kernels(sys.getDGKernelWarehouse()),
-    _interface_kernels(sys.getInterfaceKernelWarehouse()),
-    _kernels(sys.getKernelWarehouse()),
-    _time_kernels(sys.getTimeKernelWarehouse()),
-    _non_time_kernels(sys.getNonTimeKernelWarehouse())
+    _integrated_bcs(_nl.getIntegratedBCWarehouse()),
+    _dg_kernels(_nl.getDGKernelWarehouse()),
+    _interface_kernels(_nl.getInterfaceKernelWarehouse()),
+    _kernels(_nl.getKernelWarehouse()),
+    _time_kernels(_nl.getTimeKernelWarehouse()),
+    _non_time_kernels(_nl.getNonTimeKernelWarehouse())
 {
 }
 
 // Splitting Constructor
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
-    _sys(x._sys),
+    _nl(x._nl),
     _kernel_type(x._kernel_type),
     _num_cached(0),
     _integrated_bcs(x._integrated_bcs),

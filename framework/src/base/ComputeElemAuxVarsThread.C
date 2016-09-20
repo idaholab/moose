@@ -20,9 +20,9 @@
 #include "libmesh/threads.h"
 
 
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
-    _aux_sys(sys),
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
+    ThreadedElementLoop<ConstElemRange>(problem),
+    _aux_sys(problem.getAuxiliarySystem()),
     _aux_kernels(storage),
     _need_materials(need_materials)
 {
@@ -30,7 +30,7 @@ ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, Auxiliar
 
 // Splitting Constructor
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
-    ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
+    ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _aux_sys(x._aux_sys),
     _aux_kernels(x._aux_kernels),
     _need_materials(x._need_materials)
@@ -93,7 +93,7 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
       for (const auto & it : _aux_sys._elem_vars[_tid])
       {
         MooseVariable * var = it.second;
-        var->insert(_system.solution());
+        var->insert(_aux_sys.solution());
       }
     }
   }

@@ -389,7 +389,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
     if (nodal.hasActiveBlockObjects())
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
-      ComputeNodalAuxVarsThread navt(_fe_problem, *this, nodal);
+      ComputeNodalAuxVarsThread navt(_fe_problem, nodal);
       Threads::parallel_reduce(range, navt);
 
       solution().close();
@@ -405,7 +405,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
     if (nodal.hasActiveBoundaryObjects())
     {
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-      ComputeNodalAuxBcsThread nabt(_fe_problem, *this, nodal);
+      ComputeNodalAuxBcsThread nabt(_fe_problem, nodal);
       Threads::parallel_reduce(bnd_nodes, nabt);
 
       solution().close();
@@ -430,7 +430,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
     if (elemental.hasActiveBlockObjects())
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
-      ComputeElemAuxVarsThread eavt(_fe_problem, *this, elemental, true);
+      ComputeElemAuxVarsThread eavt(_fe_problem, elemental, true);
       Threads::parallel_reduce(range, eavt);
 
       solution().close();
@@ -441,7 +441,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
     if (elemental.hasActiveBoundaryObjects())
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
-      ComputeElemAuxBcsThread eabt(_fe_problem, *this, elemental, true);
+      ComputeElemAuxBcsThread eabt(_fe_problem, elemental, true);
       Threads::parallel_reduce(bnd_elems, eabt);
 
       solution().close();

@@ -29,7 +29,7 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem,
                                                    const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
                                                    const MooseObjectWarehouse<SideUserObject> & side_user_objects,
                                                    const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
+    ThreadedElementLoop<ConstElemRange>(problem),
     _soln(*sys.currentSolution()),
     _elemental_user_objects(elemental_user_objects),
     _side_user_objects(side_user_objects),
@@ -39,7 +39,7 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem,
 
 // Splitting Constructor
 ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split) :
-    ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
+    ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _soln(x._soln),
     _elemental_user_objects(x._elemental_user_objects),
     _side_user_objects(x._side_user_objects),
