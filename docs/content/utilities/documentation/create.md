@@ -37,12 +37,10 @@ When the documentation for this object is generated this string is added to the 
 system overview table. For example, the [Kernels overview](/Kernels/Overview.md) includes a table with each object
 listed; the table includes the class description from the source code.
 
-## Object Description Markdown
-A detailed description may be provided to the generated documentation for an object by creating a markdown file using
+## Object and System Markdown
+A detailed description should be provided in addition to the generated, in-code documentation for an object by creating a markdown file using
 [MOOSE Flavored Markdown](moose_flavored_markdown.md). The created file must be stored in a file named according to the
-registered MOOSE syntax within the "details" directory explained in the [Configuration](#configuration) section below.
-For example, the details for the [Diffision](/Kernels/Diffusion.md) are in the `framework/docs/details/Kernels/Diffusion.md`
-file.
+registered MOOSE syntax within the "install" directory explained in the [Configuration](/contents/utilities/documentation/setup.md#configuration) section. For example, the details for the [Diffision](/Kernels/Diffusion.md) are in the `framework/docs/content/framework/systems/Kernels/Diffusion.md` file.
 
 ---
 
@@ -55,7 +53,7 @@ the MOOSE website includes the following.
 
 !text docs/pages.yml
 
-Notice, that the framework and the modules each have include statements pointing to another "pages.moose.yml" files. This
+Notice, that the framework and the modules each have include statements pointing to another "pages.yml" files. This
 file is generated for object in the application and is placed in the "install" directory (see [Setup](/content/utilities/documentation/setup.md)).
 
 ---
@@ -69,7 +67,9 @@ Move to your application docs directory (where the [Configure File](/content/uti
 cd ~/projects/your_app_name_here/docs
 ```
 
-Generate the application specific Markdown.
+Generate the application specific Markdown. This command will generate stub markdown files for the objects and systems
+in your applications as well as the associated 'pages.yml' files for each directory created where the generated files
+are installed.
 
 ```text
 ./moosedocs.py generate
@@ -85,6 +85,21 @@ This command needs to be run only when you edit source code of your application:
 * when you add a new object (e.g., Kernel, BoundaryCondition, etc.) to your application,
 * when you add or modify the class description of an existing object, and
 * when you modify the input parameters of an existing object.
+
+!!! warning "Generating Overwrites 'pages.yml'"
+    When the generate command is used the 'pages.yml' files will be updated to match the current structure. It is
+    possible to disable this, see the help ('./moosedocs generate -h') for more information.
+
+---
+
+## Checking Documentation
+
+It is possible to check the status of your application, which runs the above "generate" command without creating any
+files.
+
+```text
+./moosedocs.py check
+```
 
 ---
 

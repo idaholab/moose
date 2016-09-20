@@ -1,0 +1,3 @@
+- Overview: content/framework/systems/Adaptivity/Overview.md
+- Indicators: !include content/framework/systems/Adaptivity/Indicators/pages.yml
+- Markers: !include content/framework/systems/Adaptivity/Markers/pages.yml

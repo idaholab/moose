@@ -57,9 +57,6 @@ python setup.py install
 If you are adding documentation to an existing project then you will need to add a few files to configure the
 documentation system to work properly for you application.
 
----
-
-### MkDocs Configuration
 As mentioned the MOOSE documentation system relies on [mkdocs](http://www.mkdocs.org/), thus a configuration file must exist for it. MOOSE
 uses the "moosedocs.yml" file for this purpose as well. Therefore, any configuration options for [mkdocs](http:://www.mkdocs.org) is simply added
 to the "mooosedocs.yml" file.
@@ -74,43 +71,20 @@ three configuration options, which are set as done in the `moosedocs.yml` file.
 | -------- | ----------- |
 | root     | The root directory of the repository, if not provided the root is found using git. |
 | make     | The location of the Makefile responsible for building the application (default: 'root'). |
+| executable | The MOOSE application to execute to generate syntax. |
 | repo     | The location for the remote repository for creating hyperlinks. |
 | docs_dir | The location of the markdown to be used for generating the site. |
 | slides   | Enable the parsing for creating reveal.js slides (default: False). |
 | package  | Enable the use of the MoosePackageParser (default: False). |
 | graphviz | The location of graphviz executable for use with diagrams. |
+| links      | Source code paths for generating code links. This options could contain headings (e.g., Tests), under each heading is a list of  directories that will be searched for input files and source code. |
+| locations | A list of locations to search for objects and systems that should be documented. |
 
+The 'locations' option contains should contain sub-items, as shown above in the MOOSE configuration file. These sub-items
+include:
 
-### MOOSE Configuration
-The documentation generation system for MOOSE is built upon [mkdocs](http://www.mkdocs.org/), thus it is configured
-using [YAML](http://yaml.org) files. For MOOSE there is a single configuration file that must be created, for applications
-the location of this file (`moosedocs.yml`) is normally under the "docs" directory (e.g., `moose/docs`). Within this
-file exists an "extra" section, which contains the configuration used by MOOSE when pages are generated.
-
-### Defaults Settings
-As will be detailed further below, it is possible to include objects from multiple sources. Each of these sources
-can be configured individually. Each of these options default to the values listed in this section. The following table
-includes the complete set of options that can be set in the defaults section and/or the included sources.
-
-| Option     | Description |
-| ---------- | ----------- |
-| executable | The MOOSE application to execute to generate syntax. |
-| details    | The location of the detailed object description markdown files (see [Adding Documentation](/content/utilities/documentation/create.md)). |
-| include    | The location of the source code (.h files), this is required to get automatic detection of object inheritance. |
-| source     | The location of the source code (.C files), this is required to get automatic detection of object inheritance. |
-| install    | The location of the generated markdown to be installed. The page is saved with the input syntax appended (e.g., <install>/Kernels/Diffusion.moose.md). |
-| repo       | The remote repository (e.g., github or bitbucket) for generating links. |
-| doxygen    | The generated Doxygen pages for generating links. |
-| hide       | A list of syntax to ignore. |
-| links      | Source code paths for generating code links. This options could contain headings (e.g., Tests), under each heading is a list of directories that will be searched for input files and source code. |
-
-The defaults may be overridden by listing the option in the "defaults" section. Any number of additional documentation
-content may be listed in the "extra" section. Each item will generate documentation,
-which can be directed to the content directories for your application site. For example, within the MOOSE documentation
-the following is contained within this option to build the documentation from the framework itself as well as the modules.
-
-!text docs/moosedocs.yml max-height=400px font-size=small
-
-The names provided in the sub-sections (i.e., "framework" and "phase_field") are arbitrary. All of the options listed
-in the table above may be used within each of the sub-sections to taylor the generation of the pages as needed to
-separate source code directories or include required MOOSE applications.
+| Option   | Description |
+| -------- | ----------- |
+| doxygen  | The path to the doxygen website, used for developer links. |
+| paths    | A list of paths to the source code (i.e., source and include directories).|
+| install  | The location where the markdown is located for this documentation sub-item. |

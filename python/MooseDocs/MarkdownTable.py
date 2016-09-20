@@ -1,3 +1,4 @@
+from markdown.util import etree
 import logging
 log = logging.getLogger(__name__)
 
@@ -23,7 +24,6 @@ class MarkdownTable(object):
         """
         return len(self._rows)
 
-
     def addRow(self, *args):
         """
         Add a row to the table.
@@ -41,31 +41,24 @@ class MarkdownTable(object):
 
         self._rows.append(args)
 
-    def markdown(self):
+    def html(self):
         """
-        Return the parameter table in markdown format. (public)
+        Return the table in an html etree object.
         """
-
-        md = []
-
-        s = self._buildFormatString(self._column_headers)
-
-        frmt = '| ' + ' | '.join( ['{:<{}s}'] * (len(s)/2) ) + ' |'
-        md += [frmt.format(*s)]
-
-        md += ['']
-        for i in range(len(self._column_headers)):
-            md[-1] += '| ' + '-'*self._column_widths[i] + ' '
-        md[-1] += '|'
-
+        table = etree.Element('table')
+        tr = etree.SubElement(table, 'tr')
+        for h in self._column_headers:
+            th = etree.SubElement(tr, 'th')
+            th.text = h
         for row in self._rows:
-            text = []
-            for item in row:
-                text.append(item)
-            s = self._buildFormatString(text)
-            md += [frmt.format(*s)]
-
-        return '\n'.join(md)
+            tr = etree.SubElement(table, 'tr')
+            for d in row:
+                td = etree.SubElement(tr, 'td')
+                if isinstance(d, str):
+                    td.text = d
+                else:
+                    td.append(d)
+        return table
 
     def _buildFormatString(self, text):
         """

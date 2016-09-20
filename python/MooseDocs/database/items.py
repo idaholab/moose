@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import MooseDocs
+from markdown.util import etree
 import logging
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,9 @@ class DatabaseItem(object):
         pass
 
     def markdown(self):
+        pass
+
+    def html(self):
         pass
 
     def filename(self):
@@ -77,7 +81,7 @@ class RegexItem(DatabaseItem):
 
 class InputFileItem(RegexItem):
     """
-    Returns a markdown list item for input file matching of (type = ).
+    Returns a list item for input file matching of (type = ).
     """
     def __init__(self, filename, **kwargs):
         RegexItem.__init__(self, filename, r'type\s*=\s*(?P<key>\w+)\b', **kwargs)
@@ -85,23 +89,31 @@ class InputFileItem(RegexItem):
     def markdown(self):
         return '* [{}]({})'.format(self._rel_path, self._repo)
 
+    def html(self):
+        el = etree.Element('li')
+        a = etree.SubElement(el, 'a')
+        a.set('href', self._repo)
+        a.text = self._rel_path
+        return el
 
 class ChildClassItem(RegexItem):
     """
-    Returns a markdown list item for h file containing a base.
+    Returns a list item for h file containing a base.
     """
     def __init__(self, filename, **kwargs):
-        RegexItem.__init__(self, filename, r'public\s*(?P<key>\w+)\b', **kwargs)
+        super(ChildClassItem, self).__init__(filename, r'public\s*(?P<key>\w+)\b', **kwargs)
 
-    def markdown(self):
-        # Check for C file
-        c_rel_path = self._rel_path.replace('/include/', '/src/').replace('.h', '.C')
-        c_repo = self._repo.replace('/include/', '/src/').replace('.h', '.C')
+    def html(self, element='li'):
         c_filename = self._filename.replace('/include/', '/src/').replace('.h', '.C')
-
+        el = etree.Element(element)
+        a = etree.SubElement(el, 'a')
+        a.set('href', self._repo)
+        a.text = self._rel_path
         if os.path.exists(c_filename):
-            md = '* [{}]({})<br>[{}]({})'.format(self._rel_path, self._repo, c_rel_path, c_repo)
-        else:
-            md = '* [{}]({})'.format(self._rel_path, self._repo)
-
-        return md
+            etree.SubElement(el, 'br')
+            c_rel_path = self._rel_path.replace('/include/', '/src/').replace('.h', '.C')
+            c_repo = self._repo.replace('/include/', '/src/').replace('.h', '.C')
+            a = etree.SubElement(el, 'a')
+            a.set('href', c_repo)
+            a.text = c_rel_path
+        return el
