@@ -4,19 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef MULTIAUXVARIABLESACTION_H
-#define MULTIAUXVARIABLESACTION_H
+#ifndef MATERIALVECTORAUXKERNELACTION_H
+#define MATERIALVECTORAUXKERNELACTION_H
 
-#include "AddAuxVariableAction.h"
+#include "Action.h"
 
-/**
- * Automatically generates all auxvariables given vectors telling it the names
- * and how many to create
- */
-class MultiAuxVariablesAction: public AddAuxVariableAction
+class MaterialVectorAuxKernelAction: public Action
 {
 public:
-  MultiAuxVariablesAction(InputParameters params);
+  MaterialVectorAuxKernelAction(const InputParameters & params);
 
   virtual void act();
 
@@ -28,12 +24,12 @@ protected:
   /// number of auxvariables
   unsigned int _num_var;
   /// list of material properties to be used
-  const MultiMooseEnum & _data_type;
+  const std::vector<MaterialPropertyName> & _prop;
   /// number of properties
-  unsigned int _data_size;
+  unsigned int _num_prop;
 };
 
 template<>
-InputParameters validParams<MultiAuxVariablesAction>();
+InputParameters validParams<MaterialVectorAuxKernelAction>();
 
-#endif //MULTIAUXVARIABLESACTION_H
+#endif //MATERIALVECTORAUXKERNELACTION_H

@@ -7,61 +7,71 @@
 #include "MultiAuxVariablesAction.h"
 #include "FEProblem.h"
 #include "Conversion.h"
-#include "libmesh/string_to_enum.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<MultiAuxVariablesAction>()
 {
-  MooseEnum familyEnum = AddAuxVariableAction::getAuxVariableFamilies();
-  MooseEnum orderEnum = AddAuxVariableAction::getAuxVariableOrders();
-
-  InputParameters params = validParams<Action>();
-  params.addClassDescription("Set up auxvariables for a polycrystal sample");
-  params.addParam<MooseEnum>("family", familyEnum, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order", orderEnum, "Specifies the order of the FE shape function to use for this variable");
-  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
-  params.addRequiredParam<unsigned int>("dim", "The dimensions of the mesh");
-  params.addRequiredParam<std::vector<std::string> >("var_name_base", "Vector that specifies the base name of the variables");
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
-  params.addParam<std::vector<OutputName> >("outputs", "Vector of output names where you would like to restrict the output of variable(s) associated with this object");
-
+  InputParameters params = validParams<AddAuxVariableAction>();
+  params.addClassDescription("Set up auxvariables for components of MaterialProperty<std::vector<data_type> > for polycrystal sample.");
+  params.addRequiredParam<unsigned int>("grain_num", "Specifies the number of grains to create the aux varaivles for.");
+  params.addRequiredParam<std::vector<std::string> >("variable_base", "Vector that specifies the base name of the variables.");
+  MultiMooseEnum data_type("Real RealGradient", "Real");
+  params.addRequiredParam<MultiMooseEnum>("data_type", data_type, "Specifying data type of the materials property, variables are created accordingly");
   return params;
 }
 
 MultiAuxVariablesAction::MultiAuxVariablesAction(InputParameters params) :
-    AddAuxVariableAction(params)
+    AddAuxVariableAction(params),
+    _grain_num(getParam<unsigned int>("grain_num")),
+    _var_name_base(getParam<std::vector<std::string> >("variable_base")),
+    _num_var(_var_name_base.size()),
+    _data_type(getParam<MultiMooseEnum>("data_type")),
+    _data_size(_data_type.size())
 {
 }
-
-/*
-The name of the variable is the variable name base followed by two digits.
-The first digit in the name is the dimension it applies to:
-  0 = x, 1 = y, 2 = z (or some other criteria as user needs).
-The second digit in the name is the order parameter it applies to.
-*/
 
 void
 MultiAuxVariablesAction::act()
 {
-  MooseEnum order = getParam<MooseEnum>("order");
-  MooseEnum family = getParam<MooseEnum>("family");
-  unsigned int op_num = getParam<unsigned int>("op_num");
-  std::vector<std::string> var_name_base = getParam<std::vector<std::string> >("var_name_base");
-  std::set<SubdomainID> blocks = getSubdomainIDs();
-  unsigned int dim = getParam<unsigned int>("dim");
+  if (_num_var != _data_size)
+    mooseError("Data type not provided for all the auxvariables in MultiAuxVariablesAction");
 
-  unsigned int size_v = var_name_base.size();
+  // Blocks from the input
+  std::set<SubdomainID> blocks = getSubdomainIDs();
+  // mesh dimension & components required for gradient variables
+  unsigned int dim = _mesh->dimension();
+  const std::vector<char> suffix = {'x', 'y', 'z'};
 
   // Loop through the number of order parameters
-  for (unsigned int val = 0; val < size_v; ++val)
-    for (unsigned int op = 0; op < op_num; ++op)
-      for (unsigned int x = 0; x < dim; ++x)
+  for (unsigned int val = 0; val < _num_var; ++val)
+    for (unsigned int gr = 0; gr < _grain_num; ++gr)
+    {
+      /// for exatrcting data from MaterialProperty<std::vector<Real> >
+      if (_data_type[val] == "Real")
       {
-        //Create variable names
-        std::string var_name = var_name_base[val] + Moose::stringify(x) + Moose::stringify(op);
+        //Create variable names with variable name base followed by the order parameter it applies to.
+        std::string var_name = _var_name_base[val] + Moose::stringify(gr);
+
         if (blocks.empty())
           _problem->addAuxVariable(var_name, _fe_type);
         else
           _problem->addAuxVariable(var_name, _fe_type, &blocks);
       }
+      /// for exatrcting data from MaterialProperty<std::vector<RealGradient> >
+      if (_data_type[val] == "RealGradient")
+        for (unsigned int x = 0; x < dim; ++x)
+        {
+          /*
+          / The name of the variable is the variable name base followed by
+          /the order parameter and a suffix mentioning dimension it applies to.
+          */
+          std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x] ;
+
+          if (blocks.empty())
+            _problem->addAuxVariable(var_name, _fe_type);
+          else
+            _problem->addAuxVariable(var_name, _fe_type, &blocks);
+        }
+    }
 }

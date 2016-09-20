@@ -73,6 +73,8 @@
     variable = w
     c = c
     v = eta
+    grain_tracker_object = grain_center
+    grain_force = grain_force
   [../]
   [./eta_dot]
     type = TimeDerivative
@@ -84,6 +86,8 @@
     variable = eta
     c = c
     v = eta
+    grain_tracker_object = grain_center
+    grain_force = grain_force
   [../]
   [./acint_eta]
     type = ACInterface
@@ -148,11 +152,6 @@
 []
 
 [VectorPostprocessors]
-  [./centers]
-    # VectorPostprocessor for outputing grain centers and volumes
-    type = GrainCentersPostprocessor
-    grain_data = grain_center
-  [../]
   [./forces]
     # VectorPostprocessor for outputing grain forces and torques
     type = GrainForcesPostprocessor
@@ -162,15 +161,16 @@
 
 [UserObjects]
   [./grain_center]
-    # user object for extracting grain centers and volumes
-    type = ComputeGrainCenterUserObject
-    etas = eta
-    execute_on = 'initial linear'
+    type = GrainTracker
+    variable = eta
+    outputs = none
+    compute_op_maps = true
+    calculate_feature_volumes = true
+    execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
-    # constant force and torque is applied on grains
     type = ConstantGrainForceAndTorque
-    execute_on = 'initial linear'
+    execute_on = 'linear nonlinear'
     force = '0.2 0.0 0.0 ' # size should be 3 * no. of grains
     torque = '0.0 0.0 5.0 ' # size should be 3 * no. of grains
   [../]
@@ -187,20 +187,19 @@
   type = Transient
   nl_max_its = 30
   scheme = bdf2
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
   l_max_its = 30
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
-  dt = 1
-  num_steps = 10
+  dt = 0.1
+  end_time = 10
 []
 
 [Outputs]
   exodus = true
-  csv = true
 []
 
 [ICs]

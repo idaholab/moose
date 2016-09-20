@@ -1,0 +1,53 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#include "MaterialVectorGradAuxKernelAction.h"
+#include "Factory.h"
+#include "Parser.h"
+#include "Conversion.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
+
+template<>
+InputParameters validParams<MaterialVectorGradAuxKernelAction>()
+{
+  InputParameters params = validParams<MaterialVectorAuxKernelAction>();
+  return params;
+}
+
+MaterialVectorGradAuxKernelAction::MaterialVectorGradAuxKernelAction(const InputParameters & params) :
+    MaterialVectorAuxKernelAction(params)
+{
+}
+
+void
+MaterialVectorGradAuxKernelAction::act()
+{
+  if (_num_prop != _num_var)
+    mooseError("variable_base and property must be vectors of the same size");
+
+  // mesh dimension required for gradient variables
+  unsigned int dim = _mesh->dimension();
+  // For Specifying the components of the gradient terms
+  const std::vector<char> suffix = {'x', 'y', 'z'};
+
+  for (unsigned int gr = 0; gr < _grain_num; ++gr)
+    for (unsigned int val = 0; val < _num_var; ++val)
+      for (unsigned int x = 0; x < dim; ++x)
+      {
+        std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x];
+
+        InputParameters params = _factory.getValidParams("MaterialStdVectorRealGradientAux");
+        params.set<AuxVariableName>("variable") = var_name;
+        params.set<MaterialPropertyName>("property") = _prop[val];
+        params.set<unsigned int>("component") = x;
+        params.set<unsigned int>("index") = gr;
+        params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+
+        std::string aux_kernel_name = var_name;
+        _problem->addAuxKernel("MaterialStdVectorRealGradientAux", aux_kernel_name, params);
+      }
+}

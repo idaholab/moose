@@ -216,6 +216,8 @@
 #include "HHPFCRFFSplitKernelAction.h"
 #include "HHPFCRFFSplitVariablesAction.h"
 #include "MatVecRealGradAuxKernelAction.h"
+#include "MaterialVectorAuxKernelAction.h"
+#include "MaterialVectorGradAuxKernelAction.h"
 #include "MortarPeriodicAction.h"
 #include "MultiAuxVariablesAction.h"
 #include "PFCRFFKernelAction.h"
@@ -462,6 +464,8 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
   syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
   syntax.registerActionSyntax("MatVecRealGradAuxKernelAction", "AuxKernels/MatVecRealGradAuxKernel");
+  syntax.registerActionSyntax("MaterialVectorAuxKernelAction", "AuxKernels/MaterialVectorAuxKernel");
+  syntax.registerActionSyntax("MaterialVectorGradAuxKernelAction", "AuxKernels/MaterialVectorGradAuxKernel");
   syntax.registerActionSyntax("MortarPeriodicAction", "Modules/PhaseField/MortarPeriodicity/*");
   syntax.registerActionSyntax("MultiAuxVariablesAction", "AuxVariables/MultiAuxVariables");
   syntax.registerActionSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
@@ -489,6 +493,8 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(HHPFCRFFSplitKernelAction, "add_kernel");
   registerAction(HHPFCRFFSplitVariablesAction, "add_variable");
   registerAction(MatVecRealGradAuxKernelAction, "add_aux_kernel");
+  registerAction(MaterialVectorAuxKernelAction, "add_aux_kernel");
+  registerAction(MaterialVectorGradAuxKernelAction, "add_aux_kernel");
   registerAction(MortarPeriodicAction, "add_variable");
   registerAction(MortarPeriodicAction, "add_mortar_interface");
   registerAction(MortarPeriodicAction, "add_constraint");
