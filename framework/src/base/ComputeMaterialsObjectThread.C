@@ -34,7 +34,7 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_proble
                                                            MaterialPropertyStorage & material_props,
                                                            MaterialPropertyStorage & bnd_material_props,
                                                            std::vector<Assembly *> & assembly) :
-ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+ThreadedElementLoop<ConstElemRange>(fe_problem),
   _fe_problem(fe_problem),
   _sys(sys),
   _material_data(material_data),

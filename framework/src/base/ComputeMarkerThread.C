@@ -23,7 +23,7 @@
 #include "libmesh/threads.h"
 
 ComputeMarkerThread::ComputeMarkerThread(FEProblem & fe_problem, AuxiliarySystem & sys) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(sys),
     _marker_whs(_fe_problem.getMarkerWarehouse())

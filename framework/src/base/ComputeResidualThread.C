@@ -28,7 +28,7 @@
 #include "libmesh/threads.h"
 
 ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, Moose::KernelType type) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _sys(sys),
     _kernel_type(type),
     _num_cached(0),

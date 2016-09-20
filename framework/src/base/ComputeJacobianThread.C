@@ -26,7 +26,7 @@
 #include "libmesh/threads.h"
 
 ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _jacobian(jacobian),
     _sys(sys),
     _num_cached(0),

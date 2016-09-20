@@ -38,7 +38,7 @@ template<typename RangeType>
 class ThreadedElementLoop : public ThreadedElementLoopBase<RangeType>
 {
 public:
-  ThreadedElementLoop(FEProblem & feproblem, SystemBase & system);
+  ThreadedElementLoop(FEProblem & feproblem);
 
   ThreadedElementLoop(ThreadedElementLoop & x, Threads::split split);
 
@@ -48,15 +48,13 @@ public:
 
   virtual bool keepGoing() override { return !_fe_problem.hasException(); }
 protected:
-  SystemBase & _system;
   FEProblem & _fe_problem;
 };
 
 
 template<typename RangeType>
-ThreadedElementLoop<RangeType>::ThreadedElementLoop(FEProblem & fe_problem, SystemBase & system) :
-    ThreadedElementLoopBase<RangeType>(system.mesh()),
-    _system(system),
+ThreadedElementLoop<RangeType>::ThreadedElementLoop(FEProblem & fe_problem) :
+    ThreadedElementLoopBase<RangeType>(fe_problem.mesh()),
     _fe_problem(fe_problem)
 {
 }
@@ -64,7 +62,6 @@ ThreadedElementLoop<RangeType>::ThreadedElementLoop(FEProblem & fe_problem, Syst
 template<typename RangeType>
 ThreadedElementLoop<RangeType>::ThreadedElementLoop(ThreadedElementLoop & x, Threads::split /*split*/) :
     ThreadedElementLoopBase<RangeType>(x),
-    _system(x._system),
     _fe_problem(x._fe_problem)
 {
 }

@@ -25,7 +25,7 @@
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
                                                AuxiliarySystem & sys,
                                                bool finalize) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(sys),
     _indicator_whs(_fe_problem.getIndicatorWarehouse()),
