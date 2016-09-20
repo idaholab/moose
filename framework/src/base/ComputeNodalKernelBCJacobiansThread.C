@@ -21,11 +21,10 @@
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem,
-                                                                         AuxiliarySystem & sys,
                                                                          const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                                                          SparseMatrix<Number> & jacobian) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
-    _sys(sys),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _jacobian(jacobian),
     _num_cached(0)
@@ -35,7 +34,7 @@ ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(FEProbl
 // Splitting Constructor
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x, Threads::split split) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
-    _sys(x._sys),
+    _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
     _jacobian(x._jacobian),
     _num_cached(0)
@@ -101,7 +100,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     if (!active_involved_kernels.empty())
     {
       // prepare variables
-      for (const auto & it : _sys._nodal_vars[_tid])
+      for (const auto & it : _aux_sys._nodal_vars[_tid])
       {
         MooseVariable * var = it.second;
         var->prepareAux();

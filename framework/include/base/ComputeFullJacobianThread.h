@@ -24,7 +24,7 @@ class NonlinearSystem;
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
 public:
-  ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
+  ComputeFullJacobianThread(FEProblem & fe_problem, SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);
@@ -38,6 +38,8 @@ protected:
   virtual void computeFaceJacobian(BoundaryID bnd_id) override;
   virtual void computeInternalFaceJacobian(const Elem * neighbor) override;
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
+
+  NonlinearSystem & _nl;
 
   // Reference to BC storage structures
   const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;

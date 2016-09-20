@@ -20,9 +20,9 @@
 #include "libmesh/threads.h"
 
 
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
     ThreadedElementLoop<ConstElemRange>(problem),
-    _aux_sys(sys),
+    _aux_sys(problem.getAuxiliarySystem()),
     _aux_kernels(storage),
     _need_materials(need_materials)
 {

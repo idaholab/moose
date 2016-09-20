@@ -23,11 +23,10 @@
 #include "libmesh/threads.h"
 
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
-                                               AuxiliarySystem & sys,
                                                bool finalize) :
     ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
-    _aux_sys(sys),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _indicator_whs(_fe_problem.getIndicatorWarehouse()),
     _internal_side_indicators(_fe_problem.getInternalSideIndicatorWarehouse()),
     _finalize(finalize)

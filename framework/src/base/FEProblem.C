@@ -450,7 +450,7 @@ void FEProblem::initialSetup()
     }
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+    ComputeMaterialsObjectThread cmt(*this, _material_data, _bnd_material_data, _neighbor_material_data,
                                      _material_props, _bnd_material_props, _assembly);
     /**
      * The ComputeMaterialObjectThread object now allocates memory as needed for the material storage system.
@@ -627,7 +627,7 @@ void FEProblem::initialSetup()
   if (!_app.isRecovering() && !_app.isRestarting() && (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this, _nl, _material_data, _bnd_material_data, _neighbor_material_data,
+    ComputeMaterialsObjectThread cmt(*this, _material_data, _bnd_material_data, _neighbor_material_data,
                                      _material_props, _bnd_material_props, _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
@@ -2359,12 +2359,12 @@ FEProblem::computeIndicators()
   // compute Indicators
   if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
-    ComputeIndicatorThread cit(*this, getAuxiliarySystem());
+    ComputeIndicatorThread cit(*this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
     _aux.solution().close();
     _aux.update();
 
-    ComputeIndicatorThread finalize_cit(*this, getAuxiliarySystem(), true);
+    ComputeIndicatorThread finalize_cit(*this, true);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
     _aux.solution().close();
     _aux.update();
@@ -2399,7 +2399,7 @@ FEProblem::computeMarkers()
         marker->markerSetup();
     }
 
-    ComputeMarkerThread cmt(*this, getAuxiliarySystem());
+    ComputeMarkerThread cmt(*this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
 
     _aux.solution().close();

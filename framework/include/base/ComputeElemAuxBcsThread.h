@@ -29,7 +29,7 @@ class AuxKernel;
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxBcsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
@@ -39,7 +39,7 @@ public:
 
 protected:
   FEProblem & _problem;
-  AuxiliarySystem & _sys;
+  AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
 
   /// Storage object containing active AuxKernel objects

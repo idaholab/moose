@@ -30,7 +30,7 @@ class AuxiliarySystem;
 class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 

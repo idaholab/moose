@@ -33,7 +33,7 @@ class KernelWarehouse;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, Moose::KernelType type);
+  ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type);
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 
@@ -50,7 +50,7 @@ public:
   void join(const ComputeResidualThread & /*y*/);
 
 protected:
-  NonlinearSystem & _sys;
+  NonlinearSystem & _nl;
   Moose::KernelType _kernel_type;
   unsigned int _num_cached;
 

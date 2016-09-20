@@ -28,7 +28,7 @@ class NodalKernel;
 class ComputeNodalKernelsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+  ComputeNodalKernelsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
 
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);

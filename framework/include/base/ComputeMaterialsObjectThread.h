@@ -30,7 +30,7 @@ class Assembly;
 class ComputeMaterialsObjectThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys,
+  ComputeMaterialsObjectThread(FEProblem & fe_problem,
                                std::vector<MooseSharedPointer<MaterialData> > & material_data,
                                std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                                std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,
@@ -53,7 +53,7 @@ public:
 
 protected:
   FEProblem & _fe_problem;
-  NonlinearSystem & _sys;
+  NonlinearSystem & _nl;
   std::vector<MooseSharedPointer<MaterialData> > & _material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _bnd_material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _neighbor_material_data;
