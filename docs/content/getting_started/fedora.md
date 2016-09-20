@@ -6,22 +6,22 @@
 ## Pre-Reqs
 * Install the following using dnf
 
-    <pre>
-    sudo -E dnf install gcc \
-    gcc-c++ \
-    gcc-gfortran \
-    tcl \
-    tk \
-    findutils \
-    make \
-    freeglut-devel \
-    libXt-devel \
-    libX11-devel \
-    m4 \
-    blas-devel \
-    lapack-devel \
-    git
-    </pre>
+```bash
+  sudo -E dnf install gcc \
+gcc-c++ \
+gcc-gfortran \
+tcl \
+tk \
+findutils \
+make \
+freeglut-devel \
+libXt-devel \
+libX11-devel \
+m4 \
+blas-devel \
+lapack-devel \
+git
+```
 
 * Download one our redistributables according to your version of Fedora
 

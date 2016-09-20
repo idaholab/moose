@@ -6,17 +6,17 @@
 ## Pre-Reqs
 * Install the following using yum
 
-    <pre>
-    sudo -E yum install gcc \
-    gcc-c++ \
-    make \
-    freeglut-devel\
-    m4 \
-    blas-devel \
-    lapack-devel \
-    gcc-gfortran \
-    libX11-devel
-    </pre>
+```bash
+  sudo -E yum install gcc \
+gcc-c++ \
+make \
+freeglut-devel\
+m4 \
+blas-devel \
+lapack-devel \
+gcc-gfortran \
+libX11-devel
+```
 
 * Download one our redistributables according to your version of CentOS
 

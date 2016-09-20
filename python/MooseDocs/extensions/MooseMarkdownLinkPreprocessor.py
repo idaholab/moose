@@ -10,10 +10,9 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
     A preprocessor for creating automatic linking between markdown files.
     """
 
-    def __init__(self, database_dir, **kwargs):
+    def __init__(self, database=None, **kwargs):
         super(MooseMarkdownLinkPreprocessor, self).__init__(**kwargs)
-        self._database_dir = database_dir
-        self._database = None
+        self._database = database
 
     def run(self, lines):
         """
@@ -26,9 +25,6 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
             lines[i] = re.sub(r'(?<!`)\[(.*?)\]\(auto::(.*?)\)', lambda m: self.linkSub(m), lines[i])
         return lines
 
-    def buildDatabase(self):
-        self._database = MooseDocs.database.Database('.md', self._database_dir, MooseDocs.database.items.MarkdownIncludeItem)
-
     def bracketSub(self, match):
         """
         Substitution of bracket links: [Diffusion.md]
@@ -40,10 +36,6 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
 
         # Locate database items given the key
         name = match.group(1)
-
-        # Build the database if needed
-        if not self._database:
-            self.buildDatabase()
 
         # Locate the markdown files matching the supplied name
         items = self._database.findall(name)

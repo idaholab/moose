@@ -13,14 +13,10 @@
         - Manual Installation: 'content/getting_started/manual_installation.md'
     - Create an Application: 'content/application_development/create_an_app.md'
 - Framework:
-    - Systems: !include content/framework/systems/pages.moose.yml
+    - Systems: !include content/framework/systems/pages.yml
 - Modules:
     - Tensor Mechanics:
-        - Systems: !include content/modules/tensor_mechanics/systems/pages.moose.yml
-    - Phase Field:
-        - Systems: !include content/modules/phase_field/systems/pages.moose.yml
-    - Contact:
-        - Systems: !include content/modules/contact/systems/pages.moose.yml
+        - Systems: !include content/modules/tensor_mechanics/systems/pages.yml
 - Utilites:
     - Documentation:
         - Setup and Configuration: 'content/utilities/documentation/setup.md'
@@ -29,4 +25,5 @@
     - Memory Logger: 'content/moose_tools/memory_logger.md'
 - Help:
     - Frequently Asked Questions: 'content/help/faq.md'
+    - INL HPC Connectivity: 'content/help/inlhpcconnectivity.md'
     - Contact Us: 'content/help/contact_us.md'

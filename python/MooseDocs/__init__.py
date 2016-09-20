@@ -1,7 +1,6 @@
 import os
 import sys
 import argparse
-import yaml
 import argparse
 import logging
 
@@ -14,16 +13,13 @@ import utils
 if utils.check_configuration(['yaml', 'mkdocs', 'markdown', 'markdown_include', 'mdx_math']):
     sys.exit(1)
 
+import yaml
 import mkdocs
 from mkdocs.commands import serve, build
 
 from MarkdownTable import MarkdownTable
 from MooseObjectParameterTable import MooseObjectParameterTable
-from MooseObjectInformation import MooseObjectInformation
-from MooseSystemInformation import MooseSystemInformation
 from MooseApplicationSyntax import MooseApplicationSyntax
-from MooseApplicationDocGenerator import MooseApplicationDocGenerator
-from MooseSubApplicationDocGenerator import MooseSubApplicationDocGenerator
 
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -34,9 +30,9 @@ if not os.path.exists(MOOSE_DIR):
 
 class MkMooseDocsFormatter(logging.Formatter):
     """
-    A formater that is aware of the class hierachy of the MooseDocs library.
+    A formatter that is aware of the class hierarchy of the MooseDocs library.
 
-    Call the init_logging function to initialize the use of this custom fomatter.
+    Call the init_logging function to initialize the use of this custom formatter.
     """
     COLOR = {'DEBUG':'CYAN', 'INFO':'RESET', 'WARNING':'YELLOW', 'ERROR':'RED', 'CRITICAL':'MAGENTA'}
     COUNTS = {'DEBUG':0, 'INFO':0, 'WARNING':0, 'ERROR':0, 'CRITICAL':0}
@@ -45,12 +41,10 @@ class MkMooseDocsFormatter(logging.Formatter):
         msg = logging.Formatter.format(self, record)
 
         if record.name.endswith('Item'):
-            level = 4
-        elif record.name.endswith('Database'):
             level = 3
-        elif record.name.endswith('MooseInformationBase') or record.name.endswith('MooseObjectInformation') or record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseSystemInformation') or record.name.endswith('MooseCommonFunctions'):
+        elif record.name.endswith('Database'):
             level = 2
-        elif record.name.endswith('MooseSubApplicationDocGenerator'):
+        elif record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseCommonFunctions'):
             level = 1
         else:
             level = 0
@@ -97,13 +91,10 @@ def init_logging(verbose=False):
 
     return formatter
 
-def yaml_load(filename, loader=yaml.Loader):
+class Loader(yaml.Loader):
     """
-    Load a YAML file capable of including other YAML files.
-
-    Args:
-        filename[str]: The name fo the file to load.
-        loader[yaml.Loader]: The loader to utilize.
+    A custom loader that handles nested includes. The nested includes should use absolute paths from the
+    origin yaml file.
     """
 
     def include(self, node):
@@ -111,27 +102,22 @@ def yaml_load(filename, loader=yaml.Loader):
         Allow for the embedding of yaml files.
         http://stackoverflow.com/questions/528281/how-can-i-include-an-yaml-file-inside-another
         """
-        filename = os.path.join(self._root, self.construct_scalar(node))
+        filename = self.construct_scalar(node)
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 return yaml.load(f, Loader)
 
-    class Loader(loader):
-        """
-        """
+def yaml_load(filename, loader=Loader):
+    """
+    Load a YAML file capable of including other YAML files.
 
-        def __init__(self, stream):
-            """
-            Store the root directory for including other yaml files.
-            """
-            if isinstance(stream, file):
-                self._root = os.path.split(stream.name)[0]
-            else:
-                self._root = os.getcwd()
-            super(Loader, self).__init__(stream)
+    Args:
+        filename[str]: The name fo the file to load.b
+        loader[yaml.Loader]: The loader to utilize.
+    """
 
     ## Attach the include constructor to our custom loader.
-    Loader.add_constructor('!include', include)
+    Loader.add_constructor('!include', Loader.include)
 
     with open(filename, 'r') as fid:
         yml = yaml.load(fid.read(), Loader)
@@ -143,7 +129,7 @@ def load_pages(filename, keys=[], **kwargs):
     A YAML loader for reading the pages file.
 
     Args:
-        filename[str]: The name fo the file to load.
+        filename[str]: The name for the file to load.
         keys[list]: A list of top-level keys to include.
         kwargs: key, value pairs passed to yaml_load function.
     """
@@ -188,9 +174,13 @@ def command_line_options():
 
     subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
+    # Check
+    check_parser = subparser.add_parser('check', help="Perform error checking on documentation.")
+
     # Generate options
-    generate_parser = subparser.add_parser('generate', help="Generate the markdown documentation from MOOSE application executable. This is done by the serve and build command automatically.")
-    generate_parser.add_argument('--purge', '-p', action='store_true', help="Remove all generated content (*.moose.md, *.moose.svg, *.moose.yml files) from the install directories.")
+    generate_parser = subparser.add_parser('generate', help="Check that documentation exists for your application and generate the markdown documentation from MOOSE application executable.")
+    generate_parser.add_argument('--no-stubs', dest='stubs', action='store_false', help="Disable the creation of system and object stub markdown files.")
+    generate_parser.add_argument('--no-pages-stubs', dest='pages_stubs', action='store_false', help="Disable the creation the pages.yml files.")
 
     # Serve options
     serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
@@ -208,6 +198,7 @@ def command_line_options():
         p.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
         p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item.")
         p.add_argument('--page-keys', default=[], nargs='+', help='A list of top-level keys from the "pages" file to include. This is a tool to help speed up the serving for development of documentation.')
+
     # Parse the arguments
     options = parser.parse_args()
 
@@ -231,11 +222,10 @@ def moosedocs():
     purge(['svg'])
 
     # Execute command
-    if options.command == 'generate':
-        if options.purge:
-            log.info('Purging *.moose.md, *.moose.yml, and *.moose.svg files from {}'.format(os.getcwd()))
-            purge(['md', 'yml', 'svg'])
-        commands.generate(config_file=options.config_file)
+    if options.command == 'check':
+        commands.generate(config_file=options.config_file, stubs=False, pages_stubs=False)
+    elif options.command == 'generate':
+        commands.generate(config_file=options.config_file, stubs=options.stubs, pages_stubs=options.pages_stubs)
     elif options.command == 'serve':
         commands.serve(config_file=options.config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme, pages=options.pages, page_keys=options.page_keys)
     elif options.command == 'build':

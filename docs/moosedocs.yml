@@ -30,84 +30,27 @@ markdown_extensions:
     - MooseDocs.extensions.MooseMarkdown:
           package: True
           make: ../modules
+          executable: ../modules/combined/modules-opt
           repo: https://github.com/idaholab/moose/blob/master
-
-# MooseDocs
-# The settings in ths section are for MOOSE documentation generation.
-extra:
-    defaults:
-
-        # Executable directory or executable
-        executable: ../modules/combined
-
-        # Complete YAML syntax to ignore (must include leading /). All "systems" in MOOSE matching
-        # these values will be completly ignored and all objects within the associated system will
-        # also be ignored.
-        hide:
-            - /BCs/Periodic
-            - /Bounds
-            - /AuxVariables/*/InitialCondition
-            - /Variables/*/InitialCondition
-
-        # Install markdown directory
-        install: content
-
-        # The default repository for linking
-        repo: https://github.com/idaholab/moose/blob/master
-
-    # Directories/applications to include
-    framework:
-        source: ../framework/src
-        include: ../framework/include
-        doxygen: http://mooseframework.com/docs/doxygen/moose/
-        details: details/framework
-        install: content/framework/systems
-        links:
-            Tests:
-                - ../test/tests
-                - ../modules/phase_field/tests
-            Examples:
-                - ../examples
-                - ../modules/phase_field/examples
-            Tutorials:
-                - ../tutorials
-
-    tensor_mechanics:
-        source: ../modules/tensor_mechanics/src
-        include: ../modules/tensor_mechanics/include
-        doxygen: http://mooseframework.com/docs/doxygen/modules/
-        details: details/tensor_mechanics
-        install: content/modules/tensor_mechanics/systems
-        hide:
-            - /XFEM
-        links:
-            Tests:
-                - ../modules/tensor_mechanics/tests
-            Examples:
-                - ../modules/tensor_mechanics/examples
-            Tutorials:
-                - ../modules/tensor_mechanics/tutorials
-
-    phase_field:
-        source: ../modules/phase_field/src
-        include: ../modules/phase_field/include
-        doxygen: http://mooseframework.com/docs/doxygen/modules/
-        details: details/phase_field
-        install: content/modules/phase_field/systems
-        hide:
-            - /XFEM
-        links:
-            Tests:
-                - ../modules/phase_field/tests
-            Examples:
-                - ../modules/phase_field/examples
-
-    contact:
-        source: ../modules/contact/src
-        include: ../modules/contact/include
-        doxygen: http://mooseframework.com/docs/doxygen/modules/
-        details: details/contact
-        install: content/modules/contact/systems
-        links:
-            Tests:
-                - ../modules/contact/tests
+          links:
+              Tests:
+                  - ../test
+                  - ../modules/phase_field/tests
+              Examples:
+                  - ../examples
+                  - ../modules/phase_field/examples
+              Tutorials:
+                  - ../tutorials
+          locations:
+              framework:
+                  doxygen: http://mooseframework.com/docs/doxygen/moose/
+                  paths:
+                      - ../framework/src
+                      - ../framework/include
+                  install: content/framework/systems
+              tensor_mechanics:
+                  doxygen: http://mooseframework.com/docs/doxygen/moduls/
+                  paths:
+                      - ../modules/tensor_mechanics/src
+                      - ../modules/tensor_mechanics/include
+                  install: content/modules/tensor_mechanics/systems
