@@ -3459,10 +3459,16 @@ FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector
   {
     computeResidualType(soln, residual, _kernel_type);
   }
-  catch(MooseException & e)
+  catch (MooseException & e)
   {
-    mooseError("Impossible");
-    // Blank on purpose because this error should have already been dealt with
+    // If a MooseException propagates all the way to here, it means
+    // that it was thrown from a MOOSE system where we do not
+    // (currently) properly support the throwing of exceptions, and
+    // therefore we have no choice but to error out.  It may be
+    // *possible* to handle exceptions from other systems, but in the
+    // meantime, we don't want to silently swallow any unhandled
+    // exceptions here.
+    mooseError("An unhandled MooseException was raised during residual computation.  Please contact the MOOSE team for assistance.");
   }
 }
 
@@ -3509,7 +3515,21 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   _nl.computeTimeDerivatives();
 
-  _aux.compute(EXEC_LINEAR);
+  try
+  {
+    _aux.compute(EXEC_LINEAR);
+  }
+  catch (MooseException & e)
+  {
+    _console << "\nA MooseException was raised during Auxiliary variable computation.\n"
+             << "The next solve will fail, the timestep will be reduced, and we will try again.\n" << std::endl;
+
+    // We know the next solve is going to fail, so there's no point in
+    // computing anything else after this.  Plus, using incompletely
+    // computed AuxVariables in subsequent calculations could lead to
+    // other errors or unhandled exceptions being thrown.
+    return;
+  }
 
   computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
 
