@@ -19,6 +19,7 @@
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/system.h"
@@ -29,19 +30,19 @@ template<>
 InputParameters validParams<MultiAppCopyTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  params.addDeprecatedParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.", "This is being replaced by 'to_variable'.");
+  params.addDeprecatedParam<VariableName>("source_variable", "The variable to transfer from.", "This is replaced by 'from_variable'.");
+  params.addRequiredParam<VariableName>("to_variable", "The variable that the solution is being transfered into.");
+  params.addRequiredParam<VariableName>("from_variable", "The variable to transfer from.");
 
   return params;
 }
 
 MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters) :
     MultiAppTransfer(parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable"))
+    _to_var_name(isParamValid("variable") ? getParam<VariableName>("variable") : getParam<VariableName>("to_variable")),
+    _from_var_name(isParamValid("source_variable") ? getParam<VariableName>("source_variable") : getParam<VariableName>("from_variable"))
 {
-  // This transfer does not work with DistributedMesh
-  _fe_problem.mesh().errorIfDistributedMesh("MultiAppCopyTransfer");
 }
 
 void
@@ -51,204 +52,99 @@ MultiAppCopyTransfer::initialSetup()
 }
 
 void
-MultiAppCopyTransfer::execute()
+MultiAppCopyTransfer::transferDofObject()
 {
-  _console << "Beginning CopyTransfer " << name() << std::endl;
+  if (_to_object->n_dofs(_to_sys_num, _to_var_num) > 0) // If this variable has dofs at this node
+    for (unsigned int comp = 0; comp < _to_object->n_comp(_to_sys_num, _to_var_num); ++comp)
+    {
+      dof_id_type dof = _to_object->dof_number(_to_sys_num, _to_var_num, comp);
 
-  switch (_direction)
+      Moose::swapLibMeshComm(_swapped);
+
+      dof_id_type from_dof = _from_object->dof_number(_from_sys_num, _from_var_num, comp);
+      Real from_value = (*_from_sys->solution)(from_dof);
+
+      _swapped = Moose::swapLibMeshComm(_multi_app->comm());
+
+      _solution->set(dof, from_value);
+    }
+}
+
+void
+MultiAppCopyTransfer::transfer(FEProblem & to_problem, FEProblem & from_problem)
+{
+  // Populate the to/from variables needed to perform the transfer
+  _swapped = Moose::swapLibMeshComm(_multi_app->comm());
+
+  MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
+  MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
+  if (to_var.feType() != from_var.feType())
+    mooseError("The variables must be the same type (order and family).");
+
+  _from_sys = &from_var.sys().system();
+
+  MeshBase * to_mesh = &to_problem.mesh().getMesh();
+  MeshBase * from_mesh = &from_problem.mesh().getMesh();
+  if ( (to_mesh->n_nodes() != from_mesh->n_nodes()) || (to_mesh->n_elem() != from_mesh->n_elem()))
+    mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");
+
+  _from_sys_num = _from_sys->number();
+  _from_var_num = _from_sys->variable_number(from_var.name());
+
+  System * to_sys = find_sys(to_problem.es(), _to_var_name);
+  _to_sys_num = to_sys->number();
+  _to_var_num = to_sys->variable_number(_to_var_name);
+
+  _solution = to_problem.getNonlinearSystem().hasVariable(_to_var_name) ? &to_problem.getNonlinearSystem().solution() : &to_problem.getAuxiliarySystem().solution();
+
+  // Transfer node dofs
+  MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
+  MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
+  for (; node_it != node_end; ++node_it)
   {
-    case TO_MULTIAPP:
-    {
-      FEProblem & from_problem = _multi_app->problem();
-      MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-
-      MeshBase * from_mesh = NULL;
-
-      from_mesh = &from_problem.mesh().getMesh();
-
-      SystemBase & from_system_base = from_var.sys();
-
-      System & from_sys = from_system_base.system();
-      unsigned int from_sys_num = from_sys.number();
-
-      // Only works with a serialized mesh to transfer from!
-      mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with ReplicatedMesh!");
-
-      unsigned int from_var_num = from_sys.variable_number(from_var.name());
-
-      //Create a serialized version of the solution vector
-//      NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
-//      serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
-
-      // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-//      from_sys.solution->localize(*serialized_solution);
-
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
-      {
-        if (_multi_app->hasLocalApp(i))
-        {
-          MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
-          // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblem(i).es(), _to_var_name);
-
-          unsigned int sys_num = to_sys->number();
-          unsigned int var_num = to_sys->variable_number(_to_var_name);
-
-          NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
-
-          MeshBase * mesh = NULL;
-
-          mesh = &_multi_app->appProblem(i).mesh().getMesh();
-
-          bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
-
-          if (is_nodal)
-          {
-            MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
-            MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
-
-            for (; node_it != node_end; ++node_it)
-            {
-              Node * node = *node_it;
-              unsigned int node_id = node->id();
-
-              if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
-              {
-                // The zero only works for LAGRANGE!
-                dof_id_type dof = node->dof_number(sys_num, var_num, 0);
-
-                // Swap back
-                Moose::swapLibMeshComm(swapped);
-
-                Node * from_node = from_mesh->node_ptr(node_id);
-
-                // Assuming LAGRANGE!
-                dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
-                //Real from_value = (*serialized_solution)(from_dof);
-                Real from_value = (*from_sys.solution)(from_dof);
-
-                // Swap again
-                swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
-                solution.set(dof, from_value);
-              }
-            }
-          }
-          else // Elemental
-          {
-            mooseError("MultiAppCopyTransfer can only be used on nodal variables");
-          }
-
-          solution.close();
-          to_sys->update();
-
-          // Swap back
-          Moose::swapLibMeshComm(swapped);
-        }
-      }
-
-//      delete serialized_solution;
-
-      break;
-    }
-    case FROM_MULTIAPP:
-    {
-      FEProblem & to_problem = _multi_app->problem();
-      MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
-      SystemBase & to_system_base = to_var.sys();
-
-      System & to_sys = to_system_base.system();
-
-      NumericVector<Real> & to_solution = *to_sys.solution;
-
-      unsigned int to_sys_num = to_sys.number();
-
-      // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with ReplicatedMesh!");
-
-      unsigned int to_var_num = to_sys.variable_number(to_var.name());
-
-      MeshBase * to_mesh = NULL;
-
-      to_mesh = &to_problem.mesh().getMesh();
-
-      bool is_nodal = to_sys.variable_type(to_var_num) == FEType();
-
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
-      {
-        if (!_multi_app->hasLocalApp(i))
-          continue;
-
-        MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
-        FEProblem & from_problem = _multi_app->appProblem(i);
-        MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
-        SystemBase & from_system_base = from_var.sys();
-
-        System & from_sys = from_system_base.system();
-
-        unsigned int from_sys_num = from_sys.number();
-
-        unsigned int from_var_num = from_sys.variable_number(from_var.name());
-
-        // Only works with a serialized mesh to transfer from!
-        mooseAssert(from_sys.get_mesh().is_serial(), "MultiAppCopyTransfer only works with ReplicatedMesh!");
-
-        //Create a serialized version of the solution vector
-//        NumericVector<Number> * serialized_solution = NumericVector<Number>::build(from_sys.comm()).release();
-//        serialized_solution->init(from_sys.n_dofs(), false, SERIAL);
-
-        // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-//        from_sys.solution->localize(*serialized_solution);
-
-
-        MeshBase * from_mesh = &from_problem.mesh().getMesh();
-
-        Moose::swapLibMeshComm(swapped);
-
-        if (is_nodal)
-        {
-          MeshBase::const_node_iterator to_node_it = to_mesh->local_nodes_begin();
-          MeshBase::const_node_iterator to_node_end = to_mesh->local_nodes_end();
-
-          for (; to_node_it != to_node_end; ++to_node_it)
-          {
-            Node * to_node = *to_node_it;
-            unsigned int to_node_id = to_node->id();
-
-            // The zero only works for LAGRANGE!
-            dof_id_type to_dof = to_node->dof_number(to_sys_num, to_var_num, 0);
-
-            MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-
-            Node * from_node = from_mesh->node_ptr(to_node_id);
-
-            // Assuming LAGRANGE!
-            dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
-            //Real from_value = (*serialized_solution)(from_dof);
-            Real from_value = (*from_sys.solution)(from_dof);
-
-            // Swap back
-            Moose::swapLibMeshComm(swapped);
-
-            to_solution.set(to_dof, from_value);
-          }
-        }
-        else // Elemental
-        {
-          mooseError("MultiAppCopyTransfer can only be used on nodal variables");
-        }
-
-//        delete serialized_solution;
-      }
-
-      to_solution.close();
-      to_sys.update();
-
-      break;
-    }
+    _to_object = *node_it;
+    _from_object = from_mesh->node_ptr(_to_object->id());
+    transferDofObject();
   }
 
-  _console << "Finished CopyTransfer " << name() << std::endl;
+  // Transfer elem dofs
+  MeshBase::const_element_iterator elem_it = to_mesh->local_elements_begin();
+  MeshBase::const_element_iterator elem_end = to_mesh->local_elements_end();
+  for (; elem_it != elem_end; ++elem_it)
+  {
+    _to_object = *elem_it;
+    _from_object = from_mesh->elem_ptr(_to_object->id());
+    mooseAssert( (*elem_it)->type() == (from_mesh->elem_ptr(_to_object->id()))->type(), "The elements must be the same type.");
+    transferDofObject();
+  }
+
+  _solution->close();
+  to_sys->update();
+
+  // Swap back
+  Moose::swapLibMeshComm(_swapped);
+}
+
+void
+MultiAppCopyTransfer::execute()
+{
+  _console << "Beginning MultiAppCopyTransfer " << name() << std::endl;
+
+  if (_direction == TO_MULTIAPP)
+  {
+    FEProblem & from_problem = _multi_app->problem();
+    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+    if (_multi_app->hasLocalApp(i))
+      transfer(_multi_app->appProblem(i), from_problem);
+  }
+
+  else if (_direction == FROM_MULTIAPP)
+  {
+    FEProblem & to_problem = _multi_app->problem();
+    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+    if (_multi_app->hasLocalApp(i))
+       transfer(to_problem, _multi_app->appProblem(i));
+  }
+
+  _console << "Finished MultiAppCopyTransfer " << name() << std::endl;
 }
