@@ -1,4 +1,4 @@
-# example showing grain motion due to applied force density on grains
+# test file for showing reaction forces between particles
 [GlobalParams]
   var_name_base = eta
   op_num = 2
@@ -7,44 +7,26 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 40
-  ny = 20
+  nx = 10
+  ny = 5
   nz = 0
-  xmin = 0.0
-  xmax = 40.0
-  ymin = 0.0
-  ymax = 20.0
+  xmax = 50
+  ymax = 25
   zmax = 0
   elem_type = QUAD4
+  uniform_refine = 1
 []
 
 [Variables]
   [./c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-      type = SpecifiedSmoothCircleIC
-      invalue = 1.0
-      outvalue = 0.0
-      int_width = 6.0
-      x_positions = '20.0 30.0 '
-      z_positions = '0.0 0.0 '
-      y_positions = '0.0 25.0 '
-      radii = '14.0 14.0'
-      3D_spheres = false
-      variable = c
-    [../]
   [../]
   [./w]
     order = FIRST
     family = LAGRANGE
   [../]
-[]
-
-[Functions]
-  [./load]
-    type = ConstantFunction
-    value = -0.01
+  [./PolycrystalVariables]
   [../]
 []
 
@@ -54,6 +36,7 @@
     variable = c
     f_name = F
     kappa_name = kappa_c
+    args = 'eta0 eta1'
     w = w
   [../]
   [./w_res]
@@ -71,8 +54,17 @@
     variable = w
     c = c
     v = 'eta0 eta1'
-    grain_tracker_object = grain_center
     grain_force = grain_force
+    grain_tracker_object = grain_center
+  [../]
+  [./RigidBodyMultiKernel]
+    # Creates all of the necessary Allen Cahn kernels automatically
+    c = c
+    f_name = F
+    mob_name = M
+    kappa_name = kappa_eta
+    grain_force = grain_force
+    grain_tracker_object = grain_center
   [../]
 []
 
@@ -80,46 +72,56 @@
   [./pfmobility]
     type = GenericConstantMaterial
     prop_names = 'M    kappa_c  kappa_eta'
-    prop_values = '1.0  2.0      0.1'
+    prop_values = '1.0  0.5      0.5'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
     f_name = F
-    args = c
+    args = 'c eta0 eta1'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
-    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
+    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+eta0*(1-eta0)*c+eta1*(1-eta1)*c
     derivative_order = 2
   [../]
   [./force_density]
-    type = ExternalForceDensityMaterial
+    type = ForceDensityMaterial
     c = c
+    etas ='eta0 eta1'
+  [../]
+  [./advection_vel]
+    type = GrainAdvectionVelocity
     etas = 'eta0 eta1'
-    k = 1.0
-    force_y = load
+    c = c
+    grain_data = grain_center
+    grain_force = grain_force
   [../]
 []
 
 [AuxVariables]
-  [./eta0]
-  [../]
-  [./eta1]
-  [../]
   [./bnds]
   [../]
-  [./df00]
+  #[./MultiAuxVariables]
+  #  order = CONSTANT
+  #  family = MONOMIAL
+  #  var_name_base = 'df vadv'
+  #  op_num = 2
+  #[../]
+  [./MultiAuxVariables]
+    order = CONSTANT
+    family = MONOMIAL
+    variable_base = 'df vadv vadv_div'
+    data_type = 'RealGradient RealGradient Real'
+    grain_num = 2
+  [../]
+  [./unique_grains]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./df01]
+  [./var_indices]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./df10]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./df11]
+  [./centroids]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -133,35 +135,42 @@
     op_num = 2.0
     v = 'eta0 eta1'
   [../]
-  [./df01]
-    type = MaterialStdVectorRealGradientAux
-    variable = df01
-    component = 1
-    property = force_density_ext
+  [./MaterialVectorGradAuxKernel]
+    variable_base = 'df vadv '
+    grain_num = 2
+    property = 'force_density advection_velocity'
   [../]
-  [./df11]
-    type = MaterialStdVectorRealGradientAux
-    variable = df11
-    index = 1
-    component = 1
-    property = force_density_ext
+  [./MaterialVectorAuxKernel]
+    variable_base = 'vadv_div '
+    grain_num = 2
+    property = 'advection_velocity_divergence'
   [../]
-  [./df00]
-    type = MaterialStdVectorRealGradientAux
-    variable = df00
-    property = force_density_ext
+  [./unique_grains]
+    type = FeatureFloodCountAux
+    variable = unique_grains
+    flood_counter = grain_center
+    field_display = UNIQUE_REGION
+    execute_on = timestep_begin
   [../]
-  [./df10]
-    type = MaterialStdVectorRealGradientAux
-    variable = df10
-    index = 1
-    property = force_density_ext
+  [./var_indices]
+    type = FeatureFloodCountAux
+    variable = var_indices
+    flood_counter = grain_center
+    field_display = VARIABLE_COLORING
+    execute_on = timestep_begin
+  [../]
+  [./centroids]
+    type = FeatureFloodCountAux
+    variable = centroids
+    execute_on = timestep_begin
+    field_display = CENTROID
+    flood_counter = grain_center
   [../]
 []
 
 [ICs]
   [./ic_eta0]
-    int_width = 6.0
+    int_width = 1.0
     x1 = 20.0
     y1 = 0.0
     radius = 14.0
@@ -171,7 +180,7 @@
     type = SmoothCircleIC
   [../]
   [./IC_eta1]
-    int_width = 6.0
+    int_width = 1.0
     x1 = 30.0
     y1 = 25.0
     radius = 14.0
@@ -179,6 +188,19 @@
     variable = eta1
     invalue = 1.0
     type = SmoothCircleIC
+  [../]
+  [./ic_c]
+    type = SpecifiedSmoothCircleIC
+    invalue = 1.0
+    outvalue = 0.1
+    int_width = 1.0
+    x_positions = '20.0 30.0 '
+    z_positions = '0.0 0.0 '
+    y_positions = '0.0 25.0 '
+    radii = '14.0 14.0'
+    3D_spheres = false
+    variable = c
+    block = 0
   [../]
 []
 
@@ -199,11 +221,11 @@
   [../]
   [./grain_force]
     type = ComputeGrainForceAndTorque
+    execute_on = 'initial linear nonlinear'
+    grain_data = grain_center
+    force_density = force_density
     c = c
     etas = 'eta0 eta1'
-    grain_data = grain_center
-    force_density = force_density_ext
-    execute_on = 'initial linear nonlinear'
   [../]
 []
 
@@ -224,16 +246,11 @@
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   start_time = 0.0
-  num_steps = 5
+  num_steps = 1
   dt = 0.1
-  [./Adaptivity]
-    refine_fraction = 0.7
-    coarsen_fraction = 0.1
-    max_h_level = 2
-    initial_adaptivity = 1
-  [../]
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []

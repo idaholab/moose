@@ -14,7 +14,6 @@ template<>
 InputParameters validParams<MatVecRealGradAuxKernelAction>()
 {
   InputParameters params = validParams<Action>();
-
   params.addRequiredParam<unsigned int>("op_num", "Value that specifies the number of grains to create");
   params.addRequiredParam<std::vector<std::string> >("var_name_base", "Vector specifies the base name of the variables");
   params.addRequiredParam<std::vector<MaterialPropertyName> >("property", "the scalar material property names");
@@ -22,13 +21,13 @@ InputParameters validParams<MatVecRealGradAuxKernelAction>()
   params.addRequiredParam<unsigned int>("dim", "the dimensions of the mesh");
   params.addParam<AuxVariableName>("divergence_variable", "Name of divergence variable to generate kernels for");
   params.addParam<MaterialPropertyName>("divergence_property", "Scalar material property name for divergence variable");
-
   return params;
 }
 
 MatVecRealGradAuxKernelAction::MatVecRealGradAuxKernelAction(const InputParameters & params) :
     Action(params)
 {
+  mooseDeprecated("Use 'MaterialVectorAuxKernel' or 'MaterialVectorGradAuxKernel' action instead depending on data_type of MaterialProperty<std::vector<date_type> >");
 }
 
 void

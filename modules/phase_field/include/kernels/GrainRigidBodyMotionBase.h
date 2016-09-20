@@ -73,8 +73,7 @@ protected:
 
   /// grain tracker object
   const GrainTrackerInterface & _grain_tracker;
-  /// total no. of grains
-  unsigned int _grain_num;
+
   /// get the total no. of dofs in the system
   unsigned int _total_dofs;
 

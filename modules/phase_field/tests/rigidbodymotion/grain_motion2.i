@@ -126,12 +126,12 @@
     variable = unique_grains
     flood_counter = grain_center
     field_display = UNIQUE_REGION
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial timestep_begin'
   [../]
   [./centroids]
     type = FeatureFloodCountAux
     variable = centroids
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial timestep_begin'
     field_display = CENTROID
     flood_counter = grain_center
   [../]
@@ -178,7 +178,7 @@
   [../]
   [./grain_force]
     type = ConstantGrainForceAndTorque
-    execute_on = 'linear nonlinear'
+    execute_on = 'initial linear nonlinear'
     force = '0.5 0.0 0.0 '
     torque = '0.0 0.0 10.0 '
   [../]
