@@ -34,7 +34,7 @@ InputParameters validParams<MultiAppCopyTransfer>()
   params.addDeprecatedParam<VariableName>("source_variable", "The variable to transfer from.", "This is replaced by 'from_variable'.");
   params.addRequiredParam<VariableName>("to_variable", "The variable that the solution is being transfered into.");
   params.addRequiredParam<VariableName>("from_variable", "The variable to transfer from.");
-
+  params.addClassDescription("Copies variables (nonlinear and auxiliary) between multiapps that have identical meshes.");
   return params;
 }
 
