@@ -64,9 +64,7 @@ SplitCHParsed::computeQpOffDiagJacobian(unsigned int jvar)
     return SplitCHCRes::computeQpOffDiagJacobian(jvar);
 
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return (*_d2Fdcdarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }

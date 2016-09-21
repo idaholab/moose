@@ -82,9 +82,7 @@ Real
 ACInterfaceKobayashi1::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   // Set modified gradient vector
   const RealGradient v(-_grad_u[_qp](1), _grad_u[_qp](0), 0);

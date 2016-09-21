@@ -88,9 +88,7 @@ KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   //  for all other vars get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return res;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   res += _L[_qp] * _prop_dh[_qp] * (*_prop_d2Fadcadarg[cvar])[_qp]
             * (_ca[_qp] - _cb[_qp]) * _phi[_j][_qp]  * _test[_i][_qp];

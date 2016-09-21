@@ -153,9 +153,7 @@ Real
 CHInterfaceBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   // Set the gradient derivative
   RealGradient dgrad_Mdarg =   (*_d2Mdcdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp]
