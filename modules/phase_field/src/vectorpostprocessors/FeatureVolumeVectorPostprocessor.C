@@ -58,8 +58,6 @@ FeatureVolumeVectorPostprocessor::execute()
   const auto num_grains = grain_tracker->getTotalNumberGrains();
   _grain_volumes.assign(num_grains, 0);
 
-//  const FeatureFloodCount::FieldType field_type = FeatureFloodCount::FieldType::UNIQUE_REGION;
-
   const auto end = _mesh.getMesh().active_local_elements_end();
   for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
