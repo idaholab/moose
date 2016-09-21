@@ -9,7 +9,8 @@
 
 // MOOSE includes
 #include "TimeDerivative.h"
-#include "Material.h"
+#include "JvarMapInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
 class HeatCapacityConductionTimeDerivative;
@@ -24,7 +25,7 @@ InputParameters validParams<HeatCapacityConductionTimeDerivative>();
  *   \f$ \rho * C_p * \frac{\partial T}{\partial t}, \f$
  * where \f$ C_p \f$ is material property for the "heat_capacity".
  */
-class HeatCapacityConductionTimeDerivative : public TimeDerivative
+class HeatCapacityConductionTimeDerivative : public DerivativeMaterialInterface<JvarMapInterface<TimeDerivative>>
 {
 public:
   HeatCapacityConductionTimeDerivative(const InputParameters & parameters);
@@ -32,8 +33,13 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  ///@{ Density and it derivatives with respect
   const MaterialProperty<Real> & _heat_capacity;
+  const MaterialProperty<Real> & _d_heat_capacity_dT;
+  std::vector<const MaterialProperty<Real> *> _d_heat_capacity_dargs;
+  ///@}
 };
 
 #endif //HEATCAPACITYCONDUCTIONTIMEDERIVATIVE_H
