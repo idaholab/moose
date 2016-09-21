@@ -29,7 +29,7 @@ class AuxiliarySystem;
 class ComputeNodalAuxVarsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxVarsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage);
+  ComputeNodalAuxVarsThread(FEProblem & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage);
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 
@@ -38,7 +38,7 @@ public:
   void join(const ComputeNodalAuxVarsThread & /*y*/);
 
 protected:
-  AuxiliarySystem & _sys;
+  AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
   const MooseObjectWarehouse<AuxKernel> & _storage;

@@ -25,15 +25,15 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, SparseMatrix<Number> & jacobian) :
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _jacobian(jacobian),
-    _sys(sys),
+    _nl(fe_problem.getNonlinearSystem()),
     _num_cached(0),
-    _integrated_bcs(sys.getIntegratedBCWarehouse()),
-    _dg_kernels(sys.getDGKernelWarehouse()),
-    _interface_kernels(sys.getInterfaceKernelWarehouse()),
-    _kernels(sys.getKernelWarehouse())
+    _integrated_bcs(_nl.getIntegratedBCWarehouse()),
+    _dg_kernels(_nl.getDGKernelWarehouse()),
+    _interface_kernels(_nl.getInterfaceKernelWarehouse()),
+    _kernels(_nl.getKernelWarehouse())
 {
 }
 
@@ -41,7 +41,7 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, NonlinearSy
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split) :
     ThreadedElementLoop<ConstElemRange>(x, split),
     _jacobian(x._jacobian),
-    _sys(x._sys),
+    _nl(x._nl),
     _num_cached(x._num_cached),
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
@@ -141,7 +141,7 @@ ComputeJacobianThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
-  if (_sys.getScalarVariables(_tid).size() > 0)
+  if (_nl.getScalarVariables(_tid).size() > 0)
     _fe_problem.reinitOffDiagScalars(_tid);
 
   computeJacobian();

@@ -22,11 +22,10 @@
 #include "libmesh/threads.h"
 
 ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem,
-                                                 AuxiliarySystem & sys,
                                                  const MooseObjectWarehouse<AuxKernel> & storage,
                                                  bool need_materials) :
     _problem(problem),
-    _sys(sys),
+    _aux_sys(problem.getAuxiliarySystem()),
     _storage(storage),
     _need_materials(need_materials)
 {
@@ -35,7 +34,7 @@ ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem,
 // Splitting Constructor
 ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split /*split*/) :
     _problem(x._problem),
-    _sys(x._sys),
+    _aux_sys(x._aux_sys),
     _storage(x._storage),
     _need_materials(x._need_materials)
 {
@@ -59,7 +58,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
     if (elem->processor_id() == _problem.processor_id())
     {
       // prepare variables
-      for (const auto & it : _sys._elem_vars[_tid])
+      for (const auto & it : _aux_sys._elem_vars[_tid])
       {
         MooseVariable * var = it.second;
         var->prepareAux();
@@ -95,10 +94,10 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       // update the solution vector
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        for (const auto & it : _sys._elem_vars[_tid])
+        for (const auto & it : _aux_sys._elem_vars[_tid])
         {
           MooseVariable * var = it.second;
-          var->insert(_sys.solution());
+          var->insert(_aux_sys.solution());
         }
       }
     }

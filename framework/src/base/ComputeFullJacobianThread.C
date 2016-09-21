@@ -23,18 +23,20 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian) :
-    ComputeJacobianThread(fe_problem, sys, jacobian),
-    _integrated_bcs(sys.getIntegratedBCWarehouse()),
-    _dg_kernels(sys.getDGKernelWarehouse()),
-    _interface_kernels(sys.getInterfaceKernelWarehouse()),
-    _kernels(sys.getKernelWarehouse())
+ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, SparseMatrix<Number> & jacobian) :
+    ComputeJacobianThread(fe_problem, jacobian),
+    _nl(fe_problem.getNonlinearSystem()),
+    _integrated_bcs(_nl.getIntegratedBCWarehouse()),
+    _dg_kernels(_nl.getDGKernelWarehouse()),
+    _interface_kernels(_nl.getInterfaceKernelWarehouse()),
+    _kernels(_nl.getKernelWarehouse())
 {
 }
 
 // Splitting Constructor
 ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split) :
     ComputeJacobianThread(x, split),
+    _nl(x._nl),
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
@@ -100,11 +102,11 @@ ComputeFullJacobianThread::computeJacobian()
     }
   }
 
-  const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
+  const std::vector<MooseVariableScalar *> & scalar_vars = _nl.getScalarVariables(_tid);
   if (scalar_vars.size() > 0)
   {
     // go over nl-variables (non-scalar)
-    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    const std::vector<MooseVariable *> & vars = _nl.getVariables(_tid);
     for (const auto & ivariable : vars)
       if (ivariable->activeOnSubdomain(_subdomain) > 0 && _kernels.hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
       {
@@ -118,7 +120,7 @@ ComputeFullJacobianThread::computeJacobian()
 
             // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
             for (const auto & jvariable : coupled_scalar_vars)
-              if (_sys.hasScalarVariable(jvariable->name()))
+              if (_nl.hasScalarVariable(jvariable->name()))
                 kernel->computeOffDiagJacobianScalar(jvariable->number());
           }
       }
@@ -146,11 +148,11 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     }
   }
 
-  const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
+  const std::vector<MooseVariableScalar *> & scalar_vars = _nl.getScalarVariables(_tid);
   if (scalar_vars.size() > 0)
   {
     // go over nl-variables (non-scalar)
-    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    const std::vector<MooseVariable *> & vars = _nl.getVariables(_tid);
     for (const auto & ivar : vars)
       if (ivar->activeOnSubdomain(_subdomain) > 0 && _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
       {
@@ -164,7 +166,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 
             // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
             for (const auto & jvar : coupled_scalar_vars)
-              if (_sys.hasScalarVariable(jvar->name()))
+              if (_nl.hasScalarVariable(jvar->name()))
                 bc->computeJacobianBlockScalar(jvar->number());
           }
       }

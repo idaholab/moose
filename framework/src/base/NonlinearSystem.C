@@ -1246,7 +1246,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   // residual contributions from the domain
   PARALLEL_TRY {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeResidualThread cr(_fe_problem, *this, type);
+    ComputeResidualThread cr(_fe_problem, type);
 
     Threads::parallel_reduce(elem_range, cr);
 
@@ -1297,7 +1297,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   {
     if (_nodal_kernels.hasActiveBlockObjects())
     {
-      ComputeNodalKernelsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
+      ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels);
 
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
@@ -1317,7 +1317,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   {
     if (_nodal_kernels.hasActiveBoundaryObjects())
     {
-      ComputeNodalKernelBcsThread cnk(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels);
+      ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels);
 
       ConstBndNodeRange & bnd_node_range = *_mesh.getBoundaryNodeRange();
 
@@ -1899,7 +1899,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     {
     case Moose::COUPLING_DIAG:
       {
-        ComputeJacobianThread cj(_fe_problem, *this, jacobian);
+        ComputeJacobianThread cj(_fe_problem, jacobian);
         Threads::parallel_reduce(elem_range, cj);
 
         unsigned int n_threads = libMesh::n_threads();
@@ -1909,7 +1909,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -1921,7 +1921,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -1935,7 +1935,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     default:
     case Moose::COUPLING_CUSTOM:
       {
-        ComputeFullJacobianThread cj(_fe_problem, *this, jacobian);
+        ComputeFullJacobianThread cj(_fe_problem, jacobian);
         Threads::parallel_reduce(elem_range, cj);
         unsigned int n_threads = libMesh::n_threads();
 
@@ -1945,7 +1945,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -1957,7 +1957,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _fe_problem.getAuxiliarySystem(), _nodal_kernels, jacobian);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -2266,7 +2266,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number> & solution,
   if (_element_dampers.hasActiveObjects())
   {
     *_increment_vec = update;
-    ComputeElemDampingThread cid(_fe_problem, *this);
+    ComputeElemDampingThread cid(_fe_problem);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
     damping = cid.damping();
   }
@@ -2312,7 +2312,7 @@ NonlinearSystem::computeDiracContributions(SparseMatrix<Number> * jacobian)
       }
     }
 
-    ComputeDiracThread cd(_fe_problem, *this, jacobian);
+    ComputeDiracThread cd(_fe_problem, jacobian);
 
     _fe_problem.getDiracElements(dirac_elements);
 

@@ -22,10 +22,10 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeMarkerThread::ComputeMarkerThread(FEProblem & fe_problem, AuxiliarySystem & sys) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+ComputeMarkerThread::ComputeMarkerThread(FEProblem & fe_problem) :
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
-    _aux_sys(sys),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _marker_whs(_fe_problem.getMarkerWarehouse())
 {
 }

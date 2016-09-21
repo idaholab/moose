@@ -24,7 +24,7 @@
 
 UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem,
                                                    const std::map<std::string, std::unique_ptr<ErrorVector> > & indicator_field_to_error_vector) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _indicator_field_to_error_vector(indicator_field_to_error_vector),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _system_number(_aux_sys.number()),

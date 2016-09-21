@@ -29,7 +29,7 @@ FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
                                        std::vector<Number> & serialized_solution,
                                        unsigned int max_h_level,
                                        const std::string & marker_name) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, fe_problem.getAuxiliarySystem()),
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _displaced_problem(_fe_problem.getDisplacedProblem()),
     _aux_sys(fe_problem.getAuxiliarySystem()),
