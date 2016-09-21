@@ -18,6 +18,8 @@
 #include "HeatConduction.h"
 #include "AnisoHeatConduction.h"
 #include "HeatConductionTimeDerivative.h"
+#include "HeatCapacityConductionTimeDerivative.h"
+#include "SpecificHeatConductionTimeDerivative.h"
 #include "HeatConductionMaterial.h"
 #include "AnisoHeatConductionMaterial.h"
 #include "HeatConductionBC.h"
@@ -69,24 +71,29 @@ void
 HeatConductionApp::registerObjects(Factory & factory)
 {
   registerNamedKernel(HeatConductionKernel, "HeatConduction");
+
   registerKernel(AnisoHeatConduction);
   registerKernel(HeatConductionTimeDerivative);
   registerKernel(HeatSource);
   registerKernel(HomogenizedHeatConduction);
+  registerKernel(HeatCapacityConductionTimeDerivative);
+  registerKernel(SpecificHeatConductionTimeDerivative);
+
   registerBoundaryCondition(HeatConductionBC);
   registerBoundaryCondition(ConvectiveFluxFunction);
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(CoupledConvectiveFlux);
+
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
   registerMaterial(AnisoHeatConductionMaterial);
+
   registerDiracKernel(GapHeatPointSourceMaster);
+
   registerPostprocessor(HomogenizedThermalConductivity);
   registerPostprocessor(ThermalConductivity);
-  registerConstraint(GapConductanceConstraint);
 
-  registerDeprecatedObjectName(ThermalConductivity, "ThermalCond", "09/15/2016 00:00");
-  registerDeprecatedObjectName(HomogenizedHeatConduction, "HomogenizationHeatConduction", "09/15/2016 00:00");
+  registerConstraint(GapConductanceConstraint);
 }
 
 // External entry point for dynamic syntax association
