@@ -1285,6 +1285,7 @@ private:
 
   friend class AuxiliarySystem;
   friend class AssemblySystem;
+  friend class NonlinearSystem;
   friend class MooseEigenSystem;
   friend class Resurrector;
   friend class RestartableDataIO;

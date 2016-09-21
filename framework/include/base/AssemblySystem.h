@@ -20,10 +20,6 @@
 #include "ConstraintWarehouse.h"
 #include "MooseObjectWarehouse.h"
 
-// libMesh includes
-#include "libmesh/transient_system.h"
-#include "libmesh/nonlinear_implicit_system.h"
-
 // Forward declarations
 class FEProblem;
 class MoosePreconditioner;
@@ -54,21 +50,11 @@ template <typename T> class SparseMatrix;
  *
  * It is a part of FEProblem ;-)
  */
-class AssemblySystem : public SystemTempl<TransientNonlinearImplicitSystem>,
-                        public ConsoleStreamInterface
+class AssemblySystem : public ConsoleStreamInterface
 {
 public:
-  AssemblySystem(FEProblem & problem, const std::string & name);
+  AssemblySystem(FEProblem & problem, Factory & factory, const std::string & name);
   virtual ~AssemblySystem();
-
-  virtual void init() override;
-  virtual void solve() override;
-  virtual void restoreSolutions() override;
-
-  /**
-   * Quit the current solve as soon as possible.
-   */
-  virtual void stopSolve();
 
   /**
    * Returns true if this system is currently computing the initial residual for a solve.
@@ -80,25 +66,11 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  void setupFiniteDifferencedPreconditioner();
   void setupFieldDecomposition();
 
   bool haveFiniteDifferencedPreconditioner() {return _use_finite_differenced_preconditioner;}
   bool haveFieldSplitPreconditioner()        {return _use_field_split_preconditioner;}
 
-  /**
-   * Returns the convergence state
-   * @return true if converged, otherwise false
-   */
-  virtual bool converged();
-
-  /**
-   * Add a time integrator
-   * @param type Type of the integrator
-   * @param name The name of the integrator
-   * @param parameters Integrator params
-   */
-  void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a kernel
@@ -124,13 +96,6 @@ public:
    */
   void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  /**
-   * Adds a boundary condition
-   * @param bc_name The type of the boundary condition
-   * @param name The name of the boundary condition
-   * @param parameters Boundary condition parameters
-   */
-  void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a Constraint
@@ -157,14 +122,6 @@ public:
   void addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters);
 
   /**
-   * Adds an interface kernel
-   * @param interface_kernel_name The type of the interface kernel
-   * @param name The name of the interface kernel
-   * @param parameters interface kernel parameters
-   */
-  void addInterfaceKernel(std::string interface_kernel_name, const std::string & name, InputParameters parameters);
-
-  /**
    * Adds a damper
    * @param damper_name The type of the damper
    * @param name The name of the damper
@@ -188,75 +145,8 @@ public:
 
   void zeroVectorForResidual(const std::string & vector_name);
 
-  void setInitialSolution();
 
-  /**
-   * Sets the value of constrained variables in the solution vector.
-   */
-  void setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced);
-
-  /**
-   * Add residual contributions from Constraints
-   *
-   * @param residual - reference to the residual vector where constraint contributions will be computed
-   * @param displaced Controls whether to do the displaced Constraints or non-displaced
-   */
-  void constraintResiduals(NumericVector<Number> & residual, bool displaced);
-
-  /**
-   * Computes residual
-   * @param residual Residual is formed in here
-   * @param type The type of kernels for which the residual is to be computed.
-   */
-  void computeResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
-
-  /**
-   * Finds the implicit sparsity graph between geometrically related dofs.
-   */
-  void findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data,
-                                            std::map<dof_id_type, std::vector<dof_id_type> > & graph);
-
-  /**
-   * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being coupled that
-   * are related geometrically (i.e. near each other across a gap).
-   */
-  void addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian, GeometricSearchData & geom_search_data);
-
-  /**
-   * Add jacobian contributions from Constraints
-   *
-   * @param jacobian reference to the Jacobian matrix
-   * @param displaced Controls whether to do the displaced Constraints or non-displaced
-   */
-  void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
-
-  /// set all the global dof indices for a nonlinear variable
-  void setVariableGlobalDoFs(const std::string & var_name);
   const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
-
-  /**
-   * Computes Jacobian
-   * @param jacobian Jacobian is formed in here
-   */
-  void computeJacobian(SparseMatrix<Number> &  jacobian);
-
-  /**
-   * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
-   *
-   * Used by Physics-based preconditioning
-   *
-   * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
-   */
-  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
-
-  /**
-   * Compute damping
-   * @param solution The trail solution vector
-   * @param update The incremental update to the solution vector
-   * @return returns The damping factor
-   */
-  Real computeDamping(const NumericVector<Number> & solution,
-                      const NumericVector<Number> & update);
 
   /**
    * Computes the time derivative vector
@@ -275,35 +165,12 @@ public:
    */
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
-  virtual void setSolution(const NumericVector<Number> & soln);
-
 
   /**
    * Update active objects of Warehouses owned by AssemblySystem
    */
   void updateActive(THREAD_ID tid);
 
-  /**
-   * Set transient term used by residual and Jacobian evaluation.
-   * @param udot transient term
-   * @note If the calling sequence for residual evaluation was changed, this could become an explicit argument.
-   */
-  virtual void setSolutionUDot(const NumericVector<Number> & udot);
-
-  virtual NumericVector<Number> & solutionUDot() override;
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
-
-  virtual const NumericVector<Number> * & currentSolution() override { return _current_solution; }
-
-  virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution() override;
-
-  virtual NumericVector<Number> & residualCopy() override;
-  virtual NumericVector<Number> & residualGhosted() override;
-
-  virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
-                               std::vector<dof_id_type> & n_nz,
-                               std::vector<dof_id_type> & n_oz) override;
 
   /**
    * Sets a preconditioner
@@ -343,19 +210,14 @@ public:
    */
   void assembleConstraintsSeparately(bool separately=true) {_assemble_constraints_separately = separately;}
 
-  /**
-   * Setup damping stuff (called before we actually start)
-   */
-  void setupDampers();
+
   /**
    * Compute the incremental change in variables for dampers. Called before we use damping
    * @param tid Thread ID
    */
   void reinitIncrementForDampers(THREAD_ID tid);
 
-  ///@{
-  /// System Integrity Checks
-  void checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const;
+
   bool containsTimeKernel();
   ///@}
 
@@ -363,12 +225,6 @@ public:
    * Return the number of non-linear iterations
    */
   unsigned int nNonlinearIterations() { return _n_iters; }
-
-  /**
-   * Returns the current nonlinear iteration number.  In libmesh, this is
-   * updated during the nonlinear solve, so it should be up-to-date.
-   */
-  unsigned int getCurrentNonlinearIterationNumber() { return _sys.get_current_nonlinear_iteration_number(); }
 
   /**
    * Return the number of linear iterations
@@ -452,10 +308,6 @@ public:
    */
   bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
 
-  /**
-   * The relative L2 norm of the difference between solution and old solution vector.
-   */
-  virtual Real relativeSolutionDifferenceNorm();
 
 public:
   FEProblem & _fe_problem;
@@ -470,21 +322,6 @@ public:
   bool _compute_initial_residual_before_preset_bcs;
 
 protected:
-  /**
-   * Compute the residual
-   * @param type The type of kernels for which the residual is to be computed.
-   */
-  void computeResidualInternal(Moose::KernelType type = Moose::KT_ALL);
-
-  /**
-   * Enforces nodal boundary conditions
-   * @param residual Residual where nodal BCs are enforced (input/output)
-   */
-  void computeNodalBCs(NumericVector<Number> & residual);
-
-  void computeJacobianInternal(SparseMatrix<Number> &  jacobian);
-
-  void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
 
   void computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian);
 
@@ -497,25 +334,12 @@ protected:
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
-  /// ghosted form of the residual
-  NumericVector<Number> & _residual_ghosted;
-
-  /// Serialized version of the solution vector
-  NumericVector<Number> & _serialized_solution;
-
-  /// Copy of the residual vector
-  NumericVector<Number> & _residual_copy;
 
   /// Time integrator
   MooseSharedPointer<TimeIntegrator> _time_integrator;
-  /// solution vector for u^dot
-  NumericVector<Number> & _u_dot;
+
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
-  /// residual vector for time contributions
-  NumericVector<Number> & _Re_time;
-  /// residual vector for non-time contributions
-  NumericVector<Number> & _Re_non_time;
 
   ///@{
   /// Kernel Storage
@@ -557,10 +381,10 @@ protected:
 
 
 protected:
+  Factory  & _factory_assbly;
+  MooseMesh & _mesh_assbly;
   /// increment vector
   NumericVector<Number> * _increment_vec;
-  /// The difference of current and old solutions
-  NumericVector<Number> & _sln_diff;
   /// Preconditioner
   MooseSharedPointer<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
@@ -627,7 +451,7 @@ protected:
   /// If there is a nodal BC having diag_save_in
   bool _has_nodalbc_diag_save_in;
 
-  void getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs);
+
 
   std::vector<dof_id_type> _var_all_dof_indices;
 };
