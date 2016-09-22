@@ -10,17 +10,55 @@
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
+template <class T>
+class JvarMapInterfaceBase;
+
 /**
- * Interface class ("Veneer") to provide a mapping from 'jvar' in
- * computeQpOffDiagJacobian into the _coupled_moose_vars array
+ * Interface class ("Veneer") for Kernel to provide a mapping from 'jvar' in
+ * computeQpOffDiagJacobian into the _coupled_moose_vars array.
+ *
+ * This class is useful in conjunction with DerivativeMaterialInterface,
+ * where vectors of material property derviatives with respect to all coupled
+ * variables (iterating over _coupled_moose_vars array) are generated.
+ * The mapping enabled the look up of the correct material property derivatives
+ * for the current jvar.
  */
 template <class T>
-class JvarMapInterface : public T
+class JvarMapKernelInterface : public JvarMapInterfaceBase<T>
 {
 public:
-  JvarMapInterface(const InputParameters & parameters);
+  JvarMapKernelInterface(const InputParameters & parameters);
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+};
 
-  void computeOffDiagJacobian(unsigned int jvar);
+/**
+ * Interface class ("Veneer") for IntegratedBC to provide a mapping from 'jvar' in
+ * computeJacobianBlock into the _coupled_moose_vars array.
+ *
+ * This class is useful in conjunction with DerivativeMaterialInterface,
+ * where vectors of material property derviatives with respect to all coupled
+ * variables (iterating over _coupled_moose_vars array) are generated.
+ * The mapping enabled the look up of the correct material property derivatives
+ * for the current jvar.
+ */
+template <class T>
+class JvarMapIntegratedBCInterface : public JvarMapInterfaceBase<T>
+{
+public:
+  JvarMapIntegratedBCInterface(const InputParameters & parameters);
+  virtual void computeJacobianBlock(unsigned int jvar) override;
+};
+
+
+/**
+ * Base class ("Veneer") that implements the actual mapping from 'jvar' in
+ * into the _coupled_moose_vars array.
+ */
+template <class T>
+class JvarMapInterfaceBase : public T
+{
+public:
+  JvarMapInterfaceBase(const InputParameters & parameters);
 
   /// Return index into the _coupled_moose_vars array for a given jvar
   unsigned int mapJvarToCvar(unsigned int jvar);
@@ -38,11 +76,14 @@ public:
 private:
   /// look-up table to determine the _coupled_moose_vars index for the jvar parameter
   std::vector<int> _jvar_map;
+
+  friend class JvarMapKernelInterface<T>;
+  friend class JvarMapIntegratedBCInterface<T>;
 };
 
 
 template<class T>
-JvarMapInterface<T>::JvarMapInterface(const InputParameters & parameters) :
+JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters) :
     T(parameters),
     _jvar_map(this->_fe_problem.getNonlinearSystem().nVariables(), -1)
 {
@@ -63,20 +104,8 @@ JvarMapInterface<T>::JvarMapInterface(const InputParameters & parameters) :
 }
 
 template<class T>
-void
-JvarMapInterface<T>::computeOffDiagJacobian(unsigned int jvar)
-{
-  // the Kernel is not coupled to the variable; no need to loop over QPs
-  if (_jvar_map[jvar] < 0)
-    return;
-
-  // call the underlying class' off-diagonal Jacobian
-  T::computeOffDiagJacobian(jvar);
-}
-
-template<class T>
 unsigned int
-JvarMapInterface<T>::mapJvarToCvar(unsigned int jvar)
+JvarMapInterfaceBase<T>::mapJvarToCvar(unsigned int jvar)
 {
   mooseAssert(jvar < _jvar_map.size(), "Calling mapJvarToCvar for an invalid Moose variable number. Maybe an AuxVariable?");
   int cit = _jvar_map[jvar];
@@ -85,18 +114,42 @@ JvarMapInterface<T>::mapJvarToCvar(unsigned int jvar)
   return cit;
 }
 
+
 template<class T>
-bool
-JvarMapInterface<T>::mapJvarToCvar(unsigned int jvar, unsigned int & cvar)
+JvarMapKernelInterface<T>::JvarMapKernelInterface(const InputParameters & parameters) :
+    JvarMapInterfaceBase<T>(parameters)
 {
-  mooseAssert(jvar < _jvar_map.size(), "Calling mapJvarToCvar for an invalid Moose variable number. Maybe an AuxVariable?");
-  int cit = _jvar_map[jvar];
+}
 
-  if (cit < 0)
-    mooseError("This should not happen!");
+template<class T>
+JvarMapIntegratedBCInterface<T>::JvarMapIntegratedBCInterface(const InputParameters & parameters) :
+    JvarMapInterfaceBase<T>(parameters)
+{
+}
 
-  cvar = cit;
-  return true;
+
+template<class T>
+void
+JvarMapKernelInterface<T>::computeOffDiagJacobian(unsigned int jvar)
+{
+  // the Kernel is not coupled to the variable; no need to loop over QPs
+  if (this->_jvar_map[jvar] < 0)
+    return;
+
+  // call the underlying class' off-diagonal Jacobian
+  T::computeOffDiagJacobian(jvar);
+}
+
+template<class T>
+void
+JvarMapIntegratedBCInterface<T>::computeJacobianBlock(unsigned int jvar)
+{
+  // the Kernel is not coupled to the variable; no need to loop over QPs
+  if (this->_jvar_map[jvar] < 0)
+    return;
+
+  // call the underlying class' off-diagonal Jacobian
+  T::computeJacobianBlock(jvar);
 }
 
 #endif //JVARMAPINTERFACE_H

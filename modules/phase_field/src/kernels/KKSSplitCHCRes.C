@@ -23,7 +23,7 @@ InputParameters validParams<KKSSplitCHCRes>()
 }
 
 KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<SplitCHBase> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase> >(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),

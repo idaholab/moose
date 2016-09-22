@@ -17,7 +17,7 @@
  * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
  */
 template<typename T>
-class CHInterfaceBase : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
+class CHInterfaceBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
 {
 public:
   CHInterfaceBase(const InputParameters & parameters);
@@ -61,7 +61,7 @@ protected:
 
 template<typename T>
 CHInterfaceBase<T>::CHInterfaceBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
     _kappa(getMaterialProperty<Real>("kappa_name")),
     _M(getMaterialProperty<T>("mob_name")),
     _dMdc(getMaterialPropertyDerivative<T>("mob_name", _var.name())),

@@ -21,7 +21,7 @@ InputParameters validParams<ACInterfaceKobayashi1>()
 }
 
 ACInterfaceKobayashi1::ACInterfaceKobayashi1(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad> >(parameters),
     _L(getMaterialProperty<Real>("mob_name")),
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
     _eps(getMaterialProperty<Real>("eps_name")),

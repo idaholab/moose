@@ -10,6 +10,8 @@ template<>
 InputParameters validParams<HeatCapacityConductionTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
+  params.addClassDescription("Time derivative term $C_p \\frac{\\partial T}{\\partial t}$ of"
+                             "the heat equation with the heat capacity $C_p$ as an argument.");
 
   // Density may be changing with deformation, so we must integrate
   // over current volume by setting the use_displaced_mesh flag.
@@ -22,17 +24,17 @@ InputParameters validParams<HeatCapacityConductionTimeDerivative>()
 
 
 HeatCapacityConductionTimeDerivative::HeatCapacityConductionTimeDerivative(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<TimeDerivative>>(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>(parameters),
     _heat_capacity(getMaterialProperty<Real>("heat_capacity")),
     _d_heat_capacity_dT(getMaterialPropertyDerivative<Real>("heat_capacity", _var.name()))
 {
-  // Get number of coupled variables
+  // get number of coupled variables
   unsigned int nvar = _coupled_moose_vars.size();
 
   // reserve space for derivatives
   _d_heat_capacity_dargs.resize(nvar);
 
-  // Iterate over all coupled variables
+  // iterate over all coupled variables
   for (unsigned int i = 0; i < nvar; ++i)
     _d_heat_capacity_dargs[i] = &getMaterialPropertyDerivative<Real>("heat_capacity", _coupled_moose_vars[i]->name());
 }

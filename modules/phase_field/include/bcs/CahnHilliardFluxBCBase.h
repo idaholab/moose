@@ -17,7 +17,7 @@
  * or a tensor (RealValueTensor).
  */
 template<typename T>
-class CahnHilliardFluxBCBase : public DerivativeMaterialInterface<JvarMapInterface<IntegratedBC> >
+class CahnHilliardFluxBCBase : public DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC> >
 {
 public:
   CahnHilliardFluxBCBase(const InputParameters & parameters);
@@ -40,7 +40,7 @@ protected:
 
 template<typename T>
 CahnHilliardFluxBCBase<T>::CahnHilliardFluxBCBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<IntegratedBC> >(parameters),
+    DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC> >(parameters),
     _flux(getParam<RealGradient>("flux")),
     _M(getMaterialProperty<T>("mob_name")),
     _dMdw(getMaterialPropertyDerivative<T>("mob_name", _var.name()))

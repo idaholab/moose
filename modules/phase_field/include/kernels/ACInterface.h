@@ -20,7 +20,7 @@ InputParameters validParams<ACInterface>();
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left( \kappa_i \nabla\eta_i, \nabla (L_i \psi) \right) \f$
  */
-class ACInterface : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
+class ACInterface : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
 {
 public:
   ACInterface(const InputParameters & parameters);

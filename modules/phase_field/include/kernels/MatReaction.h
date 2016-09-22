@@ -21,7 +21,7 @@ InputParameters validParams<MatReaction>();
  * This kernel adds to the residual a contribution of \f$ -L*v \f$ where \f$ L \f$ is a material
  * property and \f$ v \f$ is a variable (nonlinear or coupled).
  */
-class MatReaction : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
+class MatReaction : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
 {
 public:
   MatReaction(const InputParameters & parameters);

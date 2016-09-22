@@ -22,20 +22,20 @@ InputParameters validParams<HeatCapacityConductionTimeDerivative>();
  * A class for defining the time derivative of the heat equation.
  *
  * By default this Kernel computes:
- *   \f$ \rho * C_p * \frac{\partial T}{\partial t}, \f$
+ *   \f$ C_p * \frac{\partial T}{\partial t}, \f$
  * where \f$ C_p \f$ is material property for the "heat_capacity".
  */
-class HeatCapacityConductionTimeDerivative : public DerivativeMaterialInterface<JvarMapInterface<TimeDerivative>>
+class HeatCapacityConductionTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
   HeatCapacityConductionTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  ///@{ Density and it derivatives with respect
+  ///@{ Heat capacity and its derivatives with respect to temperature and other coupled variables.
   const MaterialProperty<Real> & _heat_capacity;
   const MaterialProperty<Real> & _d_heat_capacity_dT;
   std::vector<const MaterialProperty<Real> *> _d_heat_capacity_dargs;

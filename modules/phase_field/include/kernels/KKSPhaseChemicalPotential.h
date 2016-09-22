@@ -32,7 +32,7 @@ InputParameters validParams<KKSPhaseChemicalPotential>();
  * \see KKSPhaseConcentration
  */
 class KKSPhaseChemicalPotential : public DerivativeMaterialInterface<
-                                         JvarMapInterface<
+                                         JvarMapKernelInterface<
                                          Kernel
                                          > >
 {

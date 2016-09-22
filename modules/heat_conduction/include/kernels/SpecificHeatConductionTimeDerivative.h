@@ -26,21 +26,23 @@ InputParameters validParams<SpecificHeatConductionTimeDerivative>();
  * where \f$ \rho \f$ and \f$ c_p \f$ are material properties for "density" and
  * "specific_heat", respectively.
  */
-class SpecificHeatConductionTimeDerivative : public DerivativeMaterialInterface<JvarMapInterface<TimeDerivative>>
+class SpecificHeatConductionTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
   SpecificHeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  ///@{ Specific heat and its derivatives with respect to temperature and other coupled variables.
   const MaterialProperty<Real> & _specific_heat;
   const MaterialProperty<Real> & _d_specific_heat_dT;
   std::vector<const MaterialProperty<Real> *> _d_specific_heat_dargs;
+  ///@}
 
-  ///@{ Density and it derivatives with respect
+  ///@{ Density and its derivatives with respect to temperature and other coupled variables.
   const MaterialProperty<Real> & _density;
   const MaterialProperty<Real> & _d_density_dT;
   std::vector<const MaterialProperty<Real> *> _d_density_dargs;

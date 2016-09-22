@@ -19,7 +19,7 @@ InputParameters validParams<ACInterface>()
 }
 
 ACInterface::ACInterface(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
     _L(getMaterialProperty<Real>("mob_name")),
     _kappa(getMaterialProperty<Real>("kappa_name")),
     _variable_L(getParam<bool>("variable_L")),

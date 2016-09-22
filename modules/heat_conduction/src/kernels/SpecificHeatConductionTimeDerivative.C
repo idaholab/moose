@@ -10,6 +10,8 @@ template<>
 InputParameters validParams<SpecificHeatConductionTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
+  params.addClassDescription("Time derivative term $\\rho c_p \\frac{\\partial T}{\\partial t}$ of"
+                             "the heat equation with the specific heat $c_p$ and the density $\rho$ as arguments.");
 
   // Density may be changing with deformation, so we must integrate
   // over current volume by setting the use_displaced_mesh flag.
@@ -23,7 +25,7 @@ InputParameters validParams<SpecificHeatConductionTimeDerivative>()
 
 
 SpecificHeatConductionTimeDerivative::SpecificHeatConductionTimeDerivative(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<TimeDerivative>>(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>(parameters),
     _specific_heat(getMaterialProperty<Real>("specific_heat")),
     _d_specific_heat_dT(getMaterialPropertyDerivative<Real>("specific_heat", _var.name())),
     _density(getMaterialProperty<Real>("density")),

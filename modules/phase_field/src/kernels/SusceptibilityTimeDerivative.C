@@ -17,7 +17,7 @@ InputParameters validParams<SusceptibilityTimeDerivative>()
 }
 
 SusceptibilityTimeDerivative::SusceptibilityTimeDerivative(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<TimeDerivative> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative> >(parameters),
     _Chi(getMaterialProperty<Real>("f_name")),
     _dChidu(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _dChidarg(_coupled_moose_vars.size())

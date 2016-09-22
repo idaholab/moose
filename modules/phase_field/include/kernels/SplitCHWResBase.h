@@ -18,7 +18,7 @@
  * tensor mobility.
  */
 template<typename T>
-class SplitCHWResBase : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
+class SplitCHWResBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
 {
 public:
   SplitCHWResBase(const InputParameters & parameters);
@@ -39,7 +39,7 @@ private:
 
 template<typename T>
 SplitCHWResBase<T>::SplitCHWResBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
     _mob_name(getParam<MaterialPropertyName>("mob_name")),
     _mob(getMaterialProperty<T>("mob_name"))
 {

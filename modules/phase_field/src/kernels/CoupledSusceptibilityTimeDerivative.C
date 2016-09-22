@@ -17,7 +17,7 @@ InputParameters validParams<CoupledSusceptibilityTimeDerivative>()
 }
 
 CoupledSusceptibilityTimeDerivative::CoupledSusceptibilityTimeDerivative(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<CoupledTimeDerivative> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative> >(parameters),
     _F(getMaterialProperty<Real>("f_name")),
     _dFdu(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _dFdarg(_coupled_moose_vars.size())

@@ -23,7 +23,7 @@ InputParameters validParams<SplitCHParsed>();
  * This is the split operator variant.
  * \see CHParsed
  */
-class SplitCHParsed : public DerivativeMaterialInterface<JvarMapInterface<SplitCHCRes> >
+class SplitCHParsed : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHCRes> >
 {
 public:
   SplitCHParsed(const InputParameters & parameters);
