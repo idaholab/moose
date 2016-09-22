@@ -209,7 +209,7 @@ class MooseApplicationSyntax(object):
 
             if self.stubs:
                 self._markdown.append(filename)
-                stub += '\n#{} System\n'.format(name.split('/')[-1])
+                stub += '\n# {} System\n'.format(name.split('/')[-1])
                 stub += '!parameters {}\n\n'.format(name)
 
                 has_subobjects = False
@@ -264,8 +264,8 @@ class MooseApplicationSyntax(object):
 
             if self.stubs:
                 self._markdown.append(filename)
-                stub += '\n#{}\n'.format(object_name)
                 stub += '!devel {} {}\n\n'.format(name, 'float=right width=auto margin=20px padding=20px background-color=#F8F8F8')
+                stub += '\n# {}\n'.format(object_name)
                 stub += '!description {}\n\n'.format(name)
                 stub += '!parameters {}\n\n'.format(name)
                 stub += '!inputfiles {}\n\n'.format(name)

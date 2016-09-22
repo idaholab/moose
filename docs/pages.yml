@@ -15,6 +15,8 @@
 - Framework:
     - Systems: !include content/framework/systems/pages.yml
 - Modules:
+    - Heat Conduction:
+        - Systems: !include content/modules/heat_conduction/systems/pages.yml
     - Tensor Mechanics:
         - Systems: !include content/modules/tensor_mechanics/systems/pages.yml
 - Utilites:
