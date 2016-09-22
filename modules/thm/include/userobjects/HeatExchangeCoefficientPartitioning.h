@@ -25,8 +25,6 @@ public:
   virtual Real getPartitionDer(Real alpha_liquid, Real dalpha_liquid_dt, Real area) const;
 
 protected:
-  /// Steepness off the exponential function
-  Real _k;
   /// Upper cut-off limit
   Real _lower;
   /// Lower cut-off limit
