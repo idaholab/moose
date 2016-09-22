@@ -1,0 +1,38 @@
+[Tests]
+  [./melting]
+    type = CSVDiff
+    input = 'melting.i'
+    csvdiff = 'melting_out.csv'
+  [../]
+  [./sublimation]
+    type = CSVDiff
+    input = 'sublimation.i'
+    csvdiff = 'sublimation_out.csv'
+  [../]
+  [./vapor]
+    type = CSVDiff
+    input = 'vapor.i'
+    csvdiff = 'vapor_out.csv'
+  [../]
+  [./partial_density]
+    type = CSVDiff
+    input = 'partial_density.i'
+    csvdiff = 'partial_density_out.csv'
+  [../]
+  [./sweos]
+    type = CSVDiff
+    input = 'sweos.i'
+    csvdiff = 'sweos_out.csv'
+  [../]
+  [./thermalcond]
+    type = CSVDiff
+    input = 'thermalcond.i'
+    csvdiff = 'thermalcond_out.csv'
+  [../]
+  [./co2_derivatives]
+    type = Exodiff
+    input = 'co2_derivatives.i'
+    exodiff = 'co2_derivatives_out.e'
+    rel_err = 1e-4
+  [../]
+[]

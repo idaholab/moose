@@ -61,6 +61,8 @@ public:
 protected:
   /// Universal gas constant (J/mol/K)
   const Real _R;
+  /// Conversion of temperature from Celcius to Kelvin
+  const Real _T_c2k;
 };
 
 #endif /* SINGLEPHASEFLUIDPROPERTIESPT_H */
