@@ -112,6 +112,13 @@ GrainTracker::getNumberGrains() const
   return _feature_count;
 }
 
+unsigned int
+GrainTracker::getTotalNumberGrains() const
+{
+  // Note: This value is parallel consistent, see assignGrains()/trackGrains()
+  return _max_curr_grain_id + 1;
+}
+
 Real
 GrainTracker::getGrainVolume(unsigned int grain_id) const
 {

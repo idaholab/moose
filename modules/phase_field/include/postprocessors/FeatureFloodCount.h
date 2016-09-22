@@ -58,6 +58,12 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
+  /// Returns the number of coupled varaibles
+  unsigned int numCoupledVars() const { return _n_vars; }
+
+  /// Returns a const vector to the coupled variable pointers
+  const std::vector<MooseVariable *> & getCoupledVars() const { return _vars; }
+
   enum class FieldType
   {
     UNIQUE_REGION,
