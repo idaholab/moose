@@ -37,7 +37,8 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
                           'strip-extra-newlines': False}
 
         # Applying overflow/max-height CSS to <div> and <code> causes multiple scroll bars
-        self._invalid_css = { 'div' : ['overflow-y', 'overflow-x', 'max-height'] }
+        # do not let code float, the div will do this for us
+        self._invalid_css = { 'div' : ['overflow-y', 'overflow-x', 'max-height'], 'code' : ['float'] }
 
     def prepareContent(self, content, settings):
         """

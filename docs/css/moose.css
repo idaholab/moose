@@ -25,6 +25,12 @@
 }
 /* End Collapse Nav-bar correctly */
 
+/* Get rid of the Previous and Next buttons */
+ul.nav.navbar-right > li:nth-of-type(2), ul.nav.navbar-right > li:nth-of-type(3){
+    display: none;
+}
+/* Get rid of the Previous and Next buttons */
+
 p {
     text-align: justify;
 }
@@ -83,10 +89,6 @@ hr {
 .admonition > p{
     padding: 6px;
     text-align: left;
-}
-
-.info .admonition-title {
-    background: #528452;
 }
 
 .admonition.info {
