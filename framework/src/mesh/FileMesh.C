@@ -93,17 +93,19 @@ FileMesh::buildMesh()
 
     DistributedMesh * pmesh = cast_ptr<DistributedMesh *>(&mesh);
 
+    //mesh.allow_renumbering(false);
+
     if (pmesh)
       reader.parallel() = true;
 
     reader.read(_file_name);
 
-    mesh.update_parallel_id_counts();
+    //mesh.update_parallel_id_counts();
     //mesh.find_neighbors(true, true);
     //mesh.update_parallel_id_counts();
-    //mesh.redistribute();
     //mesh.delete_remote_elements();
     mesh.skip_partitioning(true);
+    //mesh.redistribute();
     mesh.prepare_for_use();
     mesh.print_info();
   }
