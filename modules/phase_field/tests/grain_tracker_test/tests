@@ -102,4 +102,10 @@
     valgrind = 'HEAVY'
     max_time = 500
   [../]
+
+  [./grain_tracker_volume]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume.i'
+    csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv'
+  [../]
 []

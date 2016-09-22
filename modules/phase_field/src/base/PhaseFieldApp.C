@@ -236,10 +236,10 @@
 /*
  * VectorPostprocessors
  */
- #include "GrainCentersPostprocessor.h"
- #include "GrainForcesPostprocessor.h"
- #include "GrainTextureVectorPostprocessor.h"
-
+#include "FeatureVolumeVectorPostprocessor.h"
+#include "GrainCentersPostprocessor.h"
+#include "GrainForcesPostprocessor.h"
+#include "GrainTextureVectorPostprocessor.h"
 
 template<>
 InputParameters validParams<PhaseFieldApp>()
@@ -405,27 +405,29 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(TimeStepMaterial);
   registerMaterial(VariableGradientMaterial);
 
+  registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(FeatureFloodCount);
+  registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
-  registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(FeatureVolumeFraction);
   registerDeprecatedObjectName(FeatureVolumeFraction, "NodalVolumeFraction", "09/01/2016 08:00");
   registerPostprocessor(PFCElementEnergyIntegral);
 
   registerAux(BndsCalcAux);
   registerAux(CrossTermGradientFreeEnergy);
+  registerAux(EBSDReaderAvgDataAux);
+  registerAux(EBSDReaderPointDataAux);
+  registerAux(EulerAngleProvider2RGBAux);
   registerAux(EulerAngleVariables2RGBAux);
   registerAux(FeatureFloodCountAux);
   registerAux(KKSGlobalFreeEnergy);
+  registerAux(OutputEulerAngles);
   registerAux(PFCEnergyDensity);
   registerAux(PFCRFFEnergyDensity);
-  registerAux(EBSDReaderAvgDataAux);
-  registerAux(EBSDReaderPointDataAux);
   registerAux(TotalFreeEnergy);
-  registerAux(OutputEulerAngles);
-  registerAux(EulerAngleProvider2RGBAux);
 
+  registerDeprecatedObjectName(FauxGrainTracker, "ComputeGrainCenterUserObject", "11/01/2016 00:00");
   registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);
@@ -434,16 +436,14 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(ConstantGrainForceAndTorque);
   registerUserObject(DiscreteNucleationInserter);
   registerUserObject(DiscreteNucleationMap);
+  registerUserObject(EBSDReader);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
-  registerDeprecatedObjectName(FauxGrainTracker, "ComputeGrainCenterUserObject", "11/01/2016 00:00");
-
-  registerUserObject(EBSDReader);
   registerUserObject(SolutionRasterizer);
 
+  registerVectorPostprocessor(FeatureVolumeVectorPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);
-  registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
 
   registerMesh(EBSDMesh);
   registerMesh(MortarPeriodicMesh);
