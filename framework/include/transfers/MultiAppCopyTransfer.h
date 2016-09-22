@@ -19,6 +19,7 @@
 
 // Forward declarations
 class MultiAppCopyTransfer;
+class MooseVariable;
 
 template<>
 InputParameters validParams<MultiAppCopyTransfer>();
@@ -52,26 +53,14 @@ protected:
   /**
    * Performs the transfer of values between a node or element.
    */
-  void transferDofObject();
+  void transferDofObject(libMesh::DofObject * to_object, libMesh::DofObject * from_object,
+                         MooseVariable & to_var, MooseVariable & from_var);
 
   /// The name of the variable to transfer to
   const VariableName & _to_var_name;
 
   /// Name of variable transfering from
   const VariableName & _from_var_name;
-
-  ///@{
-  /// Member data to avoid creating local variables or passing variables via reference to 'transferDofObject' method.
-  libMesh::DofObject * _to_object;
-  libMesh::DofObject * _from_object;
-  unsigned int _to_sys_num;
-  unsigned int _to_var_num;
-  unsigned int _from_sys_num;
-  unsigned int _from_var_num;
-  System * _from_sys;
-  NumericVector<Real> * _solution;
-  MPI_Comm _swapped;
-  ///@}
 };
 
 #endif // MULTIAPPCOPYTRANSFER_H
