@@ -1,6 +1,6 @@
 <!-- MOOSE System Documentation Stub: Remove this when content is added. -->
-#Kernels System
-!parameters /Kernels
+#XFEM System
+!parameters /XFEM
 
-!subobjects framework /Kernels
+!subobjects heat_conduction /XFEM
 
