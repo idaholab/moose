@@ -19,7 +19,7 @@ InputParameters validParams<CoupledSusceptibilityTimeDerivative>();
 /**
  * This calculates a modified coupled time derivative that multiply the time derivative of a coupled variable by a function of the variables
  **/
-class CoupledSusceptibilityTimeDerivative : public DerivativeMaterialInterface<JvarMapInterface<CoupledTimeDerivative> >
+class CoupledSusceptibilityTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative> >
 {
 public:
   CoupledSusceptibilityTimeDerivative(const InputParameters & parameters);

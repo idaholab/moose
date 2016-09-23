@@ -22,7 +22,7 @@ InputParameters validParams<ACInterfaceKobayashi1>();
  * doi:10.1016/0167-2789(93)90120-P
  * This kernel implements the first two terms on the right side of eq. (3) of the paper.
  */
-class ACInterfaceKobayashi1 : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
+class ACInterfaceKobayashi1 : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad> >
 {
 public:
   ACInterfaceKobayashi1(const InputParameters & parameters);

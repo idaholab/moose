@@ -17,7 +17,7 @@ InputParameters validParams<CoupledSusceptibilityTimeDerivative>()
 }
 
 CoupledSusceptibilityTimeDerivative::CoupledSusceptibilityTimeDerivative(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<CoupledTimeDerivative> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative> >(parameters),
     _F(getMaterialProperty<Real>("f_name")),
     _dFdu(getMaterialPropertyDerivative<Real>("f_name", _var.name())),
     _dFdarg(_coupled_moose_vars.size())
@@ -49,9 +49,7 @@ Real
 CoupledSusceptibilityTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   if (jvar == _v_var)
     return CoupledTimeDerivative::computeQpOffDiagJacobian(jvar) * _F[_qp] + CoupledTimeDerivative::computeQpResidual() * _phi[_j][_qp] * (*_dFdarg[cvar])[_qp];

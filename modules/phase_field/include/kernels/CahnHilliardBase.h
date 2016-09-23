@@ -136,9 +136,7 @@ Real
 CahnHilliardBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!this->mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = this->mapJvarToCvar(jvar);
 
   RealGradient J =   _grad_u[_qp] * _phi[_j][_qp] * (*_third_derivatives[cvar+1])[_qp]
                    + _grad_phi[_j][_qp] * (*_second_derivatives[cvar+1])[_qp];

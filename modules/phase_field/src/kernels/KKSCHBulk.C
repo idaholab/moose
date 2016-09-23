@@ -103,9 +103,7 @@ Real
 KKSCHBulk::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   RealGradient res = (*_second_derivatives[cvar])[_qp] * _grad_phi[_j][_qp];
 

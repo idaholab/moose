@@ -49,8 +49,14 @@ markdown_extensions:
                       - ../framework/include
                   install: content/framework/systems
               tensor_mechanics:
-                  doxygen: http://mooseframework.com/docs/doxygen/moduls/
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
                       - ../modules/tensor_mechanics/src
                       - ../modules/tensor_mechanics/include
                   install: content/modules/tensor_mechanics/systems
+              heat_conduction:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - ../modules/heat_conduction/src
+                      - ../modules/heat_conduction/include
+                  install: content/modules/heat_conduction/systems

@@ -107,9 +107,7 @@ KKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   //  for all other vars get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return res;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   for (unsigned int n = 0; n < _num_j; ++n)
     sum += _prop_dF1dc1[_qp] * (*_prop_d2hjdetaidarg[n][cvar])[_qp] * (*_cjs[n])[_qp]

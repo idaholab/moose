@@ -29,7 +29,7 @@ InputParameters validParams<KKSSplitCHCRes>();
  * The user picks one phase free energy \f$ F_a \f$ (f_base) and its corresponding
  * phase concentration \f$ c_a \f$
  */
-class KKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapInterface<SplitCHBase> >
+class KKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase> >
 {
 public:
   KKSSplitCHCRes(const InputParameters & parameters);

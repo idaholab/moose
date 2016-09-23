@@ -54,9 +54,7 @@ Real
 AllenCahn::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return ACBulk<Real>::computeQpOffDiagJacobian(jvar) +
          _L[_qp] * (*_d2FdEtadarg[cvar])[_qp] * _phi[_j][_qp] * _test[_i][_qp];
