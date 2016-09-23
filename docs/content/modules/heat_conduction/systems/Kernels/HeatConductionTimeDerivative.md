@@ -1,8 +1,16 @@
-<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->
-#HeatConductionTimeDerivative
 !devel /Kernels/HeatConductionTimeDerivative float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
+#HeatConductionTimeDerivative
 !description /Kernels/HeatConductionTimeDerivative
+
+!!! warning
+    This Kernel will not generate the correct on-diagonal Jacobians for temperature
+    dependent specific heat $c_p$ or density $\rho$, and this kernel does not
+    contribute an off-diagonal Jacobian at all.
+
+# See also
+* [[auto::/Kernels/HeatCapacityConductionTimeDerivative]]
+* [[auto::/Kernels/SpecificHeatConductionTimeDerivative]]
 
 !parameters /Kernels/HeatConductionTimeDerivative
 
