@@ -19,7 +19,7 @@
  * ACBulk.
  */
 template<typename T>
-class ACBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelValue> >
+class ACBulk : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue> >
 {
 public:
   ACBulk(const InputParameters & parameters);
@@ -53,7 +53,7 @@ protected:
 
 template<typename T>
 ACBulk<T>::ACBulk(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<KernelValue> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue> >(parameters),
     _L(getMaterialProperty<T>("mob_name")),
     _dLdop(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
 {
@@ -115,9 +115,7 @@ Real
 ACBulk<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   // Set off-diagonal Jacobian term from mobility derivatives
   return (*_dLdarg[cvar])[_qp] * _phi[_j][_qp] * computeDFDOP(Residual) * _test[_i][_qp];

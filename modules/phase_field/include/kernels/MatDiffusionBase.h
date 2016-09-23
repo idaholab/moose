@@ -21,7 +21,7 @@
  *           isotropic diffusion or RealTensorValue for the general anisotropic case.
  */
 template<typename T>
-class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapInterface<Kernel> >
+class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
 {
 public:
   MatDiffusionBase(const InputParameters & parameters);
@@ -69,7 +69,7 @@ MatDiffusionBase<T>::validParams()
 
 template<typename T>
 MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
     _D(getMaterialProperty<T>("D_name")),
     _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
@@ -112,9 +112,7 @@ Real
 MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
   if (_conc_var == jvar)

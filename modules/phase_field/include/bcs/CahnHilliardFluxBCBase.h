@@ -17,7 +17,7 @@
  * or a tensor (RealValueTensor).
  */
 template<typename T>
-class CahnHilliardFluxBCBase : public DerivativeMaterialInterface<JvarMapInterface<IntegratedBC> >
+class CahnHilliardFluxBCBase : public DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC> >
 {
 public:
   CahnHilliardFluxBCBase(const InputParameters & parameters);
@@ -40,7 +40,7 @@ protected:
 
 template<typename T>
 CahnHilliardFluxBCBase<T>::CahnHilliardFluxBCBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<IntegratedBC> >(parameters),
+    DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC> >(parameters),
     _flux(getParam<RealGradient>("flux")),
     _M(getMaterialProperty<T>("mob_name")),
     _dMdw(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
@@ -94,9 +94,7 @@ Real
 CahnHilliardFluxBCBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return -_phi[_j][_qp] * (*_dMdarg[cvar])[_qp] * _grad_u[_qp]  * _normals[_qp] * _test[_i][_qp];
 }

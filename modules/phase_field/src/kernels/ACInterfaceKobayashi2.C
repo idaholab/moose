@@ -19,7 +19,7 @@ InputParameters validParams<ACInterfaceKobayashi2>()
 }
 
 ACInterfaceKobayashi2::ACInterfaceKobayashi2(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad> >(parameters),
     _L(getMaterialProperty<Real>("mob_name")),
     _dLdop(getMaterialPropertyDerivative<Real>("mob_name", _var.name())),
     _eps(getMaterialProperty<Real>("eps_name")),
@@ -63,9 +63,7 @@ Real
 ACInterfaceKobayashi2::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   // Set off-diagonal jaocbian terms from mobility and epsilon dependence
   Real dsum = _L[_qp] * 2.0 *_eps[_qp] * (*_depsdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];

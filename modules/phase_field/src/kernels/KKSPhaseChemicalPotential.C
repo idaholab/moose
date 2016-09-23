@@ -23,7 +23,7 @@ InputParameters validParams<KKSPhaseChemicalPotential>()
 }
 
 KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
     _cb_var(coupled("cb")),
     _cb_name(getVar("cb", 0)->name()),
     // first derivatives
@@ -80,9 +80,7 @@ Real
 KKSPhaseChemicalPotential::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return _test[_i][_qp] * _phi[_j][_qp] * ((*_d2fadcadarg[cvar])[_qp] - (*_d2fbdcbdarg[cvar])[_qp]);
 }

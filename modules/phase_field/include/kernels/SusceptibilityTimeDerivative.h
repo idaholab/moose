@@ -18,7 +18,7 @@ InputParameters validParams<SusceptibilityTimeDerivative>();
 /**
  * This calculates the time derivative for a variable multiplied by a generalized susceptibility
  **/
-class SusceptibilityTimeDerivative : public DerivativeMaterialInterface<JvarMapInterface<TimeDerivative> >
+class SusceptibilityTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative> >
 {
 public:
   SusceptibilityTimeDerivative(const InputParameters & parameters);

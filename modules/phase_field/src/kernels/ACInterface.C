@@ -19,7 +19,7 @@ InputParameters validParams<ACInterface>()
 }
 
 ACInterface::ACInterface(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
     _L(getMaterialProperty<Real>("mob_name")),
     _kappa(getMaterialProperty<Real>("kappa_name")),
     _variable_L(getParam<bool>("variable_L")),
@@ -113,9 +113,7 @@ Real
 ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   // dsum is the derivative \f$ \frac\partial{\partial \eta} \left( \nabla (L\psi) \right) \f$
   RealGradient dsum = ((*_dkappadarg[cvar])[_qp] * _L[_qp] + _kappa[_qp] * (*_dLdarg[cvar])[_qp]) * _phi[_j][_qp] * _grad_test[_i][_qp];
