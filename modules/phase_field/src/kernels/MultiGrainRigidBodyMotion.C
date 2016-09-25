@@ -25,17 +25,18 @@ MultiGrainRigidBodyMotion::computeQpResidual()
 {
   RealGradient velocity_advection = 0.0;
   Real div_velocity_advection = 0.0;
-  const std::vector<unsigned int> & grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
-  for (unsigned int i = 0; i < grain_indices.size(); ++i)
+  for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
-    unsigned int grain_index = grain_indices[i];
-    if (grain_index != libMesh::invalid_uint)
+    auto grain_id = grain_ids[i];
+    if (grain_id != FeatureFloodCount::invalid_id)
     {
-      const auto volume = _grain_tracker.getGrainVolume(grain_index);
-      const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
-      const auto force = _mt / volume * _grain_forces[grain_index];
-      const auto torque = _mr / volume * (_grain_torques[grain_index].cross(_q_point[_qp] - centroid));
+      mooseAssert(grain_id < _grain_volumes.size(), "grain_id out of bounds");
+      const auto volume = _grain_volumes[grain_id];
+      const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
+      const auto force = _mt / volume * _grain_forces[grain_id];
+      const auto torque = _mr / volume * (_grain_torques[grain_id].cross(_q_point[_qp] - centroid));
 
       velocity_advection += (force + torque) * (*_vals[i])[_qp];
       div_velocity_advection += (force + torque) * (*_grad_vals[i])[_qp];
@@ -99,19 +100,19 @@ MultiGrainRigidBodyMotion::computeCVarJacobianEntry(dof_id_type jdof)
   Real div_velocity_advection = 0.0;
   RealGradient velocity_advection_jacobian_c = 0.0;
   Real div_velocity_advection_jacobian_c = 0.0;
-  const std::vector<unsigned int> & grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
-  for (unsigned int i = 0; i < grain_indices.size(); ++i)
+  for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
-    unsigned int grain_index = grain_indices[i];
-    if (grain_index != libMesh::invalid_uint)
+    auto grain_id = grain_ids[i];
+    if (grain_id != FeatureFloodCount::invalid_size_t)
     {
-      const auto volume = _grain_tracker.getGrainVolume(grain_index);
-      const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+      const auto volume = _grain_volumes[grain_id];
+      const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
 
-      getUserObjectCJacobians(jdof, grain_index);
-      const auto force = _mt / volume * _grain_forces[grain_index];
-      const auto torque = _mr / volume * (_grain_torques[grain_index].cross(_q_point[_qp] - centroid));
+      getUserObjectCJacobians(jdof, grain_id);
+      const auto force = _mt / volume * _grain_forces[grain_id];
+      const auto torque = _mr / volume * (_grain_torques[grain_id].cross(_q_point[_qp] - centroid));
       const auto force_jac = _mt / volume * _force_c_jacobian;
       const auto torque_jac = _mr / volume * _torque_c_jacobian.cross(_q_point[_qp] - centroid);
 
@@ -122,8 +123,8 @@ MultiGrainRigidBodyMotion::computeCVarJacobianEntry(dof_id_type jdof)
     }
   }
 
-  return  velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp] + velocity_advection_jacobian_c * _grad_c[_qp] * _test[_i][_qp]
-          + div_velocity_advection * _phi[_j][_qp] * _test[_i][_qp] + div_velocity_advection_jacobian_c * _c[_qp] * _test[_i][_qp];
+  return velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp] + velocity_advection_jacobian_c * _grad_c[_qp] * _test[_i][_qp]
+    + div_velocity_advection * _phi[_j][_qp] * _test[_i][_qp] + div_velocity_advection_jacobian_c * _c[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -131,17 +132,17 @@ MultiGrainRigidBodyMotion::computeCVarNonlocalJacobianEntry(dof_id_type jdof)
 {
   RealGradient velocity_advection_jacobian_c = 0.0;
   Real div_velocity_advection_jacobian_c = 0.0;
-  const std::vector<unsigned int> & grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
-  for (unsigned int i = 0; i < grain_indices.size(); ++i)
+  for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
-    unsigned int grain_index = grain_indices[i];
-    if (grain_index != libMesh::invalid_uint)
+    auto grain_id = grain_ids[i];
+    if (grain_id != FeatureFloodCount::invalid_size_t)
     {
-      const auto volume = _grain_tracker.getGrainVolume(grain_index);
-      const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+      const auto volume = _grain_volumes[grain_id];
+      const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
 
-      getUserObjectCJacobians(jdof, grain_index);
+      getUserObjectCJacobians(jdof, grain_id);
       const auto force_jac = _mt / volume * _force_c_jacobian;
       const auto torque_jac = _mr / volume * _torque_c_jacobian.cross(_q_point[_qp] - centroid);
 
@@ -150,7 +151,8 @@ MultiGrainRigidBodyMotion::computeCVarNonlocalJacobianEntry(dof_id_type jdof)
     }
   }
 
-  return velocity_advection_jacobian_c * _grad_c[_qp] * _test[_i][_qp] + div_velocity_advection_jacobian_c * _c[_qp] * _test[_i][_qp];
+  return velocity_advection_jacobian_c * _grad_c[_qp] * _test[_i][_qp]
+    + div_velocity_advection_jacobian_c * _c[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -158,19 +160,19 @@ MultiGrainRigidBodyMotion::computeEtaVarJacobianEntry(dof_id_type jdof, unsigned
 {
   RealGradient velocity_advection_jacobian_eta = 0.0;
   Real div_velocity_advection_jacobian_eta = 0.0;
-  const std::vector<unsigned int> & grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
-  for (unsigned int i = 0; i < grain_indices.size(); ++i)
+  for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
-    unsigned int grain_index = grain_indices[i];
-    if (grain_index != libMesh::invalid_uint)
+    auto grain_id = grain_ids[i];
+    if (grain_id != FeatureFloodCount::invalid_size_t)
     {
-      const auto volume = _grain_tracker.getGrainVolume(grain_index);
-      const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+      const auto volume = _grain_volumes[grain_id];
+      const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
 
-      getUserObjectEtaJacobians(jdof, jvar_index, grain_index);
-      const auto force = _mt / volume * _grain_forces[grain_index];
-      const auto torque = _mr / volume * (_grain_torques[grain_index].cross(_q_point[_qp] - centroid));
+      getUserObjectEtaJacobians(jdof, jvar_index, grain_id);
+      const auto force = _mt / volume * _grain_forces[grain_id];
+      const auto torque = _mr / volume * (_grain_torques[grain_id].cross(_q_point[_qp] - centroid));
       const auto force_jac = _mt / volume * _force_eta_jacobian;
       const auto torque_jac = _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid);
 
@@ -185,8 +187,8 @@ MultiGrainRigidBodyMotion::computeEtaVarJacobianEntry(dof_id_type jdof, unsigned
     }
   }
 
-  return  velocity_advection_jacobian_eta * _grad_c[_qp] * _test[_i][_qp]
-          + div_velocity_advection_jacobian_eta * _c[_qp] * _test[_i][_qp];
+  return velocity_advection_jacobian_eta * _grad_c[_qp] * _test[_i][_qp]
+    + div_velocity_advection_jacobian_eta * _c[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -195,17 +197,17 @@ MultiGrainRigidBodyMotion::computeEtaVarNonlocalJacobianEntry(dof_id_type jdof, 
   RealGradient eta_jacobian_sum = 0.0;
   RealGradient velocity_advection_jacobian_eta = 0.0;
   Real div_velocity_advection_jacobian_eta = 0.0;
-  const std::vector<unsigned int> & grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
-  for (unsigned int i = 0; i < grain_indices.size(); ++i)
+  for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
-    unsigned int grain_index = grain_indices[i];
-    if (grain_index != libMesh::invalid_uint)
+    auto grain_id = grain_ids[i];
+    if (grain_id != FeatureFloodCount::invalid_size_t)
     {
-      const auto volume = _grain_tracker.getGrainVolume(grain_index);
-      const auto centroid = _grain_tracker.getGrainCentroid(grain_index);
+      const auto volume = _grain_volumes[grain_id];
+      const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
 
-      getUserObjectEtaJacobians(jdof, jvar_index, grain_index);
+      getUserObjectEtaJacobians(jdof, jvar_index, grain_id);
       const auto force_jac = _mt / volume * _force_eta_jacobian;
       const auto torque_jac = _mr / volume * _torque_eta_jacobian.cross(_q_point[_qp] - centroid);
 
@@ -214,6 +216,6 @@ MultiGrainRigidBodyMotion::computeEtaVarNonlocalJacobianEntry(dof_id_type jdof, 
     }
   }
 
-  return  velocity_advection_jacobian_eta * _grad_c[_qp] * _test[_i][_qp]
-          + div_velocity_advection_jacobian_eta * _c[_qp] * _test[_i][_qp];
+  return velocity_advection_jacobian_eta * _grad_c[_qp] * _test[_i][_qp]
+    + div_velocity_advection_jacobian_eta * _c[_qp] * _test[_i][_qp];
 }

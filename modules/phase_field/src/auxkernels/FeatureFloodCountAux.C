@@ -18,7 +18,7 @@ InputParameters validParams<FeatureFloodCountAux>()
   params.addClassDescription("Feature detection by connectivity analysis");
   params.addDeprecatedParam<UserObjectName>("bubble_object", "The FeatureFloodCount UserObject to get values from.", "Use \"flood_counter\" instead.");
   params.addRequiredParam<UserObjectName>("flood_counter", "The FeatureFloodCount UserObject to get values from.");
-  params.addParam<unsigned int>("map_index", "The index of which map to retrieve values from when using FeatureFloodCount with multiple maps.");
+  params.addParam<unsigned long>("map_index", "The index of which map to retrieve values from when using FeatureFloodCount with multiple maps.");
   MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING GHOSTED_ENTITIES HALOS CENTROID ACTIVE_BOUNDS", "UNIQUE_REGION");
   params.addParam<MooseEnum>("field_display", field_display, "Determines how the auxilary field should be colored. (UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is elemental, default: UNIQUE_REGION)");
 
@@ -33,7 +33,7 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _flood_counter(getUserObject<FeatureFloodCount>("flood_counter")),
     _grain_tracker_ptr(dynamic_cast<const GrainTrackerInterface *>(&_flood_counter)),
-    _var_idx(isParamValid("map_index") ? getParam<unsigned int>("map_index") : std::numeric_limits<unsigned int>::max()),
+    _var_idx(isParamValid("map_index") ? getParam<unsigned long>("map_index") : std::numeric_limits<std::size_t>::max()),
     _field_display(getParam<MooseEnum>("field_display")),
     _var_coloring(_field_display == "VARIABLE_COLORING"),
     _field_type(_field_display.getEnum<FeatureFloodCount::FieldType>())
@@ -71,7 +71,7 @@ FeatureFloodCountAux::precalculateValue()
       _value = std::count_if(op_to_grains.begin(), op_to_grains.end(),
                              [](unsigned int grain_id)
                              {
-                               return grain_id != libMesh::invalid_uint;
+                               return grain_id != FeatureFloodCount::invalid_id;
                              });
     }
     else

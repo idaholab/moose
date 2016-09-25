@@ -54,19 +54,19 @@ public:
   };
 
   // GrainTrackerInterface methods
-  virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, unsigned int var_idx=0) const override;
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
-  virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const override;
-  virtual unsigned int getNumberGrains() const override;
-  virtual unsigned int getTotalNumberGrains() const override;
-  virtual Real getGrainVolume(unsigned int grain_id) const override;
+  virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, std::size_t var_idx=0) const override;
+  virtual const std::vector<std::size_t> & getOpToGrainsVector(dof_id_type elem_id) const override;
+  virtual std::size_t getNumberActiveGrains() const override;
+  virtual std::size_t getTotalNumberGrains() const override;
+//  virtual unsigned int getGrainID(std::size_t grain_index) const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
 
 protected:
   virtual void updateFieldInfo() override;
-  virtual Real getThreshold(unsigned int current_idx, bool active_feature) const override;
-  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & new_id) override;
-  virtual bool currentElemContributesToVolume(unsigned long current_idx) const override;
+  virtual Real getThreshold(std::size_t current_index, bool active_feature) const override;
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
+                                             FeatureData * & feature, unsigned int & new_id) override;
+  virtual bool currentElemContributesToVolume(std::size_t current_index) const override;
 
   void communicateHaloMap();
 
@@ -91,7 +91,7 @@ protected:
    * This method is called when a new grain is detected. It can be overridden by a derived class to handle
    * setting new properties on the newly created grain.
    */
-  virtual void newGrainCreated(unsigned int new_grain_idx);
+  virtual void newGrainCreated(unsigned int new_grain_id);
 
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.
@@ -101,7 +101,7 @@ protected:
   /**
    * Builds a grain ID to grain index for operations that need to access a grain by ID instead of index.
    */
-  void buildGrainIdToGrainIdx(unsigned int max_id);
+  void buildGrainIdToGrainIndex(unsigned int max_id);
 
   /**
    * Broadcast essential Grain information to all processors. This method is used to get certain
@@ -120,19 +120,19 @@ protected:
    * This is the recursive part of the remapping algorithm. It attempts to remap a grain to a new index and recurses until max_depth
    * is reached.
    */
-  bool attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsigned int max);
+  bool attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsigned int max_depth);
 
   /**
    * A routine for moving all of the solution values from a given grain to a new variable number. It is called
    * with different modes to only cache, or actually do the work, or bypass the cache altogether.
    */
-  void swapSolutionValues(FeatureData &  grain, unsigned int new_var_idx, std::vector<std::map<Node *, CacheValues> > & cache,
+  void swapSolutionValues(FeatureData &  grain, std::size_t new_var_index, std::vector<std::map<Node *, CacheValues> > & cache,
                           RemapCacheMode cache_mode);
 
   /**
    * Helper method for actually performing the swaps.
    */
-  void swapSolutionValuesHelper(Node * curr_node, unsigned int curr_var_idx, unsigned int new_var_idx,
+  void swapSolutionValuesHelper(Node * curr_node, std::size_t curr_var_index, std::size_t new_var_index,
                                 std::vector<std::map<Node *, CacheValues> > & cache, RemapCacheMode cache_mode);
 
   /**
@@ -178,10 +178,10 @@ protected:
   static const unsigned int _max_renumbering_recursion = 4;
 
   /// The number of reserved order parameters
-  const unsigned int _n_reserve_ops;
+  const unsigned short _n_reserve_ops;
 
   /// The cutoff index where if variable index >= this number, no remapping TO that variable will occur
-  const unsigned int _reserve_op_idx;
+  const std::size_t _reserve_op_index;
 
   /// The threshold above (or below) where a grain may be found on a reserve op field
   const Real _reserve_op_threshold;
@@ -213,21 +213,21 @@ protected:
   /// Boolean to indicate whether or not we should populate order parameter map information
   const bool _compute_op_maps;
 
-  /// Data structure to hold grain_id to grain_idx
-  std::vector<unsigned int> _grain_id_to_grain_idx;
+  /// Data structure to hold grain_id to grain_index
+  std::vector<std::size_t> _grain_id_to_grain_index;
 
   /**
    * Data structure for active order parameter information on elements:
    * elem_id -> a vector of pairs each containing the grain number and the variable index representing that grain
    */
-  std::map<dof_id_type, std::vector<std::pair<unsigned int, unsigned int> > > _elemental_data;
-  std::map<dof_id_type, std::vector<unsigned int> > _elemental_data_2;
+//  std::map<dof_id_type, std::vector<std::pair<unsigned int, unsigned int> > > _elemental_data;
+  std::map<dof_id_type, std::vector<std::size_t> > _elem_op_to_grain_indices;
 
-  static std::vector<unsigned int> _empty_2;
+  std::vector<std::size_t> _empty_op_to_grain_indices;
 
 private:
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
-  unsigned int _reserve_grain_first_idx;
+  unsigned int _reserve_grain_first_index;
 
   /// Holds the next "regular" grain ID (a grain found or remapped to the standard op vars)
   unsigned int _max_curr_grain_id;
@@ -248,7 +248,7 @@ private:
 struct GrainDistance
 {
   GrainDistance();
-  GrainDistance(Real distance, std::size_t grain_idx, unsigned int unique_id, unsigned int var_index);
+  GrainDistance(Real distance, std::size_t grain_index, unsigned int grain_id, std::size_t var_index);
 
   // Copy constructors
   GrainDistance(const GrainDistance & f) = default;
@@ -260,10 +260,10 @@ struct GrainDistance
 
   bool operator<(const GrainDistance & rhs) const;
 
+  unsigned int _grain_id;
   Real _distance;
-  std::size_t _grain_idx;
-  unsigned int _unique_id;
-  unsigned int _var_index;
+  std::size_t _grain_index;
+  std::size_t _var_index;
 };
 
 template<> void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context);

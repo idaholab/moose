@@ -55,6 +55,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
+    VectorPostprocessorInterface(this),
     MaterialPropertyInterface(this, blockIDs()),
     RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(this),

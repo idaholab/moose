@@ -40,6 +40,10 @@ protected:
 
   /// getting userobject for calculating grain forces and torques
   const GrainForceAndTorqueInterface & _grain_force_torque;
+
+  /// The grain volumes
+  const VectorPostprocessorValue & _grain_volumes;
+
   const std::vector<RealGradient> & _grain_forces;
   const std::vector<RealGradient> & _grain_torques;
 

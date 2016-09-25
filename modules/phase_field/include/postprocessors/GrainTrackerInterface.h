@@ -33,38 +33,40 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the entity value
    */
-  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType, unsigned int var_idx=0) const = 0;
+  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType, std::size_t var_idx=0) const = 0;
 
   /**
    * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
    * holds the ith node with the inner vector holds the list of active unique grains.
    * (unique_grain_id, variable_idx)
    */
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const = 0;
+//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const = 0;
 
   /**
    * Returns a list of active unique grains for a particular element. The vector is indexed by order parameter
-   * with each entry containing an invalid uint (no grain active at that location) or a grain id if it's active at that location.
+   * with each entry containing an invalid uint (no grain active at that location) or a grain index
+   * if it's active at that location.
    */
-  virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const = 0;
+  virtual const std::vector<std::size_t> & getOpToGrainsVector(dof_id_type elem_id) const = 0;
 
   /**
    * Returns the number of active grains in a simulation. Note: This value will count
    * each piece of a split grain (often enountered in EBSD datasets).
    */
-  virtual unsigned int getNumberGrains() const = 0;
+  virtual std::size_t getNumberActiveGrains() const = 0;
 
   /**
-   * Returns the maximum grain ID in use. This method can be used to size an array
+   * Returns the maximum grain index in use. This method can be used to size an array
    * or other data structure to maintain information about all grains (active and inactive)
    * in a simulation.
    */
-  virtual unsigned int getTotalNumberGrains() const = 0;
+  virtual std::size_t getTotalNumberGrains() const = 0;
 
   /**
-   * Returns the volume for the given grain number.
+   * Returns the actual grain ID given a grain index. Grain IDs are not required, and are often
+   * not contiguous when using external data like EBSD data.
    */
-  virtual Real getGrainVolume(unsigned int grain_id) const = 0;
+//  virtual unsigned int getGrainID(std::size_t grain_index) const = 0;
 
   /**
    * Returns the centroid for the given grain number.

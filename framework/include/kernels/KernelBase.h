@@ -23,6 +23,7 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "RandomInterface.h"
 #include "GeometricSearchInterface.h"
@@ -52,6 +53,7 @@ class KernelBase :
   public UserObjectInterface,
   public TransientInterface,
   public PostprocessorInterface,
+  public VectorPostprocessorInterface,
   public MaterialPropertyInterface,
   public RandomInterface,
   protected GeometricSearchInterface,

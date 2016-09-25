@@ -27,6 +27,7 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(const InputPa
     MooseVariableDependencyInterface(),
     _flood_counter(getUserObject<FeatureFloodCount>("flood_counter")),
     _grain_volumes(declareVector("grain_volumes")),
+    _grain_ids(declareVector("grain_ids")),
     _vars(_flood_counter.getCoupledVars()),
     _mesh(_subproblem.mesh()),
     _assembly(_subproblem.assembly(_tid)),
@@ -72,18 +73,18 @@ FeatureVolumeVectorPostprocessor::execute()
      * threshold perspective) then we can sum those values into
      * appropriate grain index locations.
      */
-    const std::vector<unsigned int> & op_to_grain = grain_tracker->getOpToGrainsVector(current_elem->id());
+    const auto & op_to_grains = grain_tracker->getOpToGrainsVector(current_elem->id());
 
-    for (auto op_index = beginIndex(op_to_grain); op_index < op_to_grain.size(); ++op_index)
+    for (auto op_index = beginIndex(op_to_grains); op_index < op_to_grains.size(); ++op_index)
     {
       // Only sample "active" variables
-      if (op_to_grain[op_index] != libMesh::invalid_uint)
+      if (op_to_grains[op_index] != FeatureFloodCount::invalid_size_t)
       {
-        auto grain_index = op_to_grain[op_index];
-        mooseAssert(grain_index < num_grains, "Grain index out of range");
+        auto grain_id = op_to_grains[op_index];
+        mooseAssert(grain_id < num_grains, "Grain index out of range");
 
         // Add in the integral value on the current variable to the current feature's slot
-        _grain_volumes[grain_index] += computeIntegral(op_index);
+        _grain_volumes[grain_id] += computeIntegral(op_index);
       }
     }
   }

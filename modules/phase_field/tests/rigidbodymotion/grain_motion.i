@@ -52,6 +52,7 @@
     v = eta
     grain_tracker_object = grain_center
     grain_force = grain_force
+    grain_volumes = grain_volumes
   [../]
   [./eta_dot]
     type = TimeDerivative
@@ -64,6 +65,7 @@
     v = eta
     grain_tracker_object = grain_center
     grain_force = grain_force
+    grain_volumes = grain_volumes
   [../]
   [./acint_eta]
     type = ACInterface
@@ -101,6 +103,7 @@
     etas = eta
     c = c
     grain_data = grain_center
+    grain_volumes = grain_volumes
   [../]
 []
 
@@ -108,6 +111,11 @@
   [./forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
+  [../]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_center
+    execute_on = 'initial timestep_begin'
   [../]
 []
 

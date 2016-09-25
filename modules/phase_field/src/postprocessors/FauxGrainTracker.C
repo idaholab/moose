@@ -24,13 +24,9 @@ FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
     _tracking_step(getParam<int>("tracking_step"))
 {
   // initialize faux data with identity map
-  _faux_data.resize(_vars.size());
-  for (unsigned int var_num = 0; var_num < _faux_data.size(); ++var_num)
-    _faux_data[var_num] = std::make_pair(var_num, var_num);
-
-  _faux_data_2.resize(_vars.size());
-  for (unsigned int var_num = 0; var_num < _faux_data_2.size(); ++var_num)
-    _faux_data_2[var_num] = var_num;
+  _op_to_grain_indices.resize(_vars.size());
+  for (auto i = beginIndex(_op_to_grain_indices); i < _op_to_grain_indices.size(); ++i)
+    _op_to_grain_indices[i] = i;
 }
 
 FauxGrainTracker::~FauxGrainTracker()
@@ -38,10 +34,10 @@ FauxGrainTracker::~FauxGrainTracker()
 }
 
 Real
-FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, unsigned int var_idx) const
+FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, std::size_t var_idx) const
 {
   auto use_default = false;
-  if (var_idx == std::numeric_limits<unsigned int>::max())
+  if (var_idx == FeatureFloodCount::invalid_size_t)
   {
     use_default = true;
     var_idx = 0;
@@ -70,7 +66,7 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
 
       // If this element contains the centroid of one of features, return it's index
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
-      for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+      for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
       {
         const auto centroid = _centroid.find(var_num);
         if (centroid != _centroid.end())
@@ -90,46 +86,44 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
   return 0;
 }
 
-const std::vector<std::pair<unsigned int, unsigned int> > &
-FauxGrainTracker::getElementalValues(dof_id_type /*elem_id*/) const
-{
-  mooseDeprecated("GrainTrackerInterface::getElementalValues() is deprecated use GrainTrackerInterface::getOpToGrainsVector() instead");
+//const std::vector<std::pair<unsigned int, unsigned int> > &
+//FauxGrainTracker::getElementalValues(dof_id_type /*elem_id*/) const
+//{
+//  mooseDeprecated("GrainTrackerInterface::getElementalValues() is deprecated use GrainTrackerInterface::getOpToGrainsVector() instead");
+//
+//  return _faux_data;
+//}
 
-  return _faux_data;
-}
-
-const std::vector<unsigned int> &
+const std::vector<std::size_t> &
 FauxGrainTracker::getOpToGrainsVector(dof_id_type /*elem_id*/) const
 {
-  return _faux_data_2;
+  return _op_to_grain_indices;
 }
 
-unsigned int
-FauxGrainTracker::getNumberGrains() const
+std::size_t
+FauxGrainTracker::getNumberActiveGrains() const
 {
   return _variables_used.size();
 }
 
-unsigned int
+std::size_t
 FauxGrainTracker::getTotalNumberGrains() const
 {
   return _variables_used.size();
 }
 
-Real
-FauxGrainTracker::getGrainVolume(unsigned int grain_id) const
-{
-  const auto grain_volume = _volume.find(grain_id);
-  mooseAssert(grain_volume != _volume.end(), "Grain " << grain_id << " does not exist in data structure");
-
-  return grain_volume->second;
-}
+//unsigned int
+//FauxGrainTracker::getGrainID(std::size_t grain_index) const
+//{
+//  // Reflexive numbering
+//  return static_cast<unsigned int>(grain_index);
+//}
 
 Point
-FauxGrainTracker::getGrainCentroid(unsigned int grain_id) const
+FauxGrainTracker::getGrainCentroid(unsigned int grain_index) const
 {
-  const auto grain_center = _centroid.find(grain_id);
-  mooseAssert(grain_center != _centroid.end(), "Grain " << grain_id << " does not exist in data structure");
+  const auto grain_center = _centroid.find(grain_index);
+  mooseAssert(grain_center != _centroid.end(), "Grain " << grain_index << " does not exist in data structure");
 
   return grain_center->second;
 }
@@ -163,9 +157,9 @@ FauxGrainTracker::execute()
       std::vector<Point> centroid(1, current_elem->centroid());
       _fe_problem.reinitElemPhys(current_elem, centroid, 0);
 
-      for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+      for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
       {
-        Number entity_value = _vars[var_num]->sln()[0];
+        auto entity_value = _vars[var_num]->sln()[0];
 
         if ((_use_less_than_threshold_comparison && (entity_value >= _threshold))
             || (!_use_less_than_threshold_comparison && (entity_value <= _threshold)))
@@ -187,9 +181,9 @@ FauxGrainTracker::execute()
       {
         const Node * current_node = current_elem->get_node(i);
 
-        for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+        for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
         {
-          Number entity_value = _vars[var_num]->getNodalValue(*current_node);
+          auto entity_value = _vars[var_num]->getNodalValue(*current_node);
           if ((_use_less_than_threshold_comparison && (entity_value >= _threshold))
               || (!_use_less_than_threshold_comparison && (entity_value <= _threshold)))
           {
@@ -214,7 +208,7 @@ FauxGrainTracker::finalize()
   _communicator.set_union(_entity_id_to_var_num);
 
   if (_is_elemental)
-    for (unsigned int var_num = 0; var_num < _vars.size(); ++var_num)
+    for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
     {
       /**
        * Convert elements of the maps into simple values or vector of Real.
@@ -252,5 +246,5 @@ FauxGrainTracker::finalize()
 Real
 FauxGrainTracker::getValue()
 {
-  return _variables_used.size();
+  return static_cast<Real>(_variables_used.size());
 }

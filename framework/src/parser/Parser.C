@@ -802,6 +802,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       dynamicCastAndExtractVector(int                   , it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractVector(long                  , it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractVector(unsigned int          , it.second, full_name, it.first, in_global, global_params_block);
+
       // We need to be able to parse 8-byte unsigned types when
       // libmesh is configured --with-dof-id-bytes=8.  Officially,
       // libmesh uses uint64_t in that scenario, which is usually

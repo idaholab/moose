@@ -52,6 +52,8 @@ protected:
 
   VectorPostprocessorValue & _grain_volumes;
 
+  VectorPostprocessorValue & _grain_ids;
+
 private:
   const std::vector<MooseVariable *> & _vars;
   std::vector<const VariableValue *> _coupled_sln;

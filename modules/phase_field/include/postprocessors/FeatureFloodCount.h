@@ -59,7 +59,13 @@ public:
   virtual Real getValue() override;
 
   /// Returns the number of coupled varaibles
-  unsigned int numCoupledVars() const { return _n_vars; }
+  std::size_t numCoupledVars() const { return _n_vars; }
+
+  ///@{
+  /// Constants used for invalid indices set to the max value of std::size_t type
+  static const std::size_t invalid_size_t;
+  static const unsigned int invalid_id;
+  ///@}
 
   /// Returns a const vector to the coupled variable pointers
   const std::vector<MooseVariable *> & getCoupledVars() const { return _vars; }
@@ -75,9 +81,9 @@ public:
   };
 
   // Retrieve field information
-  virtual Real getEntityValue(dof_id_type entity_id, FieldType field_type, unsigned int var_idx=0) const;
+  virtual Real getEntityValue(dof_id_type entity_id, FieldType field_type, std::size_t var_index=0) const;
 
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
+//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
 
@@ -93,18 +99,18 @@ public:
   struct FeatureData
   {
     FeatureData() :
-        FeatureData(std::numeric_limits<unsigned int>::max())
+        FeatureData(std::numeric_limits<std::size_t>::max())
     {
     }
 
-    FeatureData(unsigned int var_idx, unsigned int local_index, processor_id_type rank) :
-        FeatureData(var_idx)
+    FeatureData(std::size_t var_index, unsigned int local_index, processor_id_type rank) :
+        FeatureData(var_index)
     {
       _orig_ids = { std::make_pair(rank, local_index) };
     }
 
-    FeatureData(unsigned int var_idx) :
-        _var_idx(var_idx),
+    FeatureData(std::size_t var_index) :
+        _var_index(var_index),
         _id(libMesh::invalid_uint),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
@@ -203,7 +209,7 @@ public:
       }
       else
         // Sort based on processor independent information (mesh and variable info)
-        return _var_idx < rhs._var_idx || (_var_idx == rhs._var_idx && _min_entity_id < rhs._min_entity_id);
+        return _var_index < rhs._var_index || (_var_index == rhs._var_index && _min_entity_id < rhs._min_entity_id);
     }
 
     /// stream output operator
@@ -222,7 +228,7 @@ public:
     std::set<dof_id_type> _periodic_nodes;
 
     /// The Moose variable where this feature was found (often the "order parameter")
-    unsigned int _var_idx;
+    std::size_t _var_index;
 
     /// An ID for this feature
     unsigned int _id;
@@ -240,7 +246,7 @@ public:
     Real _volume;
 
     /// The count of entities contributing to the volume calculation
-    unsigned int _vol_count;
+    std::size_t _vol_count;
 
     /// The centroid of the feature (average of coordinates from entities participating in the volume calculation)
     Point _centroid;
@@ -266,27 +272,31 @@ protected:
    * for a new region to mark, otherwise we are in the recursive calls
    * currently marking a region.
    */
-  void flood(const DofObject * dof_object, unsigned long current_idx, FeatureData * feature);
+  void flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
 
   /**
    * Return a comparison threshold to use when inspecting an entity during the flood
    * stage.
    */
-  virtual Real getThreshold(unsigned int current_idx, bool active_feature) const;
+  virtual Real getThreshold(std::size_t current_index, bool active_feature) const;
 
   /**
-   *
+   * Method called during the recursive flood routine that should return whether or not the current
+   * entity is part of the current feature (if one is being explored), or if it's the start
+   * of a new feature.
    */
-  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & new_id);
-  virtual bool currentElemContributesToVolume(unsigned long current_idx) const;
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
+                                             FeatureData * & feature, unsigned int & new_id);
+
+  virtual bool currentElemContributesToVolume(std::size_t current_index) const;
 
   ///@{
   /**
    * These two routines are utility routines used by the flood routine and by derived classes for visiting neighbors.
    * Since the logic is different for the elemental versus nodal case it's easier to split them up.
    */
-  void visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool expand_halos_only);
-  void visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool expand_halos_only);
+  void visitNodalNeighbors(const Node * node, std::size_t current_index, FeatureData * feature, bool expand_halos_only);
+  void visitElementalNeighbors(const Elem * elem, std::size_t current_index, FeatureData * feature, bool expand_halos_only);
   ///@}
 
   /**
@@ -294,7 +304,7 @@ protected:
    * and Elemental cases together.
    */
   template<typename T>
-  void visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, unsigned long current_idx,
+  void visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, std::size_t current_index,
                             FeatureData * feature, bool expand_halos_only);
 
   /**
@@ -354,7 +364,7 @@ protected:
    *
    * It is intended to be overridden in derived classes.
    */
-  virtual void buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const;
+  virtual void buildLocalToGlobalIndices(std::vector<std::size_t> & local_to_global_all, std::vector<int> & counts) const;
 
   /**
    * Helper routine for clearing up data structures during initialize and prior to parallel
@@ -459,10 +469,10 @@ protected:
   const bool _calculate_feature_volumes;
 
   // Convenience variable holding the number of variables coupled into this object
-  const unsigned long _n_vars;
+  const std::size_t _n_vars;
 
   /// Convenience variable holding the size of all the datastructures size by the number of maps
-  const unsigned long _maps_size;
+  const std::size_t _maps_size;
 
   /// Convenience variable holding the number of processors in this simulation
   const processor_id_type _n_procs;
@@ -509,8 +519,8 @@ protected:
    */
   std::vector<std::map<dof_id_type, int> > _feature_maps;
 
-  /// The map recording the local to global feature ids
-  std::vector<unsigned int> _local_to_global_feature_map;
+  /// The map recording the local to global feature indices
+  std::vector<std::size_t> _local_to_global_feature_map;
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
@@ -545,8 +555,8 @@ protected:
    */
   std::vector<Real> _all_feature_volumes;
 
-  /// Dummy value for unimplemented method "getElementalValues()"
-  static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
+//  /// Dummy value for unimplemented method "getElementalValues()"
+//  static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
 
   /**
    * Vector of length _maps_size to keep track of the total

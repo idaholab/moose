@@ -56,6 +56,7 @@
     v = 'eta0 eta1'
     grain_force = grain_force
     grain_tracker_object = grain_center
+    grain_volumes = grain_volumes
   [../]
   [./RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
@@ -65,6 +66,7 @@
     kappa_name = kappa_eta
     grain_force = grain_force
     grain_tracker_object = grain_center
+    grain_volumes = grain_volumes
   [../]
 []
 
@@ -94,6 +96,7 @@
     c = c
     grain_data = grain_center
     grain_force = grain_force
+    grain_volumes = grain_volumes
   [../]
 []
 
@@ -208,6 +211,11 @@
   [./forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
+  [../]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_center
+    execute_on = 'initial timestep_begin'
   [../]
 []
 

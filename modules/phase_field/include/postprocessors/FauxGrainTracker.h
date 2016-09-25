@@ -35,12 +35,11 @@ public:
   virtual void execute() override;
 
   // GrainTrackerInterface methods
-  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, unsigned int var_idx) const override;
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const override;
-  virtual const std::vector<unsigned int> & getOpToGrainsVector(dof_id_type elem_id) const override;
-  virtual unsigned int getNumberGrains() const override;
-  virtual unsigned int getTotalNumberGrains() const override;
-  virtual Real getGrainVolume(unsigned int grain_id) const override;
+  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, std::size_t var_idx) const override;
+  virtual const std::vector<std::size_t> & getOpToGrainsVector(dof_id_type elem_id) const override;
+  virtual std::size_t getNumberActiveGrains() const override;
+  virtual std::size_t getTotalNumberGrains() const override;
+//  virtual unsigned int getGrainID(std::size_t grain_index) const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
 
 private:
@@ -53,8 +52,8 @@ private:
   /// Used to emulate the tracking step of the real grain tracker object
   const int _tracking_step;
 
-  std::vector<std::pair<unsigned int, unsigned int> > _faux_data;
-  std::vector<unsigned int> _faux_data_2;
+  /// Order parameter to grain indices (just a reflexive vector)
+  std::vector<std::size_t> _op_to_grain_indices;
 
   /// The volume of the feature
   std::map<unsigned int, Real> _volume;

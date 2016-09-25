@@ -47,7 +47,7 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
 void
 ComputeGrainForceAndTorque::initialize()
 {
-  _grain_num = _grain_tracker.getNumberGrains();
+  _grain_num = _grain_tracker.getTotalNumberGrains();
   _ncomp = 6 * _grain_num;
 
   _force_values.resize(_grain_num);
@@ -68,11 +68,11 @@ ComputeGrainForceAndTorque::initialize()
 void
 ComputeGrainForceAndTorque::execute()
 {
-  std::vector<unsigned int> grain_indices = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
 
   for (unsigned int i = 0; i < _grain_num; ++i)
     for (unsigned int j = 0; j < _op_num; ++j)
-      if (i == _grain_tracker.getOpToGrainsVector(_current_elem->id())[j])
+      if (i == op_to_grains[j])
       {
         const auto centroid = _grain_tracker.getGrainCentroid(i);
         for (_qp=0; _qp<_qrule->n_points(); ++_qp)
@@ -92,10 +92,12 @@ ComputeGrainForceAndTorque::execute()
 void
 ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
 {
+  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+
   if (jvar == _c_var)
     for (unsigned int i = 0; i < _grain_num; ++i)
       for (unsigned int j = 0; j < _op_num; ++j)
-        if (i == _grain_tracker.getOpToGrainsVector(_current_elem->id())[j])
+        if (i == op_to_grains[j])
         {
           const auto centroid = _grain_tracker.getGrainCentroid(i);
           for (_qp=0; _qp<_qrule->n_points(); ++_qp)
@@ -116,7 +118,7 @@ ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
     if (jvar == _vals_var[i])
       for (unsigned int j = 0; j < _grain_num; ++j)
         for (unsigned int k = 0; k < _op_num; ++k)
-          if (j == _grain_tracker.getOpToGrainsVector(_current_elem->id())[k])
+          if (j == op_to_grains[k])
           {
             const auto centroid = _grain_tracker.getGrainCentroid(j);
             for (_qp=0; _qp<_qrule->n_points(); ++_qp)

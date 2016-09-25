@@ -28,6 +28,7 @@
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "DependencyResolverInterface.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
@@ -61,6 +62,7 @@ class Material :
     public TransientInterface,
     public MaterialPropertyInterface,
     public PostprocessorInterface,
+    public VectorPostprocessorInterface,
     public DependencyResolverInterface,
     public Restartable,
     public ZeroInterface,
