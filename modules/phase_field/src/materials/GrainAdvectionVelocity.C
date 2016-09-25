@@ -26,7 +26,7 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameter
     DerivativeMaterialInterface<Material>(parameters),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data")),
     _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
-    _grain_volumes(getVectorPostprocessorValue("grain_volumes", "grain_volumes")),
+    _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes")),
     _grain_forces(_grain_force_torque.getForceValues()),
     _grain_torques(_grain_force_torque.getTorqueValues()),
     _mt(getParam<Real>("translation_constant")),
@@ -66,7 +66,7 @@ GrainAdvectionVelocity::computeQpProperties()
   _velocity_advection[_qp].resize(_grain_num);
   _div_velocity_advection[_qp].resize(_grain_num);
 
-  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   for (unsigned int i = 0; i < _grain_num; ++i)
   {
@@ -91,5 +91,5 @@ GrainAdvectionVelocity::computeQpProperties()
 void
 GrainAdvectionVelocity::getTotalNumberOfGrains()
 {
-  _grain_num = _grain_tracker.getTotalNumberGrains();
+  _grain_num = _grain_tracker.getTotalFeatureCount();
 }

@@ -18,10 +18,7 @@ template<>
 InputParameters validParams<GrainTrackerInterface>();
 
 /**
- * This class is a fake grain tracker object, it will not actually track grains nor remap them
- * but will provide the same interface as the grain tracker and can be used as a lightweight
- * replacement when neither of those methods are needed. You may safely use this object anytime
- * you have at least as many order parameters as you do grains.
+ * This class defines the interface for the GrainTracking objects.
  */
 class GrainTrackerInterface
 {
@@ -36,42 +33,35 @@ public:
   virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType, std::size_t var_idx=0) const = 0;
 
   /**
-   * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
-   * holds the ith node with the inner vector holds the list of active unique grains.
-   * (unique_grain_id, variable_idx)
+   * Returns a list of active unique feature ids for a particular element. The vector is indexed by variable number
+   * with each entry containing either an invalid size_t type (no feature active at that location) or a feature id
+   * if the variable is non-zero at that location.
    */
-//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const = 0;
+  virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const = 0;
 
   /**
-   * Returns a list of active unique grains for a particular element. The vector is indexed by order parameter
-   * with each entry containing an invalid uint (no grain active at that location) or a grain index
-   * if it's active at that location.
-   */
-  virtual const std::vector<std::size_t> & getOpToGrainsVector(dof_id_type elem_id) const = 0;
-
-  /**
-   * Returns the number of active grains in a simulation. Note: This value will count
-   * each piece of a split grain (often enountered in EBSD datasets).
+   * Returns the number of active grains current stored in the GrainTracker. This value is the same value
+   * reported when the GrainTracker (FeatureFloodObject) is used as a Postprocessor.
+   * Note: This value will count each piece of a split grain (often enountered in EBSD datasets).
    */
   virtual std::size_t getNumberActiveGrains() const = 0;
 
   /**
-   * Returns the maximum grain index in use. This method can be used to size an array
-   * or other data structure to maintain information about all grains (active and inactive)
-   * in a simulation.
+   * Returns a number large enough to contain the largest ID for all grains in use.
+   * This method can be used to size a vector or other data structure to maintain
+   * information about all grains (active and inactive) in a simulation.
    */
-  virtual std::size_t getTotalNumberGrains() const = 0;
-
-  /**
-   * Returns the actual grain ID given a grain index. Grain IDs are not required, and are often
-   * not contiguous when using external data like EBSD data.
-   */
-//  virtual unsigned int getGrainID(std::size_t grain_index) const = 0;
+  virtual std::size_t getTotalFeatureCount() const = 0;
 
   /**
    * Returns the centroid for the given grain number.
    */
   virtual Point getGrainCentroid(unsigned int grain_id) const = 0;
+
+  /**
+   * Returns a Boolean indicating whether this grain is in contact with any boundary of the domain
+   */
+  virtual bool doesGrainIntersectBoundary(unsigned int grain_id) const;
 };
 
 #endif

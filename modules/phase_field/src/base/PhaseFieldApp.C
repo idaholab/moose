@@ -157,7 +157,6 @@
 #include "GrainTracker.h"
 #include "GrainTrackerElasticity.h"
 #include "FauxGrainTracker.h"
-#include "FeatureVolumeFraction.h"
 #include "PFCElementEnergyIntegral.h"
 
 /*
@@ -236,6 +235,7 @@
 /*
  * VectorPostprocessors
  */
+#include "FeatureVolumeFraction.h"
 #include "FeatureVolumeVectorPostprocessor.h"
 #include "GrainCentersPostprocessor.h"
 #include "GrainForcesPostprocessor.h"
@@ -410,8 +410,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
-  registerPostprocessor(FeatureVolumeFraction);
-  registerDeprecatedObjectName(FeatureVolumeFraction, "NodalVolumeFraction", "09/01/2016 08:00");
   registerPostprocessor(PFCElementEnergyIntegral);
 
   registerAux(BndsCalcAux);
@@ -441,6 +439,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(MaskedGrainForceAndTorque);
   registerUserObject(SolutionRasterizer);
 
+  registerVectorPostprocessor(FeatureVolumeFraction);
   registerVectorPostprocessor(FeatureVolumeVectorPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);

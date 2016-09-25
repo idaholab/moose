@@ -25,7 +25,7 @@ MultiGrainRigidBodyMotion::computeQpResidual()
 {
   RealGradient velocity_advection = 0.0;
   Real div_velocity_advection = 0.0;
-  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
@@ -100,12 +100,12 @@ MultiGrainRigidBodyMotion::computeCVarJacobianEntry(dof_id_type jdof)
   Real div_velocity_advection = 0.0;
   RealGradient velocity_advection_jacobian_c = 0.0;
   Real div_velocity_advection_jacobian_c = 0.0;
-  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
     auto grain_id = grain_ids[i];
-    if (grain_id != FeatureFloodCount::invalid_size_t)
+    if (grain_id != FeatureFloodCount::invalid_id)
     {
       const auto volume = _grain_volumes[grain_id];
       const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
@@ -132,12 +132,12 @@ MultiGrainRigidBodyMotion::computeCVarNonlocalJacobianEntry(dof_id_type jdof)
 {
   RealGradient velocity_advection_jacobian_c = 0.0;
   Real div_velocity_advection_jacobian_c = 0.0;
-  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
     auto grain_id = grain_ids[i];
-    if (grain_id != FeatureFloodCount::invalid_size_t)
+    if (grain_id != FeatureFloodCount::invalid_id)
     {
       const auto volume = _grain_volumes[grain_id];
       const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
@@ -160,12 +160,12 @@ MultiGrainRigidBodyMotion::computeEtaVarJacobianEntry(dof_id_type jdof, unsigned
 {
   RealGradient velocity_advection_jacobian_eta = 0.0;
   Real div_velocity_advection_jacobian_eta = 0.0;
-  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
     auto grain_id = grain_ids[i];
-    if (grain_id != FeatureFloodCount::invalid_size_t)
+    if (grain_id != FeatureFloodCount::invalid_id)
     {
       const auto volume = _grain_volumes[grain_id];
       const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
@@ -197,12 +197,12 @@ MultiGrainRigidBodyMotion::computeEtaVarNonlocalJacobianEntry(dof_id_type jdof, 
   RealGradient eta_jacobian_sum = 0.0;
   RealGradient velocity_advection_jacobian_eta = 0.0;
   Real div_velocity_advection_jacobian_eta = 0.0;
-  const auto & grain_ids = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & grain_ids = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   for (auto i = beginIndex(grain_ids); i < grain_ids.size(); ++i)
   {
     auto grain_id = grain_ids[i];
-    if (grain_id != FeatureFloodCount::invalid_size_t)
+    if (grain_id != FeatureFloodCount::invalid_id)
     {
       const auto volume = _grain_volumes[grain_id];
       const auto centroid = _grain_tracker.getGrainCentroid(grain_id);

@@ -17,16 +17,15 @@ InputParameters validParams<FauxGrainTracker>()
   return params;
 }
 
-
 FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
     FeatureFloodCount(parameters),
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step"))
 {
   // initialize faux data with identity map
-  _op_to_grain_indices.resize(_vars.size());
-  for (auto i = beginIndex(_op_to_grain_indices); i < _op_to_grain_indices.size(); ++i)
-    _op_to_grain_indices[i] = i;
+  _op_to_grains.resize(_vars.size());
+  for (auto i = beginIndex(_op_to_grains); i < _op_to_grains.size(); ++i)
+    _op_to_grains[i] = i;
 }
 
 FauxGrainTracker::~FauxGrainTracker()
@@ -86,18 +85,10 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
   return 0;
 }
 
-//const std::vector<std::pair<unsigned int, unsigned int> > &
-//FauxGrainTracker::getElementalValues(dof_id_type /*elem_id*/) const
-//{
-//  mooseDeprecated("GrainTrackerInterface::getElementalValues() is deprecated use GrainTrackerInterface::getOpToGrainsVector() instead");
-//
-//  return _faux_data;
-//}
-
-const std::vector<std::size_t> &
-FauxGrainTracker::getOpToGrainsVector(dof_id_type /*elem_id*/) const
+const std::vector<unsigned int> &
+FauxGrainTracker::getVarToFeatureVector(dof_id_type /*elem_id*/) const
 {
-  return _op_to_grain_indices;
+  return _op_to_grains;
 }
 
 std::size_t
@@ -107,17 +98,10 @@ FauxGrainTracker::getNumberActiveGrains() const
 }
 
 std::size_t
-FauxGrainTracker::getTotalNumberGrains() const
+FauxGrainTracker::getTotalFeatureCount() const
 {
   return _variables_used.size();
 }
-
-//unsigned int
-//FauxGrainTracker::getGrainID(std::size_t grain_index) const
-//{
-//  // Reflexive numbering
-//  return static_cast<unsigned int>(grain_index);
-//}
 
 Point
 FauxGrainTracker::getGrainCentroid(unsigned int grain_index) const

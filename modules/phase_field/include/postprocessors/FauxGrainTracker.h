@@ -36,10 +36,9 @@ public:
 
   // GrainTrackerInterface methods
   virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, std::size_t var_idx) const override;
-  virtual const std::vector<std::size_t> & getOpToGrainsVector(dof_id_type elem_id) const override;
+  virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const override;
   virtual std::size_t getNumberActiveGrains() const override;
-  virtual std::size_t getTotalNumberGrains() const override;
-//  virtual unsigned int getGrainID(std::size_t grain_index) const override;
+  virtual std::size_t getTotalFeatureCount() const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
 
 private:
@@ -53,7 +52,7 @@ private:
   const int _tracking_step;
 
   /// Order parameter to grain indices (just a reflexive vector)
-  std::vector<std::size_t> _op_to_grain_indices;
+  std::vector<unsigned int > _op_to_grains;
 
   /// The volume of the feature
   std::map<unsigned int, Real> _volume;
@@ -63,7 +62,6 @@ private:
 
   /// The centroid of the feature (average of coordinates from entities participating in the volume calculation)
   std::map<unsigned int, Point> _centroid;
-
 };
 
 #endif

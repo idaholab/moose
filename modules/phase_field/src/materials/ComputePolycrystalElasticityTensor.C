@@ -45,7 +45,7 @@ void
 ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
 {
   // Get list of active order parameters from grain tracker
-  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   // Calculate elasticity tensor
   _elasticity_tensor[_qp].zero();

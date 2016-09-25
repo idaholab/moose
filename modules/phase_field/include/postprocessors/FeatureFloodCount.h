@@ -58,6 +58,19 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
+  /// Returns the total feature count (active and inactive ids, useful for sizing vectors)
+  virtual std::size_t getTotalFeatureCount() const;
+
+  // TODO: Implement
+  virtual bool doesFeatureIntersectBoundary(unsigned int /*feature_id*/) const { return false; }
+
+  /**
+   * Returns a list of active unique feature ids for a particular element. The vector is indexed by variable number
+   * with each entry containing either an invalid size_t type (no feature active at that location) or a feature id
+   * if the variable is non-zero at that location.
+   */
+  virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const;
+
   /// Returns the number of coupled varaibles
   std::size_t numCoupledVars() const { return _n_vars; }
 
@@ -82,8 +95,6 @@ public:
 
   // Retrieve field information
   virtual Real getEntityValue(dof_id_type entity_id, FieldType field_type, std::size_t var_index=0) const;
-
-//  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
 
   inline bool isElemental() const { return _is_elemental; }
 
@@ -111,10 +122,9 @@ public:
 
     FeatureData(std::size_t var_index) :
         _var_index(var_index),
-        _id(libMesh::invalid_uint),
+        _id(FeatureFloodCount::invalid_id),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
-        _volume(0.0),
         _vol_count(0),
         _status(Status::CLEAR),
         _intersects_boundary(false)
@@ -200,9 +210,9 @@ public:
     /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
-      if (_id != libMesh::invalid_uint)
+      if (_id != FeatureFloodCount::invalid_id)
       {
-        mooseAssert(rhs._id != libMesh::invalid_uint, "Asymmetric setting of ids detected during sort");
+        mooseAssert(rhs._id != FeatureFloodCount::invalid_id, "Asymmetric setting of ids detected during sort");
 
         // Sort based on ids
         return _id < rhs._id;
@@ -241,9 +251,6 @@ public:
 
     /// The minimum entity seen in the _local_ids, used for sorting features
     dof_id_type _min_entity_id;
-
-    /// The volume of the feature
-    Real _volume;
 
     /// The count of entities contributing to the volume calculation
     std::size_t _vol_count;
@@ -287,8 +294,6 @@ protected:
    */
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
                                              FeatureData * & feature, unsigned int & new_id);
-
-  virtual bool currentElemContributesToVolume(std::size_t current_index) const;
 
   ///@{
   /**
@@ -385,18 +390,6 @@ protected:
   void updateRegionOffsets();
 
   /**
-   * This routine writes a CSV file of volume information for each feature.
-   */
-  virtual void writeFeatureVolumeFile();
-
-  /**
-   * This routine writes out data to a CSV file.  It is designed to be extended to derived classes
-   * but is used to write out feature volumes for this class.
-   */
-  template<class T>
-  void writeCSVFile(const std::string file_name, const std::vector<T> data);
-
-  /**
    * This method detects whether two sets intersect without building a result set.  It exits as soon as
    * any intersection is detected.
    */
@@ -431,9 +424,6 @@ protected:
   const Real _connecting_threshold;
   Real _step_connecting_threshold;
 
-  /// The threshold above which the entity contributes to the volume of the feature.
-  const Real _volume_threshold;
-
   /// A reference to the mesh
   MooseMesh & _mesh;
 
@@ -458,15 +448,15 @@ protected:
   /// Indicates whether or not to communicate halo map information with all ranks
   const bool _compute_halo_maps;
 
+  /// Indicates whether or not the var to feature map is populated.
+  const bool _compute_var_to_feature_map;
+
   /**
    * Use less-than when comparing values against the threshold value.
    * True by default.  If false, then greater-than comparison is used
    * instead.
    */
   const bool _use_less_than_threshold_comparison;
-
-  /// Boolean indicating whether or not feature volumes are calculated and stored
-  const bool _calculate_feature_volumes;
 
   // Convenience variable holding the number of variables coupled into this object
   const std::size_t _n_vars;
@@ -543,38 +533,12 @@ protected:
    */
   std::multimap<dof_id_type, dof_id_type> _periodic_node_map;
 
-  /**
-   * The filename and filehandle used if feature volumes are being recorded to a file.
-   * std::unique_ptr is used so we don't have to worry about cleaning up after ourselves...
-   */
-  std::map<std::string, std::unique_ptr<std::ofstream> > _file_handles;
-
-  /**
-   * The vector hold the volume of each flooded feature.  Note: this vector is only populated
-   * when requested by passing a file name to write this information to.
-   */
-  std::vector<Real> _all_feature_volumes;
-
-//  /// Dummy value for unimplemented method "getElementalValues()"
-//  static const std::vector<std::pair<unsigned int, unsigned int> > _empty;
-
-  /**
-   * Vector of length _maps_size to keep track of the total
-   * boundary-intersecting feature volume scaled by the total domain
-   * volume for each variable.
-   */
-  std::vector<Real> _total_volume_intersecting_boundary;
-
-  /**
-   * If true, the FeatureFloodCount object also computes the
-   * (normalized) volume of features which intersect the boundary and
-   * reports this value in the CSV file (if available).  Defaults to
-   * false.
-   */
-  bool _compute_boundary_intersecting_volume;
-
-  /// The set of entities on the boundary of the domain used for calculating boundary intersecting volumes
+  /// The set of entities on the boundary of the domain used for determining if features intersect any boundary
   std::set<dof_id_type> _all_boundary_entity_ids;
+
+  std::map<dof_id_type, std::vector<unsigned int> > _entity_var_to_features;
+
+  std::vector<unsigned int> _empty_var_to_features;
 
   /// Determines if the flood counter is elements or not (nodes)
   bool _is_elemental;
@@ -582,42 +546,6 @@ protected:
   /// Convenience variable for testing master rank
   bool _is_master;
 };
-
-template <class T>
-void
-FeatureFloodCount::writeCSVFile(const std::string file_name, const std::vector<T> data)
-{
-  mooseAssert(processor_id() == 0, "Only write files on processor zero");
-
-  // Try to find the filename
-  auto handle_it = _file_handles.find(file_name);
-
-  // If the file_handle isn't found, create it
-  if (handle_it == _file_handles.end())
-  {
-    MooseUtils::checkFileWriteable(file_name);
-
-    // Store the new filename in the map
-    auto result = _file_handles.insert(std::make_pair(file_name, libmesh_make_unique<std::ofstream>(file_name.c_str())));
-
-    // Be sure that the insert worked!
-    mooseAssert(result.second, "Insertion into _file_handles map failed!");
-
-    // Set handle_it to be an iterator to the new file.
-    handle_it = result.first;
-  }
-
-  // Get reference to the stream, makes syntax below much simpler
-  std::ofstream & the_stream = *(handle_it->second);
-
-  // Set formatting flags on the stream - technically we only need to do this once, but whatever.
-  the_stream << std::scientific << std::setprecision(6);
-
-  mooseAssert(the_stream.is_open(), "File handle is not open");
-
-  std::copy(data.begin(), data.end(), infix_ostream_iterator<T>(the_stream, ", "));
-  the_stream << std::endl;
-}
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
 template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);

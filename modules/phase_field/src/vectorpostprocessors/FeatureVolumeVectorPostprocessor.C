@@ -25,10 +25,11 @@ InputParameters validParams<FeatureVolumeVectorPostprocessor>()
 FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(const InputParameters & parameters) :
     GeneralVectorPostprocessor(parameters),
     MooseVariableDependencyInterface(),
-    _flood_counter(getUserObject<FeatureFloodCount>("flood_counter")),
-    _grain_volumes(declareVector("grain_volumes")),
-    _grain_ids(declareVector("grain_ids")),
-    _vars(_flood_counter.getCoupledVars()),
+    _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
+    _feature_volumes(declareVector("feature_volumes")),
+    _feature_ids(declareVector("feature_ids")),
+    _var_volume_intersect_bounds(declareVector("op_volume_intersect_bounds")),
+    _vars(_feature_counter.getCoupledVars()),
     _mesh(_subproblem.mesh()),
     _assembly(_subproblem.assembly(_tid)),
     _q_point(_assembly.qPoints()),
@@ -51,40 +52,42 @@ FeatureVolumeVectorPostprocessor::initialize()
 void
 FeatureVolumeVectorPostprocessor::execute()
 {
-  const GrainTrackerInterface * grain_tracker = dynamic_cast<const GrainTrackerInterface *>(&_flood_counter);
+  const auto num_features = _feature_counter.getTotalFeatureCount();
 
-  if (!grain_tracker)
-    mooseError("FeatureVolumeVectorPostprocessor currently only supports the GrainTrackerInterface");
-
-  const auto num_grains = grain_tracker->getTotalNumberGrains();
-  _grain_volumes.assign(num_grains, 0);
+  // Reset all of the vectors
+  _feature_volumes.assign(num_features, 0);
+  _feature_ids.assign(num_features, -1);
+  _var_volume_intersect_bounds.assign(_vars.size(), 0);
 
   const auto end = _mesh.getMesh().active_local_elements_end();
   for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
-    const Elem * current_elem = *el;
-    _fe_problem.prepare(current_elem, 0);
-    _fe_problem.reinitElem(current_elem, 0);
+    const Elem * elem = *el;
+    _fe_problem.prepare(elem, 0);
+    _fe_problem.reinitElem(elem, 0);
 
     /**
-     * Here we retrieve the op to grains or more generally the map of active
-     * features at the current element location. We'll use that
-     * information to figure out which variables are non-zero (from a
-     * threshold perspective) then we can sum those values into
+     * Here we retrieve the var to features vector on the current element.
+     * We'll use that information to figure out which variables are non-zero
+     * (from a threshold perspective) then we can sum those values into
      * appropriate grain index locations.
      */
-    const auto & op_to_grains = grain_tracker->getOpToGrainsVector(current_elem->id());
+    const auto & var_to_features = _feature_counter.getVarToFeatureVector(elem->id());
 
-    for (auto op_index = beginIndex(op_to_grains); op_index < op_to_grains.size(); ++op_index)
+    for (auto var_index = beginIndex(var_to_features); var_index < var_to_features.size(); ++var_index)
     {
       // Only sample "active" variables
-      if (op_to_grains[op_index] != FeatureFloodCount::invalid_size_t)
+      if (var_to_features[var_index] != FeatureFloodCount::invalid_id)
       {
-        auto grain_id = op_to_grains[op_index];
-        mooseAssert(grain_id < num_grains, "Grain index out of range");
+        auto feature_id = var_to_features[var_index];
+        mooseAssert(feature_id < num_features, "Feature ID out of range");
 
         // Add in the integral value on the current variable to the current feature's slot
-        _grain_volumes[grain_id] += computeIntegral(op_index);
+        Real integral_value = computeIntegral(var_index);
+        _feature_volumes[feature_id] += integral_value;
+
+        if (_feature_counter.doesFeatureIntersectBoundary(feature_id))
+          _var_volume_intersect_bounds[var_index] += integral_value;
       }
     }
   }
@@ -94,23 +97,23 @@ void
 FeatureVolumeVectorPostprocessor::finalize()
 {
   // Do the parallel sum
-  _communicator.sum(_grain_volumes);
+  _communicator.sum(_feature_volumes);
 }
 
 Real
-FeatureVolumeVectorPostprocessor::getGrainVolume(unsigned int grain_id) const
+FeatureVolumeVectorPostprocessor::getFeatureVolume(unsigned int feature_id) const
 {
-  mooseAssert(grain_id < _grain_volumes.size(), "grain_id is out of range");
-  return _grain_volumes[grain_id];
+  mooseAssert(feature_id < _feature_volumes.size(), "feature_id is out of range");
+  return _feature_volumes[feature_id];
 }
 
 Real
-FeatureVolumeVectorPostprocessor::computeIntegral(std::size_t op_index) const
+FeatureVolumeVectorPostprocessor::computeIntegral(std::size_t var_index) const
 {
   Real sum = 0;
 
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    sum += _JxW[qp] * _coord[qp] * (*_coupled_sln[op_index])[qp];
+    sum += _JxW[qp] * _coord[qp] * (*_coupled_sln[var_index])[qp];
 
   return sum;
 }

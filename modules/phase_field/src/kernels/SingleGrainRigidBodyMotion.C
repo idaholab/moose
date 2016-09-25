@@ -25,7 +25,7 @@ SingleGrainRigidBodyMotion::SingleGrainRigidBodyMotion(const InputParameters & p
 Real
 SingleGrainRigidBodyMotion::computeQpResidual()
 {
-  auto grain_id = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+  auto grain_id = _grain_tracker.getVarToFeatureVector(_current_elem->id())[_op_index];
   if (grain_id != FeatureFloodCount::invalid_id)
   {
     const auto volume = _grain_volumes[grain_id];
@@ -46,7 +46,7 @@ SingleGrainRigidBodyMotion::computeQpResidual()
 Real
 SingleGrainRigidBodyMotion::computeQpJacobian()
 {
-  auto grain_id = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+  auto grain_id = _grain_tracker.getVarToFeatureVector(_current_elem->id())[_op_index];
   if (grain_id != FeatureFloodCount::invalid_id)
   {
     const auto volume = _grain_volumes[grain_id];
@@ -75,7 +75,7 @@ SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _c_var)
   {
-    auto grain_id = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+    auto grain_id = _grain_tracker.getVarToFeatureVector(_current_elem->id())[_op_index];
     if (grain_id != FeatureFloodCount::invalid_id)
     {
       const auto volume = _grain_volumes[grain_id];
@@ -96,7 +96,7 @@ SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
   for (unsigned int op = 0; op < _op_num; ++op)
     if (jvar == _vals_var[op])
     {
-      auto grain_id = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+      auto grain_id = _grain_tracker.getVarToFeatureVector(_current_elem->id())[_op_index];
       if (grain_id != FeatureFloodCount::invalid_id)
       {
         const auto volume = _grain_volumes[grain_id];
@@ -121,7 +121,7 @@ SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
 Real
 SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type dof_index)
 {
-  auto grain_id = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+  auto grain_id = _grain_tracker.getVarToFeatureVector(_current_elem->id())[_op_index];
   if (grain_id != FeatureFloodCount::invalid_id)
   {
     const auto volume = _grain_volumes[grain_id];
@@ -146,7 +146,7 @@ SingleGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int jvar, 
 {
   if (jvar == _c_var)
   {
-    auto grain_id = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+    auto grain_id = _grain_tracker.getVarToFeatureVector(_current_elem->id())[_op_index];
     if (grain_id != FeatureFloodCount::invalid_id)
     {
       const auto volume = _grain_volumes[grain_id];
@@ -167,7 +167,7 @@ SingleGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int jvar, 
   for (unsigned int op = 0; op < _op_num; ++op)
     if (jvar == _vals_var[op])
     {
-      auto grain_id = _grain_tracker.getOpToGrainsVector(_current_elem->id())[_op_index];
+      auto grain_id = _grain_tracker.getVarToFeatureVector(_current_elem->id())[_op_index];
       if (grain_id != FeatureFloodCount::invalid_id)
       {
         const auto volume = _grain_volumes[grain_id];

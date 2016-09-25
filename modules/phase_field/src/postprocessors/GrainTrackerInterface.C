@@ -15,9 +15,6 @@ InputParameters validParams<GrainTrackerInterface>()
   params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
   params.addParam<unsigned int>("halo_level", 2, "The thickness of the halo surrounding each feature.");
   params.addParam<bool>("remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
-  params.addParam<bool>("compute_op_maps", false, "Indicates whether the data structures that"
-                                                  "hold the active order parameter information"
-                                                  "should be populated or not");
   params.addParam<unsigned short>("reserve_op", 0, "Indicates the number of reserved ops (variables that cannot be remapped to)");
   params.addParam<Real>("reserve_op_threshold", 0.95, "Threshold for locating a new feature on the reserved op variable(s)" );
   params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
@@ -39,4 +36,10 @@ InputParameters validParams<GrainTrackerInterface>()
   params.set<MultiMooseEnum>("execute_on") = execute_options;
 
   return params;
+}
+
+bool
+GrainTrackerInterface::doesGrainIntersectBoundary(unsigned int /*grain_id*/) const
+{
+  return false;
 }

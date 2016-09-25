@@ -47,7 +47,7 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
 void
 ComputeGrainForceAndTorque::initialize()
 {
-  _grain_num = _grain_tracker.getTotalNumberGrains();
+  _grain_num = _grain_tracker.getTotalFeatureCount();
   _ncomp = 6 * _grain_num;
 
   _force_values.resize(_grain_num);
@@ -68,7 +68,7 @@ ComputeGrainForceAndTorque::initialize()
 void
 ComputeGrainForceAndTorque::execute()
 {
-  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   for (unsigned int i = 0; i < _grain_num; ++i)
     for (unsigned int j = 0; j < _op_num; ++j)
@@ -92,7 +92,7 @@ ComputeGrainForceAndTorque::execute()
 void
 ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
 {
-  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   if (jvar == _c_var)
     for (unsigned int i = 0; i < _grain_num; ++i)

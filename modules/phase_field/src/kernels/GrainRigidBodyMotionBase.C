@@ -43,7 +43,7 @@ GrainRigidBodyMotionBase::GrainRigidBodyMotionBase(const InputParameters & param
     _mt(getParam<Real>("translation_constant")),
     _mr(getParam<Real>("rotation_constant")),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
-    _grain_volumes(getVectorPostprocessorValue("grain_volumes", "grain_volumes"))
+    _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes"))
 {
   //Loop through grains and load coupled variables into the arrays
   for (unsigned int i = 0; i < _op_num; ++i)

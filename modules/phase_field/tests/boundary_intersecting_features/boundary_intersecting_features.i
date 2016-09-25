@@ -84,13 +84,14 @@
     type = FeatureFloodCount
     variable = u
     threshold = 1.0
+    execute_on = 'initial timestep_end'
+  [../]
+[]
 
-    # File to write feature volume data to
-    feature_volume_file = feature_volumes.csv
-
-    # Explicitly turn on the boundary-intersecting volume calculation
-    compute_boundary_intersecting_volume = true
-
+[VectorPostprocessors]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
   [../]
 []

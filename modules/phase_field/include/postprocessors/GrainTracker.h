@@ -31,12 +31,14 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
+  virtual std::size_t getTotalFeatureCount() const override;
+
   // Struct used to transfer minimal data to all ranks
   struct PartialFeatureData
   {
+    bool intersects_boundary;
     unsigned int id;
     Point centroid;
-    Real volume;
   };
 
   struct CacheValues
@@ -55,18 +57,16 @@ public:
 
   // GrainTrackerInterface methods
   virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, std::size_t var_idx=0) const override;
-  virtual const std::vector<std::size_t> & getOpToGrainsVector(dof_id_type elem_id) const override;
+  virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const override;
   virtual std::size_t getNumberActiveGrains() const override;
-  virtual std::size_t getTotalNumberGrains() const override;
-//  virtual unsigned int getGrainID(std::size_t grain_index) const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
+  virtual bool doesGrainIntersectBoundary(unsigned int grain_id) const override;
 
 protected:
   virtual void updateFieldInfo() override;
   virtual Real getThreshold(std::size_t current_index, bool active_feature) const override;
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
                                              FeatureData * & feature, unsigned int & new_id) override;
-  virtual bool currentElemContributesToVolume(std::size_t current_index) const override;
 
   void communicateHaloMap();
 
@@ -105,7 +105,7 @@ protected:
 
   /**
    * Broadcast essential Grain information to all processors. This method is used to get certain
-   * attributes like volume and centroid updated.
+   * attributes like centroids distributed and whether or not a grain intersects a boundary updated.
    */
   void broadcastAndUpdateGrainData();
 
@@ -210,20 +210,8 @@ protected:
   /// Boolean to indicate that we should retrieve EBSD information from a specific phase
   const bool _consider_phase;
 
-  /// Boolean to indicate whether or not we should populate order parameter map information
-  const bool _compute_op_maps;
-
   /// Data structure to hold grain_id to grain_index
   std::vector<std::size_t> _grain_id_to_grain_index;
-
-  /**
-   * Data structure for active order parameter information on elements:
-   * elem_id -> a vector of pairs each containing the grain number and the variable index representing that grain
-   */
-//  std::map<dof_id_type, std::vector<std::pair<unsigned int, unsigned int> > > _elemental_data;
-  std::map<dof_id_type, std::vector<std::size_t> > _elem_op_to_grain_indices;
-
-  std::vector<std::size_t> _empty_op_to_grain_indices;
 
 private:
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)

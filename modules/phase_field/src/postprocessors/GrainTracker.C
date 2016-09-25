@@ -21,16 +21,16 @@
 template<>
 void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
+  storeHelper(stream, feature.intersects_boundary, context);
   storeHelper(stream, feature.id, context);
-  storeHelper(stream, feature.volume, context);
   storeHelper(stream, feature.centroid, context);
 }
 
 template<>
 void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
+  loadHelper(stream, feature.intersects_boundary, context);
   loadHelper(stream, feature.id, context);
-  loadHelper(stream, feature.volume, context);
   loadHelper(stream, feature.centroid, context);
 }
 
@@ -59,19 +59,13 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _ebsd_op_var(_ebsd_reader ? &_fe_problem.getVariable(0, getParam<std::string>("var_name_base") + "_op") : nullptr),
     _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : 0),
     _consider_phase(isParamValid("phase")),
-    _compute_op_maps(getParam<bool>("compute_op_maps")),
     _reserve_grain_first_index(0),
     _max_curr_grain_id(0),
     _first_time(true),
     _is_transient(_subproblem.isTransient())
 {
-  if (!_is_elemental && _compute_op_maps)
-    mooseError("\"compute_op_maps\" is only supported with \"flood_entity_type = ELEMENTAL\"");
-
   if (_ebsd_reader && !_ebsd_op_var)
     mooseError("EBSD OP variable must be supplied if the reader is supplied");
-
-  _empty_op_to_grain_indices.resize(_n_vars, FeatureFloodCount::invalid_size_t);
 }
 
 GrainTracker::~GrainTracker()
@@ -87,6 +81,12 @@ GrainTracker::getEntityValue(dof_id_type entity_id, FieldType field_type, std::s
   return FeatureFloodCount::getEntityValue(entity_id, field_type, var_index);
 }
 
+const std::vector<unsigned int> &
+GrainTracker::getVarToFeatureVector(dof_id_type elem_id) const
+{
+  return FeatureFloodCount::getVarToFeatureVector(elem_id);
+}
+
 std::size_t
 GrainTracker::getNumberActiveGrains() const
 {
@@ -95,7 +95,7 @@ GrainTracker::getNumberActiveGrains() const
 }
 
 std::size_t
-GrainTracker::getTotalNumberGrains() const
+GrainTracker::getTotalFeatureCount() const
 {
   // Note: This value is parallel consistent, see assignGrains()/trackGrains()
   return _max_curr_grain_id + 1;
@@ -118,6 +118,22 @@ GrainTracker::getGrainCentroid(unsigned int grain_id) const
   return Point();
 }
 
+bool
+GrainTracker::doesGrainIntersectBoundary(unsigned int grain_id) const
+{
+  mooseAssert(grain_id < _grain_id_to_grain_index.size(), "Grain ID out of bounds");
+
+  auto grain_index = _grain_id_to_grain_index[grain_id];
+
+  if (grain_index != FeatureFloodCount::invalid_size_t)
+  {
+    mooseAssert(_grain_id_to_grain_index[grain_id] < _feature_sets.size(), "Grain index out of bounds");
+    return _feature_sets[_grain_id_to_grain_index[grain_id]]._intersects_boundary;
+  }
+
+  return false;
+}
+
 void
 GrainTracker::initialize()
 {
@@ -130,8 +146,6 @@ GrainTracker::initialize()
     _feature_sets_old.swap(_feature_sets);
 
   FeatureFloodCount::initialize();
-
-  _elem_op_to_grain_indices.clear();
 }
 
 void
@@ -220,16 +234,6 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::s
     return FeatureFloodCount::isNewFeatureOrConnectedRegion(dof_object, current_index, feature, new_id);
 }
 
-bool
-GrainTracker::currentElemContributesToVolume(std::size_t current_index) const
-{
-  if (_ebsd_reader && _first_time)
-    // During the initial EBSD flood, every single element will contribute to a grain
-    return true;
-  else
-    return FeatureFloodCount::currentElemContributesToVolume(current_index);
-}
-
 void
 GrainTracker::buildGrainIdToGrainIndex(unsigned int max_id)
 {
@@ -302,29 +306,6 @@ GrainTracker::finalize()
   updateFieldInfo();
   _console << "Finished inside of updateFieldInfo" << std::endl;
 
-  writeFeatureVolumeFile();
-
-  // Build data structures for the various GrainTracker APIs
-  if (_compute_op_maps)
-  {
-    for (const auto & grain : _feature_sets)
-    {
-      for (auto elem_id : grain._local_ids)
-      {
-        auto map_it = _elem_op_to_grain_indices.lower_bound(elem_id);
-        if (map_it == _elem_op_to_grain_indices.end() || map_it->first != elem_id)
-        {
-          map_it = _elem_op_to_grain_indices.emplace_hint(map_it, elem_id, std::vector<std::size_t>(_n_vars, FeatureFloodCount::invalid_size_t));
-
-          // insert the reserve op numbers (if appropriate)
-          for (auto reserve_index = decltype(_n_reserve_ops)(0); reserve_index < _n_reserve_ops; ++reserve_index)
-            map_it->second[reserve_index] = _reserve_grain_first_index + reserve_index;
-        }
-        map_it->second[grain._var_index] = grain._id;
-      }
-    }
-  }
-
   // Set the first time flag false here (after all methods of finalize() have completed)
   _first_time = false;
 
@@ -332,22 +313,6 @@ GrainTracker::finalize()
 
   _console << "Finished inside of GrainTracker" << std::endl;
   Moose::perf_log.pop("finalize()", "GrainTracker");
-}
-
-const std::vector<std::size_t> &
-GrainTracker::getOpToGrainsVector(dof_id_type elem_id) const
-{
-  const auto pos = _elem_op_to_grain_indices.find(elem_id);
-
-  if (pos != _elem_op_to_grain_indices.end())
-    return pos->second;
-  else
-  {
-#if DEBUG
-    mooseDoOnce(_console << "Elemental values not in structure for elem: " << elem_id << " this may be normal.");
-#endif
-    return _empty_op_to_grain_indices;
-  }
 }
 
 void
@@ -365,8 +330,8 @@ GrainTracker::broadcastAndUpdateGrainData()
                    [](FeatureData & feature)
                    {
                      PartialFeatureData partial_feature;
+                     partial_feature.intersects_boundary = feature._intersects_boundary;
                      partial_feature.id = feature._id;
-                     partial_feature.volume = feature._volume;
                      partial_feature.centroid = feature._centroid;
                      return partial_feature;
                    });
@@ -396,8 +361,8 @@ GrainTracker::broadcastAndUpdateGrainData()
           _grain_id_to_grain_index[partial_data.id] != FeatureFloodCount::invalid_size_t)
       {
         auto & grain = _feature_sets[_grain_id_to_grain_index[partial_data.id]];
+        grain._intersects_boundary = partial_data.intersects_boundary;
         grain._centroid = partial_data.centroid;
-        grain._volume = partial_data.volume;
       }
     }
   }
@@ -1328,18 +1293,6 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node, std::size_t curr_var_in
 void
 GrainTracker::updateFieldInfo()
 {
-  // Whether or not we should store and write out volume information
-  bool gather_volumes = _pars.isParamValid("feature_volume_file");
-  if (gather_volumes)
-  {
-    // store volumes per feature
-    mooseAssert(!_feature_sets.empty(), "Unique grain structure is empty!");
-    _all_feature_volumes.resize(_max_curr_grain_id + 1, 0);
-
-    // store totals per variable (or smaller)
-    _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 0 : _maps_size);
-  }
-
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     _feature_maps[map_num].clear();
 
@@ -1388,10 +1341,25 @@ GrainTracker::updateFieldInfo()
       {
         mooseAssert(grain._id != FeatureFloodCount::invalid_id,  "Missing Grain ID");
         _feature_maps[map_index][entity] = grain._id;
+
         if (_var_index_mode)
           _var_index_maps[map_index][entity] = grain._var_index;
 
         tmp_map[entity] = entity_value;
+      }
+
+      if (_compute_var_to_feature_map)
+      {
+        auto map_it = _entity_var_to_features.lower_bound(entity);
+        if (map_it == _entity_var_to_features.end() || map_it->first != entity)
+        {
+          map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
+
+          // insert the reserve op numbers (if appropriate)
+          for (auto reserve_index = decltype(_n_reserve_ops)(0); reserve_index < _n_reserve_ops; ++reserve_index)
+            map_it->second[reserve_index] = _reserve_grain_first_index + reserve_index;
+        }
+        map_it->second[grain._var_index] = grain._id;
       }
     }
 
@@ -1401,14 +1369,6 @@ GrainTracker::updateFieldInfo()
 
     for (auto entity : grain._ghosted_ids)
       _ghosted_entity_ids[entity] = 1;
-
-    // Save off volume information (no sort required)
-    if (gather_volumes)
-    {
-      _all_feature_volumes[grain._id] = grain._volume;
-      if (grain._intersects_boundary)
-        _total_volume_intersecting_boundary[map_index] += grain._volume;
-    }
   }
 
   communicateHaloMap();

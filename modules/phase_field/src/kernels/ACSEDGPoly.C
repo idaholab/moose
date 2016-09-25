@@ -51,7 +51,7 @@ ACSEDGPoly::computeDFDOP(PFFunctionType type)
   // Dislocation density in deformed grains
   Real rho_i = _Disloc_Den_i[_qp];
   // undeformed grains are dislocation-free
-  const auto & op_to_grain = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grain = _grain_tracker.getVarToFeatureVector(_current_elem->id());
   const auto grn_index = op_to_grain[_op_index];
   if (grn_index >= _deformed_grain_num)
     rho_i = 0.0;

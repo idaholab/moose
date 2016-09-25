@@ -63,7 +63,7 @@ DeformedGrainMaterial::computeQpProperties()
     SumEtai2 += (*_vals[i])[_qp]*(*_vals[i])[_qp];
 
   // calculate effective dislocation density and assign zero dislocation densities to undeformed grains
-  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   // loop over active OPs
   bool one_active = false;

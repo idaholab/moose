@@ -7,7 +7,7 @@
 #ifndef FEATUREVOLUMEFRACTION_H
 #define FEATUREVOLUMEFRACTION_H
 
-#include "FeatureFloodCount.h"
+#include "GeneralVectorPostprocessor.h"
 
 //Forward Declarations
 class FeatureVolumeFraction;
@@ -15,20 +15,23 @@ class FeatureVolumeFraction;
 template<>
 InputParameters validParams<FeatureVolumeFraction>();
 
-class FeatureVolumeFraction : public FeatureFloodCount
+class FeatureVolumeFraction : public GeneralVectorPostprocessor
 {
 public:
   FeatureVolumeFraction(const InputParameters & parameters);
 
-  virtual void finalize();
-
-  Real getValue();
-
-  void calculateBubbleFraction();
-  Real calculateAvramiValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
 protected:
+  Real calculateAvramiValue();
+
+  VectorPostprocessorValue & _avrami_data;
+
   const PostprocessorValue & _mesh_volume;
+  const VectorPostprocessorValue & _feature_volumes;
+
   Real _volume_fraction;
   Real _equil_fraction;
 };
