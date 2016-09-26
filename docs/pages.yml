@@ -14,6 +14,8 @@
     - Create an Application: 'content/application_development/create_an_app.md'
 - Framework:
     - Systems: !include content/framework/systems/pages.yml
+    - Interfaces:
+        - DerivativeMaterialInterface: 'content/framework/interfaces/DerivativeMaterialInterface.md'
 - Modules:
     - Heat Conduction:
         - Systems: !include content/modules/heat_conduction/systems/pages.yml
