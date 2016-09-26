@@ -98,6 +98,93 @@ InputParameters validParams<FEProblem>()
   return params;
 }
 
+//
+InputParameters
+FEProblem::executionerValidParams()
+{
+  InputParameters params = validParams<MooseObject>();
+  params.addDeprecatedParam<FileNameNoExtension>("restart_file_base", "", "File base name used for restart", "Please use \"Problem/restart_file_base\" instead");
+
+  params.registerBase("Executioner");
+
+  params.addParamNamesToGroup("restart_file_base", "Restart");
+
+  params.addParam<std::vector<std::string> >("splitting", "Top-level splitting defining a hierarchical decomposition into subsystems to help the solver.");
+
+  // Default Solver Behavior
+#ifdef LIBMESH_HAVE_PETSC
+  params += Moose::PetscSupport::getPetscValidParams();
+#endif //LIBMESH_HAVE_PETSC
+  params.addParam<Real>        ("l_tol",           1.0e-5,   "Linear Tolerance");
+  params.addParam<Real>        ("l_abs_step_tol",  -1,       "Linear Absolute Step Tolerance");
+  params.addParam<unsigned int>("l_max_its",       10000,    "Max Linear Iterations");
+  params.addParam<unsigned int>("nl_max_its",      50,       "Max Nonlinear Iterations");
+  params.addParam<unsigned int>("nl_max_funcs",    10000,    "Max Nonlinear solver function evaluations");
+  params.addParam<Real>        ("nl_abs_tol",      1.0e-50,  "Nonlinear Absolute Tolerance");
+  params.addParam<Real>        ("nl_rel_tol",      1.0e-8,   "Nonlinear Relative Tolerance");
+  params.addParam<Real>        ("nl_abs_step_tol", 1.0e-50,  "Nonlinear Absolute step Tolerance");
+  params.addParam<Real>        ("nl_rel_step_tol", 1.0e-50,  "Nonlinear Relative step Tolerance");
+  params.addParam<bool>        ("no_fe_reinit",    false,    "Specifies whether or not to reinitialize FEs");
+  params.addParam<bool>        ("compute_initial_residual_before_preset_bcs", false,
+                                "Use the residual norm computed *before* PresetBCs are imposed in relative convergence check");
+
+  params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
+                              "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol compute_initial_residual_before_preset_bcs", "Solver");
+  params.addParamNamesToGroup("no_fe_reinit", "Advanced");
+
+  return params;
+}
+
+void
+FEProblem::executionerInitParams(InputParameters params)
+{
+  // Extract and store PETSc related settings on FEProblem
+#ifdef LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::storePetscOptions(*this, params);
+#endif //LIBMESH_HAVE_PETSC
+
+  // These solver-related parameters are parsed into the params object passed
+  // in as a function argument from a solver-specific action.  They are not
+  // officially part of the Problem input parameters and so must be retrieved
+  // directly from the params argument and not from the class's _pars member
+  // - and so the getParam member function does not work.
+  EquationSystems & esys = es();
+  esys.parameters.set<Real> ("linear solver tolerance")
+    = params.get<Real>("l_tol");
+
+  esys.parameters.set<Real> ("linear solver absolute step tolerance")
+    = params.get<Real>("l_abs_step_tol");
+
+  esys.parameters.set<unsigned int> ("linear solver maximum iterations")
+    = params.get<unsigned int>("l_max_its");
+
+  esys.parameters.set<unsigned int> ("nonlinear solver maximum iterations")
+    = params.get<unsigned int>("nl_max_its");
+
+  esys.parameters.set<unsigned int> ("nonlinear solver maximum function evaluations")
+    = params.get<unsigned int>("nl_max_funcs");
+
+  esys.parameters.set<Real> ("nonlinear solver absolute residual tolerance")
+    = params.get<Real>("nl_abs_tol");
+
+  esys.parameters.set<Real> ("nonlinear solver relative residual tolerance")
+    = params.get<Real>("nl_rel_tol");
+
+  esys.parameters.set<Real> ("nonlinear solver absolute step tolerance")
+    = params.get<Real>("nl_abs_step_tol");
+
+  esys.parameters.set<Real> ("nonlinear solver relative step tolerance")
+    = params.get<Real>("nl_rel_step_tol");
+
+  getNonlinearSystem()._compute_initial_residual_before_preset_bcs = params.get<bool>("compute_initial_residual_before_preset_bcs");
+  getNonlinearSystem()._l_abs_step_tol = params.get<Real>("l_abs_step_tol");
+  getNonlinearSystem().setDecomposition(params.get<std::vector<std::string> >("splitting"));
+
+  FileNameNoExtension restart_file_base(params.get<FileNameNoExtension>("restart_file_base"));
+  if (!restart_file_base.empty())
+    setRestartFile(restart_file_base);
+}
+
 FEProblem::FEProblem(const InputParameters & parameters) :
     SubProblem(parameters),
     Restartable(parameters, "FEProblem", this),
@@ -136,6 +223,7 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _geometric_search_data(*this, _mesh),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
+
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),

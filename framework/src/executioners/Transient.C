@@ -133,7 +133,6 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose"))
 {
-  _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
@@ -146,9 +145,6 @@ Transient::Transient(const InputParameters & parameters) :
 
   _time = _time_old = _start_time;
   _problem.transient(true);
-
-  if (!_restart_file_base.empty())
-    _problem.setRestartFile(_restart_file_base);
 
   setupTimeIntegrator();
 
