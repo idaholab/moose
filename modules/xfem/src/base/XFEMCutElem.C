@@ -63,9 +63,7 @@ XFEMCutElem::computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, cons
       computePhysicalVolumeFraction();
       Real volfrac = getPhysicalVolumeFraction();
       for (unsigned qp = 0; qp < qrule->n_points(); ++qp)
-      {
         _new_weights[qp] = volfrac;
-      }
       break;
     }
     case Xfem::MOMENT_FITTING:
@@ -75,13 +73,30 @@ XFEMCutElem::computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, cons
       _qp_weights = qrule->get_weights();
 
       computeMomentFittingWeights();
-      // As a temporary solution for negative terms on the Jacobian diagonal,
-      // set the weights for integration points to zero if they are negative.
-      // TODO: A better solution for this is in the works.
-      for (unsigned qp = 0; qp < qrule->n_points(); ++qp)
+
+      //Blend weights from moment fitting and volume fraction to avoid negative weights
+      Real alpha = 1.0;
+      if (*std::min_element(_new_weights.begin(), _new_weights.end()) < 0.0)
       {
-        if (_new_weights[qp] < 0)
-          _new_weights[qp] = 0;
+        //One or more of the weights computed by moment fitting is negative.
+        //Blend moment and volume fraction weights to keep them nonnegative.
+        //Find the largest value of alpha that will keep all of the weights nonnegative.
+        for (unsigned int i = 0; i < _n_qpoints; ++i)
+        {
+          const Real denominator = _physical_volfrac - _new_weights[i];
+          if (denominator > 0.0) // Negative values would give a negative value for alpha, which must be between 0 and 1.
+          {
+            const Real alpha_i = _physical_volfrac / denominator;
+            if (alpha_i < alpha)
+              alpha = alpha_i;
+          }
+        }
+        for (unsigned int i = 0; i < _n_qpoints; ++i)
+        {
+          _new_weights[i] = alpha * _new_weights[i] + (1.0 - alpha) * _physical_volfrac;
+          if (_new_weights[i] < 0.0) //We can end up with small (roundoff) negative weights
+            _new_weights[i] = 0.0;
+        }
       }
       break;
     }
