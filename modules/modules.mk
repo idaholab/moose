@@ -28,7 +28,8 @@ ifeq ($(XFEM),yes)
 endif
 
 ifeq ($(POROUS_FLOW),yes)
-        TENSOR_MECHANICS           := yes
+        TENSOR_MECHANICS          := yes
+        FLUID_PROPERTIES          := yes
 endif
 
 # The master list of all moose modules
@@ -130,8 +131,8 @@ ifeq ($(POROUS_FLOW),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/porous_flow
   APPLICATION_NAME   := porous_flow
 
-  #Dependency on tensor_mechanics
-  DEPEND_MODULES     := tensor_mechanics
+  #Dependency on tensor_mechanics and fluid_properties
+  DEPEND_MODULES     := tensor_mechanics fluid_properties
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
