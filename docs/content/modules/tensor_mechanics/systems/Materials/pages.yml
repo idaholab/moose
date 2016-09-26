@@ -11,9 +11,9 @@
 - ComputeCosseratSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputeCosseratSmallStrain.md
 - ComputeDeformGradBasedStress: content/modules/tensor_mechanics/systems/Materials/ComputeDeformGradBasedStress.md
 - ComputeEigenstrain: content/modules/tensor_mechanics/systems/Materials/ComputeEigenstrain.md
-- ComputeElasticSmearedCrackingStress: content/modules/tensor_mechanics/systems/Materials/ComputeElasticSmearedCrackingStress.md
 - ComputeElasticityTensor: content/modules/tensor_mechanics/systems/Materials/ComputeElasticityTensor.md
 - ComputeElasticityTensorCP: content/modules/tensor_mechanics/systems/Materials/ComputeElasticityTensorCP.md
+- ComputeElasticSmearedCrackingStress: content/modules/tensor_mechanics/systems/Materials/ComputeElasticSmearedCrackingStress.md
 - ComputeFiniteStrain: content/modules/tensor_mechanics/systems/Materials/ComputeFiniteStrain.md
 - ComputeFiniteStrainElasticStress: content/modules/tensor_mechanics/systems/Materials/ComputeFiniteStrainElasticStress.md
 - ComputeIncrementalSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputeIncrementalSmallStrain.md
@@ -23,10 +23,10 @@
 - ComputeMultiPlasticityStress: content/modules/tensor_mechanics/systems/Materials/ComputeMultiPlasticityStress.md
 - ComputePlaneFiniteStrain: content/modules/tensor_mechanics/systems/Materials/ComputePlaneFiniteStrain.md
 - ComputePlaneSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputePlaneSmallStrain.md
+- ComputeReturnMappingStress: content/modules/tensor_mechanics/systems/Materials/ComputeReturnMappingStress.md
 - ComputeRSphericalFiniteStrain: content/modules/tensor_mechanics/systems/Materials/ComputeRSphericalFiniteStrain.md
 - ComputeRSphericalIncrementalStrain: content/modules/tensor_mechanics/systems/Materials/ComputeRSphericalIncrementalStrain.md
 - ComputeRSphericalSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputeRSphericalSmallStrain.md
-- ComputeReturnMappingStress: content/modules/tensor_mechanics/systems/Materials/ComputeReturnMappingStress.md
 - ComputeSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputeSmallStrain.md
 - ComputeStrainIncrementBasedStress: content/modules/tensor_mechanics/systems/Materials/ComputeStrainIncrementBasedStress.md
 - ComputeThermalExpansionEigenStrain: content/modules/tensor_mechanics/systems/Materials/ComputeThermalExpansionEigenStrain.md

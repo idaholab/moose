@@ -1,8 +1,13 @@
-<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->
-#StressDivergenceTensors
+#Stress Divergence Tensors
+!description /Kernels/StressDivergenceTensors
+
 !devel /Kernels/StressDivergenceTensors float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
-!description /Kernels/StressDivergenceTensors
+##Description
+{!content/modules/tensor_mechanics/common_documentation/supplementalStressDivergenceKernels.md!}
+
+
+For a detailed explanation of the settings for `use_displaced_mesh` in mechanics problems, see the [Introduction/StressDivergence](auto::/introduction/StressDivergence) page.
 
 !parameters /Kernels/StressDivergenceTensors
 

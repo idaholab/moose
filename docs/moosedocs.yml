@@ -36,11 +36,16 @@ markdown_extensions:
               Tests:
                   - ../test
                   - ../modules/phase_field/tests
+                  - ../modules/tensor_mechanics/tests
               Examples:
                   - ../examples
                   - ../modules/phase_field/examples
               Tutorials:
                   - ../tutorials
+                  - ../modules/tensor_mechanics/tutorials
+              Source:
+                  - ../modules/heat_conduction/include
+                  - ../modules/tensor_mechanics/include
           locations:
               framework:
                   doxygen: http://mooseframework.com/docs/doxygen/moose/

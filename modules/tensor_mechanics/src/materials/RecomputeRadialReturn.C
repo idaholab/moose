@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<RecomputeRadialReturn>()
 {
   InputParameters params = validParams<Material>();
-
+  params.addClassDescription("Calculates the effective inelastic strain increment required to return the isotropic stress state to a J2 yield surface.  This class is intended to be a parent class for classes with specific constitutive models.");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
 
   // Newton Iteration control parameters

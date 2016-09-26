@@ -10,9 +10,8 @@
 #include "RecomputeRadialReturn.h"
 
 /**
- * This class uses the Discrete material in a radial return isotropic plasticity
- * model.  This class is one of the basic radial return constitutive models;
- * more complex constitutive models combine creep and plasticity.
+ * This class uses the Discrete material in an isotropic radial return hyperbolic
+ * sine viscoplasticity model.
  *
  * This class inherits from RecomputeRadialReturn and must be used
  * in conjunction with ComputeReturnMappingStress. This uniaxial viscoplasticity
