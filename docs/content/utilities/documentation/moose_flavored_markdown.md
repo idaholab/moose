@@ -19,7 +19,7 @@ be included within \{\! and \!\}. For more information refer to the package docu
 The enables the use of [MathJax](http://www.mathjax.org) within markdown, refer to the package documentation for complete
 details: [python-markdown-math](https://github.com/mitya57/python-markdown-math).
 
-Inline math may be specified by enclosing the latex in single `$`: $y=a\cdot x + b$. Addtionally, stand-alone math may
+Inline math may be specified by enclosing the latex in single `$`: $y=a\cdot x + b$. Additionally, stand-alone math may
 be enclosed in `$$`:
 
 $$
@@ -293,7 +293,7 @@ graph {
 
 You can add a Civet build status widget to any page using !buildstatus http://url/to/civet
 
-Currently this will only work with Civet CI servicies.
+Currently this will only work with Civet CI services.
 
 ```markdown
 !buildstatus https://moosebuild.org/mooseframework/ float=right padding-left=10px
