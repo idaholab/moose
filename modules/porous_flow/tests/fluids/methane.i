@@ -1,10 +1,11 @@
-# Test the density and viscosity calculated by the simple CO2 Material
-# Pressure 5 MPa
-# Temperature 50C
-# These conditions correspond to the gas phase
-# CO2 density should equal 104 kg/m^3 (NIST webbook)
-# CO2 viscosity should equal 0.000017345 Pa.s (NIST webbook)
-# Results are within expected accuracy
+# Test MethaneFluidProperties
+# Reference data from Irvine Jr, T. F. and Liley, P. E. (1984) Steam and
+# Gas Tables with Computer Equations
+#
+# For temperature = 350K, the fluid properties should be:
+# density = 55.13 kg/m^3
+# viscosity = 0.01276 mPa.s
+# h = 708.5 kJ/kg
 
 [Mesh]
   type = GeneratedMesh
@@ -27,7 +28,7 @@
 
 [Variables]
   [./pp]
-    initial_condition = 5e6
+    initial_condition = 10e6
   [../]
 []
 
@@ -40,14 +41,14 @@
 
 [AuxVariables]
   [./temp]
-    initial_condition = 50
+    initial_condition = 76.85
   [../]
 []
 
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    temperature = temp
+    temperature = 'temp'
   [../]
   [./nnn]
     type = PorousFlowNodeNumber
@@ -57,9 +58,18 @@
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./dens0]
-    type = PorousFlowSimpleCO2
+  [./methane]
+    type = PorousFlowSingleComponentFluid
+    fp = methane
     phase = 0
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./methane]
+      type = MethaneFluidProperties
+    [../]
   [../]
 []
 
@@ -85,22 +95,14 @@
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity0'
   [../]
-  [./ddensity_dp]
+  [./enthalpy]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dpressure_variable_dummy'
-  [../]
-  [./ddensity_dt]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dtemperature_variable_dummy'
-  [../]
-  [./dviscosity_dt]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_viscosity0/dtemperature_variable_dummy'
+    mat_prop = 'PorousFlow_fluid_phase_enthalpy_nodal0'
   [../]
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = simpleco21
+  file_base = methane
   csv = true
 []
