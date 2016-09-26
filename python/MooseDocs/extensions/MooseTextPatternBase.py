@@ -61,7 +61,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
             stop = content.rfind('*******/\n')
             content = content.replace(content[strt:stop+9], '')
 
-        return content.strip()
+        return content
 
     def createElement(self, label, content, filename, rel_filename, settings, styles):
         """
