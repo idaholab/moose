@@ -18,6 +18,7 @@ from MooseDiagram import MooseDiagram
 from MooseCSS import MooseCSS
 from MooseSlidePreprocessor import MooseSlidePreprocessor
 from MooseBuildStatus import MooseBuildStatus
+from MooseBibtex import MooseBibtex
 import MooseDocs
 import utils
 
@@ -40,7 +41,7 @@ class MooseMarkdown(markdown.Extension):
         # Determine the root directory via git
         global cache
         if not cache['root']:
-            cache['root'] = os.path.dirname(subprocess.check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.STDOUT))
+            cache['root'] = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], stderr=subprocess.STDOUT).strip('\n')
 
         # Define the configuration options
         self.config = dict()
@@ -99,7 +100,14 @@ class MooseMarkdown(markdown.Extension):
             for key, value in config['locations'].iteritems():
                 cache['syntax'][key] = MooseDocs.MooseApplicationSyntax(cache['yaml'], **value)
 
+        # Populate the pages yaml
+        if not cache['pages']:
+            yml = MooseDocs.yaml_load(config['pages'])
+            for match in re.finditer(r':(.*?\.md)', yaml.dump(yml, default_flow_style=False)):
+                cache['pages'].append(match.group(1).strip())
+
         # Preprocessors
+        md.preprocessors.add('moose_bibtex', MooseBibtex(markdown_instance=md, root=config['root']), '_end')
         md.preprocessors.add('moose_auto_link', MooseMarkdownLinkPreprocessor(markdown_instance=md, database=cache['markdown_include']), '_begin')
         if config['slides']:
             md.preprocessors.add('moose_slides', MooseSlidePreprocessor(markdown_instance=md), '_end')
