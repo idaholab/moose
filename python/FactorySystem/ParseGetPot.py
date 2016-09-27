@@ -64,25 +64,25 @@ class GPNode:
     # String to be returned
     output = ''
 
-    # Write the block headings
-    if level == 0:
-       output += '[' + self.name + ']\n'
-    elif level > 0:
-      output += ' '*2*level + '[./' + self.name + ']\n'
+    # Create the opening and closing blocks
+    if self.parent and self.parent.name != 'root':
+      output += '{}[./{}]\n'.format(' '*2*level, self.name)
+    else:
+      output += '{}[{}]\n'.format(' '*2*level, self.name)
 
     # Write the parameters
     for param in self.params_list:
-      output += ' '*2*(level + 1) + param + " = '" + str(self.params[param]) + "'\n"
+      output += '{}{} = {}\n'.format(' '*2*(level + 1), param, str(self.params[param]))
 
     # Write the children
     for child in self.children_list:
       output += self.children[child].createString(level + 1) + '\n'
 
     # Write the block closing
-    if level == 0:
-      output += '[]\n'
-    elif level > 0:
-      output += ' '*2*level + '[../]'
+    if self.parent and self.parent.name != 'root':
+      output += '{}[../]'.format(' '*2*level)
+    else:
+      output += '{}[]\n'.format(' '*2*level)
 
     # Return the data
     return output
