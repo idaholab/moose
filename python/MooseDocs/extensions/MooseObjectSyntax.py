@@ -172,7 +172,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
 
                 a = etree.SubElement(p, 'a')
                 a.set('href', os.path.join(self._repo, rel_include))
-                a.text = rel_include
+                a.text = self._name
 
                 source = include.replace('/include/', '/src/').replace('.h', '.C')
                 if os.path.exists(source):
@@ -183,7 +183,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
                     rel_source = os.path.relpath(source, self._root)
                     a = etree.SubElement(p, 'a')
                     a.set('href', os.path.join(self._repo, rel_source))
-                    a.text = rel_source
+                    a.text = self._name
 
                     if syntax.doxygen:
                         p = etree.SubElement(el, 'p')
