@@ -129,13 +129,18 @@ def load_pages(filename, keys=[], **kwargs):
     A YAML loader for reading the pages file.
 
     Args:
-        filename[str]: The name for the file to load.
+        filename[str]: The name for the file to load. This is normally a '.yml' file that contains the complete
+                       website layout. It may also be a markdown file, in this case only that single file will be
+                       served with the "home" page.
         keys[list]: A list of top-level keys to include.
         kwargs: key, value pairs passed to yaml_load function.
     """
 
-    # Load the yaml data
-    pages = yaml_load(filename, **kwargs)
+    if filename.endswith('.md'):
+        pages = [{'Home':'index.md'}, {os.path.basename(filename):filename}]
+
+    else:
+        pages = yaml_load(filename, **kwargs)
 
     # Restrict the top-level keys to those provided in the 'include' argument
     if keys:
@@ -196,7 +201,7 @@ def command_line_options():
     # Both build and serve need config file
     for p in [serve_parser, build_parser]:
         p.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
-        p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item.")
+        p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item. It also supports passing the name of a single markdown file, in this case only this file will be served with the 'Home' page.")
         p.add_argument('--page-keys', default=[], nargs='+', help='A list of top-level keys from the "pages" file to include. This is a tool to help speed up the serving for development of documentation.')
 
     # Parse the arguments
