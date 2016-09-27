@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ComputeThermalExpansionEigenStrain.h"
+#include "RankTwoTensor.h"
 
 template<>
 InputParameters validParams<ComputeThermalExpansionEigenStrain>()
@@ -24,7 +25,7 @@ ComputeThermalExpansionEigenStrain::ComputeThermalExpansionEigenStrain(const Inp
     _has_incremental_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _temperature_old(_has_incremental_strain ? & coupledValueOld("temperature") : NULL),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _dstrain_dT(declareProperty<RankTwoTensor>(_base_name + "dstrain_dT")),
+    _thermal_expansion_tensor(declareProperty<RankTwoTensor>(_base_name + "_thermal_expansion_tensor")),
     _stress_free_reference_temperature(getParam<Real>("stress_free_reference_temperature")),
     _step_one(declareRestartableData<bool>("step_one", true))
 {
@@ -53,5 +54,5 @@ ComputeThermalExpansionEigenStrain::computeQpStressFreeStrain()
     _stress_free_strain[_qp] += (*_stress_free_strain_old)[_qp];
 
   RankTwoTensor identity(RankTwoTensor::initIdentity);
-  _dstrain_dT[_qp] = -_thermal_expansion_coeff * identity;
+  _thermal_expansion_tensor[_qp] = -_thermal_expansion_coeff * identity;
 }

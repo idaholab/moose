@@ -22,7 +22,7 @@ protected:
   virtual Real computeStrainZZ();
 
 private:
-  const VariableValue & _strain_zz;
+  const VariableValue & _scalar_strain_zz;
 };
 
 #endif //COMPUTEPLANESMALLSTRAIN_H

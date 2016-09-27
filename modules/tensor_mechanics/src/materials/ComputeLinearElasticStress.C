@@ -38,7 +38,4 @@ ComputeLinearElasticStress::computeQpStress()
 
   // Compute dstress_dstrain
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
-
-  // Compute dstress_dT
-  _dstress_dT[_qp] =  _elasticity_tensor[_qp] * _dstrain_dT[_qp];
 }

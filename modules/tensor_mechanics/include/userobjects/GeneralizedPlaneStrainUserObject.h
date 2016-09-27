@@ -4,24 +4,24 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef GENERALIZEDPLANESTRAINUO_H
-#define GENERALIZEDPLANESTRAINUO_H
+#ifndef GENERALIZEDPLANESTRAINUSEROBJECT_H
+#define GENERALIZEDPLANESTRAINUSEROBJECT_H
 
 #include "ElementUserObject.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
-#include "Function.h"
 
-class GeneralizedPlaneStrainUO;
+class GeneralizedPlaneStrainUserObject;
+class RankTwoTensor;
+class RankFourTensor;
+class Function;
 
 template<>
-InputParameters validParams<GeneralizedPlaneStrainUO>();
+InputParameters validParams<GeneralizedPlaneStrainUserObject>();
 
-class GeneralizedPlaneStrainUO : public ElementUserObject
+class GeneralizedPlaneStrainUserObject : public ElementUserObject
 {
 public:
-  GeneralizedPlaneStrainUO(const InputParameters & parameters);
-  virtual ~GeneralizedPlaneStrainUO() {}
+  GeneralizedPlaneStrainUserObject(const InputParameters & parameters);
+  virtual ~GeneralizedPlaneStrainUserObject() {}
 
   virtual void initialize();
   virtual void execute();
@@ -34,7 +34,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
 
-  Function & _function;
+  Function & _traction;
   const Real _factor;
 
 private:
@@ -42,4 +42,4 @@ private:
   Real _jacobian;
 };
 
-#endif // GENERALIZEDPLANESTRAINUO_H
+#endif // GENERALIZEDPLANESTRAINUSEROBJECT_H

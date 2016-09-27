@@ -5,31 +5,32 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "GeneralizedPlaneStrainDiag.h"
+#include "GeneralizedPlaneStrain.h"
 #include "Assembly.h"
+#include "GeneralizedPlaneStrainUserObject.h"
 
 template<>
-InputParameters validParams<GeneralizedPlaneStrainDiag>()
+InputParameters validParams<GeneralizedPlaneStrain>()
 {
   InputParameters params = validParams<ScalarKernel>();
   params.addClassDescription("Generalized Plane Strain Scalar Kernel");
-  params.addRequiredParam<UserObjectName>("gps_uo", "The name of the GeneralizedPlaneStrainUO UserObject");
+  params.addRequiredParam<UserObjectName>("generalized_plane_strain", "The name of the GeneralizedPlaneStrainUO UserObject");
 
   return params;
 }
 
-GeneralizedPlaneStrainDiag::GeneralizedPlaneStrainDiag(const InputParameters & parameters) :
+GeneralizedPlaneStrain::GeneralizedPlaneStrain(const InputParameters & parameters) :
     ScalarKernel(parameters),
-    _gps_uo(getUserObject<GeneralizedPlaneStrainUO>("gps_uo"))
+    _gps(getUserObject<GeneralizedPlaneStrainUserObject>("generalized_plane_strain"))
 {
 }
 
 void
-GeneralizedPlaneStrainDiag::computeResidual()
+GeneralizedPlaneStrain::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_i = 0; _i < re.size(); _i++)
-    re(_i) += _gps_uo.returnResidual();
+  for (_i = 0; _i < re.size(); ++_i)
+    re(_i) += _gps.returnResidual();
 }
 
 /**
@@ -38,9 +39,9 @@ GeneralizedPlaneStrainDiag::computeResidual()
  * in the kernel of nonlinear variables which needs to couple with the scalar variable
  */
 void
-GeneralizedPlaneStrainDiag::computeJacobian()
+GeneralizedPlaneStrain::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (_i = 0; _i < ke.m(); _i++)
-    ke(_i, _i) += _gps_uo.returnJacobian();
+  for (_i = 0; _i < ke.m(); ++_i)
+    ke(_i, _i) += _gps.returnJacobian();
 }

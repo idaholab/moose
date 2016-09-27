@@ -25,10 +25,8 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters) :
     _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain(declareProperty<RankTwoTensor>(_base_name + "elastic_strain")),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
-    _dstrain_dT(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "dstrain_dT")),
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _dstress_dT(declareProperty<RankTwoTensor>(_base_name + "dstress_dT")),
     _store_stress_old(getParam<bool>("store_stress_old"))
 {
   //Declares old stress and older stress if the parameter _store_stress_old is true. This parameter can be set from the input file using any of the child classes of ComputeStressBase.

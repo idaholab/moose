@@ -5,28 +5,27 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef GENERALIZEDPLANESTRAINDIAG_H
-#define GENERALIZEDPLANESTRAINDIAG_H
+#ifndef GENERALIZEDPLANESTRAIN_H
+#define GENERALIZEDPLANESTRAIN_H
 
 #include "ScalarKernel.h"
-#include "GeneralizedPlaneStrainUO.h"
 
 //Forward Declarations
-class GeneralizedPlaneStrainDiag;
+class GeneralizedPlaneStrain;
+class GeneralizedPlaneStrainUserObject;
 
 template<>
-InputParameters validParams<GeneralizedPlaneStrainDiag>();
+InputParameters validParams<GeneralizedPlaneStrain>();
 
-class GeneralizedPlaneStrainDiag : public ScalarKernel
+class GeneralizedPlaneStrain : public ScalarKernel
 {
 public:
-  GeneralizedPlaneStrainDiag(const InputParameters & parameters);
+  GeneralizedPlaneStrain(const InputParameters & parameters);
 
   virtual void reinit(){};
   virtual void computeResidual();
   virtual void computeJacobian();
 
-private:
-  const GeneralizedPlaneStrainUO & _gps_uo;
+  const GeneralizedPlaneStrainUserObject & _gps;
 };
-#endif //GENERALIZEDPLANESTRAINDIAG_H
+#endif //GENERALIZEDPLANESTRAIN_H

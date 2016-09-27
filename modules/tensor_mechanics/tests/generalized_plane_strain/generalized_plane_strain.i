@@ -2,7 +2,7 @@
   order = FIRST
   family = LAGRANGE
   displacements = 'disp_x disp_y'
-  strain_zz = strain_zz
+  scalar_strain_zz = scalar_strain_zz
   block = 1
 []
 
@@ -15,7 +15,7 @@
   [../]
   [./disp_y]
   [../]
-  [./strain_zz]
+  [./scalar_strain_zz]
     order = FIRST
     family = SCALAR
   [../]
@@ -75,7 +75,7 @@
 
 [UserObjects]
   [./gpsuo]
-    type = GeneralizedPlaneStrainUO
+    type = GeneralizedPlaneStrainUserObject
   [../]
 []
 
@@ -97,9 +97,9 @@
 
 [ScalarKernels]
   [./gps]
-    type = GeneralizedPlaneStrainDiag
-    variable = strain_zz
-    gps_uo = gpsuo
+    type = GeneralizedPlaneStrain
+    variable = scalar_strain_zz
+    generalized_plane_strain = gpsuo
   [../]
 []
 

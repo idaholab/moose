@@ -27,7 +27,7 @@
 #include "Gravity.h"
 #include "DynamicStressDivergenceTensors.h"
 #include "OutOfPlanePressure.h"
-#include "GeneralizedPlaneStrainDiag.h"
+#include "GeneralizedPlaneStrain.h"
 #include "GeneralizedPlaneStrainOffDiag.h"
 
 #include "LinearElasticTruss.h"
@@ -152,7 +152,7 @@
 #include "LineMaterialRankTwoSampler.h"
 #include "LineMaterialRankTwoScalarSampler.h"
 
-#include "GeneralizedPlaneStrainUO.h"
+#include "GeneralizedPlaneStrainUserObject.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -202,7 +202,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(Gravity);
   registerKernel(DynamicStressDivergenceTensors);
   registerKernel(OutOfPlanePressure);
-  registerKernel(GeneralizedPlaneStrainDiag);
+  registerKernel(GeneralizedPlaneStrain);
   registerKernel(GeneralizedPlaneStrainOffDiag);
 
   registerMaterial(LinearElasticTruss);
@@ -295,7 +295,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrystalPlasticitySlipResistanceGSS);
   registerUserObject(CrystalPlasticityStateVariable);
   registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
-  registerUserObject(GeneralizedPlaneStrainUO);
+  registerUserObject(GeneralizedPlaneStrainUserObject);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);

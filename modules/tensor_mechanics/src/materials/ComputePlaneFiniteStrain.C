@@ -11,25 +11,25 @@ InputParameters validParams<ComputePlaneFiniteStrain>()
 {
   InputParameters params = validParams<Compute2DFiniteStrain>();
   params.addClassDescription("Compute strain increment and rotation increment for finite strain under 2D planar assumptions.");
-  params.addCoupledVar("strain_zz", "Variable containing the out-of-plane strain");
+  params.addCoupledVar("scalar_strain_zz", "Variable containing the out-of-plane strain");
   return params;
 }
 
 ComputePlaneFiniteStrain::ComputePlaneFiniteStrain(const InputParameters & parameters) :
     Compute2DFiniteStrain(parameters),
-    _strain_zz(isCoupledScalar("strain_zz") ? coupledScalarValue("strain_zz") : _zero),
-    _strain_zz_old(isCoupledScalar("strain_zz") ? coupledScalarValueOld("strain_zz") : _zero)
+    _scalar_strain_zz(isCoupledScalar("scalar_strain_zz") ? coupledScalarValue("scalar_strain_zz") : _zero),
+    _scalar_strain_zz_old(isCoupledScalar("scalar_strain_zz") ? coupledScalarValueOld("scalar_strain_zz") : _zero)
 {
 }
 
 Real
 ComputePlaneFiniteStrain::computeDeformGradZZ()
 {
-    return _strain_zz[0];
+    return _scalar_strain_zz[0];
 }
 
 Real
 ComputePlaneFiniteStrain::computeDeformGradZZold()
 {
-    return _strain_zz_old[0];
+    return _scalar_strain_zz_old[0];
 }

@@ -22,9 +22,8 @@ protected:
   virtual Real computeDeformGradZZ();
   virtual Real computeDeformGradZZold();
 
-private:
-  const VariableValue & _strain_zz;
-  const VariableValue & _strain_zz_old;
+  const VariableValue & _scalar_strain_zz;
+  const VariableValue & _scalar_strain_zz_old;
 };
 
 #endif //COMPUTEPLANEFINITESTRAIN_H

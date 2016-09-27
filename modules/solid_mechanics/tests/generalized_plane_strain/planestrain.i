@@ -1,13 +1,11 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
-  displacements = 'disp_x disp_y'
-  scalar_strain_zz = scalar_strain_zz
-  block = 1
 []
 
 [Mesh]
   file = square.e
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -19,10 +17,6 @@
 
 [AuxVariables]
   [./temp]
-  [../]
-  [./scalar_strain_zz]
-    order = FIRST
-    family = SCALAR
   [../]
   [./saved_x]
   [../]
@@ -66,18 +60,21 @@
 
 [Postprocessors]
   [./react_z]
-    type = MaterialTensorIntegral
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 2
+    type = MaterialTensorIntegralSM
+    tensor = stress
+    index = 2
+    use_displaced_mesh = true
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    save_in_disp_x = saved_x
+    save_in_disp_y = saved_y
     use_displaced_mesh = true
     temp = temp
-    save_in = 'saved_x saved_y'
   [../]
 []
 
@@ -88,71 +85,54 @@
     function = tempfunc
     use_displaced_mesh = false
   [../]
-
   [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx
-    index_i = 0
-    index_j = 0
+    index = 0
   [../]
   [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xy
-    index_i = 0
-    index_j = 1
+    index = 3
   [../]
   [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yy
-    index_i = 1
-    index_j = 1
+    index = 1
   [../]
   [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zz
-    index_i = 2
-    index_j = 2
+    index = 2
   [../]
 
   [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = strain_xx
-    index_i = 0
-    index_j = 0
+    index = 0
   [../]
   [./strain_xy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = strain_xy
-    index_i = 0
-    index_j = 1
+    index = 3
   [../]
   [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = strain_yy
-    index_i = 1
-    index_j = 1
+    index = 1
   [../]
   [./strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
+    type = MaterialTensorAux
+    tensor = total_strain
     variable = aux_strain_zz
-    index_i = 2
-    index_j = 2
-  [../]
-[]
-
-[AuxScalarKernels]
-  [./strain_zz]
-    type = FunctionScalarAux
-    variable = scalar_strain_zz
-    function = scalar_strain_zz_func
+    index = 2
   [../]
 []
 
@@ -160,12 +140,6 @@
   [./tempfunc]
     type = ParsedFunction
     value = '(1-x)*t'
-  [../]
-  [./scalar_strain_zz_func]
-    type = PiecewiseLinear
-    xy_data = '0 0
-               1 7.901e-5
-               2 1.103021e-2'
   [../]
 []
 
@@ -185,22 +159,17 @@
 []
 
 [Materials]
-  [./elastic_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./linelast]
+    type = Elastic
+    block = 1
+    disp_x = disp_x
+    disp_y = disp_y
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
-  [./strain]
-    type = ComputePlaneSmallStrain
-  [../]
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenStrain
-    temperature = temp
-    thermal_expansion_coeff = 0.02
-    stress_free_reference_temperature = 0.5
-  [../]
-  [./stress]
-    type = ComputeLinearElasticStress
+    thermal_expansion = 0.02
+    stress_free_temperature = 0.5
+    temp = temp
+    formulation = PlaneStrain
   [../]
 []
 
@@ -209,6 +178,7 @@
 
   solve_type = PJFNK
   line_search = none
+
 
 # controls for linear iterations
   l_max_its = 100

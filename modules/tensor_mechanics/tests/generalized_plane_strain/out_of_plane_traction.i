@@ -4,7 +4,7 @@
   order = FIRST
   family = LAGRANGE
   displacements = 'disp_x disp_y'
-  strain_zz = strain_zz
+  scalar_strain_zz = scalar_strain_zz
   block = 1
 []
 
@@ -17,7 +17,7 @@
   [../]
   [./disp_y]
   [../]
-  [./strain_zz]
+  [./scalar_strain_zz]
     order = FIRST
     family = SCALAR
   [../]
@@ -75,8 +75,8 @@
 
 [UserObjects]
   [./gpsuo]
-    type = GeneralizedPlaneStrainUO
-    function = pressure_function
+    type = GeneralizedPlaneStrainUserObject
+    traction = traction_function
     factor = 1e5
   [../]
 []
@@ -98,9 +98,9 @@
 
 [ScalarKernels]
   [./gps]
-    type = GeneralizedPlaneStrainDiag
-    variable = strain_zz
-    gps_uo = gpsuo
+    type = GeneralizedPlaneStrain
+    variable = scalar_strain_zz
+    generalized_plane_strain = gpsuo
   [../]
 []
 
@@ -165,10 +165,10 @@
 []
 
 [Functions]
-  [./pressure_function]
+  [./traction_function]
     type = PiecewiseLinear
-    x='0  2'
-    y='0  -1'
+    x = '0  2'
+    y = '0  -1'
   [../]
 []
 
