@@ -3,8 +3,8 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR        - Root directory of the MOOSE project 
-# HERD_TRUNK_DIR   - Location of the HERD repository
+# MOOSE_DIR        - Root directory of the MOOSE project
+# MODULE_DIR       - Location of the MOOSE modules directory
 # FRAMEWORK_DIR    - Location of the MOOSE framework
 #
 ###############################################################################
@@ -17,8 +17,9 @@ FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on tensor_mechanics
+# dependency on tensor_mechanics and fluid_properties
 TENSOR_MECHANICS := yes
+FLUID_PROPERTIES := yes
 include $(MODULE_DIR)/modules.mk
 
 # dep apps

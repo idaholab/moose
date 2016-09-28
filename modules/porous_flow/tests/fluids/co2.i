@@ -1,9 +1,9 @@
-# Test the density and viscosity calculated by the water Material
-# Region 2 density
-# Pressure 3.5 kPa
-# Temperature 300K (26.85C)
-# Water density should equal 1.0 / 0.394913866e2 = 0.025323 kg/m^3 (IAPWS IF97)
-# Water viscosity should equal 9.9196e-06 Pa.s (NIST webbook)
+# Test the density and viscosity calculated by the simple CO2 Material
+# Pressure 5 MPa
+# Temperature 50C
+# These conditions correspond to the gas phase
+# CO2 density should equal 104 kg/m^3 (NIST webbook)
+# CO2 viscosity should equal 0.000017345 Pa.s (NIST webbook)
 # Results are within expected accuracy
 
 [Mesh]
@@ -27,7 +27,7 @@
 
 [Variables]
   [./pp]
-    initial_condition = 3.5e3
+    initial_condition = 5e6
   [../]
 []
 
@@ -40,14 +40,14 @@
 
 [AuxVariables]
   [./temp]
-    initial_condition = 26.85
+    initial_condition = 50
   [../]
 []
 
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    temperature = 'temp'
+    temperature = temp
   [../]
   [./nnn]
     type = PorousFlowNodeNumber
@@ -57,10 +57,18 @@
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./dens0]
-    type = PorousFlowWater
-    outputs = all
+  [./co2]
+    type = PorousFlowSingleComponentFluid
+    fp = co2
     phase = 0
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./co2]
+      type = CO2FluidProperties
+    [../]
   [../]
 []
 
@@ -86,22 +94,10 @@
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity0'
   [../]
-  [./ddensity_dp]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dpressure_variable_dummy'
-  [../]
-  [./ddensity_dt]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dtemperature_variable_dummy'
-  [../]
-  [./dviscosity_dt]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_viscosity0/dtemperature_variable_dummy'
-  [../]
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = h2o2
+  file_base = co2
   csv = true
 []
