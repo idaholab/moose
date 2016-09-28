@@ -58,9 +58,10 @@ public:
   // GrainTrackerInterface methods
   virtual Real getEntityValue(dof_id_type node_id, FieldType field_type, std::size_t var_idx=0) const override;
   virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const override;
+  virtual unsigned int getFeatureVar(unsigned int feature_id) const override;
   virtual std::size_t getNumberActiveGrains() const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
-  virtual bool doesGrainIntersectBoundary(unsigned int grain_id) const override;
+  virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const override;
 
 protected:
   virtual void updateFieldInfo() override;

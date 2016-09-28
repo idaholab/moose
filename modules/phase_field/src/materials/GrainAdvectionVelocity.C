@@ -49,26 +49,16 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameter
 }
 
 void
-GrainAdvectionVelocity::initialSetup()
-{
-  getTotalNumberOfGrains();
-}
-
-void
-GrainAdvectionVelocity::residualSetup()
-{
-  getTotalNumberOfGrains();
-}
-
-void
 GrainAdvectionVelocity::computeQpProperties()
 {
-  _velocity_advection[_qp].resize(_grain_num);
-  _div_velocity_advection[_qp].resize(_grain_num);
+  auto grain_num = _grain_tracker.getTotalFeatureCount();
+
+  _velocity_advection[_qp].resize(grain_num);
+  _div_velocity_advection[_qp].resize(grain_num);
 
   const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
-  for (unsigned int i = 0; i < _grain_num; ++i)
+  for (unsigned int i = 0; i < _grain_volumes.size(); ++i)
   {
     mooseAssert(i < _grain_volumes.size(), "grain index is out of bounds");
     const auto volume = _grain_volumes[i];
@@ -86,10 +76,4 @@ GrainAdvectionVelocity::computeQpProperties()
         _div_velocity_advection[_qp][i] = div_velocity_translation + div_velocity_rotation;
       }
   }
-}
-
-void
-GrainAdvectionVelocity::getTotalNumberOfGrains()
-{
-  _grain_num = _grain_tracker.getTotalFeatureCount();
 }

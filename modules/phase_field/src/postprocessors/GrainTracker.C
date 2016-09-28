@@ -87,6 +87,12 @@ GrainTracker::getVarToFeatureVector(dof_id_type elem_id) const
   return FeatureFloodCount::getVarToFeatureVector(elem_id);
 }
 
+unsigned int
+GrainTracker::getFeatureVar(unsigned int feature_id) const
+{
+  return FeatureFloodCount::getFeatureVar(feature_id);
+}
+
 std::size_t
 GrainTracker::getNumberActiveGrains() const
 {
@@ -119,16 +125,16 @@ GrainTracker::getGrainCentroid(unsigned int grain_id) const
 }
 
 bool
-GrainTracker::doesGrainIntersectBoundary(unsigned int grain_id) const
+GrainTracker::doesFeatureIntersectBoundary(unsigned int feature_id) const
 {
-  mooseAssert(grain_id < _grain_id_to_grain_index.size(), "Grain ID out of bounds");
+  // TODO: This data structure may need to be turned into a Multimap
+  mooseAssert(feature_id < _grain_id_to_grain_index.size(), "Grain ID out of bounds");
 
-  auto grain_index = _grain_id_to_grain_index[grain_id];
-
-  if (grain_index != FeatureFloodCount::invalid_size_t)
+  auto feature_index = _grain_id_to_grain_index[feature_id];
+  if (feature_index != FeatureFloodCount::invalid_size_t)
   {
-    mooseAssert(_grain_id_to_grain_index[grain_id] < _feature_sets.size(), "Grain index out of bounds");
-    return _feature_sets[_grain_id_to_grain_index[grain_id]]._intersects_boundary;
+    mooseAssert(feature_index < _feature_sets.size(), "Grain index out of bounds");
+    return _feature_sets[feature_index]._intersects_boundary;
   }
 
   return false;

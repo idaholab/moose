@@ -404,21 +404,16 @@ FeatureFloodCount::finalize()
 const std::vector<unsigned int> &
 FeatureFloodCount::getVarToFeatureVector(dof_id_type elem_id) const
 {
-  const auto pos = _entity_var_to_features.find(elem_id);
+  mooseAssert(_compute_var_to_feature_map, "Please set \"compute_var_to_feature_map = true\" to use this interface method");
 
+  const auto pos = _entity_var_to_features.find(elem_id);
   if (pos != _entity_var_to_features.end())
   {
     mooseAssert(pos->second.size() == _n_vars, "Variable to feature vector not sized properly");
     return pos->second;
   }
   else
-  {
-#if DEBUG
-    mooseDoOnce(_console << "Elemental values not in structure for elem: " << elem_id << " this may be normal."
-      "\nMake sure that you have set \"compute_var_maps = true\".");
-#endif
     return _empty_var_to_features;
-  }
 }
 
 void
@@ -486,6 +481,27 @@ FeatureFloodCount::getTotalFeatureCount() const
    * features.
    */
   return _feature_count;
+}
+
+unsigned int
+FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
+{
+  mooseAssert(feature_id < _feature_sets.size(), "feature_id out of bounds");
+
+  return _feature_sets[feature_id]._status != Status::INACTIVE ? _feature_sets[feature_id]._var_index : FeatureFloodCount::invalid_id;
+}
+
+bool
+FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
+{
+  // TODO: Possibly cache this information later
+  bool intersects_boundary = false;
+  for (const auto & feature : _feature_sets)
+    // We have to look at all features even after we find an ID because the ID may not be unique
+    if (feature._id == feature_id)
+      intersects_boundary |= feature._intersects_boundary;
+
+  return intersects_boundary;
 }
 
 Real

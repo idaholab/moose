@@ -84,6 +84,7 @@
     type = FeatureFloodCount
     variable = u
     threshold = 1.0
+    compute_var_to_feature_map = true
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -107,4 +108,5 @@
 
 [Outputs]
   exodus = true
+  csv = true
 []

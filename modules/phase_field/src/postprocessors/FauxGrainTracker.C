@@ -20,12 +20,16 @@ InputParameters validParams<FauxGrainTracker>()
 FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
     FeatureFloodCount(parameters),
     GrainTrackerInterface(),
+    _grain_count(0),
+    _n_vars(_vars.size()),
     _tracking_step(getParam<int>("tracking_step"))
 {
   // initialize faux data with identity map
-  _op_to_grains.resize(_vars.size());
+  _op_to_grains.resize(_n_vars);
   for (auto i = beginIndex(_op_to_grains); i < _op_to_grains.size(); ++i)
     _op_to_grains[i] = i;
+
+  _empty_var_to_features.resize(_n_vars, FeatureFloodCount::invalid_id);
 }
 
 FauxGrainTracker::~FauxGrainTracker()
@@ -42,7 +46,7 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
     var_idx = 0;
   }
 
-  mooseAssert(var_idx < _vars.size(), "Index out of range");
+  mooseAssert(var_idx < _n_vars, "Index out of range");
 
   switch (field_type)
   {
@@ -65,7 +69,7 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
 
       // If this element contains the centroid of one of features, return it's index
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
-      for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+      for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
       {
         const auto centroid = _centroid.find(var_num);
         if (centroid != _centroid.end())
@@ -86,9 +90,22 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
 }
 
 const std::vector<unsigned int> &
-FauxGrainTracker::getVarToFeatureVector(dof_id_type /*elem_id*/) const
+FauxGrainTracker::getVarToFeatureVector(dof_id_type elem_id) const
 {
-  return _op_to_grains;
+  const auto pos = _entity_var_to_features.find(elem_id);
+  if (pos != _entity_var_to_features.end())
+  {
+    mooseAssert(pos->second.size() == _n_vars, "Variable to feature vector not sized properly");
+    return pos->second;
+  }
+  else
+    return _empty_var_to_features;
+}
+
+unsigned int
+FauxGrainTracker::getFeatureVar(unsigned int feature_id) const
+{
+  return feature_id;
 }
 
 std::size_t
@@ -100,7 +117,7 @@ FauxGrainTracker::getNumberActiveGrains() const
 std::size_t
 FauxGrainTracker::getTotalFeatureCount() const
 {
-  return _variables_used.size();
+  return _grain_count;
 }
 
 Point
@@ -116,6 +133,7 @@ void
 FauxGrainTracker::initialize()
 {
   _entity_id_to_var_num.clear();
+  _entity_var_to_features.clear();
   _variables_used.clear();
   if (_is_elemental)
   {
@@ -141,7 +159,12 @@ FauxGrainTracker::execute()
       std::vector<Point> centroid(1, current_elem->centroid());
       _fe_problem.reinitElemPhys(current_elem, centroid, 0);
 
-      for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+      auto entity = current_elem->id();
+      auto map_it = _entity_var_to_features.lower_bound(entity);
+      if (map_it == _entity_var_to_features.end() || map_it->first != entity)
+        map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
+
+      for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
       {
         auto entity_value = _vars[var_num]->sln()[0];
 
@@ -154,6 +177,7 @@ FauxGrainTracker::execute()
           _vol_count[var_num]++;
           // Sum the centroid values for now, we'll average them later
           _centroid[var_num] += current_elem->centroid();
+          map_it->second[var_num] = var_num;
           break;
         }
       }
@@ -165,7 +189,7 @@ FauxGrainTracker::execute()
       {
         const Node * current_node = current_elem->get_node(i);
 
-        for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+        for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
         {
           auto entity_value = _vars[var_num]->getNodalValue(*current_node);
           if ((_use_less_than_threshold_comparison && (entity_value >= _threshold))
@@ -180,6 +204,8 @@ FauxGrainTracker::execute()
     }
   }
 
+  _grain_count = std::max(_grain_count, _variables_used.size());
+
   Moose::perf_log.pop("execute()", "FauxGrainTracker");
 }
 
@@ -192,7 +218,7 @@ FauxGrainTracker::finalize()
   _communicator.set_union(_entity_id_to_var_num);
 
   if (_is_elemental)
-    for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+    for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
     {
       /**
        * Convert elements of the maps into simple values or vector of Real.
@@ -231,4 +257,12 @@ Real
 FauxGrainTracker::getValue()
 {
   return static_cast<Real>(_variables_used.size());
+}
+
+bool
+FauxGrainTracker::doesFeatureIntersectBoundary(unsigned int /*feature_id*/) const
+{
+  mooseDoOnce(mooseWarning("FauxGrainTracker::doesFeatureIntersectboundary() is unimplemented"));
+
+  return false;
 }

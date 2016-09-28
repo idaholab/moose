@@ -27,13 +27,8 @@ class GrainAdvectionVelocity : public DerivativeMaterialInterface<Material>
 public:
   GrainAdvectionVelocity(const InputParameters & parameters);
 
-  virtual void initialSetup();
-  virtual void residualSetup();
-
 protected:
   virtual void computeQpProperties();
-  /// obtain total no. of grains from GrainTracker
-  virtual void getTotalNumberOfGrains();
 
   /// getting userobject for calculating grain centers and volumes
   const GrainTrackerInterface & _grain_tracker;
@@ -54,7 +49,6 @@ private:
   /// constant value corresponding to grain rotation
   Real _mr;
 
-  unsigned int _grain_num;
   unsigned int _op_num;
   std::vector<const VariableValue *> _vals;
   std::vector<const VariableGradient *> _grad_vals;

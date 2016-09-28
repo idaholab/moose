@@ -37,9 +37,3 @@ InputParameters validParams<GrainTrackerInterface>()
 
   return params;
 }
-
-bool
-GrainTrackerInterface::doesGrainIntersectBoundary(unsigned int /*grain_id*/) const
-{
-  return false;
-}

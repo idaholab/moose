@@ -61,8 +61,8 @@ public:
   /// Returns the total feature count (active and inactive ids, useful for sizing vectors)
   virtual std::size_t getTotalFeatureCount() const;
 
-  // TODO: Implement
-  virtual bool doesFeatureIntersectBoundary(unsigned int /*feature_id*/) const { return false; }
+  /// Returns a Boolean indicating whether this feature intersects _any_ boundary
+  virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const;
 
   /**
    * Returns a list of active unique feature ids for a particular element. The vector is indexed by variable number
@@ -70,6 +70,9 @@ public:
    * if the variable is non-zero at that location.
    */
   virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const;
+
+  /// Returns the variable representing the passed in feature
+  virtual unsigned int getFeatureVar(unsigned int feature_id) const;
 
   /// Returns the number of coupled varaibles
   std::size_t numCoupledVars() const { return _n_vars; }

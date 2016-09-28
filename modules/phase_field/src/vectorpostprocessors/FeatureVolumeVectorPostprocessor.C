@@ -26,9 +26,9 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(const InputPa
     GeneralVectorPostprocessor(parameters),
     MooseVariableDependencyInterface(),
     _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
+    _var_num(declareVector("var_num")),
     _feature_volumes(declareVector("feature_volumes")),
-    _feature_ids(declareVector("feature_ids")),
-    _var_volume_intersect_bounds(declareVector("op_volume_intersect_bounds")),
+    _intersects_bounds(declareVector("intersects_bounds")),
     _vars(_feature_counter.getCoupledVars()),
     _mesh(_subproblem.mesh()),
     _assembly(_subproblem.assembly(_tid)),
@@ -54,11 +54,20 @@ FeatureVolumeVectorPostprocessor::execute()
 {
   const auto num_features = _feature_counter.getTotalFeatureCount();
 
-  // Reset all of the vectors
-  _feature_volumes.assign(num_features, 0);
-  _feature_ids.assign(num_features, -1);
-  _var_volume_intersect_bounds.assign(_vars.size(), 0);
+  // Reset the variable index and intersect bounds vectors
+  _var_num.assign(num_features, -1); // Invalid
+  _intersects_bounds.assign(num_features, -1); // Invalid
+  for (auto feature_num = beginIndex(_var_num); feature_num < num_features; ++feature_num)
+  {
+    auto var_num = _feature_counter.getFeatureVar(feature_num);
+    if (var_num != FeatureFloodCount::invalid_id)
+      _var_num[feature_num] = var_num;
 
+    _intersects_bounds[feature_num] = static_cast<unsigned int>(_feature_counter.doesFeatureIntersectBoundary(feature_num));
+  }
+
+  // Reset the volume vector
+  _feature_volumes.assign(num_features, 0);
   const auto end = _mesh.getMesh().active_local_elements_end();
   for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
   {
@@ -85,9 +94,6 @@ FeatureVolumeVectorPostprocessor::execute()
         // Add in the integral value on the current variable to the current feature's slot
         Real integral_value = computeIntegral(var_index);
         _feature_volumes[feature_id] += integral_value;
-
-        if (_feature_counter.doesFeatureIntersectBoundary(feature_id))
-          _var_volume_intersect_bounds[var_index] += integral_value;
       }
     }
   }

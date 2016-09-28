@@ -48,11 +48,9 @@ protected:
   /// A reference to the feature flood count object
   const FeatureFloodCount & _feature_counter;
 
+  VectorPostprocessorValue & _var_num;
   VectorPostprocessorValue & _feature_volumes;
-
-  VectorPostprocessorValue & _feature_ids;
-
-  VectorPostprocessorValue & _var_volume_intersect_bounds;
+  VectorPostprocessorValue & _intersects_bounds;
 
 private:
   Real computeIntegral(std::size_t var_index) const;

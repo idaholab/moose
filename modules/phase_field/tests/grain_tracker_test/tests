@@ -107,5 +107,16 @@
     type = 'CSVDiff'
     input = 'grain_tracker_volume.i'
     csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv'
+    rel_err = 1.e-3
+  [../]
+
+  # This test should work the same with the FeatureFloodCount object
+  [./feature_flood_volume]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume.i'
+    cli_args = 'Postprocessors/grain_tracker/type=FeatureFloodCount'
+    csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv'
+    prereq = grain_tracker_volume
+    rel_err = 1.e-3
   [../]
 []

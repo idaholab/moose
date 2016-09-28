@@ -13,7 +13,7 @@ InputParameters validParams<FeatureVolumeFraction>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
   params.addRequiredParam<PostprocessorName>("mesh_volume", "Postprocessor from which to get mesh volume");
-  params.addRequiredParam<VectorPostprocessorName>("grain_volumes", "The feature volume VectorPostprocessorValue.");
+  params.addRequiredParam<VectorPostprocessorName>("feature_volumes", "The feature volume VectorPostprocessorValue.");
   params.addParam<Real>("equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
   return params;
 }

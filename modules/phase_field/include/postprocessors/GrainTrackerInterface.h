@@ -40,6 +40,12 @@ public:
   virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const = 0;
 
   /**
+   * Return the variable index (typically order parameter) for the given feature. Returns "invalid_id"
+   * if the specified feature is inactive.
+   */
+  virtual unsigned int getFeatureVar(unsigned int feature_id) const = 0;
+
+  /**
    * Returns the number of active grains current stored in the GrainTracker. This value is the same value
    * reported when the GrainTracker (FeatureFloodObject) is used as a Postprocessor.
    * Note: This value will count each piece of a split grain (often enountered in EBSD datasets).
@@ -61,7 +67,7 @@ public:
   /**
    * Returns a Boolean indicating whether this grain is in contact with any boundary of the domain
    */
-  virtual bool doesGrainIntersectBoundary(unsigned int grain_id) const;
+  virtual bool doesFeatureIntersectBoundary(unsigned int grain_id) const = 0;
 };
 
 #endif

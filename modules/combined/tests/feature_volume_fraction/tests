@@ -6,11 +6,11 @@
    rel_err = 5.0e-02
   [../]
 
-  [./Avrami_test]
-   type = CSVDiff
-   input = 'Avrami.i'
-   csvdiff = 'Avrami.csv'
-   rel_err = 1.0e-02
-   recover = false
-  [../]
+#  [./Avrami_test]
+#   type = CSVDiff
+#   input = 'Avrami.i'
+#   csvdiff = 'Avrami.csv'
+#   rel_err = 1.0e-02
+#   recover = false
+#  [../]
 []
