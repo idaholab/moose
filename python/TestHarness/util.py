@@ -83,8 +83,8 @@ LIBMESH_OPTIONS = {
 
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
-def runCommand(cmd):
-  p = Popen([cmd],stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
+def runCommand(cmd, cwd=None):
+  p = Popen([cmd], cwd=cwd, stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
   output = p.communicate()[0]
   if (p.returncode != 0):
     output = 'ERROR: ' + output
@@ -340,3 +340,18 @@ def getSharedOption(libmesh_dir):
     exit(1)
 
   return shared_option
+
+def getInitializedSubmodules(root_dir):
+  """
+  Gets a list of initialized submodules.
+  Input:
+    root_dir[str]: path to execute the git command. This should be the root
+      directory of the app so that the submodule names are correct
+  Return:
+    list[str]: List of iniitalized submodule names or an empty list if there was an error.
+  """
+  output = runCommand("git submodule status", cwd=root_dir)
+  if output.startswith("ERROR"):
+    return []
+  # This ignores submodules that have a '-' at the beginning which means they are not initialized
+  return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)
