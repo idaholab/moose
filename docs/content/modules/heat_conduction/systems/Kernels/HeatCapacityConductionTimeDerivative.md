@@ -8,7 +8,7 @@
     and accesses derivatives of the heat capacity to build the Jacobian.
 
 # See also
-* [[auto::/Kernels/SpecificHeatConductionTimeDerivative]]
+* [[/Kernels/SpecificHeatConductionTimeDerivative.md]]
 
 !parameters /Kernels/HeatCapacityConductionTimeDerivative
 
