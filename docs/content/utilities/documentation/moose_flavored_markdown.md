@@ -60,11 +60,12 @@ The supported "types" for MOOSE are: "info", "note", "important, "warning", "dan
 ## Automatic Links
 
 Moose Flavored Markdown is capable of automatically creating links based on Markdown filenames, which is
-especially useful when linking to generated pages. The syntax is as follows:
+especially useful when linking to generated pages. The syntax is identical to creating links as
+defined by [mkdocs], however the markdown path may be incomplete.
 
-* `[auto::/Kernels/Diffusion]`: [auto::/Kernels/Diffusion]
-* `[auto::framework/Kernels/Overview]`: [auto::/Kernels/Overview]
-* `[Diffusion](auto::/Kernels/Diffusion)`: [Diffusion](auto::/Kernels/Diffusion)
+* `[/Kernels/Diffusion.md]`: [/Kernels/Diffusion.md]
+* `[framework/systems/Kernels/Overview.md]`: [framework/systems/Kernels/Overview.md]
+* `[Diffusion](/Kernels/Diffusion)`: [Diffusion](/Kernels/Diffusion.md)
 
 ---
 
