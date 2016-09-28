@@ -41,21 +41,33 @@
   [../]
 []
 
-[Postprocessors]
-  [./volume_fraction]
-    type = FeatureVolumeFraction
-    variable = u
-    threshold = 0.5
+[VectorPostprocessors]
+  [./feature_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = feature_counter
     execute_on = 'initial timestep_end'
-    Avrami_file = Avrami.csv
-    mesh_volume = Volume
-    equil_fraction = 0.5
-    flood_entity_type = ELEMENTAL
+    outputs = none
   [../]
+[]
 
+[Postprocessors]
+  [./feature_counter]
+    type = FeatureFloodCount
+    variable = u
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_end'
+  [../]
   [./Volume]
     type = VolumePostprocessor
-    execute_on = initial
+    execute_on = 'initial'
+  [../]
+  [./Avrami]
+    type = FeatureVolumeFraction
+    execute_on = 'initial timestep_end'
+    mesh_volume = Volume
+    feature_volumes = feature_volumes
+    equil_fraction = 0.5
+    value_type = AVRAMI
   [../]
 []
 
@@ -66,6 +78,5 @@
 []
 
 [Outputs]
-  file_base = Avrami
-  exodus = true
+  csv = true
 []

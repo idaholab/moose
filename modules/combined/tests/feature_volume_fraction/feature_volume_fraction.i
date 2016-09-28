@@ -41,24 +41,31 @@
   [../]
 []
 
+[VectorPostprocessors]
+  [./feature_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = feature_counter
+    execute_on = 'initial timestep_end'
+    outputs = none
+  [../]
+[]
+
 [Postprocessors]
   [./feature_counter]
     type = FeatureFloodCount
     variable = u
-    execute_on = initial
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_end'
   [../]
   [./Volume]
     type = VolumePostprocessor
-    execute_on = initial
+    execute_on = 'initial'
   [../]
-[]
-
-[VectorPostprocessors]
   [./volume_fraction]
     type = FeatureVolumeFraction
     mesh_volume = Volume
-    feature_volumes = feature_counter
-    execute_on = initial
+    feature_volumes = feature_volumes
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -69,6 +76,5 @@
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []

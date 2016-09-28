@@ -407,6 +407,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(FeatureFloodCount);
+  registerPostprocessor(FeatureVolumeFraction);
   registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
@@ -439,7 +440,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(MaskedGrainForceAndTorque);
   registerUserObject(SolutionRasterizer);
 
-  registerVectorPostprocessor(FeatureVolumeFraction);
   registerVectorPostprocessor(FeatureVolumeVectorPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);
