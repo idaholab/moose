@@ -18,6 +18,9 @@
   [./sgas]
     initial_condition = 0.3
   [../]
+  [./temperature]
+    initial_condition = 50
+  [../]
 []
 
 [AuxVariables]
@@ -68,6 +71,22 @@
     family = MONOMIAL
   [../]
   [./relperm_gas]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./enthalpy_water]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./enthalpy_gas]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./energy_water]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./energy_gas]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -130,7 +149,7 @@
     phase = 1
     execute_on = timestep_end
   [../]
-  [./x1water]
+  [./x1_water]
     type = PorousFlowPropertyAux
     variable = x1_water
     property = mass_fraction
@@ -138,12 +157,40 @@
     fluid_component = 1
     execute_on = timestep_end
   [../]
-  [./x1gas]
+  [./x1_gas]
     type = PorousFlowPropertyAux
     variable = x1_gas
     property = mass_fraction
     phase = 1
     fluid_component = 1
+    execute_on = timestep_end
+  [../]
+  [./enthalpy_water]
+    type = PorousFlowPropertyAux
+    variable = enthalpy_water
+    property = enthalpy
+    phase = 0
+    execute_on = timestep_end
+  [../]
+  [./enthalpy_gas]
+    type = PorousFlowPropertyAux
+    variable = enthalpy_gas
+    property = enthalpy
+    phase = 1
+    execute_on = timestep_end
+  [../]
+  [./energy_water]
+    type = PorousFlowPropertyAux
+    variable = energy_water
+    property = internal_energy
+    phase = 0
+    execute_on = timestep_end
+  [../]
+  [./energy_gas]
+    type = PorousFlowPropertyAux
+    variable = energy_gas
+    property = internal_energy
+    phase = 1
     execute_on = timestep_end
   [../]
 []
@@ -169,12 +216,20 @@
     fluid_component = 1
     variable = sgas
   [../]
+  [./energy_dot]
+    type = PorousFlowEnergyTimeDerivative
+    variable = temperature
+  [../]
+  [./convection]
+    type = PorousFlowConvectiveFlux
+    variable = temperature
+  [../]
 []
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pwater sgas'
+    porous_flow_vars = 'pwater sgas temperature'
     number_fluid_phases = 2
     number_fluid_components = 2
   [../]
@@ -183,6 +238,7 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    temperature = temperature
   [../]
   [./nnn]
     type = PorousFlowNodeNumber
@@ -259,6 +315,38 @@
   [./porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
+  [../]
+  [./rock_heat]
+    type = PorousFlowMatrixInternalEnergy
+    specific_heat_capacity = 1.0
+    density = 125
+  [../]
+  [./fluid_energy0]
+    type = PorousFlowInternalEnergyIdeal
+    specific_heat_capacity = 2
+    phase = 0
+  [../]
+  [./fluid_energy1]
+    type = PorousFlowInternalEnergyIdeal
+    specific_heat_capacity = 1
+    phase = 1
+  [../]
+  [./energy_all]
+    type = PorousFlowJoiner
+    include_old = true
+    material_property = PorousFlow_fluid_phase_internal_energy_nodal
+  [../]
+  [./enthalpy0]
+    type = PorousFlowEnthalpy
+    phase = 0
+  [../]
+  [./enthalpy1]
+    type = PorousFlowEnthalpy
+    phase = 1
+  [../]
+  [./enthalpy_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_fluid_phase_enthalpy_nodal
   [../]
 []
 
