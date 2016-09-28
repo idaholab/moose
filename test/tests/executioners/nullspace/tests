@@ -1,0 +1,7 @@
+[Tests]
+  [./test_gpt]
+    type = 'CSVDiff'
+    input = 'gpt.i'
+    csvdiff = 'gpt_out_sample_solution_0001.csv'
+  [../]
+[]
