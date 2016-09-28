@@ -3,7 +3,7 @@
 The tensor mechanics module offers three different types of strain calculation: Small linearized total strain, small linearized incremental strain, and finite incremental strain.
 
 ##Small Linearized Total Strain
-For linear elasticity problems, the Tensor Mechanics module includes a small strain and total strain material [ComputeSmallStrain](auto::/Materials/ComputeSmallStrain).  This material is useful for verifying material models with hand calculations because of the simplified strain calculations.
+For linear elasticity problems, the Tensor Mechanics module includes a small strain and total strain material [ComputeSmallStrain](/Materials/ComputeSmallStrain.md).  This material is useful for verifying material models with hand calculations because of the simplified strain calculations.
 
 Linearized small strain theory assumes that the gradient of displacement with respect to position is much smaller than unity, and the squared displacement gradient term is neglected in the small strain definition to give:
 
@@ -21,7 +21,7 @@ The input file syntax for small strain is
 end=stress overflow-y=scroll max-height=300px
 
 ##Incremental Small Strains
-Applicable for small linearized strains, MOOSE includes an incremental small strain material, [ComputeIncrementalSmallStrain](auto::/Materials/ComputeIncrementalSmallStrain).  As in the small strain material, the incremental small strain class assumes the gradient of displacement with respect to position is much smaller than unity, and the squared displacement gradient term is neglected in the small strain definition to give:
+Applicable for small linearized strains, MOOSE includes an incremental small strain material, [ComputeIncrementalSmallStrain](/Materials/ComputeIncrementalSmallStrain.md).  As in the small strain material, the incremental small strain class assumes the gradient of displacement with respect to position is much smaller than unity, and the squared displacement gradient term is neglected in the small strain definition to give:
 
 $$
 \epsilon = \frac{1}{2} \left( u \nabla + \nabla u \right) \quad when \quad \frac{\partial u}{ \partial x} << 1
@@ -35,7 +35,7 @@ The input file syntax for incremental small strain is
 
 
 ##Finite Large Strains
-For finite strains, use [ComputeFiniteStrain](auto::/Materials/ComputeFiniteStrain) in which an incremental form is employed such that the strain_increment and rotation_increment are calculated.
+For finite strains, use [ComputeFiniteStrain](/Materials/ComputeFiniteStrain.md) in which an incremental form is employed such that the strain_increment and rotation_increment are calculated.
 The finite strain mechanics approach used in the MOOSE tensor_mechanics module is the incremental corotational form from [Rashid 1993](http://onlinelibrary.wiley.com/doi/10.1002/nme.1620362302/abstract). In this form, the generic time increment under consideration is such that $t \in [t_n, t_{n+1}]$. The configurations of the material element under consideration at $t = t_n$ and $t = t_{n+1}$ are denoted by $\kappa_n$, and $\kappa_{n + 1}$, respectively. The incremental motion over the time increment is assumed to be given in the form of the inverse of the deformation gradient $\hat{\mathbf{F}}$ of $\kappa_{n + 1}$ with respect to $\kappa_n$, which may be written as
 
 $$

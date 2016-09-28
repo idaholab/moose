@@ -48,25 +48,26 @@ The tensor mechanics materials use a modular system where the main tensors used 
 At times, a user may need to define multiple mechanics properties over a single block. For this reason, all material properties can be prepended by a name defined by the input parameter `base_name`.
 
 ###Strain or Strain increment
-The base material class to create strains ($\boldsymbol{\epsilon}$) or strain increments is ComputeStrainBase](auto::/Materials/ComputeStrainBase). `ComputeStrainBase` is a pure virtual class, requiring that all children override the `computeQpProperties()` method.  
+The base material class to create strains ($\boldsymbol{\epsilon}$) or strain increments is ComputeStrainBase](/Materials/ComputeStrainBase.md). `ComputeStrainBase` is a pure virtual class, requiring that all children override the `computeQpProperties()` method.  
 
 For all strain this class defines the property `total_strain`.  For incremental strains, both finite and small, the compute strain base class defines the properties
-`strain_rate`, `strain_increment`, `rotation_increment`, and `deformation_gradient`. A discussion of the different types of strain formulations is available on the [Introduction/Strains](auto::Strains) page.
+`strain_rate`, `strain_increment`, `rotation_increment`, and `deformation_gradient`. A discussion of the different types of strain formulations is available on the [Introduction/Strains](Strains.md) page.
 
-For small strains, use [ComputeSmallStrain](auto::/Materials/ComputeSmallStrain) in which $\boldsymbol{\epsilon} = (\nabla \mathbf{u} + \nabla \mathbf{u}^T)/2$. For finite strains, use [ComputeFiniteStrain](auto::/Materials/ComputeFiniteStrain) in which an incremental form is employed such that the strain_increment and rotation_increment are calculated. The input file syntax for a finite incremental strain material is
+For small strains, use [ComputeSmallStrain](/Materials/ComputeSmallStrain.md) in which $\boldsymbol{\epsilon} = (\nabla \mathbf{u} + \nabla \mathbf{u}^T)/2$. For finite strains, use [ComputeFiniteStrain](/Materials/ComputeFiniteStrain.md) in which an incremental form is employed such that the strain_increment and rotation_increment are calculated. The input file syntax for a finite incremental strain material is
 
 !text modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress overflow-y=scroll max-height=200px
 
 
 ###Elasticity Tensor
 
-The primary class for creating elasticity tensors ($\boldsymbol{\mathcal{C_{ijkl}}}$) is [ComputeElasticityTensor](auto::/Materials/ComputeElasticityTensor). This class defines the property
+The primary class for creating elasticity tensors ($\boldsymbol{\mathcal{C_{ijkl}}}$) is [ComputeElasticityTensor](/Materials/ComputeElasticityTensor.md). This class defines the property
 `_elasticity_tensor`. Given the elastic constants required for the applicable symmetry, such as `symmetric9`, this material calculates the elasticity tensor. If you wish to rotate the elasticity tensor, constant Euler angles can be provided. The elasticity tensor can also be scaled with a function, if desired. The input file syntax to create an elasticity tensor is
 
 `ComputeElasticityTensor` also serves as a base class for specialized elasticity tensors, including:
 
-* An elasticity tensor for crystal plasticity, [ComputeElasticityTensorCP](auto::/Materials/ComputeElasticityTensorCP),
-* A Cosserat elasticity tensor [ComputeLayeredCosseratElasticityTensor](auto::/Materials/ComputeLayeredCosseratElasticityTensor), * An isotropic elasticity tensor [ComputeIsotropicElasticityTensor](auto::/Materials/ComputeIsotropicElasticityTensor).  
+* An elasticity tensor for crystal plasticity, [ComputeElasticityTensorCP](/Materials/ComputeElasticityTensorCP.md),
+* A Cosserat elasticity tensor [ComputeLayeredCosseratElasticityTensor](/Materials/ComputeLayeredCosseratElasticityTensor.md),
+* An isotropic elasticity tensor [ComputeIsotropicElasticityTensor](/Materials/ComputeIsotropicElasticityTensor.md).  
 
 The input file syntax for the isotropic elasticity tensor is
 
@@ -79,11 +80,11 @@ and for an orthotropic material, such as a metal crystal, is
 ###Stress
 The base class for constitutive equations to compute a stress ($\boldsymbol{\sigma}$) is `ComputeStressBase`. The `ComputeStressBase` class defines the properties `stress` and `elastic_strain`. It is a pure virtual class, requiring all children to override the method `computeQpStress()`.
 
-Two elastic constitutive models have been developed, one that assumes small strains [ComputeLinearElasticStress](auto::/Materials/ComputeLinearElasticStress), and a second which assumes finite strains and rotations increments [ComputeFiniteStrainElasticStress](auto::/Materials/ComputeFiniteStrainElasticStress) The input file syntax for these materials is
+Two elastic constitutive models have been developed, one that assumes small strains [ComputeLinearElasticStress](/Materials/ComputeLinearElasticStress.md), and a second which assumes finite strains and rotations increments [ComputeFiniteStrainElasticStress](/Materials/ComputeFiniteStrainElasticStress.md) The input file syntax for these materials is
 
 !input modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=stress overflow-y=scroll max-height=500px
 
-There are a number of other constitutive models that have been implemented to calculate more complex elasticity problems, plasticity, and creep.  An overview of these different materials is available on the [Introduction/Stresses](auto::Stresses) page.
+There are a number of other constitutive models that have been implemented to calculate more complex elasticity problems, plasticity, and creep.  An overview of these different materials is available on the [Introduction/Stresses](Stresses.md) page.
 
 ### Stress-Free Strains (Eigenstrains)
 
@@ -101,13 +102,15 @@ The mechanical strain is passed to the `Compute*Stress` methods to calculate the
 
 Thermal strains are a volumetric change resulting from a change in temperature of the material.  The change in strains can be either a simple linear function of thermal change, e.g. ($\boldsymbol{\epsilon}_T = \alpha \Delta T$) or a more complex function of temperature.   Besides thermal expansion, some models employ other stress-free strains ($\boldsymbol{\epsilon}_0$) to provide inherit strains in the material.
 
-The thermal expansion class, [ComputeThermalExpansionEigenStrain](auto::/Materials/ComputeThermalExpansionEigenStrain) inherits from `ComputeStressFreeStrainBase` to compute the thermal strains for both small total strains and for incremental strains as a linear function of temperature.  The input file syntax is
+The thermal expansion class, [ComputeThermalExpansionEigenStrain](/Materials/ComputeThermalExpansionEigenStrain.md) inherits from `ComputeStressFreeStrainBase` to compute the thermal strains for both small total strains and for incremental strains as a linear function of temperature.  The input file syntax is
 
-!text modules/tensor_mechanics/tests/thermal_expansion/constant_expansion_coeff.i start=thermal_expansion_strain end=Executioner overflow-y=scroll max-height=300px
+!input modules/tensor_mechanics/tests/thermal_expansion/constant_expansion_coeff.i block=thermal_expansion_strain overflow-y=scroll max-height=300px
 
-Other stress-free strains / eigenstrains could be caused by defects such as over-sized or under-sized second phase particles. Another stress-free strain material that has been implemented is [ComputeVariableEigenstrain](auto::/Materials/ComputeVariableEigenstrain). This class computes a lattice mismatch due to a secondary phase, where the form of the tensor is defined by an input vector, and the scalar dependence on a phase variable is defined in another material. The input file syntax is
+Other stress-free strains / eigenstrains could be caused by defects such as over-sized or under-sized second phase particles. Another stress-free strain material that has been implemented is [ComputeVariableEigenstrain](/Materials/ComputeVariableEigenstrain.md). This class computes a lattice mismatch due to a secondary phase, where the form of the tensor is defined by an input vector, and the scalar dependence on a phase variable is defined in another material. The input file syntax is
 
-!text modules/combined/tests/eigenstrain/inclusion.i start=var_dependence end=strain overflow-y=scroll max-height=400px
+!input modules/combined/tests/eigenstrain/inclusion.i block=var_dependence overflow-y=scroll max-height=400px
+
+!input modules/combined/tests/eigenstrain/inclusion.i block=eigen_strain overflow-y=scroll max-height=400px
 
 Note the `DerivativeParsedMaterial`,  which evaluates an expression given in the input file, and its automatically generated derivatives, at each quadrature point.
 

@@ -7,14 +7,14 @@
 
 Both `RankTwoTensor` and `RankFourTensor` allow a user to specify how to the tensor from an input file.  `RankTwoTensor` takes a vector of six or nine inputs.  If six inputs are used, the appropriate symmetries are maintained ($ \sigma_{ij} = \sigma_{ji} $). `RankFourTensor` takes a vector of inputs of the appropriate length to fill in the tensor, with the appropriate symmetries maintained ($ C_{ijkl} = C_{klij}, C_{ijkl} = C_{ijlk}, C_{ijkl} = C_{jikl} $). Several fill methods are available to specify additional symmetries:
 
-* [`antisymmetric`](TensorSymmetries#antisymmetric-6)
-* [`symmetric9`](TensorSymmetries#symmetric9-9)
-* [`symmetric21`](TensorSymmetries#symmetric21-21)
-* [`general_isotropic`](TensorSymmetries#general_isotropic-3)
-* [`symmetric_isotropic`](TensorSymmetries#symmetric_isotropic-2)
-* [`antisymmetric_isotropic`](TensorSymmetries#antisymmetric_isotropic-1)
-* [`axisymmetric_rz`](TensorSymmetries#axisymmetric_rz-5)
-* [`general`](TensorSymmetries#general-81)
+* `antisymmetric`
+* `symmetric9`
+* `symmetric21`
+* `general_isotropic`
+* `symmetric_isotropic`
+* `antisymmetric_isotropic`
+* `axisymmetric_rz`
+* `general`
 
 There is error checking on the input vector length and the enumerator type.
 

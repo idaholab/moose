@@ -1,4 +1,4 @@
-#Stress Divergence 2D AxisymmetricRZ Action
+#StressDivergence2DAxisymmetricRZAction
 
 !!!important
-    Deprecated action to set up the stress divergence kernel for an AxisymmetricRZ problem.  Use the [TensorMechanics](auto::/Kernels/TensorMechanics) Action instead; that action autodetects the coordinate system.
+    Deprecated action to set up the stress divergence kernel for an AxisymmetricRZ problem.  Use the [TensorMechanics](/Kernels/TensorMechanics.md) Action instead; that action autodetects the coordinate system.

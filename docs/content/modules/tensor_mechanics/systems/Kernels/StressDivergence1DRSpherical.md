@@ -1,4 +1,4 @@
-#Stress Divergence 1D RSpherical Action
+#StressDivergence1DRSphericalAction
 
 !!! important
-    Deprecated action to set up the stress divergence kernel for an RSpherical problem.  Use the [TensorMechanics](auto::/Kernels/TensorMechanics) Action instead; that action autodetects the coordinate system.
+    Deprecated action to set up the stress divergence kernel for an RSpherical problem.  Use the [TensorMechanics](/Kernels/TensorMechanics.md) Action instead; that action autodetects the coordinate system.

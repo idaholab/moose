@@ -1,4 +1,4 @@
-#Recompute Radial Return
+#RecomputeRadialReturn
 !description /Materials/RecomputeRadialReturn
 
 !devel /Materials/RecomputeRadialReturn float=right width=auto margin=20px padding=20px background-color=#F8F8F8
@@ -6,10 +6,10 @@
 ###Algorithm References
 The radial return mapping method, introduced by Simo and Taylor (1985), uses a von Mises yield surface to determine the increment of plastic strain necessary to return the stress state to the yield surface after a trial stress increment takes the computed stress state across the yield surface.  Because the von Mises yield surface in the deviatoric stress space has the shape of a circle, the _plastic correction stress_ is always directed towards the center of the yield surface circle.
 
-In addition to the Sumo and Hughes (1998) textbook, _Introduction to Computational Plasticity_ by Dunnu and Petrinic (2004) (ISBN: 0-19-856826-6) is an excellent reference for users working with the Recompute Radial Return materials; several of the isotropic plasticity and creep effective plastic strain increment algorithms are taken from Dunne and Petrinic.
+In addition to the Sumo and Hughes textbook \cite{simo2006computational}, _Introduction to Computational Plasticity_ by Dunnu and Petrinic (2004) is an excellent reference for users working with the Recompute Radial Return materials; several of the isotropic plasticity and creep effective plastic strain increment algorithms are taken from \cite{dunne2005introduction}.
 
 ###The Recompute Radial Return Description
-The recompute materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method.  For the `RecomputeRadialReturn` materials, this calling material is [ComputeReturnMappingStress](auto::ComputeReturnMappingStress).  Separating the call to the recompute materials from MOOSE allows us to iteratively call the recompute materials as is required to achieve convergence.
+The recompute materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method.  For the `RecomputeRadialReturn` materials, this calling material is [ComputeReturnMappingStress](ComputeReturnMappingStress.md).  Separating the call to the recompute materials from MOOSE allows us to iteratively call the recompute materials as is required to achieve convergence.
 
 ##Radial Return Algorithm Overview
 !image tensor_mechanics-RadialReturnStressSpace.png width=350 float=right caption=Figure 1: A trial stress is shown outside of the devatoric yield surface and the radial return stress which is normal to the yield surface.
@@ -63,3 +63,7 @@ More details on how to write the equivalent yield surface equation for a creep m
 
 
 !childobjects /Materials/RecomputeRadialReturn
+
+## References
+\bibliographystyle{unsrt}
+\bibliography{docs/bib/tensor_mechanics.bib}

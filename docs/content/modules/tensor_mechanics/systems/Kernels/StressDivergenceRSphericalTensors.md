@@ -1,4 +1,4 @@
-#Stress Divergence RSpherical Tensors
+#StressDivergenceRSphericalTensors
 !description /Kernels/StressDivergenceRSphericalTensors
 
 !devel /Kernels/StressDivergenceRSphericalTensors float=right width=auto margin=20px padding=20px background-color=#F8F8F8
@@ -11,7 +11,7 @@ This kernel solves the steady state stress divergence equation in polar coordina
 
 {!content/modules/tensor_mechanics/common_documentation/supplementalStressDivergenceKernels.md!}
 
-For a detailed explanation of the settings for `use_displaced_mesh` in mechanics problems, see the [Introduction/StressDivergence](auto::/introduction/StressDivergence) page.
+For a detailed explanation of the settings for `use_displaced_mesh` in mechanics problems, see the [Introduction/StressDivergence](/introduction/StressDivergence.md) page.
 
  The stress divergence in spherical coordinates includes contributions from the normal polar and azimuthal stresses even in the 1D case.  After simplifying for the 1D case, the spherical stress divergence reduces to
 $$
