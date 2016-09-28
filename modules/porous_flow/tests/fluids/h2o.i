@@ -57,9 +57,18 @@
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./dens0]
-    type = PorousFlowWater
+  [./water]
+    type = PorousFlowSingleComponentFluid
+    fp = water
     phase = 0
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./water]
+      type = Water97FluidProperties
+    [../]
   [../]
 []
 
@@ -85,22 +94,10 @@
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity0'
   [../]
-  [./ddensity_dp]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dpressure_variable_dummy'
-  [../]
-  [./ddensity_dt]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dtemperature_variable_dummy'
-  [../]
-  [./dviscosity_dt]
-    type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_viscosity0/dtemperature_variable_dummy'
-  [../]
 []
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = h2o1
+  file_base = h2o
   csv = true
 []

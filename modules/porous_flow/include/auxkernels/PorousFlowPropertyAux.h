@@ -36,17 +36,26 @@ private:
   /// Saturation of each phase (at the qps)
   const MaterialProperty<std::vector<Real> > * _saturation;
 
+  /// Temperature of the fluid (at the qps)
+  const MaterialProperty<Real> * _temperature;
+
   /// Fluid density of each phase (at the qps)
   const MaterialProperty<std::vector<Real> > * _fluid_density;
 
-  /// Viscosity of each phase (at the qps)
+  /// Viscosity of each phase
   const MaterialProperty<std::vector<Real> > * _fluid_viscosity;
 
-  /// Mass fraction of each component in each phase (at the qps)
+  /// Mass fraction of each component in each phase
   const MaterialProperty<std::vector<std::vector<Real> > > * _mass_fractions;
 
-  /// Relative permeability of each phase (at the qps)
+  /// Relative permeability of each phase
   const MaterialProperty<std::vector<Real> > * _relative_permeability;
+
+  /// Enthalpy of each phase
+  const MaterialProperty<std::vector<Real> > * _enthalpy;
+
+  /// Internal energy of each phase
+  const MaterialProperty<std::vector<Real> > * _internal_energy;
 
   /// PorousFlow Dictator UserObject
   const PorousFlowDictator & _dictator;

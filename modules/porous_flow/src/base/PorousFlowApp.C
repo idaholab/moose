@@ -3,6 +3,7 @@
 #include "TensorMechanicsApp.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "FluidPropertiesApp.h"
 
 // UserObjects
 #include "PorousFlowDictator.h"
@@ -33,7 +34,6 @@
 #include "PorousFlowEffectiveFluidPressure.h"
 #include "PorousFlowFluidPropertiesBase.h"
 #include "PorousFlowIdealGas.h"
-#include "PorousFlowMethane.h"
 #include "PorousFlowPermeabilityConst.h"
 #include "PorousFlowPermeabilityKozenyCarman.h"
 #include "PorousFlowPermeabilityExponential.h"
@@ -42,10 +42,8 @@
 #include "PorousFlowPorosityUnity.h"
 #include "PorousFlowRelativePermeabilityCorey.h"
 #include "PorousFlowRelativePermeabilityUnity.h"
-#include "PorousFlowSimpleCO2.h"
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
-#include "PorousFlowWater.h"
 #include "PorousFlowJoiner.h"
 #include "PorousFlowNodeNumber.h"
 #include "PorousFlowTemperature.h"
@@ -54,6 +52,7 @@
 #include "PorousFlowInternalEnergyIdeal.h"
 #include "PorousFlowEnthalpy.h"
 #include "PorousFlowDiffusionCoeffConst.h"
+#include "PorousFlowSingleComponentFluid.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -92,10 +91,12 @@ PorousFlowApp::PorousFlowApp(const InputParameters & parameters) :
 {
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
+  FluidPropertiesApp::registerObjects(_factory);
   PorousFlowApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
+  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -145,7 +146,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowEffectiveFluidPressure);
   registerMaterial(PorousFlowFluidPropertiesBase);
   registerMaterial(PorousFlowIdealGas);
-  registerMaterial(PorousFlowMethane);
   registerMaterial(PorousFlowPermeabilityConst);
   registerMaterial(PorousFlowPermeabilityKozenyCarman);
   registerMaterial(PorousFlowPermeabilityExponential);
@@ -154,10 +154,8 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowPorosityUnity);
   registerMaterial(PorousFlowRelativePermeabilityCorey);
   registerMaterial(PorousFlowRelativePermeabilityUnity);
-  registerMaterial(PorousFlowSimpleCO2);
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
-  registerMaterial(PorousFlowWater);
   registerMaterial(PorousFlowJoiner);
   registerMaterial(PorousFlowNodeNumber);
   registerMaterial(PorousFlowTemperature);
@@ -166,6 +164,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowInternalEnergyIdeal);
   registerMaterial(PorousFlowEnthalpy);
   registerMaterial(PorousFlowDiffusionCoeffConst);
+  registerMaterial(PorousFlowSingleComponentFluid);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
