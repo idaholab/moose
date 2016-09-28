@@ -212,7 +212,12 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char* type, int rank){
   /**
    * This is the function that initializes the Multivariate normal distribution given:
-   * This function will compute the svd of given vecCovMatrix
+   * First, we will make sure the given covariance, i.e. vecCovMatrix, is symmetric, function 'computeNearestSymmetricMatrix' will be called
+   * Second, we will compute the svd of the computed symmetric matrix
+   * Third, we will make sure the reconstructed covariance matrix will be symmetric positive semidefinite matrix, function resetSingularValues will be called
+   * Reference for compute the nearest symmetric positive semidefinte matrix:
+   * 1. Nicholas J. Higham, "Computing a Nearest Symmetric Positive Semidefinite Matrix," Linear Algebra and Its Applications, vol. 103, pp. 103-118 (1988)
+   * 2. Risto Vanhanen, "Computing Positive Semidefinite Multigroup Nuclear Data Covariances," Nuclear Science and Engineering, vol. 179, pp. 411-422 (2015)
    * Input Parameters
    * - vecCovMatrix: covariance matrix stored in a vector<double>
    * - mu: the mean value vector
@@ -221,10 +226,13 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
    */
   unsigned int rows, columns;
   std::vector<std::vector<double> > covMatrix;
+  std::vector<std::vector<double> > symmetricCovMatrix;
   // convert the vecCovMatrix to covMatrix, output the rows and columns of the covariance matrix
   vectorToMatrix(rows,columns,vecCovMatrix,covMatrix);
+  // compute the nearest symmetric covariance matrix
+  computeNearestSymmetricMatrix(covMatrix,symmetricCovMatrix);
   _mu = mu;
-  _cov_matrix = covMatrix;
+  _cov_matrix = symmetricCovMatrix;
   _rank = (unsigned int) rank;
   _covarianceType = std::string(type);
   if(_rank > _mu.size()) {
@@ -244,6 +252,8 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
 
   //compute the svd
   computeSVD(_rank);
+  //setup the nearest symmetric semi-positive definite covariance matrix
+  resetSingularValues(_leftSingularVectors, _rightSingularVectors, _singularValues,_svdTransformedMatrix);
 
   int numberOfDiscretizations = 10;
   unsigned int dimensions = _mu.size();
@@ -338,6 +348,71 @@ std::vector<int> BasicMultivariateNormal::getTransformationMatrixDimensions(std:
    */
   std::vector<int> returnVector;
   returnVector.push_back(_svdTransformedMatrix.size());
+  returnVector.push_back(index.size());
+  return returnVector;
+}
+
+std::vector<double> BasicMultivariateNormal::getInverseTransformationMatrix() {
+  /**
+   * this function returns the inverse transformation matrix
+   * @ In, None
+   * @ Out, returnVectors,std::vector<double>, the vector stores the inverse transformation matrix
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < inverseTransformedMatrix.size(); ++i) {
+    for(unsigned int j = 0; j < inverseTransformedMatrix.at(0).size(); ++j) {
+      returnVectors.push_back(inverseTransformedMatrix.at(i).at(j));
+    }
+  }
+  return returnVectors;
+}
+
+std::vector<double> BasicMultivariateNormal::getInverseTransformationMatrix(std::vector<int> index) {
+  /**
+   * this function returns the transformation matrix
+   * @ In, index, std::vector<int>, the index of inverse transformation matrix
+   * @ Out, returnVectors,std::vector<double>, the vector stores the inverse transformation matrix associated with the provided index
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<double> returnVectors;
+  for(unsigned int i = 0; i < inverseTransformedMatrix.size(); ++i) {
+    for(unsigned int j = 0; j < index.size(); ++j) {
+      if (index.at(j) < 0) {
+        throwError("Negative value is not allowed in the provided column index vector");
+      }
+      returnVectors.push_back(inverseTransformedMatrix.at(i).at(index.at(j)));
+    }
+  }
+  return returnVectors;
+}
+
+std::vector<int> BasicMultivariateNormal::getInverseTransformationMatrixDimensions() {
+  /**
+   * return the row and colum of the inverse transformation matrix stored in returnVector.at(0) and returnVector.at(1) respectively
+   * @ In, None
+   * @ Out, returnVector, std::vector<int>, row stored in returnVector.at(0), and column stored in returnVector.at(1)
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<int> returnVector;
+  returnVector.push_back(inverseTransformedMatrix.size());
+  returnVector.push_back(inverseTransformedMatrix.at(0).size());
+  return returnVector;
+}
+
+std::vector<int> BasicMultivariateNormal::getInverseTransformationMatrixDimensions(std::vector<int> index) {
+  /**
+   * return the row and colum of the transformation matrix
+   * @ In, index, std::vector<int>, the index of inverse transformation matrix
+   * @ Out,returnVector, std::vector<int>, row stored in returnVector.at(0), and column stored in returnVector.at(1).
+   */
+  std::vector<std::vector<double> > inverseTransformedMatrix;
+  getInverseTransformedMatrix(_leftSingularVectors,_singularValues,inverseTransformedMatrix);
+  std::vector<int> returnVector;
+  returnVector.push_back(inverseTransformedMatrix.size());
   returnVector.push_back(index.size());
   return returnVector;
 }

@@ -15,11 +15,11 @@ from numpy import linalg as LA
 distribution1D = utils.find_distribution1D()
 # input data, random matrix can also be used.
 mu = [1.0,2.0,3.0,4.0,5.0]
-cov = [1.36,   -0.816,  0.521,  1.43,    -0.144,
-       -0.816, -0.659,  0.794,  -0.173,  -0.406,
-       0.521,  0.794,   -0.541, 0.461,   0.179,
-       1.43,   -0.173,  0.461,  -1.43,   0.822,
-       -0.144, -0.406,  0.179,  0.822,   -1.37]
+cov = [1.36,   -0.16,  0.21,  0.43,    -0.144,
+       -0.16, 6.59,  0.794,  -0.173,  -0.406,
+       0.21,  0.794,   5.41, 0.461,   0.179,
+       0.43,   -0.173,  0.461,  14.3,   0.822,
+       -0.144, -0.406,  0.179,  0.822,   3.75]
 
 # Transform 'mu' and 'cov' to the c++ vector
 muCpp = distribution1D.vectord_cxx(len(mu))
