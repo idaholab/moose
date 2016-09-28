@@ -8,7 +8,7 @@
     and accesses derivatives of the specific heat and density to build the Jacobian.
 
 # See also
-* [[auto::/Kernels/HeatCapacityConductionTimeDerivative]]
+* [[/Kernels/HeatCapacityConductionTimeDerivative.md]]
 
 !parameters /Kernels/SpecificHeatConductionTimeDerivative
 

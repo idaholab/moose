@@ -60,11 +60,12 @@ The supported "types" for MOOSE are: "info", "note", "important, "warning", "dan
 ## Automatic Links
 
 Moose Flavored Markdown is capable of automatically creating links based on Markdown filenames, which is
-especially useful when linking to generated pages. The syntax is as follows:
+especially useful when linking to generated pages. The syntax is identical to creating links as
+defined by [mkdocs], however the markdown path may be incomplete.
 
-* `[auto::/Kernels/Diffusion]`: [auto::/Kernels/Diffusion]
-* `[auto::framework/Kernels/Overview]`: [auto::/Kernels/Overview]
-* `[Diffusion](auto::/Kernels/Diffusion)`: [Diffusion](auto::/Kernels/Diffusion)
+* `[/Kernels/Diffusion.md]`: [/Kernels/Diffusion.md]
+* `[framework/systems/Kernels/Overview.md]`: [framework/systems/Kernels/Overview.md]
+* `[Diffusion](/Kernels/Diffusion)`: [Diffusion](/Kernels/Diffusion.md)
 
 ---
 
@@ -112,6 +113,7 @@ the following limits the included code to the `computeQpResidual` method.
 ```markdown
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
 ```
+
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
 
 !!! warning "Warning"
@@ -300,3 +302,22 @@ Currently this will only work with Civet CI services.
 ```
 !!! note
     Be sure to follow your !buildstatus extension with an empty new line.
+
+
+---
+
+## Bibliographies
+
+It is possible to include citations using latex commands, the following commands are supported within the markdown.
+
+* `\cite{slaughter2015continuous}`: \cite{slaughter2015continuous}
+* `\citet{wang2014diffusion}`: \citet{wang2014diffusion}
+* `\citep{gaston2015physics}`: \citep{gaston2015physics}
+
+The bibliography style may be set within a page using the latex command
+`\bibliographystyle{unsrt}`. Three styles are currently available: 'unsrt', 'plain', 'alpha', and 'unsrtalpha'.
+
+The references are displayed by using the latex `\bibliography{docs/moose.bib}` command. This command accepts a comma separated list of bibtex files (*.bib) to use to build citations and references. The files specified in this list must be given as a relative path to the root directory (e.g., `~/projects/moose`) of the repository.
+
+\bibliographystyle{unsrt}
+\bibliography{docs/moose.bib}

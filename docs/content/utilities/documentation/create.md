@@ -18,7 +18,7 @@ The first step is to add documentation for your application in the `validParams`
 and parameter documentation strings and calling the class description method.
 
 A description of each parameter should also be provided when they are added with the various add methods
-of the `InputParameters` object. For example, in the [FunctionIC](../systems/framework/ICs/FunctionIC.md)
+of the `InputParameters` object. For example, in the [FunctionIC](/ICs/FunctionIC.md)
 the following parameter documentation is added, which is then present in the parameter summary table of the
 generated site.
 
@@ -34,13 +34,13 @@ description.
 !text framework/src/kernels/Diffusion.C line=addClassDescription
 
 When the documentation for this object is generated this string is added to the first portion of the page and the
-system overview table. For example, the [Kernels overview](/Kernels/Overview.md) includes a table with each object
+system overview table. For example, the [Kernels overview](framework/systems/Kernels/Overview.md) includes a table with each object
 listed; the table includes the class description from the source code.
 
 ## Object and System Markdown
 A detailed description should be provided in addition to the generated, in-code documentation for an object by creating a markdown file using
 [MOOSE Flavored Markdown](moose_flavored_markdown.md). The created file must be stored in a file named according to the
-registered MOOSE syntax within the "install" directory explained in the [Configuration](/contents/utilities/documentation/setup.md#configuration) section. For example, the details for the [Diffision](/Kernels/Diffusion.md) are in the `framework/docs/content/framework/systems/Kernels/Diffusion.md` file.
+registered MOOSE syntax within the "install" directory explained in the [Configuration](/content/utilities/documentation/setup.md#configuration) section. For example, the details for the [Diffision](/Kernels/Diffusion.md) are in the `framework/docs/content/framework/systems/Kernels/Diffusion.md` file.
 
 ---
 

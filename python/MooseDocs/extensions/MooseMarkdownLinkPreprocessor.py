@@ -10,90 +10,65 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
     A preprocessor for creating automatic linking between markdown files.
     """
 
-    def __init__(self, database=None, **kwargs):
+    RE = r'\s+(.*?.md)'
+
+    def __init__(self, pages=None, **kwargs):
         super(MooseMarkdownLinkPreprocessor, self).__init__(**kwargs)
-        self._database = database
+        self._pages = pages
 
     def run(self, lines):
         """
         The raw markdown lines are processed to find and create links between pages.
         """
+        content = '\n'.join(lines)
+        content = re.sub(r'(?<!`)\[(.*?)\]\((.*?\.md)(.*?)\)', self._linkSub, content)
+        content = re.sub(r'(?<!`)\[(.*?\.md)(.*?)\]', self._bracketSub, content)
+        return content.split('\n')
 
-        # Loop through each line and create autolinks
-        for i in range(len(lines)):
-            lines[i] = re.sub(r'(?<!`)\[auto::(.*?)\]', lambda m: self.bracketSub(m), lines[i])
-            lines[i] = re.sub(r'(?<!`)\[(.*?)\]\(auto::(.*?)\)', lambda m: self.linkSub(m), lines[i])
-        return lines
-
-    def bracketSub(self, match):
+    def _bracketSub(self, match):
         """
         Substitution of bracket links: [Diffusion.md]
 
         Args:
-            local[str]: The path of the current markdown file.
             match[re.Match]: The python re.Match object.
         """
+        name = self._findFile(match.group(1))
+        print match.group(1), name
+        if name:
+            return '[{}](/{}{})'.format(name, name, match.group(2))
+        return match.group(0)
 
-        # Locate database items given the key
-        name = match.group(1)
-
-        # Locate the markdown files matching the supplied name
-        items = self._database.findall(name)
-        self.checkMultipleItems(items, name)
-
-        # Make link substitution
-        if len(items) > 0:
-            fname = items[0][0].filename()
-            rel, _ = os.path.splitext(os.path.relpath(fname, os.getcwd()))
-            syntax, _ = os.path.splitext(name)
-            return '[{}](/{})'.format(syntax, rel)
-
-        # Do nothing
-        else:
-            return self.admonition(match.group(0))
-
-    def linkSub(self, match):
+    def _linkSub(self, match):
         """
         Substitution of links: [Test](Diffusion.md)
 
         Args:
-            local[str]: The path of the current markdown file.
             match[re.Match]: The python re.Match object.
         """
+        name = self._findFile(match.group(2))
+        if name:
+            return '[{}](/{}{})'.format(match.group(1), name, match.group(3))
+        return match.group(0)
 
-        # Locate database items given the key
-        name = match.group(2)
 
-        # Build the database if needed
-        if not self._database:
-            self.buildDatabase()
-
-        # Locate the markdown files matching the supplied name
-        items = self._database.findall(name)
-        self.checkMultipleItems(items, name)
-
-        # Make link subsitution
-        if items:
-            fname = items[0][0].filename()
-            rel = os.path.relpath(fname, os.getcwd())
-            return '[{}](/{})'.format(match.group(1), rel)
-
-        # Do nothing
-        else:
-            return self.admonition(match.group(0))
-
-    @staticmethod
-    def checkMultipleItems(items, name):
+    def _findFile(self, name):
         """
-        Helper for warning if multiple items are found.
+        Helper for getting complete path and warning if multiple items are found.
+
+        Args:
+            name[str]: Partial filename to locate.
         """
-        if len(items) > 1:
+        # Create list of possible matches
+        files = []
+        for page in self._pages:
+            if page.endswith(name):
+                files.append(page)
+
+        # Warning if multiple items located
+        if len(files) > 1:
             msg = "Found multiple items listed with the name '{}':".format(name)
-            for item in items:
-                msg += '\n    {}'.format(item[0].filename())
+            for filename in files:
+                msg += '\n    {}'.format(filename)
             log.warning(msg)
-
-    @staticmethod
-    def admonition(link):
-        log.error('A page failed to locate the auto-link: {}'.format(link))
-        return '\n\n!!! warning "Auto Link Failed!"\n    A MOOSE markdown automatic link failed: `{}`\n\n'.format(link)
+        if files:
+            return files[0]
