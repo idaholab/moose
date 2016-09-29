@@ -42,8 +42,7 @@ ComputeThermalExpansionEigenStrain::computeQpStressFreeStrain()
 
   if (!_has_incremental_strain || _step_one)
     old_temp = _stress_free_reference_temperature;
-
-  if (_temperature_old) // total strain form always uses the ref temp
+  else
     old_temp = (* _temperature_old)[_qp];
 
   thermal_strain.addIa(_thermal_expansion_coeff * (_temperature[_qp] - old_temp));
