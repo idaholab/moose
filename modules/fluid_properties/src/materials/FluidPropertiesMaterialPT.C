@@ -32,6 +32,7 @@ FluidPropertiesMaterialPT::FluidPropertiesMaterialPT(const InputParameters & par
     _e(declareProperty<Real>("e")),
     _s(declareProperty<Real>("s")),
     _c(declareProperty<Real>("c")),
+    _henry(declareProperty<Real>("henry")),
 
     _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp"))
 {
@@ -53,4 +54,5 @@ FluidPropertiesMaterialPT::computeQpProperties()
   _e[_qp] = _fp.e(_pressure[_qp], _temperature[_qp]);
   _s[_qp] = _fp.s(_pressure[_qp], _temperature[_qp]);
   _c[_qp] = _fp.c(_pressure[_qp], _temperature[_qp]);
+  _henry[_qp] = _fp.henryConstant(_temperature[_qp]);
 }

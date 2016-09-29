@@ -50,6 +50,8 @@ protected:
   MaterialProperty<Real> & _s;
   /// Speed of sound (m/s)
   MaterialProperty<Real> & _c;
+  /// Henry's law constant (Pa)
+  MaterialProperty<Real> & _henry;
 
   /// Fluid properties UserObject
   const SinglePhaseFluidPropertiesPT & _fp;
