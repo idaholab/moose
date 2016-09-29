@@ -1,4 +1,4 @@
-!image rd100.png width=230 float=right
+!image media/rd100.png width=230 float=right
 
 # MOOSE: Multiphysics Object Oriented Simulation Environment
 

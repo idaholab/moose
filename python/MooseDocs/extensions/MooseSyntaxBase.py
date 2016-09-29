@@ -19,9 +19,9 @@ class MooseSyntaxBase(MooseCommonExtension, Pattern):
         syntax[dict]: A dictionary of MooseApplicatinSyntax objects.
     """
 
-    def __init__(self, regex,  yaml=None, syntax=None, **kwargs):
-        MooseCommonExtension.__init__(self)
-        Pattern.__init__(self, regex, **kwargs)
+    def __init__(self, regex, markdown_instance=None, yaml=None, syntax=None, **kwargs):
+        MooseCommonExtension.__init__(self, **kwargs)
+        Pattern.__init__(self, regex, markdown_instance)
 
         self._yaml = yaml
         self._syntax = syntax

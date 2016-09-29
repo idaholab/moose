@@ -18,14 +18,14 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         language[str]: The code language (e.g., 'python' or 'c++')
     """
 
-    def __init__(self, pattern, language=None, repo=None, root=None, **kwargs):
-        Pattern.__init__(self, pattern, **kwargs)
+    def __init__(self, pattern, markdown_instance=None, language=None, repo=None, **kwargs):
+        MooseCommonExtension.__init__(self, **kwargs)
+        Pattern.__init__(self, pattern, markdown_instance)
 
         # Set the language
         self._language = language
 
         # The root/repo settings
-        self._root = root
         self._repo = repo
 
         # The default settings

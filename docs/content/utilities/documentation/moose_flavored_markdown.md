@@ -74,6 +74,10 @@ It is possible to include complete or partial C++ or input files from the local 
 markdown syntax to needed, including the application of special settings in the form of key, value pairings that are supplied within
 the custom markdown. A complete list of available settings is provided in the [Settings](MooseFlavoredMarkdown.md#optional-settings) of the included code.
 
+!!! note
+    When including code the path specified should be defined from the "root" directory, which by default is the
+    top level of the git repository (e.g., ~/projects/moose).
+
 ### Complete Files
 You can include complete files from the repository using the `!text` syntax. For example, the following
 includes the complete code as shown.
@@ -161,7 +165,23 @@ the syntax for the system or object being documented.
 
 ---
 
-## Slideshows
+## Images and Slideshows
+It is possible to include images and slideshows of images with more flexibility than standard markdown.
+
+!!! note
+    Images paths should be specified from the "doc_dir", which by default is the "docs" directory at the top-level
+    of the repository.
+
+### Single Images
+You can include images in your documentation by use of the !image markdown syntax:
+
+```markdown
+!image media/memory_logger-plot_multi.png width=300px align=right caption=figure 1
+```
+
+!image media/memory_logger-plot_multi.png width=300px align=right caption=figure 1
+
+### Slideshows
 A sequence of images can be shown via a `carousel`. By default the images will auto cycle between images.
 
 A simple example:
@@ -189,26 +209,15 @@ line.
 A full slideshow example might be:
 ```markdown
 !slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
-    memory_logger-plot_multi.png caption=Memory Logger plotting two results
-    memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
-    memory_*.png
+    media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
+    media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
+    media/memory_*.png
 ```
 
 !slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
-    memory_logger-plot_multi.png caption=Memory Logger plotting two results
-    memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
-    memory_*.png
-
----
-
-## Images
-You can include images in your documentation by use of the !image markdown syntax:
-
-```markdown
-!image memory_logger-plot_multi.png width=300px align=right caption=figure 1
-```
-
-!image memory_logger-plot_multi.png width=300px align=right caption=figure 1
+    media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
+    media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
+    media/memory_*.png
 
 ---
 

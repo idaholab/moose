@@ -42,19 +42,18 @@ class MooseCppMethod(MooseTextPatternBase):
         # Error if the clang parser did not load
         if not HAVE_MOOSE_CPP_PARSER:
             log.error("Unable to load the MOOSE clang C++ parser.")
-            el = self.createErrorElement(rel_filename, message="Failed to load python clang python bindings.")
+            el = self.createErrorElement(message="Failed to load python clang python bindings.")
             return el
 
         # Read the file and create element
-        filename = self.checkFilename(rel_filename)
-        if not filename:
-            el = self.createErrorElement(rel_filename, message="File not found")
+        filename = os.path.join(self._root, rel_filename)
+        if not os.path.exists(filename):
+            el = self.createErrorElement("C++ file not found: {}".format(rel_filename))
         elif not settings.has_key('method'):
-            el = self.createErrorElement(rel_filename, message="Use of !clang syntax while not providing a method=some_method. If you wish to include the entire file, use !text instead")
+            el = self.createErrorElement("Use of !clang syntax while not providing a method=some_method. If you wish to include the entire file, use !text instead.")
         else:
             if self._make == None:
-                log.error('The location of the Makefile must be supplied to parser.')
-                el = self.createErrorElement(rel_filename)
+                el = self.createErrorElement("The location of the Makefile ({}) must be supplied to parser.".format(self._make))
             else:
                 log.info('Parsing method "{}" from {}'.format(settings['method'], filename))
 
