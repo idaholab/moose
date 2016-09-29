@@ -13,6 +13,8 @@
 /****************************************************************/
 
 #include "PostprocessorDT.h"
+#include "Stepper.h"
+#include "Transient.h"
 
 template<>
 InputParameters validParams<PostprocessorDT>()
@@ -45,4 +47,16 @@ Real
 PostprocessorDT::computeDT()
 {
   return _pps_value;
+}
+
+StepperBlock *
+PostprocessorDT::buildStepper()
+{
+  double dt_init = _pps_value;
+  if (_has_initial_dt)
+    dt_init = _initial_dt;
+
+  StepperBlock * s = BaseStepper::ptr(&_pps_value);
+  s = BaseStepper::initialN(BaseStepper::constant(dt_init), s, _executioner.n_startup_steps());
+  return s;
 }

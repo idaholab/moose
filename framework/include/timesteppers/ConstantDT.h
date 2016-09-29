@@ -27,13 +27,12 @@ class ConstantDT : public TimeStepper
 public:
   ConstantDT(const InputParameters & parameters);
 
-protected:
-  virtual Real computeInitialDT() override;
-  virtual Real computeDT() override;
+  virtual StepperBlock * buildStepper() override;
 
 private:
   const Real _constant_dt;
   const Real _growth_factor;
+  Real & _last_dt;
 };
 
 #endif /* CONSTANTDT_H */
