@@ -254,6 +254,8 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
 {
   Real orig_dt = limitedDT;
 
+  // repeatedly divide dt by two until it is smaller than the
+  // limiting_func(t_next) - limiting_func(t_curr) < _max_function_change
   if (_timestep_limiting_function)
   {
     Point dummyPoint;
@@ -274,6 +276,8 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
     }
   }
 
+  // if dt is large enough to be beyond the next piece-wise limiting function'
+  // defined point, then reduce dt to make t_next hit that point.
   _at_function_point = false;
   if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
