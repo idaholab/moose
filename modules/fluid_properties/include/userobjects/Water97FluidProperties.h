@@ -562,6 +562,12 @@ public:
    */
   Real densityRegion3(Real pressure, Real temperature) const;
 
+  /**
+   * Henry's law constant
+   * Note: not implemented in this fluid property
+   */
+  virtual Real henryConstant(Real temperature) const override;
+
 protected:
   /// Water molar mass (kg/mol)
   const Real _Mh2o;
