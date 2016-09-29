@@ -68,11 +68,11 @@ Compute2DFiniteStrain::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Finalize volumetric locking correction
-    _Fhat[_qp] *= std::pow(ave_Fhat.det() / _Fhat[_qp].det(), 1.0/3.0);
+    _Fhat[_qp] *= std::cbrt(ave_Fhat.det() / _Fhat[_qp].det());
 
     computeQpStrain();
 
     // Volumetric locking correction
-    _deformation_gradient[_qp] *= std::pow(ave_dfgrd_det / _deformation_gradient[_qp].det(), 1.0/3.0);
+    _deformation_gradient[_qp] *= std::cbrt(ave_dfgrd_det / _deformation_gradient[_qp].det());
   }
 }

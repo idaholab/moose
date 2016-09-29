@@ -83,13 +83,15 @@ FiniteStrainMaterial::computeStrain()
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    Real factor( std::pow( ave_Fhat.det() / Fhat[_qp].det(), 1.0/3.0));
-    Fhat[_qp] *= factor; //Finalize volumetric locking correction
+    // Finalize volumetric locking correction
+    Real factor = std::cbrt(ave_Fhat.det() / Fhat[_qp].det());
+    Fhat[_qp] *= factor;
 
     computeQpStrain(Fhat[_qp]);
 
-    factor = std::pow(ave_dfgrd_det / _deformation_gradient[_qp].det(), 1.0/3.0);//Volumetric locking correction
-    _deformation_gradient[_qp] *= factor;//Volumetric locking correction
+    // Volumetric locking correction
+    factor = std::cbrt(ave_dfgrd_det / _deformation_gradient[_qp].det());
+    _deformation_gradient[_qp] *= factor;
   }
 }
 
@@ -109,7 +111,7 @@ FiniteStrainMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   RankTwoTensor Cinv_I = A*A.transpose() - A - A.transpose();
 
   //strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
-  _strain_increment[_qp] = -Cinv_I*0.5 + Cinv_I*Cinv_I*0.25;
+  _strain_increment[_qp] = -Cinv_I * 0.5 + Cinv_I*Cinv_I * 0.25;
 
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;
@@ -119,7 +121,7 @@ FiniteStrainMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   B.addIa(-0.75);
   _strain_increment[_qp] = -B*A;*/
 
-  RankTwoTensor D = _strain_increment[_qp]/_dt;
+  RankTwoTensor D = _strain_increment[_qp] / _dt;
   _strain_rate[_qp] = D;
 
   //Calculate rotation R_incr
@@ -129,9 +131,9 @@ FiniteStrainMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   a[0] = invFhat(1,2) - invFhat(2,1);
   a[1] = invFhat(2,0) - invFhat(0,2);
   a[2] = invFhat(0,1) - invFhat(1,0);
-  Real q = (a[0]*a[0] + a[1]*a[1] + a[2]*a[2])/4.0;
+  Real q = (a[0]*a[0] + a[1]*a[1] + a[2]*a[2]) / 4.0;
   Real trFhatinv_1 = invFhat.trace() - 1.0;
-  Real p = trFhatinv_1*trFhatinv_1/4.0;
+  Real p = trFhatinv_1*trFhatinv_1 / 4.0;
   // Real y = 1.0/((q + p)*(q + p)*(q + p));
 
   /*Real C1 = std::sqrt(p * (1 + (p*(q+q+(q+p))) * (1-(q+p)) * y));
