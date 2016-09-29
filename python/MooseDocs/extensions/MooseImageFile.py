@@ -44,7 +44,7 @@ class MooseImageFile(MooseCommonExtension, Pattern):
         # Read the file and create element
         filename = os.path.join(self._root, self._docs_dir, rel_filename)
         if not os.path.exists(filename):
-            el = self.createErrorElement(message='File not found: {}'.format(rel_filename))
+            el = self.createErrorElement('File not found: {}'.format(rel_filename))
         else:
             # When aligning to one side or another, we need to adjust the margins
             # on the opposite side... silly looking buy necessary

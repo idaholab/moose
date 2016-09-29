@@ -42,7 +42,7 @@ class MooseCppMethod(MooseTextPatternBase):
         # Error if the clang parser did not load
         if not HAVE_MOOSE_CPP_PARSER:
             log.error("Unable to load the MOOSE clang C++ parser.")
-            el = self.createErrorElement(message="Failed to load python clang python bindings.")
+            el = self.createErrorElement("Failed to load python clang python bindings.")
             return el
 
         # Read the file and create element

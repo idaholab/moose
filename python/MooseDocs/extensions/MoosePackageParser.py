@@ -42,10 +42,10 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
         # Update the settings from regex match
         settings, styles = self.getSettings(match.group(2))
         if not settings.has_key('arch') or not settings.has_key('return'):
-            el = self.createErrorElement(message='Invalid MOOSEPACKAGE markdown syntax. Requires arch=, return=link|name')
+            el = self.createErrorElement('Invalid MOOSEPACKAGE markdown syntax. Requires arch=, return=link|name')
         else:
             if settings['arch'] not in self.package.keys():
-                el = self.createErrorElement(message='"arch" not found in packages.yml')
+                el = self.createErrorElement('"arch" not found in packages.yml')
             else:
                 if settings['return'] == 'link':
                     el = etree.Element('a')

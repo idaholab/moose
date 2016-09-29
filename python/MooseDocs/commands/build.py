@@ -2,6 +2,8 @@ import os
 import shutil
 import mkdocs
 import MooseDocs
+import logging
+log = logging.getLogger(__name__)
 
 def update_extra():
     """
@@ -17,7 +19,9 @@ def update_extra():
                 if (not os.path.exists(dst)) or (os.path.getmtime(src) > os.path.getmtime(dst)):
                     dst_dir = os.path.dirname(dst)
                     if not os.path.exists(dst_dir):
+                        log.debug('Creating {} directory.'.format(d))
                         os.makedirs(dst_dir)
+                    log.debug('Copying file {} --> {}'.format(src, dst))
                     shutil.copy(src, dst)
 
 
