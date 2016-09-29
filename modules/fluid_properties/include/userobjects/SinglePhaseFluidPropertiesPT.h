@@ -57,8 +57,12 @@ public:
   virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const = 0;
   /// Thermal expansion coefficient (-)
   virtual Real beta(Real pressure, Real temperature) const = 0;
+  /// Henry's law constant for dissolution in water
+  virtual Real henryConstant(Real temperature) const = 0;
 
 protected:
+  /// IAPWS formulation of Henry's law constant for dissolution in water
+  virtual Real henryConstantIAPWS(Real temperature, Real A, Real B, Real C) const;
   /// Universal gas constant (J/mol/K)
   const Real _R;
   /// Conversion of temperature from Celcius to Kelvin

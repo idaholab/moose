@@ -57,7 +57,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return density (kg/m^3)
    */
-  virtual Real rho(Real pressure, Real temperature) const;
+  virtual Real rho(Real pressure, Real temperature) const override;
 
   /**
    * Methane gas density as a function of pressure and temperature, and
@@ -69,7 +69,7 @@ public:
    * @param[out] drho_dp derivative of density wrt pressure
    * @param[out] drho_dT derivative of density wrt temperature
    */
-  virtual void rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
+  virtual void rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   /**
    * Internal energy from pressure and temperature
@@ -78,7 +78,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return internal enerygy (kJ/kg)
    */
-  virtual Real e(Real pressure, Real temperature) const;
+  virtual Real e(Real pressure, Real temperature) const override;
 
   /**
    * Internal energy and its derivatives wrt pressure and temperature
@@ -89,7 +89,7 @@ public:
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
-  virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const;
+  virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
   /**
    * Density and internal energy and their derivatives wrt pressure and temperature
@@ -103,7 +103,7 @@ public:
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
-  virtual void rho_e_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT, Real & e, Real & de_dp, Real & de_dT) const;
+  virtual void rho_e_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT, Real & e, Real & de_dp, Real & de_dT) const override;
 
   /**
    * Speed of sound
@@ -112,7 +112,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return speed of sound (m/s)
    */
-  virtual Real c(Real pressure, Real temperature) const;
+  virtual Real c(Real pressure, Real temperature) const override;
 
   /**
    * Isobaric specific heat capacity as a function of pressure and temperature.
@@ -123,7 +123,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return cp (kJ/kg/K)
    */
-  virtual Real cp(Real pressure, Real temperature) const;
+  virtual Real cp(Real pressure, Real temperature) const override;
 
   /**
    * Isochoric specific heat
@@ -132,7 +132,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return cv (kJ/kg/K)
    */
-  virtual Real cv(Real pressure, Real temperature) const;
+  virtual Real cv(Real pressure, Real temperature) const override;
 
   /**
    * Methane gas viscosity as a function of density and temperature.
@@ -143,7 +143,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return viscosity (Pa.s)
    */
-  virtual Real mu(Real density, Real temperature) const;
+  virtual Real mu(Real density, Real temperature) const override;
 
   /**
    * Methane gas viscosity and derivatives wrt density and temperature.
@@ -156,7 +156,7 @@ public:
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const;
+  virtual void mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /**
    * Thermal conductivity as a function of pressure and temperature.
@@ -167,7 +167,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return k (W/m/K)
    */
-  virtual Real k(Real pressure, Real temperature) const;
+  virtual Real k(Real pressure, Real temperature) const override;
 
   /**
    * Specific entropy as a function of pressure and temperature.
@@ -178,7 +178,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return s (kJ/kg/K)
    */
-  virtual Real s(Real pressure, Real temperature) const;
+  virtual Real s(Real pressure, Real temperature) const override;
 
   /**
    * Enthalpy as a function of pressure and temperature.
@@ -189,7 +189,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return h (kJ/kg)
    */
-  virtual Real h(Real pressure, Real temperature) const;
+  virtual Real h(Real pressure, Real temperature) const override;
 
   /**
    * Enthalpy and its derivatives wrt pressure and temperature.
@@ -202,7 +202,7 @@ public:
    * @param[out] dh_dp derivative of enthalpy wrt pressure
    * @param[out] dh_dT derivative of enthalpy wrt temperature
    */
-  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const;
+  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   /**
    * Thermal expansion coefficient
@@ -211,17 +211,18 @@ public:
    * @param temperature fluid temperature (K)
    * @return beta (1/K)
    */
-  virtual Real beta(Real pressure, Real temperature) const;
+  virtual Real beta(Real pressure, Real temperature) const override;
 
   /**
-   * Henry's law constant coefficients for dissolution of CH4 into water.
+   * Henry's law constant for dissolution of CH4 into water.
    * From Guidelines on the Henry's constant and vapour
    * liquid distribution constant for gases in H20 and D20 at high
    * temperatures, IAPWS (2004).
    *
+   * @param temperature fluid temperature (K)
    * @return constants for Henry's constant (-)
    */
-  std::vector<Real> henryConstants();
+  virtual Real henryConstant(Real temperature) const override;
 
 protected:
   /// Methane molar mass (kg/mol)

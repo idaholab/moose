@@ -1454,3 +1454,10 @@ Water97FluidProperties::densityRegion3(Real pressure, Real temperature) const
   // Density is the inverse of volume
   return 1.0 / volume;
 }
+
+Real
+Water97FluidProperties::henryConstant(Real temperature) const
+{
+  mooseError("Water97FluidProperties::henryConstant() not defined");
+  return 0.0;
+}

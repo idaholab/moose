@@ -255,14 +255,14 @@ public:
   Real d2phiSW_ddt(Real delta, Real tau) const;
 
   /**
-   * Henry's law constant coefficients for dissolution of CO2 into water
-   * From Guidelines on the Henry's constant and vapor
+   * From Guidelines on the Henry's constant and vapour
    * liquid distribution constant for gases in H20 and D20 at high
    * temperatures, IAPWS (2004).
    *
+   * @param temperature fluid temperature (K)
    * @return constants for Henry's constant (-)
    */
-  const std::vector<Real> & henryConstants() const;
+  virtual Real henryConstant(Real temperature) const override;
 
   /**
    * Partial density of dissolved CO2

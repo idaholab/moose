@@ -536,11 +536,10 @@ CO2FluidProperties::partialDensity(Real temperature) const
   return 1.e6 * _Mco2 / V;
 }
 
-const std::vector<Real> &
-CO2FluidProperties::henryConstants() const
+Real
+CO2FluidProperties::henryConstant(Real temperature) const
 {
-  static std::vector<Real> hc {-8.55445, 4.01195, 9.52345};
-  return hc;
+  return henryConstantIAPWS(temperature, -8.55445, 4.01195, 9.52345);
 }
 
 Real
