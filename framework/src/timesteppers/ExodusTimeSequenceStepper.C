@@ -16,6 +16,7 @@
 #include "MooseUtils.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
+#include "Stepper.h"
 
 template<>
 InputParameters validParams<ExodusTimeSequenceStepper>()
@@ -31,7 +32,6 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
     _mesh_file(getParam<MeshFileName>("mesh"))
 {
   // Read the Exodus file on processor 0
-  std::vector<Real> times;
   if (processor_id() == 0)
   {
     // Check that the required file exists
@@ -42,14 +42,13 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
 
     ExodusII_IO exodusII_io(mesh);
     exodusII_io.read(_mesh_file);
-    times = exodusII_io.get_time_steps();
+    _times = exodusII_io.get_time_steps();
   }
 
   // distribute timestep list
-  unsigned int num_steps = times.size();
+  unsigned int num_steps = _times.size();
   _communicator.broadcast(num_steps);
-  times.resize(num_steps);
-  _communicator.broadcast(times);
-
-  setupSequence(times);
+  _times.resize(num_steps);
+  _communicator.broadcast(_times);
+  setupSequence(_times);
 }

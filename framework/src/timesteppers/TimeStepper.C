@@ -82,7 +82,7 @@ TimeStepper::computeStep()
   else
   {
     if (converged())
-      _current_dt = computeDT();
+     _current_dt = computeDT();
     else
       _current_dt = computeFailedDT();
   }

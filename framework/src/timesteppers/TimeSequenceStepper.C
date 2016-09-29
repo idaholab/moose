@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "TimeSequenceStepper.h"
+#include "Stepper.h"
 
 template<>
 InputParameters validParams<TimeSequenceStepper>()
