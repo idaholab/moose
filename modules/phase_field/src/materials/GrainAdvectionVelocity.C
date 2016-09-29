@@ -45,7 +45,7 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameter
     _vals[i] = &coupledValue("etas", i);
     _grad_vals[i] = &coupledGradient("etas",i);
   }
-  mooseWarning("GrainAdvectionVelocity is no longer used by RBM kernels, it can be used for visualization only.");
+  mooseDeprecated("Use GrainAdvectionAux for visualizing advection velocities.");
 }
 
 void
