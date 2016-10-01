@@ -3499,6 +3499,9 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 
   execMultiApps(EXEC_LINEAR);
 
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+    reinitScalars(tid);
+
   computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
   if (_displaced_problem != NULL)
@@ -3560,6 +3563,9 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
 
     execTransfers(EXEC_NONLINEAR);
     execMultiApps(EXEC_NONLINEAR);
+
+    for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+      reinitScalars(tid);
 
     computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
