@@ -41,9 +41,8 @@
     variable = temp
   [../]
   [./heat_conduction_time_derivative]
-    type = HeatConductionTimeDerivative
+    type = HeatCapacityConductionTimeDerivative
     variable = temp
-    use_heat_capacity = true
   [../]
   [./heat_convection]
     type = DarcyConvection
