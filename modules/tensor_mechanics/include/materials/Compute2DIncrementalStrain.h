@@ -13,8 +13,8 @@
  * Compute2DIncrementalStrain defines a strain increment only for
  * incremental strains in 2D geometries, handling the out of plane strains.
  * Compute2DIncrementalStrain contains a virtual method to define the strain_zz
- * as a nonzero value in the inherited classes ComputePlaneIncrementalStrain
- * ComputeGeneralizedPlaneIncrementalStrain and ComputeAxisymmetricRZIncrementalStrain.
+ * as a general nonzero value in the inherited classes ComputePlaneIncrementalStrain
+ * and ComputeAxisymmetricRZIncrementalStrain.
  */
 class Compute2DIncrementalStrain : public ComputeIncrementalSmallStrain
 {

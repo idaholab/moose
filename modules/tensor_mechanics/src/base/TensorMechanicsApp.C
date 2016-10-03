@@ -27,6 +27,8 @@
 #include "Gravity.h"
 #include "DynamicStressDivergenceTensors.h"
 #include "OutOfPlanePressure.h"
+#include "GeneralizedPlaneStrain.h"
+#include "GeneralizedPlaneStrainOffDiag.h"
 
 #include "LinearElasticTruss.h"
 #include "FiniteStrainPlasticMaterial.h"
@@ -48,6 +50,7 @@
 #include "ComputeIsotropicElasticityTensor.h"
 #include "ComputeSmallStrain.h"
 #include "ComputePlaneSmallStrain.h"
+#include "ComputePlaneIncrementalStrain.h"
 #include "ComputePlaneFiniteStrain.h"
 #include "ComputeAxisymmetricRZSmallStrain.h"
 #include "ComputeRSphericalSmallStrain.h"
@@ -149,6 +152,8 @@
 #include "LineMaterialRankTwoSampler.h"
 #include "LineMaterialRankTwoScalarSampler.h"
 
+#include "GeneralizedPlaneStrainUserObject.h"
+
 template<>
 InputParameters validParams<TensorMechanicsApp>()
 {
@@ -197,6 +202,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(Gravity);
   registerKernel(DynamicStressDivergenceTensors);
   registerKernel(OutOfPlanePressure);
+  registerKernel(GeneralizedPlaneStrain);
+  registerKernel(GeneralizedPlaneStrainOffDiag);
 
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainPlasticMaterial);
@@ -218,6 +225,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeIsotropicElasticityTensor);
   registerMaterial(ComputeSmallStrain);
   registerMaterial(ComputePlaneSmallStrain);
+  registerMaterial(ComputePlaneIncrementalStrain);
   registerMaterial(ComputePlaneFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZSmallStrain);
   registerMaterial(ComputeRSphericalSmallStrain);
@@ -287,6 +295,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrystalPlasticitySlipResistanceGSS);
   registerUserObject(CrystalPlasticityStateVariable);
   registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
+  registerUserObject(GeneralizedPlaneStrainUserObject);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);

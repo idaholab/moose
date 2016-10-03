@@ -3,8 +3,6 @@ COORDINATES absolute 1.e-6    # min separation not calculated
 TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               2 @ t11
 
 GLOBAL VARIABLES relative 1.e-6 floor 0.0
-	max_strain_zz  # min:               0 @ t1	max:     0.023318442 @ t11
-	min_strain_zz  # min:               0 @ t1	max:     0.023318437 @ t11
 	react_z        floor 1e-4 # min:               0 @ t1	max:   2.1908779e-06 @ t9
 
 NODAL VARIABLES relative 1.e-5 floor 1e-10
@@ -14,7 +12,6 @@ NODAL VARIABLES relative 1.e-5 floor 1e-10
 	nodal_area_mech   # min:               0 @ t1,n2	max:      0.50738456 @ t11,n4
 	paired_temp       # min:               0 @ t1,n1	max:       1.1375322 @ t11,n1
 	penetration       floor 1e-9 # min:               0 @ t1,n1	max:     0.016005443 @ t2,n1
-	strain_zz         # min:               0 @ t1,n1	max:     0.023318442 @ t11,n12
 	temp              # min:               0 @ t1,n1	max:               2 @ t11,n10
 
 ELEMENT VARIABLES relative 1.e-5 floor 1e-10
@@ -30,4 +27,3 @@ ELEMENT VARIABLES relative 1.e-5 floor 1e-10
 # No NODESET VARIABLES
 
 # No SIDESET VARIABLES
-

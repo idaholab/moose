@@ -3,11 +3,11 @@
   family = LAGRANGE
   displacements = 'disp_x disp_y'
   scalar_strain_zz = scalar_strain_zz
-  temp = temp
+  block = 1
 []
 
 [Mesh]
-  file = 2squares.e
+  file = square.e
 []
 
 [Variables]
@@ -15,15 +15,20 @@
   [../]
   [./disp_y]
   [../]
+[]
+
+[AuxVariables]
   [./temp]
   [../]
   [./scalar_strain_zz]
     order = FIRST
     family = SCALAR
   [../]
-[]
+  [./saved_x]
+  [../]
+  [./saved_y]
+  [../]
 
-[AuxVariables]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -68,39 +73,22 @@
   [../]
 []
 
-[UserObjects]
-  [./gpsuo]
-    type = GeneralizedPlaneStrainUserObject
-  [../]
-[]
-
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
-  [../]
-  [./gps_x]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_x
-  [../]
-  [./gps_y]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_y
-  [../]
-  [./heat]
-    type = HeatConduction
-    variable = temp
-  [../]
-[]
-
-[ScalarKernels]
-  [./gps]
-    type = GeneralizedPlaneStrain
-    variable = scalar_strain_zz
-    generalized_plane_strain = gpsuo
+    temp = temp
+    save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
+  [./tempfuncaux]
+    type = FunctionAux
+    variable = temp
+    function = tempfunc
+    use_displaced_mesh = false
+  [../]
+
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -160,76 +148,39 @@
   [../]
 []
 
+[AuxScalarKernels]
+  [./strain_zz]
+    type = FunctionScalarAux
+    variable = scalar_strain_zz
+    function = scalar_strain_zz_func
+  [../]
+[]
+
 [Functions]
-  [./tempramp]
+  [./tempfunc]
     type = ParsedFunction
-    value = 't'
+    value = '(1-x)*t'
+  [../]
+  [./scalar_strain_zz_func]
+    type = PiecewiseLinear
+    xy_data = '0 0
+               1 7.901e-5
+               2 1.103021e-2'
   [../]
 []
 
 [BCs]
-  [./x]
-    type = DirichletBC
-    boundary = '4 6'
+  [./bottomx]
+    type = PresetBC
+    boundary = 1
     variable = disp_x
     value = 0.0
   [../]
-  [./y]
-    type = DirichletBC
-    boundary = '1 5' #'4 6'
+  [./bottomy]
+    type = PresetBC
+    boundary = 1
     variable = disp_y
     value = 0.0
-  [../]
-  [./t]
-    type = DirichletBC
-    boundary = '4'
-    variable = temp
-    value = 0.0
-  [../]
-  [./tramp]
-    type = FunctionPresetBC
-    variable = temp
-    boundary = '6'
-    function = tempramp
-  [../]
-[]
-
-[Preconditioning]
-  [./SMP]
-    type = SMP
-#    full = true
-    off_diag_row =    'disp_x disp_y'
-    off_diag_column = 'disp_y disp_x'
-  [../]
-[]
-
-[Contact]
-  [./mech]
-    master = 8
-    slave = 2
-    disp_x = disp_x
-    disp_y = disp_y
-    penalty = 1e+10
-    normalize_penalty = true
-    system = Constraint
-    tangential_tolerance = .1
-    normal_smoothing_distance = .1
-    model = frictionless
-    formulation = kinematic
-  [../]
-[]
-
-[ThermalContact]
-  [./thermal]
-    type = GapHeatTransfer
-    master = 8
-    slave = 2
-    variable = temp
-    tangential_tolerance = .1
-    normal_smoothing_distance = .1
-    gap_conductivity = 0.01
-    min_gap = 0.001
-#    quadrature = true
   [../]
 []
 
@@ -238,29 +189,18 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-    block = '1 2'
   [../]
   [./strain]
     type = ComputePlaneSmallStrain
-    block = '1 2'
   [../]
   [./thermal_strain]
     type = ComputeThermalExpansionEigenStrain
     temperature = temp
     thermal_expansion_coeff = 0.02
-    stress_free_reference_temperature = 0.0
-    block = '1 2'
+    stress_free_reference_temperature = 0.5
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-    block = '1 2'
-  [../]
-
-  [./heatcond]
-    type = HeatConductionMaterial
-    thermal_conductivity = 3.0
-    specific_heat = 300.0
-    block = '1 2'
   [../]
 []
 
@@ -270,22 +210,19 @@
   solve_type = PJFNK
   line_search = none
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu       superlu_dist'
-
 # controls for linear iterations
   l_max_its = 100
   l_tol = 1e-4
 
 # controls for nonlinear iterations
-  nl_max_its = 20
+  nl_max_its = 15
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-4
+  nl_abs_tol = 1e-5
 
 # time control
   start_time = 0.0
-  dt = 0.2
-  dtmin = 0.2
+  dt = 1.0
+  dtmin = 1.0
   end_time = 2.0
   num_steps = 5000
 []
