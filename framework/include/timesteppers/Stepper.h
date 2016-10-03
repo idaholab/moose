@@ -3,13 +3,22 @@
 #include <functional>
 
 #include "LinearInterpolation.h"
+#include "libmesh/numeric_vector.h"
 
 struct StepperInfo {
+  int call_count;
   double prev_dt;
   unsigned int nonlin_iters;
   unsigned int lin_iters;
   unsigned int time;
   bool converged;
+  NumericVector<Number>* soln_nonlin;
+  NumericVector<Number>* aux_soln;
+  NumericVector<Number>* predicted_soln;
+
+  bool sched_backup;
+  bool sched_restore;
+  double restore_time;
 };
 
 class Stepper
@@ -47,6 +56,23 @@ private:
   Stepper* _stepper;
   std::function<double (double t)> _func;
   double _max_diff;
+};
+
+class EveryNStepper : public Stepper
+{
+public:
+  EveryNStepper(Stepper* s, int every_n) : _stepper(s), _n(every_n) { }
+
+  virtual double advance(const StepperInfo* si) {
+    if (si->call_count % _n == 0)
+      return _stepper->advance(si);
+    else
+      return si->prev_dt;
+  }
+
+private:
+  Stepper* _stepper;
+  int _n;
 };
 
 class PiecewiseStepper : public Stepper
