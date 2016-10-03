@@ -18,6 +18,7 @@ struct StepperInfo {
   unsigned int nonlin_iters;
   unsigned int lin_iters;
   bool converged;
+  double solve_time_secs;
 
   // solution stuff
   NumericVector<Number>* soln_nonlin;

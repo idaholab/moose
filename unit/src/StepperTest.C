@@ -39,12 +39,12 @@ StepperTest::fixedPoint_1()
       1e-10,
       {1, 2, 5},
       {1, 2, 5, 8},
-      {1, 0, 0, 0, "", 0, 0, true, nullptr, nullptr, nullptr, false, 0}
+      {1, 0, 0, 0, "", 0, 0, true, 0, nullptr, nullptr, nullptr, false, 0}
     },{
       1e-10,
       {0, 1, 3},
       {1, 3, 5, 7},
-      {1, 0, 0, 0, "", 0, 0, true, nullptr, nullptr, nullptr, false, 0}
+      {1, 0, 0, 0, "", 0, 0, true, 0, nullptr, nullptr, nullptr, false, 0}
     }
   };
 
