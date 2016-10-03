@@ -6,7 +6,7 @@
 #include "libmesh/numeric_vector.h"
 
 struct StepperInfo {
-  int call_count;
+  int step_count;
 
   // time info
   double prev_dt;
@@ -35,6 +35,10 @@ public:
   // next value to use as dt.
   virtual double advance(const StepperInfo* si) = 0;
 };
+
+/////////////////////////////////////////////////////////////
+///////////////// Stepper Implementations ///////////////////
+/////////////////////////////////////////////////////////////
 
 // ConstrFuncStepper reduces the returned dt of an underlying stepper by
 // factors of two until the difference between a given limiting function
@@ -65,13 +69,35 @@ private:
   double _max_diff;
 };
 
+class PredictorCorrector : public Stepper
+{
+public:
+  PredictorCorrector() : { }
+
+  virtual double advance(const StepperInfo* si) {
+  }
+private:
+};
+
+class DT2 : public Stepper
+{
+public:
+  PredictorCorrector() : { }
+
+  virtual double advance(const StepperInfo* si) {
+  }
+private:
+};
+
+// Recomputes dt by calling an underlying stepper every N steps and
+// returning the previous dt otherwise.
 class EveryNStepper : public Stepper
 {
 public:
   EveryNStepper(Stepper* s, int every_n) : _stepper(s), _n(every_n) { }
 
   virtual double advance(const StepperInfo* si) {
-    if (si->call_count % _n == 0)
+    if (si->step_count % _n == 0)
       return _stepper->advance(si);
     else
       return si->prev_dt;
