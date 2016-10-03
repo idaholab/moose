@@ -1456,7 +1456,7 @@ Water97FluidProperties::densityRegion3(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::henryConstant(Real temperature) const
+Water97FluidProperties::henryConstant(Real /*temperature*/) const
 {
   mooseError("Water97FluidProperties::henryConstant() not defined");
   return 0.0;
