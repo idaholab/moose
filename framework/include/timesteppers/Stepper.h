@@ -7,15 +7,22 @@
 
 struct StepperInfo {
   int call_count;
+
+  // time info
   double prev_dt;
+  unsigned int time;
+
+  // solve stats
   unsigned int nonlin_iters;
   unsigned int lin_iters;
-  unsigned int time;
   bool converged;
+
+  // solution stuff
   NumericVector<Number>* soln_nonlin;
   NumericVector<Number>* aux_soln;
   NumericVector<Number>* predicted_soln;
 
+  // backup/restore
   bool sched_backup;
   bool sched_restore;
   double restore_time;
