@@ -1,5 +1,9 @@
 #pragma once
 
+#include <functional>
+
+#include "LinearInterpolation.h"
+
 struct StepperInfo {
   double prev_dt;
   unsigned int nonlin_iters;
@@ -12,15 +16,58 @@ class Stepper
 {
 public:
   // Implementations of advance should strive to be idempotent.  Return the
-  // next value of dt.
-  virtual double advance(StepperInfo* si) = 0;
+  // next value to use as dt.
+  virtual double advance(const StepperInfo* si) = 0;
 };
 
-class FixedPointStepper : public Stepper {
+// ConstrFuncStepper reduces the returned dt of an underlying stepper by
+// factors of two until the difference between a given limiting function
+// evaluated at t_curr and t_next is less than a specified maximum difference.
+class ConstrFuncStepper : public Stepper {
+public:
+  ConstrFuncStepper(Stepper* s, std::function<double(double)> func, double max_diff)
+    : _stepper(s),
+      _func(func),
+      _max_diff(max_diff)
+  { }
+
+  virtual double advance(const StepperInfo* si) {
+    double dt = _stepper->advance(si);
+    double f_curr = _func(si->time);
+    double df = std::abs(_func(si->time + dt) - f_curr);
+    while(df > _max_diff)
+    {
+      dt /= 2.0;
+      df = std::abs(_func(si->time + dt) - f_curr);
+    }
+    return dt;
+  }
+
+private:
+  Stepper* _stepper;
+  std::function<double (double t)> _func;
+  double _max_diff;
+};
+
+class PiecewiseStepper : public Stepper
+{
+public:
+  PiecewiseStepper(std::vector<double> times, std::vector<double> dts) : _lin(times, dts) { }
+
+  virtual double advance(const StepperInfo* si) {
+    return _lin.sample(si->time);
+  }
+
+private:
+  LinearInterpolation _lin;
+};
+
+class FixedPointStepper : public Stepper
+{
 public:
   FixedPointStepper(std::vector<double> times, double tol) : _times(times), _time_tol(tol) { }
 
-  virtual double advance(StepperInfo* si) {
+  virtual double advance(const StepperInfo* si) {
     if (_times.size() == 0)
       return si->prev_dt;
 
@@ -43,7 +90,7 @@ class MinOfStepper : public Stepper
 public:
   MinOfStepper(Stepper* a, Stepper* b) : _a(a), _b(b) { }
 
-  virtual double advance(StepperInfo* si)
+  virtual double advance(const StepperInfo* si)
   {
     return std::min(_a->advance(si), _b->advance(si));
   }
@@ -56,7 +103,7 @@ private:
 class AdaptiveStepper : public Stepper
 {
 public:
-  virtual double advance(StepperInfo* si) {
+  virtual double advance(const StepperInfo* si) {
     bool can_shrink = true;
     bool can_grow = si->converged;
 
@@ -85,4 +132,3 @@ public:
   unsigned int _lin_iter_ratio;
 };
 
-// *

@@ -75,3 +75,7 @@ StepperTest::updateInfo(StepperInfo* si, double dt) {
   si->time += dt;
 }
 
+void
+StepperTest::scratch() {
+}
+

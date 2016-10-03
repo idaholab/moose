@@ -24,10 +24,12 @@ class StepperTest : public CppUnit::TestFixture
 {
   CPPUNIT_TEST_SUITE(StepperTest);
   CPPUNIT_TEST(fixedPoint_1);
+  CPPUNIT_TEST(scratch);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void fixedPoint_1();
+  void scratch();
 
   void updateInfo(StepperInfo* si, double dt);
 };
