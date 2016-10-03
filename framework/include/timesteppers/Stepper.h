@@ -9,8 +9,10 @@ struct StepperInfo {
   int step_count;
 
   // time info
-  double prev_dt;
   unsigned int time;
+  double prev_dt;
+  double prev_prev_dt;
+  std::string time_integrator;
 
   // solve stats
   unsigned int nonlin_iters;
@@ -19,8 +21,8 @@ struct StepperInfo {
 
   // solution stuff
   NumericVector<Number>* soln_nonlin;
-  NumericVector<Number>* aux_soln;
-  NumericVector<Number>* predicted_soln;
+  NumericVector<Number>* soln_aux;
+  NumericVector<Number>* soln_predicted;
 
   // backup/restore
   bool sched_backup;
@@ -69,24 +71,113 @@ private:
   double _max_diff;
 };
 
+class MaxRatioStepper : public Stepper
+{
+public:
+  MaxRatioStepper(Stepper* s, double max_ratio) : _stepper(s), _max_ratio(max_ratio) { }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    double dt = _stepper->advance(si);
+    if (dt / si->prev_dt > _max_ratio)
+      dt = si->prev_dt * _max_ratio;
+    return dt;
+  }
+
+private:
+  Stepper* _stepper;
+  double _max_ratio;
+};
+
+// Original PredictorCorrector timestepper behavior can be achieved by
+// wrapping steppers like so: EveryNStepper(MaxRatioStepper(PredictorCorrector()))
 class PredictorCorrector : public Stepper
 {
 public:
-  PredictorCorrector() : { }
+  PredictorCorrector(int start_adapting, double e_tol, double scaling_param) :
+      _start_adapting(start_adapting),
+      _e_tol(e_tol),
+      _scale_param(scaling_param)
+  { }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
+    if (!si->converged)
+      return si->prev_dt;
+    // original Predictor stepper actually used the Real valued time step
+    // instead of step_count which is used here - which doesn't make sense for
+    // this check since if t_0 != 0 or dt != 1 would make it so the predictor
+    // might not have a prediction by the time _start_adapting was called -
+    // this could be changed back like the original, but then, start_adapting
+    // needs to be carefully documented.
+    if (si->step_count < _start_adapting)
+      return si->prev_dt;
+    if (si->soln_nonlin == nullptr || si->soln_aux == nullptr || si->soln_predicted == nullptr)
+      throw "no predicted solution available";
+
+    double error = estimateTimeError(si);
+    double infnorm = si->soln_nonlin->linfty_norm();
+    double e_max = 1.1 * _e_tol * infnorm;
+    // TODO: console handling? ==> _console << "Time Error Estimate: " << _error << std::endl;
+
+    double dt = si->prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0);
+    return dt;
   }
+
 private:
+  double estimateTimeError(const StepperInfo* si)
+  {
+    NumericVector<Number>& soln = *si->soln_nonlin;
+    NumericVector<Number>& predicted = *si->soln_predicted;
+
+    std::string scheme = si->time_integrator;
+    double dtprev = si->prev_prev_dt;
+    double dt = si->prev_dt;
+    if (scheme == "NEVER_CALLED???")
+    {
+      // NOTE: this is never called, since stringtoint does not return 1 - EVER!
+      //I am not sure this is actually correct.
+      predicted *= -1;
+      predicted += soln;
+      double calc = dt * dt * .5;
+      predicted *= calc;
+      return predicted.l2_norm();
+    }
+    else if (scheme == "CrankNicolson")
+    {
+      predicted -= soln;
+      predicted *= (dt) / (3.0 * (dt + dtprev));
+      return predicted.l2_norm();
+    }
+    else if (scheme == "BDF2")
+    {
+      predicted *= -1.0;
+      predicted += soln;
+      double topcalc = 2.0 * (dt + dtprev) * (dt + dtprev);
+      double bottomcalc = 6.0 * dt * dt + 12.0 * dt * dtprev + 5.0 * dtprev * dtprev;
+      predicted *= topcalc / bottomcalc;
+      return predicted.l2_norm();
+    }
+
+    return -1;
+  }
+
+  int _start_adapting;
+  double _e_tol;
+  double _scale_param;
 };
 
 class DT2 : public Stepper
 {
 public:
-  PredictorCorrector() : { }
+  DT2() { }
 
   virtual double advance(const StepperInfo* si) {
+    throw "unimplemented";
   }
+
 private:
+  int foo;
 };
 
 // Recomputes dt by calling an underlying stepper every N steps and
