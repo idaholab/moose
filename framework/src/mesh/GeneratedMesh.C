@@ -45,7 +45,7 @@ InputParameters validParams<GeneratedMesh>()
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
   params.addParam<MooseEnum>("elem_type", elem_types, "The type of element from libMesh to generate (default: linear element for requested dimension)");
-
+  params.addParam<bool>("gauss_lobatto_grid", false, "Grade mesh into boundaries according to Gauss-Lobatto quadrature spacing.");
   params.addRangeCheckedParam<Real>("bias_x", 1., "bias_x>=0.5 & bias_x<=2", "The amount by which to grow (or shrink) the cells in the x-direction.");
   params.addRangeCheckedParam<Real>("bias_y", 1., "bias_y>=0.5 & bias_y<=2", "The amount by which to grow (or shrink) the cells in the y-direction.");
   params.addRangeCheckedParam<Real>("bias_z", 1., "bias_z>=0.5 & bias_z<=2", "The amount by which to grow (or shrink) the cells in the z-direction.");
@@ -67,10 +67,13 @@ GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
     _ymax(getParam<Real>("ymax")),
     _zmin(getParam<Real>("zmin")),
     _zmax(getParam<Real>("zmax")),
+    _gauss_lobatto_grid(getParam<bool>("gauss_lobatto_grid")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z"))
 {
+  if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
+    mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
 }
 
 MooseMesh &
@@ -106,14 +109,16 @@ GeneratedMesh::buildMesh()
     MeshTools::Generation::build_line(dynamic_cast<UnstructuredMesh&>(getMesh()),
                                       _nx,
                                       _xmin, _xmax,
-                                      elem_type);
+                                      elem_type,
+                                      _gauss_lobatto_grid);
     break;
   case 2:
     MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
                                         _nx, _ny,
                                         _xmin, _xmax,
                                         _ymin, _ymax,
-                                        elem_type);
+                                        elem_type,
+                                        _gauss_lobatto_grid);
     break;
   case 3:
     MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
@@ -121,7 +126,8 @@ GeneratedMesh::buildMesh()
                                       _xmin, _xmax,
                                       _ymin, _ymax,
                                       _zmin, _zmax,
-                                      elem_type);
+                                      elem_type,
+                                      _gauss_lobatto_grid);
     break;
   }
 
