@@ -57,13 +57,14 @@ KKSMultiFreeEnergy::KKSMultiFreeEnergy(const InputParameters & parameters) :
 Real
 KKSMultiFreeEnergy::computeValue()
 {
-  Real total_energy = 0.0;
-  // Include bulk energy and additional contributions
+  // Start with any additional energy contribution, which is 0 if not supplied
+  Real total_energy = _additional_free_energy[_qp];
+  // Add bulk energy contributions
   for (unsigned int i = 0; i < _num_j; ++i)
     total_energy += (*_prop_hj[i])[_qp] * (*_prop_Fj[i])[_qp]
-                      + _w * (*_prop_gj[i])[_qp] + _additional_free_energy[_qp];
+                      + _w * (*_prop_gj[i])[_qp];
 
-  // Calculate interfacial energy of each variable
+  // Add interfacial energy of each variable
   for (unsigned int i = 0; i < _nvars; ++i)
     total_energy += (*_kappas[i])[_qp] / 2.0 * (*_grad_vars[i])[_qp].norm_sq();
 

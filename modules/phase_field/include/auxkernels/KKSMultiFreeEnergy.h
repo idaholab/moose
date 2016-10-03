@@ -30,21 +30,21 @@ protected:
 
   /// Names of free energy functions for each phase \f$ F_j \f$
   std::vector<MaterialPropertyName> _Fj_names;
-  unsigned int _num_j;
+  const unsigned int _num_j;
 
   /// Values of the free energy functions for each phase \f$ F_j \f$
   std::vector<const MaterialProperty<Real> *> _prop_Fj;
 
-  /// switching function names
+  /// Switching function names
   std::vector<MaterialPropertyName> _hj_names;
 
   /// Values of the switching functions for each phase \f$ h_j \f$
   std::vector<const MaterialProperty<Real> *> _prop_hj;
 
-  /// switching function names
+  /// Barrier function names
   std::vector<MaterialPropertyName> _gj_names;
 
-  /// Values of the switching functions for each phase \f$ h_j \f$
+  /// Values of the barrier functions for each phase \f$ g_j \f$
   std::vector<const MaterialProperty<Real> *> _prop_gj;
 
   /// Barrier term height
