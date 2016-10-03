@@ -13,7 +13,7 @@ template<>
 InputParameters validParams<Compute2DIncrementalStrain>()
 {
   InputParameters params = validParams<ComputeIncrementalSmallStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains in 2D geometries.");
+  params.addClassDescription("Compute strain increment for incremental strains in 2D geometries.");
   return params;
 }
 

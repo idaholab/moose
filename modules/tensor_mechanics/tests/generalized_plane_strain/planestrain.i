@@ -65,7 +65,6 @@
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
-    use_displaced_mesh = true
   [../]
 []
 
@@ -144,10 +143,6 @@
 []
 
 [Functions]
-  [./pull-top]
-    type = ParsedFunction
-    value = t*0.1
-  [../]
   [./tempfunc]
     type = ParsedFunction
     value = '(1-x)*t'
@@ -176,7 +171,7 @@
     poissons_ratio = 0.3
   [../]
   [./small_strain]
-    type = ComputeSmallStrain
+    type = ComputePlaneSmallStrain
   [../]
   [./elastic_stress]
     type = ComputeLinearElasticStress
@@ -194,7 +189,6 @@
 
   solve_type = PJFNK
   line_search = none
-
 
 # controls for linear iterations
   l_max_its = 100
