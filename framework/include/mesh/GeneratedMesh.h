@@ -48,6 +48,13 @@ protected:
   /// The min/max values for x,y,z component
   Real _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
 
+  /// All of the libmesh build_line/square/cube routines support an
+  /// option to grade the mesh into the boundaries according to the
+  /// spacing of the Gauss-Lobatto quadrature points.  Defaults to
+  /// false, and cannot be used in conjunction with x, y, and z
+  /// biasing.
+  bool _gauss_lobatto_grid;
+
   /// The amount by which to bias the cells in the x,y,z directions.
   /// Must be in the range 0.5 <= _bias_x <= 2.0.
   /// _bias_x < 1 implies cells are shrinking in the x-direction.
