@@ -32,7 +32,7 @@ protected:
   const VariableValue * _temperature_old;
   const Real & _thermal_expansion_coeff;
   MaterialProperty <RankTwoTensor> & _thermal_expansion_tensor;
-  const Real & _stress_free_reference_temperature;
+  Real _stress_free_temperature;
 
 private:
   /// True if this is the first timestep (timestep < 2). At the first

@@ -180,7 +180,7 @@
     type = ComputeThermalExpansionEigenStrain
     thermal_expansion_coeff = 0.02
     temperature = temp
-    stress_free_reference_temperature = 0.5
+    stress_free_temperature = 0.5
   [../]
 []
 
