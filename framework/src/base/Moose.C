@@ -233,6 +233,7 @@
 #include "LineMaterialRealSampler.h"
 #include "LineFunctionSampler.h"
 #include "VolumeHistogram.h"
+#include "SphericalAverage.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -654,6 +655,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(LineMaterialRealSampler);
   registerVectorPostprocessor(LineFunctionSampler);
   registerVectorPostprocessor(VolumeHistogram);
+  registerVectorPostprocessor(SphericalAverage);
 
   // user objects
   registerUserObject(LayeredIntegral);
