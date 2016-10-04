@@ -9,7 +9,7 @@ struct StepperInfo {
   int step_count;
 
   // time info
-  unsigned int time;
+  double time;
   double prev_dt;
   double prev_prev_dt;
   std::string time_integrator;
@@ -43,6 +43,58 @@ public:
 ///////////////// Stepper Implementations ///////////////////
 /////////////////////////////////////////////////////////////
 
+class ConstStepper : public Stepper
+{
+public:
+  ConstStepper(double dt) : _dt(dt) { }
+
+  virtual double advance(const StepperInfo* si) { return _dt; }
+
+private:
+  double _dt;
+};
+
+class FixedPointStepper : public Stepper
+{
+public:
+  FixedPointStepper(std::vector<double> times, double tol) : _times(times), _time_tol(tol) { }
+
+  virtual double advance(const StepperInfo* si) {
+    if (_times.size() == 0)
+      return si->prev_dt;
+
+    for (int i = 0; i < _times.size(); i++)
+    {
+      double t0 = _times[i];
+      if (t0 - _time_tol > si->time)
+        return t0 - si->time;
+    }
+    return si->prev_dt;
+  }
+
+private:
+  std::vector<double> _times;
+  double _time_tol;
+};
+
+class MaxRatioStepper : public Stepper
+{
+public:
+  MaxRatioStepper(Stepper* s, double max_ratio) : _stepper(s), _max_ratio(max_ratio) { }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    double dt = _stepper->advance(si);
+    if (si->prev_dt > 0 && dt / si->prev_dt > _max_ratio)
+      dt = si->prev_dt * _max_ratio;
+    return dt;
+  }
+
+private:
+  Stepper* _stepper;
+  double _max_ratio;
+};
+
 // ConstrFuncStepper reduces the returned dt of an underlying stepper by
 // factors of two until the difference between a given limiting function
 // evaluated at t_curr and t_next is less than a specified maximum difference.
@@ -70,24 +122,6 @@ private:
   Stepper* _stepper;
   std::function<double (double t)> _func;
   double _max_diff;
-};
-
-class MaxRatioStepper : public Stepper
-{
-public:
-  MaxRatioStepper(Stepper* s, double max_ratio) : _stepper(s), _max_ratio(max_ratio) { }
-
-  virtual double advance(const StepperInfo* si)
-  {
-    double dt = _stepper->advance(si);
-    if (dt / si->prev_dt > _max_ratio)
-      dt = si->prev_dt * _max_ratio;
-    return dt;
-  }
-
-private:
-  Stepper* _stepper;
-  double _max_ratio;
 };
 
 // Original PredictorCorrector timestepper behavior can be achieved by
@@ -134,17 +168,7 @@ private:
     std::string scheme = si->time_integrator;
     double dtprev = si->prev_prev_dt;
     double dt = si->prev_dt;
-    if (scheme == "NEVER_CALLED???")
-    {
-      // NOTE: this is never called, since stringtoint does not return 1 - EVER!
-      //I am not sure this is actually correct.
-      predicted *= -1;
-      predicted += soln;
-      double calc = dt * dt * .5;
-      predicted *= calc;
-      return predicted.l2_norm();
-    }
-    else if (scheme == "CrankNicolson")
+    if (scheme == "CrankNicolson")
     {
       predicted -= soln;
       predicted *= (dt) / (3.0 * (dt + dtprev));
@@ -211,29 +235,6 @@ public:
 
 private:
   LinearInterpolation _lin;
-};
-
-class FixedPointStepper : public Stepper
-{
-public:
-  FixedPointStepper(std::vector<double> times, double tol) : _times(times), _time_tol(tol) { }
-
-  virtual double advance(const StepperInfo* si) {
-    if (_times.size() == 0)
-      return si->prev_dt;
-
-    for (int i = 0; i < _times.size(); i++)
-    {
-      double t0 = _times[i];
-      if (t0 - _time_tol > si->time)
-        return t0 - si->time;
-    }
-    return si->prev_dt;
-  }
-
-private:
-  std::vector<double> _times;
-  double _time_tol;
 };
 
 class MinOfStepper : public Stepper

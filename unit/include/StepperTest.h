@@ -23,15 +23,15 @@ class StepperInfo;
 class StepperTest : public CppUnit::TestFixture
 {
   CPPUNIT_TEST_SUITE(StepperTest);
-  CPPUNIT_TEST(fixedPoint_1);
+  CPPUNIT_TEST(fixedPoint);
+  CPPUNIT_TEST(maxRatio);
   CPPUNIT_TEST(scratch);
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void fixedPoint_1();
+  void fixedPoint();
+  void maxRatio();
   void scratch();
-
-  void updateInfo(StepperInfo* si, double dt);
 };
 
 #endif  // STEPPERTEST_H
