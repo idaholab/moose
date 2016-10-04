@@ -6,6 +6,35 @@
 #include "LinearInterpolation.h"
 #include "libmesh/numeric_vector.h"
 
+// IterationAdaptiveDT stepper can be approximated something like this:
+//
+//     new MinOf(
+//         new FixedPointStepper(sync_times, time_tol),
+//         new MinOf(
+//             new FixedPointStepper(time_list, time_tol),
+//             new BoundsStepper(
+//                 RetryUnusedStepper(
+//                     AlternatingStepper(
+//                         new PiecewiseStepper(time_list, dt_list),
+//                         new AdaptiveStepper([config...]),
+//                         time_list,
+//                         time_tol
+//                     )
+//                 ),
+//                 dt_min,
+//                 dt_max
+//             )
+//         )
+//     );
+
+// Original AB2PredictorCorrector stepper behavior can be achieved by wrapping
+// steppers roughly like so:
+//
+//     new EveryNStepper(
+//         new MaxRatioStepper(new PredictorCorrector(...), max_ratio),
+//         every_n
+//     )
+
 struct StepperInfo {
   // The number of times the simulation has requested a dt.
   // This is equal to one on the first call fo advance(...).
@@ -110,6 +139,35 @@ public:
   }
 
 private:
+  std::vector<double> _times;
+  double _time_tol;
+};
+
+// Alternating stepper calls one stepper between the specified simulation
+// times and another between them.
+class AlternatingStepper : public Stepper
+{
+public:
+  AlternatingStepper(Stepper* on_steps, Stepper* between_steps, std::vector<double> times, double tol) :
+      _on_steps(on_steps),
+      _between_steps(between_steps),
+      _times(times),
+      _time_tol(tol)
+  { }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    for (int i = 0; i < _times.size(); i++)
+    {
+      if (std::abs(si->time - _times[i]) < _time_tol)
+        return _on_steps->advance(si);
+    }
+    return _between_steps->advance(si);
+  }
+
+private:
+  Stepper* _on_steps;
+  Stepper* _between_steps;
   std::vector<double> _times;
   double _time_tol;
 };
@@ -264,8 +322,6 @@ public:
   unsigned int lin_iter_ratio;
 };
 
-// Original PredictorCorrector timestepper behavior can be achieved by
-// wrapping steppers like so: EveryNStepper(MaxRatioStepper(PredictorCorrector()))
 class PredictorCorrector : public Stepper
 {
 public:
