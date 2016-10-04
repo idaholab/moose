@@ -3878,7 +3878,7 @@ FEProblem::initialAdaptMesh()
     }
     else
     {
-      _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
+      _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
       return;
     }
   }
@@ -3905,7 +3905,7 @@ FEProblem::adaptMesh()
     }
     else
     {
-      _console << "Mesh unchanged, skipping remaing steps..." << std::endl;
+      _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
       return;
     }
 
