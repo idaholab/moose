@@ -27,22 +27,6 @@
     max_time = 500
   [../]
 
-  [./test_elemental_csv]
-    type = 'CSVDiff'
-    input = 'grain_tracker_test_elemental.i'
-    csvdiff = 'grain_volumes.csv'
-
-    # Don't rerun this test
-    prereq = test_elemental
-    delete_output_before_running = false
-    should_execute = false
-
-    method = '!DBG' # slow test
-    recover = false  # grain tracker CSV output isn't designed to work with recover
-    valgrind = 'HEAVY'
-    max_time = 500
-  [../]
-
   [./test_remapping_parallel]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
