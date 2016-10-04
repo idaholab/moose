@@ -25,12 +25,14 @@ class StepperTest : public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE(StepperTest);
   CPPUNIT_TEST(fixedPoint);
   CPPUNIT_TEST(maxRatio);
+  CPPUNIT_TEST(everyN);
   CPPUNIT_TEST(scratch);
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void fixedPoint();
   void maxRatio();
+  void everyN();
   void scratch();
 };
 

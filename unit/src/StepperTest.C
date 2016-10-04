@@ -31,7 +31,7 @@ updateInfo(StepperInfo* si, double dt)
   si->step_count++;
 }
 
-StepperInfo blankStepper()
+StepperInfo blankInfo()
 {
     return {1, 0, 0, 0, "", 0, 0, true, 0, nullptr, nullptr, nullptr, false, 0};
 }
@@ -109,7 +109,7 @@ StepperTest::fixedPoint()
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
     FixedPointStepper stepper(times, tol);
-    StepperInfo si = blankStepper();
+    StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
     {
@@ -120,7 +120,7 @@ StepperTest::fixedPoint()
         dt /= 2;
       updateInfo(&si, dt);
       if (std::abs(want[j] - si.time) > tol) {
-        printf("test %d (%s) failed:\n", i+1, tests[i].title.c_str());
+        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
         printf("    time_step %d: want %f, got %f\n", j, want[j], si.time);
         CPPUNIT_ASSERT(false);
       }
@@ -169,14 +169,64 @@ StepperTest::maxRatio()
     std::vector<double> want = tests[i].want;
     FixedPointStepper s(times, tol);
     MaxRatioStepper stepper(&s, max_ratio);
-    StepperInfo si = blankStepper();
+    StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
     {
       dt = stepper.advance(&si);
       updateInfo(&si, dt);
       if (std::abs(want[j] - si.time) > tol) {
-        printf("test %d (%s) failed:\n", i+1, tests[i].title.c_str());
+        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
+        printf("    time_step %d: want %f, got %f\n", j, want[j], si.time);
+        CPPUNIT_ASSERT(false);
+      }
+    }
+    dt = stepper.advance(&si);
+    updateInfo(&si, dt);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
+  }
+}
+
+void
+StepperTest::everyN()
+{
+  struct testcase {
+    std::string title;
+    int every_n;
+    // The fixed point times to hit - for underlying FixedPointStepper.
+    std::vector<double> times;
+    // The expected time sequence from the stepper. This sequence should be
+    // exactly one longer than the times sequence to check what the stepper does
+    // after an extra call to advance.
+    std::vector<double> want;
+  };
+
+  testcase tests[] = {
+    {
+      "constr",
+      2,
+      {1, 3, 5},
+      {1, 2, 3, 4}
+    }
+  };
+
+  double tol = 1e-10;
+
+  for(int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
+  {
+    double dt = 0;
+    std::vector<double> times = tests[i].times;
+    std::vector<double> want = tests[i].want;
+    FixedPointStepper s(times, tol);
+    EveryNStepper stepper(&s, tests[i].every_n);
+    StepperInfo si = blankInfo();
+
+    for (int j = 0; j < times.size(); j++)
+    {
+      dt = stepper.advance(&si);
+      updateInfo(&si, dt);
+      if (std::abs(want[j] - si.time) > tol) {
+        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
         printf("    time_step %d: want %f, got %f\n", j, want[j], si.time);
         CPPUNIT_ASSERT(false);
       }
