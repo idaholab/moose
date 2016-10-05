@@ -1,6 +1,5 @@
 - AuxKernels: !include content/modules/tensor_mechanics/systems/AuxKernels/pages.yml
 - BCs: !include content/modules/tensor_mechanics/systems/BCs/pages.yml
-- Bounds: !include content/modules/tensor_mechanics/systems/Bounds/pages.yml
 - Kernels: !include content/modules/tensor_mechanics/systems/Kernels/pages.yml
 - Materials: !include content/modules/tensor_mechanics/systems/Materials/pages.yml
 - Postprocessors: !include content/modules/tensor_mechanics/systems/Postprocessors/pages.yml

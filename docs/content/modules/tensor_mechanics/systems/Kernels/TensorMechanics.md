@@ -1,4 +1,10 @@
-<!-- MOOSE System Documentation Stub: Remove this when content is added. -->
-#TensorMechanics System
-!parameters /Kernels/TensorMechanics
+#Tensor Mechanics Action
+!description /Kernels/TensorMechanics
 
+!devel /Kernels/TensorMechanics float=right width=auto margin=20px padding=20px background-color=#F8F8F8
+
+##Description
+
+something cool will go here.
+
+!parameters /Kernels/TensorMechanics

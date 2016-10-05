@@ -15,7 +15,7 @@ template<>
 InputParameters validParams<TensorMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Set up stress divergence kernels");
+  params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variables for the problem");
   params.addParam<NonlinearVariableName>("temp", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");

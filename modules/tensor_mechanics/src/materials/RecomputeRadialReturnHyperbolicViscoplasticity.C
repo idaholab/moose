@@ -12,6 +12,7 @@ template<>
 InputParameters validParams<RecomputeRadialReturnHyperbolicViscoplasticity>()
 {
   InputParameters params = validParams<RecomputeRadialReturn>();
+  params.addClassDescription("This class uses the discrete material for a hyperbolic sine viscoplasticity model in which the effective plastic strain is solved for using a creep approach.");
 
   // Linear strain hardening parameters
   params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
