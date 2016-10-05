@@ -267,9 +267,9 @@ Transient::execute()
             new FixedPointStepper(sync_times, timestepTol()),
             new MinOfStepper(
                 new FixedPointStepper(time_list, timestepTol()),
-                new DTLimitStepper(
-                    new MinOfStepper(
-                        new FixedPointStepper(piecewise_list, timestepTol()),
+                new MinOfStepper(
+                    new FixedPointStepper(piecewise_list, timestepTol()),
+                    new DTLimitStepper(
                         new ConstrFuncStepper(
                             new RetryUnusedStepper(
                                 new AlternatingStepper(
@@ -288,11 +288,11 @@ Transient::execute()
                             [&](double x)->double{if (t_limit_func) return t_limit_func->value(x, Point()); else return 0;},
                             std::max(0.0, legacy->_max_function_change)
                         ),
-                        timestepTol()
+                        dtmin,
+                        dtMax(),
+                        false
                     ),
-                    dtmin,
-                    dtMax(),
-                    false
+                    timestepTol()
                 ),
                 timestepTol()
             ),
