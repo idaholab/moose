@@ -113,6 +113,15 @@ enum EInterfacialHeatTransferModelType
   IHTM_TRACE = 1
 };
 
+/**
+ * Interfacial drag model used in 7eqn model
+ */
+enum EInterfacialDragModelType
+{
+  IDM_CONST = 0,
+  IDM_TRACE = 1
+};
+
 enum EWallHeatTransferRegimeNamesType
 {
   WHTR_CONVECTION,      ///< Weight of Forced Convection PreCHF
