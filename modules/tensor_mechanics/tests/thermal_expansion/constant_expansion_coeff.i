@@ -132,7 +132,7 @@
     type = ComputeFiniteStrainElasticStress
     block = 0
   [../]
-  [./thermal_expansion]
+  [./thermal_expansion_strain]
     type = ComputeThermalExpansionEigenStrain
     block = 0
     stress_free_reference_temperature = 298

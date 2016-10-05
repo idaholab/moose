@@ -12,6 +12,7 @@ template<>
 InputParameters validParams<RecomputeRadialReturnPowerLawCreep>()
 {
   InputParameters params = validParams<RecomputeRadialReturn>();
+  params.addClassDescription("This class uses the discrete material in a radial return isotropic power law creep model.  This class can be used in conjunction with other creep and plasticity materials for more complex simulations.");
 
   // Linear strain hardening parameters
   params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");

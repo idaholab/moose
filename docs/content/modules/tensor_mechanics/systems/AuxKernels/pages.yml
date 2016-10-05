@@ -5,6 +5,8 @@
 - ElasticEnergyAux: content/modules/tensor_mechanics/systems/AuxKernels/ElasticEnergyAux.md
 - NewmarkAccelAux: content/modules/tensor_mechanics/systems/AuxKernels/NewmarkAccelAux.md
 - NewmarkVelAux: content/modules/tensor_mechanics/systems/AuxKernels/NewmarkVelAux.md
+- RadialDisplacementCylinderAux: content/modules/tensor_mechanics/systems/AuxKernels/RadialDisplacementCylinderAux.md
+- RadialDisplacementSphereAux: content/modules/tensor_mechanics/systems/AuxKernels/RadialDisplacementSphereAux.md
 - RankFourAux: content/modules/tensor_mechanics/systems/AuxKernels/RankFourAux.md
 - RankTwoAux: content/modules/tensor_mechanics/systems/AuxKernels/RankTwoAux.md
 - RankTwoScalarAux: content/modules/tensor_mechanics/systems/AuxKernels/RankTwoScalarAux.md
