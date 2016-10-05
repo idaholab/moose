@@ -62,13 +62,11 @@ enum EHeatStructureType
   HS_TYPE_CYLINDER
 };
 
-/**
- * Heat flux partitioning model
- */
-enum EHeatFluxPartitioningModelType
+/// Global closures type
+enum EClosuresType
 {
-  HFPM_LINEAR = 0,
-  HFPM_TRACE  = 1
+  CLOSURES_SIMPLE = 0,
+  CLOSURES_TRACE  = 1
 };
 
 /**
@@ -101,24 +99,6 @@ enum EWallDragFlowRegimeNamesType
   WDFR_INVERTEDSLUG,    ///< Weight of InvertedSlug Flow Correlations PostCHF
   WDFR_DISPERSED,       ///< Weight of Dispersed Flow Correlations PostCHF
   WDFR_LEFTOVER         ///< Weight of original Pre Map correlations to be applied
-};
-
-/**
- * Interfacial heat transfer model used in 7eqn model
- */
-enum EInterfacialHeatTransferModelType
-{
-  IHTM_SIMPLE = 0,
-  IHTM_TRACE = 1
-};
-
-/**
- * Interfacial drag model used in 7eqn model
- */
-enum EInterfacialDragModelType
-{
-  IDM_CONST = 0,
-  IDM_TRACE = 1
 };
 
 enum EWallHeatTransferRegimeNamesType
