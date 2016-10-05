@@ -47,7 +47,7 @@ public:
 
   virtual bool constrainStep(Real &dt) override;
 
-protected:
+public:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
   virtual Real computeFailedDT() override;
@@ -105,6 +105,7 @@ protected:
 
   bool & _cutback_occurred;
   bool _at_function_point;
+  std::vector<Real> _tfunc_dts;
 };
 
 template<>

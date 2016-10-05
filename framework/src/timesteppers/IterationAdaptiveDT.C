@@ -63,7 +63,8 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
     _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
     _l_its(declareRestartableData<unsigned int>("l_its", 0)),
     _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
-    _at_function_point(false)
+    _at_function_point(false),
+    _tfunc_dts(parameters.get<std::vector<Real> >("time_dt"))
 {
   if (isParamValid("optimal_iterations"))
   {

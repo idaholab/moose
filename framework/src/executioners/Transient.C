@@ -24,6 +24,9 @@
 #include "NonlinearSystem.h"
 #include "Control.h"
 #include "TimePeriod.h"
+#include "Stepper.h"
+#include "IterationAdaptiveDT.h"
+#include "Function.h"
 
 // libMesh includes
 #include "libmesh/implicit_system.h"
@@ -235,8 +238,73 @@ Transient::execute()
   if (!_app.isRecovering())
     _problem.advanceState();
 
-  // TODO: setup and configure new Stepper in parallel here
-  // TODO: then have stepper advance with each time step and compare dt's/times
+  ////////////////////////////////////////////////////////////
+  // setup and configure new Stepper in parallel here       //
+  ////////////////////////////////////////////////////////////
+  IterationAdaptiveDT* legacy = dynamic_cast<IterationAdaptiveDT*>(_time_stepper.get());
+  Stepper* stepper = nullptr;
+  if (legacy != nullptr) {
+    std::vector<double> sync_times;
+    std::vector<double> time_list;
+    std::vector<double> dt_list;
+    for (auto& val : _app.getOutputWarehouse().getSyncTimes())
+      sync_times.push_back(val);
+    for (auto val : legacy->_tfunc_times)
+      time_list.push_back(val);
+    for (auto val : legacy->_tfunc_dts)
+      dt_list.push_back(val);
+    double dtmin = dtMin();
+    if (legacy->_pps_value && *legacy->_pps_value < dtmin)
+      dtmin = *legacy->_pps_value;
+
+
+    auto t_limit_func = legacy->_timestep_limiting_function;
+    auto piecewise_func = legacy->_piecewise_timestep_limiting_function;
+    std::vector<double> piecewise_list = legacy->_times;
+
+    stepper = new BoundsStepper(
+        new MinOfStepper(
+            new FixedPointStepper(sync_times, timestepTol()),
+            new MinOfStepper(
+                new FixedPointStepper(time_list, timestepTol()),
+                new DTLimitStepper(
+                    new MinOfStepper(
+                        new FixedPointStepper(piecewise_list, timestepTol()),
+                        new ConstrFuncStepper(
+                            new RetryUnusedStepper(
+                                new AlternatingStepper(
+                                    new PiecewiseStepper(time_list, dt_list),
+                                    new AdaptiveStepper(
+                                        legacy->_optimal_iterations,
+                                        legacy->_iteration_window,
+                                        legacy->_linear_iteration_ratio,
+                                        legacy->_growth_factor,
+                                        legacy->_cutback_factor // shrink_factor
+                                    ),
+                                    time_list,
+                                    timestepTol()
+                                )
+                            ),
+                            [&](double x)->double{if (t_limit_func) return t_limit_func->value(x, Point()); else return 0;},
+                            legacy->_max_function_change
+                        ),
+                        timestepTol()
+                    ),
+                    dtmin,
+                    dtMax(),
+                    false
+                ),
+                timestepTol()
+            ),
+            timestepTol()
+        ),
+        getStartTime(),
+        endTime(),
+        false
+    );
+  }
+
+  StepperInfo si = { };
 
   // Start time loop...
   while (true)
@@ -249,13 +317,34 @@ Transient::execute()
     if (!keepGoing())
       break;
 
+    // update new style stepper
+    double dt = 0;
+    if (stepper != nullptr)
+    {
+      si.time = _time;
+      si.prev_dt = _dt;
+      si.prev_prev_dt = _dt_old;
+      si.step_count++;
+      si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
+      si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
+      si.converged = _fe_problem.converged();
+      dt = stepper->advance(&si);
+    }
+
     preStep();
     computeDT();
+    double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
+    double constr_legacy_dt = _dt;
     endStep();
     postStep();
 
     _steps_taken++;
+
+    if (stepper != nullptr)
+    {
+      printf("[STEPPER] step %3d (t=%f): dt=%f, legacy=%f (constr=%f)\n", si.step_count, si.time, dt, legacy_dt, constr_legacy_dt);
+    }
   }
 
   if (!_app.halfTransient())
