@@ -247,7 +247,7 @@ Transient::execute()
     std::vector<double> sync_times;
     std::vector<double> time_list;
     std::vector<double> dt_list;
-    for (auto& val : _app.getOutputWarehouse().getSyncTimes())
+    for (auto val : _app.getOutputWarehouse().getSyncTimes())
       sync_times.push_back(val);
     for (auto val : legacy->_tfunc_times)
       time_list.push_back(val);
@@ -278,15 +278,15 @@ Transient::execute()
                                         legacy->_optimal_iterations,
                                         legacy->_iteration_window,
                                         legacy->_linear_iteration_ratio,
-                                        legacy->_growth_factor,
-                                        legacy->_cutback_factor // shrink_factor
+                                        legacy->_cutback_factor, // shrink_factor
+                                        legacy->_growth_factor
                                     ),
                                     time_list,
                                     timestepTol()
                                 )
                             ),
                             [&](double x)->double{if (t_limit_func) return t_limit_func->value(x, Point()); else return 0;},
-                            legacy->_max_function_change
+                            std::max(0.0, legacy->_max_function_change)
                         ),
                         timestepTol()
                     ),
