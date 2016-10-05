@@ -65,6 +65,11 @@ protected:
   FEProblem * _vpp_fe_problem;
 
   friend class SamplerBase;
+
+private:
+  THREAD_ID _vpp_tid;
+
+  std::map<std::string, VectorPostprocessorValue> _thread_local_vectors;
 };
 
 #endif

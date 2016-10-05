@@ -85,18 +85,22 @@ TableOutput::outputVectorPostprocessors()
   // Loop through the postprocessor names and extract the values from the VectorPostprocessorData storage
   for (const auto & vpp_name : out)
   {
-    const std::map<std::string, VectorPostprocessorValue*> & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
+    const auto & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
 
-    FormattedTable & table = _vector_postprocessor_tables[vpp_name];
+    auto table_it = _vector_postprocessor_tables.lower_bound(vpp_name);
+    if (table_it == _vector_postprocessor_tables.end() || table_it->first != vpp_name)
+      table_it =  _vector_postprocessor_tables.emplace_hint(table_it, vpp_name, FormattedTable());
+
+    FormattedTable & table = table_it->second;
 
     table.clear();
     table.outputTimeColumn(false);
 
     for (const auto & vec_it : vectors)
     {
-      VectorPostprocessorValue vector = *(vec_it.second);
+      const auto & vector = *vec_it.second.current;
 
-      for (unsigned int i=0; i<vector.size(); i++)
+      for (auto i = beginIndex(vector); i < vector.size(); ++i)
         table.addData(vec_it.first, vector[i], i);
     }
 

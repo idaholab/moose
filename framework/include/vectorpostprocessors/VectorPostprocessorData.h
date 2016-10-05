@@ -31,6 +31,12 @@ public:
    */
   VectorPostprocessorData(FEProblem & fe_problem);
 
+  struct VPPVectors
+  {
+    VectorPostprocessorValue * current;
+    VectorPostprocessorValue * old;
+  };
+
   /**
    * Initialization method, sets the current and old value to 0.0 for this
    * VectorPostprocessor
@@ -64,26 +70,27 @@ public:
   /**
    * Get the map of names -> VectorPostprocessor values. Exposed for error checking.
    */
-  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values() const { return _values; }
+//  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values() const { return _values; }
 
   /**
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */
-  const std::map<std::string, VectorPostprocessorValue*> & vectors(const std::string & vpp_name) { return _values[vpp_name]; }
+  const std::map<std::string, VPPVectors> & vectors(const std::string & vpp_name) const;
 
   /**
    * Copy the current post-processor values into old (i.e. shift it "back in time")
    */
   void copyValuesBack();
 
-protected:
+private:
+  VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name, const std::string & vector_name, bool get_current);
 
-  /// Values of the post-processor at the current time
-  std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > _values;
+  /// Values of the vector post-processor
+  std::map<std::string, std::map<std::string, VPPVectors> > _values;
 
-  /// Values of the post-processors at the time t-1
-  std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > _values_old;
+  std::set<std::string> _requested_items;
+  std::set<std::string> _supplied_items;
 };
 
 #endif //VECTORPOSTPROCESSORDATA_H

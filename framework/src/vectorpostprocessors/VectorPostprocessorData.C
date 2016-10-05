@@ -29,32 +29,51 @@ VectorPostprocessorData::hasVectorPostprocessor(const std::string & name)
 VectorPostprocessorValue &
 VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorName & vpp_name, const std::string & vector_name)
 {
-  VectorPostprocessorValue * & pp_val = _values[vpp_name][vector_name];
+  _requested_items.emplace(vpp_name + "::" + vector_name);
 
-  if (pp_val == NULL)
-    pp_val = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(vpp_name + "_" + vector_name, "values");
-
-  return *pp_val;
+  return getVectorPostprocessorHelper(vpp_name, vector_name, true);
 }
 
 VectorPostprocessorValue &
 VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name, const std::string & vector_name)
 {
-  VectorPostprocessorValue * & pp_val = _values_old[vpp_name][vector_name];
+  _requested_items.emplace(vpp_name + "::" + vector_name);
 
-  if (pp_val == NULL)
-    pp_val = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(vpp_name + "_" + vector_name, "values_old");
-
-  return *pp_val;
+  return getVectorPostprocessorHelper(vpp_name, vector_name, false);
 }
 
 
 VectorPostprocessorValue &
 VectorPostprocessorData::declareVector(const std::string & vpp_name, const std::string & vector_name)
 {
-  getVectorPostprocessorValueOld(vpp_name, vector_name);
+  _supplied_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorValue(vpp_name, vector_name);
+  return getVectorPostprocessorHelper(vpp_name, vector_name, true);
+}
+
+VectorPostprocessorValue &
+VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name, const std::string & vector_name, bool get_current)
+{
+  // Intentional use of RHS brackets on a std::map to do a multilevel retrieve or insert
+  auto & vec_struct = _values[vpp_name][vector_name];
+
+  if (!vec_struct.current)
+  {
+    mooseAssert(!vec_struct.old, "Uninitialized pointers in VectorPostprocessor Data");
+    vec_struct.current = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(vpp_name + "_" + vector_name, "values");
+    vec_struct.old = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(vpp_name + "_" + vector_name, "values_old");
+  }
+
+  return get_current ? *vec_struct.current : *vec_struct.old;
+}
+
+const std::map<std::string, VectorPostprocessorData::VPPVectors> &
+VectorPostprocessorData::vectors(const std::string & vpp_name) const
+{
+  auto vec_pair = _values.find(vpp_name);
+  mooseAssert(vec_pair != _values.end(), "No vectors found for vpp_name: " << vpp_name);
+
+  return vec_pair->second;
 }
 
 void
@@ -62,5 +81,5 @@ VectorPostprocessorData::copyValuesBack()
 {
   for (const auto & it : _values)
     for (const auto & vec_it : it.second)
-      getVectorPostprocessorValueOld(it.first, vec_it.first) = *(vec_it.second);
+      vec_it.second.old->swap(*vec_it.second.current);
 }
