@@ -286,6 +286,11 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
     {
       if (_time >= _times[i] && _time < _times[i+1])
       {
+        // This (perhaps incorrectly) *increases* dt (within timestep tol) in
+        // order to hit the next time point. - this seems dangerous - because
+        // it violates possibly other constraints that have already been
+        // "enforced" (e.g. the one above).  A policy of constraints only ever
+        // decreasing dt should perhaps be established/observed.
         if (limitedDT > _times[i+1] - _time - _timestep_tolerance)
         {
           limitedDT = _times[i+1] - _time;
