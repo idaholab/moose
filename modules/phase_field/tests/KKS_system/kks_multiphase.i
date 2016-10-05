@@ -9,9 +9,9 @@
   ny = 20
   nz = 0
   xmin = 0
-  xmax = 1
+  xmax = 40
   ymin = 0
-  ymax = 1
+  ymax = 40
   zmin = 0
   zmax = 0
   elem_type = QUAD4
@@ -25,26 +25,30 @@
   [../]
 []
 
+[AuxVariables]
+  [./Energy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Variables]
   # concentration
   [./c]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.5
   [../]
 
   # order parameter 1
   [./eta1]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.1
   [../]
 
   # order parameter 2
   [./eta2]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.9
   [../]
 
   # order parameter 3
@@ -83,25 +87,59 @@
   [../]
 []
 
+[ICs]
+  [./eta1]
+    variable = eta1
+    type = SmoothCircleIC
+    x1 = 20.0
+    y1 = 20.0
+    radius = 10
+    invalue = 0.9
+    outvalue = 0.1
+    int_width = 4
+  [../]
+  [./eta2]
+    variable = eta2
+    type = SmoothCircleIC
+    x1 = 20.0
+    y1 = 20.0
+    radius = 10
+    invalue = 0.1
+    outvalue = 0.9
+    int_width = 4
+  [../]
+  [./c]
+    variable = c
+    type = SmoothCircleIC
+    x1 = 20.0
+    y1 = 20.0
+    radius = 10
+    invalue = 0.2
+    outvalue = 0.5
+    int_width = 2
+  [../]
+[]
+
+
 [Materials]
   # simple toy free energies
   [./f1]
     type = DerivativeParsedMaterial
     f_name = F1
     args = 'c1'
-    function = '(c1-0.2)^2'
+    function = '20*(c1-0.2)^2'
   [../]
   [./f2]
     type = DerivativeParsedMaterial
     f_name = F2
     args = 'c2'
-    function = '(c2-0.5)^2'
+    function = '20*(c2-0.5)^2'
   [../]
   [./f3]
     type = DerivativeParsedMaterial
     f_name = F3
     args = 'c3'
-    function = '(c3-0.8)^2'
+    function = '20*(c3-0.8)^2'
   [../]
 
   # Switching functions for each phase
@@ -174,7 +212,7 @@
   [./constants]
     type = GenericConstantMaterial
     prop_names  = 'L   kappa  D'
-    prop_values = '0.7 0.4    1'
+    prop_values = '0.7 1.0    1'
   [../]
 []
 
@@ -215,7 +253,7 @@
     hj_names  = 'h1 h2 h3'
     gi_name   = g1
     eta_i     = eta1
-    wi        = 0.4
+    wi        = 1.0
     args      = 'c1 c2 c3 eta2 eta3'
   [../]
   [./ACBulkC1]
@@ -251,7 +289,7 @@
     hj_names  = 'h1 h2 h3'
     gi_name   = g2
     eta_i     = eta2
-    wi        = 0.4
+    wi        = 1.0
     args      = 'c1 c2 c3 eta1 eta3'
   [../]
   [./ACBulkC2]
@@ -288,7 +326,7 @@
     hj_names  = 'h1 h2 h3'
     gi_name   = g1
     eta_i     = eta1
-    wi        = 0.4
+    wi        = 1.0
     mob_name  = 1
     args      = 'c1 c2 c3 eta2 eta3'
   [../]
@@ -316,7 +354,7 @@
     hj_names  = 'h1 h2 h3'
     gi_name   = g2
     eta_i     = eta2
-    wi        = 0.4
+    wi        = 1.0
     mob_name  = 1
     args      = 'c1 c2 c3 eta1 eta3'
   [../]
@@ -344,7 +382,7 @@
     hj_names  = 'h1 h2 h3'
     gi_name   = g3
     eta_i     = eta3
-    wi        = 0.4
+    wi        = 1.0
     mob_name  = 1
     args      = 'c1 c2 c3 eta1 eta2'
   [../]
@@ -416,16 +454,29 @@
   [../]
 []
 
+[AuxKernels]
+  [./Energy_total]
+    type = KKSMultiFreeEnergy
+    Fj_names = 'F1 F2 F3'
+    hj_names = 'h1 h2 h3'
+    gj_names = 'g1 g2 g3'
+    variable = Energy
+    w = 1
+    interfacial_vars =  'eta1  eta2  eta3'
+    kappa_names =       'kappa kappa kappa'
+  [../]
+[]
+
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -sub_pc_type   -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm       lu            nonzero'
+  petsc_options_value = 'asm       ilu            nonzero'
   l_max_its = 30
   nl_max_its = 10
   l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-9
-  nl_abs_tol = 1.0e-10
+  nl_rel_tol = 1.0e-10
+  nl_abs_tol = 1.0e-11
 
   num_steps = 2
   dt = 0.5
