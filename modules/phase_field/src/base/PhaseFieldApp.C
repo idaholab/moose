@@ -168,6 +168,7 @@
 #include "EulerAngleVariables2RGBAux.h"
 #include "FeatureFloodCountAux.h"
 #include "KKSGlobalFreeEnergy.h"
+#include "KKSMultiFreeEnergy.h"
 #include "PFCEnergyDensity.h"
 #include "PFCRFFEnergyDensity.h"
 #include "EBSDReaderAvgDataAux.h"
@@ -422,6 +423,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(EulerAngleVariables2RGBAux);
   registerAux(FeatureFloodCountAux);
   registerAux(KKSGlobalFreeEnergy);
+  registerAux(KKSMultiFreeEnergy);
   registerAux(OutputEulerAngles);
   registerAux(PFCEnergyDensity);
   registerAux(PFCRFFEnergyDensity);
