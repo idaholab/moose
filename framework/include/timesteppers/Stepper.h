@@ -12,17 +12,21 @@
 //         new FixedPointStepper(sync_times, time_tol),
 //         new MinOf(
 //             new FixedPointStepper(time_list, time_tol),
-//             new BoundsStepper(
-//                 RetryUnusedStepper(
-//                     AlternatingStepper(
-//                         new PiecewiseStepper(time_list, dt_list),
-//                         new AdaptiveStepper([config...]),
-//                         time_list,
-//                         time_tol
-//                     )
+//             new ConstrFuncStepper(
+//                 new DTLimitStepper(
+//                     RetryUnusedStepper(
+//                         AlternatingStepper(
+//                             new PiecewiseStepper(time_list, dt_list),
+//                             new AdaptiveStepper([config...]),
+//                             time_list,
+//                             time_tol
+//                         )
+//                     ),
+//                     dt_min,
+//                     dt_max
 //                 ),
-//                 dt_min,
-//                 dt_max
+//                 constr_func,
+//                 max_diff
 //             )
 //         )
 //     );
@@ -90,13 +94,13 @@ private:
 // Calls an underlying stepper to compute dt. Modifies dt to be within
 // specified fixed lower and upper bounds (or throws an error - depending on
 // configuration).
-class BoundsStepper : public Stepper
+class DTLimitStepper : public Stepper
 {
 public:
   // If throw_err is true, an exception is thrown if the underlying stepper's
   // advance function returns an out of bounds dt.  Otherwise, out-of-bounds
   // cases result in dt being set to the corresponding min or max bound.
-  BoundsStepper(Stepper* s, double dt_min, double dt_max, bool throw_err) : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err) { }
+  DTLimitStepper(Stepper* s, double dt_min, double dt_max, bool throw_err) : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err) { }
 
   virtual double advance(const StepperInfo* si) {
     double dt = _stepper->advance(si);
@@ -116,26 +120,65 @@ private:
   bool _err;
 };
 
+// Calls an underlying stepper to compute dt. Modifies dt to maintain the
+// simulation time within specified fixed lower and upper bounds (or throws an
+// error - depending on configuration).
+class BoundsStepper : public Stepper
+{
+public:
+  // If throw_err is true, an exception is thrown if the underlying stepper's
+  // advance function returns a dt that causes an out of bounds simulation
+  // time.  Otherwise, out-of-bounds cases result in dt being set to hit the
+  // corresponding time bound.
+  BoundsStepper(Stepper* s, double t_min, double t_max, bool throw_err) : _stepper(s), _min(t_min), _max(t_max), _err(throw_err) { }
+
+  virtual double advance(const StepperInfo* si) {
+    double dt = _stepper->advance(si);
+    double t = si->time + dt;
+    printf("min=%f, max=%f, t+dt=%f\n", _min, _max, t);
+    if (_err && (t < _min || t > _max))
+      throw "time step is out of bounds";
+    else if (t < _min)
+      return _min;
+    else if (t > _max)
+      return _max;
+    return dt;
+  }
+
+private:
+  Stepper* _stepper;
+  double _min;
+  double _max;
+  bool _err;
+};
+
 // Calculates dt in order to hit specified fixed times. This is robust if the
 // dt used to evolve the actual simulation ended up being changed from this
 // dt.  Returns previous dt after all fixed times have been passed. Never
 // returns a negative dt
+//
+// Consider making this stepper return 1e100 or prev_dt after sim time is greater than
+// all specified times in sequence.  1e100 would help it work more correctly with
+// MinOfStepper and BoundsSteper, etc.  prev_dt would make sense possibly in
+// other contexts.
 class FixedPointStepper : public Stepper
 {
+//#define FIXED_STEPPER_RETURN si->prev_dt
+#define FIXED_STEPPER_RETURN 1e100
 public:
   FixedPointStepper(std::vector<double> times, double tol) : _times(times), _time_tol(tol) { }
 
   virtual double advance(const StepperInfo* si) {
     if (_times.size() == 0)
-      return si->prev_dt;
+      return FIXED_STEPPER_RETURN;
 
     for (int i = 0; i < _times.size(); i++)
     {
       double t0 = _times[i];
-      if (t0 - _time_tol > si->time)
+      if (si->time < t0 - _time_tol)
         return t0 - si->time;
     }
-    return si->prev_dt;
+    return FIXED_STEPPER_RETURN;
   }
 
 private:
@@ -275,51 +318,78 @@ private:
   LinearInterpolation _lin;
 };
 
+// MinOfStepper returns the smaller of two dt's from two underlying steppers.
+// It returns the preferred stepper's dt if:
+//
+//     "dt_preferred - tolerance < dt_alternate"
+//
+// Otherwise it returns the alternate stepper's dt.
 class MinOfStepper : public Stepper
 {
 public:
-  MinOfStepper(Stepper* a, Stepper* b) : _a(a), _b(b) { }
+  // stepper a is preferred
+  MinOfStepper(Stepper* a, Stepper* b, double tol) : _a(a), _b(b), _tol(tol) { }
 
   virtual double advance(const StepperInfo* si)
   {
-    return std::min(_a->advance(si), _b->advance(si));
+    double dta = _a->advance(si);
+    double dtb = _b->advance(si);
+    if (dta - _tol < dtb)
+      return dta;
+    return dtb;
   }
 
 private:
   Stepper* _a;
   Stepper* _b;
+  double _tol;
 };
 
 class AdaptiveStepper : public Stepper
 {
 public:
+  AdaptiveStepper(
+        unsigned int optimal_iters,
+        unsigned int iter_window,
+        double lin_iter_ratio,
+        double shrink_factor,
+        double growth_factor
+      ) :
+      _optimal_iters(optimal_iters),
+      _iter_window(iter_window),
+      _lin_iter_ratio(lin_iter_ratio),
+      _shrink_factor(shrink_factor),
+      _growth_factor(growth_factor)
+      { }
+
   virtual double advance(const StepperInfo* si) {
     bool can_shrink = true;
     bool can_grow = si->converged;
 
-    unsigned int shrink_nl_its = optimal_iters + iter_window;
-    unsigned int shrink_l_its = lin_iter_ratio*(optimal_iters + iter_window);
     unsigned int growth_nl_its = 0;
     unsigned int growth_l_its = 0;
-    if (optimal_iters > iter_window)
+    unsigned int shrink_nl_its = _optimal_iters + _iter_window;
+    unsigned int shrink_l_its = _lin_iter_ratio*(_optimal_iters + _iter_window);
+    if (_optimal_iters > _iter_window)
     {
-       growth_nl_its = optimal_iters - iter_window;
-       growth_l_its = lin_iter_ratio * (optimal_iters - iter_window);
+       growth_nl_its = _optimal_iters - _iter_window;
+       growth_l_its = _lin_iter_ratio * (_optimal_iters - _iter_window);
     }
 
     if (can_grow && (si->nonlin_iters < growth_nl_its && si->lin_iters < growth_l_its))
-      return si->prev_dt * growth_factor;
+      return si->prev_dt * _growth_factor;
     else if (can_shrink && (si->nonlin_iters > shrink_nl_its || si->lin_iters > shrink_l_its))
-      return si->prev_dt * shrink_factor;
+      return si->prev_dt * _shrink_factor;
     else
       return si->prev_dt;
   };
 
-  double growth_factor;
-  double shrink_factor;
-  unsigned int optimal_iters;
-  unsigned int iter_window;
-  unsigned int lin_iter_ratio;
+private:
+  unsigned int _optimal_iters;
+  unsigned int _iter_window;
+  double _lin_iter_ratio;
+  double _shrink_factor;
+  double _growth_factor;
 };
 
 class PredictorCorrector : public Stepper

@@ -60,13 +60,13 @@ StepperTest::fixedPoint()
       1e-10,
       0,
       {},
-      {0}
+      {1e100}
     },{
       "normal-seq",
       1e-10,
       0,
       {1, 2, 5},
-      {1, 2, 5, 8}
+      {1, 2, 5, 1e100}
     },{
       // checks that the stepper doesn't repeat time t0 with a dt=0 if a
       // fixed-point time is equal to the initial time.
@@ -74,19 +74,19 @@ StepperTest::fixedPoint()
       1e-10,
       0,
       {0, 1, 3},
-      {1, 3, 5, 7}
+      {1, 3, 1e100, 2e100}
     },{
       "under-tolerance",
       1e-10,
       0,
       {1e-11, 1, 3},
-      {1, 3, 5, 7}
+      {1, 3, 1e100, 2e100}
     },{
       "over-tolerance",
       1e-10,
       0,
       {1e-9, 1, 3},
-      {1e-9, 1, 3, 5}
+      {1e-9, 1, 3, 1e100}
     },{
       "violate-dt-under",
       1e-10,
@@ -98,7 +98,7 @@ StepperTest::fixedPoint()
       1e-10,
       +1,
       {1, 2, 5},
-      {2, 5, 8, 11}
+      {2, 5, 1e100, 2e100}
     }
   };
 
@@ -121,7 +121,7 @@ StepperTest::fixedPoint()
       updateInfo(&si, dt);
       if (std::abs(want[j] - si.time) > tol) {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
-        printf("    time_step %d: want %f, got %f\n", j, want[j], si.time);
+        printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
         CPPUNIT_ASSERT(false);
       }
     }
@@ -155,7 +155,7 @@ StepperTest::maxRatio()
       "no-constr",
       3,
       {1, 2, 5},
-      {1, 2, 5, 8}
+      {1, 2, 5, 14}
     }
   };
 
@@ -177,7 +177,7 @@ StepperTest::maxRatio()
       updateInfo(&si, dt);
       if (std::abs(want[j] - si.time) > tol) {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
-        printf("    time_step %d: want %f, got %f\n", j, want[j], si.time);
+        printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
         CPPUNIT_ASSERT(false);
       }
     }
@@ -227,7 +227,7 @@ StepperTest::everyN()
       updateInfo(&si, dt);
       if (std::abs(want[j] - si.time) > tol) {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
-        printf("    time_step %d: want %f, got %f\n", j, want[j], si.time);
+        printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
         CPPUNIT_ASSERT(false);
       }
     }
@@ -253,14 +253,14 @@ StepperTest::scratch() {
   auto tmp2 = tmp->clone();
   NumericVector<Number>& vec2 = *tmp2.get();
 
-  std::cout << vec(0) << "\n";
-  std::cout << vec(1) << "\n";
-  std::cout << vec(2) << "\n";
+  //std::cout << vec(0) << "\n";
+  //std::cout << vec(1) << "\n";
+  //std::cout << vec(2) << "\n";
 
-  vec += vec2;
+  //vec += vec2;
 
-  std::cout << vec(0) << "\n";
-  std::cout << vec(1) << "\n";
-  std::cout << vec(2) << "\n";
+  //std::cout << vec(0) << "\n";
+  //std::cout << vec(1) << "\n";
+  //std::cout << vec(2) << "\n";
 }
 
