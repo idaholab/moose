@@ -18,7 +18,7 @@ InputParameters validParams<SolidMechImplicitEuler>()
 
 SolidMechImplicitEuler::SolidMechImplicitEuler(const InputParameters & parameters)
   :SecondDerivativeImplicitEuler(parameters),
-   _density(getMaterialProperty<Real>("density")),
+   _density(getMaterialProperty<Real>("current_density")),
    _artificial_scaling_set(parameters.isParamValid("artificial_scaling")),
    _artificial_scaling( _artificial_scaling_set ? getParam<Real>("artificial_scaling") : 1 )
 {}

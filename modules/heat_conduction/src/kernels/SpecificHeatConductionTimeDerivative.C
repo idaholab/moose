@@ -18,7 +18,7 @@ InputParameters validParams<SpecificHeatConductionTimeDerivative>()
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addParam<MaterialPropertyName>("specific_heat", "specific_heat", "Property name of the specific heat material property");
-  params.addParam<MaterialPropertyName>("density", "density", "Property name of the density material property");
+  params.addParam<MaterialPropertyName>("density", "current_density", "Property name of the density material property");
   params.addCoupledVar("args", "Vector of additional arguments of the specific heat and density");
   return params;
 }

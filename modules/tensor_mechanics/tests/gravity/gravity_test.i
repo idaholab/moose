@@ -81,7 +81,7 @@
   [./density]
     type = GenericConstantMaterial
     block = 0
-    prop_names = density
+    prop_names = current_density
     prop_values = 2.0387
   [../]
 []

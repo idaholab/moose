@@ -100,7 +100,7 @@
   [../]
   [./density]
     type = MaterialRealAux
-    property = density
+    property = current_density
     variable = density
   [../]
 
