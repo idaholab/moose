@@ -15,9 +15,6 @@ InputParameters validParams<ComputeStrainBase>()
   params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
   params.addPrivateParam<bool>("stateful_displacements", false);
-  params.addParam<Real>("temperature_ref", 273, "Deprecated: Reference temperature for thermal expansion in K");
-  params.addCoupledVar("temperature", 273, "Decprecated: Temperature in Kelvin");
-  params.addParam<Real>("thermal_expansion_coeff", 0, "Deprecated: Thermal expansion coefficient in 1/K");
   params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
   return params;
 }
@@ -28,10 +25,6 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _disp(3),
     _grad_disp(3),
     _grad_disp_old(3),
-    _T(coupledValue("temperature")),
-    _T0(getParam<Real>("temperature_ref")),
-    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _no_thermal_eigenstrains(false),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
@@ -41,12 +34,6 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
     mooseError("The number of variables supplied in 'displacements' must match the mesh dimension.");
-
-  if (parameters.isParamSetByUser("thermal_expansion_coeff"))
-    _no_thermal_eigenstrains = true;
-
-  if (_no_thermal_eigenstrains)
-    mooseDeprecated("The calculation of the thermal strains has been moved to the material ComputeThermalExpansionEigenStrains");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
