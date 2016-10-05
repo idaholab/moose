@@ -45,6 +45,9 @@ public:
   Real getFeatureVolume(unsigned int feature_id) const;
 
 protected:
+  /// A Boolean indicating how the volume is calculated
+  const bool _single_feature_per_elem;
+
   /// A reference to the feature flood count object
   const FeatureFloodCount & _feature_counter;
 
@@ -53,6 +56,10 @@ protected:
   VectorPostprocessorValue & _intersects_bounds;
 
 private:
+  /// Add volume contributions to one or entries in the feature volume vector
+  void accumulateVolumes(const Elem * elem, const std::vector<unsigned int> & var_to_features, std::size_t num_features);
+
+  /// Calculate the integral value of the passed in variable (index)
   Real computeIntegral(std::size_t var_index) const;
 
   const std::vector<MooseVariable *> & _vars;
