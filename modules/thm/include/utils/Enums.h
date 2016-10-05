@@ -68,8 +68,7 @@ enum EHeatStructureType
 enum EHeatFluxPartitioningModelType
 {
   HFPM_LINEAR = 0,
-  HFPM_SIMPLE = 1,
-  HFPM_TRACE  = 2
+  HFPM_TRACE  = 1
 };
 
 /**
