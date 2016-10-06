@@ -138,10 +138,10 @@
     type = ComputeFiniteStrainElasticStress
     block = 0
   [../]
-  [./thermal_expansion]
+  [./thermal_expansion_strain]
     type = ComputeThermalExpansionEigenStrain
     block = 0
-    stress_free_reference_temperature = 298
+    stress_free_temperature = 298
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     incremental_form = true

@@ -99,7 +99,7 @@
   [./thermal_expansion]
     type = ComputeThermalExpansionEigenStrain
     block = 1
-    stress_free_reference_temperature = 300
+    stress_free_temperature = 300
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     incremental_form = true
