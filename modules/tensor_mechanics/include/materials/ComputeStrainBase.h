@@ -31,11 +31,6 @@ protected:
   std::vector<const VariableGradient *> _grad_disp;
   std::vector<const VariableGradient *> _grad_disp_old;
 
-  const VariableValue & _T;
-  const Real _T0;
-  const Real _thermal_expansion_coeff;
-  bool _no_thermal_eigenstrains;
-
   std::string _base_name;
 
   MaterialProperty<RankTwoTensor> & _mechanical_strain;

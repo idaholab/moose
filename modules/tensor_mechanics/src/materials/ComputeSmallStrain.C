@@ -34,9 +34,6 @@ ComputeSmallStrain::computeQpProperties()
 
   _mechanical_strain[_qp] = _total_strain[_qp];
 
-  if (_no_thermal_eigenstrains) //Deprecated; use ComputeThermalExpansionEigenStrains instead
-    _mechanical_strain[_qp].addIa(-_thermal_expansion_coeff*( _T[_qp] - _T0 ));
-
   //Remove the Eigen strain
   _mechanical_strain[_qp] -= _stress_free_strain[_qp];
 }
