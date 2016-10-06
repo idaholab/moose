@@ -88,7 +88,7 @@ public:
    * CO2 molar mass
    * @return molar mass (kg/mol)
    */
-  Real molarMass() const;
+  Real molarMass() const override;
 
   /**
    * CO2 critical pressure

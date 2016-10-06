@@ -29,7 +29,7 @@ public:
   * Methane molar mass
   * @return molar mass (kg/mol)
   */
- virtual Real molarMass() const;
+ virtual Real molarMass() const override;
 
   /**
    * Methane critical pressure
