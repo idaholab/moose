@@ -2,7 +2,6 @@
 - CosseratStressDivergenceTensors: content/modules/tensor_mechanics/systems/Kernels/CosseratStressDivergenceTensors.md
 - DynamicStressDivergenceTensors: content/modules/tensor_mechanics/systems/Kernels/DynamicStressDivergenceTensors.md
 - DynamicTensorMechanics: content/modules/tensor_mechanics/systems/Kernels/DynamicTensorMechanics.md
-- GeneralizedPlaneStrainOffDiag: content/modules/tensor_mechanics/systems/Kernels/GeneralizedPlaneStrainOffDiag.md
 - Gravity: content/modules/tensor_mechanics/systems/Kernels/Gravity.md
 - InertialForce: content/modules/tensor_mechanics/systems/Kernels/InertialForce.md
 - MomentBalancing: content/modules/tensor_mechanics/systems/Kernels/MomentBalancing.md

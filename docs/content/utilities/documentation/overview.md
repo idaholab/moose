@@ -18,6 +18,6 @@ The following links provide additional details on the MOOSE documentation system
 
 * [Setup and Configuration](documentation/setup.md)
 * [Creating a Web-Site](documentation/website.md)
-* [Building a Slideshow](documentation/slideshow.md)
+* [Building a Presentation](documentation/presentation.md)
 * [Generating a PDF](documentation/pdf.md)
 * [Moose Style Markdown](documentation/moose_flavored_markdown.md)

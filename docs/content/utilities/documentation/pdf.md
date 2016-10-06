@@ -25,10 +25,10 @@ that was created into a pdf.
 
 ```bash
 cd ~/projects/moose/docs
-./moosedocs presentation examples/report.md
+./moosedocs latex examples/report.md
 ```
 
-This will create an report.pdf in the examples directory. Run `./moosedocs presentation --help`
+This will create an report.pdf in the examples directory. Run `./moosedocs latex --help`
 for additional options when running this script.
 
 To view the pdf, simply open the report.pdf file created. On OSX you can preform the following.

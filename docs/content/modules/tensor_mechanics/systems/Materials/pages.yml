@@ -22,7 +22,6 @@
 - ComputeLinearElasticStress: content/modules/tensor_mechanics/systems/Materials/ComputeLinearElasticStress.md
 - ComputeMultiPlasticityStress: content/modules/tensor_mechanics/systems/Materials/ComputeMultiPlasticityStress.md
 - ComputePlaneFiniteStrain: content/modules/tensor_mechanics/systems/Materials/ComputePlaneFiniteStrain.md
-- ComputePlaneIncrementalStrain: content/modules/tensor_mechanics/systems/Materials/ComputePlaneIncrementalStrain.md
 - ComputePlaneSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputePlaneSmallStrain.md
 - ComputeReturnMappingStress: content/modules/tensor_mechanics/systems/Materials/ComputeReturnMappingStress.md
 - ComputeRSphericalFiniteStrain: content/modules/tensor_mechanics/systems/Materials/ComputeRSphericalFiniteStrain.md

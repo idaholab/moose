@@ -112,7 +112,7 @@ class MooseMarkdown(markdown.Extension):
 
         # Block processors
         md.parser.blockprocessors.add('diagrams', MooseDiagram(md.parser, root=config['root'], docs_dir=config['docs_dir'],
-                                                               graphviz=config['graphviz']), ext=config['dot_ext'], '_begin')
+                                                               graphviz=config['graphviz'], ext=config['dot_ext']), '_begin')
         md.parser.blockprocessors.add('slideshow', MooseCarousel(md.parser, root=config['root'], docs_dir=config['docs_dir']), '_begin')
         md.parser.blockprocessors.add('css', MooseCSS(md.parser, root=config['root'], docs_dir=config['docs_dir']), '_begin')
 
