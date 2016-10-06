@@ -83,6 +83,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
 
         # Build outer div container
         el = self.addStyle(etree.Element('div'), **styles)
+        el.set('class', 'moosedocs-code-div')
 
         # Build label
         if settings['repo_link'] and self._repo:

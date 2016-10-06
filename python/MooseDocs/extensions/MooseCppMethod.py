@@ -57,10 +57,13 @@ class MooseCppMethod(MooseTextPatternBase):
             else:
                 log.info('Parsing method "{}" from {}'.format(settings['method'], filename))
 
-                parser = utils.MooseSourceParser(self._make)
-                parser.parse(filename)
-                decl, defn = parser.method(settings['method'])
-                el = self.createElement(match.group(2), defn, filename, rel_filename, settings, styles)
+                try:
+                    parser = utils.MooseSourceParser(self._make)
+                    parser.parse(filename)
+                    decl, defn = parser.method(settings['method'])
+                    el = self.createElement(match.group(2), defn, filename, rel_filename, settings, styles)
+                except:
+                    el = self.createErrorElement(rel_filename, message='Failed to parse method using clang, check that you have the make file option passed to the MooseMarkdown object.')
 
         # Return the Element object
         return el

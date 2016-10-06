@@ -29,6 +29,11 @@ class MooseObjectParameterTable(MarkdownTable):
             items.append(self._formatParam(param[key], key, param['cpp_type']))
         self.addRow(*items)
 
+    def html(self):
+        el = super(MooseObjectParameterTable, self).html()
+        el.set('class', 'moose-object-param-table')
+        return el
+
     def _formatParam(self, param, key, ptype):
         """
         Convert the supplied parameter into a format suitable for output.

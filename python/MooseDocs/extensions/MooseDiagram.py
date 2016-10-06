@@ -15,12 +15,15 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
 
     RE = re.compile(r'^(graph|dirgraph)(.*)')
 
-    def __init__(self, md, graphviz=None, **kwargs):
+    def __init__(self, md, graphviz=None, ext='svg', **kwargs):
         MooseCommonExtension.__init__(self, **kwargs)
         BlockProcessor.__init__(self, md)
 
         # Location of the graphviz
         self._graphviz = graphviz
+
+        # Output extension
+        self._ext = ext
 
     def test(self, parent, block):
         """
@@ -47,13 +50,13 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
             fid.write(block)
 
         # Create a temporary svg file
-        svg_file = 'media/tmp_' + uuid.uuid4().hex + '.moose.svg'
+        out_file = "media/tmp_{}.moose.{}".format(uuid.uuid4().hex, self._ext)
 
         # Execute graphviz to generate the svg file
         try:
-            cmd = [executable, '-Tsvg', dot_file, '-o', svg_file]
+            cmd = [executable, '-T' + self._ext, dot_file, '-o', out_file]
             output = subprocess.check_output(cmd)
-            log.debug('Created SVG chart using dot: {}'.format(svg_file))
+            log.debug('Created SVG chart using dot: {}'.format(out_file))
         except:
             if os.path.exists(dot_file):
                 os.remove(dot_file)
@@ -65,5 +68,6 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
 
         # Create the img that will contain the flow chart
         img = etree.SubElement(parent, "img")
-        img.set('src', '/' + svg_file)
+        img.set('class', 'moose-diagram')
+        img.set('src', '/' + out_file)
         img.set('style', 'background:transparent; border:0px')

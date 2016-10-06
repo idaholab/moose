@@ -43,7 +43,8 @@ class MooseBibtex(Preprocessor):
             bib_string = match.group(0)
             for bfile in match.group(1).split(','):
                 try:
-                    data = parse_file(os.path.join(self._root, bfile))
+                    bibfiles.append(os.path.join(self._root, bfile))
+                    data = parse_file(bibfiles[-1])
                 except:
                     log.error('Failed to parse bibtex file: {}'.format(bfile))
                     return lines
@@ -76,24 +77,25 @@ class MooseBibtex(Preprocessor):
             stream = io.StringIO()
             backend().write_to_stream(formatted_bibliography, stream)
 
-            # Strip the bib items from the formated html
+            # Strip the bib items from the formatted html
             html = re.findall(r'\<dd\>(.*?)\</dd\>', stream.getvalue(), flags=re.MULTILINE|re.DOTALL)
 
             # Produces an ordered list with anchors to the citations
-            output = u'<ol>\n'
+            output = u'<ol class="moose-bibliography" data-moose-bibfiles="{}">\n'.format(str(bibfiles))
             for i, item in enumerate(html):
-                output += u'<li name="{}">{}</a></li>\n'.format(self._citations[i], item)
-
+                output += u'<li name="{}">{}</li>\n'.format(self._citations[i], item)
+            output += u'</ol>\n'
             content = re.sub(self.RE_BIBLIOGRAPHY, output, content)
 
         return content.split('\n')
 
     def authors(self, match):
         """
-        Return the author(s) citation for text, linked to bibligraphy.
+        Return the author(s) citation for text, linked to bibliography.
         """
         cmd = match.group('cmd')
         key = match.group('key')
+        tex = '\\%s{%s}' % (cmd, key)
 
         if key in self._bibtex.entries:
             self._citations.append(key)
@@ -110,6 +112,6 @@ class MooseBibtex(Preprocessor):
                 author = ' '.join(a[0].last_names)
 
             if cmd == 'citep':
-                return '(<a href="#{}">{}, {}</a>)'.format(key, author, entry.fields['year'])
+                return '(<a href="#{}" data-moose-cite="{}">{}, {}</a>)'.format(key, tex, author, entry.fields['year'])
             else:
-                return '<a href="#{}">{} ({})</a>'.format(key, author, entry.fields['year'])
+                return '<a href="#{}" data-moose-cite="{}">{} ({})</a>'.format(key, tex, author, entry.fields['year'])

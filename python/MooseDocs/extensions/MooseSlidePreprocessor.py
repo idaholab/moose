@@ -62,7 +62,7 @@ class MooseSlidePreprocessor(Preprocessor):
         start_section = u'<section {}>'.format(' '.join(attr))
         end_section = u'</section>'
 
-        section = '{}\n{}\n{}'.format(self.markdown.htmlStash.store(start_section, safe=True), section, self.markdown.htmlStash.store(end_section, safe=True))
+        section = '\n\n{}\n{}\n{}\n\n'.format(self.markdown.htmlStash.store(start_section, safe=True), section, self.markdown.htmlStash.store(end_section, safe=True))
         return section
 
     def _getSlideID(self, section):

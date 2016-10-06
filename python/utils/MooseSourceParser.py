@@ -22,8 +22,7 @@ class MooseSourceParser(object):
         # Check that the supplied path has a Makefile (for getting includes)
         if not os.path.exists(os.path.join(app_path, 'Makefile')):
             #TODO: Make this a MooseException and log the exception and also check that the make file os one from MOOSE
-            print 'The supplied application directory does not contain a Makefile:', app_path
-            return
+            raise Exception('The supplied application directory does not contain a Makefile: {}'.format(app_path))
 
         # Extract the includes from the Makefile
         self._includes = self.includes(app_path)

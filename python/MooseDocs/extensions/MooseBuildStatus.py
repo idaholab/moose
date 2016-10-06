@@ -44,6 +44,7 @@ class MooseBuildStatus(MooseCommonExtension, Pattern):
 
         # Create parent div, and set any allowed CSS
         parent_div = self.addStyle(etree.Element('div'), **styles)
+        parent_div.set('class', 'moose-buildstatus')
 
         child_div = etree.SubElement(parent_div, 'div')
         jquery_script = etree.SubElement(parent_div, 'script')

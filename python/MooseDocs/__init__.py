@@ -7,6 +7,7 @@ import logging
 import extensions
 import database
 import commands
+import html2latex
 import utils
 
 # Check for the necessary packages, this does a load so they should all get loaded.
@@ -179,24 +180,13 @@ def command_line_options():
 
     subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
-    # Check
+    # Add the sub-commands
     check_parser = subparser.add_parser('check', help="Perform error checking on documentation.")
-
-    # Generate options
-    generate_parser = subparser.add_parser('generate', help="Check that documentation exists for your application and generate the markdown documentation from MOOSE application executable.")
-    generate_parser.add_argument('--no-stubs', dest='stubs', action='store_false', help="Disable the creation of system and object stub markdown files.")
-    generate_parser.add_argument('--no-pages-stubs', dest='pages_stubs', action='store_false', help="Disable the creation the pages.yml files.")
-
-    # Serve options
-    serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
-    serve_parser.add_argument('--livereload', dest='livereload', action='store_const', const='livereload', help="Enable the live reloading server.")
-    serve_parser.add_argument('--dirtyreload', dest='livereload', action='store_const', const='dirtyreload', help="Enable the live reloading server without rebuilding entire site with single file change (default).")
-    serve_parser.add_argument('--no-livereload', dest='livereload', action='store_const', const='no-livereload', help="Disable the live reloading of the served site.")
-    serve_parser.add_argument('--strict', action='store_true', help='Enable strict mode and abort on warnings.')
-    serve_parser.add_argument('--dirty', action='store_false', dest='clean', help='Do not clean the temporary build prior to building site.')
-
-    # Build options
-    build_parser = subparser.add_parser('build', help='Generate and Build the documentation for serving.')
+    generate_parser = commands.generate_options(parser, subparser)
+    serve_parser = commands.serve_options(parser, subparser)
+    build_parser = commands.build_options(parser, subparser)
+    latex_parser = commands.latex_options(parser, subparser)
+    presentation_parser = commands.presentation_options(parser, subparser)
 
     # Both build and serve need config file
     for p in [serve_parser, build_parser]:
@@ -216,10 +206,10 @@ def command_line_options():
 def moosedocs():
 
     # Options
-    options = command_line_options()
+    options = vars(command_line_options())
 
     # Initialize logging
-    formatter = init_logging(options.verbose)
+    formatter = init_logging(options.pop('verbose'))
     log = logging.getLogger('MooseDocs')
 
     # Remove moose.svg files (these get generated via dot)
@@ -227,14 +217,17 @@ def moosedocs():
     purge(['svg'])
 
     # Execute command
-    if options.command == 'check':
-        commands.generate(config_file=options.config_file, stubs=False, pages_stubs=False)
-    elif options.command == 'generate':
-        commands.generate(config_file=options.config_file, stubs=options.stubs, pages_stubs=options.pages_stubs)
-    elif options.command == 'serve':
-        commands.serve(config_file=options.config_file, strict=options.strict, livereload=options.livereload, clean=options.clean, theme=options.theme, pages=options.pages, page_keys=options.page_keys)
-    elif options.command == 'build':
-        commands.build(config_file=options.config_file, theme=options.theme, pages=options.pages, page_keys=options.page_keys)
+    cmd = options.pop('command')
+    if cmd == 'check':
+        commands.generate(stubs=False, pages_stubs=False, **options)
+    elif cmd == 'generate':
+        commands.generate(**options)
+    elif cmd == 'serve':
+        commands.serve(**options)
+    elif cmd == 'build':
+        commands.build(**options)
+    elif cmd == 'latex':
+        commands.latex(**options)
 
     # Display logging results
     print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])

@@ -5,6 +5,14 @@ import MooseDocs
 import logging
 log = logging.getLogger(__name__)
 
+def build_options(parser, subparser):
+    """
+    Command-line options for build command.
+    """
+    build_parser = subparser.add_parser('build', help='Generate and Build the documentation for serving.')
+    return build_parser
+
+
 def update_extra():
     """
     Loop through the js/css directories of MOOSE, if the file in the local build is older than the one in MOOSE

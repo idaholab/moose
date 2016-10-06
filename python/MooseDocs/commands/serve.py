@@ -11,6 +11,20 @@ import build
 log = logging.getLogger(__name__)
 
 
+def serve_options(parser, subparser):
+    """
+    Command-line options for serve command.
+    """
+
+    serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
+    serve_parser.add_argument('--livereload', dest='livereload', action='store_const', const='livereload', help="Enable the live reloading server.")
+    serve_parser.add_argument('--dirtyreload', dest='livereload', action='store_const', const='dirtyreload', help="Enable the live reloading server without rebuilding entire site with single file change (default).")
+    serve_parser.add_argument('--no-livereload', dest='livereload', action='store_const', const='no-livereload', help="Disable the live reloading of the served site.")
+    serve_parser.add_argument('--strict', action='store_true', help='Enable strict mode and abort on warnings.')
+    serve_parser.add_argument('--dirty', action='store_false', dest='clean', help='Do not clean the temporary build prior to building site.')
+    return serve_parser
+
+
 def touch(fname, times=None):
     """
     A touch command to trigger reloading parent of nested files.
@@ -19,6 +33,7 @@ def touch(fname, times=None):
     """
     with open(fname, 'a'):
         os.utime(fname, times)
+
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
