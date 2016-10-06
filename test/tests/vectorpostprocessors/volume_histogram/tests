@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = CSVDiff
+    input = volume_histogram.i
+    csvdiff = 'volume_histogram_out_histo_0002.csv'
+  [../]
+[]
