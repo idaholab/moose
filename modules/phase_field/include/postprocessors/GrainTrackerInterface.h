@@ -30,7 +30,7 @@ public:
    * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
    * @return the entity value
    */
-  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType, std::size_t var_idx=0) const = 0;
+  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType, std::size_t var_index=0) const = 0;
 
   /**
    * Returns a list of active unique feature ids for a particular element. The vector is indexed by variable number

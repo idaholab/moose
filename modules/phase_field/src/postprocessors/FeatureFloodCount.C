@@ -495,20 +495,18 @@ bool
 FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
 {
   // TODO: Possibly cache this information later
-  bool intersects_boundary = false;
   for (const auto & feature : _feature_sets)
-    // We have to look at all features even after we find an ID because the ID may not be unique
-    if (feature._id == feature_id)
-      intersects_boundary |= feature._intersects_boundary;
+    if (feature._id == feature_id && feature._intersects_boundary)
+      return true;
 
-  return intersects_boundary;
+  return false;
 }
 
 Real
 FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, std::size_t var_index) const
 {
   auto use_default = false;
-  if (var_index == std::numeric_limits<std::size_t>::max())
+  if (var_index == FeatureFloodCount::invalid_size_t)
   {
     use_default = true;
     var_index = 0;
