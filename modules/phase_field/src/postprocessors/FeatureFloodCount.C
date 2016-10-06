@@ -161,7 +161,7 @@ FeatureFloodCount::initialSetup()
    * The user is warned in this case but this helps avoid extra bounds checking
    * in user code and avoids segfaults.
    */
-  _empty_var_to_features.resize(_n_vars, FeatureFloodCount::invalid_id);
+  _empty_var_to_features.resize(_n_vars, invalid_id);
 }
 
 void
@@ -488,7 +488,7 @@ FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
 {
   mooseAssert(feature_id < _feature_sets.size(), "feature_id out of bounds");
 
-  return _feature_sets[feature_id]._status != Status::INACTIVE ? _feature_sets[feature_id]._var_index : FeatureFloodCount::invalid_id;
+  return _feature_sets[feature_id]._status != Status::INACTIVE ? _feature_sets[feature_id]._var_index : invalid_id;
 }
 
 bool
@@ -506,7 +506,7 @@ Real
 FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, std::size_t var_index) const
 {
   auto use_default = false;
-  if (var_index == FeatureFloodCount::invalid_size_t)
+  if (var_index == invalid_size_t)
   {
     use_default = true;
     var_index = 0;
@@ -856,7 +856,7 @@ FeatureFloodCount::updateFieldInfo()
       {
         auto map_it = _entity_var_to_features.lower_bound(entity);
         if (map_it == _entity_var_to_features.end() || map_it->first != entity)
-          map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
+          map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, invalid_id));
         map_it->second[feature._var_index] = feature._id;
       }
     }
@@ -898,7 +898,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
     return;
 
   // See if the current entity either starts a new feature or continues an existing feature
-  auto new_id = FeatureFloodCount::invalid_id;  // Writable reference to hold an optional id;
+  auto new_id = invalid_id;  // Writable reference to hold an optional id;
   if (!isNewFeatureOrConnectedRegion(dof_object, current_index, feature, new_id))
     return;
 
@@ -923,7 +923,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
     feature = &_partial_feature_sets[map_num].back();
 
     // If new_id is valid, we'll set it in the feature here.
-    if (new_id != FeatureFloodCount::invalid_id)
+    if (new_id != invalid_id)
       feature->_id = new_id;
   }
 

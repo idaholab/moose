@@ -113,7 +113,7 @@ GrainTracker::getGrainCentroid(unsigned int grain_id) const
   mooseAssert(grain_id < _grain_id_to_grain_index.size(), "Grain ID out of bounds");
   auto grain_index = _grain_id_to_grain_index[grain_id];
 
-  if (grain_index != FeatureFloodCount::invalid_size_t)
+  if (grain_index != invalid_size_t)
   {
     mooseAssert(_grain_id_to_grain_index[grain_id] < _feature_sets.size(), "Grain index out of bounds");
     // Note: This value is parallel consistent, see GrainTracker::broadcastAndUpdateGrainData()
@@ -131,7 +131,7 @@ GrainTracker::doesFeatureIntersectBoundary(unsigned int feature_id) const
   mooseAssert(feature_id < _grain_id_to_grain_index.size(), "Grain ID out of bounds");
 
   auto feature_index = _grain_id_to_grain_index[feature_id];
-  if (feature_index != FeatureFloodCount::invalid_size_t)
+  if (feature_index != invalid_size_t)
   {
     mooseAssert(feature_index < _feature_sets.size(), "Grain index out of bounds");
     return _feature_sets[feature_index]._intersects_boundary;
@@ -226,7 +226,7 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::s
     }
     else
     {
-      mooseAssert(feature->_id != FeatureFloodCount::invalid_id, "Expected EBSD ID missing");
+      mooseAssert(feature->_id != invalid_id, "Expected EBSD ID missing");
 
       /**
        * If we have an active feature just make sure that the current active feature ID
@@ -246,7 +246,7 @@ GrainTracker::buildGrainIdToGrainIndex(unsigned int max_id)
   /**
    * Build grain id to grain index mapping
    */
-  _grain_id_to_grain_index.assign(max_id + 1, FeatureFloodCount::invalid_size_t);
+  _grain_id_to_grain_index.assign(max_id + 1, invalid_size_t);
   for (auto grain_index = beginIndex(_feature_sets); grain_index < _feature_sets.size(); ++grain_index)
   {
     mooseAssert(_feature_sets[grain_index]._id <= max_id, "Grain ID out of range");
@@ -364,7 +364,7 @@ GrainTracker::broadcastAndUpdateGrainData()
     {
       // See if this processor has a record of this grain
       if (partial_data.id < _grain_id_to_grain_index.size() &&
-          _grain_id_to_grain_index[partial_data.id] != FeatureFloodCount::invalid_size_t)
+          _grain_id_to_grain_index[partial_data.id] != invalid_size_t)
       {
         auto & grain = _feature_sets[_grain_id_to_grain_index[partial_data.id]];
         grain._intersects_boundary = partial_data.intersects_boundary;
@@ -561,7 +561,7 @@ GrainTracker::trackGrains()
      * unique grains.  The criteria for doing this will be to find the unique grain in the new list with a matching variable
      * index whose centroid is closest to this unique grain.
      */
-    std::vector<std::size_t> new_grain_index_to_existing_grain_index(_feature_sets.size(), FeatureFloodCount::invalid_size_t);
+    std::vector<std::size_t> new_grain_index_to_existing_grain_index(_feature_sets.size(), invalid_size_t);
 
     for (auto old_grain_index = beginIndex(_feature_sets_old); old_grain_index < _feature_sets_old.size(); ++old_grain_index)
     {
@@ -607,7 +607,7 @@ GrainTracker::trackGrains()
          * this time step. We need to figure out the rightful owner in this case and inactivate the old grain.
          */
         auto curr_index = new_grain_index_to_existing_grain_index[closest_match_index];
-        if (curr_index != FeatureFloodCount::invalid_size_t)
+        if (curr_index != invalid_size_t)
         {
           // The new feature being competed for
           auto & feature = _feature_sets[closest_match_index];
@@ -645,10 +645,10 @@ GrainTracker::trackGrains()
       auto curr_index = new_grain_index_to_existing_grain_index[new_index];
 
       // This may be a new grain, we'll handle that case below
-      if (curr_index == FeatureFloodCount::invalid_size_t)
+      if (curr_index == invalid_size_t)
         continue;
 
-      mooseAssert(_feature_sets_old[curr_index]._id != FeatureFloodCount::invalid_id, "Invalid ID in old grain structure");
+      mooseAssert(_feature_sets_old[curr_index]._id != invalid_id, "Invalid ID in old grain structure");
 
       _feature_sets[new_index]._id = _feature_sets_old[curr_index]._id;   // Transfer ID
       _feature_sets[new_index]._status = Status::MARKED;                // Mark the status in the new set
@@ -728,7 +728,7 @@ GrainTracker::newGrainCreated(unsigned int new_grain_id)
   {
     mooseAssert(new_grain_id < _grain_id_to_grain_index.size(), "new_grain_id is out of bounds");
     auto grain_index = _grain_id_to_grain_index[new_grain_id];
-    mooseAssert(grain_index != FeatureFloodCount::invalid_size_t &&
+    mooseAssert(grain_index != invalid_size_t &&
                 grain_index < _feature_sets.size(), "new_grain_id appears to be invalid");
 
     const auto & grain = _feature_sets[grain_index];
@@ -1345,7 +1345,7 @@ GrainTracker::updateFieldInfo()
 
       if (entity_value != std::numeric_limits<Real>::lowest() && (tmp_map.find(entity) == tmp_map.end() || entity_value > tmp_map[entity]))
       {
-        mooseAssert(grain._id != FeatureFloodCount::invalid_id,  "Missing Grain ID");
+        mooseAssert(grain._id != invalid_id,  "Missing Grain ID");
         _feature_maps[map_index][entity] = grain._id;
 
         if (_var_index_mode)
@@ -1359,7 +1359,7 @@ GrainTracker::updateFieldInfo()
         auto map_it = _entity_var_to_features.lower_bound(entity);
         if (map_it == _entity_var_to_features.end() || map_it->first != entity)
         {
-          map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
+          map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, invalid_id));
 
           // insert the reserve op numbers (if appropriate)
           for (auto reserve_index = decltype(_n_reserve_ops)(0); reserve_index < _n_reserve_ops; ++reserve_index)

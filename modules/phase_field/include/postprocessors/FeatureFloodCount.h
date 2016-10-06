@@ -125,7 +125,7 @@ public:
 
     FeatureData(std::size_t var_index) :
         _var_index(var_index),
-        _id(FeatureFloodCount::invalid_id),
+        _id(invalid_id),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _vol_count(0),
@@ -213,9 +213,9 @@ public:
     /// Comparison operator for sorting individual FeatureDatas
     bool operator<(const FeatureData & rhs) const
     {
-      if (_id != FeatureFloodCount::invalid_id)
+      if (_id != invalid_id)
       {
-        mooseAssert(rhs._id != FeatureFloodCount::invalid_id, "Asymmetric setting of ids detected during sort");
+        mooseAssert(rhs._id != invalid_id, "Asymmetric setting of ids detected during sort");
 
         // Sort based on ids
         return _id < rhs._id;
