@@ -232,6 +232,7 @@
 #include "IntersectionPointsAlongLine.h"
 #include "LineMaterialRealSampler.h"
 #include "LineFunctionSampler.h"
+#include "VolumeHistogram.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -652,6 +653,7 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(IntersectionPointsAlongLine);
   registerVectorPostprocessor(LineMaterialRealSampler);
   registerVectorPostprocessor(LineFunctionSampler);
+  registerVectorPostprocessor(VolumeHistogram);
 
   // user objects
   registerUserObject(LayeredIntegral);
