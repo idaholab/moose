@@ -65,6 +65,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("show_controls", "--show-controls", false, "Shows the Control logic available and executed.");
 
   params.addCommandLineParam<bool>("no_color", "--no-color", false, "Disable coloring of all Console outputs.");
+  params.addCommandLineParam<std::string>("color", "--color [auto,on,off]", "auto", "Whether to use color in console output.");
 
   params.addCommandLineParam<bool>("help", "-h --help", false, "Displays CLI usage statement.");
   params.addCommandLineParam<bool>("minimal", "--minimal", false, "Ignore input file and build a minimal application with Transient executioner.");
@@ -224,7 +225,23 @@ MooseApp::setupOptions()
     Moose::_deprecated_is_error = false;
 
   // Toggle the color console off
-  Moose::_color_console = !getParam<bool>("no_color");
+  if (getParam<bool>("no_color"))
+    Moose::setColorConsole(false);
+
+  std::string color = getParam<std::string>("color");
+  if (color == "auto")
+    Moose::setColorConsole(true);
+  else if (color == "on")
+    Moose::setColorConsole(true, true);
+  else if (color == "off")
+    Moose::setColorConsole(false, true);
+  else
+    mooseWarning("ignoring invalid --color arg (want 'auto', 'on', or 'off')");
+
+  // this warning goes below --color processing to honor that setting for
+  // the warning. And below settings for warnings/error setup.
+  if (getParam<bool>("no_color"))
+    mooseDeprecated("The --no-color flag is deprecated. Use '--color off' instead.");
 
   // If there's no threading model active, but the user asked for
   // --n-threads > 1 on the command line, throw a mooseError2.  This is
