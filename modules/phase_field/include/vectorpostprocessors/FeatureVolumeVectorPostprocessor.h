@@ -42,17 +42,19 @@ public:
   /**
    * Returns the volume for the given grain number.
    */
-  Real getGrainVolume(unsigned int grain_id) const;
-
-  Real computeIntegral(std::size_t op_index) const;
+  Real getFeatureVolume(unsigned int feature_id) const;
 
 protected:
   /// A reference to the feature flood count object
-  const FeatureFloodCount & _flood_counter;
+  const FeatureFloodCount & _feature_counter;
 
-  VectorPostprocessorValue & _grain_volumes;
+  VectorPostprocessorValue & _var_num;
+  VectorPostprocessorValue & _feature_volumes;
+  VectorPostprocessorValue & _intersects_bounds;
 
 private:
+  Real computeIntegral(std::size_t var_index) const;
+
   const std::vector<MooseVariable *> & _vars;
   std::vector<const VariableValue *> _coupled_sln;
 

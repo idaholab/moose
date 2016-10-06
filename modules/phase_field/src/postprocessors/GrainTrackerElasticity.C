@@ -29,12 +29,12 @@ GrainTrackerElasticity::GrainTrackerElasticity(const InputParameters & parameter
 }
 
 RankFourTensor
-GrainTrackerElasticity::newGrain(unsigned int new_grain_idx)
+GrainTrackerElasticity::newGrain(unsigned int new_grain_id)
 {
   EulerAngles angles;
 
-  if (new_grain_idx < _euler.getGrainNum())
-    angles = _euler.getEulerAngles(new_grain_idx);
+  if (new_grain_id < _euler.getGrainNum())
+    angles = _euler.getEulerAngles(new_grain_id);
   else
   {
     if (_random_rotations)

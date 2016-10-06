@@ -35,12 +35,11 @@ void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, 
   storeHelper(stream, feature._ghosted_ids, context);
   storeHelper(stream, feature._halo_ids, context);
   storeHelper(stream, feature._periodic_nodes, context);
-  storeHelper(stream, feature._var_idx, context);
+  storeHelper(stream, feature._var_index, context);
   storeHelper(stream, feature._id, context);
   storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._orig_ids, context);
   storeHelper(stream, feature._min_entity_id, context);
-  storeHelper(stream, feature._volume, context);
   storeHelper(stream, feature._vol_count, context);
   storeHelper(stream, feature._centroid, context);
   storeHelper(stream, feature._status, context);
@@ -64,12 +63,11 @@ void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, v
   loadHelper(stream, feature._ghosted_ids, context);
   loadHelper(stream, feature._halo_ids, context);
   loadHelper(stream, feature._periodic_nodes, context);
-  loadHelper(stream, feature._var_idx, context);
+  loadHelper(stream, feature._var_index, context);
   loadHelper(stream, feature._id, context);
   loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._orig_ids, context);
   loadHelper(stream, feature._min_entity_id, context);
-  loadHelper(stream, feature._volume, context);
   loadHelper(stream, feature._vol_count, context);
   loadHelper(stream, feature._centroid, context);
   loadHelper(stream, feature._status, context);
@@ -90,22 +88,16 @@ InputParameters validParams<FeatureFloodCount>()
   params.addRequiredCoupledVar("variable", "The variable(s) for which to find connected regions of interests, i.e. \"features\".");
   params.addParam<Real>("threshold", 0.5, "The threshold value for which a new feature may be started");
   params.addParam<Real>("connecting_threshold", "The threshold for which an existing feature may be extended (defaults to \"threshold\")");
-  params.addParam<Real>("volume_threshold", "The threshold used for calculating feature volumes (defaults to \"threshold\")");
   params.addParam<bool>("use_single_map", true, "Determine whether information is tracked per coupled variable or consolidated into one (default: true)");
   params.addParam<bool>("condense_map_info", false, "Determines whether we condense all the node values when in multimap mode (default: false)");
   params.addParam<bool>("use_global_numbering", true, "Determine whether or not global numbers are used to label features on multiple maps (default: true)");
-  params.addParam<bool>("enable_var_coloring", false, "Instruct the UO to populate the variable index map.");
-  params.addParam<bool>("compute_halo_maps", false, "Instruct the UO to communicate proper halo information to all ranks");
+  params.addParam<bool>("enable_var_coloring", false, "Instruct the Postprocessor to populate the variable index map.");
+  params.addParam<bool>("compute_halo_maps", false, "Instruct the Postprocessor to communicate proper halo information to all ranks");
+  params.addParam<bool>("compute_var_to_feature_map", false, "Instruct the Postprocessor to compute the active vars to features map");
   params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether features are defined to be less than or greater than the threshold value.");
-  params.addParam<bool>("calculate_feature_volumes", false, "Flag to calculate feature volumes (Automatically set to True if \"feature_volume_file\" is set)");
-  params.addParam<FileName>("feature_volume_file", "An optional file name where feature volumes can be output.");
-  params.addParam<bool>("compute_boundary_intersecting_volume", false, "If true, also compute the (normalized) volume of features which intersect the boundary");
   params.set<bool>("use_displaced_mesh") = true;
 
-  params.addDeprecatedParam<FileName>("bubble_volume_file", "An optional file name where feature volumes can be output.", "Use feature_volume_file instead");
-
-  params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering calculate_feature_volumes feature_volume_file "
-                             "compute_boundary_intersecting_volume", "Advanced");
+  params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering", "Advanced");
 
   MooseEnum flood_type("NODAL ELEMENTAL", "ELEMENTAL");
   params.addParam<MooseEnum>("flood_entity_type", flood_type, "Determines whether the flood algorithm runs on nodes or elements");
@@ -121,7 +113,6 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _vars(getCoupledMooseVars()),
     _threshold(getParam<Real>("threshold")),
     _connecting_threshold(isParamValid("connecting_threshold") ? getParam<Real>("connecting_threshold") : getParam<Real>("threshold")),
-    _volume_threshold(isParamValid("volume_threshold") ? getParam<Real>("volume_threshold") : getParam<Real>("threshold")),
     _mesh(_subproblem.mesh()),
     _var_number(_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
@@ -129,8 +120,8 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _global_numbering(getParam<bool>("use_global_numbering")),
     _var_index_mode(getParam<bool>("enable_var_coloring")),
     _compute_halo_maps(getParam<bool>("compute_halo_maps")),
+    _compute_var_to_feature_map(getParam<bool>("compute_var_to_feature_map")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
-    _calculate_feature_volumes(getParam<bool>("calculate_feature_volumes") || isParamValid("feature_volume_file")),
     _n_vars(_vars.size()),
     _maps_size(_single_map_mode ? 1 : _vars.size()),
     _n_procs(_app.n_processors()),
@@ -142,7 +133,6 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters) :
     _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value") ? getPostprocessorValue("elem_avg_value") : _real_zero),
     _halo_ids(_maps_size),
-    _compute_boundary_intersecting_volume(getParam<bool>("compute_boundary_intersecting_volume")),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
     _is_master(processor_id() == 0)
 {
@@ -163,6 +153,15 @@ FeatureFloodCount::initialSetup()
   _pbs = _fe_problem.getNonlinearSystem().dofMap().get_periodic_boundaries();
 
   meshChanged();
+
+  /**
+   * Size the empty var to features vector to the number of coupled variables.
+   * This empty vector (but properly sized) vector is returned for elements
+   * that are queried but are not in the structure (which also shouldn't happen).
+   * The user is warned in this case but this helps avoid extra bounds checking
+   * in user code and avoids segfaults.
+   */
+  _empty_var_to_features.resize(_n_vars, invalid_id);
 }
 
 void
@@ -186,13 +185,12 @@ FeatureFloodCount::initialize()
   _step_threshold = _element_average_value + _threshold;
   _step_connecting_threshold = _element_average_value + _connecting_threshold;
 
-  _all_feature_volumes.clear();
-  _total_volume_intersecting_boundary.clear();
-
   _ghosted_entity_ids.clear();
 
   // Reset the feature count and max local size
   _feature_count = 0;
+
+  _entity_var_to_features.clear();
 
   clearDataStructures();
 }
@@ -214,19 +212,15 @@ FeatureFloodCount::meshChanged()
   MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), _nodes_to_elem_map);
 
   /**
-   * If the user has requested that we compute boundary intersecting volumes
-   * then we need to build a set containing all of the necessary entities
-   * to compare against. This will be elements for elemental flooding and nodes
-   * for nodal flooding.
+   * We need to build a set containing all of the boundary entities
+   * to compare against. This will be elements for elemental flooding.
+   * Volumes for nodal flooding is not supported
    */
-  if (_compute_boundary_intersecting_volume)
-  {
-    _all_boundary_entity_ids.clear();
-    if (_is_elemental)
-      for (auto elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd();
-           elem_it != elem_end; ++elem_it)
-        _all_boundary_entity_ids.insert((*elem_it)->_elem->id());
-  }
+  _all_boundary_entity_ids.clear();
+  if (_is_elemental)
+    for (auto elem_it = _mesh.bndElemsBegin(), elem_end = _mesh.bndElemsEnd();
+         elem_it != elem_end; ++elem_it)
+      _all_boundary_entity_ids.insert((*elem_it)->_elem->id());
 }
 
 void
@@ -337,7 +331,7 @@ FeatureFloodCount::sortAndLabel()
 
     mooseAssert(range_front <= range_back && range_back < _feature_count, "Indexing error in feature sets");
 
-    if (!_single_map_mode && (_feature_sets[range_front]._var_idx != map_num || _feature_sets[range_back]._var_idx != map_num))
+    if (!_single_map_mode && (_feature_sets[range_front]._var_index != map_num || _feature_sets[range_back]._var_index != map_num))
       mooseError("Error in _feature_sets sorting, map index: " << map_num);
 
     feature_offset += _feature_counts_per_map[map_num];
@@ -350,7 +344,7 @@ FeatureFloodCount::sortAndLabel()
 }
 
 void
-FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_to_global_all, std::vector<int> & counts) const
+FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to_global_all, std::vector<int> & counts) const
 {
   mooseAssert(_is_master, "This method must only be called on the root processor");
 
@@ -359,7 +353,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<unsigned int> & local_t
   for (const auto & feature : _feature_sets)
     for (const auto & local_index_pair : feature._orig_ids)
           // local index                                              // rank
-      if (local_index_pair.second >= static_cast<unsigned int>(counts[local_index_pair.first]))
+      if (local_index_pair.second >= static_cast<std::size_t>(counts[local_index_pair.first]))
         counts[local_index_pair.first] = local_index_pair.second + 1;
 
   // Build the offsets vector
@@ -405,9 +399,21 @@ FeatureFloodCount::finalize()
 
   // Populate _feature_maps and _var_index_maps
   updateFieldInfo();
+}
 
-  // Output the CSV information on grains
-  writeFeatureVolumeFile();
+const std::vector<unsigned int> &
+FeatureFloodCount::getVarToFeatureVector(dof_id_type elem_id) const
+{
+  mooseAssert(_compute_var_to_feature_map, "Please set \"compute_var_to_feature_map = true\" to use this interface method");
+
+  const auto pos = _entity_var_to_features.find(elem_id);
+  if (pos != _entity_var_to_features.end())
+  {
+    mooseAssert(pos->second.size() == _n_vars, "Variable to feature vector not sized properly");
+    return pos->second;
+  }
+  else
+    return _empty_var_to_features;
 }
 
 void
@@ -416,7 +422,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
   // local to global map (one per processor)
   // TODO: Remove size one vectors after next libMesh update
   std::vector<int> counts(1, 0);
-  std::vector<unsigned int> local_to_global_all(1, 0);
+  std::vector<std::size_t> local_to_global_all(1, 0);
   if (_is_master)
     buildLocalToGlobalIndices(local_to_global_all, counts);
 
@@ -460,67 +466,71 @@ FeatureFloodCount::scatterAndUpdateRanks()
   }
 }
 
-void
-FeatureFloodCount::writeFeatureVolumeFile()
-{
-  if (_is_master && _pars.isParamValid("feature_volume_file"))
-  {
-    std::vector<Real> data;
-    data.reserve(_all_feature_volumes.size() + _total_volume_intersecting_boundary.size() + 2);
-
-    // Insert the current timestep and the simulation time into the data vector
-    data.push_back(_fe_problem.timeStep());
-    data.push_back(_fe_problem.time());
-
-    // Insert the (sorted) feature volumes into the data vector
-    data.insert(data.end(), _all_feature_volumes.begin(), _all_feature_volumes.end());
-
-    // If we are computing the boundary-intersecting volumes, insert
-    // those numbers into the normalized boundary-intersecting feature
-    // volumes into the data vector.
-    if (_compute_boundary_intersecting_volume)
-      data.insert(data.end(), _total_volume_intersecting_boundary.begin(), _total_volume_intersecting_boundary.end());
-
-    // Finally, write the file
-    writeCSVFile(getParam<FileName>("feature_volume_file"), data);
-  }
-}
-
 Real
 FeatureFloodCount::getValue()
 {
+  return static_cast<Real>(_feature_count);
+}
+
+std::size_t
+FeatureFloodCount::getTotalFeatureCount() const
+{
+  /**
+   * Since the FeatureFloodCount object doesn't maintain any information about
+   * features between invocations. The maximum id in use is simply the number of
+   * features.
+   */
   return _feature_count;
 }
 
+unsigned int
+FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
+{
+  mooseAssert(feature_id < _feature_sets.size(), "feature_id out of bounds");
+
+  return _feature_sets[feature_id]._status != Status::INACTIVE ? _feature_sets[feature_id]._var_index : invalid_id;
+}
+
+bool
+FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
+{
+  // TODO: Possibly cache this information later
+  for (const auto & feature : _feature_sets)
+    if (feature._id == feature_id && feature._intersects_boundary)
+      return true;
+
+  return false;
+}
+
 Real
-FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, unsigned int var_idx) const
+FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, std::size_t var_index) const
 {
   auto use_default = false;
-  if (var_idx == std::numeric_limits<unsigned int>::max())
+  if (var_index == invalid_size_t)
   {
     use_default = true;
-    var_idx = 0;
+    var_index = 0;
   }
 
-  mooseAssert(var_idx < _maps_size, "Index out of range");
+  mooseAssert(var_index < _maps_size, "Index out of range");
 
   switch (field_type)
   {
     case FieldType::UNIQUE_REGION:
     {
-      const auto entity_it = _feature_maps[var_idx].find(entity_id);
+      const auto entity_it = _feature_maps[var_index].find(entity_id);
 
-      if (entity_it != _feature_maps[var_idx].end())
-        return entity_it->second; // + _region_offsets[var_idx];
+      if (entity_it != _feature_maps[var_index].end())
+        return entity_it->second; // + _region_offsets[var_index];
       else
         return -1;
     }
 
     case FieldType::VARIABLE_COLORING:
     {
-      const auto entity_it = _var_index_maps[var_idx].find(entity_id);
+      const auto entity_it = _var_index_maps[var_index].find(entity_id);
 
-      if (entity_it != _var_index_maps[var_idx].end())
+      if (entity_it != _var_index_maps[var_index].end())
         return entity_it->second;
       else
         return -1;
@@ -540,8 +550,8 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, u
     {
       if (!use_default)
       {
-        const auto entity_it = _halo_ids[var_idx].find(entity_id);
-        if (entity_it != _halo_ids[var_idx].end())
+        const auto entity_it = _halo_ids[var_index].find(entity_id);
+        if (entity_it != _halo_ids[var_index].end())
           return entity_it->second;
       }
       else
@@ -583,12 +593,12 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, u
   }
 }
 
-const std::vector<std::pair<unsigned int, unsigned int> > &
-FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
-{
-  mooseDoOnce(mooseWarning("Method not implemented"));
-  return _empty;
-}
+//const std::vector<std::pair<unsigned int, unsigned int> > &
+//FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
+//{
+//  mooseDoOnce(mooseWarning("Method not implemented"));
+//  return _empty;
+//}
 
 void
 FeatureFloodCount::prepareDataForTransfer()
@@ -716,7 +726,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       {
         bool pb_intersect = false;
         if (it1 != it2 &&                                                    // Make sure that these iterators aren't pointing at the same set
-            it1->_var_idx == it2->_var_idx &&                                // and that the sets have matching variable indices
+            it1->_var_index == it2->_var_index &&                                // and that the sets have matching variable indices
              ((use_periodic_boundary_info &&                                 // and (if merging across periodic nodes
                (pb_intersect = it1->periodicBoundariesIntersect(*it2)))      //      do those periodic nodes intersect?
                  ||                                                          //      or
@@ -757,7 +767,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
   } // map loop
 
   /**
-   * Now that the merges are complete we need to adjust the centroid, volume, and halos.
+   * Now that the merges are complete we need to adjust the centroid, and halos.
    * Additionally, To make several of the sorting and tracking algorithms more straightforward,
    * we will move the features into a flat vector. Finally we can count the final number
    * of features and find the max local index seen on any processor
@@ -803,16 +813,6 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
 void
 FeatureFloodCount::updateFieldInfo()
 {
-  // Whether or not we should store and write out volume information
-  if (_calculate_feature_volumes && _is_master)
-  {
-    // store volumes per feature
-    _all_feature_volumes.reserve(_feature_count);
-
-    // store totals per variable (or smaller)
-    _total_volume_intersecting_boundary.resize(_single_map_mode || _condense_map_info ? 1 : _maps_size);
-  }
-
   for (auto i = beginIndex(_feature_sets); i < _feature_sets.size(); ++i)
   {
     auto & feature = _feature_sets[i];
@@ -841,54 +841,51 @@ FeatureFloodCount::updateFieldInfo()
     }
 
     // If the developer has requested _condense_map_info we'll make sure we only update the zeroth map
-    auto map_idx = (_single_map_mode || _condense_map_info) ? decltype(feature._var_idx)(0) : feature._var_idx;
+    auto map_index = (_single_map_mode || _condense_map_info) ? decltype(feature._var_index)(0) : feature._var_index;
 
     // Loop over the entity ids of this feature and update our local map
     for (auto entity : feature._local_ids)
     {
-      _feature_maps[map_idx][entity] = static_cast<int>(global_feature_number);
+      _feature_maps[map_index][entity] = static_cast<int>(global_feature_number);
 
       if (_var_index_mode)
-        _var_index_maps[map_idx][entity] = feature._var_idx;
+        _var_index_maps[map_index][entity] = feature._var_index;
+
+      // Fill in the data structure that keeps track of all features per elem
+      if (_compute_var_to_feature_map)
+      {
+        auto map_it = _entity_var_to_features.lower_bound(entity);
+        if (map_it == _entity_var_to_features.end() || map_it->first != entity)
+          map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, invalid_id));
+        map_it->second[feature._var_index] = feature._id;
+      }
     }
 
     if (_compute_halo_maps)
       // Loop over the halo ids to update cells with halo information
       for (auto entity : feature._halo_ids)
-        _halo_ids[map_idx][entity] = static_cast<int>(global_feature_number);
+        _halo_ids[map_index][entity] = static_cast<int>(global_feature_number);
 
     // Loop over the ghosted ids to update cells with ghost information
     for (auto entity : feature._ghosted_ids)
       _ghosted_entity_ids[entity] = 1;
-
-    // Save off volume information
-    if (_calculate_feature_volumes && _is_master)
-    {
-      _all_feature_volumes.push_back(feature._volume);
-      if (feature._intersects_boundary)
-        _total_volume_intersecting_boundary[map_idx] += feature._volume;
-    }
 
     // TODO: Fixme
     if (!_global_numbering)
       mooseError("Local numbering currently disabled");
 
 //    // If the user doesn't want a global numbering, we'll reset the feature_number for each map
-//    if (!_global_numbering && feature._var_idx != old_var_index)
+//    if (!_global_numbering && feature._var_index != old_var_index)
 //      feature_number = 0;
 
-//    old_var_index = feature._var_idx;
+//    old_var_index = feature._var_index;
   }
-
-  // Sort the feature volumes
-  if (_calculate_feature_volumes && _is_master)
-    std::sort(_all_feature_volumes.begin(), _all_feature_volumes.end(), std::greater<Real>());
 
 //  mooseAssert(_feature_count == feature_number, "feature_number does not agree with previously calculated _feature_count");
 }
 
 void
-FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx, FeatureData * feature)
+FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature)
 {
   if (dof_object == nullptr)
     return;
@@ -897,12 +894,12 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
   auto entity_id = dof_object->id();
 
   // Has this entity already been marked? - if so move along
-  if (_entities_visited[current_idx].find(entity_id) != _entities_visited[current_idx].end())
+  if (_entities_visited[current_index].find(entity_id) != _entities_visited[current_index].end())
     return;
 
   // See if the current entity either starts a new feature or continues an existing feature
-  auto new_id = libMesh::invalid_uint;  // Writable reference to hold an optional id;
-  if (!isNewFeatureOrConnectedRegion(dof_object, current_idx, feature, new_id))
+  auto new_id = invalid_id;  // Writable reference to hold an optional id;
+  if (!isNewFeatureOrConnectedRegion(dof_object, current_index, feature, new_id))
     return;
 
   /**
@@ -913,20 +910,20 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
    * feature any time a "connecting threshold" is used since we may have
    * already visited this entity earlier but it was in-between two thresholds.
    */
-  _entities_visited[current_idx][entity_id] = true;
+  _entities_visited[current_index][entity_id] = true;
 
-  auto map_num = _single_map_mode ? decltype(current_idx)(0) : current_idx;
+  auto map_num = _single_map_mode ? decltype(current_index)(0) : current_index;
 
   // New Feature (we need to create it and add it to our data structure)
   if (!feature)
   {
-    _partial_feature_sets[map_num].emplace_back(current_idx, _feature_count++, processor_id());
+    _partial_feature_sets[map_num].emplace_back(current_index, _feature_count++, processor_id());
 
     // Get a handle to the feature we will update (always the last feature in the data structure)
     feature = &_partial_feature_sets[map_num].back();
 
     // If new_id is valid, we'll set it in the feature here.
-    if (new_id != libMesh::invalid_uint)
+    if (new_id != invalid_id)
       feature->_id = new_id;
   }
 
@@ -934,40 +931,40 @@ FeatureFloodCount::flood(const DofObject * dof_object, unsigned long current_idx
   feature->_local_ids.insert(entity_id);
 
   /**
-   * See if this particular entity cell contributes to the feature volume
-   * 1) greater (or less) than the volume threshold which may be independent of the flooding threshold
-   * 2) owned by this processor so it's not double counted
+   * See if this particular entity cell contributes to the centroid calculation. We
+   * only deal with elemental floods and only count it if it's owned by the current
+   * processor to avoid skewing the result.
    */
-  if (_is_elemental && processor_id() == dof_object->processor_id() && currentElemContributesToVolume(current_idx))
+  if (_is_elemental && processor_id() == dof_object->processor_id())
   {
     const Elem * elem = static_cast<const Elem *>(dof_object);
 
-    feature->_volume += elem->volume();
+    // Keep track of how many elements participate in the centroid averaging
     feature->_vol_count++;
 
     // Sum the centroid values for now, we'll average them later
     feature->_centroid += elem->centroid();
 
     // Does the volume intersect the boundary?
-    if (_all_boundary_entity_ids.find(dof_object->id()) != _all_boundary_entity_ids.end())
+    if (_all_boundary_entity_ids.find(elem->id()) != _all_boundary_entity_ids.end())
       feature->_intersects_boundary = true;
   }
 
   if (_is_elemental)
-    visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
+    visitElementalNeighbors(static_cast<const Elem *>(dof_object), current_index, feature, /*expand_halos_only =*/false);
   else
-    visitNodalNeighbors(static_cast<const Node *>(dof_object), current_idx, feature, /*expand_halos_only =*/false);
+    visitNodalNeighbors(static_cast<const Node *>(dof_object), current_index, feature, /*expand_halos_only =*/false);
 }
 
 Real
-FeatureFloodCount::getThreshold(unsigned int /*current_idx*/, bool active_feature) const
+FeatureFloodCount::getThreshold(std::size_t /*current_index*/, bool active_feature) const
 {
   return active_feature ? _step_connecting_threshold : _step_threshold;
 }
 
-bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object, unsigned long current_idx, FeatureData * & feature, unsigned int & /*new_id*/)
+bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index, FeatureData * & feature, unsigned int & /*new_id*/)
 {
-  auto threshold = getThreshold(current_idx, feature);
+  auto threshold = getThreshold(current_index, feature);
 
   // Get the value of the current variable for the current entity
   Real entity_value;
@@ -976,10 +973,10 @@ bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_obje
     const Elem * elem = static_cast<const Elem *>(dof_object);
     std::vector<Point> centroid(1, elem->centroid());
     _subproblem.reinitElemPhys(elem, centroid, 0);
-    entity_value = _vars[current_idx]->sln()[0];
+    entity_value = _vars[current_index]->sln()[0];
   }
   else
-    entity_value = _vars[current_idx]->getNodalValue(*static_cast<const Node *>(dof_object));
+    entity_value = _vars[current_index]->getNodalValue(*static_cast<const Node *>(dof_object));
 
   // This entity hasn't been marked, is it in a feature?  We must respect
   // the user-selected value of _use_less_than_threshold_comparison.
@@ -987,15 +984,8 @@ bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_obje
           (!_use_less_than_threshold_comparison && (entity_value <= threshold)));
 }
 
-bool
-FeatureFloodCount::currentElemContributesToVolume(unsigned long current_idx) const
-{
-  auto entity_value = _vars[current_idx]->sln()[0];
-  return (entity_value >= _volume_threshold || (!_use_less_than_threshold_comparison && entity_value <= _volume_threshold));
-}
-
 void
-FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long current_idx, FeatureData * feature, bool expand_halos_only)
+FeatureFloodCount::visitElementalNeighbors(const Elem * elem, std::size_t current_index, FeatureData * feature, bool expand_halos_only)
 {
   mooseAssert(elem, "Elem is NULL");
 
@@ -1010,23 +1000,23 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem, unsigned long curr
       neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
   }
 
-  visitNeighborsHelper(elem, all_active_neighbors, current_idx, feature, expand_halos_only);
+  visitNeighborsHelper(elem, all_active_neighbors, current_index, feature, expand_halos_only);
 }
 
 void
-FeatureFloodCount::visitNodalNeighbors(const Node * node, unsigned long current_idx, FeatureData * feature, bool expand_halos_only)
+FeatureFloodCount::visitNodalNeighbors(const Node * node, std::size_t current_index, FeatureData * feature, bool expand_halos_only)
 {
   mooseAssert(node, "Node is NULL");
 
   std::vector<const Node *> all_active_neighbors;
   MeshTools::find_nodal_neighbors(_mesh.getMesh(), *node, _nodes_to_elem_map, all_active_neighbors);
 
-  visitNeighborsHelper(node, all_active_neighbors, current_idx, feature, expand_halos_only);
+  visitNeighborsHelper(node, all_active_neighbors, current_index, feature, expand_halos_only);
 }
 
 template<typename T>
 void
-FeatureFloodCount::visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, unsigned long current_idx,
+FeatureFloodCount::visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, std::size_t current_index,
                                         FeatureData * feature, bool expand_halos_only)
 {
   // Loop over all active element neighbors
@@ -1058,7 +1048,7 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity, std::vector<const
            */
           feature->_halo_ids.insert(neighbor->id());
 
-          flood(neighbor, current_idx, feature);
+          flood(neighbor, current_index, feature);
         }
       }
     }
@@ -1166,7 +1156,7 @@ FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
 void
 FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 {
-  mooseAssert(_var_idx == rhs._var_idx, "Mismatched variable index in merge");
+  mooseAssert(_var_index == rhs._var_index, "Mismatched variable index in merge");
   mooseAssert(_id == rhs._id, "Mismatched auxiliary id in merge");
 
   std::set<dof_id_type> set_union;
@@ -1213,7 +1203,6 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   // Update the min feature id
   _min_entity_id = std::min(_min_entity_id, rhs._min_entity_id);
 
-  _volume += rhs._volume;
   _vol_count += rhs._vol_count;
   _centroid += rhs._centroid;
 }
@@ -1272,7 +1261,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
   static const bool debug = true;
 
   out << "Grain ID: ";
-  if (feature._id != libMesh::invalid_uint)
+  if (feature._id != FeatureFloodCount::invalid_id)
     out << feature._id;
   else
     out << "invalid";
@@ -1320,8 +1309,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
     out << "\nOrig IDs (rank, index): ";
     for (const auto & orig_pair : feature._orig_ids)
       out << '(' << orig_pair.first << ", " << orig_pair.second << ") ";
-    out << "\nVolume: " << volume;
-    out << "\nVar_idx: " << feature._var_idx;
+    out << "\nVar_index: " << feature._var_index;
     out << "\nMin Entity ID: " << feature._min_entity_id;
   }
   out << "\n\n";
@@ -1329,4 +1317,5 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
   return out;
 }
 
-const std::vector<std::pair<unsigned int, unsigned int> > FeatureFloodCount::_empty;
+const std::size_t FeatureFloodCount::invalid_size_t = std::numeric_limits<std::size_t>::max();
+const unsigned int FeatureFloodCount::invalid_id = std::numeric_limits<unsigned int>::max();

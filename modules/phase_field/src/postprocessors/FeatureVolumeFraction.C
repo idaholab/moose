@@ -11,70 +11,57 @@
 template<>
 InputParameters validParams<FeatureVolumeFraction>()
 {
-  InputParameters params = validParams<FeatureFloodCount>();
+  InputParameters params = validParams<GeneralPostprocessor>();
+  MooseEnum value_type("VOLUME_FRACTION AVRAMI", "VOLUME_FRACTION");
+  params.addParam<MooseEnum>("value_type", value_type, "The value to output (VOLUME_FRACTION or AVRAMI value)");
   params.addRequiredParam<PostprocessorName>("mesh_volume", "Postprocessor from which to get mesh volume");
-  params.addParam<FileName>("Avrami_file", "filename for Avrami analysis info (ln time and Avrami)");
+  params.addRequiredParam<VectorPostprocessorName>("feature_volumes", "The feature volume VectorPostprocessorValue.");
   params.addParam<Real>("equil_fraction", -1.0, "Equilibrium volume fraction of 2nd phase for Avrami analysis");
-
-  params.set<bool>("calculate_feature_volumes") = true;
   return params;
 }
 
 FeatureVolumeFraction::FeatureVolumeFraction(const InputParameters & parameters) :
-    FeatureFloodCount(parameters),
+    GeneralPostprocessor(parameters),
+    _value_type(getParam<MooseEnum>("value_type").getEnum<ValueType>()),
     _mesh_volume(getPostprocessorValue("mesh_volume")),
-    _equil_fraction(getParam<Real>("equil_fraction"))
+    _feature_volumes(getVectorPostprocessorValue("feature_volumes", "feature_volumes")),
+    _equil_fraction(getParam<Real>("equil_fraction")),
+    _avrami_value(0)
 {
-  if (parameters.isParamValid("Avrami_file") && _equil_fraction < 0.0)
-    mooseError("please supply an equilibrium fraction of 2nd phase for Avrami analysis (FeatureVolumeFraction).");
-
-  if (!_is_elemental)
-    mooseError("FeatureVolumeFraction only calculates volumes when flood_entity_type = ELEMENTAL.");
 }
 
+void
+FeatureVolumeFraction::initialize()
+{
+}
 
 void
-FeatureVolumeFraction::finalize()
+FeatureVolumeFraction::execute()
 {
-  FeatureFloodCount::finalize();
+  Real volume = 0.0;
 
-  mooseAssert(!_all_feature_volumes.empty(), "All feature volumes should not be empty()");
+  //sum the values in the vector to get total volume
+  for (const auto & feature_volume : _feature_volumes)
+    volume += feature_volume;
 
-  calculateBubbleFraction();
+  mooseAssert(!MooseUtils::absoluteFuzzyEqual(_mesh_volume, 0.0), "Mesh volume is zero");
+  _volume_fraction = volume / _mesh_volume;
 
-  // Now calculate the Avrami data if requested
-  if (_pars.isParamValid("Avrami_file"))
-  {
-    // Output the headers during the first timestep
-    if (_fe_problem.timeStep() == 0)
-    {
-      std::vector<std::string> data = {"timestep", "time", "log_time", "Avrami"};
-      writeCSVFile(getParam<FileName>("Avrami_file"), data);
-    }
-    else
-    {
-      std::vector<Real> data = {Real(_fe_problem.timeStep()), _fe_problem.time(), std::log(_fe_problem.time()), calculateAvramiValue()};
-      writeCSVFile(getParam<FileName>("Avrami_file"), data);
-    }
-  }
+  _avrami_value = calculateAvramiValue();
 }
 
 Real
 FeatureVolumeFraction::getValue()
 {
-  return _volume_fraction;
-}
-
-void
-FeatureVolumeFraction::calculateBubbleFraction()
-{
-  Real volume = 0.0;
-
-  //sum the values in the vector to get total volume
-  for (std::vector<Real>::const_iterator it = _all_feature_volumes.begin(); it != _all_feature_volumes.end(); ++it)
-    volume += *it;
-
-  _volume_fraction = volume / _mesh_volume;
+  switch (_value_type)
+  {
+    case ValueType::VOLUME_FRACTION:
+      return _volume_fraction;
+    case ValueType::AVRAMI:
+      return _avrami_value;
+    default:
+      return 0;
+  }
 }
 
 Real

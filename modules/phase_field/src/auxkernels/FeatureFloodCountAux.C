@@ -32,8 +32,7 @@ InputParameters validParams<FeatureFloodCountAux>()
 FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _flood_counter(getUserObject<FeatureFloodCount>("flood_counter")),
-    _grain_tracker_ptr(dynamic_cast<const GrainTrackerInterface *>(&_flood_counter)),
-    _var_idx(isParamValid("map_index") ? getParam<unsigned int>("map_index") : std::numeric_limits<unsigned int>::max()),
+    _var_idx(isParamValid("map_index") ? getParam<unsigned int>("map_index") : std::numeric_limits<std::size_t>::max()),
     _field_display(getParam<MooseEnum>("field_display")),
     _var_coloring(_field_display == "VARIABLE_COLORING"),
     _field_type(_field_display.getEnum<FeatureFloodCount::FieldType>())
@@ -65,18 +64,16 @@ FeatureFloodCountAux::precalculateValue()
     _value = _flood_counter.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()), _field_type, _var_idx);
     break;
   case 5:  // ACTIVE_BOUNDS
-    if (_grain_tracker_ptr)
-    {
-      const auto & op_to_grains = _grain_tracker_ptr->getOpToGrainsVector(_current_elem->id());
-      _value = std::count_if(op_to_grains.begin(), op_to_grains.end(),
-                             [](unsigned int grain_id)
-                             {
-                               return grain_id != libMesh::invalid_uint;
-                             });
-    }
-    else
-      _value = 0;
+  {
+    const auto & var_to_features = _flood_counter.getVarToFeatureVector(_current_elem->id());
+    _value = std::count_if(var_to_features.begin(), var_to_features.end(),
+                           [](unsigned int feature_id)
+                           {
+                             return feature_id != FeatureFloodCount::invalid_id;
+                           });
+
     break;
+  }
   default:
     mooseError("Unimplemented \"field_display\" type");
   }

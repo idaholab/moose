@@ -37,10 +37,8 @@ protected:
 
   /// Function being used to compute the value of this kernel
   const FeatureFloodCount & _flood_counter;
-  /// Extra interface pointer if this is a GrainTracker object
-  const GrainTrackerInterface * _grain_tracker_ptr;
 
-  const unsigned int _var_idx;
+  const std::size_t _var_idx;
   const MooseEnum _field_display;
   bool _var_coloring;
 

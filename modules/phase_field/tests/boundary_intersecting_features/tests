@@ -2,7 +2,7 @@
   [./boundary_intersecting_features]
     type = CSVDiff
     input = boundary_intersecting_features.i
-    csvdiff = feature_volumes.csv
+    csvdiff = boundary_intersecting_features_out_grain_volumes_0000.csv
     # This test requires VTK because it uses the ImageFunction class
     vtk = true
   [../]

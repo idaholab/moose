@@ -41,19 +41,31 @@
   [../]
 []
 
-[Postprocessors]
-  [./volume_fraction]
-    type = FeatureVolumeFraction
-    variable = u
-    threshold = 0.5
-    execute_on = timestep_end
-    mesh_volume = Volume
-    flood_entity_type = ELEMENTAL
+[VectorPostprocessors]
+  [./feature_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = feature_counter
+    execute_on = 'initial timestep_end'
+    outputs = none
   [../]
+[]
 
+[Postprocessors]
+  [./feature_counter]
+    type = FeatureFloodCount
+    variable = u
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_end'
+  [../]
   [./Volume]
     type = VolumePostprocessor
-    execute_on = initial
+    execute_on = 'initial'
+  [../]
+  [./volume_fraction]
+    type = FeatureVolumeFraction
+    mesh_volume = Volume
+    feature_volumes = feature_volumes
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -64,7 +76,5 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  file_base = feature_volume_fraction
-  exodus = true
+  csv = true
 []

@@ -45,22 +45,22 @@ void
 ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
 {
   // Get list of active order parameters from grain tracker
-  const auto & op_to_grain = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   // Calculate elasticity tensor
   _elasticity_tensor[_qp].zero();
   Real sum_h = 0.0;
-  for (auto op_index = beginIndex(op_to_grain); op_index < op_to_grain.size(); ++op_index)
+  for (auto op_index = beginIndex(op_to_grains); op_index < op_to_grains.size(); ++op_index)
   {
-    const unsigned int grain_index = op_to_grain[op_index];
-    if (grain_index == libMesh::invalid_uint)
+    auto grain_id = op_to_grains[op_index];
+    if (grain_id == FeatureFloodCount::invalid_id)
       continue;
 
     // Interpolation factor for elasticity tensors
     Real h = (1.0 + std::sin(libMesh::pi * ((*_vals[op_index])[_qp] - 0.5))) / 2.0;
 
     // Sum all rotated elasticity tensors
-    _elasticity_tensor[_qp] += _grain_tracker.getData(grain_index) * h;
+    _elasticity_tensor[_qp] += _grain_tracker.getData(grain_id) * h;
     sum_h += h;
   }
 
@@ -72,16 +72,16 @@ ComputePolycrystalElasticityTensor::computeQpElasticityTensor()
   for (auto op_index = decltype(_op_num)(0); op_index < _op_num; ++op_index)
     (*_D_elastic_tensor[op_index])[_qp].zero();
 
-  for (auto op_index = beginIndex(op_to_grain); op_index < op_to_grain.size(); ++op_index)
+  for (auto op_index = beginIndex(op_to_grains); op_index < op_to_grains.size(); ++op_index)
   {
-    const unsigned int grain_index = op_to_grain[op_index];
-    if (grain_index == libMesh::invalid_uint)
+    auto grain_id = op_to_grains[op_index];
+    if (grain_id == FeatureFloodCount::invalid_id)
       continue;
 
     Real dhdopi = libMesh::pi * std::cos(libMesh::pi * ((*_vals[op_index])[_qp] - 0.5)) / 2.0;
     RankFourTensor & C_deriv = (*_D_elastic_tensor[op_index])[_qp];
 
-    C_deriv = (_grain_tracker.getData(grain_index) - _elasticity_tensor[_qp]) * dhdopi / sum_h;
+    C_deriv = (_grain_tracker.getData(grain_id) - _elasticity_tensor[_qp]) * dhdopi / sum_h;
 
     // Convert from XPa to eV/(xm)^3, where X is pressure scale and x is length scale;
     C_deriv *= _JtoeV * (_length_scale * _length_scale * _length_scale) * _pressure_scale;

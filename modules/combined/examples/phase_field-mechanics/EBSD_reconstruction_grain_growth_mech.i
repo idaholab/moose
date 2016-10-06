@@ -231,7 +231,7 @@
   [./grain_tracker]
     type = GrainTrackerElasticity
     threshold = 0.2
-    compute_op_maps = true
+    compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd
     flood_entity_type = ELEMENTAL

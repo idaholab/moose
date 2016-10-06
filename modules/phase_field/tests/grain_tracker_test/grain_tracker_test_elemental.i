@@ -92,7 +92,6 @@
   [./grain_tracker]
     type = GrainTracker
     flood_entity_type = ELEMENTAL
-    feature_volume_file = grain_volumes.csv
   [../]
   [./DOFs]
     type = NumDOFs

@@ -51,7 +51,7 @@
     type = GrainTracker
     variable = 'gr0 gr1'
     threshold = 0.1
-    compute_op_maps = true
+    compute_var_to_feature_map = true
     execute_on = 'initial'
   [../]
 []

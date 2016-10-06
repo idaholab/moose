@@ -24,8 +24,9 @@ InputParameters validParams<RigidBodyMultiKernelAction>()
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define type of force density under consideration");
   params.addParam<Real>("translation_constant", 500, "constant value characterizing grain translation");
   params.addParam<Real>("rotation_constant", 1.0, "constant value characterizing grain rotation");
-  params.addParam<UserObjectName>("grain_force", "userobject for getting force and torque acting on grains");
-  params.addParam<UserObjectName>("grain_tracker_object", "The FeatureFloodCount UserObject to get values from.");
+  params.addRequiredParam<UserObjectName>("grain_force", "userobject for getting force and torque acting on grains");
+  params.addRequiredParam<UserObjectName>("grain_tracker_object", "The FeatureFloodCount UserObject to get values from.");
+  params.addRequiredParam<VectorPostprocessorName>("grain_volumes", "The feature volume VectorPostprocessorValue.");
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   return params;
@@ -120,6 +121,7 @@ RigidBodyMultiKernelAction::act()
       params.set<Real>("rotation_constant") = getParam<Real>("rotation_constant");
       params.set<UserObjectName>("grain_force") = getParam<UserObjectName>("grain_force");
       params.set<UserObjectName>("grain_tracker_object") = getParam<UserObjectName>("grain_tracker_object");
+      params.set<VectorPostprocessorName>("grain_volumes") = getParam<VectorPostprocessorName>("grain_volumes");
 
       params.set<bool>("implicit") = _implicit;
       params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
