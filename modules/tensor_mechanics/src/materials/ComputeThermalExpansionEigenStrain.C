@@ -12,9 +12,10 @@ InputParameters validParams<ComputeThermalExpansionEigenStrain>()
 {
   InputParameters params = validParams<ComputeStressFreeStrainBase>();
   params.addClassDescription("Computes Eigenstrain due to thermal expansion");
-  params.addCoupledVar("temperature", 273, "Coupled temperature in units of Kelvin");
-  params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient in 1/K");
-  params.addParam<Real>("stress_free_reference_temperature", 273, "Reference temperature for thermal expansion in K; used in the first time step to calculate the temperature change");
+  params.addCoupledVar("temperature", "Coupled temperature");
+  params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient");
+  params.addDeprecatedParam<Real>("stress_free_reference_temperature", 273, "Reference temperature for thermal eigenstrain calculation", "'stress_free_temperature' has replaced this parameter");
+  params.addParam<Real>("stress_free_temperature", "Reference temperature for thermal eigenstrain calculation");
 
   return params;
 }
@@ -26,9 +27,14 @@ ComputeThermalExpansionEigenStrain::ComputeThermalExpansionEigenStrain(const Inp
     _temperature_old(_has_incremental_strain ? & coupledValueOld("temperature") : NULL),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
     _thermal_expansion_tensor(declareProperty<RankTwoTensor>(_base_name + "_thermal_expansion_tensor")),
-    _stress_free_reference_temperature(getParam<Real>("stress_free_reference_temperature")),
     _step_one(declareRestartableData<bool>("step_one", true))
 {
+  if (isParamValid("stress_free_temperature"))
+    _stress_free_temperature = getParam<Real>("stress_free_temperature");
+  else if (isParamValid("stress_free_reference_temperature"))
+    _stress_free_temperature = getParam<Real>("stress_free_reference_temperature");
+  else
+    mooseError("Please specify 'stress_free_temperature'.");
 }
 
 void
@@ -41,9 +47,8 @@ ComputeThermalExpansionEigenStrain::computeQpStressFreeStrain()
     _step_one = false;
 
   if (!_has_incremental_strain || _step_one)
-    old_temp = _stress_free_reference_temperature;
-
-  if (_temperature_old) // total strain form always uses the ref temp
+    old_temp = _stress_free_temperature;
+  else
     old_temp = (* _temperature_old)[_qp];
 
   thermal_strain.addIa(_thermal_expansion_coeff * (_temperature[_qp] - old_temp));
