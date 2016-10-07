@@ -63,8 +63,7 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
     _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
     _l_its(declareRestartableData<unsigned int>("l_its", 0)),
     _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
-    _at_function_point(false),
-    _tfunc_dts(parameters.get<std::vector<Real> >("time_dt"))
+    _at_function_point(false)
 {
   if (isParamValid("optimal_iterations"))
   {
@@ -135,6 +134,7 @@ IterationAdaptiveDT::computeDT()
 
   if (_cutback_occurred)
   {
+    std::cout << "SPOT1\n";
     _cutback_occurred = false;
     if (_adaptive_timestepping)
     {
@@ -145,6 +145,7 @@ IterationAdaptiveDT::computeDT()
   }
   else if (_tfunc_last_step)
   {
+    std::cout << "SPOT2\n";
     _tfunc_last_step = false;
     _sync_last_step = false;
     dt = _time_ipol.sample(_time_old);
@@ -158,6 +159,7 @@ IterationAdaptiveDT::computeDT()
   }
   else if (_sync_last_step)
   {
+    std::cout << "SPOT3\n";
     _sync_last_step = false;
     dt = _dt_old;
 
@@ -169,11 +171,18 @@ IterationAdaptiveDT::computeDT()
     }
   }
   else if (_adaptive_timestepping)
+  {
+    std::cout << "SPOT4\n";
     computeAdaptiveDT(dt);
+  }
   else if (_use_time_ipol)
+  {
+    std::cout << "SPOT5\n";
     dt = computeInterpolationDT();
+  }
   else
   {
+    std::cout << "SPOT6\n";
     dt *= _growth_factor;
     if (dt > _dt_old * _growth_factor)
       dt = _dt_old * _growth_factor;
@@ -255,8 +264,6 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
 {
   Real orig_dt = limitedDT;
 
-  // repeatedly divide dt by two until it is smaller than the
-  // limiting_func(t_next) - limiting_func(t_curr) < _max_function_change
   if (_timestep_limiting_function)
   {
     Point dummyPoint;
@@ -277,8 +284,6 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
     }
   }
 
-  // if dt is large enough to be beyond the next piece-wise limiting function'
-  // defined point, then reduce dt to make t_next hit that point.
   _at_function_point = false;
   if (_piecewise_timestep_limiting_function && _force_step_every_function_point)
   {
@@ -286,11 +291,6 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
     {
       if (_time >= _times[i] && _time < _times[i+1])
       {
-        // This (perhaps incorrectly) *increases* dt (within timestep tol) in
-        // order to hit the next time point. - this seems dangerous - because
-        // it violates possibly other constraints that have already been
-        // "enforced" (e.g. the one above).  A policy of constraints only ever
-        // decreasing dt should perhaps be established/observed.
         if (limitedDT > _times[i+1] - _time - _timestep_tolerance)
         {
           limitedDT = _times[i+1] - _time;

@@ -150,7 +150,6 @@ public:
     Logger l("Bounds");
     double dt = _stepper->advance(si);
     double t = si->time + dt;
-    printf("min=%f, max=%f, t+dt=%f\n", _min, _max, t);
     if (_err && (t < _min || t > _max))
       throw "time step is out of bounds";
     else if (t < _min)

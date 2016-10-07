@@ -343,7 +343,7 @@ Transient::execute()
 
     if (stepper != nullptr)
     {
-      printf("[STEPPER] step %3d (t=%f): dt=%f, legacy=%f (constr=%f)\n", si.step_count, si.time, dt, legacy_dt, constr_legacy_dt);
+      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, dt, legacy_dt, constr_legacy_dt);
     }
   }
 
