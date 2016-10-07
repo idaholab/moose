@@ -41,7 +41,7 @@
     p = p
   [../]
   [./x_momentum_space]
-    type = INSMomentum
+    type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
@@ -50,7 +50,7 @@
     integrate_p_by_parts = false
   [../]
   [./y_momentum_space]
-    type = INSMomentum
+    type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y

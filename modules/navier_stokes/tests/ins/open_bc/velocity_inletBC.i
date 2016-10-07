@@ -19,14 +19,6 @@
   elem_type = QUAD9
 []
 
-[MeshModifiers]
-  [./corner_node]
-    type = AddExtraNodeset
-    new_boundary = top_right
-    coord = '3 1'
-  [../]
-[]
-
 
 [Variables]
   [./vel_x]
@@ -52,7 +44,7 @@
     p = p
   [../]
   [./x_momentum_space]
-    type = INSMomentum
+    type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
@@ -60,7 +52,7 @@
     component = 0
   [../]
   [./y_momentum_space]
-    type = INSMomentum
+    type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y
@@ -88,37 +80,13 @@
     boundary = 'left'
     function = 'inlet_func'
   [../]
-  [./x_oulet]
-    type = INSMomentumNoBCBC
-    boundary = right
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    p = p
-    component = 0
-  [../]
-  [./y_oulet]
-    type = INSMomentumNoBCBC
-    variable = vel_y
-    boundary = right
-    u = vel_x
-    v = vel_y
-    p = p
-    component = 1
-  [../]
-  [./p_corner]
-    type = DirichletBC
-    boundary = top_right
-    value = 0
-    variable = p
-  [../]
 []
 
 [Preconditioning]
   [./SMP_PJFNK]
     type = SMP
     full = true
-    solve_type = PJFNK
+    solve_type = NEWTON
   [../]
 []
 
