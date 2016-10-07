@@ -84,7 +84,9 @@ LIBMESH_OPTIONS = {
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd, cwd=None):
-  p = Popen([cmd], cwd=cwd, stdout=PIPE,stderr=STDOUT, close_fds=True, shell=True)
+  # On Windows it is not allowed to close fds while redirecting output
+  should_close = platform.system() != "Windows"
+  p = Popen([cmd], cwd=cwd, stdout=PIPE,stderr=STDOUT, close_fds=should_close, shell=True)
   output = p.communicate()[0]
   if (p.returncode != 0):
     output = 'ERROR: ' + output
