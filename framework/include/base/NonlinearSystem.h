@@ -31,6 +31,7 @@ class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
 class ElementDamper;
+class NodalDamper;
 class GeneralDamper;
 class IntegratedBC;
 class NodalBC;
@@ -348,10 +349,18 @@ public:
    */
   void setupDampers();
   /**
-   * Compute the incremental change in variables for dampers. Called before we use damping
+   * Compute the incremental change in variables at QPs for dampers. Called before we use damping
    * @param tid Thread ID
+   * @param damped_vars Set of variables for which increment is to be computed
    */
-  void reinitIncrementForDampers(THREAD_ID tid);
+  void reinitIncrementAtQpsForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars);
+
+  /**
+   * Compute the incremental change in variables at nodes for dampers. Called before we use damping
+   * @param tid Thread ID
+   * @param damped_vars Set of variables for which increment is to be computed
+   */
+  void reinitIncrementAtNodeForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars);
 
   ///@{
   /// System Integrity Checks
@@ -440,6 +449,7 @@ public:
   const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() { return _element_dampers; }
+  const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() { return _nodal_dampers; }
   //@}
 
   /**
@@ -542,6 +552,9 @@ protected:
 
   /// Element Dampers for each thread
   MooseObjectWarehouse<ElementDamper> _element_dampers;
+
+  /// Nodal Dampers for each thread
+  MooseObjectWarehouse<NodalDamper> _nodal_dampers;
 
   /// General Dampers
   MooseObjectWarehouse<GeneralDamper> _general_dampers;

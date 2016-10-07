@@ -12,40 +12,34 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTEELEMDAMPINGTHREAD_H
-#define COMPUTEELEMDAMPINGTHREAD_H
+#ifndef BOUNDINGVALUENODALDAMPER_H
+#define BOUNDINGVALUENODALDAMPER_H
 
-// MOOSE includes
-#include "ThreadedElementLoop.h"
-#include "MooseObjectWarehouse.h"
+// Moose Includes
+#include "NodalDamper.h"
 
-// libMesh includes
-#include "libmesh/elem_range.h"
+//Forward Declarations
+class BoundingValueNodalDamper;
 
-// Forward declarations
-class NonlinearSystem;
-class ElementDamper;
+template<>
+InputParameters validParams<BoundingValueNodalDamper>();
 
-class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
+/**
+ * This class implements a damper that limits the value of a variable to be within
+ * user-specified bounds.
+ */
+class BoundingValueNodalDamper : public NodalDamper
 {
 public:
-  ComputeElemDampingThread(FEProblem & feproblem);
-
-  // Splitting Constructor
-  ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split);
-
-  virtual ~ComputeElemDampingThread();
-
-  virtual void onElement(const Elem * elem) override;
-
-  void join(const ComputeElemDampingThread & y);
-
-  Real damping();
+  BoundingValueNodalDamper(const InputParameters & parameters);
 
 protected:
-  Real _damping;
-  NonlinearSystem & _nl;
-  const MooseObjectWarehouse<ElementDamper> & _element_dampers;
+  /// The maximum permissible value of the variable
+  const Real & _max_value;
+  /// The minimum permissible value of the variable
+  const Real & _min_value;
+  /// Compute the damping for the current node
+  virtual Real computeQpDamping() override;
 };
 
-#endif //COMPUTEELEMDAMPINGTHREAD_H
+#endif //BOUNDINGVALUENODALDAMPER_H

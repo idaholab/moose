@@ -263,6 +263,8 @@
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
+#include "BoundingValueNodalDamper.h"
+#include "BoundingValueElementDamper.h"
 
 // Constraints
 #include "TiedValueConstraint.h"
@@ -683,6 +685,8 @@ registerObjects(Factory & factory)
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
+  registerDamper(BoundingValueNodalDamper);
+  registerDamper(BoundingValueElementDamper);
   // DG
   registerDGKernel(DGDiffusion);
   registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
