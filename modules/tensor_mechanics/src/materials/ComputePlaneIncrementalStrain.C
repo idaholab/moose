@@ -23,13 +23,13 @@ ComputePlaneIncrementalStrain::ComputePlaneIncrementalStrain(const InputParamete
 }
 
 Real
-ComputePlaneIncrementalStrain::computeDeformGradZZ()
+ComputePlaneIncrementalStrain::computeGradDispZZ()
 {
     return _scalar_strain_zz[0];
 }
 
 Real
-ComputePlaneIncrementalStrain::computeDeformGradZZold()
+ComputePlaneIncrementalStrain::computeGradDispZZold()
 {
     return _scalar_strain_zz_old[0];
 }

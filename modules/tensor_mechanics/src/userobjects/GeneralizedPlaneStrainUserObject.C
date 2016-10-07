@@ -17,8 +17,9 @@ InputParameters validParams<GeneralizedPlaneStrainUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription("Generalized Plane Strain UserObject to provide Residual and diagonal Jacobian entry");
-  params.addParam<FunctionName>("traction", "0", "Function used to prescribe traction in the out-of-plane direction");
+  params.addParam<FunctionName>("traction_zz", "0", "Function used to prescribe traction in the out-of-plane direction");
   params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed traction");
+  params.addParam<std::string>("base_name", "Material properties base name");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<MultiMooseEnum>("execute_on") = "linear";
 
@@ -27,9 +28,10 @@ InputParameters validParams<GeneralizedPlaneStrainUserObject>()
 
 GeneralizedPlaneStrainUserObject::GeneralizedPlaneStrainUserObject(const InputParameters & parameters) :
   ElementUserObject(parameters),
-  _Cijkl(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
-  _stress(getMaterialProperty<RankTwoTensor>("stress")),
-  _traction(getFunction("traction")),
+  _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+  _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
+  _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+  _traction_zz(getFunction("traction_zz")),
   _factor(getParam<Real>("factor"))
 {
 }
@@ -46,7 +48,7 @@ GeneralizedPlaneStrainUserObject::execute()
 {
   // residual, integral of stress_zz
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
-    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp](2, 2) - _traction.value(_t, _q_point[_qp]) * _factor);
+    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp](2, 2) - _traction_zz.value(_t, _q_point[_qp]) * _factor);
 
   // diagonal jacobian, integral of C(2, 2, 2, 2)
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
