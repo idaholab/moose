@@ -320,6 +320,8 @@ IterationAdaptiveDT::computeAdaptiveDT(Real & dt, bool allowToGrow, bool allowTo
   const unsigned int shrink_nl_its(_optimal_iterations + _iteration_window);
   const unsigned int growth_l_its(_optimal_iterations > _iteration_window ? _linear_iteration_ratio * (_optimal_iterations - _iteration_window) : 0);
   const unsigned int shrink_l_its(_linear_iteration_ratio*(_optimal_iterations + _iteration_window));
+  printf("ADAPTLEG: cangrow=%d, nl_its=%d, growth_nl_its=%d, l_its=%d, growth_l_its=%d\n", allowToGrow, _nl_its, growth_nl_its, _l_its, growth_l_its);
+
   if (allowToGrow && (_nl_its < growth_nl_its && _l_its < growth_l_its))
   {
     // Grow the timestep

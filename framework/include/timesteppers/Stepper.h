@@ -400,6 +400,7 @@ public:
        growth_nl_its = _optimal_iters - _iter_window;
        growth_l_its = _lin_iter_ratio * (_optimal_iters - _iter_window);
     }
+    printf("ADAPT: cangrow=%d, nl_its=%d, growth_nl_its=%d, l_its=%d, growth_l_its=%d\n", can_grow, si->nonlin_iters, growth_nl_its, si->lin_iters, growth_l_its);
 
     if (can_grow && (si->nonlin_iters < growth_nl_its && si->lin_iters < growth_l_its))
       return l.val(si->prev_dt * _growth_factor);

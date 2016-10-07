@@ -305,37 +305,39 @@ Transient::execute()
 
   StepperInfo si = { };
   si.converged = true;
+  si.step_count = 1;
   si.prev_converged = true;
 
   // Start time loop...
   while (true)
   {
+    double dt = legacy->_input_dt;
     if (_first != true)
-      incrementStepOrReject();
-
-    // update new style stepper
-    double dt = 0;
-    if (stepper != nullptr)
     {
-      si.time = _time;
-      si.prev_prev_dt = si.prev_dt;
-      si.prev_dt = _dt;
-      si.step_count++;
-      si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
-      si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
-      si.prev_converged = si.converged;
-      // must come before _first = false
-      si.converged = _fe_problem.converged() || _first;
-      dt = stepper->advance(&si);
+      incrementStepOrReject();
+     // update new style stepper
+      if (stepper != nullptr)
+      {
+        si.time = _time;
+        si.prev_prev_dt = si.prev_dt;
+        si.prev_dt = _dt;
+        si.step_count++;
+        si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
+        si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
+        si.prev_converged = si.converged;
+        si.converged = _fe_problem.converged() || si.step_count == 1;
+        dt = stepper->advance(&si);
+      }
     }
-
     _first = false;
 
     if (!keepGoing())
       break;
-
     preStep();
+
+    std::cout << "SPOTA\n";
     computeDT();
+    std::cout << "SPOTB\n";
     double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
     double constr_legacy_dt = _dt;
