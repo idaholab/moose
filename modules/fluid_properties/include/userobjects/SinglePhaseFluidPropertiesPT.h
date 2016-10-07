@@ -25,6 +25,8 @@ public:
   SinglePhaseFluidPropertiesPT(const InputParameters & parameters);
   virtual ~SinglePhaseFluidPropertiesPT();
 
+  /// Molar mass (kg/mol)
+  virtual Real molarMass() const = 0;
   /// Density from pressure and temperature (kg/m^3)
   virtual Real rho(Real pressure, Real temperature) const = 0;
   /// Density from pressure and temperature and its derivatives wrt pressure and temperature
