@@ -32,10 +32,10 @@ class VolumeHistogram : public ElementVectorPostprocessor
 public:
   VolumeHistogram(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
+  virtual void initialize();
+  virtual void execute();
+  virtual void finalize();
+  virtual void threadJoin(const UserObject & y);
 
 protected:
   /// compute the volume contribution at the current quadrature point
@@ -62,10 +62,7 @@ protected:
   /// value mid point of the bin
   VectorPostprocessorValue & _bin_center;
 
-  /// local thread copy of the volume vector
-  VectorPostprocessorValue _volume_tmp;
-
-  /// aggregated global volume vector
+  /// aggregated volume for the given bin
   VectorPostprocessorValue & _volume;
 };
 
