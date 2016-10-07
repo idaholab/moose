@@ -1,0 +1,9 @@
+[tests]
+  [./acceleration_bc]
+    type = 'Exodiff'
+    input = 'AccelerationBC_test.i'
+    exodiff = 'AccelerationBC_test_out.e'
+    abs_zero = 1e-08
+    compiler = 'GCC CLANG'
+  [../]
+[]
