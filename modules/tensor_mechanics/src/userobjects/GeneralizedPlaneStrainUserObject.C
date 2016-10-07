@@ -53,6 +53,21 @@ GeneralizedPlaneStrainUserObject::execute()
     _jacobian += _JxW[_qp] * _coord[_qp] * _Cijkl[_qp](2, 2, 2, 2);
 }
 
+void
+GeneralizedPlaneStrainUserObject::threadJoin(const UserObject & uo)
+{
+  const GeneralizedPlaneStrainUserObject & gpsuo = static_cast<const GeneralizedPlaneStrainUserObject &>(uo);
+  _residual += gpsuo._residual;
+  _jacobian += gpsuo._jacobian;
+}
+
+void
+GeneralizedPlaneStrainUserObject::finalize()
+{
+  gatherSum(_residual);
+  gatherSum(_jacobian);
+}
+
 Real
 GeneralizedPlaneStrainUserObject::returnResidual() const
 {
