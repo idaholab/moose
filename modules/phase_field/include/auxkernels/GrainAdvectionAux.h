@@ -10,7 +10,6 @@
 #include "AuxKernel.h"
 #include "GrainTrackerInterface.h"
 #include "GrainForceAndTorqueInterface.h"
-// #include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class GrainAdvectionAux;
@@ -19,8 +18,8 @@ template<>
 InputParameters validParams<GrainAdvectionAux>();
 
 /**
- * This Material calculates the advection velocity, it's divergence and
- * derivatives acting on a particle/grain
+ * Calculates the advection velocity of grain due to rigid body motion
+ * Reports the components of the velocity on each element
  */
 class GrainAdvectionAux : public AuxKernel
 {
@@ -28,8 +27,9 @@ public:
   GrainAdvectionAux(const InputParameters & parameters);
 
 protected:
+  /// calculate the advection velocity
   virtual void precalculateValue();
-  /// obtain total no. of grains from GrainTracker
+  /// output the component of advection velocity
   virtual Real computeValue();
 
   /// getting userobject for calculating grain centers and volumes
@@ -45,13 +45,13 @@ protected:
 
 private:
   /// constant value corresponding to grain translation
-  Real _mt;
+  const Real _mt;
 
   /// constant value corresponding to grain rotation
-  Real _mr;
+  const Real _mr;
 
   RealGradient _velocity_advection;
   MooseEnum _component;
 };
 
-#endif //GrainAdvectionAuxAUX_H
+#endif //GRAINADVECTIONAUXAUX_H

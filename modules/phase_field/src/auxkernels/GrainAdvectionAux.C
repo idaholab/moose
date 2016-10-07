@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<GrainAdvectionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription("Calculation the advection velocity of grain due to rigid vody translation and rotation");
+  params.addClassDescription("Calculates the advection velocity of grain due to rigid body translation and rotation");
   params.addParam<Real>("translation_constant", 1.0, "constant value characterizing grain translation");
   params.addParam<Real>("rotation_constant", 1.0, "constant value characterizing grain rotation");
   params.addParam<UserObjectName>("grain_tracker_object", "userobject for getting volume and center of mass of grains");
@@ -22,23 +22,23 @@ InputParameters validParams<GrainAdvectionAux>()
 }
 
 GrainAdvectionAux::GrainAdvectionAux(const InputParameters & parameters) :
-   AuxKernel(parameters),
-   _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
-   _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes")),
-   _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
-   _grain_forces(_grain_force_torque.getForceValues()),
-   _grain_torques(_grain_force_torque.getTorqueValues()),
-   _mt(getParam<Real>("translation_constant")),
-   _mr(getParam<Real>("rotation_constant")),
-   _component(getParam<MooseEnum>("component"))
+    AuxKernel(parameters),
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
+    _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes")),
+    _grain_force_torque(getUserObject<GrainForceAndTorqueInterface>("grain_force")),
+    _grain_forces(_grain_force_torque.getForceValues()),
+    _grain_torques(_grain_force_torque.getTorqueValues()),
+    _mt(getParam<Real>("translation_constant")),
+    _mr(getParam<Real>("rotation_constant")),
+    _component(getParam<MooseEnum>("component"))
 {
+  if (isNodal())
+    mooseError("Advection velocity can be assigned to elemental variables only.");
 }
 
 void
 GrainAdvectionAux::precalculateValue()
 {
-  if (isNodal())
-    mooseError("Advection velocity can be assigned to elemental variables only.");
   // ID of unique grain at current point
   const auto grain_id = _grain_tracker.getEntityValue(_current_elem->id(), FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
   if (grain_id >= 0)
