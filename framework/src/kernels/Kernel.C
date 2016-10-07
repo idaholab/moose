@@ -69,6 +69,7 @@ Kernel::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
+  precalculateJacobian();
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -98,6 +99,7 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
+    precalculateOffDiagJacobian(jvar);
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
