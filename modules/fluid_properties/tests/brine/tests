@@ -1,0 +1,32 @@
+[Tests]
+  [./brine1]
+    type = CSVDiff
+    input = 'brine1.i'
+    csvdiff = 'brine1_out.csv'
+  [../]
+  [./enthalpy]
+    type = CSVDiff
+    input = 'enthalpy.i'
+    csvdiff = 'enthalpy_out_vpp_0001.csv'
+  [../]
+  [./cp]
+    type = CSVDiff
+    input = 'cp.i'
+    csvdiff = 'cp_out_vpp_0001.csv'
+  [../]
+  [./solubility]
+    type = CSVDiff
+    input = 'solubility.i'
+    csvdiff = 'solubility_out.csv'
+  [../]
+  [./halite]
+    type = CSVDiff
+    input = 'halite.i'
+    csvdiff = 'halite_out.csv'
+  [../]
+  [./vapor]
+    type = CSVDiff
+    input = 'vapor.i'
+    csvdiff = 'vapor_out.csv'
+  [../]
+[]

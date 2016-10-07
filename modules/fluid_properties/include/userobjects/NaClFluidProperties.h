@@ -5,53 +5,63 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef METHANEFLUIDPROPERTIES_H
-#define METHANEFLUIDPROPERTIES_H
+#ifndef NACLFLUIDPROPERTIES_H
+#define NACLFLUIDPROPERTIES_H
 
 #include "SinglePhaseFluidPropertiesPT.h"
 
-class MethaneFluidProperties;
+class NaClFluidProperties;
 
 template<>
-InputParameters validParams<MethaneFluidProperties>();
+InputParameters validParams<NaClFluidProperties>();
 
 /**
- * Methane (CH4) fluid properties as a function of pressure (Pa)
- * and temperature (K)
+ * NaCl fluid properties as a function of pressure (Pa) and temperature (K).
+ * Note: only solid state (halite) properties are currently implemented to
+ * use in brine formulation
+ *
+ * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
+ * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+ * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007)
  */
-class MethaneFluidProperties : public SinglePhaseFluidPropertiesPT
+class NaClFluidProperties : public SinglePhaseFluidPropertiesPT
 {
 public:
-  MethaneFluidProperties(const InputParameters & parameters);
-  virtual ~MethaneFluidProperties();
+  NaClFluidProperties(const InputParameters & parameters);
+  virtual ~NaClFluidProperties();
 
  /**
-  * Methane molar mass
+  * NaCl molar mass
   * @return molar mass (kg/mol)
   */
  virtual Real molarMass() const override;
 
   /**
-   * Methane critical pressure
+   * NaCl critical pressure
+   * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
+   * Phase Equil., 79 (1992)
    * @return critical pressure (Pa)
    */
   virtual Real criticalPressure() const;
 
   /**
-   * Methane critical temperature
+   * NaCl critical temperature
+   * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
+   * Phase Equil., 79 (1992)
    * @return critical temperature (K)
    */
   virtual Real criticalTemperature() const;
 
   /**
-   * Methane critical density
+   * NaCl critical density
+   * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
+   * Phase Equil., 79 (1992)
    * @return critical density (kg/m^3)
    */
   virtual Real criticalDensity() const;
 
   /**
-   * Methane gas density as a function of pressure and temperature
-   * (assuming an ideal gas)
+   * NaCl density as a function of pressure and temperature
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -60,8 +70,8 @@ public:
   virtual Real rho(Real pressure, Real temperature) const override;
 
   /**
-   * Methane gas density as a function of pressure and temperature, and
-   * derivatives wrt pressure and temperature (assuming an ideal gas)
+   * NaCl density as a function of pressure and temperature, and
+   * derivatives wrt pressure and temperature
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -115,9 +125,7 @@ public:
   virtual Real c(Real pressure, Real temperature) const override;
 
   /**
-   * Isobaric specific heat capacity as a function of pressure and temperature.
-   * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
-   * Computer Equations.
+   * Isobaric specific heat capacity
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -135,9 +143,7 @@ public:
   virtual Real cv(Real pressure, Real temperature) const override;
 
   /**
-   * Methane gas viscosity as a function of density and temperature.
-   * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
-   * Computer Equations.
+   * NaCl viscosity
    *
    * @param density fluid density (kg/m^3)
    * @param temperature fluid temperature (K)
@@ -146,9 +152,7 @@ public:
   virtual Real mu(Real density, Real temperature) const override;
 
   /**
-   * Methane gas viscosity and derivatives wrt density and temperature.
-   * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
-   * Computer Equations.
+   * NaCl viscosity and derivatives wrt density and temperature
    *
    * @param density fluid density (kg/m^3)
    * @param temperature fluid temperature (K)
@@ -159,9 +163,10 @@ public:
   virtual void mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /**
-   * Thermal conductivity as a function of pressure and temperature.
-   * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
-   * Computer Equations.
+   * Thermal conductivity as a function of pressure and temperature
+   * From Urqhart and Bauer, Experimental determination of single-crystal halite
+   * thermal conductivity, diffusivity and specific heat from −75 °C to 300 °C,
+   * Int. J. Rock Mech. and Mining Sci., 78 (2015)
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -170,9 +175,7 @@ public:
   virtual Real k(Real pressure, Real temperature) const override;
 
   /**
-   * Specific entropy as a function of pressure and temperature.
-   * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
-   * Computer Equations.
+   * Specific entropy as a function of pressure and temperature
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -181,9 +184,7 @@ public:
   virtual Real s(Real pressure, Real temperature) const override;
 
   /**
-   * Enthalpy as a function of pressure and temperature.
-   * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
-   * Computer Equations.
+   * Enthalpy as a function of pressure and temperature
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -193,8 +194,6 @@ public:
 
   /**
    * Enthalpy and its derivatives wrt pressure and temperature.
-   * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
-   * Computer Equations.
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -214,10 +213,7 @@ public:
   virtual Real beta(Real pressure, Real temperature) const override;
 
   /**
-   * Henry's law constant for dissolution of CH4 into water.
-   * From Guidelines on the Henry's constant and vapour
-   * liquid distribution constant for gases in H20 and D20 at high
-   * temperatures, IAPWS (2004).
+   * Henry's law constant (not valid for NaCl)
    *
    * @param temperature fluid temperature (K)
    * @return constants for Henry's constant (-)
@@ -225,16 +221,18 @@ public:
   virtual Real henryConstant(Real temperature) const override;
 
 protected:
-  /// Methane molar mass (kg/mol)
-  const Real _Mch4;
+  /// NaCl molar mass (kg/mol)
+  const Real _Mnacl;
   /// Critical pressure (Pa)
   const Real _p_critical;
   /// Critical temperature (K)
   const Real _T_critical;
   /// Critical density (kg/m^3)
   const Real _rho_critical;
-  /// Coefficient of thermal expansion (1/K)
-  const Real _beta;
+  /// Triple point pressure (Pa)
+  const Real _p_triple;
+  /// Triple point temperature (K)
+  const Real _T_triple;
 };
 
-#endif /* METHANEFLUIDPROPERTIES_H */
+#endif /* NACLFLUIDPROPERTIES_H */

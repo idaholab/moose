@@ -44,7 +44,7 @@ public:
    * Water molar mass
    * @return molar mass (kg/mol)
    */
-  virtual Real molarMass() const;
+  virtual Real molarMass() const override;
 
   /**
    * Water critical pressure
