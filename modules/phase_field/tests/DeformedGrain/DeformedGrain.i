@@ -77,7 +77,7 @@
     type = GrainTracker
     threshold = 0.2
     connecting_threshold = 0.08
-    compute_op_maps = true
+    compute_var_to_feature_map = true
     flood_entity_type = elemental
     execute_on = ' initial timestep_begin'
     outputs = none

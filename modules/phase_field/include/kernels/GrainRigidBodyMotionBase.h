@@ -74,6 +74,9 @@ protected:
   /// grain tracker object
   const GrainTrackerInterface & _grain_tracker;
 
+  /// The grain volumes
+  const VectorPostprocessorValue & _grain_volumes;
+
   /// get the total no. of dofs in the system
   unsigned int _total_dofs;
 

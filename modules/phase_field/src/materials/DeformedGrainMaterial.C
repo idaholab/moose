@@ -63,19 +63,19 @@ DeformedGrainMaterial::computeQpProperties()
     SumEtai2 += (*_vals[i])[_qp]*(*_vals[i])[_qp];
 
   // calculate effective dislocation density and assign zero dislocation densities to undeformed grains
-  const auto & op_to_grains = _grain_tracker.getOpToGrainsVector(_current_elem->id());
+  const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   // loop over active OPs
   bool one_active = false;
   for (auto op_index = beginIndex(op_to_grains); op_index < op_to_grains.size(); ++op_index)
   {
-    if (op_to_grains[op_index] == libMesh::invalid_uint)
+    if (op_to_grains[op_index] == FeatureFloodCount::invalid_id)
       continue;
 
     one_active = true;
-    auto grain_index = op_to_grains[op_index];
+    auto grain_id = op_to_grains[op_index];
 
-    if (grain_index >= _deformed_grain_num)
+    if (grain_id >= _deformed_grain_num)
       rho_i = 0.0;
     else
       rho_i = _Disloc_Den_i[_qp];

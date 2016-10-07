@@ -193,7 +193,7 @@
   [./grain_center]
     type = GrainTracker
     outputs = none
-    compute_op_maps = true
+    compute_var_to_feature_map = true
     calculate_feature_volumes = true
     execute_on = 'initial timestep_begin'
   [../]

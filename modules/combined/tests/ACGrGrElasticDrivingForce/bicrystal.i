@@ -208,7 +208,7 @@
   [./grain_tracker]
     type = GrainTrackerElasticity
     connecting_threshold = 0.05
-    compute_op_maps = true
+    compute_var_to_feature_map = true
     flood_entity_type = elemental
     execute_on = 'initial timestep_begin'
 

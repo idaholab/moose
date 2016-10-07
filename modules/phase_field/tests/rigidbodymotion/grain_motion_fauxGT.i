@@ -58,6 +58,7 @@
     v = 'eta0 eta1'
     grain_force = grain_force
     grain_tracker_object = grain_center
+    grain_volumes = grain_volumes
   [../]
   [./eta0_dot]
     type = TimeDerivative
@@ -70,6 +71,7 @@
     v = 'eta0 eta1'
     grain_force = grain_force
     grain_tracker_object = grain_center
+    grain_volumes = grain_volumes
     op_index = 0
   [../]
   [./acint_eta0]
@@ -98,6 +100,7 @@
     op_index = 1
     grain_force = grain_force
     grain_tracker_object = grain_center
+    grain_volumes = grain_volumes
   [../]
   [./acint_eta1]
     type = ACInterface
@@ -270,14 +273,18 @@
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_center
+    execute_on = 'initial timestep_begin'
+  [../]
 []
 
 [UserObjects]
   [./grain_center]
     type = FauxGrainTracker
     outputs = none
-    compute_op_maps = true
-    calculate_feature_volumes = true
+    compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
     variable = 'eta0 eta1'
   [../]

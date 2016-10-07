@@ -11,14 +11,15 @@ template<>
 InputParameters validParams<GrainRigidBodyMotionBase>()
 {
   InputParameters params = validParams<NonlocalKernel>();
-  params.addClassDescription("Base class for adding rigid mody motion to grains");
+  params.addClassDescription("Base class for adding rigid body motion to grains");
   params.addRequiredCoupledVar("c", "Concentration");
   params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variable names");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define type of force density under consideration");
   params.addParam<Real>("translation_constant", 500, "constant value characterizing grain translation");
   params.addParam<Real>("rotation_constant", 1.0, "constant value characterizing grain rotation");
-  params.addParam<UserObjectName>("grain_force", "userobject for getting force and torque acting on grains");
-  params.addParam<UserObjectName>("grain_tracker_object", "The FeatureFloodCount UserObject to get values from.");
+  params.addRequiredParam<UserObjectName>("grain_force", "UserObject for getting force and torque acting on grains");
+  params.addRequiredParam<UserObjectName>("grain_tracker_object", "The FeatureFloodCount UserObject to get values from.");
+  params.addRequiredParam<VectorPostprocessorName>("grain_volumes", "The feature volume VectorPostprocessorValue.");
   return params;
 }
 
@@ -41,7 +42,8 @@ GrainRigidBodyMotionBase::GrainRigidBodyMotionBase(const InputParameters & param
     _grain_force_eta_jacobians(_grain_force_torque.getForceEtaJacobians()),
     _mt(getParam<Real>("translation_constant")),
     _mr(getParam<Real>("rotation_constant")),
-    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object"))
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
+    _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes"))
 {
   //Loop through grains and load coupled variables into the arrays
   for (unsigned int i = 0; i < _op_num; ++i)
