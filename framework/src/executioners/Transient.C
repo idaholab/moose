@@ -228,16 +228,6 @@ Transient::postStep()
 void
 Transient::execute()
 {
-
-  preExecute();
-
-  // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
-  // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
-  // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we might remove this call and regold the test
-  // in the future eventually.
-  if (!_app.isRecovering())
-    _problem.advanceState();
-
   ////////////////////////////////////////////////////////////
   // setup and configure new Stepper in parallel here       //
   ////////////////////////////////////////////////////////////
@@ -249,6 +239,7 @@ Transient::execute()
     std::vector<double> dt_list;
     for (auto val : _app.getOutputWarehouse().getSyncTimes())
       sync_times.push_back(val);
+    // this needs to occur before preExecute() is called on old-timestepper because that method modifies the original tfunc_times
     for (auto val : legacy->_tfunc_times)
       time_list.push_back(val);
     for (auto val : legacy->_tfunc_dts)
@@ -256,7 +247,6 @@ Transient::execute()
     double dtmin = dtMin();
     if (legacy->_pps_value && *legacy->_pps_value < dtmin)
       dtmin = *legacy->_pps_value;
-
 
     auto t_limit_func = legacy->_timestep_limiting_function;
     auto piecewise_func = legacy->_piecewise_timestep_limiting_function;
@@ -304,7 +294,18 @@ Transient::execute()
     );
   }
 
+  preExecute();
+
+  // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
+  // The reason is that we actually move the solution back in time before we actually start solving (which I think is wrong).  So this call here
+  // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we might remove this call and regold the test
+  // in the future eventually.
+  if (!_app.isRecovering())
+    _problem.advanceState();
+
   StepperInfo si = { };
+  si.converged = true;
+  si.prev_converged = true;
 
   // Start time loop...
   while (true)
@@ -312,24 +313,26 @@ Transient::execute()
     if (_first != true)
       incrementStepOrReject();
 
-    _first = false;
-
-    if (!keepGoing())
-      break;
-
     // update new style stepper
     double dt = 0;
     if (stepper != nullptr)
     {
       si.time = _time;
+      si.prev_prev_dt = si.prev_dt;
       si.prev_dt = _dt;
-      si.prev_prev_dt = _dt_old;
       si.step_count++;
       si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
       si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
-      si.converged = _fe_problem.converged();
+      si.prev_converged = si.converged;
+      // must come before _first = false
+      si.converged = _fe_problem.converged() || _first;
       dt = stepper->advance(&si);
     }
+
+    _first = false;
+
+    if (!keepGoing())
+      break;
 
     preStep();
     computeDT();

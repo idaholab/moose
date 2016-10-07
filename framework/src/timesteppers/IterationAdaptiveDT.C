@@ -63,7 +63,8 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
     _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
     _l_its(declareRestartableData<unsigned int>("l_its", 0)),
     _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
-    _at_function_point(false)
+    _at_function_point(false),
+    _tfunc_dts(getParam<std::vector<Real> >("time_dt"))
 {
   if (isParamValid("optimal_iterations"))
   {
@@ -319,7 +320,6 @@ IterationAdaptiveDT::computeAdaptiveDT(Real & dt, bool allowToGrow, bool allowTo
   const unsigned int shrink_nl_its(_optimal_iterations + _iteration_window);
   const unsigned int growth_l_its(_optimal_iterations > _iteration_window ? _linear_iteration_ratio * (_optimal_iterations - _iteration_window) : 0);
   const unsigned int shrink_l_its(_linear_iteration_ratio*(_optimal_iterations + _iteration_window));
-
   if (allowToGrow && (_nl_its < growth_nl_its && _l_its < growth_l_its))
   {
     // Grow the timestep

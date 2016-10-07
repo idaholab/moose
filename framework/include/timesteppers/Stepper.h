@@ -67,6 +67,7 @@ struct StepperInfo {
   unsigned int nonlin_iters;
   unsigned int lin_iters;
   bool converged;
+  bool prev_converged;
   double solve_time_secs;
 
   // solution stuff
@@ -388,7 +389,7 @@ public:
   virtual double advance(const StepperInfo* si) {
     Logger l("Adaptive");
     bool can_shrink = true;
-    bool can_grow = si->converged;
+    bool can_grow = si->converged && si->prev_converged;
 
     unsigned int growth_nl_its = 0;
     unsigned int growth_l_its = 0;
