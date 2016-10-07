@@ -25,8 +25,8 @@ public:
 
   virtual void initialize();
   virtual void execute();
-  virtual void threadJoin(const UserObject & uo){};
-  virtual void finalize(){};
+  virtual void threadJoin(const UserObject & uo);
+  virtual void finalize();
   virtual Real returnResidual() const;
   virtual Real returnJacobian() const;
 
