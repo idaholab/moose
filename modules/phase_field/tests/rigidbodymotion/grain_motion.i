@@ -97,14 +97,6 @@
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+(c-eta)^2
     derivative_order = 2
   [../]
-  [./advection_vel]
-    type = GrainAdvectionVelocity
-    grain_force = grain_force
-    etas = eta
-    c = c
-    grain_data = grain_center
-    grain_volumes = grain_volumes
-  [../]
 []
 
 [VectorPostprocessors]

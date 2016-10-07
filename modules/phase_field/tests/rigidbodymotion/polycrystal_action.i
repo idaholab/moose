@@ -102,11 +102,11 @@
     data_type = 'RealGradient'
     grain_num = 2
   [../]
-  [./vadv_x]
+  [./vadvx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vadv_y]
+  [./vadvy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -138,18 +138,20 @@
     property = 'force_density'
   [../]
   [./vadv_x]
-    type = GrainAdvectionVelocityAux
+    type = GrainAdvectionAux
     component = x
-    grain_data = grain_center
+    grain_tracker_object = grain_center
     grain_force = grain_force
-    variable = vadv_x
+    grain_volumes = grain_volumes
+    variable = vadvx
   [../]
   [./vadv_y]
-    type = GrainAdvectionVelocityAux
+    type = GrainAdvectionAux
     component = y
-    grain_data = grain_center
+    grain_tracker_object = grain_center
     grain_force = grain_force
-    variable = vadv_y
+    grain_volumes = grain_volumes
+    variable = vadvy
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
