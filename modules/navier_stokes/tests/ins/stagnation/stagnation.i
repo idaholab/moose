@@ -116,7 +116,7 @@
     p = p
   [../]
   [./x_momentum_space]
-    type = INSMomentum
+    type = INSMomentumLaplaceForm
     variable = vel_x
     u = vel_x
     v = vel_y
@@ -124,7 +124,7 @@
     component = 0
   [../]
   [./y_momentum_space]
-    type = INSMomentum
+    type = INSMomentumLaplaceForm
     variable = vel_y
     u = vel_x
     v = vel_y

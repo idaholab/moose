@@ -4,10 +4,11 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "INSMomentum.h"
+
+#include "INSMomentumBase.h"
 
 template<>
-InputParameters validParams<INSMomentum>()
+InputParameters validParams<INSMomentumBase>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -29,7 +30,7 @@ InputParameters validParams<INSMomentum>()
 
 
 
-INSMomentum::INSMomentum(const InputParameters & parameters) :
+INSMomentumBase::INSMomentumBase(const InputParameters & parameters) :
   Kernel(parameters),
 
   // Coupled variables
@@ -64,7 +65,7 @@ INSMomentum::INSMomentum(const InputParameters & parameters) :
 
 
 
-Real INSMomentum::computeQpResidual()
+Real INSMomentumBase::computeQpResidual()
 {
   // The convection part, rho * (u.grad) * u_component * v.
   // Note: _grad_u is the gradient of the _component entry of the velocity vector.
@@ -80,39 +81,8 @@ Real INSMomentum::computeQpResidual()
   else
     pressure_part = _grad_p[_qp](_component) * _test[_i][_qp];
 
-
-  // The component'th row (or col, it's symmetric) of the viscous stress tensor
-  RealVectorValue tau_row;
-
-  switch (_component)
-  {
-  case 0:
-    tau_row(0) = 2.*_grad_u_vel[_qp](0);                    // 2*du/dx1
-    tau_row(1) = _grad_u_vel[_qp](1) + _grad_v_vel[_qp](0); // du/dx2 + dv/dx1
-    tau_row(2) = _grad_u_vel[_qp](2) + _grad_w_vel[_qp](0); // du/dx3 + dw/dx1
-    break;
-
-  case 1:
-    tau_row(0) = _grad_v_vel[_qp](0) + _grad_u_vel[_qp](1); // dv/dx1 + du/dx2
-    tau_row(1) = 2.*_grad_v_vel[_qp](1);                    // 2*dv/dx2
-    tau_row(2) = _grad_v_vel[_qp](2) + _grad_w_vel[_qp](1); // dv/dx3 + dw/dx2
-    break;
-
-  case 2:
-    tau_row(0) = _grad_w_vel[_qp](0) + _grad_u_vel[_qp](2); // dw/dx1 + du/dx3
-    tau_row(1) = _grad_w_vel[_qp](1) + _grad_v_vel[_qp](2); // dw/dx2 + dv/dx3
-    tau_row(2) = 2.*_grad_w_vel[_qp](2);                    // 2*dw/dx3
-    break;
-
-  default:
-    mooseError("Unrecognized _component requested.");
-  }
-
-  // The viscous part, tau : grad(v)
-  Real viscous_part = _mu * (tau_row * _grad_test[_i][_qp]);
-
-  // Simplified version: mu * Laplacian(u_component)
-  // Real viscous_part = _mu * (_grad_u[_qp] * _grad_test[_i][_qp]);
+  // Call derived class to compute the viscous contribution.
+  Real viscous_part = computeQpResidualViscousPart();
 
   // Body force term.  For truly incompressible flow, this term is constant, and
   // since it is proportional to g, can be written as the gradient of some scalar
@@ -125,20 +95,15 @@ Real INSMomentum::computeQpResidual()
 
 
 
-Real INSMomentum::computeQpJacobian()
+Real INSMomentumBase::computeQpJacobian()
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // Convective part
   Real convective_part = _rho * ((U*_grad_phi[_j][_qp]) + _phi[_j][_qp]*_grad_u[_qp](_component)) * _test[_i][_qp];
 
-  // Viscous part, Stokes/Laplacian version
-  // Real viscous_part = _mu * (_grad_phi[_j][_qp] * _grad_test[_i][_qp]);
-
-  // Viscous part, full stress tensor.  The extra contribution comes from the "2"
-  // on the diagonal of the viscous stress tensor.
-  Real viscous_part = _mu * (_grad_phi[_j][_qp]             * _grad_test[_i][_qp] +
-                             _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
+  // Call derived class to compute the viscous contribution.
+  Real viscous_part = computeQpJacobianViscousPart();
 
   return convective_part + viscous_part;
 }
@@ -146,13 +111,15 @@ Real INSMomentum::computeQpJacobian()
 
 
 
-Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
+Real INSMomentumBase::computeQpOffDiagJacobian(unsigned jvar)
 {
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)
   {
     Real convective_part = _phi[_j][_qp] * _grad_u[_qp](0) * _test[_i][_qp];
-    Real viscous_part = _mu * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](0);
+
+    // Call derived class to compute the viscous contribution.
+    Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
 
     return convective_part + viscous_part;
   }
@@ -160,7 +127,9 @@ Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _v_vel_var_number)
   {
     Real convective_part = _phi[_j][_qp] * _grad_u[_qp](1) * _test[_i][_qp];
-    Real viscous_part = _mu * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](1);
+
+    // Call derived class to compute the viscous contribution.
+    Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
 
     return convective_part + viscous_part;
   }
@@ -168,7 +137,9 @@ Real INSMomentum::computeQpOffDiagJacobian(unsigned jvar)
   else if (jvar == _w_vel_var_number)
   {
     Real convective_part = _phi[_j][_qp] * _grad_u[_qp](2) * _test[_i][_qp];
-    Real viscous_part = _mu * _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](2);
+
+    // Call derived class to compute the viscous contribution.
+    Real viscous_part = computeQpOffDiagJacobianViscousPart(jvar);
 
     return convective_part + viscous_part;
   }

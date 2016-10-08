@@ -74,8 +74,9 @@
 #include "INSMass.h"
 #include "INSMassRZ.h"
 #include "INSMomentumTimeDerivative.h"
-#include "INSMomentum.h"
 #include "INSMomentumRZ.h"
+#include "INSMomentumTractionForm.h"
+#include "INSMomentumLaplaceForm.h"
 #include "INSTemperatureTimeDerivative.h"
 #include "INSTemperature.h"
 #include "INSSplitMomentum.h"
@@ -198,8 +199,12 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSMass);
   registerKernel(INSMassRZ);
   registerKernel(INSMomentumTimeDerivative);
-  registerKernel(INSMomentum);
+  // INSMomentum is now deprecated, convert input files to use
+  // INSMomentumLaplaceForm or INSMomentumTractionForm instead.
+  registerDeprecatedObjectName(INSMomentumTractionForm, "INSMomentum", "10/07/2017 12:00");
   registerKernel(INSMomentumRZ);
+  registerKernel(INSMomentumTractionForm);
+  registerKernel(INSMomentumLaplaceForm);
   registerKernel(INSTemperatureTimeDerivative);
   registerKernel(INSTemperature);
   registerKernel(INSSplitMomentum);

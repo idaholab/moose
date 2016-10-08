@@ -7,7 +7,7 @@
 #ifndef INSMOMENTUMRZ_H
 #define INSMOMENTUMRZ_H
 
-#include "INSMomentum.h"
+#include "INSMomentumTractionForm.h"
 
 // Forward Declarations
 class INSMomentumRZ;
@@ -20,7 +20,7 @@ InputParameters validParams<INSMomentumRZ>();
  * contributions for the incompressible Navier-Stokes momentum
  * equation.
  */
-class INSMomentumRZ : public INSMomentum
+class INSMomentumRZ : public INSMomentumTractionForm
 {
 public:
   INSMomentumRZ(const InputParameters & parameters);
