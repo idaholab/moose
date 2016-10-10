@@ -87,6 +87,22 @@ public:
   virtual Real mu(Real water_density, Real temperature, Real xnacl) const override;
 
   /**
+   * Viscosity of brine and derivatives wrt pressure, temperature and mass fraction
+   * From Phillips et al, A technical databook for geothermal energy utilization,
+   * LbL-12810 (1981).
+   *
+   * @param water_density water density (kg/m^3)
+   * @param temperature brine temperature (K)
+   * @param xnacl salt mass fraction (-)
+   * @param[out] mu viscosity (Pa.s)
+   * @param[out] dmu_drho derivative of viscosity wrt water density
+   * @param[out] dmu_dT derivative of viscosity wrt temperature
+   * @param[out] dmu_dx derivative of viscosity wrt NaCl mass fraction
+   */
+  virtual void mu_drhoTx(Real water_density, Real temperature, Real xnacl, Real & mu, Real & dmu_drho, Real & dmu_dT, Real & dmu_dx) const override;
+
+
+  /**
    * Enthalpy of brine
    * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
    * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
