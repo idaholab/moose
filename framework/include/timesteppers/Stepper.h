@@ -418,6 +418,46 @@ private:
   double _growth_factor;
 };
 
+class StartupStepper : public Stepper
+{
+public:
+  StartupStepper(Stepper* s, double initial_dt, int n_steps = 1) : _stepper(s), _dt(initial_dt), _n(n_steps) { }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    if (si->step_count <= _n)
+      return _dt;
+    return _stepper->advance(si);
+  }
+
+private:
+  Stepper* _stepper;
+  double _dt;
+  int _n;
+};
+
+class GrowShrinkStepper : public Stepper
+{
+public:
+  GrowShrinkStepper( double shrink_factor, double growth_factor) :
+      _grow_fac(growth_factor),
+      _shrink_fac(shrink_factor)
+      { }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    if (!si->converged)
+      return si->prev_dt * _shrink_fac;
+    else if (si->converged && !si->prev_converged)
+      return si->prev_dt * _grow_fac;
+    return si->prev_dt;
+  }
+
+private:
+  double _grow_fac;
+  double _shrink_fac;
+};
+
 class PredictorCorrector : public Stepper
 {
 public:

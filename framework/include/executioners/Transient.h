@@ -25,6 +25,7 @@
 class Transient;
 class TimeStepper;
 class FEProblem;
+class Stepper;
 
 template<>
 InputParameters validParams<Transient>();
@@ -205,6 +206,8 @@ public:
   //iteration count (which starts at 0), increment by 1.
   Real numPicardIts() { return _picard_it+1; }
 
+  Stepper* buildIterationAdaptiveDT();
+  Stepper* buildFunctionDT();
 
 protected:
   /**
@@ -294,6 +297,9 @@ protected:
   Real _solution_change_norm;
 
   void setupTimeIntegrator();
+
+  Real _new_dt;
+  Stepper* _stepper;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

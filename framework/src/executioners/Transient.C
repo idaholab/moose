@@ -26,6 +26,7 @@
 #include "TimePeriod.h"
 #include "Stepper.h"
 #include "IterationAdaptiveDT.h"
+#include "FunctionDT.h"
 #include "Function.h"
 
 // libMesh includes
@@ -134,7 +135,9 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_timestep_end_norm(declareRecoverableData<Real>("picard_timestep_end_norm", 0.0)),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _new_dt(0),
+    _stepper(nullptr)
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
@@ -225,59 +228,93 @@ Transient::postStep()
   _time_stepper->postStep();
 }
 
+Stepper*
+Transient::buildIterationAdaptiveDT()
+{
+  IterationAdaptiveDT* legacy = dynamic_cast<IterationAdaptiveDT*>(_time_stepper.get());
+  Stepper* stepper = nullptr;
+  if (legacy == nullptr)
+    return nullptr;
+
+  std::vector<double> time_list;
+  std::vector<double> dt_list;
+  // this needs to occur before preExecute() is called on old-timestepper because that method modifies the original tfunc_times
+  for (auto val : legacy->_tfunc_times)
+    time_list.push_back(val);
+  for (auto val : legacy->_tfunc_dts)
+    dt_list.push_back(val);
+
+  auto t_limit_func = legacy->_timestep_limiting_function;
+  auto piecewise_func = legacy->_piecewise_timestep_limiting_function;
+  std::vector<double> piecewise_list = legacy->_times;
+
+  stepper = new AdaptiveStepper(
+        legacy->_optimal_iterations,
+        legacy->_iteration_window,
+        legacy->_linear_iteration_ratio,
+        legacy->_cutback_factor, // shrink_factor
+        legacy->_growth_factor
+      );
+
+  stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, timestepTol());
+
+  stepper = new RetryUnusedStepper(stepper);
+  // add function constraints
+  stepper = new ConstrFuncStepper(
+        stepper,
+        [&](double x)->double{if (t_limit_func) return t_limit_func->value(x, Point()); else return 0;},
+        std::max(0.0, legacy->_max_function_change)
+      );
+  // add time_list (piece-wise function points constraint)
+  stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, timestepTol()), stepper, timestepTol());
+  // add time_list (user-specified time points constraint)
+  stepper = new MinOfStepper(new FixedPointStepper(time_list, timestepTol()), stepper, timestepTol());
+  // optional extra post-processor value dtmin constraint
+  if (legacy->_pps_value && *legacy->_pps_value < dtMin())
+    stepper = new DTLimitStepper(stepper, dtMin(), 1e100, false);
+
+  // initial dt
+  stepper = new StartupStepper(stepper, legacy->_input_dt);
+  return stepper;
+}
+
+Stepper*
+Transient::buildFunctionDT()
+{
+  FunctionDT* legacy = dynamic_cast<FunctionDT*>(_time_stepper.get());
+  Stepper* stepper = nullptr;
+  if (legacy == nullptr)
+    return nullptr;
+
+  return nullptr;
+  //stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, timestepTol()), stepper, timestepTol());
+}
+
 void
 Transient::execute()
 {
   ////////////////////////////////////////////////////////////
   // setup and configure new Stepper in parallel here       //
   ////////////////////////////////////////////////////////////
-  IterationAdaptiveDT* legacy = dynamic_cast<IterationAdaptiveDT*>(_time_stepper.get());
   Stepper* stepper = nullptr;
-  if (legacy != nullptr) {
+  if (name() == "IterationAdaptiveDT")
+    stepper = buildIterationAdaptiveDT();
+  else if (name() == "FunctionDT")
+    stepper = buildFunctionDT();
+  _stepper = stepper;
+
+  if (stepper)
+  {
     std::vector<double> sync_times;
-    std::vector<double> time_list;
-    std::vector<double> dt_list;
     for (auto val : _app.getOutputWarehouse().getSyncTimes())
       sync_times.push_back(val);
-    // this needs to occur before preExecute() is called on old-timestepper because that method modifies the original tfunc_times
-    for (auto val : legacy->_tfunc_times)
-      time_list.push_back(val);
-    for (auto val : legacy->_tfunc_dts)
-      dt_list.push_back(val);
 
-    auto t_limit_func = legacy->_timestep_limiting_function;
-    auto piecewise_func = legacy->_piecewise_timestep_limiting_function;
-    std::vector<double> piecewise_list = legacy->_times;
-
-    stepper = new AdaptiveStepper(
-          legacy->_optimal_iterations,
-          legacy->_iteration_window,
-          legacy->_linear_iteration_ratio,
-          legacy->_cutback_factor, // shrink_factor
-          legacy->_growth_factor
-        );
-
-    stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, timestepTol());
-
-    stepper = new RetryUnusedStepper(stepper);
-    // add function constraints
-    stepper = new ConstrFuncStepper(
-          stepper,
-          [&](double x)->double{if (t_limit_func) return t_limit_func->value(x, Point()); else return 0;},
-          std::max(0.0, legacy->_max_function_change)
-        );
-    // add dtmin/max constraints
-    double dtmin = dtMin();
-    if (legacy->_pps_value && *legacy->_pps_value < dtmin)
-      dtmin = *legacy->_pps_value;
-    stepper = new DTLimitStepper(stepper, dtmin, dtMax(), false);
-    // add time_list (piece-wise function points constraint)
-    stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, timestepTol()), stepper, timestepTol());
-    // add time_list (user-specified time points constraint)
-    stepper = new MinOfStepper(new FixedPointStepper(time_list, timestepTol()), stepper, timestepTol());
-    // add sync_times constraint
+    // these are global/sim constraints for *EVERY* time stepper:
+    // dtmin/max constraints
+    stepper = new DTLimitStepper(stepper, dtMin(), dtMax(), false);
+    // sync_times constraint
     stepper = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), stepper, timestepTol());
-    // add max/min sim time constraint
+    // max/min sim time constraint
     stepper = new BoundsStepper(stepper, getStartTime(), endTime(), false);
   }
 
@@ -300,27 +337,21 @@ Transient::execute()
   // Start time loop...
   while (true)
   {
-    double dt = 0;
-    if (legacy)
-      dt = legacy->_input_dt;
     if (_first != true)
-    {
       incrementStepOrReject();
-
-      // update new style stepper
-      si.time = _time;
-      si.prev_prev_dt = si.prev_dt;
-      si.prev_dt = _dt;
-      si.step_count++;
-      si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
-      si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
-      si.prev_converged = si.converged;
-      si.converged = _fe_problem.converged() || si.step_count == 1;
-      if (stepper != nullptr)
-        dt = stepper->advance(&si);
-    }
-
     _first = false;
+
+    // update new style stepper
+    si.time = _time;
+    si.prev_prev_dt = si.prev_dt;
+    si.prev_dt = _dt;
+    si.step_count++;
+    si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
+    si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
+    si.prev_converged = si.converged;
+    si.converged = _fe_problem.converged() || si.step_count == 1;
+    if (stepper != nullptr)
+      _new_dt = stepper->advance(&si);
 
     // print out stepper info
     std::string nonlin_str = "nullptr";
@@ -368,9 +399,7 @@ Transient::execute()
       break;
     preStep();
 
-    std::cout << "SPOTA\n";
     computeDT();
-    std::cout << "SPOTB\n";
     double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
     double constr_legacy_dt = _dt;
@@ -381,7 +410,7 @@ Transient::execute()
 
     if (stepper != nullptr)
     {
-      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, dt, legacy_dt, constr_legacy_dt);
+      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, _new_dt, legacy_dt, constr_legacy_dt);
     }
   }
 
@@ -616,6 +645,8 @@ Transient::endStep(Real input_time)
     _problem.outputStep(EXEC_TIMESTEP_END);
 
     //output
+    // TODO: this is dead code - _time_interval is always false and
+    // _time_interval_output_interval and friends are never used.
     if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
       _next_interval_output_time += _time_interval_output_interval;
   }
@@ -624,19 +655,12 @@ Transient::endStep(Real input_time)
 Real
 Transient::computeConstrainedDT()
 {
-//  // If start up steps are needed
-//  if (_t_step == 1 && _n_startup_steps > 1)
-//    _dt = _input_dt/(double)(_n_startup_steps);
-//  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
-//    _dt = _input_dt;
-
   Real dt_cur = _dt;
   std::ostringstream diag;
 
   //After startup steps, compute new dt
   if (_t_step > _n_startup_steps)
     dt_cur = getDT();
-
   else
   {
     diag << "Timestep < n_startup_steps, using old dt: "
@@ -664,6 +688,7 @@ Transient::computeConstrainedDT()
   _at_sync_point = _time_stepper->constrainStep(dt_cur);
 
   // Don't let time go beyond next time interval output if specified
+  // TODO: delete this dead code - _time_interval is always false
   if ((_time_interval) &&
       (_time + dt_cur + _timestep_tolerance >= _next_interval_output_time))
   {
@@ -749,6 +774,11 @@ Transient::computeConstrainedDT()
 Real
 Transient::getDT()
 {
+  if (_stepper)
+  {
+    std::cout << "NEWDT\n";
+    return _new_dt;
+  }
   return _time_stepper->getCurrentDT();
 }
 
