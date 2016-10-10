@@ -206,8 +206,8 @@ public:
   //iteration count (which starts at 0), increment by 1.
   Real numPicardIts() { return _picard_it+1; }
 
-  Stepper* buildIterationAdaptiveDT();
-  Stepper* buildFunctionDT();
+  Stepper* buildIterationAdaptiveDT(double tol);
+  Stepper* buildFunctionDT(double tol);
 
 protected:
   /**

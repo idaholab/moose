@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#define USE_NEW_STEPPER false
+
 #include "Transient.h"
 
 // MOOSE includes
@@ -229,7 +231,7 @@ Transient::postStep()
 }
 
 Stepper*
-Transient::buildIterationAdaptiveDT()
+Transient::buildIterationAdaptiveDT(double tol)
 {
   IterationAdaptiveDT* legacy = dynamic_cast<IterationAdaptiveDT*>(_time_stepper.get());
   Stepper* stepper = nullptr;
@@ -256,7 +258,7 @@ Transient::buildIterationAdaptiveDT()
         legacy->_growth_factor
       );
 
-  stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, timestepTol());
+  stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
 
   stepper = new RetryUnusedStepper(stepper);
   // add function constraints
@@ -266,9 +268,9 @@ Transient::buildIterationAdaptiveDT()
         std::max(0.0, legacy->_max_function_change)
       );
   // add time_list (piece-wise function points constraint)
-  stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, timestepTol()), stepper, timestepTol());
+  stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
   // add time_list (user-specified time points constraint)
-  stepper = new MinOfStepper(new FixedPointStepper(time_list, timestepTol()), stepper, timestepTol());
+  stepper = new MinOfStepper(new FixedPointStepper(time_list, tol), stepper, tol);
   // optional extra post-processor value dtmin constraint
   if (legacy->_pps_value && *legacy->_pps_value < dtMin())
     stepper = new DTLimitStepper(stepper, dtMin(), 1e100, false);
@@ -279,7 +281,7 @@ Transient::buildIterationAdaptiveDT()
 }
 
 Stepper*
-Transient::buildFunctionDT()
+Transient::buildFunctionDT(double tol)
 {
   FunctionDT* legacy = dynamic_cast<FunctionDT*>(_time_stepper.get());
   Stepper* stepper = nullptr;
@@ -287,7 +289,7 @@ Transient::buildFunctionDT()
     return nullptr;
 
   return nullptr;
-  //stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, timestepTol()), stepper, timestepTol());
+  //stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
 }
 
 void
@@ -297,10 +299,10 @@ Transient::execute()
   // setup and configure new Stepper in parallel here       //
   ////////////////////////////////////////////////////////////
   Stepper* stepper = nullptr;
-  if (name() == "IterationAdaptiveDT")
-    stepper = buildIterationAdaptiveDT();
-  else if (name() == "FunctionDT")
-    stepper = buildFunctionDT();
+  if (!stepper)
+    stepper = buildIterationAdaptiveDT(timestepTol());
+  if (!stepper)
+    stepper = buildFunctionDT(timestepTol());
   _stepper = stepper;
 
   if (stepper)
@@ -349,7 +351,9 @@ Transient::execute()
     si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
     si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
     si.prev_converged = si.converged;
-    si.converged = _fe_problem.converged() || si.step_count == 1;
+    // this explicit FEProblem call prevents tests that subclass FEProblem
+    // with stateful overrides of converged() from erroneously failing.
+    si.converged = _fe_problem.FEProblem::converged() || si.step_count == 1;
     if (stepper != nullptr)
       _new_dt = stepper->advance(&si);
 
@@ -409,9 +413,7 @@ Transient::execute()
     _steps_taken++;
 
     if (stepper != nullptr)
-    {
       printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, _new_dt, legacy_dt, constr_legacy_dt);
-    }
   }
 
   if (!_app.halfTransient())
@@ -774,7 +776,7 @@ Transient::computeConstrainedDT()
 Real
 Transient::getDT()
 {
-  if (_stepper)
+  if (_stepper && USE_NEW_STEPPER)
   {
     std::cout << "NEWDT\n";
     return _new_dt;
