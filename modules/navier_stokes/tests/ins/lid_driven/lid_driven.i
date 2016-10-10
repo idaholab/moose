@@ -28,48 +28,29 @@
 
 
 [Variables]
-  # x-velocity
-  [./u]
+  [./vel_x]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+
+  [./vel_y]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+
+  [./T]
     order = SECOND
     family = LAGRANGE
 
     [./InitialCondition]
       type = ConstantIC
-      value = 0.0
+      value = 1.0
     [../]
   [../]
 
-  # y-velocity
-  [./v]
-    order = SECOND
-    family = LAGRANGE
-
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
-  [../]
-
- # Temperature
- [./T]
-   order = SECOND
-   family = LAGRANGE
-
-   [./InitialCondition]
-     type = ConstantIC
-     value = 1.0
-   [../]
- [../]
-
-  # Pressure
   [./p]
     order = FIRST
     family = LAGRANGE
-
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0 # This number is arbitrary for NS...
-    [../]
   [../]
 []
 
@@ -80,8 +61,8 @@
   [./mass]
     type = INSMass
     variable = p
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     p = p
   [../]
 
@@ -90,15 +71,15 @@
   # x-momentum, time
   [./x_momentum_time]
     type = INSMomentumTimeDerivative
-    variable = u
+    variable = vel_x
   [../]
 
   # x-momentum, space
   [./x_momentum_space]
-    type = INSMomentum
-    variable = u
-    u = u
-    v = v
+    type = INSMomentumLaplaceForm
+    variable = vel_x
+    u = vel_x
+    v = vel_y
     p = p
     component = 0
   [../]
@@ -108,15 +89,15 @@
   # y-momentum, time
   [./y_momentum_time]
     type = INSMomentumTimeDerivative
-    variable = v
+    variable = vel_y
   [../]
 
   # y-momentum, space
   [./y_momentum_space]
-    type = INSMomentum
-    variable = v
-    u = u
-    v = v
+    type = INSMomentumLaplaceForm
+    variable = vel_y
+    u = vel_x
+    v = vel_y
     p = p
     component = 1
   [../]
@@ -137,8 +118,8 @@
  [./temperature_space]
    type = INSTemperature
    variable = T
-   u = u
-   v = v
+   u = vel_x
+   v = vel_y
  [../]
 []
 
@@ -148,24 +129,21 @@
 [BCs]
   [./x_no_slip]
     type = DirichletBC
-    variable = u
-    # boundary = '0 1 3'
+    variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
   [../]
 
   [./lid]
     type = DirichletBC
-    variable = u
-    # boundary = '2'
+    variable = vel_x
     boundary = 'top'
     value = 10.0
   [../]
 
   [./y_no_slip]
     type = DirichletBC
-    variable = v
-    # boundary = '0 1 2 3'
+    variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
   [../]
@@ -173,7 +151,6 @@
  [./T_hot]
    type = DirichletBC
    variable = T
-   #boundary = '0'
    boundary = 'bottom'
    value = 1
  [../]
@@ -181,7 +158,6 @@
  [./T_cold]
    type = DirichletBC
    variable = T
-   #boundary = '2'
    boundary = 'top'
    value = 0
  [../]
@@ -193,9 +169,7 @@
   [./SMP_PJFNK]
     type = SMP
     full = true
-
-    # Preconditioned JFNK (default)
-    solve_type = 'PJFNK'
+    solve_type = 'NEWTON'
   [../]
 []
 
@@ -204,25 +178,9 @@
   type = Transient
   dt = 1.e-2
   dtmin = 1.e-2
-
-  # Basic GMRES/linesearch options only
-  petsc_options_iname = '-ksp_gmres_restart '
-  petsc_options_value = '300                '
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
+  petsc_options_value = 'asm      2               ilu          4'
   line_search = 'none'
-
-  # MOOSE does not correctly read these options!! Always run with actual command line arguments if
-  # you want to guarantee you are getting pilut!  Also, even though there are pilut defaults,
-  # i'm not sure that petsc actually passes them through, so always specify them!.
-  #
-  # PILUT options:
-  # -pc_type hypre -pc_hypre_type pilut -pc_hypre_pilut_factorrowsize 20 -pc_hypre_pilut_tol 1.e-4
-  #
-  # PETSc ILU options (parallel):
-  # -sub_pc_type ilu -sub_pc_factor_levels 2
-  #
-  # ASM options (to be used in conjunction with ILU sub_pc)
-  # -pc_type asm -pc_asm_overlap 2
-
   nl_rel_tol = 1e-9
   nl_max_its = 6
   l_tol = 1e-6

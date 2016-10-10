@@ -9,14 +9,14 @@
 template<>
 InputParameters validParams<INSMomentumRZ>()
 {
-  InputParameters params = validParams<INSMomentum>();
+  InputParameters params = validParams<INSMomentumTractionForm>();
   return params;
 }
 
 
 
 INSMomentumRZ::INSMomentumRZ(const InputParameters & parameters) :
-  INSMomentum(parameters)
+    INSMomentumTractionForm(parameters)
 {
 }
 
@@ -24,7 +24,7 @@ INSMomentumRZ::INSMomentumRZ(const InputParameters & parameters) :
 Real INSMomentumRZ::computeQpResidual()
 {
   // Base class residual contribution
-  Real res_base = INSMomentum::computeQpResidual();
+  Real res_base = INSMomentumTractionForm::computeQpResidual();
 
   if (_component == 0)
   {
@@ -47,7 +47,7 @@ Real INSMomentumRZ::computeQpResidual()
 Real INSMomentumRZ::computeQpJacobian()
 {
   // Base class jacobian contribution
-  Real jac_base = INSMomentum::computeQpJacobian();
+  Real jac_base = INSMomentumTractionForm::computeQpJacobian();
 
   // If this is the radial component of momentum, there is an extra term for RZ.
   if (_component == 0)
@@ -65,7 +65,7 @@ Real INSMomentumRZ::computeQpJacobian()
 Real INSMomentumRZ::computeQpOffDiagJacobian(unsigned jvar)
 {
   // Base class jacobian contribution
-  Real jac_base = INSMomentum::computeQpOffDiagJacobian(jvar);
+  Real jac_base = INSMomentumTractionForm::computeQpOffDiagJacobian(jvar);
 
   // If we're getting the pressure Jacobian contribution, and we
   // integrated the pressure term by parts, there is an extra term for
