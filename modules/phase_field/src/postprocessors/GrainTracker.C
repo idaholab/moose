@@ -110,14 +110,14 @@ GrainTracker::getTotalFeatureCount() const
 Point
 GrainTracker::getGrainCentroid(unsigned int grain_id) const
 {
-  mooseAssert(grain_id < _grain_id_to_grain_index.size(), "Grain ID out of bounds");
-  auto grain_index = _grain_id_to_grain_index[grain_id];
+  mooseAssert(grain_id < _feature_id_to_local_index.size(), "Grain ID out of bounds");
+  auto grain_index = _feature_id_to_local_index[grain_id];
 
   if (grain_index != invalid_size_t)
   {
-    mooseAssert(_grain_id_to_grain_index[grain_id] < _feature_sets.size(), "Grain index out of bounds");
+    mooseAssert(_feature_id_to_local_index[grain_id] < _feature_sets.size(), "Grain index out of bounds");
     // Note: This value is parallel consistent, see GrainTracker::broadcastAndUpdateGrainData()
-    return _feature_sets[_grain_id_to_grain_index[grain_id]]._centroid;
+    return _feature_sets[_feature_id_to_local_index[grain_id]]._centroid;
   }
 
   // Inactive grain
@@ -128,9 +128,9 @@ bool
 GrainTracker::doesFeatureIntersectBoundary(unsigned int feature_id) const
 {
   // TODO: This data structure may need to be turned into a Multimap
-  mooseAssert(feature_id < _grain_id_to_grain_index.size(), "Grain ID out of bounds");
+  mooseAssert(feature_id < _feature_id_to_local_index.size(), "Grain ID out of bounds");
 
-  auto feature_index = _grain_id_to_grain_index[feature_id];
+  auto feature_index = _feature_id_to_local_index[feature_id];
   if (feature_index != invalid_size_t)
   {
     mooseAssert(feature_index < _feature_sets.size(), "Grain index out of bounds");
@@ -238,20 +238,6 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::s
   else
     // Just use normal variable inspection on subsequent steps
     return FeatureFloodCount::isNewFeatureOrConnectedRegion(dof_object, current_index, feature, new_id);
-}
-
-void
-GrainTracker::buildGrainIdToGrainIndex(unsigned int max_id)
-{
-  /**
-   * Build grain id to grain index mapping
-   */
-  _grain_id_to_grain_index.assign(max_id + 1, invalid_size_t);
-  for (auto grain_index = beginIndex(_feature_sets); grain_index < _feature_sets.size(); ++grain_index)
-  {
-    mooseAssert(_feature_sets[grain_index]._id <= max_id, "Grain ID out of range");
-    _grain_id_to_grain_index[_feature_sets[grain_index]._id] = grain_index;
-  }
 }
 
 void
@@ -363,10 +349,10 @@ GrainTracker::broadcastAndUpdateGrainData()
     for (const auto & partial_data : root_feature_data)
     {
       // See if this processor has a record of this grain
-      if (partial_data.id < _grain_id_to_grain_index.size() &&
-          _grain_id_to_grain_index[partial_data.id] != invalid_size_t)
+      if (partial_data.id < _feature_id_to_local_index.size() &&
+          _feature_id_to_local_index[partial_data.id] != invalid_size_t)
       {
-        auto & grain = _feature_sets[_grain_id_to_grain_index[partial_data.id]];
+        auto & grain = _feature_sets[_feature_id_to_local_index[partial_data.id]];
         grain._intersects_boundary = partial_data.intersects_boundary;
         grain._centroid = partial_data.centroid;
       }
@@ -512,7 +498,7 @@ GrainTracker::assignGrains()
 
   // Build up an id to index map
   _communicator.broadcast(_max_curr_grain_id);
-  buildGrainIdToGrainIndex(_max_curr_grain_id);
+  buildFeatureIdToLocalIndices(_max_curr_grain_id);
 
   // Now trigger the newGrainCreated() callback on all ranks
   for (auto new_id = decltype(_max_curr_grain_id)(0); new_id <= _max_curr_grain_id; ++new_id)
@@ -707,7 +693,7 @@ GrainTracker::trackGrains()
 
   // Build up an id to index map
   _communicator.broadcast(_max_curr_grain_id);
-  buildGrainIdToGrainIndex(_max_curr_grain_id);
+  buildFeatureIdToLocalIndices(_max_curr_grain_id);
 
   /**
    * Trigger callback for new grains
@@ -726,8 +712,8 @@ GrainTracker::newGrainCreated(unsigned int new_grain_id)
 {
   if (!_first_time && _is_master)
   {
-    mooseAssert(new_grain_id < _grain_id_to_grain_index.size(), "new_grain_id is out of bounds");
-    auto grain_index = _grain_id_to_grain_index[new_grain_id];
+    mooseAssert(new_grain_id < _feature_id_to_local_index.size(), "new_grain_id is out of bounds");
+    auto grain_index = _feature_id_to_local_index[new_grain_id];
     mooseAssert(grain_index != invalid_size_t &&
                 grain_index < _feature_sets.size(), "new_grain_id appears to be invalid");
 

@@ -100,11 +100,6 @@ protected:
   void remapGrains();
 
   /**
-   * Builds a grain ID to grain index for operations that need to access a grain by ID instead of index.
-   */
-  void buildGrainIdToGrainIndex(unsigned int max_id);
-
-  /**
    * Broadcast essential Grain information to all processors. This method is used to get certain
    * attributes like centroids distributed and whether or not a grain intersects a boundary updated.
    */
@@ -210,9 +205,6 @@ protected:
 
   /// Boolean to indicate that we should retrieve EBSD information from a specific phase
   const bool _consider_phase;
-
-  /// Data structure to hold grain_id to grain_index
-  std::vector<std::size_t> _grain_id_to_grain_index;
 
 private:
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)

@@ -375,6 +375,14 @@ protected:
   virtual void buildLocalToGlobalIndices(std::vector<std::size_t> & local_to_global_all, std::vector<int> & counts) const;
 
   /**
+   * This method builds a lookup map for retrieving the right local feature (by index) given a global
+   * index or id. max_id is passed to size the vector properly and may or may not be a globally consistent
+   * number. The assumption is that any id that is later queried from this object that is higher simply
+   * doesn't exist on the local processor.
+   */
+  void buildFeatureIdToLocalIndices(unsigned int max_id);
+
+  /**
    * Helper routine for clearing up data structures during initialize and prior to parallel
    * communication.
    */
@@ -512,8 +520,11 @@ protected:
    */
   std::vector<std::map<dof_id_type, int> > _feature_maps;
 
-  /// The map recording the local to global feature indices
+  /// The vector recording the local to global feature indices
   std::vector<std::size_t> _local_to_global_feature_map;
+
+  /// The vector recording the grain_id to local index (several indices will contain invalid_size_t)
+  std::vector<std::size_t> _feature_id_to_local_index;
 
   /// A pointer to the periodic boundary constraints object
   PeriodicBoundaries *_pbs;
