@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define USE_NEW_STEPPER false
+#define USE_NEW_STEPPER true
 
 #include "Transient.h"
 
@@ -331,7 +331,7 @@ Transient::execute()
 
   StepperInfo si = { };
   si.converged = true;
-  si.step_count = 1;
+  si.step_count = 0;
   si.prev_converged = true;
 
   std::string type = name();
@@ -406,12 +406,12 @@ Transient::execute()
     computeDT();
     double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
-    double constr_legacy_dt = _dt;
     endStep();
     postStep();
 
     _steps_taken++;
 
+    double constr_legacy_dt = _dt;
     if (stepper != nullptr)
       printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, _new_dt, legacy_dt, constr_legacy_dt);
   }
