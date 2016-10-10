@@ -68,6 +68,7 @@
 #include "ComputeFiniteStrainElasticStress.h"
 #include "ComputeVariableElasticConstantStress.h"
 #include "ComputeEigenstrain.h"
+#include "ComputeExtraStressConstant.h"
 #include "ComputeVariableBaseEigenStrain.h"
 #include "ComputeVariableEigenstrain.h"
 #include "ComputeThermalExpansionEigenstrain.h"
@@ -256,6 +257,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeFiniteStrainElasticStress);
   registerMaterial(ComputeVariableElasticConstantStress);
   registerMaterial(ComputeEigenstrain);
+  registerMaterial(ComputeExtraStressConstant);
   registerMaterial(ComputeVariableBaseEigenStrain);
   registerMaterial(ComputeVariableEigenstrain);
   registerDeprecatedObjectName(ComputeThermalExpansionEigenstrain, "ComputeThermalExpansionEigenStrain", "12/19/2016 00:00");
