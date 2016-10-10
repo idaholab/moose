@@ -187,14 +187,14 @@ Console::Console(const InputParameters & parameters) :
     _system_info_flags.push_back("output");
 
   // Set output coloring
-  if (Moose::_color_console)
+  if (Moose::colorConsole())
   {
     char * term_env = getenv("TERM");
     if (term_env)
     {
       std::string term(term_env);
       if (term != "xterm-256color" && term != "xterm")
-        Moose::_color_console = false;
+        Moose::setColorConsole(false);
     }
   }
 }
