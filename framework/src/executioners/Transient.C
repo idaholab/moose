@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define USE_NEW_STEPPER true
+#define USE_NEW_STEPPER false
 
 #include "Transient.h"
 
@@ -260,7 +260,6 @@ Transient::buildIterationAdaptiveDT(double tol)
 
   stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
 
-  stepper = new RetryUnusedStepper(stepper);
   // add function constraints
   stepper = new ConstrFuncStepper(
         stepper,
@@ -271,9 +270,12 @@ Transient::buildIterationAdaptiveDT(double tol)
   stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
   // add time_list (user-specified time points constraint)
   stepper = new MinOfStepper(new FixedPointStepper(time_list, tol), stepper, tol);
+  // retry unused dt's
+  stepper = new RetryUnusedStepper(stepper);
   // optional extra post-processor value dtmin constraint
   if (legacy->_pps_value && *legacy->_pps_value < dtMin())
     stepper = new DTLimitStepper(stepper, dtMin(), 1e100, false);
+  // TODO: add another layer to replicate SPOT6 cout area in IterationAdaptiveDT.C
 
   // initial dt
   stepper = new StartupStepper(stepper, legacy->_input_dt);
