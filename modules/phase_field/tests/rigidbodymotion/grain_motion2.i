@@ -27,15 +27,11 @@
 []
 
 [AuxVariables]
-  [./vadv00]
+  [./vadvx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vadv01]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv0_div]
+  [./vadvy]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -107,21 +103,21 @@
 []
 
 [AuxKernels]
-  [./vadv00]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv00
-    property = advection_velocity
+  [./vadv_x]
+    type = GrainAdvectionAux
+    component = x
+    grain_tracker_object = grain_center
+    grain_force = grain_force
+    grain_volumes = grain_volumes
+    variable = vadvx
   [../]
-  [./vadv01]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv01
-    property = advection_velocity
-    component = 1
-  [../]
-  [./vadv0_div]
-    type = MaterialStdVectorAux
-    variable = vadv0_div
-    property = advection_velocity_divergence
+  [./vadv_y]
+    type = GrainAdvectionAux
+    component = y
+    grain_tracker_object = grain_center
+    grain_force = grain_force
+    grain_volumes = grain_volumes
+    variable = vadvy
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
@@ -152,13 +148,6 @@
     constant_expressions = '0.1          1.0e-2'
     function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+(c-eta)^2
     derivative_order = 2
-  [../]
-  [./advection_vel]
-    type = GrainAdvectionVelocity
-    grain_force = grain_force
-    etas = eta
-    c = c
-    grain_data = grain_center
   [../]
 []
 
