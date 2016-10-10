@@ -60,24 +60,29 @@ GrainRigidBodyMotionBase::timestepSetup()
   _total_dofs = _subproblem.es().n_dofs();
 }
 
-void
-GrainRigidBodyMotionBase::getUserObjectCJacobians(dof_id_type dof_index, unsigned int grain_index)
+bool
+GrainRigidBodyMotionBase::globalDoFEnabled(MooseVariable & /*var*/, dof_id_type /*dof_index*/)
 {
-  _force_c_jacobian(0) = _grain_force_c_jacobians[(6*grain_index+0)*_total_dofs+dof_index];
-  _force_c_jacobian(1) = _grain_force_c_jacobians[(6*grain_index+1)*_total_dofs+dof_index];
-  _force_c_jacobian(2) = _grain_force_c_jacobians[(6*grain_index+2)*_total_dofs+dof_index];
-  _torque_c_jacobian(0) = _grain_force_c_jacobians[(6*grain_index+3)*_total_dofs+dof_index];
-  _torque_c_jacobian(1) = _grain_force_c_jacobians[(6*grain_index+4)*_total_dofs+dof_index];
-  _torque_c_jacobian(2) = _grain_force_c_jacobians[(6*grain_index+5)*_total_dofs+dof_index];
+  if (_velocity_advection_jacobian(0) == 0 && _velocity_advection_jacobian(1) == 0 && _velocity_advection_jacobian(2) == 0)
+    return false;
+
+  return true;
 }
 
 void
-GrainRigidBodyMotionBase::getUserObjectEtaJacobians(dof_id_type dof_index, unsigned int jvar_index, unsigned int grain_index)
+GrainRigidBodyMotionBase::precalculateResidual()
 {
-  _force_eta_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_index+0)*_total_dofs+dof_index];
-  _force_eta_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_index+1)*_total_dofs+dof_index];
-  _force_eta_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_index+2)*_total_dofs+dof_index];
-  _torque_eta_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_index+3)*_total_dofs+dof_index];
-  _torque_eta_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_index+4)*_total_dofs+dof_index];
-  _torque_eta_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_index+5)*_total_dofs+dof_index];
+  calculateAdvectionVelocity();
+}
+
+void
+GrainRigidBodyMotionBase::precalculateJacobian()
+{
+  calculateAdvectionVelocity();
+}
+
+void
+GrainRigidBodyMotionBase::precalculateOffDiagJacobian(unsigned int /* jvar */)
+{
+  calculateAdvectionVelocity();
 }
