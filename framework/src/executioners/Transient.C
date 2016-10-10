@@ -244,54 +244,41 @@ Transient::execute()
       time_list.push_back(val);
     for (auto val : legacy->_tfunc_dts)
       dt_list.push_back(val);
-    double dtmin = dtMin();
-    if (legacy->_pps_value && *legacy->_pps_value < dtmin)
-      dtmin = *legacy->_pps_value;
 
     auto t_limit_func = legacy->_timestep_limiting_function;
     auto piecewise_func = legacy->_piecewise_timestep_limiting_function;
     std::vector<double> piecewise_list = legacy->_times;
 
-    stepper = new BoundsStepper(
-        new MinOfStepper(
-            new FixedPointStepper(sync_times, timestepTol()),
-            new MinOfStepper(
-                new FixedPointStepper(time_list, timestepTol()),
-                new MinOfStepper(
-                    new FixedPointStepper(piecewise_list, timestepTol()),
-                    new DTLimitStepper(
-                        new ConstrFuncStepper(
-                            new RetryUnusedStepper(
-                                new AlternatingStepper(
-                                    new PiecewiseStepper(time_list, dt_list),
-                                    new AdaptiveStepper(
-                                        legacy->_optimal_iterations,
-                                        legacy->_iteration_window,
-                                        legacy->_linear_iteration_ratio,
-                                        legacy->_cutback_factor, // shrink_factor
-                                        legacy->_growth_factor
-                                    ),
-                                    time_list,
-                                    timestepTol()
-                                )
-                            ),
-                            [&](double x)->double{if (t_limit_func) return t_limit_func->value(x, Point()); else return 0;},
-                            std::max(0.0, legacy->_max_function_change)
-                        ),
-                        dtmin,
-                        dtMax(),
-                        false
-                    ),
-                    timestepTol()
-                ),
-                timestepTol()
-            ),
-            timestepTol()
-        ),
-        getStartTime(),
-        endTime(),
-        false
-    );
+    stepper = new AdaptiveStepper(
+          legacy->_optimal_iterations,
+          legacy->_iteration_window,
+          legacy->_linear_iteration_ratio,
+          legacy->_cutback_factor, // shrink_factor
+          legacy->_growth_factor
+        );
+
+    stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, timestepTol());
+
+    stepper = new RetryUnusedStepper(stepper);
+    // add function constraints
+    stepper = new ConstrFuncStepper(
+          stepper,
+          [&](double x)->double{if (t_limit_func) return t_limit_func->value(x, Point()); else return 0;},
+          std::max(0.0, legacy->_max_function_change)
+        );
+    // add dtmin/max constraints
+    double dtmin = dtMin();
+    if (legacy->_pps_value && *legacy->_pps_value < dtmin)
+      dtmin = *legacy->_pps_value;
+    stepper = new DTLimitStepper(stepper, dtmin, dtMax(), false);
+    // add time_list (piece-wise function points constraint)
+    stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, timestepTol()), stepper, timestepTol());
+    // add time_list (user-specified time points constraint)
+    stepper = new MinOfStepper(new FixedPointStepper(time_list, timestepTol()), stepper, timestepTol());
+    // add sync_times constraint
+    stepper = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), stepper, timestepTol());
+    // add max/min sim time constraint
+    stepper = new BoundsStepper(stepper, getStartTime(), endTime(), false);
   }
 
   preExecute();
@@ -308,28 +295,74 @@ Transient::execute()
   si.step_count = 1;
   si.prev_converged = true;
 
+  std::string type = name();
+  std::cout << "FIXTURE: type=" << type << "\n";
   // Start time loop...
   while (true)
   {
-    double dt = legacy->_input_dt;
+    double dt = 0;
+    if (legacy)
+      dt = legacy->_input_dt;
     if (_first != true)
     {
       incrementStepOrReject();
-     // update new style stepper
+
+      // update new style stepper
+      si.time = _time;
+      si.prev_prev_dt = si.prev_dt;
+      si.prev_dt = _dt;
+      si.step_count++;
+      si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
+      si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
+      si.prev_converged = si.converged;
+      si.converged = _fe_problem.converged() || si.step_count == 1;
       if (stepper != nullptr)
-      {
-        si.time = _time;
-        si.prev_prev_dt = si.prev_dt;
-        si.prev_dt = _dt;
-        si.step_count++;
-        si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
-        si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
-        si.prev_converged = si.converged;
-        si.converged = _fe_problem.converged() || si.step_count == 1;
         dt = stepper->advance(&si);
-      }
     }
+
     _first = false;
+
+    // print out stepper info
+    std::string nonlin_str = "nullptr";
+    std::string aux_str = "nullptr";
+    std::string predicted_str = "nullptr";
+    if (si.soln_nonlin)
+    {
+      std::stringstream ss;
+      si.soln_nonlin->print(ss);
+      nonlin_str = ss.str();
+    }
+    if (si.soln_aux)
+    {
+      std::stringstream ss;
+      si.soln_aux->print(ss);
+      aux_str = ss.str();
+    }
+    if (si.soln_predicted)
+    {
+      std::stringstream ss;
+      si.soln_predicted->print(ss);
+      predicted_str = ss.str();
+    }
+
+    std::cout << "FIXTURE: StepperInfo = {"
+      << si.step_count << ", "
+      << si.time << ", "
+      << si.prev_dt << ", "
+      << si.prev_prev_dt << ", "
+      << si.time_integrator << ", "
+      << si.nonlin_iters << ", "
+      << si.lin_iters << ", "
+      << si.converged << ", "
+      << si.prev_converged << ", "
+      << si.solve_time_secs << ", "
+      << nonlin_str << ", "
+      << aux_str << ", "
+      << predicted_str << ", "
+      << si.sched_backup << ", "
+      << si.sched_restore << ", "
+      << si.restore_time
+      << "};\n";
 
     if (!keepGoing())
       break;
