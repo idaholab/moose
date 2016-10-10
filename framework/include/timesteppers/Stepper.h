@@ -359,8 +359,8 @@ public:
     double dta = _a->advance(si);
     double dtb = _b->advance(si);
     if (dta - _tol < dtb)
-      return dta;
-    return dtb;
+      return l.val(dta);
+    return l.val(dtb);
   }
 
 private:
