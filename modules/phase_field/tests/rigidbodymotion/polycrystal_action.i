@@ -90,31 +90,25 @@
     c = c
     etas ='eta0 eta1'
   [../]
-  [./advection_vel]
-    type = GrainAdvectionVelocity
-    etas = 'eta0 eta1'
-    c = c
-    grain_data = grain_center
-    grain_force = grain_force
-    grain_volumes = grain_volumes
-  [../]
 []
 
 [AuxVariables]
   [./bnds]
   [../]
-  #[./MultiAuxVariables]
-  #  order = CONSTANT
-  #  family = MONOMIAL
-  #  var_name_base = 'df vadv'
-  #  op_num = 2
-  #[../]
   [./MultiAuxVariables]
     order = CONSTANT
     family = MONOMIAL
-    variable_base = 'df vadv vadv_div'
-    data_type = 'RealGradient RealGradient Real'
+    variable_base = 'df'
+    data_type = 'RealGradient'
     grain_num = 2
+  [../]
+  [./vadvx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./vadvy]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./unique_grains]
     order = CONSTANT
@@ -139,14 +133,25 @@
     v = 'eta0 eta1'
   [../]
   [./MaterialVectorGradAuxKernel]
-    variable_base = 'df vadv '
+    variable_base = 'df'
     grain_num = 2
-    property = 'force_density advection_velocity'
+    property = 'force_density'
   [../]
-  [./MaterialVectorAuxKernel]
-    variable_base = 'vadv_div '
-    grain_num = 2
-    property = 'advection_velocity_divergence'
+  [./vadv_x]
+    type = GrainAdvectionAux
+    component = x
+    grain_tracker_object = grain_center
+    grain_force = grain_force
+    grain_volumes = grain_volumes
+    variable = vadvx
+  [../]
+  [./vadv_y]
+    type = GrainAdvectionAux
+    component = y
+    grain_tracker_object = grain_center
+    grain_force = grain_force
+    grain_volumes = grain_volumes
+    variable = vadvy
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
