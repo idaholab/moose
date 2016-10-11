@@ -14,4 +14,9 @@
     input = 'elastic_rotation_test.i'
     exodiff = 'elastic_rotation_test_out.e'
   [../]
+  [./eigen_sol]
+    type = 'Exodiff'
+    input = 'finite_strain_elastic_eigen_sol.i'
+    exodiff = 'finite_strain_elastic_eigen_sol_out.e'
+  [../]
 []
