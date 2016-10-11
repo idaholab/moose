@@ -267,11 +267,11 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
   stepper = new StartupStepper(stepper, legacy->_input_dt, std::max(1, n_startup_steps));
   // Original IterationAdaptiveDT stepper constrains to simulation end time
   // *before* applying other constraints - sometimes resulting in an
-  // over-constrained dt - for example a the dt divide-by-two algo to satisfy
-  // function maping constraints will start with a smaller dt than it would
+  // over-constrained dt - for example a dt divide-by-two algo to satisfy
+  // function mapping constraints will start with a smaller dt than it would
   // have otherwise - and it might end up generating a dt that satisfies
   // simulation time end constraint without having to enforce that constraint
-  // anyway.  This behavior is undesirable.  The simulation end constraint should
+  // explicitly.  This behavior is undesirable.  The simulation end constraint should
   // be the last constraint enforced.
   stepper = new BoundsStepper(stepper, getStartTime(), endTime(), false); // This is stupid.
   if (t_limit_func)
