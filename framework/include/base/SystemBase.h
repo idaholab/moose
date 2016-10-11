@@ -134,8 +134,8 @@ public:
    */
   virtual void solve();
 
-  virtual void copyOldSolutions() = 0;
-  virtual void restoreSolutions() = 0;
+  virtual void copyOldSolutions();
+  virtual void restoreSolutions();
 
   /**
    * The solution vector that is currently being operated on.
@@ -429,6 +429,11 @@ public:
 
   void copyVars(ExodusII_IO & io);
 
+  /**
+   * Copy current solution into old and older
+   */
+  virtual void copySolutionsBackwards();
+
 protected:
   SubProblem & _subproblem;
 
@@ -482,39 +487,9 @@ public:
   {
   }
 
-
   virtual NumericVector<Number> & solution() { return _solution; }
   virtual NumericVector<Number> & solutionOld() { return _solution_old; }
   virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
-
-  /**
-   * Copy current solution into old and older
-   */
-  virtual void copySolutionsBackwards()
-  {
-    _sys.update();
-    *_sys.older_local_solution = *_sys.current_local_solution;
-    *_sys.old_local_solution   = *_sys.current_local_solution;
-  }
-
-  /**
-   * Shifts the solutions backwards in time
-   */
-  virtual void copyOldSolutions()
-  {
-    *_sys.older_local_solution = *_sys.old_local_solution;
-    *_sys.old_local_solution = *_sys.current_local_solution;
-  }
-
-  /**
-   * Restore current solutions (call after your solve failed)
-   */
-  virtual void restoreSolutions()
-  {
-    *_sys.current_local_solution = *_sys.old_local_solution;
-    *_sys.solution = *_sys.old_local_solution;
-    _sys.update();
-  }
 
   /**
    * Get a reference to libMesh system object
@@ -522,9 +497,7 @@ public:
    */
   T & sys() { return _sys; }
 
-
   virtual System & system() { return _sys; }
-
 
 protected:
   T & _sys;

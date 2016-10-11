@@ -621,3 +621,33 @@ void SystemBase::solve()
 {
   system().solve();
 }
+
+/**
+ * Copy current solution into old and older
+ */
+void SystemBase::copySolutionsBackwards()
+{
+  system().update();
+  solutionOlder() = *currentSolution();
+  solutionOld()   = *currentSolution();
+}
+
+/**
+ * Shifts the solutions backwards in time
+ */
+void SystemBase::copyOldSolutions()
+{
+  solutionOlder() = solutionOld();
+  solutionOld()   = *currentSolution();
+}
+
+
+/**
+ * Restore current solutions (call after your solve failed)
+ */
+void SystemBase::restoreSolutions()
+{
+  *(const_cast<NumericVector<Number> * &>(currentSolution())) = solutionOld();
+  solution() = solutionOld();
+  system().update();
+}
