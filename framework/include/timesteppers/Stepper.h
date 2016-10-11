@@ -154,9 +154,9 @@ public:
     if (_err && (t < _min || t > _max))
       throw "time step is out of bounds";
     else if (t < _min)
-      return l.val(_min);
+      return l.val(_min - si->time);
     else if (t > _max)
-      return l.val(_max);
+      return l.val(_max - si->time);
     return l.val(dt);
   }
 
@@ -280,12 +280,20 @@ private:
 class RetryUnusedStepper : public Stepper
 {
 public:
-  RetryUnusedStepper(Stepper* s) : _stepper(s), _prev_dt(0) { }
+  RetryUnusedStepper(Stepper* s, double tol, bool prev_prev) : _stepper(s), _tol(tol), _prev_prev(prev_prev), _prev_dt(0) { }
 
   virtual double advance(const StepperInfo* si) {
     Logger l("RetryUnused");
-    if (_prev_dt != 0 && si->prev_dt != _prev_dt)
-      return l.val(_prev_dt);
+    if (_prev_dt != 0 && std::abs(si->prev_dt - _prev_dt) > _tol)
+    {
+      if (_prev_prev)
+      {
+        _prev_dt = si->prev_prev_dt;
+        return l.val(si->prev_prev_dt);
+      }
+      else
+        return l.val(_prev_dt);
+    }
 
     _prev_dt  = _stepper->advance(si);
     return l.val(_prev_dt);
@@ -293,6 +301,8 @@ public:
 
 private:
   Stepper* _stepper;
+  double _tol;
+  bool _prev_prev;
   double _prev_dt;
 };
 
@@ -307,11 +317,15 @@ public:
       _max_diff(max_diff)
   { }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     Logger l("ConstrFunc");
     double dt = _stepper->advance(si);
     double f_curr = _func(si->time);
     double df = std::abs(_func(si->time + dt) - f_curr);
+    printf("SPOT df_max=%f\n", _max_diff);
+    printf("SPOT f(t=%f)=%f, f(t_next=%f)=%f\n", si->time, f_curr, si->time + dt, _func(si->time + dt));
+    printf("SPOT f(t=2.002e6)=%f\n", _func(2.002e6));
     while(df > _max_diff)
     {
       dt /= 2.0;
@@ -425,9 +439,10 @@ public:
 
   virtual double advance(const StepperInfo* si)
   {
+    Logger l("Startup");
     if (si->step_count <= _n)
-      return _dt;
-    return _stepper->advance(si);
+      return l.val(_dt);
+    return l.val(_stepper->advance(si));
   }
 
 private:
@@ -446,11 +461,11 @@ public:
 
   virtual double advance(const StepperInfo* si)
   {
+    Logger l("GrowShrink");
     if (!si->converged)
-      return si->prev_dt * _shrink_fac;
-    else if (si->converged && !si->prev_converged)
-      return si->prev_dt * _grow_fac;
-    return si->prev_dt;
+      return l.val(si->prev_dt * _shrink_fac);
+    else
+      return l.val(si->prev_dt * _grow_fac);
   }
 
 private:

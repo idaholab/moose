@@ -275,8 +275,10 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
     if (_max_function_change > 0.0 &&
         change > _max_function_change)
     {
+
       do
       {
+        printf("SPOT f(t=%f)=%f, f(t_next=%f)=%f\n", _time_old, oldValue, _time_old + limitedDT, newValue);
         limitedDT /= 2.0;
         newValue = _timestep_limiting_function->value(_time_old + limitedDT, dummyPoint);
         change = std::abs(newValue - oldValue);
