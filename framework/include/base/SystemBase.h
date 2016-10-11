@@ -74,7 +74,8 @@ dataLoad(std::istream & stream, SystemBase & system_base, void * context);
 /**
  * Information about variables that will be copied
  */
-struct VarCopyInfo {
+struct VarCopyInfo
+{
   VarCopyInfo(const std::string & dest_name, const std::string & source_name, const std::string & timestep) :
     _dest_name(dest_name),
     _source_name(source_name),
@@ -192,7 +193,7 @@ public:
    * @param scale_factor the scaling factor for the variable
    * @param active_subdomains a list of subdomain ids this variable is active on
    */
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains = NULL);
 
   /**
    * Query a system for a variable
@@ -421,11 +422,11 @@ public:
    * @param order The order of the variable
    * @param scale_factor The scaling factor to be used with this scalar variable
    */
-  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set<SubdomainID> * const active_subdomains = NULL);
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); };
 
-  virtual void computeVariables(const NumericVector<Number> & /*soln*/){ };
+  virtual void computeVariables(const NumericVector<Number> & /*soln*/) { };
 
   void copyVars(ExodusII_IO & io);
 
@@ -465,48 +466,6 @@ protected:
 
   std::vector<VarCopyInfo> _var_to_copy;
 };
-
-
-/**
- * Template for wrapping libMesh systems within MOOSE
- */
-template<typename T>
-class SystemTempl : public SystemBase
-{
-public:
-  SystemTempl(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind) :
-      SystemBase(subproblem, name,var_kind),
-      _sys(subproblem.es().add_system<T>(_name)),
-      _solution(*_sys.solution),
-      _solution_old(*_sys.old_local_solution),
-      _solution_older(*_sys.older_local_solution)
-  {
-  }
-
-  virtual ~SystemTempl()
-  {
-  }
-
-  virtual NumericVector<Number> & solution() { return _solution; }
-  virtual NumericVector<Number> & solutionOld() { return _solution_old; }
-  virtual NumericVector<Number> & solutionOlder() { return _solution_older; }
-
-  /**
-   * Get a reference to libMesh system object
-   * @return the reference to the libMesh object
-   */
-  T & sys() { return _sys; }
-
-  virtual System & system() { return _sys; }
-
-protected:
-  T & _sys;
-
-  NumericVector<Number> & _solution;
-  NumericVector<Number> & _solution_old;
-  NumericVector<Number> & _solution_older;
-};
-
 
 #define PARALLEL_TRY
 

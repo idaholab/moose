@@ -55,7 +55,7 @@ public:
   virtual void jacobianSetup();
   virtual void updateActive(THREAD_ID tid);
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL) override;
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains = NULL) override;
 
   /**
    * Add a time integrator

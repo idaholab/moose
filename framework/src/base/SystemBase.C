@@ -27,14 +27,16 @@
 #include "MooseMesh.h"
 
 /// Free function used for a libMesh callback
-void extraSendList(std::vector<dof_id_type> & send_list, void * context)
+void
+extraSendList(std::vector<dof_id_type> & send_list, void * context)
 {
   SystemBase * sys = static_cast<SystemBase *>(context);
   sys->augmentSendList(send_list);
 }
 
 /// Free function used for a libMesh callback
-void extraSparsity(SparsityPattern::Graph & sparsity,
+void
+extraSparsity(SparsityPattern::Graph & sparsity,
                    std::vector<dof_id_type> & n_nz,
                    std::vector<dof_id_type> & n_oz,
                    void * context)
@@ -438,7 +440,8 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 /**
  * Save the old and older solutions.
  */
-void SystemBase::saveOldSolutions()
+void
+SystemBase::saveOldSolutions()
 {
   if (!_saved_old)
     _saved_old = &addVector("save_solution_old", false, PARALLEL);
@@ -452,7 +455,8 @@ void SystemBase::saveOldSolutions()
 /**
  * Restore the old and older solutions when the saved solutions present.
  */
-void SystemBase::restoreOldSolutions()
+void
+SystemBase::restoreOldSolutions()
 {
   if (_saved_old)
   {
@@ -470,7 +474,8 @@ void SystemBase::restoreOldSolutions()
 
 
 
-NumericVector<Number> & SystemBase::addVector(const std::string & vector_name, const bool project, const ParallelType type)
+NumericVector<Number> &
+SystemBase::addVector(const std::string & vector_name, const bool project, const ParallelType type)
 {
   if (hasVector(vector_name))
     return getVector(vector_name);
@@ -480,7 +485,8 @@ NumericVector<Number> & SystemBase::addVector(const std::string & vector_name, c
 }
 
 
-void SystemBase::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
+void
+SystemBase::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
 {
   unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -498,7 +504,8 @@ void SystemBase::addVariable(const std::string & var_name, const FEType & type, 
 }
 
 
-void SystemBase::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
+void
+SystemBase::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
 {
   FEType type(order, SCALAR);
   unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
@@ -517,7 +524,8 @@ void SystemBase::addScalarVariable(const std::string & var_name, Order order, Re
 }
 
 
-bool SystemBase::hasVariable(const std::string & var_name)
+bool
+SystemBase::hasVariable(const std::string & var_name)
 {
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family != SCALAR;
@@ -526,7 +534,8 @@ bool SystemBase::hasVariable(const std::string & var_name)
 }
 
 
-bool SystemBase::hasScalarVariable(const std::string & var_name)
+bool
+SystemBase::hasScalarVariable(const std::string & var_name)
 {
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family == SCALAR;
@@ -535,12 +544,14 @@ bool SystemBase::hasScalarVariable(const std::string & var_name)
 }
 
 
-bool SystemBase::isScalarVariable(unsigned int var_num)
+bool
+SystemBase::isScalarVariable(unsigned int var_num)
 {
   return (system().variable(var_num).type().family == SCALAR);
 }
 
-unsigned int SystemBase::nVariables()
+unsigned int
+SystemBase::nVariables()
 {
   return _vars[0].names().size();
 }
@@ -548,7 +559,8 @@ unsigned int SystemBase::nVariables()
 /**
  * Check if the named vector exists in the system.
  */
-bool SystemBase::hasVector(const std::string & name)
+bool
+SystemBase::hasVector(const std::string & name)
 {
   return system().have_vector(name);
 }
@@ -556,29 +568,34 @@ bool SystemBase::hasVector(const std::string & name)
 /**
  * Get a raw NumericVector with the given name.
  */
-NumericVector<Number> & SystemBase::getVector(const std::string & name)
+NumericVector<Number> &
+SystemBase::getVector(const std::string & name)
 {
   return system().get_vector(name);
 }
 
 
-unsigned int SystemBase::number()
+unsigned int
+SystemBase::number()
 {
   return system().number();
 }
 
-DofMap & SystemBase::dofMap()
+DofMap &
+SystemBase::dofMap()
 {
   return system().get_dof_map();
 }
 
-void SystemBase::addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep)
+void
+SystemBase::addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep)
 {
   _var_to_copy.push_back(VarCopyInfo(dest_name, source_name, timestep));
 }
 
 
-void SystemBase::copyVars(ExodusII_IO & io)
+void
+SystemBase::copyVars(ExodusII_IO & io)
 {
   int n_steps = io.get_num_time_steps();
 
@@ -612,12 +629,14 @@ void SystemBase::copyVars(ExodusII_IO & io)
     solution().close();
 }
 
-void SystemBase::update()
+void
+SystemBase::update()
 {
   system().update();
 }
 
-void SystemBase::solve()
+void
+SystemBase::solve()
 {
   system().solve();
 }
@@ -625,7 +644,8 @@ void SystemBase::solve()
 /**
  * Copy current solution into old and older
  */
-void SystemBase::copySolutionsBackwards()
+void
+SystemBase::copySolutionsBackwards()
 {
   system().update();
   solutionOlder() = *currentSolution();
@@ -635,7 +655,8 @@ void SystemBase::copySolutionsBackwards()
 /**
  * Shifts the solutions backwards in time
  */
-void SystemBase::copyOldSolutions()
+void
+SystemBase::copyOldSolutions()
 {
   solutionOlder() = solutionOld();
   solutionOld()   = *currentSolution();
@@ -645,7 +666,8 @@ void SystemBase::copyOldSolutions()
 /**
  * Restore current solutions (call after your solve failed)
  */
-void SystemBase::restoreSolutions()
+void
+SystemBase::restoreSolutions()
 {
   *(const_cast<NumericVector<Number> * &>(currentSolution())) = solutionOld();
   solution() = solutionOld();
