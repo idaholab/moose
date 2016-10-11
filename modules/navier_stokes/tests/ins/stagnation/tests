@@ -8,13 +8,11 @@
   [./axisymmetric]
     type = 'Exodiff'
     input = 'stagnation.i'
-    # Note: you can also specify INSMomentumRZ for the y-momentum
-    # kernel, but it is identical to the XY version of the Kernel.  We
-    # also need to specify a slightly different vertical velocity
+    # Note: We need to specify a slightly different vertical velocity
     # boundary condition in the axisymmetric case in order to have
     # the "far field" flow conditions satisfy the divergence-free
     # constraint.
-    cli_args = 'Outputs/file_base=axisymmetric_out Problem/coord_type=RZ Kernels/mass/type=INSMassRZ Kernels/x_momentum_space/type=INSMomentumRZ Kernels/y_momentum_space/type=INSMomentumRZ Functions/vel_y_inlet/value=-2*k*y'
+    cli_args = 'Outputs/file_base=axisymmetric_out Problem/coord_type=RZ Kernels/mass/type=INSMassRZ Kernels/x_momentum_space/type=INSMomentumLaplaceFormRZ Kernels/y_momentum_space/type=INSMomentumLaplaceFormRZ Functions/vel_y_inlet/value=-2*k*y'
     exodiff = 'axisymmetric_out.e'
   [../]
 []
