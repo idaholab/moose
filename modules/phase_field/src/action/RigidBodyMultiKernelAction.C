@@ -81,11 +81,9 @@ RigidBodyMultiKernelAction::act()
     // Create vector of order parameters
     //
 
-    std::vector<VariableName> v;
-    unsigned int i = 0;
-    v.resize(_op_num);
+    std::vector<VariableName> v(_op_num);
     for (unsigned int j = 0; j < _op_num; ++j)
-      v[i++] = _var_name_base + Moose::stringify(j);
+      v[j] = _var_name_base + Moose::stringify(j);
 
     //
     // Set up ACInterface kernels
