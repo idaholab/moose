@@ -30,9 +30,9 @@ Compute2DIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_st
   RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); //Deformation gradient
   RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
 
-  // Compute the deformation gradient (2,*) value for plane strain, generalized plane strain, or axisymmetric problems
-  A(2,2) = computeDeformGradZZ();
-  Fbar(2,2) = computeDeformGradZZold();
+  // Compute the displacement gradient (2,2) value for plane strain, generalized plane strain, or axisymmetric problems
+  A(2,2) = computeGradDispZZ();
+  Fbar(2,2) = computeGradDispZZold();
 
   // Gauss point deformation gradient
   _deformation_gradient[_qp] = A;

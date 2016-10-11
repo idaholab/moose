@@ -19,8 +19,8 @@ public:
   ComputePlaneFiniteStrain(const InputParameters & parameters);
 
 protected:
-  virtual Real computeDeformGradZZ();
-  virtual Real computeDeformGradZZold();
+  virtual Real computeGradDispZZ();
+  virtual Real computeGradDispZZold();
 
   const VariableValue & _scalar_strain_zz;
   const VariableValue & _scalar_strain_zz_old;

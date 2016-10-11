@@ -23,13 +23,17 @@ ComputePlaneFiniteStrain::ComputePlaneFiniteStrain(const InputParameters & param
 }
 
 Real
-ComputePlaneFiniteStrain::computeDeformGradZZ()
+ComputePlaneFiniteStrain::computeGradDispZZ()
 {
-    return _scalar_strain_zz[0];
+  /**
+   * This is consistent with the approximation of stretch rate tensor
+   * D = log(sqrt(Fhat^T * Fhat)) / dt
+   */
+    return std::exp(_scalar_strain_zz[0]) - 1.0;
 }
 
 Real
-ComputePlaneFiniteStrain::computeDeformGradZZold()
+ComputePlaneFiniteStrain::computeGradDispZZold()
 {
-    return _scalar_strain_zz_old[0];
+    return std::exp(_scalar_strain_zz_old[0]) - 1.0;
 }

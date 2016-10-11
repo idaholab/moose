@@ -32,6 +32,8 @@ public:
   virtual void rho_dpTx(Real pressure, Real temperature, Real xmass, Real & rho, Real & drho_dp, Real & drho_dT, Real & drho_dx) const = 0;
   /// Dynamic viscosity (Pa s)
   virtual Real mu(Real density, Real temperature, Real xmass) const = 0;
+  /// Dynamic viscosity and its derivatives wrt pressure, temperature and mass fraction
+  virtual void mu_drhoTx(Real density, Real temperature, Real xmass, Real & mu, Real & dmu_dp, Real & dmu_dT, Real & dmu_dx) const = 0;
   /// Enthalpy (kJ/kg)
   virtual Real h(Real pressure, Real temperature, Real xmass) const = 0;
   /// Enthalpy and its derivatives wrt pressure, temperature and mass fraction

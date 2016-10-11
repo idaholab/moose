@@ -31,10 +31,12 @@ public:
   virtual Real returnJacobian() const;
 
 protected:
+  std::string _base_name;
+
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
 
-  Function & _traction;
+  Function & _traction_zz;
   const Real _factor;
 
 private:

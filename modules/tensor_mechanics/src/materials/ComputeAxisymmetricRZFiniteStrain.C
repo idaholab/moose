@@ -34,7 +34,7 @@ ComputeAxisymmetricRZFiniteStrain::initialSetup()
 }
 
 Real
-ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZ()
+ComputeAxisymmetricRZFiniteStrain::computeGradDispZZ()
 {
   if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
@@ -43,7 +43,7 @@ ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZ()
 }
 
 Real
-ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZold()
+ComputeAxisymmetricRZFiniteStrain::computeGradDispZZold()
 {
   if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);
