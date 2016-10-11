@@ -27,13 +27,13 @@ protected:
   /// and returns the total strain increment tensor
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
 
-  /// Computes the current deformation gradient; as a virtual function, this function is
+  /// Computes the current out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDeformGradZZ() = 0;
+  virtual Real computeGradDispZZ() = 0;
 
-  /// Computes the old deformation gradient; as a virtual function, this function is
+  /// Computes the old out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDeformGradZZold() = 0;
+  virtual Real computeGradDispZZold() = 0;
 };
 
 #endif //COMPUTE2DINCREMENTALSTRAIN_H

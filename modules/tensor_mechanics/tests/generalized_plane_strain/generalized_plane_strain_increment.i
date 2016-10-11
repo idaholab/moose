@@ -1,5 +1,3 @@
-# Tests for application of out-of-plane pressure in generalized plane strain.
-
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -24,6 +22,8 @@
 []
 
 [AuxVariables]
+  [./temp]
+  [../]
   [./saved_x]
   [../]
   [./saved_y]
@@ -76,14 +76,13 @@
 [UserObjects]
   [./gpsuo]
     type = GeneralizedPlaneStrainUserObject
-    traction_zz = traction_function
-    factor = 1e5
   [../]
 []
 
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
+    temp = temp
     save_in = 'saved_x saved_y'
   [../]
   [./gps_x]
@@ -105,6 +104,12 @@
 []
 
 [AuxKernels]
+  [./tempfuncaux]
+    type = FunctionAux
+    variable = temp
+    function = tempfunc
+    use_displaced_mesh = false
+  [../]
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -165,17 +170,16 @@
 []
 
 [Functions]
-  [./traction_function]
-    type = PiecewiseLinear
-    x = '0  2'
-    y = '0  -1'
+  [./tempfunc]
+    type = ParsedFunction
+    value = '(1-x)*t'
   [../]
 []
 
 [BCs]
-  [./leftx]
+  [./bottomx]
     type = PresetBC
-    boundary = 4
+    boundary = 1
     variable = disp_x
     value = 0.0
   [../]
@@ -194,10 +198,17 @@
     youngs_modulus = 1e6
   [../]
   [./strain]
-    type = ComputePlaneSmallStrain
+    type = ComputePlaneIncrementalStrain
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenStrain
+    temperature = temp
+    thermal_expansion_coeff = 0.02
+    stress_free_temperature = 0.5
+    incremental_form = true
   [../]
   [./stress]
-    type = ComputeLinearElasticStress
+    type = ComputeStrainIncrementBasedStress
   [../]
 []
 
@@ -213,8 +224,8 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-14
-  nl_abs_tol = 1e-11
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-5
 
 # time control
   start_time = 0.0

@@ -11,10 +11,22 @@
    exodiff = 'planestrain_prescribed_out.e'
    custom_cmp = 'planestrain.exodiff'
  [../]
- [./generalized_plane_strain]
+ [./generalized_plane_strain_small]
    type = 'Exodiff'
-   input = 'generalized_plane_strain.i'
-   exodiff = 'generalized_plane_strain_out.e'
+   input = 'generalized_plane_strain_small.i'
+   exodiff = 'generalized_plane_strain_small_out.e'
+   custom_cmp = 'generalized.exodiff'
+ [../]
+ [./generalized_plane_strain_increment]
+   type = 'Exodiff'
+   input = 'generalized_plane_strain_increment.i'
+   exodiff = 'generalized_plane_strain_increment_out.e'
+   custom_cmp = 'generalized.exodiff'
+ [../]
+ [./generalized_plane_strain_finite]
+   type = 'Exodiff'
+   input = 'generalized_plane_strain_finite.i'
+   exodiff = 'generalized_plane_strain_finite_out.e'
    custom_cmp = 'generalized.exodiff'
  [../]
  [./out_of_plane_traction]
