@@ -11,7 +11,7 @@ class MooseInputBlock(MooseTextPatternBase):
     CPP_RE = r'^!input\s+(.*?)(?:$|\s+)(.*)'
 
     def __init__(self, **kwargs):
-        super(MooseInputBlock, self).__init__(self.CPP_RE, language='text', **kwargs)
+        MooseTextPatternBase.__init__(self, self.CPP_RE, language='text', **kwargs)
 
     def handleMatch(self, match):
         """
@@ -22,16 +22,14 @@ class MooseInputBlock(MooseTextPatternBase):
         settings, styles = self.getSettings(match.group(3))
 
         # Build the complete filename.
-        # NOTE: os.path.join doesn't like the unicode even if you call str() on it first.
-        rel_filename = match.group(2).lstrip('/')
-        filename = MooseDocs.MOOSE_DIR.rstrip('/') + os.path.sep + rel_filename
+        rel_filename = match.group(2)
+        filename = os.path.join(self._root, rel_filename)
 
         # Read the file and create element
-        filename = self.checkFilename(rel_filename)
-        if not filename:
-            el = self.createErrorElement(rel_filename)
+        if not os.path.exists(filename):
+            el = self.createErrorElement("The input file was not located: {}".format(rel_filename))
         elif not settings.has_key('block'):
-            el = self.createErrorElement(rel_filename, message="Use of !input syntax while not providing a block=some_block. If you wish to include the entire file, use !text instead")
+            el = self.createErrorElement("Use of !input syntax while not providing a block=some_block. If you wish to include the entire file, use !text instead")
         else:
             parser = ParseGetPot(filename)
             node = parser.root_node.getNode(settings['block'])

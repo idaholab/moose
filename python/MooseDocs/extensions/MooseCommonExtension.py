@@ -11,9 +11,14 @@ import utils
 class MooseCommonExtension(object):
     """
     Class containing commonly used routines.
-
     """
-    def __init__(self):
+    def __init__(self, root=None, docs_dir=None, **kwargs):
+
+        # 'root' and 'docs_dir' are required
+        if not root:
+            log.error("The 'root' keyword argument is required for {}".format(self.__class__.__name__))
+        if not docs_dir:
+            log.error("The 'docs_dir' keyword argument is required for {}".format(self.__class__.__name__))
 
         # The default settings should be stored here
         self._settings = dict()
@@ -22,21 +27,15 @@ class MooseCommonExtension(object):
         # { element.tag : [attribute,] }
         self._invalid_css = dict()
 
-    def checkFilename(self, rel_filename):
-        """
-        Checks that the filename exists, if it does not a error Element is return.
-
-        Args:
-            filename[str]: The filename to check for existence.
-        """
-        filename = os.path.abspath(os.path.join(self._root, rel_filename))
-        if os.path.exists(filename):
-            return filename
-        return None
+        # Set the directories
+        self._root = root
+        if not os.path.isabs(docs_dir):
+            docs_dir = os.path.join(self._root, docs_dir)
+        self._docs_dir = docs_dir
 
     def getSettings(self, settings_line):
       """
-      Parses a string of space seperated key=value pairs.
+      Parses a string of space separated key=value pairs.
       This supports having values with spaces in them.
       So something like "key0=foo bar key1=value1"
       is supported.
@@ -89,7 +88,7 @@ class MooseCommonExtension(object):
                     element.set('style', ':'.join([attribute,value]) + ';')
             return element
 
-    def createErrorElement(self, rel_filename='', message=None, title='Markdown Parsing Error', parent=None):
+    def createErrorElement(self, message, title='Markdown Parsing Error', parent=None):
         """
         Returns a tree element containing error message.
 
@@ -101,7 +100,6 @@ class MooseCommonExtension(object):
         <p>...</p>
         </div>
         """
-
         if parent:
             el = etree.SubElement(parent, 'div')
         else:
@@ -113,8 +111,6 @@ class MooseCommonExtension(object):
         title_el.text = title
 
         msg = etree.SubElement(el, 'p')
-        msg.text = 'Invalid markdown for ' + rel_filename
-        if message:
-            msg.text = message
+        msg.text = message
         log.error('{}: {}'.format(title, message))
         return el

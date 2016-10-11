@@ -24,11 +24,9 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
     # they need to have different ids
     MATCHES_FOUND = 0
 
-    def __init__(self, parser, root=None, **kwargs):
-      MooseCommonExtension.__init__(self)
-      BlockProcessor.__init__(self, parser, **kwargs)
-
-      self._root = os.path.join(root, 'docs/media')
+    def __init__(self, parser, **kwargs):
+      MooseCommonExtension.__init__(self, **kwargs)
+      BlockProcessor.__init__(self, parser)
 
       # The default settings
       self._settings = {'caption'  : None,
@@ -63,7 +61,7 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
           caption = ""
           fname = sline
 
-        new_files = glob.glob(os.path.join(self._root, fname))
+        new_files = glob.glob(os.path.join(self._docs_dir, fname))
         if not new_files:
           # If one of the paths is broken then
           # we return an empty list to indicate
@@ -102,7 +100,7 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
         div = self.addStyle(etree.SubElement(parent, "div"), **styles)
         filenames = self.parseFilenames(files)
         if not filenames:
-            return self.createErrorElement(files, "No matching files found")
+            return self.createErrorElement("No matching files found: {}".format(files))
         self.createCarousel(parsed_options, div, filenames)
         # We processed this whole block so mark it as done
         block = ""

@@ -10,8 +10,6 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
     A preprocessor for creating automatic linking between markdown files.
     """
 
-    RE = r'\s+(.*?.md)'
-
     def __init__(self, pages=None, **kwargs):
         super(MooseMarkdownLinkPreprocessor, self).__init__(**kwargs)
         self._pages = pages
@@ -33,7 +31,6 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
             match[re.Match]: The python re.Match object.
         """
         name = self._findFile(match.group(1))
-        print match.group(1), name
         if name:
             return '[{}](/{}{})'.format(name, name, match.group(2))
         return match.group(0)
@@ -49,7 +46,6 @@ class MooseMarkdownLinkPreprocessor(Preprocessor):
         if name:
             return '[{}](/{}{})'.format(match.group(1), name, match.group(3))
         return match.group(0)
-
 
     def _findFile(self, name):
         """

@@ -16,7 +16,8 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
     RE = re.compile(r'^(graph|dirgraph)(.*)')
 
     def __init__(self, md, graphviz=None, **kwargs):
-        super(MooseDiagram, self).__init__(md, **kwargs)
+        MooseCommonExtension.__init__(self, **kwargs)
+        BlockProcessor.__init__(self, md)
 
         # Location of the graphviz
         self._graphviz = graphviz
@@ -38,7 +39,7 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
         # Test if graphviz can be found
         executable = os.path.join(self._graphviz, 'dot')
         if not os.path.exists(executable):
-            return self.createErrorElement(title='Failed to locate Graphviz', message=block, parent=parent)
+            return self.createErrorElement(block, title='Failed to locate Graphviz', parent=parent)
 
         # Create the temporary dot file
         dot_file = 'tmp_' + uuid.uuid4().hex + '.dot'
@@ -56,7 +57,7 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
         except:
             if os.path.exists(dot_file):
                 os.remove(dot_file)
-            return self.createErrorElement(title='Failed to execute Graphviz', message=block, parent=parent)
+            return self.createErrorElement(block, title='Failed to execute Graphviz', parent=parent)
 
         # Clean up dot temporary
         if os.path.exists(dot_file):

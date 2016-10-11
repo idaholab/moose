@@ -54,7 +54,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
             node = self._yaml.find(os.path.join(syntax, '<type>'))
 
         if not node:
-            return self.createErrorElement(message="The are not any sub-objects for the supplied syntax: {}".format(syntax))
+            return self.createErrorElement("The are not any sub-objects for the supplied syntax: {}".format(syntax))
 
         table = MooseDocs.MarkdownTable('Name', 'Description')
         for child in node['subblocks']:
@@ -70,7 +70,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
                 table.addRow(a, child['description'])
 
         if table.size() == 0:
-            return self.createErrorElement(message="No sub-objects exists for the supplied syntax: {}".format(syntax))
+            return self.createErrorElement("No sub-objects exists for the supplied syntax: {}".format(syntax))
 
         el = etree.Element('div', styles)
         h2 = etree.SubElement(el, 'h2')
@@ -85,7 +85,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
 
         node = self._yaml.find(syntax)
         if not node:
-            return createErrorElement(message="The are not any sub-systems for the supplied syntax: {} You likely need to remove the '!subobjects' syntax.".format(syntax))
+            return createErrorElement("The are not any sub-systems for the supplied syntax: {} You likely need to remove the '!subobjects' syntax.".format(syntax))
 
         table = MooseDocs.MarkdownTable('Name', 'Description')
         if node['subblocks']:
@@ -99,7 +99,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
                     table.addRow(a, child['description'])
 
         if table.size() == 0:
-            return self.createErrorElement(message="No sub-systems exists for the supplied syntax: {}. You likely need to remove the '!subsystems' markdown.".format(syntax))
+            return self.createErrorElement("No sub-systems exists for the supplied syntax: {}. You likely need to remove the '!subsystems' markdown.".format(syntax))
 
         el = etree.Element('div', styles)
         h2 = etree.SubElement(el, 'h2')

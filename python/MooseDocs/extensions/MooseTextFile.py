@@ -27,11 +27,9 @@ class MooseTextFile(MooseTextPatternBase):
 
         # Read the file
         rel_filename = match.group(2).lstrip('/')
-        filename = self.checkFilename(rel_filename)
-
-        if not filename:
-            return self.createErrorElement(rel_filename)
-
+        filename = os.path.join(self._root, rel_filename)
+        if not os.path.exists(filename):
+            return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
         if settings['line']:
             content = self.extractLine(filename, settings["line"])
 
@@ -43,8 +41,7 @@ class MooseTextFile(MooseTextPatternBase):
                 content = fid.read()
 
         if content == None:
-            log.error("Failed to extract content from {}.".format(filename))
-            return self.createErrorElement(rel_filename, 'No content')
+            return self.createErrorElement("Failed to extract content from {}.".format(filename))
 
         # Return the Element object
         el = self.createElement(match.group(2), content, filename, rel_filename, settings, styles)
