@@ -22,9 +22,9 @@ class MooseBuildStatus(MooseCommonExtension, Pattern):
     # Find !buildstatus url attribute=value
     RE = r'^!buildstatus\s+(.*?)(?:$|\s+)(.*)'
 
-    def __init__(self, **kwargs):
-        MooseCommonExtension.__init__(self)
-        Pattern.__init__(self, self.RE, **kwargs)
+    def __init__(self, markdown_instance=None, **kwargs):
+        MooseCommonExtension.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
 
         # We have a strict width set that can not be disturbed
         self._invalid_css = { 'div' : ['width'] }

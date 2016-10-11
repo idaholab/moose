@@ -16,9 +16,9 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
 
     RE = r'!MOOSEPACKAGE\s*(.*?)!'
 
-    def __init__(self, **kwargs):
-        MooseCommonExtension.__init__(self)
-        Pattern.__init__(self, self.RE, **kwargs)
+    def __init__(self, markdown_instance=None, **kwargs):
+        MooseCommonExtension.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
 
         # Load the yaml data containing package information
         self.package = MooseDocs.yaml_load("packages.yml")
@@ -42,10 +42,10 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
         # Update the settings from regex match
         settings, styles = self.getSettings(match.group(2))
         if not settings.has_key('arch') or not settings.has_key('return'):
-            el = self.createErrorElement('', message='Invalid MOOSEPACKAGE markdown syntax. Requires arch=, return=link|name')
+            el = self.createErrorElement('Invalid MOOSEPACKAGE markdown syntax. Requires arch=, return=link|name')
         else:
             if settings['arch'] not in self.package.keys():
-                el = self.createErrorElement('', message='arch not found in packages.yml')
+                el = self.createErrorElement('"arch" not found in packages.yml')
             else:
                 if settings['return'] == 'link':
                     el = etree.Element('a')

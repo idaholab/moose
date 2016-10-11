@@ -28,13 +28,12 @@ class MooseObjectSyntax(MooseSyntaxBase):
 
     RE = r'^!(description|parameters|inputfiles|childobjects|devel)\s+(.*?)(?:$|\s+)(.*)'
 
-    def __init__(self, yaml=None, syntax=None, input_files=dict(), child_objects=dict(), root=None, repo=None, **kwargs):
-        MooseSyntaxBase.__init__(self, self.RE, yaml=yaml, syntax=syntax, **kwargs)
+    def __init__(self, input_files=dict(), child_objects=dict(), repo=None, **kwargs):
+        super(MooseObjectSyntax, self).__init__(self.RE, **kwargs)
 
         # Input arguments
         self._input_files = input_files
         self._child_objects = child_objects
-        self._root = root
         self._repo = repo
         self._name = None
 
@@ -51,7 +50,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
         # Locate description
         node = self._yaml.find(syntax)
         if not node:
-            return self.createErrorElement(message='Failed to locate {} syntax.'.format(syntax))
+            return self.createErrorElement('Failed to locate {} syntax.'.format(syntax))
 
         # Determine object name
         self._name = node['name'].split('/')[-1]
@@ -80,7 +79,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
         """
 
         if ('description' not in node) or (not node['description']):
-            return self.createErrorElement(message='Failed to locate class description for {} syntax.'.format(node['name']))
+            return self.createErrorElement('Failed to locate class description for {} syntax.'.format(node['name']))
 
         # Create the html element with supplied styles
         el = self.addStyle(etree.Element('p'), **styles)
@@ -158,7 +157,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
         """
 
         if not self._repo:
-            el = createErrorElement(message="Attempting to create source links to repository, but the 'repo' configuration option was not supplied.")
+            el = createErrorElement("Attempting to create source links to repository, but the 'repo' configuration option was not supplied.")
 
         el = self.addStyle(etree.Element('div'), **styles)
 

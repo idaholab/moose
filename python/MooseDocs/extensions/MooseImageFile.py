@@ -22,11 +22,9 @@ class MooseImageFile(MooseCommonExtension, Pattern):
     # Find !image /path/to/file attribute=setting
     RE = r'^!image\s+(.*?)(?:$|\s+)(.*)'
 
-    def __init__(self, root=None, **kwargs):
-        MooseCommonExtension.__init__(self)
-        Pattern.__init__(self, self.RE, **kwargs)
-
-        self._root = os.path.join(root, 'docs/media')
+    def __init__(self, markdown_instance=None, **kwargs):
+        MooseCommonExtension.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
 
         # Valid settings for MOOS specific documentation features
         # All other markdown 'attributes' will be treated as HTML
@@ -44,13 +42,12 @@ class MooseImageFile(MooseCommonExtension, Pattern):
         settings, styles = self.getSettings(match.group(3))
 
         # Read the file and create element
-        filename = self.checkFilename(rel_filename)
-
-        if not filename:
-            el = self.createErrorElement(rel_filename, message='file not found')
+        filename = os.path.join(self._root, self._docs_dir, rel_filename)
+        if not os.path.exists(filename):
+            el = self.createErrorElement('File not found: {}'.format(rel_filename))
         else:
             # When aligning to one side or another, we need to adjust the margins
-            # on the opisite side... silly looking buy necessary
+            # on the opposite side... silly looking buy necessary
             reverse_margin = { 'left' : 'right',
                                'right' : 'left',
                                'None' : 'none'}

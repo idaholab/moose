@@ -18,9 +18,9 @@ class MooseCSS(BlockProcessor, MooseCommonExtension):
     # they need to have different ids
     MATCHES_FOUND = 0
 
-    def __init__(self, parser, root=None, **kwargs):
-      MooseCommonExtension.__init__(self)
-      BlockProcessor.__init__(self, parser, **kwargs)
+    def __init__(self, parser, **kwargs):
+      MooseCommonExtension.__init__(self, **kwargs)
+      BlockProcessor.__init__(self, parser)
 
     def test(self, parent, block):
       """

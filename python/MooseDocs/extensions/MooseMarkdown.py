@@ -53,7 +53,8 @@ class MooseMarkdown(markdown.Extension):
         self.config['locations'] = [dict(), "The locations to parse for syntax."]
         self.config['repo'] = ['', "The remote repository to create hyperlinks."]
         self.config['links'] = [dict(), "The set of paths for generating input file and source code links to objects."]
-        self.config['docs_dir'] = [os.path.join('docs', 'content'), "The location of the markdown to be used for generating the site."]
+        self.config['docs_dir'] = ['docs', "The location of the documentation directory."]
+        self.config['markdown_dir'] = [os.path.join('docs', 'content'), "The location of the markdown to be used for generating the site."]
         self.config['slides'] = [False, "Enable the parsing for creating reveal.js slides."]
         self.config['package'] = [False, "Enable the use of the MoosePackageParser."]
         self.config['graphviz'] = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
@@ -107,9 +108,9 @@ class MooseMarkdown(markdown.Extension):
             md.preprocessors.add('moose_slides', MooseSlidePreprocessor(markdown_instance=md), '_end')
 
         # Block processors
-        md.parser.blockprocessors.add('diagrams', MooseDiagram(md.parser, graphviz=config['graphviz']), '_begin')
-        md.parser.blockprocessors.add('slideshow', MooseCarousel(md.parser, root=config['root']), '_begin')
-        md.parser.blockprocessors.add('css', MooseCSS(md.parser, root=config['root']), '_begin')
+        md.parser.blockprocessors.add('diagrams', MooseDiagram(md.parser, root=config['root'], docs_dir=config['docs_dir'], graphviz=config['graphviz']), '_begin')
+        md.parser.blockprocessors.add('slideshow', MooseCarousel(md.parser, root=config['root'], docs_dir=config['docs_dir']), '_begin')
+        md.parser.blockprocessors.add('css', MooseCSS(md.parser, root=config['root'], docs_dir=config['docs_dir']), '_begin')
 
         # Inline Patterns
         object_markdown = MooseObjectSyntax(markdown_instance=md,
@@ -118,21 +119,24 @@ class MooseMarkdown(markdown.Extension):
                                             input_files=cache['input_files'],
                                             child_objects=cache['child_objects'],
                                             repo=config['repo'],
-                                            root=config['root'])
+                                            root=config['root'],
+                                            docs_dir=config['docs_dir'])
         system_markdown = MooseSystemSyntax(markdown_instance=md,
                                             yaml=cache['yaml'],
-                                            syntax=cache['syntax'])
+                                            syntax=cache['syntax'],
+                                            root=config['root'],
+                                            docs_dir=config['docs_dir'])
         md.inlinePatterns.add('moose_object_syntax', object_markdown, '_begin')
         md.inlinePatterns.add('moose_system_syntax', system_markdown, '_begin')
 
-        md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
-        md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, make=config['make'], repo=config['repo'], root=config['root']), '<image_link')
-        md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, repo=config['repo'], root=config['root']), '<image_link')
-        md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, root=config['root']), '<image_link')
-        md.inlinePatterns.add('moose_build_status', MooseBuildStatus(markdown_instance=md), '_begin')
+        md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, root=config['root'], docs_dir=config['docs_dir'], repo=config['repo']), '<image_link')
+        md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, root=config['root'], docs_dir=config['docs_dir'], make=config['make'], repo=config['repo']), '<image_link')
+        md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, root=config['root'], docs_dir=config['docs_dir'], repo=config['repo']), '<image_link')
+        md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, root=config['root'], docs_dir=config['docs_dir']), '<image_link')
+        md.inlinePatterns.add('moose_build_status', MooseBuildStatus(markdown_instance=md, root=config['root'], docs_dir=config['docs_dir']), '_begin')
 
         if config['package']:
-            md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md), '_end')
+            md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md, root=config['root'], docs_dir=config['docs_dir']), '_end')
 
 def makeExtension(*args, **kwargs):
     return MooseMarkdown(*args, **kwargs)
