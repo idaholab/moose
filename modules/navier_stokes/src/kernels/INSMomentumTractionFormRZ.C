@@ -4,24 +4,22 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "INSMomentumRZ.h"
+#include "INSMomentumTractionFormRZ.h"
 
 template<>
-InputParameters validParams<INSMomentumRZ>()
+InputParameters validParams<INSMomentumTractionFormRZ>()
 {
   InputParameters params = validParams<INSMomentumTractionForm>();
   return params;
 }
 
-
-
-INSMomentumRZ::INSMomentumRZ(const InputParameters & parameters) :
+INSMomentumTractionFormRZ::INSMomentumTractionFormRZ(const InputParameters & parameters) :
     INSMomentumTractionForm(parameters)
 {
 }
 
-
-Real INSMomentumRZ::computeQpResidual()
+Real
+INSMomentumTractionFormRZ::computeQpResidual()
 {
   // Base class residual contribution
   Real res_base = INSMomentumTractionForm::computeQpResidual();
@@ -31,7 +29,7 @@ Real INSMomentumRZ::computeQpResidual()
     const Real r = _q_point[_qp](0);
 
     // If this is the radial component of momentum, there is an extra term for RZ.
-    res_base += 2. * _mu * _u_vel[_qp] / (r*r) * _test[_i][_qp];
+    res_base += 2. * _mu * _u_vel[_qp] / (r * r) * _test[_i][_qp];
 
     // If the pressure is also integrated by parts, there is an extra term in RZ.
     if (_integrate_p_by_parts)
@@ -41,10 +39,8 @@ Real INSMomentumRZ::computeQpResidual()
   return res_base;
 }
 
-
-
-
-Real INSMomentumRZ::computeQpJacobian()
+Real
+INSMomentumTractionFormRZ::computeQpJacobian()
 {
   // Base class jacobian contribution
   Real jac_base = INSMomentumTractionForm::computeQpJacobian();
@@ -53,16 +49,14 @@ Real INSMomentumRZ::computeQpJacobian()
   if (_component == 0)
   {
     const Real r = _q_point[_qp](0);
-    jac_base += 2. * _mu * _phi[_j][_qp] * _test[_i][_qp] / (r*r);
+    jac_base += 2. * _mu * _phi[_j][_qp] * _test[_i][_qp] / (r * r);
   }
 
   return jac_base;
 }
 
-
-
-
-Real INSMomentumRZ::computeQpOffDiagJacobian(unsigned jvar)
+Real
+INSMomentumTractionFormRZ::computeQpOffDiagJacobian(unsigned jvar)
 {
   // Base class jacobian contribution
   Real jac_base = INSMomentumTractionForm::computeQpOffDiagJacobian(jvar);

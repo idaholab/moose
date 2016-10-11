@@ -4,33 +4,35 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INSMOMENTUMNOBCBC_H
-#define INSMOMENTUMNOBCBC_H
+#ifndef INSMOMENTUMNOBCBCBASE_H
+#define INSMOMENTUMNOBCBCBASE_H
 
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class INSMomentumNoBCBC;
+class INSMomentumNoBCBCBase;
 
 template<>
-InputParameters validParams<INSMomentumNoBCBC>();
+InputParameters validParams<INSMomentumNoBCBCBase>();
 
 /**
- * This class implements the "No BC" boundary condition
- * discussed by Griffiths, Papanastiou, and others.
+ * Base class for the "No BC" boundary condition.  Subclasses will
+ * implement the computeQpXYZ() functions differently based on whether the
+ * "traction" or "Laplacian" form of the viscous stress tensor is
+ * used.  The idea behind this is discussed by Griffiths, Papanastiou,
+ * and others.  Note that this BC, unlike the natural BC, is
+ * insufficient to set the value of the pressure in outflow problems,
+ * and therefore you will need to implement a pressure pin or similar
+ * approach for constraining the null space of constant pressures.
  */
-class INSMomentumNoBCBC : public IntegratedBC
+class INSMomentumNoBCBCBase : public IntegratedBC
 {
 public:
-  INSMomentumNoBCBC(const InputParameters & parameters);
+  INSMomentumNoBCBCBase(const InputParameters & parameters);
 
-  virtual ~INSMomentumNoBCBC(){}
+  virtual ~INSMomentumNoBCBCBase(){}
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned jvar);
-
   // Coupled variables
   const VariableValue & _u_vel;
   const VariableValue & _v_vel;
@@ -57,4 +59,4 @@ protected:
 };
 
 
-#endif // INSMOMENTUMNOBCBC_H
+#endif
