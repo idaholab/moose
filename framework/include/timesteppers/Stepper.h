@@ -369,7 +369,7 @@ public:
     printf("SPOT df_max=%f\n", _max_diff);
     printf("SPOT f(t=%f)=%f, f(t_next=%f)=%f\n", si->time, f_curr, si->time + dt, _func(si->time + dt));
     printf("SPOT f(t=2.002e6)=%f\n", _func(2.002e6));
-    while (df > _max_diff)
+    while (_max_diff > 0 && df > _max_diff)
     {
       dt /= 2.0;
       df = std::abs(_func(si->time + dt) - f_curr);
