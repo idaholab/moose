@@ -403,7 +403,7 @@ public:
   virtual double advance(const StepperInfo* si) {
     Logger l("Adaptive");
     bool can_shrink = true;
-    bool can_grow = si->converged; //&& si->prev_converged;
+    bool can_grow = si->converged && si->prev_converged;
 
     unsigned int growth_nl_its = 0;
     unsigned int growth_l_its = 0;
@@ -418,7 +418,7 @@ public:
 
     if (can_grow && (si->nonlin_iters < growth_nl_its && si->lin_iters < growth_l_its))
       return l.val(si->prev_dt * _growth_factor);
-    else if (can_shrink && (si->nonlin_iters > shrink_nl_its || si->lin_iters > shrink_l_its))
+    else if (can_shrink && (!si->converged || si->nonlin_iters > shrink_nl_its || si->lin_iters > shrink_l_its))
       return l.val(si->prev_dt * _shrink_factor);
     else
       return l.val(si->prev_dt);
