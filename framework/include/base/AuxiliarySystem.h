@@ -40,13 +40,13 @@ template <typename T> class NumericVector;
  * A system that holds auxiliary variables
  *
  */
-class AuxiliarySystem : public SystemTempl<TransientExplicitSystem>
+class AuxiliarySystem : public SystemBase
 {
 public:
   AuxiliarySystem(FEProblem & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
-  virtual void init();
+  virtual void init() override;
 
   virtual void initialSetup();
   virtual void timestepSetup();
@@ -55,7 +55,7 @@ public:
   virtual void jacobianSetup();
   virtual void updateActive(THREAD_ID tid);
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL) override;
 
   /**
    * Add a time integrator
@@ -81,20 +81,20 @@ public:
    */
   void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  virtual void reinitElem(const Elem * elem, THREAD_ID tid);
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid);
+  virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
+  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
 
-  virtual const NumericVector<Number> * & currentSolution() { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
+  virtual const NumericVector<Number> * & currentSolution() override { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
 
-  virtual NumericVector<Number> & solutionUDot();
+  virtual NumericVector<Number> & solutionUDot() override;
 
   virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution();
+  virtual NumericVector<Number> & serializedSolution() override;
 
   // This is an empty function since the Aux system doesn't have a matrix!
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
                                std::vector<dof_id_type> & /*n_nz*/,
-                               std::vector<dof_id_type> & /*n_oz*/);
+                               std::vector<dof_id_type> & /*n_oz*/) override;
 
   /**
    * Compute auxiliary variables
@@ -119,12 +119,12 @@ public:
    *             GHOSTED is needed if you are going to be accessing off-processor entries.
    *             The ghosting pattern is the same as the solution vector.
    */
-  NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type);
+  NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type) override;
 
   /**
    * Get the minimum quadrature order for evaluating elemental auxiliary variables
    */
-  virtual Order getMinQuadratureOrder();
+  virtual Order getMinQuadratureOrder() override;
 
   /**
    * Indicated whether this system needs material properties on boundaries.
@@ -132,12 +132,24 @@ public:
    */
   bool needMaterialOnSide(BoundaryID bnd_id);
 
+  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+
+  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+
+  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+
+  virtual TransientExplicitSystem & sys() { return _sys; }
+
+  virtual System & system() override { return _sys; }
+
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
   void computeElementalVars(ExecFlagType type);
 
   FEProblem & _fe_problem;
+
+  TransientExplicitSystem & _sys;
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
