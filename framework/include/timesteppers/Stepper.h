@@ -5,7 +5,6 @@
 
 #include <functional>
 
-#include "MooseError.h"
 #include "LinearInterpolation.h"
 #include "libmesh/numeric_vector.h"
 
