@@ -11,26 +11,19 @@
 template<>
 InputParameters validParams<RecomputeRadialReturn>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<StressUpdateBase>();
   params.addClassDescription("Calculates the effective inelastic strain increment required to return the isotropic stress state to a J2 yield surface.  This class is intended to be a parent class for classes with specific constitutive models.");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
-
   // Newton Iteration control parameters
   params.addParam<bool>("output_iteration_info", false, "Set true to output newton iteration information from the radial return material");
   params.addParam<bool>("output_iteration_info_on_error", false, "Set true to output the recompute material iteration information when a step fails");
   params.addParam<Real>("relative_tolerance", 1e-8, "Relative convergence tolerance for the newton iteration within the radial return material");
   params.addParam<Real>("absolute_tolerance", 1e-20, "Absolute convergence tolerance for newton iteration within the radial return material");
   params.addParam<unsigned int>("max_iterations", 30, "Maximum number of newton iterations in the radial return material");
-
-  params.addPrivateParam<bool>("compute", false); //The return stress increment classes are intended to be iterative materials
   return params;
 }
 
 RecomputeRadialReturn::RecomputeRadialReturn(const InputParameters & parameters) :
-    Material(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
-    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
-    _elastic_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "elastic_strain")),
+    StressUpdateBase(parameters),
     _max_its(parameters.get<unsigned int>("max_iterations")),
     _output_iteration_info(getParam<bool>("output_iteration_info")),
     _output_iteration_info_on_error(getParam<bool>("output_iteration_info_on_error")),
@@ -40,7 +33,7 @@ RecomputeRadialReturn::RecomputeRadialReturn(const InputParameters & parameters)
 }
 
 void
-RecomputeRadialReturn::computeStress(RankTwoTensor & strain_increment,
+RecomputeRadialReturn::updateStress(RankTwoTensor & strain_increment,
                                      RankTwoTensor & inelastic_strain_increment,
                                      RankTwoTensor & stress_new)
 {
@@ -151,10 +144,4 @@ RecomputeRadialReturn::getIsotropicBulkModulus()
   const Real lambda = dilatational_modulus - 2.0 * shear_modulus;
   const Real bulk_modulus = lambda + 2.0 * shear_modulus / 3.0;
   return bulk_modulus;
-}
-
-void
-RecomputeRadialReturn::setQp(unsigned qp)
-{
-  _qp = qp;
 }

@@ -7,9 +7,7 @@
 #ifndef RECOMPUTERADIALRETURN_H
 #define RECOMPUTERADIALRETURN_H
 
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
-#include "Conversion.h"
+#include "StressUpdateBase.h"
 
 //Forward declaration
 class RecomputeRadialReturn;
@@ -30,18 +28,16 @@ InputParameters validParams<RecomputeRadialReturn>();
  * Petrinic's Introduction to Computational Plasticity (2004) Oxford University Press.
  */
 
-class RecomputeRadialReturn : public Material
+class RecomputeRadialReturn : public StressUpdateBase
 {
 public:
   RecomputeRadialReturn(const InputParameters & parameters);
 
   /// A radial return (J2) mapping method is defined in this material by overwritting
   /// the computeInelasticStrainIncrement method.
-  virtual void computeStress(RankTwoTensor & strain_increment,
+  virtual void updateStress(RankTwoTensor & strain_increment,
                              RankTwoTensor & inelastic_strain_increment,
                              RankTwoTensor & stress_new);
-
-  void setQp(unsigned qp);
 
 protected:
   virtual void computeStressInitialize(Real /*effectiveTrialStress*/){}
@@ -52,10 +48,6 @@ protected:
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
   virtual Real getIsotropicShearModulus();
   virtual Real getIsotropicBulkModulus();
-
-  const std::string _base_name;
-  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
-  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
   const unsigned int _max_its;
   const bool _output_iteration_info;

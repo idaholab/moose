@@ -9,7 +9,7 @@
 
 #include "ComputeFiniteStrainElasticStress.h"
 
-class RecomputeRadialReturn;
+class StressUpdateBase;
 
 /**
  * ComputeReturnMappingStress computes the stress, with a return mapping
@@ -31,7 +31,7 @@ protected:
 
   virtual void computeQpStress();
 
-  virtual void computeStress(RankTwoTensor & strain_increment,
+  virtual void updateQpStress(RankTwoTensor & strain_increment,
                              RankTwoTensor & stress_new);
 
   const unsigned int _max_its;
@@ -42,7 +42,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  std::vector<MooseSharedPointer<RecomputeRadialReturn> > _models;
+  std::vector<MooseSharedPointer<StressUpdateBase> > _models;
 };
 
 #endif //COMPUTERETURNMAPPINGSTRESS_H

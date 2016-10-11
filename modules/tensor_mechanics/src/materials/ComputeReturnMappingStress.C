@@ -6,17 +6,17 @@
 /****************************************************************/
 #include "ComputeReturnMappingStress.h"
 
-#include "RecomputeRadialReturn.h"
+#include "StressUpdateBase.h"
 
 template<>
 InputParameters validParams<ComputeReturnMappingStress>()
 {
   InputParameters params = validParams<ComputeFiniteStrainElasticStress>();
   params.addClassDescription("Compute stress using a radial return mapping implementation for creep or creep combined with plasticity");
-  params.addParam<unsigned int>("max_iterations", 30, "Maximum number of newton iterations in the radial return material");
-  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for the newton iteration within the radial return material");
-  params.addParam<Real>("absolute_tolerance", 1e-5, "Absolute convergence tolerance for newton iteration within the radial return material");
-  params.addParam<bool>("output_iteration_info", false, "Set true to output newton iteration information from the radial return material");
+  params.addParam<unsigned int>("max_iterations", 30, "Maximum number of picard iterations over the stress change after all update materials are called");
+  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for the picard iterations over the stress change after all update materials are called");
+  params.addParam<Real>("absolute_tolerance", 1e-5, "Absolute convergence tolerance for the picard iterations over the stress change after all update materials are called");
+  params.addParam<bool>("output_iteration_info", false, "Set true to output picard iteration information over the stress change");
   params.addRequiredParam<std::vector<MaterialName> >("return_mapping_models", "The material objects to use to calculate stress.");
   return params;
 }
@@ -39,7 +39,7 @@ ComputeReturnMappingStress::initialSetup()
   std::vector<MaterialName> models = getParam<std::vector<MaterialName> >("return_mapping_models");
   for (unsigned i = 0; i < models.size(); ++i)
   {
-    MooseSharedPointer<RecomputeRadialReturn> rrr = MooseSharedNamespace::dynamic_pointer_cast<RecomputeRadialReturn>(getMaterialSharedPointerByName(models[i]));
+    MooseSharedPointer<StressUpdateBase> rrr = MooseSharedNamespace::dynamic_pointer_cast<StressUpdateBase>(getMaterialSharedPointerByName(models[i]));
     if (rrr)
       _models.push_back(rrr);
     else
@@ -56,7 +56,7 @@ ComputeReturnMappingStress::computeQpStress()
 
   RankTwoTensor strain_increment = _strain_increment[_qp];
   RankTwoTensor stress_new;
-  computeStress(strain_increment, stress_new);
+  updateQpStress(strain_increment, stress_new);
   _elastic_strain[_qp] = _rotation_increment[_qp] * (strain_increment + _elastic_strain_old[_qp]) * _rotation_increment[_qp].transpose();
   _stress[_qp] = _rotation_increment[_qp] * stress_new * _rotation_increment[_qp].transpose();
 
@@ -65,7 +65,7 @@ ComputeReturnMappingStress::computeQpStress()
 }
 
 void
-ComputeReturnMappingStress::computeStress(RankTwoTensor & strain_increment,
+ComputeReturnMappingStress::updateQpStress(RankTwoTensor & strain_increment,
                                           RankTwoTensor & stress_new)
 {
   if (_output_iteration_info == true)
@@ -100,7 +100,7 @@ ComputeReturnMappingStress::computeStress(RankTwoTensor & strain_increment,
     for (unsigned i_rmm =0; i_rmm < _models.size(); ++i_rmm)
     {
       _models[i_rmm]->setQp(_qp);
-      _models[i_rmm]->computeStress(elastic_strain_increment,
+      _models[i_rmm]->updateStress(elastic_strain_increment,
                                     inelastic_strain_increment,
                                     stress_new);
     }
