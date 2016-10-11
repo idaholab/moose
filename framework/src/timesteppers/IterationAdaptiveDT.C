@@ -135,7 +135,7 @@ IterationAdaptiveDT::computeDT()
 
   if (_cutback_occurred)
   {
-    std::cout << "SPOT1\n";
+    DBG << "SPOT1\n";
     _cutback_occurred = false;
     if (_adaptive_timestepping)
     {
@@ -146,7 +146,7 @@ IterationAdaptiveDT::computeDT()
   }
   else if (_tfunc_last_step)
   {
-    std::cout << "SPOT2\n";
+    DBG << "SPOT2\n";
     _tfunc_last_step = false;
     _sync_last_step = false;
     dt = _time_ipol.sample(_time_old);
@@ -160,7 +160,7 @@ IterationAdaptiveDT::computeDT()
   }
   else if (_sync_last_step)
   {
-    std::cout << "SPOT3\n";
+    DBG << "SPOT3\n";
     _sync_last_step = false;
     dt = _dt_old;
 
@@ -173,17 +173,17 @@ IterationAdaptiveDT::computeDT()
   }
   else if (_adaptive_timestepping)
   {
-    std::cout << "SPOT4\n";
+    DBG << "SPOT4\n";
     computeAdaptiveDT(dt);
   }
   else if (_use_time_ipol)
   {
-    std::cout << "SPOT5\n";
+    DBG << "SPOT5\n";
     dt = computeInterpolationDT();
   }
   else
   {
-    std::cout << "SPOT6\n";
+    DBG << "SPOT6\n";
     dt *= _growth_factor;
     if (dt > _dt_old * _growth_factor)
       dt = _dt_old * _growth_factor;

@@ -354,7 +354,7 @@ Transient::execute()
   si.prev_converged = true;
 
   std::string type = name();
-  std::cout << "FIXTURE: type=" << type << "\n";
+  DBG << "FIXTURE: type=" << type << "\n";
   // Start time loop...
   while (true)
   {
@@ -399,7 +399,7 @@ Transient::execute()
       predicted_str = ss.str();
     }
 
-    std::cout << "FIXTURE: StepperInfo = {"
+    DBG << "FIXTURE: StepperInfo = {"
       << si.step_count << ", "
       << si.time << ", "
       << si.prev_dt << ", "
@@ -797,7 +797,7 @@ Transient::getDT()
 {
   if (_stepper && USE_NEW_STEPPER)
   {
-    std::cout << "NEWDT\n";
+    DBG << "NEWDT\n";
     return _new_dt;
   }
   return _time_stepper->getCurrentDT();

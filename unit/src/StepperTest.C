@@ -102,7 +102,7 @@ StepperTest::fixedPoint()
     }
   };
 
-  for(int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
+  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
   {
     double dt = 0;
     double tol = tests[i].tol;
@@ -119,7 +119,8 @@ StepperTest::fixedPoint()
       else if (j == 0 && tests[i].violate_dt < 0)
         dt /= 2;
       updateInfo(&si, dt);
-      if (std::abs(want[j] - si.time) > tol) {
+      if (std::abs(want[j] - si.time) > tol)
+      {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
         printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
         CPPUNIT_ASSERT(false);
@@ -161,7 +162,7 @@ StepperTest::maxRatio()
 
   double tol = 1e-10;
 
-  for(int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
+  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
   {
     double dt = 0;
     double max_ratio = tests[i].max_ratio;
@@ -175,7 +176,8 @@ StepperTest::maxRatio()
     {
       dt = stepper.advance(&si);
       updateInfo(&si, dt);
-      if (std::abs(want[j] - si.time) > tol) {
+      if (std::abs(want[j] - si.time) > tol)
+      {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
         printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
         CPPUNIT_ASSERT(false);
@@ -212,7 +214,7 @@ StepperTest::everyN()
 
   double tol = 1e-10;
 
-  for(int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
+  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
   {
     double dt = 0;
     std::vector<double> times = tests[i].times;
@@ -225,7 +227,8 @@ StepperTest::everyN()
     {
       dt = stepper.advance(&si);
       updateInfo(&si, dt);
-      if (std::abs(want[j] - si.time) > tol) {
+      if (std::abs(want[j] - si.time) > tol)
+      {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
         printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
         CPPUNIT_ASSERT(false);
@@ -239,7 +242,8 @@ StepperTest::everyN()
 
 
 void
-StepperTest::scratch() {
+StepperTest::scratch()
+{
   libMesh::Parallel::Communicator dummy_comm;
 
   int n = 5;
@@ -253,14 +257,14 @@ StepperTest::scratch() {
   auto tmp2 = tmp->clone();
   NumericVector<Number>& vec2 = *tmp2.get();
 
-  //std::cout << vec(0) << "\n";
-  //std::cout << vec(1) << "\n";
-  //std::cout << vec(2) << "\n";
+  //std::c out << vec(0) << "\n";
+  //std::c out << vec(1) << "\n";
+  //std::c out << vec(2) << "\n";
 
   //vec += vec2;
 
-  //std::cout << vec(0) << "\n";
-  //std::cout << vec(1) << "\n";
-  //std::cout << vec(2) << "\n";
+  //std::c out << vec(0) << "\n";
+  //std::c out << vec(1) << "\n";
+  //std::c out << vec(2) << "\n";
 }
 

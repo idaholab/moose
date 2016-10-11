@@ -1,5 +1,8 @@
 #pragma once
 
+#define MAKETOGETHER(a,b) a##b
+#define DBG MAKETOGETHER(std::c,out)
+
 #include <functional>
 
 #include "MooseError.h"
@@ -9,9 +12,27 @@
 class Logger
 {
 public:
-  Logger(std::string loc) : _loc(loc) { if (on) {std::cout << "[LOG] " << std::string(level*4, ' ') << "- entering " << _loc << "\n"; level++;}}
-  ~Logger() { if (on) {level--; std::cout << "[LOG] " << std::string(level*4, ' ') << "- leaving " << _loc << "\n"; }}
-  double val(double dt) { if (on) std::cout << "[LOG] " << std::string(level*4, ' ') << "* dt=" << dt << "\n"; return dt;}
+  Logger(std::string loc) : _loc(loc)
+  { if (on)
+    {
+      DBG << "[LOG] " << std::string(level*4, ' ') << "- entering " << _loc << "\n";
+      level++;
+    }
+  }
+  ~Logger()
+  {
+    if (on)
+    {
+      level--;
+      DBG << "[LOG] " << std::string(level*4, ' ') << "- leaving " << _loc << "\n";
+    }
+  }
+  double val(double dt)
+  {
+    if (on)
+      DBG << "[LOG] " << std::string(level*4, ' ') << "* dt=" << dt << "\n";
+    return dt;
+  }
   static int level;
   static bool on;
   std::string _loc;
@@ -97,9 +118,14 @@ public:
 class ConstStepper : public Stepper
 {
 public:
-  ConstStepper(double dt) : _dt(dt) { }
+  ConstStepper(double dt) : _dt(dt)
+  {
+  }
 
-  virtual double advance(const StepperInfo* si) { return _dt; }
+  virtual double advance(const StepperInfo* si)
+  {
+    return _dt;
+  }
 
 private:
   double _dt;
@@ -114,9 +140,12 @@ public:
   // If throw_err is true, an exception is thrown if the underlying stepper's
   // advance function returns an out of bounds dt.  Otherwise, out-of-bounds
   // cases result in dt being set to the corresponding min or max bound.
-  DTLimitStepper(Stepper* s, double dt_min, double dt_max, bool throw_err) : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err) { }
+  DTLimitStepper(Stepper* s, double dt_min, double dt_max, bool throw_err) : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err)
+  {
+  }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     Logger l("DTLimit");
     double dt = _stepper->advance(si);
     if (_err && (dt < _min || dt > _max))
@@ -145,9 +174,12 @@ public:
   // advance function returns a dt that causes an out of bounds simulation
   // time.  Otherwise, out-of-bounds cases result in dt being set to hit the
   // corresponding time bound.
-  BoundsStepper(Stepper* s, double t_min, double t_max, bool throw_err) : _stepper(s), _min(t_min), _max(t_max), _err(throw_err) { }
+  BoundsStepper(Stepper* s, double t_min, double t_max, bool throw_err) : _stepper(s), _min(t_min), _max(t_max), _err(throw_err)
+  {
+  }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     Logger l("Bounds");
     double dt = _stepper->advance(si);
     double t = si->time + dt;
@@ -181,9 +213,12 @@ class FixedPointStepper : public Stepper
 //#define FIXED_STEPPER_RETURN si->prev_dt
 #define FIXED_STEPPER_RETURN 1e100
 public:
-  FixedPointStepper(std::vector<double> times, double tol) : _times(times), _time_tol(tol) { }
+  FixedPointStepper(std::vector<double> times, double tol) : _times(times), _time_tol(tol)
+  {
+  }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     Logger l("FixedPoint");
     if (_times.size() == 0)
       return l.val(FIXED_STEPPER_RETURN);
@@ -238,7 +273,9 @@ private:
 class MaxRatioStepper : public Stepper
 {
 public:
-  MaxRatioStepper(Stepper* s, double max_ratio) : _stepper(s), _max_ratio(max_ratio) { }
+  MaxRatioStepper(Stepper* s, double max_ratio) : _stepper(s), _max_ratio(max_ratio)
+  {
+  }
 
   virtual double advance(const StepperInfo* si)
   {
@@ -259,9 +296,12 @@ private:
 class EveryNStepper : public Stepper
 {
 public:
-  EveryNStepper(Stepper* s, int every_n) : _stepper(s), _n(every_n) { }
+  EveryNStepper(Stepper* s, int every_n) : _stepper(s), _n(every_n)
+  {
+  }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     Logger l("EveryN");
     if (si->step_count % _n == 1)
       return l.val(_stepper->advance(si));
@@ -280,9 +320,12 @@ private:
 class RetryUnusedStepper : public Stepper
 {
 public:
-  RetryUnusedStepper(Stepper* s, double tol, bool prev_prev) : _stepper(s), _tol(tol), _prev_prev(prev_prev), _prev_dt(0) { }
+  RetryUnusedStepper(Stepper* s, double tol, bool prev_prev) : _stepper(s), _tol(tol), _prev_prev(prev_prev), _prev_dt(0)
+  {
+  }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     Logger l("RetryUnused");
     if (_prev_dt != 0 && std::abs(si->prev_dt - _prev_dt) > _tol)
     {
@@ -326,7 +369,7 @@ public:
     printf("SPOT df_max=%f\n", _max_diff);
     printf("SPOT f(t=%f)=%f, f(t_next=%f)=%f\n", si->time, f_curr, si->time + dt, _func(si->time + dt));
     printf("SPOT f(t=2.002e6)=%f\n", _func(2.002e6));
-    while(df > _max_diff)
+    while (df > _max_diff)
     {
       dt /= 2.0;
       df = std::abs(_func(si->time + dt) - f_curr);
@@ -343,7 +386,9 @@ private:
 class PiecewiseStepper : public Stepper
 {
 public:
-  PiecewiseStepper(std::vector<double> times, std::vector<double> dts) : _lin(times, dts) { }
+  PiecewiseStepper(std::vector<double> times, std::vector<double> dts) : _lin(times, dts)
+  {
+  }
 
   virtual double advance(const StepperInfo* si)
   {
@@ -365,7 +410,9 @@ class MinOfStepper : public Stepper
 {
 public:
   // stepper a is preferred
-  MinOfStepper(Stepper* a, Stepper* b, double tol) : _a(a), _b(b), _tol(tol) { }
+  MinOfStepper(Stepper* a, Stepper* b, double tol) : _a(a), _b(b), _tol(tol)
+  {
+  }
 
   virtual double advance(const StepperInfo* si)
   {
@@ -400,7 +447,8 @@ public:
       _growth_factor(growth_factor)
       { }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     Logger l("Adaptive");
     bool can_shrink = true;
     bool can_grow = si->converged && si->prev_converged;
@@ -435,7 +483,9 @@ private:
 class StartupStepper : public Stepper
 {
 public:
-  StartupStepper(Stepper* s, double initial_dt, int n_steps = 1) : _stepper(s), _dt(initial_dt), _n(n_steps) { }
+  StartupStepper(Stepper* s, double initial_dt, int n_steps = 1) : _stepper(s), _dt(initial_dt), _n(n_steps)
+  {
+  }
 
   virtual double advance(const StepperInfo* si)
   {
@@ -542,9 +592,12 @@ private:
 class DT2 : public Stepper
 {
 public:
-  DT2() { }
+  DT2()
+  {
+  }
 
-  virtual double advance(const StepperInfo* si) {
+  virtual double advance(const StepperInfo* si)
+  {
     throw "unimplemented";
   }
 
