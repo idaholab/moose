@@ -22,8 +22,6 @@ InputParameters validParams<GrainTrackerInterface>()
 
   params.addRequiredCoupledVarWithAutoBuild("variable", "var_name_base", "op_num", "Array of coupled variables");
 
-  params.suppressParameter<std::vector<VariableName> >("variable");
-
   // Set suitable default parameters for grain tracking
   params.set<Real>("threshold") = 0.1;             // flood out to a fairly low value for grain remapping
   params.set<Real>("connecting_threshold") = 0.09; // connecting threshold should be just slightly lower than threshold

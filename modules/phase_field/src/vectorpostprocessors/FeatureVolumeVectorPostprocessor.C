@@ -19,12 +19,15 @@ InputParameters validParams<FeatureVolumeVectorPostprocessor>()
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
   params.addRequiredParam<UserObjectName>("flood_counter", "The FeatureFloodCount UserObject to get values from.");
+  params.addParam<bool>("single_feature_per_element", false, "Set this Boolean if you wish to use an element based volume where"
+                        " the dominant order parameter determines the feature that accumulates the entire element volume");
   return params;
 }
 
 FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(const InputParameters & parameters) :
     GeneralVectorPostprocessor(parameters),
     MooseVariableDependencyInterface(),
+    _single_feature_per_elem(getParam<bool>("single_feature_per_element")),
     _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
     _var_num(declareVector("var_num")),
     _feature_volumes(declareVector("feature_volumes")),
@@ -83,19 +86,7 @@ FeatureVolumeVectorPostprocessor::execute()
      */
     const auto & var_to_features = _feature_counter.getVarToFeatureVector(elem->id());
 
-    for (auto var_index = beginIndex(var_to_features); var_index < var_to_features.size(); ++var_index)
-    {
-      // Only sample "active" variables
-      if (var_to_features[var_index] != FeatureFloodCount::invalid_id)
-      {
-        auto feature_id = var_to_features[var_index];
-        mooseAssert(feature_id < num_features, "Feature ID out of range");
-
-        // Add in the integral value on the current variable to the current feature's slot
-        Real integral_value = computeIntegral(var_index);
-        _feature_volumes[feature_id] += integral_value;
-      }
-    }
+    accumulateVolumes(elem, var_to_features, num_features);
   }
 }
 
@@ -111,6 +102,42 @@ FeatureVolumeVectorPostprocessor::getFeatureVolume(unsigned int feature_id) cons
 {
   mooseAssert(feature_id < _feature_volumes.size(), "feature_id is out of range");
   return _feature_volumes[feature_id];
+}
+
+void
+FeatureVolumeVectorPostprocessor::accumulateVolumes(const Elem * elem, const std::vector<unsigned int> & var_to_features, std::size_t num_features)
+{
+  unsigned int dominant_feature_id = FeatureFloodCount::invalid_id;
+  Real max_var_value = std::numeric_limits<Real>::lowest();
+
+  for (auto var_index = beginIndex(var_to_features); var_index < var_to_features.size(); ++var_index)
+  {
+    // Only sample "active" variables
+    if (var_to_features[var_index] != FeatureFloodCount::invalid_id)
+    {
+      auto feature_id = var_to_features[var_index];
+      mooseAssert(feature_id < num_features, "Feature ID out of range");
+      auto integral_value = computeIntegral(var_index);
+
+      // Compute volumes in a simplistic but domain conservative fashion
+      if (_single_feature_per_elem)
+      {
+        if (integral_value > max_var_value)
+        {
+          // Update the current dominant feature and associated value
+          max_var_value = integral_value;
+          dominant_feature_id = feature_id;
+        }
+      }
+      // Solution based volume calculation (integral value)
+      else
+        _feature_volumes[feature_id] += integral_value;
+    }
+  }
+
+  // Accumulate the entire element volume into the dominant feature. Do not use the integral value
+  if (_single_feature_per_elem && dominant_feature_id != FeatureFloodCount::invalid_id)
+    _feature_volumes[dominant_feature_id] += elem->volume();
 }
 
 Real

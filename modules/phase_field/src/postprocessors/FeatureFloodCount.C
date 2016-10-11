@@ -385,6 +385,17 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
 }
 
 void
+FeatureFloodCount::buildFeatureIdToLocalIndices(unsigned int max_id)
+{
+  _feature_id_to_local_index.assign(max_id + 1, invalid_size_t);
+  for (auto feature_index = beginIndex(_feature_sets); feature_index < _feature_sets.size(); ++feature_index)
+  {
+    mooseAssert(_feature_sets[feature_index]._id <= max_id, "Feature ID out of range");
+    _feature_id_to_local_index[_feature_sets[feature_index]._id] = feature_index;
+  }
+}
+
+void
 FeatureFloodCount::finalize()
 {
   // Gather all information on processor zero and merge
@@ -429,6 +440,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
   // Scatter local_to_global indices to all processors and store in class member variable
   _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
 
+  std::size_t largest_global_index = std::numeric_limits<std::size_t>::lowest();
   if (!_is_master)
   {
     _feature_sets.resize(_local_to_global_feature_map.size());
@@ -446,17 +458,19 @@ FeatureFloodCount::scatterAndUpdateRanks()
       {
         mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
 
-        auto local_id = feature._orig_ids.begin()->second;
-        mooseAssert(local_id < _local_to_global_feature_map.size(), "local_id : "
-                    << local_id << " is out of range (" << _local_to_global_feature_map.size() << ')');
+        auto local_index = feature._orig_ids.begin()->second;
+        mooseAssert(local_index < _local_to_global_feature_map.size(), "local_id : "
+                    << local_index << " is out of range (" << _local_to_global_feature_map.size() << ')');
 
-        auto global_id = _local_to_global_feature_map[local_id];
+        auto global_index = _local_to_global_feature_map[local_index];
+        if (global_index > largest_global_index)
+          largest_global_index = global_index;
 
-        // Set the correct global id
-        feature._id = global_id;
+        // Set the correct global index
+        feature._id = global_index;
 
         // Move the feature into the correct place
-        _feature_sets[local_id] = std::move(feature);
+        _feature_sets[local_index] = std::move(feature);
 
         ++local_feature_count;
       }
@@ -464,6 +478,14 @@ FeatureFloodCount::scatterAndUpdateRanks()
 
     mooseAssert(local_feature_count == _local_to_global_feature_map.size(), "Indexing error");
   }
+  else
+  {
+    for (auto global_index : local_to_global_all)
+      if (global_index > largest_global_index)
+        largest_global_index = global_index;
+  }
+
+  buildFeatureIdToLocalIndices(largest_global_index);
 }
 
 Real
@@ -486,18 +508,36 @@ FeatureFloodCount::getTotalFeatureCount() const
 unsigned int
 FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
 {
-  mooseAssert(feature_id < _feature_sets.size(), "feature_id out of bounds");
+  // Some processors don't contain the largest feature id, in that case we just return invalid_id back
+  if (feature_id >= _feature_id_to_local_index.size())
+    return invalid_id;
 
-  return _feature_sets[feature_id]._status != Status::INACTIVE ? _feature_sets[feature_id]._var_index : invalid_id;
+  auto local_index = _feature_id_to_local_index[feature_id];
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    return _feature_sets[local_index]._status != Status::INACTIVE ? _feature_sets[feature_id]._var_index : invalid_id;
+  }
+
+  return invalid_id;
 }
 
 bool
 FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
 {
-  // TODO: Possibly cache this information later
-  for (const auto & feature : _feature_sets)
-    if (feature._id == feature_id && feature._intersects_boundary)
-      return true;
+  // TODO: This information is not parallel consistent when using FeatureFloodCounter
+
+  // Some processors don't contain the largest feature id, in that case we just return invalid_id back
+  if (feature_id >= _feature_id_to_local_index.size())
+    return false;
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    return _feature_sets[local_index]._intersects_boundary;
+  }
 
   return false;
 }
