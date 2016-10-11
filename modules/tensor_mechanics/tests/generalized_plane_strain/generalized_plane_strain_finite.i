@@ -73,9 +73,13 @@
   [../]
 []
 
-[UserObjects]
-  [./gpsuo]
-    type = GeneralizedPlaneStrainUserObject
+[Modules]
+  [./TensorMechanics]
+    [./GeneralizedPlaneStrain]
+      [./gps]
+        use_displaced_mesh = true
+      [../]
+    [../]
   [../]
 []
 
@@ -84,22 +88,6 @@
     use_displaced_mesh = true
     temp = temp
     save_in = 'saved_x saved_y'
-  [../]
-  [./gps_x]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_x
-  [../]
-  [./gps_y]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_y
-  [../]
-[]
-
-[ScalarKernels]
-  [./gps]
-    type = GeneralizedPlaneStrain
-    variable = scalar_strain_zz
-    generalized_plane_strain = gpsuo
   [../]
 []
 

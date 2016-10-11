@@ -88,10 +88,23 @@
   [../]
 []
 
-[GeneralizedPlaneStrain]
-  displacements = 'disp_x disp_y'
-  scalar_strain_zz = 'scalar_strain_zz1 scalar_strain_zz2'
-  block = '1 2'
+[Modules]
+  [./TensorMechanics]
+    [./GeneralizedPlaneStrain]
+      [./gps1]
+        use_displaced_mesh = true
+        displacements = 'disp_x disp_y'
+        scalar_strain_zz = scalar_strain_zz1
+        block = '1'
+      [../]
+      [./gps2]
+        use_displaced_mesh = true
+        displacements = 'disp_x disp_y'
+        scalar_strain_zz = scalar_strain_zz2
+        block = '2'
+      [../]
+    [../]
+  [../]
 []
 
 [Kernels]

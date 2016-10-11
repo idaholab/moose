@@ -343,7 +343,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
-  syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "GeneralizedPlaneStrain");
+  syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
 
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");

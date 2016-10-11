@@ -29,26 +29,15 @@
    exodiff = 'generalized_plane_strain_finite_out.e'
    custom_cmp = 'generalized.exodiff'
  [../]
- [./generalized_plane_strain_action]
-   type = 'Exodiff'
-   input = 'generalized_plane_strain_action.i'
-   exodiff = 'generalized_plane_strain_small_out.e'
-   custom_cmp = 'generalized.exodiff'
- [../]
  [./generalized_plane_strain_squares]
    type = 'Exodiff'
    input = 'generalized_plane_strain_squares.i'
    exodiff = 'generalized_plane_strain_squares_out.e'
+   abs_zero = 1e-7
  [../]
  [./out_of_plane_traction]
    type = 'Exodiff'
    input = 'out_of_plane_traction.i'
-   exodiff = 'out_of_plane_traction_out.e'
-   abs_zero = 1e-9
- [../]
- [./out_of_plane_traction_action]
-   type = 'Exodiff'
-   input = 'out_of_plane_traction_action.i'
    exodiff = 'out_of_plane_traction_out.e'
    abs_zero = 1e-9
  [../]

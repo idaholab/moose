@@ -25,11 +25,6 @@ protected:
   std::vector<NonlinearVariableName> _displacements;
   unsigned int _ndisp;
 
-  std::vector<SubdomainName> _block;
-
-  std::vector<NonlinearVariableName> _scalar_strain_zz;
-  std::vector<VariableName> _scalar_strain_zz_var;
-
-  unsigned int _nblock;
+  NonlinearVariableName _scalar_strain_zz;
 };
 #endif //GENERALIZEDPLANESTRAINACTION_H
