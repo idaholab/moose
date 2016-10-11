@@ -25,7 +25,7 @@
 class DisplacedProblem;
 
 
-class DisplacedSystem : public SystemTempl<TransientExplicitSystem>
+class DisplacedSystem : public SystemBase
 {
 public:
   DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name, Moose::VarKindType var_kind);
@@ -78,8 +78,17 @@ public:
    */
   virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed) override { _undisplaced_system.zeroVariables(vars_to_be_zeroed); }
 
+  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+
+  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+
+  virtual TransientExplicitSystem & sys() { return _sys; }
+
+  virtual System & system() override { return _sys; }
+
 protected:
   SystemBase & _undisplaced_system;
+  TransientExplicitSystem & _sys;
 };
 
 #endif /* DISPLACEDSYSTEM_H */
