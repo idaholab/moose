@@ -42,13 +42,13 @@ The tensor mechanics materials use a modular system where the main tensors used 
 !!! info "Three Tensors Are Required for a Mechanics Problem"
     The three tensors that must be defined for any mechanics problem are the the strain $\boldsymbol{\epsilon}$ or strain increment, elasticity tensor $\boldsymbol{\mathcal{C}}$, and the stress $\boldsymbol{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain) $\boldsymbol{\epsilon}_0$ and additional stress $\boldsymbol{\sigma}_0$.
 
-!image tensor_mechanics-IntroPlugNPlay.png width=800 float=right caption=Figure 1: Tensors required to fully describe a mechanics material.
+!image media/tensor_mechanics-IntroPlugNPlay.png width=800 float=right caption=Figure 1: Tensors required to fully describe a mechanics material.
 
 
 At times, a user may need to define multiple mechanics properties over a single block. For this reason, all material properties can be prepended by a name defined by the input parameter `base_name`.
 
 ###Strain or Strain increment
-The base material class to create strains ($\boldsymbol{\epsilon}$) or strain increments is ComputeStrainBase](/Materials/ComputeStrainBase.md). `ComputeStrainBase` is a pure virtual class, requiring that all children override the `computeQpProperties()` method.  
+The base material class to create strains ($\boldsymbol{\epsilon}$) or strain increments is ComputeStrainBase](/Materials/ComputeStrainBase.md). `ComputeStrainBase` is a pure virtual class, requiring that all children override the `computeQpProperties()` method.
 
 For all strain this class defines the property `total_strain`.  For incremental strains, both finite and small, the compute strain base class defines the properties
 `strain_rate`, `strain_increment`, `rotation_increment`, and `deformation_gradient`. A discussion of the different types of strain formulations is available on the [Introduction/Strains](Strains.md) page.
@@ -67,7 +67,7 @@ The primary class for creating elasticity tensors ($\boldsymbol{\mathcal{C_{ijkl
 
 * An elasticity tensor for crystal plasticity, [ComputeElasticityTensorCP](/Materials/ComputeElasticityTensorCP.md),
 * A Cosserat elasticity tensor [ComputeLayeredCosseratElasticityTensor](/Materials/ComputeLayeredCosseratElasticityTensor.md),
-* An isotropic elasticity tensor [ComputeIsotropicElasticityTensor](/Materials/ComputeIsotropicElasticityTensor.md).  
+* An isotropic elasticity tensor [ComputeIsotropicElasticityTensor](/Materials/ComputeIsotropicElasticityTensor.md).
 
 The input file syntax for the isotropic elasticity tensor is
 
