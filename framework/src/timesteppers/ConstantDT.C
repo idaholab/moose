@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "ConstantDT.h"
+#include "Stepper.h"
 
 template<>
 InputParameters validParams<ConstantDT>()
@@ -42,5 +43,11 @@ Real
 ConstantDT::computeDT()
 {
   return std::min(_constant_dt, _growth_factor * getCurrentDT());
+}
+
+Stepper*
+ConstantDT::buildStepper()
+{
+  return new MinOfStepper(new ConstStepper(_constant_dt), new GrowShrinkStepper(0.5, _growth_factor), 0);
 }
 
