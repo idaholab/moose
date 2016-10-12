@@ -47,6 +47,8 @@ public:
 
   virtual bool constrainStep(Real &dt) override;
 
+  virtual Stepper * buildStepper() override;
+
 public:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;

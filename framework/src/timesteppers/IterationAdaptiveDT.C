@@ -18,6 +18,7 @@
 #include "Piecewise.h"
 #include "Transient.h"
 #include "NonlinearSystem.h"
+#include "Stepper.h"
 
 template<>
 InputParameters validParams<IterationAdaptiveDT>()
@@ -413,3 +414,85 @@ IterationAdaptiveDT::acceptStep()
   else
     _dt_old = _dt;
 }
+
+Stepper*
+IterationAdaptiveDT::buildStepper()
+{
+  double tol = _executioner.timestepTol();
+  int n_startup_steps = _executioner.n_startup_steps();
+  double end_time = _executioner.endTime();
+  double start_time = _executioner.getStartTime();
+  double dtmin = _executioner.dtMin();
+  double dtmax = _executioner.dtMax();
+  bool half_transient = _app.halfTransient();
+
+  Stepper* stepper = nullptr;
+
+  std::vector<double> time_list;
+  std::vector<double> dt_list;
+  // this needs to occur before preExecute() is called on old-timestepper because that method modifies the original tfunc_times
+  for (auto val : _tfunc_times)
+    time_list.push_back(val);
+  for (auto val : _tfunc_dts)
+    dt_list.push_back(val);
+
+  Function* t_limit_func = _timestep_limiting_function;
+  std::vector<double> piecewise_list = _times;
+
+  if (_adaptive_timestepping)
+  {
+    stepper = new AdaptiveStepper(
+          _optimal_iterations,
+          _iteration_window,
+          _linear_iteration_ratio,
+          _cutback_factor, // shrink_factor
+          _growth_factor
+        );
+    if (_use_time_ipol)
+      stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
+  }
+  else if (_use_time_ipol)
+      stepper = new PiecewiseStepper(time_list, dt_list);
+  else
+    // this should cover the final else clause in IterationAdaptiveDT::computeDT
+    stepper = new GrowShrinkStepper(0.5, _growth_factor);
+
+  stepper = new IfConvergedStepper(stepper, new GrowShrinkStepper(0.5, 1.0));
+
+  stepper = new StartupStepper(stepper, _input_dt, std::max(1, n_startup_steps));
+  // Original IterationAdaptiveDT stepper constrains to simulation end time
+  // *before* applying other constraints - sometimes resulting in an
+  // over-constrained dt - for example a dt divide-by-two algo to satisfy
+  // function mapping constraints will start with a smaller dt than it would
+  // have otherwise - and it might end up generating a dt that satisfies
+  // simulation time end constraint without having to enforce that constraint
+  // explicitly.  This behavior is undesirable.  The simulation end constraint should
+  // be the last constraint enforced.
+  if (half_transient)
+    stepper = new BoundsStepper(stepper, start_time, end_time, false); // This is stupid.
+  if (t_limit_func)
+  {
+    stepper = new ConstrFuncStepper(
+          stepper,
+          // must capture pointer by value - not ref because scope
+          [=](double x)->double{return t_limit_func->value(x, Point());},
+          _max_function_change
+        );
+  }
+  // Original IterationAdaptiveDT stepper does not retry prior dt if last dt
+  // was constrained by dt min/max - whatever - so we need this stepper to be
+  // inside the Retry stepper to reproduce that behavior
+  stepper = new DTLimitStepper(stepper, dtmin, dtmax, false);
+  // this needs to go before RetryUnused stepper
+  if (_pps_value)
+    stepper = new DTLimitPtrStepper(stepper, NULL, _pps_value, false);
+
+  if (time_list.size() > 0)
+    stepper = new MinOfStepper(new FixedPointStepper(time_list, tol), stepper, tol);
+  stepper = new RetryUnusedStepper(stepper, tol, true);
+  if (_force_step_every_function_point && piecewise_list.size() > 0)
+    stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
+
+  return stepper;
+}
+

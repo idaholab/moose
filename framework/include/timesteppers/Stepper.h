@@ -36,8 +36,6 @@ public:
   std::string _loc;
   double _dt;
 };
-int Logger::level = 0;
-bool Logger::on = true;
 
 // IterationAdaptiveDT stepper can be approximated something like this:
 //
@@ -104,6 +102,7 @@ struct StepperInfo {
 class Stepper
 {
 public:
+  typedef std::unique_ptr<Stepper> Ptr;
   // Implementations of advance should strive to be idempotent.  Return the
   // next value to use as dt.
   virtual double advance(const StepperInfo* si) = 0;
@@ -157,7 +156,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   double _min;
   double _max;
   bool _err;
@@ -187,7 +186,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   const double* _min;
   const double* _max;
   bool _err;
@@ -222,7 +221,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   double _min;
   double _max;
   bool _err;
@@ -290,8 +289,8 @@ public:
   }
 
 private:
-  Stepper* _on_steps;
-  Stepper* _between_steps;
+  Ptr _on_steps;
+  Ptr _between_steps;
   std::vector<double> _times;
   double _time_tol;
 };
@@ -316,7 +315,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   double _max_ratio;
 };
 
@@ -339,7 +338,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   int _n;
 };
 
@@ -372,7 +371,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   double _tol;
   bool _prev_prev;
   double _prev_dt;
@@ -407,7 +406,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   std::function<double (double t)> _func;
   double _max_diff;
 };
@@ -456,8 +455,8 @@ public:
   }
 
 private:
-  Stepper* _a;
-  Stepper* _b;
+  Ptr _a;
+  Ptr _b;
   double _tol;
 };
 
@@ -527,7 +526,7 @@ public:
   }
 
 private:
-  Stepper* _stepper;
+  Ptr _stepper;
   double _dt;
   int _n;
 };
@@ -550,8 +549,8 @@ public:
   }
 
 private:
-  Stepper* _converged;
-  Stepper* _not_converged;
+  Ptr _converged;
+  Ptr _not_converged;
 };
 
 
