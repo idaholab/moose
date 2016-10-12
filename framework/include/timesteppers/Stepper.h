@@ -11,7 +11,7 @@
 class Logger
 {
 public:
-  Logger(std::string loc) : _loc(loc)
+  Logger(std::string loc) : _loc(loc), _dt(-1)
   { if (on)
     {
       DBG << "[LOG] " << std::string(level*4, ' ') << "- entering " << _loc << "\n";
@@ -23,18 +23,18 @@ public:
     if (on)
     {
       level--;
-      DBG << "[LOG] " << std::string(level*4, ' ') << "- leaving " << _loc << "\n";
+      DBG << "[LOG] " << std::string(level*4, ' ') << "- leaving " << _loc << " (dt=" << _dt << ")\n";
     }
   }
   double val(double dt)
   {
-    if (on)
-      DBG << "[LOG] " << std::string(level*4, ' ') << "* dt=" << dt << "\n";
+    _dt = dt;
     return dt;
   }
   static int level;
   static bool on;
   std::string _loc;
+  double _dt;
 };
 int Logger::level = 0;
 bool Logger::on = true;

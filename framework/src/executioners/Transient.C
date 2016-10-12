@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define USE_NEW_STEPPER true
+#define USE_NEW_STEPPER false
 
 #include "Transient.h"
 
@@ -250,6 +250,7 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
   std::vector<double> piecewise_list = legacy->_times;
 
   if (legacy->_adaptive_timestepping)
+  {
     stepper = new AdaptiveStepper(
           legacy->_optimal_iterations,
           legacy->_iteration_window,
@@ -257,12 +258,14 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
           legacy->_cutback_factor, // shrink_factor
           legacy->_growth_factor
         );
+    if (legacy->_use_time_ipol)
+      stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
+  }
+  else if (legacy->_use_time_ipol)
+      stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
   else
     // this should cover the final else clause in IterationAdaptiveDT::computeDT
     stepper = new GrowShrinkStepper(0.5, legacy->_growth_factor);
-
-  if (time_list.size() > 0)
-    stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
 
   stepper = new StartupStepper(stepper, legacy->_input_dt, std::max(1, n_startup_steps));
   // Original IterationAdaptiveDT stepper constrains to simulation end time
@@ -290,11 +293,12 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
   // this needs to go before RetryUnused stepper
   if (legacy->_pps_value)
     stepper = new DTLimitPtrStepper(stepper, NULL, legacy->_pps_value, false);
-  stepper = new RetryUnusedStepper(stepper, tol, true); // TODO: uncomment me
-  if (legacy->_force_step_every_function_point && piecewise_list.size() > 0)
-    stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
+
   if (time_list.size() > 0)
     stepper = new MinOfStepper(new FixedPointStepper(time_list, tol), stepper, tol);
+  stepper = new RetryUnusedStepper(stepper, tol, true);
+  if (legacy->_force_step_every_function_point && piecewise_list.size() > 0)
+    stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
 
   return stepper;
 }
