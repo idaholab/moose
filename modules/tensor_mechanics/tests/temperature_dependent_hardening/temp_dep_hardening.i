@@ -224,7 +224,7 @@
   [../]
 
   [./temp_dep_hardening]
-    type = RecomputeRadialReturnTempDepHardening
+    type = TemperatureDependentHardeningStressUpdate
     block = 0
     hardening_functions = 'hf1 hf2'
     temperatures = '300.0 800.0'

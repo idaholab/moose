@@ -95,19 +95,19 @@ The integration of the model is performed using a combination of Material and Di
 * `HEVPStrengthUOBase`
 
 
-##Creep and Plasticity with Recompute Materials
-In addition to the User Object based plasticity models, another set of plasticity and creep material models have been developed with the `DiscreteMaterial` class, which allows for iterations within the material itself.  These iterative materials are designated by `Recompute` at the start of the class name. These classes use a Radial Return von Mises, or J2, approach to determine the inelastic, creep, damage, or plasticity strain increments at each time step.  The advantage of the recompute materials is the ability to combine multiple inelastic stress calculations, such as creep and plasticity. The [Recompute Radial Return Mapping Algorithm](/Materials/RecomputeRadialReturn.md) discusses the general algorithm to return the stress state to the yield surface.
+##Creep and Plasticity with StressUpdate Materials
+In addition to the User Object based plasticity models, another set of plasticity and creep material models have been developed with the `StressUpdateBase` class, which allows for iterations within the material itself.  These iterative materials are designated by `StressUpdate` at the end of the class name. These classes use a Radial Return von Mises, or J2, approach to determine the inelastic, creep, damage, or plasticity strain increments at each time step.  The advantage of the stress update materials is the ability to combine multiple inelastic stress calculations, such as creep and plasticity. The [Stress Update Radial Return Mapping Algorithm](/Materials/RadialReturnStressUpdate.md) discusses the general algorithm to return the stress state to the yield surface.
 
-The recompute materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method. Separating the call to the recompute materials from MOOSE allows us to iteratively call the recompute materials as is required to achieve convergence.
+The stress update materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method. Separating the call to the stress update materials from MOOSE allows us to iteratively call the update materials as is required to achieve convergence.
 
 For **isotropic materials** the radial return approach offers distinct advantages:
 
   - **Faster simulation run times**: The isotropic material iteration algorithm uses single variable `Reals` to compute and converge the inelastic strain instead of inverting the full `Rank-4` elasticity tensor required in more complicated anisotropic algorithms.
-  - **Easy to understand**: The return mapping algorithm implemented in [RecomputeRadialReturn](Materials/RecomputeRadialReturn.md) is the classical radial return method based on the von Mises yield criterion.
+  - **Easy to understand**: The return mapping algorithm implemented in [RadialReturnStressUpdate](Materials/RadialReturnStressUpdate.md) is the classical radial return method based on the von Mises yield criterion.
   - **Applicable to a variety of models**: The radial return method provides the flexibility to include creep, plasticity, and damage within a single simulation.  The [ComputeReturnMappingStress](/Materials/ComputeReturnMappingStress.md) class calls each individual creep and plasticity model to iterate separately over the inelastic strain increment before checking for the convergence of the combined total radial return stress increment required to return the stress state to the yield surface.
 
 
-The recompute radial return materials each individually calculate, using the [Newton Method](http://mathworld.wolfram.com/NewtonsMethod.html), the amount of effective inelastic strain required to return the stress state to the yield surface.
+The stress update materials each individually calculate, using the [Newton Method](http://mathworld.wolfram.com/NewtonsMethod.html), the amount of effective inelastic strain required to return the stress state to the yield surface.
 $$
 \Delta p^{(t+1)} = \Delta p^t + d \Delta p
 $$
@@ -117,4 +117,4 @@ $$
 $$
 where G is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress.  
 
-When more than one radial recompute material is included in the simulation `ComputeReturnMappingStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.  
+When more than one stress update material is included in the simulation `ComputeReturnMappingStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.

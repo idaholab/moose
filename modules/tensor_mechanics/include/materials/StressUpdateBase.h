@@ -20,22 +20,25 @@ InputParameters validParams<StressUpdateBase>();
 /**
  * StressUpdateBase is a material that is not called by MOOSE because
  * of the compute=false flag set in the parameter list.  This class is a base class
- * for materials that use Newton iterations to perform radial return mapping
- * iterations to compute inelastic strains.  All materials inheriting from this
- * class must be called by a separate material, such as ComputeReturnMappingStress.
+ * for materials that use Newton iterations to perform return mapping iterations
+ * to compute inelastic strains and update the stress.  All materials inheriting
+ * from this class must be called by a separate material, such as ComputeReturnMappingStress.
  */
 class StressUpdateBase : public Material
 {
 public:
   StressUpdateBase(const InputParameters & parameters);
 
-  /// A radial return (J2) mapping method is defined in this material by overwritting
-  /// the computeInelasticStrainIncrement method.
+  /// This virtual method enables inheriting materials to define an iterative
+  /// procedure to calculate the stress, updating the calculated stress after
+  /// each iteration is completed until convergence is achieved.  This method
+  /// is called by ComputeReturnMappingStress.  All inheriting classes must
+  /// overwrite this method.
   virtual void updateStress(RankTwoTensor & strain_increment,
                             RankTwoTensor & inelastic_strain_increment,
                             RankTwoTensor & stress_new);
 
-  void setQp(unsigned qp);
+  void setQp(unsigned int qp);
 
 protected:
   const std::string _base_name;

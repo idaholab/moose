@@ -13,10 +13,10 @@ InputParameters validParams<ComputeReturnMappingStress>()
 {
   InputParameters params = validParams<ComputeFiniteStrainElasticStress>();
   params.addClassDescription("Compute stress using a radial return mapping implementation for creep or creep combined with plasticity");
-  params.addParam<unsigned int>("max_iterations", 30, "Maximum number of picard iterations over the stress change after all update materials are called");
-  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for the picard iterations over the stress change after all update materials are called");
-  params.addParam<Real>("absolute_tolerance", 1e-5, "Absolute convergence tolerance for the picard iterations over the stress change after all update materials are called");
-  params.addParam<bool>("output_iteration_info", false, "Set true to output picard iteration information over the stress change");
+  params.addParam<unsigned int>("max_iterations", 30, "Maximum number of the stress update iterations over the stress change after all update materials are called");
+  params.addParam<Real>("relative_tolerance", 1e-5, "Relative convergence tolerance for the stress update iterations over the stress change after all update materials are called");
+  params.addParam<Real>("absolute_tolerance", 1e-5, "Absolute convergence tolerance for the stress update iterations over the stress change after all update materials are called");
+  params.addParam<bool>("output_iteration_info", false, "Set to true to output stress update iteration information over the stress change");
   params.addRequiredParam<std::vector<MaterialName> >("return_mapping_models", "The material objects to use to calculate stress.");
   return params;
 }
@@ -37,9 +37,9 @@ void
 ComputeReturnMappingStress::initialSetup()
 {
   std::vector<MaterialName> models = getParam<std::vector<MaterialName> >("return_mapping_models");
-  for (unsigned i = 0; i < models.size(); ++i)
+  for (unsigned int i = 0; i < models.size(); ++i)
   {
-    MooseSharedPointer<StressUpdateBase> rrr = MooseSharedNamespace::dynamic_pointer_cast<StressUpdateBase>(getMaterialSharedPointerByName(models[i]));
+    StressUpdateBase * rrr = dynamic_cast<StressUpdateBase *>(&getMaterialByName(models[i]));
     if (rrr)
       _models.push_back(rrr);
     else

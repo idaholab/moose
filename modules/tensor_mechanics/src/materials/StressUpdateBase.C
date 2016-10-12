@@ -14,9 +14,9 @@ InputParameters validParams<StressUpdateBase>()
   InputParameters params = validParams<Material>();
   params.addClassDescription("Calculates the effective inelastic strain increment required to return the isotropic stress state to a J2 yield surface.  This class is intended to be a parent class for classes with specific constitutive models.");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
-
-  params.addParam<bool>("compute", false, "The return stress increment classes are intended to be iterative materials");
-  params.addParamNamesToGroup("compute", "Advanced");
+  //The return stress increment classes are intended to be iterative materials, so must set compute = false for all inheriting classes
+  params.set<bool>("compute") = false;
+  params.suppressParameter<bool>("compute");
   return params;
 }
 
@@ -36,7 +36,7 @@ StressUpdateBase::updateStress(RankTwoTensor & strain_increment,
 }
 
 void
-StressUpdateBase::setQp(unsigned qp)
+StressUpdateBase::setQp(unsigned int qp)
 {
   _qp = qp;
 }

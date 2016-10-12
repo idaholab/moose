@@ -159,8 +159,8 @@
     block = 1
   [../]
 
-  [./isotropic_plasticity_recompute]
-    type = RecomputeRadialReturnIsotropicPlasticity
+  [./isotropic_plasticity]
+    type = IsotropicPlasticityStressUpdate
     block = 1
     yield_stress = 50.0
     hardening_function = hf
@@ -173,7 +173,7 @@
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 1
-    return_mapping_models = 'isotropic_plasticity_recompute'
+    return_mapping_models = 'isotropic_plasticity'
   [../]
 []
 

@@ -128,7 +128,7 @@
   [../]
 
   [./power_law_hardening]
-    type = RecomputeRadialReturnIsotropicPowerLawHardening
+    type = IsotropicPowerLawHardeningStressUpdate
     strength_coefficient = 0.5 #K
     strain_hardening_exponent = 0.5 #n
     output_iteration_info_on_error = true
