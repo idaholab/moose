@@ -287,13 +287,14 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
   // was constrained by dt min/max - whatever - so we need this stepper to be
   // inside the Retry stepper to reproduce that behavior
   stepper = new DTLimitStepper(stepper, dtMin(), dtMax(), false);
+  // this needs to go before RetryUnused stepper
+  if (legacy->_pps_value)
+    stepper = new DTLimitPtrStepper(stepper, NULL, legacy->_pps_value, false);
   stepper = new RetryUnusedStepper(stepper, tol, true); // TODO: uncomment me
   if (legacy->_force_step_every_function_point && piecewise_list.size() > 0)
     stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
   if (time_list.size() > 0)
     stepper = new MinOfStepper(new FixedPointStepper(time_list, tol), stepper, tol);
-  if (legacy->_pps_value && *legacy->_pps_value < dtMin())
-    stepper = new DTLimitStepper(stepper, dtMin(), 1e100, false);
 
   return stepper;
 }

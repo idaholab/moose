@@ -163,6 +163,36 @@ private:
   bool _err;
 };
 
+class DTLimitPtrStepper : public Stepper
+{
+public:
+  DTLimitPtrStepper(Stepper* s, const double* dt_min, const double* dt_max, bool throw_err) : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err)
+  {
+  }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    Logger l("DTLimitPtr");
+    double dt = _stepper->advance(si);
+    if (_err && *_min && dt < *_min)
+      throw "time step is out of bounds";
+    else if (_err && *_max && dt > *_max)
+      throw "time step is out of bounds";
+
+    if (_min && dt < *_min)
+      return l.val(*_min);
+    else if ( _max && *_max > 0 && dt > *_max)
+      return l.val(*_max);
+    return l.val(dt);
+  }
+
+private:
+  Stepper* _stepper;
+  const double* _min;
+  const double* _max;
+  bool _err;
+};
+
 // Calls an underlying stepper to compute dt. Modifies dt to maintain the
 // simulation time within specified fixed lower and upper bounds (or throws an
 // error - depending on configuration).
