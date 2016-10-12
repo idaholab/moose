@@ -26,7 +26,15 @@ class Parser:
     0x04 - Missing required parameter
     0x08 - Bad value
     0x10 - Mismatched type
+    0x20 - Missing Node type parameter
+
+    If new error codes are added, the static mask value needs to be adjusted
   """
+  @staticmethod
+  def getErrorCodeMask():
+    # See Error codes description above for mask calculation
+    return 0x3F
+
   def parse(self, filename):
     error_code = 0x00
 
@@ -132,8 +140,23 @@ class Parser:
       # Put it in the warehouse
       self.warehouse.addObject(moose_object)
 
+    # Are we in a tree node that "looks" like it should contain a buildable object?
+    elif self._looksLikeValidSubBlock(node):
+      print 'Error detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
+      print '       Missing "type" parameter in block'
+      error_code = error_code | 0x20
+
     # Loop over the section names and parse them
     for child in node.children_list:
       error_code = error_code | self._parseNode(filename, node.children[child])
 
     return error_code
+
+  # This routine returns a Boolean indicating whether a given block
+  # looks like a valid subblock. In the Testing system, a valid subblock
+  # has a "type" and no children blocks.
+  def _looksLikeValidSubBlock(self, node):
+    if len(node.params.keys()) and len(node.children_list) == 0:
+      return True
+    else:
+      return False
