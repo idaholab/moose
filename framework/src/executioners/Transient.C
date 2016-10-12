@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define USE_NEW_STEPPER false
+#define USE_NEW_STEPPER true
 
 #include "Transient.h"
 
@@ -262,7 +262,7 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
       stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
   }
   else if (legacy->_use_time_ipol)
-      stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
+      stepper = new PiecewiseStepper(time_list, dt_list);
   else
     // this should cover the final else clause in IterationAdaptiveDT::computeDT
     stepper = new GrowShrinkStepper(0.5, legacy->_growth_factor);
