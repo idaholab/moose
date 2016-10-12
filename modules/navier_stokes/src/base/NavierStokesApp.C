@@ -74,9 +74,10 @@
 #include "INSMass.h"
 #include "INSMassRZ.h"
 #include "INSMomentumTimeDerivative.h"
-#include "INSMomentumRZ.h"
 #include "INSMomentumTractionForm.h"
+#include "INSMomentumTractionFormRZ.h"
 #include "INSMomentumLaplaceForm.h"
+#include "INSMomentumLaplaceFormRZ.h"
 #include "INSTemperatureTimeDerivative.h"
 #include "INSTemperature.h"
 #include "INSSplitMomentum.h"
@@ -88,7 +89,8 @@
 #include "INSCompressibilityPenalty.h"
 
 // BCs
-#include "INSMomentumNoBCBC.h"
+#include "INSMomentumNoBCBCTractionForm.h"
+#include "INSMomentumNoBCBCLaplaceForm.h"
 #include "INSTemperatureNoBCBC.h"
 #include "ImplicitNeumannBC.h"
 
@@ -202,9 +204,13 @@ NavierStokesApp::registerObjects(Factory & factory)
   // INSMomentum is now deprecated, convert input files to use
   // INSMomentumLaplaceForm or INSMomentumTractionForm instead.
   registerDeprecatedObjectName(INSMomentumTractionForm, "INSMomentum", "10/07/2017 12:00");
-  registerKernel(INSMomentumRZ);
+  // INSMomentumRZ has been renamed, convert input files to use
+  // INSMomentumTractionFormRZ.
+  registerDeprecatedObjectName(INSMomentumTractionFormRZ, "INSMomentumRZ", "10/07/2017 12:00");
   registerKernel(INSMomentumTractionForm);
+  registerKernel(INSMomentumTractionFormRZ);
   registerKernel(INSMomentumLaplaceForm);
+  registerKernel(INSMomentumLaplaceFormRZ);
   registerKernel(INSTemperatureTimeDerivative);
   registerKernel(INSTemperature);
   registerKernel(INSSplitMomentum);
@@ -216,7 +222,11 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSCompressibilityPenalty);
 
   // BCs
-  registerBoundaryCondition(INSMomentumNoBCBC);
+  // Register the newly-named class with the old name for a while in
+  // case anyone is using this in their app.
+  registerDeprecatedObjectName(INSMomentumNoBCBCTractionForm, "INSMomentumNoBCBC", "10/07/2017 12:00");
+  registerBoundaryCondition(INSMomentumNoBCBCTractionForm);
+  registerBoundaryCondition(INSMomentumNoBCBCLaplaceForm);
   registerBoundaryCondition(INSTemperatureNoBCBC);
   registerBoundaryCondition(ImplicitNeumannBC);
 

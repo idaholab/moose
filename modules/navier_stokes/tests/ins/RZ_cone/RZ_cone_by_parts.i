@@ -1,9 +1,12 @@
+# This input file tests several different things:
+# .) The axisymmetric (RZ) form of the governing equations.
+# .) An open boundary.
+# .) Integrating the pressure by parts.
+# .) Natural boundary condition at the outlet.
 [GlobalParams]
   rho = 1
   mu = 1
-  integrate_p_by_parts = false
   gravity = '0 0 0'
-  coord_type = RZ
 []
 
 [Mesh]
@@ -11,6 +14,7 @@
 []
 
 [Problem]
+  coord_type = RZ
 []
 
 [Preconditioning]
@@ -24,8 +28,9 @@
 [Executioner]
   type = Transient
   dt = 0.005
+  dtmin = 0.005
   num_steps = 5
-  l_max_its = 299
+  l_max_its = 100
 
   # Note: The Steady executioner can be used for this problem, if you
   # drop the INSMomentumTimeDerivative kernels and use the following
@@ -33,9 +38,11 @@
   # petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -ksp_type'
   # petsc_options_value = 'lu NONZERO 1.e-10 preonly'
 
-  # "Standard" ILU options
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type -sub_pc_factor_levels'
-  petsc_options_value = '300                bjacobi  ilu          4'
+  # Block Jacobi works well for this problem, as does "-pc_type asm
+  # -pc_asm_overlap 2", but an overlap of 1 does not work for some
+  # reason?
+  petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
+  petsc_options_value = 'bjacobi  ilu          4'
 
   nl_rel_tol = 1e-12
   nl_max_its = 6
@@ -44,7 +51,7 @@
 [Outputs]
   [./out]
     type = Exodus
-  []
+  [../]
 []
 
 [Variables]
@@ -65,12 +72,6 @@
 []
 
 [BCs]
-  [./p_corner]
-    type = DirichletBC
-    boundary = top_right
-    value = 0
-    variable = p
-  [../]
   [./u_in]
     type = DirichletBC
     boundary = bottom
@@ -82,24 +83,6 @@
     boundary = bottom
     variable = vel_y
     function = 'inlet_func'
-  [../]
-  [./u_out]
-    type = INSMomentumNoBCBC
-    boundary = top
-    variable = vel_x
-    u = vel_x
-    v = vel_y
-    p = p
-    component = 0
-  [../]
-  [./v_out]
-    type = INSMomentumNoBCBC
-    boundary = top
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    p = p
-    component = 1
   [../]
   [./u_axis_and_walls]
     type = DirichletBC
@@ -133,7 +116,7 @@
     p = p
   [../]
   [./x_momentum_space]
-    type = INSMomentumRZ
+    type = INSMomentumLaplaceFormRZ
     variable = vel_x
     u = vel_x
     v = vel_y
@@ -141,7 +124,7 @@
     component = 0
   [../]
   [./y_momentum_space]
-    type = INSMomentumRZ
+    type = INSMomentumLaplaceFormRZ
     variable = vel_y
     u = vel_x
     v = vel_y
