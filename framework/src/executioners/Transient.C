@@ -116,7 +116,7 @@ Transient::Transient(const InputParameters & parameters) :
     _dtmax(getParam<Real>("dtmax")),
     _num_steps(getParam<unsigned int>("num_steps")),
     _n_startup_steps(getParam<int>("n_startup_steps")),
-    _steps_taken(0),
+    _steps_taken(declareRecoverableData<unsigned int>("steps_taken", 0)),
     _trans_ss_check(getParam<bool>("trans_ss_check")),
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
@@ -139,7 +139,9 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose")),
     _new_dt(0),
-    _stepper(nullptr)
+    _stepper(nullptr),
+    _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
+    _l_its(declareRestartableData<unsigned int>("l_its", 0))
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
@@ -278,7 +280,8 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
   // simulation time end constraint without having to enforce that constraint
   // explicitly.  This behavior is undesirable.  The simulation end constraint should
   // be the last constraint enforced.
-  stepper = new BoundsStepper(stepper, getStartTime(), endTime(), false); // This is stupid.
+  if (!_app.halfTransient())
+    stepper = new BoundsStepper(stepper, getStartTime(), endTime(), false); // This is stupid.
   if (t_limit_func)
   {
     stepper = new ConstrFuncStepper(
@@ -337,13 +340,15 @@ Transient::execute()
       sync_times.push_back(val);
 
     // these are global/sim constraints for *EVERY* time stepper:
+
     // dtmin/max constraints
     stepper = new DTLimitStepper(stepper, dtMin(), dtMax(), false);
     // sync_times constraint
     if (sync_times.size() > 0)
       stepper = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), stepper, timestepTol());
     // max/min sim time constraint
-    stepper = new BoundsStepper(stepper, getStartTime(), endTime(), false);
+    if (!_app.halfTransient())
+      stepper = new BoundsStepper(stepper, getStartTime(), endTime(), false);
   }
 
   preExecute();
@@ -355,33 +360,34 @@ Transient::execute()
   if (!_app.isRecovering())
     _problem.advanceState();
 
-  StepperInfo si = { };
-  si.converged = true;
-  si.step_count = 0;
-  si.prev_converged = true;
-
-  std::string type = name();
-  DBG << "FIXTURE: type=" << type << "\n";
   // Start time loop...
+  StepperInfo si = { };
+  bool first = true;
   while (true)
   {
+    _steps_taken++;
+
     if (_first != true)
       incrementStepOrReject();
-    _first = false;
 
     // update new style stepper
     si.time = _time;
     si.prev_prev_dt = si.prev_dt;
     si.prev_dt = _dt;
-    si.step_count++;
-    si.nonlin_iters =  _fe_problem.getNonlinearSystem().nNonlinearIterations();
-    si.lin_iters = _fe_problem.getNonlinearSystem().nLinearIterations();
-    si.prev_converged = si.converged;
-    // this explicit FEProblem call prevents tests that subclass FEProblem
+    si.step_count = _steps_taken;
+    si.nonlin_iters =  _nl_its;
+    si.lin_iters = _l_its;
+    si.prev_converged = si.converged || first;
+    // This explicit FEProblem call prevents tests that subclass FEProblem
     // with stateful overrides of converged() from erroneously failing.
-    si.converged = _fe_problem.FEProblem::converged() || si.step_count == 1;
+    // Also, a step_count == 1 condition is not sufficient to account for
+    // restart/recover cases where step_count is already something else.
+    si.converged = _fe_problem.FEProblem::converged() || first;
     if (stepper != nullptr)
       _new_dt = stepper->advance(&si);
+
+    first = false;
+    _first = false;
 
     // print out stepper info
     std::string nonlin_str = "nullptr";
@@ -432,10 +438,11 @@ Transient::execute()
     computeDT();
     double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
+    _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
+    _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
     endStep();
     postStep();
 
-    _steps_taken++;
 
     double constr_legacy_dt = _dt;
     if (stepper != nullptr)

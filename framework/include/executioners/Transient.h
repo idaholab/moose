@@ -258,7 +258,7 @@ protected:
   Real _dtmax;
   unsigned int _num_steps;
   int _n_startup_steps;
-  unsigned int _steps_taken;
+  unsigned int & _steps_taken;
 
   /**
    * Steady state detection variables:
@@ -305,6 +305,15 @@ protected:
 
   Real _new_dt;
   Stepper* _stepper;
+
+  /// TODO: the following two member vars are only here because FEProblem/NonlinearSystem do not save the
+  /// state of these values themselves.  If that gets fixed, these vars can be
+  /// removed from this class and vals just fetched from
+  /// FEProblem/NonlinearSystem directly.
+  /// Number of nonlinear iterations in previous solve
+  unsigned int & _nl_its;
+  /// Number of linear iterations in previous solve
+  unsigned int & _l_its;
 };
 
 #endif //TRANSIENTEXECUTIONER_H
