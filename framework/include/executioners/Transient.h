@@ -19,6 +19,7 @@
 #define TRANSIENT_H
 
 #include "Executioner.h"
+#include "Stepper.h"
 
 // System includes
 #include <string>
@@ -301,7 +302,7 @@ protected:
   void setupTimeIntegrator();
 
   Real _new_dt;
-  Stepper* _stepper;
+  std::unique_ptr<Stepper> _stepper;
 
   /// TODO: the following two member vars are only here because FEProblem/NonlinearSystem do not save the
   /// state of these values themselves.  If that gets fixed, these vars can be

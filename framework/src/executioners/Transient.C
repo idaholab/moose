@@ -264,7 +264,7 @@ Transient::execute()
     if (!_app.halfTransient())
       inner = new BoundsStepper(inner, getStartTime(), endTime(), false);
   }
-  std::unique_ptr<Stepper> stepper(inner);
+  _stepper.reset(inner);
 
   preExecute();
 
@@ -293,13 +293,11 @@ Transient::execute()
     si.nonlin_iters =  _nl_its;
     si.lin_iters = _l_its;
     si.prev_converged = si.converged || first;
-    // This explicit FEProblem call prevents tests that subclass FEProblem
-    // with stateful overrides of converged() from erroneously failing.
-    // Also, a step_count == 1 condition is not sufficient to account for
+    // A step_count == 1 condition is not sufficient to account for
     // restart/recover cases where step_count is already something else.
-    si.converged = _fe_problem.FEProblem::converged() || first;
-    if (stepper != nullptr)
-      _new_dt = stepper->advance(&si);
+    si.converged = _last_solve_converged || first;
+    if (_stepper)
+      _new_dt = _stepper->advance(&si);
 
     first = false;
     _first = false;
@@ -360,7 +358,7 @@ Transient::execute()
 
 
     double constr_legacy_dt = _dt;
-    if (stepper != nullptr)
+    if (_stepper)
       printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, _new_dt, legacy_dt, constr_legacy_dt);
   }
 
