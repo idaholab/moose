@@ -13,16 +13,13 @@ InputParameters validParams<INSMomentumTractionForm>()
   return params;
 }
 
-
-
 INSMomentumTractionForm::INSMomentumTractionForm(const InputParameters & parameters) :
-  INSMomentumBase(parameters)
+    INSMomentumBase(parameters)
 {
 }
 
-
-
-Real INSMomentumTractionForm::computeQpResidualViscousPart()
+Real
+INSMomentumTractionForm::computeQpResidualViscousPart()
 {
   // The component'th row (or col, it's symmetric) of the viscous stress tensor
   RealVectorValue tau_row;
@@ -55,9 +52,8 @@ Real INSMomentumTractionForm::computeQpResidualViscousPart()
   return _mu * (tau_row * _grad_test[_i][_qp]);
 }
 
-
-
-Real INSMomentumTractionForm::computeQpJacobianViscousPart()
+Real
+INSMomentumTractionForm::computeQpJacobianViscousPart()
 {
   // Viscous part, full stress tensor.  The extra contribution comes from the "2"
   // on the diagonal of the viscous stress tensor.
@@ -65,9 +61,8 @@ Real INSMomentumTractionForm::computeQpJacobianViscousPart()
                 _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
 }
 
-
-
-Real INSMomentumTractionForm::computeQpOffDiagJacobianViscousPart(unsigned jvar)
+Real
+INSMomentumTractionForm::computeQpOffDiagJacobianViscousPart(unsigned jvar)
 {
   // In Stokes/Laplacian version, off-diag Jacobian entries wrt u,v,w are zero
   if (jvar == _u_vel_var_number)

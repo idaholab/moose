@@ -4,28 +4,27 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INSMOMENTUMRZ_H
-#define INSMOMENTUMRZ_H
+#ifndef INSMOMENTUMNOBCBCTRACTIONFORM_H
+#define INSMOMENTUMNOBCBCTRACTIONFORM_H
 
-#include "INSMomentumTractionForm.h"
+#include "INSMomentumNoBCBCBase.h"
 
 // Forward Declarations
-class INSMomentumRZ;
+class INSMomentumNoBCBCTractionForm;
 
 template<>
-InputParameters validParams<INSMomentumRZ>();
+InputParameters validParams<INSMomentumNoBCBCTractionForm>();
 
 /**
- * This class computes momentum equation residual and Jacobian
- * contributions for the incompressible Navier-Stokes momentum
- * equation.
+ * This class implements the "No BC" boundary condition based on the
+ * "traction" form of the viscous stress tensor.
  */
-class INSMomentumRZ : public INSMomentumTractionForm
+class INSMomentumNoBCBCTractionForm : public INSMomentumNoBCBCBase
 {
 public:
-  INSMomentumRZ(const InputParameters & parameters);
+  INSMomentumNoBCBCTractionForm(const InputParameters & parameters);
 
-  virtual ~INSMomentumRZ(){}
+  virtual ~INSMomentumNoBCBCTractionForm(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -34,4 +33,4 @@ protected:
 };
 
 
-#endif // INSMOMENTUMRZ_H
+#endif
