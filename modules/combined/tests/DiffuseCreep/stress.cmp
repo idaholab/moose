@@ -1,0 +1,23 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               5 @ t6
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 0.0
+	c
+	disp_x  absolute 1.e-9
+	disp_y  absolute 1.e-9
+	gb
+	jx      absolute 1.e-9
+	jy      absolute 1.e-9
+	mu
+
+ELEMENT VARIABLES relative 1.e-6 floor 0.0
+	creep_strain_xx  absolute 1.e-9
+	creep_strain_yy  absolute 1.e-9
+	creep_strain_xy  absolute 1.e-9
+	stress_xx        absolute 1.e-9
+	stress_yy        absolute 1.e-9
+	stress_xy        absolute 1.e-9
