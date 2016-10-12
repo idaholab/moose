@@ -42,10 +42,10 @@
   {                                                                                 \
     std::ostringstream _error_oss_;                                                 \
     _error_oss_ << "\n\n"                                                           \
-                << COLOR_RED                         \
+                << (Moose::_color_console ? XTERM_RED : "")                         \
                 << "\n\n*** ERROR ***\n"                                            \
                 << msg                                                              \
-                << COLOR_DEFAULT                     \
+                << (Moose::_color_console ? XTERM_DEFAULT : "")                     \
                 << "\n\n";                                                          \
     if (Moose::_throw_on_error)                                                     \
       throw std::runtime_error(_error_oss_.str());                                  \
@@ -82,12 +82,12 @@
     {                                                                               \
       std::ostringstream _assert_oss_;                                              \
       _assert_oss_                                                                  \
-        << COLOR_RED                                 \
+        << (Moose::_color_console ? XTERM_RED : "")                                 \
         << "\n\nAssertion `" #asserted "' failed\n"                                 \
         << msg                                                                      \
         << "\nat "                                                                  \
         << __FILE__ << ", line " << __LINE__                                        \
-        << COLOR_DEFAULT                             \
+        << (Moose::_color_console ? XTERM_DEFAULT : "")                             \
         << std::endl;                                                               \
       if (Moose::_throw_on_error)                                                   \
         throw std::runtime_error(_assert_oss_.str());                               \
@@ -115,11 +115,11 @@
       std::ostringstream _warn_oss_;                                                \
                                                                                     \
       _warn_oss_                                                                    \
-        << COLOR_YELLOW                              \
+        << (Moose::_color_console ? XTERM_YELLOW : "")                              \
         << "\n\n*** Warning ***\n"                                                  \
         << msg                                                                      \
         << "\nat " << __FILE__ << ", line " << __LINE__                             \
-        << COLOR_DEFAULT                             \
+        << (Moose::_color_console ? XTERM_DEFAULT : "")                             \
         << "\n\n";                                                                  \
       if (Moose::_throw_on_error)                                                   \
         throw std::runtime_error(_warn_oss_.str());                                 \
@@ -136,11 +136,11 @@
       mooseDoOnce(                                                                  \
         {                                                                           \
           Moose::out                                                                \
-            << COLOR_CYAN                            \
+            << (Moose::_color_console ? XTERM_CYAN : "")                            \
             << "\n\n*** Info ***\n"                                                 \
             << msg                                                                  \
             << "\nat " << __FILE__ << ", line " << __LINE__                         \
-            << COLOR_DEFAULT                         \
+            << (Moose::_color_console ? XTERM_DEFAULT : "")                         \
             << "\n" << std::endl;                                                   \
         }                                                                           \
       );                                                                            \
@@ -154,12 +154,12 @@
     else                                                                                                    \
       mooseDoOnce(                                                                                          \
         Moose::out                                                                                          \
-          << COLOR_YELLOW                                                    \
+          << (Moose::_color_console ? XTERM_YELLOW : "")                                                    \
           << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
           << msg << '\n'                                                                                    \
           << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
           << LIBMESH_DATE << " at " << LIBMESH_TIME << " ***"                                               \
-          << COLOR_DEFAULT                                                   \
+          << (Moose::_color_console ? XTERM_DEFAULT : "")                                                   \
           << std::endl;                                                                                     \
       );                                                                                                    \
    } while (0)
