@@ -28,6 +28,7 @@ InputParameters validParams<ValueRangeMarker>()
   params.addParam<Real>("buffer_size", 0.0, "A buffer zone value added to both ends of the range where a third_state marker can be returned.");
   params.addParam<bool>("invert", false, "If this is true then values inside the range will be coarsened, and values outside the range will be refined.");
   params.addRequiredCoupledVar("variable", "The variable whose values are used in this marker.");
+  params.addClassDescription("Mark elements for adaptivity based on the supplied upper and lower bounds and the specified variable.");
   return params;
 }
 

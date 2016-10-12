@@ -25,6 +25,8 @@ InputParameters validParams<ErrorFractionMarker>()
                                     "Elements within this percentage of the min error will be coarsened.  Must be between 0 and 1!");
   params.addRangeCheckedParam<Real>("refine", 0, "refine>=0 & refine<=1",
                                     "Elements within this percentage of the max error will be refined.  Must be between 0 and 1!");
+
+  params.addClassDescription("Marks elements for refinement or coarsening based on the fraction of the total error from the supplied indicator.");
   return params;
 }
 

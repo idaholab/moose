@@ -18,7 +18,8 @@ template<>
 InputParameters validParams<ComboMarker>()
 {
   InputParameters params = validParams<Marker>();
-  params.addRequiredParam<std::vector<MarkerName> >("markers", "The Markers to combine.");
+  params.addRequiredParam<std::vector<MarkerName> >("markers", "A list of marker names to combine into a single marker.");
+  params.addClassDescription("A marker that converts many markers into a single marker by considering the maximum value of the listed markers (i.e., refinement takes precedent).");
   return params;
 }
 
@@ -43,4 +44,3 @@ ComboMarker::computeElementMarker()
 
   return marker_value;
 }
-
