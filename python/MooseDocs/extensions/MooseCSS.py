@@ -19,38 +19,38 @@ class MooseCSS(BlockProcessor, MooseCommonExtension):
     MATCHES_FOUND = 0
 
     def __init__(self, parser, **kwargs):
-      MooseCommonExtension.__init__(self, **kwargs)
-      BlockProcessor.__init__(self, parser)
+        MooseCommonExtension.__init__(self, **kwargs)
+        BlockProcessor.__init__(self, parser)
 
     def test(self, parent, block):
-      """
-      Test to see if we should process this block of markdown.
-      Inherited from BlockProcessor.
-      """
-      return self.RE.search(block)
+        """
+        Test to see if we should process this block of markdown.
+        Inherited from BlockProcessor.
+        """
+        return self.RE.search(block)
 
     def run(self, parent, blocks):
-      """
-      Called when it is determined that we can process this block.
-      This will convert the markdown into HTML
-      """
-      sibling = self.lastChild(parent)
-      block = blocks.pop(0)
-      m = self.RE.search(block)
+        """
+        Called when it is determined that we can process this block.
+        This will convert the markdown into HTML
+        """
+        sibling = self.lastChild(parent)
+        block = blocks.pop(0)
+        m = self.RE.search(block)
 
-      if m:
-        # Parse out the options on the css line
-        options, styles = self.getSettings(m.group(1))
-        block = block[m.end() + 1:] # removes the css line
+        if m:
+            # Parse out the options on the css line
+            options, styles = self.getSettings(m.group(1))
+            block = block[m.end() + 1:] # removes the css line
 
-      block, paragraph = self.detab(block)
-      if m:
-        top_div = etree.SubElement(parent, 'div')
-        self.createCSS(top_div, styles, paragraph)
-      else:
-        top_div = sibling
+        block, paragraph = self.detab(block)
+        if m:
+            top_div = etree.SubElement(parent, 'div')
+            self.createCSS(top_div, styles, paragraph)
+        else:
+            top_div = sibling
 
-      self.parser.parseChunk(top_div, block)
+        self.parser.parseChunk(top_div, block)
 
     def createCSS(self, top_div, styles, paragraph):
         """

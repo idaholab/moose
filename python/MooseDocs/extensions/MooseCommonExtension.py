@@ -34,33 +34,33 @@ class MooseCommonExtension(object):
         self._docs_dir = docs_dir
 
     def getSettings(self, settings_line):
-      """
-      Parses a string of space separated key=value pairs.
-      This supports having values with spaces in them.
-      So something like "key0=foo bar key1=value1"
-      is supported.
-      Input:
-        settings_line[str]: Line to parse
-      Returns:
-        dict of values that were parsed
-      """
+        """
+        Parses a string of space separated key=value pairs.
+        This supports having values with spaces in them.
+        So something like "key0=foo bar key1=value1"
+        is supported.
+        Input:
+          settings_line[str]: Line to parse
+        Returns:
+          dict of values that were parsed
+        """
 
-      # Crazy RE capable of many things
-      # like understanding key=value pairs with spaces in them!
-      SETTINGS_RE = re.compile("([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))")
-      matches = SETTINGS_RE.findall(settings_line.strip())
+        # Crazy RE capable of many things
+        # like understanding key=value pairs with spaces in them!
+        SETTINGS_RE = re.compile("([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))")
+        matches = SETTINGS_RE.findall(settings_line.strip())
 
-      options = copy.copy(self._settings)
-      styles = {}
-      if len(matches) == 0:
-          return options, styles
+        options = copy.copy(self._settings)
+        styles = {}
+        if len(matches) == 0:
+            return options, styles
 
-      for entry in matches:
-        if entry[0] in options.keys():
-            options[entry[0].strip()] = entry[1].strip()
-        else:
-            styles[entry[0].strip()] = entry[1].strip()
-      return options, styles
+        for entry in matches:
+            if entry[0] in options.keys():
+                options[entry[0].strip()] = entry[1].strip()
+            else:
+                styles[entry[0].strip()] = entry[1].strip()
+        return options, styles
 
     def addStyle(self, element, **kwargs):
         """

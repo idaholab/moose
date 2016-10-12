@@ -7,41 +7,41 @@ import threading, cgi
 
 class ICEUpdaterTester(RunApp):
 
-  @staticmethod
-  def validParams():
-    params = RunApp.validParams()
-    params.addRequiredParam('nPosts', "The Number of Expected Posts")
-    params.addRequiredParam('port', "The port to listen to")
-    # Recover testing requires the Tester object to be copied, but
-    # this type of object *can't* be copied because it contains a
-    # thread.lock object.
-    params['recover'] = False
+    @staticmethod
+    def validParams():
+        params = RunApp.validParams()
+        params.addRequiredParam('nPosts', "The Number of Expected Posts")
+        params.addRequiredParam('port', "The port to listen to")
+        # Recover testing requires the Tester object to be copied, but
+        # this type of object *can't* be copied because it contains a
+        # thread.lock object.
+        params['recover'] = False
 
-    return params
+        return params
 
-  def __init__(self, name=None, params=None):
-    RunApp.__init__(self, name, params)
-    if params is not None:
-       self.nPosts = self.getParam('nPosts')
-       self.port = int(self.getParam('port'))
+    def __init__(self, name=None, params=None):
+        RunApp.__init__(self, name, params)
+        if params is not None:
+            self.nPosts = self.getParam('nPosts')
+            self.port = int(self.getParam('port'))
 
-  # This method is called prior to running the test.  It can be used to cleanup files
-  # or do other preparations before the tester is run
-  def prepare(self):
-    self.httpServer = SimpleHttpServer("localhost", self.port)
-    self.httpServer.start()
-    self.httpServer.resetNPosts()
-    return
+    # This method is called prior to running the test.  It can be used to cleanup files
+    # or do other preparations before the tester is run
+    def prepare(self):
+        self.httpServer = SimpleHttpServer("localhost", self.port)
+        self.httpServer.start()
+        self.httpServer.resetNPosts()
+        return
 
-  # This method will be called to process the results of running the test.  Any post-test
-  # processing should happen in this method
-  def processResults(self, moose_dir, retcode, options, output):
-    if self.httpServer.getNumberOfPosts() != int(self.nPosts):
-       return ("ICEUpdater FAILED: DID NOT GET CORRECT NUMBER OF POSTS",
-               "Number of Posts was " + str(self.httpServer.getNumberOfPosts()) +
-               ", but should have been " + str(self.nPosts))
-    else:
-       return RunApp.processResults(self, moose_dir, retcode, options, output)
+    # This method will be called to process the results of running the test.  Any post-test
+    # processing should happen in this method
+    def processResults(self, moose_dir, retcode, options, output):
+        if self.httpServer.getNumberOfPosts() != int(self.nPosts):
+            return ("ICEUpdater FAILED: DID NOT GET CORRECT NUMBER OF POSTS",
+                    "Number of Posts was " + str(self.httpServer.getNumberOfPosts()) +
+                    ", but should have been " + str(self.nPosts))
+        else:
+            return RunApp.processResults(self, moose_dir, retcode, options, output)
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
     nPosts = 0
