@@ -267,6 +267,8 @@ Transient::buildIterationAdaptiveDT(double tol, int n_startup_steps)
     // this should cover the final else clause in IterationAdaptiveDT::computeDT
     stepper = new GrowShrinkStepper(0.5, legacy->_growth_factor);
 
+  stepper = new IfConvergedStepper(stepper, new GrowShrinkStepper(0.5, 1.0));
+
   stepper = new StartupStepper(stepper, legacy->_input_dt, std::max(1, n_startup_steps));
   // Original IterationAdaptiveDT stepper constrains to simulation end time
   // *before* applying other constraints - sometimes resulting in an

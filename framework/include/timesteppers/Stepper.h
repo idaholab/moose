@@ -412,6 +412,8 @@ private:
   double _max_diff;
 };
 
+
+
 class PiecewiseStepper : public Stepper
 {
 public:
@@ -422,7 +424,7 @@ public:
   virtual double advance(const StepperInfo* si)
   {
     Logger l("Piecewise");
-    return _lin.sample(si->time);
+    return l.val(_lin.sample(si->time));
   }
 
 private:
@@ -529,6 +531,29 @@ private:
   double _dt;
   int _n;
 };
+
+class IfConvergedStepper : public Stepper
+{
+public:
+  IfConvergedStepper(Stepper* if_converged, Stepper* if_not_converged) :
+      _converged(if_converged),
+      _not_converged(if_not_converged)
+      { }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    Logger l("IfConverged");
+    if (si->converged)
+      return l.val(_converged->advance(si));
+    else
+      return l.val(_not_converged->advance(si));
+  }
+
+private:
+  Stepper* _converged;
+  Stepper* _not_converged;
+};
+
 
 class GrowShrinkStepper : public Stepper
 {
