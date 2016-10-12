@@ -25,92 +25,92 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
     MATCHES_FOUND = 0
 
     def __init__(self, parser, **kwargs):
-      MooseCommonExtension.__init__(self, **kwargs)
-      BlockProcessor.__init__(self, parser)
+        MooseCommonExtension.__init__(self, **kwargs)
+        BlockProcessor.__init__(self, parser)
 
-      # The default settings
-      self._settings = {'caption'  : None,
-                        'interval' : None,
-                        'pause'    : None,
-                        'wrap'     : None,
-                        'keyboard' : None}
+        # The default settings
+        self._settings = {'caption'  : None,
+                          'interval' : None,
+                          'pause'    : None,
+                          'wrap'     : None,
+                          'keyboard' : None}
 
     def parseFilenames(self, filenames_block):
-      """
-      Parse a set of lines with filenames in them and an optional caption.
-      Filenames can contain wildcards and glob will be used to expand them.
-      Expected input is similar to:
-          images/1.png caption=My caption
-          images/other*.png
-      Input:
-        filenames_block[str]: String block to parse
-      Return:
-        list of dicts. Each dict has keys of "path" which is the filename path
-          and "caption" which is the associated caption. Caption will be "" if not
-          specified.
-      """
-      lines = filenames_block.split("\n")
-      files = []
-      for line in lines:
-        sline = line.strip()
-        idx = sline.find("caption=")
-        if idx >=0 :
-          caption = sline[idx+8:].strip()
-          fname = sline[:idx].strip()
-        else:
-          caption = ""
-          fname = sline
+        """
+        Parse a set of lines with filenames in them and an optional caption.
+        Filenames can contain wildcards and glob will be used to expand them.
+        Expected input is similar to:
+            images/1.png caption=My caption
+            images/other*.png
+        Input:
+          filenames_block[str]: String block to parse
+        Return:
+          list of dicts. Each dict has keys of "path" which is the filename path
+            and "caption" which is the associated caption. Caption will be "" if not
+            specified.
+        """
+        lines = filenames_block.split("\n")
+        files = []
+        for line in lines:
+            sline = line.strip()
+            idx = sline.find("caption=")
+            if idx >=0 :
+                caption = sline[idx+8:].strip()
+                fname = sline[:idx].strip()
+            else:
+                caption = ""
+                fname = sline
 
-        new_files = glob.glob(os.path.join(self._docs_dir, fname))
-        if not new_files:
-          # If one of the paths is broken then
-          # we return an empty list to indicate
-          # an error state
-          return []
-        for f in new_files:
-          files.append({"path": f, "caption": caption})
-      return files
+            new_files = glob.glob(os.path.join(self._docs_dir, fname))
+            if not new_files:
+                # If one of the paths is broken then
+                # we return an empty list to indicate
+                # an error state
+                return []
+            for f in new_files:
+                files.append({"path": f, "caption": caption})
+        return files
 
     def test(self, parent, block):
-      """
-      Test to see if we should process this block of markdown.
-      Inherited from BlockProcessor.
-      """
-      return self.RE.search(block)
+        """
+        Test to see if we should process this block of markdown.
+        Inherited from BlockProcessor.
+        """
+        return self.RE.search(block)
 
     def run(self, parent, blocks):
-      """
-      Called when it is determined that we can process this block.
-      This will convert the markdown into HTML
-      """
-      sibling = self.lastChild(parent)
-      block = blocks.pop(0)
-      m = self.RE.search(block)
+        """
+        Called when it is determined that we can process this block.
+        This will convert the markdown into HTML
+        """
+        sibling = self.lastChild(parent)
+        block = blocks.pop(0)
+        m = self.RE.search(block)
 
-      if m:
-        # Parse out the options on the slideshow line
-        options = m.group(1)
-        parsed_options, styles = self.getSettings(options)
-        block = block[m.end() + 1:] # removes the slideshow line
+        if m:
+            # Parse out the options on the slideshow line
+            options = m.group(1)
+            parsed_options, styles = self.getSettings(options)
+            block = block[m.end() + 1:] # removes the slideshow line
 
-      block, theRest = self.detab(block)
+        block, theRest = self.detab(block)
 
-      if m:
-        files = block
-        div = self.addStyle(etree.SubElement(parent, "div"), **styles)
-        filenames = self.parseFilenames(files)
-        if not filenames:
-            return self.createErrorElement("No matching files found: {}".format(files))
-        self.createCarousel(parsed_options, div, filenames)
-        # We processed this whole block so mark it as done
-        block = ""
-      else:
-        div = sibling
+        if m:
+            files = block
+            div = self.addStyle(etree.SubElement(parent, "div"), **styles)
+            filenames = self.parseFilenames(files)
+            if not filenames:
+                return self.createErrorElement("No matching files found: {}".format(files))
+            self.createCarousel(parsed_options, div, filenames)
+            # We processed this whole block so mark it as done
+            block = ""
+        else:
+            div = sibling
 
-      self.parser.parseChunk(div, block)
+        self.parser.parseChunk(div, block)
 
-      if theRest:
-        blocks.insert(0, theRest)
+        if theRest:
+            blocks.insert(0, theRest)
 
     def createCarousel(self, options, top_div, files):
         """
@@ -157,12 +157,12 @@ class MooseCarousel(BlockProcessor, MooseCommonExtension):
             img.set("src", os.path.join('/media', os.path.basename(f["path"])))
             caption = f["caption"]
             if not caption:
-              caption = default_caption
+                caption = default_caption
 
             if caption:
-              cap_div = etree.SubElement(item_div, "div")
-              cap_div.set("class", "carousel-caption")
-              cap_div.text = caption
+                cap_div = etree.SubElement(item_div, "div")
+                cap_div.set("class", "carousel-caption")
+                cap_div.text = caption
         self.addControl(top_div, cid, "prev", "Previous")
         self.addControl(top_div, cid, "next", "Next")
         self.MATCHES_FOUND += 1
