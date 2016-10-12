@@ -441,8 +441,6 @@
 #include "TimeDerivativeNodalKernel.h"
 #include "UserForcingFunctionNodalKernel.h"
 
-#include <unistd.h>
-
 namespace Moose {
 
 static bool registered = false;
@@ -1174,20 +1172,7 @@ bool _trap_fpe = true;
 bool _trap_fpe = false;
 #endif
 
-static bool _color_console = isatty(fileno(stdout));
-
-bool
-colorConsole()
-{
-  return _color_console;
-}
-
-bool
-setColorConsole(bool use_color, bool force)
-{
-  _color_console = (isatty(fileno(stdout)) || force) && use_color;
-  return _color_console;
-}
+bool _color_console = true;
 
 bool _warnings_are_errors = false;
 
