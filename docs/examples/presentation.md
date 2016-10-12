@@ -30,7 +30,7 @@ Complete source code and snippets are available.
 ## Include Markdown
 You can include other markdown files.
 
-{!slides/demo_include.md!}
+{!slides/presentation-include.md!}
 
 ---
 
@@ -98,10 +98,10 @@ a presentation.
 
 ```
 cd ~/projects/moose/docs
-./mooseslides /path/to/your/markdown.md
+./moosedocs presentation /path/to/your/markdown.md
 ```
 
-This will create an index.html file in your reveal.js checkout that contains the presentation. Run `./mooseslides --help` for additional options when running this
+This will create an index.html file in your reveal.js checkout that contains the presentation. Run `./moosedocs presentation --help` for additional options when running this
 script.
 
 --

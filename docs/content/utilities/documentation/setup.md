@@ -1,4 +1,5 @@
-# MOOSE Documentation Setup and Configuration
+# Documentation Setup and Configuration
+
 MOOSE contains a single-source documentation system for creating websites, slideshows, and pdfs (coming soon)
 using [markdown](https://en.wikipedia.org/wiki/Markdown) syntax, including a custom syntax aimed to simply the
 process: [Moose Flavored Markdown](moose_flavored_markdown.md).
@@ -39,7 +40,7 @@ source activate docs
 (3) Install the additional python packages.
 
 ```text
-pip install markdown-include python-markdown-math mkdocs-bootstrap mkdocs-bootswatch
+pip install markdown-include python-markdown-math mkdocs-bootstrap mkdocs-bootswatch beautifulsoup4
 ```
 
 (4) Install development version of [mkdocs](http://www.mkdocs.org/).

@@ -11,334 +11,334 @@ import yaml
 log = logging.getLogger(__name__)
 
 class PagesHelper(object):
+  """
+  A helper class for checking if a markdown file is include in the 'pages.yml' file.
+  """
+  def __init__(self, pages):
+    self.pages = MooseDocs.yaml_load(pages)
+    self.raw = yaml.dump(self.pages, default_flow_style=False)
+
+  def check(self, filename):
+    return filename in self.raw
+
+  @staticmethod
+  def create(root):
     """
-    A helper class for checking if a markdown file is include in the 'pages.yml' file.
+    Generated nested 'pages.yml' files.
     """
-    def __init__(self, pages):
-        self.pages = MooseDocs.yaml_load(pages)
-        self.raw = yaml.dump(self.pages, default_flow_style=False)
 
-    def check(self, filename):
-        return filename in self.raw
+    # Define the pages.yml file
+    pages = os.path.join(root, 'pages.yml')
+    content = []
+    if not os.path.exists(root):
+      os.makedirs(root)
 
-    @staticmethod
-    def create(root):
-        """
-        Generated nested 'pages.yml' files.
-        """
+    # Loop through the contents of the directory
+    for item in os.listdir(root):
+      full = os.path.join(root, item)
+      txt = None
+      if os.path.isdir(full):
+        txt = '- {}: !include {}\n'.format(item, os.path.join(full, 'pages.yml'))
+        PagesHelper.create(full)
+      elif full.endswith('.md'):
+        txt = '- {}: {}\n'.format(item[:-3], full)
 
-        # Define the pages.yml file
-        pages = os.path.join(root, 'pages.yml')
-        content = []
-        if not os.path.exists(root):
-            os.makedirs(root)
+      if txt:
+        if txt.startswith('- Overview:'):
+          content.insert(0, txt)
+        else:
+          content.append(txt)
 
-        # Loop through the contents of the directory
-        for item in os.listdir(root):
-            full = os.path.join(root, item)
-            txt = None
-            if os.path.isdir(full):
-                txt = '- {}: !include {}\n'.format(item, os.path.join(full, 'pages.yml'))
-                PagesHelper.create(full)
-            elif full.endswith('.md'):
-                txt = '- {}: {}\n'.format(item[:-3], full)
-
-            if txt:
-                if txt.startswith('- Overview:'):
-                    content.insert(0, txt)
-                else:
-                    content.append(txt)
-
-        # Write the contents
-        with open(pages, 'w') as fid:
-            log.info('Writing pages file: {}'.format(pages))
-            for line in content:
-                fid.write(line)
+    # Write the contents
+    with open(pages, 'w') as fid:
+      log.info('Writing pages file: {}'.format(pages))
+      for line in content:
+        fid.write(line)
 
 
 class MooseApplicationSyntax(object):
+  """
+  An object for handling the registered object and action syntax for a specific set of directories.
+
+  A compiled MOOSE application contains all included libraries (i.e., framework, modules, and other applications), thus
+  when an application is executed with --yaml in includes the complete syntax.
+
+  To allow for documentation to be generated to only include the objects and syntax specific to an application the syntax
+  defined in the application source directory must be separated from that of the entire library. This object builds maps to
+  the registered objects and syntax specific to the application.
+
+  Args:
+    yaml[MooseYaml]: The MooseYaml object obtained by running the application with --yaml option.
+    paths[list]: Valid source directory to extract syntax.
+    doxygen[str]: The URL to the doxygen page.
+
+  Optional Args (only needed when check() method is called, see generate.py)
+    pages[list]: The .yml file containing the website layout (mkdocs 'pages' configuration option)
+    name[str]: The name of the syntax group (i.e., the key used in the 'locations' configuration for MooseMarkdown)
+    install[str]: The install directory for the markdown (see MooseMarkdown config)
+    generate[bool]: When True stub pages are generated if they do not exist
+  """
+
+  def __init__(self, yaml_data, paths=[], doxygen=None, pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, **kwargs):
+
+    # Store the input variables
+    self._yaml_data = yaml_data
+    self.paths = paths
+    self.install = install
+    self.stubs = stubs
+    self.pages_stubs = pages_stubs
+    self.doxygen = doxygen
+    self.name = name
+
+    if pages:
+      self.pages = PagesHelper(pages)
+
+    # The databases containing the system/object/markdown/source information for this directory
+    self._systems = set()
+    self._objects = dict()
+    self._filenames = dict()
+    self._syntax = set()
+    self._markdown = list() # A list of markdown files, used for updating pages.yml
+
+    # Update the syntax maps
+    for path in paths:
+      if (not path):
+        log.critical("Missing or invalid source/include directory.")
+        raise Exception("A directory with a value of None was supplied, which is not allowed.")
+      elif not os.path.exists(path):
+        log.critical("Unknown source directory supplied: {}".format(os.path.abspath(path)))
+        raise IOError(os.path.abspath(path))
+      self._updateSyntax(path)
+
+    for s in self._syntax:
+      nodes = self._yaml_data[s]
+      for node in nodes:
+        name = node['name'].split('/')[-1]
+        if name not in self._objects:
+          self._systems.add(node['name'].rstrip('/*'))
+        else:
+          name = node['name'].rsplit('/', 1)[0]
+          self._systems.add(name)
+
+  def systems(self):
     """
-    An object for handling the registered object and action syntax for a specific set of directories.
+    Return a set of MOOSE systems defined in the supplied directories.
+    """
+    return self._systems
 
-    A compiled MOOSE application contains all included libraries (i.e., framework, modules, and other applications), thus
-    when an application is executed with --yaml in includes the complete syntax.
+  def hasSystem(self, name):
+    """
+    Returns True when the supplied name is a system in this object.
+    """
+    return name in self._systems
 
-    To allow for documentation to be generated to only include the objects and syntax specific to an application the syntax
-    defined in the application source directory must be separated from that of the entire library. This object builds maps to
-    the registered objects and syntax specific to the application.
+  def objects(self):
+    """
+    Returns a set of MOOSE objects defined in the supplied directories.
+    """
+    return self._objects
+
+  def hasObject(self, name):
+    """
+    Returns True when the supplied name is an object stored in the syntax object.
+    """
+    return name in self._objects
+
+  def filenames(self, name):
+    """
+    Return the filename(s), *h (and *.C) for the given object name.
+    """
+    return self._filenames[self._objects[name]]
+
+  def check(self):
+    """
+    Check that the application documentation exists, create stubs if it does not.
+    """
+    for node in self._yaml_data.get():
+      self._checkNode(node)
+
+    if self.pages_stubs:
+      self.pages.create(self.install)
+
+    for md in self._markdown:
+      if not self.pages.check(md):
+        log.error('The markdown file {} was not found in the pages.yml'.format(md))
+
+  def _checkNode(self, node):
+    """
+    Check a YAML node.
 
     Args:
-        yaml[MooseYaml]: The MooseYaml object obtained by running the application with --yaml option.
-        paths[list]: Valid source directory to extract syntax.
-        doxygen[str]: The URL to the doxygen page.
-
-    Optional Args (only needed when check() method is called, see generate.py)
-        pages[list]: The .yml file containing the website layout (mkdocs 'pages' configuration option)
-        name[str]: The name of the syntax group (i.e., the key used in the 'locations' configuration for MooseMarkdown)
-        install[str]: The install directory for the markdown (see MooseMarkdown config)
-        generate[bool]: When True stub pages are generated if they do not exist
+      node[str]: The syntax connected to this object.
     """
 
-    def __init__(self, yaml_data, paths=[], doxygen=None, pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, **kwargs):
+    full_name = node['name']
+    obj_name = node['name'].split('/')[-1]
+    if full_name.endswith('*') or full_name.endswith('<type>'):
+      return
 
-        # Store the input variables
-        self._yaml_data = yaml_data
-        self.paths = paths
-        self.install = install
-        self.stubs = stubs
-        self.pages_stubs = pages_stubs
-        self.doxygen = doxygen
-        self.name = name
+    if self.hasSystem(full_name):
+      self._checkSystem(node)
 
-        if pages:
-            self.pages = PagesHelper(pages)
+    if self.hasObject(obj_name):
+      self._checkObject(node, obj_name)
 
-        # The databases containing the system/object/markdown/source information for this directory
-        self._systems = set()
-        self._objects = dict()
-        self._filenames = dict()
-        self._syntax = set()
-        self._markdown = list() # A list of markdown files, used for updating pages.yml
+    if node['subblocks']:
+      for child in node['subblocks']:
+        self._checkNode(child)
 
-        # Update the syntax maps
-        for path in paths:
-            if (not path):
-                log.critical("Missing or invalid source/include directory.")
-                raise Exception("A directory with a value of None was supplied, which is not allowed.")
-            elif not os.path.exists(path):
-                log.critical("Unknown source directory supplied: {}".format(os.path.abspath(path)))
-                raise IOError(os.path.abspath(path))
-            self._updateSyntax(path)
+  def _checkSystem(self, node):
+    """
+    Check the status of the documentation for a system.
 
-        for s in self._syntax:
-            nodes = self._yaml_data[s]
-            for node in nodes:
-                name = node['name'].split('/')[-1]
-                if name not in self._objects:
-                    self._systems.add(node['name'].rstrip('/*'))
-                else:
-                    name = node['name'].rsplit('/', 1)[0]
-                    self._systems.add(name)
+    Args:
+      node[str]: The syntax connected to this system.
+    """
+    # The full name of the object
+    name = node['name']
+    stub = '<!-- MOOSE System Documentation Stub: Remove this when content is added. -->'
 
-    def systems(self):
-        """
-        Return a set of MOOSE systems defined in the supplied directories.
-        """
-        return self._systems
+    # Determine the filename
+    if node['subblocks']:
+      filename = os.path.join(self.install, name.rstrip('*').strip('/'), 'Overview.md')
+    else:
+      filename = os.path.join(self.install, name.rstrip('*').strip('/') + '.md')
 
-    def hasSystem(self, name):
-        """
-        Returns True when the supplied name is a system in this object.
-        """
-        return name in self._systems
+    if not os.path.exists(filename):
+      log.error("No documentation for {}. Documentation for this system should be created in: {}".format(name, os.path.abspath(filename)))
 
-    def objects(self):
-        """
-        Returns a set of MOOSE objects defined in the supplied directories.
-        """
-        return self._objects
+      if self.stubs:
+        self._markdown.append(filename)
+        stub += '\n# {} System\n'.format(name.split('/')[-1])
+        stub += '!parameters {}\n\n'.format(name)
 
-    def hasObject(self, name):
-        """
-        Returns True when the supplied name is an object stored in the syntax object.
-        """
-        return name in self._objects
-
-    def filenames(self, name):
-        """
-        Return the filename(s), *h (and *.C) for the given object name.
-        """
-        return self._filenames[self._objects[name]]
-
-    def check(self):
-        """
-        Check that the application documentation exists, create stubs if it does not.
-        """
-        for node in self._yaml_data.get():
-            self._checkNode(node)
-
-        if self.pages_stubs:
-            self.pages.create(self.install)
-
-        for md in self._markdown:
-            if not self.pages.check(md):
-                log.error('The markdown file {} was not found in the pages.yml'.format(md))
-
-    def _checkNode(self, node):
-        """
-        Check a YAML node.
-
-        Args:
-            node[str]: The syntax connected to this object.
-        """
-
-        full_name = node['name']
-        obj_name = node['name'].split('/')[-1]
-        if full_name.endswith('*') or full_name.endswith('<type>'):
-            return
-
-        if self.hasSystem(full_name):
-            self._checkSystem(node)
-
-        if self.hasObject(obj_name):
-            self._checkObject(node, obj_name)
-
+        has_subobjects = False
+        has_subsystems = False
         if node['subblocks']:
-            for child in node['subblocks']:
-                self._checkNode(child)
+          for child in node['subblocks']:
+            if self.hasObject(child['name'].split('/')[-1]):
+              has_subobjects = True
+            if self.hasSystem(child['name']):
+              has_subsystems = True
 
-    def _checkSystem(self, node):
-        """
-        Check the status of the documentation for a system.
+        if has_subobjects:
+          stub += '!subobjects {} {}\n\n'.format(self.name, name)
+        if has_subsystems:
+          stub += '!subsystems {} {}\n\n'.format(self.name, name)
 
-        Args:
-            node[str]: The syntax connected to this system.
-        """
-        # The full name of the object
-        name = node['name']
-        stub = '<!-- MOOSE System Documentation Stub: Remove this when content is added. -->'
+        # Write the stub file
+        if not os.path.exists(os.path.dirname(filename)):
+          os.makedirs(os.path.dirname(filename))
+        with open(filename, 'w') as fid:
+          log.info('Creating stub page for MOOSE system {}: {}'.format(name, filename))
+          fid.write(stub)
 
-        # Determine the filename
-        if node['subblocks']:
-            filename = os.path.join(self.install, name.rstrip('*').strip('/'), 'Overview.md')
-        else:
-            filename = os.path.join(self.install, name.rstrip('*').strip('/') + '.md')
+    # If the file does exist, check that isn't just a stub
+    else:
+      self._markdown.append(filename)
+      with open(filename, 'r') as fid:
+        content = fid.read()
+      if stub in content:
+        log.error("MOOSE generated a stub page for {} system, but no content was added. Add documentation content to {}.".format(name, filename))
 
-        if not os.path.exists(filename):
-            log.error("No documentation for {}. Documentation for this system should be created in: {}".format(name, os.path.abspath(filename)))
+  def _checkObject(self, node, object_name):
+    """
+    Check the status of the documentation for a object.
 
-            if self.stubs:
-                self._markdown.append(filename)
-                stub += '\n# {} System\n'.format(name.split('/')[-1])
-                stub += '!parameters {}\n\n'.format(name)
+    Args:
+      node[str]: The syntax connected to this object.
+      object_name[str]: The name of the object.
+    """
+    # The full name of the object
+    name = node['name']
+    stub = '<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->'
 
-                has_subobjects = False
-                has_subsystems = False
-                if node['subblocks']:
-                    for child in node['subblocks']:
-                        if self.hasObject(child['name'].split('/')[-1]):
-                            has_subobjects = True
-                        if self.hasSystem(child['name']):
-                            has_subsystems = True
+    # Test for class description
+    if not node['description']:
+      log.error("No class description for {}. The 'addClassDescription' method should be used in the objects validParams function.".format(name))
 
-                if has_subobjects:
-                    stub += '!subobjects {} {}\n\n'.format(self.name, name)
-                if has_subsystems:
-                    stub += '!subsystems {} {}\n\n'.format(self.name, name)
+    # Error if the filename does not exist and create a stub if desired
+    filename = os.path.join(self.install, name.strip('/').replace('<type>', '') + '.md')
+    if not os.path.exists(filename):
+      log.error("No documentation for {}. Documentation for this object should be created in: {}".format(name, os.path.abspath(filename)))
 
-                # Write the stub file
-                if not os.path.exists(os.path.dirname(filename)):
-                    os.makedirs(os.path.dirname(filename))
-                with open(filename, 'w') as fid:
-                    log.info('Creating stub page for MOOSE system {}: {}'.format(name, filename))
-                    fid.write(stub)
+      if self.stubs:
+        self._markdown.append(filename)
+        stub += '!devel {} {}\n\n'.format(name, 'float=right width=auto margin=20px padding=20px background-color=#F8F8F8')
+        stub += '\n# {}\n'.format(object_name)
+        stub += '!description {}\n\n'.format(name)
+        stub += '!parameters {}\n\n'.format(name)
+        stub += '!inputfiles {}\n\n'.format(name)
+        stub += '!childobjects {}\n'.format(name)
 
-        # If the file does exist, check that isn't just a stub
-        else:
-            self._markdown.append(filename)
-            with open(filename, 'r') as fid:
-                content = fid.read()
-            if stub in content:
-                log.error("MOOSE generated a stub page for {} system, but no content was added. Add documentation content to {}.".format(name, filename))
+        # Write the stub file
+        if not os.path.exists(os.path.dirname(filename)):
+          os.makedirs(os.path.dirname(filename))
+        with open(filename, 'w') as fid:
+          log.info('Creating stub page for MOOSE object {}: {}'.format(name, filename))
+          fid.write(stub)
 
-    def _checkObject(self, node, object_name):
-        """
-        Check the status of the documentation for a object.
+    # If the file does exist, check that isn't just a stub
+    else:
+      self._markdown.append(filename)
+      with open(filename, 'r') as fid:
+        content = fid.read()
+      if stub in content:
+        log.error("MOOSE generated a stub page for {} object, but no content was added. Add documentation content to {}.".format(name, filename))
 
-        Args:
-            node[str]: The syntax connected to this object.
-            object_name[str]: The name of the object.
-        """
-        # The full name of the object
-        name = node['name']
-        stub = '<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->'
+  def _updateSyntax(self, path):
+    """
+    A helper for populating the syntax/filename/markdown databases. (private)
 
-        # Test for class description
-        if not node['description']:
-            log.error("No class description for {}. The 'addClassDescription' method should be used in the objects validParams function.".format(name))
+    Args:
+      path[str]: A valid source directory to inspect.
+    """
 
-        # Error if the filename does not exist and create a stub if desired
-        filename = os.path.join(self.install, name.strip('/').replace('<type>', '') + '.md')
-        if not os.path.exists(filename):
-            log.error("No documentation for {}. Documentation for this object should be created in: {}".format(name, os.path.abspath(filename)))
+    def appendSyntax(key):
+      key = '/' + key
+      for node in self._yaml_data[key]:
+        self._syntax.add(node['name'])
 
-            if self.stubs:
-                self._markdown.append(filename)
-                stub += '!devel {} {}\n\n'.format(name, 'float=right width=auto margin=20px padding=20px background-color=#F8F8F8')
-                stub += '\n# {}\n'.format(object_name)
-                stub += '!description {}\n\n'.format(name)
-                stub += '!parameters {}\n\n'.format(name)
-                stub += '!inputfiles {}\n\n'.format(name)
-                stub += '!childobjects {}\n'.format(name)
+    # Walk the directory, looking for files with the supplied extension.
+    for root, dirs, files in os.walk(path, topdown=False):
+      for filename in files:
+        fullfile = os.path.join(root, filename)
 
-                # Write the stub file
-                if not os.path.exists(os.path.dirname(filename)):
-                    os.makedirs(os.path.dirname(filename))
-                with open(filename, 'w') as fid:
-                    log.info('Creating stub page for MOOSE object {}: {}'.format(name, filename))
-                    fid.write(stub)
+        # Inspect source files
+        if filename.endswith('.C') or filename.endswith('.h'):
 
-        # If the file does exist, check that isn't just a stub
-        else:
-            self._markdown.append(filename)
-            with open(filename, 'r') as fid:
-                content = fid.read()
-            if stub in content:
-                log.error("MOOSE generated a stub page for {} object, but no content was added. Add documentation content to {}.".format(name, filename))
+          fid = open(fullfile, 'r')
+          content = fid.read()
+          fid.close()
 
-    def _updateSyntax(self, path):
-        """
-        A helper for populating the syntax/filename/markdown databases. (private)
+          # Update class to source definition map
+          if filename.endswith('.h'):
+            for match in re.finditer(r'class\s*(?P<class>\w+)', content):
+              self._filenames[match.group('class')] = [fullfile]
 
-        Args:
-            path[str]: A valid source directory to inspect.
-        """
+          # Map of registered objects
+          for match in re.finditer(r'(?<!\:)register(?!RecoverableData|edError)\w+?\((?P<key>\w+)\);', content):
+            key = match.group('key')
+            self._objects[key] = key
+            appendSyntax(key)
 
-        def appendSyntax(key):
-            key = '/' + key
-            for node in self._yaml_data[key]:
-                self._syntax.add(node['name'])
+          # Map of named registered objects
+          for match in re.finditer(r'registerNamed\w+?\((?P<class>\w+),\s*"(?P<key>\w+)"\);', content):
+            name = match.group('class')
+            key = match.group('key')
+            self._objects[key] = name
+            appendSyntax(key)
 
-        # Walk the directory, looking for files with the supplied extension.
-        for root, dirs, files in os.walk(path, topdown=False):
-            for filename in files:
-                fullfile = os.path.join(root, filename)
+          # Action syntax map
+          for match in re.finditer(r'registerActionSyntax\("(?P<action>\w+)"\s*,\s*"(?P<key>.*?)\"[,\);]', content):
+            key = match.group('key')
+            appendSyntax(key)
 
-                # Inspect source files
-                if filename.endswith('.C') or filename.endswith('.h'):
+    for root, dirs, files in os.walk(path, topdown=False):
+      for filename in files:
+        fullfile = os.path.join(root, filename)
 
-                    fid = open(fullfile, 'r')
-                    content = fid.read()
-                    fid.close()
-
-                    # Update class to source definition map
-                    if filename.endswith('.h'):
-                        for match in re.finditer(r'class\s*(?P<class>\w+)', content):
-                            self._filenames[match.group('class')] = [fullfile]
-
-                    # Map of registered objects
-                    for match in re.finditer(r'(?<!\:)register(?!RecoverableData|edError)\w+?\((?P<key>\w+)\);', content):
-                        key = match.group('key')
-                        self._objects[key] = key
-                        appendSyntax(key)
-
-                    # Map of named registered objects
-                    for match in re.finditer(r'registerNamed\w+?\((?P<class>\w+),\s*"(?P<key>\w+)"\);', content):
-                        name = match.group('class')
-                        key = match.group('key')
-                        self._objects[key] = name
-                        appendSyntax(key)
-
-                    # Action syntax map
-                    for match in re.finditer(r'registerActionSyntax\("(?P<action>\w+)"\s*,\s*"(?P<key>.*?)\"[,\);]', content):
-                        key = match.group('key')
-                        appendSyntax(key)
-
-        for root, dirs, files in os.walk(path, topdown=False):
-            for filename in files:
-                fullfile = os.path.join(root, filename)
-
-                # Inspect source files
-                name, ext = os.path.splitext(filename)
-                if (ext == '.C') and (name in self._filenames):
-                    self._filenames[name].append(fullfile)
+        # Inspect source files
+        name, ext = os.path.splitext(filename)
+        if (ext == '.C') and (name in self._filenames):
+          self._filenames[name].append(fullfile)

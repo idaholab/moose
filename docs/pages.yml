@@ -24,10 +24,14 @@
         - Systems: !include content/modules/tensor_mechanics/systems/pages.yml
 - Utilites:
     - Documentation:
+        - Overview: 'content/utilities/documentation/overview.md'
         - Setup and Configuration: 'content/utilities/documentation/setup.md'
-        - Creating Documentation: 'content/utilities/documentation/create.md'
+        - Documenting Code: 'content/utilities/documentation/code.md'
+        - Creating a Website: 'content/utilities/documentation/website.md'
+        - Building a Presentation: 'content/utilities/documentation/presentation.md'
+        - Generating a PDF: 'content/utilities/documentation/pdf.md'
         - Moose Flavored Markdown: 'content/utilities/documentation/moose_flavored_markdown.md'
-    - Memory Logger: 'content/moose_tools/memory_logger.md'
+    - Memory Logger: 'content/utilities/memory_logger/memory_logger.md'
 - Help:
     - Frequently Asked Questions: 'content/help/faq.md'
     - INL HPC Connectivity: 'content/help/inlhpcconnectivity.md'

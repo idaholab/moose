@@ -3,73 +3,73 @@ from markdown.preprocessors import Preprocessor
 from markdown.util import etree
 
 class MooseSlidePreprocessor(Preprocessor):
+  """
+  Creates sections breaks for presentations with Reveal.js.
+  """
+
+  def run(self, lines):
     """
-    Creates sections breaks for presentations with Reveal.js.
+    Searches the raw markdown lines for '---' and '--' and replaces them with the appropriate <section> tags.
+
+    Args:
+      lines[list]: List of markdown lines to preprocess.
     """
 
-    def run(self, lines):
-        """
-        Searches the raw markdown lines for '---' and '--' and replaces them with the appropriate <section> tags.
+    # Break the lines at '---' items
+    content = '\n'.join(lines)
+    sections = content.split('---\n')
 
-        Args:
-            lines[list]: List of markdown lines to preprocess.
-        """
+    # Loop through the sections
+    for i, section in enumerate(sections):
 
-        # Break the lines at '---' items
-        content = '\n'.join(lines)
-        sections = content.split('---\n')
+      # Locate the parent name
+      parent = self._getSlideID(section)
 
-        # Loop through the sections
-        for i, section in enumerate(sections):
+      # Look for sub-sections ('--') breaks
+      subsections = section.split('--\n')
+      has_subsections = len(subsections) > 1
+      if has_subsections:
+        for j, subsection in enumerate(subsections):
+          subsections[j] = self._injectSection(subsection, parent=parent)
+        section = '\n'.join(subsections)
 
-            # Locate the parent name
-            parent = self._getSlideID(section)
+      # Inject '---' breaks
+      sections[i] = self._injectSection(section, add_id=not has_subsections)
 
-            # Look for sub-sections ('--') breaks
-            subsections = section.split('--\n')
-            has_subsections = len(subsections) > 1
-            if has_subsections:
-                for j, subsection in enumerate(subsections):
-                    subsections[j] = self._injectSection(subsection, parent=parent)
-                section = '\n'.join(subsections)
+    return '\n'.join(sections).split('\n')
 
-            # Inject '---' breaks
-            sections[i] = self._injectSection(section, add_id=not has_subsections)
+  def _injectSection(self, section, add_id=True, parent=None):
+    """
+    Helper for injecting html placeholders with the <section>, </section> tags.
+    """
 
-        return '\n'.join(sections).split('\n')
+    # Build slide attributes
+    match = re.search(r'(?<!`)<!--\s\.slide(.*?)\s*-->', section)
+    attr = []
+    if match:
+      attr.append(match.group(1))
+      section = section.replace(match.group(0), '', 1)
 
-    def _injectSection(self, section, add_id=True, parent=None):
-        """
-        Helper for injecting html placeholders with the <section>, </section> tags.
-        """
+    # Slide id
+    if add_id:
+      id = self._getSlideID(section)
+      if id:
+        if parent and parent != id:
+          id = '{}-{}'.format(parent, id)
+      attr.append('id="{}"'.format(id))
 
-        # Build slide attributes
-        match = re.search(r'(?<!`)<!--\s\.slide(.*?)\s*-->', section)
-        attr = []
-        if match:
-            attr.append(match.group(1))
-            section = section.replace(match.group(0), '', 1)
+    # Define section tags
+    start_section = u'<section {}>'.format(' '.join(attr))
+    end_section = u'</section>'
 
-        # Slide id
-        if add_id:
-            id = self._getSlideID(section)
-            if id:
-                if parent and parent != id:
-                    id = '{}-{}'.format(parent, id)
-            attr.append('id="{}"'.format(id))
+    section = '\n\n{}\n{}\n{}\n\n'.format(self.markdown.htmlStash.store(start_section, safe=True), section, self.markdown.htmlStash.store(end_section, safe=True))
+    return section
 
-        # Define section tags
-        start_section = u'<section {}>'.format(' '.join(attr))
-        end_section = u'</section>'
-
-        section = '{}\n{}\n{}'.format(self.markdown.htmlStash.store(start_section, safe=True), section, self.markdown.htmlStash.store(end_section, safe=True))
-        return section
-
-    def _getSlideID(self, section):
-        """
-        Helper for getting slide name
-        """
-        match = re.search(r'#+\s*(.*?)\s*\n', section)
-        if match:
-            return match.group(1).lower().replace(' ','-')
-        return None
+  def _getSlideID(self, section):
+    """
+    Helper for getting slide name
+    """
+    match = re.search(r'#+\s*(.*?)\s*\n', section)
+    if match:
+      return match.group(1).lower().replace(' ','-')
+    return None

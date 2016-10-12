@@ -4,96 +4,96 @@ import MooseDocs
 from MooseTextPatternBase import MooseTextPatternBase
 
 class MooseTextFile(MooseTextPatternBase):
+  """
+  A markdown extension for including complete source code files.
+  """
+  RE = r'^!text\s+(.*?)(?:$|\s+)(.*)'
+
+  def __init__(self, **kwargs):
+    super(MooseTextFile, self).__init__(self.RE, language='text', **kwargs)
+
+    # Add to the default settings
+    self._settings['line'] =  None
+    self._settings['start'] =  None
+    self._settings['end'] =  None
+
+  def handleMatch(self, match):
     """
-    A markdown extension for including complete source code files.
+    Process the text file provided.
     """
-    RE = r'^!text\s+(.*?)(?:$|\s+)(.*)'
 
-    def __init__(self, **kwargs):
-        super(MooseTextFile, self).__init__(self.RE, language='text', **kwargs)
+    # Update the settings from regex match
+    settings, styles = self.getSettings(match.group(3))
 
-        # Add to the default settings
-        self._settings['line'] =  None
-        self._settings['start'] =  None
-        self._settings['end'] =  None
+    # Read the file
+    rel_filename = match.group(2).lstrip('/')
+    filename = os.path.join(self._root, rel_filename)
+    if not os.path.exists(filename):
+      return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
+    if settings['line']:
+      content = self.extractLine(filename, settings["line"])
 
-    def handleMatch(self, match):
-        """
-        Process the text file provided.
-        """
+    elif settings['start'] or settings['end']:
+      content = self.extractLineRange(filename, settings['start'], settings['end'])
 
-        # Update the settings from regex match
-        settings, styles = self.getSettings(match.group(3))
+    else:
+      with open(filename) as fid:
+        content = fid.read()
 
-        # Read the file
-        rel_filename = match.group(2).lstrip('/')
-        filename = os.path.join(self._root, rel_filename)
-        if not os.path.exists(filename):
-            return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
-        if settings['line']:
-            content = self.extractLine(filename, settings["line"])
+    if content == None:
+      return self.createErrorElement("Failed to extract content from {}.".format(filename))
 
-        elif settings['start'] or settings['end']:
-            content = self.extractLineRange(filename, settings['start'], settings['end'])
+    # Return the Element object
+    el = self.createElement(match.group(2), content, filename, rel_filename, settings, styles)
+    return el
 
-        else:
-            with open(filename) as fid:
-                content = fid.read()
+  def extractLine(self, filename, desired):
+    """
+    Function for returning a single line.
 
-        if content == None:
-            return self.createErrorElement("Failed to extract content from {}.".format(filename))
+    Args:
+      desired[str]: The text to look for within the source file.
+    """
 
-        # Return the Element object
-        el = self.createElement(match.group(2), content, filename, rel_filename, settings, styles)
-        return el
+    # Read the lines
+    with open(filename) as fid:
+      lines = fid.readlines()
 
-    def extractLine(self, filename, desired):
-        """
-        Function for returning a single line.
+    # Search the lines
+    content = None
+    for line in lines:
+      if desired in line:
+        content = line
 
-        Args:
-            desired[str]: The text to look for within the source file.
-        """
+    return content
 
-        # Read the lines
-        with open(filename) as fid:
-            lines = fid.readlines()
+  def extractLineRange(self, filename, start, end):
+    """
+    Function for extracting content between start/end strings.
 
-        # Search the lines
-        content = None
-        for line in lines:
-            if desired in line:
-                content = line
+    Args:
+      start[str|None]: The starting line (when None is provided the beginning is used).
+      end[str|None]: The ending line (when None is provided the end is used).
+    """
 
-        return content
+    # Read the lines
+    with open(filename) as fid:
+      lines = fid.readlines()
 
-    def extractLineRange(self, filename, start, end):
-        """
-        Function for extracting content between start/end strings.
+    start_idx = None
+    end_idx = None
 
-        Args:
-            start[str|None]: The starting line (when None is provided the beginning is used).
-            end[str|None]: The ending line (when None is provided the end is used).
-        """
+    # Search the lines
+    content = None
+    for i in range(len(lines)):
+      if start != None and start in lines[i]:
+        start_idx = i
+      if end != None and end in lines[i]:
+        end_idx = i
 
-        # Read the lines
-        with open(filename) as fid:
-            lines = fid.readlines()
-
-        start_idx = None
-        end_idx = None
-
-        # Search the lines
-        content = None
-        for i in range(len(lines)):
-            if start != None and start in lines[i]:
-                start_idx = i
-            if end != None and end in lines[i]:
-                end_idx = i
-
-        if end == None:
-            return ''.join(lines[start_idx:])
-        elif start == None:
-            return ''.join(lines[:end_idx])
-        else:
-            return ''.join(lines[start_idx:end_idx])
+    if end == None:
+      return ''.join(lines[start_idx:])
+    elif start == None:
+      return ''.join(lines[:end_idx])
+    else:
+      return ''.join(lines[start_idx:end_idx])
