@@ -122,7 +122,8 @@ public:
 
   virtual double advance(const StepperInfo* si)
   {
-    return _dt;
+    Logger l("Const");
+    return l.val(_dt);
   }
 
 private:
@@ -557,7 +558,7 @@ private:
 class GrowShrinkStepper : public Stepper
 {
 public:
-  GrowShrinkStepper( double shrink_factor, double growth_factor) :
+  GrowShrinkStepper(double shrink_factor, double growth_factor) :
       _grow_fac(growth_factor),
       _shrink_fac(shrink_factor)
       { }
@@ -642,10 +643,10 @@ private:
   double _scale_param;
 };
 
-class DT2 : public Stepper
+class DT2Stepper : public Stepper
 {
 public:
-  DT2()
+  DT2Stepper()
   {
   }
 
