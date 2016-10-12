@@ -16,6 +16,7 @@ class MooseTextFile(MooseTextPatternBase):
     self._settings['line'] =  None
     self._settings['start'] =  None
     self._settings['end'] =  None
+    self._settings['include_end'] = False
 
   def handleMatch(self, match):
     """
@@ -34,7 +35,7 @@ class MooseTextFile(MooseTextPatternBase):
       content = self.extractLine(filename, settings["line"])
 
     elif settings['start'] or settings['end']:
-      content = self.extractLineRange(filename, settings['start'], settings['end'])
+      content = self.extractLineRange(filename, settings['start'], settings['end'], settings['include_end'])
 
     else:
       with open(filename) as fid:
@@ -67,33 +68,34 @@ class MooseTextFile(MooseTextPatternBase):
 
     return content
 
-  def extractLineRange(self, filename, start, end):
+  def extractLineRange(self, filename, start, end, include_end):
     """
     Function for extracting content between start/end strings.
 
     Args:
+      filename[str]: The name of the file to examine.
       start[str|None]: The starting line (when None is provided the beginning is used).
       end[str|None]: The ending line (when None is provided the end is used).
+      include_end[bool]: If True then the end string is included
     """
 
     # Read the lines
     with open(filename) as fid:
       lines = fid.readlines()
 
-    start_idx = None
-    end_idx = None
+    # The default start/end positions
+    start_idx = 0
+    end_idx = len(lines)
 
-    # Search the lines
-    content = None
-    for i in range(len(lines)):
-      if start != None and start in lines[i]:
-        start_idx = i
-      if end != None and end in lines[i]:
-        end_idx = i
+    if start:
+      for i in range(end_idx):
+        if start in lines[i]:
+          start_idx = i
+          break
+    if end:
+      for i in range(start_idx, end_idx):
+        if end in lines[i]:
+          end_idx = i + 1 if include_end else i
+          break
 
-    if end == None:
-      return ''.join(lines[start_idx:])
-    elif start == None:
-      return ''.join(lines[:end_idx])
-    else:
-      return ''.join(lines[start_idx:end_idx])
+    return ''.join(lines[start_idx:end_idx])
