@@ -1084,6 +1084,9 @@ def verifyArgs(args):
   if args.run:
     if args.run[0].find('--recover') != -1:
       args.recover = True
+    if args.run[0].find('~') != -1:
+      print "You must use absolute paths. Python does not understand the '~' path discriptor.\nYou can use environment vairables (eg: $HOME) so long as they are absolute paths."
+      sys.exit(1)
 
   if args.outfile == None and args.run:
     # Attempt to build the output file based on input file
@@ -1114,7 +1117,7 @@ def parseArguments(args=None):
   parser = argparse.ArgumentParser(description='Track and Display memory usage')
 
   rungroup = parser.add_argument_group('Tracking', 'The following options control how the memory logger tracks memory usage')
-  rungroup.add_argument('--run', nargs=1, metavar='command', help='Run specified command. You must encapsulate the command in quotes\n ')
+  rungroup.add_argument('--run', nargs=1, metavar='command', help='Run specified command using absolute paths. You must encapsulate the command in quotes.')
   rungroup.add_argument('--pbs', dest='pbs', metavar='', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
   rungroup.add_argument('--pbs-delay', dest='pbs_delay', metavar='float', nargs=1, type=float, default=[1.0], help='For larger jobs, you may need to increase the delay as to when the memory_logger will launch the tracking agents\n ')
   rungroup.add_argument('--sample-delay', dest='sample_delay', metavar='float', nargs=1, type=float, default=[0.25], help='The time to delay before taking the first sample (when not using pbs)')
