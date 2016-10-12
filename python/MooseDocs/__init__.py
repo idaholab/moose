@@ -12,7 +12,7 @@ import utils
 
 # Check for the necessary packages, this does a load so they should all get loaded.
 if utils.check_configuration(['yaml', 'mkdocs', 'markdown', 'markdown_include', 'mdx_math']):
-    sys.exit(1)
+  sys.exit(1)
 
 import yaml
 import mkdocs
@@ -27,208 +27,208 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), 'moose'))
 if not os.path.exists(MOOSE_DIR):
-    MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
+  MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
 
 class MkMooseDocsFormatter(logging.Formatter):
-    """
-    A formatter that is aware of the class hierarchy of the MooseDocs library.
+  """
+  A formatter that is aware of the class hierarchy of the MooseDocs library.
 
-    Call the init_logging function to initialize the use of this custom formatter.
-    """
-    COLOR = {'DEBUG':'CYAN', 'INFO':'RESET', 'WARNING':'YELLOW', 'ERROR':'RED', 'CRITICAL':'MAGENTA'}
-    COUNTS = {'DEBUG':0, 'INFO':0, 'WARNING':0, 'ERROR':0, 'CRITICAL':0}
+  Call the init_logging function to initialize the use of this custom formatter.
+  """
+  COLOR = {'DEBUG':'CYAN', 'INFO':'RESET', 'WARNING':'YELLOW', 'ERROR':'RED', 'CRITICAL':'MAGENTA'}
+  COUNTS = {'DEBUG':0, 'INFO':0, 'WARNING':0, 'ERROR':0, 'CRITICAL':0}
 
-    def format(self, record):
-        msg = logging.Formatter.format(self, record)
+  def format(self, record):
+    msg = logging.Formatter.format(self, record)
 
-        if record.name.endswith('Item'):
-            level = 3
-        elif record.name.endswith('Database'):
-            level = 2
-        elif record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseCommonFunctions'):
-            level = 1
-        else:
-            level = 0
+    if record.name.endswith('Item'):
+      level = 3
+    elif record.name.endswith('Database'):
+      level = 2
+    elif record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseCommonFunctions'):
+      level = 1
+    else:
+      level = 0
 
-        if record.levelname in ['DEBUG', 'WARNING', 'ERROR', 'CRITICAL']:
-            msg = '{}{}: {}'.format(' '*4*level, record.levelname, msg)
-        else:
-            msg = '{}{}'.format(' '*4*level, msg)
+    if record.levelname in ['DEBUG', 'WARNING', 'ERROR', 'CRITICAL']:
+      msg = '{}{}: {}'.format(' '*4*level, record.levelname, msg)
+    else:
+      msg = '{}{}'.format(' '*4*level, msg)
 
-        if record.levelname in self.COLOR:
-            msg = utils.colorText(msg, self.COLOR[record.levelname])
+    if record.levelname in self.COLOR:
+      msg = utils.colorText(msg, self.COLOR[record.levelname])
 
-        # Increment counts
-        self.COUNTS[record.levelname] += 1
+    # Increment counts
+    self.COUNTS[record.levelname] += 1
 
-        return msg
+    return msg
 
 def init_logging(verbose=False):
-    """
-    Call this function to initialize the MooseDocs logging formatter.
-    """
+  """
+  Call this function to initialize the MooseDocs logging formatter.
+  """
 
-    # Setup the logger object
-    if verbose:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
+  # Setup the logger object
+  if verbose:
+    level = logging.DEBUG
+  else:
+    level = logging.INFO
 
-    # The markdown package dumps way too much information in debug mode (so always set it to INFO)
-    log = logging.getLogger('MARKDOWN')
-    log.setLevel(logging.INFO)
+  # The markdown package dumps way too much information in debug mode (so always set it to INFO)
+  log = logging.getLogger('MARKDOWN')
+  log.setLevel(logging.INFO)
 
-    # Setup the custom formatter
-    log = logging.getLogger('MooseDocs')
-    formatter = MkMooseDocsFormatter()
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    log.addHandler(handler)
-    log.setLevel(level)
+  # Setup the custom formatter
+  log = logging.getLogger('MooseDocs')
+  formatter = MkMooseDocsFormatter()
+  handler = logging.StreamHandler()
+  handler.setFormatter(formatter)
+  log.addHandler(handler)
+  log.setLevel(level)
 
-    log = logging.getLogger('mkdocs')
-    log.addHandler(handler)
-    log.setLevel(level)
+  log = logging.getLogger('mkdocs')
+  log.addHandler(handler)
+  log.setLevel(level)
 
-    return formatter
+  return formatter
 
 class Loader(yaml.Loader):
-    """
-    A custom loader that handles nested includes. The nested includes should use absolute paths from the
-    origin yaml file.
-    """
+  """
+  A custom loader that handles nested includes. The nested includes should use absolute paths from the
+  origin yaml file.
+  """
 
-    def include(self, node):
-        """
-        Allow for the embedding of yaml files.
-        http://stackoverflow.com/questions/528281/how-can-i-include-an-yaml-file-inside-another
-        """
-        filename = self.construct_scalar(node)
-        if os.path.exists(filename):
-            with open(filename, 'r') as f:
-                return yaml.load(f, Loader)
+  def include(self, node):
+    """
+    Allow for the embedding of yaml files.
+    http://stackoverflow.com/questions/528281/how-can-i-include-an-yaml-file-inside-another
+    """
+    filename = self.construct_scalar(node)
+    if os.path.exists(filename):
+      with open(filename, 'r') as f:
+        return yaml.load(f, Loader)
 
 def yaml_load(filename, loader=Loader):
-    """
-    Load a YAML file capable of including other YAML files.
+  """
+  Load a YAML file capable of including other YAML files.
 
-    Args:
-        filename[str]: The name fo the file to load.b
-        loader[yaml.Loader]: The loader to utilize.
-    """
+  Args:
+    filename[str]: The name fo the file to load.b
+    loader[yaml.Loader]: The loader to utilize.
+  """
 
-    ## Attach the include constructor to our custom loader.
-    Loader.add_constructor('!include', Loader.include)
+  ## Attach the include constructor to our custom loader.
+  Loader.add_constructor('!include', Loader.include)
 
-    with open(filename, 'r') as fid:
-        yml = yaml.load(fid.read(), Loader)
+  with open(filename, 'r') as fid:
+    yml = yaml.load(fid.read(), Loader)
 
-    return yml
+  return yml
 
 def load_pages(filename, keys=[], **kwargs):
-    """
-    A YAML loader for reading the pages file.
+  """
+  A YAML loader for reading the pages file.
 
-    Args:
-        filename[str]: The name for the file to load. This is normally a '.yml' file that contains the complete
-                       website layout. It may also be a markdown file, in this case only that single file will be
-                       served with the "home" page.
-        keys[list]: A list of top-level keys to include.
-        kwargs: key, value pairs passed to yaml_load function.
-    """
+  Args:
+    filename[str]: The name for the file to load. This is normally a '.yml' file that contains the complete
+            website layout. It may also be a markdown file, in this case only that single file will be
+            served with the "home" page.
+    keys[list]: A list of top-level keys to include.
+    kwargs: key, value pairs passed to yaml_load function.
+  """
 
-    if filename.endswith('.md'):
-        pages = [{'Home':'index.md'}, {os.path.basename(filename):filename}]
+  if filename.endswith('.md'):
+    pages = [{'Home':'index.md'}, {os.path.basename(filename):filename}]
 
-    else:
-        pages = yaml_load(filename, **kwargs)
+  else:
+    pages = yaml_load(filename, **kwargs)
 
-    # Restrict the top-level keys to those provided in the 'include' argument
-    if keys:
-        pages = [page for page in pages if page.keys()[0] in keys]
+  # Restrict the top-level keys to those provided in the 'include' argument
+  if keys:
+    pages = [page for page in pages if page.keys()[0] in keys]
 
-    return pages
+  return pages
 
 def purge(extensions):
-    """
-    Removes generated files from repository.
+  """
+  Removes generated files from repository.
 
-    Args:
-        extensions[list]: List of file extensions to purge (.e.g., 'png'); it will be prefixed with '.moose.'
-                          so the files actually removed are '.moose.png'.
-    """
-    for i, ext in enumerate(extensions):
-        extensions[i] = '.moose.{}'.format(ext)
+  Args:
+    extensions[list]: List of file extensions to purge (.e.g., 'png'); it will be prefixed with '.moose.'
+             so the files actually removed are '.moose.png'.
+  """
+  for i, ext in enumerate(extensions):
+    extensions[i] = '.moose.{}'.format(ext)
 
-    log = logging.getLogger('MooseDocs')
-    for root, dirs, files in os.walk(os.getcwd(), topdown=False):
-        for name in files:
-            if any([name.endswith(ext) for ext in extensions]):
-                full_file = os.path.join(root, name)
-                log.debug('Removing: {}'.format(full_file))
-                os.remove(full_file)
+  log = logging.getLogger('MooseDocs')
+  for root, dirs, files in os.walk(os.getcwd(), topdown=False):
+    for name in files:
+      if any([name.endswith(ext) for ext in extensions]):
+        full_file = os.path.join(root, name)
+        log.debug('Removing: {}'.format(full_file))
+        os.remove(full_file)
 
 def command_line_options():
-    """
-    Return the command line options for the moosedocs script.
-    """
+  """
+  Return the command line options for the moosedocs script.
+  """
 
-    # Command-line options
-    parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
-    parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
-    parser.add_argument('--config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
+  # Command-line options
+  parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
+  parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
+  parser.add_argument('--config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
 
-    subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
+  subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
-    # Add the sub-commands
-    check_parser = subparser.add_parser('check', help="Perform error checking on documentation.")
-    generate_parser = commands.generate_options(parser, subparser)
-    serve_parser = commands.serve_options(parser, subparser)
-    build_parser = commands.build_options(parser, subparser)
-    latex_parser = commands.latex_options(parser, subparser)
-    presentation_parser = commands.presentation_options(parser, subparser)
+  # Add the sub-commands
+  check_parser = subparser.add_parser('check', help="Perform error checking on documentation.")
+  generate_parser = commands.generate_options(parser, subparser)
+  serve_parser = commands.serve_options(parser, subparser)
+  build_parser = commands.build_options(parser, subparser)
+  latex_parser = commands.latex_options(parser, subparser)
+  presentation_parser = commands.presentation_options(parser, subparser)
 
-    # Both build and serve need config file
-    for p in [serve_parser, build_parser]:
-        p.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
-        p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item. It also supports passing the name of a single markdown file, in this case only this file will be served with the 'Home' page.")
-        p.add_argument('--page-keys', default=[], nargs='+', help='A list of top-level keys from the "pages" file to include. This is a tool to help speed up the serving for development of documentation.')
+  # Both build and serve need config file
+  for p in [serve_parser, build_parser]:
+    p.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
+    p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item. It also supports passing the name of a single markdown file, in this case only this file will be served with the 'Home' page.")
+    p.add_argument('--page-keys', default=[], nargs='+', help='A list of top-level keys from the "pages" file to include. This is a tool to help speed up the serving for development of documentation.')
 
-    # Parse the arguments
-    options = parser.parse_args()
+  # Parse the arguments
+  options = parser.parse_args()
 
-    # Set livereload default
-    if options.command == 'serve' and not options.livereload:
-        options.livereload = 'dirtyreload'
+  # Set livereload default
+  if options.command == 'serve' and not options.livereload:
+    options.livereload = 'dirtyreload'
 
-    return options
+  return options
 
 def moosedocs():
 
-    # Options
-    options = vars(command_line_options())
+  # Options
+  options = vars(command_line_options())
 
-    # Initialize logging
-    formatter = init_logging(options.pop('verbose'))
-    log = logging.getLogger('MooseDocs')
+  # Initialize logging
+  formatter = init_logging(options.pop('verbose'))
+  log = logging.getLogger('MooseDocs')
 
-    # Remove moose.svg files (these get generated via dot)
-    log.info('Removing *.moose.svg files from {}'.format(os.getcwd()))
-    purge(['svg'])
+  # Remove moose.svg files (these get generated via dot)
+  log.info('Removing *.moose.svg files from {}'.format(os.getcwd()))
+  purge(['svg'])
 
-    # Execute command
-    cmd = options.pop('command')
-    if cmd == 'check':
-        commands.generate(stubs=False, pages_stubs=False, **options)
-    elif cmd == 'generate':
-        commands.generate(**options)
-    elif cmd == 'serve':
-        commands.serve(**options)
-    elif cmd == 'build':
-        commands.build(**options)
-    elif cmd == 'latex':
-        commands.latex(**options)
+  # Execute command
+  cmd = options.pop('command')
+  if cmd == 'check':
+    commands.generate(stubs=False, pages_stubs=False, **options)
+  elif cmd == 'generate':
+    commands.generate(**options)
+  elif cmd == 'serve':
+    commands.serve(**options)
+  elif cmd == 'build':
+    commands.build(**options)
+  elif cmd == 'latex':
+    commands.latex(**options)
 
-    # Display logging results
-    print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])
-    return formatter.COUNTS['ERROR'] > 0
+  # Display logging results
+  print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])
+  return formatter.COUNTS['ERROR'] > 0
