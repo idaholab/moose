@@ -48,6 +48,6 @@ ConstantDT::computeDT()
 Stepper*
 ConstantDT::buildStepper()
 {
-  return new MinOfStepper(new ConstStepper(_constant_dt), new GrowShrinkStepper(0.5, _growth_factor), 0);
+  return new MinOfStepper(new ConstStepper(_constant_dt), new RetryUnusedStepper(new GrowShrinkStepper(0.5, _growth_factor), 0, false), 0);
 }
 

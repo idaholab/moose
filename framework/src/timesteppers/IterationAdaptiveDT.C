@@ -468,7 +468,7 @@ IterationAdaptiveDT::buildStepper()
   // simulation time end constraint without having to enforce that constraint
   // explicitly.  This behavior is undesirable.  The simulation end constraint should
   // be the last constraint enforced.
-  if (half_transient)
+  if (!half_transient)
     stepper = new BoundsStepper(stepper, start_time, end_time, false); // This is stupid.
   if (t_limit_func)
   {
