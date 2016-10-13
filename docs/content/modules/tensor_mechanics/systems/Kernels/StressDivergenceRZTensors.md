@@ -14,7 +14,7 @@ This kernel solves the steady state stress divergence equation in cylindrical co
 
 For a detailed explanation of the settings for `use_displaced_mesh` in mechanics problems, see the [Introduction/StressDivergence](auto::/introduction/StressDivergence) page.
 
-As in the Stress Divergence kernel for Cartesian coordinates, [StressDivergenceTensors](StressDivergenceTensors.md), the stress divergence kernel for the Axisymmetric simulations includes the stress divergence calculation for the residual and the calculation of the Jacobian matrix.  
+As in the Stress Divergence kernel for Cartesian coordinates, [StressDivergenceTensors](/StressDivergenceTensors.md), the stress divergence kernel for the Axisymmetric simulations includes the stress divergence calculation for the residual and the calculation of the Jacobian matrix.
 
 In cylindrical coordinates, the [divergence of a rank-2 tensor](https://en.wikipedia.org/wiki/Tensor_derivative_%28continuum_mechanics%29#Cylindrical_polar_coordinates_2) includes mixed term contributions.  In the axisymmetric model we assume symmetric loading conditions, in addition to the zero out-of-plane shear strains, so that the residual computation is simplified.
 
@@ -26,7 +26,7 @@ $$
 $$
 
 !!! note
-    This calculation of the residual and the Jacobian calculation require the axis of symmetry lies along the $z$-axis.  
+    This calculation of the residual and the Jacobian calculation require the axis of symmetry lies along the $z$-axis.
 
 The calculation of the Jacobian is similarly complex, requiring up to four terms in the calculation of the diagonal entries.
 

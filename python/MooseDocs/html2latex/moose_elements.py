@@ -250,6 +250,9 @@ class moose_img(elements.img):
     return ['\\usepackage{graphicx}']
 
 class moose_bib(elements.ol):
+  """
+  Convert html bibliography (from MooseBibtex) to the correct latex entry.
+  """
   attrs = ['data-moose-bibfiles']
   def convert(self, tag, content):
     bibfiles = eval(tag.attrs['data-moose-bibfiles'])
@@ -258,6 +261,9 @@ class moose_bib(elements.ol):
     return ['\\usepackage{natbib}']
 
 class moose_bib_a(elements.a):
+  """
+  Convert the cite command from MooseBibtex to the proper latex cite command.
+  """
   attrs = ['data-moose-cite']
   def convert(self, tag, content):
     return tag.attrs['data-moose-cite']
