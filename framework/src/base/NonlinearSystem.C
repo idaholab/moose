@@ -120,6 +120,12 @@ namespace Moose {
     p->computeNullSpace(sys, sp);
   }
 
+  void compute_transpose_nullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
+  {
+    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    p->computeTransposeNullSpace(sys, sp);
+  }
+
   void compute_nearnullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
   {
     FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
@@ -191,11 +197,12 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _has_nodalbc_save_in(false),
     _has_nodalbc_diag_save_in(false)
 {
-  _sys.nonlinear_solver->residual      = Moose::compute_residual;
-  _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
-  _sys.nonlinear_solver->bounds        = Moose::compute_bounds;
-  _sys.nonlinear_solver->nullspace     = Moose::compute_nullspace;
-  _sys.nonlinear_solver->nearnullspace = Moose::compute_nearnullspace;
+  _sys.nonlinear_solver->residual            = Moose::compute_residual;
+  _sys.nonlinear_solver->jacobian            = Moose::compute_jacobian;
+  _sys.nonlinear_solver->bounds              = Moose::compute_bounds;
+  _sys.nonlinear_solver->nullspace           = Moose::compute_nullspace;
+  _sys.nonlinear_solver->transpose_nullspace = Moose::compute_transpose_nullspace;
+  _sys.nonlinear_solver->nearnullspace       = Moose::compute_nearnullspace;
 
 #ifdef LIBMESH_HAVE_PETSC
   PetscNonlinearSolver<Real> * petsc_solver = static_cast<PetscNonlinearSolver<Real> *>(_sys.nonlinear_solver.get());

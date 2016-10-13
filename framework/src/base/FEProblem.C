@@ -87,8 +87,9 @@ InputParameters validParams<FEProblem>()
 {
   InputParameters params = validParams<SubProblem>();
   params.addPrivateParam<MooseMesh *>("mesh");
-  params.addParam<unsigned int>("dimNullSpace", 0, "The dimension of the nullspace");
-  params.addParam<unsigned int>("dimNearNullSpace", 0, "The dimension of the near nullspace");
+  params.addParam<unsigned int>("null_space_dimension", 0, "The dimension of the nullspace");
+  params.addParam<unsigned int>("transpose_null_space_dimension", 0, "The dimension of the transpose nullspace");
+  params.addParam<unsigned int>("near_null_space_dimension", 0, "The dimension of the near nullspace");
   params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
   params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
   params.addParam<bool>("error_on_jacobian_nonzero_reallocation", false, "This causes PETSc to error if it had to reallocate memory in the Jacobian matrix due to not having enough nonzeros");
@@ -180,8 +181,9 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i] = new Assembly(_nl, couplingMatrix(), i);
 
-  unsigned int dimNullSpace      = parameters.get<unsigned int>("dimNullSpace");
-  unsigned int dimNearNullSpace  = parameters.get<unsigned int>("dimNearNullSpace");
+  unsigned int dimNullSpace = parameters.get<unsigned int>("null_space_dimension");
+  unsigned int dimTransposeNullSpace = parameters.get<unsigned int>("transpose_null_space_dimension");
+  unsigned int dimNearNullSpace = parameters.get<unsigned int>("near_null_space_dimension");
   for (unsigned int i = 0; i < dimNullSpace; ++i)
   {
     std::ostringstream oss;
@@ -190,6 +192,14 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _nl.addVector("NullSpace" + oss.str(), false, GHOSTED);
   }
   _subspace_dim["NullSpace"] = dimNullSpace;
+  for (unsigned int i = 0; i < dimTransposeNullSpace; ++i)
+  {
+    std::ostringstream oss;
+    oss << "_" << i;
+    // do not project, since this will be recomputed, but make it ghosted, since the near nullspace builder might march over all nodes
+    _nl.addVector("TransposeNullSpace" + oss.str(), false, GHOSTED);
+  }
+  _subspace_dim["TransposeNullSpace"] = dimTransposeNullSpace;
   for (unsigned int i = 0; i < dimNearNullSpace; ++i)
   {
     std::ostringstream oss;
@@ -3678,6 +3688,17 @@ FEProblem::computeNullSpace(NonlinearImplicitSystem & /*sys*/, std::vector<Numer
     std::stringstream postfix;
     postfix << "_" << i;
     sp.push_back(&_nl.getVector("NullSpace"+postfix.str()));
+  }
+}
+
+void
+FEProblem::computeTransposeNullSpace(NonlinearImplicitSystem & /*sys*/, std::vector<NumericVector<Number>*>& sp)
+{
+  sp.clear();
+  for (unsigned int i = 0; i < subspaceDim("TransposeNullSpace"); ++i) {
+    std::stringstream postfix;
+    postfix << "_" << i;
+    sp.push_back(&_nl.getVector("TransposeNullSpace"+postfix.str()));
   }
 }
 
