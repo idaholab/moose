@@ -22,6 +22,7 @@ public:
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpStrain();
+  virtual void computeQpIncrements(RankTwoTensor & e, RankTwoTensor & r);
 
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
@@ -36,6 +37,8 @@ protected:
 
   const Real & _current_elem_volume;
   std::vector<RankTwoTensor> _Fhat;
+
+  MooseEnum _decomposition_method;
 
 private:
   /// True if this is the first timestep (timestep < 2). At the first
