@@ -79,6 +79,7 @@ struct StepperInfo {
   double time;
   double prev_dt;
   double prev_prev_dt;
+  double prev_prev_prev_dt;
   std::string time_integrator;
 
   // solve stats
@@ -86,7 +87,9 @@ struct StepperInfo {
   unsigned int lin_iters;
   bool converged;
   bool prev_converged;
-  double solve_time_secs;
+  double prev_solve_time_secs;
+  double prev_prev_solve_time_secs;
+  double prev_prev_prev_solve_time_secs;
 
   // solution stuff
   NumericVector<Number>* soln_nonlin;
@@ -533,6 +536,44 @@ private:
   double _lin_iter_ratio;
   double _shrink_factor;
   double _growth_factor;
+};
+
+class SolveTimeAdaptiveStepper : public Stepper
+{
+public:
+  SolveTimeAdaptiveStepper(int initial_direc, double percent_change) :
+      _percent_change(percent_change),
+      _direc_init(initial_direc)
+      { }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    Logger l("SolveTimeAdaptive");
+    double ratio = si->prev_solve_time_secs / si->prev_dt;
+    double prev_ratio = si->prev_prev_solve_time_secs / si->prev_prev_dt;
+    double prev_prev_ratio = si->prev_prev_prev_solve_time_secs / si->prev_prev_prev_dt;
+
+    int direc = 1;
+    if (si->prev_dt < si->prev_prev_dt)
+      direc = -1;
+    int prev_direc = 1;
+    if (si->prev_prev_dt < si->prev_prev_prev_dt)
+      prev_direc = -1;
+
+    if (si->prev_dt == 0)
+    {
+      direc = _direc_init;
+      prev_direc = _direc_init;
+    }
+
+    if (ratio > prev_ratio && prev_ratio > prev_prev_ratio && direc == prev_direc)
+      direc *= -1;
+
+    return l.val(si->prev_dt + si->prev_dt * _percent_change * direc);
+  }
+private:
+  double _percent_change;
+  int _direc_init;
 };
 
 class StartupStepper : public Stepper

@@ -312,6 +312,8 @@ protected:
   unsigned int & _nl_its;
   /// Number of linear iterations in previous solve
   unsigned int & _l_its;
+
+  double _solve_time;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

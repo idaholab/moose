@@ -282,8 +282,12 @@ Transient::execute()
 
     // update new style stepper
     si.time = _time;
+    si.prev_prev_prev_dt = si.prev_prev_dt;
     si.prev_prev_dt = si.prev_dt;
     si.prev_dt = _dt;
+    si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
+    si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
+    si.prev_solve_time_secs = _solve_time;
     si.step_count = _steps_taken;
     si.nonlin_iters = _nl_its;
     si.lin_iters = _l_its;
@@ -330,7 +334,7 @@ Transient::execute()
       << si.lin_iters << ", "
       << si.converged << ", "
       << si.prev_converged << ", "
-      << si.solve_time_secs << ", "
+      << si.prev_solve_time_secs << ", "
       << nonlin_str << ", "
       << aux_str << ", "
       << predicted_str << ", "
@@ -491,7 +495,13 @@ Transient::solveStep(Real input_dt)
   // Update warehouse active objects
   _problem.updateActiveObjects();
 
+  timeval solve_start;
+  timeval solve_end;
+  gettimeofday(&solve_start, NULL);
   _time_stepper->step();
+  gettimeofday(&solve_end, NULL);
+  _solve_time = (static_cast<double>(solve_end.tv_sec  - solve_start.tv_sec) +
+                                             static_cast<double>(solve_end.tv_usec - solve_start.tv_usec)*1.e-6);
 
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())

@@ -116,3 +116,11 @@ SolutionTimeAdaptiveDT::rejectStep()
   TimeStepper::rejectStep();
 }
 
+Stepper *
+SolutionTimeAdaptiveDT::buildStepper()
+{
+  Stepper* s = new SolveTimeAdaptiveStepper(_direction, _percent_change);
+  s = new MinOfStepper(s, new GrowShrinkStepper(0.5, 1.0), 0);
+  s = new StartupStepper(s, getParam<Real>("dt"), _executioner.n_startup_steps());
+  return s;
+}
