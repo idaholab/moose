@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "LinearInterpolation.h"
+#include "MooseUtils.h"
 #include "libmesh/numeric_vector.h"
 
 class Logger
@@ -444,17 +445,33 @@ private:
 class PiecewiseStepper : public Stepper
 {
 public:
-  PiecewiseStepper(std::vector<double> times, std::vector<double> dts) : _lin(times, dts)
+  PiecewiseStepper(std::vector<double> times, std::vector<double> dts, bool interpolate = true) :
+      _times(times),
+      _dts(dts),
+      _interp(interpolate),
+      _lin(times, dts)
   {
   }
 
   virtual double advance(const StepperInfo* si)
   {
     Logger l("Piecewise");
-    return l.val(_lin.sample(si->time));
+    if (_interp)
+      return l.val(_lin.sample(si->time));
+
+    if (MooseUtils::relativeFuzzyGreaterEqual(si->time, _times.back()))
+      return l.val(_times.back());
+
+    for (int i = 0; i < _times.size() - 1; i++)
+      if (MooseUtils::relativeFuzzyLessThan(si->time, _times[i + 1]))
+        return l.val(_dts[i]);
+    return l.val(_dts.back());
   }
 
 private:
+  std::vector<double> _times;
+  std::vector<double> _dts;
+  bool _interp;
   LinearInterpolation _lin;
 };
 
