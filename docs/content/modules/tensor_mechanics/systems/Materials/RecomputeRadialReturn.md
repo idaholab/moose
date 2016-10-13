@@ -12,7 +12,7 @@ In addition to the Sumo and Hughes textbook \cite{simo2006computational}, _Intro
 The recompute materials are not called by MOOSE directly but instead only by other materials using the `computeProperties` method.  For the `RecomputeRadialReturn` materials, this calling material is [ComputeReturnMappingStress](ComputeReturnMappingStress.md).  Separating the call to the recompute materials from MOOSE allows us to iteratively call the recompute materials as is required to achieve convergence.
 
 ##Radial Return Algorithm Overview
-!image tensor_mechanics-RadialReturnStressSpace.png width=350 float=right caption=Figure 1: A trial stress is shown outside of the devatoric yield surface and the radial return stress which is normal to the yield surface.
+!image media/tensor_mechanics-RadialReturnStressSpace.png width=350 float=right caption=Figure 1: A trial stress is shown outside of the devatoric yield surface and the radial return stress which is normal to the yield surface.
 
 {!content/modules/tensor_mechanics/common_documentation/supplementalRecomputeRadialReturn.md!}
 
@@ -20,7 +20,7 @@ In the case of isotropic linear hardening plasticity, with the hardening functio
 $$
  d \Delta p = \frac{\sigma^{trial}_{effective} - 3 G \Delta p - r - \sigma_{yield}}{3G + h}
 $$
-where G is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress.  
+where G is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress.
 
 Once convergence has been reached on the scalar inelastic strain increment, the full inelastic strain tensor is calculated.
 $$
@@ -39,13 +39,13 @@ $$
 \sigma^{new}_{ij} = C_{ijkl} \left( \Delta \epsilon^{elastic}_{kl} + \epsilon^{old-elastic}_{kl} \right)
 $$
 
-When more than one radial recompute material is included in the simulation, as in Combined Power Law Creep and Linear Strain Hardening, `ComputeReturnMappingStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.  
+When more than one radial recompute material is included in the simulation, as in Combined Power Law Creep and Linear Strain Hardening, `ComputeReturnMappingStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.
 
 Users can print out any of these strains and stresses using the `RankTwoAux` as described on the
 [Introduction/Visualizing Tensors](auto::/introduction/VisualizingTensors) page.
 
 ##Writing a New Recompute Material
-New radial return models must inherit from `RecomputeRadialReturn` and must overwrite the six virtual methods.  
+New radial return models must inherit from `RecomputeRadialReturn` and must overwrite the six virtual methods.
 
   - **initQpStatefulProperties**: Set the initial values for all new material properties that are not initialized by an input parameter; generally the material properties initialized in this method are all set to zero.
   - **computeStressInitialize**: Calculate the initial trial stress state, the yield surface value, and any hardening or softening parameters at the start of the simulation time increment.

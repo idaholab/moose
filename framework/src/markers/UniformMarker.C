@@ -21,7 +21,7 @@ InputParameters validParams<UniformMarker>()
   MooseEnum marker_states = Marker::markerStates();
 
   params.addRequiredParam<MooseEnum>("mark", marker_states, "How to mark elements.");
-
+  params.addClassDescription("Uniformly mark all elements for refinement or coarsening.");
   return params;
 }
 
@@ -37,5 +37,3 @@ UniformMarker::computeElementMarker()
 {
   return _mark;
 }
-
-

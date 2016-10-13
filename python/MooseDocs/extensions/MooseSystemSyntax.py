@@ -14,12 +14,16 @@ class MooseSystemSyntax(MooseSyntaxBase):
 
   !subobjects = A list of subobjects /* and /<type>
   !subsystems = A list of sub-syntax (e.g, Markers and Indicators)
+
+  Available Settings:
+    title[str]: Set the title of the section defined above the table.
   """
 
   RE = r'^!(subobjects|subsystems)\s+(.*?)\s+(.*?)(?:$|\s+)(.*)'
 
   def __init__(self, yaml=None, syntax=None, **kwargs):
     MooseSyntaxBase.__init__(self, self.RE, yaml=yaml, syntax=syntax, **kwargs)
+    self._settings['title'] = None
 
   def handleMatch(self, match):
     """
@@ -37,12 +41,12 @@ class MooseSystemSyntax(MooseSyntaxBase):
       return self.createErrorElement(message="The group name '{}' was not found.".format(group))
 
     if action == 'subobjects':
-      el = self.subobjectsElement(group, syntax, styles)
+      el = self.subobjectsElement(group, syntax, styles, settings)
     elif action == 'subsystems':
-      el = self.subsystemsElement(group, syntax, styles)
+      el = self.subsystemsElement(group, syntax, styles, settings)
     return el
 
-  def subobjectsElement(self, group, syntax, styles):
+  def subobjectsElement(self, group, syntax, styles, settings):
     """
     Create table of sub-objects.
     """
@@ -74,11 +78,11 @@ class MooseSystemSyntax(MooseSyntaxBase):
 
     el = etree.Element('div', styles)
     h2 = etree.SubElement(el, 'h2')
-    h2.text = 'Available Sub-Objects'
+    h2.text = settings['title'] if settings['title'] else 'Available Sub-Objects'
     el.append(table.html())
     return el
 
-  def subsystemsElement(self, group, syntax, styles):
+  def subsystemsElement(self, group, syntax, styles, settings):
     """
     Create table of sub-systems.
     """
@@ -103,6 +107,6 @@ class MooseSystemSyntax(MooseSyntaxBase):
 
     el = etree.Element('div', styles)
     h2 = etree.SubElement(el, 'h2')
-    h2.text = 'Available Sub-Systems'
+    h2.text = settings['title'] if settings['title'] else 'Available Sub-Systems'
     el.append(table.html())
     return table.html()

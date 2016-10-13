@@ -34,8 +34,8 @@ class MooseBuildStatus(MooseCommonExtension, Pattern):
     process settings associated with !buildstatus markdown
     """
     reverse_margin = { 'left' : 'right',
-              'right' : 'left',
-              'None' : 'none'}
+                       'right' : 'left',
+                       'None' : 'none'}
 
     url = match.group(2)
 

@@ -1,8 +1,15 @@
-<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->
-#ComboMarker
 !devel /Adaptivity/Markers/ComboMarker float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
+# ComboMarker
 !description /Adaptivity/Markers/ComboMarker
+
+## Description
+The `ComboMarker` is used to combine multiple markers into a single marker. This is done by
+taking the maximum value of the marker value from the supplied markers. Therefore, refinement
+of an element takes precedence.
+
+## Example Input Syntax
+!input test/tests/markers/combo_marker/combo_marker_test.i block=Adaptivity
 
 !parameters /Adaptivity/Markers/ComboMarker
 

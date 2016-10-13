@@ -51,7 +51,6 @@ def generate_html(input, config_file):
   #TODO: Make this more robust
   config = MooseDocs.yaml_load(config_file)
   md_config = config['markdown_extensions'][-1]['MooseDocs.extensions.MooseMarkdown']
-  #md_config['bibtex'] = False
   md_config['dot_ext'] = 'svg'
 
   # Convert markdown
@@ -65,8 +64,8 @@ def generate_html(input, config_file):
     return ''
   md = re.sub(r'@\+\s*set\s+(.*?)=(.*?)\+@', sub, md)
 
-  parser = markdown.Markdown(extensions=[MooseDocs.extensions.MooseMarkdown(**md_config),
-                      'markdown_include.include', 'admonition', 'mdx_math', 'toc', 'extra'])
+  moose = MooseDocs.extensions.MooseMarkdown(**md_config)
+  parser = markdown.Markdown(extensions=[moose, 'markdown_include.include', 'admonition', 'mdx_math', 'toc', 'extra'])
   return parser.convert(md), settings
 
 

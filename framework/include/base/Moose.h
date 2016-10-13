@@ -80,6 +80,11 @@ extern PerfLog setup_perf_log;
 extern bool _trap_fpe;
 
 /**
+ * Variable indicating whether Console coloring will be turned on (default: true).
+ */
+extern bool _color_console;
+
+/**
  * Variable to toggle any warning into an error (includes deprecated code warnings)
  */
 extern bool _warnings_are_errors;
@@ -98,24 +103,15 @@ extern bool _throw_on_error;
 /**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)
  */
-#define COLOR_BLACK   (Moose::colorConsole() ? XTERM_BLACK : "")
-#define COLOR_RED     (Moose::colorConsole() ? XTERM_RED : "")
-#define COLOR_GREEN   (Moose::colorConsole() ? XTERM_GREEN : "")
-#define COLOR_YELLOW  (Moose::colorConsole() ? XTERM_YELLOW : "")
-#define COLOR_BLUE    (Moose::colorConsole() ? XTERM_BLUE : "")
-#define COLOR_MAGENTA (Moose::colorConsole() ? XTERM_MAGENTA : "")
-#define COLOR_CYAN    (Moose::colorConsole() ? XTERM_CYAN : "")
-#define COLOR_WHITE   (Moose::colorConsole() ? XTERM_WHITE : "")
-#define COLOR_DEFAULT (Moose::colorConsole() ? XTERM_DEFAULT : "")
-
-
-
-/// Returns whether Console coloring is turned on (default: true).
-bool colorConsole();
-
-/// Turns color escape sequences on/off for info written to stdout.
-/// Returns the the set value which may be different than use_color.
-bool setColorConsole(bool use_color, bool force = false);
+#define COLOR_BLACK   (Moose::_color_console ? XTERM_BLACK : "")
+#define COLOR_RED     (Moose::_color_console ? XTERM_RED : "")
+#define COLOR_GREEN   (Moose::_color_console ? XTERM_GREEN : "")
+#define COLOR_YELLOW  (Moose::_color_console ? XTERM_YELLOW : "")
+#define COLOR_BLUE    (Moose::_color_console ? XTERM_BLUE : "")
+#define COLOR_MAGENTA (Moose::_color_console ? XTERM_MAGENTA : "")
+#define COLOR_CYAN    (Moose::_color_console ? XTERM_CYAN : "")
+#define COLOR_WHITE   (Moose::_color_console ? XTERM_WHITE : "")
+#define COLOR_DEFAULT (Moose::_color_console ? XTERM_DEFAULT : "")
 
 /**
  * Import libMesh::out, and libMesh::err for use in MOOSE.

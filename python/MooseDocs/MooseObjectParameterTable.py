@@ -30,6 +30,9 @@ class MooseObjectParameterTable(MarkdownTable):
     self.addRow(*items)
 
   def html(self):
+    """
+    Return html for the table including special class name indicating that this is a parameter table.
+    """
     el = super(MooseObjectParameterTable, self).html()
     el.set('class', 'moose-object-param-table')
     return el

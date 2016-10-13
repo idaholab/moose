@@ -34,7 +34,7 @@ InputParameters validParams<OrientedBoxMarker>()
   params.addRequiredParam<MooseEnum>("inside", marker_states, "How to mark elements inside the box.");
   params.addRequiredParam<MooseEnum>("outside", marker_states, "How to mark elements outside the box.");
 
-  params.addClassDescription("Marks inside and outside a box that can have arbitrary orientation and center point");
+  params.addClassDescription("Marks inside and outside a box that can have arbitrary orientation and center point.");
   return params;
 }
 
@@ -60,4 +60,3 @@ OrientedBoxMarker::computeElementMarker()
 
   return _outside;
 }
-
