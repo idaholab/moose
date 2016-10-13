@@ -16,7 +16,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
   Extracts the description from a MooseObject parameters.
 
   Markdown Syntax:
-  !<Keyword> <YAML Syntax> key=value, key1=valu1, etc...
+  !<Keyword> <YAML Syntax> key=value, key1=value1, etc...
 
   Keywords Available:
     !description - Returns the description added via the 'addClassDescription' method
@@ -24,12 +24,17 @@ class MooseObjectSyntax(MooseSyntaxBase):
     !inputfiles - Returns a set of lists containing links to the input files that use the syntax
     !childobjects - Returns a set of lists containing links to objects that inherit from this class
     !devel - Returns links to the source code in the repository and doxygen page.
+
+  "devel" Settings:
+    title[str]: The developer link box title (default: Developer Links)
+
   """
 
   RE = r'^!(description|parameters|inputfiles|childobjects|devel)\s+(.*?)(?:$|\s+)(.*)'
 
   def __init__(self, input_files=dict(), child_objects=dict(), repo=None, **kwargs):
     super(MooseObjectSyntax, self).__init__(self.RE, **kwargs)
+
 
     # Input arguments
     self._input_files = input_files
@@ -45,6 +50,12 @@ class MooseObjectSyntax(MooseSyntaxBase):
     # Extract match options and settings
     action = match.group(2)
     syntax = match.group(3)
+
+    # Default Settings
+    if action == 'devel':
+      self._settings['title'] = 'Developer Links'
+
+    # Extract Settings
     settings, styles = self.getSettings(match.group(4))
 
     # Locate description
@@ -56,20 +67,20 @@ class MooseObjectSyntax(MooseSyntaxBase):
     self._name = node['name'].split('/')[-1]
 
     if action == 'description':
-      el = self.descriptionElement(node, styles)
+      el = self.descriptionElement(node, settings, styles)
     elif action == 'parameters':
-      el = self.parametersElement(node, styles)
+      el = self.parametersElement(node, settings, styles)
     elif action == 'inputfiles':
-      el = self.inputfilesElement(node, styles)
+      el = self.inputfilesElement(node, settings, styles)
     elif action == 'childobjects':
-      el = self.childobjectsElement(node, styles)
+      el = self.childobjectsElement(node, settings, styles)
     elif action == 'devel':
-      el = self.develElement(node, styles)
+      el = self.develElement(node, settings, styles)
     elif action == 'subobjects':
-      el = self.subobjectsElement(node, styles)
+      el = self.subobjectsElement(node, settings, styles)
     return el
 
-  def descriptionElement(self, node, styles):
+  def descriptionElement(self, node, settings, styles):
     """
     Return the class description html element.
 
@@ -86,7 +97,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
     el.text = node['description']
     return el
 
-  def parametersElement(self, node, styles):
+  def parametersElement(self, node, settings, styles):
     """
     Return table(s) of input parameters.
 
@@ -121,7 +132,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
       el.append(table.html())
     return el
 
-  def inputfilesElement(self, node, styles):
+  def inputfilesElement(self, node, settings, styles):
     """
     Return the links to input files and child objects.
 
@@ -134,7 +145,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
     self._listhelper(node, 'Input Files', el, self._input_files)
     return el
 
-  def childobjectsElement(self, node, styles):
+  def childobjectsElement(self, node, settings, styles):
     """
     Return the links to input files and child objects.
 
@@ -147,7 +158,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
     self._listhelper(node, 'Child Objects', el, self._child_objects)
     return el
 
-  def develElement(self, node, styles):
+  def develElement(self, node, settings, styles):
     """
     Return the developer doxygen, github links.
 
@@ -160,32 +171,32 @@ class MooseObjectSyntax(MooseSyntaxBase):
       el = createErrorElement("Attempting to create source links to repository, but the 'repo' configuration option was not supplied.")
 
     el = self.addStyle(etree.Element('div'), **styles)
+    title = etree.SubElement(el, 'h4')
+    title.text = settings['title']
+    ul = etree.SubElement(el, 'ul')
 
     for key, syntax in self._syntax.iteritems():
       if syntax.hasObject(self._name):
         include = syntax.filenames(self._name)[0]
         rel_include = os.path.relpath(include, self._root)
 
-        p = etree.SubElement(el, 'p')
-        p.text = 'Include:&nbsp;'
-
+        p = etree.SubElement(ul, 'li')
         a = etree.SubElement(p, 'a')
         a.set('href', os.path.join(self._repo, rel_include))
-        a.text = self._name
+        a.text = os.path.basename(rel_include)
 
         source = include.replace('/include/', '/src/').replace('.h', '.C')
         if os.path.exists(source):
 
-          p = etree.SubElement(el, 'p')
-          p.text = 'Source:&nbsp;'
+          p = etree.SubElement(ul, 'li')
 
           rel_source = os.path.relpath(source, self._root)
           a = etree.SubElement(p, 'a')
           a.set('href', os.path.join(self._repo, rel_source))
-          a.text = self._name
+          a.text = os.path.basename(rel_source)
 
           if syntax.doxygen:
-            p = etree.SubElement(el, 'p')
+            p = etree.SubElement(ul, 'li')
             p.text = 'Doxygen:&nbsp;'
             a = etree.SubElement(p, 'a')
             a.set('href', "{}class{}.html".format(syntax.doxygen, self._name))
