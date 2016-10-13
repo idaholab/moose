@@ -35,7 +35,7 @@ public:
   virtual void postStep() override;
   virtual void rejectStep() override;
 
-public:
+private:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
 

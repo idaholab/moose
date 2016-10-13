@@ -49,7 +49,7 @@ public:
 
   virtual Stepper * buildStepper() override;
 
-public:
+private:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
   virtual Real computeFailedDT() override;
