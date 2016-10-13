@@ -247,8 +247,9 @@ class TestHarness:
 
     self.cleanup()
 
+    # Flags for the parser start at the low bit, flags for the TestHarness start at the high bit
     if self.num_failed:
-      self.error_code = self.error_code | 0x10
+      self.error_code = self.error_code | 0x80
 
     return
 
@@ -669,7 +670,7 @@ class TestHarness:
       summary += ', <b>%d failed</b>'
 
     # Mask off TestHarness error codes to report parser errors
-    if self.error_code & 0x0F:
+    if self.error_code & Parser.getErrorCodeMask():
       summary += ', <r>FATAL PARSER ERROR</r>'
 
     print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
