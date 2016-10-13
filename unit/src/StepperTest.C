@@ -168,8 +168,8 @@ StepperTest::maxRatio()
     double max_ratio = tests[i].max_ratio;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    FixedPointStepper s(times, tol);
-    MaxRatioStepper stepper(&s, max_ratio);
+    Stepper * s = new FixedPointStepper(times, tol);
+    MaxRatioStepper stepper(s, max_ratio);
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
@@ -219,8 +219,8 @@ StepperTest::everyN()
     double dt = 0;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    FixedPointStepper s(times, tol);
-    EveryNStepper stepper(&s, tests[i].every_n);
+    Stepper * s = new FixedPointStepper(times, tol);
+    EveryNStepper stepper(s, tests[i].every_n);
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
