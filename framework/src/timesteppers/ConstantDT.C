@@ -14,6 +14,7 @@
 
 #include "ConstantDT.h"
 #include "Stepper.h"
+#include "Transient.h"
 
 template<>
 InputParameters validParams<ConstantDT>()
@@ -48,6 +49,16 @@ ConstantDT::computeDT()
 Stepper*
 ConstantDT::buildStepper()
 {
-  return new MinOfStepper(new ConstStepper(_constant_dt), new RetryUnusedStepper(new GrowShrinkStepper(0.5, _growth_factor), 0, false), 0);
+  int n_startup_steps = _executioner.n_startup_steps();
+
+  InstrumentedStepper* s = new InstrumentedStepper();
+  *s->dtPtr() = getCurrentDT(); // required for restart
+
+  Stepper* inner = new GrowShrinkStepper(0.5, _growth_factor, new ReturnPtrStepper(s->dtPtr()));
+  inner = new MinOfStepper(new ConstStepper(_constant_dt), inner, 0);
+  inner = new StartupStepper(inner, _constant_dt, n_startup_steps);
+
+  s->setStepper(inner);
+  return s;
 }
 

@@ -485,7 +485,13 @@ IterationAdaptiveDT::buildStepper()
   stepper = new DTLimitStepper(stepper, dtmin, dtmax, false);
   // this needs to go before RetryUnused stepper
   if (_pps_value)
-    stepper = new DTLimitPtrStepper(stepper, NULL, _pps_value, false);
+  {
+    Stepper * s = new ReturnPtrStepper(_pps_value);
+    // startup stepper needed for initial case where pps_value hasn't been set
+    // to anything yet.
+    s = new StartupStepper(stepper, 1e100, n_startup_steps);
+    stepper = new MinOfStepper(stepper, s, 0);
+  }
 
   if (time_list.size() > 0)
     stepper = new MinOfStepper(new FixedPointStepper(time_list, tol), stepper, tol);

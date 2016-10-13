@@ -236,7 +236,7 @@ Transient::postStep()
 
 int Transient::n_startup_steps()
 {
-  return _n_startup_steps;
+  return std::max(1, _n_startup_steps);
 }
 
 void
@@ -246,7 +246,6 @@ Transient::execute()
   // setup and configure new Stepper in parallel here       //
   ////////////////////////////////////////////////////////////
   Stepper* inner = _time_stepper->buildStepper();
-
   if (inner)
   {
     std::vector<double> sync_times;
@@ -254,13 +253,9 @@ Transient::execute()
       sync_times.push_back(val);
 
     // these are global/sim constraints for *EVERY* time inner:
-
-    // dtmin/max constraints
     inner = new DTLimitStepper(inner, dtMin(), dtMax(), false);
-    // sync_times constraint
     if (sync_times.size() > 0)
       inner = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), inner, timestepTol());
-    // max/min sim time constraint
     if (!_app.halfTransient())
       inner = new BoundsStepper(inner, getStartTime(), endTime(), false);
   }
@@ -290,7 +285,7 @@ Transient::execute()
     si.prev_prev_dt = si.prev_dt;
     si.prev_dt = _dt;
     si.step_count = _steps_taken;
-    si.nonlin_iters =  _nl_its;
+    si.nonlin_iters = _nl_its;
     si.lin_iters = _l_its;
     si.prev_converged = si.converged || first;
     // A step_count == 1 condition is not sufficient to account for

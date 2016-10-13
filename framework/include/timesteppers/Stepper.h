@@ -163,36 +163,6 @@ private:
   bool _err;
 };
 
-class DTLimitPtrStepper : public Stepper
-{
-public:
-  DTLimitPtrStepper(Stepper* s, const double* dt_min, const double* dt_max, bool throw_err) : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err)
-  {
-  }
-
-  virtual double advance(const StepperInfo* si)
-  {
-    Logger l("DTLimitPtr");
-    double dt = _stepper->advance(si);
-    if (_err && *_min && dt < *_min)
-      throw "time step is out of bounds";
-    else if (_err && *_max && dt > *_max)
-      throw "time step is out of bounds";
-
-    if (_min && dt < *_min)
-      return l.val(*_min);
-    else if ( _max && *_max > 0 && dt > *_max)
-      return l.val(*_max);
-    return l.val(dt);
-  }
-
-private:
-  Ptr _stepper;
-  const double* _min;
-  const double* _max;
-  bool _err;
-};
-
 // Calls an underlying stepper to compute dt. Modifies dt to maintain the
 // simulation time within specified fixed lower and upper bounds (or throws an
 // error - depending on configuration).
@@ -341,6 +311,60 @@ public:
 private:
   Ptr _stepper;
   int _n;
+};
+
+class ReturnPtrStepper : public Stepper
+{
+public:
+  ReturnPtrStepper(const double * dt_store) : _dt_store(dt_store)
+  {
+  }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    Logger l("ReturnPtr");
+    return l.val(*_dt_store);
+  }
+
+private:
+  const double * _dt_store;
+};
+
+// Returns the dt of the underlying stepper unmodified.  Stores/remembers this
+// dt which can be viewed/connected to via the pointer returned by dtPtr().
+// The underlying stepper must be set via setStepper - this allows
+// InstrumentedStepper to be created before other steppers which may want to
+// use the dt_store pointer.
+class InstrumentedStepper : public Stepper
+{
+public:
+  InstrumentedStepper() : _stepper(nullptr), _dt_store(0)
+  {
+  }
+
+  virtual double advance(const StepperInfo* si)
+  {
+    Logger l("Instrumented");
+    if (!_stepper)
+      throw "InstrumentedStepper's inner stepper not set";
+
+    _dt_store = _stepper->advance(si);
+    return l.val(_dt_store);
+  }
+
+  void setStepper(Stepper* s)
+  {
+    _stepper.reset(s);
+  }
+
+  double * dtPtr()
+  {
+    return &_dt_store;
+  }
+
+private:
+  Ptr _stepper;
+  double _dt_store;
 };
 
 // Uses an underlying stepper to compute dt.  If the actuall simulation-used
@@ -558,23 +582,31 @@ private:
 class GrowShrinkStepper : public Stepper
 {
 public:
-  GrowShrinkStepper(double shrink_factor, double growth_factor) :
+  // if source_dt != nullptr, the dt returned by it is used to grow or shrink
+  // on accordingly
+  GrowShrinkStepper(double shrink_factor, double growth_factor, Stepper* source_dt = nullptr) :
       _grow_fac(growth_factor),
-      _shrink_fac(shrink_factor)
+      _shrink_fac(shrink_factor),
+      _source_dt(source_dt)
       { }
 
   virtual double advance(const StepperInfo* si)
   {
     Logger l("GrowShrink");
+    double dt_init = si->prev_dt;
+    if (_source_dt)
+      dt_init = _source_dt->advance(si);
+
     if (!si->converged)
-      return l.val(si->prev_dt * _shrink_fac);
+      return l.val(dt_init * _shrink_fac);
     else
-      return l.val(si->prev_dt * _grow_fac);
+      return l.val(dt_init * _grow_fac);
   }
 
 private:
   double _grow_fac;
   double _shrink_fac;
+  Ptr _source_dt;
 };
 
 class PredictorCorrector : public Stepper
