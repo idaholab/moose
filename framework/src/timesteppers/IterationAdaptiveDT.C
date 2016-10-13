@@ -489,7 +489,7 @@ IterationAdaptiveDT::buildStepper()
     Stepper * s = new ReturnPtrStepper(_pps_value);
     // startup stepper needed for initial case where pps_value hasn't been set
     // to anything yet.
-    s = new StartupStepper(stepper, 1e100, n_startup_steps);
+    s = new StartupStepper(s, 1e100, n_startup_steps);
     stepper = new MinOfStepper(stepper, s, 0);
   }
 
