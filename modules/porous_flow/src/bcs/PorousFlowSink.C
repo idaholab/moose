@@ -160,7 +160,6 @@ PorousFlowSink::jac(unsigned int jvar)
   if (_use_mass_fraction)
   {
     deriv = _mass_fractions[qp_for_this_node][_ph][_sp] * deriv + _dmass_fractions_dvar[qp_for_this_node][_ph][_sp][pvar] * flux;
-    flux *= _mass_fractions[qp_for_this_node][_ph][_sp];
   }
   return deriv;
 }

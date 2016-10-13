@@ -578,7 +578,6 @@ XFEM::markCutEdgesByState(Real time)
         orig_edge = CEMElem->getEdge(orig_cut_side_id);
         orig_node = CEMElem->getTipEmbeddedNode();
         unsigned int emb_id = orig_edge->getEmbeddedNodeIndex(orig_node);
-        orig_cut_distance = orig_edge->getIntersection(emb_id,orig_edge->getNode(0));
       }
       else
         mooseError("element "<<elem->id()<<" has no valid crack-tip edge");
@@ -751,7 +750,6 @@ XFEM::markCutEdgesByState(Real time)
             {
               _efa_mesh.addElemEdgeIntersection(elem->id(), elem_cut_edges[i].host_side_id,
                                                 elem_cut_edges[i].distance);
-              marked_edges = true;
             }
           }
         }
