@@ -26,9 +26,9 @@ class MooseImageFile(MooseCommonExtension, Pattern):
     MooseCommonExtension.__init__(self, **kwargs)
     Pattern.__init__(self, self.RE, markdown_instance)
 
-    # Valid settings for MOOS specific documentation features
+    # Valid settings for MOOSE specific documentation features
     # All other markdown 'attributes' will be treated as HTML
-    # style settings
+    # style settings for the figure tag.
     self._settings = {'caption' : None}
 
   def handleMatch(self, match):

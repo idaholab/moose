@@ -72,7 +72,7 @@ class MooseCommonExtension(object):
     Usage:
     addStyle(etree.Element, width='300px')
 
-    returns your element with style="with=300px;" along
+    returns your element with style="width=300px;" along
     with any pre-existing styles set.
 
     """
