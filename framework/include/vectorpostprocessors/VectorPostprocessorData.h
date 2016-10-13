@@ -31,7 +31,7 @@ public:
    */
   VectorPostprocessorData(FEProblem & fe_problem);
 
-  struct VPPVectors
+  struct VectorPostprocessorState
   {
     VectorPostprocessorValue * current;
     VectorPostprocessorValue * old;
@@ -76,7 +76,7 @@ public:
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */
-  const std::map<std::string, VPPVectors> & vectors(const std::string & vpp_name) const;
+  const std::map<std::string, VectorPostprocessorState> & vectors(const std::string & vpp_name) const;
 
   /**
    * Copy the current post-processor values into old (i.e. shift it "back in time")
@@ -87,7 +87,7 @@ private:
   VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name, const std::string & vector_name, bool get_current);
 
   /// Values of the vector post-processor
-  std::map<std::string, std::map<std::string, VPPVectors> > _values;
+  std::map<std::string, std::map<std::string, VectorPostprocessorState> > _values;
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;

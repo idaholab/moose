@@ -61,7 +61,7 @@ SamplerBase::addSample(const Point & p, const Real & id, const std::vector<Real>
 
   mooseAssert(values.size() == _variable_names.size(), "Mismatch of variable names to vector size");
   for (auto i = beginIndex(values); i < values.size(); ++i)
-    _values[i]->push_back(values[i]);
+    _values[i]->emplace_back(values[i]);
 }
 
 void
@@ -84,26 +84,25 @@ SamplerBase::finalize()
 {
   /**
    * We have several vectors that all need to be processed in the same way.
-   * Rather than enumerate them all, let's just create a vector a pointers
+   * Rather than enumerate them all, let's just create a vector of pointers
    * and work on them that way.
    */
-  // Initialize the pointer vector with the position and ID vectors since we sort only on these.
-  std::vector<VectorPostprocessorValue *> vec_ptrs { { &_x, &_y, &_z, &_id } };
+  constexpr auto NUM_ID_VECTORS = 4;
+
+  std::vector<VectorPostprocessorValue *> vec_ptrs;
+  vec_ptrs.reserve(_values.size() + NUM_ID_VECTORS);
+  // Initialize the pointer vector with the position and ID vectors
+  vec_ptrs = { { &_x, &_y, &_z, &_id } };
+  // Now extend the vector by all the remaining values vector before processing
+  vec_ptrs.insert(vec_ptrs.end(), _values.begin(), _values.end());
+
+  // Gather up each of the partial vectors
+  for (auto vec_ptr : vec_ptrs)
+    _comm.allgather(*vec_ptr, /* identical buffer lengths = */ false);
+
+  // Now create an index vector by using an indirect sort
   std::vector<std::size_t> sorted_indices;
-
-  // Gather up each of the partial vectors then choose one to sort by
-  for (auto i = beginIndex(vec_ptrs); i < vec_ptrs.size(); ++i)
-  {
-    _comm.allgather(*vec_ptrs[i], false);
-
-    // Sort by the vector chosen by the user
-    if (i == _sort_by)
-      Moose::indirectSort(vec_ptrs[i]->begin(), vec_ptrs[i]->end(), sorted_indices);
-  }
-
-  // Now gather the contents of each of the sample value vectors
-  for (auto i = beginIndex(_variable_names); i < _variable_names.size(); ++i)
-    _comm.allgather(*_values[i], false);
+  Moose::indirectSort(vec_ptrs[_sort_by]->begin(), vec_ptrs[_sort_by]->end(), sorted_indices);
 
   /**
    * We now have one sorted vector. The remaining vectors need to be sorted according to that vector.
@@ -114,9 +113,6 @@ SamplerBase::finalize()
   // This vector is used as temp storage to sort each of the remaining vectors according to the first
   auto vector_length = sorted_indices.size();
   VectorPostprocessorValue tmp_vector(vector_length);
-
-  // Here we extend the vector by all the remaining values vector before performing the final sort
-  vec_ptrs.insert(vec_ptrs.end(), _values.begin(), _values.end());
 
 #ifndef NDEBUG
   for (const auto vec_ptr : vec_ptrs)

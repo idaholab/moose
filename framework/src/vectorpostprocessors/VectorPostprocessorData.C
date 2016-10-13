@@ -67,7 +67,7 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   return get_current ? *vec_struct.current : *vec_struct.old;
 }
 
-const std::map<std::string, VectorPostprocessorData::VPPVectors> &
+const std::map<std::string, VectorPostprocessorData::VectorPostprocessorState> &
 VectorPostprocessorData::vectors(const std::string & vpp_name) const
 {
   auto vec_pair = _values.find(vpp_name);

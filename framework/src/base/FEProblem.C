@@ -2311,7 +2311,7 @@ FEProblem::declareVectorPostprocessorVector(const VectorPostprocessorName & name
   return _vpps_data.declareVector(name, vector_name);
 }
 
-const std::map<std::string, VectorPostprocessorData::VPPVectors> &
+const std::map<std::string, VectorPostprocessorData::VectorPostprocessorState> &
 FEProblem::getVectorPostprocessorVectors(const std::string & vpp_name)
 {
   return _vpps_data.vectors(vpp_name);
