@@ -26,8 +26,8 @@ Threads::spin_mutex parsed_function_mutex;
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),
     _tr_x(&feproblem.getFunction(fn_names[0])),
-    _tr_y(fn_names.size() > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),
-    _tr_z(fn_names.size() > 2 ? &feproblem.getFunction(fn_names[2]) : NULL)
+    _tr_y(_dim > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),
+    _tr_z(_dim > 2 ? &feproblem.getFunction(fn_names[2]) : NULL)
 {
 
   // Make certain the the dimensions agree
