@@ -150,7 +150,7 @@ CommonOutputAction::act()
     create("ControlOutput");
 
   if (!getParam<bool>("color"))
-    Moose::setColorConsole(false);
+    Moose::_color_console = false;
 }
 
 void

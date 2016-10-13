@@ -114,9 +114,7 @@ class RunApp(Tester):
       specs['cli_args'].append('Outputs/print_perf_log=true')
 
     if options.colored == False:
-      specs['cli_args'].append('--color off')
-    else:
-      specs['cli_args'].append('--color on')
+      specs['cli_args'].append('--no-color')
 
     if options.cli_args:
       specs['cli_args'].insert(0, options.cli_args)
