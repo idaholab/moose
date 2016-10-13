@@ -1,4 +1,4 @@
-import os, re
+import os, re, math
 
 class CSVDiffer:
   def __init__(self, test_dir, out_files, abs_zero=1e-11, relative_error=5.5e-6):
@@ -89,6 +89,14 @@ class CSVDiffer:
           if abs(val2) < abs_zero:
             val2 = 0
 
+          # disallow nan in the gold file
+          if math.isnan(val1):
+            self.addError(fname, "The values in column \"" + key.strip() + "\" contain NaN")
+
+          # disallow inf in the gold file
+          if math.isinf(val1):
+            self.addError(fname, "The values in column \"" + key.strip() + "\" contain Inf")
+
           # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
           if val1 == 0 and val2 == 0:
             continue
@@ -123,7 +131,11 @@ class CSVDiffer:
         if len(headers) != len(vals):
           self.addError(fname, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
         for header, val in zip(headers,vals):
-          table[header].append(float(val))
+          try:
+            table[header].append(float(val))
+          except:
+            # ignore strings
+            table[header].append(0)
 
     except Exception as e:
       self.addError(fname, "Exception parsing file: "+str(e.args))
@@ -140,7 +152,6 @@ class CSVDiffer:
   def getNumErrors(self):
     """Return number of errors in diff"""
     return self.num_errors
-
 
 # testing the test harness!
 if __name__ == '__main__':
