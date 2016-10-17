@@ -91,6 +91,5 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(XFEMAction, "add_aux_kernel");
 
   syntax.registerActionSyntax("XFEMAction", "XFEM");
-  syntax.registerActionSyntax("AddUserObjectAction", "XFEM/*");
 
 }
