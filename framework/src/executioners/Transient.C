@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define USE_NEW_STEPPER true
+#define USE_NEW_STEPPER false
 
 #include "Transient.h"
 
@@ -31,6 +31,7 @@
 #include "FunctionDT.h"
 #include "Function.h"
 #include "Predictor.h"
+#include "TimeIntegrator.h"
 
 // libMesh includes
 #include "libmesh/implicit_system.h"
@@ -243,9 +244,6 @@ int Transient::n_startup_steps()
 void
 Transient::execute()
 {
-  ////////////////////////////////////////////////////////////
-  // setup and configure new Stepper in parallel here       //
-  ////////////////////////////////////////////////////////////
   Stepper* inner = _time_stepper->buildStepper();
   if (inner)
   {
@@ -272,9 +270,11 @@ Transient::execute()
     _problem.advanceState();
 
   // Start time loop...
-  StepperInfo si = { };
-  si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
-  si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
+  _si = { };
+  _si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
+  _si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
+  _si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector("predicted_u1", true, GHOSTED);
+  _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
 
   bool first = true; // needs to not be restartable data
   while (true)
@@ -285,36 +285,33 @@ Transient::execute()
       incrementStepOrReject();
 
     // update new style stepper
-    si.time = _time;
-    si.prev_prev_prev_dt = si.prev_prev_dt;
-    si.prev_prev_dt = si.prev_dt;
-    si.prev_dt = _dt;
-    si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
-    si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
-    si.prev_solve_time_secs = _solve_time;
-    si.step_count = _steps_taken;
-    si.nonlin_iters = _nl_its;
-    si.lin_iters = _l_its;
-    si.prev_converged = si.converged || first;
+    _si.time = _time;
+    _si.prev_prev_prev_dt = _si.prev_prev_dt;
+    _si.prev_prev_dt = _si.prev_dt;
+    _si.prev_dt = _dt;
+    _si.prev_prev_prev_solve_time_secs = _si.prev_prev_solve_time_secs;
+    _si.prev_prev_solve_time_secs = _si.prev_solve_time_secs;
+    _si.prev_solve_time_secs = _solve_time;
+    _si.step_count = _steps_taken;
+    _si.nonlin_iters = _nl_its;
+    _si.lin_iters = _l_its;
+    _si.prev_converged = _si.converged || first;
     // A step_count == 1 condition is not sufficient to account for
     // restart/recover cases where step_count is already something else.
-    si.converged = _last_solve_converged || first;
+    _si.converged = _last_solve_converged || first;
 
-    if (!first)
-    {
-      *si.soln_nonlin = *(_fe_problem.getNonlinearSystem().currentSolution());
-      *si.soln_aux =  *(_fe_problem.getAuxiliarySystem().currentSolution());
-      Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
-      if (p)
-        si.soln_predicted = &(p->solutionPredictor());
-      if (si.soln_nonlin);
-        si.soln_nonlin->close();
-      if (si.soln_aux);
-        si.soln_aux->close();
-    }
-
+    *_si.soln_nonlin = *(_fe_problem.getNonlinearSystem().currentSolution());
+    *_si.soln_aux =  *(_fe_problem.getAuxiliarySystem().currentSolution());
+    if (_si.soln_nonlin);
+      _si.soln_nonlin->close();
+    if (_si.soln_aux);
+      _si.soln_aux->close();
+    Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
+    if (p)
+      *_si.soln_predicted = p->solutionPredictor(); // copy here because other code mutates this later :(
+    
     if (_stepper)
-      _new_dt = _stepper->advance(&si);
+      _new_dt = _stepper->advance(&_si);
 
     first = false;
     _first = false;
@@ -323,48 +320,47 @@ Transient::execute()
     std::string nonlin_str = "nullptr";
     std::string aux_str = "nullptr";
     std::string predicted_str = "nullptr";
-    if (si.soln_nonlin)
+    if (_si.soln_nonlin)
     {
       std::stringstream ss;
-      si.soln_nonlin->print(ss);
+      _si.soln_nonlin->print(ss);
       nonlin_str = ss.str();
     }
-    if (si.soln_aux)
+    if (_si.soln_aux)
     {
       std::stringstream ss;
-      si.soln_aux->print(ss);
+      _si.soln_aux->print(ss);
       aux_str = ss.str();
     }
-    if (si.soln_predicted)
+    if (_si.soln_predicted)
     {
       std::stringstream ss;
-      si.soln_predicted->print(ss);
+      _si.soln_predicted->print(ss);
       predicted_str = ss.str();
     }
 
     DBG << "FIXTURE: StepperInfo = {"
-      << si.step_count << ", "
-      << si.time << ", "
-      << si.prev_dt << ", "
-      << si.prev_prev_dt << ", "
-      << si.time_integrator << ", "
-      << si.nonlin_iters << ", "
-      << si.lin_iters << ", "
-      << si.converged << ", "
-      << si.prev_converged << ", "
-      << si.prev_solve_time_secs << ", "
+      << _si.step_count << ", "
+      << _si.time << ", "
+      << _si.prev_dt << ", "
+      << _si.prev_prev_dt << ", "
+      << _si.time_integrator << ", "
+      << _si.nonlin_iters << ", "
+      << _si.lin_iters << ", "
+      << _si.converged << ", "
+      << _si.prev_converged << ", "
+      << _si.prev_solve_time_secs << ", "
       << nonlin_str << ", "
       << aux_str << ", "
       << predicted_str << ", "
-      << si.sched_backup << ", "
-      << si.sched_restore << ", "
-      << si.restore_time
+      << _si.sched_backup << ", "
+      << _si.sched_restore << ", "
+      << _si.restore_time
       << "};\n";
 
     if (!keepGoing())
       break;
     preStep();
-
     computeDT();
     double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
@@ -372,11 +368,9 @@ Transient::execute()
     _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
     endStep();
     postStep();
-
-
     double constr_legacy_dt = _dt;
     if (_stepper)
-      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, _new_dt, legacy_dt, constr_legacy_dt);
+      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", _si.step_count, _si.time, _new_dt, legacy_dt, constr_legacy_dt);
   }
 
   if (!_app.halfTransient())
@@ -470,7 +464,8 @@ Transient::solveStep(Real input_dt)
     _dt = input_dt;
 
   Real current_dt = _dt;
-
+  
+  
   _problem.onTimestepBegin();
 
   // Increment time
@@ -516,6 +511,7 @@ Transient::solveStep(Real input_dt)
   timeval solve_start;
   timeval solve_end;
   gettimeofday(&solve_start, NULL);
+
   _time_stepper->step();
   gettimeofday(&solve_end, NULL);
   _solve_time = (static_cast<double>(solve_end.tv_sec  - solve_start.tv_sec) +
@@ -567,7 +563,7 @@ Transient::solveStep(Real input_dt)
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
   }
-
+    
   postSolve();
   _time_stepper->postSolve();
 

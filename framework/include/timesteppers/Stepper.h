@@ -261,11 +261,12 @@ private:
   double _max_ratio;
 };
 
-// Delegates dt calculations to an underlying stepper only every N steps.
-// Otherwise, it returns the previous dt.
+// Delegates dt calculations to an underlying stepper only every N steps (not every n calls to advance).
+// Otherwise, it returns the previous dt.  If an offset is provided, the first call to advance will occur on the offset'th step.
 class EveryNStepper : public Stepper
 {
 public:
+  // offset must be smaller than every_n.
   EveryNStepper(Stepper* s, int every_n, int offset = 0) : _stepper(s), _n(every_n), _offset(offset)
   {
   }
@@ -273,7 +274,7 @@ public:
   virtual double advance(const StepperInfo* si)
   {
     Logger l("EveryN");
-    if ((si->step_count + _offset) % _n == 1)
+    if ((si->step_count + (_n - _offset) - 1) % _n == 0)
       return l.val(_stepper->advance(si));
     else
       return l.val(si->prev_dt);
@@ -659,10 +660,16 @@ public:
       return l.val(si->prev_dt);
     if (si->soln_nonlin == nullptr || si->soln_aux == nullptr || si->soln_predicted == nullptr)
       throw "no predicted solution available";
-
+      
+    DBG << "newstyle soln:\n" << *si->soln_nonlin << "\n";
+    DBG << "newstyle pred_soln:\n" << *si->soln_predicted << "\n";
+    
     double error = estimateTimeError(si);
     double infnorm = si->soln_nonlin->linfty_norm();
     double e_max = 1.1 * _e_tol * infnorm;
+    printf("NEWerror=%.10f, e_max=%f, e_tol=%f, infnorm=%f\n", error, e_max, _e_tol, infnorm);
+    printf("NEWdt=%f, prevdt=%f, scaleparam=%f\n", si->prev_dt, si->prev_prev_dt, _scale_param);
+
     if (error > e_max)
       return  l.val(si->prev_dt * 0.5);
     return l.val(si->prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0));
@@ -671,7 +678,7 @@ public:
 private:
   double estimateTimeError(const StepperInfo* si)
   {
-    const NumericVector<Number>& soln = *si->soln_nonlin;
+    NumericVector<Number>& soln = *si->soln_nonlin;
     NumericVector<Number>& predicted = *si->soln_predicted;
 
     std::string scheme = si->time_integrator;
@@ -693,7 +700,7 @@ private:
       return predicted.l2_norm();
     }
 
-    return -1;
+    throw "unsupported time integration scheme";
   }
 
   int _start_adapting;

@@ -314,6 +314,7 @@ protected:
   unsigned int & _l_its;
 
   double _solve_time;
+  StepperInfo _si;
 };
 
 #endif //TRANSIENTEXECUTIONER_H
