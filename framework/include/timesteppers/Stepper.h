@@ -582,8 +582,7 @@ public:
       direc = _direc_init;
       prev_direc = _direc_init;
     }
-    printf("prev_dt=%f, prev_prev_dt=%f, prev_prev_prev_dt=%f\n", si->prev_dt, si->prev_prev_dt, si->prev_prev_prev_dt);
-    printf("ratio=%f, prev_ratio=%f, prev_prev_ratio=%f, direc=%d, prev_direc=%d\n", ratio, prev_ratio, prev_prev_ratio, direc, prev_direc);
+
     if (ratio > prev_ratio && prev_ratio > prev_prev_ratio && direc == prev_direc)
       direc *= -1;
 
