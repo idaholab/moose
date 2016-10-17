@@ -688,7 +688,10 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
         d2phi_local = &(*_second_phi)[i][qp];
 
         if (_need_second)
+        {
           second_u_qp = &_second_u[qp];
+          second_u_qp->add_scaled(*d2phi_local, soln_local);
+        }
 
         if (is_transient)
         {
@@ -703,9 +706,6 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
       _u[qp]     += phi_local * soln_local;
 
       grad_u_qp->add_scaled(*dphi_qp, soln_local);
-
-      if (_need_second)
-        second_u_qp->add_scaled(*d2phi_local, soln_local);
 
       if (is_transient)
       {
@@ -925,7 +925,10 @@ MooseVariable::computeElemValues()
         d2phi_local = &(*_second_phi)[i][qp];
 
         if (_need_second)
+        {
           second_u_qp = &_second_u[qp];
+          second_u_qp->add_scaled(*d2phi_local, soln_local);
+        }
 
         if (is_transient)
         {
@@ -940,9 +943,6 @@ MooseVariable::computeElemValues()
       _u[qp] += phi_local * soln_local;
 
       grad_u_qp->add_scaled(*dphi_qp, soln_local);
-
-      if (_need_second)
-        second_u_qp->add_scaled(*d2phi_local, soln_local);
 
       if (is_transient)
       {

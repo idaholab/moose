@@ -29,8 +29,8 @@ Real
 ReconPhaseVarIC::value(const Point & /*p*/)
 {
   // Return error if current node is NULL
-  if (_current_node == NULL)
-    mooseError("The following node id is reporting a NULL condition: " << _current_node->id());
+  if (_current_node == nullptr)
+    mooseError("_current_node is reporting NULL");
 
   // Make sure the _current_node is in the _node_to_phase_weight_map (return error if not in map)
   std::map<dof_id_type, std::vector<Real> >::const_iterator it = _node_to_phase_weight_map.find(_current_node->id());

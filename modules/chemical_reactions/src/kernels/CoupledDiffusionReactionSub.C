@@ -122,7 +122,7 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
   RealGradient diff3;
   RealGradient diff3_sum;
   Real val_jvar;
-  unsigned int var;
+  unsigned int var = 0;
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (jvar == _vars[i])
     {

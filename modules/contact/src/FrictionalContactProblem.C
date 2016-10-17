@@ -310,7 +310,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
 
   MooseVariable * disp_x_var = &getVariable(0,_disp_x);
   MooseVariable * disp_y_var = &getVariable(0,_disp_y);
-  MooseVariable * disp_z_var = NULL;
+  MooseVariable * disp_z_var = nullptr;
   if (dim == 3)
     disp_z_var = &getVariable(0,_disp_z);
 
@@ -412,13 +412,13 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
 
   MooseVariable * residual_x_var = &getVariable(0,_residual_x);
   MooseVariable * residual_y_var = &getVariable(0,_residual_y);
-  MooseVariable * residual_z_var = NULL;
+  MooseVariable * residual_z_var = nullptr;
   MooseVariable * diag_stiff_x_var = &getVariable(0,_diag_stiff_x);
   MooseVariable * diag_stiff_y_var = &getVariable(0,_diag_stiff_y);
-  MooseVariable * diag_stiff_z_var = NULL;
+  MooseVariable * diag_stiff_z_var = nullptr;
   MooseVariable * inc_slip_x_var = &getVariable(0,_inc_slip_x);
   MooseVariable * inc_slip_y_var = &getVariable(0,_inc_slip_y);
-  MooseVariable * inc_slip_z_var = NULL;
+  MooseVariable * inc_slip_z_var = nullptr;
   if (dim == 3)
   {
     residual_z_var = &getVariable(0,_residual_z);
@@ -666,18 +666,18 @@ FrictionalContactProblem::applySlip(NumericVector<Number> & vec_solution,
 
   MooseVariable * disp_x_var = &getVariable(0,_disp_x);
   MooseVariable * disp_y_var = &getVariable(0,_disp_y);
-  MooseVariable * disp_z_var = NULL;
+  MooseVariable * disp_z_var = nullptr;
   MooseVariable * inc_slip_x_var = &getVariable(0,_inc_slip_x);
   MooseVariable * inc_slip_y_var = &getVariable(0,_inc_slip_y);
-  MooseVariable * inc_slip_z_var = NULL;
+  MooseVariable * inc_slip_z_var = nullptr;
   if (dim == 3)
   {
     disp_z_var = &getVariable(0,_disp_z);
     inc_slip_z_var = &getVariable(0,_inc_slip_z);
   }
 
-  MooseVariable * disp_var;
-  MooseVariable * inc_slip_var;
+  MooseVariable * disp_var = nullptr;
+  MooseVariable * inc_slip_var = nullptr;
 
   for (unsigned int iislip=0; iislip<iterative_slip.size(); ++iislip)
   {
@@ -820,7 +820,7 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string & msg,
         nonlinear_sys.update();
         const NumericVector<Number>*& ghosted_solution = nonlinear_sys.currentSolution();
 
-        calculateSlip(*ghosted_solution, NULL); //Just to calculate slip residual
+        calculateSlip(*ghosted_solution, nullptr); //Just to calculate slip residual
 
         if (_slip_residual > _target_contact_residual &&
             _slip_residual > _target_relative_contact_residual*_refResidContact)
@@ -887,7 +887,7 @@ FrictionalContactProblem::updateIncrementalSlip()
 
   MooseVariable * inc_slip_x_var = &getVariable(0,_inc_slip_x);
   MooseVariable * inc_slip_y_var = &getVariable(0,_inc_slip_y);
-  MooseVariable * inc_slip_z_var = NULL;
+  MooseVariable * inc_slip_z_var = nullptr;
 
   unsigned int dim = getNonlinearSystem().subproblem().mesh().dimension();
   if (dim == 3)

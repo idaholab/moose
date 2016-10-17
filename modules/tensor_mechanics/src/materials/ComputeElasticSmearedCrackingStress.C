@@ -348,7 +348,6 @@ ComputeElasticSmearedCrackingStress::crackingStressRotation()
         ++num_cracks;
     }
 
-    bool new_crack(false);
     bool cracked(false);
     RealVectorValue sigma;
     for (unsigned int i = 0; i < 3; ++i)
@@ -372,7 +371,6 @@ ComputeElasticSmearedCrackingStress::crackingStressRotation()
 
         if ((*_crack_count_old)[_qp](i) == 0)
         {
-          new_crack = true;
           ++num_cracks;
           (*_crack_strain)[_qp](i) = cracking_stress / stiff;
         }
@@ -392,7 +390,6 @@ ComputeElasticSmearedCrackingStress::crackingStressRotation()
       {
         // A new crack
         cracked = true;
-        new_crack = true;
         ++num_cracks;
 
         // Assume Poisson's ratio drops to zero for this direction.  Stiffness is then Young's modulus.

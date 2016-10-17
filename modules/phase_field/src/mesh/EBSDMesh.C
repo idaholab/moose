@@ -134,7 +134,7 @@ EBSDMesh::buildMesh()
   unsigned int uniform_refine = getParam<unsigned int>("uniform_refine");
   _dim = (_geometry.dim == 1 ? "1" : (_geometry.dim == 2 ? "2" : "3"));
 
-  unsigned int nr[3];
+  std::array<unsigned int, 3> nr;
   nr[0] = _geometry.n[0];
   nr[1] = _geometry.n[1];
   nr[2] = _geometry.n[2];
