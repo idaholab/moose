@@ -85,7 +85,7 @@ RandomData::updateGenerators()
    */
   if (_rd_mesh.isDistributedMesh())
   {
-    unsigned int parallel_seed;
+    unsigned int parallel_seed = 0;
     for (processor_id_type proc_id = 0; proc_id < _rd_problem.n_processors(); ++proc_id)
       if (proc_id == _rd_problem.processor_id())
         parallel_seed = _generator.randl(MASTER);
