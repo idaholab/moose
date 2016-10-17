@@ -20,9 +20,14 @@ PorousFlowRelativePermeabilityUnity::PorousFlowRelativePermeabilityUnity(const I
 {
 }
 
-void
-PorousFlowRelativePermeabilityUnity::computeQpProperties()
+Real
+PorousFlowRelativePermeabilityUnity::relativePermeability(Real /*seff*/) const
 {
-  _relative_permeability[_qp] = 1.0;
-  _drelative_permeability_ds[_qp] = 0.0;
+  return 1.0;
+}
+
+Real
+PorousFlowRelativePermeabilityUnity::dRelativePermeability_dS(Real /*seff*/) const
+{
+  return 0.0;
 }

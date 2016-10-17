@@ -24,7 +24,9 @@ public:
   PorousFlowRelativePermeabilityUnity(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual Real relativePermeability(Real saturation) const override;
+
+  virtual Real dRelativePermeability_dS(Real saturation) const override;
 };
 
 #endif //POROUSFLOWRELATIVEPERMEABILITYUNITY_H
