@@ -20,6 +20,7 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "TimeIntegrator.h"
+#include "Stepper.h"
 
 //libMesh includes
 #include "libmesh/nonlinear_solver.h"
@@ -218,5 +219,16 @@ AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
     break;
   }
   return -1;
+}
+
+Stepper *
+AB2PredictorCorrector::buildStepper()
+{
+  Stepper * s = new PredictorCorrectorStepper(_start_adapting, _e_tol, _scaling_parameter);
+  s = new MaxRatioStepper(s, _max_increase);
+  s = new EveryNStepper(s, _steps_between_increase, _start_adapting);
+  s = new StartupStepper(s, getParam<Real>("dt"), _start_adapting);
+  s = new IfConvergedStepper(s, new GrowShrinkStepper(0.5, 1.0));
+  return s;
 }
 

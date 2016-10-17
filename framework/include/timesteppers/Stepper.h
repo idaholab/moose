@@ -38,39 +38,6 @@ public:
   double _dt;
 };
 
-// IterationAdaptiveDT stepper can be approximated something like this:
-//
-//     new MinOf(
-//         new FixedPointStepper(sync_times, time_tol),
-//         new MinOf(
-//             new FixedPointStepper(time_list, time_tol),
-//             new ConstrFuncStepper(
-//                 new DTLimitStepper(
-//                     RetryUnusedStepper(
-//                         AlternatingStepper(
-//                             new PiecewiseStepper(time_list, dt_list),
-//                             new AdaptiveStepper([config...]),
-//                             time_list,
-//                             time_tol
-//                         )
-//                     ),
-//                     dt_min,
-//                     dt_max
-//                 ),
-//                 constr_func,
-//                 max_diff
-//             )
-//         )
-//     );
-
-// Original AB2PredictorCorrector stepper behavior can be achieved by wrapping
-// steppers roughly like so:
-//
-//     new EveryNStepper(
-//         new MaxRatioStepper(new PredictorCorrector(...), max_ratio),
-//         every_n
-//     )
-
 struct StepperInfo {
   // The number of times the simulation has requested a dt.
   // This is equal to one on the first call fo advance(...).
@@ -299,14 +266,14 @@ private:
 class EveryNStepper : public Stepper
 {
 public:
-  EveryNStepper(Stepper* s, int every_n) : _stepper(s), _n(every_n)
+  EveryNStepper(Stepper* s, int every_n, int offset = 0) : _stepper(s), _n(every_n), _offset(offset)
   {
   }
 
   virtual double advance(const StepperInfo* si)
   {
     Logger l("EveryN");
-    if (si->step_count % _n == 1)
+    if ((si->step_count + _offset) % _n == 1)
       return l.val(_stepper->advance(si));
     else
       return l.val(si->prev_dt);
@@ -315,6 +282,7 @@ public:
 private:
   Ptr _stepper;
   int _n;
+  int _offset;
 };
 
 class ReturnPtrStepper : public Stepper
@@ -667,10 +635,10 @@ private:
   Ptr _source_dt;
 };
 
-class PredictorCorrector : public Stepper
+class PredictorCorrectorStepper : public Stepper
 {
 public:
-  PredictorCorrector(int start_adapting, double e_tol, double scaling_param) :
+  PredictorCorrectorStepper(int start_adapting, double e_tol, double scaling_param) :
       _start_adapting(start_adapting),
       _e_tol(e_tol),
       _scale_param(scaling_param)
@@ -678,8 +646,9 @@ public:
 
   virtual double advance(const StepperInfo* si)
   {
+    Logger l("PredictorCorrector");
     if (!si->converged)
-      return si->prev_dt;
+      return l.val(si->prev_dt);
     // original Predictor stepper actually used the Real valued time step
     // instead of step_count which is used here - which doesn't make sense for
     // this check since if t_0 != 0 or dt != 1 would make it so the predictor
@@ -687,23 +656,22 @@ public:
     // this could be changed back like the original, but then, start_adapting
     // needs to be carefully documented.
     if (si->step_count < _start_adapting)
-      return si->prev_dt;
+      return l.val(si->prev_dt);
     if (si->soln_nonlin == nullptr || si->soln_aux == nullptr || si->soln_predicted == nullptr)
       throw "no predicted solution available";
 
     double error = estimateTimeError(si);
     double infnorm = si->soln_nonlin->linfty_norm();
     double e_max = 1.1 * _e_tol * infnorm;
-    // TODO: console handling? ==> _console << "Time Error Estimate: " << _error << std::endl;
-
-    double dt = si->prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0);
-    return dt;
+    if (error > e_max)
+      return  l.val(si->prev_dt * 0.5);
+    return l.val(si->prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0));
   }
 
 private:
   double estimateTimeError(const StepperInfo* si)
   {
-    NumericVector<Number>& soln = *si->soln_nonlin;
+    const NumericVector<Number>& soln = *si->soln_nonlin;
     NumericVector<Number>& predicted = *si->soln_predicted;
 
     std::string scheme = si->time_integrator;

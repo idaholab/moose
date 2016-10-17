@@ -30,6 +30,7 @@
 #include "IterationAdaptiveDT.h"
 #include "FunctionDT.h"
 #include "Function.h"
+#include "Predictor.h"
 
 // libMesh includes
 #include "libmesh/implicit_system.h"
@@ -272,7 +273,10 @@ Transient::execute()
 
   // Start time loop...
   StepperInfo si = { };
-  bool first = true;
+  si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
+  si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
+
+  bool first = true; // needs to not be restartable data
   while (true)
   {
     _steps_taken++;
@@ -295,6 +299,20 @@ Transient::execute()
     // A step_count == 1 condition is not sufficient to account for
     // restart/recover cases where step_count is already something else.
     si.converged = _last_solve_converged || first;
+
+    if (!first)
+    {
+      *si.soln_nonlin = *(_fe_problem.getNonlinearSystem().currentSolution());
+      *si.soln_aux =  *(_fe_problem.getAuxiliarySystem().currentSolution());
+      Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
+      if (p)
+        si.soln_predicted = &(p->solutionPredictor());
+      if (si.soln_nonlin);
+        si.soln_nonlin->close();
+      if (si.soln_aux);
+        si.soln_aux->close();
+    }
+
     if (_stepper)
       _new_dt = _stepper->advance(&si);
 

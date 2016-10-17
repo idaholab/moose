@@ -47,6 +47,8 @@ public:
   virtual void preSolve() override;
   virtual bool converged() override;
 
+  virtual Stepper * buildStepper() override;
+
 protected:
   virtual Real computeDT() override;
   virtual Real computeInitialDT() override;
