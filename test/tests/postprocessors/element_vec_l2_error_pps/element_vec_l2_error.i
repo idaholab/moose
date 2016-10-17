@@ -84,6 +84,7 @@
     type = UserForcingFunction
     variable = v
     function = f_v
+  [../]
 []
 
 [BCs]
