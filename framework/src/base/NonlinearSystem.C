@@ -13,84 +13,42 @@
 /****************************************************************/
 
 #include "NonlinearSystem.h"
-#include "AuxiliarySystem.h"
-#include "Problem.h"
 #include "FEProblem.h"
-#include "MooseVariable.h"
-#include "PetscSupport.h"
-#include "Factory.h"
-#include "ParallelUniqueId.h"
-#include "ThreadedElementLoop.h"
-#include "MaterialData.h"
-#include "ComputeResidualThread.h"
-#include "ComputeJacobianThread.h"
-#include "ComputeFullJacobianThread.h"
-#include "ComputeJacobianBlocksThread.h"
-#include "ComputeDiracThread.h"
-#include "ComputeElemDampingThread.h"
-#include "ComputeNodalKernelsThread.h"
-#include "ComputeNodalKernelBcsThread.h"
-#include "ComputeNodalKernelJacobiansThread.h"
-#include "ComputeNodalKernelBCJacobiansThread.h"
-#include "TimeKernel.h"
+#include "TimeIntegrator.h"
+#include "DisplacedProblem.h"
 #include "BoundaryCondition.h"
-#include "PresetNodalBC.h"
 #include "NodalBC.h"
 #include "IntegratedBC.h"
-#include "DGKernel.h"
 #include "InterfaceKernel.h"
-#include "ElementDamper.h"
-#include "GeneralDamper.h"
-#include "DisplacedProblem.h"
-#include "NearestNodeLocator.h"
+#include "PresetNodalBC.h"
+#include "Predictor.h"
+#include "MooseMesh.h"
 #include "PenetrationLocator.h"
-#include "NodalConstraint.h"
+#include "NearestNodeLocator.h"
 #include "NodeFaceConstraint.h"
 #include "FaceFaceConstraint.h"
+#include "ElementPairLocator.h"
 #include "ElemElemConstraint.h"
+#include "ComputeResidualThread.h"
 #include "ScalarKernel.h"
-#include "Parser.h"
-#include "Split.h"
-#include "FieldSplitPreconditioner.h"
-#include "MooseMesh.h"
-#include "MooseUtils.h"
-#include "MooseApp.h"
+#include "ComputeNodalKernelsThread.h"
+#include "ComputeNodalKernelBcsThread.h"
+#include "KernelBase.h"
+#include "NodalConstraint.h"
 #include "NodalKernel.h"
 #include "DiracKernel.h"
-#include "NodalKernel.h"
-#include "TimeIntegrator.h"
-#include "Predictor.h"
-#include "Assembly.h"
-#include "ElementPairLocator.h"
-#include "ODETimeKernel.h"
+#include "ElementDamper.h"
+#include "GeneralDamper.h"
+#include "ComputeJacobianThread.h"
+#include "ComputeNodalKernelJacobiansThread.h"
+#include "ComputeNodalKernelBCJacobiansThread.h"
+#include "ComputeFullJacobianThread.h"
 #include "AllLocalDofIndicesThread.h"
+#include "ComputeJacobianBlocksThread.h"
+#include "ComputeElemDampingThread.h"
+#include "ComputeDiracThread.h"
 
-// libMesh
-#include "libmesh/nonlinear_solver.h"
-#include "libmesh/quadrature_gauss.h"
-#include "libmesh/dense_vector.h"
-#include "libmesh/boundary_info.h"
 #include "libmesh/petsc_matrix.h"
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_nonlinear_solver.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/mesh.h"
-#include "libmesh/dense_subvector.h"
-#include "libmesh/dense_submatrix.h"
-#include "libmesh/dof_map.h"
-#include "libmesh/sparse_matrix.h"
-#include "libmesh/petsc_matrix.h"
-
-// PETSc
-#ifdef LIBMESH_HAVE_PETSC
-#include "petscsnes.h"
-#if !PETSC_VERSION_LESS_THAN(3,3,0)
-#include <PetscDMMoose.h>
-EXTERN_C_BEGIN
-extern PetscErrorCode DMCreate_Moose(DM);
-EXTERN_C_END
-#endif
-#endif
 
 
 namespace Moose {
@@ -142,51 +100,17 @@ namespace Moose {
 } // namespace Moose
 
 
+
 NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
     SystemTempl<TransientNonlinearImplicitSystem>(fe_problem, name, Moose::VAR_NONLINEAR),
-    ConsoleStreamInterface(fe_problem.getMooseApp()),
-    _fe_problem(fe_problem),
-    _last_rnorm(0.),
-    _last_nl_rnorm(0.),
-    _l_abs_step_tol(1e-10),
-    _initial_residual_before_preset_bcs(0.),
-    _initial_residual_after_preset_bcs(0.),
-    _current_nl_its(0),
-    _compute_initial_residual_before_preset_bcs(true),
-    _current_solution(NULL),
+    AssemblySystem(fe_problem, _factory, name),
     _residual_ghosted(addVector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _Re_time(addVector("Re_time", false, GHOSTED)),
     _Re_non_time(addVector("Re_non_time", false, GHOSTED)),
-    _scalar_kernels(/*threaded=*/false),
-    _nodal_bcs(/*threaded=*/false),
-    _preset_nodal_bcs(/*threaded=*/false),
-    _splits(/*threaded=*/false),
-    _increment_vec(NULL),
-    _sln_diff(addVector("sln_diff", false, PARALLEL)),
-    _pc_side(Moose::PCS_RIGHT),
-    _use_finite_differenced_preconditioner(false),
-    _have_decomposition(false),
-    _use_field_split_preconditioner(false),
-    _add_implicit_geometric_coupling_entries_to_jacobian(false),
-    _assemble_constraints_separately(false),
-    _need_serialized_solution(false),
-    _need_residual_copy(false),
-    _need_residual_ghosted(false),
-    _debugging_residuals(false),
-    _doing_dg(false),
-    _n_iters(0),
-    _n_linear_iters(0),
-    _n_residual_evaluations(0),
-    _final_residual(0.),
-    _computing_initial_residual(false),
-    _print_all_var_norms(false),
-    _has_save_in(false),
-    _has_diag_save_in(false),
-    _has_nodalbc_save_in(false),
-    _has_nodalbc_diag_save_in(false)
+    _sln_diff(addVector("sln_diff", false, PARALLEL))
 {
   _sys.nonlinear_solver->residual      = Moose::compute_residual;
   _sys.nonlinear_solver->jacobian      = Moose::compute_jacobian;
@@ -194,7 +118,8 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   _sys.nonlinear_solver->nullspace     = Moose::compute_nullspace;
   _sys.nonlinear_solver->nearnullspace = Moose::compute_nearnullspace;
 
-#ifdef LIBMESH_HAVE_PETSC
+
+  #ifdef LIBMESH_HAVE_PETSC
   PetscNonlinearSolver<Real> * petsc_solver = static_cast<PetscNonlinearSolver<Real> *>(_sys.nonlinear_solver.get());
   if (petsc_solver)
   {
@@ -202,7 +127,7 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     petsc_solver->set_jacobian_zero_out(false);
     petsc_solver->use_default_monitor(false);
   }
-#endif
+  #endif
 }
 
 NonlinearSystem::~NonlinearSystem()
@@ -228,6 +153,8 @@ NonlinearSystem::init()
 
   Moose::setup_perf_log.pop("NonlinerSystem::init()", "Setup");
 }
+
+
 
 void
 NonlinearSystem::solve()
@@ -283,6 +210,7 @@ NonlinearSystem::solve()
 #endif
 }
 
+
 void
 NonlinearSystem::restoreSolutions()
 {
@@ -291,6 +219,153 @@ NonlinearSystem::restoreSolutions()
   // and update _current_solution
   _current_solution = _sys.current_local_solution.get();
 }
+
+
+void
+NonlinearSystem::setSolutionUDot(const NumericVector<Number> & udot)
+{
+  _u_dot = udot;
+}
+
+
+NumericVector<Number> &
+NonlinearSystem::solutionUDot()
+{
+  return _u_dot;
+}
+
+
+
+NumericVector<Number> &
+NonlinearSystem::residualVector(Moose::KernelType type)
+{
+  switch (type)
+  {
+  case Moose::KT_TIME: return _Re_time;
+  case Moose::KT_NONTIME: return _Re_non_time;
+  case Moose::KT_ALL: return _Re_non_time;
+
+  default: mooseError("Trying to get residual vector that is not available");
+  }
+}
+
+
+Real
+NonlinearSystem::relativeSolutionDifferenceNorm()
+{
+  const NumericVector<Number> & current_solution  = *currentSolution();
+  const NumericVector<Number> & old_solution = solutionOld();
+
+  _sln_diff = current_solution;
+  _sln_diff -= old_solution;
+
+  return (_sln_diff.l2_norm() / current_solution.l2_norm());
+}
+
+
+NumericVector<Number> &
+NonlinearSystem::serializedSolution()
+{
+  if (!_serialized_solution.initialized())
+    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+
+  _need_serialized_solution = true;
+  return _serialized_solution;
+}
+
+
+
+NumericVector<Number> &
+NonlinearSystem::residualCopy()
+{
+  _need_residual_copy = true;
+  return _residual_copy;
+}
+
+
+
+NumericVector<Number> &
+NonlinearSystem::residualGhosted()
+{
+  _need_residual_ghosted = true;
+  return _residual_ghosted;
+}
+
+
+
+
+void
+NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
+                                 std::vector<dof_id_type> & n_nz,
+                                 std::vector<dof_id_type> & n_oz)
+{
+
+  if (_add_implicit_geometric_coupling_entries_to_jacobian)
+  {
+    _fe_problem.updateGeomSearch();
+
+    std::map<dof_id_type, std::vector<dof_id_type> > graph;
+
+    findImplicitGeometricCouplingEntries(_fe_problem.geomSearchData(), graph);
+
+    if (_fe_problem.getDisplacedProblem())
+      findImplicitGeometricCouplingEntries(_fe_problem.getDisplacedProblem()->geomSearchData(), graph);
+
+    const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
+    const dof_id_type end_dof_on_proc   = dofMap().end_dof(processor_id());
+
+    // If we're on the last processor then we have all of the scalar dofs
+    const dof_id_type n_scalar_dofs_on_proc = processor_id() == n_processors()-1 ? dofMap().n_SCALAR_dofs() : 0;
+
+    // If we're _not_ on the last processor then all of the scalar dofs are off processor (n_oz)
+    const dof_id_type n_scalar_dofs_not_on_proc = processor_id() == n_processors()-1 ? 0 : dofMap().n_SCALAR_dofs();
+
+    // The total number of dofs on and off processor (including scalar dofs)
+    const dof_id_type n_dofs_on_proc = dofMap().n_local_dofs() + n_scalar_dofs_on_proc;
+    const dof_id_type n_dofs_not_on_proc = (dofMap().n_dofs() - dofMap().n_local_dofs()) + n_scalar_dofs_not_on_proc;
+
+    unsigned int max_nz = sparsity.size();
+
+    for (const auto & git : graph)
+    {
+      dof_id_type dof = git.first;
+      dof_id_type local_dof = dof - first_dof_on_proc;
+
+      if (dof < first_dof_on_proc || dof >= end_dof_on_proc)
+        continue;
+
+      const std::vector<dof_id_type> & row = git.second;
+
+      SparsityPattern::Row & sparsity_row = sparsity[local_dof];
+
+      unsigned int original_row_length = sparsity_row.size();
+
+      sparsity_row.insert(sparsity_row.end(), row.begin(), row.end());
+
+      SparsityPattern::sort_row(sparsity_row.begin(), sparsity_row.begin()+original_row_length, sparsity_row.end());
+
+      // Fix up nonzero arrays
+      for (const auto & coupled_dof : row)
+      {
+        if (coupled_dof < first_dof_on_proc || coupled_dof >= end_dof_on_proc)
+        {
+          if (n_oz[local_dof] < max_nz)
+            n_oz[local_dof]++;
+        }
+        else
+        {
+          if (n_nz[local_dof] < max_nz)
+            n_nz[local_dof]++;
+        }
+      }
+
+      // Safety
+      n_nz[local_dof] = std::min(n_nz[local_dof], n_dofs_on_proc);
+      n_oz[local_dof] = std::min(n_oz[local_dof], n_dofs_not_on_proc);
+    }
+  }
+}
+
 
 
 void
@@ -317,47 +392,6 @@ NonlinearSystem::stopSolve()
   // these...
   residualVector(Moose::KT_TIME).close();
   residualVector(Moose::KT_NONTIME).close();
-}
-
-
-void
-NonlinearSystem::initialSetup()
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _kernels.initialSetup(tid);
-    _nodal_kernels.initialSetup(tid);
-    _dirac_kernels.initialSetup(tid);
-    if (_doing_dg)
-      _dg_kernels.initialSetup(tid);
-    _interface_kernels.initialSetup(tid);
-    _element_dampers.initialSetup(tid);
-    _integrated_bcs.initialSetup(tid);
-  }
-  _scalar_kernels.initialSetup();
-  _constraints.initialSetup();
-  _general_dampers.initialSetup();
-  _nodal_bcs.initialSetup();
-}
-
-void
-NonlinearSystem::timestepSetup()
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    _kernels.timestepSetup(tid);
-    _nodal_kernels.timestepSetup(tid);
-    _dirac_kernels.timestepSetup(tid);
-    if (_doing_dg)
-      _dg_kernels.timestepSetup(tid);
-    _interface_kernels.timestepSetup(tid);
-    _element_dampers.timestepSetup(tid);
-    _integrated_bcs.timestepSetup(tid);
-  }
-  _scalar_kernels.initialSetup();
-  _constraints.timestepSetup();
-  _general_dampers.timestepSetup();
-  _nodal_bcs.timestepSetup();
 }
 
 
@@ -459,33 +493,6 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 #endif
 }
 
-void
-NonlinearSystem::setDecomposition(const std::vector<std::string>& splits)
-{
-  /// Although a single top-level split is allowed in Problem, treat it as a list of splits for conformity with the Split input syntax.
- if (splits.size() && splits.size() != 1)
-  {
-    std::ostringstream err;
-    err << "Only a single top-level split is allowed in a Problem's decomposition.";
-    mooseError(err.str());
-  }
-  if (splits.size())
-  {
-    _decomposition_split = splits[0];
-    _have_decomposition = true;
-  }  else {
-    _have_decomposition = false;
-  }
-}
-
-
-void
-NonlinearSystem::setupFieldDecomposition()
-{
-  if (!_have_decomposition) return;
-  MooseSharedPointer<Split> top_split = getSplit(_decomposition_split);
-  top_split->setup();
-}
 
 bool
 NonlinearSystem::converged()
@@ -496,6 +503,7 @@ NonlinearSystem::converged()
   return _sys.nonlinear_solver->converged;
 }
 
+
 void
 NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
@@ -505,60 +513,8 @@ NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string &
   _time_integrator = ti;
 }
 
-void
-NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // Create the kernel object via the factory and add to warehouse
-    MooseSharedPointer<KernelBase> kernel = _factory.create<KernelBase>(kernel_name, name, parameters, tid);
-    _kernels.addObject(kernel, tid);
 
-    // Store time/non-time kernels separately
-    MooseSharedPointer<TimeKernel> t_kernel = MooseSharedNamespace::dynamic_pointer_cast<TimeKernel>(kernel);
-    if (t_kernel)
-      _time_kernels.addObject(kernel, tid);
-    else
-      _non_time_kernels.addObject(kernel, tid);
-  }
 
-  if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
-    _has_save_in = true;
-  if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
-    _has_diag_save_in = true;
-}
-
-void
-NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // Create the kernel object via the factory and add to the warehouse
-    MooseSharedPointer<NodalKernel> kernel = _factory.create<NodalKernel>(kernel_name, name, parameters, tid);
-    _nodal_kernels.addObject(kernel, tid);
-  }
-
-  if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
-    _has_save_in = true;
-  if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
-    _has_diag_save_in = true;
-}
-
-void
-NonlinearSystem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
-{
-  MooseSharedPointer<ScalarKernel> kernel =
-    _factory.create<ScalarKernel>(kernel_name, name, parameters);
-  _scalar_kernels.addObject(kernel);
-
-  // Store time/non-time ScalarKernels separately
-  ODETimeKernel * t_kernel = dynamic_cast<ODETimeKernel *>(kernel.get());
-
-  if (t_kernel)
-    _time_scalar_kernels.addObject(kernel);
-  else
-    _non_time_scalar_kernels.addObject(kernel);
-}
 
 void
 NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
@@ -567,7 +523,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
   THREAD_ID tid = 0;
 
   // Create the object
-  MooseSharedPointer<BoundaryCondition> bc = _factory.create<BoundaryCondition>(bc_name, name, parameters, tid);
+  MooseSharedPointer<BoundaryCondition> bc = _factory_assbly.create<BoundaryCondition>(bc_name, name, parameters, tid);
 
   // Active BoundaryIDs for the object
   const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
@@ -608,7 +564,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
     for (tid = 1; tid < libMesh::n_threads(); tid++)
     {
       // Create the object
-      bc = _factory.create<BoundaryCondition>(bc_name, name, parameters, tid);
+      bc = _factory_assbly.create<BoundaryCondition>(bc_name, name, parameters, tid);
 
       // Active BoundaryIDs for the object
       const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
@@ -625,37 +581,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
     mooseError("Unknown BoundaryCondition type for object named " << bc->name());
 }
 
-void
-NonlinearSystem::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
-{
-  MooseSharedPointer<Constraint> constraint = _factory.create<Constraint>(c_name, name, parameters);
-  _constraints.addObject(constraint);
 
-  if (constraint && constraint->addCouplingEntriesToJacobian())
-    addImplicitGeometricCouplingEntriesToJacobian(true);
-}
-
-void
-NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    MooseSharedPointer<DiracKernel> kernel = _factory.create<DiracKernel>(kernel_name, name, parameters, tid);
-    _dirac_kernels.addObject(kernel, tid);
-  }
-}
-
-void
-NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    MooseSharedPointer<DGKernel> dg_kernel = _factory.create<DGKernel>(dg_kernel_name, name, parameters, tid);
-    _dg_kernels.addObject(dg_kernel, tid);
-  }
-
-  _doing_dg = true;
-}
 
 void
 NonlinearSystem::addInterfaceKernel(std::string interface_kernel_name, const std::string & name, InputParameters parameters)
@@ -674,51 +600,8 @@ NonlinearSystem::addInterfaceKernel(std::string interface_kernel_name, const std
   _doing_dg = true;
 }
 
-void
-NonlinearSystem::addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters)
-{
-  for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
-  {
-    MooseSharedPointer<Damper> damper = _factory.create<Damper>(damper_name, name, parameters, tid);
 
-    // Attempt to cast to the damper types
-    MooseSharedPointer<ElementDamper> ed = MooseSharedNamespace::dynamic_pointer_cast<ElementDamper>(damper);
-    MooseSharedPointer<GeneralDamper> gd = MooseSharedNamespace::dynamic_pointer_cast<GeneralDamper>(damper);
 
-    if (gd)
-    {
-      _general_dampers.addObject(gd);
-      break; // not threaded
-    }
-    else if (ed)
-      _element_dampers.addObject(ed,tid);
-    else
-      mooseError("Invalid damper type");
-  }
-}
-
-void
-NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
-{
-  MooseSharedPointer<Split> split = _factory.create<Split>(split_name, name, parameters);
-  _splits.addObject(split);
-}
-
-MooseSharedPointer<Split>
-NonlinearSystem::getSplit(const std::string & name)
-{
-  return _splits.getActiveObject(name);
-}
-
-void
-NonlinearSystem::zeroVectorForResidual(const std::string & vector_name)
-{
-  for (unsigned int i = 0; i < _vecs_to_zero_for_residual.size(); ++i)
-    if (vector_name == _vecs_to_zero_for_residual[i])
-      return;
-
-  _vecs_to_zero_for_residual.push_back(vector_name);
-}
 
 void
 NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
@@ -776,13 +659,6 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 }
 
 
-void
-NonlinearSystem::onTimestepBegin()
-{
-  _time_integrator->preSolve();
-  if (_predictor.get())
-    _predictor->timestepSetup();
-}
 
 void
 NonlinearSystem::setInitialSolution()
@@ -795,7 +671,7 @@ NonlinearSystem::setInitialSolution()
   }
 
   // do nodal BC
-  ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+  ConstBndNodeRange & bnd_nodes = *_mesh_assbly.getBoundaryNodeRange();
   for (const auto & bnode : bnd_nodes)
   {
     BoundaryID boundary_id = bnode->_bnd_id;
@@ -825,94 +701,8 @@ NonlinearSystem::setInitialSolution()
     setConstraintSlaveValues(initial_solution, true);
 }
 
-void NonlinearSystem::setPredictor(MooseSharedPointer<Predictor> predictor)
-{
-  _predictor = predictor;
-}
 
-void
-NonlinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
-{
-  _kernels.subdomainSetup(subdomain, tid);
-  _nodal_kernels.subdomainSetup(subdomain, tid);
-  _element_dampers.subdomainSetup(subdomain, tid);
-}
 
-NumericVector<Number> &
-NonlinearSystem::solutionUDot()
-{
-  return _u_dot;
-}
-
-NumericVector<Number> &
-NonlinearSystem::residualVector(Moose::KernelType type)
-{
-  switch (type)
-  {
-  case Moose::KT_TIME: return _Re_time;
-  case Moose::KT_NONTIME: return _Re_non_time;
-  case Moose::KT_ALL: return _Re_non_time;
-
-  default: mooseError("Trying to get residual vector that is not available");
-  }
-}
-
-void
-NonlinearSystem::computeTimeDerivatives()
-{
-  _time_integrator->preStep();
-  _time_integrator->computeTimeDerivatives();
-}
-
-void
-NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residual)
-{
-  THREAD_ID tid = 0; // constraints are going to be done single-threaded
-  residual.close();
-  if (_constraints.hasActiveNodalConstraints())
-  {
-    const std::vector<MooseSharedPointer<NodalConstraint> > & ncs = _constraints.getActiveNodalConstraints();
-    for (const auto & nc : ncs)
-    {
-      std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
-      std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
-
-      if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
-      {
-        _fe_problem.reinitNodes(master_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
-        nc->computeResidual(residual);
-      }
-    }
-    _fe_problem.addCachedResidualDirectly(residual, tid);
-    residual.close();
-  }
-}
-
-void
-NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
-{
-  THREAD_ID tid = 0;    // constraints are going to be done single-threaded
-  jacobian.close();
-  if (_constraints.hasActiveNodalConstraints())
-  {
-    const std::vector<MooseSharedPointer<NodalConstraint> > & ncs = _constraints.getActiveNodalConstraints();
-    for (const auto & nc : ncs)
-    {
-      std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
-      std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
-
-      if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
-      {
-        _fe_problem.reinitNodes(master_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
-        nc->computeJacobian(jacobian);
-      }
-    }
-    _fe_problem.addCachedJacobian(jacobian, tid);
-    jacobian.close();
-  }
-}
 
 void
 NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
@@ -947,7 +737,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
-        Node & slave_node = _mesh.nodeRef(slave_node_num);
+        Node & slave_node = _mesh_assbly.nodeRef(slave_node_num);
 
         if (slave_node.processor_id() == processor_id())
         {
@@ -991,6 +781,9 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
   }
 }
 
+
+
+
 void
 NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool displaced)
 {
@@ -1033,7 +826,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
-        Node & slave_node = _mesh.nodeRef(slave_node_num);
+        Node & slave_node = _mesh_assbly.nodeRef(slave_node_num);
 
         if (slave_node.processor_id() == processor_id())
         {
@@ -1126,7 +919,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
   THREAD_ID tid = 0;
   // go over mortar interfaces
-  auto & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh_assbly.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
     if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
@@ -1245,7 +1038,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 
   // residual contributions from the domain
   PARALLEL_TRY {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ConstElemRange & elem_range = *_mesh_assbly.getActiveLocalElementRange();
     ComputeResidualThread cr(_fe_problem, type);
 
     Threads::parallel_reduce(elem_range, cr);
@@ -1299,7 +1092,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     {
       ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels);
 
-      ConstNodeRange & range = *_mesh.getLocalNodeRange();
+      ConstNodeRange & range = *_mesh_assbly.getLocalNodeRange();
 
       _fe_problem.reinitNode(*range.begin(), 0);
 
@@ -1319,7 +1112,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
     {
       ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels);
 
-      ConstBndNodeRange & bnd_node_range = *_mesh.getBoundaryNodeRange();
+      ConstBndNodeRange & bnd_node_range = *_mesh_assbly.getBoundaryNodeRange();
 
       Threads::parallel_reduce(bnd_node_range, cnk);
 
@@ -1373,6 +1166,8 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
   }
 }
 
+
+
 void
 NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 {
@@ -1382,7 +1177,7 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 
   PARALLEL_TRY {
     // last thing to do are nodal BCs
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    ConstBndNodeRange & bnd_nodes = *_mesh_assbly.getBoundaryNodeRange();
     for (const auto & bnode : bnd_nodes)
     {
       BoundaryID boundary_id = bnode->_bnd_id;
@@ -1410,10 +1205,12 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
   residualVector(Moose::KT_NONTIME).close();
 }
 
+
+
 void
 NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
 {
-  const Node & node = _mesh.nodeRef(node_id);
+  const Node & node = _mesh_assbly.nodeRef(node_id);
   unsigned int s = number();
   if (node.has_dofs(s))
   {
@@ -1423,12 +1220,15 @@ NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & do
   }
 }
 
+
+
+
 void
 NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<dof_id_type, std::vector<dof_id_type> > & graph)
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh_assbly.nodeToElemMap();
   for (const auto & it : nearest_node_locators)
   {
     std::vector<dof_id_type> & slave_nodes = it.second->_slave_nodes;
@@ -1447,7 +1247,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
         for (const auto & cur_elem : elems)
         {
           std::vector<dof_id_type> dof_indices;
-          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+          dofMap().dof_indices(_mesh_assbly.elemPtr(cur_elem), dof_indices);
 
           for (const auto & dof : dof_indices)
             unique_slave_indices.insert(dof);
@@ -1466,7 +1266,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
         for (const auto & cur_elem : master_node_elems)
         {
           std::vector<dof_id_type> dof_indices;
-          dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
+          dofMap().dof_indices(_mesh_assbly.elemPtr(cur_elem), dof_indices);
 
           for (const auto & dof : dof_indices)
             unique_master_indices.insert(dof);
@@ -1515,7 +1315,6 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
 }
 
 
-
 void
 NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian, GeometricSearchData & geom_search_data)
 {
@@ -1532,6 +1331,8 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
       jacobian.add(dof, coupled_dof, 0);
   }
 }
+
+
 
 void
 NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
@@ -1578,7 +1379,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
       for (const auto & slave_node_num : slave_nodes)
       {
-        Node & slave_node = _mesh.nodeRef(slave_node_num);
+        Node & slave_node = _mesh_assbly.nodeRef(slave_node_num);
 
         if (slave_node.processor_id() == processor_id())
         {
@@ -1736,7 +1537,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 
   THREAD_ID tid = 0;
   // go over mortar interfaces
-  auto & ifaces = _mesh.getMortarInterfaces();
+  auto & ifaces = _mesh_assbly.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
     if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
@@ -1827,24 +1628,6 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
   }
 }
 
-void
-NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
-{
-  // Compute the diagonal block for scalar variables
-  if (_scalar_kernels.hasActiveObjects())
-  {
-    const std::vector<MooseSharedPointer<ScalarKernel> > & scalars = _scalar_kernels.getActiveObjects();
-
-    _fe_problem.reinitScalars(/*tid=*/0);
-    for (const auto & kernel : scalars)
-    {
-      kernel->reinit();
-      kernel->computeJacobian();
-      _fe_problem.addJacobianOffDiagScalar(jacobian, kernel->variable().number());
-    }
-    _fe_problem.addJacobianScalar(jacobian);
-  }
-}
 
 void
 NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
@@ -1867,7 +1650,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
   if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-    MatSetOption(static_cast<PetscMatrix<Number> &>(*sys().matrix).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 #endif
 
 #endif
@@ -1894,7 +1677,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     _fe_problem.reinitScalars(tid);
 
   PARALLEL_TRY {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ConstElemRange & elem_range = *_mesh_assbly.getActiveLocalElementRange();
     switch (_fe_problem.coupling())
     {
     case Moose::COUPLING_DIAG:
@@ -1910,7 +1693,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         if (_nodal_kernels.hasActiveBlockObjects())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
-          ConstNodeRange & range = *_mesh.getLocalNodeRange();
+          ConstNodeRange & range = *_mesh_assbly.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
           unsigned int n_threads = libMesh::n_threads();
@@ -1922,7 +1705,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
-          ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
+          ConstBndNodeRange & bnd_range = *_mesh_assbly.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
           unsigned int n_threads = libMesh::n_threads();
@@ -1946,7 +1729,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         if (_nodal_kernels.hasActiveBlockObjects())
         {
           ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
-          ConstNodeRange & range = *_mesh.getLocalNodeRange();
+          ConstNodeRange & range = *_mesh_assbly.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
           unsigned int n_threads = libMesh::n_threads();
@@ -1958,7 +1741,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
           ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
-          ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
+          ConstBndNodeRange & bnd_range = *_mesh_assbly.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
 
@@ -2014,7 +1797,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     // Cache the information about which BCs are coupled to which
     // variables, so we don't have to figure it out for each node.
     std::map<std::string, std::set<unsigned int> > bc_involved_vars;
-    const std::set<BoundaryID> & all_boundary_ids = _mesh.getBoundaryIDs();
+    const std::set<BoundaryID> & all_boundary_ids = _mesh_assbly.getBoundaryIDs();
     for (const auto & bid : all_boundary_ids)
     {
       // Get reference to all the NodalBCs for this ID.  This is only
@@ -2045,7 +1828,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries = _fe_problem.couplingEntries(/*_tid=*/0);
 
     // Compute Jacobians for NodalBCs
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    ConstBndNodeRange & bnd_nodes = *_mesh_assbly.getBoundaryNodeRange();
     for (const auto & bnode : bnd_nodes)
     {
       BoundaryID boundary_id = bnode->_bnd_id;
@@ -2096,15 +1879,17 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     _fe_problem.getAuxiliarySystem().update();
 }
 
+
 void
 NonlinearSystem::setVariableGlobalDoFs(const std::string & var_name)
 {
   AllLocalDofIndicesThread aldit(_sys.system(), { var_name });
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+  ConstElemRange & elem_range = *_mesh_assbly.getActiveLocalElementRange();
   Threads::parallel_reduce(elem_range, aldit);
   _communicator.set_union(aldit._all_dof_indices);
   _var_all_dof_indices.assign(aldit._all_dof_indices.begin(), aldit._all_dof_indices.end());
 }
+
 
 void
 NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
@@ -2128,6 +1913,8 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 
   Moose::perf_log.pop("compute_jacobian()", "Execution");
 }
+
+
 
 void
 NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
@@ -2170,7 +1957,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
     _fe_problem.reinitScalars(tid);
 
   PARALLEL_TRY {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ConstElemRange & elem_range = *_mesh_assbly.getActiveLocalElementRange();
     ComputeJacobianBlocksThread cjb(_fe_problem, blocks);
     Threads::parallel_reduce(elem_range, cjb);
   }
@@ -2191,7 +1978,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
     //Dirichlet BCs
     std::vector<numeric_index_type> zero_rows;
     PARALLEL_TRY {
-      ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+      ConstBndNodeRange & bnd_nodes = *_mesh_assbly.getBoundaryNodeRange();
       for (const auto & bnode : bnd_nodes)
       {
         BoundaryID boundary_id = bnode->_bnd_id;
@@ -2234,25 +2021,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   Moose::perf_log.pop("compute_jacobian_block()", "Execution");
 }
 
-void
-NonlinearSystem::updateActive(THREAD_ID tid)
-{
-  _element_dampers.updateActive(tid);
-  _integrated_bcs.updateActive(tid);
-  _dg_kernels.updateActive(tid);
-  _interface_kernels.updateActive(tid);
-  _dirac_kernels.updateActive(tid);
-  _kernels.updateActive(tid);
-  _nodal_kernels.updateActive(tid);
-  if (tid == 0)
-  {
-    _general_dampers.updateActive();
-    _nodal_bcs.updateActive();
-    _preset_nodal_bcs.updateActive();
-    _constraints.updateActive();
-    _scalar_kernels.updateActive();
-  }
-}
+
 
 Real
 NonlinearSystem::computeDamping(const NumericVector<Number> & solution,
@@ -2267,7 +2036,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number> & solution,
   {
     *_increment_vec = update;
     ComputeElemDampingThread cid(_fe_problem);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
+    Threads::parallel_reduce(*_mesh_assbly.getActiveLocalElementRange(), cid);
     damping = cid.damping();
   }
 
@@ -2288,6 +2057,8 @@ NonlinearSystem::computeDamping(const NumericVector<Number> & solution,
 
   return damping;
 }
+
+
 
 void
 NonlinearSystem::computeDiracContributions(SparseMatrix<Number> * jacobian)
@@ -2331,91 +2102,6 @@ NonlinearSystem::computeDiracContributions(SparseMatrix<Number> * jacobian)
   Moose::perf_log.pop("computeDiracContributions()", "Execution");
 }
 
-NumericVector<Number> &
-NonlinearSystem::residualCopy()
-{
-  _need_residual_copy = true;
-  return _residual_copy;
-}
-
-NumericVector<Number> &
-NonlinearSystem::residualGhosted()
-{
-  _need_residual_ghosted = true;
-  return _residual_ghosted;
-}
-
-void
-NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
-                                 std::vector<dof_id_type> & n_nz,
-                                 std::vector<dof_id_type> & n_oz)
-{
-
-  if (_add_implicit_geometric_coupling_entries_to_jacobian)
-  {
-    _fe_problem.updateGeomSearch();
-
-    std::map<dof_id_type, std::vector<dof_id_type> > graph;
-
-    findImplicitGeometricCouplingEntries(_fe_problem.geomSearchData(), graph);
-
-    if (_fe_problem.getDisplacedProblem())
-      findImplicitGeometricCouplingEntries(_fe_problem.getDisplacedProblem()->geomSearchData(), graph);
-
-    const dof_id_type first_dof_on_proc = dofMap().first_dof(processor_id());
-    const dof_id_type end_dof_on_proc   = dofMap().end_dof(processor_id());
-
-    // If we're on the last processor then we have all of the scalar dofs
-    const dof_id_type n_scalar_dofs_on_proc = processor_id() == n_processors()-1 ? dofMap().n_SCALAR_dofs() : 0;
-
-    // If we're _not_ on the last processor then all of the scalar dofs are off processor (n_oz)
-    const dof_id_type n_scalar_dofs_not_on_proc = processor_id() == n_processors()-1 ? 0 : dofMap().n_SCALAR_dofs();
-
-    // The total number of dofs on and off processor (including scalar dofs)
-    const dof_id_type n_dofs_on_proc = dofMap().n_local_dofs() + n_scalar_dofs_on_proc;
-    const dof_id_type n_dofs_not_on_proc = (dofMap().n_dofs() - dofMap().n_local_dofs()) + n_scalar_dofs_not_on_proc;
-
-    unsigned int max_nz = sparsity.size();
-
-    for (const auto & git : graph)
-    {
-      dof_id_type dof = git.first;
-      dof_id_type local_dof = dof - first_dof_on_proc;
-
-      if (dof < first_dof_on_proc || dof >= end_dof_on_proc)
-        continue;
-
-      const std::vector<dof_id_type> & row = git.second;
-
-      SparsityPattern::Row & sparsity_row = sparsity[local_dof];
-
-      unsigned int original_row_length = sparsity_row.size();
-
-      sparsity_row.insert(sparsity_row.end(), row.begin(), row.end());
-
-      SparsityPattern::sort_row(sparsity_row.begin(), sparsity_row.begin()+original_row_length, sparsity_row.end());
-
-      // Fix up nonzero arrays
-      for (const auto & coupled_dof : row)
-      {
-        if (coupled_dof < first_dof_on_proc || coupled_dof >= end_dof_on_proc)
-        {
-          if (n_oz[local_dof] < max_nz)
-            n_oz[local_dof]++;
-        }
-        else
-        {
-          if (n_nz[local_dof] < max_nz)
-            n_nz[local_dof]++;
-        }
-      }
-
-      // Safety
-      n_nz[local_dof] = std::min(n_nz[local_dof], n_dofs_on_proc);
-      n_oz[local_dof] = std::min(n_oz[local_dof], n_dofs_not_on_proc);
-    }
-  }
-}
 
 void
 NonlinearSystem::serializeSolution()
@@ -2430,7 +2116,9 @@ NonlinearSystem::serializeSolution()
 
     _current_solution->localize(_serialized_solution);
   }
- }
+}
+
+
 
 void
 NonlinearSystem::setSolution(const NumericVector<Number> & soln)
@@ -2441,30 +2129,6 @@ NonlinearSystem::setSolution(const NumericVector<Number> & soln)
     serializeSolution();
 }
 
-void
-NonlinearSystem::setSolutionUDot(const NumericVector<Number> & udot)
-{
-  _u_dot = udot;
-}
-
-NumericVector<Number> &
-NonlinearSystem::serializedSolution()
-{
-  if (!_serialized_solution.initialized())
-    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
-
-  _need_serialized_solution = true;
-  return _serialized_solution;
-}
-
-void
-NonlinearSystem::setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc)
-{
-  if (_preconditioner.get() != NULL)
-    mooseError("More than one active Preconditioner detected");
-
-  _preconditioner = pc;
-}
 
 void
 NonlinearSystem::setupDampers()
@@ -2472,19 +2136,6 @@ NonlinearSystem::setupDampers()
   _increment_vec = &_sys.add_vector("u_increment", true, GHOSTED);
 }
 
-void
-NonlinearSystem::reinitIncrementForDampers(THREAD_ID tid)
-{
-  // Find the variables that are being operated on by active element dampers
-  std::set<MooseVariable *> damped_vars;
-
-  const std::vector<MooseSharedPointer<ElementDamper> > & edampers = _element_dampers.getActiveObjects(tid);
-  for (const auto & damper : edampers)
-    damped_vars.insert(damper->getVariable());
-
-  for (const auto & var : damped_vars)
-    var->computeIncrement(*_increment_vec);
-}
 
 void
 NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const
@@ -2532,53 +2183,4 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
     mooseError("Each variable must be referenced by at least one active Kernel.\nThe following variable(s) lack an active kernel: "
                + missing_kernel_vars.str());
   }
-}
-
-bool
-NonlinearSystem::containsTimeKernel()
-{
-  return _time_kernels.hasActiveObjects();
-}
-
-void
-NonlinearSystem::setPCSide(MooseEnum pcs)
-{
-  if (pcs == "left")
-    _pc_side = Moose::PCS_LEFT;
-  else if (pcs == "right")
-    _pc_side = Moose::PCS_RIGHT;
-  else if (pcs == "symmetric")
-    _pc_side = Moose::PCS_SYMMETRIC;
-  else
-    mooseError("Unknown PC side specified.");
-}
-
-bool
-NonlinearSystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
-{
-  return _integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid);
-}
-
-bool
-NonlinearSystem::needMaterialOnSide(SubdomainID /*subdomain_id*/, THREAD_ID /*tid*/) const
-{
-  return _doing_dg;
-}
-
-bool
-NonlinearSystem::doingDG() const
-{
-  return _doing_dg;
-}
-
-Real
-NonlinearSystem::relativeSolutionDifferenceNorm()
-{
-  const NumericVector<Number> & current_solution  = *currentSolution();
-  const NumericVector<Number> & old_solution = solutionOld();
-
-  _sln_diff = current_solution;
-  _sln_diff -= old_solution;
-
-  return (_sln_diff.l2_norm() / current_solution.l2_norm());
 }

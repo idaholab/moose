@@ -1284,6 +1284,7 @@ private:
   bool _started_initial_setup;
 
   friend class AuxiliarySystem;
+  friend class AssemblySystem;
   friend class NonlinearSystem;
   friend class MooseEigenSystem;
   friend class Resurrector;
