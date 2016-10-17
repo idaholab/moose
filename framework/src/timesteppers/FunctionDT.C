@@ -127,7 +127,7 @@ Stepper *
 FunctionDT::buildStepper()
 {
   Stepper* s = new PiecewiseStepper(_time_t, _time_dt, _interpolate);
-  s = new MinOfStepper(new FixedPointStepper(_time_t, 0), s, 0);
+  s = new MinOfStepper(new FixedPointStepper(_time_t, _executioner.timestepTol()), s, 0);
   s = new DTLimitStepper(s, _min_dt, 1e100, false);
   // this packs a single Stepper* into multiple std::unique_ptr's - bad
   s = new IfConvergedStepper(s, new MinOfStepper(s, new GrowShrinkStepper(0.5, _growth_factor), 0));
