@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "TimeSequenceStepper.h"
+#include "Stepper.h"
 
 template<>
 InputParameters validParams<TimeSequenceStepper>()
@@ -32,4 +33,11 @@ void
 TimeSequenceStepper::init()
 {
   setupSequence(getParam<std::vector<Real> >("time_sequence"));
+}
+
+Stepper *
+TimeSequenceStepper::buildStepper()
+{
+  auto seq = getParam<std::vector<Real> >("time_sequence");
+  return new IfConvergedStepper(new FixedPointStepper(seq, 0), new GrowShrinkStepper(0.5, 1.0));
 }
