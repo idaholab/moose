@@ -571,18 +571,19 @@ public:
     double prev_prev_ratio = si->prev_prev_prev_solve_time_secs / si->prev_prev_prev_dt;
 
     int direc = 1;
-    if (si->prev_dt < si->prev_prev_dt)
+    if (prev_ratio && prev_prev_ratio && si->prev_dt < si->prev_prev_dt)
       direc = -1;
     int prev_direc = 1;
-    if (si->prev_prev_dt < si->prev_prev_prev_dt)
+    if (prev_ratio && prev_prev_ratio && si->prev_prev_dt < si->prev_prev_prev_dt)
       prev_direc = -1;
 
-    if (si->prev_dt == 0)
+    if (si->prev_dt == 0 || si->prev_prev_dt == 0 || si->prev_prev_prev_dt == 0)
     {
       direc = _direc_init;
       prev_direc = _direc_init;
     }
-
+    printf("prev_dt=%f, prev_prev_dt=%f, prev_prev_prev_dt=%f\n", si->prev_dt, si->prev_prev_dt, si->prev_prev_prev_dt);
+    printf("ratio=%f, prev_ratio=%f, prev_prev_ratio=%f, direc=%d, prev_direc=%d\n", ratio, prev_ratio, prev_prev_ratio, direc, prev_direc);
     if (ratio > prev_ratio && prev_ratio > prev_prev_ratio && direc == prev_direc)
       direc *= -1;
 
