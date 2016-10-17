@@ -576,12 +576,21 @@ GrainTracker::trackGrains()
            new_grain_index < _feature_sets.size() && _feature_sets[new_grain_index]._var_index == old_grain._var_index;
            ++new_grain_index)
       {
-        Real curr_centroid_diff = centroidRegionDistance(old_grain._bboxes, _feature_sets[new_grain_index]._bboxes);
-        if (curr_centroid_diff <= min_centroid_diff)
+        auto & new_grain = _feature_sets[new_grain_index];
+
+        /**
+         * Don't try to do any matching unless the bounding boxes at least overlap. This is to avoid the
+         * corner case of having a grain split and a grain disappear during the same time step!
+         */
+        if (new_grain.boundingBoxesIntersect(old_grain))
         {
-          found_one = true;
-          closest_match_index = new_grain_index;
-          min_centroid_diff = curr_centroid_diff;
+          Real curr_centroid_diff = centroidRegionDistance(old_grain._bboxes, new_grain._bboxes);
+          if (curr_centroid_diff <= min_centroid_diff)
+          {
+            found_one = true;
+            closest_match_index = new_grain_index;
+            min_centroid_diff = curr_centroid_diff;
+          }
         }
       }
 
@@ -596,13 +605,13 @@ GrainTracker::trackGrains()
         if (curr_index != invalid_size_t)
         {
           // The new feature being competed for
-          auto & feature = _feature_sets[closest_match_index];
+          auto & new_grain = _feature_sets[closest_match_index];
 
           // The other old grain competing to match up to the same new grain
           auto & other_old_grain = _feature_sets_old[curr_index];
 
-          auto centroid_diff1 = centroidRegionDistance(feature._bboxes, old_grain._bboxes);
-          auto centroid_diff2 = centroidRegionDistance(feature._bboxes, other_old_grain._bboxes);
+          auto centroid_diff1 = centroidRegionDistance(new_grain._bboxes, old_grain._bboxes);
+          auto centroid_diff2 = centroidRegionDistance(new_grain._bboxes, other_old_grain._bboxes);
 
           auto & inactive_grain = (centroid_diff1 < centroid_diff2) ? other_old_grain : old_grain;
 
@@ -656,18 +665,67 @@ GrainTracker::trackGrains()
      */
 
     // Case 1 (new grains in _feature_sets):
-    for (auto feature_num = beginIndex(_feature_sets); feature_num < _feature_sets.size(); ++feature_num)
+    for (auto grain_num = beginIndex(_feature_sets); grain_num < _feature_sets.size(); ++grain_num)
     {
-      auto & feature = _feature_sets[feature_num];
+      auto & grain = _feature_sets[grain_num];
 
       // New Grain
-      if (feature._status == Status::CLEAR)
+      if (grain._status == Status::CLEAR)
       {
-        mooseAssert(!_ebsd_reader || !_first_time, "Can't create new grains in intial EBSD step, logic error");
+        mooseAssert(!_ebsd_reader || !_first_time, "Can't create new grains in initial EBSD step, logic error");
 
-        auto new_index = getNextUniqueID();
-        _feature_sets[feature_num]._id = new_index;                    // Set the ID
-        _feature_sets[feature_num]._status = Status::MARKED;           // Mark it
+        /**
+         * Now we need to figure out what kind of "new" grain this is. Is it a nucleating grain that
+         * we're just barely seeing for the first time or is it a "splitting" grain. A grain that
+         * gets pinched into two or more pieces usually as it is being absorbed by other grains or
+         * possibly due to external forces. We have to handle splitting grains this way so as to
+         * no confuse them with regular grains that just happen to be in contact in this step.
+         *
+         * Splitting Grain: An grain that is unmatched by any old grain
+         *                  on the same order parameter with touching halos.
+         *
+         * Nucleating Grain: A completely new grain appearing somewhere in the domain
+         *                   not overlapping any other grain's halo.
+         *
+         * To figure out which case we are dealing with, we have to make another pass over all of the
+         * existing grains with matching variable indices to see if any of them have overlapping halos.
+         */
+        auto start_it = std::lower_bound(_feature_sets.begin(), _feature_sets.end(), grain._var_index,
+                                         [](const FeatureData & item, std::size_t var_index)
+                                         {
+                                           return item._var_index < var_index;
+                                         });
+
+        // Loop over matching variable indices
+        for (decltype(_feature_sets.size()) new_grain_index = std::distance(_feature_sets.begin(), start_it);
+             new_grain_index < _feature_sets.size() && _feature_sets[new_grain_index]._var_index == grain._var_index;
+             ++new_grain_index)
+        {
+          auto & other_grain = _feature_sets[new_grain_index];
+
+          // Splitting grain?
+          if (grain_num != new_grain_index &&              // Make sure indices aren't pointing at the same grain
+              other_grain._status == Status::MARKED &&     // and that the other grain is indeed marked
+              other_grain.boundingBoxesIntersect(grain) && // and the bboxes intersect
+              other_grain.halosIntersect(grain))           // and the halos also intersect
+              // TODO: Inspect combined volume and see if it's "close" to the expected value
+          {
+            grain._id = other_grain._id;                   // Set the duplicate ID
+            grain._status = Status::MARKED;                // Mark it
+            _console << "Split Grain Detected " << " (variable index: "
+                     << grain._var_index <<  ")\n"
+                     << grain
+                     << other_grain;
+          }
+        }
+
+        // Must be a nucleating grain (status is still not set)
+        if (grain._status == Status::CLEAR)
+        {
+          auto new_index = getNextUniqueID();
+          grain._id = new_index;            // Set the ID
+          grain._status = Status::MARKED;   // Mark it
+        }
       }
     }
 
@@ -843,7 +901,7 @@ GrainTracker::remapGrains()
           if (&grain1 == &grain2)
             continue;
 
-          if (grain1._var_index == grain2._var_index &&     // Are the grains represented by the same variable?
+          if (grain1._var_index == grain2._var_index && // Are the grains represented by the same variable?
               grain1._id != grain2._id &&               // if so, are they part of different grains?
               grain1.boundingBoxesIntersect(grain2) &&  // If so, do their bboxes intersect (coarse level check)?
               grain1.halosIntersect(grain2))            // If so, do they actually overlap (tight "hull" check)?
