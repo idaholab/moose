@@ -63,7 +63,8 @@ plugins	    += $(patsubst %.f, %-$(METHOD).plugin, $(fplugfiles))
 plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
 
 # main
-main_src    := $(APPLICATION_DIR)/src/main.C    # Main must be located here!
+MAIN_DIR    ?= $(APPLICATION_DIR)/src
+main_src    := $(MAIN_DIR)/main.C
 main_object := $(patsubst %.C, %.$(obj-suffix), $(main_src))
 
 # dependency files
