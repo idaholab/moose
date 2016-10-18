@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define USE_NEW_STEPPER false
+#define USE_NEW_STEPPER true
 
 #include "Transient.h"
 
