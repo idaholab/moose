@@ -14,4 +14,9 @@
     input = 'theis2.i'
     csvdiff = 'theis2_pressure_0018.csv'
   [../]
+  [./theis3]
+    type = 'CSVDiff'
+    input = 'theis3.i'
+    csvdiff = 'theis3.csv'
+  [../]
 []
