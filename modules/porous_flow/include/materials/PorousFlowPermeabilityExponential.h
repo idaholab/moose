@@ -8,7 +8,7 @@
 #ifndef POROUSFLOWPERMEABILITYEXPONENTIAL_H
 #define POROUSFLOWPERMEABILITYEXPONENTIAL_H
 
-#include "PorousFlowPermeabilityUnity.h"
+#include "PorousFlowPermeabilityBase.h"
 
 //Forward Declarations
 class PorousFlowPermeabilityExponential;
@@ -29,13 +29,13 @@ InputParameters validParams<PorousFlowPermeabilityExponential>();
  * k = B * exp(A * phi)
  * A and B are then converted to AA and BB.
  */
-class PorousFlowPermeabilityExponential : public PorousFlowPermeabilityUnity
+class PorousFlowPermeabilityExponential : public PorousFlowPermeabilityBase
 {
 public:
   PorousFlowPermeabilityExponential(const InputParameters & parameters);
 
 protected:
-  void computeQpProperties();
+  void computeQpProperties() override;
 
   /// Empirical constant A
   const Real _A;

@@ -8,7 +8,7 @@
 #ifndef POROUSFLOWPERMEABILITYKOZENYCARMAN_H
 #define POROUSFLOWPERMEABILITYKOZENYCARMAN_H
 
-#include "PorousFlowPermeabilityUnity.h"
+#include "PorousFlowPermeabilityBase.h"
 
 //Forward Declarations
 class PorousFlowPermeabilityKozenyCarman;
@@ -30,13 +30,13 @@ InputParameters validParams<PorousFlowPermeabilityKozenyCarman>();
  * A = f * d^2
  * where f is a scalar constant and d is grain diameter.
  */
-class PorousFlowPermeabilityKozenyCarman : public PorousFlowPermeabilityUnity
+class PorousFlowPermeabilityKozenyCarman : public PorousFlowPermeabilityBase
 {
 public:
   PorousFlowPermeabilityKozenyCarman(const InputParameters & parameters);
 
 protected:
-  void computeQpProperties();
+  void computeQpProperties() override;
 
   /// Reference scalar permeability in A = k0 * (1 - phi0)^m / phi0^n
   const Real _k0;
