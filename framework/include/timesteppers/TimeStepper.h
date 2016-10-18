@@ -101,6 +101,11 @@ public:
   void addSyncTime(const std::set<Real> & times);
   ///@}
 
+  /**
+   * Gives ability for TimeStepper to control output of solution in Transient
+   */
+  virtual bool enableOutput() { return true; }
+
 protected:
   /**
    * Called to compute _current_dt for the first timestep.

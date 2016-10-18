@@ -474,6 +474,8 @@ Transient::endStep(Real input_time)
 
   _picard_converged=false;
 
+  bool ts_output =_time_stepper->enableOutput();
+
   _last_solve_converged = lastSolveConverged();
 
   if (_last_solve_converged && !_xfem_repeat_step)
@@ -483,7 +485,8 @@ Transient::endStep(Real input_time)
     _problem.computeMarkers();
 
     // Perform the output of the current time step
-    _problem.outputStep(EXEC_TIMESTEP_END);
+    if (ts_output)
+      _problem.outputStep(EXEC_TIMESTEP_END);
 
     //output
     if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
