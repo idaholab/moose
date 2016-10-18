@@ -18,9 +18,15 @@
 #include "Function.h"
 #include "LinearInterpolation.h"
 
+class Piecewise;
+
+template<>
+InputParameters validParams<Piecewise>();
+
 /**
- * Base class for function objects.  Functions override value to supply a
- * value at a point.
+ * Function which provides a piecewise approximation to a provided
+ * (x,y) point data set.  Derived classes which control the order
+ * (constant, linear) of the approximation should be used directly.
  */
 class Piecewise : public Function
 {
@@ -45,8 +51,5 @@ private:
   void parseRows( std::vector<Real> & x, std::vector<Real> & y );
   void parseColumns( std::vector<Real> & x, std::vector<Real> & y);
 };
-
-template<>
-InputParameters validParams<Piecewise>();
 
 #endif
