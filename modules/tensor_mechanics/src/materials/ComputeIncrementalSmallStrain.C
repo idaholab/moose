@@ -26,7 +26,7 @@ ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParamete
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
     _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment"))
+    _eigenstrain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment"))
 {
 }
 
@@ -55,8 +55,8 @@ ComputeIncrementalSmallStrain::computeProperties()
 
     _strain_increment[_qp] = total_strain_increment;
 
-    //Remove the Eigen strain increment
-    _strain_increment[_qp] -= _stress_free_strain_increment[_qp];
+    //Remove the eigenstrain increment
+    _strain_increment[_qp] -= _eigenstrain_increment[_qp];
 
     // strain rate
     _strain_rate[_qp] = _strain_increment[_qp]/_dt;

@@ -139,7 +139,7 @@
     block = 0
   [../]
   [./thermal_expansion_strain]
-    type = ComputeThermalExpansionEigenStrain
+    type = ComputeThermalExpansionEigenstrain
     block = 0
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.3e-5
