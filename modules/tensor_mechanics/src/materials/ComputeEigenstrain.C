@@ -10,7 +10,7 @@
 template<>
 InputParameters validParams<ComputeEigenstrain>()
 {
-  InputParameters params = validParams<ComputeStressFreeStrainBase>();
+  InputParameters params = validParams<ComputeEigenstrainBase>();
   params.addClassDescription("Computes a constant Eigenstrain");
   params.addRequiredParam<std::vector<Real> >("eigen_base", "Vector of values defining the constant base tensor for the Eigenstrain");
   params.addParam<MaterialPropertyName>("prefactor", 1.0, "Name of material defining the variable dependence");
@@ -18,15 +18,15 @@ InputParameters validParams<ComputeEigenstrain>()
 }
 
 ComputeEigenstrain::ComputeEigenstrain(const InputParameters & parameters) :
-    ComputeStressFreeStrainBase(parameters),
+    ComputeEigenstrainBase(parameters),
     _prefactor(getMaterialProperty<Real>("prefactor"))
 {
   _eigen_base_tensor.fillFromInputVector(getParam<std::vector<Real> >("eigen_base"));
 }
 
 void
-ComputeEigenstrain::computeQpStressFreeStrain()
+ComputeEigenstrain::computeQpEigenstrain()
 {
   // Define Eigenstrain
-  _stress_free_strain[_qp] = _eigen_base_tensor * _prefactor[_qp];
+  _eigenstrain[_qp] = _eigen_base_tensor * _prefactor[_qp];
 }

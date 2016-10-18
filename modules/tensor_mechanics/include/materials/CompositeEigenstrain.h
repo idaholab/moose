@@ -7,7 +7,7 @@
 #ifndef COMPOSITEEIGENSTRAIN_H
 #define COMPOSITEEIGENSTRAIN_H
 
-#include "ComputeStressFreeStrainBase.h"
+#include "ComputeEigenstrainBase.h"
 #include "CompositeTensorBase.h"
 #include "RankTwoTensor.h"
 
@@ -19,13 +19,13 @@
  * The generic logic that computes a weighted sum of tensors is located in the
  * templated base class CompositeTensorBase.
  */
-class CompositeEigenstrain : public CompositeTensorBase<RankTwoTensor, ComputeStressFreeStrainBase>
+class CompositeEigenstrain : public CompositeTensorBase<RankTwoTensor, ComputeEigenstrainBase>
 {
 public:
   CompositeEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpStressFreeStrain();
+  virtual void computeQpEigenstrain();
 
   const std::string _M_name;
 };
