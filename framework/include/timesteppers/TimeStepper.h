@@ -112,14 +112,14 @@ protected:
    * Note that this does not return.
    * The TimeStepper's job here is to fill in _current_dt.
    */
-  virtual Real computeInitialDT() = 0;
+  virtual Real computeInitialDT() {return -1;};
 
   /**
    * Called to compute _current_dt for a normal step.
    * Note that this does not return.
    * The TimeStepper's job here is to fill in _current_dt.
    */
-  virtual Real computeDT() = 0;
+  virtual Real computeDT() {return -1;};
 
   /**
    * Called to compute _current_dt after a solve has failed.
