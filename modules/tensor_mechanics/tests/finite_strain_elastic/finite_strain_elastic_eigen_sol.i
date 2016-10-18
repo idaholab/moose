@@ -69,7 +69,7 @@
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y disp_z'
-    decomposition_method = EigenSolution
+    decomposition_method = EIGENSOLUTION
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
