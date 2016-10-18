@@ -10,14 +10,14 @@
 template<>
 InputParameters validParams<PorousFlowPorosityConst>()
 {
-  InputParameters params = validParams<PorousFlowPorosityUnity>();
+  InputParameters params = validParams<PorousFlowPorosityBase>();
   params.addRequiredParam<Real>("porosity", "The porosity, which is assumed constant for this material");
   params.addClassDescription("This Material calculates the porosity assuming it is constant");
   return params;
 }
 
 PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & parameters) :
-    PorousFlowPorosityUnity(parameters),
+    PorousFlowPorosityBase(parameters),
     _input_porosity(getParam<Real>("porosity"))
 {
 }
@@ -25,9 +25,10 @@ PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & paramet
 void
 PorousFlowPorosityConst::initQpStatefulProperties()
 {
-  _porosity_nodal[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
-  _porosity_qp[_qp] = _input_porosity; // this becomes _porosity_old[_qp] in the first call to computeQpProperties
+  _porosity_nodal[_qp] = _input_porosity;
+  _porosity_qp[_qp] = _input_porosity;
 
+  // The derivatives are zero for all time
   _dporosity_nodal_dvar[_qp].assign(_num_var, 0.0);
   _dporosity_qp_dvar[_qp].assign(_num_var, 0.0);
   _dporosity_nodal_dgradvar[_qp].assign(_num_var, RealGradient());

@@ -5,30 +5,26 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef POROUSFLOWPOROSITYUNITY_H
-#define POROUSFLOWPOROSITYUNITY_H
+#ifndef POROUSFLOWPOROSITYBASE_H
+#define POROUSFLOWPOROSITYBASE_H
 
 #include "PorousFlowMaterialVectorBase.h"
 
 //Forward Declarations
-class PorousFlowPorosityUnity;
+class PorousFlowPorosityBase;
 
 template<>
-InputParameters validParams<PorousFlowPorosityUnity>();
+InputParameters validParams<PorousFlowPorosityBase>();
 
 /**
  * Base class Material designed to provide the porosity.
- * In this class porosity = 1
  */
-class PorousFlowPorosityUnity : public PorousFlowMaterialVectorBase
+class PorousFlowPorosityBase : public PorousFlowMaterialVectorBase
 {
 public:
-  PorousFlowPorosityUnity(const InputParameters & parameters);
+  PorousFlowPorosityBase(const InputParameters & parameters);
 
 protected:
-    virtual void initQpStatefulProperties();
-    virtual void computeQpProperties();
-
   /// nodal porosity
   MaterialProperty<Real> & _porosity_nodal;
 
@@ -54,4 +50,4 @@ protected:
   MaterialProperty<std::vector<RealGradient> > & _dporosity_qp_dgradvar;
 };
 
-#endif //POROUSFLOWPOROSITYUNITY_H
+#endif //POROUSFLOWPOROSITYBASE_H
