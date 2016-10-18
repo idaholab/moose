@@ -337,48 +337,6 @@ Transient::execute()
     first = false;
     _first = false;
 
-    // print out stepper info
-    std::string nonlin_str = "nullptr";
-    std::string aux_str = "nullptr";
-    std::string predicted_str = "nullptr";
-    if (si.soln_nonlin)
-    {
-      std::stringstream ss;
-      si.soln_nonlin->print(ss);
-      nonlin_str = ss.str();
-    }
-    if (si.soln_aux)
-    {
-      std::stringstream ss;
-      si.soln_aux->print(ss);
-      aux_str = ss.str();
-    }
-    if (si.soln_predicted)
-    {
-      std::stringstream ss;
-      si.soln_predicted->print(ss);
-      predicted_str = ss.str();
-    }
-
-    DBG << "FIXTURE: StepperInfo = {"
-      << si.step_count << ", "
-      << si.time << ", "
-      << si.prev_dt << ", "
-      << si.prev_prev_dt << ", "
-      << si.time_integrator << ", "
-      << si.nonlin_iters << ", "
-      << si.lin_iters << ", "
-      << si.converged << ", "
-      << si.prev_converged << ", "
-      << si.prev_solve_time_secs << ", "
-      << nonlin_str << ", "
-      << aux_str << ", "
-      << predicted_str << ", "
-      << si.sched_backup << ", "
-      << si.sched_restore << ", "
-      << si.restore_time
-      << "};\n";
-
     if (!keepGoing())
       break;
     preStep();
