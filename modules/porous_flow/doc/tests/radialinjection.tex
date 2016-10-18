@@ -1,0 +1,50 @@
+\documentclass[]{report}
+\usepackage{amsmath,amsfonts,graphicx}
+
+\def\species{\mathrm{sp}}
+\def\phase{\mathrm{ph}}
+\def\massfrac{\chi}
+\def\flux{\mathbf{F}}
+\def\darcyvel{\mathbf{v}}
+\def\energydens{\mathcal{E}}
+\def\d{\mathrm{d}}
+
+\newcommand{\uo}{\mbox{UO\textsubscript{2}}\xspace}
+
+\setcounter{secnumdepth}{3}
+\DeclareMathOperator{\erfc}{erfc}
+
+\begin{document}
+
+
+\title{Flow from a source in a 1D radial model}
+\author{CSIRO}
+\maketitle
+
+\tableofcontents
+
+\chapter{Similarity solution}
+
+Flow from a source in a radial 1D problem admits a similarity solution that is valid for a
+broad range of problems, including multi-component, multi-phase flow. Properties such as fluid
+pressure, saturation and component mass fraction can all be characterised by the similarity
+variable $\zeta = r^2/t$, where $r$ is the radial distance from the source, and $t$ is time.
+
+This similarity solution can be used to verify simple 1D radial models of increasing complexity.
+
+\chapter{Two phase immiscible flow}
+
+The simplest test case that features a similarity solution is injection of a gas phase into a fully liquid
+saturated model at a constant rate. Figure \ref{fig:theis_similarity_fig} shows the comparison of
+similarity solutions calculated with either fixed radial distance or fixed time. In this case, good agreement
+is observed between the two results for both liquid pressure and gas saturation. This example is included
+in the automatic test suite.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{theis_similarity_fig.pdf}
+\caption{Comparison of similarity solutions. (a) Liquid pressure; (b) Gas saturation}
+\label{fig:theis_similarity_fig}
+\end{figure}
+
+\end{document}
