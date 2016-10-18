@@ -525,7 +525,8 @@ class SolveTimeAdaptiveStepper : public Stepper
 public:
   SolveTimeAdaptiveStepper(int initial_direc, double percent_change) :
       _percent_change(percent_change),
-      _direc_init(initial_direc)
+      _direc(initial_direc),
+      _n_steps(0)
       { }
 
   virtual double advance(const StepperInfo* si)
@@ -535,27 +536,22 @@ public:
     double prev_ratio = si->prev_prev_solve_time_secs / si->prev_prev_dt;
     double prev_prev_ratio = si->prev_prev_prev_solve_time_secs / si->prev_prev_prev_dt;
 
-    int direc = 1;
-    if (prev_ratio && prev_prev_ratio && si->prev_dt < si->prev_prev_dt)
-      direc = -1;
-    int prev_direc = 1;
-    if (prev_ratio && prev_prev_ratio && si->prev_prev_dt < si->prev_prev_prev_dt)
-      prev_direc = -1;
-
-    if (si->prev_dt == 0 || si->prev_prev_dt == 0 || si->prev_prev_prev_dt == 0)
+    _n_steps++;
+    // this is this way in order to mirror original SolutionTimeAdaptiveDT
+    // stepper behavior.  However, it might be better to compare prev_ratio to
+    // prev_prev ratio instead.
+    if (ratio > prev_ratio && ratio > prev_prev_ratio && _n_steps > 1)
     {
-      direc = _direc_init;
-      prev_direc = _direc_init;
+      _direc *= -1;
+      _n_steps = 0;
     }
 
-    if (ratio > prev_ratio && prev_ratio > prev_prev_ratio && direc == prev_direc)
-      direc *= -1;
-
-    return l.val(si->prev_dt + si->prev_dt * _percent_change * direc);
+    return l.val(si->prev_dt + si->prev_dt * _percent_change * _direc);
   }
 private:
   double _percent_change;
-  int _direc_init;
+  int _direc;
+  int _n_steps;
 };
 
 class StartupStepper : public Stepper

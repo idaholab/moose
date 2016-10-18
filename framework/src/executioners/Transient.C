@@ -297,7 +297,7 @@ Transient::execute()
 
     si.time = _time;
     si.prev_prev_prev_dt = si.prev_prev_dt;
-    si.prev_prev_dt = std::max(si.prev_dt, _prev_dt);
+    si.prev_prev_dt = _prev_dt;
     si.prev_dt = _dt;
     si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
     si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
@@ -312,7 +312,7 @@ Transient::execute()
     *si.soln_nonlin = _soln_nonlin;
     *si.soln_aux =  _soln_aux;
     *si.soln_predicted = _soln_predicted;
-    _prev_dt = si.prev_prev_dt; // for restart
+    _prev_dt = si.prev_dt; // for restart
 
     if (_stepper)
       _new_dt = _stepper->advance(&si);
