@@ -24,11 +24,6 @@
 // Forward Declarations
 class AB2PredictorCorrector;
 
-namespace libMesh
-{
-template <typename T> class NumericVector;
-}
-
 template<>
 InputParameters validParams<AB2PredictorCorrector>();
 
@@ -42,47 +37,19 @@ class AB2PredictorCorrector : public TimeStepper
 public:
   AB2PredictorCorrector(const InputParameters & parameters);
 
-  virtual void step() override;
-  virtual void preExecute() override;
-  virtual void preSolve() override;
-  virtual bool converged() override;
-
   virtual Stepper * buildStepper() override;
 
 protected:
-  virtual Real computeDT() override;
-  virtual Real computeInitialDT() override;
-
-  virtual Real estimateTimeError(NumericVector<Number> & sol);
-
-  int stringtoint(std::string string);
-  ///
-  NumericVector<Number> & _u1;
-  NumericVector<Number> & _aux1;
-  NumericVector<Number> & _pred1;
-
-  /// dt of the big step
-  Real & _dt_full;
-
-  /// global relative time discretization error estimate
-  Real & _error;
   /// error tolerance
   Real _e_tol;
-  /// maximal error
   Real _e_max;
   /// maximum increase ratio
   Real _max_increase;
   /// steps to take before increasing dt
   int _steps_between_increase;
-  /// steps taken at current dt
-  int & _dt_steps_taken;
   int _start_adapting;
-  Real & _my_dt_old;
-  ///infinity norm of the solution vector
-  Real & _infnorm;
   /// scaling_parameter for time step selection, default is 0.8
   Real _scaling_parameter;
-  std::ofstream myfile;
 };
 
 #endif // AB2PREDICTORCORRECTOR_H
