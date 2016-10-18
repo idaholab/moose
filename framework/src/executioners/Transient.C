@@ -309,7 +309,7 @@ Transient::execute()
     Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
     if (p)
       *_si.soln_predicted = p->solutionPredictor(); // copy here because other code mutates this later :(
-    
+
     if (_stepper)
       _new_dt = _stepper->advance(&_si);
 
@@ -464,8 +464,8 @@ Transient::solveStep(Real input_dt)
     _dt = input_dt;
 
   Real current_dt = _dt;
-  
-  
+
+
   _problem.onTimestepBegin();
 
   // Increment time
@@ -563,7 +563,7 @@ Transient::solveStep(Real input_dt)
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
   }
-    
+
   postSolve();
   _time_stepper->postSolve();
 

@@ -392,9 +392,6 @@ public:
     double dt = _stepper->advance(si);
     double f_curr = _func(si->time);
     double df = std::abs(_func(si->time + dt) - f_curr);
-    printf("SPOT df_max=%f\n", _max_diff);
-    printf("SPOT f(t=%f)=%f, f(t_next=%f)=%f\n", si->time, f_curr, si->time + dt, _func(si->time + dt));
-    printf("SPOT f(t=2.002e6)=%f\n", _func(2.002e6));
     while (_max_diff > 0 && df > _max_diff)
     {
       dt /= 2.0;
@@ -506,7 +503,6 @@ public:
        growth_nl_its = _optimal_iters - _iter_window;
        growth_l_its = _lin_iter_ratio * (_optimal_iters - _iter_window);
     }
-    printf("ADAPT: cangrow=%d, nl_its=%d, growth_nl_its=%d, l_its=%d, growth_l_its=%d\n", can_grow, si->nonlin_iters, growth_nl_its, si->lin_iters, growth_l_its);
 
     if (can_grow && (si->nonlin_iters < growth_nl_its && si->lin_iters < growth_l_its))
       return l.val(si->prev_dt * _growth_factor);
@@ -660,15 +656,10 @@ public:
       return l.val(si->prev_dt);
     if (si->soln_nonlin == nullptr || si->soln_aux == nullptr || si->soln_predicted == nullptr)
       throw "no predicted solution available";
-      
-    DBG << "newstyle soln:\n" << *si->soln_nonlin << "\n";
-    DBG << "newstyle pred_soln:\n" << *si->soln_predicted << "\n";
-    
+
     double error = estimateTimeError(si);
     double infnorm = si->soln_nonlin->linfty_norm();
     double e_max = 1.1 * _e_tol * infnorm;
-    printf("NEWerror=%.10f, e_max=%f, e_tol=%f, infnorm=%f\n", error, e_max, _e_tol, infnorm);
-    printf("NEWdt=%f, prevdt=%f, scaleparam=%f\n", si->prev_dt, si->prev_prev_dt, _scale_param);
 
     if (error > e_max)
       return  l.val(si->prev_dt * 0.5);

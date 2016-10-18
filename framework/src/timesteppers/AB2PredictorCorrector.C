@@ -140,7 +140,6 @@ AB2PredictorCorrector::computeDT()
   if (_t_step <= _start_adapting)
     return _dt;
 
-  printf("OLDdt=%f, prevdt=%f, scaleparam=%f\n", _dt,  _my_dt_old, _scaling_parameter);
   _my_dt_old = _dt;
 
   _dt_steps_taken += 1;
@@ -148,8 +147,6 @@ AB2PredictorCorrector::computeDT()
   {
 
     Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
-    printf("OLDerror=%.10f, e_max=%f, e_tol=%f, infnorm=%f\n", _error, _e_max, _e_tol, _infnorm);
-    printf("OLDdtfull=%f, computed_dt=%f\n", _dt_full, new_dt);
 
     if (new_dt / _dt_full > _max_increase)
       new_dt = _dt_full*_max_increase;
@@ -187,9 +184,6 @@ AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
   Real dt_old = _my_dt_old;
   if (dt_old == 0)
     dt_old = _dt;
-  DBG << "NEXToldstyle soln:\n" << _u1 << "\n";
-  DBG << "NEXToldstyle pred_soln:\n" << _pred1 << "\n";
-  printf("NEXTOLDdt=%f, prevdt=%f, scaleparam=%f\n", _dt,  dt_old, _scaling_parameter);
 
   switch (stringtoint(scheme))
   {
@@ -218,9 +212,6 @@ AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
     Real topcalc = 2.0 * (_dt + dt_old) * (_dt + dt_old);
     Real bottomcalc = 6.0 * _dt * _dt + 12.0 * _dt * dt_old + 5.0 * dt_old * dt_old;
     _pred1 *= topcalc / bottomcalc;
-
-    printf("NEXTOLDerror=%.10f\n", _pred1.l2_norm());
-
     return _pred1.l2_norm();
   }
   default:
