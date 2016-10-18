@@ -178,7 +178,7 @@ AB2PredictorCorrector::stringtoint(std::string string)
 Real
 AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 {
- _pred1 = _fe_problem.getNonlinearSystem().getPredictor()->solutionPredictor();
+  _pred1 = _fe_problem.getNonlinearSystem().getPredictor()->solutionPredictor();
   TimeIntegrator * ti = _fe_problem.getNonlinearSystem().getTimeIntegrator();
   std::string scheme = ti->name();
   Real dt_old = _my_dt_old;

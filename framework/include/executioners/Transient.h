@@ -315,6 +315,10 @@ protected:
 
   double _solve_time;
   StepperInfo _si;
+  std::vector<Real> & _soln_nonlin;
+  std::vector<Real> & _soln_aux;
+  std::vector<Real> & _soln_predicted;
+  Real & _prev_dt;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

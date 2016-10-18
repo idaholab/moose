@@ -143,7 +143,11 @@ Transient::Transient(const InputParameters & parameters) :
     _new_dt(0),
     _stepper(nullptr),
     _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
-    _l_its(declareRestartableData<unsigned int>("l_its", 0))
+    _l_its(declareRestartableData<unsigned int>("l_its", 0)),
+    _soln_nonlin(declareRestartableData<std::vector<Real> >("soln_nonlin", std::vector<Real>())),
+    _soln_aux(declareRestartableData<std::vector<Real> >("soln_aux", std::vector<Real>())),
+    _soln_predicted(declareRestartableData<std::vector<Real> >("soln_predicted", std::vector<Real>())),
+    _prev_dt(declareRestartableData<Real>("prev_dt", 0))
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
@@ -270,11 +274,18 @@ Transient::execute()
     _problem.advanceState();
 
   // Start time loop...
-  _si = { };
-  _si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
-  _si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
-  _si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector("predicted_u1", true, GHOSTED);
-  _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
+  StepperInfo si = { };
+  si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
+  si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
+  si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector("predicted_u1", true, GHOSTED);
+  si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
+
+  if (_soln_nonlin.size() == 0)
+  {
+    _soln_nonlin.resize(si.soln_nonlin->size());
+    _soln_aux.resize(si.soln_aux->size());
+    _soln_predicted.resize(si.soln_nonlin->size());
+  }
 
   bool first = true; // needs to not be restartable data
   while (true)
@@ -284,34 +295,27 @@ Transient::execute()
     if (_first != true)
       incrementStepOrReject();
 
-    // update new style stepper
-    _si.time = _time;
-    _si.prev_prev_prev_dt = _si.prev_prev_dt;
-    _si.prev_prev_dt = _si.prev_dt;
-    _si.prev_dt = _dt;
-    _si.prev_prev_prev_solve_time_secs = _si.prev_prev_solve_time_secs;
-    _si.prev_prev_solve_time_secs = _si.prev_solve_time_secs;
-    _si.prev_solve_time_secs = _solve_time;
-    _si.step_count = _steps_taken;
-    _si.nonlin_iters = _nl_its;
-    _si.lin_iters = _l_its;
-    _si.prev_converged = _si.converged || first;
+    si.time = _time;
+    si.prev_prev_prev_dt = si.prev_prev_dt;
+    si.prev_prev_dt = std::max(si.prev_dt, _prev_dt);
+    si.prev_dt = _dt;
+    si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
+    si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
+    si.prev_solve_time_secs = _solve_time;
+    si.step_count = _steps_taken;
+    si.nonlin_iters = _nl_its;
+    si.lin_iters = _l_its;
+    si.prev_converged = si.converged || first;
     // A step_count == 1 condition is not sufficient to account for
     // restart/recover cases where step_count is already something else.
-    _si.converged = _last_solve_converged || first;
-
-    *_si.soln_nonlin = *(_fe_problem.getNonlinearSystem().currentSolution());
-    *_si.soln_aux =  *(_fe_problem.getAuxiliarySystem().currentSolution());
-    if (_si.soln_nonlin);
-      _si.soln_nonlin->close();
-    if (_si.soln_aux);
-      _si.soln_aux->close();
-    Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
-    if (p)
-      *_si.soln_predicted = p->solutionPredictor(); // copy here because other code mutates this later :(
+    si.converged = _last_solve_converged || first;
+    *si.soln_nonlin = _soln_nonlin;
+    *si.soln_aux =  _soln_aux;
+    *si.soln_predicted = _soln_predicted;
+    _prev_dt = si.prev_prev_dt; // for restart
 
     if (_stepper)
-      _new_dt = _stepper->advance(&_si);
+      _new_dt = _stepper->advance(&si);
 
     first = false;
     _first = false;
@@ -320,42 +324,42 @@ Transient::execute()
     std::string nonlin_str = "nullptr";
     std::string aux_str = "nullptr";
     std::string predicted_str = "nullptr";
-    if (_si.soln_nonlin)
+    if (si.soln_nonlin)
     {
       std::stringstream ss;
-      _si.soln_nonlin->print(ss);
+      si.soln_nonlin->print(ss);
       nonlin_str = ss.str();
     }
-    if (_si.soln_aux)
+    if (si.soln_aux)
     {
       std::stringstream ss;
-      _si.soln_aux->print(ss);
+      si.soln_aux->print(ss);
       aux_str = ss.str();
     }
-    if (_si.soln_predicted)
+    if (si.soln_predicted)
     {
       std::stringstream ss;
-      _si.soln_predicted->print(ss);
+      si.soln_predicted->print(ss);
       predicted_str = ss.str();
     }
 
     DBG << "FIXTURE: StepperInfo = {"
-      << _si.step_count << ", "
-      << _si.time << ", "
-      << _si.prev_dt << ", "
-      << _si.prev_prev_dt << ", "
-      << _si.time_integrator << ", "
-      << _si.nonlin_iters << ", "
-      << _si.lin_iters << ", "
-      << _si.converged << ", "
-      << _si.prev_converged << ", "
-      << _si.prev_solve_time_secs << ", "
+      << si.step_count << ", "
+      << si.time << ", "
+      << si.prev_dt << ", "
+      << si.prev_prev_dt << ", "
+      << si.time_integrator << ", "
+      << si.nonlin_iters << ", "
+      << si.lin_iters << ", "
+      << si.converged << ", "
+      << si.prev_converged << ", "
+      << si.prev_solve_time_secs << ", "
       << nonlin_str << ", "
       << aux_str << ", "
       << predicted_str << ", "
-      << _si.sched_backup << ", "
-      << _si.sched_restore << ", "
-      << _si.restore_time
+      << si.sched_backup << ", "
+      << si.sched_restore << ", "
+      << si.restore_time
       << "};\n";
 
     if (!keepGoing())
@@ -366,11 +370,17 @@ Transient::execute()
     takeStep();
     _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
     _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
+    _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
+    _fe_problem.getAuxiliarySystem().currentSolution()->localize(_soln_aux);
+    Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
+    if (p)
+      p->solutionPredictor().localize(_soln_predicted);
+
     endStep();
     postStep();
     double constr_legacy_dt = _dt;
     if (_stepper)
-      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", _si.step_count, _si.time, _new_dt, legacy_dt, constr_legacy_dt);
+      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, _new_dt, legacy_dt, constr_legacy_dt);
   }
 
   if (!_app.halfTransient())
