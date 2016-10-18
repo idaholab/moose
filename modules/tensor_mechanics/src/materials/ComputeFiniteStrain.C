@@ -16,7 +16,7 @@ InputParameters validParams<ComputeFiniteStrain>()
 {
   InputParameters params = validParams<ComputeStrainBase>();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains.");
-  MooseEnum decomposition_type("TAYLOREXPANSION EIGENSOLUTION", "TAYLOREXPANSION");
+  MooseEnum decomposition_type("TaylorExpansion EigenSolution", "TaylorExpansion");
   params.addParam<MooseEnum>("decomposition_method", decomposition_type, "Methods to calculate the strain and rotation increments: " + decomposition_type.getRawNames());
   params.set<bool>("stateful_displacements") = true;
 
@@ -136,7 +136,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
 {
   switch (_decomposition_method)
   {
-    case DecompMethod::TAYLOREXPANSION:
+    case DecompMethod::TaylorExpansion:
     {
       // inverse of _Fhat
       RankTwoTensor invFhat(_Fhat[_qp].inverse());
@@ -194,7 +194,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       break;
     }
 
-    case DecompMethod::EIGENSOLUTION:
+    case DecompMethod::EigenSolution:
     {
       std::vector<Real> e_value(3);
       RankTwoTensor e_vector, N1, N2, N3;
@@ -220,6 +220,6 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
     }
 
     default:
-    mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TAYLOREXPANSION or EIGENSOLUTION.");
+      mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion or EigenSolution.");
   }
 }

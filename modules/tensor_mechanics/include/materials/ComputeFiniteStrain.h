@@ -50,8 +50,8 @@ private:
 
   enum class DecompMethod
   {
-    TAYLOREXPANSION,
-    EIGENSOLUTION
+    TaylorExpansion,
+    EigenSolution
   };
 
   const DecompMethod _decomposition_method;
