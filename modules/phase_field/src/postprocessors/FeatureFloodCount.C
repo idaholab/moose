@@ -766,7 +766,7 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
       {
         bool pb_intersect = false;
         if (it1 != it2 &&                                                    // Make sure that these iterators aren't pointing at the same set
-            it1->_var_index == it2->_var_index &&                                // and that the sets have matching variable indices
+            it1->_var_index == it2->_var_index &&                            // and that the sets have matching variable indices
              ((use_periodic_boundary_info &&                                 // and (if merging across periodic nodes
                (pb_intersect = it1->periodicBoundariesIntersect(*it2)))      //      do those periodic nodes intersect?
                  ||                                                          //      or

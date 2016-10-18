@@ -166,20 +166,22 @@ the syntax for the system or object being documented.
 ---
 
 ## Images and Slideshows
+!image media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
+
 It is possible to include images and slideshows of images with more flexibility than standard markdown.
 
 !!! note
-    Images paths should be specified from the "doc_dir", which by default is the "docs" directory at the top-level
-    of the repository.
+    Images paths should be specified relative to the "doc_dir", which by default is the "docs" directory
+    at the top-level of the repository.
 
 ### Single Images
-You can include images in your documentation by use of the !image markdown syntax:
+The markdown keyword for MOOSE images is `!image` followed by the filename as shown below. This command, like most of the other
+special MOOSE markdown commands except arbitrary html attributes. Therefore, any keyword, value pairs (e.g., `width=50%`) are
+automatically applied to the `<figure>` tag of the image. For example, the following syntax was used to include the image on the right.
 
 ```markdown
-!image media/memory_logger-plot_multi.png width=300px align=right caption=figure 1
+!image media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
 ```
-
-!image media/memory_logger-plot_multi.png width=300px align=right caption=figure 1
 
 ### Slideshows
 A sequence of images can be shown via a `carousel`. By default the images will auto cycle between images.

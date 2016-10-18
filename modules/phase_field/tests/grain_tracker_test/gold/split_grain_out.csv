@@ -1,0 +1,5 @@
+time,DOFs,grain_tracker,n_elements,n_nodes
+0,0,12,900,961
+10,16749,11,900,961
+20,16749,11,900,961
+

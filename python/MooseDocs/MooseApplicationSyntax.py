@@ -79,7 +79,7 @@ class MooseApplicationSyntax(object):
     generate[bool]: When True stub pages are generated if they do not exist
   """
 
-  def __init__(self, yaml_data, paths=[], doxygen=None, pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, **kwargs):
+  def __init__(self, yaml_data, paths=[], doxygen=None, pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, hide=[], **kwargs):
 
     # Store the input variables
     self._yaml_data = yaml_data
@@ -89,6 +89,7 @@ class MooseApplicationSyntax(object):
     self.pages_stubs = pages_stubs
     self.doxygen = doxygen
     self.name = name
+    self.hide = hide
 
     if pages:
       self.pages = PagesHelper(pages)
@@ -164,6 +165,12 @@ class MooseApplicationSyntax(object):
       if not self.pages.check(md):
         log.error('The markdown file {} was not found in the pages.yml'.format(md))
 
+  def hidden(self, name):
+    """
+    Return True if the syntax is hidden.
+    """
+    return any([name.startswith(h) for h in self.hide])
+
   def _checkNode(self, node):
     """
     Check a YAML node.
@@ -196,6 +203,9 @@ class MooseApplicationSyntax(object):
     """
     # The full name of the object
     name = node['name']
+    if self.hidden(name):
+      return
+
     stub = '<!-- MOOSE System Documentation Stub: Remove this when content is added. -->'
 
     # Determine the filename
@@ -251,6 +261,9 @@ class MooseApplicationSyntax(object):
     """
     # The full name of the object
     name = node['name']
+    if self.hidden(name):
+      return
+
     stub = '<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->'
 
     # Test for class description
