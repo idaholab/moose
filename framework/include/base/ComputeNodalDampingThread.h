@@ -12,40 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTEELEMDAMPINGTHREAD_H
-#define COMPUTEELEMDAMPINGTHREAD_H
+#ifndef COMPUTENODALDAMPINGTHREAD_H
+#define COMPUTENODALDAMPINGTHREAD_H
 
 // MOOSE includes
-#include "ThreadedElementLoop.h"
+#include "ThreadedNodeLoop.h"
 #include "MooseObjectWarehouse.h"
-
-// libMesh includes
-#include "libmesh/elem_range.h"
 
 // Forward declarations
 class NonlinearSystem;
-class ElementDamper;
+class NodalDamper;
 
-class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
+class ComputeNodalDampingThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeElemDampingThread(FEProblem & feproblem);
+  ComputeNodalDampingThread(FEProblem & feproblem);
 
   // Splitting Constructor
-  ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split);
+  ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split);
 
-  virtual ~ComputeElemDampingThread();
+  virtual ~ComputeNodalDampingThread();
 
-  virtual void onElement(const Elem * elem) override;
+  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
 
-  void join(const ComputeElemDampingThread & y);
+  void join(const ComputeNodalDampingThread & y);
 
   Real damping();
 
 protected:
   Real _damping;
   NonlinearSystem & _nl;
-  const MooseObjectWarehouse<ElementDamper> & _element_dampers;
+  const MooseObjectWarehouse<NodalDamper> & _nodal_dampers;
 };
 
-#endif //COMPUTEELEMDAMPINGTHREAD_H
+#endif //COMPUTENODALDAMPINGTHREAD_H

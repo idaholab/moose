@@ -231,9 +231,14 @@ public:
   void setNodalValueNeighbor(const DenseVector<Number> & value);
 
   /**
-   * Compute and store incremental change based on increment_vec
+   * Compute and store incremental change in solution at QPs based on increment_vec
    */
-  void computeIncrement(const NumericVector<Number> & increment_vec);
+  void computeIncrementAtQps(const NumericVector<Number> & increment_vec);
+
+  /**
+   * Compute and store incremental change at the current node based on increment_vec
+   */
+  void computeIncrementAtNode(const NumericVector<Number> & increment_vec);
 
   /**
    * Get DOF indices for currently selected element

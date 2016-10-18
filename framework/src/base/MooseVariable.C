@@ -1590,7 +1590,7 @@ MooseVariable::setNodalValueNeighbor(Number value)
 }
 
 void
-MooseVariable::computeIncrement(const NumericVector<Number> & increment_vec)
+MooseVariable::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
 {
   unsigned int nqp = _qrule->n_points();
 
@@ -1603,6 +1603,18 @@ MooseVariable::computeIncrement(const NumericVector<Number> & increment_vec)
     for (unsigned int i=0; i<num_dofs; i++)
       _increment[qp] +=  _phi[i][qp]*increment_vec(_dof_indices[i]);
   }
+}
+
+void
+MooseVariable::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
+{
+  if (!isNodal())
+    mooseError("computeIncrementAtNode can only be called for nodal variables");
+
+  _increment.resize(1);
+
+  // Compute the increment for the current DOF
+  _increment[0] = increment_vec(_dof_indices[0]);
 }
 
 Number
