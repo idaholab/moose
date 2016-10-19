@@ -42,7 +42,7 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
 
     ExodusII_IO exodusII_io(mesh);
     exodusII_io.read(_mesh_file);
-    _times = exodusII_io.get_time_steps();
+   setupSequence(exodusII_io.get_time_steps());
   }
 
   // distribute timestep list
@@ -50,11 +50,5 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
   _communicator.broadcast(num_steps);
   _times.resize(num_steps);
   _communicator.broadcast(_times);
-
   setupSequence(_times);
-}
-Stepper *
-ExodusTimeSequenceStepper::buildStepper()
-{
-  return new IfConvergedStepper(new FixedPointStepper(_times, 0), new GrowShrinkStepper(0.5, 1.0));
 }

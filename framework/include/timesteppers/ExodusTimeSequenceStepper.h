@@ -31,8 +31,6 @@ class ExodusTimeSequenceStepper : public TimeSequenceStepperBase
 public:
   ExodusTimeSequenceStepper(const InputParameters & parameters);
 
-  virtual Stepper * buildStepper() override;
-
 protected:
   /// The ExodusII file that is being read
   std::string _mesh_file;
