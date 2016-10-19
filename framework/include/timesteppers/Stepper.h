@@ -313,8 +313,16 @@ private:
 class InstrumentedStepper : public Stepper
 {
 public:
-  InstrumentedStepper() : _stepper(nullptr), _dt_store(0)
+  InstrumentedStepper(double * dt_store = nullptr) : _stepper(nullptr), _dt_store(dt_store), _own(!dt_store)
   {
+    if (!_dt_store)
+      _dt_store = new double(0);
+  }
+
+  virtual ~InstrumentedStepper()
+  {
+    if (_own)
+      delete _dt_store;
   }
 
   virtual double advance(const StepperInfo* si)
@@ -323,8 +331,8 @@ public:
     if (!_stepper)
       throw "InstrumentedStepper's inner stepper not set";
 
-    _dt_store = _stepper->advance(si);
-    return l.val(_dt_store);
+    *_dt_store = _stepper->advance(si);
+    return l.val(*_dt_store);
   }
 
   void setStepper(Stepper* s)
@@ -334,12 +342,13 @@ public:
 
   double * dtPtr()
   {
-    return &_dt_store;
+    return _dt_store;
   }
 
 private:
   Ptr _stepper;
-  double _dt_store;
+  double* _dt_store;
+  bool _own;
 };
 
 // Uses an underlying stepper to compute dt.  If the actuall simulation-used

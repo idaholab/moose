@@ -30,22 +30,18 @@ InputParameters validParams<ConstantDT>()
 ConstantDT::ConstantDT(const InputParameters & parameters) :
     TimeStepper(parameters),
     _constant_dt(getParam<Real>("dt")),
-    _growth_factor(getParam<Real>("growth_factor"))
+    _growth_factor(getParam<Real>("growth_factor")),
+    _last_dt(declareRestartableData<Real>("last_dt", 0))
 {
 }
 
 Stepper*
 ConstantDT::buildStepper()
 {
-  int n_startup_steps = _executioner.n_startup_steps();
-
-  InstrumentedStepper* s = new InstrumentedStepper();
-  *s->dtPtr() = getCurrentDT(); // required for restart
-
+  InstrumentedStepper* s = new InstrumentedStepper(&_last_dt);
   Stepper* inner = new GrowShrinkStepper(0.5, _growth_factor, new ReturnPtrStepper(s->dtPtr()));
   inner = new MinOfStepper(new ConstStepper(_constant_dt), inner, 0);
-  inner = new StartupStepper(inner, _constant_dt, n_startup_steps);
-
+  inner = new StartupStepper(inner, _constant_dt, _executioner.n_startup_steps());
   s->setStepper(inner);
   return s;
 }

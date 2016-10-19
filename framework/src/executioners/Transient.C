@@ -215,32 +215,36 @@ Transient::init()
   if (_t_step == 0)
     _t_step = 1;
 
+  StepperInfo si = { };
+  si.time = _time;
+  si.prev_prev_prev_dt = si.prev_prev_dt;
+  si.prev_prev_dt = _prev_dt;
+  si.prev_dt = _dt;
+  si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
+  si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
+  si.prev_solve_time_secs = _solve_time;
+  si.step_count = _steps_taken;
+  si.nonlin_iters = _nl_its;
+  si.lin_iters = _l_its;
+  si.prev_converged = true;
+  si.converged = _last_solve_converged;
+  Stepper* s = _time_stepper->buildStepper();
+  if (s)
+  {
+    _stepper.reset(s);
+    _new_dt = _stepper->advance(&si);
+  }
+
   if (_t_step > 1) //Recover case
+  {
     _dt_old = _dt;
+    _new_dt = _dt;
+  }
 
   else
   {
     computeDT();
 //  _dt = computeConstrainedDT();
-    StepperInfo si = { };
-    si.time = _time;
-    si.prev_prev_prev_dt = si.prev_prev_dt;
-    si.prev_prev_dt = _prev_dt;
-    si.prev_dt = _dt;
-    si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
-    si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
-    si.prev_solve_time_secs = _solve_time;
-    si.step_count = _steps_taken;
-    si.nonlin_iters = _nl_its;
-    si.lin_iters = _l_its;
-    si.prev_converged = true;
-    si.converged = true;
-    Stepper* s = _time_stepper->buildStepper();
-    if (s)
-    {
-      _stepper.reset(s);
-      _new_dt = _stepper->advance(&si);
-    }
     _dt = getDT();
   }
 }
@@ -731,6 +735,7 @@ Transient::getDT()
     DBG << "NEWDT\n";
     return _new_dt;
   }
+  DBG << "OLDDT\n";
   return _time_stepper->getCurrentDT();
 }
 

@@ -32,6 +32,7 @@ public:
 private:
   const Real _constant_dt;
   const Real _growth_factor;
+  Real & _last_dt;
 };
 
 #endif /* CONSTANTDT_H */
