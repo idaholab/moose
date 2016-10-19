@@ -80,7 +80,7 @@
     [./brine]
       type = BrineFluidProperties
     [../]
-  []
+  [../]
 []
 
 [Materials]
@@ -122,6 +122,7 @@
     variable = psat
     elementid = 2
   [../]
+[]
 
 [Outputs]
   csv = true

@@ -59,7 +59,7 @@
     [./brine]
       type = BrineFluidProperties
     [../]
-  []
+  [../]
 []
 
 [Materials]
