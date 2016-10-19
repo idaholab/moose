@@ -1,29 +1,30 @@
 /* Collapse Nav-bar correctly */
 @media(min-width: 768px) {
     .bs-sidebar.affix {
-	top: 110px;
+        top: 110px;
     }
     div.col-md-3 {
-	margin-top: 60px;
+        margin-top: 60px;
     }
 }
 @media(min-width:992px) {
     .bs-sidebar.affix {
-	top: 140px;
+        top: 140px;
 }
     div.col-md-9 {
-	margin-top: 50px;
+        margin-top: 50px;
     }
 }
 @media(min-width:1200px) {
     .bs-sidebar.affix {
-	top: 90px;
+        top: 90px;
 }
     div.col-md-9 {
-	margin-top: 5px;
+        margin-top: 5px;
     }
 }
 /* End Collapse Nav-bar correctly */
+
 
 /* Get rid of the Previous and Next buttons */
 ul.nav.navbar-right > li:nth-of-type(2), ul.nav.navbar-right > li:nth-of-type(3){
@@ -38,14 +39,24 @@ a {
     color: #0333a5;
     text-decoration: none;
 }
-
-a:hover, a:focus {
+a:hover,
+a:focus {
     color: #0333a5;
     text-decoration: underline;
 }
 
+a:focus {
+    outline: thin dotted;
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px
+}
+
+
 /* NavBar hover color modification (bluish to more closely match our </a> links color) */
-.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus , .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus,
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
     color: #b7c0ff;
 }
 
@@ -155,6 +166,49 @@ Slide style
 .reveal .slides > section {
   text-align: left;
 }
+
+/* ObjectSyntax Table width alignment */
+/* Turn off that dumb table hover and stripe stuff */
+tbody tr:hover td.hasRowSpan {
+    background-color: none;   /* or whatever color you want */
+}
+.moose-object-param-table > tbody > tr >th:nth-of-type(1) {
+    width: 100px;
+}
+.moose-object-param-table > tbody > tr >th:nth-of-type(2) {
+    width: 300px;
+}
+.moose-object-param-table > tbody > tr > td {
+    border-top: unset;
+    text-align: justify;
+}
+.moose-object-param-table > tbody > tr > td > code {
+    font-size: 80%;
+}
+
+.moose-object-param-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.row-identifier {
+    color: #555;
+    font-style:  italic
+}
+.row-even {
+    background-color: #f6f6f6;
+}
+.param-header {
+    background-color: #ccc;
+    text-align: left;
+    padding-left: 6px;
+    font-size: large;
+}
+.param-description {
+    width: 50%;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
 /* MOOSE Build status CSS */
 .boxed_job_status_Passed {
     vertical-align: middle;

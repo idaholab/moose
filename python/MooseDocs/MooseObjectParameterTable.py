@@ -1,4 +1,8 @@
+from markdown.util import etree
+import logging
 import re
+log = logging.getLogger(__name__)
+
 
 from MarkdownTable import MarkdownTable
 
@@ -7,12 +11,13 @@ class MooseObjectParameterTable(MarkdownTable):
   A class for creating markdown tables from parameter data parsed from MOOSE yaml data.
   """
 
+  PARAMETER_TABLE_ROW_NAMES = ['Information', '', 'Description']
   PARAMETER_TABLE_COLUMNS = ['name', 'cpp_type', 'default', 'description']
-  PARAMETER_TABLE_COLUMN_NAMES = ['Name', 'Type', 'Default', 'Description']
+  PARAMETER_TABLE_COLUMN_NAMES = ['Name:', 'Type:', 'Default:', 'Description']
 
   def __init__(self, **kwargs):
-    super(MooseObjectParameterTable, self).__init__(*self.PARAMETER_TABLE_COLUMN_NAMES)
     self._parameters = []
+    self._rows = []
 
   def addParam(self, param):
     """
@@ -24,18 +29,84 @@ class MooseObjectParameterTable(MarkdownTable):
 
     self._parameters.append(param)
 
-    items = []
-    for key in self.PARAMETER_TABLE_COLUMNS:
-      items.append(self._formatParam(param[key], key, param['cpp_type']))
-    self.addRow(*items)
+    items = {}
+
+    for idx, key in enumerate(self.PARAMETER_TABLE_COLUMNS):
+      items[self.PARAMETER_TABLE_COLUMN_NAMES[idx]] = self._formatParam(param[key], key, param['cpp_type'])
+    for key in self.PARAMETER_TABLE_COLUMN_NAMES:
+      if key == self.PARAMETER_TABLE_COLUMN_NAMES[0]:
+        self._rows.append([self.PARAMETER_TABLE_COLUMN_NAMES[0], items[key], items[self.PARAMETER_TABLE_COLUMN_NAMES[-1]]])
+      elif key != self.PARAMETER_TABLE_COLUMN_NAMES[-1]:
+        self._rows.append([key, items[key]])
 
   def html(self):
     """
     Return html for the table including special class name indicating that this is a parameter table.
     """
-    el = super(MooseObjectParameterTable, self).html()
-    el.set('class', 'moose-object-param-table')
-    return el
+
+    table = etree.Element('table')
+    table.set('class', 'moose-object-param-table')
+    tr = etree.SubElement(table, 'tr')
+    for header in self.PARAMETER_TABLE_ROW_NAMES:
+      th = etree.SubElement(tr, 'th')
+      th.set('class','param-header')
+      th.text = header
+
+    for idr, row in enumerate(self._rows):
+      tr = etree.SubElement(table, 'tr')
+      for idd, d in enumerate(row):
+        td = etree.SubElement(tr, 'td')
+
+        # Apply indentifier for first column
+        if idd == 0:
+          td.set('class', 'row-identifier')
+
+        # Apply stripe class (for 3 rows) when necessary
+        if self._canStripe(idr, len(self._rows), 3):
+          if td.get('class') is not None:
+            td.set('class', ' '.join(['row-even', td.get('class')]))
+          else:
+            td.set('class', 'row-even')
+
+        # Apply a rowspan for description field only
+        if row[0] == self.PARAMETER_TABLE_COLUMN_NAMES[0] and idd == 2:
+          td.set('rowspan', '3')
+          td.set('valign', 'top')
+          if td.get('class') is not None:
+            td.set('class', ' '.join(['param-description', td.get('class')]))
+          else:
+            td.set('class', 'param-description')
+
+        # Add content to <td>
+        if isinstance(d, str):
+          td.text = d
+        else:
+          td.append(d)
+
+      # Create another row to simulate a spacer
+      if row[0] == self.PARAMETER_TABLE_COLUMN_NAMES[-2]:
+        tr = etree.SubElement(table, 'tr')
+        tr.set('class', 'param-rowspacer')
+        for spacer in self.PARAMETER_TABLE_COLUMN_NAMES:
+          td = etree.SubElement(tr, 'td')
+          td.set('class', 'row-spacer')
+
+    return table
+
+  def _canStripe(self, current_row, total_rows, iterator):
+    """
+    returns True if we should set this cell as a stripped cell based on inputs
+
+    Args:
+      current_row[int]: The current row we are on
+      total_rows[int]: The total number of rows
+      iterator[int]: The amount of rows to include in a section
+    """
+    every_nth = range(total_rows)[::iterator]
+    for x in every_nth[::2]:
+      if current_row in [i for i in xrange(x, (x + iterator), 1)]:
+        return True
+    return False
 
   def _formatParam(self, param, key, ptype):
     """

@@ -29,12 +29,11 @@ class MarkdownTable(object):
     Add a row to the table.
 
     Args:
-      *args: The items to include in the table (must be the same length as the supplied headers).
+      *args: The items to include in the table.
     """
-
-    if len(args) != len(self._column_headers):
-      msg = "The number of supplied items ({}) does not match the number of columns ({}).".format(len(args), len(self._column_headers))
-      raise Exception(msg)
+    # if len(args) != len(self._column_headers):
+    #   msg = "The number of supplied items ({}) does not match the number of columns ({}).".format(len(args), len(self._column_headers))
+    #   raise Exception(msg)
 
     for i in range(len(self._column_headers)):
       self._column_widths[i] = max(self._column_widths[i], len(args[i]))
