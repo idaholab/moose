@@ -38,11 +38,24 @@ ConstantDT::ConstantDT(const InputParameters & parameters) :
 Stepper*
 ConstantDT::buildStepper()
 {
-  InstrumentedStepper* s = new InstrumentedStepper(&_last_dt);
-  Stepper* inner = new GrowShrinkStepper(0.5, _growth_factor, new ReturnPtrStepper(s->dtPtr()));
+  Stepper* inner = new GrowShrinkStepper(0.5, _growth_factor, new ReturnPtrStepper(&_last_dt));
   inner = new MinOfStepper(new ConstStepper(_constant_dt), inner, 0);
   inner = new StartupStepper(inner, _constant_dt, _executioner.n_startup_steps());
+  inner = new IfConvergedStepper(inner, new GrowShrinkStepper(0.5, 1.0));
+
+  InstrumentedStepper* s = new InstrumentedStepper(&_last_dt);
   s->setStepper(inner);
   return s;
 }
 
+Real
+ConstantDT::computeInitialDT()
+{
+  return _constant_dt;
+}
+
+Real
+ConstantDT::computeDT()
+{
+  return std::min(_constant_dt, _growth_factor * getCurrentDT());
+}

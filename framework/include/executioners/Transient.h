@@ -83,7 +83,7 @@ public:
 
   virtual void postExecute() override;
 
-  virtual void computeDT();
+  virtual void computeDT(bool first = false);
 
   virtual void preStep();
 
@@ -314,11 +314,12 @@ protected:
   unsigned int & _l_its;
 
   double _solve_time;
-  StepperInfo _si;
   std::vector<Real> & _soln_nonlin;
   std::vector<Real> & _soln_aux;
   std::vector<Real> & _soln_predicted;
   Real & _prev_dt;
+  StepperInfo _si;
+  bool _initialized;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

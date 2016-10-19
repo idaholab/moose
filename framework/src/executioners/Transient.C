@@ -147,7 +147,9 @@ Transient::Transient(const InputParameters & parameters) :
     _soln_nonlin(declareRestartableData<std::vector<Real> >("soln_nonlin", std::vector<Real>())),
     _soln_aux(declareRestartableData<std::vector<Real> >("soln_aux", std::vector<Real>())),
     _soln_predicted(declareRestartableData<std::vector<Real> >("soln_predicted", std::vector<Real>())),
-    _prev_dt(declareRestartableData<Real>("prev_dt", 0))
+    _prev_dt(declareRestartableData<Real>("prev_dt", 0)),
+    _si({}),
+    _initialized(false)
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
@@ -205,6 +207,22 @@ Transient::init()
 
   _problem.initialSetup();
   _time_stepper->init();
+  
+  Stepper* inner = _time_stepper->buildStepper();
+  if (inner)
+  {
+    std::vector<double> sync_times;
+    for (auto val : _app.getOutputWarehouse().getSyncTimes())
+      sync_times.push_back(val);
+
+    // these are global/sim constraints for *EVERY* time inner:
+    inner = new DTLimitStepper(inner, dtMin(), dtMax(), false);
+    if (sync_times.size() > 0)
+      inner = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), inner, timestepTol());
+    if (!_app.halfTransient())
+      inner = new BoundsStepper(inner, getStartTime(), endTime(), false);
+    _stepper.reset(inner);
+  }
 
   if (_app.isRestarting())
     _time_old = _time;
@@ -215,37 +233,18 @@ Transient::init()
   if (_t_step == 0)
     _t_step = 1;
 
-  StepperInfo si = { };
-  si.time = _time;
-  si.prev_prev_prev_dt = si.prev_prev_dt;
-  si.prev_prev_dt = _prev_dt;
-  si.prev_dt = _dt;
-  si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
-  si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
-  si.prev_solve_time_secs = _solve_time;
-  si.step_count = _steps_taken;
-  si.nonlin_iters = _nl_its;
-  si.lin_iters = _l_its;
-  si.prev_converged = true;
-  si.converged = _last_solve_converged;
-  Stepper* s = _time_stepper->buildStepper();
-  if (s)
-  {
-    _stepper.reset(s);
-    _new_dt = _stepper->advance(&si);
-  }
-
   if (_t_step > 1) //Recover case
   {
     _dt_old = _dt;
     _new_dt = _dt;
+    DBG << "RECOVERING (" << this << "): dtold=newdt=" << _dt_old << "\n";
   }
-
   else
   {
-    computeDT();
+    computeDT(true);
 //  _dt = computeConstrainedDT();
     _dt = getDT();
+    DBG << "NOTRECOVERING (" << this << "): dtold=" << _dt_old << ", dt=" << _dt << ", newdt=" << _new_dt << "\n";
   }
 }
 
@@ -269,22 +268,6 @@ int Transient::n_startup_steps()
 void
 Transient::execute()
 {
-  Stepper* inner = _time_stepper->buildStepper();
-  if (inner)
-  {
-    std::vector<double> sync_times;
-    for (auto val : _app.getOutputWarehouse().getSyncTimes())
-      sync_times.push_back(val);
-
-    // these are global/sim constraints for *EVERY* time inner:
-    inner = new DTLimitStepper(inner, dtMin(), dtMax(), false);
-    if (sync_times.size() > 0)
-      inner = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), inner, timestepTol());
-    if (!_app.halfTransient())
-      inner = new BoundsStepper(inner, getStartTime(), endTime(), false);
-  }
-  _stepper.reset(inner);
-
   preExecute();
 
   // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
@@ -295,19 +278,6 @@ Transient::execute()
     _problem.advanceState();
 
   // Start time loop...
-  StepperInfo si = { };
-  si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
-  si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
-  si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector("predicted_u1", true, GHOSTED);
-  si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
-
-  if (_soln_nonlin.size() == 0)
-  {
-    _soln_nonlin.resize(si.soln_nonlin->size());
-    _soln_aux.resize(si.soln_aux->size());
-    _soln_predicted.resize(si.soln_nonlin->size());
-  }
-
   bool first = true; // needs to not be restartable data
   while (true)
   {
@@ -315,36 +285,12 @@ Transient::execute()
 
     if (_first != true)
       incrementStepOrReject();
-
-    si.time = _time;
-    si.prev_prev_prev_dt = si.prev_prev_dt;
-    si.prev_prev_dt = _prev_dt;
-    si.prev_dt = _dt;
-    si.prev_prev_prev_solve_time_secs = si.prev_prev_solve_time_secs;
-    si.prev_prev_solve_time_secs = si.prev_solve_time_secs;
-    si.prev_solve_time_secs = _solve_time;
-    si.step_count = _steps_taken;
-    si.nonlin_iters = _nl_its;
-    si.lin_iters = _l_its;
-    si.prev_converged = si.converged || first;
-    // A step_count == 1 condition is not sufficient to account for
-    // restart/recover cases where step_count is already something else.
-    si.converged = _last_solve_converged || first;
-    *si.soln_nonlin = _soln_nonlin;
-    *si.soln_aux =  _soln_aux;
-    *si.soln_predicted = _soln_predicted;
-    _prev_dt = si.prev_dt; // for restart
-
-    if (_stepper)
-      _new_dt = _stepper->advance(&si);
-
-    first = false;
     _first = false;
 
     if (!keepGoing())
       break;
     preStep();
-    computeDT();
+    computeDT(first);
     double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
     _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
@@ -354,12 +300,13 @@ Transient::execute()
     Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
     if (p)
       p->solutionPredictor().localize(_soln_predicted);
+    double constr_legacy_dt = _dt;
+    if (_stepper)
+      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", _steps_taken, _time, _new_dt, legacy_dt, constr_legacy_dt);
 
     endStep();
     postStep();
-    double constr_legacy_dt = _dt;
-    if (_stepper)
-      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", si.step_count, si.time, _new_dt, legacy_dt, constr_legacy_dt);
+    first = false;
   }
 
   if (!_app.halfTransient())
@@ -368,9 +315,49 @@ Transient::execute()
 }
 
 void
-Transient::computeDT()
+Transient::computeDT(bool first)
 {
+  DBG << "COMPUTE (" << this << ") first=" << first << "\n";
   _time_stepper->computeStep(); // This is actually when DT gets computed
+
+  if (!_initialized)
+  {
+    _initialized = true;
+    _si = {};
+    _si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
+    _si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
+    _si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector("predicted_u1", true, GHOSTED);
+    _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
+    if (_soln_nonlin.size() == 0)
+    {
+      _soln_nonlin.resize(_si.soln_nonlin->size());
+      _soln_aux.resize(_si.soln_aux->size());
+      _soln_predicted.resize(_si.soln_nonlin->size());
+    }
+  }
+  
+  _si.time = _time;
+  _si.prev_prev_prev_dt = _si.prev_prev_dt;
+  _si.prev_prev_dt = _prev_dt;
+  _si.prev_dt = _dt;
+  _si.prev_prev_prev_solve_time_secs = _si.prev_prev_solve_time_secs;
+  _si.prev_prev_solve_time_secs = _si.prev_solve_time_secs;
+  _si.prev_solve_time_secs = _solve_time;
+  _si.step_count = _steps_taken;
+  _si.nonlin_iters = _nl_its;
+  _si.lin_iters = _l_its;
+  _si.prev_converged = _si.converged || first;
+  // A step_count == 1 condition is not sufficient to account for
+  // restart/recover cases where step_count is already something else.
+  _si.converged = _last_solve_converged || first;
+  *_si.soln_nonlin = _soln_nonlin;
+  *_si.soln_aux =  _soln_aux;
+  *_si.soln_predicted = _soln_predicted;
+  _prev_dt = _si.prev_dt; // for restart
+  printf("COMPUTEPARAMS step_count=%d, time=%f, prevdt=%f, converged=%d\n", _si.step_count, _si.time, _si.prev_dt, _si.converged);
+
+  if (_stepper)
+    _new_dt = _stepper->advance(&_si);
 }
 
 void
@@ -407,6 +394,7 @@ Transient::incrementStepOrReject()
     _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
     _time_stepper->rejectStep();
+    _last_solve_converged = false; // TODO: discover why this is not already correctly set...
     _time = _time_old;
   }
 
@@ -473,6 +461,8 @@ Transient::solveStep(Real input_dt)
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
+  _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps) and the early-return just below
+  DBG << "SPOT1 (" << this << "): last_solve_converge=" << _last_solve_converged << "\n";
 
   if (!_multiapps_converged)
     return;
@@ -505,7 +495,8 @@ Transient::solveStep(Real input_dt)
   gettimeofday(&solve_end, NULL);
   _solve_time = (static_cast<double>(solve_end.tv_sec  - solve_start.tv_sec) +
                                              static_cast<double>(solve_end.tv_usec - solve_start.tv_usec)*1.e-6);
-
+  _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps)
+  DBG << "SPOT2 (" << this << "): last_solve_converge=" << _last_solve_converged << "\n";
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())
   {
@@ -732,10 +723,10 @@ Transient::getDT()
 {
   if (_stepper && USE_NEW_STEPPER)
   {
-    DBG << "NEWDT\n";
+    DBG << "NEWDT (" << this << ")=" << _new_dt << "\n";
     return _new_dt;
   }
-  DBG << "OLDDT\n";
+  DBG << "OLDDT (" << this << ")=" << _time_stepper->getCurrentDT() << ", newdt=" << _new_dt << "\n";
   return _time_stepper->getCurrentDT();
 }
 

@@ -2806,7 +2806,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     _console << COLOR_CYAN << "\nExecuting MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
 
     bool success = true;
-
+    // TODO: success ret vals of early multi_apps are overwritten by later ones - fix this.
     for (const auto & multi_app : multi_apps)
       success = multi_app->solveStep(_dt, _time, auto_advance);
 
@@ -3572,7 +3572,9 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _currently_computing_jacobian = true;
 
     execTransfers(EXEC_NONLINEAR);
+    printf("start exec multiapp\n");
     execMultiApps(EXEC_NONLINEAR);
+    printf("end exec multiapp\n");
 
     for (unsigned int tid = 0; tid < n_threads; tid++)
       reinitScalars(tid);

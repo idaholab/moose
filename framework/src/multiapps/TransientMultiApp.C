@@ -393,6 +393,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   catch (MultiAppSolveFailure & e)
   {
     mooseWarning(e.what());
+    DBG << "THIS=" << this << "\n";
     _console << "Failed to Solve MultiApp " << name() << ", attempting to recover." << std::endl;
     return_value = false;
   }
