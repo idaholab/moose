@@ -232,9 +232,9 @@ double NDInterpolation::integralCellValue(std::vector<std::vector<double> > cell
         double value = 0.0;
 
         int numberOfVerteces = cell.size();
-        double sign = 1.0;
+        //double sign = 1.0;
 
-        int counter = 1;
+        //int counter = 1;
 
 //        for(int i=numberOfVerteces; i>0; i--){
 //                value += interpolateAt(cell.at(i-1)) * sign;

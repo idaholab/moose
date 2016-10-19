@@ -882,8 +882,8 @@ BasicBetaDistribution::Pdf(double x){
 
 double
 BasicBetaDistribution::Cdf(double x){
-  double scale = _dist_parameters.find("scale") ->second;
-  double low   = _dist_parameters.find("low"  ) ->second;
+  //double scale = _dist_parameters.find("scale") ->second;
+  //double low   = _dist_parameters.find("low"  ) ->second;
   return BasicTruncatedDistribution::Cdf( x );// -low)/scale ); scaling happens in untrCdf
 }
 
