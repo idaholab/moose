@@ -40,6 +40,7 @@ markdown_extensions:
               Examples:
                   - ../examples
                   - ../modules/phase_field/examples
+                  - ../modules/combined/examples
               Tutorials:
                   - ../tutorials
                   - ../modules/tensor_mechanics/tutorials
@@ -53,6 +54,12 @@ markdown_extensions:
                       - ../framework/src
                       - ../framework/include
                   install: content/framework/systems
+              phase_field:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - ../modules/phase_field/src
+                      - ../modules/phase_field/include
+                  install: content/modules/phase_field/systems
               tensor_mechanics:
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
