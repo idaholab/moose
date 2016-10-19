@@ -16,8 +16,9 @@
 #include "DisplacedProblem.h"
 
 DisplacedSystem::DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name, Moose::VarKindType var_kind) :
-    SystemTempl<TransientExplicitSystem>(problem, name, var_kind),
-    _undisplaced_system(undisplaced_system)
+    SystemBase(problem, name, var_kind),
+    _undisplaced_system(undisplaced_system),
+    _sys(problem.es().add_system<TransientExplicitSystem>(name))
 {
 }
 
@@ -38,4 +39,3 @@ DisplacedSystem::getVector(const std::string & name)
   else
     return _undisplaced_system.getVector(name);
 }
-

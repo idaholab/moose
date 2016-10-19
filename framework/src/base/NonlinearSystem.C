@@ -145,9 +145,10 @@ namespace Moose {
 
 
 NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
-    SystemTempl<TransientNonlinearImplicitSystem>(fe_problem, name, Moose::VAR_NONLINEAR),
+    SystemBase(fe_problem, name, Moose::VAR_NONLINEAR),
     ConsoleStreamInterface(fe_problem.getMooseApp()),
     _fe_problem(fe_problem),
+    _sys(fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name)),
     _last_rnorm(0.),
     _last_nl_rnorm(0.),
     _l_abs_step_tol(1e-10),
@@ -289,7 +290,7 @@ void
 NonlinearSystem::restoreSolutions()
 {
   // call parent
-  SystemTempl<TransientNonlinearImplicitSystem>::restoreSolutions();
+  SystemBase::restoreSolutions();
   // and update _current_solution
   _current_solution = _sys.current_local_solution.get();
 }
