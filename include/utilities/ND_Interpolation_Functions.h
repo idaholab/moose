@@ -18,7 +18,6 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <stdio.h>
 #include "randomClass.h"
 
 bool checkUpperBound(double upper_bound, std::vector<double> values);

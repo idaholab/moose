@@ -19,11 +19,9 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
-#include <stdio.h>
 #include <iostream>
 #include <string>
 #include <iostream>
-#include <stdio.h>
 #include <cmath> // to use erfc error function
 #include <ctime> // for rand() and srand()
 #include <cstdio>

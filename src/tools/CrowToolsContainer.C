@@ -11,7 +11,6 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include <stdio.h>
 
 #ifndef mooseError
 #define mooseError(msg) { std::cerr << "\n\n" << msg << "\n\n"; }

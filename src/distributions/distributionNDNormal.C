@@ -11,7 +11,6 @@
 #include "DistributionContainer.h"
 #include <stdexcept>
 #include <iostream>
-#include <stdio.h>
 #include "MDreader.h"
 #include "distributionFunctions.h"
 #include <cmath>

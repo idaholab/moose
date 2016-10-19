@@ -1,5 +1,4 @@
 #include "ND_Interpolation_Functions.h"
-#include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
