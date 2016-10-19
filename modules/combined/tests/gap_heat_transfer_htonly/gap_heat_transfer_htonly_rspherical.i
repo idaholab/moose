@@ -172,6 +172,7 @@
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'
   [../]
+[]
 
 
 [Outputs]

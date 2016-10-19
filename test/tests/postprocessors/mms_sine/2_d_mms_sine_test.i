@@ -68,6 +68,7 @@
     type = MMSConstantAux
     variable = nodal_aux
   [../]
+[]
 
 [BCs]
   active = 'all_u'
