@@ -57,6 +57,7 @@ protected:
   ///
   NumericVector<Number> & _u1;
   NumericVector<Number> & _aux1;
+  NumericVector<Number> & _pred1;
 
   /// dt of the big step
   Real & _dt_full;
