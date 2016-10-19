@@ -15,5 +15,7 @@
     abs_zero = 1e-08
     scale_refine = 1
     compiler = 'GCC CLANG'
+    heavy = true
+    max_time = 500
   [../]
 []
