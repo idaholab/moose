@@ -34,8 +34,9 @@
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name) :
-    SystemTempl<TransientExplicitSystem>(subproblem, name, Moose::VAR_AUXILIARY),
+    SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     _fe_problem(subproblem),
+    _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _need_serialized_solution(false)
@@ -126,7 +127,7 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
 void
 AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
-  SystemTempl<TransientExplicitSystem>::addVariable(var_name, type, scale_factor, active_subdomains);
+  SystemBase::addVariable(var_name, type, scale_factor, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));

@@ -55,7 +55,7 @@ template <typename T> class SparseMatrix;
  *
  * It is a part of FEProblem ;-)
  */
-class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>,
+class NonlinearSystem : public SystemBase,
                         public ConsoleStreamInterface
 {
 public:
@@ -467,8 +467,19 @@ public:
    */
   virtual Real relativeSolutionDifferenceNorm();
 
+  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+
+  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+
+  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+
+  virtual TransientNonlinearImplicitSystem & sys() { return _sys; }
+
+  virtual System & system() override { return _sys; }
+
 public:
   FEProblem & _fe_problem;
+  TransientNonlinearImplicitSystem & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _last_nl_rnorm;
