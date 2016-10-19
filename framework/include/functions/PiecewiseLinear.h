@@ -24,8 +24,8 @@ template<>
 InputParameters validParams<PiecewiseLinear>();
 
 /**
- * Base class for function objects.  Functions override value to supply a
- * value at a point.
+ * Function which provides a piecewise continuous linear interpolation
+ * of a provided (x,y) point data set.
  */
 class PiecewiseLinear : public Piecewise
 {

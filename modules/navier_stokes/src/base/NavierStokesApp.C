@@ -104,6 +104,9 @@
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
 
+// Functions
+#include "WedgeFunction.h"
+
 template<>
 InputParameters validParams<NavierStokesApp>()
 {
@@ -239,6 +242,9 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Materials
   registerMaterial(Air);
+
+  // Functions
+  registerFunction(WedgeFunction);
 }
 
 // External entry point for dynamic syntax association

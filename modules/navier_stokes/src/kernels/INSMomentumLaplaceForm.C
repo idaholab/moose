@@ -38,7 +38,7 @@ Real INSMomentumLaplaceForm::computeQpJacobianViscousPart()
 
 
 
-Real INSMomentumLaplaceForm::computeQpOffDiagJacobianViscousPart(unsigned jvar)
+Real INSMomentumLaplaceForm::computeQpOffDiagJacobianViscousPart(unsigned /*jvar*/)
 {
   return 0.;
 }
