@@ -74,6 +74,8 @@ class Stepper
 {
 public:
   typedef std::unique_ptr<Stepper> Ptr;
+
+  virtual ~Stepper() = default;
   // Implementations of advance should strive to be idempotent.  Return the
   // next value to use as dt.
   virtual double advance(const StepperInfo* si) = 0;
