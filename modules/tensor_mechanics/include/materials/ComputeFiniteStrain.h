@@ -38,8 +38,6 @@ protected:
   const Real & _current_elem_volume;
   std::vector<RankTwoTensor> _Fhat;
 
-  MooseEnum _decomposition_method;
-
 private:
   /// True if this is the first timestep (timestep < 2). At the first
   /// timestep, the change in temperature should be calculated with the reference
@@ -49,6 +47,14 @@ private:
   /// This boolean is delcared as a reference so that the variable is restartable
   /// data:  if we restart, the code will not think it is the first timestep again.
   bool & _step_one;
+
+  enum class DecompMethod
+  {
+    TaylorExpansion,
+    EigenSolution
+  };
+
+  const DecompMethod _decomposition_method;
 };
 
 #endif //COMPUTEFINITESTRAIN_H

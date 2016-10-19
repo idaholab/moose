@@ -35,8 +35,8 @@ ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
     _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
     _current_elem_volume(_assembly.elemVolume()),
     _Fhat(_fe_problem.getMaxQps()),
-    _decomposition_method(getParam<MooseEnum>("decomposition_method")),
-    _step_one(declareRestartableData<bool>("step_one", true))
+    _step_one(declareRestartableData<bool>("step_one", true)),
+    _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>())
 {
 }
 
@@ -136,7 +136,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
 {
   switch (_decomposition_method)
   {
-    case 0:
+    case DecompMethod::TaylorExpansion:
     {
       // inverse of _Fhat
       RankTwoTensor invFhat(_Fhat[_qp].inverse());
@@ -194,7 +194,7 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       break;
     }
 
-    case 1:
+    case DecompMethod::EigenSolution:
     {
       std::vector<Real> e_value(3);
       RankTwoTensor e_vector, N1, N2, N3;
@@ -220,6 +220,6 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
     }
 
     default:
-    mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion or EigenSolution.");
+      mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion or EigenSolution.");
   }
 }
