@@ -14,6 +14,7 @@ template<>
 InputParameters validParams<EBSDReader>()
 {
   InputParameters params = validParams<EulerAngleProvider>();
+  params.addClassDescription("Load and manage DREAM.3D EBSD data files for running simulations on reconstructed microstructures.");
   params.addParam<unsigned int>("custom_columns", 0, "Number of additional custom data columns to read from the EBSD file");
   return params;
 }
