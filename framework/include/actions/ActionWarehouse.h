@@ -106,9 +106,9 @@ public:
   const T & getAction(const std::string & name)
     {
       T* p = NULL;
-      for (unsigned int i=0; i<_all_ptrs.size(); ++i)
+      for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
       {
-        Action * act = _all_ptrs[i].get();
+        auto act = _all_ptrs[i].get();
         if (act->name() == name)
         {
           p = dynamic_cast<T*>(act);
@@ -122,20 +122,26 @@ public:
     }
 
   /**
-   * Retrieve all actions in a specific type.
+   * Retrieve all actions in a specific type ordered by their names.
    */
   template <class T>
-  std::set<const T *> getActions()
+  std::vector<const T *> getActions()
     {
-      std::set<const T*> actions;
-      for (unsigned int i=0; i<_all_ptrs.size(); i++)
+      // we need to create the map first to ensure that all actions in the map are unique
+      // and the actions are sorted by their names
+      std::map<std::string, const T*> actions;
+      for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
       {
-        Action * act = _all_ptrs[i].get();
+        auto act = _all_ptrs[i].get();
         T* p = dynamic_cast<T*>(act);
         if (p)
-          actions.insert(p);
+          actions.insert(std::pair<std::string, const T*>(act->name(), p));
       }
-      return actions;
+      // construct the vector from the map entries
+      std::vector<const T*> action_vector;
+      for (auto & pair : actions)
+        action_vector.push_back(pair.second);
+      return action_vector;
     }
 
   /**
