@@ -191,7 +191,7 @@
   [../]
 
   [./power_law_creep]
-    type = RecomputeRadialReturnPowerLawCreep
+    type = PowerLawCreepStressUpdate
     block = 1
     coefficient = 1.0e-15
     n_exponent = 4

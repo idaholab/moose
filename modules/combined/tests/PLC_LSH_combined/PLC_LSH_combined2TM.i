@@ -240,7 +240,7 @@
   [../]
 
   [./creep]
-    type = RecomputeRadialReturnPowerLawCreep
+    type = PowerLawCreepStressUpdate
     block = 1
     coefficient = 0.5e-7
     n_exponent = 5
@@ -253,7 +253,7 @@
   [../]
 
   [./plas]
-    type = RecomputeRadialReturnIsotropicPlasticity
+    type = IsotropicPlasticityStressUpdate
     block = 1
     hardening_constant = 100
     yield_stress = 20

@@ -21,53 +21,48 @@
   [./isotropic_plasticity_error1]
     type = 'RunException'
     input = 'isotropic_plasticity_errors.i'
-    cli_args = 'Materials/isotropic_plasticity_recompute/hardening_function=harden_func
-    Materials/isotropic_plasticity_recompute/hardening_constant=2
-    Materials/isotropic_plasticity_recompute/yield_stress=50
-    Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
-    Materials/elasticity_tensor/poissons_ratio=0.
-    Materials/isotropic_plasticity_recompute/compute=false'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/isotropic_plasticity/hardening_constant=2
+                Materials/isotropic_plasticity/yield_stress=50
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0'
     expect_err = 'Only the hardening_constant or only the hardening_function can be defined but not both'
   [../]
   [./isotropic_plasticity_error2]
     type = 'RunException'
     input = 'isotropic_plasticity_errors.i'
-    cli_args = 'Materials/isotropic_plasticity_recompute/yield_stress=50
-    Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
-    Materials/elasticity_tensor/poissons_ratio=0.
-    Materials/isotropic_plasticity_recompute/compute=false'
+    cli_args = 'Materials/isotropic_plasticity/yield_stress=50
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0'
     expect_err = 'Either hardening_constant or hardening_function must be defined'
     prereq = 'isotropic_plasticity_error1'
   [../]
   [./isotropic_plasticity_error3]
     type = 'RunException'
     input = 'isotropic_plasticity_errors.i'
-    cli_args = 'Materials/isotropic_plasticity_recompute/hardening_function=harden_func
-    Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
-    Materials/elasticity_tensor/poissons_ratio=0.
-    Materials/isotropic_plasticity_recompute/compute=false'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0'
     expect_err = 'Either yield_stress or yield_stress_function must be given'
     prereq = 'isotropic_plasticity_error2'
   [../]
   [./isotropic_plasticity_error4]
     type = 'RunException'
     input = 'isotropic_plasticity_errors.i'
-    cli_args = 'Materials/isotropic_plasticity_recompute/hardening_function=harden_func
-    Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
-    Materials/elasticity_tensor/poissons_ratio=0.
-    Materials/isotropic_plasticity_recompute/yield_stress=-5
-    Materials/isotropic_plasticity_recompute/compute=false'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0
+                Materials/isotropic_plasticity/yield_stress=-5.0'
     expect_err = 'Yield stress must be greater than zero'
     prereq = 'isotropic_plasticity_error3'
   [../]
   [./isotropic_plasticity_error5]
     type = 'RunException'
     input = 'isotropic_plasticity_errors.i'
-    cli_args = 'Materials/isotropic_plasticity_recompute/hardening_function=harden_func
-    Materials/isotropic_plasticity_recompute/yield_stress=50
-    Materials/elasticity_tensor/type=ComputeElasticityTensor Materials/elasticity_tensor/fill_method=symmetric21
-    Materials/elasticity_tensor/C_ijkl="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21"
-    Materials/isotropic_plasticity_recompute/compute=false'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/isotropic_plasticity/yield_stress=50
+                Materials/elasticity_tensor/type=ComputeElasticityTensor Materials/elasticity_tensor/fill_method=symmetric21
+                Materials/elasticity_tensor/C_ijkl="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21"'
     expect_err = 'Check to ensure that your Elasticity Tensor is truly Isotropic'
     prereq = 'isotropic_plasticity_error4'
   [../]

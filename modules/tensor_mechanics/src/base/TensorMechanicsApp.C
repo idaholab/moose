@@ -74,12 +74,12 @@
 #include "ComputeDeformGradBasedStress.h"
 #include "VolumeDeformGradCorrectedStress.h"
 #include "ComputeReturnMappingStress.h"
-#include "RecomputeRadialReturn.h"
-#include "RecomputeRadialReturnIsotropicPlasticity.h"
-#include "RecomputeRadialReturnIsotropicPowerLawHardening.h"
-#include "RecomputeRadialReturnPowerLawCreep.h"
-#include "RecomputeRadialReturnHyperbolicViscoplasticity.h"
-#include "RecomputeRadialReturnTempDepHardening.h"
+#include "RadialReturnStressUpdate.h"
+#include "IsotropicPlasticityStressUpdate.h"
+#include "IsotropicPowerLawHardeningStressUpdate.h"
+#include "PowerLawCreepStressUpdate.h"
+#include "HyperbolicViscoplasticityStressUpdate.h"
+#include "TemperatureDependentHardeningStressUpdate.h"
 #include "StressBasedChemicalPotential.h"
 #include "FluxBasedStrainIncrement.h"
 #include "GBRelaxationStrainIncrement.h"
@@ -249,12 +249,12 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeDeformGradBasedStress);
   registerMaterial(VolumeDeformGradCorrectedStress);
   registerMaterial(ComputeReturnMappingStress);
-  registerMaterial(RecomputeRadialReturn);
-  registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
-  registerMaterial(RecomputeRadialReturnIsotropicPowerLawHardening);
-  registerMaterial(RecomputeRadialReturnPowerLawCreep);
-  registerMaterial(RecomputeRadialReturnHyperbolicViscoplasticity);
-  registerMaterial(RecomputeRadialReturnTempDepHardening);
+  registerMaterial(RadialReturnStressUpdate);
+  registerMaterial(IsotropicPlasticityStressUpdate);
+  registerMaterial(IsotropicPowerLawHardeningStressUpdate);
+  registerMaterial(PowerLawCreepStressUpdate);
+  registerMaterial(HyperbolicViscoplasticityStressUpdate);
+  registerMaterial(TemperatureDependentHardeningStressUpdate);
   registerMaterial(StressBasedChemicalPotential);
   registerMaterial(FluxBasedStrainIncrement);
   registerMaterial(GBRelaxationStrainIncrement);

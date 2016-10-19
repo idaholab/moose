@@ -1,4 +1,4 @@
-# This is a test of the RecomputeRadialReturnHyperbolicViscoplasticity model
+# This is a test of the HyperbolicViscoplasticityStressUpdate model
 # using the small strain formulation. The material is a visco-plastic material
 # i.e. a time-dependent linear strain hardening plasticity model.
 # A similar problem was run in Abaqus with exactly the same result, although the element
@@ -143,8 +143,8 @@
     block = 1
   [../]
 
-  [./viscoplasticity_recompute]
-    type = RecomputeRadialReturnHyperbolicViscoplasticity
+  [./viscoplasticity]
+    type = HyperbolicViscoplasticityStressUpdate
     block = 1
     yield_stress = 10.0
     hardening_constant = 100.0
@@ -158,7 +158,7 @@
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 1
-    return_mapping_models = 'viscoplasticity_recompute'
+    return_mapping_models = 'viscoplasticity'
   [../]
 []
 
