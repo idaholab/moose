@@ -75,24 +75,16 @@ TimeStepper::computeStep()
     _has_reset_dt = true;
 
     if (converged())
-    {DBG << "computeInitial\n";
       _current_dt = computeInitialDT();
-      }
     else
-    {DBG << "computeFailedInitial\n";
       _current_dt = computeFailedDT();
-      }
   }
   else
   {
     if (converged())
-     {DBG << "computeDT\n";
      _current_dt = computeDT();
-     }
     else
-    {DBG << "computeFailed\n";
       _current_dt = computeFailedDT();
-      }
   }
 }
 

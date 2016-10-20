@@ -1,13 +1,14 @@
 #pragma once
 
-#define MAKETOGETHER(a,b) a##b
-#define DBG MAKETOGETHER(std::c,out)
-
 #include <functional>
 
 #include "LinearInterpolation.h"
 #include "MooseUtils.h"
 #include "libmesh/numeric_vector.h"
+
+#define MAKETOGETHER(a,b) a##b
+#define DBG MAKETOGETHER(std::c,out)
+#define STEPPER_LOGGING true
 
 class Logger
 {
@@ -705,20 +706,3 @@ private:
   double _e_tol;
   double _scale_param;
 };
-
-class DT2Stepper : public Stepper
-{
-public:
-  DT2Stepper()
-  {
-  }
-
-  virtual double advance(const StepperInfo* si)
-  {
-    throw "unimplemented";
-  }
-
-private:
-  int foo;
-};
-

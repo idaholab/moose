@@ -238,14 +238,11 @@ Transient::init()
   {
     _dt_old = _dt;
     _new_dt = _dt;
-    DBG << "RECOVERING (" << this << "): dtold=newdt=" << _dt_old << "\n";
   }
   else
   {
     computeDT(true);
-//  _dt = computeConstrainedDT();
     _dt = getDT();
-    DBG << "NOTRECOVERING (" << this << "): dtold=" << _dt_old << ", dt=" << _dt << ", newdt=" << _new_dt << "\n";
   }
 
   _t_step_backup = _t_step;
@@ -325,7 +322,6 @@ Transient::execute()
 void
 Transient::computeDT(bool first)
 {
-  DBG << "COMPUTE (" << this << ") first=" << first << "\n";
   _time_stepper->computeStep(); // This is actually when DT gets computed
 
   if (!_initialized)
@@ -363,7 +359,6 @@ Transient::computeDT(bool first)
   *_si.soln_aux =  _soln_aux;
   *_si.soln_predicted = _soln_predicted;
   _prev_dt = _si.prev_dt; // for restart
-  printf("COMPUTEPARAMS step_count=%d, time=%f, prevdt=%f, converged=%d\n", _si.step_count, _si.time, _si.prev_dt, _si.converged);
 
   if (_stepper)
     _new_dt = _stepper->advance(&_si);
@@ -472,7 +467,6 @@ Transient::solveStep(Real input_dt)
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
   _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps) and the early-return just below
-  DBG << "SPOT1 (" << this << "): last_solve_converge=" << _last_solve_converged << "\n";
 
   if (!_multiapps_converged)
     return;
@@ -506,7 +500,6 @@ Transient::solveStep(Real input_dt)
   _solve_time = (static_cast<double>(solve_end.tv_sec  - solve_start.tv_sec) +
                                              static_cast<double>(solve_end.tv_usec - solve_start.tv_usec)*1.e-6);
   _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps)
-  DBG << "SPOT2 (" << this << "): last_solve_converge=" << _last_solve_converged << "\n";
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())
   {
@@ -732,11 +725,7 @@ Real
 Transient::getDT()
 {
   if (_stepper && USE_NEW_STEPPER)
-  {
-    DBG << "NEWDT (" << this << ")=" << _new_dt << "\n";
     return _new_dt;
-  }
-  DBG << "OLDDT (" << this << ")=" << _time_stepper->getCurrentDT() << ", newdt=" << _new_dt << "\n";
   return _time_stepper->getCurrentDT();
 }
 
