@@ -94,7 +94,7 @@ protected:
   std::vector<std::string> _variable_names;
 
   /// What to sort by
-  unsigned int _sort_by;
+  const unsigned int _sort_by;
 
   /// x coordinate of the points
   VectorPostprocessorValue & _x;
@@ -107,18 +107,6 @@ protected:
   VectorPostprocessorValue & _id;
 
   std::vector<VectorPostprocessorValue *> _values;
-
-  /// x coordinate of the points
-  VectorPostprocessorValue _x_tmp;
-  /// y coordinate of the points
-  VectorPostprocessorValue _y_tmp;
-  /// x coordinate of the points
-  VectorPostprocessorValue _z_tmp;
-
-  /// The node ID of each point
-  VectorPostprocessorValue _id_tmp;
-
-  std::vector<VectorPostprocessorValue> _values_tmp;
 };
 
 #endif
