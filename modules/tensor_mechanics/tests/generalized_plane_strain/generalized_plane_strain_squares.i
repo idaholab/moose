@@ -1,21 +1,22 @@
-[GlobalParams]
-  order = FIRST
-  family = LAGRANGE
-  displacements = 'disp_x disp_y'
-  scalar_strain_zz = scalar_strain_zz
-  block = 1
-[]
-
 [Mesh]
-  file = square.e
+  file = 2squares.e
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
   [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./disp_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
-  [./scalar_strain_zz]
+  [./scalar_strain_zz1]
+    order = FIRST
+    family = SCALAR
+  [../]
+  [./scalar_strain_zz2]
     order = FIRST
     family = SCALAR
   [../]
@@ -23,10 +24,16 @@
 
 [AuxVariables]
   [./temp]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./saved_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./saved_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./stress_xx]
@@ -65,19 +72,36 @@
 []
 
 [Postprocessors]
-  [./react_z]
+  [./react_z1]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
+    block = 1
+  [../]
+  [./react_z2]
+    type = MaterialTensorIntegral
+    rank_two_tensor = stress
+    index_i = 2
+    index_j = 2
+    block = 2
   [../]
 []
 
 [Modules]
   [./TensorMechanics]
     [./GeneralizedPlaneStrain]
-      [./gps]
+      [./gps1]
         use_displaced_mesh = true
+        displacements = 'disp_x disp_y'
+        scalar_strain_zz = scalar_strain_zz1
+        block = '1'
+      [../]
+      [./gps2]
+        use_displaced_mesh = true
+        displacements = 'disp_x disp_y'
+        scalar_strain_zz = scalar_strain_zz2
+        block = '2'
       [../]
     [../]
   [../]
@@ -86,8 +110,10 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
+    displacements = 'disp_x disp_y'
     temp = temp
     save_in = 'saved_x saved_y'
+    block = '1 2'
   [../]
 []
 
@@ -148,7 +174,7 @@
     index_i = 1
     index_j = 1
   [../]
-  [./strain_zz]
+  [./aux_strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = aux_strain_zz
@@ -165,15 +191,27 @@
 []
 
 [BCs]
-  [./bottomx]
+  [./bottom1x]
     type = PresetBC
     boundary = 1
     variable = disp_x
     value = 0.0
   [../]
-  [./bottomy]
+  [./bottom1y]
     type = PresetBC
     boundary = 1
+    variable = disp_y
+    value = 0.0
+  [../]
+  [./bottom2x]
+    type = PresetBC
+    boundary = 2
+    variable = disp_x
+    value = 0.0
+  [../]
+  [./bottom2y]
+    type = PresetBC
+    boundary = 2
     variable = disp_y
     value = 0.0
   [../]
@@ -184,19 +222,30 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
+    block = '1 2'
   [../]
-  [./strain]
-    type = ComputePlaneFiniteStrain
+  [./strain1]
+    type = ComputePlaneSmallStrain
+    displacements = 'disp_x disp_y'
+    scalar_strain_zz = scalar_strain_zz1
+    block = 1
+  [../]
+  [./strain2]
+    type = ComputePlaneSmallStrain
+    displacements = 'disp_x disp_y'
+    scalar_strain_zz = scalar_strain_zz2
+    block = 2
   [../]
   [./thermal_strain]
     type = ComputeThermalExpansionEigenStrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
-    incremental_form = true
+    block = '1 2'
   [../]
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLinearElasticStress
+    block = '1 2'
   [../]
 []
 
