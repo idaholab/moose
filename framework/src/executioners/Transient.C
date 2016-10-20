@@ -336,12 +336,13 @@ Transient::computeDT(bool first)
     _si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
     _si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector("predicted_u1", true, GHOSTED);
     _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
-    if (_soln_nonlin.size() == 0)
-    {
-      _soln_nonlin.resize(_si.soln_nonlin->size());
-      _soln_aux.resize(_si.soln_aux->size());
-      _soln_predicted.resize(_si.soln_nonlin->size());
-    }
+  }
+
+  if (_soln_nonlin.size() != _si.soln_nonlin->size() || _soln_aux.size() != _si.soln_aux->size() || _soln_predicted.size() != _si.soln_predicted->size())
+  {
+    _soln_nonlin.resize(_si.soln_nonlin->size());
+    _soln_aux.resize(_si.soln_aux->size());
+    _soln_predicted.resize(_si.soln_predicted->size());
   }
 
   _si.time = _time;
