@@ -7,12 +7,12 @@
 #ifndef COMPUTEINCREMENTALSMALLSTRAIN_H
 #define COMPUTEINCREMENTALSMALLSTRAIN_H
 
-#include "ComputeSmallStrain.h"
+#include "ComputeStrainBase.h"
 
 /**
  * ComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small strains.
  */
-class ComputeIncrementalSmallStrain : public ComputeSmallStrain
+class ComputeIncrementalSmallStrain : public ComputeStrainBase
 {
 public:
   ComputeIncrementalSmallStrain(const InputParameters & parameters);

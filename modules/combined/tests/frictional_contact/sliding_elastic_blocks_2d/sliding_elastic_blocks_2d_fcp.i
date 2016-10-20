@@ -18,7 +18,7 @@
   diag_stiff_y = diag_saved_y
   inc_slip_x = inc_slip_x
   inc_slip_y = inc_slip_y
-  contact_slip_tolerance_factor = 100
+  contact_slip_tolerance_factor = 1e5
   target_relative_contact_residual = 1.e-6
   maximum_slip_iterations = 500
   minimum_slip_iterations = 1
@@ -169,6 +169,13 @@
   [../]
 []
 
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   type = Transient
 
@@ -188,7 +195,7 @@
   dt = 0.01
   end_time = 0.05
   num_steps = 1000
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-7
   dtmin = 0.01
   l_tol = 1e-3

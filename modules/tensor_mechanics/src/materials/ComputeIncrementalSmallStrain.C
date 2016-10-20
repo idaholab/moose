@@ -12,14 +12,14 @@
 template<>
 InputParameters validParams<ComputeIncrementalSmallStrain>()
 {
-  InputParameters params = validParams<ComputeSmallStrain>();
+  InputParameters params = validParams<ComputeStrainBase>();
   params.addClassDescription("Compute a strain increment and rotation increment for small strains.");
   params.set<bool>("stateful_displacements") = true;
   return params;
 }
 
 ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParameters & parameters) :
-    ComputeSmallStrain(parameters),
+    ComputeStrainBase(parameters),
     _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _mechanical_strain_old(declarePropertyOld<RankTwoTensor>("mechanical_strain")),
@@ -33,7 +33,7 @@ ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParamete
 void
 ComputeIncrementalSmallStrain::initQpStatefulProperties()
 {
-  ComputeSmallStrain::initQpStatefulProperties();
+  ComputeStrainBase::initQpStatefulProperties();
 
   _strain_rate[_qp].zero();
   _strain_increment[_qp].zero();
