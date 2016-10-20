@@ -64,11 +64,8 @@ protected:
   /// value mid point of the bin
   VectorPostprocessorValue & _bin_center;
 
-  /// local thread copy of the sum vectors
-  std::vector<VectorPostprocessorValue> _sum_tmp;
-
   /// sample count per bin
-  VectorPostprocessorValue _count_tmp;
+  std::vector<unsigned int> _counts;
 
   /// aggregated global average vectors
   std::vector<VectorPostprocessorValue *> _average;
