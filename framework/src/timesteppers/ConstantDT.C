@@ -47,15 +47,3 @@ ConstantDT::buildStepper()
   s->setStepper(inner);
   return s;
 }
-
-Real
-ConstantDT::computeInitialDT()
-{
-  return _constant_dt;
-}
-
-Real
-ConstantDT::computeDT()
-{
-  return std::min(_constant_dt, _growth_factor * getCurrentDT());
-}

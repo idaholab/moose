@@ -28,9 +28,7 @@ public:
   ConstantDT(const InputParameters & parameters);
 
   virtual Stepper * buildStepper() override;
-protected:
-  virtual Real computeInitialDT() override;
-  virtual Real computeDT() override;
+
 private:
   const Real _constant_dt;
   const Real _growth_factor;

@@ -207,7 +207,7 @@ Transient::init()
 
   _problem.initialSetup();
   _time_stepper->init();
-  
+
   Stepper* inner = _time_stepper->buildStepper();
   if (inner)
   {
@@ -335,7 +335,7 @@ Transient::computeDT(bool first)
       _soln_predicted.resize(_si.soln_nonlin->size());
     }
   }
-  
+
   _si.time = _time;
   _si.prev_prev_prev_dt = _si.prev_prev_dt;
   _si.prev_prev_dt = _prev_dt;
