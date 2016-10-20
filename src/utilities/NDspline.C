@@ -143,7 +143,7 @@ double NDSpline::interpolateAt(std::vector<double> point_coordinate){
 }
 
 
-double NDSpline::getGradientAt(std::vector<double> point_coordinate){
+double NDSpline::getGradientAt(std::vector<double> /* point_coordinate */){
  // TO BE COMPLETED
  double gradient= -1;
  if (not _completed_init)
@@ -153,7 +153,7 @@ double NDSpline::getGradientAt(std::vector<double> point_coordinate){
  return gradient;
 }
 
-void NDSpline::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
+void NDSpline::fit(std::vector< std::vector<double> > /* coordinates */, std::vector<double> /* values */){
   throw ("Error in NDSpline: fit not yet implemented!!!");
   _completed_init = true;
 }
@@ -591,7 +591,7 @@ double NDSpline::integralSpline(std::vector<double> point_coordinate){
  * Six functions are needed since the kernel function is piecewise with modulus operator.
  */
 
-double NDSpline::val1(double t){
+double NDSpline::val1(double /* t */){
         return 0.0;
 }
 double NDSpline::val2(double t){
@@ -610,7 +610,7 @@ double NDSpline::val5(double t){
         double value = 8.0*t - 6.0*pow(t,2) + 2.0*pow(t,3) - 0.25*pow(t,4);
         return value;
 }
-double NDSpline::val6(double t){
+double NDSpline::val6(double /* t */){
         return 0.0;
 }
 

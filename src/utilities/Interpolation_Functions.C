@@ -116,12 +116,12 @@ Interpolation_Functions::cumulativeInterpolation_Step_Left(double x_point){
   for (unsigned int i=1; i<_x_coordinates.size(); i++)
     CDF[i]=CDF[i-1]+_x_coordinates[i];
 
-  double lower; //upper
+  int lower; //upper
   std::vector<double>::iterator it;
 
   it=std::lower_bound(_x_coordinates.begin() , _x_coordinates.end() , x_point);
 
-  lower=*(it-1);
+  lower=(it-1) - _x_coordinates.begin();
   //upper=*it;
 
   value = CDF[lower];
@@ -139,13 +139,13 @@ Interpolation_Functions::cumulativeInterpolation_Step_Right(double x_point){
   for (unsigned int i=1; i<_x_coordinates.size(); i++)
     CDF[i]=CDF[i-1]+_x_coordinates[i];
 
-  double upper; //,lower;
+  int upper; //,lower;
   std::vector<double>::iterator it;
 
   it=std::lower_bound(_x_coordinates.begin() , _x_coordinates.end() , x_point);
 
   //lower=*(it-1);
-  upper=*it;
+  upper=it - _x_coordinates.begin();
 
   value = CDF[upper];
 
@@ -162,12 +162,12 @@ Interpolation_Functions::cumulativeInterpolation_Linear(double x_point){
   for (unsigned int i=1; i<_x_coordinates.size(); i++)
      CDF[i] = CDF[i-1] + 1/2 * (_y_coordinates[i]-_y_coordinates[i-1]) * (_x_coordinates[i]-_x_coordinates[i-1]);
 
-  double upper,lower;
+  int upper,lower;
   std::vector<double>::iterator it;
   it=std::lower_bound(_x_coordinates.begin() , _x_coordinates.end() , x_point);
 
-  lower=*(it-1);
-  upper=*it;
+  lower=(it-1) - _x_coordinates.begin();
+  upper=it - _x_coordinates.begin();
 
   value = CDF[lower] + (_y_coordinates[upper]-_y_coordinates[lower]) / (_x_coordinates[upper]-_x_coordinates[lower]) * (x_point-_x_coordinates[lower]);
 

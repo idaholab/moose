@@ -11,7 +11,7 @@
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 
-double NDInterpolation::interpolateAt(std::vector<double> point_coordinate){
+double NDInterpolation::interpolateAt(std::vector<double> /* point_coordinate */){
   throw ("Error in interpolateAt: NOT IMPLEMENTED!!!!");
   return -1;
 }
@@ -24,12 +24,12 @@ double NDInterpolation::interpolateAt(std::vector<double> point_coordinate){
 //}
 
 
-double NDInterpolation::getGradientAt(std::vector<double> point_coordinate){
+double NDInterpolation::getGradientAt(std::vector<double> /* point_coordinate */){
   throw ("Error in getGradientAt: NOT IMPLEMENTED!!!!");
   return -1;
 }
 
-void NDInterpolation::fit(std::vector< std::vector<double> > coordinates, std::vector<double> values){
+void NDInterpolation::fit(std::vector< std::vector<double> > /* coordinates */, std::vector<double> /* values */){
   throw ("Error in fit: NOT IMPLEMENTED!!!!");
 }
 

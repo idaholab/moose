@@ -97,7 +97,7 @@ double MicroSphere::cosValueBetweenVectors(std::vector<double> point1, std::vect
  return cosAngle;
 }
 
-double MicroSphere::getGradientAt(std::vector<double> point_coordinate){
+double MicroSphere::getGradientAt(std::vector<double> /* point_coordinate */){
   if (not _completed_init)
   {
     throw ("Error in getGradientAt: the class has not been completely initialized... you can not interpolate!!!!");

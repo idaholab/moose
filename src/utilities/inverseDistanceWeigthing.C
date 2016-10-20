@@ -89,7 +89,7 @@ double InverseDistanceWeighting::interpolateAt(std::vector<double> point){
  return value;
 }
 
-double InverseDistanceWeighting::getGradientAt(std::vector<double> point){
+double InverseDistanceWeighting::getGradientAt(std::vector<double> /* point */){
  // TO BE COMPLETED
   if (not _completed_init)
   {
