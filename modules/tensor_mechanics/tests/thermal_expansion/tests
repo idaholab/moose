@@ -11,4 +11,10 @@
     exodiff = 'constant_thermal_expan_restart.e'
     prereq = 'const_thermal_expansion'
   [../]
+
+  [./multiple_thermal_eigenstrains]
+    type = 'Exodiff'
+    input = 'multiple_thermal_eigenstrains.i'
+    exodiff = 'multiple_thermal_eigenstrains.e'
+  [../]
 []

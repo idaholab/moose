@@ -229,12 +229,14 @@
     displacements = 'disp_x disp_y'
     scalar_strain_zz = scalar_strain_zz1
     block = 1
+    eigenstrain_names = eigenstrain
   [../]
   [./strain2]
     type = ComputePlaneSmallStrain
     displacements = 'disp_x disp_y'
     scalar_strain_zz = scalar_strain_zz2
     block = 2
+    eigenstrain_names = eigenstrain
   [../]
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain
@@ -242,6 +244,7 @@
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5
     block = '1 2'
+    eigenstrain_name = eigenstrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress

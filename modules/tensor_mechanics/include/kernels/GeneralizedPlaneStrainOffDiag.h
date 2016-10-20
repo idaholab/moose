@@ -40,7 +40,8 @@ protected:
   std::string _base_name;
 
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
-  const MaterialProperty<RankTwoTensor> & _thermal_expansion_tensor;
+  const std::vector<MaterialPropertyName> _eigenstrain_names;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
 
   const unsigned int _scalar_strain_zz_var;
 

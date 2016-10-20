@@ -87,6 +87,7 @@
   [./strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
@@ -99,6 +100,7 @@
     #   T0 = 300
     # options of LinearElasticMaterial (T-T0)*1e-6 = 1e-4
     eigen_base = '1e-4'
+    eigenstrain_name = eigenstrain
   [../]
 []
 

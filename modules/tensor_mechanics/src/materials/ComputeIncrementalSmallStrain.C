@@ -14,7 +14,6 @@ InputParameters validParams<ComputeIncrementalSmallStrain>()
 {
   InputParameters params = validParams<ComputeIncrementalStrainBase>();
   params.addClassDescription("Compute a strain increment and rotation increment for small strains.");
-  params.set<bool>("stateful_displacements") = true;
   return params;
 }
 
@@ -24,25 +23,22 @@ ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParamete
 }
 
 void
-ComputeIncrementalSmallStrain::computeProperties()
+ComputeIncrementalSmallStrain::computeQpProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-    RankTwoTensor total_strain_increment;
-    computeTotalStrainIncrement(total_strain_increment);
+  RankTwoTensor total_strain_increment;
+  computeTotalStrainIncrement(total_strain_increment);
 
-    _strain_increment[_qp] = total_strain_increment;
+  _strain_increment[_qp] = total_strain_increment;
 
-    //Remove the eigenstrain increment
-    _strain_increment[_qp] -= _eigenstrain_increment[_qp];
+  //Remove the eigenstrain increment
+  subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
-    // strain rate
-    _strain_rate[_qp] = _strain_increment[_qp]/_dt;
+  // strain rate
+  _strain_rate[_qp] = _strain_increment[_qp] /_dt;
 
-    //Update strain in intermediate configuration: rotations are not needed
-    _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
-    _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
-  }
+  //Update strain in intermediate configuration: rotations are not needed
+  _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
+  _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
 }
 
 void

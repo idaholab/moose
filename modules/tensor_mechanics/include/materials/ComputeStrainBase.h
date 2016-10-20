@@ -23,7 +23,7 @@ public:
   virtual ~ComputeStrainBase() {}
 
 protected:
-  virtual void initQpStatefulProperties();
+  virtual void initQpStatefulProperties() override;
 
   /// Coupled displacement variables
   unsigned int _ndisp;
@@ -36,7 +36,8 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _total_strain;
 
-  const MaterialProperty<RankTwoTensor> & _eigenstrain;
+  std::vector<MaterialPropertyName> _eigenstrain_names;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains;
 
   bool _volumetric_locking_correction;
 };

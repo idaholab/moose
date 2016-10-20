@@ -8,6 +8,7 @@
 #define COMPUTETHERMALEXPANSIONEIGENSTRAIN_H
 
 #include "ComputeEigenstrainBase.h"
+#include "DerivativeMaterialInterface.h"
 
 class ComputeThermalExpansionEigenstrain;
 class RankTwoTensor;
@@ -19,7 +20,7 @@ InputParameters validParams<ComputeThermalExpansionEigenstrain>();
  * ComputeThermalExpansionEigenstrain computes an Eigenstrain corresponding to the
  * thermal expansion of a material.
  */
-class ComputeThermalExpansionEigenstrain : public ComputeEigenstrainBase
+class ComputeThermalExpansionEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrainBase>
 {
 public:
   ComputeThermalExpansionEigenstrain(const InputParameters & parameters);
@@ -28,8 +29,8 @@ protected:
   virtual void computeQpEigenstrain();
 
   const VariableValue & _temperature;
+  MaterialProperty<RankTwoTensor> & _deigenstrain_dT;
   const Real & _thermal_expansion_coeff;
-  MaterialProperty<RankTwoTensor> & _thermal_expansion_tensor;
   Real _stress_free_temperature;
 };
 

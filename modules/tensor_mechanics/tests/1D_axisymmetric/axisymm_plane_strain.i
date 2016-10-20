@@ -127,6 +127,7 @@
   [./strain]
     type = ComputeAxisymmetricRZIncrementalPlaneStrain
     block = pellet_type_1
+    eigenstrain_names = eigenstrain
   [../]
 
   [./thermal_strain]
@@ -136,6 +137,7 @@
     temperature = temp
     incremental_form = true
     stress_free_temperature = 580
+    eigenstrain_name = eigenstrain
   [../]
 
   [./stress]

@@ -15,6 +15,7 @@ InputParameters validParams<ComputeStrainBase>()
   params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
   params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
+  params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
   return params;
 }
 
@@ -26,9 +27,16 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
-    _eigenstrain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain")),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _eigenstrains(_eigenstrain_names.size()),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
+  for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
+  {
+    _eigenstrain_names[i] = _base_name + _eigenstrain_names[i];
+    _eigenstrains[i] = &getMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
+  }
+
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
     mooseError("The number of variables supplied in 'displacements' must match the mesh dimension.");

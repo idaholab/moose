@@ -172,6 +172,7 @@
   [../]
   [./small_strain]
     type = ComputePlaneSmallStrain
+    eigenstrain_names = eigenstrain
   [../]
   [./elastic_stress]
     type = ComputeLinearElasticStress
@@ -181,6 +182,7 @@
     thermal_expansion_coeff = 0.02
     temperature = temp
     stress_free_temperature = 0.5
+    eigenstrain_name = eigenstrain
   [../]
 []
 

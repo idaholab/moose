@@ -47,6 +47,10 @@ ComputeCosseratSmallStrain::computeQpProperties()
         strain(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
 
   _total_strain[_qp] = strain;
-  _mechanical_strain[_qp] = strain - _eigenstrain[_qp];
+
+  _mechanical_strain[_qp] = strain;
+  for (auto es : _eigenstrains)
+    _mechanical_strain[_qp] -= (*es)[_qp];
+
   _curvature[_qp] = RankTwoTensor((*_grad_wc[0])[_qp], (*_grad_wc[1])[_qp], (*_grad_wc[2])[_qp]);
 }
