@@ -17,35 +17,35 @@
   {
     _CDFprovided = CDFprovided;
     BasicMultiDimensionalCartesianSpline_init();
-  };
+  }
 
   BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::string data_filename, bool CDFprovided):  _interpolator(data_filename)
   {
     _CDFprovided = CDFprovided;
     BasicMultiDimensionalCartesianSpline_init();
-  };
+  }
 
   BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(const char * data_filename, bool CDFprovided):  _interpolator(data_filename)
   {
     _CDFprovided = CDFprovided;
     BasicMultiDimensionalCartesianSpline_init();
-  };
+  }
 
   BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided):  _interpolator(discretizations, values, alpha, beta)
   {
     _CDFprovided = CDFprovided;
     BasicMultiDimensionalCartesianSpline_init();
-  };
+  }
 
   BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided): _interpolator(data_filename, alpha, beta)
   {
     _CDFprovided = CDFprovided;
     BasicMultiDimensionalCartesianSpline_init();
-  };
+  }
 
   BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline():_interpolator()
     {
-    };
+    }
 
 
   void BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline_init(){
@@ -93,7 +93,7 @@
       }
       _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
     }
-  };
+  }
 
 
   double
@@ -103,7 +103,7 @@
       return _interpolator.NDderivative(x);
     else
       return _interpolator.interpolateAt(x);
-  };
+  }
 
   double
   BasicMultiDimensionalCartesianSpline::Cdf(std::vector<double> x)
@@ -121,7 +121,7 @@
     }
 
      return value;
-  };
+  }
 
 
   std::vector<double>
@@ -132,7 +132,7 @@
     else{
       return _CDFinterpolator.NDinverseFunctionGrid(F,g);
     }
-  };
+  }
 
   double BasicMultiDimensionalCartesianSpline::inverseMarginal(double F, int dimension){
     double value=0.0;
@@ -153,7 +153,7 @@
   BasicMultiDimensionalCartesianSpline::returnDimensionality()
   {
     return _interpolator.returnDimensionality();
-  };
+  }
 
 //  double cellIntegral(std::vector<double> center, std::vector<double> dx){
 //    if (_CDFprovided){
@@ -173,7 +173,7 @@
       _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
       _CDFinterpolator.updateRNGparameters(_tolerance,_initial_divisions);
     }
-  };
+  }
 
   double BasicMultiDimensionalCartesianSpline::Marginal(double x, int dimension){
     double value=0.0;

@@ -130,7 +130,7 @@ std::vector<int> BasicDistributionND::oneDtoNDconverter(int oneDcoordinate, std:
    NDcoordinates.at(0) = oneDcoordinate;
     }
     return NDcoordinates;
-};
+}
 
 
 double

@@ -10,7 +10,7 @@ public:
 };
 
 RandomClass::RandomClass() : rng(new RandomClassImpl()), range(rng->backend.max() - rng->backend.min()) {
-};
+}
 
 void RandomClass::seed(unsigned int seed) {
     rng->backend.seed(seed);
