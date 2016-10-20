@@ -101,6 +101,7 @@ Transient::Transient(const InputParameters & parameters) :
     _problem(_fe_problem),
     _time_scheme(getParam<MooseEnum>("scheme")),
     _t_step(_problem.timeStep()),
+    _t_step_backup(declareRestartableData("t_step_backup", 0)),
     _time(_problem.time()),
     _time_old(_problem.timeOld()),
     _dt(_problem.dt()),
@@ -153,8 +154,8 @@ Transient::Transient(const InputParameters & parameters) :
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
-    _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
-    _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
+  _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
+  _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
   _dt = 0;
   _next_interval_output_time = 0.0;
 
@@ -246,6 +247,8 @@ Transient::init()
     _dt = getDT();
     DBG << "NOTRECOVERING (" << this << "): dtold=" << _dt_old << ", dt=" << _dt << ", newdt=" << _new_dt << "\n";
   }
+
+  _t_step_backup = _t_step;
 }
 
 void
@@ -263,6 +266,11 @@ Transient::postStep()
 int Transient::n_startup_steps()
 {
   return std::max(1, _n_startup_steps);
+}
+
+int Transient::timeStep()
+{
+  return _t_step_backup;
 }
 
 void
@@ -378,6 +386,7 @@ Transient::incrementStepOrReject()
 
       _time_old = _time; // = _time_old + _dt;
       _t_step++;
+      _t_step_backup = _t_step;
 
       _problem.advanceState();
 

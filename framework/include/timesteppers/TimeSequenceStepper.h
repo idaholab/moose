@@ -32,8 +32,6 @@ public:
   TimeSequenceStepper(const InputParameters & parameters);
 
   virtual void init() override;
-
-  virtual Stepper * buildStepper() override;
 };
 
 #endif //TIMESEQUENCESTEPPER_H

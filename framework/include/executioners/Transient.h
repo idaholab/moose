@@ -212,6 +212,8 @@ public:
 
   int n_startup_steps();
 
+  int timeStep();
+
 protected:
   /**
    * This should execute the solve for one timestep.
@@ -226,6 +228,7 @@ protected:
 
   /// Current timestep.
   int & _t_step;
+  int & _t_step_backup;
   /// Current time
   Real & _time;
   /// Previous time

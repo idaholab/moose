@@ -37,7 +37,7 @@ public:
 
 protected:
   /// stores the sequence of time points
-  std::vector<Real>  _time_sequence;
+  std::vector<Real> &  _time_sequence;
 };
 
 #endif //TIMESEQUENCESTEPPERBASE_H
