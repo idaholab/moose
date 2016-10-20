@@ -34,11 +34,10 @@ Compute2DIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_st
   A(2,2) = computeGradDispZZ();
   Fbar(2,2) = computeGradDispZZold();
 
-  // Gauss point deformation gradient
   _deformation_gradient[_qp] = A;
   _deformation_gradient[_qp].addIa(1.0);
 
-  A -= Fbar; //very nearly A = gradU - gradUold, adapted to cylinderical coords
+  A -= Fbar; //very nearly A = gradU - gradUold, adapted to cylindrical coords
 
   total_strain_increment = 0.5 * (A + A.transpose());
 }

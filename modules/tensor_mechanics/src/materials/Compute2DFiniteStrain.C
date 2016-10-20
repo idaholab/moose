@@ -45,7 +45,7 @@ Compute2DFiniteStrain::computeProperties()
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
-    A -= Fbar; //very nearly A = gradU - gradUold, adapted to cylinderical coords
+    A -= Fbar; //very nearly A = gradU - gradUold, adapted to cylindrical coords
 
     Fbar.addIa(1.0); //Fbar = ( I + gradUold)
 

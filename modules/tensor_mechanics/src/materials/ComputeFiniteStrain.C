@@ -14,44 +14,21 @@
 template<>
 InputParameters validParams<ComputeFiniteStrain>()
 {
-  InputParameters params = validParams<ComputeStrainBase>();
+  InputParameters params = validParams<ComputeIncrementalStrainBase>();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains.");
   MooseEnum decomposition_type("TaylorExpansion EigenSolution", "TaylorExpansion");
   params.addParam<MooseEnum>("decomposition_method", decomposition_type, "Methods to calculate the strain and rotation increments: " + decomposition_type.getRawNames());
-  params.set<bool>("stateful_displacements") = true;
+  params.set<bool>("stateful_deformation_gradient") = true;
 
   return params;
 }
 
 ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
-    ComputeStrainBase(parameters),
-    _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
-    _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _mechanical_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _total_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "total_strain")),
-    _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-    _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _deformation_gradient_old(declarePropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _eigenstrain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
+    ComputeIncrementalStrainBase(parameters),
     _current_elem_volume(_assembly.elemVolume()),
     _Fhat(_fe_problem.getMaxQps()),
     _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>())
 {
-}
-
-void
-ComputeFiniteStrain::initQpStatefulProperties()
-{
-  ComputeStrainBase::initQpStatefulProperties();
-
-  _strain_rate[_qp].zero();
-  _strain_increment[_qp].zero();
-  _rotation_increment[_qp].zero();
-  _deformation_gradient[_qp].zero();
-  _deformation_gradient[_qp].addIa(1.0);
-  _deformation_gradient_old[_qp] = _deformation_gradient[_qp];
-  _mechanical_strain_old[_qp] = _mechanical_strain[_qp];
-  _total_strain_old[_qp] = _total_strain[_qp];
 }
 
 void
