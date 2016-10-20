@@ -15,6 +15,7 @@
 #include "TensorMechanicsRSphericalAction.h"
 #include "PoroMechanicsAction.h"
 #include "PressureAction.h"
+#include "GeneralizedPlaneStrainAction.h"
 
 #include "StressDivergenceTensors.h"
 #include "StressDivergenceTensorsTruss.h"
@@ -342,6 +343,8 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
+  syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
@@ -351,4 +354,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
   registerAction(TensorMechanicsRSphericalAction, "add_kernel");
   registerAction(PressureAction, "add_bc");
+  registerAction(GeneralizedPlaneStrainAction, "add_kernel");
+  registerAction(GeneralizedPlaneStrainAction, "add_user_object");
+  registerAction(GeneralizedPlaneStrainAction, "add_scalar_kernel");
 }

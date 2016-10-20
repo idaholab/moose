@@ -1,21 +1,18 @@
-# Tests for application of out-of-plane pressure in generalized plane strain.
-
-[GlobalParams]
-  order = FIRST
-  family = LAGRANGE
-  displacements = 'disp_x disp_y'
-  scalar_strain_zz = scalar_strain_zz
-  block = 1
-[]
+# Tests for application of out-of-plane traction in generalized plane strain.
 
 [Mesh]
   file = square.e
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
   [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./disp_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./scalar_strain_zz]
     order = FIRST
@@ -25,8 +22,12 @@
 
 [AuxVariables]
   [./saved_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./saved_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./stress_xx]
@@ -73,34 +74,25 @@
   [../]
 []
 
-[UserObjects]
-  [./gpsuo]
-    type = GeneralizedPlaneStrainUserObject
-    traction_zz = traction_function
-    factor = 1e5
+[Modules]
+  [./TensorMechanics]
+    [./GeneralizedPlaneStrain]
+      [./gps]
+        use_displaced_mesh = true
+        displacements = 'disp_x disp_y'
+        scalar_strain_zz = scalar_strain_zz
+        traction_zz = traction_function
+        factor = 1e5
+      [../]
+    [../]
   [../]
 []
 
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
+    displacements = 'disp_x disp_y'
     save_in = 'saved_x saved_y'
-  [../]
-  [./gps_x]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_x
-  [../]
-  [./gps_y]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_y
-  [../]
-[]
-
-[ScalarKernels]
-  [./gps]
-    type = GeneralizedPlaneStrain
-    variable = scalar_strain_zz
-    generalized_plane_strain = gpsuo
   [../]
 []
 
@@ -195,6 +187,8 @@
   [../]
   [./strain]
     type = ComputePlaneSmallStrain
+    displacements = 'disp_x disp_y'
+    scalar_strain_zz = scalar_strain_zz
   [../]
   [./stress]
     type = ComputeLinearElasticStress
