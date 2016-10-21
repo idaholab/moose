@@ -113,7 +113,7 @@ Note that we have reversed which equation is used to solve for each variable fro
 
 ## Free Energy Based Model Development
 
-The goal of the MOOSE phase field module is to facilitate the development of advanced phase field models by taking advantage of their common structure, i.e.\ their usage of the Cahn-Hilliard and Allen-Cahn equations and their reliance on free energy functionals.  Thus, only the free energy derivatives and the parameters vary between most models. By taking advantage of the modular structure of MOOSE, we have developed a series of kernels that implement the various pieces of the Allen-Cahn equation and the two solution approaches to the Cahn-Hilliard equation. The free energy derivatives and the material parameters are provided in materials objects, which can be created by the user or created using our automatic differentiation system. Note that use of these kernels is not required. If you choose not to use them, you would develop your kernels in the usual way for MOOSE.
+The goal of the MOOSE phase field module is to facilitate the development of advanced phase field models by taking advantage of their common structure, i.e. their usage of the Cahn-Hilliard and Allen-Cahn equations and their reliance on free energy functionals.  Thus, only the free energy derivatives and the parameters vary between most models. By taking advantage of the modular structure of MOOSE, we have developed a series of kernels that implement the various pieces of the Allen-Cahn equation and the two solution approaches to the Cahn-Hilliard equation. The free energy derivatives and the material parameters are provided in materials objects, which can be created by the user or created using our automatic differentiation system. Note that use of these kernels is not required. If you choose not to use them, you would develop your kernels in the usual way for MOOSE.
 
 The Allen-Cahn residual equation, without boundary terms, is shown here:
 $$
@@ -158,7 +158,7 @@ $$
 
 ## Free Energy Function Materials
 
-The free energy functional is the basis of the evolution of the phase field variables. However, the free energy itself is never used directly in the phase field Eqs, rather derivatives of the free energy are required. In the case of a free energies involving multiple coupled variables, different derivatives will be required for each residual equation.
+The free energy functional is the basis of the evolution of the phase field variables. However, the free energy itself is never used directly in the phase field equations, rather derivatives of the free energy are required. In the case of a free energies involving multiple coupled variables, different derivatives will be required for each residual equation.
 
 In the free energy based model approach, a [Function Material](FunctionMaterials) class defines these required free energy derivatives, which are used by the respective kernels. These derivatives can be defined in the code by the user or they can be generated using automatic differentiation. The derivatives can also come from CALPHAD type free energies. The required order of derivative that is required for the residual are shown in the previous tables for the Allen-Cahn equation and for the two solution approaches for the Cahn-Hilliard equations. One additional derivative is required to define the Jacobian term used in the solution of the nonlinear system of FEM equations. It is common to also define the full free energy, even when not required, for visualization and debugging purposes.
 
@@ -216,5 +216,4 @@ An alternative to writing your own free energy materials is to take advantage of
 * [Function Material Kernels](FunctionMaterialKernels) - Kernels which utilize free energy densities provides by Function Material. These are the recommended phase field kernels.
 * [ExpressionBuilder](ExpressionBuilder) - Use automatic differentiation with Free energies defined in the C++ code.
 * [Multi Phase Models](MultiPhaseModels) - Combine multiple single phase free energies into multiphase field models using these tools.
-
-Free energies can also be combined with the deformation energy calculated using the Tensor Mechanics module.
+* Free energies can also be combined with the deformation energy calculated using the Tensor Mechanics module.

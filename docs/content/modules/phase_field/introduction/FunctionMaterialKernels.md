@@ -1,6 +1,7 @@
 # Function Material Kernels
 
-Kernels `CahnHilliard`, `CahnHilliardAniso`, `SplitCHParsed`, and `AllenCahn` solve
+Kernels [`CahnHilliard`](/Kernels/CahnHilliard.md), [`CahnHilliardAniso`](/Kernels/CahnHilliardAniso.md),
+[`SplitCHParsed`](/Kernels/SplitCHParsed.md), and [`AllenCahn`](/Kernels/AllenCahn.md) solve
 the Cahn-Hilliard and Allen-Cahn equations using  free energies provided by
 [Function Material](../FunctionMaterials) objects. These include parsed function
 materials with free energy expressions supplied in the configuration files and all

@@ -29,10 +29,10 @@ bool JITCompile();
 ```
 
 Calling this method on an FParser object will execute an attempt at
-- generating a small temporary C++ file with a function that performs the calculation of the parsed function
-- launching a compiler (the same compiler used to build libMesh) to compile the C++ file into a small dynamic library (`.so` file)
-- using `dlopen()` to immediately load the library file
-- using `dlsym()` to bind the compiled function to the FParser object
+* generating a small temporary C++ file with a function that performs the calculation of the parsed function
+* launching a compiler (the same compiler used to build libMesh) to compile the C++ file into a small dynamic library (`.so` file)
+* using `dlopen()` to immediately load the library file
+* using `dlsym()` to bind the compiled function to the FParser object
 
 If all steps above succeed all further evaluations (calls to `Eval()`) of the FParser object will be redirected to the compiled function, which will yield a speedup of about an order of magnitude, depending on the complexity of the function.
 

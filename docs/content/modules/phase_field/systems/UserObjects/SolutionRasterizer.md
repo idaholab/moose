@@ -34,39 +34,7 @@ The following input can be executed with the MOOSE Phase Field module executable
 * accept all atoms at the coordinates where the value of the non-linear variable `c` is above a value of `0.5`
 * write out the atomic coordinate file `out.xyz`
 
-```puppet
-[Mesh]
-  type = GeneratedMesh
-  dim = 3
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  solve = false
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[UserObjects]
-  [./soln]
-    type = SolutionRasterizer
-    system_variables = 'c'
-    mesh = diffuse_out.e
-    execute_on = timestep_begin
-
-    variable = c
-    xyz_input = in.xyz
-    xyz_output = out.xyz
-
-    # raster_mode = MAP
-    raster_mode = FILTER
-    threshold = 0.5
-  [../]
-[]
-```
-
+!text modules/phase_field/tests/solution_rasterizer/raster.i overflow-y=scroll max-height=500px language=puppet
 
 !parameters /UserObjects/SolutionRasterizer
 

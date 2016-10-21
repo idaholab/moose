@@ -4,7 +4,7 @@ Build FParser expressions using C++ operator overloading
 
 Mixing in the `ExpressionBuilder` class into your MOOSE classes will allow you to build FParser expressions using familiar C++ syntax.
 
-## Documentation
+## Introduction
 
 ### EBTerm
 
@@ -91,7 +91,7 @@ ExampleFreeEnergy::ExampleFreeEnergy(const InputParameters & parameters) :
 }
 ```
 
-That's it. The `functionParse` call will generate, optimize, an (if selected by the user through the `enable_jit` config parameter) compile the function and its derivatives.
+That's it. The `functionParse` call will generate, optimize, and (if selected by the user through the `enable_jit` config parameter) compile the function and its derivatives.
 
 All named variables declared through `EBTerm var("name")` will be substituted by the coupled variables of the same `name`.
 

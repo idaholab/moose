@@ -1,6 +1,14 @@
 # Automatic Differentiation
 
-The version of the _Function Parser_ library that ships with MOOSE contains an automatic differentiation feature that is not present in the [upstream version](http://warp.povusers.org/FunctionParser/).
+Automatic differentiation is a means to construct derivatives of a given expression
+in a symbolic way. Specifically this means _not_ performing finite differencing.
+Derivatives show up the phase field evolution equations (commonly derivatives of both
+the free energy and teh mobilities). Automatic differentiation shifts the burden of
+computing the derivatives of the oftentimes complex known expressions for the free energies
+from the user to the software.  
+
+The version of the _Function Parser_ library that ships with MOOSE contains an
+automatic differentiation feature that is not present in the [upstream version](http://warp.povusers.org/FunctionParser/).
 
 Include the automatic differentiation module (which also adds [just in time compilation](JITCompile) support) with
 
@@ -78,7 +86,7 @@ Not that optimizing the FParser object using `.Optimize()` after taking the deri
 
 The convenience of parsed and automatically differentiated functions does come with a performance penalty. Despite optimizations the parsed functions are slower than hand coded and compiled functions.
 
-JIT (Just In Time) compilation is available for parsed functions. The JIT system is utilized by adding the `enable_jit = true` (default) option in the [`DerivativeParsedMaterial`](/Materials/DerivativeParsedMaterial.md) block. MOOSE will then attempt to compile the free energy functions and its derivatives into machine code and use it for the residual and Jacobian calculations. This almost fully recovers the performance of hand coded free energies while retaining the flexibility of automatic differentiation.
+JIT (Just In Time) compilation is available for parsed functions. The JIT system is utilized by adding the `enable_jit = true` (default) option in the [`DerivativeParsedMaterial`](/Materials/DerivativeParsedMaterial.md) block. MOOSE will then attempt to compile the functions and its derivatives into machine code and use it for the residual and Jacobian calculations. This almost fully recovers the performance of hand coded free energies while retaining the flexibility of automatic differentiation.
 
 ## See also
 

@@ -10,7 +10,7 @@ model, the interface width is a function of the gradient energy coefficient $\ka
 and the height of the free energy barrier between equilibrium phases. When you change
 the grid spacing and keep the system dimensions the same, you change the number of
 elements in the interfacial region, but not the width of the interface in the
-\coordinate system you have chosen. So if you were to keep the system dimensions
+coordinate system you have chosen. So, if you were to keep the system dimensions
 the same, simulate an interface between two phases with increasingly finer resolution,
 and plot the results on top of one another, you would see the same interface shape
 (width) represented with an increasing number of data points in the interfacial
