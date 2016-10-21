@@ -354,11 +354,11 @@ Transient::computeDT(bool first)
   {
          std::cout << "SPOT3\n";
 
-    _si.soln_nonlin = _fe_problem.getNonlinearSystem().currentSolution()->clone();
-    _si.soln_aux = _fe_problem.getAuxiliarySystem().currentSolution()->clone();
+    _si.soln_nonlin.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
+    _si.soln_aux.reset(_fe_problem.getAuxiliarySystem().currentSolution()->clone().release());
     if (p)
          {std::cout << "SPOT4\n";
-      _si.soln_predicted = p->solutionPredictor().clone();
+      _si.soln_predicted.reset(p->solutionPredictor().clone().release());
       }
   }
   std::cout << "soln_predicted=" << _soln_predicted.size() << ", " << _si.soln_predicted->size() << ", soln_nonlin=" << _soln_nonlin.size() << ", " << _si.soln_nonlin->size() << "\n";
