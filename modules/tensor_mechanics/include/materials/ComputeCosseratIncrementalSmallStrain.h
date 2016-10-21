@@ -50,8 +50,8 @@ class ComputeCosseratIncrementalSmallStrain : public ComputeCosseratSmallStrain
   /// deformation_gradient = 1 + strain, where the latter includes the contributions from Cosserat rotations
   MaterialProperty<RankTwoTensor> & _deformation_gradient;
 
-  /// increment of eigenstrain
-  const MaterialProperty<RankTwoTensor> & _eigenstrain_increment;
+  /// increment of stress_free_strain (eg, stress_free_strain = thermal_expansion_coeff * (T - T0), and the "increment" is stress_free_strain - stress_free_strain_old
+  const MaterialProperty<RankTwoTensor> & _stress_free_strain_increment;
 
   /// the Cosserat curvature strain: curvature_ij = nabla_j CosseratRotation_i
   MaterialProperty<RankTwoTensor> & _curvature_old;

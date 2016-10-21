@@ -32,9 +32,10 @@ ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
     _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _deformation_gradient_old(declarePropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _eigenstrain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
+    _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
     _current_elem_volume(_assembly.elemVolume()),
     _Fhat(_fe_problem.getMaxQps()),
+    _step_one(declareRestartableData<bool>("step_one", true)),
     _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>())
 {
 }
@@ -115,8 +116,8 @@ ComputeFiniteStrain::computeQpStrain()
 
   _strain_increment[_qp] = total_strain_increment;
 
-  // Remove the eigenstrain increment
-  _strain_increment[_qp] -= _eigenstrain_increment[_qp];
+  // Remove the Eigen strain increment
+  _strain_increment[_qp] -= _stress_free_strain_increment[_qp];
 
   RankTwoTensor D = _strain_increment[_qp] / _dt;
   _strain_rate[_qp] = D;

@@ -43,9 +43,9 @@ ComputeVariableEigenstrain::ComputeVariableEigenstrain(const InputParameters & p
 }
 
 void
-ComputeVariableEigenstrain::computeQpEigenstrain()
+ComputeVariableEigenstrain::computeQpStressFreeStrain()
 {
-  ComputeEigenstrain::computeQpEigenstrain();
+  ComputeEigenstrain::computeQpStressFreeStrain();
 
   //Define derivatives of the elastic strain
   for (unsigned int i = 0; i < _num_args; ++i)

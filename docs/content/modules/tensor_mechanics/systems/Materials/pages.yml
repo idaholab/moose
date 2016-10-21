@@ -29,7 +29,7 @@
 - ComputeRSphericalSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputeRSphericalSmallStrain.md
 - ComputeSmallStrain: content/modules/tensor_mechanics/systems/Materials/ComputeSmallStrain.md
 - ComputeStrainIncrementBasedStress: content/modules/tensor_mechanics/systems/Materials/ComputeStrainIncrementBasedStress.md
-- ComputeThermalExpansionEigenstrain: content/modules/tensor_mechanics/systems/Materials/ComputeThermalExpansionEigenstrain.md
+- ComputeThermalExpansionEigenStrain: content/modules/tensor_mechanics/systems/Materials/ComputeThermalExpansionEigenStrain.md
 - ComputeVariableBaseEigenStrain: content/modules/tensor_mechanics/systems/Materials/ComputeVariableBaseEigenStrain.md
 - ComputeVariableEigenstrain: content/modules/tensor_mechanics/systems/Materials/ComputeVariableEigenstrain.md
 - ComputeVolumetricDeformGrad: content/modules/tensor_mechanics/systems/Materials/ComputeVolumetricDeformGrad.md

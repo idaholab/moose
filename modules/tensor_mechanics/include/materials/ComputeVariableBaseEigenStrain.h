@@ -7,9 +7,7 @@
 #ifndef COMPUTEVARIABLEBASEEIGENSTRAIN_H
 #define COMPUTEVARIABLEBASEEIGENSTRAIN_H
 
-#include "ComputeEigenstrainBase.h"
-
-#include "RankTwoTensor.h"
+#include "ComputeStressFreeStrainBase.h"
 
 class ComputeVariableBaseEigenStrain;
 
@@ -21,13 +19,13 @@ InputParameters validParams<ComputeVariableBaseEigenStrain>();
  * a real material property prefactor (p) and a rank two tensor offset tensor (b)
  * p * a + b
  */
-class ComputeVariableBaseEigenStrain : public ComputeEigenstrainBase
+class ComputeVariableBaseEigenStrain : public ComputeStressFreeStrainBase
 {
 public:
   ComputeVariableBaseEigenStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpEigenstrain();
+  virtual void computeQpStressFreeStrain();
 
   const MaterialProperty<RealTensorValue> & _base_tensor;
   const MaterialProperty<Real> & _prefactor;

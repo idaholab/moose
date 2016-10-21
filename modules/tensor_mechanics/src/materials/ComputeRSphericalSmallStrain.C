@@ -43,6 +43,6 @@ ComputeRSphericalSmallStrain::computeProperties()
     _mechanical_strain[_qp] = _total_strain[_qp];
 
     //Remove the Eigen strain
-    _mechanical_strain[_qp] -= _eigenstrain[_qp];
+    _mechanical_strain[_qp] -= _stress_free_strain[_qp];
   }
 }

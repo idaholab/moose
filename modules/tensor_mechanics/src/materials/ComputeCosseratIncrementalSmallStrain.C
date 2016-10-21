@@ -28,7 +28,7 @@ ComputeCosseratIncrementalSmallStrain::ComputeCosseratIncrementalSmallStrain(con
   _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
   _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
   _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-  _eigenstrain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
+  _stress_free_strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
   _curvature_old(declarePropertyOld<RankTwoTensor>("curvature")),
   _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment"))
 {
@@ -76,7 +76,7 @@ ComputeCosseratIncrementalSmallStrain::computeQpProperties()
   const RankTwoTensor total_strain_increment = strain - strain_old;
 
   _strain_increment[_qp] = total_strain_increment;
-  _strain_increment[_qp] -= _eigenstrain_increment[_qp];
+  _strain_increment[_qp] -= _stress_free_strain_increment[_qp];
 
   _strain_rate[_qp] = _strain_increment[_qp]/_dt;
 
