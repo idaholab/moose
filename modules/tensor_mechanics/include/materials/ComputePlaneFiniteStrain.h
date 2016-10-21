@@ -22,8 +22,13 @@ protected:
   virtual Real computeGradDispZZ();
   virtual Real computeGradDispZZold();
 
+  const bool _scalar_strain_zz_coupled;
   const VariableValue & _scalar_strain_zz;
   const VariableValue & _scalar_strain_zz_old;
+
+  const bool _strain_zz_coupled;
+  const VariableValue & _strain_zz;
+  const VariableValue & _strain_zz_old;
 };
 
 #endif //COMPUTEPLANEFINITESTRAIN_H

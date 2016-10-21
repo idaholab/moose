@@ -30,6 +30,7 @@
 #include "OutOfPlanePressure.h"
 #include "GeneralizedPlaneStrain.h"
 #include "GeneralizedPlaneStrainOffDiag.h"
+#include "WeakPlaneStress.h"
 
 #include "LinearElasticTruss.h"
 #include "FiniteStrainPlasticMaterial.h"
@@ -207,6 +208,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(OutOfPlanePressure);
   registerKernel(GeneralizedPlaneStrain);
   registerKernel(GeneralizedPlaneStrainOffDiag);
+  registerKernel(WeakPlaneStress);
 
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainPlasticMaterial);
