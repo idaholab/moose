@@ -161,7 +161,7 @@
     execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
-    type = ComputeGrainForceAndTorque
+    type = ComputeExternalGrainForceAndTorque
     execute_on = 'linear nonlinear'
     grain_data = grain_center
     c = c

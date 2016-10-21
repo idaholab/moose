@@ -78,6 +78,7 @@
     mob_name = L
     kappa_name = kappa_gr
     grain_force = grain_force
+    grain_volumes = grain_volumes
     grain_tracker_object = grain_center
   [../]
   # Cahn Hilliard kernels
@@ -105,6 +106,7 @@
     c = c
     v = 'gr0 gr1 gr2 gr3'
     grain_force = grain_force
+    grain_volumes = grain_volumes
     grain_tracker_object = grain_center
   [../]
 []
@@ -183,6 +185,11 @@
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_center
+    execute_on = 'initial timestep_begin'
+  [../]
 []
 
 [UserObjects]
@@ -190,11 +197,10 @@
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
-    calculate_feature_volumes = true
     execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
-    type = ComputeGrainForceAndTorque
+    type = ComputeExternalGrainForceAndTorque
     grain_data = grain_center
     c = c
     etas = 'gr0 gr1 gr2 gr3'
