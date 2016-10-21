@@ -45,6 +45,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <mutex>
 
 template<>
 InputParameters validParams<Transient>()
@@ -270,6 +271,9 @@ int Transient::timeStep()
   return _t_step_backup;
 }
 
+class Locker {public: Locker(std::mutex* m) : _m(m) {m->lock();}; ~Locker() {_m->unlock();}; std::mutex* _m;};
+static std::mutex mut;
+
 void
 Transient::execute()
 {
@@ -301,18 +305,21 @@ Transient::execute()
     _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
     _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
 
-    if (_fe_problem.getNonlinearSystem().currentSolution()->size() != _soln_nonlin.size())
-      _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
-    if (_fe_problem.getAuxiliarySystem().currentSolution()->size() != _soln_aux.size())
-      _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
-
-    _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
-    _fe_problem.getAuxiliarySystem().currentSolution()->localize(_soln_aux);
-    Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
-    if (p)
     {
-      _soln_predicted.resize(p->solutionPredictor().size());
-      p->solutionPredictor().localize(_soln_predicted);
+      Locker lock(&mut);
+      if (_fe_problem.getNonlinearSystem().currentSolution()->size() != _soln_nonlin.size())
+        _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+      if (_fe_problem.getAuxiliarySystem().currentSolution()->size() != _soln_aux.size())
+        _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
+
+      _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
+      _fe_problem.getAuxiliarySystem().currentSolution()->localize(_soln_aux);
+      Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
+      if (p)
+      {
+        _soln_predicted.resize(p->solutionPredictor().size());
+        p->solutionPredictor().localize(_soln_predicted);
+      }
     }
     double constr_legacy_dt = _dt;
     if (_stepper)
@@ -331,6 +338,8 @@ Transient::execute()
 void
 Transient::computeDT(bool first)
 {
+  Locker lock(&mut);
+
   _time_stepper->computeStep(); // This is actually when DT gets computed
 
   if (!_initialized)
@@ -345,7 +354,7 @@ Transient::computeDT(bool first)
     _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
   }
 
-  if (_soln_nonlin.size() != _si.soln_nonlin->size() || _soln_aux.size() != _si.soln_aux->size() || _soln_predicted.size() != _si.soln_predicted->size())
+  if (_soln_nonlin.size() != _si.soln_nonlin->size())
   {
     _soln_nonlin.resize(_si.soln_nonlin->size());
     _soln_aux.resize(_si.soln_aux->size());
