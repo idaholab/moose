@@ -271,9 +271,6 @@ int Transient::timeStep()
   return _t_step_backup;
 }
 
-class Locker {public: Locker(std::mutex* m) : _m(m) {m->lock();}; ~Locker() {_m->unlock();}; std::mutex* _m;};
-static std::mutex mut;
-
 void
 Transient::execute()
 {
@@ -305,22 +302,17 @@ Transient::execute()
     _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
     _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
 
+    _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+    _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
+    _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
+    _fe_problem.getAuxiliarySystem().currentSolution()->localize(_soln_aux);
+    Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
+    if (p)
     {
-      Locker lock(&mut);
-      if (_fe_problem.getNonlinearSystem().currentSolution()->size() != _soln_nonlin.size())
-        _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
-      if (_fe_problem.getAuxiliarySystem().currentSolution()->size() != _soln_aux.size())
-        _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
-
-      _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
-      _fe_problem.getAuxiliarySystem().currentSolution()->localize(_soln_aux);
-      Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
-      if (p)
-      {
-        _soln_predicted.resize(p->solutionPredictor().size());
-        p->solutionPredictor().localize(_soln_predicted);
-      }
+      _soln_predicted.resize(p->solutionPredictor().size());
+      p->solutionPredictor().localize(_soln_predicted);
     }
+
     double constr_legacy_dt = _dt;
     if (_stepper)
       printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", _steps_taken, _time, _new_dt, legacy_dt, constr_legacy_dt);
@@ -338,28 +330,38 @@ Transient::execute()
 void
 Transient::computeDT(bool first)
 {
-  Locker lock(&mut);
-
   _time_stepper->computeStep(); // This is actually when DT gets computed
-
+  Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
   if (!_initialized)
   {
+     std::cout << "SPOT1\n";
     _initialized = true;
-    _si = {};
-    std::stringstream ss;
-    ss << this;
-    _si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector(ss.str() + "nl_u1", true, GHOSTED);
-    _si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector(ss.str() + "aux_u1", true, GHOSTED);
-    _si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector(ss.str() + "predicted_u1", true, GHOSTED);
-    _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
+      _si.soln_nonlin = _fe_problem.getNonlinearSystem().currentSolution()->clone();
+      _si.soln_aux = _fe_problem.getAuxiliarySystem().currentSolution()->clone();
+      if (_si.soln_nonlin->size() == _soln_nonlin.size())
+        *_si.soln_nonlin = _soln_nonlin;
+      if (_si.soln_aux->size() == _soln_aux.size())
+        *_si.soln_aux = _soln_aux;
+      if (p)
+      {
+       std::cout << "SPOT2\n";
+        _si.soln_predicted = _fe_problem.getNonlinearSystem().currentSolution()->clone();
+        if (_si.soln_predicted->size() == _soln_predicted.size())
+          *_si.soln_predicted = _soln_predicted;
+      }
   }
-
-  if (_soln_nonlin.size() != _si.soln_nonlin->size())
+  else
   {
-    _soln_nonlin.resize(_si.soln_nonlin->size());
-    _soln_aux.resize(_si.soln_aux->size());
-    _soln_predicted.resize(_si.soln_predicted->size());
+         std::cout << "SPOT3\n";
+
+    _si.soln_nonlin = _fe_problem.getNonlinearSystem().currentSolution()->clone();
+    _si.soln_aux = _fe_problem.getAuxiliarySystem().currentSolution()->clone();
+    if (p)
+         {std::cout << "SPOT4\n";
+      _si.soln_predicted = p->solutionPredictor().clone();
+      }
   }
+  std::cout << "soln_predicted=" << _soln_predicted.size() << ", " << _si.soln_predicted->size() << ", soln_nonlin=" << _soln_nonlin.size() << ", " << _si.soln_nonlin->size() << "\n";
 
   _si.time = _time;
   _si.prev_prev_prev_dt = _si.prev_prev_dt;
@@ -375,9 +377,6 @@ Transient::computeDT(bool first)
   // A step_count == 1 condition is not sufficient to account for
   // restart/recover cases where step_count is already something else.
   _si.converged = _last_solve_converged || first;
-  *_si.soln_nonlin = _soln_nonlin;
-  *_si.soln_aux =  _soln_aux;
-  *_si.soln_predicted = _soln_predicted;
   _prev_dt = _si.prev_dt; // for restart
 
   if (_stepper)

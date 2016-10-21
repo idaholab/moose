@@ -61,9 +61,9 @@ struct StepperInfo {
   double prev_prev_prev_solve_time_secs;
 
   // solution stuff
-  NumericVector<Number>* soln_nonlin;
-  NumericVector<Number>* soln_aux;
-  NumericVector<Number>* soln_predicted;
+  std::unique_ptr<NumericVector<Number> > soln_nonlin;
+  std::unique_ptr<NumericVector<Number> > soln_aux;
+  std::unique_ptr<NumericVector<Number> > soln_predicted;
 
   // backup/restore
   bool sched_backup;
