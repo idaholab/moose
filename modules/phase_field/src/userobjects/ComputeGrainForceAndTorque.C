@@ -78,7 +78,7 @@ ComputeGrainForceAndTorque::execute()
         for (_qp=0; _qp<_qrule->n_points(); ++_qp)
           if (_dF[_qp][j](0) != 0.0 || _dF[_qp][j](1) != 0.0 || _dF[_qp][j](2) != 0.0)
           {
-            const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_q_point[_qp] - centroid).cross(_dF[_qp][j]);
+            const RealGradient compute_torque =_JxW[_qp] * _coord[_qp] * (_current_elem->centroid() - centroid).cross(_dF[_qp][j]);
             _force_torque_store[6*i+0] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](0);
             _force_torque_store[6*i+1] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](1);
             _force_torque_store[6*i+2] += _JxW[_qp] * _coord[_qp] * _dF[_qp][j](2);
@@ -104,7 +104,7 @@ ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
             if (_dFdc[_qp][j](0) != 0.0 || _dFdc[_qp][j](1) != 0.0 || _dFdc[_qp][j](2) != 0.0)
             {
               const Real factor = _JxW[_qp] * _coord[_qp] * _phi[_j][_qp];
-              const RealGradient compute_torque_jacobian_c = factor * (_q_point[_qp] - centroid).cross(_dFdc[_qp][j]);
+              const RealGradient compute_torque_jacobian_c = factor * (_current_elem->centroid() - centroid).cross(_dFdc[_qp][j]);
               _force_torque_c_jacobian_store[(6*i+0)*_total_dofs+_j_global] += factor * _dFdc[_qp][j](0);
               _force_torque_c_jacobian_store[(6*i+1)*_total_dofs+_j_global] += factor * _dFdc[_qp][j](1);
               _force_torque_c_jacobian_store[(6*i+2)*_total_dofs+_j_global] += factor * _dFdc[_qp][j](2);
@@ -125,7 +125,7 @@ ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
               if ((*_dFdgradeta[i])[_qp][j] != 0.0)
               {
                 const Real factor =_JxW[_qp] * _coord[_qp] * (*_dFdgradeta[i])[_qp][k];
-                const RealGradient compute_torque_jacobian_eta = factor * (_q_point[_qp] - centroid).cross(_grad_phi[_j][_qp]);
+                const RealGradient compute_torque_jacobian_eta = factor * (_current_elem->centroid() - centroid).cross(_grad_phi[_j][_qp]);
                 _force_torque_eta_jacobian_store[i][(6*j+0)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](0);
                 _force_torque_eta_jacobian_store[i][(6*j+1)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](1);
                 _force_torque_eta_jacobian_store[i][(6*j+2)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](2);

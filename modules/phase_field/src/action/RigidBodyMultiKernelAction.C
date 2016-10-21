@@ -50,27 +50,40 @@ RigidBodyMultiKernelAction::act()
     //
 
     std::string var_name = _var_name_base + Moose::stringify(op);
-    std::vector<VariableName> v;
+
+    //
+    // Create vector of coupled variables
+    //
+
+    std::vector<VariableName> arg;
     unsigned int ind = 0;
 
     if (isParamValid("c"))
     {
       VariableName c = getParam<VariableName>("c");
-      v.resize(_op_num);
+      arg.resize(_op_num);
 
       for (unsigned int j = 0; j < _op_num; ++j)
         if (j != op)
-          v[ind++] = _var_name_base + Moose::stringify(j);
+          arg[ind++] = _var_name_base + Moose::stringify(j);
 
-        v[ind++] = c;
+        arg[ind++] = c;
     }
     else
     {
-      v.resize(_op_num - 1);
+      arg.resize(_op_num - 1);
       for (unsigned int j = 0; j < _op_num; ++j)
         if (j != op)
-          v[ind++] = _var_name_base + Moose::stringify(j);
+          arg[ind++] = _var_name_base + Moose::stringify(j);
     }
+
+    //
+    // Create vector of order parameters
+    //
+
+    std::vector<VariableName> v(_op_num);
+    for (unsigned int j = 0; j < _op_num; ++j)
+      v[j] = _var_name_base + Moose::stringify(j);
 
     //
     // Set up ACInterface kernels
@@ -95,7 +108,7 @@ RigidBodyMultiKernelAction::act()
     {
       InputParameters params = _factory.getValidParams("AllenCahn");
       params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<std::vector<VariableName> >("args") = v;
+      params.set<std::vector<VariableName> >("args") = arg;
       params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mob_name");
       params.set<MaterialPropertyName>("f_name") = getParam<MaterialPropertyName>("f_name");
       params.set<bool>("implicit") = _implicit;
