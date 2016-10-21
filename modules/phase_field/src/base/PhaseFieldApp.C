@@ -184,6 +184,7 @@
 /*
  * User Objects
  */
+#include "ComputeExternalGrainForceAndTorque.h"
 #include "ComputeGrainCenterUserObject.h"
 #include "ComputeGrainForceAndTorque.h"
 #include "ConservedMaskedNormalNoise.h"
@@ -431,6 +432,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(TotalFreeEnergy);
 
   registerDeprecatedObjectName(FauxGrainTracker, "ComputeGrainCenterUserObject", "11/01/2016 00:00");
+  registerUserObject(ComputeExternalGrainForceAndTorque);
   registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
   registerUserObject(ConservedMaskedUniformNoise);

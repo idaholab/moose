@@ -51,6 +51,13 @@ ForceDensityMaterial::computeQpProperties()
 {
   _dF[_qp].resize(_op_num);
   _dFdc[_qp].resize(_op_num);
+
+  Real c = _c[_qp];
+  if (c >= _ceq)
+    c = _ceq;
+  else if (c < 0.0 )
+    c = 0.0;
+
   for (unsigned int i = 0; i < _op_num; ++i)
   {
     _sum_grad_etas[i] = 0.0;
