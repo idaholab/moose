@@ -177,7 +177,7 @@
     type = ComputeLinearElasticStress
   [../]
   [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
+    type = ComputeThermalExpansionEigenStrain
     thermal_expansion_coeff = 0.02
     temperature = temp
     stress_free_temperature = 0.5

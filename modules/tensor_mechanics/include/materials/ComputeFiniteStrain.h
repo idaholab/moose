@@ -33,12 +33,21 @@ protected:
   MaterialProperty<RankTwoTensor> & _deformation_gradient;
   MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
 
-  const MaterialProperty<RankTwoTensor> & _eigenstrain_increment;
+  const MaterialProperty<RankTwoTensor> & _stress_free_strain_increment;
 
   const Real & _current_elem_volume;
   std::vector<RankTwoTensor> _Fhat;
 
 private:
+  /// True if this is the first timestep (timestep < 2). At the first
+  /// timestep, the change in temperature should be calculated with the reference
+  /// stress free temperature, not the stateful _temperature_old; this boolean variable
+  /// eliminates the use of the _app.isRestarting() in the soon to be deprecicated
+  /// calculation of thermal expansion strain in this class.
+  /// This boolean is delcared as a reference so that the variable is restartable
+  /// data:  if we restart, the code will not think it is the first timestep again.
+  bool & _step_one;
+
   enum class DecompMethod
   {
     TaylorExpansion,

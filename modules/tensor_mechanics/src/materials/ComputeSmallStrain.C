@@ -20,7 +20,7 @@ InputParameters validParams<ComputeSmallStrain>()
 
 ComputeSmallStrain::ComputeSmallStrain(const InputParameters & parameters) :
     ComputeStrainBase(parameters),
-    _eigenstrain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain"))
+    _stress_free_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain"))
 {
 }
 
@@ -35,5 +35,5 @@ ComputeSmallStrain::computeQpProperties()
   _mechanical_strain[_qp] = _total_strain[_qp];
 
   //Remove the Eigen strain
-  _mechanical_strain[_qp] -= _eigenstrain[_qp];
+  _mechanical_strain[_qp] -= _stress_free_strain[_qp];
 }
