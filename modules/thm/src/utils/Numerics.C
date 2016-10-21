@@ -30,10 +30,10 @@ Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l)
 }
 
 Real
-Laplace(Real surf_tension, Real rho_l, Real rho_v)
+Laplace(Real surf_tension, Real delta_rho)
 {
   // Eq. 4-119; 5-13.
-  return std::sqrt(surf_tension / gravity_const / (rho_l - rho_v));
+  return std::sqrt(surf_tension / (gravity_const * delta_rho));
 }
 
 Real

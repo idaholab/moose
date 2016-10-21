@@ -57,11 +57,10 @@ Real Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l);
 /**
  * Compute Laplace number (or coefficient)
  * @param surf_tension Surface tension
- * @param rho_l Density of liquid
- * @param rho_v Density of vapor
+ * @param delta_rho Difference in density of phases
  * @return Laplace number
  */
-Real Laplace(Real surf_tension, Real rho_l, Real rho_v);
+Real Laplace(Real surf_tension, Real delta_rho);
 
 /**
  * Compute viscosity number (or coefficient)

@@ -96,20 +96,21 @@ enum EWallDragFlowRegimeNamesType
   WDFR_ANNULARMIST,     ///< Weight of Annular/Mist Correlations PreCHF
   WDFR_STRATIFIED,      ///< Weight of Horiz Stratified Flow Exp PreCHF
   WDFR_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
-  WDFR_INVERTEDSLUG,    ///< Weight of InvertedSlug Flow Correlations PostCHF
   WDFR_DISPERSED,       ///< Weight of Dispersed Flow Correlations PostCHF
   WDFR_LEFTOVER         ///< Weight of original Pre Map correlations to be applied
 };
 
 enum EWallHeatTransferRegimeNamesType
 {
-  WHTR_CONVECTION,      ///< Weight of Forced Convection PreCHF
-  WHTR_SUBCOOLED,       ///< Weight of Subcooled Nucleate boiling PreCHF
-  WHTR_NUCLEATE,        ///< Weight of Stable Nucleate boiling PreCHF
-  WHTR_TRANSITION,      ///< Weight of Transition Boiling PreCHF
-  WHTR_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
-  WHTR_DISPERSED,       ///< Weight of Dispersed Flow Correlations PostCHF
-  WHTR_LEFTOVER         ///< Weight of original Pre Map correlations to be applied
+  WHT_SINGLECONVECTION,   ///< Weight of Single Phase Forced Convection PreCHF
+  WHT_TWOPHASECONVECTION, ///< Weight of Two Phase Forced Convection PreCHF
+  WHT_FILMCONDENSATION,   ///< Weight of Film Condensation PreCHF
+  WHT_SUBCOOLED,       ///< Weight of Subcooled Nucleate boiling PreCHF
+  WHT_NUCLEATE,        ///< Weight of Stable Nucleate boiling PreCHF
+  WHT_TRANSITION,      ///< Weight of Transition Boiling PreCHF
+  WHT_INVERTEDANNULAR, ///< Weight of Inverted Annular Flow Correlations PostCHF
+  WHT_DISPERSED,       ///< Weight of Dispersed Flow Correlations PostCHF
+  WHT_LEFTOVER         ///< Weight of original Pre Map correlations to be applied
 };
 
 /**
