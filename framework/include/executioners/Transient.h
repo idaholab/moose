@@ -322,7 +322,6 @@ protected:
   std::vector<Real> & _soln_predicted;
   Real & _prev_dt;
   StepperInfo _si;
-  bool _initialized;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

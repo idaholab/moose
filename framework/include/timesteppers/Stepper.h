@@ -64,11 +64,6 @@ struct StepperInfo {
   std::unique_ptr<NumericVector<Number> > soln_nonlin;
   std::unique_ptr<NumericVector<Number> > soln_aux;
   std::unique_ptr<NumericVector<Number> > soln_predicted;
-
-  // backup/restore
-  bool sched_backup;
-  bool sched_restore;
-  double restore_time;
 };
 
 class Stepper

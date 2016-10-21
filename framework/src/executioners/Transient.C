@@ -150,8 +150,7 @@ Transient::Transient(const InputParameters & parameters) :
     _soln_aux(declareRestartableData<std::vector<Real> >("soln_aux", std::vector<Real>())),
     _soln_predicted(declareRestartableData<std::vector<Real> >("soln_predicted", std::vector<Real>())),
     _prev_dt(declareRestartableData<Real>("prev_dt", 0)),
-    _si({}),
-    _initialized(false)
+    _si({})
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
@@ -331,32 +330,21 @@ void
 Transient::computeDT(bool first)
 {
   _time_stepper->computeStep(); // This is actually when DT gets computed
-  Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
-  if (!_initialized)
-  {
-    _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
-    _initialized = true;
-     _si.soln_nonlin = _fe_problem.getNonlinearSystem().currentSolution()->clone();
-     _si.soln_aux = _fe_problem.getAuxiliarySystem().currentSolution()->clone();
-     if (_si.soln_nonlin->size() == _soln_nonlin.size())
-       *_si.soln_nonlin = _soln_nonlin;
-     if (_si.soln_aux->size() == _soln_aux.size())
-       *_si.soln_aux = _soln_aux;
-     if (p)
-     {
-       _si.soln_predicted = _fe_problem.getNonlinearSystem().currentSolution()->clone();
-       if (_si.soln_predicted->size() == _soln_predicted.size())
-         *_si.soln_predicted = _soln_predicted;
-    }
-  }
-  else
-  {
 
+  _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
+  if (!_si.soln_nonlin || _si.soln_nonlin->size() != _fe_problem.getNonlinearSystem().currentSolution()->size())
     _si.soln_nonlin.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
+  if (!_si.soln_aux || _si.soln_aux->size() != _fe_problem.getAuxiliarySystem().currentSolution()->size())
     _si.soln_aux.reset(_fe_problem.getAuxiliarySystem().currentSolution()->clone().release());
-    if (p)
-      _si.soln_predicted.reset(p->solutionPredictor().clone().release());
-  }
+  if (!_si.soln_predicted || _si.soln_predicted->size() != _fe_problem.getNonlinearSystem().currentSolution()->size())
+    _si.soln_predicted.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
+  _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+  _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
+  _soln_predicted.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+
+  *_si.soln_nonlin = _soln_nonlin;
+  *_si.soln_aux = _soln_aux;
+  *_si.soln_predicted = _soln_predicted;
 
   _si.time = _time;
   _si.prev_prev_prev_dt = _si.prev_prev_dt;
