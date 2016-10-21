@@ -239,6 +239,7 @@
 #include "AddLotsOfAuxVariablesAction.h"
 #include "ApplyCoupledVariablesTestAction.h"
 #include "AddLotsOfDiffusion.h"
+#include "TestGetActionsAction.h"
 #include "BadAddKernelAction.h"
 
 // TimeSteppers
@@ -545,6 +546,8 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddLotsOfDiffusion, "add_kernel");
   registerAction(AddLotsOfDiffusion, "add_bc");
 
+  registerAction(TestGetActionsAction, "meta_action");
+
   syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
   syntax.registerActionSyntax("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
   syntax.registerActionSyntax("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
@@ -552,5 +555,6 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(ApplyCoupledVariablesTestAction, "meta_action");
   syntax.registerActionSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
   syntax.registerActionSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
+  syntax.registerActionSyntax("TestGetActionsAction", "TestGetActions");
   syntax.registerActionSyntax("BadAddKernelAction", "BadKernels/*");
 }
