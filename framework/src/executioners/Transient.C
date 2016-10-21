@@ -300,11 +300,20 @@ Transient::execute()
     takeStep();
     _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
     _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
+
+    if (_fe_problem.getNonlinearSystem().currentSolution()->size() != _soln_nonlin.size())
+      _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+    if (_fe_problem.getAuxiliarySystem().currentSolution()->size() != _soln_aux.size())
+      _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
+
     _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
     _fe_problem.getAuxiliarySystem().currentSolution()->localize(_soln_aux);
     Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
     if (p)
+    {
+      _soln_predicted.resize(p->solutionPredictor().size());
       p->solutionPredictor().localize(_soln_predicted);
+    }
     double constr_legacy_dt = _dt;
     if (_stepper)
       printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", _steps_taken, _time, _new_dt, legacy_dt, constr_legacy_dt);
@@ -328,9 +337,11 @@ Transient::computeDT(bool first)
   {
     _initialized = true;
     _si = {};
-    _si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector("nl_u1", true, GHOSTED);
-    _si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector("aux_u1", true, GHOSTED);
-    _si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector("predicted_u1", true, GHOSTED);
+    std::stringstream ss;
+    ss << this;
+    _si.soln_nonlin = &_fe_problem.getNonlinearSystem().addVector(ss.str() + "nl_u1", true, GHOSTED);
+    _si.soln_aux = &_fe_problem.getAuxiliarySystem().addVector(ss.str() + "aux_u1", true, GHOSTED);
+    _si.soln_predicted = &_fe_problem.getNonlinearSystem().addVector(ss.str() + "predicted_u1", true, GHOSTED);
     _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
   }
 
