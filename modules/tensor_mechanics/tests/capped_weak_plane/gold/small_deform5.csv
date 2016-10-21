@@ -1,0 +1,4 @@
+time,f_compressive,f_shear,f_tensile,intnl_shear,intnl_tensile,iter,ls,strainp_xx,strainp_xy,strainp_xz,strainp_yy,strainp_yz,strainp_zz,straint_xx,straint_xy,straint_xz,straint_yy,straint_yz,straint_zz,stress_xx,stress_xy,stress_xz,stress_yy,stress_yz,stress_zz
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,-99.999999999984,0,-100.00000000002,4.999999999998,0,0,0,1.9428902930904e-17,0,1.9999999999992,1.2490009027022e-17,1.4999999999994,0.83333333333467,0,2.3245294578089e-16,4,4.8572257327351e-17,3,0.83333333333333,-5.3334003879968e-12,1.8596235662471e-15,16.000000000006,-5.3329562987869e-12,12.000000000005,-1.5999868097083e-11
+

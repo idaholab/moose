@@ -1,0 +1,103 @@
+[Tests]
+  [./except1]
+    type = 'RunException'
+    input = 'except1.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
+  [../]
+  [./except2]
+    type = 'RunException'
+    input = 'except2.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in \[0, Pi/2\]'
+  [../]
+  [./except3]
+    type = 'RunException'
+    input = 'except3.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than dilation angle'
+  [../]
+  [./except4]
+    type = 'RunException'
+    input = 'except4.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative'
+  [../]
+  [./except5]
+    type = 'RunException'
+    input = 'except5.i'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak plane tensile strength must not be less than negative-compressive-strength'
+  [../]
+  [./small1]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+  [../]
+  [./small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+  [../]
+  [./small3]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+  [../]
+  [./small4]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+  [../]
+  [./small5]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+  [../]
+  [./small7]
+    type = 'CSVDiff'
+    input = 'small_deform7.i'
+    csvdiff = 'small_deform7.csv'
+  [../]
+  [./small8]
+    type = 'CSVDiff'
+    input = 'small_deform8.i'
+    csvdiff = 'small_deform8.csv'
+  [../]
+  [./small9]
+    type = 'CSVDiff'
+    input = 'small_deform9.i'
+    csvdiff = 'small_deform9.csv'
+  [../]
+  [./small10]
+    type = 'CSVDiff'
+    input = 'small_deform10.i'
+    csvdiff = 'small_deform10.csv'
+  [../]
+  [./small11]
+    type = 'CSVDiff'
+    input = 'small_deform11.i'
+    csvdiff = 'small_deform11.csv'
+  [../]
+
+  [./pull_push]
+    type = Exodiff
+    input = 'pull_push.i'
+    exodiff = 'pull_push.e'
+    abs_zero = 1E-4
+  [../]
+  [./pull_push_h]
+    type = Exodiff
+    input = 'pull_push_h.i'
+    exodiff = 'pull_push_h.e'
+    abs_zero = 1E-4
+  [../]
+
+  [./cwp_beam]
+    type = Exodiff
+    input = 'beam.i'
+    exodiff = 'beam.e'
+    #heavy = true
+    abs_zero = 1E-4
+  [../]
+[]

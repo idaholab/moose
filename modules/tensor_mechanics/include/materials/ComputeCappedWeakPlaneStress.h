@@ -34,6 +34,21 @@ protected:
   virtual void computeQpStress() override;
   virtual void initQpStatefulProperties() override;
 
+  /// Number of variables = 2 = (p, q)
+  constexpr static int _num_pq = 2;
+
+  /// Number of yield functions
+  constexpr static unsigned _num_yf = 3;
+
+  /// Number of internal parameters
+  constexpr static unsigned _num_intnl = 2;
+
+  /// Number of equations in the Return-map Newton-Raphson
+  constexpr static int _num_rhs = 3;
+
+  /// Internal dimensionality of tensors (currently this is 3 throughout tensor_mechanics)
+  constexpr static unsigned _tensor_dimensionality = 3;
+
   /// Hardening model for cohesion
   const TensorMechanicsHardeningModel & _cohesion;
 
@@ -68,7 +83,7 @@ protected:
   const Real _f_tol2;
 
   /// The type of tangent operator to return.  tangent operator = d(stress_rate)/d(strain_rate).
-  enum TangentOperatorEnum {
+  enum class TangentOperatorEnum {
     elastic, nonlinear
   } _tangent_operator_type;
 
@@ -87,7 +102,7 @@ protected:
    * Otherwise (and at the very end after return-map) _stress_return_type
    * is set to nothing_special.
    */
-  enum StressReturnType {
+  enum class StressReturnType {
     nothing_special, no_compression, no_tension
   } _stress_return_type;
 
@@ -217,13 +232,7 @@ protected:
     std::vector<std::vector<Real> > d2g;
     std::vector<std::vector<Real> > d2g_di;
 
-    f_and_derivs():
-      f(0.0),
-      df(0),
-      df_di(0),
-      dg(0),
-      d2g(0),
-      d2g_di(0)
+    f_and_derivs(): f_and_derivs(0, 0)
     {}
 
     f_and_derivs(unsigned num_var, unsigned num_intnl):
@@ -288,7 +297,7 @@ protected:
    * @param smoothed_q Upon input, the value of the smoothed yield function and derivatives at the prior-to-Newton configuration.  Upon exit this is evaluated at the new (p, q, intnl)
    * @param intnl_ok The value of _intnl from either the start of this (sub)strain increment
    */
-  int lineSearch(Real & res2, Real & gaE, Real & p, Real & q, Real q_trial, Real p_trial, f_and_derivs & smoothed_q, const std::vector<Real> intnl_ok);
+  int lineSearch(Real & res2, Real & gaE, Real & p, Real & q, Real q_trial, Real p_trial, f_and_derivs & smoothed_q, const std::array<Real, 2> intnl_ok);
 
   /** Performs a Newton-Raphson step to zero _rhs
    * Upon return, _rhs will contain the solution.
@@ -346,7 +355,7 @@ private:
    * in these equations, but the PETSc-LAPACK gesv routine puts the
    * changes of the variables into the _rhs too
    */
-  std::vector<Real> _rhs;
+  std::array<Real, _num_rhs> _rhs;
 
   /** Holds the yield function, derivatives and flow information for the
    * three yield functions of this model

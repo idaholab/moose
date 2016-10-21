@@ -46,7 +46,7 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
     _f_tol2(Utility::pow<2>(getParam<Real>("yield_function_tol"))),
     _tangent_operator_type((TangentOperatorEnum)(int)getParam<MooseEnum>("tangent_operator")),
     _perfect_guess(getParam<bool>("perfect_guess")),
-    _stress_return_type(nothing_special),
+    _stress_return_type(StressReturnType::nothing_special),
     _min_step_size(getParam<Real>("min_step_size")),
     _step_one(declareRestartableData<bool>("step_one", true)),
 
@@ -70,8 +70,8 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
     _dgaE_dqt(0.0),
     _dp_dqt(0.0),
     _dq_dqt(0.0),
-    _rhs(3),
-    _all_q(3)
+    //DELETE?_rhs(_num_rhs),
+    _all_q(_num_yf)
 {
   // With arbitary UserObjects, it is impossible to check everything,
   // but this will catch the common errors
@@ -84,8 +84,8 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
   if (_tstrength.value(0) < - _cstrength.value(0))
     mooseError("ComputeCappedWeakPlaneStress: Weak plane tensile strength must not be less than negative-compressive-strength");
 
-  for (unsigned i = 0; i < 3; ++i)
-    _all_q[i] = f_and_derivs(2, 2);
+  for (unsigned i = 0; i < _num_yf; ++i)
+    _all_q[i] = f_and_derivs(_num_pq, _num_intnl);
 }
 
 void
@@ -94,8 +94,8 @@ ComputeCappedWeakPlaneStress::initQpStatefulProperties()
   ComputeStressBase::initQpStatefulProperties();
 
   _plastic_strain[_qp].zero();
-  _intnl[_qp].assign(2, 0);
-  _yf[_qp].assign(3, 0);
+  _intnl[_qp].assign(_num_intnl, 0);
+  _yf[_qp].assign(_num_yf, 0);
   _iter[_qp] = 0.0;
   _linesearch_needed[_qp] = 0.0;
 }
@@ -125,12 +125,12 @@ ComputeCappedWeakPlaneStress::returnMap()
 {
   // initially assume an elastic deformation
   _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
-  _intnl[_qp][0] = _intnl_old[_qp][0];
-  _intnl[_qp][1] = _intnl_old[_qp][1];
+  for (unsigned i = 0; i < _num_intnl; ++i)
+    _intnl[_qp][i] = _intnl_old[_qp][i];
   _iter[_qp] = 0.0;
   _linesearch_needed[_qp] = 0.0;
 
-  _stress_return_type = nothing_special;
+  _stress_return_type = StressReturnType::nothing_special;
 
   Real p_trial = _stress[_qp](2, 2);
   Real q_trial = std::sqrt(Utility::pow<2>(_stress[_qp](2, 0)) + Utility::pow<2>(_stress[_qp](2, 1)));
@@ -176,9 +176,7 @@ ComputeCappedWeakPlaneStress::returnMap()
   Real p_ok = _stress_old[_qp](2, 2);
   Real q_ok = std::sqrt(Utility::pow<2>(_stress[_qp](2, 0)) + Utility::pow<2>(_stress[_qp](2, 1)));
   // note that _intnl[_qp] is the "running" intnl variable that gets updated every NR iteration
-  std::vector<Real> intnl_ok(2);
-  intnl_ok[0] = _intnl_old[_qp][0];
-  intnl_ok[1] = _intnl_old[_qp][1];
+  std::array<Real, 2> intnl_ok = {_intnl_old[_qp][0], _intnl_old[_qp][1]};
   if (isParamValid("initial_stress") && _step_one)
   {
     // the initial stress might be inadmissible
@@ -199,9 +197,9 @@ ComputeCappedWeakPlaneStress::returnMap()
 
   // If it's obvious, then simplify the return-type
   if (_yf[_qp][1] >= 0)
-    _stress_return_type = no_compression;
+    _stress_return_type = StressReturnType::no_compression;
   else if (_yf[_qp][2] >= 0)
-    _stress_return_type = no_tension;
+    _stress_return_type = StressReturnType::no_tension;
 
   Real step_taken = 0.0; // amount of (del_p, del_q) that we've applied and the return-map problem has succeeded
   Real step_size = 1.0; // potentially can apply (del_p, del_q) in substeps
@@ -299,7 +297,7 @@ ComputeCappedWeakPlaneStress::returnMap()
     throw MooseException("ComputeCappedWeakPlaneStress: Minimum step-size violated");
 
   // success!
-  _stress_return_type = nothing_special;
+  _stress_return_type = StressReturnType::nothing_special;
   unsmoothedYieldFunctions(p_ok, q_ok, _intnl[_qp], _yf[_qp]);
 
   if (!smoothed_q_calculated)
@@ -330,7 +328,7 @@ ComputeCappedWeakPlaneStress::dVardTrial(bool elastic_only, Real q, Real q_trial
   if (!_fe_problem.currentlyComputingJacobian())
     return;
 
-  if (_tangent_operator_type == elastic)
+  if (_tangent_operator_type == TangentOperatorEnum::elastic)
     return;
 
   if (elastic_only)
@@ -351,9 +349,8 @@ ComputeCappedWeakPlaneStress::dVardTrial(bool elastic_only, Real q, Real q_trial
   const Real dintnl1_dq = tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dq / Ezxzx;
   const Real dintnl1_dqt = - tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dqt / Ezxzx;
 
-  int system_size = 3;
   // _rhs is defined above, the following are changes in rhs wrt the trial p and q values
-  std::vector<Real> rhs_cto(2 * system_size);
+  std::array<Real, _num_pq * _num_rhs> rhs_cto;
   // change in p_trial
   rhs_cto[0] = - smoothed_q.df_di[1] * dintnl1_dpt;
   rhs_cto[1] = 1.0 - gaE * smoothed_q.d2g_di[0][1] * dintnl1_dpt;
@@ -364,7 +361,7 @@ ComputeCappedWeakPlaneStress::dVardTrial(bool elastic_only, Real q, Real q_trial
   rhs_cto[5] = 1.0 - Ezxzx * gaE / Ezzzz * (smoothed_q.d2g_di[1][0] * dintnl0_dqt + smoothed_q.d2g_di[1][1] * dintnl1_dqt);
 
   // jac = d(rhs)/d(var), where var[0] = gaE, var[1] = p, var[2] = q.
-  std::vector<double> jac(system_size * system_size);
+  std::array<double, _num_rhs * _num_rhs> jac;
   jac[0] = 0;
   jac[1] = smoothed_q.dg[0];
   jac[2] = Ezxzx * smoothed_q.dg[1] / Ezzzz;
@@ -375,10 +372,11 @@ ComputeCappedWeakPlaneStress::dVardTrial(bool elastic_only, Real q, Real q_trial
   jac[7] = gaE * (smoothed_q.d2g[0][1] + smoothed_q.d2g_di[0][0] * dintnl0_dq + smoothed_q.d2g_di[0][1] * dintnl1_dq);
   jac[8] = 1.0 + Ezxzx * gaE / Ezzzz * (smoothed_q.d2g[1][1] + smoothed_q.d2g_di[1][0] * dintnl0_dq + smoothed_q.d2g_di[1][1] * dintnl1_dq);
 
-  int nrhs = 2;
-  std::vector<int> ipiv(system_size);
+  std::array<int, _num_rhs> ipiv;
   int info;
-  LAPACKgesv_(&system_size, &nrhs, &jac[0], &system_size, &ipiv[0], &rhs_cto[0], &system_size, &info);
+  const int gesv_num_rhs = _num_rhs;
+  const int gesv_num_pq = _num_pq;
+  LAPACKgesv_(&gesv_num_rhs, &gesv_num_pq, &jac[0], &gesv_num_rhs, &ipiv[0], &rhs_cto[0], &gesv_num_rhs, &info);
   if (info != 0)
     throw MooseException("ComputeCappedWeakPlaneStress: PETSC LAPACK gsev routine returned with error code " + Moose::stringify(info));
 
@@ -409,7 +407,7 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(Real q, Real q_trial, Re
     return;
 
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
-  if (_tangent_operator_type == elastic)
+  if (_tangent_operator_type == TangentOperatorEnum::elastic)
     return;
 
   const Real Ezzzz = _elasticity_tensor[_qp](2, 2, 2, 2);
@@ -422,7 +420,7 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(Real q, Real q_trial, Re
   const Real dintnl1_dq = tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dq / Ezxzx;
   const Real dintnl1_dqt = - tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dqt / Ezxzx;
 
-  for (unsigned i = 0; i < 3; ++i)
+  for (unsigned i = 0; i < _tensor_dimensionality; ++i)
   {
     const Real dpt_depii = _elasticity_tensor[_qp](2, 2, i, i);
     _Jacobian_mult[_qp](2, 2, i, i) = _dp_dpt * dpt_depii;
@@ -462,14 +460,14 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(Real q, Real q_trial, Re
 void
 ComputeCappedWeakPlaneStress::unsmoothedYieldFunctions(Real p, Real q, const std::vector<Real> & intnl, std::vector<Real> & yf) const
 {
-  mooseAssert(intnl.size() == 2, "ComputeCappedWeakPlaneStress: yieldFunctions called with intnl size " + Moose::stringify(intnl.size()));
-  mooseAssert(yf.size() == 3, "ComputeCappedWeakPlaneStress: yieldFunctions called with yf size " + Moose::stringify(yf.size()));
+  mooseAssert(intnl.size() == _num_intnl, "ComputeCappedWeakPlaneStress: yieldFunctions called with intnl size " << intnl.size());;
+  mooseAssert(yf.size() == _num_yf, "ComputeCappedWeakPlaneStress: yieldFunctions called with yf size " << yf.size());
   yf[0] = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) - _cohesion.value(intnl[0]);
-  if (_stress_return_type == no_tension)
+  if (_stress_return_type == StressReturnType::no_tension)
     yf[1] = std::numeric_limits<Real>::lowest();
   else
     yf[1] = p - _tstrength.value(intnl[1]);
-  if (_stress_return_type == no_compression)
+  if (_stress_return_type == StressReturnType::no_compression)
     yf[2] = std::numeric_limits<Real>::lowest();
   else
     yf[2] = - p - _cstrength.value(intnl[1]);
@@ -479,11 +477,11 @@ void
 ComputeCappedWeakPlaneStress::unsmoothedYieldFunctions(Real p, Real q, const std::vector<Real> & intnl)
 {
   _all_q[0].f = std::sqrt(Utility::pow<2>(q) + _small_smoother2) + p * _tan_phi.value(intnl[0]) - _cohesion.value(intnl[0]);
-  if (_stress_return_type == no_tension)
+  if (_stress_return_type == StressReturnType::no_tension)
     _all_q[1].f = std::numeric_limits<Real>::lowest();
   else
     _all_q[1].f = p - _tstrength.value(intnl[1]);
-  if (_stress_return_type == no_compression)
+  if (_stress_return_type == StressReturnType::no_compression)
     _all_q[2].f = std::numeric_limits<Real>::lowest();
   else
     _all_q[2].f = - p - _cstrength.value(intnl[1]);
@@ -583,7 +581,7 @@ ComputeCappedWeakPlaneStress::d2flowPotential(Real /*p*/, Real q, const std::vec
 Real
 ComputeCappedWeakPlaneStress::yieldF(Real p, Real q, const std::vector<Real> & intnl) const
 {
-  std::vector<Real> yf(3);
+  std::vector<Real> yf(_num_yf);
   unsmoothedYieldFunctions(p, q, intnl, yf);
   std::sort(yf.begin(), yf.end());
   unsigned num = yf.size();
@@ -599,7 +597,7 @@ ComputeCappedWeakPlaneStress::yieldF(Real p, Real q, const std::vector<Real> & i
 ComputeCappedWeakPlaneStress::f_and_derivs
 ComputeCappedWeakPlaneStress::smoothAllQuantities(Real p, Real q, const std::vector<Real> & intnl)
 {
-  for (unsigned i = _all_q.size(); i < 3; ++i)
+  for (unsigned i = _all_q.size(); i < _num_yf; ++i)
     _all_q.push_back(f_and_derivs(2, 2));
 
   unsmoothedYieldFunctions(p, q, intnl);
@@ -630,20 +628,20 @@ ComputeCappedWeakPlaneStress::smoothAllQuantities(Real p, Real q, const std::vec
     const Real ism = ismoother(_all_q[num - 2].f - _all_q[num - 1].f);
     const Real sm = smoother(_all_q[num - 2].f - _all_q[num - 1].f);
     const Real dsm = dsmoother(_all_q[num - 2].f - _all_q[num - 1].f);
-    for (unsigned i = 0; i < 2; ++i)
+    for (unsigned i = 0; i < _num_pq; ++i)
     {
-      for (unsigned j = 0; j < 2; ++j)
-      {
+      for (unsigned j = 0; j < _num_pq; ++j)
         _all_q[num - 2].d2g[i][j] = _all_q[num - 1].d2g[i][j] + dsm * (_all_q[num - 2].df[j] - _all_q[num - 1].df[j]) * (_all_q[num - 2].dg[i] - _all_q[num - 1].dg[i]) + sm * (_all_q[num - 2].d2g[i][j] - _all_q[num - 1].d2g[i][j]);
+      for (unsigned j = 0; j < _num_intnl; ++j)
         _all_q[num - 2].d2g_di[i][j] = _all_q[num - 1].d2g_di[i][j] + dsm * (_all_q[num - 2].df_di[j] - _all_q[num - 1].df_di[j]) * (_all_q[num - 2].dg[i] - _all_q[num - 1].dg[i]) + sm * (_all_q[num - 2].d2g_di[i][j] - _all_q[num - 1].d2g_di[i][j]);
-      }
     }
-    for (unsigned i = 0; i < 2; ++i)
+    for (unsigned i = 0; i < _num_pq; ++i)
     {
       _all_q[num - 2].dg[i] = _all_q[num - 1].dg[i] + sm * (_all_q[num - 2].dg[i] - _all_q[num - 1].dg[i]);
       _all_q[num - 2].df[i] = _all_q[num - 1].df[i] + sm * (_all_q[num - 2].df[i] - _all_q[num - 1].df[i]);
-      _all_q[num - 2].df_di[i] = _all_q[num - 1].df_di[i] + sm * (_all_q[num - 2].df_di[i] - _all_q[num - 1].df_di[i]);
     }
+    for (unsigned i = 0; i < _num_intnl; ++i)
+      _all_q[num - 2].df_di[i] = _all_q[num - 1].df_di[i] + sm * (_all_q[num - 2].df_di[i] - _all_q[num - 1].df_di[i]);
     _all_q[num - 2].f = _all_q[num - 1].f + ism;
     _all_q.pop_back();
     num = _all_q.size();
@@ -684,7 +682,7 @@ ComputeCappedWeakPlaneStress::dsmoother(Real f_diff) const
 
 
 int
-ComputeCappedWeakPlaneStress::lineSearch(Real & res2, Real & gaE, Real & p, Real & q, Real q_trial, Real p_trial, f_and_derivs & smoothed_q, const std::vector<Real> intnl_ok)
+ComputeCappedWeakPlaneStress::lineSearch(Real & res2, Real & gaE, Real & p, Real & q, Real q_trial, Real p_trial, f_and_derivs & smoothed_q, const std::array<Real, 2> intnl_ok)
 {
   const Real res2_old = res2;
   const Real gaE_old = gaE;
@@ -778,8 +776,7 @@ ComputeCappedWeakPlaneStress::nrStep(const f_and_derivs & smoothed_q, Real q_tri
   const Real tanpsi = _tan_psi.value(_intnl[_qp][0]);
   const Real dintnl1_dq = tanpsi / Ezxzx - (q_trial - q) * _tan_psi.derivative(_intnl[_qp][0]) * dintnl0_dq / Ezxzx;
 
-  int system_size = 3;
-  std::vector<double> jac(system_size * system_size);
+  std::array<double, _num_rhs * _num_rhs> jac;
 
   // LAPACK gsev stores the matrix in the following way:
   // d(-yieldF)/d(gaE)
@@ -802,10 +799,11 @@ ComputeCappedWeakPlaneStress::nrStep(const f_and_derivs & smoothed_q, Real q_tri
   jac[8] = - 1.0 - Ezxzx * gaE / Ezzzz * (smoothed_q.d2g[1][1] + smoothed_q.d2g_di[1][0] * dintnl0_dq + smoothed_q.d2g_di[1][1] * dintnl1_dq);
 
   // use LAPACK to solve the linear system
-  int nrhs = 1;
-  std::vector<int> ipiv(system_size);
+  const int nrhs = 1;
+  std::array<int, _num_rhs> ipiv;
   int info;
-  LAPACKgesv_(&system_size, &nrhs, &jac[0], &system_size, &ipiv[0], &_rhs[0], &system_size, &info);
+  const int gesv_num_rhs = _num_rhs;
+  LAPACKgesv_(&gesv_num_rhs, &nrhs, &jac[0], &gesv_num_rhs, &ipiv[0], &_rhs[0], &gesv_num_rhs, &info);
   return info;
 }
 
