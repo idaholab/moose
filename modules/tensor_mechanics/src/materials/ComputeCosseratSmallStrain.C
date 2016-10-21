@@ -21,7 +21,7 @@ InputParameters validParams<ComputeCosseratSmallStrain>()
 
 ComputeCosseratSmallStrain::ComputeCosseratSmallStrain(const InputParameters & parameters) :
     ComputeStrainBase(parameters),
-    _stress_free_strain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain")),
+    _eigenstrain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain")),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
     _nrots(coupledComponents("Cosserat_rotations")),
     _wc(_nrots),
@@ -48,6 +48,6 @@ ComputeCosseratSmallStrain::computeQpProperties()
         strain(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
 
   _total_strain[_qp] = strain;
-  _mechanical_strain[_qp] = strain - _stress_free_strain[_qp];
+  _mechanical_strain[_qp] = strain - _eigenstrain[_qp];
   _curvature[_qp] = RankTwoTensor((*_grad_wc[0])[_qp], (*_grad_wc[1])[_qp], (*_grad_wc[2])[_qp]);
 }
