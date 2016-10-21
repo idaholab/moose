@@ -140,6 +140,8 @@
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "DisplacementAboutAxis.h"
+#include "PresetDisplacement.h"
+#include "PresetAcceleration.h"
 
 #include "CrystalPlasticitySlipRateGSS.h"
 #include "CrystalPlasticitySlipResistanceGSS.h"
@@ -314,6 +316,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
   registerBoundaryCondition(DisplacementAboutAxis);
+  registerBoundaryCondition(PresetDisplacement);
+  registerBoundaryCondition(PresetAcceleration);
 
   registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(Mass);

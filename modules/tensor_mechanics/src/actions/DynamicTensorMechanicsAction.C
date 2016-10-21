@@ -17,6 +17,7 @@ InputParameters validParams<DynamicTensorMechanicsAction>()
   params.addClassDescription("Set up dynamic stress divergence kernels");
   params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
   params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
+  params.addParam<bool>("static_initialization", false, "Set to true get the system to equillibrium under gravity by running a quasi-static analysis (by solving Ku = F) in the first time step.");
   return params;
 }
 
@@ -54,6 +55,6 @@ DynamicTensorMechanicsAction::getParameters(std::string type)
 
   params.set<Real>("zeta") = getParam<Real>("zeta");
   params.set<Real>("alpha") = getParam<Real>("alpha");
-
+  params.set<bool>("static_initialization") = getParam<bool>("static_initialization");
   return params;
 }
