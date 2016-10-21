@@ -7,14 +7,12 @@
 
 #include "PorousFlowRelativePermeabilityCorey.h"
 
-#include "Conversion.h"
-
 template<>
 InputParameters validParams<PorousFlowRelativePermeabilityCorey>()
 {
   InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
   params.addRequiredParam<Real>("n_j", "The Corey exponent of phase j.");
-  params.addClassDescription("This Material calculates relative permeability of either phase Sj, using the simple Corey model (Sj-Sjr)^n/(1-S1r-S2r)");
+  params.addClassDescription("This Material calculates relative permeability of either phase Sj, using the simple Corey model ((Sj-Sjr)/(1-S1r-S2r))^n");
   return params;
 }
 
@@ -24,9 +22,14 @@ PorousFlowRelativePermeabilityCorey::PorousFlowRelativePermeabilityCorey(const I
 {
 }
 
-void
-PorousFlowRelativePermeabilityCorey::computeQpProperties()
+Real
+PorousFlowRelativePermeabilityCorey::relativePermeability(Real seff) const
 {
-  _relative_permeability[_qp] = std::pow(_saturation_nodal[_qp][_phase_num], _n);
-  _drelative_permeability_ds[_qp] = _n * std::pow(_saturation_nodal[_qp][_phase_num], _n - 1.0);
+  return std::pow(seff, _n);
+}
+
+Real
+PorousFlowRelativePermeabilityCorey::dRelativePermeability_dS(Real seff) const
+{
+  return _n * std::pow(seff, _n - 1.0);
 }
