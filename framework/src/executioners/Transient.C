@@ -334,34 +334,29 @@ Transient::computeDT(bool first)
   Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
   if (!_initialized)
   {
-     std::cout << "SPOT1\n";
+    _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
     _initialized = true;
-      _si.soln_nonlin = _fe_problem.getNonlinearSystem().currentSolution()->clone();
-      _si.soln_aux = _fe_problem.getAuxiliarySystem().currentSolution()->clone();
-      if (_si.soln_nonlin->size() == _soln_nonlin.size())
-        *_si.soln_nonlin = _soln_nonlin;
-      if (_si.soln_aux->size() == _soln_aux.size())
-        *_si.soln_aux = _soln_aux;
-      if (p)
-      {
-       std::cout << "SPOT2\n";
-        _si.soln_predicted = _fe_problem.getNonlinearSystem().currentSolution()->clone();
-        if (_si.soln_predicted->size() == _soln_predicted.size())
-          *_si.soln_predicted = _soln_predicted;
-      }
+     _si.soln_nonlin = _fe_problem.getNonlinearSystem().currentSolution()->clone();
+     _si.soln_aux = _fe_problem.getAuxiliarySystem().currentSolution()->clone();
+     if (_si.soln_nonlin->size() == _soln_nonlin.size())
+       *_si.soln_nonlin = _soln_nonlin;
+     if (_si.soln_aux->size() == _soln_aux.size())
+       *_si.soln_aux = _soln_aux;
+     if (p)
+     {
+       _si.soln_predicted = _fe_problem.getNonlinearSystem().currentSolution()->clone();
+       if (_si.soln_predicted->size() == _soln_predicted.size())
+         *_si.soln_predicted = _soln_predicted;
+    }
   }
   else
   {
-         std::cout << "SPOT3\n";
 
     _si.soln_nonlin.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
     _si.soln_aux.reset(_fe_problem.getAuxiliarySystem().currentSolution()->clone().release());
     if (p)
-         {std::cout << "SPOT4\n";
       _si.soln_predicted.reset(p->solutionPredictor().clone().release());
-      }
   }
-  std::cout << "soln_predicted=" << _soln_predicted.size() << ", " << _si.soln_predicted->size() << ", soln_nonlin=" << _soln_nonlin.size() << ", " << _si.soln_nonlin->size() << "\n";
 
   _si.time = _time;
   _si.prev_prev_prev_dt = _si.prev_prev_dt;

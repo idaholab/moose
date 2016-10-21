@@ -662,7 +662,7 @@ public:
     // needs to be carefully documented.
     if (si->step_count < _start_adapting)
       return l.val(si->prev_dt);
-    if (si->soln_nonlin == nullptr || si->soln_aux == nullptr || si->soln_predicted == nullptr)
+    if (si->soln_nonlin == nullptr || si->soln_predicted == nullptr)
       throw "no predicted solution available";
 
     double error = estimateTimeError(si);
