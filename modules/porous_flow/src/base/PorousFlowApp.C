@@ -42,6 +42,7 @@
 #include "PorousFlowPorosityUnity.h"
 #include "PorousFlowRelativePermeabilityCorey.h"
 #include "PorousFlowRelativePermeabilityUnity.h"
+#include "PorousFlowRelativePermeabilityVG.h"
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowJoiner.h"
@@ -154,6 +155,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowPorosityUnity);
   registerMaterial(PorousFlowRelativePermeabilityCorey);
   registerMaterial(PorousFlowRelativePermeabilityUnity);
+  registerMaterial(PorousFlowRelativePermeabilityVG);
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowJoiner);
