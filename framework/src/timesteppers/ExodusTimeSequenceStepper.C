@@ -42,6 +42,7 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
 
     ExodusII_IO exodusII_io(mesh);
     exodusII_io.read(_mesh_file);
+    _times = exodusII_io.get_time_steps();
   }
 
   // distribute timestep list
