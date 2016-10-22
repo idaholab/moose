@@ -331,6 +331,7 @@ Transient::computeDT(bool first)
 {
   _time_stepper->computeStep(); // This is actually when DT gets computed
 
+  _communicator.barrier();
   _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
   if (!_si.soln_nonlin || _si.soln_nonlin->size() != _fe_problem.getNonlinearSystem().currentSolution()->size())
     _si.soln_nonlin.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
