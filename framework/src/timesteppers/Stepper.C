@@ -63,7 +63,7 @@ FixedPointStepper::advance(const StepperInfo* si)
 {
   Logger l("FixedPoint");
   if (_times.size() == 0)
-    return l.val(std::numeric_limits<double>::max());
+    return l.val(std::numeric_limits<double>::infinity());
 
   for (int i = 0; i < _times.size(); i++)
   {
@@ -71,7 +71,7 @@ FixedPointStepper::advance(const StepperInfo* si)
     if (si->time < t0 - _time_tol)
       return l.val(t0 - si->time);
   }
-  return l.val(std::numeric_limits<double>::max());
+  return l.val(std::numeric_limits<double>::infinity());
 }
 
 AlternatingStepper::AlternatingStepper(Stepper* on_steps, Stepper* between_steps, std::vector<double> times, double tol) :

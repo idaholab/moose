@@ -54,19 +54,21 @@ StepperTest::fixedPoint()
     std::vector<double> want;
   };
 
+  double inf = std::numeric_limits<double>::infinity();
+
   testcase tests[] = {
     {
       "zero-len-seq",
       1e-10,
       0,
       {},
-      {1e100}
+      {inf}
     },{
       "normal-seq",
       1e-10,
       0,
       {1, 2, 5},
-      {1, 2, 5, 1e100}
+      {1, 2, 5, inf}
     },{
       // checks that the stepper doesn't repeat time t0 with a dt=0 if a
       // fixed-point time is equal to the initial time.
@@ -74,19 +76,19 @@ StepperTest::fixedPoint()
       1e-10,
       0,
       {0, 1, 3},
-      {1, 3, 1e100, 2e100}
+      {1, 3, inf, inf}
     },{
       "under-tolerance",
       1e-10,
       0,
       {1e-11, 1, 3},
-      {1, 3, 1e100, 2e100}
+      {1, 3, inf, inf}
     },{
       "over-tolerance",
       1e-10,
       0,
       {1e-9, 1, 3},
-      {1e-9, 1, 3, 1e100}
+      {1e-9, 1, 3, inf}
     },{
       "violate-dt-under",
       1e-10,
@@ -98,7 +100,7 @@ StepperTest::fixedPoint()
       1e-10,
       +1,
       {1, 2, 5},
-      {2, 5, 1e100, 2e100}
+      {2, 5, inf, inf}
     }
   };
 

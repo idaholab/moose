@@ -142,7 +142,7 @@ private:
 
 /// Calculates dt in order to hit specified fixed times. This is robust if the
 /// dt used to evolve the actual simulation ended up being changed from this
-/// dt.  Returns max double after the simulation time is beyond the last user-specified time.
+/// dt.  Returns infinity after the simulation time is beyond the last user-specified time.
 class FixedPointStepper : public Stepper
 {
 public:
