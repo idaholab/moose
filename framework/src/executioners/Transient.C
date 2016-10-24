@@ -45,7 +45,6 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <mutex>
 
 template<>
 InputParameters validParams<Transient>()

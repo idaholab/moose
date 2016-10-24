@@ -12,9 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define MAKETOGETHER(a,b) a##b
-#define DBG MAKETOGETHER(std::c,out)
-
 #ifndef TRANSIENT_H
 #define TRANSIENT_H
 
