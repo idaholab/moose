@@ -1,0 +1,16 @@
+[tests]
+  [./displacement_bc]
+    type = 'Exodiff'
+    input = '3D_QStatic_1_Ramped_Displacement.i'
+    exodiff = '3D_QStatic_1_Ramped_Displacement_out.e'
+    abs_zero = 1e-08
+    compiler = 'GCC CLANG'
+  [../]
+  [./displacement_bc_gravity]
+    type = 'Exodiff'
+    input = '3D_QStatic_1_Ramped_Displacement_with_gravity.i'
+    exodiff = '3D_QStatic_1_Ramped_Displacement_with_gravity_out.e'
+    abs_zero = 1e-08
+    compiler = 'GCC CLANG'
+  [../]
+[]

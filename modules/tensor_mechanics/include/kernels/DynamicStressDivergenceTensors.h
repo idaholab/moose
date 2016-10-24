@@ -28,6 +28,7 @@ protected:
   // Rayleigh damping parameter _zeta and HHT time integration parameter _alpha
   const Real _zeta;
   const Real _alpha;
+  const bool _static_initialization;
 };
 
 #endif //DYNAMICSTRESSDIVERGENCETENSORS_H
