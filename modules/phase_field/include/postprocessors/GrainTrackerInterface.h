@@ -68,6 +68,11 @@ public:
    * Returns a Boolean indicating whether this grain is in contact with any boundary of the domain
    */
   virtual bool doesFeatureIntersectBoundary(unsigned int grain_id) const = 0;
+
+  /**
+   * This method returns all of the new ids generated in an invocation of the GrainTracker.
+   */
+  virtual std::vector<unsigned int> getNewGrainIDs() const;
 };
 
 #endif

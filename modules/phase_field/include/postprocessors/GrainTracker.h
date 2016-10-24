@@ -62,6 +62,7 @@ public:
   virtual std::size_t getNumberActiveGrains() const override;
   virtual Point getGrainCentroid(unsigned int grain_id) const override;
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const override;
+  virtual std::vector<unsigned int> getNewGrainIDs() const override;
 
 protected:
   virtual void updateFieldInfo() override;
@@ -209,6 +210,9 @@ protected:
 private:
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
   unsigned int _reserve_grain_first_index;
+
+  /// The previous max grain id (needed to figure out which ids are new in a given step)
+  unsigned int _old_max_grain_id;
 
   /// Holds the next "regular" grain ID (a grain found or remapped to the standard op vars)
   unsigned int _max_curr_grain_id;
