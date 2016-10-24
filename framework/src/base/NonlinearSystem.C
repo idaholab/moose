@@ -2427,19 +2427,15 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
       {
         if (coupled_dof < first_dof_on_proc || coupled_dof >= end_dof_on_proc)
         {
-          if (n_oz[local_dof] < max_nz)
+          if (n_oz[local_dof] < n_dofs_not_on_proc)
             n_oz[local_dof]++;
         }
         else
         {
-          if (n_nz[local_dof] < max_nz)
+          if (n_nz[local_dof] < n_dofs_on_proc)
             n_nz[local_dof]++;
         }
       }
-
-      // Safety
-      n_nz[local_dof] = std::min(n_nz[local_dof], n_dofs_on_proc);
-      n_oz[local_dof] = std::min(n_oz[local_dof], n_dofs_not_on_proc);
     }
   }
 }

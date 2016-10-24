@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = '2blocks3d.i'
     exodiff = '2blocks3d_out.e'
+    max_parallel = 4
   [../]
 []
