@@ -20,7 +20,7 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  const MaterialProperty<RankTwoTensor> & _stress_free_strain;
+  const MaterialProperty<RankTwoTensor> & _eigenstrain;
 };
 
 #endif //COMPUTESMALLSTRAIN_H

@@ -197,7 +197,7 @@
     scalar_strain_zz = scalar_strain_zz
   [../]
   [./thermal_strain]
-    type = ComputeThermalExpansionEigenStrain
+    type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.5

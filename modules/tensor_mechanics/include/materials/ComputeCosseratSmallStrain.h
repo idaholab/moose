@@ -20,7 +20,7 @@
  protected:
    virtual void computeQpProperties();
 
-   const MaterialProperty<RankTwoTensor> & _stress_free_strain;
+   const MaterialProperty<RankTwoTensor> & _eigenstrain;
 
    /// the Cosserat curvature strain: curvature_ij = nabla_j CosseratRotation_i
   MaterialProperty<RankTwoTensor> & _curvature;
