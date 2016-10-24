@@ -57,8 +57,8 @@ class MooseMarkdown(markdown.Extension):
     self.config['slides'] = [False, "Enable the parsing for creating reveal.js slides."]
     self.config['package'] = [False, "Enable the use of the MoosePackageParser."]
     self.config['graphviz'] = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
-    self.config['dot_ext'] = ['svg', "The graphviz/dot output file extension (default: %(default)s)."]
-    self.config['pages'] = ['pages.yml', "The location of the pages file for auto link creation."]
+    self.config['dot_ext'] = ['svg', "The graphviz/dot output file extension (default: svg)."]
+    self.config['pages'] = ['pages.yml', "The the pages file defining the site map."]
 
     # Construct the extension object
     super(MooseMarkdown, self).__init__(**kwargs)
