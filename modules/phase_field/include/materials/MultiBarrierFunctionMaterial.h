@@ -17,8 +17,8 @@ template<>
 InputParameters validParams<MultiBarrierFunctionMaterial>();
 
 /**
- * MultiBarrierFunctionMaterial is a constraint kernel that acts on one of the eta_i variables to
- * enforce \f$ \sum_n h_i(\eta_i) \equiv 1 \f$.
+ * Double well phase transformation barrier free energy contribution.
+ *\f$ g(\vec\eta) = \sum_i \eta_i^2(1-\eta_i)^2 \f$
  */
 class MultiBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
 {

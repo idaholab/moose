@@ -19,6 +19,9 @@
 - Modules:
     - Heat Conduction:
         - Systems: !include content/modules/heat_conduction/systems/pages.yml
+    - Phase Field:
+        - Introduction: !include content/modules/phase_field/introduction/pages.yml
+        - Systems: !include content/modules/phase_field/systems/pages.yml
     - Tensor Mechanics:
         - Introduction: !include content/modules/tensor_mechanics/introduction/pages.yml
         - Systems: !include content/modules/tensor_mechanics/systems/pages.yml

@@ -18,12 +18,9 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
     language[str]: The code language (e.g., 'python' or 'c++')
   """
 
-  def __init__(self, pattern, markdown_instance=None, language=None, repo=None, **kwargs):
+  def __init__(self, pattern, markdown_instance=None, repo=None, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs)
     Pattern.__init__(self, pattern, markdown_instance)
-
-    # Set the language
-    self._language = language
 
     # The root/repo settings
     self._repo = repo
@@ -33,6 +30,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
              'repo_link'           : True,
              'label'               : True,
              'method'              : True,
+             'language'            : 'text',
              'block'               : True,
              'strip-extra-newlines': False}
 
@@ -92,14 +90,14 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
     else:
       title = etree.SubElement(el, 'div')
 
-    if self._settings['label']:
+    if settings['label']:
       title.text = label
 
     # Build the code
     pre = etree.SubElement(el, 'pre')
     code = self.addStyle(etree.SubElement(pre, 'code'), **styles)
-    if self._language:
-      code.set('class', 'hljs ' + self._language)
+    if settings['language']:
+      code.set('class', 'hljs ' + settings['language'])
     code.text = content
 
     return el

@@ -15,6 +15,7 @@ template<>
 InputParameters validParams<DiscreteNucleationMap>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params.addClassDescription("Generates a spatial smoothed map of all nucleation sites with the data of the DiscreteNucleationInserter for use by the DiscreteNucleation material.");
   params.addParam<Real>("radius", 0.0, "Radius for the inserted nuclei");
   params.addParam<Real>("int_width", 0.0, "Nucleus interface width for smooth nuclei");
   params.addRequiredParam<UserObjectName>("inserter", "DiscreteNucleationInserter user object");
