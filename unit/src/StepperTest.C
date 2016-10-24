@@ -33,7 +33,7 @@ updateInfo(StepperInfo* si, double dt)
 
 StepperInfo blankInfo()
 {
-    return {1, 0, 0, 0, 0, "", 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr, false, 0};
+    return {1, 0, 0, 0, 0, "", 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
 }
 
 void
