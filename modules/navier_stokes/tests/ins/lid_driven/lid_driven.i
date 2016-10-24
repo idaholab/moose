@@ -1,18 +1,10 @@
 [GlobalParams]
-  # rho = 1000    # kg/m^3
-  # mu = 0.798e-3 # Pa-s at 30C
-  # cp = 4.179e3  # J/kg-K at 30C
-  # k = 0.58      # W/m-K at ?C
   gravity = '0 0 0'
-
-  # Dummy parameters
   rho = 1
   mu = 1
   cp = 1
-  k = 1
+  k = .01
 []
-
-
 
 [Mesh]
   type = GeneratedMesh
@@ -26,6 +18,13 @@
   elem_type = QUAD9
 []
 
+[MeshModifiers]
+  [./corner_node]
+    type = AddExtraNodeset
+    new_boundary = 'pinned_node'
+    nodes = '0'
+  [../]
+[]
 
 [Variables]
   [./vel_x]
@@ -54,8 +53,6 @@
   [../]
 []
 
-
-
 [Kernels]
   # mass
   [./mass]
@@ -65,8 +62,6 @@
     v = vel_y
     p = p
   [../]
-
-
 
   # x-momentum, time
   [./x_momentum_time]
@@ -84,8 +79,6 @@
     component = 0
   [../]
 
-
-
   # y-momentum, time
   [./y_momentum_time]
     type = INSMomentumTimeDerivative
@@ -102,13 +95,6 @@
     component = 1
   [../]
 
-  [./penalty]
-    type = INSCompressibilityPenalty
-    variable = p
-    penalty  = 1e-5
-  [../]
-
-
  # temperature
  [./temperature_time]
    type = INSTemperatureTimeDerivative
@@ -123,9 +109,6 @@
  [../]
 []
 
-
-
-
 [BCs]
   [./x_no_slip]
     type = DirichletBC
@@ -135,10 +118,10 @@
   [../]
 
   [./lid]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = vel_x
     boundary = 'top'
-    value = 10.0
+    function = 'lid_function'
   [../]
 
   [./y_no_slip]
@@ -148,49 +131,61 @@
     value = 0.0
   [../]
 
- [./T_hot]
-   type = DirichletBC
-   variable = T
-   boundary = 'bottom'
-   value = 1
- [../]
+  [./T_hot]
+    type = DirichletBC
+    variable = T
+    boundary = 'bottom'
+    value = 1
+  [../]
 
- [./T_cold]
-   type = DirichletBC
-   variable = T
-   boundary = 'top'
-   value = 0
- [../]
+  [./T_cold]
+    type = DirichletBC
+    variable = T
+    boundary = 'top'
+    value = 0
+  [../]
+
+  [./pressure_pin]
+    type = DirichletBC
+    variable = p
+    boundary = 'pinned_node'
+    value = 0
+  [../]
 []
 
-
+[Functions]
+  [./lid_function]
+    # We pick a function that is exactly represented in the velocity
+    # space so that the Dirichlet conditions are the same regardless
+    # of the mesh spacing.
+    type = ParsedFunction
+    value = '4*x*(1-x)'
+  [../]
+[]
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [./SMP]
     type = SMP
     full = true
     solve_type = 'NEWTON'
   [../]
 []
 
-
 [Executioner]
   type = Transient
-  dt = 1.e-2
-  dtmin = 1.e-2
+  # Run for 100+ timesteps to reach steady state.
+  num_steps = 5
+  dt = .5
+  dtmin = .5
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
   petsc_options_value = 'asm      2               ilu          4'
   line_search = 'none'
-  nl_rel_tol = 1e-9
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-13
   nl_max_its = 6
   l_tol = 1e-6
   l_max_its = 500
-  start_time = 0.0
-  num_steps = 2
 []
-
-
-
 
 [Outputs]
   file_base = lid_driven_out
