@@ -1,0 +1,20 @@
+[Tests]
+ [./weak_plane_stress_small]
+   type = 'Exodiff'
+   input = 'weak_plane_stress_small.i'
+   exodiff = 'weak_plane_stress_small_out.e'
+ [../]
+
+ [./weak_plane_stress_incremental]
+   type = 'Exodiff'
+   input = 'weak_plane_stress_incremental.i'
+   exodiff = 'weak_plane_stress_incremental_out.e'
+ [../]
+
+ [./weak_plane_stress_finite]
+   type = 'Exodiff'
+   input = 'weak_plane_stress_finite.i'
+   exodiff = 'weak_plane_stress_finite_out.e'
+   abs_zero = 1e-9
+ [../]
+[]
