@@ -140,7 +140,9 @@
   [../]
 []
 
-
+[Problem]
+  error_on_jacobian_nonzero_reallocation = true;
+[]
 
 [Executioner]
   type = Transient
