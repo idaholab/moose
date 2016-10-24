@@ -115,7 +115,7 @@
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./relperm]
-    type = PorousFlowRelativePermeabilityUnity
+    type = PorousFlowRelativePermeabilityConst
     phase = 0
   [../]
   [./relperm_all]
