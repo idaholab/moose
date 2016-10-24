@@ -14,6 +14,7 @@ template<>
 InputParameters validParams<MortarPeriodicMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
+  params.addClassDescription("Set up an orthogonal mesh with additional dim-1 dimensional side domains for use with the Mortar method.");
   MultiMooseEnum periodic_dirs("x=0 y=1 z=2");
   params.addRequiredParam<MultiMooseEnum>("periodic_directions", periodic_dirs, "Directions along which additional Mortar meshes are generated");
   return params;

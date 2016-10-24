@@ -10,7 +10,7 @@ class MooseTextFile(MooseTextPatternBase):
   RE = r'^!text\s+(.*?)(?:$|\s+)(.*)'
 
   def __init__(self, **kwargs):
-    super(MooseTextFile, self).__init__(self.RE, language='text', **kwargs)
+    super(MooseTextFile, self).__init__(self.RE, **kwargs)
 
     # Add to the default settings
     self._settings['line'] =  None

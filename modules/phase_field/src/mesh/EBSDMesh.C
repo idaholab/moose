@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<EBSDMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
-  params.addClassDescription("Mesh generated from a specified EBSD data file");
+  params.addClassDescription("Mesh generated from a specified DREAM.3D EBSD data file.");
   params.addRequiredParam<FileName>("filename", "The name of the file containing the EBSD data");
   params.addParam<unsigned int>("uniform_refine", 0, "Number of coarsening levels available in adaptive mesh refinement.");
 

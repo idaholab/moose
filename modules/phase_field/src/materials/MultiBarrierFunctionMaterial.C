@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<MultiBarrierFunctionMaterial>()
 {
   InputParameters params = validParams<Material>();
+  params.addClassDescription("Double well phase transformation barrier free energy contribution.");
   params.addParam<std::string>("function_name", "g", "actual name for g(eta_i)");
   MooseEnum h_order("SIMPLE=0", "SIMPLE");
   params.addParam<MooseEnum>("g_order", h_order, "Polynomial order of the switching function h(eta)");

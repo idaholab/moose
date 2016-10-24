@@ -52,6 +52,6 @@
 - RadialReturnStressUpdate: content/modules/tensor_mechanics/systems/Materials/RadialReturnStressUpdate.md
 - StressBasedChemicalPotential: content/modules/tensor_mechanics/systems/Materials/StressBasedChemicalPotential.md
 - SumTensorIncrements: content/modules/tensor_mechanics/systems/Materials/SumTensorIncrements.md
-- TempDepHardeningStressUpdate: content/modules/tensor_mechanics/systems/Materials/TempDepHardeningStressUpdate.md
+- TemperatureDependentHardeningStressUpdate: content/modules/tensor_mechanics/systems/Materials/TemperatureDependentHardeningStressUpdate.md
 - TwoPhaseStressMaterial: content/modules/tensor_mechanics/systems/Materials/TwoPhaseStressMaterial.md
 - VolumeDeformGradCorrectedStress: content/modules/tensor_mechanics/systems/Materials/VolumeDeformGradCorrectedStress.md
