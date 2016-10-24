@@ -314,6 +314,8 @@ Transient::computeDT(bool first)
 {
   _time_stepper->computeStep(); // This is actually when DT gets computed
 
+  // initialize new-style stepper here because users of moose may have subclassed Transient
+  // (I'm looking at you Yak!) and overridden functions like init().
   if (!_stepper)
   {
     Stepper* inner = _time_stepper->buildStepper();
