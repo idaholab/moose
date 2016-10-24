@@ -208,22 +208,6 @@ Transient::init()
   _problem.initialSetup();
   _time_stepper->init();
 
-  Stepper* inner = _time_stepper->buildStepper();
-  if (inner)
-  {
-    std::vector<double> sync_times;
-    for (auto val : _app.getOutputWarehouse().getSyncTimes())
-      sync_times.push_back(val);
-
-    // these are global/sim constraints for *EVERY* time inner:
-    inner = new DTLimitStepper(inner, dtMin(), dtMax(), false);
-    if (sync_times.size() > 0)
-      inner = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), inner, timestepTol());
-    if (!_app.halfTransient())
-      inner = new BoundsStepper(inner, getStartTime(), endTime(), false);
-    _stepper.reset(inner);
-  }
-
   if (_app.isRestarting())
     _time_old = _time;
 
@@ -329,6 +313,25 @@ void
 Transient::computeDT(bool first)
 {
   _time_stepper->computeStep(); // This is actually when DT gets computed
+
+  if (!_stepper)
+  {
+    Stepper* inner = _time_stepper->buildStepper();
+    if (inner)
+    {
+      std::vector<double> sync_times;
+      for (auto val : _app.getOutputWarehouse().getSyncTimes())
+        sync_times.push_back(val);
+
+      // these are global/sim constraints for *EVERY* time inner:
+      inner = new DTLimitStepper(inner, dtMin(), dtMax(), false);
+      if (sync_times.size() > 0)
+        inner = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), inner, timestepTol());
+      if (!_app.halfTransient())
+        inner = new BoundsStepper(inner, getStartTime(), endTime(), false);
+      _stepper.reset(inner);
+    }
+  }
 
   _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
   if (!_si.soln_nonlin || _si.soln_nonlin->size() != _fe_problem.getNonlinearSystem().currentSolution()->size())
@@ -447,7 +450,6 @@ Transient::solveStep(Real input_dt)
     _dt = input_dt;
 
   Real current_dt = _dt;
-
 
   _problem.onTimestepBegin();
 
