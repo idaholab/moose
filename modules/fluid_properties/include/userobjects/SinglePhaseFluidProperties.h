@@ -66,6 +66,11 @@ public:
   /// Compute enthalpy and its derivatives
   virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const = 0;
 
+  /// Pressure as a function of specific enthalpy and specific entropy
+  virtual Real p_from_h_s(Real h, Real s) const = 0;
+  /// Derivative of pressure wrt specific enthalpy
+  virtual Real dpdh_from_h_s(Real h, Real s) const = 0;
+
   /// Thermal expansion coefficient
   virtual Real beta(Real p, Real T) const = 0;
 };

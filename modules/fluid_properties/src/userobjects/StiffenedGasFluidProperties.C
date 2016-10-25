@@ -193,6 +193,19 @@ StiffenedGasFluidProperties::h_dpT(Real, Real temperature, Real & h, Real & dh_d
   dh_dT = _gamma * _cv;
 }
 
+
+Real
+StiffenedGasFluidProperties::p_from_h_s(Real h, Real s) const
+{
+  return std::pow((h - _q) / (_gamma * _cv), _gamma / (_gamma-1)) * std::exp((_q_prime - s) / ((_gamma - 1) * _cv)) - _p_inf;
+}
+
+Real
+StiffenedGasFluidProperties::dpdh_from_h_s(Real h, Real s) const
+{
+  return _gamma / (_gamma - 1.0) / (_gamma * _cv) * std::pow((h - _q) / (_gamma * _cv), 1.0 / (_gamma - 1.0)) * std::exp((_q_prime - s) / ((_gamma - 1.0) * _cv));
+}
+
 Real
 StiffenedGasFluidProperties::gamma(Real, Real) const
 {

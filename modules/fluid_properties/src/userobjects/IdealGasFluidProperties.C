@@ -191,3 +191,17 @@ IdealGasFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real &
   dh_dp = 0;
   dh_dT = _cv + pressure / rho / temperature;
 }
+
+Real
+IdealGasFluidProperties::p_from_h_s(Real h, Real s) const
+{
+  mooseError(name() << ": p_from_h_s() not implemented.");
+  return 0;
+}
+
+Real
+IdealGasFluidProperties::dpdh_from_h_s(Real h, Real s) const
+{
+  mooseError(name() << ": dpdh_from_h_s() not implemented.");
+  return 0;
+}
