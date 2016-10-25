@@ -48,6 +48,7 @@
 #include "ImageSubdomain.h"
 #include "BlockDeleter.h"
 #include "ParsedSubdomainMeshModifier.h"
+#include "BreakBoundaryOnSubdomain.h"
 
 // problems
 #include "FEProblem.h"
@@ -474,6 +475,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(ImageSubdomain);
   registerMeshModifier(BlockDeleter);
   registerMeshModifier(ParsedSubdomainMeshModifier);
+  registerMeshModifier(BreakBoundaryOnSubdomain);
 
   // problems
   registerProblem(FEProblem);
