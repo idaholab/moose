@@ -28,7 +28,6 @@ PolycrystalReducedIC::PolycrystalReducedIC(const InputParameters & parameters) :
     InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
     _dim(_mesh.dimension()),
-    _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
     _grain_num(getParam<unsigned int>("grain_num")),
     _op_index(getParam<unsigned int>("op_index")),

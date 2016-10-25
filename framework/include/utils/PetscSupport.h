@@ -29,7 +29,7 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class CommandLine;
 
 namespace Moose
@@ -70,7 +70,7 @@ void petscSetOptions(FEProblem & problem);
  */
 void petscSetDefaults(FEProblem & problem);
 
-void petscSetupDM(NonlinearSystem & nl);
+void petscSetupDM(NonlinearSystemBase & nl);
 
 PetscErrorCode petscSetupOutput(CommandLine * cmd_line);
 

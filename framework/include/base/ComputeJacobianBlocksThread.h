@@ -19,7 +19,6 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
 
 /**
  * Helper class for holding the preconditioning blocks to fill.

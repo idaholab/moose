@@ -22,7 +22,7 @@
 // Forward declarations
 class Predictor;
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 
 namespace libMesh
 {
@@ -52,7 +52,7 @@ public:
 
 protected:
   FEProblem & _fe_problem;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 
   int & _t_step;
   Real & _dt;

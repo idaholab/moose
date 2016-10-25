@@ -23,7 +23,7 @@
 class TimeIntegrator;
 class FEProblem;
 class SystemBase;
-class NonlinearSystem;
+class NonlinearSystemBase;
 
 namespace libMesh
 {
@@ -81,7 +81,7 @@ protected:
 
   FEProblem & _fe_problem;
   SystemBase & _sys;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;

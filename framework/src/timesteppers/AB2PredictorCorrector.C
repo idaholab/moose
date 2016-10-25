@@ -84,7 +84,7 @@ AB2PredictorCorrector::preSolve()
 void
 AB2PredictorCorrector::step()
 {
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem();
   AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
 
   _fe_problem.solve();
@@ -219,4 +219,3 @@ AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
   }
   return -1;
 }
-

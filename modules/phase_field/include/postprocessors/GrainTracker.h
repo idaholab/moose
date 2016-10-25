@@ -187,7 +187,7 @@ protected:
   const bool _remap;
 
   /// A reference to the nonlinear system (used for retrieving solution vectors)
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 
   /**
    * This data structure holds the map of unique grains from the previous time step.

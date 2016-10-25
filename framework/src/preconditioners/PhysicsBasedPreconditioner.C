@@ -59,7 +59,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
   _pre_type.resize(num_systems);
 
   { // Setup the Coupling Matrix so MOOSE knows what we're doing
-    NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+    NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem();
     unsigned int n_vars = nl.nVariables();
 
     // The coupling matrix is held and released by FEProblem, so it is not released in this object

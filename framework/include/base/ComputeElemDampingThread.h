@@ -23,7 +23,7 @@
 #include "libmesh/elem_range.h"
 
 // Forward declarations
-class NonlinearSystem;
+class NonlinearSystemBase;
 class ElementDamper;
 
 class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
@@ -44,7 +44,7 @@ public:
 
 protected:
   Real _damping;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<ElementDamper> & _element_dampers;
 };
 

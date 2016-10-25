@@ -23,7 +23,6 @@ InputParameters validParams<ReconVarIC>()
 ReconVarIC::ReconVarIC(const InputParameters & parameters) :
     InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
-    _nl(_fe_problem.getNonlinearSystem()),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _consider_phase(isParamValid("phase")),
     _phase(_consider_phase ? getParam<unsigned int>("phase") : 0),

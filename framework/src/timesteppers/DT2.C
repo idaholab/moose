@@ -97,7 +97,7 @@ DT2::preSolve()
 void
 DT2::step()
 {
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem(); // returned reference is not used for anything?
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem(); // returned reference is not used for anything?
   TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
 

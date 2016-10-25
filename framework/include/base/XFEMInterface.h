@@ -22,7 +22,7 @@
 
 class MooseApp;
 class AuxiliarySystem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class MaterialData;
 class FEProblem;
 
@@ -106,7 +106,7 @@ public:
   /**
    * Initialize the solution on newly created nodes
    */
-  virtual void initSolution(NonlinearSystem & nl, AuxiliarySystem & aux) = 0;
+  virtual void initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux) = 0;
 
 
   /**

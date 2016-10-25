@@ -23,7 +23,7 @@
 #include "libmesh/elem_range.h"
 
 // Forward declarations
-class NonlinearSystem;
+class NonlinearSystemBase;
 class DiracKernel;
 
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
@@ -49,7 +49,7 @@ public:
 
 protected:
   SparseMatrix<Number> * _jacobian;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 
   /// Storage for DiracKernel objects
   const MooseObjectWarehouse<DiracKernel> & _dirac_kernels;

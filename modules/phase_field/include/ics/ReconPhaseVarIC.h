@@ -32,7 +32,7 @@ public:
 
 private:
   MooseMesh & _mesh;
-  NonlinearSystem & _nl;
+
   const EBSDReader & _ebsd_reader;
 
   unsigned int _phase;

@@ -77,7 +77,7 @@ public:
   /**
    * Initialize the solution on newly created nodes
    */
-  virtual void initSolution(NonlinearSystem & nl, AuxiliarySystem & aux);
+  virtual void initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux);
 
   Node * getNodeFromUniqueID(unique_id_type uid);
 

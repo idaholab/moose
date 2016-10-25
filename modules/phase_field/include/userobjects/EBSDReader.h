@@ -110,7 +110,7 @@ public:
 protected:
   ///@{ MooseMesh Variables
   MooseMesh & _mesh;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
   ///@}
 
   ///@{ Variables needed to determine reduced order parameter values

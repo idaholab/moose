@@ -17,7 +17,6 @@
 
 #include "Moose.h"
 #include "Factory.h"
-#include "NonlinearSystem.h"
 #include "PetscSupport.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"

@@ -48,7 +48,7 @@
 
 struct DM_Moose
 {
-  NonlinearSystem * _nl; // nonlinear system context
+  NonlinearSystemBase * _nl; // nonlinear system context
   std::set<std::string> * _vars; // variables
   std::map<std::string, unsigned int> * _var_ids;
   std::map<unsigned int, std::string> * _var_names;
@@ -220,7 +220,7 @@ DMMooseGetVariables(DM dm, std::vector<std::string> & var_names)
 #undef  __FUNCT__
 #define __FUNCT__ "DMMooseSetNonlinearSystem"
 PetscErrorCode
-DMMooseSetNonlinearSystem(DM dm, NonlinearSystem & nl)
+DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -396,7 +396,7 @@ DMMooseSetUnContacts(DM dm, const std::vector<std::pair<std::string,std::string>
 #undef  __FUNCT__
 #define __FUNCT__ "DMMooseGetNonlinearSystem"
 PetscErrorCode
-DMMooseGetNonlinearSystem(DM dm, NonlinearSystem * & nl)
+DMMooseGetNonlinearSystem(DM dm, NonlinearSystemBase * & nl)
 {
   PetscErrorCode ierr;
   PetscBool ismoose;
@@ -1082,7 +1082,7 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   libmesh_assert(x);
   libmesh_assert(r);
 
-  NonlinearSystem* nl = NULL;
+  NonlinearSystemBase* nl = NULL;
   ierr = DMMooseGetNonlinearSystem(dm, nl);
   CHKERRQ(ierr);
   PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
@@ -1166,7 +1166,7 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
 #endif
 {
   PetscErrorCode ierr;
-  NonlinearSystem * nl = NULL;
+  NonlinearSystemBase * nl = NULL;
 
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);CHKERRQ(ierr);
@@ -1265,7 +1265,7 @@ static PetscErrorCode
 DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
 {
   PetscErrorCode ierr;
-  NonlinearSystem * nl = NULL;
+  NonlinearSystemBase * nl = NULL;
 
   PetscFunctionBegin;
   ierr = DMMooseGetNonlinearSystem(dm, nl);
@@ -2229,7 +2229,7 @@ DMDestroy_Moose(DM dm)
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateMoose"
 PetscErrorCode
-DMCreateMoose(MPI_Comm comm, NonlinearSystem & nl, DM * dm)
+DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, DM * dm)
 {
   PetscErrorCode ierr;
 

@@ -22,7 +22,7 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class IntegratedBC;
 class DGKernel;
 class InterfaceKernel;
@@ -50,7 +50,7 @@ public:
 
 protected:
   SparseMatrix<Number> & _jacobian;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 
   unsigned int _num_cached;
 

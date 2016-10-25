@@ -22,7 +22,7 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class IntegratedBC;
 class DGKernel;
 class InterfaceKernel;
@@ -50,7 +50,7 @@ public:
   void join(const ComputeResidualThread & /*y*/);
 
 protected:
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
   Moose::KernelType _kernel_type;
   unsigned int _num_cached;
 

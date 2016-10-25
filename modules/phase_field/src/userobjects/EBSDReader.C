@@ -9,6 +9,7 @@
 #include "EBSDMesh.h"
 #include "MooseMesh.h"
 #include "Conversion.h"
+#include "NonlinearSystem.h"
 
 template<>
 InputParameters validParams<EBSDReader>()

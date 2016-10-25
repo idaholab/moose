@@ -426,7 +426,7 @@ Console::writeVariableNorms()
   std::ostringstream oss;
 
   // Get a references to the NonlinearSystem and libMesh system
-  NonlinearSystem & nl = _problem_ptr->getNonlinearSystem();
+  NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystem();
   TransientNonlinearImplicitSystem & sys = nl.sys();
 
   // Storage for norm outputs

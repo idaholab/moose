@@ -22,7 +22,7 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class MaterialPropertyStorage;
 class MaterialData;
 class Assembly;
@@ -53,7 +53,7 @@ public:
 
 protected:
   FEProblem & _fe_problem;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
   std::vector<MooseSharedPointer<MaterialData> > & _material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _bnd_material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _neighbor_material_data;

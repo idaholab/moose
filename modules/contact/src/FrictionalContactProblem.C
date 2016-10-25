@@ -303,7 +303,7 @@ FrictionalContactProblem::predictorCleanup(NumericVector<Number>& ghosted_soluti
 bool
 FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution)
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystem();
   unsigned int dim = nonlinear_sys.subproblem().mesh().dimension();
 
   _displaced_problem->updateMesh(ghosted_solution, *_aux.currentSolution());
@@ -407,7 +407,7 @@ bool
 FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_solution,
                                         std::vector<SlipData> * iterative_slip)
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystem();
   unsigned int dim = nonlinear_sys.subproblem().mesh().dimension();
 
   MooseVariable * residual_x_var = &getVariable(0,_residual_x);
@@ -659,7 +659,7 @@ FrictionalContactProblem::applySlip(NumericVector<Number> & vec_solution,
                                     NumericVector<Number> & ghosted_solution,
                                     std::vector<SlipData> & iterative_slip)
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystem();
   unsigned int dim = nonlinear_sys.subproblem().mesh().dimension();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   NumericVector<Number> & aux_solution = aux_sys.solution();
@@ -816,7 +816,7 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string & msg,
       {
         _do_slip_update = true;
 
-        NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+        NonlinearSystemBase & nonlinear_sys = getNonlinearSystem();
         nonlinear_sys.update();
         const NumericVector<Number>*& ghosted_solution = nonlinear_sys.currentSolution();
 

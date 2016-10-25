@@ -16,7 +16,6 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "Assembly.h"
-#include "NonlinearSystem.h"
 #include "MooseMesh.h"
 
 // libMesh

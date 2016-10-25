@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "ComputeJacobianBlocksThread.h"
-#include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBC.h"

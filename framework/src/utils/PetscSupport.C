@@ -137,7 +137,7 @@ setSolverOptions(SolverParams & solver_params)
 }
 
 void
-petscSetupDM (NonlinearSystem & nl) {
+petscSetupDM (NonlinearSystemBase & nl) {
 #if !PETSC_VERSION_LESS_THAN(3,3,0)
   PetscErrorCode  ierr;
   PetscBool       ismoose;
@@ -327,7 +327,7 @@ PetscErrorCode
 petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
   FEProblem & problem = *static_cast<FEProblem *>(ctx);
-  NonlinearSystem & system = problem.getNonlinearSystem();
+  NonlinearSystemBase & system = problem.getNonlinearSystem();
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -449,7 +449,7 @@ void
 petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
-  NonlinearSystem & nl = problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = problem.getNonlinearSystem();
   PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
   KSP ksp;

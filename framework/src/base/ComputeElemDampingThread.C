@@ -14,6 +14,7 @@
 
 // MOOSE includes
 #include "ComputeElemDampingThread.h"
+#include "NonlinearSystemBase.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
 #include "ElementDamper.h"

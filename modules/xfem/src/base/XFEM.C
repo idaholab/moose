@@ -226,7 +226,7 @@ XFEM::update(Real time)
   return mesh_changed;
 }
 
-void XFEM::initSolution(NonlinearSystem & nl, AuxiliarySystem & /*aux*/)
+void XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & /*aux*/)
 {
   const std::vector<MooseVariable *> & nl_vars = nl.getVariables(0); //TODO pass in real thread id?
 

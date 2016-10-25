@@ -19,7 +19,7 @@
 
 // Forward declarations
 class FEProblem;
-class NonlinearSystem;
+class NonlinearSystemBase;
 
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
@@ -39,7 +39,7 @@ protected:
   virtual void computeInternalFaceJacobian(const Elem * neighbor) override;
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
 
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 
   // Reference to BC storage structures
   const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;

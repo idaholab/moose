@@ -61,7 +61,7 @@ AdaptivityAction::AdaptivityAction(InputParameters params) :
 void
 AdaptivityAction::act()
 {
-  NonlinearSystem & system = _problem->getNonlinearSystem();
+  NonlinearSystemBase & system = _problem->getNonlinearSystem();
 
   Adaptivity & adapt = _problem->adaptivity();
 
