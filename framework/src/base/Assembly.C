@@ -57,6 +57,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _current_neighbor_elem(NULL),
     _current_neighbor_side(0),
     _current_neighbor_side_elem(NULL),
+    _need_neighbor_elem_volume(false),
     _current_neighbor_volume(0),
     _current_node(NULL),
     _current_neighbor_node(NULL),
@@ -340,6 +341,13 @@ Assembly::feSecondPhiFaceNeighbor(FEType type)
   return _fe_shape_data_face_neighbor[type]->_second_phi;
 }
 
+const Real &
+Assembly::neighborVolume()
+{
+  _need_neighbor_elem_volume = true;
+  return _current_neighbor_volume;
+}
+
 void
 Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
 {
@@ -570,51 +578,53 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   _current_neighbor_elem = neighbor;
 
   // Calculate the volume of the neighbor
-
-  FEType fe_type (neighbor->default_order() , LAGRANGE);
-  std::unique_ptr<FEBase> fe (FEBase::build(neighbor->dim(), fe_type));
-
-  const std::vector<Real> & JxW = fe->get_JxW();
-  const std::vector<Point> & q_points = fe->get_xyz();
-
-  // The default quadrature rule should integrate the mass matrix,
-  // thus it should be plenty to compute the area
-  QGauss qrule (neighbor->dim(), fe_type.default_quadrature_order());
-  fe->attach_quadrature_rule(&qrule);
-  fe->reinit(neighbor);
-
-  // set the coord transformation
-  MooseArray<Real> coord;
-  coord.resize(qrule.n_points());
-  Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(neighbor->subdomain_id());
-  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
-  switch (coord_type) // coord type should be the same for the neighbor
+  if (_need_neighbor_elem_volume)
   {
-    case Moose::COORD_XYZ:
-      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-        coord[qp] = 1.;
-      break;
+    FEType fe_type(neighbor->default_order(), LAGRANGE);
+    std::unique_ptr<FEBase> fe(FEBase::build(neighbor->dim(), fe_type));
 
-    case Moose::COORD_RZ:
-      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-        coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-      break;
+    const std::vector<Real> & JxW = fe->get_JxW();
+    const std::vector<Point> & q_points = fe->get_xyz();
 
-    case Moose::COORD_RSPHERICAL:
-      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-        coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-      break;
+    // The default quadrature rule should integrate the mass matrix,
+    // thus it should be plenty to compute the area
+    QGauss qrule(neighbor->dim(), fe_type.default_quadrature_order());
+    fe->attach_quadrature_rule(&qrule);
+    fe->reinit(neighbor);
 
-    default:
-      mooseError("Unknown coordinate system");
-      break;
+    // set the coord transformation
+    MooseArray<Real> coord;
+    coord.resize(qrule.n_points());
+    Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(neighbor->subdomain_id());
+    unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
+    switch (coord_type) // coord type should be the same for the neighbor
+    {
+      case Moose::COORD_XYZ:
+        for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+          coord[qp] = 1.;
+        break;
+
+      case Moose::COORD_RZ:
+        for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+          coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
+        break;
+
+      case Moose::COORD_RSPHERICAL:
+        for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+          coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
+        break;
+
+      default:
+        mooseError("Unknown coordinate system");
+        break;
+    }
+
+    _current_neighbor_volume = 0.;
+    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+      _current_neighbor_volume += JxW[qp] * coord[qp];
+
+    coord.release();
   }
-
-  _current_neighbor_volume = 0.;
-  for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-    _current_neighbor_volume += JxW[qp] * coord[qp];
-
-  coord.release();
 }
 
 void
