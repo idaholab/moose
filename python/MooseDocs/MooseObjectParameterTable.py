@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 from MarkdownTable import MarkdownTable
 
-class MooseObjectParameterTable(MarkdownTable):
+class MooseObjectParameterTable(object):
   """
   A class for creating markdown tables from parameter data parsed from MOOSE yaml data.
   """
@@ -30,7 +30,6 @@ class MooseObjectParameterTable(MarkdownTable):
     self._parameters.append(param)
 
     items = {}
-
     for idx, key in enumerate(self.PARAMETER_TABLE_COLUMNS):
       items[self.PARAMETER_TABLE_COLUMN_NAMES[idx]] = self._formatParam(param[key], key, param['cpp_type'])
     for key in self.PARAMETER_TABLE_COLUMN_NAMES:
@@ -52,6 +51,11 @@ class MooseObjectParameterTable(MarkdownTable):
       th.set('class','param-header')
       th.text = header
 
+    # Loop through each row, and add attributes to each cell
+    # TODO:
+    # Possibly convert this whole process into divs. Tables are a 90's
+    # thing, and much of its attributes are not controllable via CSS
+    # (colspan, rowspan, text-align just to name a few)
     for idr, row in enumerate(self._rows):
       tr = etree.SubElement(table, 'tr')
       for idd, d in enumerate(row):
