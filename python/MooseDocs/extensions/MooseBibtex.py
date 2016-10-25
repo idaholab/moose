@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import io
+import traceback
 
 from pybtex.plugin import find_plugin
 from pybtex.database import BibliographyData, parse_file
@@ -45,8 +46,9 @@ class MooseBibtex(Preprocessor):
         try:
           bibfiles.append(os.path.join(self._root, bfile))
           data = parse_file(bibfiles[-1])
-        except:
+        except Exception as e:
           log.error('Failed to parse bibtex file: {}'.format(bfile))
+          traceback.prent_exc(e)
           return lines
         self._bibtex.add_entries(data.entries.iteritems())
     else:
