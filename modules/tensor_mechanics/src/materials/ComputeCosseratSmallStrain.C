@@ -21,7 +21,6 @@ InputParameters validParams<ComputeCosseratSmallStrain>()
 
 ComputeCosseratSmallStrain::ComputeCosseratSmallStrain(const InputParameters & parameters) :
     ComputeStrainBase(parameters),
-    _eigenstrain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain")),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
     _nrots(coupledComponents("Cosserat_rotations")),
     _wc(_nrots),

@@ -166,7 +166,7 @@
     tortuosity = 0.1
   [../]
   [./relp]
-    type = PorousFlowRelativePermeabilityUnity
+    type = PorousFlowRelativePermeabilityConst
     phase = 0
   [../]
   [./relp_all]

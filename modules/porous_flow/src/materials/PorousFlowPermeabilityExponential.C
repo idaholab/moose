@@ -10,7 +10,7 @@
 template<>
 InputParameters validParams<PorousFlowPermeabilityExponential>()
 {
-  InputParameters params = validParams<PorousFlowPermeabilityUnity>();
+  InputParameters params = validParams<PorousFlowPermeabilityBase>();
   MooseEnum poroperm_function("log_k ln_k exp_k", "exp_k");
   params.addParam<MooseEnum>("poroperm_function", poroperm_function, "Form of the function relating porosity and permeability. The options are: log_k (log k = A phi + B); ln_k (ln k = A phi + B); exp_k (k = B exp(A phi)); where k is permeability, phi is porosity, A and B are empirical constants.");
   params.addParam<RealTensorValue>("k_anisotropy", "A tensor to multiply the calculated scalar permeability, in order to obtain anisotropy if required. Defaults to isotropic permeability if not specified.");
@@ -21,10 +21,10 @@ InputParameters validParams<PorousFlowPermeabilityExponential>()
 }
 
 PorousFlowPermeabilityExponential::PorousFlowPermeabilityExponential(const InputParameters & parameters) :
-    PorousFlowPermeabilityUnity(parameters),
+    PorousFlowPermeabilityBase(parameters),
     _A(getParam<Real>("A")),
     _B(getParam<Real>("B")),
-    _k_anisotropy(parameters.isParamValid("k_anisotropy") ? getParam<RealTensorValue>("k_anisotropy") : RealTensorValue(1, 0, 0, 0, 1, 0, 0, 0, 1)),
+    _k_anisotropy(parameters.isParamValid("k_anisotropy") ? getParam<RealTensorValue>("k_anisotropy") : RealTensorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _dporosity_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
     _poroperm_function(getParam<MooseEnum>("poroperm_function"))
@@ -32,13 +32,15 @@ PorousFlowPermeabilityExponential::PorousFlowPermeabilityExponential(const Input
   switch (_poroperm_function)
   {
     case 0: // log_k
-      _AA = _A * std::log(10);
-      _BB = std::pow(10, _B);
+      _AA = _A * std::log(10.0);
+      _BB = std::pow(10.0, _B);
       break;
+
     case 1: // ln_k
       _AA = _A;
       _BB = std::exp(_B);
       break;
+
     case 2: // exp_k
       _AA = _A;
       _BB = _B;
@@ -52,7 +54,6 @@ PorousFlowPermeabilityExponential::computeQpProperties()
   _permeability_qp[_qp] = _k_anisotropy * _BB * std::exp(_porosity_qp[_qp] * _AA);
 
   _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
-  for (unsigned v = 0; v < _num_var; ++v)
+  for (unsigned int v = 0; v < _num_var; ++v)
     _dpermeability_qp_dvar[_qp][v] = _AA * _permeability_qp[_qp] * _dporosity_qp_dvar[_qp][v];
 }
-

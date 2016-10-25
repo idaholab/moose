@@ -113,11 +113,11 @@
     phase1_saturation = s1
   [../]
   [./kr0]
-    type = PorousFlowRelativePermeabilityUnity
+    type = PorousFlowRelativePermeabilityConst
     phase = 0
   [../]
   [./kr1]
-    type = PorousFlowRelativePermeabilityUnity
+    type = PorousFlowRelativePermeabilityConst
     phase = 1
   [../]
   [./kr_all]

@@ -10,14 +10,14 @@
 template<>
 InputParameters validParams<PorousFlowPermeabilityConst>()
 {
-  InputParameters params = validParams<PorousFlowPermeabilityUnity>();
+  InputParameters params = validParams<PorousFlowPermeabilityBase>();
   params.addRequiredParam<RealTensorValue>("permeability", "The permeability tensor (usually in m^2), which is assumed constant for this material");
   params.addClassDescription("This Material calculates the permeability tensor assuming it is constant");
   return params;
 }
 
 PorousFlowPermeabilityConst::PorousFlowPermeabilityConst(const InputParameters & parameters) :
-    PorousFlowPermeabilityUnity(parameters),
+    PorousFlowPermeabilityBase(parameters),
     _input_permeability(getParam<RealTensorValue>("permeability"))
 {
 }

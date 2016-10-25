@@ -38,7 +38,7 @@ ComputeRSphericalIncrementalStrain::initialSetup()
 void
 ComputeRSphericalIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
 {
-  // Deformation gradient calculation in cylinderical coordinates
+  // Deformation gradient calculation in cylindrical coordinates
   RankTwoTensor A;    // Deformation gradient
   RankTwoTensor Fbar; // Old Deformation gradient
 
@@ -63,7 +63,7 @@ ComputeRSphericalIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & 
   _deformation_gradient[_qp] = A;
   _deformation_gradient[_qp].addIa(1.0);
 
-  // very nearly A = gradU - gradUold, adapted to cylinderical coords
+  // very nearly A = gradU - gradUold, adapted to cylindrical coords
   A -= Fbar;
 
   total_strain_increment = 0.5 * (A + A.transpose());
