@@ -42,12 +42,14 @@ public:
   std::string val;
   std::vector<StepperNode> args;
 
-  void printTree(int level = 0) {
-    std::cout << std::string(level*4, ' ') << "Node '" << val << "' {\n";
+  std::string str(int level = 0) {
+    std::stringstream ss;
+    ss << std::string(level*4, ' ') << "Node '" << val << "' {\n";
     for (auto& sub : args) {
-      sub.printTree(level + 1);
+      ss << sub.str(level + 1);
     }
-    std::cout << std::string(level*4, ' ') << "}\n";
+    ss << std::string(level*4, ' ') << "}\n";
+    return ss.str();
   };
 
   template <class T>

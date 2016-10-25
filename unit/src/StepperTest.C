@@ -244,21 +244,23 @@ StepperTest::everyN()
 void
 StepperTest::scratch()
 {
-  std::string str = "(MinOfStepper (ConstStepper 4.2) (FixedPointStepper (2 4 10 12) 1e-10))";
+  std::string str = "(MinOfStepper (ConstStepper 4.2) (FixedPointStepper (2 4 10 12) 1e-10) 1e-10)";
   std::vector<StepperToken> toks = lexStepper(str);
   for (auto& tok : toks) {
-    std::cout << tok.str() << "\n";
+    //std::c out << tok.str() << "\n";
   }
   StepperNode nd = parseStepper(lexStepper(str));
-  nd.printTree();
+  //std::c out << nd.str();
 
   Stepper* s = buildStepper(nd);
+  if (!s)
+    throw Err("got nullptr from buildStepper");
   StepperInfo si = blankInfo();
 
   for (int j = 0; j < 10; j++)
   {
     double dt = s->advance(&si);
-    std::cout << "time=" << si.time << ", dt=" << dt << "\n";
+    //std::c out << "time=" << si.time << ", dt=" << dt << "\n";
     updateInfo(&si, dt);
   }
   return;
