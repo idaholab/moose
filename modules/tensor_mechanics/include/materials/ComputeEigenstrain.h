@@ -7,18 +7,20 @@
 #ifndef COMPUTEEIGENSTRAIN_H
 #define COMPUTEEIGENSTRAIN_H
 
-#include "ComputeStressFreeStrainBase.h"
+#include "ComputeEigenstrainBase.h"
+
+#include "RankTwoTensor.h"
 
 /**
  * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a base tensor and a scalar function defined in a Derivative Material.
  */
-class ComputeEigenstrain : public ComputeStressFreeStrainBase
+class ComputeEigenstrain : public ComputeEigenstrainBase
 {
 public:
   ComputeEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpStressFreeStrain();
+  virtual void computeQpEigenstrain();
 
   const MaterialProperty<Real> & _prefactor;
 
