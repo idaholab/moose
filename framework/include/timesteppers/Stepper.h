@@ -442,3 +442,16 @@ private:
   double _e_tol;
   double _scale_param;
 };
+
+class DT2Stepper : public Stepper
+{
+public:
+  DT2Stepper(double e_tol, double e_max);
+  virtual double advance(const StepperInfo * si);
+
+private:
+  double _e_tol;
+  double _e_max;
+  std::unique_ptr<NumericVector<Number>> _big_soln;
+  int _step;
+};

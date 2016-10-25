@@ -445,3 +445,17 @@ PredictorCorrectorStepper::estimateTimeError(const StepperInfo * si)
 
   throw "unsupported time integration scheme";
 }
+
+
+DT2Stepper::DT2Stepper(double e_tol, double e_max) : _e_tol(e_tol), _e_max(e_max), _big_soln(nullptr), _step(0)
+{
+}
+
+double DT2Stepper::advance(const StepperInfo * si)
+{
+  _step++;
+
+//  if ((si->step_count - 1) % 3 == 0)
+//    si->snapshot = true;
+  return -1000;
+}
