@@ -69,6 +69,14 @@ protected:
   /// The number of samples to be taken
   unsigned int _num_samples;
 
+
+  ///@{ Values used to scale and or shift x and y data
+  const Real _x_scale;
+  const Real _x_shift;
+  const Real _y_scale;
+  const Real _y_shift;
+  ///@}
+
   /// Did the user specify the min and max x values for sampling?
   bool _have_sample_x_min;
   bool _have_sample_x_max;
