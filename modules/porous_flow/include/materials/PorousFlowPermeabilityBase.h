@@ -5,37 +5,26 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef POROUSFLOWPERMEABILITYUNITY_H
-#define POROUSFLOWPERMEABILITYUNITY_H
+#ifndef POROUSFLOWPERMEABILITYBASE_H
+#define POROUSFLOWPERMEABILITYBASE_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterialVectorBase.h"
 
 //Forward Declarations
-class PorousFlowPermeabilityUnity;
+class PorousFlowPermeabilityBase;
 
 template<>
-InputParameters validParams<PorousFlowPermeabilityUnity>();
+InputParameters validParams<PorousFlowPermeabilityBase>();
 
 /**
  * Base class Material designed to provide the permeability tensor.
- * In this class permeability = 1 0 0  0 1 0  0 0 1
  */
-class PorousFlowPermeabilityUnity : public DerivativeMaterialInterface<Material>
+class PorousFlowPermeabilityBase : public PorousFlowMaterialVectorBase
 {
 public:
-  PorousFlowPermeabilityUnity(const InputParameters & parameters);
+  PorousFlowPermeabilityBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
-
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator;
-
-  /// The number of variables
-  const Real _num_var;
-
   /// quadpoint permeability
   MaterialProperty<RealTensorValue> & _permeability_qp;
 
@@ -43,4 +32,4 @@ protected:
   MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_qp_dvar;
 };
 
-#endif //POROUSFLOWPERMEABILITYUNITY_H
+#endif //POROUSFLOWPERMEABILITYBASE_H
