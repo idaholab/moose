@@ -9,7 +9,7 @@ ConstStepper::ConstStepper(double dt) : _dt(dt)
 }
 
 double
-ConstStepper::advance(const StepperInfo * si)
+ConstStepper::advance(const StepperInfo *)
 {
   Logger l("Const");
   return l.val(_dt);

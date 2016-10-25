@@ -15,13 +15,12 @@
 #include "StepperTest.h"
 #include "Stepper.h"
 #include "libmesh/parallel.h"
+#include "DynStepper.h"
 
 #include <cmath>
 #include <cstdio>
 
-
 CPPUNIT_TEST_SUITE_REGISTRATION( StepperTest );
-
 void
 updateInfo(StepperInfo* si, double dt)
 {
@@ -242,10 +241,28 @@ StepperTest::everyN()
   }
 }
 
-
 void
 StepperTest::scratch()
 {
+  std::string str = "(MinOfStepper (ConstStepper 4.2) (FixedPointStepper (2 4 10 12) 1e-10))";
+  std::vector<StepperToken> toks = lexStepper(str);
+  for (auto& tok : toks) {
+    std::cout << tok.str() << "\n";
+  }
+  StepperNode nd = parseStepper(lexStepper(str));
+  nd.printTree();
+
+  Stepper* s = buildStepper(nd);
+  StepperInfo si = blankInfo();
+
+  for (int j = 0; j < 10; j++)
+  {
+    double dt = s->advance(&si);
+    std::cout << "time=" << si.time << ", dt=" << dt << "\n";
+    updateInfo(&si, dt);
+  }
+  return;
+
   libMesh::Parallel::Communicator dummy_comm;
 
   int n = 5;
@@ -269,4 +286,3 @@ StepperTest::scratch()
   //std::c out << vec(1) << "\n";
   //std::c out << vec(2) << "\n";
 }
-
