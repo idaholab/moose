@@ -86,6 +86,10 @@ struct StepperInfo
   /// If no predictor was used, this is a zero vector with the same length as
   /// soln_nonlin.
   std::unique_ptr<NumericVector<Number>> soln_predicted;
+
+  bool snapshot;
+  bool rewind;
+  double rewind_time;
 };
 
 /// A base class for time stepping algorithms for use in determining dt between
