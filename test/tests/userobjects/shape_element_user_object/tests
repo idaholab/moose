@@ -4,7 +4,7 @@
     input = 'shape_element_user_object.i'
     recover = false
     allow_warnings = true
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
 
   [./simple_shape_element_uo]
@@ -15,7 +15,7 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
 
   [./jacobian_test1]
@@ -26,7 +26,7 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
 
   [./jacobian_test2]
@@ -37,6 +37,6 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
 []
