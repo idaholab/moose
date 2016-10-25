@@ -78,7 +78,7 @@
     csvdiff = 'random.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+    cli_args = '--no-trap-fpe Mesh/nx=4 Mesh/ny=5 Mesh/xmax=4 Mesh/ymax=5'
   [../]
   [./random_heavy]
     type = 'CSVDiff'
