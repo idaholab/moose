@@ -149,6 +149,13 @@ class MooseApplicationSyntax(object):
     """
     Return the filename(s), *h (and *.C) for the given object name.
     """
+    if name not in self._objects:
+      log.error("The supplied syntax {} is not listed as a registered object, the source location where the function is registered was likely not included in the 'locations' items in the configuration file.".format(name))
+      return None
+    elif self._objects[name] not in self._filenames:
+      log.error("Unable to locate {} in the list of files, the include location where the class is declared was likely not included in the 'locations' items in the configuration file.".format(self._objects[name]))
+      return None
+
     return self._filenames[self._objects[name]]
 
   def check(self):
@@ -206,7 +213,7 @@ class MooseApplicationSyntax(object):
     if self.hidden(name):
       return
 
-    stub = '<!-- MOOSE System Documentation Stub: Remove this when content is added. -->'
+    stub = '<!-- MOOSE System Documentation Stub: Remove this when content is added. -->\n'
 
     # Determine the filename
     if node['subblocks']:
