@@ -25,7 +25,7 @@ write_header = args.write_header
 
 delimiter = args.delimiter
 if delimiter == None:
-  delimiter = ' '
+  delimiter = ','
 
 csvfile_names=[]
 csvfiles=[]
