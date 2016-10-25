@@ -145,7 +145,7 @@ void  vectorToMatrix(unsigned int &rows,unsigned int &columns,std::vector<double
          * _cov_matrix: covariance matrix stored in vector<vector<double> >
          */
         unsigned int dimensions = vecMatrix.size();
-        dimensions = (unsigned int)std::ceil(std::sqrt(dimensions));
+        dimensions = std::lround(std::sqrt(dimensions));
         rows = dimensions;
         columns = dimensions;
         if(rows*columns != vecMatrix.size())
