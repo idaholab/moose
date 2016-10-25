@@ -52,6 +52,9 @@ public:
   virtual Real h(Real pressure, Real temperature) const;
   virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const;
 
+  virtual Real p_from_h_s(Real h, Real s) const;
+  virtual Real dpdh_from_h_s(Real h, Real s) const;
+
 protected:
   Real _gamma;
   Real _R;
