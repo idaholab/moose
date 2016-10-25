@@ -9,7 +9,7 @@
 
 #include "ShapeElementUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
-#include "DerivativeMaterialPropertyNameInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
 class ComputeExternalGrainForceAndTorque;
@@ -22,8 +22,7 @@ InputParameters validParams<ComputeExternalGrainForceAndTorque>();
  * This class is here to get the force and torque acting on a grain
  */
 class ComputeExternalGrainForceAndTorque :
-    public ShapeElementUserObject,
-    public DerivativeMaterialPropertyNameInterface,
+    public DerivativeMaterialInterface<ShapeElementUserObject>,
     public GrainForceAndTorqueInterface
 {
 public:

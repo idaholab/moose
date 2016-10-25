@@ -23,7 +23,7 @@ InputParameters validParams<ComputeGrainForceAndTorque>()
 }
 
 ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & parameters) :
-    ShapeElementUserObject(parameters),
+    DerivativeMaterialInterface<ShapeElementUserObject>(parameters),
     GrainForceAndTorqueInterface(),
     _c_name(getVar("c", 0)->name()),
     _c_var(coupled("c")),
