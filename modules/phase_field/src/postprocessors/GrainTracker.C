@@ -17,6 +17,7 @@
 
 #include <limits>
 #include <algorithm>
+#include <numeric>
 
 template<>
 void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context)
@@ -60,6 +61,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : 0),
     _consider_phase(isParamValid("phase")),
     _reserve_grain_first_index(0),
+    _old_max_grain_id(0),
     _max_curr_grain_id(0),
     _first_time(true),
     _is_transient(_subproblem.isTransient())
@@ -511,7 +513,7 @@ GrainTracker::trackGrains()
   mooseAssert(!_first_time, "Track grains may only be called when _tracking_step > _t_step");
 
   // Used to track indices for which to trigger the new grain callback on (used on all ranks)
-  auto old_max_grain_id = _max_curr_grain_id;
+  auto _old_max_grain_id = _max_curr_grain_id;
 
   /**
    * Only the master rank does tracking, the remaining ranks
@@ -756,9 +758,9 @@ GrainTracker::trackGrains()
   /**
    * Trigger callback for new grains
    */
-  if (old_max_grain_id < _max_curr_grain_id)
+  if (_old_max_grain_id < _max_curr_grain_id)
   {
-    for (auto new_id = old_max_grain_id + 1; new_id <= _max_curr_grain_id; ++new_id)
+    for (auto new_id = _old_max_grain_id + 1; new_id <= _max_curr_grain_id; ++new_id)
       // Don't trigger the callback on the reserve IDs
       if (new_id >= _reserve_grain_first_index + _n_reserve_ops)
         newGrainCreated(new_id);
@@ -782,6 +784,18 @@ GrainTracker::newGrainCreated(unsigned int new_grain_id)
              << "\nCreating new unique grain: " << new_grain_id << '\n' << grain
              << "\n*****************************************************************************\n" << COLOR_DEFAULT;
   }
+}
+
+std::vector<unsigned int>
+GrainTracker::getNewGrainIDs() const
+{
+  std::vector<unsigned int> new_ids(_max_curr_grain_id - _old_max_grain_id);
+  auto new_id = _old_max_grain_id + 1;
+
+  // Generate the new ids
+  std::iota(new_ids.begin(), new_ids.end(), new_id);
+
+  return new_ids;
 }
 
 void

@@ -35,3 +35,9 @@ InputParameters validParams<GrainTrackerInterface>()
 
   return params;
 }
+
+std::vector<unsigned int>
+GrainTrackerInterface::getNewGrainIDs() const
+{
+  return std::vector<unsigned int>();
+}
