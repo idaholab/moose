@@ -13,28 +13,30 @@
 template<>
 InputParameters validParams<ComputeCosseratIncrementalSmallStrain>()
 {
-  InputParameters params = validParams<ComputeCosseratSmallStrain>();
+  InputParameters params = validParams<ComputeIncrementalStrainBase>();
   params.addClassDescription("Compute incremental small Cosserat strains");
+  params.addRequiredCoupledVar("Cosserat_rotations", "The 3 Cosserat rotation variables");
   return params;
 }
 
 ComputeCosseratIncrementalSmallStrain::ComputeCosseratIncrementalSmallStrain(const InputParameters & parameters) :
-  ComputeCosseratSmallStrain(parameters),
+  ComputeIncrementalStrainBase(parameters),
+  _curvature(declareProperty<RankTwoTensor>("curvature")),
+  _nrots(coupledComponents("Cosserat_rotations")),
+  _wc(_nrots),
   _wc_old(_nrots),
+  _grad_wc(_nrots),
   _grad_wc_old(_nrots),
-  _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
-  _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
-  _mechanical_strain_old(declarePropertyOld<RankTwoTensor>("mechanical_strain")),
-  _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
-  _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-  _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-  _eigenstrain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment")),
   _curvature_old(declarePropertyOld<RankTwoTensor>("curvature")),
   _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment"))
 {
+  if (_nrots != 3)
+    mooseError("ComputeCosseratSmallStrain: This Material is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
   for (unsigned i = 0; i < _nrots; ++i)
     {
+      _wc[i] = &coupledValue("Cosserat_rotations", i);
       _wc_old[i] = &coupledValueOld("Cosserat_rotations", i);
+      _grad_wc[i] = &coupledGradient("Cosserat_rotations", i);
       _grad_wc_old[i] = &coupledGradientOld("Cosserat_rotations", i);
     }
 }
@@ -42,16 +44,9 @@ ComputeCosseratIncrementalSmallStrain::ComputeCosseratIncrementalSmallStrain(con
 void
 ComputeCosseratIncrementalSmallStrain::initQpStatefulProperties()
 {
-  ComputeCosseratSmallStrain::initQpStatefulProperties();
+  ComputeIncrementalStrainBase::initQpStatefulProperties();
 
-  _strain_rate[_qp].zero();
-  _strain_increment[_qp].zero();
-  _rotation_increment[_qp].zero();
-  _rotation_increment[_qp].addIa(1.0); // this remains constant
-  _deformation_gradient[_qp].zero();
-  _mechanical_strain_old[_qp] = _mechanical_strain[_qp];
-  _total_strain_old[_qp] = _total_strain[_qp];
-  _curvature_old[_qp] = _curvature[_qp];
+  _curvature[_qp].zero();
 }
 
 void

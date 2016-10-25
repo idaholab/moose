@@ -12,38 +12,16 @@
 template<>
 InputParameters validParams<ComputeIncrementalSmallStrain>()
 {
-  InputParameters params = validParams<ComputeSmallStrain>();
+  InputParameters params = validParams<ComputeIncrementalStrainBase>();
   params.addClassDescription("Compute a strain increment and rotation increment for small strains.");
   params.set<bool>("stateful_displacements") = true;
   return params;
 }
 
 ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParameters & parameters) :
-    ComputeSmallStrain(parameters),
-    _strain_rate(declareProperty<RankTwoTensor>(_base_name + "strain_rate")),
-    _strain_increment(declareProperty<RankTwoTensor>(_base_name + "strain_increment")),
-    _mechanical_strain_old(declarePropertyOld<RankTwoTensor>("mechanical_strain")),
-    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
-    _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-    _deformation_gradient(declareProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _eigenstrain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment"))
+    ComputeIncrementalStrainBase(parameters)
 {
 }
-
-void
-ComputeIncrementalSmallStrain::initQpStatefulProperties()
-{
-  ComputeSmallStrain::initQpStatefulProperties();
-
-  _strain_rate[_qp].zero();
-  _strain_increment[_qp].zero();
-  _rotation_increment[_qp].zero();
-  _rotation_increment[_qp].addIa(1.0); // this remains constant
-  _deformation_gradient[_qp].zero();
-  _mechanical_strain_old[_qp] = _mechanical_strain[_qp];
-  _total_strain_old[_qp] = _total_strain[_qp];
-}
-
 
 void
 ComputeIncrementalSmallStrain::computeProperties()
@@ -75,7 +53,7 @@ ComputeIncrementalSmallStrain::computeTotalStrainIncrement(RankTwoTensor & total
   RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
 
   _deformation_gradient[_qp] = A;
-  _deformation_gradient[_qp].addIa(1.0); //Gauss point deformation gradient
+  _deformation_gradient[_qp].addIa(1.0);
 
   A -= Fbar; // A = grad_disp - grad_disp_old
 

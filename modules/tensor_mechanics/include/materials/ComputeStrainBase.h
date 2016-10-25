@@ -29,7 +29,6 @@ protected:
   unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableGradient *> _grad_disp;
-  std::vector<const VariableGradient *> _grad_disp_old;
 
   std::string _base_name;
 
@@ -37,7 +36,7 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _total_strain;
 
-  const bool _stateful_displacements;
+  const MaterialProperty<RankTwoTensor> & _eigenstrain;
 
   bool _volumetric_locking_correction;
 };

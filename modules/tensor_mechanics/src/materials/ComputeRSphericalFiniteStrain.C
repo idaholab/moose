@@ -45,7 +45,7 @@ ComputeRSphericalFiniteStrain::computeProperties()
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    // Deformation gradient calculation in cylinderical coordinates
+    // Deformation gradient calculation in cylindrical coordinates
     RankTwoTensor A;    // Deformation gradient
     RankTwoTensor Fbar; // Old Deformation gradient
 
@@ -70,7 +70,7 @@ ComputeRSphericalFiniteStrain::computeProperties()
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
-    // very nearly A = gradU - gradUold, adapted to cylinderical coords
+    // very nearly A = gradU - gradUold, adapted to cylindrical coords
     A -= Fbar;
 
     // Fbar = ( I + gradUold)
