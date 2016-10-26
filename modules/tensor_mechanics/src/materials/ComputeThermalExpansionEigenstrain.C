@@ -14,7 +14,7 @@ InputParameters validParams<ComputeThermalExpansionEigenstrain>()
   params.addClassDescription("Computes Eigenstrain due to thermal expansion");
   params.addCoupledVar("temperature", "Coupled temperature");
   params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient");
-  params.addDeprecatedParam<Real>("stress_free_reference_temperature", 273, "Reference temperature for thermal eigenstrain calculation", "'stress_free_temperature' has replaced this parameter");
+  params.addDeprecatedParam<Real>("stress_free_reference_temperature", "Reference temperature for thermal eigenstrain calculation", "'stress_free_temperature' has replaced this parameter");
   params.addParam<Real>("stress_free_temperature", "Reference temperature for thermal eigenstrain calculation");
 
   return params;
