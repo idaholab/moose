@@ -1,4 +1,3 @@
-
 [Mesh]
   file = thinfilm.e
 []
@@ -9,10 +8,26 @@
   prefactor = -0.01
 []
 
+
+[MeshModifiers]
+  [./cnode]
+    type = AddExtraNodeset
+    coord = '0.0 0.0 0.0' #these coords must be within some tolerance of a node (close!)
+    new_boundary = 100
+  [../]
+  [./anode]
+    type = AddExtraNodeset
+    coord = '-1.0 -1.0 -1.0'
+    new_boundary = 101
+  [../]
+[]
+
+
 [Variables]
   [./u]
     order = FIRST
     family = LAGRANGE
+    block  = '1'
     [./InitialCondition]
       type = RandomIC
       min = -0.5e-5
@@ -38,7 +53,6 @@
   [./eigen_strain_zz] #Use for stress-free strain (ie epitaxial)
     type = ComputeEigenstrain
     block = '1'
-   # eigen_base = 'exx exy exz eyx eyy eyz ezx ezy ezz'
     eigen_base = '1 0 0 0 1 0 0 0 0'
   [../]
 
@@ -86,13 +100,48 @@
   [./u_time]
     type = TimeDerivative
     variable = u
-    block = '1 2'
+    block = '1'
   [../]
 
 []
 
 
 [BCs]
+
+  # fix center point location
+  [./centerfix_x]
+    type = PresetBC
+    boundary = 100
+    variable = disp_x
+    value = 0
+  [../]
+  [./centerfix_y]
+    type = PresetBC
+    boundary = 100
+    variable = disp_y
+    value = 0
+  [../]
+  [./centerfix_z]
+    type = PresetBC
+    boundary = 100
+    variable = disp_z
+    value = 0
+  [../]
+
+  # fix side point x coordinate to inhibit rotation
+  [./angularfix_x]
+    type = PresetBC
+    boundary = 101
+    variable = disp_x
+    value = 0
+  [../]
+  [./angularfix_y]
+    type = PresetBC
+    boundary = 101
+    variable = disp_y
+    value = 0
+  [../]
+
   [./u_bot]
     type = DirichletBC
     variable = u
