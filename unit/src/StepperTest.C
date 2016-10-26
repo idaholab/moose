@@ -21,9 +21,38 @@
 #include <cstdio>
 
 CPPUNIT_TEST_SUITE_REGISTRATION( StepperTest );
+
+void cloneStepperInfo(StepperInfo* src, StepperInfo* dst) {
+  dst->step_count = src->step_count;
+  dst->time = src->time;
+  dst->prev_dt = src->prev_dt;
+  dst->prev_prev_dt = src->prev_prev_dt;
+  dst->prev_prev_prev_dt = src->prev_prev_prev_dt;
+  dst->time_integrator = src->time_integrator;
+  dst->nonlin_iters = src->nonlin_iters;
+  dst->lin_iters = src->lin_iters;
+  dst->prev_converged = src->prev_converged;
+  dst->prev_solve_time_secs = src->prev_solve_time_secs;
+  dst->prev_prev_solve_time_secs = src->prev_prev_solve_time_secs;
+  dst->prev_prev_prev_solve_time_secs = src->prev_prev_prev_solve_time_secs;
+  if (src->soln_nonlin)
+    dst->soln_nonlin.reset(src->soln_nonlin->clone().release());
+  if (src->soln_aux)
+    dst->soln_aux.reset(src->soln_aux->clone().release());
+  if (src->soln_predicted)
+    dst->soln_predicted.reset(src->soln_predicted->clone().release());
+};
+
 void
-updateInfo(StepperInfo* si, double dt)
+updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, StepperInfo>* snaps = nullptr)
 {
+  if (sf && sf->rewind) {
+    cloneStepperInfo(&(*snaps)[sf->rewind_time], si);
+    return;
+  } else if (sf && snaps && sf->snapshot) {
+    cloneStepperInfo(si, &(*snaps)[si->time]);
+  }
+
   si->prev_prev_dt = si->prev_dt;
   si->prev_dt = dt;
   si->time += dt;
@@ -119,7 +148,7 @@ StepperTest::fixedPoint()
         dt *= 2;
       else if (j == 0 && tests[i].violate_dt < 0)
         dt /= 2;
-      updateInfo(&si, dt);
+      updateInfo(&si, nullptr, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
@@ -128,7 +157,7 @@ StepperTest::fixedPoint()
       }
     }
     dt = stepper.advance(&si, nullptr);
-    updateInfo(&si, dt);
+    updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
 }
@@ -176,7 +205,7 @@ StepperTest::maxRatio()
     for (int j = 0; j < times.size(); j++)
     {
       dt = stepper.advance(&si, nullptr);
-      updateInfo(&si, dt);
+      updateInfo(&si, nullptr, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
@@ -185,7 +214,7 @@ StepperTest::maxRatio()
       }
     }
     dt = stepper.advance(&si, nullptr);
-    updateInfo(&si, dt);
+    updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
 }
@@ -227,7 +256,7 @@ StepperTest::everyN()
     for (int j = 0; j < times.size(); j++)
     {
       dt = stepper.advance(&si, nullptr);
-      updateInfo(&si, dt);
+      updateInfo(&si, nullptr, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
         printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
@@ -236,8 +265,66 @@ StepperTest::everyN()
       }
     }
     dt = stepper.advance(&si, nullptr);
-    updateInfo(&si, dt);
+    updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
+  }
+}
+
+void
+StepperTest::DT2()
+{
+  struct testcase {
+    std::string title;
+    double e_tol;
+    double e_max;
+    std::vector<std::vector<double> > solns;
+    std::vector<double> want_times;
+    std::vector<double> want_dts;
+  };
+
+  testcase tests[] = {
+    {
+      "testOne",
+      1e-10,
+      1.0,
+      {{1, 1, 1}, {0, 0, 0}, {.5, .5, .5}, {.9, .9, .9}},
+      {1, 0, 0.5, 1.0},
+      {1, 0.5, 0.5, 0.5},
+    }
+  };
+
+  double tol = 1e-10;
+
+  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
+  {
+    double dt = 0;
+    std::vector<std::vector<double> > solns = tests[i].solns;
+    std::vector<double> want_dts = tests[i].want_dts;
+    std::vector<double> want_times = tests[i].want_times;
+
+    DT2Stepper s(tol, tests[i].e_tol, tests[i].e_max);
+    StepperFeedback sf = {};
+    StepperInfo si = blankInfo();
+
+    libMesh::Parallel::Communicator dummy_comm;
+    int n = tests[i].solns[0].size();
+    si.soln_nonlin = NumericVector<Number>::build(dummy_comm);
+    si.soln_nonlin->init(n, n, false, SERIAL);
+
+    for (int j = 0; j < solns.size(); j++)
+    {
+      std::map<double, StepperInfo> snaps;
+      dt = s.advance(&si, &sf);
+      updateInfo(&si, &sf, dt, &snaps);
+      *si.soln_nonlin = solns[j];
+      if (std::abs(want_times[j] - si.time) > tol || std::abs(want_dts[j] - si.prev_dt) > tol)
+      {
+        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
+        printf("    time (step %d): want %f, got %f\n", j+1, want_times[j], si.time);
+        printf("    dt   (step %d): want %f, got %f\n", j+1, want_dts[j], si.prev_dt);
+        CPPUNIT_ASSERT(false);
+      }
+    }
   }
 }
 
@@ -261,7 +348,7 @@ StepperTest::scratch()
   {
     double dt = s->advance(&si, nullptr);
     //std::c out << "time=" << si.time << ", dt=" << dt << "\n";
-    updateInfo(&si, dt);
+    updateInfo(&si, nullptr, dt);
   }
   return;
 

@@ -454,6 +454,7 @@ DT2Stepper::DT2Stepper(double time_tol, double e_tol, double e_max) :
 
 double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
+  Logger l("DT2");
   if (std::abs(si->time - _end_time) < _tol && _big_soln && si->converged) {
     // we just finished the second of the two smaller dt steps and are ready for error calc
     double new_dt = 0; // {compute dt using _big_soln and si->nonlin_soln}
@@ -462,24 +463,24 @@ double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
     _end_time = _start_time + new_dt;
     sf->snapshot = true;
     _big_dt = new_dt;
-    return new_dt;
+    return l.val(new_dt);
   } else if (std::abs(si->time - _end_time) < _tol && !_big_soln && si->converged) {
     // collect big dt soln and rewind to collect small dt solns
     _big_soln.reset(si->soln_nonlin->clone().release());
     sf->rewind = true;
     sf->rewind_time = _start_time;
-    return _big_dt / 2; // doesn't actually matter what we return here because rewind
+    return l.val(_big_dt / 2); // doesn't actually matter what we return here because rewind
   } else if (std::abs(si->time - _start_time) < _tol && _big_soln) {
     // we just rewound and need to do small steps
-    return _big_dt / 2;
+    return l.val(_big_dt / 2);
   } else if (si->time > _start_time && si->time < _end_time && _big_soln && si->converged) {
     // we just finished the first of the smaller dt steps
-    return _big_dt / 2;
+    return l.val(_big_dt / 2);
   } else {
     // something went wrong or this is initial call of simulation - start over
     _start_time = si->time;
     _end_time = _start_time + si->prev_dt;
     sf->snapshot = true;
-    return si->prev_dt;
+    return l.val(si->prev_dt);
   }
 }
