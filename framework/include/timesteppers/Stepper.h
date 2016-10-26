@@ -68,6 +68,7 @@ struct StepperInfo
   double prev_prev_prev_dt;
   /// Name for the time integration scheme currently in use.
   std::string time_integrator;
+  int time_integrator_order;
 
   /// Number of nonlinear iterations performed for the most recent solve.
   unsigned int nonlin_iters;
@@ -452,6 +453,7 @@ public:
   virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
+  double calcDT(const StepperInfo * si);
   double _tol;
   double _e_tol;
   double _e_max;

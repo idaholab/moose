@@ -422,6 +422,8 @@ PredictorCorrectorStepper::estimateTimeError(const StepperInfo * si)
 {
   NumericVector<Number> & soln = *si->soln_nonlin;
   NumericVector<Number> & predicted = *si->soln_predicted;
+  soln.close();
+  predicted.close();
 
   std::string scheme = si->time_integrator;
   double dtprev = si->prev_prev_dt;
@@ -443,7 +445,7 @@ PredictorCorrectorStepper::estimateTimeError(const StepperInfo * si)
     return predicted.l2_norm();
   }
 
-  throw "unsupported time integration scheme";
+  mooseError("unsupported time integration scheme");
 }
 
 
@@ -457,7 +459,7 @@ double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
   Logger l("DT2");
   if (std::abs(si->time - _end_time) < _tol && _big_soln && si->converged) {
     // we just finished the second of the two smaller dt steps and are ready for error calc
-    double new_dt = 0; // {compute dt using _big_soln and si->nonlin_soln}
+    double new_dt = calcDT(si); // {compute dt using _big_soln and si->nonlin_soln}
     _big_soln.release();
     _start_time = si->time;
     _end_time = _start_time + new_dt;
@@ -469,17 +471,29 @@ double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
     sf->rewind = true;
     sf->rewind_time = _start_time;
     return l.val((_end_time - _start_time) / 2); // doesn't actually matter what we return here because rewind
-  } else if (std::abs(si->time - _start_time) < _tol && _big_soln) {
+  } else if (std::abs(si->time - _start_time) < _tol && _big_soln && si->converged) {
     // we just rewound and need to do small steps
     return l.val((_end_time - _start_time) / 2);
-  } else if (si->time > _start_time && si->time < _end_time && _big_soln && si->converged) {
+  } else if (std::abs(_start_time + (_end_time - _start_time) / 2 - si->time) < _tol && _big_soln && si->converged) {
     // we just finished the first of the smaller dt steps
     return l.val((_end_time - _start_time) / 2);
   } else {
     // something went wrong or this is initial call of simulation - start over
+    _big_soln.release();
     _start_time = si->time;
     _end_time = _start_time + si->prev_dt;
     sf->snapshot = true;
     return l.val(si->prev_dt);
   }
+}
+
+double DT2Stepper::calcDT(const StepperInfo * si)
+{
+  std::unique_ptr<NumericVector<Number>> small_soln(si->soln_nonlin->clone().release());
+  std::unique_ptr<NumericVector<Number>> diff(si->soln_nonlin->clone().release());
+  *diff -= *_big_soln;
+  diff->close();
+  double dt = _end_time - _start_time;
+  double err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt;
+  return dt * std::pow(_e_tol / err, 1.0 / si->time_integrator_order);
 }

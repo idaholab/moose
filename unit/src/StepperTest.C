@@ -29,6 +29,7 @@ void cloneStepperInfo(StepperInfo* src, StepperInfo* dst) {
   dst->prev_prev_dt = src->prev_prev_dt;
   dst->prev_prev_prev_dt = src->prev_prev_prev_dt;
   dst->time_integrator = src->time_integrator;
+  dst->time_integrator_order = src->time_integrator_order;
   dst->nonlin_iters = src->nonlin_iters;
   dst->lin_iters = src->lin_iters;
   dst->prev_converged = src->prev_converged;
@@ -54,16 +55,18 @@ updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, S
     printf("[SNAPSHOTTING...]\n");
     cloneStepperInfo(si, &(*snaps)[si->time]);
   }
-
+  if (si->converged)
+  {
+    si->time += dt;
+  }
   si->prev_prev_dt = si->prev_dt;
   si->prev_dt = dt;
-  si->time += dt;
   si->step_count++;
 }
 
 StepperInfo blankInfo()
 {
-    return {1, 0, 0, 0, 0, "", 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
+    return {1, 0, 0, 0, 0, "", 0, 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
 }
 
 void
@@ -280,18 +283,55 @@ StepperTest::DT2()
     double e_tol;
     double e_max;
     std::vector<std::vector<double> > solns;
-    std::vector<double> want_times;
     std::vector<double> want_dts;
+    std::vector<bool> convergeds;
+    std::vector<double> want_times;
   };
 
+  // Initial prev_dt is set to one - which DT2 will use for its first returned dt.
+  // The first solution vector is set *after* the first dt and time step.
+  // the times are compared after applying the most recent dt.
   testcase tests[] = {
     {
       "testOne",
       1e-10,
       1.0,
-      {{1, 1, 1}, {0, 0, 0}, {.5, .5, .5}, {.9, .9, .9}},
-      {1, 0, 0.5, 1.0},
-      {1, 1, 0.5, 0.5},
+      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+      {1   , 1   , 0.5 , 0.5 },
+      {true, true, true, true},
+      {1   , 0   , 0.5 , 1.0 },
+    },  {
+      "testConvergeFailBeforeRewind",
+      1e-10,
+      1.0,
+      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+      {1    , 1   , 1   , 0.5 , 0.5 },
+      {false, true, true, true, true},
+      {0    , 1   , 0   , 0.5 , 1.0 },
+     },  {
+      "testConvergeFailOnRewind",
+      1e-10,
+      1.0,
+      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+      {1   , 1    , 1   , 1   , 0.5 , 0.5 },
+      {true, false, true, true, true, true},
+      {1   , 0    , 1   , 0   , 0.5 , 1   },
+     },  {
+      "testConvergeFailAfterRewind",
+      1e-10,
+      1.0,
+      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+      {1   , 1   , 0.5  , 0.5 , 0.5 , 0.25, 0.25},
+      {true, true, false, true, true, true, true},
+      {1   , 0   , 0    , 0.5 , 0   , 0.25, 0.5 },
+    },  {
+      "testConvergeFailBeforeFinal",
+      1e-10,
+      1.0,
+      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+      {1   , 1   , 0.5 , 0.5  , 0.5 , 0.5 , 0.25, 0.25},
+      {true, true, true, false, true, true, true, true},
+      {1   , 0   , 0.5 , 0.5  , 1   , 0.5 , 0.75, 1.0 },
     }
   };
 
@@ -313,13 +353,14 @@ StepperTest::DT2()
     int n = tests[i].solns[0].size();
     si.soln_nonlin = NumericVector<Number>::build(dummy_comm);
     si.soln_nonlin->init(n, n, false, SERIAL);
-
+    si.converged = true;
     std::stringstream ss;
     ss << "case " << i+1 << " (" << tests[i].title << "):\n";
     for (int j = 0; j < solns.size(); j++)
     {
       StepperFeedback sf = {};
       dt = s.advance(&si, &sf);
+      si.converged = tests[i].convergeds[j];
       updateInfo(&si, &sf, dt, &snaps);
       *si.soln_nonlin = solns[j];
       ss << "    step " << j+1 << "\n";
@@ -350,7 +391,7 @@ StepperTest::scratch()
   StepperNode nd = parseStepper(lexStepper(str));
   //std::c out << nd.str();
 
-  Stepper* s = buildStepper(nd);
+  std::unique_ptr<Stepper> s(buildStepper(nd));
   if (!s)
     throw Err("got nullptr from buildStepper");
   StepperInfo si = blankInfo();

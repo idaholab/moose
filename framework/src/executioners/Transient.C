@@ -335,7 +335,6 @@ Transient::computeDT(bool first)
     }
   }
 
-  _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
   if (!_si.soln_nonlin || _si.soln_nonlin->size() != _fe_problem.getNonlinearSystem().currentSolution()->size())
     _si.soln_nonlin.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
   if (!_si.soln_aux || _si.soln_aux->size() != _fe_problem.getAuxiliarySystem().currentSolution()->size())
@@ -354,6 +353,8 @@ Transient::computeDT(bool first)
   _si.prev_prev_prev_dt = _si.prev_prev_dt;
   _si.prev_prev_dt = _prev_dt;
   _si.prev_dt = _dt;
+  _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
+  _si.time_integrator_order = _fe_problem.getNonlinearSystem().getTimeIntegrator()->order();
   _si.prev_prev_prev_solve_time_secs = _si.prev_prev_solve_time_secs;
   _si.prev_prev_solve_time_secs = _si.prev_solve_time_secs;
   _si.prev_solve_time_secs = _solve_time;
