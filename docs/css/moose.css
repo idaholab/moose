@@ -167,49 +167,93 @@ Slide style
   text-align: left;
 }
 
-/* ObjectSyntax Table width alignment */
-/* Turn off that dumb table hover and stripe stuff */
-tbody tr:hover td.hasRowSpan {
-    background-color: none;   /* or whatever color you want */
+/* start Param div-table */
+.moose-object-param-table >.param-header {
+    background-color: rgba(0,0,0,.2);
+    width: 100%;
+    height: 30px;
+    font-size: larger;
+    padding-left: 10px;
+    padding-bottom: 34px;
 }
-.moose-object-param-table > tbody > tr >th:nth-of-type(1) {
-    width: 100px;
+.moose-object-param-table >.param-header >.param-header-information {
+    float: left;
+    width: 40%;
+    line-height: 0;
+    padding-top: 15px;
 }
-.moose-object-param-table > tbody > tr >th:nth-of-type(2) {
-    width: 300px;
+.moose-object-param-table >.param-header >.param-header-description {
+    float: left;
+    width: 60%;
+    line-height: 0;
+    padding-top: 15px;
 }
-.moose-object-param-table > tbody > tr > td {
-    border-top: unset;
-    text-align: justify;
+.moose-object-param-table > .param-detailed-even {
+    overflow: auto;
+    background-color: rgba(0,0,0,.1);
+    width: 100%;
+    padding-top: 5px;
 }
-.moose-object-param-table > tbody > tr > td > code {
-    font-size: 80%;
+.moose-object-param-table > .param-detailed-even > .param-detailed-identifier {
+    width: 40%;
+    float: left;
+    padding-left: 5px;
+    line-height: 1.1;
 }
-
-.moose-object-param-table {
-    border-collapse: collapse;
-    border-spacing: 0;
-}
-.row-identifier {
-    color: #555;
-    font-style:  italic
-}
-.row-even {
-    background-color: #f6f6f6;
-}
-.param-header {
-    background-color: #ccc;
-    text-align: left;
-    padding-left: 6px;
-    font-size: large;
-}
-.param-description {
-    width: 50%;
-    padding-left: 6px;
-    padding-right: 6px;
+.moose-object-param-table > .param-detailed-even > .param-detailed-description {
+    width: 60%;
+    float: right;
+    padding-right: 5px;
 }
 
-/* MOOSE Build status CSS */
+.moose-object-param-table > .param-detailed-odd {
+    overflow: auto;
+    background-color: rgba(0,0,0,0.02);
+    width: 100%;
+    padding-top: 5px;
+}
+.moose-object-param-table > .param-detailed-odd > .param-detailed-identifier {
+    width: 40%;
+    float: left;
+    padding-left: 5px;
+    line-height: 1.1;
+}
+.moose-object-param-table > .param-detailed-odd > .param-detailed-description {
+    width: 60%;
+    float: right;
+    padding-right: 5px;
+}
+.param-sub-detailed-name {
+    width: 100%;
+}
+.param-sub-id-name {
+    width: 20%;
+    float: left;
+    font-style: italic;
+}
+.param-sub-detailed-type {
+    width: 100%;
+}
+.param-sub-id-type {
+    width: 20%;
+    float: left;
+    font-style: italic;
+}
+.param-sub-detailed-default {
+    width: 100%;
+}
+.param-sub-id-default {
+    width: 20%;
+    float: left;
+    font-style: italic;
+}
+
+.param-sub-id-description {
+    display: none;
+}
+/* end Param div-Table */
+
+/* Moose Build status CSS */
 .boxed_job_status_Passed {
     vertical-align: middle;
     text-align: center;

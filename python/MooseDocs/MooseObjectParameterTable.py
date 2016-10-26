@@ -1,22 +1,19 @@
+from collections import OrderedDict
 from markdown.util import etree
-import logging
 import re
-log = logging.getLogger(__name__)
-
-
-from MarkdownTable import MarkdownTable
 
 class MooseObjectParameterTable(object):
   """
   A class for creating markdown tables from parameter data parsed from MOOSE yaml data.
   """
 
-  PARAMETER_TABLE_ROW_NAMES = ['Information', '', 'Description']
-  PARAMETER_TABLE_COLUMNS = ['name', 'cpp_type', 'default', 'description']
-  PARAMETER_TABLE_COLUMN_NAMES = ['Name:', 'Type:', 'Default:', 'Description']
+  # List of parameters to render with their corresponding pretty name.
+  PARAMETER_ROW_IDENTIFIERS = [('name',     'Name'),
+                               ('cpp_type', 'Type'),
+                               ('default',  'Default'),
+                               ('description', 'Description')]
 
   def __init__(self, **kwargs):
-    self._parameters = []
     self._rows = []
 
   def addParam(self, param):
@@ -27,90 +24,71 @@ class MooseObjectParameterTable(object):
       param[dict]: A parameter dict() extracted from MOOSE yaml data.
     """
 
-    self._parameters.append(param)
-
-    items = {}
-    for idx, key in enumerate(self.PARAMETER_TABLE_COLUMNS):
-      items[self.PARAMETER_TABLE_COLUMN_NAMES[idx]] = self._formatParam(param[key], key, param['cpp_type'])
-    for key in self.PARAMETER_TABLE_COLUMN_NAMES:
-      if key == self.PARAMETER_TABLE_COLUMN_NAMES[0]:
-        self._rows.append([self.PARAMETER_TABLE_COLUMN_NAMES[0], items[key], items[self.PARAMETER_TABLE_COLUMN_NAMES[-1]]])
-      elif key != self.PARAMETER_TABLE_COLUMN_NAMES[-1]:
-        self._rows.append([key, items[key]])
+    ordered_identifiers = OrderedDict()
+    for identifier, pretty_text in self.PARAMETER_ROW_IDENTIFIERS:
+      ordered_identifiers[pretty_text] = self._formatParam(param[identifier], identifier, param['cpp_type'])
+    self._rows.append(ordered_identifiers)
 
   def html(self):
     """
-    Return html for the table including special class name indicating that this is a parameter table.
+    Return html for the div including special class names indicating that this is a parameter table.
+    All formatting will be done using CSS
     """
 
-    table = etree.Element('table')
-    table.set('class', 'moose-object-param-table')
-    tr = etree.SubElement(table, 'tr')
-    for header in self.PARAMETER_TABLE_ROW_NAMES:
-      th = etree.SubElement(tr, 'th')
-      th.set('class','param-header')
-      th.text = header
+    # Create the parent div
+    param_div = etree.Element('div')
+    param_div.set('class', 'moose-object-param-table')
 
-    # Loop through each row, and add attributes to each cell
-    # TODO:
-    # Possibly convert this whole process into divs. Tables are a 90's
-    # thing, and much of its attributes are not controllable via CSS
-    # (colspan, rowspan, text-align just to name a few)
-    for idr, row in enumerate(self._rows):
-      tr = etree.SubElement(table, 'tr')
-      for idd, d in enumerate(row):
-        td = etree.SubElement(tr, 'td')
+    # Create the div containing the header
+    header_div = etree.SubElement(param_div, 'div')
+    header_div.set('class', 'param-header')
+    for header_text in ['Information', 'Description']:
+      single_header = etree.SubElement(header_div, 'div')
+      single_header.set('class', 'param-header-' + header_text.lower())
+      p = etree.SubElement(single_header, 'p')
+      p.set('class', 'param-header-p' + header_text.lower())
+      p.text = header_text
 
-        # Apply indentifier for first column
-        if idd == 0:
-          td.set('class', 'row-identifier')
+    # Create Detailed section
+    for idx, row in enumerate(self._rows):
+      detail_div = etree.SubElement(param_div, 'div')
 
-        # Apply stripe class (for 3 rows) when necessary
-        if self._canStripe(idr, len(self._rows), 3):
-          if td.get('class') is not None:
-            td.set('class', ' '.join(['row-even', td.get('class')]))
-          else:
-            td.set('class', 'row-even')
+      # stripe every other div
+      if idx in range(len(self._rows))[1::2]:
+        detail_div.set('class', 'param-detailed-odd')
+      else:
+        detail_div.set('class', 'param-detailed-even')
 
-        # Apply a rowspan for description field only
-        if row[0] == self.PARAMETER_TABLE_COLUMN_NAMES[0] and idd == 2:
-          td.set('rowspan', '3')
-          td.set('valign', 'top')
-          if td.get('class') is not None:
-            td.set('class', ' '.join(['param-description', td.get('class')]))
-          else:
-            td.set('class', 'param-description')
+      # create two divs, one for identifiers and one for description
+      identifier_div = etree.SubElement(detail_div, 'div')
+      identifier_div.set('class', 'param-detailed-identifier')
 
-        # Add content to <td>
-        if isinstance(d, str):
-          td.text = d
+      description_div = etree.SubElement(detail_div, 'div')
+      description_div.set('class', 'param-detailed-description')
+
+      # fill in all the details from the ordered_dict based on identifier
+      for identifier, value in row.iteritems():
+        if identifier.lower() == 'description':
+          sub_div = etree.SubElement(description_div, 'div')
         else:
-          td.append(d)
+          sub_div = etree.SubElement(identifier_div, 'div')
+        sub_div.set('class', 'param-sub-detailed-' + identifier.lower())
 
-      # Create another row to simulate a spacer
-      if row[0] == self.PARAMETER_TABLE_COLUMN_NAMES[-2]:
-        tr = etree.SubElement(table, 'tr')
-        tr.set('class', 'param-rowspacer')
-        for spacer in self.PARAMETER_TABLE_COLUMN_NAMES:
-          td = etree.SubElement(tr, 'td')
-          td.set('class', 'row-spacer')
+        # create identifier text
+        id_div = etree.SubElement(sub_div, 'div')
+        id_div.set('class', 'param-sub-id-' + identifier.lower())
+        p = etree.SubElement(id_div, 'p')
+        p.set('class', 'param-sub-detailed-p-id-' + identifier.lower())
+        p.text = identifier
 
-    return table
+        # create value text
+        value_div = etree.SubElement(sub_div, 'div')
+        value_div.set('class', 'param-sub-value-' + identifier.lower())
+        p = etree.SubElement(value_div, 'p')
+        p.set('class', 'param-sub-detailed-p-value-' + identifier.lower())
+        p.text = value
 
-  def _canStripe(self, current_row, total_rows, iterator):
-    """
-    returns True if we should set this cell as a stripped cell based on inputs
-
-    Args:
-      current_row[int]: The current row we are on
-      total_rows[int]: The total number of rows
-      iterator[int]: The amount of rows to include in a section
-    """
-    every_nth = range(total_rows)[::iterator]
-    for x in every_nth[::2]:
-      if current_row in [i for i in xrange(x, (x + iterator), 1)]:
-        return True
-    return False
+    return param_div
 
   def _formatParam(self, param, key, ptype):
     """

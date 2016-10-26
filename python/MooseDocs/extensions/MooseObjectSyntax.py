@@ -106,8 +106,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
       styles[dict]: Styles from markdown.
     """
 
-    # Create the tables (generate 'Required' and 'Optional'
-    # initially so that they come out in the proper order)
+    # Create the tables (generate 'Required' and 'Optional' initially so that they come out in the proper order)
     tables = collections.OrderedDict()
     tables['Required'] = MooseDocs.MooseObjectParameterTable()
     tables['Optional'] = MooseDocs.MooseObjectParameterTable()
