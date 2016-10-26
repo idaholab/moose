@@ -100,6 +100,10 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     (*_holder_fe_face_neighbor_helper[dim])->get_xyz();
     (*_holder_fe_face_neighbor_helper[dim])->get_JxW();
     (*_holder_fe_face_neighbor_helper[dim])->get_normals();
+
+    _holder_fe_neighbor_helper[dim] = &_fe_neighbor[dim][FEType(FIRST, LAGRANGE)];
+    (*_holder_fe_neighbor_helper[dim])->get_xyz();
+    (*_holder_fe_neighbor_helper[dim])->get_JxW();
   }
 }
 
@@ -154,6 +158,7 @@ Assembly::~Assembly()
   _current_physical_points.release();
 
   _coord.release();
+  _coord_neighbor.release();
 }
 
 void
@@ -580,38 +585,35 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   // Calculate the volume of the neighbor
   if (_need_neighbor_elem_volume)
   {
-    FEType fe_type(neighbor->default_order(), LAGRANGE);
-    std::unique_ptr<FEBase> fe(FEBase::build(neighbor->dim(), fe_type));
+    unsigned int dim = neighbor->dim();
+    FEBase * fe = *_holder_fe_neighbor_helper[dim];
+    QBase * qrule = _holder_qrule_volume[dim];
 
-    const std::vector<Real> & JxW = fe->get_JxW();
-    const std::vector<Point> & q_points = fe->get_xyz();
-
-    // The default quadrature rule should integrate the mass matrix,
-    // thus it should be plenty to compute the area
-    QGauss qrule(neighbor->dim(), fe_type.default_quadrature_order());
-    fe->attach_quadrature_rule(&qrule);
+    fe->attach_quadrature_rule(qrule);
     fe->reinit(neighbor);
 
     // set the coord transformation
-    MooseArray<Real> coord;
-    coord.resize(qrule.n_points());
-    Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(neighbor->subdomain_id());
+    _coord_neighbor.resize(qrule->n_points());
+    Moose::CoordinateSystemType coord_type = _sys.subproblem().getCoordSystem(_current_neighbor_elem->subdomain_id());
     unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
-    switch (coord_type) // coord type should be the same for the neighbor
+    const std::vector<Real> & JxW = fe->get_JxW();
+    const std::vector<Point> & q_points = fe->get_xyz();
+
+    switch (coord_type)
     {
       case Moose::COORD_XYZ:
-        for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-          coord[qp] = 1.;
+        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+          _coord_neighbor[qp] = 1.;
         break;
 
       case Moose::COORD_RZ:
-        for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-          coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
+        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+          _coord_neighbor[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
         break;
 
       case Moose::COORD_RSPHERICAL:
-        for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-          coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
+        for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+          _coord_neighbor[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
         break;
 
       default:
@@ -620,10 +622,8 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     }
 
     _current_neighbor_volume = 0.;
-    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-      _current_neighbor_volume += JxW[qp] * coord[qp];
-
-    coord.release();
+    for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+      _current_neighbor_volume += JxW[qp] * _coord_neighbor[qp];
   }
 }
 

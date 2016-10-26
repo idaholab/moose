@@ -532,6 +532,8 @@ protected:
 
   void computeCurrentFaceVolume();
 
+  void computeCurrentNeighborVolume();
+
   void addResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, const std::vector<dof_id_type> & dof_indices, Real scaling_factor);
   void cacheResidualBlock(std::vector<Real> & cached_residual_values,
                           std::vector<dof_id_type> & cached_residual_rows,
@@ -657,6 +659,7 @@ protected:
   std::map<unsigned int, std::map<FEType, FEBase *> > _fe_neighbor;
   std::map<unsigned int, std::map<FEType, FEBase *> > _fe_face_neighbor;
   /// Each dimension's helper objects
+  std::map<unsigned int, FEBase **> _holder_fe_neighbor_helper;
   std::map<unsigned int, FEBase **> _holder_fe_face_neighbor_helper;
 
   /// quadrature rule used on neighbors
@@ -665,6 +668,8 @@ protected:
   std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_neighbor;
   /// The current transformed jacobian weights on a neighbor's face
   MooseArray<Real> _current_JxW_neighbor;
+  /// The current coordinate transformation coefficients
+  MooseArray<Real> _coord_neighbor;
 
   /// The current "element" we are currently on.
   const Elem * _current_elem;
