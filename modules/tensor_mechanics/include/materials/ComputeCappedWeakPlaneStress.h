@@ -10,6 +10,8 @@
 #include "ComputeStressBase.h"
 #include "TensorMechanicsHardeningModel.h"
 
+#include <array>
+
 class ComputeCappedWeakPlaneStress;
 
 template<>
