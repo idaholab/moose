@@ -29,7 +29,7 @@ class Tester(MooseObject):
     params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
     params.addParam('compiler',      ['ALL'], "A list of compilers for which this test is valid on. ('ALL', 'GCC', 'INTEL', 'CLANG')")
     params.addParam('petsc_version', ['ALL'], "A list of petsc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-    params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('PARALLEL', 'SERIAL')")
+    params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED'), PARALLEL and SERIAL are deprecated")
     params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
     params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
     params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
@@ -55,6 +55,16 @@ class Tester(MooseObject):
   def __init__(self, name, params):
     MooseObject.__init__(self, name, params)
     self.specs = params
+
+    # mesh_mode has a few deprecated options
+    # TODO: We need to print out a deprecated warning in the future
+    mesh_mode = self.specs['mesh_mode']
+    replacement_list = []
+    for i, item in enumerate(mesh_mode):
+      if item.upper() == 'PARALLEL':
+        mesh_mode[i] = 'DISTRIBUTED'
+      if item.upper() == 'SERIAL':
+        mesh_mode[i] = 'REPLICATED'
 
   # Method to return the input file if applicable to this Tester
   def getInputFile(self):

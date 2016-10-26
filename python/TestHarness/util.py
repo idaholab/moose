@@ -7,11 +7,11 @@ TERM_COLS = 110
 
 LIBMESH_OPTIONS = {
   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
-                     'default'   : 'SERIAL',
+                     'default'   : 'REPLICATED',
                      'options'   :
                        {
-      'PARALLEL' : '1',
-      'SERIAL'   : '0'
+      'DISTRIBUTED' : '1',
+      'REPLICATED'  : '0'
       }
                      },
   'unique_ids' :   { 're_option' : r'#define\s+LIBMESH_ENABLE_UNIQUE_ID\s+(\d+)',
