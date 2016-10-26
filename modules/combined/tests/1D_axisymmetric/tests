@@ -1,0 +1,7 @@
+[Tests]
+  [./constraint]
+    type = 'Exodiff'
+    input = 'constraint.i'
+    exodiff = 'constraint_out.e'
+  [../]
+[]
