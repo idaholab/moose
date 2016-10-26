@@ -177,7 +177,15 @@ class MooseObjectSyntax(MooseSyntaxBase):
 
     for key, syntax in self._syntax.iteritems():
       if syntax.hasObject(self._name):
-        include = syntax.filenames(self._name)[0]
+        include_names = syntax.filenames(self._name)
+        if not include_names:
+          continue
+        elif len(include_names) > 1:
+          msg = 'Multiple include files with the name {} were located:\n'.format(self._name)
+          for n in include_names:
+            msg += '    ' + n
+          log.error(msg)
+        include = include_names[0]
         rel_include = os.path.relpath(include, self._root)
 
         p = etree.SubElement(ul, 'li')

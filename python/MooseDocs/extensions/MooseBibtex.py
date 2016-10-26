@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import io
+import traceback
 
 from pybtex.plugin import find_plugin
 from pybtex.database import BibliographyData, parse_file
@@ -45,8 +46,9 @@ class MooseBibtex(Preprocessor):
         try:
           bibfiles.append(os.path.join(self._root, bfile))
           data = parse_file(bibfiles[-1])
-        except:
+        except Exception as e:
           log.error('Failed to parse bibtex file: {}'.format(bfile))
+          traceback.prent_exc(e)
           return lines
         self._bibtex.add_entries(data.entries.iteritems())
     else:
@@ -85,7 +87,7 @@ class MooseBibtex(Preprocessor):
       for i, item in enumerate(html):
         output += u'<li name="{}">{}</li>\n'.format(self._citations[i], item)
       output += u'</ol>\n'
-      content = re.sub(self.RE_BIBLIOGRAPHY, output, content)
+      content = re.sub(self.RE_BIBLIOGRAPHY, output, self.markdown.htmlStash.store(content, safe=True))
 
     return content.split('\n')
 
@@ -112,6 +114,8 @@ class MooseBibtex(Preprocessor):
         author = ' '.join(a[0].last_names)
 
       if cmd == 'citep':
-        return '(<a href="#{}" data-moose-cite="{}">{}, {}</a>)'.format(key, tex, author, entry.fields['year'])
+        a = '<a href="#{}" data-moose-cite="{}">{}, {}</a>'.format(key, tex, author, entry.fields['year'])
+        return '({})'.format(self.markdown.htmlStash.store(a, safe=True))
       else:
-        return '<a href="#{}" data-moose-cite="{}">{} ({})</a>'.format(key, tex, author, entry.fields['year'])
+        a = '<a href="#{}" data-moose-cite="{}">{} ({})</a>'.format(key, tex, author, entry.fields['year'])
+        return self.markdown.htmlStash.store(a, safe=True)
