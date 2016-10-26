@@ -42,6 +42,10 @@ def generate(config_file='moosedocs.yml', pages='pages.yml', stubs=False, pages_
 
   # Populate the syntax
   for key, value in config['locations'].iteritems():
+    if 'hide' in value:
+      value['hide'] += config['hide']
+    else:
+      value['hide'] = config['hide']
     syntax = MooseDocs.MooseApplicationSyntax(yaml, name=key, stubs=stubs,  pages_stubs=pages_stubs, pages=pages, **value)
     log.info("Checking documentation for '{}'.".format(key))
     syntax.check()

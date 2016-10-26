@@ -59,6 +59,7 @@ class MooseMarkdown(markdown.Extension):
     self.config['graphviz'] = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
     self.config['dot_ext'] = ['svg', "The graphviz/dot output file extension (default: svg)."]
     self.config['pages'] = ['pages.yml', "The the pages file defining the site map."]
+    self.config['hide'] = [[], "A list of input file syntax to hide from system."]
 
     # Construct the extension object
     super(MooseMarkdown, self).__init__(**kwargs)
@@ -93,6 +94,10 @@ class MooseMarkdown(markdown.Extension):
     # Populate the syntax
     if not cache['syntax']:
       for key, value in config['locations'].iteritems():
+        if 'hide' in value:
+          value['hide'] += config['hide']
+        else:
+          value['hide'] = config['hide']
         cache['syntax'][key] = MooseDocs.MooseApplicationSyntax(cache['yaml'], **value)
 
     # Populate the pages yaml
