@@ -32,7 +32,7 @@ updateInfo(StepperInfo* si, double dt)
 
 StepperInfo blankInfo()
 {
-    return {1, 0, 0, 0, 0, "", 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr, false, false, 0};
+    return {1, 0, 0, 0, 0, "", 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
 }
 
 void
@@ -114,7 +114,7 @@ StepperTest::fixedPoint()
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper.advance(&si);
+      dt = stepper.advance(&si, nullptr);
       if (j == 0 && tests[i].violate_dt > 0)
         dt *= 2;
       else if (j == 0 && tests[i].violate_dt < 0)
@@ -127,7 +127,7 @@ StepperTest::fixedPoint()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper.advance(&si);
+    dt = stepper.advance(&si, nullptr);
     updateInfo(&si, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -175,7 +175,7 @@ StepperTest::maxRatio()
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper.advance(&si);
+      dt = stepper.advance(&si, nullptr);
       updateInfo(&si, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
@@ -184,7 +184,7 @@ StepperTest::maxRatio()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper.advance(&si);
+    dt = stepper.advance(&si, nullptr);
     updateInfo(&si, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -226,7 +226,7 @@ StepperTest::everyN()
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper.advance(&si);
+      dt = stepper.advance(&si, nullptr);
       updateInfo(&si, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
@@ -235,7 +235,7 @@ StepperTest::everyN()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper.advance(&si);
+    dt = stepper.advance(&si, nullptr);
     updateInfo(&si, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -259,7 +259,7 @@ StepperTest::scratch()
 
   for (int j = 0; j < 10; j++)
   {
-    double dt = s->advance(&si);
+    double dt = s->advance(&si, nullptr);
     //std::c out << "time=" << si.time << ", dt=" << dt << "\n";
     updateInfo(&si, dt);
   }

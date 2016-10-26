@@ -366,8 +366,10 @@ Transient::computeDT(bool first)
   _si.converged = _last_solve_converged || first;
   _prev_dt = _si.prev_dt; // for restart
 
+  StepperFeedback sf = {};
+
   if (_stepper)
-    _new_dt = _stepper->advance(&_si);
+    _new_dt = _stepper->advance(&_si, &sf);
 }
 
 void

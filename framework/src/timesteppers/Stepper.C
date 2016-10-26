@@ -9,7 +9,7 @@ ConstStepper::ConstStepper(double dt) : _dt(dt)
 }
 
 double
-ConstStepper::advance(const StepperInfo *)
+ConstStepper::advance(const StepperInfo *, StepperFeedback *)
 {
   Logger l("Const");
   return l.val(_dt);
@@ -22,10 +22,10 @@ DTLimitStepper::DTLimitStepper(Stepper * s, double dt_min, double dt_max,
 }
 
 double
-DTLimitStepper::advance(const StepperInfo * si)
+DTLimitStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("DTLimit");
-  double dt = _stepper->advance(si);
+  double dt = _stepper->advance(si, sf);
   if (_err && (dt < _min || dt > _max))
     throw "time step is out of bounds";
   else if (dt < _min)
@@ -42,10 +42,10 @@ BoundsStepper::BoundsStepper(Stepper * s, double t_min, double t_max,
 }
 
 double
-BoundsStepper::advance(const StepperInfo * si)
+BoundsStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("Bounds");
-  double dt = _stepper->advance(si);
+  double dt = _stepper->advance(si, sf);
   double t = si->time + dt;
   if (_err && (t < _min || t > _max))
     throw "time step is out of bounds";
@@ -62,7 +62,7 @@ FixedPointStepper::FixedPointStepper(std::vector<double> times, double tol)
 }
 
 double
-FixedPointStepper::advance(const StepperInfo * si)
+FixedPointStepper::advance(const StepperInfo * si, StepperFeedback *)
 {
   Logger l("FixedPoint");
   if (_times.size() == 0)
@@ -88,15 +88,15 @@ AlternatingStepper::AlternatingStepper(Stepper * on_steps,
 }
 
 double
-AlternatingStepper::advance(const StepperInfo * si)
+AlternatingStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("Alternating");
   for (int i = 0; i < _times.size(); i++)
   {
     if (std::abs(si->time - _times[i]) < _time_tol)
-      return l.val(_on_steps->advance(si));
+      return l.val(_on_steps->advance(si, sf));
   }
-  return l.val(_between_steps->advance(si));
+  return l.val(_between_steps->advance(si, sf));
 }
 
 MaxRatioStepper::MaxRatioStepper(Stepper * s, double max_ratio)
@@ -105,10 +105,10 @@ MaxRatioStepper::MaxRatioStepper(Stepper * s, double max_ratio)
 }
 
 double
-MaxRatioStepper::advance(const StepperInfo * si)
+MaxRatioStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("MaxRatio");
-  double dt = _stepper->advance(si);
+  double dt = _stepper->advance(si, sf);
   if (si->prev_dt > 0 && dt / si->prev_dt > _max_ratio)
     dt = si->prev_dt * _max_ratio;
   return l.val(dt);
@@ -121,11 +121,11 @@ EveryNStepper::EveryNStepper(Stepper * s, int every_n, int offset)
 }
 
 double
-EveryNStepper::advance(const StepperInfo * si)
+EveryNStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("EveryN");
   if ((si->step_count + (_n - _offset) - 1) % _n == 0)
-    return l.val(_stepper->advance(si));
+    return l.val(_stepper->advance(si, sf));
   else
     return l.val(si->prev_dt);
 }
@@ -136,7 +136,7 @@ ReturnPtrStepper::ReturnPtrStepper(const double * dt_store)
 }
 
 double
-ReturnPtrStepper::advance(const StepperInfo * si)
+ReturnPtrStepper::advance(const StepperInfo * si, StepperFeedback *)
 {
   Logger l("ReturnPtr");
   return l.val(*_dt_store);
@@ -156,13 +156,13 @@ InstrumentedStepper::~InstrumentedStepper()
 }
 
 double
-InstrumentedStepper::advance(const StepperInfo * si)
+InstrumentedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("Instrumented");
   if (!_stepper)
     throw "InstrumentedStepper's inner stepper not set";
 
-  *_dt_store = _stepper->advance(si);
+  *_dt_store = _stepper->advance(si, sf);
   return l.val(*_dt_store);
 }
 
@@ -184,7 +184,7 @@ RetryUnusedStepper::RetryUnusedStepper(Stepper * s, double tol, bool prev_prev)
 }
 
 double
-RetryUnusedStepper::advance(const StepperInfo * si)
+RetryUnusedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("RetryUnused");
   if (_prev_dt != 0 && std::abs(si->prev_dt - _prev_dt) > _tol)
@@ -198,7 +198,7 @@ RetryUnusedStepper::advance(const StepperInfo * si)
       return l.val(_prev_dt);
   }
 
-  _prev_dt = _stepper->advance(si);
+  _prev_dt = _stepper->advance(si, sf);
   return l.val(_prev_dt);
 }
 
@@ -210,10 +210,10 @@ ConstrFuncStepper::ConstrFuncStepper(Stepper * s,
 }
 
 double
-ConstrFuncStepper::advance(const StepperInfo * si)
+ConstrFuncStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("ConstrFunc");
-  double dt = _stepper->advance(si);
+  double dt = _stepper->advance(si, sf);
   double f_curr = _func(si->time);
   double df = std::abs(_func(si->time + dt) - f_curr);
   while (_max_diff > 0 && df > _max_diff)
@@ -231,7 +231,7 @@ PiecewiseStepper::PiecewiseStepper(std::vector<double> times,
 }
 
 double
-PiecewiseStepper::advance(const StepperInfo * si)
+PiecewiseStepper::advance(const StepperInfo * si, StepperFeedback *)
 {
   Logger l("Piecewise");
   if (_interp)
@@ -252,11 +252,11 @@ MinOfStepper::MinOfStepper(Stepper * a, Stepper * b, double tol)
 }
 
 double
-MinOfStepper::advance(const StepperInfo * si)
+MinOfStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("MinOf");
-  double dta = _a->advance(si);
-  double dtb = _b->advance(si);
+  double dta = _a->advance(si, sf);
+  double dtb = _b->advance(si, sf);
   if (dta - _tol < dtb)
     return l.val(dta);
   return l.val(dtb);
@@ -275,7 +275,7 @@ AdaptiveStepper::AdaptiveStepper(unsigned int optimal_iters,
 }
 
 double
-AdaptiveStepper::advance(const StepperInfo * si)
+AdaptiveStepper::advance(const StepperInfo * si, StepperFeedback *)
 {
   Logger l("Adaptive");
   bool can_shrink = true;
@@ -308,7 +308,7 @@ SolveTimeAdaptiveStepper::SolveTimeAdaptiveStepper(int initial_direc,
 }
 
 double
-SolveTimeAdaptiveStepper::advance(const StepperInfo * si)
+SolveTimeAdaptiveStepper::advance(const StepperInfo * si, StepperFeedback *)
 {
   Logger l("SolveTimeAdaptive");
   double ratio = si->prev_solve_time_secs / si->prev_dt;
@@ -335,12 +335,12 @@ StartupStepper::StartupStepper(Stepper * s, double initial_dt, int n_steps)
 }
 
 double
-StartupStepper::advance(const StepperInfo * si)
+StartupStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("Startup");
   if (si->step_count <= _n)
     return l.val(_dt);
-  return l.val(_stepper->advance(si));
+  return l.val(_stepper->advance(si, sf));
 }
 
 IfConvergedStepper::IfConvergedStepper(Stepper * if_converged,
@@ -350,13 +350,13 @@ IfConvergedStepper::IfConvergedStepper(Stepper * if_converged,
 }
 
 double
-IfConvergedStepper::advance(const StepperInfo * si)
+IfConvergedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("IfConverged");
   if (si->converged)
-    return l.val(_converged->advance(si));
+    return l.val(_converged->advance(si, sf));
   else
-    return l.val(_not_converged->advance(si));
+    return l.val(_not_converged->advance(si, sf));
 }
 
 GrowShrinkStepper::GrowShrinkStepper(double shrink_factor, double growth_factor,
@@ -368,12 +368,12 @@ GrowShrinkStepper::GrowShrinkStepper(double shrink_factor, double growth_factor,
 }
 
 double
-GrowShrinkStepper::advance(const StepperInfo * si)
+GrowShrinkStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("GrowShrink");
   double dt_init = si->prev_dt;
   if (_source_dt)
-    dt_init = _source_dt->advance(si);
+    dt_init = _source_dt->advance(si, sf);
 
   if (!si->converged)
     return l.val(dt_init * _shrink_fac);
@@ -391,7 +391,7 @@ PredictorCorrectorStepper::PredictorCorrectorStepper(int start_adapting,
 }
 
 double
-PredictorCorrectorStepper::advance(const StepperInfo * si)
+PredictorCorrectorStepper::advance(const StepperInfo * si, StepperFeedback *)
 {
   Logger l("PredictorCorrector");
   if (!si->converged)
@@ -447,15 +447,39 @@ PredictorCorrectorStepper::estimateTimeError(const StepperInfo * si)
 }
 
 
-DT2Stepper::DT2Stepper(double e_tol, double e_max) : _e_tol(e_tol), _e_max(e_max), _big_soln(nullptr), _step(0)
+DT2Stepper::DT2Stepper(double time_tol, double e_tol, double e_max) :
+    _tol(time_tol), _e_tol(e_tol), _e_max(e_max), _start_time(-1), _end_time(-1), _big_dt(0), _big_soln(nullptr)
 {
 }
 
-double DT2Stepper::advance(const StepperInfo * si)
+double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
-  _step++;
-
-//  if ((si->step_count - 1) % 3 == 0)
-//    si->snapshot = true;
-  return -1000;
+  if (std::abs(si->time - _end_time) < _tol && _big_soln && si->converged) {
+    // we just finished the second of the two smaller dt steps and are ready for error calc
+    double new_dt = 0; // {compute dt using _big_soln and si->nonlin_soln}
+    _big_soln.release();
+    _start_time = si->time;
+    _end_time = _start_time + new_dt;
+    sf->snapshot = true;
+    _big_dt = new_dt;
+    return new_dt;
+  } else if (std::abs(si->time - _end_time) < _tol && !_big_soln && si->converged) {
+    // collect big dt soln and rewind to collect small dt solns
+    _big_soln.reset(si->soln_nonlin->clone().release());
+    sf->rewind = true;
+    sf->rewind_time = _start_time;
+    return _big_dt / 2; // doesn't actually matter what we return here because rewind
+  } else if (std::abs(si->time - _start_time) < _tol && _big_soln) {
+    // we just rewound and need to do small steps
+    return _big_dt / 2;
+  } else if (si->time > _start_time && si->time < _end_time && _big_soln && si->converged) {
+    // we just finished the first of the smaller dt steps
+    return _big_dt / 2;
+  } else {
+    // something went wrong or this is initial call of simulation - start over
+    _start_time = si->time;
+    _end_time = _start_time + si->prev_dt;
+    sf->snapshot = true;
+    return si->prev_dt;
+  }
 }

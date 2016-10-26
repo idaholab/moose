@@ -42,6 +42,12 @@ public:
   double _dt;
 };
 
+struct StepperFeedback {
+  bool snapshot;
+  bool rewind;
+  double rewind_time;
+};
+
 /// Holds all information used by Steppers to calculate dt via the "advance"
 /// function.
 struct StepperInfo
@@ -86,10 +92,6 @@ struct StepperInfo
   /// If no predictor was used, this is a zero vector with the same length as
   /// soln_nonlin.
   std::unique_ptr<NumericVector<Number>> soln_predicted;
-
-  bool snapshot;
-  bool rewind;
-  double rewind_time;
 };
 
 /// A base class for time stepping algorithms for use in determining dt between
@@ -107,7 +109,7 @@ public:
   /// Returns a value for dt to calculate the next time step.  Implementations
   /// can assume si is not NULL.  Implementations of advance should strive to be
   /// idempotent.
-  virtual double advance(const StepperInfo * si) = 0;
+  virtual double advance(const StepperInfo * si, StepperFeedback * sf) = 0;
 };
 
 /// Always returns a single, unchanging, user-specified dt.
@@ -115,7 +117,7 @@ class ConstStepper : public Stepper
 {
 public:
   ConstStepper(double dt);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   double _dt;
@@ -131,7 +133,7 @@ public:
   /// advance function returns an out of bounds dt.  Otherwise, out-of-bounds
   /// cases result in dt being set to the corresponding min or max bound.
   DTLimitStepper(Stepper * s, double dt_min, double dt_max, bool throw_err);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _stepper;
@@ -151,7 +153,7 @@ public:
   /// time.  Otherwise, out-of-bounds cases result in dt being set to hit the
   /// corresponding time bound.
   BoundsStepper(Stepper * s, double t_min, double t_max, bool throw_err);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _stepper;
@@ -168,7 +170,7 @@ class FixedPointStepper : public Stepper
 {
 public:
   FixedPointStepper(std::vector<double> times, double tol);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   std::vector<double> _times;
@@ -182,7 +184,7 @@ class AlternatingStepper : public Stepper
 public:
   AlternatingStepper(Stepper * on_steps, Stepper * between_steps,
                      std::vector<double> times, double tol);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _on_steps;
@@ -198,7 +200,7 @@ class MaxRatioStepper : public Stepper
 {
 public:
   MaxRatioStepper(Stepper * s, double max_ratio);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _stepper;
@@ -214,7 +216,7 @@ class EveryNStepper : public Stepper
 public:
   // offset must be smaller than every_n.
   EveryNStepper(Stepper * s, int every_n, int offset = 0);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _stepper;
@@ -228,7 +230,7 @@ class ReturnPtrStepper : public Stepper
 public:
   /// dt_store must not be null.
   ReturnPtrStepper(const double * dt_store);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   const double * _dt_store;
@@ -246,7 +248,7 @@ class InstrumentedStepper : public Stepper
 public:
   InstrumentedStepper(double * dt_store = nullptr);
   virtual ~InstrumentedStepper();
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
   void setStepper(Stepper * s);
   double * dtPtr();
 
@@ -267,7 +269,7 @@ public:
   /// returned dt that was used (i.e. prev_prev_dt) instead of the last returned
   /// dt that was not used.
   RetryUnusedStepper(Stepper * s, double tol, bool prev_prev);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _stepper;
@@ -284,7 +286,7 @@ class ConstrFuncStepper : public Stepper
 public:
   ConstrFuncStepper(Stepper * s, std::function<double(double)> func,
                     double max_diff);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _stepper;
@@ -302,7 +304,7 @@ public:
   /// at the index of the lower bound.
   PiecewiseStepper(std::vector<double> times, std::vector<double> dts,
                    bool interpolate = true);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   std::vector<double> _times;
@@ -321,7 +323,7 @@ class MinOfStepper : public Stepper
 public:
   /// Stepper "a" is preferred.
   MinOfStepper(Stepper * a, Stepper * b, double tol);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _a;
@@ -342,7 +344,7 @@ public:
   AdaptiveStepper(unsigned int optimal_iters, unsigned int iter_window,
                   double lin_iter_ratio, double shrink_factor,
                   double growth_factor);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   unsigned int _optimal_iters;
@@ -362,7 +364,7 @@ public:
   /// adjustments to dt should be an increase or decrease.  frac_change should
   /// generally be between 0.0 and 1.0.
   SolveTimeAdaptiveStepper(int initial_direc, double frac_change);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   double _percent_change;
@@ -379,7 +381,7 @@ public:
   /// n_steps is the number of steps to return initial_dt before defaulting to
   /// returning dt from s.
   StartupStepper(Stepper * s, double initial_dt, int n_steps = 1);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _stepper;
@@ -394,7 +396,7 @@ class IfConvergedStepper : public Stepper
 public:
   /// if_converged and if_not_converged must not be NULL.
   IfConvergedStepper(Stepper * if_converged, Stepper * if_not_converged);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _converged;
@@ -413,7 +415,7 @@ public:
   /// on instead of the previous dt.
   GrowShrinkStepper(double shrink_factor, double growth_factor,
                     Stepper * source_dt = nullptr);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   double _grow_fac;
@@ -433,7 +435,7 @@ public:
   /// details on e_tol and scaling_param usage - divine it from the code.
   PredictorCorrectorStepper(int start_adapting, double e_tol,
                             double scaling_param);
-  virtual double advance(const StepperInfo * si);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   double estimateTimeError(const StepperInfo * si);
@@ -446,12 +448,15 @@ private:
 class DT2Stepper : public Stepper
 {
 public:
-  DT2Stepper(double e_tol, double e_max);
-  virtual double advance(const StepperInfo * si);
+  DT2Stepper(double time_tol, double e_tol, double e_max);
+  virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
+  double _tol;
   double _e_tol;
   double _e_max;
+  double _start_time;
+  double _end_time;
+  double _big_dt;
   std::unique_ptr<NumericVector<Number>> _big_soln;
-  int _step;
 };
