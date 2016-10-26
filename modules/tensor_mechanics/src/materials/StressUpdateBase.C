@@ -29,9 +29,9 @@ StressUpdateBase::StressUpdateBase(const InputParameters & parameters) :
 }
 
 void
-StressUpdateBase::updateStress(RankTwoTensor & strain_increment,
-                                     RankTwoTensor & inelastic_strain_increment,
-                                     RankTwoTensor & stress_new)
+StressUpdateBase::updateStress(RankTwoTensor & /*strain_increment*/,
+                               RankTwoTensor & /*inelastic_strain_increment*/,
+                               RankTwoTensor & /*stress_new*/)
 {
 }
 

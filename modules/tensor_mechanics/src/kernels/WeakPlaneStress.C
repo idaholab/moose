@@ -43,7 +43,7 @@ WeakPlaneStress::computeQpJacobian()
 }
 
 Real
-WeakPlaneStress::computeQpOffDiagJacobian(unsigned int jvar)
+WeakPlaneStress::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
 }

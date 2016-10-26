@@ -1,0 +1,10 @@
+[Tests]
+  [./parsed_sideset]
+    type = 'Exodiff'
+    input = ' parsed_sideset.i'
+    exodiff = 'parsed_sideset_in.e'
+    cli_args = '--mesh-only'
+    mesh_mode = REPLICATED
+    recover = false
+  [../]
+[]
