@@ -53,6 +53,7 @@
     v = 'eta0 eta1 eta2 eta3'
     grain_tracker_object = grain_center
     grain_force = grain_force
+    grain_volumes = grain_volumes
   [../]
 
   [./RigidBodyMultiKernel]
@@ -62,6 +63,7 @@
     mob_name = L
     kappa_name = kappa_eta
     grain_force = grain_force
+    grain_volumes = grain_volumes
     grain_tracker_object = grain_center
   [../]
 []
@@ -238,6 +240,11 @@
     type = GrainForcesPostprocessor
     grain_force = grain_force
   [../]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_center
+    execute_on = 'initial timestep_begin'
+  [../]
 []
 
 [UserObjects]
@@ -245,11 +252,10 @@
     type = GrainTracker
     outputs = none
     compute_var_to_feature_map = true
-    calculate_feature_volumes = true
     execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
-    type = ComputeGrainForceAndTorque
+    type = ComputeExternalGrainForceAndTorque
     c = c
     grain_data = grain_center
     force_density = force_density_ext
