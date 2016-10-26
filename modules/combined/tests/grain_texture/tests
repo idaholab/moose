@@ -24,4 +24,10 @@
     input = 'EulerAngle2RGBAction.i'
     exodiff = 'EulerAngle2RGBAction_out.e'
   [../]
+
+  [./random_orientation]
+    type = 'Exodiff'
+    input = 'random_grain_orientation.i'
+    exodiff = 'random_grain_orientation_out.e'
+  [../]
 []
