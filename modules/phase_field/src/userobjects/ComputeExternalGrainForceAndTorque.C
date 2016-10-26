@@ -4,14 +4,14 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "ComputeGrainForceAndTorque.h"
+#include "ComputeExternalGrainForceAndTorque.h"
 #include "GrainTrackerInterface.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
 
 template<>
-InputParameters validParams<ComputeGrainForceAndTorque>()
+InputParameters validParams<ComputeExternalGrainForceAndTorque>()
 {
   InputParameters params = validParams<ShapeElementUserObject>();
   params.addClassDescription("Userobject for calculating force and torque acting on a grain");
@@ -22,7 +22,7 @@ InputParameters validParams<ComputeGrainForceAndTorque>()
   return params;
 }
 
-ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & parameters) :
+ComputeExternalGrainForceAndTorque::ComputeExternalGrainForceAndTorque(const InputParameters & parameters) :
     DerivativeMaterialInterface<ShapeElementUserObject>(parameters),
     GrainForceAndTorqueInterface(),
     _c_name(getVar("c", 0)->name()),
@@ -34,18 +34,18 @@ ComputeGrainForceAndTorque::ComputeGrainForceAndTorque(const InputParameters & p
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_data")),
     _vals_var(_op_num),
     _vals_name(_op_num),
-    _dFdgradeta(_op_num)
+    _dFdeta(_op_num)
 {
   for (unsigned int i = 0; i < _op_num; ++i)
   {
     _vals_var[i] = coupled("etas", i);
     _vals_name[i] = getVar("etas", i)->name();
-    _dFdgradeta[i] = &getMaterialPropertyByName<std::vector<Real> >(propertyNameFirst(_dF_name, _vals_name[i]));
+    _dFdeta[i] = &getMaterialPropertyByName<std::vector<RealGradient> >(propertyNameFirst(_dF_name, _vals_name[i]));
   }
 }
 
 void
-ComputeGrainForceAndTorque::initialize()
+ComputeExternalGrainForceAndTorque::initialize()
 {
   _grain_num = _grain_tracker.getTotalFeatureCount();
   _ncomp = 6 * _grain_num;
@@ -66,7 +66,7 @@ ComputeGrainForceAndTorque::initialize()
 }
 
 void
-ComputeGrainForceAndTorque::execute()
+ComputeExternalGrainForceAndTorque::execute()
 {
   const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
@@ -90,7 +90,7 @@ ComputeGrainForceAndTorque::execute()
 }
 
 void
-ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
+ComputeExternalGrainForceAndTorque::executeJacobian(unsigned int jvar)
 {
   const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
@@ -122,13 +122,13 @@ ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
           {
             const auto centroid = _grain_tracker.getGrainCentroid(j);
             for (_qp=0; _qp<_qrule->n_points(); ++_qp)
-              if ((*_dFdgradeta[i])[_qp][j] != 0.0)
+              if ((*_dFdeta[i])[_qp][j](0) != 0.0 || (*_dFdeta[i])[_qp][j](1) != 0.0 || (*_dFdeta[i])[_qp][j](2) != 0.0)
               {
-                const Real factor =_JxW[_qp] * _coord[_qp] * (*_dFdgradeta[i])[_qp][k];
-                const RealGradient compute_torque_jacobian_eta = factor * (_current_elem->centroid() - centroid).cross(_grad_phi[_j][_qp]);
-                _force_torque_eta_jacobian_store[i][(6*j+0)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](0);
-                _force_torque_eta_jacobian_store[i][(6*j+1)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](1);
-                _force_torque_eta_jacobian_store[i][(6*j+2)*_total_dofs+_j_global] += factor * _grad_phi[_j][_qp](2);
+                const Real factor = _JxW[_qp] * _coord[_qp] * _phi[_j][_qp];
+                const RealGradient compute_torque_jacobian_eta = factor * (_current_elem->centroid() - centroid).cross((*_dFdeta[i])[_qp][k]);
+                _force_torque_eta_jacobian_store[i][(6*j+0)*_total_dofs+_j_global] += factor * (*_dFdeta[i])[_qp][k](0);
+                _force_torque_eta_jacobian_store[i][(6*j+1)*_total_dofs+_j_global] += factor * (*_dFdeta[i])[_qp][k](1);
+                _force_torque_eta_jacobian_store[i][(6*j+2)*_total_dofs+_j_global] += factor * (*_dFdeta[i])[_qp][k](2);
                 _force_torque_eta_jacobian_store[i][(6*j+3)*_total_dofs+_j_global] += compute_torque_jacobian_eta(0);
                 _force_torque_eta_jacobian_store[i][(6*j+4)*_total_dofs+_j_global] += compute_torque_jacobian_eta(1);
                 _force_torque_eta_jacobian_store[i][(6*j+5)*_total_dofs+_j_global] += compute_torque_jacobian_eta(2);
@@ -137,7 +137,7 @@ ComputeGrainForceAndTorque::executeJacobian(unsigned int jvar)
 }
 
 void
-ComputeGrainForceAndTorque::finalize()
+ComputeExternalGrainForceAndTorque::finalize()
 {
   gatherSum(_force_torque_store);
   for (unsigned int i = 0; i < _grain_num; ++i)
@@ -159,9 +159,9 @@ ComputeGrainForceAndTorque::finalize()
 }
 
 void
-ComputeGrainForceAndTorque::threadJoin(const UserObject & y)
+ComputeExternalGrainForceAndTorque::threadJoin(const UserObject & y)
 {
-  const ComputeGrainForceAndTorque & pps = static_cast<const ComputeGrainForceAndTorque &>(y);
+  const ComputeExternalGrainForceAndTorque & pps = static_cast<const ComputeExternalGrainForceAndTorque &>(y);
   for (unsigned int i = 0; i < _ncomp; ++i)
     _force_torque_store[i] += pps._force_torque_store[i];
   if (_fe_problem.currentlyComputingJacobian())
@@ -175,24 +175,24 @@ ComputeGrainForceAndTorque::threadJoin(const UserObject & y)
 }
 
 const std::vector<RealGradient> &
-ComputeGrainForceAndTorque::getForceValues() const
+ComputeExternalGrainForceAndTorque::getForceValues() const
 {
   return _force_values;
 }
 
 const std::vector<RealGradient> &
-ComputeGrainForceAndTorque::getTorqueValues() const
+ComputeExternalGrainForceAndTorque::getTorqueValues() const
 {
   return _torque_values;
 }
 
 const std::vector<Real> &
-ComputeGrainForceAndTorque::getForceCJacobians() const
+ComputeExternalGrainForceAndTorque::getForceCJacobians() const
 {
   return _force_torque_c_jacobian_store;
 }
 const std::vector<std::vector<Real> > &
-ComputeGrainForceAndTorque::getForceEtaJacobians() const
+ComputeExternalGrainForceAndTorque::getForceEtaJacobians() const
 {
   return _force_torque_eta_jacobian_store;
 }

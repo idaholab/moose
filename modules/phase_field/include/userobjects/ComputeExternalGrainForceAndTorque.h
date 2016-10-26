@@ -4,29 +4,29 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTEGRAINFORCEANDTORQUE_H
-#define COMPUTEGRAINFORCEANDTORQUE_H
+#ifndef COMPUTEEXTERNALGRAINFORCEANDTORQUE_H
+#define COMPUTEEXTERNALGRAINFORCEANDTORQUE_H
 
 #include "ShapeElementUserObject.h"
 #include "GrainForceAndTorqueInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 //Forward Declarations
-class ComputeGrainForceAndTorque;
+class ComputeExternalGrainForceAndTorque;
 class GrainTrackerInterface;
 
 template<>
-InputParameters validParams<ComputeGrainForceAndTorque>();
+InputParameters validParams<ComputeExternalGrainForceAndTorque>();
 
 /**
  * This class is here to get the force and torque acting on a grain
  */
-class ComputeGrainForceAndTorque :
+class ComputeExternalGrainForceAndTorque :
     public DerivativeMaterialInterface<ShapeElementUserObject>,
     public GrainForceAndTorqueInterface
 {
 public:
-  ComputeGrainForceAndTorque(const InputParameters & parameters);
+  ComputeExternalGrainForceAndTorque(const InputParameters & parameters);
 
   virtual void initialize();
   virtual void execute();
@@ -58,8 +58,7 @@ protected:
 
   std::vector<unsigned int> _vals_var;
   std::vector<VariableName> _vals_name;
-  std::vector<const MaterialProperty<std::vector<Real> > *> _dFdgradeta;
-  std::vector<const MaterialProperty<Real> *> _test_derivatives;
+  std::vector<const MaterialProperty<std::vector<RealGradient> > *> _dFdeta;
 
   ///@{ providing grain forces, torques and their jacobians w. r. t c
   std::vector<RealGradient> _force_values;
@@ -74,4 +73,4 @@ protected:
   unsigned int _total_dofs;
 };
 
-#endif //COMPUTEGRAINFORCEANDTORQUE_H
+#endif //COMPUTEEXTERNALGRAINFORCEANDTORQUE_H

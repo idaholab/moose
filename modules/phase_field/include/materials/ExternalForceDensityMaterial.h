@@ -38,7 +38,7 @@ private:
   const VariableValue & _c;
   VariableName _c_name;
   /// stiffness constant
-  Real _k;
+  const Real _k;
 
   unsigned int _op_num;
   std::vector<const VariableValue *> _vals;
@@ -49,7 +49,7 @@ private:
   /// first order derivative of force density material w.r.t c
   MaterialProperty<std::vector<RealGradient> > & _dFdc;
 
-  std::vector<MaterialProperty<std::vector<Real> > *> _dFdeta;
+  std::vector<MaterialProperty<std::vector<RealGradient> > *> _dFdeta;
 };
 
 #endif //EXTERNALFORCEDENSITYMATERIAL_H

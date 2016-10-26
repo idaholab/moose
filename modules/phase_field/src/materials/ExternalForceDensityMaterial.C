@@ -41,7 +41,7 @@ ExternalForceDensityMaterial::ExternalForceDensityMaterial(const InputParameters
   {
     _vals[i] = &coupledValue("etas", i);
     _vals_name[i] = getVar("etas", i)->name();
-    _dFdeta[i] = &declarePropertyDerivative<std::vector<Real> >("force_density_ext", _vals_name[i]);
+    _dFdeta[i] = &declarePropertyDerivative<std::vector<RealGradient> >("force_density_ext", _vals_name[i]);
   }
 }
 
@@ -66,6 +66,10 @@ ExternalForceDensityMaterial::computeQpProperties()
   {
     (*_dFdeta[i])[_qp].resize(_op_num);
     for (unsigned int j = 0; j < _op_num; ++j)
-      (*_dFdeta[i])[_qp][j] = _k * _c[_qp];
+    {
+      (*_dFdeta[i])[_qp][j](0) = _k * _c[_qp] * _force_x.value(_t, _q_point[_qp]);
+      (*_dFdeta[i])[_qp][j](1) = _k * _c[_qp] * _force_y.value(_t, _q_point[_qp]);
+      (*_dFdeta[i])[_qp][j](2) = _k * _c[_qp] * _force_z.value(_t, _q_point[_qp]);
+    }
   }
 }
