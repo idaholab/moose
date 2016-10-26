@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'thinfilm_periodic_boundary.i'
+    exodiff = 'thinfilm_pb.e'
+    max_parallel = 2
+    min_parallel = 2
+  [../]
+[]
