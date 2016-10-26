@@ -47,9 +47,11 @@ void
 updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, StepperInfo>* snaps = nullptr)
 {
   if (sf && sf->rewind) {
+    printf("[REWINDING...]\n");
     cloneStepperInfo(&(*snaps)[sf->rewind_time], si);
     return;
   } else if (sf && snaps && sf->snapshot) {
+    printf("[SNAPSHOTTING...]\n");
     cloneStepperInfo(si, &(*snaps)[si->time]);
   }
 
@@ -289,7 +291,7 @@ StepperTest::DT2()
       1.0,
       {{1, 1, 1}, {0, 0, 0}, {.5, .5, .5}, {.9, .9, .9}},
       {1, 0, 0.5, 1.0},
-      {1, 0.5, 0.5, 0.5},
+      {1, 1, 0.5, 0.5},
     }
   };
 
@@ -302,27 +304,36 @@ StepperTest::DT2()
     std::vector<double> want_dts = tests[i].want_dts;
     std::vector<double> want_times = tests[i].want_times;
 
+    std::map<double, StepperInfo> snaps;
     DT2Stepper s(tol, tests[i].e_tol, tests[i].e_max);
-    StepperFeedback sf = {};
     StepperInfo si = blankInfo();
+    si.prev_dt = 1; // initial dt
 
     libMesh::Parallel::Communicator dummy_comm;
     int n = tests[i].solns[0].size();
     si.soln_nonlin = NumericVector<Number>::build(dummy_comm);
     si.soln_nonlin->init(n, n, false, SERIAL);
 
+    std::stringstream ss;
+    ss << "case " << i+1 << " (" << tests[i].title << "):\n";
     for (int j = 0; j < solns.size(); j++)
     {
-      std::map<double, StepperInfo> snaps;
+      StepperFeedback sf = {};
       dt = s.advance(&si, &sf);
       updateInfo(&si, &sf, dt, &snaps);
       *si.soln_nonlin = solns[j];
+      ss << "    step " << j+1 << "\n";
       if (std::abs(want_times[j] - si.time) > tol || std::abs(want_dts[j] - si.prev_dt) > tol)
       {
-        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
-        printf("    time (step %d): want %f, got %f\n", j+1, want_times[j], si.time);
-        printf("    dt   (step %d): want %f, got %f\n", j+1, want_dts[j], si.prev_dt);
+        ss << "        time: want " << want_times[j] << ", got " << si.time << "\n";
+        ss << "        dt  : want " << want_dts[j] << ", got " << si.prev_dt << "\n";
+        printf(ss.str().c_str());
         CPPUNIT_ASSERT(false);
+      }
+      else
+      {
+        ss << "        time: got "  << si.time << "\n";
+        ss << "        dt  : got " << si.prev_dt << "\n";
       }
     }
   }

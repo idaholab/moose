@@ -457,6 +457,5 @@ private:
   double _e_max;
   double _start_time;
   double _end_time;
-  double _big_dt;
   std::unique_ptr<NumericVector<Number>> _big_soln;
 };

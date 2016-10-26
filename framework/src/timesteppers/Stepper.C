@@ -448,7 +448,7 @@ PredictorCorrectorStepper::estimateTimeError(const StepperInfo * si)
 
 
 DT2Stepper::DT2Stepper(double time_tol, double e_tol, double e_max) :
-    _tol(time_tol), _e_tol(e_tol), _e_max(e_max), _start_time(-1), _end_time(-1), _big_dt(0), _big_soln(nullptr)
+    _tol(time_tol), _e_tol(e_tol), _e_max(e_max), _start_time(-1), _end_time(-1), _big_soln(nullptr)
 {
 }
 
@@ -462,20 +462,19 @@ double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
     _start_time = si->time;
     _end_time = _start_time + new_dt;
     sf->snapshot = true;
-    _big_dt = new_dt;
     return l.val(new_dt);
   } else if (std::abs(si->time - _end_time) < _tol && !_big_soln && si->converged) {
     // collect big dt soln and rewind to collect small dt solns
     _big_soln.reset(si->soln_nonlin->clone().release());
     sf->rewind = true;
     sf->rewind_time = _start_time;
-    return l.val(_big_dt / 2); // doesn't actually matter what we return here because rewind
+    return l.val((_end_time - _start_time) / 2); // doesn't actually matter what we return here because rewind
   } else if (std::abs(si->time - _start_time) < _tol && _big_soln) {
     // we just rewound and need to do small steps
-    return l.val(_big_dt / 2);
+    return l.val((_end_time - _start_time) / 2);
   } else if (si->time > _start_time && si->time < _end_time && _big_soln && si->converged) {
     // we just finished the first of the smaller dt steps
-    return l.val(_big_dt / 2);
+    return l.val((_end_time - _start_time) / 2);
   } else {
     // something went wrong or this is initial call of simulation - start over
     _start_time = si->time;
