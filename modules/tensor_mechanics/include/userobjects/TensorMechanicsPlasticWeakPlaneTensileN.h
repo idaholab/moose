@@ -25,8 +25,7 @@ class TensorMechanicsPlasticWeakPlaneTensileN : public TensorMechanicsPlasticWea
  public:
   TensorMechanicsPlasticWeakPlaneTensileN(const InputParameters & parameters);
 
-  /// Returns the model name (WeakPlaneTensileN)
-  virtual std::string modelName() const;
+  virtual std::string modelName() const override;
 
  protected:
   Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;

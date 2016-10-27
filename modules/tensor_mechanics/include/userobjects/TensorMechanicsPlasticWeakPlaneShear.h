@@ -28,8 +28,7 @@ class TensorMechanicsPlasticWeakPlaneShear : public TensorMechanicsPlasticModel
 
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const override;
 
-  /// Returns the model name (WeakPlaneShear)
-  virtual std::string modelName() const;
+  virtual std::string modelName() const override;
 
  protected:
   /// Hardening model for cohesion

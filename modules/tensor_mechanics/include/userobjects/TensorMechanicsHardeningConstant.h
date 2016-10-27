@@ -24,17 +24,15 @@ class TensorMechanicsHardeningConstant : public TensorMechanicsHardeningModel
  public:
   TensorMechanicsHardeningConstant(const InputParameters & parameters);
 
-  virtual Real value(Real intnl) const;
+  virtual Real value(Real intnl) const override;
 
-  virtual Real derivative(Real intnl) const;
+  virtual Real derivative(Real intnl) const override;
 
-  virtual std::string modelName() const;
+  virtual std::string modelName() const override;
 
  private:
-
   /// The value that the parameter will take
   Real _val;
-
 };
 
 #endif // TENSORMECHANICSHARDENINGCONSTANT_H
