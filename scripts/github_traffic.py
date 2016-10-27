@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import argparse, sys, os, time, re
-
+import argparse, sys, os, re
+import datetime
 try:
   import requests
 except ImportError:
@@ -31,9 +31,9 @@ def getClones(args):
   return results
 
 
-def fixTime(time_seconds):
-  tmp_time = time.gmtime(int(time_seconds))
-  return time.strftime('%Y-%b-%d', tmp_time)
+def fixTime(iso_time):
+  tmp_time = datetime.datetime.strptime(iso_time, "%Y-%m-%dT%H:%M:%SZ")
+  return tmp_time.strftime('%Y-%b-%d')
 
 def parseData(search_type, json_data):
   # The new GitHub API reversed the list from our previous scrapping method
@@ -41,7 +41,7 @@ def parseData(search_type, json_data):
 
   activity = []
   for item in json_data[search_type]:
-    formatted_time = fixTime(str(item['timestamp'])[:-3])
+    formatted_time = fixTime(item['timestamp'])
     total = str(item['count'])
     unique = str(item['uniques'])
     activity.extend([formatted_time, total, unique])
