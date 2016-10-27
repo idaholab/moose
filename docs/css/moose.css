@@ -51,6 +51,9 @@ a:focus {
     outline-offset: -2px
 }
 
+code {
+    color: #333d3e;
+}
 
 /* NavBar hover color modification (bluish to more closely match our </a> links color) */
 .navbar-default .navbar-brand:hover,
@@ -178,15 +181,17 @@ Slide style
 }
 .moose-object-param-table >.param-header >.param-header-information {
     float: left;
-    width: 40%;
+    width: 45%;
     line-height: 0;
     padding-top: 15px;
 }
 .moose-object-param-table >.param-header >.param-header-description {
     float: left;
-    width: 60%;
+    width: 55%;
     line-height: 0;
     padding-top: 15px;
+    position: absolute;
+    right: 0%;
 }
 .moose-object-param-table > .param-detailed-even {
     overflow: auto;
@@ -195,13 +200,13 @@ Slide style
     padding-top: 5px;
 }
 .moose-object-param-table > .param-detailed-even > .param-detailed-identifier {
-    width: 40%;
+    width: 45%;
     float: left;
     padding-left: 5px;
     line-height: 1.1;
 }
 .moose-object-param-table > .param-detailed-even > .param-detailed-description {
-    width: 60%;
+    width: 55%;
     float: right;
     padding-right: 5px;
 }
@@ -213,13 +218,13 @@ Slide style
     padding-top: 5px;
 }
 .moose-object-param-table > .param-detailed-odd > .param-detailed-identifier {
-    width: 40%;
+    width: 45%;
     float: left;
     padding-left: 5px;
     line-height: 1.1;
 }
 .moose-object-param-table > .param-detailed-odd > .param-detailed-description {
-    width: 60%;
+    width: 55%;
     float: right;
     padding-right: 5px;
 }
