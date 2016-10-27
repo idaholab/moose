@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "RandomEulerAngleProvider.h"
-#include "MooseRandom.h"
+#include "GrainTrackerInterface.h"
 
 template<>
 InputParameters validParams<RandomEulerAngleProvider>()
@@ -22,7 +22,7 @@ RandomEulerAngleProvider::RandomEulerAngleProvider(const InputParameters & param
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
     _angles(0)
 {
-  MooseRandom::seed(getParam<unsigned int>("seed"));
+  _random.seed(0, getParam<unsigned int>("seed"));
 }
 
 void
@@ -32,7 +32,7 @@ RandomEulerAngleProvider::initialize()
   auto grain_num = _grain_tracker.getTotalFeatureCount();
   for (auto i = _angles.size(); i < grain_num; ++i)
   {
-    angle.random();
+    angle.random(_random);
     _angles.push_back(angle);
   }
 }

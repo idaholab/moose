@@ -8,11 +8,11 @@
 #define RANDOMEULERANGLEPROVIDER_H
 
 #include "EulerAngleProvider.h"
-#include "EulerAngles.h"
-#include "GrainTrackerInterface.h"
+#include "MooseRandom.h"
 
 //Forward declaration
 class RandomEulerAngleProvider;
+class GrainTrackerInterface;
 
 template<>
 InputParameters validParams<RandomEulerAngleProvider>();
@@ -35,6 +35,8 @@ public:
 protected:
   const GrainTrackerInterface & _grain_tracker;
   std::vector<EulerAngles> _angles;
+
+  MooseRandom _random;
 };
 
 #endif //RANDOMEULERANGLEPROVIDER_H

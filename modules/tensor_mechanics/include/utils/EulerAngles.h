@@ -11,6 +11,9 @@
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
 
+// forward declaration
+class MooseRandom;
+
 /**
  * Euler angle triplet.
  */
@@ -22,6 +25,7 @@ public:
   operator RealVectorValue() const { return RealVectorValue(phi1, Phi, phi2); }
 
   void random();
+  void random(MooseRandom & random);
 };
 
 #endif //EULERANGLES_H
