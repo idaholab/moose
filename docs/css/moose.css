@@ -171,6 +171,9 @@ Slide style
 }
 
 /* start Param div-table */
+.moose-object-param-table:nth-of-type(1) {
+    margin-top: 60px;
+}
 .moose-object-param-table >.param-header {
     background-color: rgba(0,0,0,.2);
     width: 100%;

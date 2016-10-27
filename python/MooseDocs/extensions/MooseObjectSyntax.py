@@ -127,9 +127,10 @@ class MooseObjectSyntax(MooseSyntaxBase):
     title = etree.SubElement(el, 'h2')
     title.text = 'Input Parameters'
     for key, table in tables.iteritems():
-      subtitle = etree.SubElement(el, 'h3')
-      subtitle.text = '{} {}'.format(key, 'Parameters')
-      el.append(table.html())
+      if table:
+        subtitle = etree.SubElement(el, 'h3')
+        subtitle.text = '{} {}'.format(key, 'Parameters')
+        el.append(table.html())
     return el
 
   def inputfilesElement(self, node, settings, styles):

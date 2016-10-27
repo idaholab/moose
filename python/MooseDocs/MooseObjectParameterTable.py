@@ -16,6 +16,9 @@ class MooseObjectParameterTable(object):
   def __init__(self, **kwargs):
     self._rows = []
 
+  def __nonzero__(self):
+    return len(self._rows) > 0
+
   def addParam(self, param):
     """
     Add a parameter to the table.
