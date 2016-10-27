@@ -2402,8 +2402,6 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
     const dof_id_type n_dofs_on_proc = dofMap().n_local_dofs() + n_scalar_dofs_on_proc;
     const dof_id_type n_dofs_not_on_proc = (dofMap().n_dofs() - dofMap().n_local_dofs()) + n_scalar_dofs_not_on_proc;
 
-    unsigned int max_nz = sparsity.size();
-
     for (const auto & git : graph)
     {
       dof_id_type dof = git.first;
@@ -2496,14 +2494,14 @@ NonlinearSystem::setupDampers()
 }
 
 void
-NonlinearSystem::reinitIncrementAtQpsForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars)
+NonlinearSystem::reinitIncrementAtQpsForDampers(THREAD_ID /*tid*/, const std::set<MooseVariable *> & damped_vars)
 {
   for (const auto & var : damped_vars)
     var->computeIncrementAtQps(*_increment_vec);
 }
 
 void
-NonlinearSystem::reinitIncrementAtNodeForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars)
+NonlinearSystem::reinitIncrementAtNodeForDampers(THREAD_ID /*tid*/, const std::set<MooseVariable *> & damped_vars)
 {
   for (const auto & var : damped_vars)
     var->computeIncrementAtNode(*_increment_vec);

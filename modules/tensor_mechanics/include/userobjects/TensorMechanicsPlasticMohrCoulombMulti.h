@@ -25,7 +25,7 @@ class TensorMechanicsPlasticMohrCoulombMulti : public TensorMechanicsPlasticMode
   TensorMechanicsPlasticMohrCoulombMulti(const InputParameters & parameters);
 
   /// The number of yield surfaces for this plasticity model
-  virtual unsigned int numberSurfaces() const;
+  virtual unsigned int numberSurfaces() const override;
 
   virtual void yieldFunctionV(const RankTwoTensor & stress, Real intnl, std::vector<Real> & f) const override;
 

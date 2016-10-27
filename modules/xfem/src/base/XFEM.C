@@ -577,7 +577,6 @@ XFEM::markCutEdgesByState(Real time)
       {
         orig_edge = CEMElem->getEdge(orig_cut_side_id);
         orig_node = CEMElem->getTipEmbeddedNode();
-        unsigned int emb_id = orig_edge->getEmbeddedNodeIndex(orig_node);
       }
       else
         mooseError("element "<<elem->id()<<" has no valid crack-tip edge");
