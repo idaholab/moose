@@ -176,7 +176,7 @@ ComputeCappedWeakPlaneStress::returnMap()
   Real p_ok = _stress_old[_qp](2, 2);
   Real q_ok = std::sqrt(Utility::pow<2>(_stress[_qp](2, 0)) + Utility::pow<2>(_stress[_qp](2, 1)));
   // note that _intnl[_qp] is the "running" intnl variable that gets updated every NR iteration
-  std::array<Real, 2> intnl_ok = {_intnl_old[_qp][0], _intnl_old[_qp][1]};
+  std::array<Real, 2> intnl_ok = {{ _intnl_old[_qp][0], _intnl_old[_qp][1] }};
   if (isParamValid("initial_stress") && _step_one)
   {
     // the initial stress might be inadmissible

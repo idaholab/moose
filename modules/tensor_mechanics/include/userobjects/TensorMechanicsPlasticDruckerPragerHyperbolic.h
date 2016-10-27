@@ -38,7 +38,7 @@ class TensorMechanicsPlasticDruckerPragerHyperbolic : public TensorMechanicsPlas
   RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const override;
 
   /// Function that's used in dyieldFunction_dstress and flowPotential
-  virtual RankTwoTensor df_dsig(const RankTwoTensor & stress, Real bbb) const;
+  virtual RankTwoTensor df_dsig(const RankTwoTensor & stress, Real bbb) const override;
 
   virtual bool returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
                          Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,

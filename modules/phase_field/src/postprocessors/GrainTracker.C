@@ -1446,9 +1446,8 @@ GrainTracker::communicateHaloMap()
     //rank               var_index     entity_id
     std::vector<std::pair<std::size_t, dof_id_type> > halo_ids_all;
 
-    // TODO: Remove size one vectors after next libMesh update
-    std::vector<int> counts(1);
-    std::vector<std::pair<std::size_t, dof_id_type> > local_halo_ids(1, std::make_pair(0, 0));
+    std::vector<int> counts;
+    std::vector<std::pair<std::size_t, dof_id_type> > local_halo_ids;
     std::size_t counter = 0;
 
     if (_is_master)

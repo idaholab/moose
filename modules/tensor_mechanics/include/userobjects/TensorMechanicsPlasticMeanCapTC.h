@@ -83,7 +83,7 @@ class TensorMechanicsPlasticMeanCapTC : public TensorMechanicsPlasticModel
    * @param intnl internal parameter
    * @return the hardening potential
    */
-  Real hardPotential(const RankTwoTensor & stress, Real intnl) const;
+  Real hardPotential(const RankTwoTensor & stress, Real intnl) const override;
 
   virtual RankTwoTensor dhardPotential_dstress(const RankTwoTensor & stress, Real intnl) const override;
 
