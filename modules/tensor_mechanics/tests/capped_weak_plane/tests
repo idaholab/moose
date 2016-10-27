@@ -22,7 +22,7 @@
   [./except5]
     type = 'RunException'
     input = 'except5.i'
-    expect_err = 'ComputeCappedWeakPlaneStress: Weak plane tensile strength must not be less than negative-compressive-strength'
+    expect_err = 'ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol'
   [../]
   [./small1]
     type = 'CSVDiff'
@@ -97,7 +97,26 @@
     type = Exodiff
     input = 'beam.i'
     exodiff = 'beam.e'
-    #heavy = true
+    #heavy = true  # uncomment if this test takes too long on INL computers
+    abs_zero = 1E-4
+  [../]
+
+  [./pull_and_shear_1step]
+    type = Exodiff
+    input = 'pull_and_shear_1step.i'
+    exodiff = 'pull_and_shear_1step.e'
+  [../]
+  [./pull_and_shear]
+    type = Exodiff
+    input = 'pull_and_shear.i'
+    exodiff = 'pull_and_shear.e'
+    #heavy = true  # uncomment if this test takes too long on INL computers
+    abs_zero = 1E-4
+  [../]
+  [./push_and_shear]
+    type = Exodiff
+    input = 'push_and_shear.i'
+    exodiff = 'push_and_shear.e'
     abs_zero = 1E-4
   [../]
 []

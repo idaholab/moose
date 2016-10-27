@@ -24,8 +24,8 @@
     input = 'cyl3_template1.i'
     csvdiff = 'cyl3_frictionless_kin_check.csv cyl3_frictionless_kin_check_x_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic Outputs/file_base=cyl3_frictionless_kin_out Outputs/chkfile/file_base=cyl3_frictionless_kin_check'
-    rel_err = 1e-5
-    abs_zero = 2e-6
+    rel_err = 2e-5
+    abs_zero = 1e-4
     max_parallel = 1
     superlu = true
   [../]
