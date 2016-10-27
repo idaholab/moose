@@ -10,7 +10,8 @@
 #include "ComputeElasticityTensorBase.h"
 
 /**
- * ComputeElasticityTensor defines an elasticity tensor material for isi.
+ * ComputeIsotropicElasticityTensor defines an elasticity tensor material for
+ * isotropic materials.
  */
 class ComputeIsotropicElasticityTensor : public ComputeElasticityTensorBase
 {

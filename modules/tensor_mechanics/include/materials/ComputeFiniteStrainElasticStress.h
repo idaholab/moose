@@ -10,7 +10,8 @@
 #include "ComputeStressBase.h"
 
 /**
- * ComputeFiniteStrainElasticStress computes the stress following elasticity theory for finite strains
+ * ComputeFiniteStrainElasticStress computes the stress following elasticity
+ * theory for finite strains
  */
 class ComputeFiniteStrainElasticStress : public ComputeStressBase
 {
@@ -18,7 +19,6 @@ public:
   ComputeFiniteStrainElasticStress(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
   virtual void computeQpStress();
 
   const MaterialProperty<RankTwoTensor> & _strain_increment;

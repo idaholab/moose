@@ -120,12 +120,36 @@ StiffenedGasFluidProperties::rho_e_ps(Real pressure, Real entropy, Real & rho, R
 void
 StiffenedGasFluidProperties::rho_e_dps(Real pressure, Real entropy, Real & rho, Real & drho_dp, Real & drho_ds, Real & e, Real & de_dp, Real & de_ds) const
 {
+  // compute rho(p, T(p,s)) and e(p, rho(p, T(p,s)))
   this->rho_e_ps(pressure, entropy, rho, e);
-  // TODO: derive these
-  drho_dp = 0;
-  drho_ds = 0;
-  de_dp = 0;
-  de_ds = 0;
+
+  // compute temperature
+  const Real aux = (entropy - _q_prime + _cv * std::log(std::pow(pressure + _p_inf, _gamma - 1))) / _cv;
+  const Real T = std::pow(std::exp(aux), 1 / _gamma);
+
+  // dT/dp
+  const Real dT_dp = 1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0)
+    * std::exp(aux) / std::pow(pressure + _p_inf, _gamma - 1.0)
+    * (_gamma - 1.0) * std::pow(pressure + _p_inf, _gamma - 2.0);
+
+  // dT/ds
+  const Real dT_ds = 1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) / _cv;
+
+  // Drho/Dp = d/dp[rho(p, T(p,s))] = drho/dp + drho/dT * dT/dp
+  Real drho_dp_partial, drho_dT;
+  rho_dpT(pressure, T, rho, drho_dp_partial, drho_dT);
+  drho_dp = drho_dp_partial + drho_dT * dT_dp;
+
+  // Drho/Ds = d/ds[rho(p, T(p,s))] = drho/dT * dT/ds
+  drho_ds = drho_dT * dT_ds;
+
+  // De/Dp = d/dp[e(p, rho(p, T(p,s)))] = de/dp + de/drho * Drho/Dp
+  const Real de_dp_partial = 1.0 / ((_gamma - 1.0) * rho);
+  const Real de_drho = -(pressure + _gamma * _p_inf) / ((_gamma - 1.0) * rho * rho);
+  de_dp = de_dp_partial + de_drho * drho_dp;
+
+  // De/Ds = d/ds[e(p, rho(p, T(p,s)))] = de/drho * Drho/Ds
+  de_ds = de_drho * drho_ds;
 }
 
 Real

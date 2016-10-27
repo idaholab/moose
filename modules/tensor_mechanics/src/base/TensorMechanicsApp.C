@@ -51,6 +51,7 @@
 #include "ComputeElasticityTensor.h"
 #include "ComputeElasticityTensorCP.h"
 #include "ComputeIsotropicElasticityTensor.h"
+#include "ComputeVariableIsotropicElasticityTensor.h"
 #include "ComputeSmallStrain.h"
 #include "ComputePlaneSmallStrain.h"
 #include "ComputePlaneIncrementalStrain.h"
@@ -66,6 +67,7 @@
 #include "ComputeRSphericalFiniteStrain.h"
 #include "ComputeLinearElasticStress.h"
 #include "ComputeFiniteStrainElasticStress.h"
+#include "ComputeVariableElasticConstantStress.h"
 #include "ComputeEigenstrain.h"
 #include "ComputeVariableBaseEigenStrain.h"
 #include "ComputeVariableEigenstrain.h"
@@ -231,6 +233,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeElasticityTensor);
   registerMaterial(ComputeElasticityTensorCP);
   registerMaterial(ComputeIsotropicElasticityTensor);
+  registerMaterial(ComputeVariableIsotropicElasticityTensor);
   registerMaterial(ComputeSmallStrain);
   registerMaterial(ComputePlaneSmallStrain);
   registerMaterial(ComputePlaneIncrementalStrain);
@@ -246,6 +249,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeRSphericalFiniteStrain);
   registerMaterial(ComputeLinearElasticStress);
   registerMaterial(ComputeFiniteStrainElasticStress);
+  registerMaterial(ComputeVariableElasticConstantStress);
   registerMaterial(ComputeEigenstrain);
   registerMaterial(ComputeVariableBaseEigenStrain);
   registerMaterial(ComputeVariableEigenstrain);
