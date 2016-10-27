@@ -6,4 +6,3 @@
 - Postprocessors: !include content/modules/heat_conduction/systems/Postprocessors/pages.yml
 - ThermalContact: !include content/modules/heat_conduction/systems/ThermalContact/pages.yml
 - UserObjects: !include content/modules/heat_conduction/systems/UserObjects/pages.yml
-- XFEM: !include content/modules/heat_conduction/systems/XFEM/pages.yml

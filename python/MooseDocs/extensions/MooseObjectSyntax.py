@@ -90,7 +90,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
     """
 
     if ('description' not in node) or (not node['description']):
-      return self.createErrorElement('Failed to locate class description for {} syntax.'.format(node['name']))
+      hidden = any([obj.hidden(node['name']) for obj in self._syntax.itervalues()])
+      return self.createErrorElement('Failed to locate class description for {} syntax.'.format(node['name']),warning=hidden)
 
     # Create the html element with supplied styles
     el = self.addStyle(etree.Element('p'), **styles)
@@ -180,11 +181,6 @@ class MooseObjectSyntax(MooseSyntaxBase):
         include_names = syntax.filenames(self._name)
         if not include_names:
           continue
-        elif len(include_names) > 1:
-          msg = 'Multiple include files with the name {} were located:\n'.format(self._name)
-          for n in include_names:
-            msg += '    ' + n
-          log.error(msg)
         include = include_names[0]
         rel_include = os.path.relpath(include, self._root)
 
