@@ -431,9 +431,8 @@ void
 FeatureFloodCount::scatterAndUpdateRanks()
 {
   // local to global map (one per processor)
-  // TODO: Remove size one vectors after next libMesh update
-  std::vector<int> counts(1, 0);
-  std::vector<std::size_t> local_to_global_all(1, 0);
+  std::vector<int> counts;
+  std::vector<std::size_t> local_to_global_all;
   if (_is_master)
     buildLocalToGlobalIndices(local_to_global_all, counts);
 
@@ -632,13 +631,6 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, s
       return 0;
   }
 }
-
-//const std::vector<std::pair<unsigned int, unsigned int> > &
-//FeatureFloodCount::getElementalValues(dof_id_type /*elem_id*/) const
-//{
-//  mooseDoOnce(mooseWarning("Method not implemented"));
-//  return _empty;
-//}
 
 void
 FeatureFloodCount::prepareDataForTransfer()
