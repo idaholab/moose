@@ -63,13 +63,15 @@ public:
   virtual ~NonlinearSystemBase();
 
   virtual void init() override;
-  virtual void solve() override;
+  virtual void solve() override = 0;
   virtual void restoreSolutions() override;
 
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve();
+  virtual void stopSolve() = 0;
+
+  virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
 
   /**
    * Returns true if this system is currently computing the initial residual for a solve.
@@ -81,7 +83,7 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  void setupFiniteDifferencedPreconditioner();
+  virtual void setupFiniteDifferencedPreconditioner() = 0;
   void setupFieldDecomposition();
 
   bool haveFiniteDifferencedPreconditioner() {return _use_finite_differenced_preconditioner;}
@@ -91,7 +93,7 @@ public:
    * Returns the convergence state
    * @return true if converged, otherwise false
    */
-  virtual bool converged();
+  virtual bool converged() = 0;
 
   /**
    * Add a time integrator
@@ -302,6 +304,8 @@ public:
   virtual NumericVector<Number> & residualCopy() override;
   virtual NumericVector<Number> & residualGhosted() override;
 
+  virtual NumericVector<Number> & RHS() = 0;
+
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) override;
@@ -372,12 +376,6 @@ public:
    * Return the number of non-linear iterations
    */
   unsigned int nNonlinearIterations() { return _n_iters; }
-
-  /**
-   * Returns the current nonlinear iteration number.  In libmesh, this is
-   * updated during the nonlinear solve, so it should be up-to-date.
-   */
-  unsigned int getCurrentNonlinearIterationNumber() { return _sys.get_current_nonlinear_iteration_number(); }
 
   /**
    * Return the number of linear iterations
@@ -469,13 +467,11 @@ public:
 
   virtual NumericVector<Number> & solution() override { return *_sys.solution; }
 
-  virtual TransientNonlinearImplicitSystem & sys() { return _sys; }
-
   virtual System & system() override { return _sys; }
 
 public:
   FEProblem & _fe_problem;
-  TransientNonlinearImplicitSystem & _sys;
+  System & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _last_nl_rnorm;

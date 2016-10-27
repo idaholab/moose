@@ -51,7 +51,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
     Preconditioner<Number>(MoosePreconditioner::_communicator),
     _nl(_fe_problem.getNonlinearSystem())
 {
-  unsigned int num_systems = _nl.sys().n_vars();
+  unsigned int num_systems = _nl.system().n_vars();
   _systems.resize(num_systems);
   _preconditioners.resize(num_systems);
   _off_diag.resize(num_systems);
@@ -103,10 +103,10 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
   const std::vector<std::string> & solve_order = getParam<std::vector<std::string> >("solve_order");
   _solve_order.resize(solve_order.size());
   for (unsigned int i = 0; i < solve_order.size(); i++)
-    _solve_order[i] = _nl.sys().variable_number(solve_order[i]);
+    _solve_order[i] = _nl.system().variable_number(solve_order[i]);
 
   // diag and off-diag systems
-  unsigned int n_vars = _nl.sys().n_vars();
+  unsigned int n_vars = _nl.system().n_vars();
 
   // off-diagonal entries
   const std::vector<std::string> & odr = getParam<std::vector<std::string> >("off_diag_row");
@@ -114,8 +114,8 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
   std::vector<std::vector<unsigned int> > off_diag(n_vars);
   for (unsigned int i = 0; i < odr.size(); i++)
   {
-    unsigned int row = _nl.sys().variable_number(odr[i]);
-    unsigned int column = _nl.sys().variable_number(odc[i]);
+    unsigned int row = _nl.system().variable_number(odr[i]);
+    unsigned int column = _nl.system().variable_number(odc[i]);
     off_diag[row].push_back(column);
   }
   // Add all of the preconditioning systems
@@ -123,8 +123,8 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
     addSystem(var, off_diag[var], _pre_type[var]);
 
   // We don't want to be computing the big Jacobian!
-  _nl.sys().nonlinear_solver->jacobian = NULL;
-  _nl.sys().nonlinear_solver->attach_preconditioner(this);
+  _nl.nonlinearSolver()->jacobian = NULL;
+  _nl.nonlinearSolver()->attach_preconditioner(this);
 
   _fe_problem.solverParams()._type = Moose::ST_JFNK;
 }
@@ -140,13 +140,13 @@ PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner ()
 void
 PhysicsBasedPreconditioner::addSystem(unsigned int var, std::vector<unsigned int> off_diag, PreconditionerType type)
 {
-  std::string var_name = _nl.sys().variable_name(var);
+  std::string var_name = _nl.system().variable_name(var);
 
   LinearImplicitSystem & precond_system = _fe_problem.es().add_system<LinearImplicitSystem>(var_name+"_system");
   precond_system.assemble_before_solve = false;
 
   const std::set<SubdomainID> * active_subdomains = _nl.getVariableBlocks(var);
-  precond_system.add_variable(var_name+"_prec", _nl.sys().variable(var).type(), active_subdomains);
+  precond_system.add_variable(var_name+"_prec", _nl.system().variable(var).type(), active_subdomains);
 
   _systems[var] = &precond_system;
   _pre_type[var] = type;
@@ -155,7 +155,7 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var, std::vector<unsigned int
   for (unsigned int i = 0; i < off_diag.size(); i++)
   {
     //Add the matrix to hold the off-diagonal piece
-    _off_diag_mats[var][i] = &precond_system.add_matrix(_nl.sys().variable_name(off_diag[i]));
+    _off_diag_mats[var][i] = &precond_system.add_matrix(_nl.system().variable_name(off_diag[i]));
   }
 
   _off_diag[var] = off_diag;
@@ -218,7 +218,7 @@ PhysicsBasedPreconditioner::setup()
     for (unsigned int diag = 0; diag < _off_diag[system_var].size(); diag++)
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
-      std::string coupled_name = _nl.sys().variable_name(coupled_var);
+      std::string coupled_name = _nl.system().variable_name(coupled_var);
 
       JacobianBlock * block =  new JacobianBlock(u_system, *_off_diag_mats[system_var][diag], system_var, coupled_var);
       blocks.push_back(block);
@@ -254,7 +254,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 
     //Copy rhs from the big system into the small one
     MoosePreconditioner::copyVarValues(mesh,
-        _nl.sys().number(),system_var,x,
+        _nl.system().number(),system_var,x,
         u_system.number(),0,*u_system.rhs);
 
     //Modify the RHS by subtracting off the matvecs of the solutions for the other preconditioning
@@ -281,7 +281,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
     _preconditioners[system_var]->apply(*u_system.rhs, *u_system.solution);
 
     //Copy solution from small system into the big one
-    //copyVarValues(mesh,sys,0,*u_system.solution,0,system_var,y);
+    //copyVarValues(mesh,system,0,*u_system.solution,0,system_var,y);
   }
 
   //Copy the solutions out
@@ -291,7 +291,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 
     MoosePreconditioner::copyVarValues(mesh,
         u_system.number(),0,*u_system.solution,
-        _nl.sys().number(),system_var,y);
+        _nl.system().number(),system_var,y);
   }
 
   y.close();

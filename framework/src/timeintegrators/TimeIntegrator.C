@@ -51,6 +51,5 @@ TimeIntegrator::~TimeIntegrator()
 void
 TimeIntegrator::solve()
 {
-  _nl.sys().solve();
+  _nl.system().solve();
 }
-

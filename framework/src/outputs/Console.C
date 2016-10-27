@@ -427,7 +427,7 @@ Console::writeVariableNorms()
 
   // Get a references to the NonlinearSystem and libMesh system
   NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystem();
-  TransientNonlinearImplicitSystem & sys = nl.sys();
+  System & sys = nl.system();
 
   // Storage for norm outputs
   std::map<std::string, Real> other;
@@ -441,7 +441,7 @@ Console::writeVariableNorms()
   for (unsigned int i = 0; i < n_vars; i++)
   {
     // Compute the norm and extract the variable name
-    Real var_norm = sys.calculate_norm(*sys.rhs, i, DISCRETE_L2);
+    Real var_norm = sys.calculate_norm(nl.RHS(), i, DISCRETE_L2);
     var_norm *= var_norm; // use the norm squared
     std::string var_name = sys.variable_name(i);
 

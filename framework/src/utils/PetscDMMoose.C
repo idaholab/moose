@@ -521,7 +521,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
     // Then take the set difference of 'indices' and 'unindices', putting the result in 'dindices'.
     if (!dmm->_all_vars || !dmm->_all_blocks || !dmm->_nosides || !dmm->_nounsides || !dmm->_nocontacts || !dmm->_nouncontacts)
     {
-      DofMap & dofmap = dmm->_nl->sys().get_dof_map();
+      DofMap & dofmap = dmm->_nl->system().get_dof_map();
       std::set<dof_id_type> indices;
       std::set<dof_id_type> unindices;
       std::set<dof_id_type> cached_indices;
@@ -536,8 +536,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           for (const auto & bit : *(dmm->_block_ids))
           {
             subdomain_id_type b = bit.second;
-            MeshBase::const_element_iterator el = dmm->_nl->sys().get_mesh().active_local_subdomain_elements_begin(b);
-            MeshBase::const_element_iterator end_el = dmm->_nl->sys().get_mesh().active_local_subdomain_elements_end(b);
+            MeshBase::const_element_iterator el = dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b);
+            MeshBase::const_element_iterator end_el = dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b);
             for (; el != end_el; ++el)
             {
               const Elem * elem = *el;
@@ -598,12 +598,12 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           // For some reason the following may return an empty node list
           // std::vector<dof_id_type> snodes;
           // std::vector<boundary_id_type> sides;
-          // dmm->nl->sys().get_mesh().get_boundary_info().build_node_list(snodes, sides);
+          // dmm->nl->system().get_mesh().get_boundary_info().build_node_list(snodes, sides);
           // // FIXME: make an array of (snode,side) pairs, sort on side and use std::lower_bound from <algorithm>
           // for (dof_id_type i = 0; i < sides.size(); ++i) {
           //   boundary_id_type s = sides[i];
           //   if (!dmm->sidenames->count(s)) continue;
-          //  const Node& node = dmm->nl->sys().get_mesh().node_ref(snodes[i]);
+          //  const Node& node = dmm->nl->system().get_mesh().node_ref(snodes[i]);
           //  // determine v's dof on node and insert into indices
           // }
           ConstBndNodeRange & bnodes = *dmm->_nl->mesh().getBoundaryNodeRange();
@@ -614,7 +614,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               continue;
 
             const Node * node = bnode->_node;
-            dof_id_type dof = node->dof_number(dmm->_nl->sys().number(), v, 0);
+            dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, 0);
 
             // might want to use variable_first/last_local_dof instead
             if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
@@ -634,7 +634,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             const Node * node = bnode->_node;
 
             // might want to use variable_first/last_local_dof instead
-            dof_id_type dof = node->dof_number(dmm->_nl->sys().number(), v, 0);
+            dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, 0);
             if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
               unindices.insert(dof);
           }
@@ -700,8 +700,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               PenetrationInfo * pinfo = lit->second;
               if (pinfo && pinfo->isCaptured())
               {
-                Node & slave_node = dmm->_nl->sys().get_mesh().node_ref(slave_node_num);
-                dof_id_type dof = slave_node.dof_number(dmm->_nl->sys().number(), v, 0);
+                Node & slave_node = dmm->_nl->system().get_mesh().node_ref(slave_node_num);
+                dof_id_type dof = slave_node.dof_number(dmm->_nl->system().number(), v, 0);
                 // might want to use variable_first/last_local_dof instead
                 if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
                   indices.insert(dof);
@@ -714,7 +714,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
                 for (const auto & elem_num : node_to_elem_pair->second)
                 {
-                  Elem & slave_elem = dmm->_nl->sys().get_mesh().elem_ref(elem_num);
+                  Elem & slave_elem = dmm->_nl->system().get_mesh().elem_ref(elem_num);
                   // Get the degree of freedom indices for the given variable off the current element.
                   evindices.clear();
                   dofmap.dof_indices(&slave_elem, evindices, v);
@@ -801,8 +801,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               PenetrationInfo * pinfo = lit->second;
               if (pinfo && pinfo->isCaptured())
               {
-                Node & slave_node = dmm->_nl->sys().get_mesh().node_ref(slave_node_num);
-                dof_id_type dof = slave_node.dof_number(dmm->_nl->sys().number(), v, 0);
+                Node & slave_node = dmm->_nl->system().get_mesh().node_ref(slave_node_num);
+                dof_id_type dof = slave_node.dof_number(dmm->_nl->system().number(), v, 0);
                 // might want to use variable_first/last_local_dof instead
                 if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
                   unindices.insert(dof);
@@ -1085,48 +1085,48 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   NonlinearSystemBase* nl = NULL;
   ierr = DMMooseGetNonlinearSystem(dm, nl);
   CHKERRQ(ierr);
-  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number>* >(nl->sys().solution.get());
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number>* >(nl->system().solution.get());
   PetscVector<Number> X_global(x, nl->comm()), R(r, nl->comm());
 
   // Use the system's update() to get a good local version of the
-  // parallel solution.  sys.update() does change the residual vector,
+  // parallel solution.  system.update() does change the residual vector,
   // so there's no reason to swap PETSc's residual into the system for
   // this step.
   X_global.swap(X_sys);
-  nl->sys().update();
+  nl->system().update();
   X_global.swap(X_sys);
 
   // Enforce constraints (if any) exactly on the
   // current_local_solution.  This is the solution vector that is
   // actually used in the computation of the residual below, and is
   // not locked by debug-enabled PETSc the way that "x" is.
-  nl->sys().get_dof_map().enforce_constraints_exactly(nl->sys(), nl->sys().current_local_solution.get());
+  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(), nl->system().current_local_solution.get());
 
   // Zero the residual vector before assembling
   R.zero();
 
   // if the user has provided both function pointers and objects only the pointer
   // will be used, so catch that as an error
-  if (nl->sys().nonlinear_solver->residual && nl->sys().nonlinear_solver->residual_object)
+  if (nl->nonlinearSolver()->residual && nl->nonlinearSolver()->residual_object)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the Residual!" << std::endl;
     mooseError(err.str());
   }
-  if (nl->sys().nonlinear_solver->matvec && nl->sys().nonlinear_solver->residual_and_jacobian_object)
+  if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & Jacobian!" << std::endl;
     mooseError(err.str());
   }
-  if (nl->sys().nonlinear_solver->residual != NULL)
-    nl->sys().nonlinear_solver->residual(*(nl->sys().current_local_solution.get()), R, nl->sys());
-  else if (nl->sys().nonlinear_solver->residual_object != NULL)
-    nl->sys().nonlinear_solver->residual_object->residual(*(nl->sys().current_local_solution.get()), R, nl->sys());
-  else if (nl->sys().nonlinear_solver->matvec != NULL)
-    nl->sys().nonlinear_solver->matvec(*(nl->sys().current_local_solution.get()), &R, NULL, nl->sys());
-  else if (nl->sys().nonlinear_solver->residual_and_jacobian_object != NULL)
-    nl->sys().nonlinear_solver->residual_and_jacobian_object->residual_and_jacobian(*(nl->sys().current_local_solution.get()), &R, NULL, nl->sys());
+  if (nl->nonlinearSolver()->residual != NULL)
+    nl->nonlinearSolver()->residual(*(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
+  else if (nl->nonlinearSolver()->residual_object != NULL)
+    nl->nonlinearSolver()->residual_object->residual(*(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
+  else if (nl->nonlinearSolver()->matvec != NULL)
+    nl->nonlinearSolver()->matvec(*(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
+  else if (nl->nonlinearSolver()->residual_and_jacobian_object != NULL)
+    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(*(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
   else
   {
     std::ostringstream err;
@@ -1173,52 +1173,52 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
 
   PetscMatrix<Number> the_pc(pc, nl->comm());
   PetscMatrix<Number> Jac(jac, nl->comm());
-  PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>*>(nl->sys().solution.get());
+  PetscVector<Number>& X_sys = *cast_ptr<PetscVector<Number>*>(nl->system().solution.get());
   PetscVector<Number> X_global(x, nl->comm());
 
   // Set the dof maps
-  the_pc.attach_dof_map(nl->sys().get_dof_map());
-  Jac.attach_dof_map(nl->sys().get_dof_map());
+  the_pc.attach_dof_map(nl->system().get_dof_map());
+  Jac.attach_dof_map(nl->system().get_dof_map());
 
   // Use the system's update() to get a good local version of the
-  // parallel solution.  sys.update() does change the Jacobian, so
+  // parallel solution.  system.update() does change the Jacobian, so
   // there's no reason to swap PETSc's Jacobian into the system for
   // this step.
   X_global.swap(X_sys);
-  nl->sys().update();
+  nl->system().update();
   X_global.swap(X_sys);
 
   // Enforce constraints (if any) exactly on the
   // current_local_solution.  This is the solution vector that is
   // actually used in the computation of the Jacobian below, and is
   // not locked by debug-enabled PETSc the way that "x" is.
-  nl->sys().get_dof_map().enforce_constraints_exactly(nl->sys(), nl->sys().current_local_solution.get());
+  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(), nl->system().current_local_solution.get());
 
   // Zero out the preconditioner before computing the Jacobian.
   the_pc.zero();
 
   // if the user has provided both function pointers and objects only the pointer
   // will be used, so catch that as an error
-  if (nl->sys().nonlinear_solver->jacobian && nl->sys().nonlinear_solver->jacobian_object)
+  if (nl->nonlinearSolver()->jacobian && nl->nonlinearSolver()->jacobian_object)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the Jacobian!" << std::endl;
     mooseError(err.str());
   }
-  if (nl->sys().nonlinear_solver->matvec && nl->sys().nonlinear_solver->residual_and_jacobian_object)
+  if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & Jacobian!" << std::endl;
     mooseError(err.str());
   }
-  if (nl->sys().nonlinear_solver->jacobian != NULL)
-    nl->sys().nonlinear_solver->jacobian(*(nl->sys().current_local_solution.get()), the_pc, nl->sys());
-  else if (nl->sys().nonlinear_solver->jacobian_object != NULL)
-    nl->sys().nonlinear_solver->jacobian_object->jacobian(*(nl->sys().current_local_solution.get()), the_pc, nl->sys());
-  else if (nl->sys().nonlinear_solver->matvec != NULL)
-    nl->sys().nonlinear_solver->matvec(*(nl->sys().current_local_solution.get()), NULL, &the_pc, nl->sys());
-  else if (nl->sys().nonlinear_solver->residual_and_jacobian_object != NULL)
-    nl->sys().nonlinear_solver->residual_and_jacobian_object->residual_and_jacobian(*(nl->sys().current_local_solution.get()), NULL, &the_pc, nl->sys());
+  if (nl->nonlinearSolver()->jacobian != NULL)
+    nl->nonlinearSolver()->jacobian(*(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
+  else if (nl->nonlinearSolver()->jacobian_object != NULL)
+    nl->nonlinearSolver()->jacobian_object->jacobian(*(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
+  else if (nl->nonlinearSolver()->matvec != NULL)
+    nl->nonlinearSolver()->matvec(*(nl->system().current_local_solution.get()), NULL, &the_pc, nl->nonlinearSolver()->system());
+  else if (nl->nonlinearSolver()->residual_and_jacobian_object != NULL)
+    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(*(nl->system().current_local_solution.get()), NULL, &the_pc, nl->nonlinearSolver()->system());
   else
   {
     std::ostringstream err;
@@ -1285,10 +1285,10 @@ DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
   ierr = VecSet(xu, PETSC_INFINITY);
   CHKERRQ(ierr);
 #endif
-  if (nl->sys().nonlinear_solver->bounds != NULL)
-    nl->sys().nonlinear_solver->bounds(XL, XU, nl->sys());
-  else if (nl->sys().nonlinear_solver->bounds_object != NULL)
-    nl->sys().nonlinear_solver->bounds_object->bounds(XL, XU, nl->sys());
+  if (nl->nonlinearSolver()->bounds != NULL)
+    nl->nonlinearSolver()->bounds(XL, XU, nl->nonlinearSolver()->system());
+  else if (nl->nonlinearSolver()->bounds_object != NULL)
+    nl->nonlinearSolver()->bounds_object->bounds(XL, XU, nl->nonlinearSolver()->system());
   else
     SETERRQ(((PetscObject)dm)->comm, PETSC_ERR_ARG_WRONG, "No bounds calculation in this Moose object");
   PetscFunctionReturn(0);
@@ -1312,7 +1312,7 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
-  NumericVector<Number> * nv = (dmm->_nl->sys().solution).get();
+  NumericVector<Number> * nv = (dmm->_nl->system().solution).get();
   PetscVector<Number> * pv = dynamic_cast<PetscVector<Number>*>(nv);
   Vec v = pv->vec();
   /* Unfortunately, currently this does not produce a ghosted vector, so nonlinear subproblem solves aren't going to be easily available.
@@ -1380,12 +1380,12 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
    Even fancier: compute the sparsity of the coupling of a contact slave to the contact master.
    In any event, here we are in control of the matrix type and structure.
    */
-  DofMap & dof_map = dmm->_nl->sys().get_dof_map();
+  DofMap & dof_map = dmm->_nl->system().get_dof_map();
   PetscInt M,N,m,n;
   MPI_Comm comm;
   M = dof_map.n_dofs();
   N = M;
-  m = static_cast<PetscInt>(dof_map.n_dofs_on_processor(dmm->_nl->sys().processor_id()));
+  m = static_cast<PetscInt>(dof_map.n_dofs_on_processor(dmm->_nl->system().processor_id()));
   n = m;
   ierr = PetscObjectGetComm((PetscObject)dm,&comm);
   CHKERRQ(ierr);
@@ -1560,7 +1560,7 @@ DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type> & blocks)
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
-  const MeshBase & mesh = dmm->_nl->sys().get_mesh();
+  const MeshBase & mesh = dmm->_nl->system().get_mesh();
   /* The following effectively is a verbatim copy of MeshBase::n_subdomains(). */
   // This requires an inspection on every processor
   libmesh_parallel_only(mesh.comm());
@@ -1592,9 +1592,9 @@ DMSetUp_Moose_Pre(DM dm)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
   /* Set up variables, blocks and sides. */
-  DofMap & dofmap = dmm->_nl->sys().get_dof_map();
+  DofMap & dofmap = dmm->_nl->system().get_dof_map();
   /* libMesh mesh */
-  const MeshBase & mesh = dmm->_nl->sys().get_mesh();
+  const MeshBase & mesh = dmm->_nl->system().get_mesh();
 
   dmm->_nosides = PETSC_TRUE;
   dmm->_side_ids->clear();
@@ -1753,7 +1753,7 @@ DMSetUp_Moose_Pre(DM dm)
     dmm->_blocks = PETSC_NULL;
   }
 
-  std::string name = dmm->_nl->sys().name();
+  std::string name = dmm->_nl->system().name();
   name += "_vars";
   for (const auto & vit : *(dmm->_var_names))
     name += "_" + vit.second;
@@ -1885,7 +1885,7 @@ DMSetUp_Moose(DM dm)
     ierr = DMSNESSetJacobian(dm, SNESJacobian_DMMoose, (void*)dm);
     CHKERRQ(ierr);
 #endif
-    if (dmm->_nl->sys().nonlinear_solver->bounds || dmm->_nl->sys().nonlinear_solver->bounds_object)
+    if (dmm->_nl->nonlinearSolver()->bounds || dmm->_nl->nonlinearSolver()->bounds_object)
       ierr = DMSetVariableBounds(dm, DMVariableBounds_Moose);
     CHKERRQ(ierr);
   }
@@ -1930,7 +1930,7 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   ierr = PetscOptionsBegin(((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM");
   CHKERRQ(ierr);
   std::string opt, help;
-  PetscInt maxvars = dmm->_nl->sys().get_dof_map().n_variables();
+  PetscInt maxvars = dmm->_nl->system().get_dof_map().n_variables();
   char ** vars;
   std::set<std::string> varset;
   PetscInt nvars = maxvars;
@@ -1980,7 +1980,7 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
     ierr = DMMooseSetBlocks(dm, blockset);
     CHKERRQ(ierr);
   }
-  PetscInt maxsides = dmm->_nl->sys().get_mesh().get_boundary_info().get_boundary_ids().size();
+  PetscInt maxsides = dmm->_nl->system().get_mesh().get_boundary_info().get_boundary_ids().size();
   char ** sides;
   ierr = PetscMalloc(maxsides * sizeof(char*), &sides);
   CHKERRQ(ierr);

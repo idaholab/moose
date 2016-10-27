@@ -147,7 +147,7 @@ petscSetupDM (NonlinearSystemBase & nl) {
   ierr = DMMooseRegisterAll();
   CHKERRABORT(nl.comm().get(),ierr);
   // Create and set up the DM that will consume the split options and deal with block matrices.
-  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   // if there exists a DMMoose object, not to recreate a new one
   ierr = SNESGetDM(snes, &dm);
@@ -450,7 +450,7 @@ petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
   NonlinearSystemBase & nl = problem.getNonlinearSystem();
-  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
