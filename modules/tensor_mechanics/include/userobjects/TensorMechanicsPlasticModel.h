@@ -140,8 +140,7 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl,
                                  const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
 
-  /// Returns the model name (eg "MohrCoulomb")
-  virtual std::string modelName() const;
+  virtual std::string modelName() const = 0;
 
   /// Returns false.  You will want to override this in your derived class if you write a custom returnMap function
   virtual bool useCustomReturnMap() const;
