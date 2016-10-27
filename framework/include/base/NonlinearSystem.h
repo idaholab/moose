@@ -29,6 +29,14 @@ public:
   NonlinearSystem(FEProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
+  virtual TransientNonlinearImplicitSystem & sys() override { return _transient_sys; }
+
+  virtual NumericVector<Number> & solutionOld() override { return *_transient_sys.old_local_solution; }
+
+  virtual NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
+
+private:
+ TransientNonlinearImplicitSystem & _transient_sys;
 };
 
 #endif /* NONLINEARSYSTEM_H */

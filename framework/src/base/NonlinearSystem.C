@@ -17,7 +17,8 @@
 
 
 NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
-  NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name)
+  NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name),
+  _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name))
 {
 
 }

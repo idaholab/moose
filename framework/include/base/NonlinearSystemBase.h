@@ -469,10 +469,6 @@ public:
 
   virtual NumericVector<Number> & solution() override { return *_sys.solution; }
 
-  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
-
-  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
-
   virtual TransientNonlinearImplicitSystem & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }
