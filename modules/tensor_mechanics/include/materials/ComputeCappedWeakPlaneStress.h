@@ -9,7 +9,6 @@
 
 #include "ComputeStressBase.h"
 #include "TensorMechanicsHardeningModel.h"
-#include <array>
 
 #include <array>
 

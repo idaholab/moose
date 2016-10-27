@@ -108,24 +108,15 @@
 [UserObjects]
   [./grain_tracker]
     type = GrainTracker
-    connecting_threshold = 0.05
-    compute_var_to_feature_map = true
     flood_entity_type = elemental
-    execute_on = 'initial timestep_begin'
     outputs = none
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_begin'
   [../]
   [./euler_angle_file]
     type = RandomEulerAngleProvider
     grain_tracker_object = grain_tracker
     execute_on = 'initial timestep_begin'
-    #file_name = test.tex
-  [../]
-[]
-
-[Postprocessors]
-  [./gr0_area]
-    type = ElementIntegralVariablePostprocessor
-    variable = gr0
   [../]
 []
 
@@ -138,23 +129,12 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
-  petsc_options_value = 'hypre boomeramg 31 0.7'
-
-  l_max_its = 30
-  l_tol = 1e-4
-  nl_max_its = 30
-  nl_rel_tol = 1e-9
-
-  start_time = 0.0
-  num_steps = 3
   dt = 0.2
+  num_steps = 3
 []
 
 [Outputs]
-  #execute_on = 'initial timestep_end'
   exodus = true
   print_perf_log = true
 []
