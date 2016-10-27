@@ -1,7 +1,6 @@
 - AuxKernels: !include content/modules/phase_field/systems/AuxKernels/pages.yml
 - AuxVariables: !include content/modules/phase_field/systems/AuxVariables/pages.yml
 - BCs: !include content/modules/phase_field/systems/BCs/pages.yml
-- Bounds: !include content/modules/phase_field/systems/Bounds/pages.yml
 - ICs: !include content/modules/phase_field/systems/ICs/pages.yml
 - Kernels: !include content/modules/phase_field/systems/Kernels/pages.yml
 - Materials: !include content/modules/phase_field/systems/Materials/pages.yml

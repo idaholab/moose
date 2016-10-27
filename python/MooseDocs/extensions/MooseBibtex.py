@@ -3,7 +3,6 @@ import os
 import re
 import io
 import traceback
-
 from pybtex.plugin import find_plugin
 from pybtex.database import BibliographyData, parse_file
 
@@ -87,7 +86,7 @@ class MooseBibtex(Preprocessor):
       for i, item in enumerate(html):
         output += u'<li name="{}">{}</li>\n'.format(self._citations[i], item)
       output += u'</ol>\n'
-      content = re.sub(self.RE_BIBLIOGRAPHY, output, self.markdown.htmlStash.store(content, safe=True))
+      content = re.sub(self.RE_BIBLIOGRAPHY, self.markdown.htmlStash.store(output, safe=True), content)
 
     return content.split('\n')
 

@@ -32,6 +32,42 @@ markdown_extensions:
           make: ../modules
           executable: ../modules/combined/modules-opt
           repo: https://github.com/idaholab/moose/blob/master
+          hide:
+              - /Bounds # this should not be removed, this is deprecated syntax that we do not want to document
+              - /Adaptivity/Indicators
+              - /AuxKernels
+              - /AuxScalarKernels
+              - /AuxVariables
+              - /BCs
+              - /Constraints
+              - /Controls
+              - /DGKernels
+              - /Dampers
+              - /Debug
+              - /DeprecatedBlock
+              - /DiracKernels
+              - /Executioner
+              - /Functions
+              - /GlobalParams
+              - /ICs
+              - /InterfaceKernels
+              - /Kernels
+              - /Materials
+              - /Mesh
+              - /MeshModifiers
+              - /Modules
+              - /MultiApps
+              - /NodalKernels
+              - /NodalNormals
+              - /Outputs
+              - /Postprocessors
+              - /Preconditioning
+              - /Problem
+              - /ScalarKernels
+              - /Transfers
+              - /Variables
+              - /VectorPostprocessors
+              - /UserObjects
           links:
               Tests:
                   - ../test
@@ -67,6 +103,8 @@ markdown_extensions:
                       - ../modules/tensor_mechanics/include
                   install: content/modules/tensor_mechanics/systems
               heat_conduction:
+                  hide:
+                      - /ThermalContact
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
                       - ../modules/heat_conduction/src
