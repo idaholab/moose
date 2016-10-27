@@ -24,11 +24,11 @@ class TensorMechanicsHardeningPowerRule : public TensorMechanicsHardeningModel
  public:
   TensorMechanicsHardeningPowerRule(const InputParameters & parameters);
 
-  virtual Real value(Real intnl) const;
+  virtual Real value(Real intnl) const override;
 
-  virtual Real derivative(Real intnl) const;
+  virtual Real derivative(Real intnl) const override;
 
-  virtual std::string modelName() const;
+  virtual std::string modelName() const override;
 
  private:
   /// The value = value_0 * (p / epsilon0 + 1)^{exponent})

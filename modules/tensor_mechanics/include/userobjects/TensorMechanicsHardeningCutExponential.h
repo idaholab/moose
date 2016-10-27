@@ -26,14 +26,13 @@ class TensorMechanicsHardeningCutExponential : public TensorMechanicsHardeningMo
  public:
   TensorMechanicsHardeningCutExponential(const InputParameters & parameters);
 
-  virtual Real value(Real intnl) const;
+  virtual Real value(Real intnl) const override;
 
-  virtual Real derivative(Real intnl) const;
+  virtual Real derivative(Real intnl) const override;
 
-  virtual std::string modelName() const;
+  virtual std::string modelName() const override;
 
  private:
-
   /// The value = _val_res + (val_0 - val_res)*exp(-rate*(internal_parameter - _intnl_0)), for internal_parameter >= _intnl_0, otherwise value = _val_0
   Real _val_0;
 
@@ -45,7 +44,6 @@ class TensorMechanicsHardeningCutExponential : public TensorMechanicsHardeningMo
 
   /// The value = _val_res + (val_0 - val_res)*exp(-rate*(internal_parameter - _intnl_0)), for internal_parameter >= _intnl_0, otherwise value = _val_0
   Real _rate;
-
 };
 
 #endif // TENSORMECHANICSHARDENINGCUTEXPONENTIAL_H
