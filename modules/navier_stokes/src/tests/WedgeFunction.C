@@ -13,11 +13,12 @@ InputParameters validParams<WedgeFunction>()
   InputParameters params = validParams<Function>();
   params.addRequiredParam<Real>("alpha_degrees", "The wedge half-angle size (in degrees) used in computing 'f' below.");
   params.addRequiredParam<Real>("Re", "The Reynolds number used in computing 'f' below.");
-  params.addRequiredParam<unsigned int>("component", "The component (x==0, y==1) of the velocity we are computing.");
+  params.addRequiredRangeCheckedParam<unsigned int>("var_num", "var_num<3", "The variable (0==vel_x, 1==vel_y, 2==p) we are computing the exact solution for.");
   params.addRequiredParam<Real>("mu", "dynamic viscosity");
   params.addRequiredParam<Real>("rho", "density");
+  params.addRequiredParam<Real>("K", "Constant obtained by interating the Jeffery-Hamel ODE once.");
   params.addRequiredParam<FunctionName>("f", "The pre-computed semi-analytic exact solution f(theta) as a PiecewiseLinear function.");
-  params.addClassDescription("Function representing the exact solution for Jeffery-Hamel flow in a wedge.");
+  params.addClassDescription("Function which computes the exact solution for Jeffery-Hamel flow in a wedge.");
   return params;
 }
 
@@ -26,9 +27,13 @@ WedgeFunction::WedgeFunction(const InputParameters & parameters) :
     FunctionInterface(this),
     _alpha_radians(libMesh::pi * (getParam<Real>("alpha_degrees") / 180.)),
     _Re(getParam<Real>("Re")),
-    _component(getParam<unsigned int>("component")),
+    _var_num(getParam<unsigned int>("var_num")),
     _mu(getParam<Real>("mu")),
     _rho(getParam<Real>("rho")),
+    _nu(_mu / _rho),
+    _K(getParam<Real>("K")),
+    _lambda(_Re * _nu / _alpha_radians),
+    _p_star(-2 * _mu * _lambda * (1 + _K)),
     _f(getFunction("f"))
 {
 }
@@ -52,30 +57,21 @@ WedgeFunction::value(Real /*t*/, const Point & p)
   // plus a dummy Point which is not used.
   const Real f_value = _f.value(eta, Point(0., 0., 0.));
 
-  // Converts the radial velocity vector to x and y components, respectively.
-  const Real cs[2] = {std::cos(theta), std::sin(theta)};
+  // Vars 0 and 1 are the velocities.
+  if (_var_num < 2)
+  {
+    // Converts the radial velocity vector to x and y components, respectively.
+    const Real cs[2] = {std::cos(theta), std::sin(theta)};
 
-  // We need to compute u_max for the users given Re.  Since
-  //
-  // Re := (u_max * r * alpha) / nu
-  //
-  // we can rearrange this to get:
-  //
-  // u_max = (Re * nu) / (r * alpha).
-  //
-  // Note that u_max is *not* a constant, it depends on r!  However,
-  // we have the relationship:
-  //
-  // r * u_max = const.
-  //
-  // so it makes sense to use this definition for Re.  Consequently,
-  // the u_max we are computing here is for the current value of r, so
-  // we don't have to divide by r later when computing the velocity
-  // magnitude to return.
-  const Real nu = _mu / _rho;
-  const Real u_max = _Re * nu / (r * _alpha_radians);
+    // Compute the centerline velocity for this r.
+    const Real u_max = _lambda / r;
 
-  // The true velocity value is simply u_max * f, times either
-  // cos(theta) or sin(theta) to convert it to Cartesian coordinates.
-  return u_max * f_value * cs[_component];
+    // The true velocity value is simply u_max * f, times either
+    // cos(theta) or sin(theta) to convert it to Cartesian coordinates.
+    return u_max * f_value * cs[_var_num];
+  }
+
+  // Otherwise, we are computing the pressure.
+  else
+    return _p_star + (2 * _mu * _lambda) / (r * r) * (f_value + _K);
 }
