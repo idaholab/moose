@@ -19,6 +19,7 @@
 #include "FEProblem.h"
 #include "GeneratedMesh.h"
 #include "MooseMesh.h"
+#include "DisplacedProblem.h"
 
 // LibMesh includes
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh
@@ -68,6 +69,8 @@ AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector
 bool
 AddPeriodicBCAction::autoTranslationBoundaries()
 {
+  auto displaced_problem = _problem->getDisplacedProblem();
+
   if (isParamValid("auto_direction"))
   {
     // If we are working with a parallel mesh then we're going to ghost all the boundaries everywhere because we don't know what we need...
@@ -123,6 +126,8 @@ AddPeriodicBCAction::autoTranslationBoundaries()
         p.pairedboundary = boundary_ids->second;
         setPeriodicVars(p, getParam<std::vector<VariableName> >("variable"));
         nl.dofMap().add_periodic_boundary(p);
+        if (displaced_problem)
+          displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
       }
     }
     return true;
@@ -135,6 +140,7 @@ AddPeriodicBCAction::act()
 {
   NonlinearSystem & nl = _problem->getNonlinearSystem();
   _mesh = &_problem->mesh();
+  auto displaced_problem = _problem->getDisplacedProblem();
 
   if (autoTranslationBoundaries())
     return;
@@ -152,6 +158,8 @@ AddPeriodicBCAction::act()
     _problem->addGhostedBoundary(p.pairedboundary);
 
     nl.dofMap().add_periodic_boundary(p);
+    if (displaced_problem)
+       displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
   }
   else if (getParam<std::vector<std::string> >("transform_func") != std::vector<std::string>())
   {
@@ -178,6 +186,8 @@ AddPeriodicBCAction::act()
 
     // Add the pair of periodic boundaries to the dof map
     nl.dofMap().add_periodic_boundary(pb, ipb);
+    if (displaced_problem)
+       displaced_problem->nlSys().dofMap().add_periodic_boundary(pb, ipb);
   }
   else
   {
