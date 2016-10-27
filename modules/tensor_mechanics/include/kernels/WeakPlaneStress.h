@@ -31,5 +31,7 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
+
+  const unsigned int _direction;
 };
 #endif //WEAKPLANESTRESS_H
