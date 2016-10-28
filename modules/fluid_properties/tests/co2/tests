@@ -35,9 +35,4 @@
     exodiff = 'co2_derivatives_out.e'
     rel_err = 1e-4
   [../]
-  [./henry]
-    type = CSVDiff
-    input = 'henry.i'
-    csvdiff = 'henry_out.csv'
-  [../]
 []

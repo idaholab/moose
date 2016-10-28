@@ -1,5 +1,5 @@
-# Test the Water97FluidProperties module in region 5 by recovering the values
-# in Table 42 of Revised Release on the IAPWS Industrial Formulation 1997 for the
+# Example of using Water97FluidProperties module in Region 1 by recovering the values
+# in Table 5 of Revised Release on the IAPWS Industrial Formulation 1997 for the
 # Thermodynamic Properties of Water and Steam
 
 [Mesh]
@@ -31,7 +31,7 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./u]
+  [./e]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -55,16 +55,24 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+  [./mu]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./k]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [Functions]
   [./tic]
     type = ParsedFunction
-    value = 'if(x<2, 1500, 2000)'
+    value = 'if(x<2, 300, 500)'
   [../]
   [./pic]
     type = ParsedFunction
-    value = 'if(x<1, 0.5e6, 30e6)'
+    value = 'if(x<1,3e6, if(x<2, 80e6, 3e6))'
   [../]
 []
 
@@ -93,20 +101,20 @@
     function = 1/rho
     variable = v
   [../]
-  [./u]
+  [./e]
     type = MaterialRealAux
-    variable = u
-    property = internal_energy
+    variable = e
+    property = e
   [../]
   [./h]
     type = MaterialRealAux
     variable = h
-    property = enthalpy
+    property = h
   [../]
   [./s]
     type = MaterialRealAux
     variable = s
-    property = entropy
+    property = s
   [../]
   [./cp]
     type = MaterialRealAux
@@ -123,6 +131,16 @@
     variable = c
     property = c
   [../]
+  [./mu]
+    type = MaterialRealAux
+    variable = mu
+    property = viscosity
+  [../]
+  [./k]
+    type = MaterialRealAux
+    variable = k
+    property = k
+  [../]
 []
 
 [Modules]
@@ -135,7 +153,7 @@
 
 [Materials]
   [./fp_mat]
-    type = WaterFluidPropertiesTestMaterial
+    type = FluidPropertiesMaterialPT
     pressure = pressure
     temperature = temperature
     fp = water
@@ -180,19 +198,19 @@
     variable = v
     elementid = 2
   [../]
-  [./u0]
+  [./e0]
     type = ElementalVariableValue
-    variable = u
+    variable = e
     elementid = 0
   [../]
-  [./u1]
+  [./e1]
     type = ElementalVariableValue
-    variable = u
+    variable = e
     elementid = 1
   [../]
-  [./u2]
+  [./e2]
     type = ElementalVariableValue
-    variable = u
+    variable = e
     elementid = 2
   [../]
   [./h0]
@@ -268,6 +286,36 @@
   [./c2]
     type = ElementalVariableValue
     variable = c
+    elementid = 2
+  [../]
+  [./mu0]
+    type = ElementalVariableValue
+    variable = mu
+    elementid = 0
+  [../]
+  [./mu1]
+    type = ElementalVariableValue
+    variable = mu
+    elementid = 1
+  [../]
+  [./mu2]
+    type = ElementalVariableValue
+    variable = mu
+    elementid = 2
+  [../]
+  [./k0]
+    type = ElementalVariableValue
+    variable = k
+    elementid = 0
+  [../]
+  [./k1]
+    type = ElementalVariableValue
+    variable = k
+    elementid = 1
+  [../]
+  [./k2]
+    type = ElementalVariableValue
+    variable = k
     elementid = 2
   [../]
 []
