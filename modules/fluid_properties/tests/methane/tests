@@ -4,9 +4,4 @@
     input = 'methane.i'
     exodiff = 'methane_out.e'
   [../]
-  [./methane_derivatives]
-    type = Exodiff
-    input = 'methane_derivatives.i'
-    exodiff = 'methane_derivatives_out.e'
-  [../]
 []
