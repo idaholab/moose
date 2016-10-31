@@ -4,6 +4,15 @@
   gravity = '0 0 0'
   rho = 1
   mu = 1
+
+  # Params used by the WedgeFunction for computing the exact solution.
+  # The value of K is only required for comparing the pressure to the
+  # exact solution, and is computed by the associated jeffery_hamel.py
+  # script.
+  alpha_degrees = 15
+  Re = 30
+  K = -9.78221333616
+  f = f_theta
 []
 
 [Mesh]
@@ -16,15 +25,13 @@
 
 [MeshModifiers]
   [./corner_node]
-    # I found that pinning the pressure to zero on any part of the
-    # boundary, i.e.
-    # coord = (1, 0) # centerline left
-    # coord = (2, 0) # centerline right
-    # coord = (1.4488887394336025, 0.3882285676537811) # halfway along the top solid wall
-    # didn't make much difference in the final solution.
+    # Pin is on the centerline of the channel on the left-hand side of
+    # the domain at r=1.  If you change the domain, you will need to
+    # update this pin location for the pressure exact solution to
+    # work.
     type = AddExtraNodeset
     new_boundary = pinned_node
-    coord = '1.4488887394336025, 0.3882285676537811'
+    coord = '1, 0'
   [../]
 []
 
@@ -128,24 +135,22 @@
   petsc_options_value = '300                bjacobi  ilu          4'
   line_search = none
   nl_rel_tol = 1e-13
-  nl_abs_tol = 1e-12
+  nl_abs_tol = 1e-11
   nl_max_its = 10
   l_tol = 1e-6
   l_max_its = 300
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-  [../]
+  exodus = true
 []
 
 [Functions]
   [./f_theta]
     # Non-dimensional solution values f(eta), 0 <= eta <= 1 for
-    # alpha=15deg, Re=30.  Note: this introduces an input file
+    # alpha=15 deg, Re=30.  Note: this introduces an input file
     # ordering dependency: this Function must appear *before* the two
-    # function below which use it since apparently proper dependency
+    # functions below which use it since apparently proper dependency
     # resolution is not done in this scenario.
     type = PiecewiseLinear
     data_file = 'f.csv'
@@ -153,17 +158,15 @@
   [../]
   [./vel_x_exact]
     type = WedgeFunction
-    alpha_degrees = 15 # Must match mesh and PiecewiseLinear function!
-    Re = 30 # Must match PiecewiseLinear function!
-    component = 0
-    f = f_theta
+    var_num = 0
   [../]
   [./vel_y_exact]
     type = WedgeFunction
-    alpha_degrees = 15 # Note: must match mesh and PiecewiseLinear function!
-    Re = 30 # Must match PiecewiseLinear function!
-    component = 1
-    f = f_theta
+    var_num = 1
+  [../]
+  [./p_exact]
+    type = WedgeFunction
+    var_num = 2
   [../]
 []
 
@@ -178,6 +181,12 @@
     type = ElementL2Error
     variable = vel_y
     function = vel_y_exact
+    execute_on = 'initial timestep_end'
+  [../]
+  [./p_L2_error]
+    type = ElementL2Error
+    variable = p
+    function = p_exact
     execute_on = 'initial timestep_end'
   [../]
 []

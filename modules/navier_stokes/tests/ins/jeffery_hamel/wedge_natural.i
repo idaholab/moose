@@ -1,19 +1,24 @@
-# This input file tests whether we can converge to the semi-analytical
-# solution for flow in a 2D wedge.  This input file uses a natural BC
-# at the outlet, which I would not a-priori expect to match the
-# semi-analytical solution.
+# This input file solves the Jeffery-Hamel problem with the exact
+# solution's outlet BC replaced by a natural BC.  This problem does
+# not converge to the analytical solution, although the flow at the
+# outlet still "looks" reasonable.
 [GlobalParams]
   gravity = '0 0 0'
   rho = 1
   mu = 1
+
+  # Params used by the WedgeFunction for computing the exact solution.
+  # The value of K is only required for comparing the pressure to the
+  # exact solution, and is computed by the associated jeffery_hamel.py
+  # script.
+  alpha_degrees = 15
+  Re = 30
+  K = -9.78221333616
+  f = f_theta
 []
 
 [Mesh]
-  # file = wedge_4x6.e
   file = wedge_8x12.e
-  # file = wedge_16x24.e
-  # file = wedge_32x48.e
-  # file = wedge_64x96.e
 []
 
 [Variables]
@@ -109,16 +114,14 @@
   petsc_options_value = '300                bjacobi  ilu          4'
   line_search = none
   nl_rel_tol = 1e-13
-  nl_abs_tol = 1e-12
+  nl_abs_tol = 1e-11
   nl_max_its = 10
   l_tol = 1e-6
   l_max_its = 300
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-  [../]
+  exodus = true
 []
 
 [Functions]
@@ -134,31 +137,10 @@
   [../]
   [./vel_x_exact]
     type = WedgeFunction
-    alpha_degrees = 15 # Must match mesh and PiecewiseLinear function!
-    Re = 30 # Must match PiecewiseLinear function!
-    component = 0
-    f = f_theta
+    var_num = 0
   [../]
   [./vel_y_exact]
     type = WedgeFunction
-    alpha_degrees = 15 # Note: must match mesh and PiecewiseLinear function!
-    Re = 30 # Must match PiecewiseLinear function!
-    component = 1
-    f = f_theta
-  [../]
-[]
-
-[Postprocessors]
-  [./vel_x_L2_error]
-    type = ElementL2Error
-    variable = vel_x
-    function = vel_x_exact
-    execute_on = 'initial timestep_end'
-  [../]
-  [./vel_y_L2_error]
-    type = ElementL2Error
-    variable = vel_y
-    function = vel_y_exact
-    execute_on = 'initial timestep_end'
+    var_num = 1
   [../]
 []
