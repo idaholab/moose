@@ -1,0 +1,14 @@
+[Tests]
+  [./test_singular]
+    type = 'CSVDiff'
+    input = 'singular.i'
+    csvdiff = 'singular_out_sample_solution_0001.csv'
+    petsc_version = '>=3.6.0'
+  [../]
+  [./test_singular_contaminated]
+    type = 'CSVDiff'
+    input = 'singular_contaminated.i'
+    csvdiff = 'singular_contaminated_out_sample_solution_0001.csv'
+    petsc_version = '>=3.6.0'
+  [../]
+[]

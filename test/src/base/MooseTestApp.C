@@ -228,6 +228,7 @@
 #include "StripeMesh.h"
 
 #include "TestSteady.h"
+#include "SteadyWithNull.h"
 #include "AdaptAndModify.h"
 
 // problems
@@ -515,6 +516,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerExecutioner(TestSteady);
   registerExecutioner(AdaptAndModify);
+  registerExecutioner(SteadyWithNull);
 
   registerProblem(MooseTestProblem);
   registerProblem(FailingProblem);

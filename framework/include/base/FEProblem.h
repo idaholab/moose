@@ -750,6 +750,7 @@ public:
   virtual void computeBounds(NonlinearImplicitSystem & sys, NumericVector<Number> & lower, NumericVector<Number> & upper);
   virtual void computeNearNullSpace(NonlinearImplicitSystem & sys, std::vector<NumericVector<Number>*> &sp);
   virtual void computeNullSpace(NonlinearImplicitSystem & sys, std::vector<NumericVector<Number>*> &sp);
+  virtual void computeTransposeNullSpace(NonlinearImplicitSystem & sys, std::vector<NumericVector<Number>*> &sp);
   virtual void computePostCheck(NonlinearImplicitSystem & sys,
                                 const NumericVector<Number> & old_soln,
                                 NumericVector<Number> & search_direction,
