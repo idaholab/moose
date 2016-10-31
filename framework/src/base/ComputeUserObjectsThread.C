@@ -17,6 +17,7 @@
 #include "SystemBase.h"
 #include "ElementUserObject.h"
 #include "ShapeElementUserObject.h"
+#include "ShapeSideUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
@@ -130,6 +131,31 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     const std::vector<MooseSharedPointer<SideUserObject> > & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
     for (const auto & uo : objects)
       uo->execute();
+
+  // UserObject Jacobians
+  if (_fe_problem.currentlyComputingJacobian())
+    if (_side_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+    {
+      // Prepare shape functions for ShapeSideUserObjects
+      std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
+      for (auto jvar_it = jacobian_moose_vars.begin();
+           jvar_it != jacobian_moose_vars.end();
+           ++jvar_it)
+      {
+        unsigned int jvar = (*jvar_it)->number();
+        std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
+
+        _fe_problem.prepareShapes(jvar, _tid);
+
+        const std::vector<MooseSharedPointer<SideUserObject> > & e_objects = _side_user_objects.getActiveBlockObjects(_subdomain, _tid);
+        for (const auto & uo : e_objects)
+        {
+          MooseSharedPointer<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
+          if (shape_side_uo)
+            shape_side_uo->executeJacobianWrapper(jvar, dof_indices);
+        }
+      }
+    }
 
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
   }
