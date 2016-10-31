@@ -145,8 +145,9 @@ IterationAdaptiveDT::buildStepper()
   else if (use_time_ipol)
       stepper = new PiecewiseStepper(time_list, dt_list);
   else
-    // this should cover the final else clause in IterationAdaptiveDT::computeDT
-    stepper = new GrowShrinkStepper(0.5, _growth_factor);
+    // this should cover the final else clause in IterationAdaptiveDT::computeDT combined with
+    // the no growth if _cutback_occurred - from the first if clause body.
+    stepper = new IfConvergedStepper(new GrowShrinkStepper(0.5, _growth_factor), new GrowShrinkStepper(1.0, 1.0), true);
 
   stepper = new IfConvergedStepper(stepper, new GrowShrinkStepper(0.5, 1.0));
 

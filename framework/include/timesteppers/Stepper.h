@@ -395,13 +395,14 @@ private:
 class IfConvergedStepper : public Stepper
 {
 public:
-  /// if_converged and if_not_converged must not be NULL.
-  IfConvergedStepper(Stepper * if_converged, Stepper * if_not_converged);
+  /// if_converged and if_not_converged must not be NULL.  If delay is true, then if_converged will only be called if the most recent *two* solves converged.
+  IfConvergedStepper(Stepper * if_converged, Stepper * if_not_converged, bool delay = false);
   virtual double advance(const StepperInfo * si, StepperFeedback* sf);
 
 private:
   Ptr _converged;
   Ptr _not_converged;
+  bool _delay;
 };
 
 /// If the solve converged, multiply the previous dt by a growth factor,

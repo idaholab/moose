@@ -344,8 +344,8 @@ StartupStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 }
 
 IfConvergedStepper::IfConvergedStepper(Stepper * if_converged,
-                                       Stepper * if_not_converged)
-    : _converged(if_converged), _not_converged(if_not_converged)
+                                       Stepper * if_not_converged, bool delay)
+    : _converged(if_converged), _not_converged(if_not_converged), _delay(delay)
 {
 }
 
@@ -353,7 +353,7 @@ double
 IfConvergedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("IfConverged");
-  if (si->converged)
+  if (si->converged && (!_delay || si->prev_converged))
     return l.val(_converged->advance(si, sf));
   else
     return l.val(_not_converged->advance(si, sf));
