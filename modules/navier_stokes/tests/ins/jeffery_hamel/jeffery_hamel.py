@@ -31,6 +31,7 @@
 from scipy.integrate import ode
 import matplotlib.pyplot as plt
 import math
+import numpy as np
 
 # Use fonts that match LaTeX
 from matplotlib import rcParams
@@ -74,9 +75,13 @@ def solve_ode(guess, dt, alpha, Re):
   # Set up [alpha, Re] list of parameters which are used by the 'f' and 'jac' functions.
   p = [alpha, Re]
 
-  # The ODE object does not store the entire solution internally.  That is up to the user.
+  # The ODE object does not store the entire solution internally.
+  # That is up to the user.  In our case, we are interested in the
+  # values of both y0 and y2.  y2 is needed for computing the exact
+  # value of the pressure.
   timesteps = []
   solution = []
+  second_deriv = []
 
   # This follows the various examples which call multiple functions on a single line
   r.set_initial_value(y0, t0).set_f_params(*p).set_jac_params(*p)
@@ -84,6 +89,7 @@ def solve_ode(guess, dt, alpha, Re):
   # Store the initial condition for plotting later
   timesteps.append(t0)
   solution.append(y0[0])
+  second_deriv.append(y0[2])
 
   # Do the time integration
   while r.successful() and abs(r.t - 1) > dt/2:
@@ -92,9 +98,10 @@ def solve_ode(guess, dt, alpha, Re):
     # print r.t, r.y
     timesteps.append(r.t)
     solution.append(r.y[0])
+    second_deriv.append(r.y[2])
 
   # Return the ODE object as well as the computed solution at each time step.
-  return r, timesteps, solution
+  return r, timesteps, solution, second_deriv
 
 
 
@@ -149,7 +156,7 @@ while (current_iterate < max_its):
   # print('Newton Iteration {}'.format(current_iterate))
 
   # Solve ODE system with current alpha value
-  r, timesteps, solution = solve_ode(guess, dt, alpha, Re)
+  r, timesteps, solution, second_deriv = solve_ode(guess, dt, alpha, Re)
 
   # Compute residual for the current value of alpha
   newton_res = r.y[0]
@@ -164,7 +171,7 @@ while (current_iterate < max_its):
 
   # We estimate Jacobian by finite differencing, so compute the ODE
   # with a perturbed initial guess.
-  r2, dummy, dummy = solve_ode(guess + newton_fd_eps, dt, alpha, Re)
+  r2, dummy, dummy, dummy = solve_ode(guess + newton_fd_eps, dt, alpha, Re)
 
   # Approximate the Jacobian
   newton_jac = (r2.y[0] - r.y[0]) / newton_fd_eps
@@ -185,11 +192,42 @@ while (current_iterate < max_its):
 if (current_iterate >= max_its):
   print('\nWarning, max iterates reached before reaching tolerance!\n')
 
+# Compute the "constant" K for each value of eta.  It turns out it is
+# not actually constant.. but it is fairly close.  We can compute a
+# mean and standard deviation to try and pick the best single value...
+K = []
+for i in xrange(len(timesteps)):
+  K.append(-1. / (4. * alpha * alpha) * (alpha * Re * solution[i]**2 + second_deriv[i]) - solution[i])
+
+mean_K = np.mean(K)
+std_K = np.std(K)
+
+# Print mean and standard deviation of constant K.  The size of the
+# standard deviation will certainly have some effect on the accuracy
+# with which we can approximate the exact solution...
+#
+# For the alpha=15deg, Re=30 case, the results are:
+# dt        mean(K)         std(K)
+# .50,      -9.78221667283, 1.55432108496e-05
+# .25,      -9.78221793235, 1.28909839468e-05
+# .10,      -9.78221636352, 1.00149614255e-05 (max Newton iterations exceeded)
+# .05,      -9.78221622393, 9.19157491110e-06
+# .025,     -9.78222001829, 1.62242457073e-05
+# .0125,    -9.78221345306, 7.36636294056e-06
+# .00625,   -9.78221617295, 8.56617697780e-06
+# .003125,  -9.78221785067, 7.05391749561e-06 (max Newton iterations exceeded)
+# .0015625, -9.78221333616, 7.23063998586e-06
+#
+# Interestingly, neither the mean value of the constant nor the
+# standard deviation seems to be affected by the eta discretization
+# much.
+print('mean(K) = {:.11f}, std(K) = {:.11e}'.format(mean_K, std_K))
 
 # Print all results.  Useful for tabulating values of f(theta).
 if print_results:
+  print('eta'.rjust(22) + ', ' + 'f'.rjust(22) + ', ' + 'f"'.rjust(22))
   for i in xrange(len(timesteps)):
-    print('{:.16e}, {:.16e}'.format(timesteps[i], solution[i]))
+    print('{:.16e}, {:.16e}, {:.16e}, {:.16e}'.format(timesteps[i], solution[i], second_deriv[i], K[i]))
 
 if plot_results:
   fig = plt.figure()
