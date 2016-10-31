@@ -75,6 +75,7 @@
 #include "ConsoleUtils.h"
 #include "NonlocalKernel.h"
 #include "ShapeElementUserObject.h"
+#include "ShapeSideUserObject.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
