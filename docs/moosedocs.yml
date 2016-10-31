@@ -1,30 +1,21 @@
-###############################################################
-# Configuration for creating MOOSE application documentation. #
-###############################################################
+template: materialize.html
 
-# MkDocs Settings
-# The settings in this section are for MkDocs, asny MkDocs settings can be set via this file.
-site_name: MOOSE
+template_arguments:
+    title: MOOSE
+    logo: media/moose_logo_small.png
+    repo_url: https://github.com/idaholab/moose/
+    site_url: /index.html
 
-docs_dir: .
-
-site_dir: ../site
-
-repo_url: https://github.com/idaholab/moose/
-
-theme: flatly
-
-extra_css:
-    - css/moose.css
-
-extra_javascript:
-    - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-    - js/mathjaxconfig.js
+extra_pages:
+    - MOOSE:
+        filename: index.html
+        template: materialize-home.html
 
 markdown_extensions:
     - toc
     - smarty
     - admonition
+    - extra
     - markdown_include.include           # pip install markdown-include
     - mdx_math                           # pip install python-markdown-math
     - MooseDocs.extensions.MooseMarkdown:

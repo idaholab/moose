@@ -1,65 +1,197 @@
-/* Collapse Nav-bar correctly */
-@media(min-width: 768px) {
-    .bs-sidebar.affix {
-	top: 110px;
-    }
-    div.col-md-3 {
-	margin-top: 60px;
-    }
+/* Materialize */
+html {
+    font-family: GillSans, Calibri, Trebuchet, sans-serif;
 }
-@media(min-width:992px) {
-    .bs-sidebar.affix {
-	top: 140px;
-}
-    div.col-md-9 {
-	margin-top: 50px;
-    }
-}
-@media(min-width:1200px) {
-    .bs-sidebar.affix {
-	top: 90px;
-}
-    div.col-md-9 {
-	margin-top: 5px;
-    }
-}
-/* End Collapse Nav-bar correctly */
 
-/* Get rid of the Previous and Next buttons */
-ul.nav.navbar-right > li:nth-of-type(2), ul.nav.navbar-right > li:nth-of-type(3){
-    display: none;
+h1 {
+    font-size:250%;
+    font-weight:300;
 }
-/* Get rid of the Previous and Next buttons */
+
+h2 {
+    font-size:220%;
+    font-weight:300;
+}
+
+h3 {
+    font-size:150%;
+    font-weight:300;
+}
+
+h4 {
+    font-size:120%;
+    font-weight:300;
+}
 
 p {
-    text-align: justify;
-}
-a {
-    color: #0333a5;
-    text-decoration: none;
+    line-height:1rem;
 }
 
-a:hover, a:focus {
-    color: #0333a5;
-    text-decoration: underline;
+.table-of-contents a.active {
+    border-left: 2px solid #005897;
 }
 
-/* NavBar hover color modification (bluish to more closely match our </a> links color) */
-.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus , .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-    color: #b7c0ff;
+nav,
+.btn,
+.btn-large,
+footer.page-footer,
+.side-nav .collapsible li.active a.active,
+.side-nav.fixed .collapsible li.active a.active {
+    background-color:#005897;
 }
 
-pre {
-    overflow: auto;
+footer.page-footer {
+    padding-top:0px;
 }
 
-hr {
-    border-bottom-style: groove;
-    border-bottom-width: 2px;
+.container{
+    width:90%;
 }
-/* NavBar submenu font color */
-.dropdown-menu>li>a {
-    color: #383d3e;
+
+.side-nav .collapsible ul {
+    margin-left:20px;
+}
+
+.side-nav .collapsible li.active a.active,
+.side-nav.fixed .collapsible li.active a.active {
+    color:#fff;
+    font-family: sans-serif;
+    font-weight:500;
+}
+
+.side-nav .collapsible li,
+.side-nav.fixed .collapsible li{
+    color:#757575;
+    font-family: sans-serif;
+    font-weight:300;
+}
+
+.side-nav .collapsible li.active a,
+.side-nav.fixed .collapsible li.active a
+{
+    color:#757575;
+    font-family: sans-serif;
+    font-weight:300;
+}
+
+.breadcrumb-nav{
+    margin-top: 24px;
+    padding-left: 12px;
+    background-color: transparent;
+}
+
+.breadcrumb{
+    color:#757575;
+    font-family: sans-serif;
+    font-weight:300;
+}
+
+.breadcrumb:before{
+    color:#757575;
+}
+
+.breadcrumb:last-child{
+    color:#757575;
+    font-family: sans-serif;
+    font-weight:500;
+}
+
+.page-title{
+    font-size:x-large;
+}
+
+.github-mark-label{
+    color:white;
+}
+
+.github-mark{
+    height: 24px;
+    vertical-align: middle;
+    padding-bottom: 4px;
+    padding-right: 4px;
+}
+
+header, main, footer {
+    padding-left: 300px;
+}
+
+@media only screen and (max-width : 992px) {
+    header, main, footer {
+        padding-left: 0;
+    }
+}
+
+/* Class for when element is above threshold */
+.pin-top {
+    width:220px;
+    position: relative;
+}
+
+// Class for when element is below threshold
+.pin-bottom {
+    width:220px;
+    position: relative;
+}
+
+// Class for when element is pinned
+.pinned {
+    width:220px;
+    position: fixed !important;
+}
+
+nav ul a,
+nav .brand-logo {
+  color: #444;
+}
+
+p {
+  line-height: 2rem;
+}
+
+.button-collapse {
+    color: white;
+    padding-right: 8px;
+}
+
+.parallax-container {
+  min-height: 380px;
+  line-height: 0;
+  height: auto;
+  color: rgba(255,255,255,.9);
+}
+  .parallax-container .section {
+    width: 100%;
+  }
+
+@media only screen and (max-width : 992px) {
+  .parallax-container .section {
+    position: absolute;
+    top: 40%;
+  }
+  #index-banner .section {
+    top: 10%;
+  }
+}
+
+@media only screen and (max-width : 600px) {
+  #index-banner .section {
+    top: 0;
+  }
+}
+
+.icon-block {
+  padding: 0 15px;
+}
+.icon-block .material-icons {
+  font-size: inherit;
+}
+
+footer.page-footer {
+  margin: 0;
+}
+
+.moose-caption {
+    padding: 5px;
 }
 
 /* Slideshows with white backgrounds and captions, need a black drop text shadow */
@@ -67,7 +199,10 @@ hr {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
 
+
+/* Admonition */
 .admonition-title {
+    margin-top:0px;
     font-weight: bold;
     display: block;
     padding: 6px 12px;
@@ -141,9 +276,9 @@ hr {
     color: #000;
     border: 0px solid transparent;
 }
-/*
-Slide style
-*/
+
+
+/* Slide style */
 .reveal h1 {
     font-size: 2em;
 }
@@ -155,6 +290,8 @@ Slide style
 .reveal .slides > section {
   text-align: left;
 }
+
+
 /* MOOSE Build status CSS */
 .boxed_job_status_Passed {
     vertical-align: middle;
@@ -204,4 +341,3 @@ Slide style
     box-shadow: 2px 2px 3px #888888;
     display: inline-block;
 }
-/* MOOSE Build status CSS */

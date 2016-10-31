@@ -1,0 +1,24 @@
+<!--
+Table of Contents
+
+Loops through the current MoosePage object and builds a list
+of second level headers.
+
+Additionally, the "Edit on Github" button is added that links
+the source markdown file if the 'github_edit' paramater is
+set to True (the default).
+
+-->
+
+<div class="toc-wrapper pin-top">
+  {% if github_edit|default(true) %}
+    <a href="{{current.edit(repo_url)}}" class="waves-effect waves-light btn">Edit on GitHub</a>
+  {% endif %}
+  <div class="section table-of-contents">
+    <ul>
+      {% for text, id in current.contents() %}
+        <li><a href="#{{id}}">{{text}}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,34 @@
+<!--
+Navigation tree constructed from the 'tree' variable, which
+contains all MoosePage objects for the website.
+-->
+{% if fixed|default(true) %}
+  <ul id="nav-mobile" class="side-nav fixed">
+{% else %}
+  <ul id="nav-mobile" class="side-nav">
+{% endif %}
+  <li class="logo">
+    <a id="logo-container" class="barnd-logo" href="{{site_url}}">
+      <img width="200px" align="middle" src="{{current.relpath(logo)}}">
+    </a>
+  </li>
+  <li>
+    <ul class="collapsible" data-collapsible="accoridon">
+      {% for child in tree.children recursive %}
+        {% set active = child.active(current) %}
+        <li class="{{active}}">
+        {% if child.children %}
+          <a class="collapsible-header {{active}}">{{child.name|e}}</a>
+          <div class="collapsible-body">
+            <ul class="collapsible" data-collapsible="accoridon">
+              {{loop(child.children)}}
+            </ul>
+          </div>
+        {% else %}
+          <a class="collapsible-header {{active}}" href="{{current.relpath(child.url())}}">{{child.name|e}}</a>
+        {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </li>
+</ul>

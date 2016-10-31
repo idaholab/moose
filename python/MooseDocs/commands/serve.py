@@ -2,7 +2,6 @@ import os
 import sys
 import glob
 import re
-import mkdocs
 import livereload
 import logging
 import shutil
@@ -10,30 +9,27 @@ import MooseDocs
 import build
 log = logging.getLogger(__name__)
 
-
 def serve_options(parser, subparser):
   """
   Command-line options for serve command.
   """
 
   serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
-  serve_parser.add_argument('--livereload', dest='livereload', action='store_const', const='livereload', help="Enable the live reloading server.")
-  serve_parser.add_argument('--dirtyreload', dest='livereload', action='store_const', const='dirtyreload', help="Enable the live reloading server without rebuilding entire site with single file change (default).")
-  serve_parser.add_argument('--no-livereload', dest='livereload', action='store_const', const='no-livereload', help="Disable the live reloading of the served site.")
-  serve_parser.add_argument('--strict', action='store_true', help='Enable strict mode and abort on warnings.')
-  serve_parser.add_argument('--dirty', action='store_false', dest='clean', help='Do not clean the temporary build prior to building site.')
+  serve_parser.add_argument('--host', default='127.0.0.1', type=str, help="The local host location for live web server (default: %(default)s).")
+  serve_parser.add_argument('--port', default='8000', type=str, help="The local host port for live web server (default: %(default)s).")
+
   return serve_parser
 
-def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean=True, pages='pages.yml', page_keys=[], **kwargs):
+def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000'):
   """
-  Mimics mkdocs serve command.
+  Create live server
   """
 
   # Location of serve site
   tempdir = os.path.abspath(os.path.join(os.getenv('HOME'), '.local', 'share', 'moose', 'site'))
 
   # Clean the "temp" directory (if desired)
-  if clean and os.path.exists(tempdir):
+  if os.path.exists(tempdir):
     log.info('Cleaning build directory: {}'.format(tempdir))
     shutil.rmtree(tempdir)
 
@@ -41,21 +37,29 @@ def serve(config_file='mkdocs.yml', strict=None, livereload='dirtyreload', clean
   if not os.path.exists(tempdir):
     os.makedirs(tempdir)
 
-  def builder(**kwargs):
-    clean = kwargs.pop('clean', livereload != 'dirtyreload')
-    live_server = livereload in ['dirtyreload', 'livereload']
-    config = build.build(live_server=live_server, site_dir=tempdir,  pages=pages, page_keys=page_keys, clean_site_dir=clean, **kwargs)
-    return config
-
   # Perform the initial build
   log.info("Building documentation...")
-  config = builder(clean=clean, **kwargs)
-  host, port = config['dev_addr'].split(':', 1)
 
-  try:
-    if livereload in ['livereload', 'dirtyreload']:
-      mkdocs.commands.serve._livereload(host, port, config, builder, tempdir)
-    else:
-      mkdocs.commands.serve._static_server(host, port, tempdir)
-  finally:
-    log.info("Finished serving local site.")
+  # Wrapper for building complete website
+  def build_complete():
+    return build.build(config_file=config_file, site_dir=tempdir)
+  config, parser, builder = build_complete()
+
+  # Start the live server
+  server = livereload.Server()
+
+  # Watch markdown files
+  for page in builder:
+    server.watch(page.filename, page.build)
+
+  # Watch support directories
+  server.watch(os.path.join(os.getcwd(), 'media'), builder.copyFiles)
+  server.watch(os.path.join(os.getcwd(), 'css'), builder.copyFiles)
+  server.watch(os.path.join(os.getcwd(), 'js'), builder.copyFiles)
+  server.watch(os.path.join(os.getcwd(), 'fonts'), builder.copyFiles)
+
+  # Watch the pages file
+  server.watch(config['pages'], build_complete)
+
+  # Start the server
+  server.serve(root=config['site_dir'], host=host, port=port, restart_delay=0)

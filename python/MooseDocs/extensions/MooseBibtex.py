@@ -25,7 +25,6 @@ class MooseBibtex(Preprocessor):
     Preprocessor.__init__(self, **kwargs)
 
     self._citations = []
-    self._bibtex = BibliographyData()
     self._root = root
 
   def run(self, lines):
@@ -35,6 +34,10 @@ class MooseBibtex(Preprocessor):
 
     # Join the content to enable regex searches throughout entire text
     content = '\n'.join(lines)
+
+    # Re-create the data object, this must be done each time too not get duplicate data,
+    # it also must be a member variable be cause the 'authors' substitution function uses it.
+    self._bibtex = BibliographyData()
 
     # Build the database of bibtex data
     bibfiles = []

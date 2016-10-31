@@ -216,7 +216,7 @@ A full slideshow example might be:
     media/memory_*.png
 ```
 
-!slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
+!slideshow caption=My caption with spaces
     media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
     media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
     media/memory_*.png
