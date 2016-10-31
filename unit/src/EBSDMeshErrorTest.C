@@ -36,7 +36,6 @@ void
 EBSDMeshErrorTest::tearDown()
 {
   delete _app;
-  _app = NULL;
 }
 
 
@@ -52,7 +51,7 @@ EBSDMeshErrorTest::fileDoesNotExist()
   params.set<FileName>("filename") = "FILEDOESNOTEXIST";
 
   // construct mesh object
-  EBSDMesh * mesh = new EBSDMesh(params);
+  std::unique_ptr<EBSDMesh> mesh(new EBSDMesh(params));
 
   try
   {
@@ -64,9 +63,6 @@ EBSDMeshErrorTest::fileDoesNotExist()
     std::string msg(e.what());
     CPPUNIT_ASSERT( msg.find("Can't open EBSD file: FILEDOESNOTEXIST") != std::string::npos );
   }
-
-  // delete mesh object
-  delete mesh;
 }
 
 void
@@ -98,7 +94,7 @@ EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
   params.set<unsigned int>("uniform_refine") = 2;
 
   // construct mesh object
-  EBSDMesh * mesh = new EBSDMesh(params);
+  std::unique_ptr<EBSDMesh> mesh(new EBSDMesh(params));
 
   try
   {
@@ -110,9 +106,6 @@ EBSDMeshErrorTest::headerErrorHelper(const char * filename, const char * error)
     std::string msg(e.what());
     CPPUNIT_ASSERT_MESSAGE( filename, msg.find(error) != std::string::npos );
   }
-
-  // delete mesh object
-  delete mesh;
 }
 
 void
@@ -153,8 +146,7 @@ EBSDMeshErrorTest::testParam(unsigned int nparam, const char ** param_list, std:
     try
     {
       // construct mesh object
-      EBSDMesh * mesh = new EBSDMesh(params);
-      delete mesh;
+      std::unique_ptr<EBSDMesh> mesh(new EBSDMesh(params));
     }
     catch(const std::exception & e)
     {
