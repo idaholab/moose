@@ -713,7 +713,7 @@ FEProblemBase::checkNonlocalCoupling()
 }
 
 void
-FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
+FEProblem::checkUserObjectJacobianRequirement(THREAD_ID tid)
 {
   std::set<MooseVariable *> uo_jacobian_moose_vars;
   const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveObjects(tid);
@@ -724,6 +724,17 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
     {
       _calculate_jacobian_in_uo = shape_element_uo->computeJacobianFlag();
       const std::set<MooseVariable *> & mv_deps = shape_element_uo->jacobianMooseVariables();
+      uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+  }
+  const std::vector<MooseSharedPointer<SideUserObject> > & s_objects = _side_user_objects.getActiveObjects(tid);
+  for (const auto & uo : s_objects)
+  {
+    MooseSharedPointer<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
+    if (shape_side_uo)
+    {
+      _calculate_jacobian_in_uo = shape_side_uo->computeJacobianFlag();
+      const std::set<MooseVariable *> & mv_deps = shape_side_uo->jacobianMooseVariables();
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
