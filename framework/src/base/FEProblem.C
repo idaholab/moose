@@ -762,6 +762,17 @@ FEProblem::checkUserObjectJacobianRequirement(THREAD_ID tid)
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
+  const std::vector<MooseSharedPointer<SideUserObject> > & s_objects = _side_user_objects.getActiveObjects(tid);
+  for (const auto & uo : s_objects)
+  {
+    MooseSharedPointer<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
+    if (shape_side_uo)
+    {
+      _calculate_jacobian_in_uo = shape_side_uo->computeJacobianFlag();
+      const std::set<MooseVariable *> & mv_deps = shape_side_uo->jacobianMooseVariables();
+      uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+  }
   _uo_jacobian_moose_vars[tid].assign(uo_jacobian_moose_vars.begin(), uo_jacobian_moose_vars.end());
   std::sort(_uo_jacobian_moose_vars[tid].begin(), _uo_jacobian_moose_vars[tid].end(), sortMooseVariables);
 }
