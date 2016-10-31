@@ -54,6 +54,8 @@ void
 IdealGasFluidPropertiesTest::tearDown()
 {
   delete _fe_problem;
+  delete _mesh;
+  delete _app;
 }
 
 void
