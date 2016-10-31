@@ -78,6 +78,16 @@
     abs_zero = 1e-6
   [../]
 
+  [./testperiodic_dp]
+    type = 'Exodiff'
+    input = 'periodic_bc_displaced_problem.i'
+    exodiff = 'out_displaced_problem.e'
+    group = 'periodic'
+    abs_zero = 1e-6
+    max_parallel = 2
+    min_parallel = 2
+  [../]
+
   [./testtrapezoid]
     type = 'Exodiff'
     input = 'trapezoid.i'
