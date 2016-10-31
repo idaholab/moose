@@ -36,7 +36,7 @@ ParsedFunctionTest::init()
   InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
   mesh_params.set<MooseEnum>("dim") = "3";
   mesh_params.set<std::string>("_object_name") = "mesh";
-  _mesh = new GeneratedMesh(mesh_params); // deleted by ~FEProblem
+  _mesh = new GeneratedMesh(mesh_params);
 
   InputParameters problem_params = _factory->getValidParams("FEProblem");
   problem_params.set<MooseMesh *>("mesh") = _mesh;
@@ -48,13 +48,8 @@ void
 ParsedFunctionTest::finalize()
 {
   delete _fe_problem;
-  _fe_problem = NULL;
-
-  delete _app;
-  _app = NULL;
-
   delete _mesh;
-  _mesh = NULL;
+  delete _app;
 }
 
 

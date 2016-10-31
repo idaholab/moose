@@ -125,5 +125,8 @@ void ExpressionBuilderTest::test()
     s[1] = new EBTermSubstitution(y, a);
     w.substitute(s);
     CPPUNIT_ASSERT( std::string(w) == "if" "(y<1,y*1,y/1)" );
+
+    delete s[0];
+    delete s[1];
   }
 }
