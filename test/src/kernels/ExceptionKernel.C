@@ -91,5 +91,5 @@ ExceptionKernel::computeQpJacobian()
 bool
 ExceptionKernel::time_to_throw()
 {
-  return (_t_step==1 && _fe_problem.getNonlinearSystem().getCurrentNonlinearIterationNumber()==1);
+  return (_t_step==1 && _fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber()==1);
 }

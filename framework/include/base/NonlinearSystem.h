@@ -40,7 +40,7 @@ public:
    * Returns the current nonlinear iteration number.  In libmesh, this is
    * updated during the nonlinear solve, so it should be up-to-date.
    */
-  unsigned int getCurrentNonlinearIterationNumber() { return _transient_sys.get_current_nonlinear_iteration_number(); }
+  virtual unsigned int getCurrentNonlinearIterationNumber() override { return _transient_sys.get_current_nonlinear_iteration_number(); }
 
   virtual void setupFiniteDifferencedPreconditioner() override;
 

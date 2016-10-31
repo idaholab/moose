@@ -516,7 +516,7 @@ void FEProblem::initialSetup()
   // Auxilary variable initialSetup calls
   _aux.initialSetup();
 
-  _nl.setSolution(*(_nl.sys().current_local_solution.get()));
+  _nl.setSolution(*(_nl.system().current_local_solution.get()));
 
   Moose::perf_log.push("Initial updateGeomSearch()", "Setup");
   // Update the nearest node searches (has to be called after the problem is all set up)
@@ -1426,7 +1426,7 @@ FEProblem::addVariable(const std::string & var_name, const FEType & type, Real s
 
   if (_nl.hasVariable(var_name))
   {
-    const Variable & var = _nl.sys().variable(_nl.sys().variable_number(var_name));
+    const Variable & var = _nl.system().variable(_nl.system().variable_number(var_name));
     if (var.type() != type)
       mooseError("Variable with name '" << var_name << "' already exists but is of a differing type!");
 
@@ -1847,7 +1847,7 @@ FEProblem::projectSolution()
   Moose::enableFPE(false);
 
   _nl.solution().close();
-  _nl.solution().localize(*_nl.sys().current_local_solution, _nl.dofMap().get_send_list());
+  _nl.solution().localize(*_nl.system().current_local_solution, _nl.dofMap().get_send_list());
 
   _aux.solution().close();
   _aux.solution().localize(*_aux.sys().current_local_solution, _aux.dofMap().get_send_list());
@@ -2526,7 +2526,7 @@ FEProblem::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup &
   // Execute Elemental/Side/InternalSideUserObjects
   if (elemental.hasActiveObjects() || side.hasActiveObjects() || internal_side.hasActiveObjects())
   {
-    ComputeUserObjectsThread cppt(*this, getNonlinearSystem(), elemental, side, internal_side);
+    ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), elemental, side, internal_side);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
   }
 
@@ -3457,9 +3457,9 @@ FEProblem::addPredictor(const std::string & type, const std::string & name, Inpu
 Real
 FEProblem::computeResidualL2Norm()
 {
-  computeResidualType(*_nl.currentSolution(), *_nl.sys().rhs);
+  computeResidualType(*_nl.currentSolution(), _nl.RHS());
 
-  return _nl.sys().rhs->l2_norm();
+  return _nl.RHS().l2_norm();
 }
 
 void
@@ -3483,12 +3483,31 @@ FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector
 }
 
 void
+FEProblem::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
+{
+  try
+  {
+    computeResidualType(soln, residual, _kernel_type);
+  }
+  catch (MooseException & e)
+  {
+    // If a MooseException propagates all the way to here, it means
+    // that it was thrown from a MOOSE system where we do not
+    // (currently) properly support the throwing of exceptions, and
+    // therefore we have no choice but to error out.  It may be
+    // *possible* to handle exceptions from other systems, but in the
+    // meantime, we don't want to silently swallow any unhandled
+    // exceptions here.
+    mooseError("An unhandled MooseException was raised during residual computation.  Please contact the MOOSE team for assistance.");
+  }
+}
+
+void
 FEProblem::computeTransientImplicitResidual(Real time, const NumericVector<Number> & u, const NumericVector<Number> & udot, NumericVector<Number> & residual)
 {
   _nl.setSolutionUDot(udot);
-  NonlinearImplicitSystem &sys = _nl.sys();
   _time = time;
-  computeResidual(sys, u, residual);
+  computeResidual(u, residual);
 }
 
 void
@@ -3613,6 +3632,67 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
   }
 }
 
+
+void
+FEProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
+{
+  if (!_has_jacobian || !_const_jacobian)
+  {
+    _nl.setSolution(soln);
+
+    _nl.zeroVariablesForJacobian();
+    _aux.zeroVariablesForJacobian();
+
+    unsigned int n_threads = libMesh::n_threads();
+
+    // Random interface objects
+    for (const auto & it : _random_data_objects)
+      it.second->updateSeeds(EXEC_NONLINEAR);
+
+    _currently_computing_jacobian = true;
+
+    execTransfers(EXEC_NONLINEAR);
+    execMultiApps(EXEC_NONLINEAR);
+
+    for (unsigned int tid = 0; tid < n_threads; tid++)
+      reinitScalars(tid);
+
+    computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
+
+    if (_displaced_problem != NULL)
+      _displaced_problem->updateMesh();
+
+    for (unsigned int tid = 0; tid < n_threads; tid++)
+    {
+      _all_materials.jacobianSetup(tid);
+      _functions.jacobianSetup(tid);
+    }
+
+    _aux.jacobianSetup();
+
+    _aux.compute(EXEC_NONLINEAR);
+
+    computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
+
+    executeControls(EXEC_NONLINEAR);
+
+    _app.getOutputWarehouse().jacobianSetup();
+
+    _nl.computeJacobian(jacobian);
+
+    _currently_computing_jacobian = false;
+    _has_jacobian = true;
+  }
+
+  if (_solver_params._type == Moose::ST_JFNK || _solver_params._type == Moose::ST_PJFNK)
+  {
+    // This call is here to make sure the residual vector is up to date with any decisions that have been made in
+    // the Jacobian evaluation.  That is important in JFNK because that residual is used for finite differencing
+    computeResidual(soln, _nl.RHS());
+    _nl.RHS().close();
+  }
+}
+
 void
 FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Number> & u, const NumericVector<Number> & udot, Real shift, SparseMatrix<Number> & jacobian)
 {
@@ -3621,9 +3701,8 @@ FEProblem::computeTransientImplicitJacobian(Real time, const NumericVector<Numbe
     _nl.setSolutionUDot(udot);
   }
   _nl.duDotDu() = shift;
-  NonlinearImplicitSystem &sys = _nl.sys();
   _time = time;
-  computeJacobian(sys,u,jacobian);
+  computeJacobian(u,jacobian);
 }
 
 
@@ -4340,7 +4419,7 @@ FEProblem::checkNonlinearConvergence(std::string &msg,
                                      const Real initial_residual_before_preset_bcs,
                                      const Real div_threshold)
 {
-  NonlinearSystem & system = getNonlinearSystem();
+  NonlinearSystemBase & system = getNonlinearSystemBase();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
 
   // This is the first residual before any iterations have been done,
@@ -4424,7 +4503,7 @@ FEProblem::checkLinearConvergence(std::string & /*msg*/,
   MooseLinearConvergenceReason reason = MOOSE_LINEAR_ITERATING;
 
   // Get a reference to our Nonlinear System
-  NonlinearSystem & system = getNonlinearSystem();
+  NonlinearSystemBase & system = getNonlinearSystemBase();
 
   // If it's the beginning of a new set of iterations, reset
   // last_rnorm, otherwise record the most recent linear residual norm

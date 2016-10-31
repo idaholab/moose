@@ -319,7 +319,7 @@ DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & ba
   std::vector<VariableName> missing;
 
   // iterate over all variables in the both the non-linear and auxiliary system (optional)
-  validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getNonlinearSystem().system(), missing);
+  validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getNonlinearSystemBase().system(), missing);
   if (validate_aux)
     validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getAuxiliarySystem().system(), missing);
 

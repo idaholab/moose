@@ -30,7 +30,7 @@
 
 ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type) :
     ThreadedElementLoop<ConstElemRange>(fe_problem),
-    _nl(fe_problem.getNonlinearSystem()),
+    _nl(fe_problem.getNonlinearSystemBase()),
     _kernel_type(type),
     _num_cached(0),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),

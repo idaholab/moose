@@ -205,8 +205,8 @@ petscSetOptions(FEProblem & problem)
     setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
   // set up DM which is required if use a field split preconditioner
-  if (problem.getNonlinearSystem().haveFieldSplitPreconditioner())
-    petscSetupDM(problem.getNonlinearSystem());
+  if (problem.getNonlinearSystemBase().haveFieldSplitPreconditioner())
+    petscSetupDM(problem.getNonlinearSystemBase());
 
   // commandline options always win
   // the options from a user commandline will overwrite the existing ones if any conflicts
@@ -327,7 +327,7 @@ PetscErrorCode
 petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
   FEProblem & problem = *static_cast<FEProblem *>(ctx);
-  NonlinearSystemBase & system = problem.getNonlinearSystem();
+  NonlinearSystemBase & system = problem.getNonlinearSystemBase();
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -449,7 +449,7 @@ void
 petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
-  NonlinearSystemBase & nl = problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
   PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   KSP ksp;

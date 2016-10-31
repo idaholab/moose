@@ -92,7 +92,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
-    if (_fe_problem.getNonlinearSystem().hasVariable(_save_in_strings[i]))
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
       mooseError("Trying to use solution variable "+_save_in_strings[i]+" as a save_in variable in "+name());
 
     if (var->feType() != _var.feType())
@@ -110,7 +110,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
-    if (_fe_problem.getNonlinearSystem().hasVariable(_diag_save_in_strings[i]))
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
       mooseError("Trying to use solution variable "+_diag_save_in_strings[i]+" as a diag_save_in variable in "+name());
 
     if (var->feType() != _var.feType())

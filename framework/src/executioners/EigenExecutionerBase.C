@@ -49,7 +49,7 @@ EigenExecutionerBase::eigenvalueOld()
 EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
     Executioner(parameters),
     _problem(_fe_problem),
-    _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystem())),
+    _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystemBase())),
     _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
     _source_integral(getPostprocessorValue("bx_norm")),
     _source_integral_old(1),
@@ -236,7 +236,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     // Important: we do not call _problem.advanceState() because we do not
     // want to overwrite the old postprocessor values and old material
     // properties in stateful materials.
-    _problem.getNonlinearSystem().copyOldSolutions();
+    _problem.getNonlinearSystemBase().copyOldSolutions();
     _problem.getAuxiliarySystem().copyOldSolutions();
     if (_problem.getDisplacedProblem() != NULL)
     {

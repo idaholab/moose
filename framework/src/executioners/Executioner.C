@@ -104,9 +104,9 @@ Executioner::Executioner(const InputParameters & parameters) :
   es.parameters.set<Real> ("nonlinear solver relative step tolerance")
     = getParam<Real>("nl_rel_step_tol");
 
-  _fe_problem.getNonlinearSystem()._compute_initial_residual_before_preset_bcs = getParam<bool>("compute_initial_residual_before_preset_bcs");
+  _fe_problem.getNonlinearSystemBase()._compute_initial_residual_before_preset_bcs = getParam<bool>("compute_initial_residual_before_preset_bcs");
 
-  _fe_problem.getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
+  _fe_problem.getNonlinearSystemBase()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
 }
 
 Executioner::~Executioner()

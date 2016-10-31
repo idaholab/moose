@@ -107,7 +107,7 @@ outputAuxiliarySystemInformation(FEProblem & problem)
 std::string
 outputNonlinearSystemInformation(FEProblem & problem)
 {
-  return outputSystemInformationHelper(problem.getNonlinearSystem().system());
+  return outputSystemInformationHelper(problem.getNonlinearSystemBase().system());
 }
 
 

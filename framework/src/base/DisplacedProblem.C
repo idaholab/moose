@@ -42,7 +42,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters) :
     _eq(_mesh),
     _ref_mesh(_mproblem.mesh()),
     _displacements(getParam<std::vector<std::string> >("displacements")),
-    _displaced_nl(*this, _mproblem.getNonlinearSystem(), _mproblem.getNonlinearSystem().name() + "_displaced", Moose::VAR_NONLINEAR),
+    _displaced_nl(*this, _mproblem.getNonlinearSystemBase(), _mproblem.getNonlinearSystemBase().name() + "_displaced", Moose::VAR_NONLINEAR),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh)
 {
@@ -135,7 +135,7 @@ DisplacedProblem::restoreOldSolutions()
 void
 DisplacedProblem::syncSolutions()
 {
-  (*_displaced_nl.sys().solution) = *_mproblem.getNonlinearSystem().currentSolution();
+  (*_displaced_nl.sys().solution) = *_mproblem.getNonlinearSystemBase().currentSolution();
   (*_displaced_aux.sys().solution) = *_mproblem.getAuxiliarySystem().currentSolution();
   _displaced_nl.update();
   _displaced_aux.update();
@@ -162,7 +162,7 @@ DisplacedProblem::updateMesh()
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i]->invalidateCache();
 
-  _nl_solution = _mproblem.getNonlinearSystem().currentSolution();
+  _nl_solution = _mproblem.getNonlinearSystemBase().currentSolution();
   _aux_solution = _mproblem.getAuxiliarySystem().currentSolution();
 
   UpdateDisplacedMeshThread udmt(_mproblem, *this);

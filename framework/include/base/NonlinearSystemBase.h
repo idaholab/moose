@@ -73,6 +73,8 @@ public:
 
   virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
 
+  virtual unsigned int getCurrentNonlinearIterationNumber() = 0;
+
   /**
    * Returns true if this system is currently computing the initial residual for a solve.
    * @return Whether or not we are currently computing the initial residual.

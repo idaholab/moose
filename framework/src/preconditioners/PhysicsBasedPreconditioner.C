@@ -49,7 +49,7 @@ InputParameters validParams<PhysicsBasedPreconditioner>()
 PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & params) :
     MoosePreconditioner(params),
     Preconditioner<Number>(MoosePreconditioner::_communicator),
-    _nl(_fe_problem.getNonlinearSystem())
+    _nl(_fe_problem.getNonlinearSystemBase())
 {
   unsigned int num_systems = _nl.system().n_vars();
   _systems.resize(num_systems);
@@ -59,7 +59,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
   _pre_type.resize(num_systems);
 
   { // Setup the Coupling Matrix so MOOSE knows what we're doing
-    NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem();
+    NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
     unsigned int n_vars = nl.nVariables();
 
     // The coupling matrix is held and released by FEProblem, so it is not released in this object

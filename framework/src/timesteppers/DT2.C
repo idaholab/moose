@@ -16,7 +16,7 @@
 #include "DT2.h"
 #include "FEProblem.h"
 #include "TimeIntegrator.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 //libMesh includes
 #include "libmesh/implicit_system.h"
@@ -61,29 +61,29 @@ void
 DT2::preExecute()
 {
   TimeStepper::preExecute();
-  TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
-  _u1 = &nl_sys.add_vector("u1", true, GHOSTED);
-  _u2 = &nl_sys.add_vector("u2", false, GHOSTED);
-  _u_diff = &nl_sys.add_vector("u_diff", false, GHOSTED);
+  System & nl_sys = _fe_problem.getNonlinearSystemBase().system();
+  _u1 = & nl_sys.add_vector("u1", true, GHOSTED);
+  _u2 = & nl_sys.add_vector("u2", false, GHOSTED);
+  _u_diff = & nl_sys.add_vector("u_diff", false, GHOSTED);
 
-  _u_saved = &nl_sys.add_vector("u_saved", false, GHOSTED);
-  _u_older_saved = &nl_sys.add_vector("u_older_saved", false, GHOSTED);
+  _u_saved = & nl_sys.add_vector("u_saved", false, GHOSTED);
+  _u_older_saved = & nl_sys.add_vector("u_older_saved", false, GHOSTED);
 
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
-  _aux1 = &aux_sys.add_vector("aux1", true, GHOSTED);
-  _aux_saved = &aux_sys.add_vector("aux_saved", false, GHOSTED);
-  _aux_older_saved = &aux_sys.add_vector("aux_older_saved", false, GHOSTED);
+  _aux1 = & aux_sys.add_vector("aux1", true, GHOSTED);
+  _aux_saved = & aux_sys.add_vector("aux_saved", false, GHOSTED);
+  _aux_older_saved = & aux_sys.add_vector("aux_older_saved", false, GHOSTED);
 }
 
 void
 DT2::preSolve()
 {
-  TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
+  NonlinearSystemBase & nl_sys = _fe_problem.getNonlinearSystemBase();
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
 
   // save solution vectors
-  *_u_saved = *nl_sys.current_local_solution;
-  *_u_older_saved = *nl_sys.older_local_solution;
+  *_u_saved = * nl_sys.currentSolution();
+  *_u_older_saved = nl_sys.solutionOlder();
 
   *_aux_saved = *aux_sys.current_local_solution;
   *_aux_older_saved = *aux_sys.older_local_solution;
@@ -97,8 +97,8 @@ DT2::preSolve()
 void
 DT2::step()
 {
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem(); // returned reference is not used for anything?
-  TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+  System & nl_sys = nl.system();
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
 
   // solve the problem with full dt
@@ -107,7 +107,7 @@ DT2::step()
   if (_converged)
   {
     // save the solution (for time step with dt)
-    *_u1 = *nl_sys.current_local_solution;
+    *_u1 = *nl.currentSolution();
     _u1->close();
     *_aux1 = *aux_sys.current_local_solution;
     _aux1->close();
@@ -181,16 +181,16 @@ DT2::step()
     if (!_converged)
     {
       *nl_sys.current_local_solution= *_u1;
-      *nl_sys.old_local_solution = *_u1;
-      *nl_sys.older_local_solution = *_u_saved;
+      nl.solutionOld() = *_u1;
+      nl.solutionOlder() = *_u_saved;
 
       *aux_sys.current_local_solution = *_aux1;
       *aux_sys.old_local_solution = *_aux1;
       *aux_sys.older_local_solution = *_aux_saved;
 
       nl_sys.current_local_solution->close();
-      nl_sys.old_local_solution->close();
-      nl_sys.older_local_solution->close();
+      nl.solutionOld().close();
+      nl.solutionOlder().close();
       aux_sys.current_local_solution->close();
       aux_sys.old_local_solution->close();
       aux_sys.older_local_solution->close();
@@ -208,7 +208,7 @@ Real
 DT2::computeDT()
 {
   Real curr_dt = getCurrentDT();
-  Real new_dt = curr_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
+  Real new_dt = curr_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystemBase().getTimeIntegrator()->order());
   if (new_dt / curr_dt > _max_increase)
     new_dt = curr_dt * _max_increase;
 
@@ -222,21 +222,22 @@ DT2::rejectStep()
     _console << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) = "
                << _error << " >= e_max." << std::endl;
 
-  TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+  System & nl_sys = nl.system();
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
 
   // recover initial state
   *nl_sys.current_local_solution = *_u_saved;
-  *nl_sys.old_local_solution = *_u_saved;
-  *nl_sys.older_local_solution = *_u_older_saved;
+  nl.solutionOld() = *_u_saved;
+  nl.solutionOlder() = *_u_older_saved;
 
   *aux_sys.current_local_solution = *_aux_saved;
   *aux_sys.old_local_solution = *_aux_saved;
   *aux_sys.older_local_solution = *_aux_older_saved;
 
   nl_sys.solution->close();
-  nl_sys.old_local_solution->close();
-  nl_sys.older_local_solution->close();
+  nl.solutionOld().close();
+  nl.solutionOlder().close();
   aux_sys.solution->close();
   aux_sys.old_local_solution->close();
   aux_sys.older_local_solution->close();

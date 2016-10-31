@@ -133,7 +133,7 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose"))
 {
-  _problem.getNonlinearSystem().setDecomposition(_splitting);
+  _problem.getNonlinearSystemBase().setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
@@ -642,7 +642,7 @@ Transient::keepGoing()
     else // Keep going
     {
       // Update solution norm for next time step
-      _old_time_solution_norm = _problem.getNonlinearSystem().currentSolution()->l2_norm();
+      _old_time_solution_norm = _problem.getNonlinearSystemBase().currentSolution()->l2_norm();
       // Print steady-state relative error norm
       _console << "Steady-State Relative Differential Norm: " << _sln_diff_norm << std::endl;
     }

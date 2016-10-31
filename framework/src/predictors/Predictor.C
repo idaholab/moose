@@ -37,7 +37,7 @@ Predictor::Predictor(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "Predictors"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _nl(_fe_problem.getNonlinearSystem()),
+    _nl(_fe_problem.getNonlinearSystemBase()),
 
     _t_step(_fe_problem.timeStep()),
     _dt(_fe_problem.dt()),

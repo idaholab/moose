@@ -67,10 +67,10 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
 {
   bool updatedSolution = false;  // this gets set to true if we needed to enforce the bound at any node
 
-  unsigned int sys_num = getNonlinearSystem().number();
+  unsigned int sys_num = getNonlinearSystemBase().number();
 
   // For parallel procs i believe that i have to use local_nodes_begin, rather than just nodes_begin
-  // _mesh comes from SystemBase (_mesh = getNonlinearSystem().subproblem().mesh(), and subproblem is this object)
+  // _mesh comes from SystemBase (_mesh = getNonlinearSystemBase().subproblem().mesh(), and subproblem is this object)
   MeshBase::node_iterator nit = _mesh.getMesh().local_nodes_begin();
   const MeshBase::node_iterator nend = _mesh.getMesh().local_nodes_end();
 

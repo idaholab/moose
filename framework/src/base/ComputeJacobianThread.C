@@ -29,7 +29,7 @@
 ComputeJacobianThread::ComputeJacobianThread(FEProblem & fe_problem, SparseMatrix<Number> & jacobian) :
     ThreadedElementLoop<ConstElemRange>(fe_problem),
     _jacobian(jacobian),
-    _nl(fe_problem.getNonlinearSystem()),
+    _nl(fe_problem.getNonlinearSystemBase()),
     _num_cached(0),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),

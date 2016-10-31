@@ -30,7 +30,7 @@ ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
                                        SparseMatrix<Number> * jacobian) :
     ThreadedElementLoop<DistElemRange>(feproblem),
     _jacobian(jacobian),
-    _nl(feproblem.getNonlinearSystem()),
+    _nl(feproblem.getNonlinearSystemBase()),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
 {}
 

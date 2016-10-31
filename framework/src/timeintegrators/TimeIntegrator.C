@@ -30,7 +30,7 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters) :
     Restartable(parameters, "TimeIntegrators"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
-    _nl(_fe_problem.getNonlinearSystem()),
+    _nl(_fe_problem.getNonlinearSystemBase()),
     _u_dot(_sys.solutionUDot()),
     _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),

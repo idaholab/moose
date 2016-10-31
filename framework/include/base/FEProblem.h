@@ -38,7 +38,7 @@
 class DisplacedProblem;
 class FEProblem;
 class MooseMesh;
-class NonlinearSystem;
+class NonlinearSystemBase;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
@@ -447,7 +447,7 @@ public:
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
-  NonlinearSystem & getNonlinearSystem() { return _nl; }
+  NonlinearSystemBase & getNonlinearSystemBase() { return _nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
@@ -703,10 +703,11 @@ public:
    */
   virtual Real computeResidualL2Norm();
 
-  virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual );
+  virtual void computeResidual(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, NumericVector<Number> & residual);
+  virtual void computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeResidualType(const NumericVector<Number> & soln, NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
-
+  virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian);
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
    *
@@ -1080,7 +1081,7 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
   AuxiliarySystem _aux;
 
   Moose::CouplingType _coupling;                        ///< Type of variable coupling

@@ -25,7 +25,7 @@
 ComputeElemDampingThread::ComputeElemDampingThread(FEProblem & feproblem) :
     ThreadedElementLoop<ConstElemRange>(feproblem),
     _damping(1.0),
-    _nl(feproblem.getNonlinearSystem()),
+    _nl(feproblem.getNonlinearSystemBase()),
     _element_dampers(_nl.getElementDamperWarehouse())
 {
 }

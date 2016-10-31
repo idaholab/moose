@@ -36,7 +36,7 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_proble
                                                            std::vector<Assembly *> & assembly) :
 ThreadedElementLoop<ConstElemRange>(fe_problem),
   _fe_problem(fe_problem),
-  _nl(fe_problem.getNonlinearSystem()),
+  _nl(fe_problem.getNonlinearSystemBase()),
   _material_data(material_data),
   _bnd_material_data(bnd_material_data),
   _neighbor_material_data(neighbor_material_data),

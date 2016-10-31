@@ -46,7 +46,7 @@ void
 RigidBodyModesRZ::execute()
 {
   // Currently this only works for Lagrange displacement variables!
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   const Node& node = *_current_node;
   // z-translation mode
   {
@@ -64,7 +64,7 @@ void
 RigidBodyModesRZ::finalize()
 {
   // Close the basis vectors
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   for (unsigned int i = 0; i < _subspace_indices.size(); ++i) {
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i];

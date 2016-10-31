@@ -23,7 +23,7 @@ InputParameters validParams<EBSDReader>()
 EBSDReader::EBSDReader(const InputParameters & params) :
     EulerAngleProvider(params),
     _mesh(_fe_problem.mesh()),
-    _nl(_fe_problem.getNonlinearSystem()),
+    _nl(_fe_problem.getNonlinearSystemBase()),
     _grain_num(0),
     _custom_columns(getParam<unsigned int>("custom_columns")),
     _time_step(_fe_problem.timeStep()),

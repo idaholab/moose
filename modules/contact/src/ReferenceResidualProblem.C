@@ -46,7 +46,7 @@ ReferenceResidualProblem::~ReferenceResidualProblem()
 void
 ReferenceResidualProblem::initialSetup()
 {
-  NonlinearSystemBase & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   System & s = nonlinear_sys.system();
   TransientExplicitSystem & as = aux_sys.sys();
@@ -111,7 +111,7 @@ ReferenceResidualProblem::timestepSetup()
 void
 ReferenceResidualProblem::updateReferenceResidual()
 {
-  NonlinearSystemBase & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   System & s = nonlinear_sys.system();
   TransientExplicitSystem & as = aux_sys.sys();
@@ -164,7 +164,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
                << std::endl;
   }
 
-  NonlinearSystemBase & system = getNonlinearSystem();
+  NonlinearSystemBase & system = getNonlinearSystemBase();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
   std::stringstream oss;
 

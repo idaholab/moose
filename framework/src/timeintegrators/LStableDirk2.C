@@ -74,7 +74,7 @@ LStableDirk2::solve()
   _console << "1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_stage1;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Compute second stage
   _fe_problem.initPetscOutput();
@@ -82,7 +82,7 @@ LStableDirk2::solve()
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;
   _fe_problem.time()    = time_new;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;

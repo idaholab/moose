@@ -134,7 +134,7 @@ AStableDirk4::solve()
       }
 
       // Do the solve
-      _fe_problem.getNonlinearSystem().sys().solve();
+      _fe_problem.getNonlinearSystemBase().system().solve();
     }
   }
 }

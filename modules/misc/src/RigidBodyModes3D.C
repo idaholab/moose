@@ -98,7 +98,7 @@ RigidBodyModes3D::execute()
 {
   // Set the appropriate dof of the selectedrigid body vectors
   // Currently this only works for Lagrange displacement variables!
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   const Node& node = *_current_node;
   unsigned int i = 0;
   // x-displacement mode
@@ -182,7 +182,7 @@ void
 RigidBodyModes3D::finalize()
 {
   // Close the basis vectors
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   for (unsigned int i = 0; i < _subspace_indices.size(); ++i) {
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i];

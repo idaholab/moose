@@ -17,7 +17,7 @@
 #include "Transient.h"
 #include "Predictor.h"
 #include "Factory.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 template<>
 InputParameters validParams<SetupPredictorAction>()
@@ -44,6 +44,6 @@ SetupPredictorAction::act()
     _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
     MooseSharedPointer<Predictor> predictor = _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);
-    _problem->getNonlinearSystem().setPredictor(predictor);
+    _problem->getNonlinearSystemBase().setPredictor(predictor);
   }
 }
