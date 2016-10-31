@@ -405,7 +405,7 @@ PredictorCorrectorStepper::advance(const StepperInfo * si, StepperFeedback *)
   if (si->step_count < _start_adapting)
     return l.val(si->prev_dt);
   if (si->soln_nonlin == nullptr || si->soln_predicted == nullptr)
-    throw "no predicted solution available";
+    mooseError("no predicted solution available");
 
   double error = estimateTimeError(si);
   double infnorm = si->soln_nonlin->linfty_norm();
