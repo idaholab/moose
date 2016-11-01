@@ -23,7 +23,8 @@ InputParameters validParams<EquationProblem>()
 }
 
 EquationProblem::EquationProblem(const InputParameters & parameters) :
-    FEProblem(parameters)
+    FEProblem(parameters),
+    _use_nonlinear(getParam<bool>("use_nonlinear"))
 {
 
 }

@@ -447,7 +447,7 @@ public:
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
-  NonlinearSystemBase & getNonlinearSystemBase() { return _nl; }
+  NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
@@ -1081,7 +1081,7 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  NonlinearSystemBase & _nl;
+  NonlinearSystemBase * _nl;
   AuxiliarySystem _aux;
 
   Moose::CouplingType _coupling;                        ///< Type of variable coupling

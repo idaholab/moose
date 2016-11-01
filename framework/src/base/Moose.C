@@ -485,6 +485,7 @@ registerObjects(Factory & factory)
   registerProblem(DisplacedProblem);
   registerProblem(EquationProblem);
 
+
   // kernels
   registerKernel(TimeDerivative);
   registerKernel(CoupledTimeDerivative);
