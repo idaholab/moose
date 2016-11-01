@@ -365,10 +365,24 @@ Transient::computeDT(bool first)
   _si.converged = _last_solve_converged || first;
   _prev_dt = _si.prev_dt; // for restart
 
-  StepperFeedback sf = {};
-
   if (_stepper)
+  {
+    StepperFeedback sf = {};
     _new_dt = _stepper->advance(&_si, &sf);
+    //std::c out << "DT2: t=" << _time << ", new_dt=" << _new_dt << "\n";
+    if (sf.snapshot)
+    {
+      _snapshots[_time] = _app.backup();
+      //std::c out << "    DT2: snapshot\n";
+    }
+    if (sf.rewind)
+    {
+      //std::c out << "    DT2: rewind to t=" << sf.rewind_time << "\n";
+      _app.restore(_snapshots[sf.rewind_time]);
+      computeDT(); // recursive call necessary because rewind modifies state _si depends on
+      //std::c out << "    DT2: rewind complete\n";
+    }
+  }
 }
 
 void

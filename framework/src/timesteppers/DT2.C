@@ -17,6 +17,8 @@
 #include "FEProblem.h"
 #include "TimeIntegrator.h"
 #include "NonlinearSystem.h"
+#include "Stepper.h"
+#include "Transient.h"
 
 //libMesh includes
 #include "libmesh/implicit_system.h"
@@ -97,6 +99,8 @@ DT2::preSolve()
 void
 DT2::step()
 {
+  TimeStepper::step();
+  return;
   NonlinearSystem & nl = _fe_problem.getNonlinearSystem(); // returned reference is not used for anything?
   TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
@@ -252,4 +256,13 @@ DT2::converged()
     return true;
   else
     return false;
+}
+
+Stepper *
+DT2::buildStepper()
+{
+  Stepper * s = new DT2Stepper(_executioner.timestepTol(), _e_tol, _e_max, _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
+  s = new MaxRatioStepper(s, _max_increase);
+  s = new StartupStepper(s, getParam<Real>("dt"), _executioner.n_startup_steps());
+  return s;
 }

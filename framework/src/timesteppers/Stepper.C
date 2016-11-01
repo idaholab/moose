@@ -458,6 +458,7 @@ DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
   {
     // collect big dt soln and rewind to collect small dt solns
     _big_soln.reset(si->soln_nonlin->clone().release());
+    _big_soln->close();
     sf->rewind = true;
     sf->rewind_time = _start_time;
     return l.val((_end_time - _start_time) /
@@ -490,8 +491,11 @@ DT2Stepper::calcDT(const StepperInfo * si)
 {
   std::unique_ptr<NumericVector<Number>> small_soln(si->soln_nonlin->clone().release());
   std::unique_ptr<NumericVector<Number>> diff(si->soln_nonlin->clone().release());
-  *diff -= *_big_soln;
+  small_soln->close();
   diff->close();
+  //std::c out << "SPOTA\n";
+  *diff -= *_big_soln;
+  //std::c out << "SPOTB\n";
   double dt = _end_time - _start_time;
   double err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt;
   return dt * std::pow(_e_tol / err, 1.0 / _order);

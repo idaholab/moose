@@ -319,6 +319,7 @@ protected:
   std::vector<Real> & _soln_predicted;
   Real & _prev_dt;
   StepperInfo _si;
+  std::map<double, MooseSharedPointer<Backup>> _snapshots;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

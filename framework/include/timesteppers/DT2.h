@@ -47,6 +47,8 @@ public:
   virtual void rejectStep() override;
   virtual bool converged() override;
 
+  Stepper * buildStepper() override;
+
 protected:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
