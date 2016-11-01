@@ -15,8 +15,7 @@ ConstStepper::advance(const StepperInfo *, StepperFeedback *)
   return l.val(_dt);
 }
 
-DTLimitStepper::DTLimitStepper(Stepper * s, double dt_min, double dt_max,
-                               bool throw_err)
+DTLimitStepper::DTLimitStepper(Stepper * s, double dt_min, double dt_max, bool throw_err)
     : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err)
 {
 }
@@ -35,8 +34,7 @@ DTLimitStepper::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(dt);
 }
 
-BoundsStepper::BoundsStepper(Stepper * s, double t_min, double t_max,
-                             bool throw_err)
+BoundsStepper::BoundsStepper(Stepper * s, double t_min, double t_max, bool throw_err)
     : _stepper(s), _min(t_min), _max(t_max), _err(throw_err)
 {
 }
@@ -77,13 +75,9 @@ FixedPointStepper::advance(const StepperInfo * si, StepperFeedback *)
   return l.val(std::numeric_limits<double>::infinity());
 }
 
-AlternatingStepper::AlternatingStepper(Stepper * on_steps,
-                                       Stepper * between_steps,
+AlternatingStepper::AlternatingStepper(Stepper * on_steps, Stepper * between_steps,
                                        std::vector<double> times, double tol)
-    : _on_steps(on_steps),
-      _between_steps(between_steps),
-      _times(times),
-      _time_tol(tol)
+    : _on_steps(on_steps), _between_steps(between_steps), _times(times), _time_tol(tol)
 {
 }
 
@@ -99,8 +93,7 @@ AlternatingStepper::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(_between_steps->advance(si, sf));
 }
 
-MaxRatioStepper::MaxRatioStepper(Stepper * s, double max_ratio)
-    : _stepper(s), _max_ratio(max_ratio)
+MaxRatioStepper::MaxRatioStepper(Stepper * s, double max_ratio) : _stepper(s), _max_ratio(max_ratio)
 {
 }
 
@@ -130,8 +123,7 @@ EveryNStepper::advance(const StepperInfo * si, StepperFeedback * sf)
     return l.val(si->prev_dt);
 }
 
-ReturnPtrStepper::ReturnPtrStepper(const double * dt_store)
-    : _dt_store(dt_store)
+ReturnPtrStepper::ReturnPtrStepper(const double * dt_store) : _dt_store(dt_store)
 {
 }
 
@@ -202,8 +194,7 @@ RetryUnusedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(_prev_dt);
 }
 
-ConstrFuncStepper::ConstrFuncStepper(Stepper * s,
-                                     std::function<double(double)> func,
+ConstrFuncStepper::ConstrFuncStepper(Stepper * s, std::function<double(double)> func,
                                      double max_diff)
     : _stepper(s), _func(func), _max_diff(max_diff)
 {
@@ -224,8 +215,8 @@ ConstrFuncStepper::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(dt);
 }
 
-PiecewiseStepper::PiecewiseStepper(std::vector<double> times,
-                                   std::vector<double> dts, bool interpolate)
+PiecewiseStepper::PiecewiseStepper(std::vector<double> times, std::vector<double> dts,
+                                   bool interpolate)
     : _times(times), _dts(dts), _interp(interpolate), _lin(times, dts)
 {
 }
@@ -246,8 +237,7 @@ PiecewiseStepper::advance(const StepperInfo * si, StepperFeedback *)
   return l.val(_dts.back());
 }
 
-MinOfStepper::MinOfStepper(Stepper * a, Stepper * b, double tol)
-    : _a(a), _b(b), _tol(tol)
+MinOfStepper::MinOfStepper(Stepper * a, Stepper * b, double tol) : _a(a), _b(b), _tol(tol)
 {
 }
 
@@ -262,10 +252,8 @@ MinOfStepper::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(dtb);
 }
 
-AdaptiveStepper::AdaptiveStepper(unsigned int optimal_iters,
-                                 unsigned int iter_window,
-                                 double lin_iter_ratio, double shrink_factor,
-                                 double growth_factor)
+AdaptiveStepper::AdaptiveStepper(unsigned int optimal_iters, unsigned int iter_window,
+                                 double lin_iter_ratio, double shrink_factor, double growth_factor)
     : _optimal_iters(optimal_iters),
       _iter_window(iter_window),
       _lin_iter_ratio(lin_iter_ratio),
@@ -291,18 +279,16 @@ AdaptiveStepper::advance(const StepperInfo * si, StepperFeedback *)
     growth_l_its = _lin_iter_ratio * (_optimal_iters - _iter_window);
   }
 
-  if (can_grow &&
-      (si->nonlin_iters < growth_nl_its && si->lin_iters < growth_l_its))
+  if (can_grow && (si->nonlin_iters < growth_nl_its && si->lin_iters < growth_l_its))
     return l.val(si->prev_dt * _growth_factor);
-  else if (can_shrink && (!si->converged || si->nonlin_iters > shrink_nl_its ||
-                          si->lin_iters > shrink_l_its))
+  else if (can_shrink &&
+           (!si->converged || si->nonlin_iters > shrink_nl_its || si->lin_iters > shrink_l_its))
     return l.val(si->prev_dt * _shrink_factor);
   else
     return l.val(si->prev_dt);
 };
 
-SolveTimeAdaptiveStepper::SolveTimeAdaptiveStepper(int initial_direc,
-                                                   double percent_change)
+SolveTimeAdaptiveStepper::SolveTimeAdaptiveStepper(int initial_direc, double percent_change)
     : _percent_change(percent_change), _direc(initial_direc), _n_steps(0)
 {
 }
@@ -313,8 +299,7 @@ SolveTimeAdaptiveStepper::advance(const StepperInfo * si, StepperFeedback *)
   Logger l("SolveTimeAdaptive");
   double ratio = si->prev_solve_time_secs / si->prev_dt;
   double prev_ratio = si->prev_prev_solve_time_secs / si->prev_prev_dt;
-  double prev_prev_ratio =
-      si->prev_prev_prev_solve_time_secs / si->prev_prev_prev_dt;
+  double prev_prev_ratio = si->prev_prev_prev_solve_time_secs / si->prev_prev_prev_dt;
 
   _n_steps++;
   // this is this way in order to mirror original SolutionTimeAdaptiveDT
@@ -343,8 +328,8 @@ StartupStepper::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(_stepper->advance(si, sf));
 }
 
-IfConvergedStepper::IfConvergedStepper(Stepper * if_converged,
-                                       Stepper * if_not_converged, bool delay)
+IfConvergedStepper::IfConvergedStepper(Stepper * if_converged, Stepper * if_not_converged,
+                                       bool delay)
     : _converged(if_converged), _not_converged(if_not_converged), _delay(delay)
 {
 }
@@ -361,9 +346,7 @@ IfConvergedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 
 GrowShrinkStepper::GrowShrinkStepper(double shrink_factor, double growth_factor,
                                      Stepper * source_dt)
-    : _grow_fac(growth_factor),
-      _shrink_fac(shrink_factor),
-      _source_dt(source_dt)
+    : _grow_fac(growth_factor), _shrink_fac(shrink_factor), _source_dt(source_dt)
 {
 }
 
@@ -381,12 +364,13 @@ GrowShrinkStepper::advance(const StepperInfo * si, StepperFeedback * sf)
     return l.val(dt_init * _grow_fac);
 }
 
-PredictorCorrectorStepper::PredictorCorrectorStepper(int start_adapting,
-                                                     double e_tol,
-                                                     double scaling_param)
+PredictorCorrectorStepper::PredictorCorrectorStepper(int start_adapting, double e_tol,
+                                                     double scaling_param,
+                                                     std::string time_integrator)
     : _start_adapting(start_adapting),
       _e_tol(e_tol),
-      _scale_param(scaling_param)
+      _scale_param(scaling_param),
+      _time_integrator(time_integrator)
 {
 }
 
@@ -413,8 +397,7 @@ PredictorCorrectorStepper::advance(const StepperInfo * si, StepperFeedback *)
 
   if (error > e_max)
     return l.val(si->prev_dt * 0.5);
-  return l.val(si->prev_dt * _scale_param *
-               std::pow(infnorm * _e_tol / error, 1.0 / 3.0));
+  return l.val(si->prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0));
 }
 
 double
@@ -425,39 +408,44 @@ PredictorCorrectorStepper::estimateTimeError(const StepperInfo * si)
   soln.close();
   predicted.close();
 
-  std::string scheme = si->time_integrator;
   double dtprev = si->prev_prev_dt;
   double dt = si->prev_dt;
-  if (scheme == "CrankNicolson")
+  if (_time_integrator == "CrankNicolson")
   {
     predicted -= soln;
     predicted *= (dt) / (3.0 * (dt + dtprev));
     return predicted.l2_norm();
   }
-  else if (scheme == "BDF2")
+  else if (_time_integrator == "BDF2")
   {
     predicted *= -1.0;
     predicted += soln;
     double topcalc = 2.0 * (dt + dtprev) * (dt + dtprev);
-    double bottomcalc =
-        6.0 * dt * dt + 12.0 * dt * dtprev + 5.0 * dtprev * dtprev;
+    double bottomcalc = 6.0 * dt * dt + 12.0 * dt * dtprev + 5.0 * dtprev * dtprev;
     predicted *= topcalc / bottomcalc;
     return predicted.l2_norm();
   }
 
-  mooseError("unsupported time integration scheme");
+  mooseError("unsupported time integration scheme '" + _time_integrator + "'");
 }
 
-
-DT2Stepper::DT2Stepper(double time_tol, double e_tol, double e_max) :
-    _tol(time_tol), _e_tol(e_tol), _e_max(e_max), _start_time(-1), _end_time(-1), _big_soln(nullptr)
+DT2Stepper::DT2Stepper(double time_tol, double e_tol, double e_max, int integrator_order)
+    : _tol(time_tol),
+      _e_tol(e_tol),
+      _e_max(e_max),
+      _start_time(-1),
+      _end_time(-1),
+      _big_soln(nullptr),
+      _order(integrator_order)
 {
 }
 
-double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
+double
+DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("DT2");
-  if (std::abs(si->time - _end_time) < _tol && _big_soln && si->converged) {
+  if (std::abs(si->time - _end_time) < _tol && _big_soln && si->converged)
+  {
     // we just finished the second of the two smaller dt steps and are ready for error calc
     double new_dt = calcDT(si); // {compute dt using _big_soln and si->nonlin_soln}
     _big_soln.release();
@@ -465,19 +453,29 @@ double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
     _end_time = _start_time + new_dt;
     sf->snapshot = true;
     return l.val(new_dt);
-  } else if (std::abs(si->time - _end_time) < _tol && !_big_soln && si->converged) {
+  }
+  else if (std::abs(si->time - _end_time) < _tol && !_big_soln && si->converged)
+  {
     // collect big dt soln and rewind to collect small dt solns
     _big_soln.reset(si->soln_nonlin->clone().release());
     sf->rewind = true;
     sf->rewind_time = _start_time;
-    return l.val((_end_time - _start_time) / 2); // doesn't actually matter what we return here because rewind
-  } else if (std::abs(si->time - _start_time) < _tol && _big_soln && si->converged) {
+    return l.val((_end_time - _start_time) /
+                 2.0); // doesn't actually matter what we return here because rewind
+  }
+  else if (std::abs(si->time - _start_time) < _tol && _big_soln && si->converged)
+  {
     // we just rewound and need to do small steps
     return l.val((_end_time - _start_time) / 2);
-  } else if (std::abs(_start_time + (_end_time - _start_time) / 2 - si->time) < _tol && _big_soln && si->converged) {
+  }
+  else if (std::abs(_start_time + (_end_time - _start_time) / 2 - si->time) < _tol && _big_soln &&
+           si->converged)
+  {
     // we just finished the first of the smaller dt steps
     return l.val((_end_time - _start_time) / 2);
-  } else {
+  }
+  else
+  {
     // something went wrong or this is initial call of simulation - start over
     _big_soln.release();
     _start_time = si->time;
@@ -487,7 +485,8 @@ double DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
   }
 }
 
-double DT2Stepper::calcDT(const StepperInfo * si)
+double
+DT2Stepper::calcDT(const StepperInfo * si)
 {
   std::unique_ptr<NumericVector<Number>> small_soln(si->soln_nonlin->clone().release());
   std::unique_ptr<NumericVector<Number>> diff(si->soln_nonlin->clone().release());
@@ -495,5 +494,5 @@ double DT2Stepper::calcDT(const StepperInfo * si)
   diff->close();
   double dt = _end_time - _start_time;
   double err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt;
-  return dt * std::pow(_e_tol / err, 1.0 / si->time_integrator_order);
+  return dt * std::pow(_e_tol / err, 1.0 / _order);
 }

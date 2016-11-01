@@ -64,7 +64,9 @@ AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters)
 Stepper *
 AB2PredictorCorrector::buildStepper()
 {
-  Stepper * s = new PredictorCorrectorStepper(_start_adapting, _e_tol, _scaling_parameter);
+  std::string integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
+
+  Stepper * s = new PredictorCorrectorStepper(_start_adapting, _e_tol, _scaling_parameter, integrator);
   s = new MaxRatioStepper(s, _max_increase);
   s = new EveryNStepper(s, _steps_between_increase, _start_adapting);
   s = new StartupStepper(s, getParam<Real>("dt"), _start_adapting);

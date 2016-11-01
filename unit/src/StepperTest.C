@@ -28,8 +28,6 @@ void cloneStepperInfo(StepperInfo* src, StepperInfo* dst) {
   dst->prev_dt = src->prev_dt;
   dst->prev_prev_dt = src->prev_prev_dt;
   dst->prev_prev_prev_dt = src->prev_prev_prev_dt;
-  dst->time_integrator = src->time_integrator;
-  dst->time_integrator_order = src->time_integrator_order;
   dst->nonlin_iters = src->nonlin_iters;
   dst->lin_iters = src->lin_iters;
   dst->prev_converged = src->prev_converged;
@@ -56,9 +54,8 @@ updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, S
     cloneStepperInfo(si, &(*snaps)[si->time]);
   }
   if (si->converged)
-  {
     si->time += dt;
-  }
+  si->prev_prev_prev_dt = si->prev_prev_dt;
   si->prev_prev_dt = si->prev_dt;
   si->prev_dt = dt;
   si->step_count++;
@@ -66,7 +63,7 @@ updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, S
 
 StepperInfo blankInfo()
 {
-    return {1, 0, 0, 0, 0, "", 0, 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
+    return {1, 0, 0, 0, 0, 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
 }
 
 void
@@ -293,14 +290,14 @@ StepperTest::DT2()
   // the times are compared after applying the most recent dt.
   testcase tests[] = {
     {
-      "testOne",
+      "testConvergeAll",
       1e-10,
       1.0,
       {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
       {1   , 1   , 0.5 , 0.5 },
       {true, true, true, true},
       {1   , 0   , 0.5 , 1.0 },
-    },  {
+    }, {
       "testConvergeFailBeforeRewind",
       1e-10,
       1.0,
@@ -308,7 +305,7 @@ StepperTest::DT2()
       {1    , 1   , 1   , 0.5 , 0.5 },
       {false, true, true, true, true},
       {0    , 1   , 0   , 0.5 , 1.0 },
-     },  {
+     }, {
       "testConvergeFailOnRewind",
       1e-10,
       1.0,
@@ -316,7 +313,7 @@ StepperTest::DT2()
       {1   , 1    , 1   , 1   , 0.5 , 0.5 },
       {true, false, true, true, true, true},
       {1   , 0    , 1   , 0   , 0.5 , 1   },
-     },  {
+     }, {
       "testConvergeFailAfterRewind",
       1e-10,
       1.0,
@@ -324,7 +321,7 @@ StepperTest::DT2()
       {1   , 1   , 0.5  , 0.5 , 0.5 , 0.25, 0.25},
       {true, true, false, true, true, true, true},
       {1   , 0   , 0    , 0.5 , 0   , 0.25, 0.5 },
-    },  {
+    }, {
       "testConvergeFailBeforeFinal",
       1e-10,
       1.0,
@@ -332,10 +329,19 @@ StepperTest::DT2()
       {1   , 1   , 0.5 , 0.5  , 0.5 , 0.5 , 0.25, 0.25},
       {true, true, true, false, true, true, true, true},
       {1   , 0   , 0.5 , 0.5  , 1   , 0.5 , 0.75, 1.0 },
+    }, {
+      "testConvergeAll-more",
+      1e-2,
+      1.0,
+      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.85, .85, .85}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+      {1   , 1   , 0.5 , 0.5 , .18 , .5  , .09 , .09 },
+      {true, true, true, true, true, true, true, true},
+      {1   , 0   , 0.5 , 1   , 1.18, 1   , 1.09, 1.18},
     }
   };
 
   double tol = 1e-10;
+  double integrator_order = 1;
 
   for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
   {
@@ -345,7 +351,7 @@ StepperTest::DT2()
     std::vector<double> want_times = tests[i].want_times;
 
     std::map<double, StepperInfo> snaps;
-    DT2Stepper s(tol, tests[i].e_tol, tests[i].e_max);
+    DT2Stepper s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
     StepperInfo si = blankInfo();
     si.prev_dt = 1; // initial dt
 

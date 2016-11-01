@@ -353,8 +353,6 @@ Transient::computeDT(bool first)
   _si.prev_prev_prev_dt = _si.prev_prev_dt;
   _si.prev_prev_dt = _prev_dt;
   _si.prev_dt = _dt;
-  _si.time_integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
-  _si.time_integrator_order = _fe_problem.getNonlinearSystem().getTimeIntegrator()->order();
   _si.prev_prev_prev_solve_time_secs = _si.prev_prev_solve_time_secs;
   _si.prev_prev_solve_time_secs = _si.prev_solve_time_secs;
   _si.prev_solve_time_secs = _solve_time;
