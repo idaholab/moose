@@ -29,13 +29,13 @@
 \begin{document}
 
 
-\title{Convection Tests}
+\title{Heat Advection Tests}
 \author{CSIRO}
 \maketitle
 
 \tableofcontents
 
-\chapter{One-dimensional heat convection with a single-phase fluid}
+\chapter{One-dimensional heat advection via a single-phase fluid}
 
 Consider the case of a single-phase fluid in 1 dimension, $0\leq x
 \leq 1$, with the porepressure fixed at the boundaries:
@@ -79,25 +79,25 @@ The sharp front is {\em not} maintained by
 MOOSE.  This is due to numerical diffusion, which is particularly
 strong in the upwinding scheme implemented in the PorousFlow module.
 Nevertheless, MOOSE advects the smooth front with the correct
-velocity, as shown in Figure~\ref{convect_1d.fig}.
+velocity, as shown in Figure~\ref{heat_advection_1d.fig}.
 
 \begin{figure}[htb]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[width=7cm]{convect_1d_0_1.pdf}  &
-\includegraphics[width=7cm]{convect_1d_0_6.pdf}
+\includegraphics[width=7cm]{heat_advection_1d_0_1.pdf}  &
+\includegraphics[width=7cm]{heat_advection_1d_0_6.pdf}
 \end{tabular}
-\caption{Results of heat convection via a fluid in 1D.  The fluid
+\caption{Results of heat advection via a fluid in 1D.  The fluid
   flows with constant Darcy velocity of $0.25$\,m.s$^{-1}$ to the
-  right, and this convects a temperature front at velocity
+  right, and this advects a temperature front at velocity
   $1$\,m.s$^{-1}$ to the right.  This pictures above
   that the numerical implementation of porous flow within
-  MOOSE diffuses sharp fronts, but convects them at the correct
+  MOOSE diffuses sharp fronts, but advects them at the correct
   velocity (notice the centre of
   the front is at the correct position in each picture).  Left: temperature
   $t=0.1$\,s.  Right: temperature
   at $t=0.6$\,s.}
-\label{convect_1d.fig}
+\label{heat_advection_1d.fig}
 \end{center}
 \end{figure}
 

@@ -5,17 +5,17 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "PorousFlowConvectiveFlux.h"
+#include "PorousFlowHeatAdvection.h"
 
 template<>
-InputParameters validParams<PorousFlowConvectiveFlux>()
+InputParameters validParams<PorousFlowHeatAdvection>()
 {
   InputParameters params = validParams<PorousFlowDarcyBase>();
-  params.addClassDescription("Fully-upwinded convective flux");
+  params.addClassDescription("Fully-upwinded heat flux, advected by the fluid");
   return params;
 }
 
-PorousFlowConvectiveFlux::PorousFlowConvectiveFlux(const InputParameters & parameters) :
+PorousFlowHeatAdvection::PorousFlowHeatAdvection(const InputParameters & parameters) :
     PorousFlowDarcyBase(parameters),
     _enthalpy(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_enthalpy_nodal")),
     _denthalpy_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_enthalpy_nodal_dvar")),
@@ -24,12 +24,12 @@ PorousFlowConvectiveFlux::PorousFlowConvectiveFlux(const InputParameters & param
 {
 }
 
-Real PorousFlowConvectiveFlux::mobility(unsigned nodenum, unsigned phase)
+Real PorousFlowHeatAdvection::mobility(unsigned nodenum, unsigned phase)
 {
   return _enthalpy[nodenum][phase] * _fluid_density_node[nodenum][phase] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];
 }
 
-Real PorousFlowConvectiveFlux::dmobility(unsigned nodenum, unsigned phase, unsigned pvar)
+Real PorousFlowHeatAdvection::dmobility(unsigned nodenum, unsigned phase, unsigned pvar)
 {
   Real dm = _denthalpy_dvar[nodenum][phase][pvar] * _fluid_density_node[nodenum][phase] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];
   dm += _enthalpy[nodenum][phase] * _dfluid_density_node_dvar[nodenum][phase][pvar] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];

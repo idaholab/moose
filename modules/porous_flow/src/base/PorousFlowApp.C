@@ -61,7 +61,7 @@
 #include "PorousFlowMassVolumetricExpansion.h"
 #include "PorousFlowEnergyTimeDerivative.h"
 #include "PorousFlowHeatConduction.h"
-#include "PorousFlowConvectiveFlux.h"
+#include "PorousFlowHeatAdvection.h"
 #include "PorousFlowDispersiveFlux.h"
 
 // BoundaryConditions
@@ -173,7 +173,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowMassVolumetricExpansion);
   registerKernel(PorousFlowEnergyTimeDerivative);
   registerKernel(PorousFlowHeatConduction);
-  registerKernel(PorousFlowConvectiveFlux);
+  registerKernel(PorousFlowHeatAdvection);
   registerKernel(PorousFlowDispersiveFlux);
 
   // BoundaryConditions
