@@ -45,7 +45,6 @@
   [./pos]
     type = FindValueOnLine
     target = 0.5
-    depth = 20
     v = phi
     start_point = '0 0 0'
     end_point = '10 0 0'
