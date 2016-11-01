@@ -12,7 +12,6 @@
 
 #include "FluidPropertiesMaterial.h"
 #include "FluidPropertiesMaterialPT.h"
-#include "WaterFluidPropertiesTestMaterial.h"
 #include "FluidPropertiesDerivativeTestMaterial.h"
 #include "CO2FluidPropertiesTestMaterial.h"
 #include "BrineFluidPropertiesTestMaterial.h"
@@ -75,7 +74,6 @@ FluidPropertiesApp::registerObjects(Factory & factory)
 {
   registerMaterial(FluidPropertiesMaterial);
   registerMaterial(FluidPropertiesMaterialPT);
-  registerMaterial(WaterFluidPropertiesTestMaterial);
   registerMaterial(FluidPropertiesDerivativeTestMaterial);
   registerMaterial(CO2FluidPropertiesTestMaterial);
   registerMaterial(BrineFluidPropertiesTestMaterial);

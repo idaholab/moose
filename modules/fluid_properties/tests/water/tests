@@ -1,48 +1,7 @@
 [Tests]
-  [./region1]
+  [./water]
     type = CSVDiff
-    input = 'region1.i'
-    csvdiff = 'region1_out.csv'
-  [../]
-  [./region2]
-    type = CSVDiff
-    input = 'region2.i'
-    csvdiff = 'region2_out.csv'
-  [../]
-  [./region3]
-    type = CSVDiff
-    input = 'region3subregions.i'
-    csvdiff = 'region3subregions_out.csv'
-  [../]
-  [./region4]
-    type = CSVDiff
-    input = 'region4.i'
-    csvdiff = 'region4_out.csv'
-  [../]
-  [./region5]
-    type = CSVDiff
-    input = 'region5.i'
-    csvdiff = 'region5_out.csv'
-  [../]
-  [./b23]
-    type = CSVDiff
-    input = 'b23.i'
-    csvdiff = 'b23_out.csv'
-  [../]
-  [./thermal_cond]
-    type = CSVDiff
-    input = 'thermalcond.i'
-    csvdiff = 'thermalcond_out.csv'
-  [../]
-  [./viscosity]
-    type = CSVDiff
-    input = 'viscosity.i'
-    csvdiff = 'viscosity_out.csv'
-  [../]
-  [./water_derivatives]
-    type = Exodiff
-    input = 'water_derivatives.i'
-    exodiff = 'water_derivatives_out.e'
-    rel_err = 1e-4
+    input = 'water.i'
+    csvdiff = 'water_out.csv'
   [../]
 []
