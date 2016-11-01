@@ -194,6 +194,7 @@
 #include "ConstantGrainForceAndTorque.h"
 #include "DiscreteNucleationInserter.h"
 #include "DiscreteNucleationMap.h"
+#include "EulerAngleUpdater.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
 #include "RandomEulerAngleProvider.h"
@@ -443,6 +444,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(DiscreteNucleationInserter);
   registerUserObject(DiscreteNucleationMap);
   registerUserObject(EBSDReader);
+  registerUserObject(EulerAngleUpdater);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
   registerUserObject(RandomEulerAngleProvider);
