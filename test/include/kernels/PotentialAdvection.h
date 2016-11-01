@@ -32,9 +32,10 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  const VariableGradient & _grad_potential;
-  unsigned int _potential_id;
+  int _potential_id;
   Real _sgn;
+  VariableGradient _default;
+  const VariableGradient & _grad_potential;
 };
 
 #endif //POTENTIALADVECTION_H
