@@ -165,6 +165,7 @@
 // PPS
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
+#include "CumulativeValuePostprocessor.h"
 #include "NodalSum.h"
 #include "ElementAverageValue.h"
 #include "ElementAverageTimeDerivative.h"
@@ -591,6 +592,7 @@ registerObjects(Factory & factory)
   // PPS
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(AverageNodalVariableValue);
+  registerPostprocessor(CumulativeValuePostprocessor);
   registerPostprocessor(NodalSum);
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementAverageTimeDerivative);

@@ -1,7 +1,0 @@
-[Tests]
-  [./convect_1d]
-    type = Exodiff
-    input = convect_1d.i
-    exodiff = convect_1d.e
-  [../]
-[]

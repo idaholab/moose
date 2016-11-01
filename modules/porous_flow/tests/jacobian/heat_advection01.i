@@ -1,29 +1,13 @@
-# 1phase convective flux
+# 1phase, unsaturated, heat advection
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 50
+  dim = 2
+  nx = 2
   xmin = 0
   xmax = 1
-[]
-
-[Adaptivity]
-  active = ''
-  max_h_level = 1
-  [./Markers]
-    [./error_frac]
-      indicator = ind
-      type = ErrorFractionMarker
-      refine = 0.1
-      coarsen = 0.1
-    [../]
-  [../]
-  [./Indicators]
-    [./ind]
-      type = GradientJumpIndicator
-      variable = temp
-    [../]
-  [../]
+  ny = 1
+  ymin = 0
+  ymax = 1
 []
 
 [GlobalParams]
@@ -32,67 +16,36 @@
 
 [Variables]
   [./temp]
-    initial_condition = 200
   [../]
   [./pp]
   [../]
 []
 
 [ICs]
+  [./temp]
+    type = RandomIC
+    variable = temp
+    max = 1.0
+    min = 0.0
+  [../]
   [./pp]
-    type = FunctionIC
+    type = RandomIC
     variable = pp
-    function = '1-x'
+    max = 0.0
+    min = -1.0
   [../]
 []
 
-[BCs]
-  [./pp0]
-    type = PresetBC
-    variable = pp
-    boundary = left
-    value = 1
-  [../]
-  [./pp1]
-    type = PresetBC
-    variable = pp
-    boundary = right
-    value = 0
-  [../]
-  [./spit_heat]
-    type = PresetBC
-    variable = temp
-    boundary = left
-    value = 300
-  [../]
-  [./suck_heat]
-    type = PresetBC
-    variable = temp
-    boundary = right
-    value = 200
-  [../]
-[]
 
 [Kernels]
-  [./mass_dot]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
+  [./pp]
+    type = TimeDerivative
     variable = pp
   [../]
-  [./advection]
-    type = PorousFlowAdvectiveFlux
-    fluid_component = 0
-    variable = pp
-    gravity = '0 0 0'
-  [../]
-  [./energy_dot]
-    type = PorousFlowEnergyTimeDerivative
+  [./heat_advection]
+    type = PorousFlowHeatAdvection
     variable = temp
-  [../]
-  [./convection]
-    type = PorousFlowConvectiveFlux
-    variable = temp
-    gravity = '0 0 0'
+    gravity = '1 2 3'
   [../]
 []
 
@@ -114,18 +67,9 @@
     type = PorousFlowNodeNumber
     on_initial_only = true
   [../]
-  [./porosity]
-    type = PorousFlowPorosityConst
-    porosity = 0.2
-  [../]
-  [./rock_heat]
-    type = PorousFlowMatrixInternalEnergy
-    specific_heat_capacity = 1.0
-    density = 125
-  [../]
   [./visc0]
     type = PorousFlowViscosityConst
-    viscosity = 4.4
+    viscosity = 1
     phase = 0
   [../]
   [./visc_all]
@@ -134,15 +78,12 @@
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    permeability = '1.1 0 0 0 2 0 0 0 3'
+    permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
     n_j = 2
     phase = 0
-  [../]
-  [./massfrac]
-    type = PorousFlowMassFraction
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
@@ -156,13 +97,12 @@
   [../]
   [./fluid_density]
     type = PorousFlowDensityConstBulk
-    density_P0 = 1E3
-    bulk_modulus = 100.0
+    density_P0 = 1.1
+    bulk_modulus = 0.5
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
-    include_old = true
     material_property = PorousFlow_fluid_phase_density
   [../]
   [./dens_qp_all]
@@ -172,12 +112,11 @@
   [../]
   [./fluid_energy]
     type = PorousFlowInternalEnergyIdeal
-    specific_heat_capacity = 2
+    specific_heat_capacity = 1.1
     phase = 0
   [../]
   [./energy_all]
     type = PorousFlowJoiner
-    include_old = true
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
   [./fluid_enthalpy]
@@ -191,23 +130,28 @@
 []
 
 [Preconditioning]
+  active = check
   [./andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'gmres bjacobi 1E-15 1E-10 10000'
+    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000'
+  [../]
+  [./check]
+    type = SMP
+    full = true
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
+    petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
-  dt = 0.01
-  end_time = 0.6
+  dt = 1
+  end_time = 1
 []
 
 [Outputs]
-  file_base = convect_1d
-  exodus = true
-  interval = 10
+  exodus = false
 []

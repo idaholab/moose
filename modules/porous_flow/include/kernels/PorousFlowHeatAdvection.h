@@ -5,40 +5,30 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef POROUSFLOWCONVECTIVEFLUX_H
-#define POROUSFLOWCONVECTIVEFLUX_H
+#ifndef POROUSFLOWHEATADVECTION_H
+#define POROUSFLOWHEATADVECTION_H
 
 #include "PorousFlowDarcyBase.h"
 
-class PorousFlowConvectiveFlux;
+class PorousFlowHeatAdvection;
 
 template<>
-InputParameters validParams<PorousFlowConvectiveFlux>();
+InputParameters validParams<PorousFlowHeatAdvection>();
 
 /**
- * Convective flux of component k in fluid phase alpha.
+ * Advection of heat via flux of component k in fluid phase alpha.
  * A fully-updwinded version is implemented, where the mobility
  * of the upstream nodes is used.
  */
-class PorousFlowConvectiveFlux : public PorousFlowDarcyBase
+class PorousFlowHeatAdvection : public PorousFlowDarcyBase
 {
 public:
-  PorousFlowConvectiveFlux(const InputParameters & parameters);
+  PorousFlowHeatAdvection(const InputParameters & parameters);
 
 protected:
-  /** The mobility of the fluid.
-   * This is enthalpy * fluid_density * relative_permeability / fluid_viscosity
-   * @param nodenum The node-number to evaluate the mobility for
-   * @param phase the fluid phase number
-   */
-  virtual Real mobility(unsigned nodenum, unsigned phase);
+  virtual Real mobility(unsigned nodenum, unsigned phase) override;
 
-  /** The derivative of mobility with respect to PorousFlow variable pvar
-   * @param nodenum The node-number to evaluate the mobility for
-   * @param phase the fluid phase number
-   * @param pvar the PorousFlow variable pvar
-   */
-  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar);
+  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) override;
 
   /// Enthalpy of each phase
   const MaterialProperty<std::vector<Real> > & _enthalpy;
@@ -53,4 +43,4 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
 };
 
-#endif // POROUSFLOWCONVECTIVEFLUX_H
+#endif // POROUSFLOWHEATADVECTION_H
