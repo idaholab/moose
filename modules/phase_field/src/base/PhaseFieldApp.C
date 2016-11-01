@@ -196,6 +196,7 @@
 #include "DiscreteNucleationMap.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
+#include "RandomEulerAngleProvider.h"
 
 #include "EBSDReader.h"
 #include "SolutionRasterizer.h"
@@ -444,6 +445,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(EBSDReader);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
+  registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 
   registerVectorPostprocessor(FeatureVolumeVectorPostprocessor);
