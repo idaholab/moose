@@ -53,6 +53,7 @@
 // problems
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
+#include "EquationProblem.h"
 
 // kernels
 #include "TimeDerivative.h"
@@ -482,6 +483,7 @@ registerObjects(Factory & factory)
   // problems
   registerProblem(FEProblem);
   registerProblem(DisplacedProblem);
+  registerProblem(EquationProblem);
 
   // kernels
   registerKernel(TimeDerivative);

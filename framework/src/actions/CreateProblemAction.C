@@ -24,7 +24,7 @@ InputParameters validParams<CreateProblemAction>()
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
 
   InputParameters params = validParams<MooseObjectAction>();
-  params.set<std::string>("type") = "FEProblem";
+  params.set<std::string>("type") = "EquationProblem";
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
   params.addParam<std::vector<SubdomainName> >("block", "Block IDs for the coordinate systems");
   params.addParam<MultiMooseEnum>("coord_type", coord_types, "Type of the coordinate system per block param");
