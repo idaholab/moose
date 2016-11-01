@@ -442,6 +442,7 @@ private:
   std::string _time_integrator;
 };
 
+// TODO: need mechanism for telling executioner to not output data for "intermediate" solve/time steps
 class DT2Stepper : public Stepper
 {
 public:
@@ -449,12 +450,14 @@ public:
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:
-  double calcDT(const StepperInfo * si);
+  double dt();
+  double resetWindow(double start, double dt);
+  double calcErr(const StepperInfo * si);
   double _tol;
   double _e_tol;
   double _e_max;
+  int _order;
   double _start_time;
   double _end_time;
   std::unique_ptr<NumericVector<Number>> _big_soln;
-  int _order;
 };

@@ -378,6 +378,8 @@ Transient::computeDT(bool first)
     if (sf.rewind)
     {
       //std::c out << "    DT2: rewind to t=" << sf.rewind_time << "\n";
+      if (_snapshots.count(sf.rewind_time) == 0)
+        mooseError("no snapshot available for requested rewind time");
       _app.restore(_snapshots[sf.rewind_time]);
       computeDT(); // recursive call necessary because rewind modifies state _si depends on
       //std::c out << "    DT2: rewind complete\n";

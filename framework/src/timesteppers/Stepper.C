@@ -433,70 +433,92 @@ DT2Stepper::DT2Stepper(double time_tol, double e_tol, double e_max, int integrat
     : _tol(time_tol),
       _e_tol(e_tol),
       _e_max(e_max),
+      _order(integrator_order),
       _start_time(-1),
       _end_time(-1),
-      _big_soln(nullptr),
-      _order(integrator_order)
+      _big_soln(nullptr)
 {
+}
+
+double
+DT2Stepper::resetWindow(double start, double dt)
+{
+  _start_time = start;
+  _end_time = _start_time + dt;
+  _big_soln.release();
+  return dt;
+}
+
+double DT2Stepper::dt()
+{
+  return _end_time - _start_time;
 }
 
 double
 DT2Stepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("DT2");
+
   if (std::abs(si->time - _end_time) < _tol && _big_soln && si->converged)
   {
+    //std::c out << "DT2:inner: set complete - calcing error\n";
     // we just finished the second of the two smaller dt steps and are ready for error calc
-    double new_dt = calcDT(si); // {compute dt using _big_soln and si->nonlin_soln}
-    _big_soln.release();
-    _start_time = si->time;
-    _end_time = _start_time + new_dt;
+    double err = calcErr(si);
+    if (err > _e_max)
+    {
+      //std::c out << "DT2:inner: error too large, rewinding and start over with dt/2\n";
+      sf->rewind = true;
+      sf->rewind_time = _start_time;
+      return l.val(resetWindow(sf->rewind_time, dt() / 2));
+    }
+
+    double new_dt = dt() * std::pow(_e_tol / err, 1.0 / _order);
     sf->snapshot = true;
-    return l.val(new_dt);
+    return l.val(resetWindow(si->time, new_dt));
   }
   else if (std::abs(si->time - _end_time) < _tol && !_big_soln && si->converged)
   {
+    //std::c out << "DT2:inner: got big soln, rewinding\n";
     // collect big dt soln and rewind to collect small dt solns
     _big_soln.reset(si->soln_nonlin->clone().release());
     _big_soln->close();
     sf->rewind = true;
     sf->rewind_time = _start_time;
-    return l.val((_end_time - _start_time) /
-                 2.0); // doesn't actually matter what we return here because rewind
+    return l.val(dt() / 2.0); // doesn't actually matter what we return here because rewind
   }
   else if (std::abs(si->time - _start_time) < _tol && _big_soln && si->converged)
   {
+    //std::c out << "DT2:inner: just rewound - starting small steps\n";
     // we just rewound and need to do small steps
-    return l.val((_end_time - _start_time) / 2);
+    return l.val(dt() / 2);
   }
-  else if (std::abs(_start_time + (_end_time - _start_time) / 2 - si->time) < _tol && _big_soln &&
-           si->converged)
+  else if (std::abs(_start_time + dt() / 2 - si->time) < _tol && _big_soln && si->converged)
   {
+    //std::c out << "DT2:inner: finished 1st small step, doing second\n";
     // we just finished the first of the smaller dt steps
-    return l.val((_end_time - _start_time) / 2);
+    return l.val(dt() / 2);
   }
   else
   {
+    //std::c out << "DT2:inner: starting solve sequence over\n";
     // something went wrong or this is initial call of simulation - start over
-    _big_soln.release();
-    _start_time = si->time;
-    _end_time = _start_time + si->prev_dt;
     sf->snapshot = true;
-    return l.val(si->prev_dt);
+    double ddt = dt();
+    if (ddt == 0)
+      ddt = si->prev_dt;
+    return l.val(resetWindow(si->time, ddt));
   }
 }
 
 double
-DT2Stepper::calcDT(const StepperInfo * si)
+DT2Stepper::calcErr(const StepperInfo * si)
 {
   std::unique_ptr<NumericVector<Number>> small_soln(si->soln_nonlin->clone().release());
   std::unique_ptr<NumericVector<Number>> diff(si->soln_nonlin->clone().release());
   small_soln->close();
   diff->close();
-  //std::c out << "SPOTA\n";
   *diff -= *_big_soln;
-  //std::c out << "SPOTB\n";
-  double dt = _end_time - _start_time;
-  double err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt;
-  return dt * std::pow(_e_tol / err, 1.0 / _order);
+  double err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt();
+  //std::c out << "DT2:inner: error=" << err << ", e_tol=" << _e_tol << "\n";
+  return err;
 }
