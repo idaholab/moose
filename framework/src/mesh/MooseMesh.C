@@ -304,6 +304,7 @@ MooseMesh::prepare(bool force)
   // Collect (local) subdomain IDs
   const MeshBase::element_iterator el_end = getMesh().elements_end();
 
+  _mesh_subdomains.clear();
   for (MeshBase::element_iterator el = getMesh().elements_begin(); el != el_end; ++el)
     _mesh_subdomains.insert((*el)->subdomain_id());
 
