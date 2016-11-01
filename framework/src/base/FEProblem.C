@@ -3465,21 +3465,7 @@ FEProblem::computeResidualL2Norm()
 void
 FEProblem::computeResidual(NonlinearImplicitSystem &/*sys*/, const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
-  try
-  {
-    computeResidualType(soln, residual, _kernel_type);
-  }
-  catch (MooseException & e)
-  {
-    // If a MooseException propagates all the way to here, it means
-    // that it was thrown from a MOOSE system where we do not
-    // (currently) properly support the throwing of exceptions, and
-    // therefore we have no choice but to error out.  It may be
-    // *possible* to handle exceptions from other systems, but in the
-    // meantime, we don't want to silently swallow any unhandled
-    // exceptions here.
-    mooseError("An unhandled MooseException was raised during residual computation.  Please contact the MOOSE team for assistance.");
-  }
+  computeResidual(soln, residual);
 }
 
 void
@@ -3573,63 +3559,9 @@ FEProblem::computeResidualType(const NumericVector<Number>& soln, NumericVector<
 }
 
 void
-FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
+FEProblem::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
 {
-  if (!_has_jacobian || !_const_jacobian)
-  {
-    _nl.setSolution(soln);
-
-    _nl.zeroVariablesForJacobian();
-    _aux.zeroVariablesForJacobian();
-
-    unsigned int n_threads = libMesh::n_threads();
-
-    // Random interface objects
-    for (const auto & it : _random_data_objects)
-      it.second->updateSeeds(EXEC_NONLINEAR);
-
-    _currently_computing_jacobian = true;
-
-    execTransfers(EXEC_NONLINEAR);
-    execMultiApps(EXEC_NONLINEAR);
-
-    for (unsigned int tid = 0; tid < n_threads; tid++)
-      reinitScalars(tid);
-
-    computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
-
-    if (_displaced_problem != NULL)
-      _displaced_problem->updateMesh();
-
-    for (unsigned int tid = 0; tid < n_threads; tid++)
-    {
-      _all_materials.jacobianSetup(tid);
-      _functions.jacobianSetup(tid);
-    }
-
-    _aux.jacobianSetup();
-
-    _aux.compute(EXEC_NONLINEAR);
-
-    computeUserObjects(EXEC_NONLINEAR, Moose::POST_AUX);
-
-    executeControls(EXEC_NONLINEAR);
-
-    _app.getOutputWarehouse().jacobianSetup();
-
-    _nl.computeJacobian(jacobian);
-
-    _currently_computing_jacobian = false;
-    _has_jacobian = true;
-  }
-
-  if (_solver_params._type == Moose::ST_JFNK || _solver_params._type == Moose::ST_PJFNK)
-  {
-    // This call is here to make sure the residual vector is up to date with any decisions that have been made in
-    // the Jacobian evaluation.  That is important in JFNK because that residual is used for finite differencing
-    computeResidual(sys, soln, *sys.rhs);
-    sys.rhs->close();
-  }
+  computeJacobian(soln, jacobian);
 }
 
 
