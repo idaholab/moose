@@ -258,8 +258,8 @@ private:
 
 /// Uses an underlying stepper to compute dt.  If the actuall simulation-used
 /// previous dt was not what the underlying stepper returned on the prior call
-/// to
-/// advance, this stepper returns/retries that dt value.
+/// to advance and the current sim time is different than on the prior call to advance,
+/// this stepper returns/retries that dt value.
 class RetryUnusedStepper : public Stepper
 {
 public:
@@ -274,6 +274,7 @@ private:
   double _tol;
   bool _prev_prev;
   double _prev_dt;
+  double _prev_time;
 };
 
 /// ConstrFuncStepper reduces the returned dt of an underlying stepper by

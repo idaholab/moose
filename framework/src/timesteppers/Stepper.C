@@ -171,7 +171,7 @@ InstrumentedStepper::dtPtr()
 }
 
 RetryUnusedStepper::RetryUnusedStepper(Stepper * s, double tol, bool prev_prev)
-    : _stepper(s), _tol(tol), _prev_prev(prev_prev), _prev_dt(0)
+    : _stepper(s), _tol(tol), _prev_prev(prev_prev), _prev_dt(0), _prev_time(0)
 {
 }
 
@@ -179,7 +179,7 @@ double
 RetryUnusedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
 {
   Logger l("RetryUnused");
-  if (_prev_dt != 0 && std::abs(si->prev_dt - _prev_dt) > _tol)
+  if (_prev_dt != 0 && std::abs(si->prev_dt - _prev_dt) > _tol && std::abs(si->time - _prev_time) > _tol)
   {
     if (_prev_prev)
     {
@@ -189,7 +189,7 @@ RetryUnusedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
     else
       return l.val(_prev_dt);
   }
-
+  _prev_time = si->time;
   _prev_dt = _stepper->advance(si, sf);
   return l.val(_prev_dt);
 }
