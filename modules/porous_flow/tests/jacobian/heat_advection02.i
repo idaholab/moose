@@ -1,4 +1,4 @@
-# 2phase, unsaturated, convective flux
+# 2phase, unsaturated, heat advection
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -54,8 +54,8 @@
     type = Diffusion
     variable = pwater
   [../]
-  [./convection]
-    type = PorousFlowConvectiveFlux
+  [./heat_advection]
+    type = PorousFlowHeatAdvection
     variable = temp
     gravity = '1 2 3'
   [../]

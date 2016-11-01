@@ -177,15 +177,15 @@
     difference_tol = 1E10
   [../]
 
-  [./convect01]
+  [./heat_advection01]
     type = 'PetscJacobianTester'
-    input = 'convect01.i'
+    input = 'heat_advection01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
-  [./convect02]
+  [./heat_advection02]
     type = 'PetscJacobianTester'
-    input = 'convect02.i'
+    input = 'heat_advection02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
