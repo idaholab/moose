@@ -97,6 +97,7 @@
 #include "ExampleShapeElementKernel2.h"
 #include "SimpleTestShapeElementKernel.h"
 #include "LateDeclarationVectorPostprocessor.h"
+#include "PotentialAdvection.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -298,6 +299,7 @@ void
 MooseTestApp::registerObjects(Factory & factory)
 {
   // Kernels
+  registerKernel(PotentialAdvection);
   registerKernel(ConservativeAdvection);
   registerKernel(CoeffParamDiffusion);
   registerKernel(CoupledConvection);
