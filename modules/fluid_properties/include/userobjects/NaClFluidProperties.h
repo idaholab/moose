@@ -167,6 +167,8 @@ public:
    * From Urqhart and Bauer, Experimental determination of single-crystal halite
    * thermal conductivity, diffusivity and specific heat from −75 °C to 300 °C,
    * Int. J. Rock Mech. and Mining Sci., 78 (2015)
+   * Note: The function given in this reference doesn't satisfactorily match their
+   * experimental data, so the data was refitted using a third order polynomial
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
