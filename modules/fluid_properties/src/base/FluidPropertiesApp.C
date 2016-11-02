@@ -24,6 +24,10 @@
 #include "NaClFluidProperties.h"
 #include "BrineFluidProperties.h"
 
+#include "SpecificEnthalpyAux.h"
+#include "StagnationPressureAux.h"
+#include "StagnationTemperatureAux.h"
+
 #include "AddFluidPropertiesAction.h"
 
 template<>
@@ -85,6 +89,10 @@ FluidPropertiesApp::registerObjects(Factory & factory)
   registerUserObject(CO2FluidProperties);
   registerUserObject(NaClFluidProperties);
   registerUserObject(BrineFluidProperties);
+
+  registerAuxKernel(SpecificEnthalpyAux);
+  registerAuxKernel(StagnationPressureAux);
+  registerAuxKernel(StagnationTemperatureAux);
 }
 
 // External entry point for dynamic syntax association
