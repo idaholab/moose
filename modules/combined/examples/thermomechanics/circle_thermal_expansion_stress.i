@@ -119,7 +119,7 @@
     type= ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
     temperature = T
-    stress_free_reference_temperature = 273
+    stress_free_temperature = 273
     block = 1
   [../]
 []
