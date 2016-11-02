@@ -55,4 +55,11 @@
     exodiff = 'polycrystal_action_out.e'
     allow_warnings = true
   [../]
+
+  [./euler_angles_updater]
+    type = 'Exodiff'
+    input = 'update_orientation.i'
+    exodiff = 'update_orientation_out.e'
+    allow_warnings = true
+  [../]
 []
