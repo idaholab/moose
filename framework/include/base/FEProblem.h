@@ -463,7 +463,7 @@ public:
   void addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
   void addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  AuxiliarySystem & getAuxiliarySystem() { return _aux; }
+  AuxiliarySystem & getAuxiliarySystem() { return *_aux; }
 
   // Dirac /////
   void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
@@ -1082,7 +1082,7 @@ protected:
   Real & _dt_old;
 
   NonlinearSystemBase * _nl;
-  AuxiliarySystem _aux;
+  AuxiliarySystem *_aux;
 
   Moose::CouplingType _coupling;                        ///< Type of variable coupling
   CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.

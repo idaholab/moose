@@ -19,7 +19,6 @@ template<>
 InputParameters validParams<EquationProblem>()
 {
   InputParameters params = validParams<FEProblem>();
-  params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
   return params;
 }
 
@@ -27,6 +26,11 @@ EquationProblem::EquationProblem(const InputParameters & parameters) :
     FEProblem(parameters),
     _use_nonlinear(getParam<bool>("use_nonlinear"))
 {
+  _nl = _use_nonlinear? (new NonlinearSystem(*this, "nl0")) : (new MooseEigenSystem(*this, "eigen0"));
+  _aux = new AuxiliarySystem(*this, "aux0");
+
+  unsigned int n_threads = libMesh::n_threads();
+
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly[i] = new Assembly(*_nl, couplingMatrix(), i);
@@ -67,4 +71,8 @@ EquationProblem::~EquationProblem()
   {
     delete _assembly[i];
   }
+
+  delete _nl;
+
+  delete _aux;
 }

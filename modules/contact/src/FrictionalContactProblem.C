@@ -306,7 +306,7 @@ FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solut
   NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   unsigned int dim = nonlinear_sys.subproblem().mesh().dimension();
 
-  _displaced_problem->updateMesh(ghosted_solution, *_aux.currentSolution());
+  _displaced_problem->updateMesh(ghosted_solution, *_aux->currentSolution());
 
   MooseVariable * disp_x_var = &getVariable(0,_disp_x);
   MooseVariable * disp_y_var = &getVariable(0,_disp_y);
@@ -868,7 +868,7 @@ FrictionalContactProblem::updateContactPoints(NumericVector<Number> & ghosted_so
   }
 
   //Do new contact search to update positions of slipped nodes
-  _displaced_problem->updateMesh(ghosted_solution, *_aux.currentSolution());
+  _displaced_problem->updateMesh(ghosted_solution, *_aux->currentSolution());
 
   for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
   {
