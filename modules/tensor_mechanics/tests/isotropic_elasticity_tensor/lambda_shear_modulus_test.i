@@ -1,16 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [AuxVariables]
@@ -20,9 +14,13 @@
   [../]
 []
 
-[Kernels]
+[Modules]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+    [./Master]
+      [./all]
+        add_variables = true
+      [../]
+    [../]
   [../]
 []
 
@@ -98,4 +96,3 @@
 [Outputs]
   exodus = true
 []
-

@@ -359,11 +359,14 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
   syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+  syntax.registerActionSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
   registerAction(TensorMechanicsAction, "add_kernel");
+  registerAction(TensorMechanicsAction, "add_variable");
+  registerAction(TensorMechanicsAction, "add_material");
   registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");

@@ -21,7 +21,6 @@ public:
 
 protected:
   virtual std::string getKernelType();
-  virtual InputParameters getParameters(std::string type);
 };
 
 #endif //DYNAMICTENSORMECHANICSACTION_H

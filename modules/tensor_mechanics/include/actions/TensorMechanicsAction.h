@@ -23,17 +23,32 @@ public:
 
 protected:
   virtual std::string getKernelType();
-  virtual InputParameters getParameters(std::string type);
+  virtual InputParameters getKernelParameters(std::string type);
 
+  ///@{ displacement variables
   std::vector<NonlinearVariableName> _displacements;
   unsigned int _ndisp;
-
   std::vector<VariableName> _coupled_displacements;
+  ///@}
 
+  ///@{ residual debugging
   std::vector<AuxVariableName> _save_in;
   std::vector<AuxVariableName> _diag_save_in;
+  ///@}
 
   Moose::CoordinateSystemType _coord_system;
+
+  /// if this vector is not empty the variables, kernels and materials are restricted to these subdomains
+  std::vector<SubdomainName> _subdomain_names;
+
+  /// strain formulation
+  enum class Strain { Small, Incremental, Finite } _strain;
+
+  /// use a plane strain formulation
+  enum class PlaneStrain { None, Weak, Generalized } _plane_strain;
+
+  /// use displaced mesh (true unless _strain is SMALL)
+  bool _use_displaced_mesh;
 };
 
 #endif //TENSORMECHANICSACTION_H
