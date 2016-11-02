@@ -10,7 +10,7 @@
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 template<>
-InputParameters validParams<distribution>(){
+InputParameters validParams<Distribution>(){
 
    InputParameters params = validParams<MooseObject>();
 
@@ -35,9 +35,9 @@ InputParameters validParams<distribution>(){
    return params;
 }
 
-class distribution;
+class Distribution;
 
-distribution::distribution(const InputParameters & parameters):
+Distribution::Distribution(const InputParameters & parameters):
       MooseObject(parameters)
 {
    _type=getParam<std::string>("type");
@@ -97,7 +97,7 @@ distribution::distribution(const InputParameters & parameters):
       _checkStatus = false;
 }
 
-distribution::~distribution(){
+Distribution::~Distribution(){
 }
 
 /*
@@ -108,7 +108,7 @@ distribution::~distribution(){
 template<>
 InputParameters validParams<UniformDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("xMin", "Distribution lower bound");
    params.addRequiredParam<double>("xMax", "Distribution upper bound");
@@ -118,7 +118,7 @@ InputParameters validParams<UniformDistribution>(){
 
 
 UniformDistribution::UniformDistribution(const InputParameters & parameters):
-  distribution(parameters), BasicUniformDistribution(getParam<double>("xMin"), getParam<double>("xMax"))
+  Distribution(parameters), BasicUniformDistribution(getParam<double>("xMin"), getParam<double>("xMax"))
 {
 }
 
@@ -134,7 +134,7 @@ UniformDistribution::~UniformDistribution()
 template<>
 InputParameters validParams<NormalDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("mu", "Mean");
    params.addRequiredParam<double>("sigma", "Standard deviation");
@@ -142,7 +142,7 @@ InputParameters validParams<NormalDistribution>(){
 }
 
 NormalDistribution::NormalDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicNormalDistribution(getParam<double>("mu"),getParam<double>("sigma")) {
 }
 
@@ -157,7 +157,7 @@ NormalDistribution::~NormalDistribution(){
 template<>
 InputParameters validParams<LogNormalDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("mu", "Mean");
    params.addRequiredParam<double>("sigma", "Standard deviation");
@@ -167,7 +167,7 @@ InputParameters validParams<LogNormalDistribution>(){
 }
 
 LogNormalDistribution::LogNormalDistribution(const InputParameters & parameters):
-  distribution(parameters), BasicLogNormalDistribution(getParam<double>("mu"), getParam<double>("sigma"),getParam<double>("low"))
+  Distribution(parameters), BasicLogNormalDistribution(getParam<double>("mu"), getParam<double>("sigma"),getParam<double>("low"))
 {
 }
 
@@ -182,7 +182,7 @@ LogNormalDistribution::~LogNormalDistribution()
 template<>
 InputParameters validParams<LogisticDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("scale", "Scale");
    params.addRequiredParam<double>("location", "Location");
@@ -191,7 +191,7 @@ InputParameters validParams<LogisticDistribution>(){
 }
 
 LogisticDistribution::LogisticDistribution(const InputParameters & parameters):
-  distribution(parameters), BasicLogisticDistribution(getParam<double>("location"), getParam<double>("scale"))
+  Distribution(parameters), BasicLogisticDistribution(getParam<double>("location"), getParam<double>("scale"))
 {
 }
 
@@ -206,7 +206,7 @@ LogisticDistribution::~LogisticDistribution()
 template<>
 InputParameters validParams<TriangularDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("xPeak", "Maximum coordinate");
    params.addRequiredParam<double>("lowerBound", "Lower bound");
@@ -215,7 +215,7 @@ InputParameters validParams<TriangularDistribution>(){
 }
 
 TriangularDistribution::TriangularDistribution(const InputParameters & parameters):
-  distribution(parameters), BasicTriangularDistribution(getParam<double>("xPeak"),getParam<double>("lowerBound"),getParam<double>("upperBound"))
+  Distribution(parameters), BasicTriangularDistribution(getParam<double>("xPeak"),getParam<double>("lowerBound"),getParam<double>("upperBound"))
 {
 }
 TriangularDistribution::~TriangularDistribution()
@@ -230,7 +230,7 @@ TriangularDistribution::~TriangularDistribution()
 template<>
 InputParameters validParams<ExponentialDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("lambda", "lambda");
    params.addParam<double>("low",0.0, "low");
@@ -238,7 +238,7 @@ InputParameters validParams<ExponentialDistribution>(){
 }
 
 ExponentialDistribution::ExponentialDistribution(const InputParameters & parameters):
-  distribution(parameters), BasicExponentialDistribution(getParam<double>("lambda"),getParam<double>("low"))
+  Distribution(parameters), BasicExponentialDistribution(getParam<double>("lambda"),getParam<double>("low"))
 {
 }
 ExponentialDistribution::~ExponentialDistribution()
@@ -252,7 +252,7 @@ ExponentialDistribution::~ExponentialDistribution()
 template<>
 InputParameters validParams<WeibullDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("k", "shape parameter");
    params.addRequiredParam<double>("lambda", "scale parameter");
@@ -261,7 +261,7 @@ InputParameters validParams<WeibullDistribution>(){
 }
 
 WeibullDistribution::WeibullDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicWeibullDistribution(getParam<double>("k"),getParam<double>("lambda"),getParam<double>("low"))
 
 {
@@ -278,7 +278,7 @@ WeibullDistribution::~WeibullDistribution()
 template<>
 InputParameters validParams<GammaDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("k", "shape parameter");
    params.addRequiredParam<double>("theta", "scale parameter");
@@ -287,7 +287,7 @@ InputParameters validParams<GammaDistribution>(){
 }
 
 GammaDistribution::GammaDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicGammaDistribution(getParam<double>("k"),getParam<double>("theta"),getParam<double>("low"))
 
 {
@@ -304,7 +304,7 @@ GammaDistribution::~GammaDistribution()
 template<>
 InputParameters validParams<BetaDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("alpha", "alpha parameter");
    params.addRequiredParam<double>("beta", "beta parameter");
@@ -314,7 +314,7 @@ InputParameters validParams<BetaDistribution>(){
 }
 
 BetaDistribution::BetaDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicBetaDistribution(getParam<double>("alpha"),getParam<double>("beta"),
                         getParam<double>("scale"),getParam<double>("low"))
 
@@ -332,14 +332,14 @@ BetaDistribution::~BetaDistribution()
 template<>
 InputParameters validParams<PoissonDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("mu", "mu parameter (mean)");
    return params;
 }
 
 PoissonDistribution::PoissonDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicPoissonDistribution(getParam<double>("mu"))
 
 {
@@ -356,7 +356,7 @@ PoissonDistribution::~PoissonDistribution()
 template<>
 InputParameters validParams<BinomialDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("n", "n parameter (number of independent experiments)");
    params.addRequiredParam<double>("p", "p parameter (probability of success with each independent experiment)");
@@ -364,7 +364,7 @@ InputParameters validParams<BinomialDistribution>(){
 }
 
 BinomialDistribution::BinomialDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicBinomialDistribution(getParam<double>("n"),getParam<double>("p"))
 
 {
@@ -381,14 +381,14 @@ BinomialDistribution::~BinomialDistribution()
 template<>
 InputParameters validParams<BernoulliDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("p", "p parameter (probability of success with each independent experiment)");
    return params;
 }
 
 BernoulliDistribution::BernoulliDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicBernoulliDistribution(getParam<double>("p"))
 
 {
@@ -405,14 +405,14 @@ BernoulliDistribution::~BernoulliDistribution()
 template<>
 InputParameters validParams<ConstantDistribution>(){
 
-   InputParameters params = validParams<distribution>();
+   InputParameters params = validParams<Distribution>();
 
    params.addRequiredParam<double>("value", "the value this distribution always returns");
    return params;
 }
 
 ConstantDistribution::ConstantDistribution(const InputParameters & parameters):
-  distribution(parameters),
+  Distribution(parameters),
   BasicConstantDistribution(getParam<double>("value"))
 {
 }
@@ -428,7 +428,7 @@ ConstantDistribution::~ConstantDistribution()
 // template<>
 // InputParameters validParams<CustomDistribution>(){
 
-//    InputParameters params = validParams<distribution>();
+//    InputParameters params = validParams<Distribution>();
 
 //    params.addRequiredParam< vector<double> >("x_coordinates", "coordinates along x");
 //    params.addRequiredParam< vector<double> >("y_coordinates", "coordinates along y");
@@ -441,7 +441,7 @@ ConstantDistribution::~ConstantDistribution()
 // class CustomDistribution;
 
 // CustomDistribution::CustomDistribution(const InputParameters & parameters):
-//   distribution(parameters),
+//   Distribution(parameters),
 //   BasicCustomDistribution(getParam<double>("x_coordinates"),
 //                           getParam<double>("y_coordinates"),
 //                           getParam<MooseEnum>("fitting_type"),

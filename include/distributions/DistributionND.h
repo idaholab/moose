@@ -11,17 +11,17 @@
 #include "distributionNDScatteredMS.h"
 #include "ND_Interpolation_Functions.h"
 
-class distributionND;
+class DistributionND;
 
 template<>
-InputParameters validParams<distributionND>();
+InputParameters validParams<DistributionND>();
 
-class distributionND : public MooseObject , public virtual BasicDistributionND
+class DistributionND : public MooseObject , public virtual BasicDistributionND
 {
 public:
   //> constructor for built-in distributions
-  distributionND(const InputParameters & parameters);
-  virtual ~distributionND();
+  DistributionND(const InputParameters & parameters);
+  virtual ~DistributionND();
 
 };
 
@@ -33,7 +33,7 @@ class MultiDimensionalInverseWeight;
 template<>
 InputParameters validParams<MultiDimensionalInverseWeight>();
 
-class MultiDimensionalInverseWeight : public distributionND, public BasicMultiDimensionalInverseWeight
+class MultiDimensionalInverseWeight : public DistributionND, public BasicMultiDimensionalInverseWeight
 {
 public:
   MultiDimensionalInverseWeight(const InputParameters & parameters);
@@ -48,7 +48,7 @@ class MultivariateNormal;
 template<>
 InputParameters validParams<MultivariateNormal>();
 
-class MultivariateNormal : public distributionND, public BasicMultivariateNormal
+class MultivariateNormal : public DistributionND, public BasicMultivariateNormal
 {
 public:
   MultivariateNormal(const InputParameters & parameters);
@@ -64,7 +64,7 @@ class MultiDimensionalScatteredMS;
 template<>
 InputParameters validParams<MultiDimensionalScatteredMS>();
 
-class MultiDimensionalScatteredMS : public distributionND, public BasicMultiDimensionalScatteredMS
+class MultiDimensionalScatteredMS : public DistributionND, public BasicMultiDimensionalScatteredMS
 {
 public:
   MultiDimensionalScatteredMS(const InputParameters & parameters);
@@ -80,7 +80,7 @@ template<>
 InputParameters validParams<MultiDimensionalCartesianSpline>();
 
 
-class MultiDimensionalCartesianSpline : public distributionND, public BasicMultiDimensionalCartesianSpline
+class MultiDimensionalCartesianSpline : public DistributionND, public BasicMultiDimensionalCartesianSpline
 {
 public:
   MultiDimensionalCartesianSpline(const InputParameters & parameters);
@@ -96,7 +96,7 @@ public:
 //InputParameters validParams<MultiDimensionalLinear>();
 //
 //
-//class MultiDimensionalLinear : public distributionND, public BasicMultiDimensionalLinear
+//class MultiDimensionalLinear : public DistributionND, public BasicMultiDimensionalLinear
 //{
 //public:
 //  MultiDimensionalLinear(const InputParameters & parameters);

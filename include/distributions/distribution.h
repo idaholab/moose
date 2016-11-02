@@ -11,8 +11,6 @@ const int _defaultSeed = 1256955321;
 
 enum truncation {MULTIPLICATIVE=1, SUM=2};
 
-class distribution;
-
 class DistributionContainer;
 
 class BasicDistribution

@@ -19,8 +19,6 @@
 
 enum EPbFunctionType{PDF,CDF};
 
-class distributionND;
-
 class BasicDistributionND
 {
 public:

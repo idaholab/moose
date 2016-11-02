@@ -1,12 +1,12 @@
 /*
- * distribution_ND.C
+ * DistributionND.C
  *
  *  Created on: Feb 6, 2014
  *      Author: alfoa
  *
  */
 
-#include "distribution_ND.h"
+#include "DistributionND.h"
 #include "distributionNDCartesianSpline.h"
 #include <string>
 #include <list>
@@ -14,7 +14,7 @@
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
 template<>
-InputParameters validParams<distributionND>()
+InputParameters validParams<DistributionND>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<double>("ProbabilityThreshold", 1.0, "Probability Threshold");
@@ -23,13 +23,13 @@ InputParameters validParams<distributionND>()
   params.addParam<double>("PB_window_Low", 0.0, "Probability window lower bound");
   params.addParam<double>("PB_window_Up", 1.0, "Probability window upper bound");
   params.addRequiredParam<EPbFunctionType>("function_type","PDF or CDF");
-  params.registerBase("distributionND");
+  params.registerBase("DistributionND");
   return params;
 }
 
-class distributionND;
+class DistributionND;
 
-distributionND::distributionND(const InputParameters & parameters):
+DistributionND::DistributionND(const InputParameters & parameters):
       MooseObject(parameters)
 {
    _type          = getParam<std::string>("type");
@@ -42,7 +42,7 @@ distributionND::distributionND(const InputParameters & parameters):
    _checkStatus   = false;
 }
 
-distributionND::~distributionND(){
+DistributionND::~DistributionND(){
 }
 
 /*
@@ -52,7 +52,7 @@ distributionND::~distributionND(){
 template<>
 InputParameters validParams<MultiDimensionalInverseWeight>(){
 
-   InputParameters params = validParams<distributionND>();
+   InputParameters params = validParams<DistributionND>();
    params.addRequiredParam<double>("p", "Minkowski distance parameter");
    params.addRequiredParam<bool>("CDF", "Boolean value (True if CDF is provided)");
    return params;
@@ -60,13 +60,13 @@ InputParameters validParams<MultiDimensionalInverseWeight>(){
 }
 
 MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const InputParameters & parameters):
-    distributionND(parameters),
+    DistributionND(parameters),
     BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"), getParam<bool>("CDF"))
 {
 }
 
 //MultiDimensionalInverseWeight::MultiDimensionalInverseWeight(const char * name, InputParameters parameters):
-//    distributionND(parameters),
+//    DistributionND(parameters),
 //    BasicMultiDimensionalInverseWeight(getParam<std::string>("data_filename"),getParam<double>("p"))
 //{
 //}
@@ -82,14 +82,14 @@ MultiDimensionalInverseWeight::~MultiDimensionalInverseWeight()
 template<>
 InputParameters validParams<MultivariateNormal>(){
 
-   InputParameters params = validParams<distributionND>();
+   InputParameters params = validParams<DistributionND>();
    params.addRequiredParam<std::vector<double> >("mu", "Mu vector");
    return params;
 
 }
 
 MultivariateNormal::MultivariateNormal(const InputParameters & parameters):
-    distributionND(parameters),
+    DistributionND(parameters),
     BasicMultivariateNormal(getParam<std::string>("data_filename"),getParam<std::vector<double> >("mu"))
 {
 }
@@ -106,7 +106,7 @@ MultivariateNormal::~MultivariateNormal()
 template<>
 InputParameters validParams<MultiDimensionalScatteredMS>(){
 
-   InputParameters params = validParams<distributionND>();
+   InputParameters params = validParams<DistributionND>();
    params.addRequiredParam<double>("p", "Minkowski distance parameter");
    params.addRequiredParam<int>("precision", " ");
    return params;
@@ -114,7 +114,7 @@ InputParameters validParams<MultiDimensionalScatteredMS>(){
 }
 
 MultiDimensionalScatteredMS::MultiDimensionalScatteredMS(const InputParameters & parameters):
-    distributionND(parameters),
+    DistributionND(parameters),
     BasicMultiDimensionalScatteredMS(getParam<std::string>("data_filename"),getParam<double>("p"),getParam<int>("precision"))
 {
 }
@@ -130,7 +130,7 @@ MultiDimensionalScatteredMS::~MultiDimensionalScatteredMS()
 template<>
 InputParameters validParams<MultiDimensionalCartesianSpline>(){
 
-   InputParameters params = validParams<distributionND>();
+   InputParameters params = validParams<DistributionND>();
    params.addRequiredParam<bool>("CDF", "Boolean value (True if CDF is provided)");
    //params.addRequiredParam<std::vector<double> >("alpha", "alpha");
    //params.addRequiredParam<std::vector<double> >("beta", "beta");
@@ -139,7 +139,7 @@ InputParameters validParams<MultiDimensionalCartesianSpline>(){
 }
 
 MultiDimensionalCartesianSpline::MultiDimensionalCartesianSpline(const InputParameters & parameters):
-    distributionND(parameters),
+    DistributionND(parameters),
         //BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"),getParam<std::vector<double> >("alpha"),getParam<std::vector<double> >("beta"), getParam<bool>("CDF"))
     BasicMultiDimensionalCartesianSpline(getParam<std::string>("data_filename"), getParam<bool>("CDF"))
 {
@@ -157,13 +157,13 @@ MultiDimensionalCartesianSpline::~MultiDimensionalCartesianSpline()
 //template<>
 //InputParameters validParams<MultiDimensionalLinear>(){
 //
-//   InputParameters params = validParams<distributionND>();
+//   InputParameters params = validParams<DistributionND>();
 //   return params;
 //
 //}
 //
 //MultiDimensionalLinear::MultiDimensionalLinear(const InputParameters & parameters):
-//    distributionND(parameters),
+//    DistributionND(parameters),
 //    BasicMultiDimensionalLinear(getParam<std::string>("data_filename"))
 //{
 //}
