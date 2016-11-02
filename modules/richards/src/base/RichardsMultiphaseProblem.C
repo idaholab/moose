@@ -20,7 +20,7 @@ InputParameters validParams<RichardsMultiphaseProblem>()
 
 
 RichardsMultiphaseProblem::RichardsMultiphaseProblem(const InputParameters & params) :
-    FEProblem(params),
+    EquationProblem(params),
     // in the following have to get the names of the variables, and then find their numbers in initialSetup,
     // as their numbers won't be defined at the moment of instantiation of this class
     _bounded_var_name(params.get<NonlinearVariableName>("bounded_var")),

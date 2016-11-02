@@ -19,13 +19,13 @@
 template<>
 InputParameters validParams<FailingProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<EquationProblem>();
   params.addRequiredParam<unsigned int>("fail_step", "The timestep to fail");
   return params;
 }
 
 FailingProblem::FailingProblem(const InputParameters & params) :
-    FEProblem(params),
+    EquationProblem(params),
     _failed(false),
     _fail_step(getParam<unsigned int>("fail_step"))
 {}

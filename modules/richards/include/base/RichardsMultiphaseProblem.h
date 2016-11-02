@@ -9,7 +9,7 @@
 #ifndef RICHARDSMULTIPHASEPROBLEM_H
 #define RICHARDSMULTIPHASEPROBLEM_H
 
-#include "FEProblem.h"
+#include "EquationProblem.h"
 
 class RichardsMultiphaseProblem;
 
@@ -21,7 +21,7 @@ InputParameters validParams<RichardsMultiphaseProblem>();
  * the nonlinear iteration process.  This is done
  * by modifying u (which is called bounded_var below)
  */
-class RichardsMultiphaseProblem : public FEProblem
+class RichardsMultiphaseProblem : public EquationProblem
 {
 public:
   RichardsMultiphaseProblem(const InputParameters & params);

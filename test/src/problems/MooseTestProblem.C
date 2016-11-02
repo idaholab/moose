@@ -17,13 +17,13 @@
 template<>
 InputParameters validParams<MooseTestProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<EquationProblem>();
   return params;
 }
 
 
 MooseTestProblem::MooseTestProblem(const InputParameters & params) :
-    FEProblem(params)
+    EquationProblem(params)
 {
   _console << "Hello, I am your FEProblem-derived class and my name is '" << this->name() << "'" << std::endl;
 }

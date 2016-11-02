@@ -15,7 +15,7 @@
 #ifndef FAILINGPROBLEM_H
 #define FAILINGPROBLEM_H
 
-#include "FEProblem.h"
+#include "EquationProblem.h"
 
 class FailingProblem;
 
@@ -26,7 +26,7 @@ InputParameters validParams<FailingProblem>();
  * FEProblem derived class that will fail a prescribed timestep for testing
  * timestepping algorithms
  */
-class FailingProblem : public FEProblem
+class FailingProblem : public EquationProblem
 {
 public:
   FailingProblem(const InputParameters & params);

@@ -14,7 +14,7 @@
 template<>
 InputParameters validParams<ReferenceResidualProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<EquationProblem>();
   params.addParam<std::vector<std::string> >("solution_variables","Set of solution variables to be checked for relative convergence");
   params.addParam<std::vector<std::string> >("reference_residual_variables","Set of variables that provide reference residuals for relative convergence check");
   params.addParam<Real>("acceptable_multiplier",1.0,"Multiplier applied to relative tolerance for acceptable limit");
@@ -23,7 +23,7 @@ InputParameters validParams<ReferenceResidualProblem>()
 }
 
 ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & params) :
-    FEProblem(params)
+    EquationProblem(params)
 {
   if (params.isParamValid("solution_variables"))
     _solnVarNames = params.get<std::vector<std::string> >("solution_variables");
