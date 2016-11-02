@@ -1,22 +1,22 @@
 /*
- * Interpolation_Functions.C
+ * InterpolationFunctions.C
  *
  *  Created on: Jul 10, 2012
  *      Author: alfoa
  */
 
-#include "Interpolation_Functions.h"
+#include "InterpolationFunctions.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
-Interpolation_Functions::Interpolation_Functions()
+InterpolationFunctions::InterpolationFunctions()
 {
 }
 
-Interpolation_Functions::Interpolation_Functions(std::vector<double> x_cordinates, std::vector<double> y_cordinates, custom_dist_fit_type type):
+InterpolationFunctions::InterpolationFunctions(std::vector<double> x_cordinates, std::vector<double> y_cordinates, custom_dist_fit_type type):
   _x_coordinates(x_cordinates),
   _y_coordinates(y_cordinates),
   _type(type)
@@ -30,12 +30,12 @@ Interpolation_Functions::Interpolation_Functions(std::vector<double> x_cordinate
 }
 
 
-Interpolation_Functions::~Interpolation_Functions(){
+InterpolationFunctions::~InterpolationFunctions(){
 
 }
 
 double
-Interpolation_Functions::interpolation(double x_point){
+InterpolationFunctions::interpolation(double x_point){
     double interp_value;
 
     switch (_type) {
@@ -59,7 +59,7 @@ Interpolation_Functions::interpolation(double x_point){
 }
 
 double
-Interpolation_Functions::interpolation_Step_Left (double x_point){
+InterpolationFunctions::interpolation_Step_Left (double x_point){
 
   int pivotPoint=0;
 
@@ -73,7 +73,7 @@ Interpolation_Functions::interpolation_Step_Left (double x_point){
 }
 
 double
-Interpolation_Functions::interpolation_Step_Right (double x_point){
+InterpolationFunctions::interpolation_Step_Right (double x_point){
   int pivotPoint=0;
 
   for (unsigned int i=0; i<_x_coordinates.size()-1; i++){
@@ -86,7 +86,7 @@ Interpolation_Functions::interpolation_Step_Right (double x_point){
 }
 
 double
-Interpolation_Functions::cumulativeInterpolation(double x_point){
+InterpolationFunctions::cumulativeInterpolation(double x_point){
     double interp_value;
 
     switch (_type) {
@@ -107,7 +107,7 @@ Interpolation_Functions::cumulativeInterpolation(double x_point){
 }
 
 double
-Interpolation_Functions::cumulativeInterpolation_Step_Left(double x_point){
+InterpolationFunctions::cumulativeInterpolation_Step_Left(double x_point){
   double value;
 
   std::vector<double> CDF (_x_coordinates.size());
@@ -130,7 +130,7 @@ Interpolation_Functions::cumulativeInterpolation_Step_Left(double x_point){
 }
 
 double
-Interpolation_Functions::cumulativeInterpolation_Step_Right(double x_point){
+InterpolationFunctions::cumulativeInterpolation_Step_Right(double x_point){
   double value;
 
   std::vector<double> CDF (_x_coordinates.size());
@@ -153,7 +153,7 @@ Interpolation_Functions::cumulativeInterpolation_Step_Right(double x_point){
 }
 
 double
-Interpolation_Functions::cumulativeInterpolation_Linear(double x_point){
+InterpolationFunctions::cumulativeInterpolation_Linear(double x_point){
   double value;
 
   std::vector<double> CDF (_x_coordinates.size());

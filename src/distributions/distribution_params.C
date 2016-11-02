@@ -69,7 +69,7 @@ distribution::distribution(const InputParameters & parameters):
      std::vector<double> y_cordinates = getParam<std::vector<double> >("y_coordinates");
      //custom_dist_fit_type fitting_type = static_cast<custom_dist_fit_type>((int)getParam<MooseEnum>("fitting_type"));
 
-     //_interpolation=Interpolation_Functions(x_coordinates,
+     //_interpolation=InterpolationFunctions(x_coordinates,
      //                                       y_cordinates,
      //                                       fitting_type);
    }

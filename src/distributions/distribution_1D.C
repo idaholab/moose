@@ -16,7 +16,7 @@
 #include "dynamicArray.h"
 #include <ctime>
 #include <cstdlib>
-//#include "Interpolation_Functions.h"
+//#include "InterpolationFunctions.h"
 #include <string>
 #include <limits>
 #include <boost/math/distributions/uniform.hpp>

@@ -102,7 +102,7 @@ $(CROW_DIR)/control_modules/_crowtools.so : $(CROW_DIR)/control_modules/crowtool
 					     $(CROW_DIR)/src/tools/decayHeat.C \
 					     $(CROW_DIR)/src/tools/powerGrid.C \
 					     $(CROW_DIR)/src/tools/CrowToolsContainer.C \
-					     $(CROW_DIR)/src/utilities/Interpolation_Functions.C $(CROW_LIB)
+					     $(CROW_DIR)/src/utilities/InterpolationFunctions.C $(CROW_LIB)
 # Swig
 	swig -c++ -python $(SWIG_PY_FLAGS) -I$(CROW_DIR)/../moose/include/base/  \
 	  -I$(CROW_DIR)/../moose/include/utils/ -I$(CROW_DIR)/include/tools/ \

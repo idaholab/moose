@@ -1,4 +1,4 @@
-/*
+ /*
  * pumpCoastdown.C
  *
  *  Created on: Aug 8, 2012
@@ -67,7 +67,7 @@ pumpCoastdownExponential::compute(double time)
 //  _tool_parameters["initial_flow_rate"       ] = getParam<double>("initial_flow_rate");
 //  _tool_parameters["interpolation_num_points"] = double(getParam<int>("interpolation_num_points"));
 //
-//  _interpolation=Interpolation_Functions(getParam<std::vector <double> >("time_points"),
+//  _interpolation=InterpolationFunctions(getParam<std::vector <double> >("time_points"),
 //                                         getParam<std::vector <double> >("flow_rate_points"),
 //                                         getParam<int>("interpolation_num_points"),
 //                                         getParam<custom_dist_fit_type>("interpolation_type"));

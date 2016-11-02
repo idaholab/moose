@@ -2,7 +2,7 @@
 #define PUMPCOASTDOWN_H
 
 #include <vector>
-#include "Interpolation_Functions.h"
+#include "InterpolationFunctions.h"
 #include "CrowTools.h"
 
 class pumpCoastdownExponential;
