@@ -2,7 +2,9 @@
   [./eigenstrain]
     type = RunApp
     input = 'eigenstrain.i'
-    cli_args = '--check-input'
+    # The actual input file solves on a 50x50 mesh.  For checking the
+    # input we can run on something much smaller...
+    cli_args = '--check-input Mesh/nx=2 Mesh/ny=2'
   [../]
   [./mortar_gradient]
     type = RunApp

@@ -3,6 +3,8 @@
     type = RunApp
     input = 'grain_growth_2D_graintracker.i'
     cli_args = '--check-input Executioner/Adaptivity/initial_adaptivity=0'
+    # Only run in opt mode to avoid timeouts in dbg.
+    method = 'OPT'
   [../]
   [./grain_growth_2D_random]
     type = RunApp
@@ -23,6 +25,8 @@
     type = RunApp
     input = 'grain_growth_3D.i'
     cli_args = '--check-input'
+    # Only run in opt mode to avoid timeouts in dbg.
+    method = 'OPT'
   [../]
   [./really_small_problem]
     type = RunApp
@@ -33,5 +37,6 @@
     type = RunApp
     input = 'test_problem.i'
     cli_args = '--check-input Executioner/Adaptivity/initial_adaptivity=0'
+    method = 'OPT'
   [../]
 []

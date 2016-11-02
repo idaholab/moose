@@ -1,0 +1,29 @@
+# This simple journal file creates a "fake" mesh for testing the
+# bridge input file quickly.  The actual problem uses the bridge.e
+# mesh.
+reset
+
+# Make a 1x1x1 cube
+create brick X 1 Y 1 Z 1
+
+# Assign subdomain id = 1 to the mesh.
+block 1 volume 1
+
+# Generate a 1 element mesh of Hex8s
+curve all interval 1
+mesh volume all
+block 1 elem hex8
+
+sideset 1 surface 1
+sideset 2 surface 2
+sideset 3 surface 3
+sideset 4 surface 4
+sideset 5 surface 5
+sideset 6 surface 6
+
+# This writes the file to ~/Documents on OSX systems.
+export mesh 'fake_bridge.e' overwrite
+
+# Local Variables:
+# mode: shell-script
+# End:

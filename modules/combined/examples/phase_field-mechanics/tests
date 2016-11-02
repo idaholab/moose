@@ -18,7 +18,10 @@
   [./Pattern1]
     type = RunApp
     input = 'Pattern1.i'
-    cli_args = '--check-input'
+    # Note: we use a smaller mesh, as this does not affect the
+    # --check-input results in any way other than the amount of time
+    # it takes to run.
+    cli_args = '--check-input Mesh/nx=2 Mesh/ny=2'
   [../]
   [./grain_texture]
     type = RunApp

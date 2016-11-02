@@ -2,11 +2,17 @@
   [./bridge]
     type = RunApp
     input = 'bridge.i'
-    cli_args = '--check-input'
+    # When we run this input file through the test harness to check
+    # for regressions, we'll use a much smaller mesh in place of the
+    # real bridge.e mesh, just to make the checks run faster.
+    cli_args = '--check-input Mesh/file=fake_bridge.e'
   [../]
   [./bridge_large_strain]
     type = RunApp
     input = 'bridge_large_strain.i'
-    cli_args = '--check-input'
+    # When we run this input file through the test harness to check
+    # for regressions, we'll use a much smaller mesh in place of the
+    # real bridge.e mesh, just to make the checks run faster.
+    cli_args = '--check-input Mesh/file=fake_bridge.e'
   [../]
 []
