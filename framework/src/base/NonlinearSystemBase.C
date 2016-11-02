@@ -95,7 +95,7 @@ EXTERN_C_END
 #endif
 
 
-NonlinearSystemBase::NonlinearSystemBase(FEProblem & fe_problem, TransientNonlinearImplicitSystem & sys, const std::string & name) :
+NonlinearSystemBase::NonlinearSystemBase(FEProblem & fe_problem, System & sys, const std::string & name) :
     SystemBase(fe_problem, name, Moose::VAR_NONLINEAR),
     ConsoleStreamInterface(fe_problem.getMooseApp()),
     _fe_problem(fe_problem),

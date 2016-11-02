@@ -59,7 +59,7 @@ class NonlinearSystemBase : public SystemBase,
                         public ConsoleStreamInterface
 {
 public:
-  NonlinearSystemBase(FEProblem & problem, TransientNonlinearImplicitSystem & sys, const std::string & name);
+  NonlinearSystemBase(FEProblem & problem, System & sys, const std::string & name);
   virtual ~NonlinearSystemBase();
 
   virtual void init() override;
