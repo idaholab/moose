@@ -177,13 +177,18 @@ BrineFluidProperties::mu_drhoTx(Real water_density, Real temperature, Real xnacl
   Real Tc = temperature - _T_c2k;
 
   Real a = 1.0 + 0.0816 * mol + 0.0122 * mol2 + 0.128e-3 * mol3 + 0.629e-3 * Tc * (1.0 - std::exp(-0.7 * mol));
-  Real da_dT = 1.0 - std::exp(-0.7 * mol);
   Real da_dx = (0.0816 + 0.0244 * mol + 3.84e-4 * mol2 + 4.403e-4 * Tc * std::exp(-0.7 * mol)) * dmol_dx;
 
   mu = a * muw;
   dmu_drho = a * dmuw_drhow;
-  dmu_dT = a * dmuw_dT + da_dT * muw;
   dmu_dx = da_dx * muw;
+
+  // Use finite difference for derivative wrt T for now, as drho_dT is required
+  // to calculate analytical derivative
+  Real eps = 1.0e-8;
+  Real Teps = temperature * eps;
+  Real mu2T = this->mu(water_density, temperature + Teps, xnacl);
+  dmu_dT = (mu2T - mu) / Teps;
 }
 
 Real
