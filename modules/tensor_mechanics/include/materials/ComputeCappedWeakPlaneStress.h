@@ -117,6 +117,9 @@ protected:
   /// handles case of initial_stress that is inadmissible being supplied
   bool _step_one;
 
+  /// Output a warning message if precision loss is encountered during the return-map process
+  const bool _warn_about_precision_loss;
+
 
   /// plastic strain
   MaterialProperty<RankTwoTensor> & _plastic_strain;

@@ -23,11 +23,12 @@ InputParameters validParams<ComputeCappedWeakPlaneStress>()
   params.addRequiredRangeCheckedParam<Real>("tip_smoother", "tip_smoother>=0", "The cone vertex at shear-stress = 0 will be smoothed by the given amount.  Typical value is 0.1*cohesion");
   params.addParam<bool>("perform_finite_strain_rotations", false, "Tensors are correctly rotated in finite-strain simulations.  For optimal performance you can set this to 'false' if you are only ever using small strains");
   params.addRequiredParam<Real>("smoothing_tol", "Intersections of the yield surfaces will be smoothed by this amount (this is measured in units of stress).  Often this is 0.1*cohesion, but it is important to set this small enough so that the tensile and compressive yield do not mix together in the smoothing process, otherwise no stresses will be admissible");
-  params.addRequiredParam<Real>("yield_function_tol", "The return-map process will be deemed to have converged if all yield functions are within yield_function_tol of zero.");
+  params.addRequiredParam<Real>("yield_function_tol", "The return-map process will be deemed to have converged if all yield functions are within yield_function_tol of zero.  If this is set very low then precision-loss might be encountered: if the code detects precision loss then it also deems the return-map process has converged.");
   MooseEnum tangent_operator("elastic nonlinear", "nonlinear");
   params.addParam<MooseEnum>("tangent_operator", tangent_operator, "Type of tangent operator to return.  'elastic': return the elasticity tensor.  'nonlinear': return the full consistent tangent operator.");
-  params.addParam<bool>("perfect_guess", true, "Provide a guess to the Newton-Raphson proceedure that is the result from perfect plasticity.  With severed hardening/softening this is suboptimal.");
-  params.addParam<Real>("min_step_size", 1.0E-3, "In order to help the Newton-Raphson procedure, the applied strain increment may be applied in sub-increments of size greater than this value.");
+  params.addParam<bool>("perfect_guess", true, "Provide a guess to the Newton-Raphson proceedure that is the result from perfect plasticity.  With severe hardening/softening this may be suboptimal.");
+  params.addParam<Real>("min_step_size", 1.0, "In order to help the Newton-Raphson procedure, the applied strain increment may be applied in sub-increments of size greater than this value.  Usually it is better for Moose's nonlinear convergence to increase max_NR_iterations rather than decrease this parameter.");
+  params.addParam<bool>("warn_about_precision_loss", false, "Output a message to the console every time precision-loss is encountered during the Newton-Raphson process");
   return params;
 }
 
@@ -49,6 +50,7 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
     _stress_return_type(StressReturnType::nothing_special),
     _min_step_size(getParam<Real>("min_step_size")),
     _step_one(declareRestartableData<bool>("step_one", true)),
+    _warn_about_precision_loss(getParam<bool>("warn_about_precision_loss")),
 
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
@@ -70,7 +72,6 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
     _dgaE_dqt(0.0),
     _dp_dqt(0.0),
     _dq_dqt(0.0),
-    //DELETE?_rhs(_num_rhs),
     _all_q(_num_yf)
 {
   // With arbitary UserObjects, it is impossible to check everything,
@@ -81,8 +82,8 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
     mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than dilation angle");
   if (_cohesion.value(0) < 0)
     mooseError("ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative");
-  if (_tstrength.value(0) < - _cstrength.value(0))
-    mooseError("ComputeCappedWeakPlaneStress: Weak plane tensile strength must not be less than negative-compressive-strength");
+  if (_tstrength.value(0) + _cstrength.value(0) <= _smoothing_tol)
+    mooseError("ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol");
 
   for (unsigned i = 0; i < _num_yf; ++i)
     _all_q[i] = f_and_derivs(_num_pq, _num_intnl);
@@ -261,6 +262,16 @@ ComputeCappedWeakPlaneStress::returnMap()
         if (nr_failure != 0)
           break;
 
+        // check for precision loss
+        if (std::abs(_rhs[0]) <= 1E-13 * std::abs(gaE) &&
+            std::abs(_rhs[1]) <= 1E-13 * std::abs(p) &&
+            std::abs(_rhs[2]) <= 1E-13 * std::abs(q)) {
+          if (_warn_about_precision_loss)
+            Moose::err << "ComputeCappedWeakPlaneStress: precision-loss in element " <<_current_elem->id() << " quadpoint=" << _qp << " p=" << p << " q=" << q << " gaE=" << gaE << "\n";
+          res2 = 0.0;
+          break;
+        }
+
         // apply (parts of) the updates, re-calculate smoothed_q, and res2
         ls_failure = lineSearch(res2, gaE, p, q, q_trial, p_trial, smoothed_q, intnl_ok);
         step_iter++;
@@ -287,7 +298,7 @@ ComputeCappedWeakPlaneStress::returnMap()
     }
     else
     {
-      // Newton-Raphson failed
+      // Newton-Raphson + line-search process failed
       step_size *= 0.5;
     }
   }
@@ -692,7 +703,6 @@ ComputeCappedWeakPlaneStress::lineSearch(Real & res2, Real & gaE, Real & p, Real
   const Real de_p = _rhs[1];
   const Real de_q = _rhs[2];
 
-
   const Real Ezzzz = _elasticity_tensor[_qp](2, 2, 2, 2);
   const Real Ezxzx = _elasticity_tensor[_qp](2, 0, 2, 0);
 
@@ -709,8 +719,6 @@ ComputeCappedWeakPlaneStress::lineSearch(Real & res2, Real & gaE, Real & p, Real
     gaE = gaE_old + lam * de_gaE;
     p = p_old + lam * de_p;
     q = q_old + lam * de_q;
-
-    //Moose::out << "  lam, p, q = " << lam << " " << p << " " << q << "\n";
 
     // and internal parameters
     _intnl[_qp][0] = intnl_ok[0] + (q_trial - q) / Ezxzx;
@@ -846,27 +854,49 @@ ComputeCappedWeakPlaneStress::initialiseVars(Real p_trial, Real q_trial, Real & 
     else
     {
       // shear failure or a mixture
+      // Calculate ga assuming a pure shear failure
       const Real ga = (q_trial + p_trial * tanphi - coh) / (Ezxzx + Ezzzz * tanphi * tanpsi);
-      q = q_trial - Ezxzx * ga;
-      if (q <= q_at_T)
-      {
-        // mixture of tensile and shear
-        gaE = ga * Ezzzz * (q_trial - q) / (q_trial - q_at_T);
-        q = q_at_T;
-        p = tens;
-      }
-      else if (q >= q_at_C)
-      {
-        // mixture of compression and shear
-        gaE = ga * Ezzzz * (q_trial - q) / (q_trial - q_at_C);
-        q = q_at_C;
-        p = - comp;
+      if (ga <= 0 && p_trial <= tens && p_trial >= - comp) {
+        // very close to one of the rounded corners:  there is no advantage to guessing the solution, so:
+        p = p_trial;
+        q = q_trial;
+        gaE = 0.0;
       }
       else
       {
-        // pure shear
-        p = p_trial - Ezzzz * ga * tanpsi;
-        gaE = ga * Ezzzz;
+        q = q_trial - Ezxzx * ga;
+        if (q <= 0.0 && q_at_T <= 0.0)
+        {
+          // user has set tensile strength so large that it is irrelevant: return to the tip of the shear cone
+          q = 0.0;
+          p = coh / tanphi;
+          gaE = (p_trial - p) / tanpsi;  // just a guess, based on the angle to the corner
+        }
+        else if (q <= q_at_T)
+        {
+          // pure shear is incorrect: mixture of tension and shear is correct
+          q = q_at_T;
+          p = tens;
+          gaE = (p_trial - p) / tanpsi; // just a guess, based on the angle to the corner
+        }
+        else if (q >= q_at_C)
+        {
+          // pure shear is incorrect: mixture of compression and shear is correct
+          q = q_at_C;
+          p = - comp;
+          if (p - p_trial < Ezzzz * tanpsi * (q_trial - q) / Ezxzx)
+            // trial point is sitting almost directly above corner
+            gaE = (q_trial - q) * Ezzzz / Ezxzx;
+          else
+            // trial point is sitting to the left of the corner
+            gaE = (p - p_trial) / tanpsi;
+        }
+        else
+        {
+          // pure shear was correct
+          p = p_trial - Ezzzz * ga * tanpsi;
+          gaE = ga * Ezzzz;
+        }
       }
     }
   }
