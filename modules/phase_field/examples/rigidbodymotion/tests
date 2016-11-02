@@ -12,6 +12,10 @@
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
     cli_args = '--check-input'
+    # This example uses NonlocalKernl which contains a
+    # mooseWarning() that is treated as an error in dbg mode.
+    # Therefore only check this test in opt mode.
+    method = 'OPT'
   [../]
   [./grain_forcedensity_ext]
     type = RunApp
