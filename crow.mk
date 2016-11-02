@@ -96,11 +96,11 @@ $(CROW_DIR)/control_modules/_distribution1D.so : $(CROW_DIR)/control_modules/dis
 
 
 $(CROW_DIR)/control_modules/_crowtools.so : $(CROW_DIR)/control_modules/crowtools.i \
-					     $(CROW_DIR)/src/tools/batteries.C \
+					     $(CROW_DIR)/src/tools/Batteries.C \
 					     $(CROW_DIR)/src/tools/DieselGeneratorBase.C \
-					     $(CROW_DIR)/src/tools/pumpCoastdown.C \
-					     $(CROW_DIR)/src/tools/decayHeat.C \
-					     $(CROW_DIR)/src/tools/powerGrid.C \
+					     $(CROW_DIR)/src/tools/PumpCoastdownExponential.C \
+					     $(CROW_DIR)/src/tools/DecayHeat.C \
+					     $(CROW_DIR)/src/tools/PowerGrid.C \
 					     $(CROW_DIR)/src/tools/CrowToolsContainer.C \
 					     $(CROW_DIR)/src/utilities/InterpolationFunctions.C $(CROW_LIB)
 # Swig

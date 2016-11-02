@@ -1,11 +1,11 @@
  /*
- * pumpCoastdown.C
+ * PumpCoastdownExponential.C
  *
  *  Created on: Aug 8, 2012
  *      Author: mandd
  */
 
-#include "pumpCoastdown.h"
+#include "PumpCoastdownExponential.h"
 #include <cmath>
 #include "CrowTools.h"
 
@@ -14,7 +14,7 @@
  */
 
 template<>
-InputParameters validParams<pumpCoastdownExponential>(){
+InputParameters validParams<PumpCoastdownExponential>(){
 
    InputParameters params = validParams<CrowTools>();
 
@@ -25,19 +25,19 @@ InputParameters validParams<pumpCoastdownExponential>(){
 
 
 
-pumpCoastdownExponential::pumpCoastdownExponential(const InputParameters & parameters):
+PumpCoastdownExponential::PumpCoastdownExponential(const InputParameters & parameters):
   CrowTools(parameters)
 {
   _tool_parameters["coefficient"      ] = getParam<double>("coefficient");
   _tool_parameters["initial_flow_rate"] = getParam<double>("initial_flow_rate");
 }
 
-pumpCoastdownExponential::~pumpCoastdownExponential()
+PumpCoastdownExponential::~PumpCoastdownExponential()
 {
 }
 
 double
-pumpCoastdownExponential::compute(double time)
+PumpCoastdownExponential::compute(double time)
 {
   return getVariable("initial_flow_rate")*(exp(-time/getVariable("coefficient")));
 }
@@ -48,7 +48,7 @@ pumpCoastdownExponential::compute(double time)
 
 
 //template<>
-//InputParameters validParams<pumpCoastdownCurve>(){
+//InputParameters validParams<PumpCoastdownCurve>(){
 //
 //   InputParameters params = validParams<CrowTools>();
 //
@@ -60,7 +60,7 @@ pumpCoastdownExponential::compute(double time)
 //   return params;
 //}
 
-//pumpCoastdownCurve::pumpCoastdownCurve(const std::string & name, InputParameters parameters):
+//PumpCoastdownCurve::PumpCoastdownCurve(const std::string & name, InputParameters parameters):
 //  CrowTools(name,parameters)
 //
 //{
@@ -73,12 +73,12 @@ pumpCoastdownExponential::compute(double time)
 //                                         getParam<custom_dist_fit_type>("interpolation_type"));
 //}
 //
-//pumpCoastdownCurve::~pumpCoastdownCurve()
+//PumpCoastdownCurve::~PumpCoastdownCurve()
 //{
 //}
 //
 //double
-//pumpCoastdownCurve::compute(double time)
+//PumpCoastdownCurve::compute(double time)
 //{
 //  return _interpolation.interpolation(time);
 //}

@@ -1,15 +1,15 @@
 /*
- * batteries.C
+ * Batteries.C
  *
  *  Created on: Aug 9, 2012
  *      Author: mandd
  */
 
-#include "batteries.h"
+#include "Batteries.h"
 #include "CrowTools.h"
 
 template<>
-InputParameters validParams<batteries>(){
+InputParameters validParams<Batteries>(){
 
    InputParameters params = validParams<CrowTools>();
 
@@ -21,11 +21,11 @@ InputParameters validParams<batteries>(){
 
 
 
-batteries::batteries(const InputParameters & parameters) :
+Batteries::Batteries(const InputParameters & parameters) :
   CrowTools(parameters)
 {
-  if((getParam<double>("initial_life") > 0)  & (getParam<double>("status") != 1)) throw("Bad input - batteries values do not agree");
-  if((getParam<double>("initial_life") <= 0) & (getParam<double>("status") != 0)) throw("Bad input - batteries values do not agree");
+  if((getParam<double>("initial_life") > 0)  & (getParam<double>("status") != 1)) throw("Bad input - Batteries values do not agree");
+  if((getParam<double>("initial_life") <= 0) & (getParam<double>("status") != 0)) throw("Bad input - Batteries values do not agree");
 
   if(getParam<double>("initial_life") < 0)
   {
@@ -41,12 +41,12 @@ batteries::batteries(const InputParameters & parameters) :
   }
 }
 
-batteries::~batteries()
+Batteries::~Batteries()
 {
 }
 
 double
-batteries::compute(double time)
+Batteries::compute(double time)
 {
  double status=getVariable(std::string("status"));
 
