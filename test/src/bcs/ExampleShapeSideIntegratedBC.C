@@ -43,20 +43,23 @@ ExampleShapeSideIntegratedBC::ExampleShapeSideIntegratedBC(const InputParameters
 Real
 ExampleShapeSideIntegratedBC::computeQpResidual()
 {
-  return _test[_i][_qp] * (1 + _num_shp_integral - _Vb) / _denom_shp_integral;
+  return _test[_i][_qp] * (_u[_qp] + _num_shp_integral - _Vb) / (_denom_shp_integral + std::numeric_limits<double>::epsilon());
 }
 
 Real
 ExampleShapeSideIntegratedBC::computeQpJacobian()
 {
-  return 0;
+  return _test[_i][_qp] * (_phi[_j][_qp]) / (_denom_shp_integral + std::numeric_limits<double>::epsilon());
 }
 
 Real
 ExampleShapeSideIntegratedBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
-    return _test[_i][_qp] * (_num_shp_jacobian[_v_dofs[_j]] * _denom_shp_integral - (1 + _num_shp_integral - _Vb) * _denom_shp_jacobian[_v_dofs[_j]]) / (_denom_shp_integral * _denom_shp_integral);
+  {
+    Real jac = _test[_i][_qp] * (_num_shp_jacobian[_v_dofs[_j]] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[_v_dofs[_j]]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<double>::epsilon());
+    return jac;
+  }
 
   return 0.0;
 }
@@ -71,7 +74,10 @@ Real
 ExampleShapeSideIntegratedBC::computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index)
 {
   if (jvar == _v_var)
-    return _test[_i][_qp] * (_num_shp_jacobian[dof_index] * _denom_shp_integral - (1 + _num_shp_integral - _Vb) * _denom_shp_jacobian[dof_index]) / (_denom_shp_integral * _denom_shp_integral);
+  {
+    Real jac = _test[_i][_qp] * (_num_shp_jacobian[dof_index] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[dof_index]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<double>::epsilon());
+    return jac;
+  }
 
   return 0.0;
 }

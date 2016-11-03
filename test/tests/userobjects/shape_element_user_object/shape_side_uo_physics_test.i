@@ -1,7 +1,10 @@
+u_left = 0.5
+
 [Mesh]
   type = GeneratedMesh
-  dim = 1
+  dim = 2
   nx = 10
+  ny = 10
 []
 
 [Variables]
@@ -33,7 +36,7 @@
   [./left]
     boundary = left
     type = DirichletBC
-    value = 1
+    value = ${u_left}
     variable = u
   [../]
   [./right]
@@ -43,16 +46,9 @@
     value = 0
   [../]
 
-# [./left_pot]
-#     boundary = left
-#     type = DirichletBC
-#     value = 1
-#     variable = pot
-#   [../]
   [./left_pot]
     boundary = left
     type = ExampleShapeSideIntegratedBC
-    value = 1
     variable = pot
     num_user_object = num_user_object
     denom_user_object = denom_user_object
@@ -65,22 +61,43 @@
     variable = pot
     value = 0
   [../]
-  # [./right]
-  #   boundary = right
-  #   type = VacuumBC
-  #   variable = u
-  # [../]
 []
 
 [UserObjects]
   [./num_user_object]
-    type = NumShapeSiderUserObject
+    type = NumShapeSideUserObject
     u = u
+    boundary = left
+    execute_on = 'linear nonlinear'
   [../]
   [./denom_user_object]
     type = DenomShapeSideUserObject
     u = u
+    boundary = left
+    execute_on = 'linear nonlinear'
   [../]
+[]
+
+[AuxVariables]
+  [./u_flux]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./u_flux]
+    type = DriftDiffusionFluxAux
+    variable = u_flux
+    u = u
+    potential = pot
+    component = 0
+  [../]
+[]
+
+[Problem]
+  type = FEProblem
+[]
 
 [Preconditioning]
   [./smp]
@@ -91,15 +108,38 @@
 
 [Executioner]
   type = Steady
+
   solve_type = NEWTON
-  # petsc_options = '-snes_test_display'
-  # petsc_options_iname = '-snes_type'
-  # petsc_options_value = 'test'
-  # dt = 0.1
-  # num_steps = 2
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
+  petsc_options_iname = '-pc_type -sub_pc_type -sub_ksp_type'
+  petsc_options_value = 'asm      lu           preonly'
 []
 
 [Outputs]
   exodus = true
   print_perf_log = true
+[]
+
+[ICs]
+  [./u]
+    type = FunctionIC
+    variable = u
+    function = ic_u
+  [../]
+  [./pot]
+    type = FunctionIC
+    variable = pot
+    function = ic_pot
+  [../]
+[]
+
+[Functions]
+  [./ic_u]
+    type = ParsedFunction
+    value = '${u_left} * (1 - x)'
+  [../]
+  [./ic_pot]
+    type = ParsedFunction
+    value = '1 - x'
+  [../]
 []

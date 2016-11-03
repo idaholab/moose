@@ -26,8 +26,8 @@ InputParameters validParams<ShapeSideUserObject>()
 
 ShapeSideUserObject::ShapeSideUserObject(const InputParameters & parameters) :
     SideUserObject(parameters),
-    _phi(_assembly.phi()),
-    _grad_phi(_assembly.gradPhi()),
+    _phi(_assembly.phiFace()),
+    _grad_phi(_assembly.gradPhiFace()),
     _compute_jacobians(getParam<bool>("compute_jacobians"))
 {
   mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");

@@ -76,6 +76,7 @@
 #include "WrongJacobianDiffusion.h"
 #include "DefaultMatPropConsumerKernel.h"
 #include "DoNotCopyParametersKernel.h"
+#include "DriftDiffusionFluxAux.h"
 #include "CoupledAux.h"
 #include "CoupledScalarAux.h"
 #include "CoupledGradAux.h"
@@ -363,6 +364,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(SimpleTestShapeElementKernel);
 
   // Aux kernels
+  registerAux(DriftDiffusionFluxAux);
   registerAux(CoupledAux);
   registerAux(CoupledScalarAux);
   registerAux(CoupledGradAux);
