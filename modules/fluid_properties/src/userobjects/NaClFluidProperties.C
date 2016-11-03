@@ -167,7 +167,7 @@ NaClFluidProperties::k(Real /*pressure*/, Real temperature) const
   // Correlation requires temperature in Celcius
   Real Tc = temperature - _T_c2k;
 
-  return 6.8203 - 3.17e-2 * Tc + 1.0e-4 * Tc * Tc - 2.0e-7 * Tc * Tc * Tc;
+  return 6.82793 - 3.16584e-2 * Tc + 1.03451e-4 * Tc * Tc - 1.48207e-7 * Tc * Tc * Tc;
 }
 
 Real
