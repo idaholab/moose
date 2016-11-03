@@ -15,5 +15,8 @@
     abs_zero = 1e-08
     scale_refine = 1
     compiler = 'GCC CLANG'
+    # This test has been known to timeout in debug mode, so it's
+    # probably just a bit too expensive to be a regression test.
+    method = 'OPT'
   [../]
 []

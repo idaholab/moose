@@ -4,5 +4,7 @@
     input = 'fsp_test.i'
     exodiff = 'out.e'
     max_parallel = 1
+    # Splits require PETSc >= 3.3.0
+    petsc_version = '>=3.3.0'
   [../]
 []
