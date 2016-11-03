@@ -12,6 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+
+#include "libmesh/libmesh_config.h"
+
+#if LIBMESH_HAVE_SLEPC
+
 // moose includes
 #include "NonlinearEigenSystem.h"
 #include "FEProblem.h"
@@ -91,3 +96,6 @@ NonlinearEigenSystem::nonlinearSolver()
   mooseError("did not implement yet \n");
   return NULL;
 }
+
+
+#endif /* LIBMESH_HAVE_SLEPC */

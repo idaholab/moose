@@ -15,6 +15,9 @@
 #ifndef NONLINEAREIGENSYSTEM_H
 #define NONLINEAREIGENSYSTEM_H
 
+#include "libmesh/libmesh_config.h"
+
+#if LIBMESH_HAVE_SLEPC
 
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
@@ -68,5 +71,7 @@ public:
 private:
  TransientEigenSystem & _transient_sys;
 };
+
+#endif /* LIBMESH_HAVE_SLEPC */
 
 #endif /* NONLINEAREIGENSYSTEM_H */
