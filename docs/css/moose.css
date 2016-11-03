@@ -1,3 +1,4 @@
+
 /* Materialize */
 html {
     font-family: GillSans, Calibri, Trebuchet, sans-serif;
@@ -27,17 +28,90 @@ p {
     line-height:1rem;
 }
 
+#logo-container {
+    height: 57px;
+    margin-bottom: 32px;
+}
+
 .table-of-contents a.active {
     border-left: 2px solid #005897;
 }
 
+.collapsible-body p{
+    padding:0px;
+    padding-left: 30px;
+    padding-top: 5px;
+    padding-bottom: 15px;
+    padding-right: 5px;
+}
+
+.collapsible-header i{
+    font-size:1.25rem;
+}
+
+.collapsible-header span{
+    color:#a2a2a2;
+    font-weight:100;
+}
+
+.moose-parameter-table-outer .td{
+    vertical-align: top;
+}
+
+.moose-parameter-table-outer td{
+    padding:5px;
+}
+
+.moose-parameter-table-outer .tr .td{
+    padding:0px;
+}
+
+.moose-parameter-table-outer .tr td+td{
+    width:70%;
+}
+
+.moose-parameter-table-inner tr{
+    text-align:right;
+}
+
+.moose-parameter-table-inner th, p{
+    margin: 0px;
+    font-weight:100;
+    color: #757575;
+    text-align: left;
+    padding: 0px;
+    padding-right:5px;
+
+}
+
+.moose-parameter-table-inner p{
+    text-align: right;
+}
+
+.moose-parameter-table-inner td{
+    padding:0px;
+}
+
+
 nav,
 .btn,
 .btn-large,
-footer.page-footer,
+footer.page-footer{
+    background-color:#005897;
+}
+
 .side-nav .collapsible li.active a.active,
 .side-nav.fixed .collapsible li.active a.active {
+
+    background-color:#e8e8e8;
+
+}
+
+.side-nav .collapsible ul:last-child a.active:last-child,
+.side-nav.fixed .collapsible ul:last-child a.active:last-child{
     background-color:#005897;
+    color:#fff;
+    font-weight:500;
 }
 
 footer.page-footer {
@@ -50,13 +124,6 @@ footer.page-footer {
 
 .side-nav .collapsible ul {
     margin-left:20px;
-}
-
-.side-nav .collapsible li.active a.active,
-.side-nav.fixed .collapsible li.active a.active {
-    color:#fff;
-    font-family: sans-serif;
-    font-weight:500;
 }
 
 .side-nav .collapsible li,

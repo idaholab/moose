@@ -28,6 +28,9 @@ class MooseObjectSyntax(MooseSyntaxBase):
   "devel" Settings:
     title[str]: The developer link box title (default: Developer Links)
 
+  "paramaters" Settings:
+    display[str]: "table" or "collapsible" to toggle the display type (default: "collapsible"
+
   """
 
   RE = r'^!(description|parameters|inputfiles|childobjects|devel)\s+(.*?)(?:$|\s+)(.*)'
@@ -54,6 +57,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
     # Default Settings
     if action == 'devel':
       self._settings['title'] = 'Developer Links'
+    elif action == 'parameters':
+      self._settings['display'] = "collapsible"
 
     # Extract Settings
     settings, styles = self.getSettings(match.group(4))
@@ -109,8 +114,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
 
     # Create the tables (generate 'Required' and 'Optional' initially so that they come out in the proper order)
     tables = collections.OrderedDict()
-    tables['Required'] = MooseDocs.MooseObjectParameterTable()
-    tables['Optional'] = MooseDocs.MooseObjectParameterTable()
+    tables['Required'] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
+    tables['Optional'] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
 
     # Loop through the parameters in yaml object
     for param in node['parameters'] or []:
@@ -121,17 +126,21 @@ class MooseObjectSyntax(MooseSyntaxBase):
         name = 'Optional'
 
       if name not in tables:
-        tables[name] = MooseDocs.MooseObjectParameterTable()
+        tables[name] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
       tables[name].addParam(param)
 
     el = self.addStyle(etree.Element('div'), **styles)
-    title = etree.SubElement(el, 'h2')
-    title.text = 'Input Parameters'
-    for key, table in tables.iteritems():
-      subtitle = etree.SubElement(el, 'h3')
-      subtitle.text = '{} {}'.format(key, 'Parameters')
-      el.append(table.html())
+    if any(tables.values()):
+      title = etree.SubElement(el, 'h2')
+      title.text = 'Input Parameters'
+      for key, table in tables.iteritems():
+        if table:
+          subtitle = etree.SubElement(el, 'h3')
+          subtitle.text = '{} {}'.format(key, 'Parameters')
+          el.append(table.html())
+
     return el
+
 
   def inputfilesElement(self, node, settings, styles):
     """
@@ -217,7 +226,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
       node[dict]: YAML data node.
       title[str]: The level two header to apply to lists.
       parent[etree.Element]: The parent element the headers and lists are to be applied
-      items[dict]: Dictionary of databases containg link information
+      items[dict]: Dictionary of databases containing link information
     """
 
     has_items = False

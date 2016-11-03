@@ -1,18 +1,19 @@
 import re
+from markdown.util import etree
 
-from MarkdownTable import MarkdownTable
-
-class MooseObjectParameterTable(MarkdownTable):
+class MooseObjectParameterTable(object):
   """
   A class for creating markdown tables from parameter data parsed from MOOSE yaml data.
   """
 
-  PARAMETER_TABLE_COLUMNS = ['name', 'cpp_type', 'default', 'description']
-  PARAMETER_TABLE_COLUMN_NAMES = ['Name', 'Type', 'Default', 'Description']
+  INNER = [('name', 'Name:'), ('cpp_type', 'Type:'), ('default', 'Default:')]
 
-  def __init__(self, **kwargs):
-    super(MooseObjectParameterTable, self).__init__(*self.PARAMETER_TABLE_COLUMN_NAMES)
+  def __init__(self, display_type='collapsible', **kwargs):
     self._parameters = []
+    self._display_type = display_type
+
+  def __nonzero__(self):
+    return len(self._parameters) > 0
 
   def addParam(self, param):
     """
@@ -24,20 +25,94 @@ class MooseObjectParameterTable(MarkdownTable):
 
     self._parameters.append(param)
 
-    items = []
-    for key in self.PARAMETER_TABLE_COLUMNS:
-      items.append(self._formatParam(param[key], key, param['cpp_type']))
-    self.addRow(*items)
-
   def html(self):
     """
     Return html for the table including special class name indicating that this is a parameter table.
     """
-    el = super(MooseObjectParameterTable, self).html()
-    el.set('class', 'moose-object-param-table')
+    if self._display_type == 'collapsible':
+      el = self.htmlCollapsible()
+    else:
+      el = self.htmlTable()
     return el
 
-  def _formatParam(self, param, key, ptype):
+  def htmlCollapsible(self):
+    """
+    Shows parameters as collapsible items.
+    """
+
+    ul = etree.Element('ul')
+    ul.set('class', "collapsible moose-parameter-collapsible")
+    ul.set('data-collapsible', "expandable")
+    for param in self._parameters:
+      li = etree.SubElement(ul, 'li')
+      header = etree.SubElement(li, 'div')
+      header.set('class', "collapsible-header")
+      i = etree.SubElement(header, 'i')
+      i.text = 'input'
+      i.set('class', 'material-icons')
+
+      header.text = param['name']
+
+      default = self._formatParam(param, 'default')
+      if default:
+        span = etree.SubElement(header, 'span')
+        span.text = '(Default: {})'.format(default)
+
+      desc = etree.SubElement(li, 'div')
+      desc.set('class', "collapsible-body")
+      p = etree.SubElement(desc, 'p')
+      p.text = '{}<br>Type: {}'.format(param['description'], self._formatParam(param, 'cpp_type'))
+
+    return ul
+
+  def htmlTable(self):
+    """
+    Creates a table for displaying parameters
+    """
+
+    outer_table = self.element('table', cls='moose-parameter-table-outer')
+
+    # Header
+    header_tr = etree.SubElement(outer_table, 'tr')
+    header_tr.append(self.element('th', 'Information', cls='moose-parameter-table-info'))
+    header_tr.append(self.element('th', 'Description', cls='moose-parameter-table-desc'))
+
+    for param in self._parameters:
+      param_tr = etree.SubElement(outer_table, 'tr')
+      param_td = etree.SubElement(param_tr, 'td')
+
+      # Information
+      info_table = etree.SubElement(param_td, 'table')
+      info_table.set('class', 'moose-parameter-table-inner')
+      for key, name in self.INNER:
+        inner_tr = etree.SubElement(info_table, 'tr')
+        inner_th = etree.SubElement(inner_tr, 'th')
+        inner_th.append(self.element('p', name))
+
+        text = self._formatParam(param[key], key, param['cpp_type'])
+        inner_tr.append(self.element('td', text))
+
+      # Description
+      param_tr.append(self.element('td', param['description']))
+
+    return outer_table
+
+  @staticmethod
+  def element(tag, text=None, cls=None, id=None):
+    el = etree.Element(tag)
+
+    if text:
+      el.text = text
+
+    if cls:
+      el.set('class', cls)
+
+    if id:
+      el.set('id', id)
+
+    return el
+
+  def _formatParam(self, parameter, key):
     """
     Convert the supplied parameter into a format suitable for output.
 
@@ -48,7 +123,8 @@ class MooseObjectParameterTable(MarkdownTable):
     """
 
     # Make sure that supplied parameter is a string
-    param = str(param).strip()
+    ptype = parameter['cpp_type']
+    param = str(parameter[key]).strip()
 
     # The c++ types returned by the yaml dump are raw and contain "allocator" stuff. This script attempts
     # to present the types in a more readable fashion.
